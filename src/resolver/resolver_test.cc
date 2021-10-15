@@ -175,12 +175,12 @@ TEST_F(ResolverTest, Stmt_If) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  ASSERT_NE(TypeOf(stmt->condition()), nullptr);
+  ASSERT_NE(TypeOf(stmt->condition), nullptr);
   ASSERT_NE(TypeOf(else_lhs), nullptr);
   ASSERT_NE(TypeOf(else_rhs), nullptr);
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
-  EXPECT_TRUE(TypeOf(stmt->condition())->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(stmt->condition)->Is<sem::Bool>());
   EXPECT_TRUE(TypeOf(else_lhs)->UnwrapRef()->Is<sem::F32>());
   EXPECT_TRUE(TypeOf(else_rhs)->Is<sem::F32>());
   EXPECT_TRUE(TypeOf(lhs)->UnwrapRef()->Is<sem::F32>());
@@ -253,11 +253,11 @@ TEST_F(ResolverTest, Stmt_Switch) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  ASSERT_NE(TypeOf(stmt->condition()), nullptr);
+  ASSERT_NE(TypeOf(stmt->condition), nullptr);
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
 
-  EXPECT_TRUE(TypeOf(stmt->condition())->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(stmt->condition)->Is<sem::I32>());
   EXPECT_TRUE(TypeOf(lhs)->UnwrapRef()->Is<sem::F32>());
   EXPECT_TRUE(TypeOf(rhs)->Is<sem::F32>());
   EXPECT_EQ(BlockOf(lhs), case_block);
@@ -282,7 +282,7 @@ TEST_F(ResolverTest, Stmt_Call) {
 
 TEST_F(ResolverTest, Stmt_VariableDecl) {
   auto* var = Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2));
-  auto* init = var->constructor();
+  auto* init = var->constructor;
 
   auto* decl = Decl(var);
   WrapInFunction(decl);
@@ -296,7 +296,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl) {
 TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
   auto* my_int = Alias("MyInt", ty.i32());
   auto* var = Var("my_var", ty.Of(my_int), ast::StorageClass::kNone, Expr(2));
-  auto* init = var->constructor();
+  auto* init = var->constructor;
 
   auto* decl = Decl(var);
   WrapInFunction(decl);
@@ -343,24 +343,24 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
 
   // Declare i32 "foo" inside a block
   auto* foo_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2));
-  auto* foo_i32_init = foo_i32->constructor();
+  auto* foo_i32_init = foo_i32->constructor;
   auto* foo_i32_decl = Decl(foo_i32);
 
   // Reference "foo" inside the block
   auto* bar_i32 = Var("bar", ty.i32(), ast::StorageClass::kNone, Expr("foo"));
-  auto* bar_i32_init = bar_i32->constructor();
+  auto* bar_i32_init = bar_i32->constructor;
   auto* bar_i32_decl = Decl(bar_i32);
 
   auto* inner = Block(foo_i32_decl, bar_i32_decl);
 
   // Declare f32 "foo" at function scope
   auto* foo_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f));
-  auto* foo_f32_init = foo_f32->constructor();
+  auto* foo_f32_init = foo_f32->constructor;
   auto* foo_f32_decl = Decl(foo_f32);
 
   // Reference "foo" at function scope
   auto* bar_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"));
-  auto* bar_f32_init = bar_f32->constructor();
+  auto* bar_f32_init = bar_f32->constructor;
   auto* bar_f32_decl = Decl(bar_f32);
 
   Func("func", params, ty.void_(), {inner, foo_f32_decl, bar_f32_decl},
@@ -379,12 +379,12 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
   EXPECT_EQ(StmtOf(bar_i32_init), bar_i32_decl);
   EXPECT_EQ(StmtOf(foo_f32_init), foo_f32_decl);
   EXPECT_EQ(StmtOf(bar_f32_init), bar_f32_decl);
-  EXPECT_TRUE(CheckVarUsers(foo_i32, {bar_i32->constructor()}));
-  EXPECT_TRUE(CheckVarUsers(foo_f32, {bar_f32->constructor()}));
-  ASSERT_NE(VarOf(bar_i32->constructor()), nullptr);
-  EXPECT_EQ(VarOf(bar_i32->constructor())->Declaration(), foo_i32);
-  ASSERT_NE(VarOf(bar_f32->constructor()), nullptr);
-  EXPECT_EQ(VarOf(bar_f32->constructor())->Declaration(), foo_f32);
+  EXPECT_TRUE(CheckVarUsers(foo_i32, {bar_i32->constructor}));
+  EXPECT_TRUE(CheckVarUsers(foo_f32, {bar_f32->constructor}));
+  ASSERT_NE(VarOf(bar_i32->constructor), nullptr);
+  EXPECT_EQ(VarOf(bar_i32->constructor)->Declaration(), foo_i32);
+  ASSERT_NE(VarOf(bar_f32->constructor), nullptr);
+  EXPECT_EQ(VarOf(bar_f32->constructor)->Declaration(), foo_f32);
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
@@ -400,18 +400,18 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
 
   // Declare i32 "foo" inside a function
   auto* fn_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2));
-  auto* fn_i32_init = fn_i32->constructor();
+  auto* fn_i32_init = fn_i32->constructor;
   auto* fn_i32_decl = Decl(fn_i32);
   Func("func_i32", params, ty.void_(), {fn_i32_decl}, ast::DecorationList{});
 
   // Declare f32 "foo" at module scope
   auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kPrivate, Expr(2.f));
-  auto* mod_init = mod_f32->constructor();
+  auto* mod_init = mod_f32->constructor;
   AST().AddGlobalVariable(mod_f32);
 
   // Reference "foo" in another function
   auto* fn_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"));
-  auto* fn_f32_init = fn_f32->constructor();
+  auto* fn_f32_init = fn_f32->constructor;
   auto* fn_f32_decl = Decl(fn_f32);
   Func("func_f32", params, ty.void_(), {fn_f32_decl}, ast::DecorationList{});
 
@@ -426,9 +426,9 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   EXPECT_EQ(StmtOf(mod_init), nullptr);
   EXPECT_EQ(StmtOf(fn_f32_init), fn_f32_decl);
   EXPECT_TRUE(CheckVarUsers(fn_i32, {}));
-  EXPECT_TRUE(CheckVarUsers(mod_f32, {fn_f32->constructor()}));
-  ASSERT_NE(VarOf(fn_f32->constructor()), nullptr);
-  EXPECT_EQ(VarOf(fn_f32->constructor())->Declaration(), mod_f32);
+  EXPECT_TRUE(CheckVarUsers(mod_f32, {fn_f32->constructor}));
+  ASSERT_NE(VarOf(fn_f32->constructor), nullptr);
+  EXPECT_EQ(VarOf(fn_f32->constructor)->Declaration(), mod_f32);
 }
 
 TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
@@ -1115,7 +1115,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
   ASSERT_NE(sma, nullptr);
   EXPECT_TRUE(sma->Member()->Type()->Is<sem::F32>());
   EXPECT_EQ(sma->Member()->Index(), 1u);
-  EXPECT_EQ(sma->Member()->Declaration()->symbol(),
+  EXPECT_EQ(sma->Member()->Declaration()->symbol,
             Symbols().Get("second_member"));
 }
 
@@ -1623,7 +1623,7 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
   ASSERT_EQ(r()->error(),
             "12:34 error: Binary expression operand types are invalid for "
             "this operation: " +
-                FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op()) +
+                FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op) +
                 " " + FriendlyName(rhs_type));
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -1672,7 +1672,7 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
     ASSERT_EQ(r()->error(),
               "12:34 error: Binary expression operand types are invalid for "
               "this operation: " +
-                  FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op()) +
+                  FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op) +
                   " " + FriendlyName(rhs_type));
   }
 }
@@ -1714,7 +1714,7 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
     ASSERT_EQ(r()->error(),
               "12:34 error: Binary expression operand types are invalid for "
               "this operation: " +
-                  FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op()) +
+                  FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op) +
                   " " + FriendlyName(rhs_type));
   }
 }

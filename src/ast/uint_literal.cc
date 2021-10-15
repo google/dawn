@@ -21,21 +21,19 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::UintLiteral);
 namespace tint {
 namespace ast {
 
-UintLiteral::UintLiteral(ProgramID program_id,
-                         const Source& source,
-                         uint32_t value)
-    : Base(program_id, source, value) {}
+UintLiteral::UintLiteral(ProgramID pid, const Source& src, uint32_t val)
+    : Base(pid, src), value(val) {}
 
 UintLiteral::~UintLiteral() = default;
 
-std::string UintLiteral::name() const {
-  return "__uint" + std::to_string(value());
+uint32_t UintLiteral::ValueAsU32() const {
+  return value;
 }
 
 UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<UintLiteral>(src, value());
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<UintLiteral>(src, value);
 }
 
 }  // namespace ast

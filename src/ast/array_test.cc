@@ -24,10 +24,10 @@ using AstArrayTest = TestHelper;
 
 TEST_F(AstArrayTest, CreateSizedArray) {
   auto* u32 = create<U32>();
-  auto* size = Expr(3);
-  auto* arr = create<Array>(u32, size, DecorationList{});
-  EXPECT_EQ(arr->type(), u32);
-  EXPECT_EQ(arr->Size(), size);
+  auto* count = Expr(3);
+  auto* arr = create<Array>(u32, count, DecorationList{});
+  EXPECT_EQ(arr->type, u32);
+  EXPECT_EQ(arr->count, count);
   EXPECT_TRUE(arr->Is<Array>());
   EXPECT_FALSE(arr->IsRuntimeArray());
 }
@@ -35,8 +35,8 @@ TEST_F(AstArrayTest, CreateSizedArray) {
 TEST_F(AstArrayTest, CreateRuntimeArray) {
   auto* u32 = create<U32>();
   auto* arr = create<Array>(u32, nullptr, DecorationList{});
-  EXPECT_EQ(arr->type(), u32);
-  EXPECT_EQ(arr->Size(), nullptr);
+  EXPECT_EQ(arr->type, u32);
+  EXPECT_EQ(arr->count, nullptr);
   EXPECT_TRUE(arr->Is<Array>());
   EXPECT_TRUE(arr->IsRuntimeArray());
 }

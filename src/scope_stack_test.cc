@@ -34,11 +34,11 @@ TEST_F(ScopeStackTest, Global) {
 TEST_F(ScopeStackTest, Global_SetWithPointer) {
   auto* v = Var("my_var", ty.f32(), ast::StorageClass::kNone);
   ScopeStack<ast::Variable*> s;
-  s.set_global(v->symbol(), v);
+  s.set_global(v->symbol, v);
 
   ast::Variable* v2 = nullptr;
-  EXPECT_TRUE(s.get(v->symbol(), &v2));
-  EXPECT_EQ(v2->symbol(), v->symbol());
+  EXPECT_TRUE(s.get(v->symbol, &v2));
+  EXPECT_EQ(v2->symbol, v->symbol);
 }
 
 TEST_F(ScopeStackTest, Global_CanNotPop) {

@@ -26,18 +26,15 @@ class ScalarConstructorExpression
     : public Castable<ScalarConstructorExpression, ConstructorExpression> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the constructor source
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param literal the const literal
-  ScalarConstructorExpression(ProgramID program_id,
-                              const Source& source,
+  ScalarConstructorExpression(ProgramID pid,
+                              const Source& src,
                               Literal* literal);
   /// Move constructor
   ScalarConstructorExpression(ScalarConstructorExpression&&);
   ~ScalarConstructorExpression() override;
-
-  /// @returns the literal value
-  Literal* literal() const { return literal_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -45,10 +42,11 @@ class ScalarConstructorExpression
   /// @return the newly cloned node
   ScalarConstructorExpression* Clone(CloneContext* ctx) const override;
 
+  /// The literal value
+  Literal* const literal;
+
  private:
   ScalarConstructorExpression(const ScalarConstructorExpression&) = delete;
-
-  Literal* const literal_;
 };
 
 }  // namespace ast

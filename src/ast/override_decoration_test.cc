@@ -24,13 +24,13 @@ using OverrideDecorationTest = TestHelper;
 
 TEST_F(OverrideDecorationTest, Creation_WithValue) {
   auto* d = create<OverrideDecoration>(12);
-  EXPECT_TRUE(d->HasValue());
-  EXPECT_EQ(12u, d->value());
+  EXPECT_TRUE(d->has_value);
+  EXPECT_EQ(12u, d->value);
 }
 
 TEST_F(OverrideDecorationTest, Creation_WithoutValue) {
   auto* d = create<OverrideDecoration>();
-  EXPECT_FALSE(d->HasValue());
+  EXPECT_FALSE(d->has_value);
 }
 
 }  // namespace

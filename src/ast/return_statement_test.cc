@@ -27,12 +27,12 @@ TEST_F(ReturnStatementTest, Creation) {
   auto* expr = Expr("expr");
 
   auto* r = create<ReturnStatement>(expr);
-  EXPECT_EQ(r->value(), expr);
+  EXPECT_EQ(r->value, expr);
 }
 
 TEST_F(ReturnStatementTest, Creation_WithSource) {
   auto* r = create<ReturnStatement>(Source{Source::Location{20, 2}});
-  auto src = r->source();
+  auto src = r->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
@@ -42,15 +42,15 @@ TEST_F(ReturnStatementTest, IsReturn) {
   EXPECT_TRUE(r->Is<ReturnStatement>());
 }
 
-TEST_F(ReturnStatementTest, HasValue_WithoutValue) {
+TEST_F(ReturnStatementTest, WithoutValue) {
   auto* r = create<ReturnStatement>();
-  EXPECT_FALSE(r->has_value());
+  EXPECT_EQ(r->value, nullptr);
 }
 
-TEST_F(ReturnStatementTest, HasValue_WithValue) {
+TEST_F(ReturnStatementTest, WithValue) {
   auto* expr = Expr("expr");
   auto* r = create<ReturnStatement>(expr);
-  EXPECT_TRUE(r->has_value());
+  EXPECT_NE(r->value, nullptr);
 }
 
 TEST_F(ReturnStatementTest, Assert_DifferentProgramID_Expr) {

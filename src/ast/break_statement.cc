@@ -21,8 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BreakStatement);
 namespace tint {
 namespace ast {
 
-BreakStatement::BreakStatement(ProgramID program_id, const Source& source)
-    : Base(program_id, source) {}
+BreakStatement::BreakStatement(ProgramID pid, const Source& src)
+    : Base(pid, src) {}
 
 BreakStatement::BreakStatement(BreakStatement&&) = default;
 
@@ -30,7 +30,7 @@ BreakStatement::~BreakStatement() = default;
 
 BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
+  auto src = ctx->Clone(source);
   return ctx->dst->create<BreakStatement>(src);
 }
 

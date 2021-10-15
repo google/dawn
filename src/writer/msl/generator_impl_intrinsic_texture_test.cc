@@ -241,8 +241,8 @@ class MslGeneratorIntrinsicTextureTest
 TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
   auto param = GetParam();
 
-  param.buildTextureVariable(this);
-  param.buildSamplerVariable(this);
+  param.BuildTextureVariable(this);
+  param.BuildSamplerVariable(this);
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));

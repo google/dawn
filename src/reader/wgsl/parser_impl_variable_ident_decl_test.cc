@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   ASSERT_TRUE(decl->type->Is<ast::F32>());
 
   EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
-  EXPECT_EQ(decl->type->source().range, (Source::Range{{1u, 10u}, {1u, 13u}}));
+  EXPECT_EQ(decl->type->source.range, (Source::Range{{1u, 10u}, {1u, 13u}}));
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_Inferred_Parses) {

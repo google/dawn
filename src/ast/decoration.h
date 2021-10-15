@@ -29,14 +29,13 @@ class Decoration : public Castable<Decoration, Node> {
   ~Decoration() override;
 
   /// @returns the WGSL name for the decoration
-  virtual std::string name() const = 0;
+  virtual std::string Name() const = 0;
 
  protected:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
-  Decoration(ProgramID program_id, const Source& source)
-      : Base(program_id, source) {}
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  Decoration(ProgramID pid, const Source& src) : Base(pid, src) {}
 };
 
 /// A list of decorations

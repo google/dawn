@@ -26,13 +26,13 @@ namespace ast {
 class IfStatement : public Castable<IfStatement, Statement> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source information
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param condition the if condition
   /// @param body the if body
   /// @param else_stmts the else statements
-  IfStatement(ProgramID program_id,
-              const Source& source,
+  IfStatement(ProgramID pid,
+              const Source& src,
               Expression* condition,
               BlockStatement* body,
               ElseStatementList else_stmts);
@@ -40,31 +40,23 @@ class IfStatement : public Castable<IfStatement, Statement> {
   IfStatement(IfStatement&&);
   ~IfStatement() override;
 
-  /// @returns the if condition or nullptr if none set
-  Expression* condition() const { return condition_; }
-  /// @returns the if body
-  const BlockStatement* body() const { return body_; }
-  /// @returns the if body
-  BlockStatement* body() { return body_; }
-
-  /// @returns the else statements
-  const ElseStatementList& else_statements() const { return else_statements_; }
-
-  /// @returns true if there are else statements
-  bool has_else_statements() const { return !else_statements_.empty(); }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   IfStatement* Clone(CloneContext* ctx) const override;
 
+  /// The if condition or nullptr if none set
+  Expression* const condition;
+
+  /// The if body
+  BlockStatement* const body;
+
+  /// The else statements
+  ElseStatementList const else_statements;
+
  private:
   IfStatement(const IfStatement&) = delete;
-
-  Expression* const condition_;
-  BlockStatement* const body_;
-  ElseStatementList const else_statements_;
 };
 
 }  // namespace ast

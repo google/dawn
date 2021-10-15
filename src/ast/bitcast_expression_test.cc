@@ -27,8 +27,8 @@ TEST_F(BitcastExpressionTest, Create) {
   auto* expr = Expr("expr");
 
   auto* exp = create<BitcastExpression>(ty.f32(), expr);
-  EXPECT_TRUE(exp->type()->Is<ast::F32>());
-  ASSERT_EQ(exp->expr(), expr);
+  EXPECT_TRUE(exp->type->Is<ast::F32>());
+  ASSERT_EQ(exp->expr, expr);
 }
 
 TEST_F(BitcastExpressionTest, CreateWithSource) {
@@ -36,7 +36,7 @@ TEST_F(BitcastExpressionTest, CreateWithSource) {
 
   auto* exp = create<BitcastExpression>(Source{Source::Location{20, 2}},
                                         ty.f32(), expr);
-  auto src = exp->source();
+  auto src = exp->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }

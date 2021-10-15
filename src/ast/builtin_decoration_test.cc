@@ -23,7 +23,7 @@ using BuiltinDecorationTest = TestHelper;
 
 TEST_F(BuiltinDecorationTest, Creation) {
   auto* d = create<BuiltinDecoration>(Builtin::kFragDepth);
-  EXPECT_EQ(Builtin::kFragDepth, d->value());
+  EXPECT_EQ(Builtin::kFragDepth, d->builtin);
 }
 
 }  // namespace

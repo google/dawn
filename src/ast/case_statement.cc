@@ -21,13 +21,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CaseStatement);
 namespace tint {
 namespace ast {
 
-CaseStatement::CaseStatement(ProgramID program_id,
-                             const Source& source,
-                             CaseSelectorList selectors,
-                             BlockStatement* body)
-    : Base(program_id, source), selectors_(selectors), body_(body) {
-  TINT_ASSERT(AST, body_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body_, program_id);
+CaseStatement::CaseStatement(ProgramID pid,
+                             const Source& src,
+                             CaseSelectorList s,
+                             BlockStatement* b)
+    : Base(pid, src), selectors(s), body(b) {
+  TINT_ASSERT(AST, body);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
   for (auto* selector : selectors) {
     TINT_ASSERT(AST, selector);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, selector, program_id);
@@ -40,9 +40,9 @@ CaseStatement::~CaseStatement() = default;
 
 CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto sel = ctx->Clone(selectors_);
-  auto* b = ctx->Clone(body_);
+  auto src = ctx->Clone(source);
+  auto sel = ctx->Clone(selectors);
+  auto* b = ctx->Clone(body);
   return ctx->dst->create<CaseStatement>(src, sel, b);
 }
 

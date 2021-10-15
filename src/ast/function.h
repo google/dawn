@@ -57,36 +57,11 @@ class Function : public Castable<Function, Node> {
 
   ~Function() override;
 
-  /// @returns the function symbol
-  Symbol symbol() const { return symbol_; }
-  /// @returns the function params
-  const VariableList& params() const { return params_; }
-
-  /// @returns the decorations attached to this function
-  const DecorationList& decorations() const { return decorations_; }
-
   /// @returns the functions pipeline stage or None if not set
-  PipelineStage pipeline_stage() const;
+  ast::PipelineStage PipelineStage() const;
 
   /// @returns true if this function is an entry point
-  bool IsEntryPoint() const { return pipeline_stage() != PipelineStage::kNone; }
-
-  /// @returns the function return type.
-  ast::Type* return_type() const { return return_type_; }
-
-  /// @returns the decorations attached to the function return type.
-  const DecorationList& return_type_decorations() const {
-    return return_type_decorations_;
-  }
-
-  /// @returns a pointer to the last statement of the function or nullptr if
-  // function is empty
-  const Statement* get_last_statement() const;
-
-  /// @returns the function body
-  const BlockStatement* body() const { return body_; }
-  /// @returns the function body
-  BlockStatement* body() { return body_; }
+  bool IsEntryPoint() const { return PipelineStage() != PipelineStage::kNone; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -94,15 +69,26 @@ class Function : public Castable<Function, Node> {
   /// @return the newly cloned node
   Function* Clone(CloneContext* ctx) const override;
 
+  /// The function symbol
+  Symbol const symbol;
+
+  /// The function params
+  VariableList const params;
+
+  /// The function return type
+  ast::Type* const return_type;
+
+  /// The function body
+  BlockStatement* const body;
+
+  /// The decorations attached to this function
+  DecorationList const decorations;
+
+  /// The decorations attached to the function return type.
+  DecorationList const return_type_decorations;
+
  private:
   Function(const Function&) = delete;
-
-  Symbol const symbol_;
-  VariableList const params_;
-  ast::Type* const return_type_;
-  BlockStatement* const body_;
-  DecorationList const decorations_;
-  DecorationList const return_type_decorations_;
 };
 
 /// A list of functions

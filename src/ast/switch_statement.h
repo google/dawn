@@ -25,25 +25,20 @@ namespace ast {
 class SwitchStatement : public Castable<SwitchStatement, Statement> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source information
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param condition the switch condition
   /// @param body the switch body
-  SwitchStatement(ProgramID program_id,
-                  const Source& source,
+  SwitchStatement(ProgramID pid,
+                  const Source& src,
                   Expression* condition,
                   CaseStatementList body);
   /// Move constructor
   SwitchStatement(SwitchStatement&&);
   ~SwitchStatement() override;
 
-  /// @returns the switch condition or nullptr if none set
-  Expression* condition() const { return condition_; }
   /// @returns true if this is a default statement
-  bool IsDefault() const { return condition_ == nullptr; }
-
-  /// @returns the Switch body
-  const CaseStatementList& body() const { return body_; }
+  bool IsDefault() const { return condition == nullptr; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -51,11 +46,14 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
   /// @return the newly cloned node
   SwitchStatement* Clone(CloneContext* ctx) const override;
 
+  /// The switch condition or nullptr if none set
+  Expression* const condition;
+
+  /// The Switch body
+  CaseStatementList const body;
+
  private:
   SwitchStatement(const SwitchStatement&) = delete;
-
-  Expression* const condition_;
-  CaseStatementList const body_;
 };
 
 }  // namespace ast

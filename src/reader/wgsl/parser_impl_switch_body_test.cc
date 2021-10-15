@@ -29,10 +29,10 @@ TEST_F(ParserImplTest, SwitchBody_Case) {
   ASSERT_TRUE(e->Is<ast::CaseStatement>());
   EXPECT_FALSE(e->IsDefault());
   auto* stmt = e->As<ast::CaseStatement>();
-  ASSERT_EQ(stmt->selectors().size(), 1u);
-  EXPECT_EQ(stmt->selectors()[0]->value_as_u32(), 1u);
-  ASSERT_EQ(e->body()->size(), 1u);
-  EXPECT_TRUE(e->body()->get(0)->Is<ast::AssignmentStatement>());
+  ASSERT_EQ(stmt->selectors.size(), 1u);
+  EXPECT_EQ(stmt->selectors[0]->ValueAsU32(), 1u);
+  ASSERT_EQ(e->body->statements.size(), 1u);
+  EXPECT_TRUE(e->body->statements[0]->Is<ast::AssignmentStatement>());
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_TrailingComma) {
@@ -45,9 +45,9 @@ TEST_F(ParserImplTest, SwitchBody_Case_TrailingComma) {
   ASSERT_TRUE(e->Is<ast::CaseStatement>());
   EXPECT_FALSE(e->IsDefault());
   auto* stmt = e->As<ast::CaseStatement>();
-  ASSERT_EQ(stmt->selectors().size(), 2u);
-  EXPECT_EQ(stmt->selectors()[0]->value_as_u32(), 1u);
-  EXPECT_EQ(stmt->selectors()[1]->value_as_u32(), 2u);
+  ASSERT_EQ(stmt->selectors.size(), 2u);
+  EXPECT_EQ(stmt->selectors[0]->ValueAsU32(), 1u);
+  EXPECT_EQ(stmt->selectors[1]->ValueAsU32(), 2u);
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
@@ -129,10 +129,10 @@ TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectors) {
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::CaseStatement>());
   EXPECT_FALSE(e->IsDefault());
-  ASSERT_EQ(e->body()->size(), 0u);
-  ASSERT_EQ(e->selectors().size(), 2u);
-  ASSERT_EQ(e->selectors()[0]->value_as_i32(), 1);
-  ASSERT_EQ(e->selectors()[1]->value_as_i32(), 2);
+  ASSERT_EQ(e->body->statements.size(), 0u);
+  ASSERT_EQ(e->selectors.size(), 2u);
+  ASSERT_EQ(e->selectors[0]->ValueAsI32(), 1);
+  ASSERT_EQ(e->selectors[1]->ValueAsI32(), 2);
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsMissingColon) {
@@ -174,8 +174,8 @@ TEST_F(ParserImplTest, SwitchBody_Default) {
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::CaseStatement>());
   EXPECT_TRUE(e->IsDefault());
-  ASSERT_EQ(e->body()->size(), 1u);
-  EXPECT_TRUE(e->body()->get(0)->Is<ast::AssignmentStatement>());
+  ASSERT_EQ(e->body->statements.size(), 1u);
+  EXPECT_TRUE(e->body->statements[0]->Is<ast::AssignmentStatement>());
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingColon) {

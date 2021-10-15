@@ -36,9 +36,9 @@ using AstMatrixTest = TestHelper;
 TEST_F(AstMatrixTest, Creation) {
   auto* i32 = create<I32>();
   auto* m = create<Matrix>(i32, 2, 4);
-  EXPECT_EQ(m->type(), i32);
-  EXPECT_EQ(m->rows(), 2u);
-  EXPECT_EQ(m->columns(), 4u);
+  EXPECT_EQ(m->type, i32);
+  EXPECT_EQ(m->rows, 2u);
+  EXPECT_EQ(m->columns, 4u);
 }
 
 TEST_F(AstMatrixTest, FriendlyName) {

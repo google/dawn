@@ -21,21 +21,19 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::SintLiteral);
 namespace tint {
 namespace ast {
 
-SintLiteral::SintLiteral(ProgramID program_id,
-                         const Source& source,
-                         int32_t value)
-    : Base(program_id, source, static_cast<uint32_t>(value)) {}
+SintLiteral::SintLiteral(ProgramID pid, const Source& src, int32_t val)
+    : Base(pid, src), value(val) {}
 
 SintLiteral::~SintLiteral() = default;
 
-std::string SintLiteral::name() const {
-  return "__sint_" + std::to_string(value());
+uint32_t SintLiteral::ValueAsU32() const {
+  return static_cast<uint32_t>(value);
 }
 
 SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<SintLiteral>(src, value());
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<SintLiteral>(src, value);
 }
 
 }  // namespace ast

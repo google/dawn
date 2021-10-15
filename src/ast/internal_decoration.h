@@ -39,7 +39,7 @@ class InternalDecoration : public Castable<InternalDecoration, Decoration> {
   virtual std::string InternalName() const = 0;
 
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 };
 
 }  // namespace ast

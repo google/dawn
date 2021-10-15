@@ -30,27 +30,20 @@ using CaseSelectorList = std::vector<IntLiteral*>;
 class CaseStatement : public Castable<CaseStatement, Statement> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source information
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param selectors the case selectors
   /// @param body the case body
-  CaseStatement(ProgramID program_id,
-                const Source& source,
+  CaseStatement(ProgramID pid,
+                const Source& src,
                 CaseSelectorList selectors,
                 BlockStatement* body);
   /// Move constructor
   CaseStatement(CaseStatement&&);
   ~CaseStatement() override;
 
-  /// @returns the case selectors, empty if none set
-  const CaseSelectorList& selectors() const { return selectors_; }
   /// @returns true if this is a default statement
-  bool IsDefault() const { return selectors_.empty(); }
-
-  /// @returns the case body
-  const BlockStatement* body() const { return body_; }
-  /// @returns the case body
-  BlockStatement* body() { return body_; }
+  bool IsDefault() const { return selectors.empty(); }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -58,11 +51,14 @@ class CaseStatement : public Castable<CaseStatement, Statement> {
   /// @return the newly cloned node
   CaseStatement* Clone(CloneContext* ctx) const override;
 
+  /// The case selectors, empty if none set
+  CaseSelectorList const selectors;
+
+  /// The case body
+  BlockStatement* const body;
+
  private:
   CaseStatement(const CaseStatement&) = delete;
-
-  CaseSelectorList const selectors_;
-  BlockStatement* const body_;
 };
 
 /// A list of case statements

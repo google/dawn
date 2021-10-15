@@ -21,13 +21,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeConstructorExpression);
 namespace tint {
 namespace ast {
 
-TypeConstructorExpression::TypeConstructorExpression(ProgramID program_id,
-                                                     const Source& source,
-                                                     ast::Type* type,
-                                                     ExpressionList values)
-    : Base(program_id, source), type_(type), values_(std::move(values)) {
-  TINT_ASSERT(AST, type_);
-  for (auto* val : values_) {
+TypeConstructorExpression::TypeConstructorExpression(ProgramID pid,
+                                                     const Source& src,
+                                                     ast::Type* ty,
+                                                     ExpressionList vals)
+    : Base(pid, src), type(ty), values(std::move(vals)) {
+  TINT_ASSERT(AST, type);
+  for (auto* val : values) {
     TINT_ASSERT(AST, val);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, val, program_id);
   }
@@ -41,9 +41,9 @@ TypeConstructorExpression::~TypeConstructorExpression() = default;
 TypeConstructorExpression* TypeConstructorExpression::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
-  auto vals = ctx->Clone(values());
+  auto src = ctx->Clone(source);
+  auto* ty = ctx->Clone(type);
+  auto vals = ctx->Clone(values);
   return ctx->dst->create<TypeConstructorExpression>(src, ty, vals);
 }
 

@@ -26,8 +26,8 @@ using AstVectorTest = TestHelper;
 TEST_F(AstVectorTest, Creation) {
   auto* i32 = create<I32>();
   auto* v = create<Vector>(i32, 2);
-  EXPECT_EQ(v->type(), i32);
-  EXPECT_EQ(v->size(), 2u);
+  EXPECT_EQ(v->type, i32);
+  EXPECT_EQ(v->width, 2u);
 }
 
 TEST_F(AstVectorTest, FriendlyName) {

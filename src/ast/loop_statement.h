@@ -36,31 +36,20 @@ class LoopStatement : public Castable<LoopStatement, Statement> {
   LoopStatement(LoopStatement&&);
   ~LoopStatement() override;
 
-  /// @returns the body statements
-  const BlockStatement* body() const { return body_; }
-  /// @returns the body statements
-  BlockStatement* body() { return body_; }
-
-  /// @returns the continuing statements
-  const BlockStatement* continuing() const { return continuing_; }
-  /// @returns the continuing statements
-  BlockStatement* continuing() { return continuing_; }
-  /// @returns true if there are continuing statements in the loop
-  bool has_continuing() const {
-    return continuing_ != nullptr && !continuing_->empty();
-  }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   LoopStatement* Clone(CloneContext* ctx) const override;
 
+  /// The loop body
+  BlockStatement* const body;
+
+  /// The continuing statements
+  BlockStatement* const continuing;
+
  private:
   LoopStatement(const LoopStatement&) = delete;
-
-  BlockStatement* const body_;
-  BlockStatement* const continuing_;
 };
 
 }  // namespace ast

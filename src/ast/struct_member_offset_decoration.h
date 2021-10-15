@@ -36,19 +36,16 @@ class StructMemberOffsetDecoration
     : public Castable<StructMemberOffsetDecoration, Decoration> {
  public:
   /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param offset the offset value
-  StructMemberOffsetDecoration(ProgramID program_id,
-                               const Source& source,
+  StructMemberOffsetDecoration(ProgramID pid,
+                               const Source& src,
                                uint32_t offset);
   ~StructMemberOffsetDecoration() override;
 
-  /// @returns the offset value
-  uint32_t offset() const { return offset_; }
-
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -56,8 +53,8 @@ class StructMemberOffsetDecoration
   /// @return the newly cloned node
   StructMemberOffsetDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  uint32_t const offset_;
+  /// The offset value
+  uint32_t const offset;
 };
 
 }  // namespace ast

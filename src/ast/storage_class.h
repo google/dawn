@@ -44,7 +44,7 @@ inline bool IsHostShareable(StorageClass sc) {
 
 /// @param sc the StorageClass
 /// @return the name of the given storage class
-const char* str(StorageClass sc);
+const char* ToString(StorageClass sc);
 
 /// @param out the std::ostream to write to
 /// @param sc the StorageClass

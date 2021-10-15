@@ -21,15 +21,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::MemberAccessorExpression);
 namespace tint {
 namespace ast {
 
-MemberAccessorExpression::MemberAccessorExpression(ProgramID program_id,
-                                                   const Source& source,
-                                                   Expression* structure,
-                                                   IdentifierExpression* member)
-    : Base(program_id, source), struct_(structure), member_(member) {
-  TINT_ASSERT(AST, struct_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, struct_, program_id);
-  TINT_ASSERT(AST, member_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, member_, program_id);
+MemberAccessorExpression::MemberAccessorExpression(ProgramID pid,
+                                                   const Source& src,
+                                                   Expression* str,
+                                                   IdentifierExpression* mem)
+    : Base(pid, src), structure(str), member(mem) {
+  TINT_ASSERT(AST, structure);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, structure, program_id);
+  TINT_ASSERT(AST, member);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, member, program_id);
 }
 
 MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) =
@@ -40,9 +40,9 @@ MemberAccessorExpression::~MemberAccessorExpression() = default;
 MemberAccessorExpression* MemberAccessorExpression::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* str = ctx->Clone(structure());
-  auto* mem = ctx->Clone(member());
+  auto src = ctx->Clone(source);
+  auto* str = ctx->Clone(structure);
+  auto* mem = ctx->Clone(member);
   return ctx->dst->create<MemberAccessorExpression>(src, str, mem);
 }
 

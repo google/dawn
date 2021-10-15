@@ -24,16 +24,13 @@ namespace ast {
 class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param sym the symbol for the identifier
-  IdentifierExpression(ProgramID program_id, const Source& source, Symbol sym);
+  IdentifierExpression(ProgramID pid, const Source& src, Symbol sym);
   /// Move constructor
   IdentifierExpression(IdentifierExpression&&);
   ~IdentifierExpression() override;
-
-  /// @returns the symbol for the identifier
-  Symbol symbol() const { return sym_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -41,10 +38,11 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   /// @return the newly cloned node
   IdentifierExpression* Clone(CloneContext* ctx) const override;
 
+  /// The symbol for the identifier
+  Symbol const symbol;
+
  private:
   IdentifierExpression(const IdentifierExpression&) = delete;
-
-  Symbol const sym_;
 };
 
 }  // namespace ast

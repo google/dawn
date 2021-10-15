@@ -21,13 +21,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BitcastExpression);
 namespace tint {
 namespace ast {
 
-BitcastExpression::BitcastExpression(ProgramID program_id,
-                                     const Source& source,
-                                     ast::Type* type,
-                                     Expression* expr)
-    : Base(program_id, source), type_(type), expr_(expr) {
-  TINT_ASSERT(AST, type_);
-  TINT_ASSERT(AST, expr_);
+BitcastExpression::BitcastExpression(ProgramID pid,
+                                     const Source& src,
+                                     ast::Type* t,
+                                     Expression* e)
+    : Base(pid, src), type(t), expr(e) {
+  TINT_ASSERT(AST, type);
+  TINT_ASSERT(AST, expr);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
 }
 
@@ -36,10 +36,10 @@ BitcastExpression::~BitcastExpression() = default;
 
 BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
-  auto* e = ctx->Clone(expr_);
-  return ctx->dst->create<BitcastExpression>(src, ty, e);
+  auto src = ctx->Clone(source);
+  auto* t = ctx->Clone(type);
+  auto* e = ctx->Clone(expr);
+  return ctx->dst->create<BitcastExpression>(src, t, e);
 }
 
 }  // namespace ast

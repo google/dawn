@@ -28,9 +28,9 @@ class ConstructorExpression
 
  protected:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the constructor source
-  ConstructorExpression(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  ConstructorExpression(ProgramID pid, const Source& src);
   /// Move constructor
   ConstructorExpression(ConstructorExpression&&);
 

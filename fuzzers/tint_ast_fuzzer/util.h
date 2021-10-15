@@ -54,7 +54,7 @@ std::vector<const sem::Variable*> GetAllVarsInScope(
   // Walk up the hierarchy of blocks in which `curr_stmt` is contained.
   for (const auto* block = curr_stmt->Block(); block;
        block = tint::As<sem::BlockStatement>(block->Parent())) {
-    for (const auto* stmt : *block->Declaration()) {
+    for (const auto* stmt : block->Declaration()->statements) {
       if (stmt == curr_stmt->Declaration()) {
         // `curr_stmt` was found. This is only possible if `block is the
         // enclosing block of `curr_stmt` since the AST nodes are not shared.
@@ -65,7 +65,7 @@ std::vector<const sem::Variable*> GetAllVarsInScope(
       }
 
       if (const auto* var_node = tint::As<ast::VariableDeclStatement>(stmt)) {
-        const auto* sem_var = program.Sem().Get(var_node->variable());
+        const auto* sem_var = program.Sem().Get(var_node->variable);
         if (pred(sem_var)) {
           result.push_back(sem_var);
         }
@@ -74,7 +74,7 @@ std::vector<const sem::Variable*> GetAllVarsInScope(
   }
 
   // Process function parameters.
-  for (const auto* param : curr_stmt->Function()->params()) {
+  for (const auto* param : curr_stmt->Function()->params) {
     const auto* sem_var = program.Sem().Get(param);
     if (pred(sem_var)) {
       result.push_back(sem_var);

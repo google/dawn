@@ -35,11 +35,8 @@ class StageDecoration : public Castable<StageDecoration, Decoration> {
                   PipelineStage stage);
   ~StageDecoration() override;
 
-  /// @returns the stage
-  PipelineStage value() const { return stage_; }
-
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -47,8 +44,8 @@ class StageDecoration : public Castable<StageDecoration, Decoration> {
   /// @return the newly cloned node
   StageDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  PipelineStage const stage_;
+  /// The pipeline stage
+  PipelineStage const stage;
 };
 
 }  // namespace ast

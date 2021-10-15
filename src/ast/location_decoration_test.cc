@@ -23,7 +23,7 @@ using LocationDecorationTest = TestHelper;
 
 TEST_F(LocationDecorationTest, Creation) {
   auto* d = create<LocationDecoration>(2);
-  EXPECT_EQ(2u, d->value());
+  EXPECT_EQ(2u, d->value);
 }
 
 }  // namespace

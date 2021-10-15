@@ -28,8 +28,8 @@ TEST_F(AssignmentStatementTest, Creation) {
   auto* rhs = Expr("rhs");
 
   auto* stmt = create<AssignmentStatement>(lhs, rhs);
-  EXPECT_EQ(stmt->lhs(), lhs);
-  EXPECT_EQ(stmt->rhs(), rhs);
+  EXPECT_EQ(stmt->lhs, lhs);
+  EXPECT_EQ(stmt->rhs, rhs);
 }
 
 TEST_F(AssignmentStatementTest, CreationWithSource) {
@@ -38,7 +38,7 @@ TEST_F(AssignmentStatementTest, CreationWithSource) {
 
   auto* stmt =
       create<AssignmentStatement>(Source{Source::Location{20, 2}}, lhs, rhs);
-  auto src = stmt->source();
+  auto src = stmt->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }

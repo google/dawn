@@ -46,8 +46,8 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   ASSERT_NE(t.value, nullptr) << p->error();
   auto* type_name = t.value->As<ast::TypeName>();
   ASSERT_NE(type_name, nullptr);
-  EXPECT_EQ(p->builder().Symbols().Get("A"), type_name->name());
-  EXPECT_EQ(type_name->source().range, (Source::Range{{1u, 1u}, {1u, 2u}}));
+  EXPECT_EQ(p->builder().Symbols().Get("A"), type_name->name);
+  EXPECT_EQ(type_name->source.range, (Source::Range{{1u, 1u}, {1u, 2u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_TRUE(t.value->Is<ast::Bool>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_F32) {
@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_TRUE(t.value->Is<ast::F32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_I32) {
@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_TRUE(t.value->Is<ast::I32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_U32) {
@@ -102,7 +102,7 @@ TEST_F(ParserImplTest, TypeDecl_U32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_TRUE(t.value->Is<ast::U32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
 struct VecData {
@@ -126,8 +126,8 @@ TEST_P(VecTest, Parse) {
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
   EXPECT_TRUE(t.value->Is<ast::Vector>());
-  EXPECT_EQ(t.value->As<ast::Vector>()->size(), params.count);
-  EXPECT_EQ(t.value->source().range, params.range);
+  EXPECT_EQ(t.value->As<ast::Vector>()->width, params.count);
+  EXPECT_EQ(t.value->source.range, params.range);
 }
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
@@ -218,9 +218,9 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
   ASSERT_TRUE(t.value->Is<ast::Pointer>());
 
   auto* ptr = t.value->As<ast::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<ast::F32>());
-  ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 19u}}));
+  ASSERT_TRUE(ptr->type->Is<ast::F32>());
+  ASSERT_EQ(ptr->storage_class, ast::StorageClass::kFunction);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_WithAccess) {
@@ -233,10 +233,10 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_WithAccess) {
   ASSERT_TRUE(t.value->Is<ast::Pointer>());
 
   auto* ptr = t.value->As<ast::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<ast::F32>());
-  ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
-  ASSERT_EQ(ptr->access(), ast::Access::kRead);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 25u}}));
+  ASSERT_TRUE(ptr->type->Is<ast::F32>());
+  ASSERT_EQ(ptr->storage_class, ast::StorageClass::kFunction);
+  ASSERT_EQ(ptr->access, ast::Access::kRead);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
@@ -249,13 +249,13 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   ASSERT_TRUE(t.value->Is<ast::Pointer>());
 
   auto* ptr = t.value->As<ast::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<ast::Vector>());
-  ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
+  ASSERT_TRUE(ptr->type->Is<ast::Vector>());
+  ASSERT_EQ(ptr->storage_class, ast::StorageClass::kFunction);
 
-  auto* vec = ptr->type()->As<ast::Vector>();
-  ASSERT_EQ(vec->size(), 2u);
-  ASSERT_TRUE(vec->type()->Is<ast::F32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 25}}));
+  auto* vec = ptr->type->As<ast::Vector>();
+  ASSERT_EQ(vec->width, 2u);
+  ASSERT_TRUE(vec->type->Is<ast::F32>());
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
@@ -388,8 +388,8 @@ TEST_F(ParserImplTest, TypeDecl_Atomic) {
   ASSERT_TRUE(t.value->Is<ast::Atomic>());
 
   auto* atomic = t.value->As<ast::Atomic>();
-  ASSERT_TRUE(atomic->type()->Is<ast::F32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 12u}}));
+  ASSERT_TRUE(atomic->type->Is<ast::F32>());
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 12u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Atomic_ToVec) {
@@ -402,12 +402,12 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_ToVec) {
   ASSERT_TRUE(t.value->Is<ast::Atomic>());
 
   auto* atomic = t.value->As<ast::Atomic>();
-  ASSERT_TRUE(atomic->type()->Is<ast::Vector>());
+  ASSERT_TRUE(atomic->type->Is<ast::Vector>());
 
-  auto* vec = atomic->type()->As<ast::Vector>();
-  ASSERT_EQ(vec->size(), 2u);
-  ASSERT_TRUE(vec->type()->Is<ast::F32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 18u}}));
+  auto* vec = atomic->type->As<ast::Vector>();
+  ASSERT_EQ(vec->width, 2u);
+  ASSERT_TRUE(vec->type->Is<ast::F32>());
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Atomic_MissingLessThan) {
@@ -451,15 +451,15 @@ TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::F32>());
-  EXPECT_EQ(a->decorations().size(), 0u);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 14u}}));
+  ASSERT_TRUE(a->type->Is<ast::F32>());
+  EXPECT_EQ(a->decorations.size(), 0u);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 
-  auto* size_expr = a->Size()->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(size_expr, nullptr);
-  auto* size = size_expr->literal()->As<ast::SintLiteral>();
+  auto* count_expr = a->count->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(count_expr, nullptr);
+  auto* size = count_expr->literal->As<ast::SintLiteral>();
   ASSERT_NE(size, nullptr);
-  EXPECT_EQ(size->value_as_i32(), 5);
+  EXPECT_EQ(size->ValueAsI32(), 5);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
@@ -473,15 +473,15 @@ TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::F32>());
-  EXPECT_EQ(a->decorations().size(), 0u);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 15u}}));
+  ASSERT_TRUE(a->type->Is<ast::F32>());
+  EXPECT_EQ(a->decorations.size(), 0u);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 15u}}));
 
-  auto* size_expr = a->Size()->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(size_expr, nullptr);
-  auto* size = size_expr->literal()->As<ast::UintLiteral>();
+  auto* count_expr = a->count->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(count_expr, nullptr);
+  auto* size = count_expr->literal->As<ast::UintLiteral>();
   ASSERT_NE(size, nullptr);
-  EXPECT_EQ(size->value_as_u32(), 5u);
+  EXPECT_EQ(size->ValueAsU32(), 5u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
@@ -495,13 +495,13 @@ TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::F32>());
-  EXPECT_EQ(a->decorations().size(), 0u);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
+  ASSERT_TRUE(a->type->Is<ast::F32>());
+  EXPECT_EQ(a->decorations.size(), 0u);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 
-  auto* size_expr = a->Size()->As<ast::IdentifierExpression>();
-  ASSERT_NE(size_expr, nullptr);
-  EXPECT_EQ(p->builder().Symbols().NameFor(size_expr->symbol()), "size");
+  auto* count_expr = a->count->As<ast::IdentifierExpression>();
+  ASSERT_NE(count_expr, nullptr);
+  EXPECT_EQ(p->builder().Symbols().NameFor(count_expr->symbol), "size");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
@@ -515,19 +515,19 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::F32>());
+  ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  auto* size_expr = a->Size()->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(size_expr, nullptr);
-  auto* size = size_expr->literal()->As<ast::SintLiteral>();
+  auto* count_expr = a->count->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(count_expr, nullptr);
+  auto* size = count_expr->literal->As<ast::SintLiteral>();
   ASSERT_NE(size, nullptr);
-  EXPECT_EQ(size->value_as_i32(), 5);
+  EXPECT_EQ(size->ValueAsI32(), 5);
 
-  ASSERT_EQ(a->decorations().size(), 1u);
-  auto* stride = a->decorations()[0];
+  ASSERT_EQ(a->decorations.size(), 1u);
+  auto* stride = a->decorations[0];
   ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
-  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 16u);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 16u}, {1u, 29u}}));
+  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride, 16u);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 16u}, {1u, 29u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
@@ -541,13 +541,13 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::F32>());
+  ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  ASSERT_EQ(a->decorations().size(), 1u);
-  auto* stride = a->decorations()[0];
+  ASSERT_EQ(a->decorations.size(), 1u);
+  auto* stride = a->decorations[0];
   ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
-  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 16u);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 16u}, {1u, 26u}}));
+  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride, 16u);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 16u}, {1u, 26u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
@@ -561,15 +561,15 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::F32>());
+  ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  auto& decos = a->decorations();
+  auto& decos = a->decorations;
   ASSERT_EQ(decos.size(), 2u);
   EXPECT_TRUE(decos[0]->Is<ast::StrideDecoration>());
-  EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride(), 16u);
+  EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride, 16u);
   EXPECT_TRUE(decos[1]->Is<ast::StrideDecoration>());
-  EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride(), 32u);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 28u}, {1u, 38u}}));
+  EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride, 32u);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 28u}, {1u, 38u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
@@ -583,15 +583,15 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::F32>());
+  ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  auto& decos = a->decorations();
+  auto& decos = a->decorations;
   ASSERT_EQ(decos.size(), 2u);
   EXPECT_TRUE(decos[0]->Is<ast::StrideDecoration>());
-  EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride(), 16u);
+  EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride, 16u);
   EXPECT_TRUE(decos[1]->Is<ast::StrideDecoration>());
-  EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride(), 32u);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 31u}, {1u, 41u}}));
+  EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride, 32u);
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 31u}, {1u, 41u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
@@ -687,8 +687,8 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::U32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 11u}}));
+  ASSERT_TRUE(a->type->Is<ast::U32>());
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 11u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
@@ -702,10 +702,10 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::Vector>());
-  EXPECT_EQ(a->type()->As<ast::Vector>()->size(), 4u);
-  EXPECT_TRUE(a->type()->As<ast::Vector>()->type()->Is<ast::U32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
+  ASSERT_TRUE(a->type->Is<ast::Vector>());
+  EXPECT_EQ(a->type->As<ast::Vector>()->width, 4u);
+  EXPECT_TRUE(a->type->As<ast::Vector>()->type->Is<ast::U32>());
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
@@ -791,9 +791,9 @@ TEST_P(MatrixTest, Parse) {
   ASSERT_FALSE(p->has_error());
   EXPECT_TRUE(t.value->Is<ast::Matrix>());
   auto* mat = t.value->As<ast::Matrix>();
-  EXPECT_EQ(mat->rows(), params.rows);
-  EXPECT_EQ(mat->columns(), params.columns);
-  EXPECT_EQ(t.value->source().range, params.range);
+  EXPECT_EQ(mat->rows, params.rows);
+  EXPECT_EQ(mat->columns, params.columns);
+  EXPECT_EQ(t.value->source.range, params.range);
 }
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
@@ -915,7 +915,7 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_TRUE(t.value->Is<ast::Sampler>());
   ASSERT_FALSE(t.value->As<ast::Sampler>()->IsComparison());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 8u}}));
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture) {
@@ -927,8 +927,8 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t.value->Is<ast::Texture>());
   ASSERT_TRUE(t.value->Is<ast::SampledTexture>());
-  ASSERT_TRUE(t.value->As<ast::SampledTexture>()->type()->Is<ast::F32>());
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 18u}}));
+  ASSERT_TRUE(t.value->As<ast::SampledTexture>()->type->Is<ast::F32>());
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 
 }  // namespace

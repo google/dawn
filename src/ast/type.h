@@ -42,9 +42,9 @@ class Type : public Castable<Type, Node> {
 
  protected:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
-  Type(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  Type(ProgramID pid, const Source& src);
 };
 
 }  // namespace ast

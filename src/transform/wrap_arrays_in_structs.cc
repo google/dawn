@@ -60,14 +60,14 @@ void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll([&](ast::ArrayAccessorExpression* accessor)
                      -> ast::ArrayAccessorExpression* {
     if (auto* array = ::tint::As<sem::Array>(
-            sem.Get(accessor->array())->Type()->UnwrapRef())) {
+            sem.Get(accessor->array)->Type()->UnwrapRef())) {
       if (wrapper(array)) {
         // Array is wrapped in a structure. Emit a member accessor to get
         // to the actual array.
-        auto* arr = ctx.Clone(accessor->array());
-        auto* idx = ctx.Clone(accessor->idx_expr());
+        auto* arr = ctx.Clone(accessor->array);
+        auto* idx = ctx.Clone(accessor->index);
         auto* unwrapped = ctx.dst->MemberAccessor(arr, "arr");
-        return ctx.dst->IndexAccessor(accessor->source(), unwrapped, idx);
+        return ctx.dst->IndexAccessor(accessor->source, unwrapped, idx);
       }
     }
     return nullptr;
@@ -80,10 +80,9 @@ void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       if (auto w = wrapper(array)) {
         // Wrap the array type constructor with another constructor for
         // the wrapper
-        auto* wrapped_array_ty = ctx.Clone(ctor->type());
+        auto* wrapped_array_ty = ctx.Clone(ctor->type);
         auto* array_ty = w.array_type(ctx);
-        auto* arr_ctor =
-            ctx.dst->Construct(array_ty, ctx.Clone(ctor->values()));
+        auto* arr_ctor = ctx.dst->Construct(array_ty, ctx.Clone(ctor->values));
         return ctx.dst->Construct(wrapped_array_ty, arr_ctor);
       }
     }

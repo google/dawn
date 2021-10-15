@@ -23,12 +23,7 @@ using SintLiteralTest = TestHelper;
 TEST_F(SintLiteralTest, Value) {
   auto* i = create<SintLiteral>(47);
   ASSERT_TRUE(i->Is<SintLiteral>());
-  EXPECT_EQ(i->value(), 47);
-}
-
-TEST_F(SintLiteralTest, Name_I32) {
-  auto* i = create<SintLiteral>(2);
-  EXPECT_EQ("__sint_2", i->name());
+  EXPECT_EQ(i->value, 47);
 }
 
 }  // namespace

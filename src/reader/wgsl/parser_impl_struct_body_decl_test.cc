@@ -30,9 +30,9 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   ASSERT_EQ(m.value.size(), 1u);
 
   const auto* mem = m.value[0];
-  EXPECT_EQ(mem->symbol(), builder.Symbols().Get("a"));
-  EXPECT_TRUE(mem->type()->Is<ast::I32>());
-  EXPECT_EQ(mem->decorations().size(), 0u);
+  EXPECT_EQ(mem->symbol, builder.Symbols().Get("a"));
+  EXPECT_TRUE(mem->type->Is<ast::I32>());
+  EXPECT_EQ(mem->decorations.size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {

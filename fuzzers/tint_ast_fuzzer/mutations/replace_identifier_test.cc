@@ -49,19 +49,18 @@ TEST(ReplaceIdentifierTest, NotApplicable_Simple) {
 
   NodeIdMap node_id_map(program);
 
-  const auto& main_fn_stmts =
-      program.AST().Functions()[0]->body()->statements();
+  const auto& main_fn_stmts = program.AST().Functions()[0]->body->statements;
 
   const auto* a_var =
-      main_fn_stmts[0]->As<ast::VariableDeclStatement>()->variable();
+      main_fn_stmts[0]->As<ast::VariableDeclStatement>()->variable;
   ASSERT_NE(a_var, nullptr);
 
   const auto* b_var =
-      main_fn_stmts[2]->As<ast::VariableDeclStatement>()->variable();
+      main_fn_stmts[2]->As<ast::VariableDeclStatement>()->variable;
   ASSERT_NE(b_var, nullptr);
 
   const auto* e_var =
-      main_fn_stmts[4]->As<ast::VariableDeclStatement>()->variable();
+      main_fn_stmts[4]->As<ast::VariableDeclStatement>()->variable;
   ASSERT_NE(e_var, nullptr);
 
   auto a_var_id = node_id_map.GetId(a_var);
@@ -70,10 +69,10 @@ TEST(ReplaceIdentifierTest, NotApplicable_Simple) {
   auto b_var_id = node_id_map.GetId(b_var);
   ASSERT_NE(b_var_id, 0);
 
-  const auto* sum_expr = b_var->constructor()->As<ast::BinaryExpression>();
+  const auto* sum_expr = b_var->constructor->As<ast::BinaryExpression>();
   ASSERT_NE(sum_expr, nullptr);
 
-  auto a_ident_id = node_id_map.GetId(sum_expr->lhs());
+  auto a_ident_id = node_id_map.GetId(sum_expr->lhs);
   ASSERT_NE(a_ident_id, 0);
 
   auto sum_expr_id = node_id_map.GetId(sum_expr);
@@ -83,7 +82,7 @@ TEST(ReplaceIdentifierTest, NotApplicable_Simple) {
   ASSERT_NE(e_var_id, 0);
 
   auto vec_member_access_id = node_id_map.GetId(
-      e_var->constructor()->As<ast::MemberAccessorExpression>()->member());
+      e_var->constructor->As<ast::MemberAccessorExpression>()->member);
   ASSERT_NE(vec_member_access_id, 0);
 
   // use_id is invalid.
@@ -136,10 +135,9 @@ var<private> b: i32;
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[0]
+                                      ->body->statements[0]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs());
+                                      ->lhs);
   ASSERT_NE(use_id, 0);
 
   auto replacement_id = node_id_map.GetId(program.AST().GlobalVariables()[1]);
@@ -170,14 +168,11 @@ fn f() {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[0]
+                                      ->body->statements[0]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->lhs->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -202,22 +197,18 @@ fn f() {
 
   auto replacement_id = node_id_map.GetId(program.AST()
                                               .Functions()[0]
-                                              ->body()
-                                              ->statements()[0]
+                                              ->body->statements[0]
                                               ->As<ast::VariableDeclStatement>()
-                                              ->variable());
+                                              ->variable);
   ASSERT_NE(replacement_id, 0);
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[1]
+                                      ->body->statements[1]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->lhs->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -242,22 +233,18 @@ fn f() {
 
   auto replacement_id = node_id_map.GetId(program.AST()
                                               .Functions()[0]
-                                              ->body()
-                                              ->statements()[0]
+                                              ->body->statements[0]
                                               ->As<ast::VariableDeclStatement>()
-                                              ->variable());
+                                              ->variable);
   ASSERT_NE(replacement_id, 0);
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[1]
+                                      ->body->statements[1]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->lhs->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -280,19 +267,16 @@ fn f(b: i32) {
   NodeIdMap node_id_map(program);
 
   auto replacement_id =
-      node_id_map.GetId(program.AST().Functions()[0]->params()[0]);
+      node_id_map.GetId(program.AST().Functions()[0]->params[0]);
   ASSERT_NE(replacement_id, 0);
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[0]
+                                      ->body->statements[0]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->lhs->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -325,14 +309,11 @@ fn f() {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[0]
+                                      ->body->statements[0]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->lhs->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -365,12 +346,10 @@ fn f() {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[1]
+                                      ->body->statements[1]
                                       ->As<ast::AssignmentStatement>()
-                                      ->rhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->rhs->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -405,12 +384,10 @@ fn f() {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[1]
+                                      ->body->statements[1]
                                       ->As<ast::AssignmentStatement>()
-                                      ->rhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->rhs->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -443,14 +420,11 @@ fn f() {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[0]
+                                      ->body->statements[0]
                                       ->As<ast::AssignmentStatement>()
-                                      ->rhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->rhs->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -483,14 +457,11 @@ fn f() {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[0]
+                                      ->body->statements[0]
                                       ->As<ast::AssignmentStatement>()
-                                      ->rhs()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->rhs->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
@@ -514,24 +485,19 @@ fn f() {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[2]
+                                      ->body->statements[2]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs()
-                                      ->As<ast::ArrayAccessorExpression>()
-                                      ->array()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->lhs->As<ast::ArrayAccessorExpression>()
+                                      ->array->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   auto replacement_id = node_id_map.GetId(program.AST()
                                               .Functions()[0]
-                                              ->body()
-                                              ->statements()[0]
+                                              ->body->statements[0]
                                               ->As<ast::VariableDeclStatement>()
-                                              ->variable());
+                                              ->variable);
   ASSERT_NE(replacement_id, 0);
 
   ASSERT_TRUE(MaybeApplyMutation(
@@ -569,18 +535,15 @@ fn f(b: ptr<function, vec2<u32>>) {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[2]
+                                      ->body->statements[2]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs()
-                                      ->As<ast::ArrayAccessorExpression>()
-                                      ->array()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->lhs->As<ast::ArrayAccessorExpression>()
+                                      ->array->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   auto replacement_id =
-      node_id_map.GetId(program.AST().Functions()[0]->params()[0]);
+      node_id_map.GetId(program.AST().Functions()[0]->params[0]);
   ASSERT_NE(replacement_id, 0);
 
   ASSERT_TRUE(MaybeApplyMutation(
@@ -619,16 +582,12 @@ fn f() {
 
   auto use_id = node_id_map.GetId(program.AST()
                                       .Functions()[0]
-                                      ->body()
-                                      ->statements()[1]
+                                      ->body->statements[1]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs()
-                                      ->As<ast::ArrayAccessorExpression>()
-                                      ->array()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+                                      ->lhs->As<ast::ArrayAccessorExpression>()
+                                      ->array->As<ast::UnaryOpExpression>()
+                                      ->expr->As<ast::UnaryOpExpression>()
+                                      ->expr);
   ASSERT_NE(use_id, 0);
 
   auto replacement_id = node_id_map.GetId(program.AST().GlobalVariables()[0]);
@@ -654,19 +613,15 @@ fn f() {
 
   NodeIdMap node_id_map(program);
 
-  auto use_id = node_id_map.GetId(program.AST()
-                                      .Functions()[0]
-                                      ->body()
-                                      ->statements()[1]
-                                      ->As<ast::VariableDeclStatement>()
-                                      ->variable()
-                                      ->constructor()
-                                      ->As<ast::ArrayAccessorExpression>()
-                                      ->array()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+  auto use_id = node_id_map.GetId(
+      program.AST()
+          .Functions()[0]
+          ->body->statements[1]
+          ->As<ast::VariableDeclStatement>()
+          ->variable->constructor->As<ast::ArrayAccessorExpression>()
+          ->array->As<ast::UnaryOpExpression>()
+          ->expr->As<ast::UnaryOpExpression>()
+          ->expr);
   ASSERT_NE(use_id, 0);
 
   auto replacement_id = node_id_map.GetId(program.AST().GlobalVariables()[0]);
@@ -694,25 +649,21 @@ fn f() {
 
   NodeIdMap node_id_map(program);
 
-  auto use_id = node_id_map.GetId(program.AST()
-                                      .Functions()[0]
-                                      ->body()
-                                      ->statements()[3]
-                                      ->As<ast::VariableDeclStatement>()
-                                      ->variable()
-                                      ->constructor()
-                                      ->As<ast::ArrayAccessorExpression>()
-                                      ->array()
-                                      ->As<ast::UnaryOpExpression>()
-                                      ->expr());
+  auto use_id = node_id_map.GetId(
+      program.AST()
+          .Functions()[0]
+          ->body->statements[3]
+          ->As<ast::VariableDeclStatement>()
+          ->variable->constructor->As<ast::ArrayAccessorExpression>()
+          ->array->As<ast::UnaryOpExpression>()
+          ->expr);
   ASSERT_NE(use_id, 0);
 
   auto replacement_id = node_id_map.GetId(program.AST()
                                               .Functions()[0]
-                                              ->body()
-                                              ->statements()[2]
+                                              ->body->statements[2]
                                               ->As<ast::VariableDeclStatement>()
-                                              ->variable());
+                                              ->variable);
   ASSERT_NE(replacement_id, 0);
   ASSERT_FALSE(MutationReplaceIdentifier(use_id, replacement_id)
                    .IsApplicable(program, node_id_map));

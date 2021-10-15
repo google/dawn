@@ -21,19 +21,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMember);
 namespace tint {
 namespace ast {
 
-StructMember::StructMember(ProgramID program_id,
-                           const Source& source,
+StructMember::StructMember(ProgramID pid,
+                           const Source& src,
                            const Symbol& sym,
-                           ast::Type* type,
-                           DecorationList decorations)
-    : Base(program_id, source),
-      symbol_(sym),
-      type_(type),
-      decorations_(std::move(decorations)) {
+                           ast::Type* ty,
+                           DecorationList decos)
+    : Base(pid, src), symbol(sym), type(ty), decorations(std::move(decos)) {
   TINT_ASSERT(AST, type);
-  TINT_ASSERT(AST, symbol_.IsValid());
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol_, program_id);
-  for (auto* deco : decorations_) {
+  TINT_ASSERT(AST, symbol.IsValid());
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
+  for (auto* deco : decorations) {
     TINT_ASSERT(AST, deco);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
   }
@@ -43,24 +40,12 @@ StructMember::StructMember(StructMember&&) = default;
 
 StructMember::~StructMember() = default;
 
-bool StructMember::has_offset_decoration() const {
-  return HasDecoration<StructMemberOffsetDecoration>(decorations_);
-}
-
-uint32_t StructMember::offset() const {
-  if (auto* offset =
-          GetDecoration<StructMemberOffsetDecoration>(decorations_)) {
-    return offset->offset();
-  }
-  return 0;
-}
-
 StructMember* StructMember::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto sym = ctx->Clone(symbol_);
-  auto* ty = ctx->Clone(type_);
-  auto decos = ctx->Clone(decorations_);
+  auto src = ctx->Clone(source);
+  auto sym = ctx->Clone(symbol);
+  auto* ty = ctx->Clone(type);
+  auto decos = ctx->Clone(decorations);
   return ctx->dst->create<StructMember>(src, sym, ty, decos);
 }
 

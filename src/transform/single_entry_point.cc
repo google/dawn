@@ -47,7 +47,7 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
     if (!f->IsEntryPoint()) {
       continue;
     }
-    if (ctx.src->Symbols().NameFor(f->symbol()) == cfg->entry_point_name) {
+    if (ctx.src->Symbols().NameFor(f->symbol) == cfg->entry_point_name) {
       entry_point = f;
       break;
     }
@@ -74,11 +74,11 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
       // TODO(jrprice): Strip unused types.
       ctx.dst->AST().AddTypeDecl(ctx.Clone(ty));
     } else if (auto* var = decl->As<ast::Variable>()) {
-      if (var->is_const() || referenced_vars.count(var)) {
+      if (var->is_const || referenced_vars.count(var)) {
         ctx.dst->AST().AddGlobalVariable(ctx.Clone(var));
       }
     } else if (auto* func = decl->As<ast::Function>()) {
-      if (sem.Get(func)->HasAncestorEntryPoint(entry_point->symbol())) {
+      if (sem.Get(func)->HasAncestorEntryPoint(entry_point->symbol)) {
         ctx.dst->AST().AddFunction(ctx.Clone(func));
       }
     } else {

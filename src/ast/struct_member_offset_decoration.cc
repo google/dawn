@@ -23,22 +23,22 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberOffsetDecoration);
 namespace tint {
 namespace ast {
 
-StructMemberOffsetDecoration::StructMemberOffsetDecoration(ProgramID program_id,
-                                                           const Source& source,
-                                                           uint32_t offset)
-    : Base(program_id, source), offset_(offset) {}
+StructMemberOffsetDecoration::StructMemberOffsetDecoration(ProgramID pid,
+                                                           const Source& src,
+                                                           uint32_t o)
+    : Base(pid, src), offset(o) {}
 
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
 
-std::string StructMemberOffsetDecoration::name() const {
+std::string StructMemberOffsetDecoration::Name() const {
   return "offset";
 }
 
 StructMemberOffsetDecoration* StructMemberOffsetDecoration::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<StructMemberOffsetDecoration>(src, offset_);
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<StructMemberOffsetDecoration>(src, offset);
 }
 
 }  // namespace ast

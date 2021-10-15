@@ -54,9 +54,8 @@ struct ArrayUsage {
 
 }  // namespace
 
-CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(
-    ProgramID program_id)
-    : Base(program_id) {}
+CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(ProgramID pid)
+    : Base(pid) {}
 CalculateArrayLength::BufferSizeIntrinsic::~BufferSizeIntrinsic() = default;
 std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
   return "intrinsic_buffer_size";
@@ -82,7 +81,7 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
       auto name = ctx.dst->Sym();
       auto* buffer_typename =
-          ctx.dst->ty.type_name(ctx.Clone(buffer_type->Declaration()->name()));
+          ctx.dst->ty.type_name(ctx.Clone(buffer_type->Declaration()->name));
       auto* disable_validation =
           ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
               ctx.dst->ID(),
@@ -134,14 +133,14 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
           // We can assume that the arrayLength() call has a single argument of
           // the form: arrayLength(&X.Y) where X is an expression that resolves
           // to the storage buffer structure, and Y is the runtime sized array.
-          auto* arg = call_expr->args()[0];
+          auto* arg = call_expr->args[0];
           auto* address_of = arg->As<ast::UnaryOpExpression>();
-          if (!address_of || address_of->op() != ast::UnaryOp::kAddressOf) {
+          if (!address_of || address_of->op != ast::UnaryOp::kAddressOf) {
             TINT_ICE(Transform, ctx.dst->Diagnostics())
                 << "arrayLength() expected pointer to member access, got "
                 << address_of->TypeInfo().name;
           }
-          auto* array_expr = address_of->expr();
+          auto* array_expr = address_of->expr;
 
           auto* accessor = array_expr->As<ast::MemberAccessorExpression>();
           if (!accessor) {
@@ -151,7 +150,7 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                 << array_expr->TypeInfo().name;
             break;
           }
-          auto* storage_buffer_expr = accessor->structure();
+          auto* storage_buffer_expr = accessor->structure;
           auto* storage_buffer_sem = sem.Get(storage_buffer_expr);
           auto* storage_buffer_type =
               storage_buffer_sem->Type()->UnwrapRef()->As<sem::Struct>();
@@ -201,7 +200,7 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                         //  X.GetDimensions(ARGS..) by the writer
                         buffer_size, ctx.Clone(storage_buffer_expr),
                         ctx.dst->AddressOf(ctx.dst->Expr(
-                            buffer_size_result->variable()->symbol()))));
+                            buffer_size_result->variable->symbol))));
 
                 // Calculate actual array length
                 //                total_storage_buffer_size - array_offset
@@ -213,16 +212,16 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                 auto* array_length_var = ctx.dst->Decl(ctx.dst->Const(
                     name, ctx.dst->ty.u32(),
                     ctx.dst->Div(
-                        ctx.dst->Sub(buffer_size_result->variable()->symbol(),
+                        ctx.dst->Sub(buffer_size_result->variable->symbol,
                                      array_offset),
                         array_stride)));
 
                 // Insert the array length calculations at the top of the block
-                ctx.InsertBefore(block->statements(), *block->begin(),
+                ctx.InsertBefore(block->statements, block->statements[0],
                                  buffer_size_result);
-                ctx.InsertBefore(block->statements(), *block->begin(),
+                ctx.InsertBefore(block->statements, block->statements[0],
                                  call_get_dims);
-                ctx.InsertBefore(block->statements(), *block->begin(),
+                ctx.InsertBefore(block->statements, block->statements[0],
                                  array_length_var);
                 return name;
               });

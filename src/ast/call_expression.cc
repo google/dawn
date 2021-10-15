@@ -21,14 +21,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
 namespace tint {
 namespace ast {
 
-CallExpression::CallExpression(ProgramID program_id,
-                               const Source& source,
-                               IdentifierExpression* func,
-                               ExpressionList args)
-    : Base(program_id, source), func_(func), args_(args) {
-  TINT_ASSERT(AST, func_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func_, program_id);
-  for (auto* arg : args_) {
+CallExpression::CallExpression(ProgramID pid,
+                               const Source& src,
+                               IdentifierExpression* fn,
+                               ExpressionList a)
+    : Base(pid, src), func(fn), args(a) {
+  TINT_ASSERT(AST, func);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
+  for (auto* arg : args) {
     TINT_ASSERT(AST, arg);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
   }
@@ -40,9 +40,9 @@ CallExpression::~CallExpression() = default;
 
 CallExpression* CallExpression::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* fn = ctx->Clone(func_);
-  auto p = ctx->Clone(args_);
+  auto src = ctx->Clone(source);
+  auto* fn = ctx->Clone(func);
+  auto p = ctx->Clone(args);
   return ctx->dst->create<CallExpression>(src, fn, p);
 }
 

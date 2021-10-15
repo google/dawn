@@ -37,22 +37,20 @@ class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
   UnaryOpExpression(UnaryOpExpression&&);
   ~UnaryOpExpression() override;
 
-  /// @returns the op
-  UnaryOp op() const { return op_; }
-  /// @returns the expression
-  Expression* expr() const { return expr_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   UnaryOpExpression* Clone(CloneContext* ctx) const override;
 
+  /// The op
+  UnaryOp const op;
+
+  /// The expression
+  Expression* const expr;
+
  private:
   UnaryOpExpression(const UnaryOpExpression&) = delete;
-
-  UnaryOp const op_;
-  Expression* const expr_;
 };
 
 }  // namespace ast

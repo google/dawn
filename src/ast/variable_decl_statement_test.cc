@@ -27,7 +27,7 @@ TEST_F(VariableDeclStatementTest, Creation) {
   auto* var = Var("a", ty.f32(), StorageClass::kNone);
 
   auto* stmt = create<VariableDeclStatement>(var);
-  EXPECT_EQ(stmt->variable(), var);
+  EXPECT_EQ(stmt->variable, var);
 }
 
 TEST_F(VariableDeclStatementTest, Creation_WithSource) {
@@ -35,7 +35,7 @@ TEST_F(VariableDeclStatementTest, Creation_WithSource) {
 
   auto* stmt =
       create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);
-  auto src = stmt->source();
+  auto src = stmt->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }

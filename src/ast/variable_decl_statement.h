@@ -36,19 +36,17 @@ class VariableDeclStatement
   VariableDeclStatement(VariableDeclStatement&&);
   ~VariableDeclStatement() override;
 
-  /// @returns the variable
-  Variable* variable() const { return variable_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   VariableDeclStatement* Clone(CloneContext* ctx) const override;
 
+  /// The variable
+  Variable* const variable;
+
  private:
   VariableDeclStatement(const VariableDeclStatement&) = delete;
-
-  Variable* const variable_;
 };
 
 }  // namespace ast

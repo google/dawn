@@ -27,15 +27,15 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable(), nullptr);
-  EXPECT_EQ(e->variable()->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_NE(e->variable, nullptr);
+  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_EQ(e->source().range.begin.line, 1u);
-  ASSERT_EQ(e->source().range.begin.column, 5u);
-  ASSERT_EQ(e->source().range.end.line, 1u);
-  ASSERT_EQ(e->source().range.end.column, 6u);
+  ASSERT_EQ(e->source.range.begin.line, 1u);
+  ASSERT_EQ(e->source.range.begin.column, 5u);
+  ASSERT_EQ(e->source.range.end.line, 1u);
+  ASSERT_EQ(e->source.range.end.column, 6u);
 
-  EXPECT_EQ(e->variable()->constructor(), nullptr);
+  EXPECT_EQ(e->variable->constructor, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
@@ -46,16 +46,16 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable(), nullptr);
-  EXPECT_EQ(e->variable()->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_NE(e->variable, nullptr);
+  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_EQ(e->source().range.begin.line, 1u);
-  ASSERT_EQ(e->source().range.begin.column, 5u);
-  ASSERT_EQ(e->source().range.end.line, 1u);
-  ASSERT_EQ(e->source().range.end.column, 6u);
+  ASSERT_EQ(e->source.range.begin.line, 1u);
+  ASSERT_EQ(e->source.range.begin.column, 5u);
+  ASSERT_EQ(e->source.range.end.line, 1u);
+  ASSERT_EQ(e->source.range.end.column, 6u);
 
-  ASSERT_NE(e->variable()->constructor(), nullptr);
-  EXPECT_TRUE(e->variable()->constructor()->Is<ast::ConstructorExpression>());
+  ASSERT_NE(e->variable->constructor, nullptr);
+  EXPECT_TRUE(e->variable->constructor->Is<ast::ConstructorExpression>());
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {
@@ -86,11 +86,11 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable(), nullptr);
-  EXPECT_EQ(e->variable()->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_NE(e->variable, nullptr);
+  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->variable()->constructor(), nullptr);
-  EXPECT_TRUE(e->variable()->constructor()->Is<ast::ConstructorExpression>());
+  ASSERT_NE(e->variable->constructor, nullptr);
+  EXPECT_TRUE(e->variable->constructor->Is<ast::ConstructorExpression>());
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
@@ -101,11 +101,11 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable(), nullptr);
-  EXPECT_EQ(e->variable()->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_NE(e->variable, nullptr);
+  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->variable()->constructor(), nullptr);
-  EXPECT_TRUE(e->variable()->constructor()->Is<ast::ConstructorExpression>());
+  ASSERT_NE(e->variable->constructor, nullptr);
+  EXPECT_TRUE(e->variable->constructor->Is<ast::ConstructorExpression>());
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
@@ -116,11 +116,11 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable(), nullptr);
-  EXPECT_EQ(e->variable()->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_NE(e->variable, nullptr);
+  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->variable()->constructor(), nullptr);
-  EXPECT_TRUE(e->variable()->constructor()->Is<ast::ConstructorExpression>());
+  ASSERT_NE(e->variable->constructor, nullptr);
+  EXPECT_TRUE(e->variable->constructor->Is<ast::ConstructorExpression>());
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
@@ -131,11 +131,11 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable(), nullptr);
-  EXPECT_EQ(e->variable()->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_NE(e->variable, nullptr);
+  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->variable()->constructor(), nullptr);
-  EXPECT_TRUE(e->variable()->constructor()->Is<ast::ConstructorExpression>());
+  ASSERT_NE(e->variable->constructor, nullptr);
+  EXPECT_TRUE(e->variable->constructor->Is<ast::ConstructorExpression>());
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let) {
@@ -147,10 +147,10 @@ TEST_F(ParserImplTest, VariableStmt_Let) {
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
 
-  ASSERT_EQ(e->source().range.begin.line, 1u);
-  ASSERT_EQ(e->source().range.begin.column, 5u);
-  ASSERT_EQ(e->source().range.end.line, 1u);
-  ASSERT_EQ(e->source().range.end.column, 6u);
+  ASSERT_EQ(e->source.range.begin.line, 1u);
+  ASSERT_EQ(e->source.range.begin.column, 5u);
+  ASSERT_EQ(e->source.range.end.line, 1u);
+  ASSERT_EQ(e->source.range.end.column, 6u);
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_InvalidVarIdent) {

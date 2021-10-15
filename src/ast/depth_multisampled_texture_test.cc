@@ -24,7 +24,7 @@ using AstDepthMultisampledTextureTest = TestHelper;
 
 TEST_F(AstDepthMultisampledTextureTest, Dim) {
   auto* d = create<DepthMultisampledTexture>(TextureDimension::k2d);
-  EXPECT_EQ(d->dim(), TextureDimension::k2d);
+  EXPECT_EQ(d->dim, TextureDimension::k2d);
 }
 
 TEST_F(AstDepthMultisampledTextureTest, FriendlyName) {

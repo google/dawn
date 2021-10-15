@@ -26,17 +26,14 @@ namespace ast {
 class GroupDecoration : public Castable<GroupDecoration, Decoration> {
  public:
   /// constructor
-  /// @param program_id the identifier of the program that owns this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param value the group value
-  /// @param source the source of this decoration
-  GroupDecoration(ProgramID program_id, const Source& source, uint32_t value);
+  GroupDecoration(ProgramID pid, const Source& src, uint32_t value);
   ~GroupDecoration() override;
 
-  /// @returns the group value
-  uint32_t value() const { return value_; }
-
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -44,8 +41,8 @@ class GroupDecoration : public Castable<GroupDecoration, Decoration> {
   /// @return the newly cloned node
   GroupDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  uint32_t const value_;
+  /// The group value
+  uint32_t const value;
 };
 
 }  // namespace ast

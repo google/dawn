@@ -45,8 +45,8 @@ Result Generate(const Program* program, const Options& options) {
   // Collect the list of entry points in the sanitized program.
   for (auto* func : sanitized_result.program.AST().Functions()) {
     if (func->IsEntryPoint()) {
-      auto name = sanitized_result.program.Symbols().NameFor(func->symbol());
-      result.entry_points.push_back({name, func->pipeline_stage()});
+      auto name = sanitized_result.program.Symbols().NameFor(func->symbol);
+      result.entry_points.push_back({name, func->PipelineStage()});
     }
   }
 

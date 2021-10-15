@@ -80,9 +80,9 @@ void FirstIndexOffset::Run(CloneContext& ctx,
   // parameters) or structure member accesses.
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* var = node->As<ast::Variable>()) {
-      for (ast::Decoration* dec : var->decorations()) {
+      for (ast::Decoration* dec : var->decorations) {
         if (auto* builtin_dec = dec->As<ast::BuiltinDecoration>()) {
-          ast::Builtin builtin = builtin_dec->value();
+          ast::Builtin builtin = builtin_dec->builtin;
           if (builtin == ast::Builtin::kVertexIndex) {
             auto* sem_var = ctx.src->Sem().Get(var);
             builtin_vars.emplace(sem_var, kFirstVertexName);
@@ -97,9 +97,9 @@ void FirstIndexOffset::Run(CloneContext& ctx,
       }
     }
     if (auto* member = node->As<ast::StructMember>()) {
-      for (ast::Decoration* dec : member->decorations()) {
+      for (ast::Decoration* dec : member->decorations) {
         if (auto* builtin_dec = dec->As<ast::BuiltinDecoration>()) {
-          ast::Builtin builtin = builtin_dec->value();
+          ast::Builtin builtin = builtin_dec->builtin;
           if (builtin == ast::Builtin::kVertexIndex) {
             auto* sem_mem = ctx.src->Sem().Get(member);
             builtin_members.emplace(sem_mem, kFirstVertexName);

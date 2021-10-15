@@ -28,18 +28,18 @@ TEST_F(ElseStatementTest, Creation) {
   auto* body = create<BlockStatement>(StatementList{
       create<DiscardStatement>(),
   });
-  auto* discard = body->get(0);
+  auto* discard = body->statements[0];
 
   auto* e = create<ElseStatement>(cond, body);
-  EXPECT_EQ(e->condition(), cond);
-  ASSERT_EQ(e->body()->size(), 1u);
-  EXPECT_EQ(e->body()->get(0), discard);
+  EXPECT_EQ(e->condition, cond);
+  ASSERT_EQ(e->body->statements.size(), 1u);
+  EXPECT_EQ(e->body->statements[0], discard);
 }
 
 TEST_F(ElseStatementTest, Creation_WithSource) {
   auto* e = create<ElseStatement>(Source{Source::Location{20, 2}}, Expr(true),
                                   Block());
-  auto src = e->source();
+  auto src = e->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
@@ -52,12 +52,12 @@ TEST_F(ElseStatementTest, IsElse) {
 TEST_F(ElseStatementTest, HasCondition) {
   auto* cond = Expr(true);
   auto* e = create<ElseStatement>(cond, Block());
-  EXPECT_TRUE(e->HasCondition());
+  EXPECT_TRUE(e->condition);
 }
 
 TEST_F(ElseStatementTest, HasContition_NullCondition) {
   auto* e = create<ElseStatement>(nullptr, Block());
-  EXPECT_FALSE(e->HasCondition());
+  EXPECT_FALSE(e->condition);
 }
 
 TEST_F(ElseStatementTest, Assert_Null_Body) {

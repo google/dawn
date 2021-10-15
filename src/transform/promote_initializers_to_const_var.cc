@@ -68,7 +68,7 @@ void PromoteInitializersToConstVar::Run(CloneContext& ctx,
       auto* src_stmt = src_sem_stmt->Declaration();
 
       if (auto* src_var_decl = src_stmt->As<ast::VariableDeclStatement>()) {
-        if (src_var_decl->variable()->constructor() == src_init) {
+        if (src_var_decl->variable->constructor == src_init) {
           // This statement is just a variable declaration with the initializer
           // as the constructor value. This is what we're attempting to
           // transform to, and so ignore.
@@ -81,7 +81,7 @@ void PromoteInitializersToConstVar::Run(CloneContext& ctx,
         // Create a new symbol for the constant
         auto dst_symbol = ctx.dst->Sym();
         // Clone the type
-        auto* dst_ty = ctx.Clone(src_init->type());
+        auto* dst_ty = ctx.Clone(src_init->type);
         // Clone the initializer
         auto* dst_init = ctx.Clone(src_init);
         // Construct the constant that holds the hoisted initializer
@@ -92,7 +92,7 @@ void PromoteInitializersToConstVar::Run(CloneContext& ctx,
         auto* dst_ident = ctx.dst->Expr(dst_symbol);
 
         // Insert the constant before the usage
-        ctx.InsertBefore(src_sem_stmt->Block()->Declaration()->statements(),
+        ctx.InsertBefore(src_sem_stmt->Block()->Declaration()->statements,
                          src_stmt, dst_var_decl);
         // Replace the inlined initializer with a reference to the constant
         ctx.Replace(src_init, dst_ident);

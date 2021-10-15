@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, Decoration_Size) {
   ASSERT_TRUE(member_deco->Is<ast::StructMemberSizeDecoration>());
 
   auto* o = member_deco->As<ast::StructMemberSizeDecoration>();
-  EXPECT_EQ(o->size(), 4u);
+  EXPECT_EQ(o->size, 4u);
 }
 
 TEST_F(ParserImplTest, Decoration_Size_MissingLeftParen) {
@@ -90,7 +90,7 @@ TEST_F(ParserImplTest, Decoration_Align) {
   ASSERT_TRUE(member_deco->Is<ast::StructMemberAlignDecoration>());
 
   auto* o = member_deco->As<ast::StructMemberAlignDecoration>();
-  EXPECT_EQ(o->align(), 4u);
+  EXPECT_EQ(o->align, 4u);
 }
 
 TEST_F(ParserImplTest, Decoration_Align_MissingLeftParen) {

@@ -29,14 +29,14 @@ std::string SizeExprToString(const ast::Expression* size,
                              const SymbolTable* symbols = nullptr) {
   if (auto* ident = size->As<ast::IdentifierExpression>()) {
     if (symbols) {
-      return symbols->NameFor(ident->symbol());
+      return symbols->NameFor(ident->symbol);
     }
     return "<unknown>";
   }
   if (auto* scalar = size->As<ast::ScalarConstructorExpression>()) {
-    auto* literal = scalar->literal()->As<ast::IntLiteral>();
+    auto* literal = scalar->literal->As<ast::IntLiteral>();
     if (literal) {
-      return std::to_string(literal->value_as_u32());
+      return std::to_string(literal->ValueAsU32());
     }
   }
   // This will never be exposed to the user as the Resolver will reject this
@@ -45,15 +45,12 @@ std::string SizeExprToString(const ast::Expression* size,
 }
 }  // namespace
 
-Array::Array(ProgramID program_id,
-             const Source& source,
+Array::Array(ProgramID pid,
+             const Source& src,
              Type* subtype,
-             ast::Expression* size,
-             ast::DecorationList decorations)
-    : Base(program_id, source),
-      subtype_(subtype),
-      size_(size),
-      decos_(decorations) {}
+             ast::Expression* cnt,
+             ast::DecorationList decos)
+    : Base(pid, src), type(subtype), count(cnt), decorations(decos) {}
 
 Array::Array(Array&&) = default;
 
@@ -61,14 +58,14 @@ Array::~Array() = default;
 
 std::string Array::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
-  for (auto* deco : decos_) {
+  for (auto* deco : decorations) {
     if (auto* stride = deco->As<ast::StrideDecoration>()) {
-      out << "[[stride(" << stride->stride() << ")]] ";
+      out << "[[stride(" << stride->stride << ")]] ";
     }
   }
-  out << "array<" << subtype_->FriendlyName(symbols);
+  out << "array<" << type->FriendlyName(symbols);
   if (!IsRuntimeArray()) {
-    out << ", " << SizeExprToString(size_, &symbols);
+    out << ", " << SizeExprToString(count, &symbols);
   }
   out << ">";
   return out.str();
@@ -76,11 +73,11 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
 
 Array* Array::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
-  auto* size = ctx->Clone(Size());
-  auto decos = ctx->Clone(decorations());
-  return ctx->dst->create<Array>(src, ty, size, decos);
+  auto src = ctx->Clone(source);
+  auto* ty = ctx->Clone(type);
+  auto* cnt = ctx->Clone(count);
+  auto decos = ctx->Clone(decorations);
+  return ctx->dst->create<Array>(src, ty, cnt, decos);
 }
 
 }  // namespace ast

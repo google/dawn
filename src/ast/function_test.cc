@@ -30,10 +30,10 @@ TEST_F(FunctionTest, Creation) {
   auto* var = params[0];
 
   auto* f = Func("func", params, ty.void_(), StatementList{}, DecorationList{});
-  EXPECT_EQ(f->symbol(), Symbols().Get("func"));
-  ASSERT_EQ(f->params().size(), 1u);
-  EXPECT_TRUE(f->return_type()->Is<ast::Void>());
-  EXPECT_EQ(f->params()[0], var);
+  EXPECT_EQ(f->symbol, Symbols().Get("func"));
+  ASSERT_EQ(f->params.size(), 1u);
+  EXPECT_TRUE(f->return_type->Is<ast::Void>());
+  EXPECT_EQ(f->params[0], var);
 }
 
 TEST_F(FunctionTest, Creation_WithSource) {
@@ -42,7 +42,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
 
   auto* f = Func(Source{Source::Location{20, 2}}, "func", params, ty.void_(),
                  StatementList{}, DecorationList{});
-  auto src = f->source();
+  auto src = f->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
@@ -137,22 +137,6 @@ TEST_F(FunctionTest, Assert_NonConstParam) {
         b.Func("f", params, b.ty.void_(), StatementList{}, DecorationList{});
       },
       "internal compiler error");
-}
-
-TEST_F(FunctionTest, GetLastStatement) {
-  VariableList params;
-  auto* stmt = create<DiscardStatement>();
-  auto* f =
-      Func("func", params, ty.void_(), StatementList{stmt}, DecorationList{});
-
-  EXPECT_EQ(f->get_last_statement(), stmt);
-}
-
-TEST_F(FunctionTest, GetLastStatement_nullptr) {
-  VariableList params;
-  auto* f = Func("func", params, ty.void_(), StatementList{}, DecorationList{});
-
-  EXPECT_EQ(f->get_last_statement(), nullptr);
 }
 
 using FunctionListTest = TestHelper;

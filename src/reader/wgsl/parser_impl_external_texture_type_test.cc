@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, ExternalTextureType) {
   auto t = p->external_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
+  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 
 }  // namespace

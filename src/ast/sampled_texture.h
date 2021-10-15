@@ -26,20 +26,17 @@ namespace ast {
 class SampledTexture : public Castable<SampledTexture, Texture> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param dim the dimensionality of the texture
   /// @param type the data type of the sampled texture
-  SampledTexture(ProgramID program_id,
-                 const Source& source,
+  SampledTexture(ProgramID pid,
+                 const Source& src,
                  TextureDimension dim,
                  Type const* type);
   /// Move constructor
   SampledTexture(SampledTexture&&);
   ~SampledTexture() override;
-
-  /// @returns the subtype of the sampled texture
-  Type* type() const { return const_cast<Type*>(type_); }
 
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
@@ -51,8 +48,8 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   /// @return the newly cloned type
   SampledTexture* Clone(CloneContext* ctx) const override;
 
- private:
-  Type const* const type_;
+  /// The subtype of the sampled texture
+  Type* const type;
 };
 
 }  // namespace ast

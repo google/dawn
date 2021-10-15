@@ -125,7 +125,7 @@ bool IsValidationDisabled(const ast::DecorationList& decorations,
                           ast::DisabledValidation validation) {
   for (auto* decoration : decorations) {
     if (auto* dv = decoration->As<ast::DisableValidationDecoration>()) {
-      if (dv->Validation() == validation) {
+      if (dv->validation == validation) {
         return true;
       }
     }
@@ -145,9 +145,9 @@ bool IsValidationEnabled(const ast::DecorationList& decorations,
 std::string deco_to_str(const ast::Decoration* deco) {
   std::stringstream str;
   if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-    str << "builtin(" << builtin->value() << ")";
+    str << "builtin(" << builtin->builtin << ")";
   } else if (auto* location = deco->As<ast::LocationDecoration>()) {
-    str << "location(" << location->value() << ")";
+    str << "location(" << location->value << ")";
   }
   return str.str();
 }
@@ -275,7 +275,7 @@ bool Resolver::ResolveInternal() {
     if (marked_.count(node) == 0) {
       TINT_ICE(Resolver, diagnostics_) << "AST node '" << node->TypeInfo().name
                                        << "' was not reached by the resolver\n"
-                                       << "At: " << node->source() << "\n"
+                                       << "At: " << node->source << "\n"
                                        << "Pointer: " << node;
       result = false;
     }
@@ -303,10 +303,10 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return builder_->create<sem::F32>();
     }
     if (auto* t = ty->As<ast::Vector>()) {
-      if (auto* el = Type(t->type())) {
+      if (auto* el = Type(t->type)) {
         if (auto* vector = builder_->create<sem::Vector>(
-                const_cast<sem::Type*>(el), t->size())) {
-          if (ValidateVector(vector, t->source())) {
+                const_cast<sem::Type*>(el), t->width)) {
+          if (ValidateVector(vector, t->source)) {
             return vector;
           }
         }
@@ -314,12 +314,12 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return nullptr;
     }
     if (auto* t = ty->As<ast::Matrix>()) {
-      if (auto* el = Type(t->type())) {
+      if (auto* el = Type(t->type)) {
         if (auto* column_type = builder_->create<sem::Vector>(
-                const_cast<sem::Type*>(el), t->rows())) {
+                const_cast<sem::Type*>(el), t->rows)) {
           if (auto* matrix =
-                  builder_->create<sem::Matrix>(column_type, t->columns())) {
-            if (ValidateMatrix(matrix, t->source())) {
+                  builder_->create<sem::Matrix>(column_type, t->columns)) {
+            if (ValidateMatrix(matrix, t->source)) {
               return matrix;
             }
           }
@@ -331,7 +331,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return Array(t);
     }
     if (auto* t = ty->As<ast::Atomic>()) {
-      if (auto* el = Type(t->type())) {
+      if (auto* el = Type(t->type)) {
         auto* a = builder_->create<sem::Atomic>(const_cast<sem::Type*>(el));
         if (!ValidateAtomic(t, a)) {
           return nullptr;
@@ -341,47 +341,46 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return nullptr;
     }
     if (auto* t = ty->As<ast::Pointer>()) {
-      if (auto* el = Type(t->type())) {
-        auto access = t->access();
+      if (auto* el = Type(t->type)) {
+        auto access = t->access;
         if (access == ast::kUndefined) {
-          access = DefaultAccessForStorageClass(t->storage_class());
+          access = DefaultAccessForStorageClass(t->storage_class);
         }
         return builder_->create<sem::Pointer>(const_cast<sem::Type*>(el),
-                                              t->storage_class(), access);
+                                              t->storage_class, access);
       }
       return nullptr;
     }
     if (auto* t = ty->As<ast::Sampler>()) {
-      return builder_->create<sem::Sampler>(t->kind());
+      return builder_->create<sem::Sampler>(t->kind);
     }
     if (auto* t = ty->As<ast::SampledTexture>()) {
-      if (auto* el = Type(t->type())) {
+      if (auto* el = Type(t->type)) {
         return builder_->create<sem::SampledTexture>(
-            t->dim(), const_cast<sem::Type*>(el));
+            t->dim, const_cast<sem::Type*>(el));
       }
       return nullptr;
     }
     if (auto* t = ty->As<ast::MultisampledTexture>()) {
-      if (auto* el = Type(t->type())) {
+      if (auto* el = Type(t->type)) {
         return builder_->create<sem::MultisampledTexture>(
-            t->dim(), const_cast<sem::Type*>(el));
+            t->dim, const_cast<sem::Type*>(el));
       }
       return nullptr;
     }
     if (auto* t = ty->As<ast::DepthTexture>()) {
-      return builder_->create<sem::DepthTexture>(t->dim());
+      return builder_->create<sem::DepthTexture>(t->dim);
     }
     if (auto* t = ty->As<ast::DepthMultisampledTexture>()) {
-      return builder_->create<sem::DepthMultisampledTexture>(t->dim());
+      return builder_->create<sem::DepthMultisampledTexture>(t->dim);
     }
     if (auto* t = ty->As<ast::StorageTexture>()) {
-      if (auto* el = Type(t->type())) {
+      if (auto* el = Type(t->type)) {
         if (!ValidateStorageTexture(t)) {
           return nullptr;
         }
         return builder_->create<sem::StorageTexture>(
-            t->dim(), t->image_format(), t->access(),
-            const_cast<sem::Type*>(el));
+            t->dim, t->format, t->access, const_cast<sem::Type*>(el));
       }
       return nullptr;
     }
@@ -389,11 +388,10 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return builder_->create<sem::ExternalTexture>();
     }
     if (auto* t = ty->As<ast::TypeName>()) {
-      auto it = named_type_info_.find(t->name());
+      auto it = named_type_info_.find(t->name);
       if (it == named_type_info_.end()) {
-        AddError(
-            "unknown type '" + builder_->Symbols().NameFor(t->name()) + "'",
-            t->source());
+        AddError("unknown type '" + builder_->Symbols().NameFor(t->name) + "'",
+                 t->source);
         return nullptr;
       }
       return it->second.sem;
@@ -414,36 +412,36 @@ bool Resolver::ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s) {
   // T must be either u32 or i32.
   if (!s->Type()->IsAnyOf<sem::U32, sem::I32>()) {
     AddError("atomic only supports i32 or u32 types",
-             a->type() ? a->type()->source() : a->source());
+             a->type ? a->type->source : a->source);
     return false;
   }
   return true;
 }
 
 bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
-  switch (t->access()) {
+  switch (t->access) {
     case ast::Access::kWrite:
       break;
     case ast::Access::kUndefined:
-      AddError("storage texture missing access control", t->source());
+      AddError("storage texture missing access control", t->source);
       return false;
     default:
       AddError("storage textures currently only support 'write' access control",
-               t->source());
+               t->source);
       return false;
   }
 
-  if (!IsValidStorageTextureDimension(t->dim())) {
+  if (!IsValidStorageTextureDimension(t->dim)) {
     AddError("cube dimensions for storage textures are not supported",
-             t->source());
+             t->source);
     return false;
   }
 
-  if (!IsValidStorageTextureImageFormat(t->image_format())) {
+  if (!IsValidStorageTextureImageFormat(t->format)) {
     AddError(
         "image format must be one of the texel formats specified for storage "
         "textues in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
-        t->source());
+        t->source);
     return false;
   }
   return true;
@@ -454,7 +452,7 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
                                            uint32_t index /* = 0 */) {
   if (variable_to_info_.count(var)) {
     TINT_ICE(Resolver, diagnostics_)
-        << "Variable " << builder_->Symbols().NameFor(var->symbol())
+        << "Variable " << builder_->Symbols().NameFor(var->symbol)
         << " already resolved";
     return nullptr;
   }
@@ -463,7 +461,7 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
   const sem::Type* storage_type = nullptr;
 
   // If the variable has a declared type, resolve it.
-  if (auto* ty = var->type()) {
+  if (auto* ty = var->type) {
     type_name = ty->FriendlyName(builder_->Symbols());
     storage_type = Type(ty);
     if (!storage_type) {
@@ -475,9 +473,9 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
   const sem::Type* rhs_type = nullptr;
 
   // Does the variable have a constructor?
-  if (auto* ctor = var->constructor()) {
-    Mark(var->constructor());
-    if (!Expression(var->constructor())) {
+  if (auto* ctor = var->constructor) {
+    Mark(var->constructor);
+    if (!Expression(var->constructor)) {
       return nullptr;
     }
 
@@ -490,37 +488,37 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
 
     // If the variable has no declared type, infer it from the RHS
     if (!storage_type) {
-      if (!var->is_const() && kind == VariableKind::kGlobal) {
-        AddError("global var declaration must specify a type", var->source());
+      if (!var->is_const && kind == VariableKind::kGlobal) {
+        AddError("global var declaration must specify a type", var->source);
         return nullptr;
       }
 
       type_name = rhs_type_name;
       storage_type = rhs_type->UnwrapRef();  // Implicit load of RHS
     }
-  } else if (var->is_const() && kind != VariableKind::kParameter &&
-             !ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
-    AddError("let declaration must have an initializer", var->source());
+  } else if (var->is_const && kind != VariableKind::kParameter &&
+             !ast::HasDecoration<ast::OverrideDecoration>(var->decorations)) {
+    AddError("let declaration must have an initializer", var->source);
     return nullptr;
-  } else if (!var->type()) {
+  } else if (!var->type) {
     AddError(
         (kind == VariableKind::kGlobal)
             ? "module scope var declaration requires a type and initializer"
             : "function scope var declaration requires a type or initializer",
-        var->source());
+        var->source);
     return nullptr;
   }
 
   if (!storage_type) {
     TINT_ICE(Resolver, diagnostics_)
         << "failed to determine storage type for variable '" +
-               builder_->Symbols().NameFor(var->symbol()) + "'\n"
-        << "Source: " << var->source();
+               builder_->Symbols().NameFor(var->symbol) + "'\n"
+        << "Source: " << var->source;
     return nullptr;
   }
 
-  auto storage_class = var->declared_storage_class();
-  if (storage_class == ast::StorageClass::kNone && !var->is_const()) {
+  auto storage_class = var->declared_storage_class;
+  if (storage_class == ast::StorageClass::kNone && !var->is_const) {
     // No declared storage class. Infer from usage / type.
     if (kind == VariableKind::kLocal) {
       storage_class = ast::StorageClass::kFunction;
@@ -533,13 +531,13 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     }
   }
 
-  auto access = var->declared_access();
+  auto access = var->declared_access;
   if (access == ast::Access::kUndefined) {
     access = DefaultAccessForStorageClass(storage_class);
   }
 
   auto* type = storage_type;
-  if (!var->is_const()) {
+  if (!var->is_const) {
     // Variable declaration. Unlike `let`, `var` has storage.
     // Variables are always of a reference type to the declared storage type.
     type =
@@ -588,14 +586,14 @@ void Resolver::AllocateOverridableConstantIds() {
       continue;
     }
     auto* override_deco =
-        ast::GetDecoration<ast::OverrideDecoration>(var->decorations());
+        ast::GetDecoration<ast::OverrideDecoration>(var->decorations);
     if (!override_deco) {
       continue;
     }
 
     uint16_t constant_id;
-    if (override_deco->HasValue()) {
-      constant_id = static_cast<uint16_t>(override_deco->value());
+    if (override_deco->has_value) {
+      constant_id = static_cast<uint16_t>(override_deco->value);
     } else {
       // No ID was specified, so allocate the next available ID.
       constant_id = next_constant_id;
@@ -624,14 +622,14 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
 
   // Value type has to match storage type
   if (storage_type != value_type) {
-    std::string decl = var->is_const() ? "let" : "var";
+    std::string decl = var->is_const ? "let" : "var";
     AddError("cannot initialize " + decl + " of type '" + type_name +
                  "' with value of type '" + rhs_type_name + "'",
-             var->source());
+             var->source);
     return false;
   }
 
-  if (!var->is_const()) {
+  if (!var->is_const) {
     switch (storage_class) {
       case ast::StorageClass::kPrivate:
       case ast::StorageClass::kFunction:
@@ -641,11 +639,11 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
         // Optionally has an initializer expression, if the variable is in the
         // private or function storage classes.
         AddError("var of storage class '" +
-                     std::string(ast::str(storage_class)) +
+                     std::string(ast::ToString(storage_class)) +
                      "' cannot have an initializer. var initializers are only "
                      "supported for the storage classes "
                      "'private' and 'function'",
-                 var->source());
+                 var->source);
         return false;
     }
   }
@@ -654,7 +652,7 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
 }
 
 bool Resolver::GlobalVariable(ast::Variable* var) {
-  if (!ValidateNoDuplicateDefinition(var->symbol(), var->source(),
+  if (!ValidateNoDuplicateDefinition(var->symbol, var->source,
                                      /* check_global_scope_only */ true)) {
     return false;
   }
@@ -663,34 +661,34 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
   if (!info) {
     return false;
   }
-  variable_stack_.set_global(var->symbol(), info);
+  variable_stack_.set_global(var->symbol, info);
 
-  if (!var->is_const() && info->storage_class == ast::StorageClass::kNone) {
-    AddError("global variables must have a storage class", var->source());
+  if (!var->is_const && info->storage_class == ast::StorageClass::kNone) {
+    AddError("global variables must have a storage class", var->source);
     return false;
   }
-  if (var->is_const() && !(info->storage_class == ast::StorageClass::kNone)) {
-    AddError("global constants shouldn't have a storage class", var->source());
+  if (var->is_const && !(info->storage_class == ast::StorageClass::kNone)) {
+    AddError("global constants shouldn't have a storage class", var->source);
     return false;
   }
 
-  for (auto* deco : var->decorations()) {
+  for (auto* deco : var->decorations) {
     Mark(deco);
 
     if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
       // Track the constant IDs that are specified in the shader.
-      if (override_deco->HasValue()) {
-        constant_ids_.emplace(override_deco->value(), info);
+      if (override_deco->has_value) {
+        constant_ids_.emplace(override_deco->value, info);
       }
     }
   }
 
-  if (!ValidateNoDuplicateDecorations(var->decorations())) {
+  if (!ValidateNoDuplicateDecorations(var->decorations)) {
     return false;
   }
 
-  if (auto bp = var->binding_point()) {
-    info->binding_point = {bp.group->value(), bp.binding->value()};
+  if (auto bp = var->BindingPoint()) {
+    info->binding_point = {bp.group->value, bp.binding->value};
   }
 
   if (!ValidateGlobalVariable(info)) {
@@ -699,10 +697,10 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 
   if (!ApplyStorageClassUsageToType(
           info->storage_class, const_cast<sem::Type*>(info->type->UnwrapRef()),
-          var->source())) {
+          var->source)) {
     AddNote("while instantiating variable " +
-                builder_->Symbols().NameFor(var->symbol()),
-            var->source());
+                builder_->Symbols().NameFor(var->symbol),
+            var->source);
     return false;
   }
 
@@ -738,11 +736,11 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
   };
 
   auto member_name_of = [this](const sem::StructMember* sm) {
-    return builder_->Symbols().NameFor(sm->Declaration()->symbol());
+    return builder_->Symbols().NameFor(sm->Declaration()->symbol);
   };
 
   auto type_name_of = [this](const sem::StructMember* sm) {
-    return sm->Declaration()->type()->FriendlyName(builder_->Symbols());
+    return sm->Declaration()->type->FriendlyName(builder_->Symbols());
   };
 
   // TODO(amaiorano): Output struct and member decorations so that this output
@@ -833,21 +831,21 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
     // Validate that member is at a valid byte offset
     if (m->Offset() % required_align != 0) {
       AddError("the offset of a struct member of type '" + type_name_of(m) +
-                   "' in storage class '" + ast::str(sc) +
+                   "' in storage class '" + ast::ToString(sc) +
                    "' must be a multiple of " + std::to_string(required_align) +
                    " bytes, but '" + member_name_of(m) +
                    "' is currently at offset " + std::to_string(m->Offset()) +
                    ". Consider setting [[align(" +
                    std::to_string(required_align) + ")]] on this member",
-               m->Declaration()->source());
+               m->Declaration()->source);
 
       AddNote("see layout of struct:\n" + get_struct_layout_string(str),
-              str->Declaration()->source());
+              str->Declaration()->source);
 
       if (auto* member_str = m->Type()->As<sem::Struct>()) {
         AddNote("and layout of struct member:\n" +
                     get_struct_layout_string(member_str),
-                member_str->Declaration()->source());
+                member_str->Declaration()->source);
       }
 
       return false;
@@ -866,15 +864,15 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
                 std::to_string(prev_to_curr_offset) + " bytes between '" +
                 member_name_of(prev_member) + "' and '" + member_name_of(m) +
                 "'. Consider setting [[align(16)]] on this member",
-            m->Declaration()->source());
+            m->Declaration()->source);
 
         AddNote("see layout of struct:\n" + get_struct_layout_string(str),
-                str->Declaration()->source());
+                str->Declaration()->source);
 
         auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
         AddNote("and layout of previous member struct:\n" +
                     get_struct_layout_string(prev_member_str),
-                prev_member_str->Declaration()->source());
+                prev_member_str->Declaration()->source);
         return false;
       }
     }
@@ -896,9 +894,9 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
                   std::to_string(
                       utils::RoundUp(required_align, arr->Stride())) +
                   ")]] on the array type",
-              m->Declaration()->type()->source());
+              m->Declaration()->type->source);
           AddNote("see layout of struct:\n" + get_struct_layout_string(str),
-                  str->Declaration()->source());
+                  str->Declaration()->source);
           return false;
         }
       }
@@ -921,7 +919,7 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
 bool Resolver::ValidateStorageClassLayout(const VariableInfo* info) {
   if (auto* str = info->type->UnwrapRef()->As<sem::Struct>()) {
     if (!ValidateStorageClassLayout(str, info->storage_class)) {
-      AddNote("see declaration of variable", info->declaration->source());
+      AddNote("see declaration of variable", info->declaration->source);
       return false;
     }
   }
@@ -930,34 +928,34 @@ bool Resolver::ValidateStorageClassLayout(const VariableInfo* info) {
 }
 
 bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
-  if (!ValidateNoDuplicateDecorations(info->declaration->decorations())) {
+  if (!ValidateNoDuplicateDecorations(info->declaration->decorations)) {
     return false;
   }
 
-  for (auto* deco : info->declaration->decorations()) {
-    if (info->declaration->is_const()) {
+  for (auto* deco : info->declaration->decorations) {
+    if (info->declaration->is_const) {
       if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
-        if (override_deco->HasValue()) {
-          uint32_t id = override_deco->value();
+        if (override_deco->has_value) {
+          uint32_t id = override_deco->value;
           auto itr = constant_ids_.find(id);
           if (itr != constant_ids_.end() && itr->second != info) {
-            AddError("pipeline constant IDs must be unique", deco->source());
+            AddError("pipeline constant IDs must be unique", deco->source);
             AddNote("a pipeline constant with an ID of " + std::to_string(id) +
                         " was previously declared "
                         "here:",
                     ast::GetDecoration<ast::OverrideDecoration>(
-                        itr->second->declaration->decorations())
-                        ->source());
+                        itr->second->declaration->decorations)
+                        ->source);
             return false;
           }
           if (id > 65535) {
             AddError("pipeline constant IDs must be between 0 and 65535",
-                     deco->source());
+                     deco->source);
             return false;
           }
         }
       } else {
-        AddError("decoration is not valid for constants", deco->source());
+        AddError("decoration is not valid for constants", deco->source);
         return false;
       }
     } else {
@@ -970,13 +968,13 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       if (!(deco->IsAnyOf<ast::BindingDecoration, ast::GroupDecoration,
                           ast::InternalDecoration>()) &&
           (!is_shader_io_decoration || !has_io_storage_class)) {
-        AddError("decoration is not valid for variables", deco->source());
+        AddError("decoration is not valid for variables", deco->source);
         return false;
       }
     }
   }
 
-  auto binding_point = info->declaration->binding_point();
+  auto binding_point = info->declaration->BindingPoint();
   switch (info->storage_class) {
     case ast::StorageClass::kUniform:
     case ast::StorageClass::kStorage:
@@ -988,7 +986,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         AddError(
             "resource variables require [[group]] and [[binding]] "
             "decorations",
-            info->declaration->source());
+            info->declaration->source);
         return false;
       }
       break;
@@ -1000,7 +998,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         AddError(
             "non-resource variables must not have [[group]] or [[binding]] "
             "decorations",
-            info->declaration->source());
+            info->declaration->source);
         return false;
       }
   }
@@ -1009,10 +1007,10 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
   // The access mode always has a default, and except for variables in the
   // storage storage class, must not be written.
   if (info->storage_class != ast::StorageClass::kStorage &&
-      info->declaration->declared_access() != ast::Access::kUndefined) {
+      info->declaration->declared_access != ast::Access::kUndefined) {
     AddError(
         "only variables in <storage> storage class may declare an access mode",
-        info->declaration->source());
+        info->declaration->source);
     return false;
   }
 
@@ -1029,7 +1027,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         AddError(
             "variables declared in the <storage> storage class must be of a "
             "structure type",
-            info->declaration->source());
+            info->declaration->source);
         return false;
       }
 
@@ -1037,10 +1035,10 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         AddError(
             "structure used as a storage buffer must be declared with the "
             "[[block]] decoration",
-            str->Declaration()->source());
-        if (info->declaration->source().range.begin.line) {
+            str->Declaration()->source);
+        if (info->declaration->source.range.begin.line) {
           AddNote("structure used as storage buffer here",
-                  info->declaration->source());
+                  info->declaration->source);
         }
         return false;
       }
@@ -1056,7 +1054,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         AddError(
             "variables declared in the <uniform> storage class must be of a "
             "structure type",
-            info->declaration->source());
+            info->declaration->source);
         return false;
       }
 
@@ -1064,10 +1062,10 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         AddError(
             "structure used as a uniform buffer must be declared with the "
             "[[block]] decoration",
-            str->Declaration()->source());
-        if (info->declaration->source().range.begin.line) {
+            str->Declaration()->source);
+        if (info->declaration->source.range.begin.line) {
           AddNote("structure used as uniform buffer here",
-                  info->declaration->source());
+                  info->declaration->source);
         }
         return false;
       }
@@ -1078,8 +1076,8 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
             AddError(
                 "structure containing a runtime sized array "
                 "cannot be used as a uniform buffer",
-                info->declaration->source());
-            AddNote("structure is declared here", str->Declaration()->source());
+                info->declaration->source);
+            AddNote("structure is declared here", str->Declaration()->source);
             return false;
           }
         }
@@ -1091,7 +1089,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       break;
   }
 
-  if (!info->declaration->is_const()) {
+  if (!info->declaration->is_const) {
     if (!ValidateAtomicVariable(info)) {
       return false;
     }
@@ -1107,8 +1105,8 @@ bool Resolver::ValidateAtomicVariable(const VariableInfo* info) {
   auto sc = info->storage_class;
   auto access = info->access;
   auto* type = info->type->UnwrapRef();
-  auto source = info->declaration->type() ? info->declaration->type()->source()
-                                          : info->declaration->source();
+  auto source = info->declaration->type ? info->declaration->type->source
+                                        : info->declaration->source;
 
   if (type->Is<sem::Atomic>()) {
     if (sc != ast::StorageClass::kWorkgroup) {
@@ -1152,59 +1150,59 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
   auto* var = info->declaration;
   auto* storage_type = info->type->UnwrapRef();
 
-  if (!var->is_const() && !IsStorable(storage_type)) {
+  if (!var->is_const && !IsStorable(storage_type)) {
     AddError(storage_type->FriendlyName(builder_->Symbols()) +
                  " cannot be used as the type of a var",
-             var->source());
+             var->source);
     return false;
   }
 
-  if (var->is_const() && info->kind != VariableKind::kParameter &&
+  if (var->is_const && info->kind != VariableKind::kParameter &&
       !(storage_type->IsConstructible() || storage_type->Is<sem::Pointer>())) {
     AddError(storage_type->FriendlyName(builder_->Symbols()) +
                  " cannot be used as the type of a let",
-             var->source());
+             var->source);
     return false;
   }
 
   if (auto* r = storage_type->As<sem::Array>()) {
     if (r->IsRuntimeSized()) {
       AddError("runtime arrays may only appear as the last member of a struct",
-               var->source());
+               var->source);
       return false;
     }
   }
 
   if (auto* r = storage_type->As<sem::MultisampledTexture>()) {
     if (r->dim() != ast::TextureDimension::k2d) {
-      AddError("only 2d multisampled textures are supported", var->source());
+      AddError("only 2d multisampled textures are supported", var->source);
       return false;
     }
 
     if (!r->type()->UnwrapRef()->is_numeric_scalar()) {
       AddError("texture_multisampled_2d<type>: type must be f32, i32 or u32",
-               var->source());
+               var->source);
       return false;
     }
   }
 
   if (storage_type->is_handle() &&
-      var->declared_storage_class() != ast::StorageClass::kNone) {
+      var->declared_storage_class != ast::StorageClass::kNone) {
     // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
     // If the store type is a texture type or a sampler type, then the
     // variable declaration must not have a storage class decoration. The
     // storage class will always be handle.
     AddError("variables of type '" + info->type_name +
                  "' must not have a storage class",
-             var->source());
+             var->source);
     return false;
   }
 
-  if (IsValidationEnabled(var->decorations(),
+  if (IsValidationEnabled(var->decorations,
                           ast::DisabledValidation::kIgnoreStorageClass) &&
-      (var->declared_storage_class() == ast::StorageClass::kInput ||
-       var->declared_storage_class() == ast::StorageClass::kOutput)) {
-    AddError("invalid use of input/output storage class", var->source());
+      (var->declared_storage_class == ast::StorageClass::kInput ||
+       var->declared_storage_class == ast::StorageClass::kOutput)) {
+    AddError("invalid use of input/output storage class", var->source);
     return false;
   }
   return true;
@@ -1216,25 +1214,24 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
     return false;
   }
 
-  for (auto* deco : info->declaration->decorations()) {
+  for (auto* deco : info->declaration->decorations) {
     if (!func->IsEntryPoint() && !deco->Is<ast::InternalDecoration>()) {
       AddError(
           "decoration is not valid for non-entry point function parameters",
-          deco->source());
+          deco->source);
       return false;
     } else if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InvariantDecoration,
                               ast::LocationDecoration,
                               ast::InterpolateDecoration,
                               ast::InternalDecoration>() &&
                (IsValidationEnabled(
-                    info->declaration->decorations(),
+                    info->declaration->decorations,
                     ast::DisabledValidation::kEntryPointParameter) &&
                 IsValidationEnabled(
-                    info->declaration->decorations(),
+                    info->declaration->decorations,
                     ast::DisabledValidation::
                         kIgnoreConstructibleFunctionParameter))) {
-      AddError("decoration is not valid for function parameters",
-               deco->source());
+      AddError("decoration is not valid for function parameters", deco->source);
       return false;
     }
   }
@@ -1247,7 +1244,7 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
       std::stringstream ss;
       ss << "function parameter of pointer type cannot be in '" << sc
          << "' storage class";
-      AddError(ss.str(), info->declaration->source());
+      AddError(ss.str(), info->declaration->source);
       return false;
     }
   }
@@ -1255,16 +1252,16 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
   if (IsPlain(info->type)) {
     if (!info->type->IsConstructible() &&
         IsValidationEnabled(
-            info->declaration->decorations(),
+            info->declaration->decorations,
             ast::DisabledValidation::kIgnoreConstructibleFunctionParameter)) {
       AddError("store type of function parameter must be a constructible type",
-               info->declaration->source());
+               info->declaration->source);
       return false;
     }
   } else if (!info->type->IsAnyOf<sem::Texture, sem::Sampler, sem::Pointer>()) {
     AddError("store type of function parameter cannot be " +
                  info->type->FriendlyName(builder_->Symbols()),
-             info->declaration->source());
+             info->declaration->source);
     return false;
   }
 
@@ -1276,13 +1273,13 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                          const bool is_input) {
   auto* type = storage_type->UnwrapRef();
   const auto stage = current_function_
-                         ? current_function_->declaration->pipeline_stage()
+                         ? current_function_->declaration->PipelineStage()
                          : ast::PipelineStage::kNone;
   std::stringstream stage_name;
   stage_name << stage;
   bool is_stage_mismatch = false;
   bool is_output = !is_input;
-  switch (deco->value()) {
+  switch (deco->builtin) {
     case ast::Builtin::kPosition:
       if (stage != ast::PipelineStage::kNone &&
           !((is_input && stage == ast::PipelineStage::kFragment) ||
@@ -1291,7 +1288,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       if (!(type->is_float_vector() && type->As<sem::Vector>()->Width() == 4)) {
         AddError("store type of " + deco_to_str(deco) + " must be 'vec4<f32>'",
-                 deco->source());
+                 deco->source);
         return false;
       }
       break;
@@ -1306,7 +1303,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       if (!(type->is_unsigned_integer_vector() &&
             type->As<sem::Vector>()->Width() == 3)) {
         AddError("store type of " + deco_to_str(deco) + " must be 'vec3<u32>'",
-                 deco->source());
+                 deco->source);
         return false;
       }
       break;
@@ -1317,7 +1314,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       if (!type->Is<sem::F32>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'f32'",
-                 deco->source());
+                 deco->source);
         return false;
       }
       break;
@@ -1328,7 +1325,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       if (!type->Is<sem::Bool>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'bool'",
-                 deco->source());
+                 deco->source);
         return false;
       }
       break;
@@ -1339,7 +1336,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       if (!type->Is<sem::U32>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
-                 deco->source());
+                 deco->source);
         return false;
       }
       break;
@@ -1351,7 +1348,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       if (!type->Is<sem::U32>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
-                 deco->source());
+                 deco->source);
         return false;
       }
       break;
@@ -1362,7 +1359,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       if (!type->Is<sem::U32>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
-                 deco->source());
+                 deco->source);
         return false;
       }
       break;
@@ -1373,7 +1370,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       if (!type->Is<sem::U32>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
-                 deco->source());
+                 deco->source);
         return false;
       }
       break;
@@ -1385,7 +1382,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
     AddError(deco_to_str(deco) + " cannot be used in " +
                  (is_input ? "input of " : "output of ") + stage_name.str() +
                  " pipeline stage",
-             deco->source());
+             deco->source);
     return false;
   }
 
@@ -1401,14 +1398,14 @@ bool Resolver::ValidateInterpolateDecoration(
     AddError(
         "store type of interpolate attribute must be floating point scalar or "
         "vector",
-        deco->source());
+        deco->source);
     return false;
   }
 
-  if (deco->type() == ast::InterpolationType::kFlat &&
-      deco->sampling() != ast::InterpolationSampling::kNone) {
+  if (deco->type == ast::InterpolationType::kFlat &&
+      deco->sampling != ast::InterpolationSampling::kNone) {
     AddError("flat interpolation attribute must not have a sampling parameter",
-             deco->source());
+             deco->source);
     return false;
   }
 
@@ -1417,34 +1414,34 @@ bool Resolver::ValidateInterpolateDecoration(
 
 bool Resolver::ValidateFunction(const ast::Function* func,
                                 const FunctionInfo* info) {
-  if (!ValidateNoDuplicateDefinition(func->symbol(), func->source(),
+  if (!ValidateNoDuplicateDefinition(func->symbol, func->source,
                                      /* check_global_scope_only */ true)) {
     return false;
   }
 
   auto workgroup_deco_count = 0;
-  for (auto* deco : func->decorations()) {
+  for (auto* deco : func->decorations) {
     if (deco->Is<ast::WorkgroupDecoration>()) {
       workgroup_deco_count++;
-      if (func->pipeline_stage() != ast::PipelineStage::kCompute) {
+      if (func->PipelineStage() != ast::PipelineStage::kCompute) {
         AddError(
             "the workgroup_size attribute is only valid for compute stages",
-            deco->source());
+            deco->source);
         return false;
       }
     } else if (!deco->IsAnyOf<ast::StageDecoration,
                               ast::InternalDecoration>()) {
-      AddError("decoration is not valid for functions", deco->source());
+      AddError("decoration is not valid for functions", deco->source);
       return false;
     }
   }
 
-  if (func->params().size() > 255) {
-    AddError("functions may declare at most 255 parameters", func->source());
+  if (func->params.size() > 255) {
+    AddError("functions may declare at most 255 parameters", func->source);
     return false;
   }
 
-  for (auto* param : func->params()) {
+  for (auto* param : func->params) {
     if (!ValidateFunctionParameter(func, variable_to_info_.at(param))) {
       return false;
     }
@@ -1453,42 +1450,42 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   if (!info->return_type->Is<sem::Void>()) {
     if (!info->return_type->IsConstructible()) {
       AddError("function return type must be a constructible type",
-               func->return_type()->source());
+               func->return_type->source);
       return false;
     }
 
-    if (func->body()) {
-      if (!func->get_last_statement() ||
-          !func->get_last_statement()->Is<ast::ReturnStatement>()) {
+    if (func->body) {
+      if (!func->body->Last() ||
+          !func->body->Last()->Is<ast::ReturnStatement>()) {
         AddError("non-void function must end with a return statement",
-                 func->source());
+                 func->source);
         return false;
       }
     } else if (IsValidationEnabled(
-                   func->decorations(),
+                   func->decorations,
                    ast::DisabledValidation::kFunctionHasNoBody)) {
       TINT_ICE(Resolver, diagnostics_)
-          << "Function " << builder_->Symbols().NameFor(func->symbol())
+          << "Function " << builder_->Symbols().NameFor(func->symbol)
           << " has no body";
     }
 
-    for (auto* deco : func->return_type_decorations()) {
+    for (auto* deco : func->return_type_decorations) {
       if (!func->IsEntryPoint()) {
         AddError(
             "decoration is not valid for non-entry point function return types",
-            deco->source());
+            deco->source);
         return false;
       }
       if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InternalDecoration,
                          ast::LocationDecoration, ast::InterpolateDecoration,
                          ast::InvariantDecoration>() &&
-          (IsValidationEnabled(info->declaration->decorations(),
+          (IsValidationEnabled(info->declaration->decorations,
                                ast::DisabledValidation::kEntryPointParameter) &&
-           IsValidationEnabled(info->declaration->decorations(),
+           IsValidationEnabled(info->declaration->decorations,
                                ast::DisabledValidation::
                                    kIgnoreConstructibleFunctionParameter))) {
         AddError("decoration is not valid for entry point return types",
-                 deco->source());
+                 deco->source);
         return false;
       }
     }
@@ -1529,21 +1526,21 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           auto is_invalid_compute_shader_decoration = false;
           if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
             if (pipeline_io_attribute) {
-              AddError("multiple entry point IO attributes", deco->source());
+              AddError("multiple entry point IO attributes", deco->source);
               AddNote(
                   "previously consumed " + deco_to_str(pipeline_io_attribute),
-                  pipeline_io_attribute->source());
+                  pipeline_io_attribute->source);
               return false;
             }
             pipeline_io_attribute = deco;
 
-            if (builtins.count(builtin->value())) {
+            if (builtins.count(builtin->builtin)) {
               AddError(
                   deco_to_str(builtin) +
                       " attribute appears multiple times as pipeline " +
                       (param_or_ret == ParamOrRetType::kParameter ? "input"
                                                                   : "output"),
-                  func->source());
+                  func->source);
               return false;
             }
 
@@ -1552,13 +1549,13 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                                                ParamOrRetType::kParameter)) {
               return false;
             }
-            builtins.emplace(builtin->value());
+            builtins.emplace(builtin->builtin);
           } else if (auto* location = deco->As<ast::LocationDecoration>()) {
             if (pipeline_io_attribute) {
-              AddError("multiple entry point IO attributes", deco->source());
+              AddError("multiple entry point IO attributes", deco->source);
               AddNote(
                   "previously consumed " + deco_to_str(pipeline_io_attribute),
-                  pipeline_io_attribute->source());
+                  pipeline_io_attribute->source);
               return false;
             }
             pipeline_io_attribute = deco;
@@ -1570,13 +1567,13 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
             }
           } else if (auto* interpolate =
                          deco->As<ast::InterpolateDecoration>()) {
-            if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+            if (func->PipelineStage() == ast::PipelineStage::kCompute) {
               is_invalid_compute_shader_decoration = true;
             } else if (!ValidateInterpolateDecoration(interpolate, ty)) {
               return false;
             }
           } else if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
-            if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+            if (func->PipelineStage() == ast::PipelineStage::kCompute) {
               is_invalid_compute_shader_decoration = true;
             }
             invariant_attribute = invariant;
@@ -1587,7 +1584,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                                                            : "output";
             AddError(
                 "decoration is not valid for compute shader " + input_or_output,
-                deco->source());
+                deco->source);
             return false;
           }
         }
@@ -1616,14 +1613,14 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
             if (pipeline_io_attribute) {
               if (auto* builtin =
                       pipeline_io_attribute->As<ast::BuiltinDecoration>()) {
-                has_position = (builtin->value() == ast::Builtin::kPosition);
+                has_position = (builtin->builtin == ast::Builtin::kPosition);
               }
             }
             if (!has_position) {
               AddError(
                   "invariant attribute must only be applied to a position "
                   "builtin",
-                  invariant_attribute->source());
+                  invariant_attribute->source);
               return false;
             }
           }
@@ -1643,12 +1640,12 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     if (auto* str = ty->As<sem::Struct>()) {
       for (auto* member : str->Members()) {
         if (!validate_entry_point_decorations_inner(
-                member->Declaration()->decorations(), member->Type(),
-                member->Declaration()->source(), param_or_ret,
+                member->Declaration()->decorations, member->Type(),
+                member->Declaration()->source, param_or_ret,
                 /*is_struct_member*/ true)) {
           AddNote("while analysing entry point '" +
-                      builder_->Symbols().NameFor(func->symbol()) + "'",
-                  func->source());
+                      builder_->Symbols().NameFor(func->symbol) + "'",
+                  func->source);
           return false;
         }
       }
@@ -1659,8 +1656,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
 
   for (auto* param : info->parameters) {
     if (!validate_entry_point_decorations(
-            param->declaration->decorations(), param->type,
-            param->declaration->source(), ParamOrRetType::kParameter)) {
+            param->declaration->decorations, param->type,
+            param->declaration->source, ParamOrRetType::kParameter)) {
       return false;
     }
   }
@@ -1672,21 +1669,21 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
   locations.clear();
 
   if (!info->return_type->Is<sem::Void>()) {
-    if (!validate_entry_point_decorations(func->return_type_decorations(),
-                                          info->return_type, func->source(),
+    if (!validate_entry_point_decorations(func->return_type_decorations,
+                                          info->return_type, func->source,
                                           ParamOrRetType::kReturnType)) {
       return false;
     }
   }
 
-  if (func->pipeline_stage() == ast::PipelineStage::kVertex &&
+  if (func->PipelineStage() == ast::PipelineStage::kVertex &&
       builtins.count(ast::Builtin::kPosition) == 0) {
     // Check module-scope variables, as the SPIR-V sanitizer generates these.
     bool found = false;
     for (auto* var : info->referenced_module_vars) {
       if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-              var->declaration->decorations())) {
-        if (builtin->value() == ast::Builtin::kPosition) {
+              var->declaration->decorations)) {
+        if (builtin->builtin == ast::Builtin::kPosition) {
           found = true;
           break;
         }
@@ -1696,17 +1693,17 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
       AddError(
           "a vertex shader must include the 'position' builtin in its return "
           "type",
-          func->source());
+          func->source);
       return false;
     }
   }
 
-  if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-    if (!ast::HasDecoration<ast::WorkgroupDecoration>(func->decorations())) {
+  if (func->PipelineStage() == ast::PipelineStage::kCompute) {
+    if (!ast::HasDecoration<ast::WorkgroupDecoration>(func->decorations)) {
       AddError(
           "a compute shader must include 'workgroup_size' in its "
           "attributes",
-          func->source());
+          func->source);
       return false;
     }
   }
@@ -1714,30 +1711,30 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
   // Validate there are no resource variable binding collisions
   std::unordered_map<sem::BindingPoint, const ast::Variable*> binding_points;
   for (auto* var_info : info->referenced_module_vars) {
-    if (!var_info->declaration->binding_point()) {
+    if (!var_info->declaration->BindingPoint()) {
       continue;
     }
     auto bp = var_info->binding_point;
     auto res = binding_points.emplace(bp, var_info->declaration);
     if (!res.second &&
-        IsValidationEnabled(var_info->declaration->decorations(),
+        IsValidationEnabled(var_info->declaration->decorations,
                             ast::DisabledValidation::kBindingPointCollision) &&
-        IsValidationEnabled(res.first->second->decorations(),
+        IsValidationEnabled(res.first->second->decorations,
                             ast::DisabledValidation::kBindingPointCollision)) {
       // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
       // Bindings must not alias within a shader stage: two different
       // variables in the resource interface of a given shader must not have
       // the same group and binding values, when considered as a pair of
       // values.
-      auto func_name = builder_->Symbols().NameFor(info->declaration->symbol());
+      auto func_name = builder_->Symbols().NameFor(info->declaration->symbol);
       AddError("entry point '" + func_name +
                    "' references multiple variables that use the "
                    "same resource binding [[group(" +
                    std::to_string(bp.group) + "), binding(" +
                    std::to_string(bp.binding) + ")]]",
-               var_info->declaration->source());
+               var_info->declaration->source);
       AddNote("first resource binding usage declared here",
-              res.first->second->source());
+              res.first->second->source);
       return false;
     }
   }
@@ -1757,14 +1754,14 @@ bool Resolver::Function(ast::Function* func) {
   variable_stack_.push_scope();
   uint32_t parameter_index = 0;
   std::unordered_map<Symbol, Source> parameter_names;
-  for (auto* param : func->params()) {
+  for (auto* param : func->params) {
     Mark(param);
 
     {  // Check the parameter name is unique for the function
-      auto emplaced = parameter_names.emplace(param->symbol(), param->source());
+      auto emplaced = parameter_names.emplace(param->symbol, param->source);
       if (!emplaced.second) {
-        auto name = builder_->Symbols().NameFor(param->symbol());
-        AddError("redefinition of parameter '" + name + "'", param->source());
+        auto name = builder_->Symbols().NameFor(param->symbol);
+        AddError("redefinition of parameter '" + name + "'", param->source);
         AddNote("previous definition is here", emplaced.first->second);
         return false;
       }
@@ -1776,26 +1773,26 @@ bool Resolver::Function(ast::Function* func) {
       return false;
     }
 
-    for (auto* deco : param->decorations()) {
+    for (auto* deco : param->decorations) {
       Mark(deco);
     }
-    if (!ValidateNoDuplicateDecorations(param->decorations())) {
+    if (!ValidateNoDuplicateDecorations(param->decorations)) {
       return false;
     }
 
-    variable_stack_.set(param->symbol(), param_info);
+    variable_stack_.set(param->symbol, param_info);
     info->parameters.emplace_back(param_info);
 
-    if (!ApplyStorageClassUsageToType(param->declared_storage_class(),
-                                      param_info->type, param->source())) {
+    if (!ApplyStorageClassUsageToType(param->declared_storage_class,
+                                      param_info->type, param->source)) {
       AddNote("while instantiating parameter " +
-                  builder_->Symbols().NameFor(param->symbol()),
-              param->source());
+                  builder_->Symbols().NameFor(param->symbol),
+              param->source);
       return false;
     }
 
     if (auto* str = param_info->type->As<sem::Struct>()) {
-      switch (func->pipeline_stage()) {
+      switch (func->PipelineStage()) {
         case ast::PipelineStage::kVertex:
           str->AddUsage(sem::PipelineStageUsage::kVertexInput);
           break;
@@ -1811,7 +1808,7 @@ bool Resolver::Function(ast::Function* func) {
     }
   }
 
-  if (auto* ty = func->return_type()) {
+  if (auto* ty = func->return_type) {
     info->return_type = Type(ty);
     info->return_type_name = ty->FriendlyName(builder_->Symbols());
     if (!info->return_type) {
@@ -1825,14 +1822,14 @@ bool Resolver::Function(ast::Function* func) {
 
   if (auto* str = info->return_type->As<sem::Struct>()) {
     if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str,
-                                      func->source())) {
+                                      func->source)) {
       AddNote("while instantiating return type for " +
-                  builder_->Symbols().NameFor(func->symbol()),
-              func->source());
+                  builder_->Symbols().NameFor(func->symbol),
+              func->source);
       return false;
     }
 
-    switch (func->pipeline_stage()) {
+    switch (func->PipelineStage()) {
       case ast::PipelineStage::kVertex:
         str->AddUsage(sem::PipelineStageUsage::kVertexOutput);
         break;
@@ -1847,32 +1844,32 @@ bool Resolver::Function(ast::Function* func) {
     }
   }
 
-  if (func->body()) {
-    Mark(func->body());
+  if (func->body) {
+    Mark(func->body);
     if (current_compound_statement_) {
       TINT_ICE(Resolver, diagnostics_)
           << "Resolver::Function() called with a current compound statement";
       return false;
     }
     auto* sem_block = builder_->create<sem::FunctionBlockStatement>(func);
-    builder_->Sem().Add(func->body(), sem_block);
-    if (!Scope(sem_block, [&] { return Statements(func->body()->list()); })) {
+    builder_->Sem().Add(func->body, sem_block);
+    if (!Scope(sem_block, [&] { return Statements(func->body->statements); })) {
       return false;
     }
   }
   variable_stack_.pop_scope();
 
-  for (auto* deco : func->decorations()) {
+  for (auto* deco : func->decorations) {
     Mark(deco);
   }
-  if (!ValidateNoDuplicateDecorations(func->decorations())) {
+  if (!ValidateNoDuplicateDecorations(func->decorations)) {
     return false;
   }
 
-  for (auto* deco : func->return_type_decorations()) {
+  for (auto* deco : func->return_type_decorations) {
     Mark(deco);
   }
-  if (!ValidateNoDuplicateDecorations(func->return_type_decorations())) {
+  if (!ValidateNoDuplicateDecorations(func->return_type_decorations)) {
     return false;
   }
 
@@ -1883,8 +1880,8 @@ bool Resolver::Function(ast::Function* func) {
   }
 
   if (auto* workgroup =
-          ast::GetDecoration<ast::WorkgroupDecoration>(func->decorations())) {
-    auto values = workgroup->values();
+          ast::GetDecoration<ast::WorkgroupDecoration>(func->decorations)) {
+    auto values = workgroup->Values();
     auto any_i32 = false;
     auto any_u32 = false;
     for (int i = 0; i < 3; i++) {
@@ -1913,33 +1910,33 @@ bool Resolver::Function(ast::Function* func) {
       bool is_i32 = ty->UnwrapRef()->Is<sem::I32>();
       bool is_u32 = ty->UnwrapRef()->Is<sem::U32>();
       if (!is_i32 && !is_u32) {
-        AddError(kErrBadType, expr->source());
+        AddError(kErrBadType, expr->source);
         return false;
       }
 
       any_i32 = any_i32 || is_i32;
       any_u32 = any_u32 || is_u32;
       if (any_i32 && any_u32) {
-        AddError(kErrInconsistentType, expr->source());
+        AddError(kErrInconsistentType, expr->source);
         return false;
       }
 
       if (auto* ident = expr->As<ast::IdentifierExpression>()) {
         // We have an identifier of a module-scope constant.
         VariableInfo* var = nullptr;
-        if (!variable_stack_.get(ident->symbol(), &var) ||
-            !(var->declaration->is_const())) {
-          AddError(kErrBadType, expr->source());
+        if (!variable_stack_.get(ident->symbol, &var) ||
+            !(var->declaration->is_const)) {
+          AddError(kErrBadType, expr->source);
           return false;
         }
 
         // Capture the constant if an [[override]] attribute is present.
         if (ast::HasDecoration<ast::OverrideDecoration>(
-                var->declaration->decorations())) {
+                var->declaration->decorations)) {
           info->workgroup_size[i].overridable_const = var->declaration;
         }
 
-        expr = var->declaration->constructor();
+        expr = var->declaration->constructor;
         if (!expr) {
           // No constructor means this value must be overriden by the user.
           info->workgroup_size[i].value = 0;
@@ -1949,7 +1946,7 @@ bool Resolver::Function(ast::Function* func) {
         AddError(
             "workgroup_size argument must be either a literal or a "
             "module-scope constant",
-            values[i]->source());
+            values[i]->source);
         return false;
       }
 
@@ -1962,7 +1959,7 @@ bool Resolver::Function(ast::Function* func) {
       // Validate and set the default value for this dimension.
       if (is_i32 ? val.Elements()[0].i32 < 1 : val.Elements()[0].u32 < 1) {
         AddError("workgroup_size argument must be at least 1",
-                 values[i]->source());
+                 values[i]->source);
         return false;
       }
 
@@ -1979,7 +1976,7 @@ bool Resolver::Function(ast::Function* func) {
   // Register the function information _after_ processing the statements. This
   // allows us to catch a function calling itself when determining the call
   // information as this function doesn't exist until it's finished.
-  symbol_to_function_[func->symbol()] = info;
+  symbol_to_function_[func->symbol] = info;
   function_to_info_.emplace(func, info);
 
   return true;
@@ -2003,16 +2000,16 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
   bool unreachable = false;
   for (auto* stmt : stmts) {
     if (unreachable) {
-      AddError("code is unreachable", stmt->source());
+      AddError("code is unreachable", stmt->source);
       return false;
     }
 
     auto* nested_stmt = stmt;
     while (auto* block = nested_stmt->As<ast::BlockStatement>()) {
-      if (block->empty()) {
+      if (block->Empty()) {
         break;
       }
-      nested_stmt = block->statements().back();
+      nested_stmt = block->statements.back();
     }
     if (nested_stmt->IsAnyOf<ast::ReturnStatement, ast::BreakStatement,
                              ast::ContinueStatement, ast::DiscardStatement>()) {
@@ -2025,7 +2022,7 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
 bool Resolver::Statement(ast::Statement* stmt) {
   if (stmt->Is<ast::CaseStatement>()) {
     AddError("case statement can only be used inside a switch statement",
-             stmt->source());
+             stmt->source);
     return false;
   }
   if (stmt->Is<ast::ElseStatement>()) {
@@ -2066,14 +2063,14 @@ bool Resolver::Statement(ast::Statement* stmt) {
     if (!sem_statement->FindFirstParent<sem::LoopBlockStatement>() &&
         !sem_statement->FindFirstParent<sem::SwitchCaseBlockStatement>()) {
       AddError("break statement must be in a loop or switch case",
-               stmt->source());
+               stmt->source);
       return false;
     }
     return true;
   }
   if (auto* c = stmt->As<ast::CallStatement>()) {
-    Mark(c->expr());
-    if (!Expression(c->expr())) {
+    Mark(c->expr);
+    if (!Expression(c->expr)) {
       return false;
     }
     if (!ValidateCallStatement(c)) {
@@ -2093,11 +2090,11 @@ bool Resolver::Statement(ast::Statement* stmt) {
         }
       } else {
         AddError("continuing blocks must not contain a continue statement",
-                 stmt->source());
+                 stmt->source);
         return false;
       }
     } else {
-      AddError("continue statement must be in a loop", stmt->source());
+      AddError("continue statement must be in a loop", stmt->source);
       return false;
     }
 
@@ -2108,10 +2105,9 @@ bool Resolver::Statement(ast::Statement* stmt) {
             sem_statement
                 ->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
       AddError("continuing blocks must not contain a discard statement",
-               stmt->source());
+               stmt->source);
       if (continuing != sem_statement->Parent()) {
-        AddNote("see continuing block here",
-                continuing->Declaration()->source());
+        AddNote("see continuing block here", continuing->Declaration()->source);
       }
       return false;
     }
@@ -2129,20 +2125,20 @@ bool Resolver::Statement(ast::Statement* stmt) {
 
   AddError("unknown statement type for type determination: " +
                std::string(stmt->TypeInfo().name),
-           stmt->source());
+           stmt->source);
   return false;
 }
 
 bool Resolver::CaseStatement(ast::CaseStatement* stmt) {
   auto* sem = builder_->create<sem::SwitchCaseBlockStatement>(
-      stmt->body(), current_compound_statement_);
+      stmt->body, current_compound_statement_);
   builder_->Sem().Add(stmt, sem);
-  builder_->Sem().Add(stmt->body(), sem);
-  Mark(stmt->body());
-  for (auto* sel : stmt->selectors()) {
+  builder_->Sem().Add(stmt->body, sem);
+  Mark(stmt->body);
+  for (auto* sel : stmt->selectors) {
     Mark(sel);
   }
-  return Scope(sem, [&] { return Statements(stmt->body()->list()); });
+  return Scope(sem, [&] { return Statements(stmt->body->statements); });
 }
 
 bool Resolver::IfStatement(ast::IfStatement* stmt) {
@@ -2150,28 +2146,28 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
       builder_->create<sem::IfStatement>(stmt, current_compound_statement_);
   builder_->Sem().Add(stmt, sem);
   return Scope(sem, [&] {
-    Mark(stmt->condition());
-    if (!Expression(stmt->condition())) {
+    Mark(stmt->condition);
+    if (!Expression(stmt->condition)) {
       return false;
     }
 
-    auto* cond_type = TypeOf(stmt->condition())->UnwrapRef();
+    auto* cond_type = TypeOf(stmt->condition)->UnwrapRef();
     if (!cond_type->Is<sem::Bool>()) {
       AddError("if statement condition must be bool, got " +
                    cond_type->FriendlyName(builder_->Symbols()),
-               stmt->condition()->source());
+               stmt->condition->source);
       return false;
     }
 
-    Mark(stmt->body());
+    Mark(stmt->body);
     auto* body = builder_->create<sem::BlockStatement>(
-        stmt->body(), current_compound_statement_);
-    builder_->Sem().Add(stmt->body(), body);
-    if (!Scope(body, [&] { return Statements(stmt->body()->list()); })) {
+        stmt->body, current_compound_statement_);
+    builder_->Sem().Add(stmt->body, body);
+    if (!Scope(body, [&] { return Statements(stmt->body->statements); })) {
       return false;
     }
 
-    for (auto* else_stmt : stmt->else_statements()) {
+    for (auto* else_stmt : stmt->else_statements) {
       Mark(else_stmt);
       if (!ElseStatement(else_stmt)) {
         return false;
@@ -2186,7 +2182,7 @@ bool Resolver::ElseStatement(ast::ElseStatement* stmt) {
       builder_->create<sem::ElseStatement>(stmt, current_compound_statement_);
   builder_->Sem().Add(stmt, sem);
   return Scope(sem, [&] {
-    if (auto* cond = stmt->condition()) {
+    if (auto* cond = stmt->condition) {
       Mark(cond);
       if (!Expression(cond)) {
         return false;
@@ -2196,16 +2192,16 @@ bool Resolver::ElseStatement(ast::ElseStatement* stmt) {
       if (!else_cond_type->Is<sem::Bool>()) {
         AddError("else statement condition must be bool, got " +
                      else_cond_type->FriendlyName(builder_->Symbols()),
-                 cond->source());
+                 cond->source);
         return false;
       }
     }
 
-    Mark(stmt->body());
+    Mark(stmt->body);
     auto* body = builder_->create<sem::BlockStatement>(
-        stmt->body(), current_compound_statement_);
-    builder_->Sem().Add(stmt->body(), body);
-    return Scope(body, [&] { return Statements(stmt->body()->list()); });
+        stmt->body, current_compound_statement_);
+    builder_->Sem().Add(stmt->body, body);
+    return Scope(body, [&] { return Statements(stmt->body->statements); });
   });
 }
 
@@ -2213,7 +2209,7 @@ bool Resolver::BlockStatement(ast::BlockStatement* stmt) {
   auto* sem = builder_->create<sem::BlockStatement>(
       stmt->As<ast::BlockStatement>(), current_compound_statement_);
   builder_->Sem().Add(stmt, sem);
-  return Scope(sem, [&] { return Statements(stmt->list()); });
+  return Scope(sem, [&] { return Statements(stmt->statements); });
 }
 
 bool Resolver::LoopStatement(ast::LoopStatement* stmt) {
@@ -2221,25 +2217,27 @@ bool Resolver::LoopStatement(ast::LoopStatement* stmt) {
       builder_->create<sem::LoopStatement>(stmt, current_compound_statement_);
   builder_->Sem().Add(stmt, sem);
   return Scope(sem, [&] {
-    Mark(stmt->body());
+    Mark(stmt->body);
 
     auto* body = builder_->create<sem::LoopBlockStatement>(
-        stmt->body(), current_compound_statement_);
-    builder_->Sem().Add(stmt->body(), body);
+        stmt->body, current_compound_statement_);
+    builder_->Sem().Add(stmt->body, body);
     return Scope(body, [&] {
-      if (!Statements(stmt->body()->list())) {
+      if (!Statements(stmt->body->statements)) {
         return false;
       }
-      if (stmt->continuing()) {  // has_continuing() also checks for empty()
-        Mark(stmt->continuing());
-      }
-      if (stmt->has_continuing()) {
-        auto* continuing = builder_->create<sem::LoopContinuingBlockStatement>(
-            stmt->continuing(), current_compound_statement_);
-        builder_->Sem().Add(stmt->continuing(), continuing);
-        if (!Scope(continuing,
-                   [&] { return Statements(stmt->continuing()->list()); })) {
-          return false;
+      if (stmt->continuing) {
+        Mark(stmt->continuing);
+        if (!stmt->continuing->Empty()) {
+          auto* continuing =
+              builder_->create<sem::LoopContinuingBlockStatement>(
+                  stmt->continuing, current_compound_statement_);
+          builder_->Sem().Add(stmt->continuing, continuing);
+          if (!Scope(continuing, [&] {
+                return Statements(stmt->continuing->statements);
+              })) {
+            return false;
+          }
         }
       }
       return true;
@@ -2252,14 +2250,14 @@ bool Resolver::ForLoopStatement(ast::ForLoopStatement* stmt) {
       stmt, current_compound_statement_);
   builder_->Sem().Add(stmt, sem);
   return Scope(sem, [&] {
-    if (auto* initializer = stmt->initializer()) {
+    if (auto* initializer = stmt->initializer) {
       Mark(initializer);
       if (!Statement(initializer)) {
         return false;
       }
     }
 
-    if (auto* condition = stmt->condition()) {
+    if (auto* condition = stmt->condition) {
       Mark(condition);
       if (!Expression(condition)) {
         return false;
@@ -2268,24 +2266,24 @@ bool Resolver::ForLoopStatement(ast::ForLoopStatement* stmt) {
       if (!TypeOf(condition)->UnwrapRef()->Is<sem::Bool>()) {
         AddError(
             "for-loop condition must be bool, got " + TypeNameOf(condition),
-            condition->source());
+            condition->source);
         return false;
       }
     }
 
-    if (auto* continuing = stmt->continuing()) {
+    if (auto* continuing = stmt->continuing) {
       Mark(continuing);
       if (!Statement(continuing)) {
         return false;
       }
     }
 
-    Mark(stmt->body());
+    Mark(stmt->body);
 
     auto* body = builder_->create<sem::LoopBlockStatement>(
-        stmt->body(), current_compound_statement_);
-    builder_->Sem().Add(stmt->body(), body);
-    return Scope(body, [&] { return Statements(stmt->body()->statements()); });
+        stmt->body, current_compound_statement_);
+    builder_->Sem().Add(stmt->body, body);
+    return Scope(body, [&] { return Statements(stmt->body->statements); });
   });
 }
 
@@ -2306,25 +2304,25 @@ bool Resolver::TraverseExpressions(ast::Expression* root,
     out.emplace_back(expr);
 
     if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
-      add(array->array());
-      add(array->idx_expr());
+      add(array->array);
+      add(array->index);
     } else if (auto* bin_op = expr->As<ast::BinaryExpression>()) {
-      add(bin_op->lhs());
-      add(bin_op->rhs());
+      add(bin_op->lhs);
+      add(bin_op->rhs);
     } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
-      add(bitcast->expr());
+      add(bitcast->expr);
     } else if (auto* call = expr->As<ast::CallExpression>()) {
-      for (auto* arg : call->args()) {
+      for (auto* arg : call->args) {
         add(arg);
       }
     } else if (auto* type_ctor = expr->As<ast::TypeConstructorExpression>()) {
-      for (auto* value : type_ctor->values()) {
+      for (auto* value : type_ctor->values) {
         add(value);
       }
     } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
-      add(member->structure());
+      add(member->structure);
     } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
-      add(unary->expr());
+      add(unary->expr);
     } else if (expr->IsAnyOf<ast::ScalarConstructorExpression,
                              ast::IdentifierExpression>()) {
       // Leaf expression
@@ -2376,8 +2374,8 @@ bool Resolver::Expression(ast::Expression* root) {
 }
 
 bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
-  auto* idx = expr->idx_expr();
-  auto* res = TypeOf(expr->array());
+  auto* idx = expr->index;
+  auto* res = TypeOf(expr->array);
   auto* parent_type = res->UnwrapRef();
   const sem::Type* ret = nullptr;
   if (auto* arr = parent_type->As<sem::Array>()) {
@@ -2387,15 +2385,15 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
   } else if (auto* mat = parent_type->As<sem::Matrix>()) {
     ret = builder_->create<sem::Vector>(mat->type(), mat->rows());
   } else {
-    AddError("cannot index type '" + TypeNameOf(expr->array()) + "'",
-             expr->source());
+    AddError("cannot index type '" + TypeNameOf(expr->array) + "'",
+             expr->source);
     return false;
   }
 
   if (!TypeOf(idx)->UnwrapRef()->IsAnyOf<sem::I32, sem::U32>()) {
     AddError("index must be of type 'i32' or 'u32', found: '" +
                  TypeNameOf(idx) + "'",
-             idx->source());
+             idx->source);
     return false;
   }
 
@@ -2404,9 +2402,9 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
       // TODO(bclayton): expand this to allow any const_expr expression
       // https://github.com/gpuweb/gpuweb/issues/1272
       auto* scalar = idx->As<ast::ScalarConstructorExpression>();
-      if (!scalar || !scalar->literal()->As<ast::IntLiteral>()) {
+      if (!scalar || !scalar->literal->As<ast::IntLiteral>()) {
         AddError("index must be signed or unsigned integer literal",
-                 idx->source());
+                 idx->source);
         return false;
       }
     }
@@ -2423,22 +2421,22 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
 }
 
 bool Resolver::Bitcast(ast::BitcastExpression* expr) {
-  auto* ty = Type(expr->type());
+  auto* ty = Type(expr->type);
   if (!ty) {
     return false;
   }
   if (ty->Is<sem::Pointer>()) {
-    AddError("cannot cast to a pointer", expr->source());
+    AddError("cannot cast to a pointer", expr->source);
     return false;
   }
-  SetExprInfo(expr, ty, expr->type()->FriendlyName(builder_->Symbols()));
+  SetExprInfo(expr, ty, expr->type->FriendlyName(builder_->Symbols()));
   return true;
 }
 
 bool Resolver::Call(ast::CallExpression* call) {
-  Mark(call->func());
-  auto* ident = call->func();
-  auto name = builder_->Symbols().NameFor(ident->symbol());
+  Mark(call->func);
+  auto* ident = call->func;
+  auto name = builder_->Symbols().NameFor(ident->symbol);
 
   auto intrinsic_type = sem::ParseIntrinsicType(name);
   if (intrinsic_type != IntrinsicType::kNone) {
@@ -2460,7 +2458,7 @@ bool Resolver::ValidateCall(ast::CallExpression* call) {
     if (current_statement_) {
       if (auto* call_stmt =
               As<ast::CallStatement>(current_statement_->Declaration())) {
-        if (call_stmt->expr() == call) {
+        if (call_stmt->expr == call) {
           is_call_statement = true;
         }
       }
@@ -2469,15 +2467,15 @@ bool Resolver::ValidateCall(ast::CallExpression* call) {
       // https://gpuweb.github.io/gpuweb/wgsl/#function-call-expr
       // If the called function does not return a value, a function call
       // statement should be used instead.
-      auto* ident = call->func();
-      auto name = builder_->Symbols().NameFor(ident->symbol());
+      auto* ident = call->func;
+      auto name = builder_->Symbols().NameFor(ident->symbol);
       // A function call is made to either a user declared function or an
       // intrinsic. function_calls_ only maps CallExpression to user declared
       // functions
       bool is_function = function_calls_.count(call) != 0;
       AddError((is_function ? "function" : "intrinsic") + std::string(" '") +
                    name + "' does not return a value",
-               call->source());
+               call->source);
       return false;
     }
   }
@@ -2486,7 +2484,7 @@ bool Resolver::ValidateCall(ast::CallExpression* call) {
 }
 
 bool Resolver::ValidateCallStatement(ast::CallStatement* stmt) {
-  const sem::Type* return_type = TypeOf(stmt->expr());
+  const sem::Type* return_type = TypeOf(stmt->expr);
   if (!return_type->Is<sem::Void>()) {
     // https://gpuweb.github.io/gpuweb/wgsl/#function-call-statement
     // A function call statement executes a function call where the called
@@ -2497,7 +2495,7 @@ bool Resolver::ValidateCallStatement(ast::CallStatement* stmt) {
     AddError(
         "result of called function was not used. If this was intentional wrap "
         "the function call in ignore()",
-        stmt->source());
+        stmt->source);
     return false;
   }
   return true;
@@ -2506,19 +2504,19 @@ bool Resolver::ValidateCallStatement(ast::CallStatement* stmt) {
 bool Resolver::IntrinsicCall(ast::CallExpression* call,
                              sem::IntrinsicType intrinsic_type) {
   std::vector<const sem::Type*> arg_tys;
-  arg_tys.reserve(call->args().size());
-  for (auto* expr : call->args()) {
+  arg_tys.reserve(call->args.size());
+  for (auto* expr : call->args) {
     arg_tys.emplace_back(TypeOf(expr));
   }
 
   auto* result =
-      intrinsic_table_->Lookup(intrinsic_type, arg_tys, call->source());
+      intrinsic_table_->Lookup(intrinsic_type, arg_tys, call->source);
   if (!result) {
     return false;
   }
 
   if (result->IsDeprecated()) {
-    AddWarning("use of deprecated intrinsic", call->source());
+    AddWarning("use of deprecated intrinsic", call->source);
   }
 
   auto* out = builder_->create<sem::Call>(call, result, current_statement_);
@@ -2547,13 +2545,13 @@ bool Resolver::ValidateTextureIntrinsicFunction(
   auto& signature = intrinsic->Signature();
   auto index = signature.IndexOf(sem::ParameterUsage::kOffset);
   if (index > -1) {
-    auto* param = ast_call->args()[index];
+    auto* param = ast_call->args[index];
     if (param->Is<ast::TypeConstructorExpression>()) {
       auto values = ConstantValueOf(param);
       if (!values.IsValid()) {
         AddError(
             "'" + func_name + "' offset parameter must be a const_expression",
-            param->source());
+            param->source);
         return false;
       }
       if (!values.Type()->Is<sem::Vector>() ||
@@ -2569,14 +2567,14 @@ bool Resolver::ValidateTextureIntrinsicFunction(
                        "' must be at least -8 and at most 7. "
                        "found: '" +
                        std::to_string(offset_value) + "'",
-                   param->source());
+                   param->source);
           return false;
         }
       }
     } else {
       AddError(
           "'" + func_name + "' offset parameter must be a const_expression",
-          param->source());
+          param->source);
       return false;
     }
   }
@@ -2584,18 +2582,18 @@ bool Resolver::ValidateTextureIntrinsicFunction(
 }
 
 bool Resolver::FunctionCall(const ast::CallExpression* call) {
-  auto* ident = call->func();
-  auto name = builder_->Symbols().NameFor(ident->symbol());
+  auto* ident = call->func;
+  auto name = builder_->Symbols().NameFor(ident->symbol);
 
-  auto callee_func_it = symbol_to_function_.find(ident->symbol());
+  auto callee_func_it = symbol_to_function_.find(ident->symbol);
   if (callee_func_it == symbol_to_function_.end()) {
     if (current_function_ &&
-        current_function_->declaration->symbol() == ident->symbol()) {
+        current_function_->declaration->symbol == ident->symbol) {
       AddError("recursion is not permitted. '" + name +
                    "' attempted to call itself.",
-               call->source());
+               call->source);
     } else {
-      AddError("unable to find called function: " + name, call->source());
+      AddError("unable to find called function: " + name, call->source);
     }
     return false;
   }
@@ -2630,30 +2628,30 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
 
 bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
                                     const FunctionInfo* target) {
-  auto* ident = call->func();
-  auto name = builder_->Symbols().NameFor(ident->symbol());
+  auto* ident = call->func;
+  auto name = builder_->Symbols().NameFor(ident->symbol);
 
   if (target->declaration->IsEntryPoint()) {
     // https://www.w3.org/TR/WGSL/#function-restriction
     // An entry point must never be the target of a function call.
     AddError("entry point functions cannot be the target of a function call",
-             call->source());
+             call->source);
     return false;
   }
 
-  if (call->args().size() != target->parameters.size()) {
-    bool more = call->args().size() > target->parameters.size();
+  if (call->args.size() != target->parameters.size()) {
+    bool more = call->args.size() > target->parameters.size();
     AddError("too " + (more ? std::string("many") : std::string("few")) +
                  " arguments in call to '" + name + "', expected " +
                  std::to_string(target->parameters.size()) + ", got " +
-                 std::to_string(call->args().size()),
-             call->source());
+                 std::to_string(call->args.size()),
+             call->source);
     return false;
   }
 
-  for (size_t i = 0; i < call->args().size(); ++i) {
+  for (size_t i = 0; i < call->args.size(); ++i) {
     const VariableInfo* param = target->parameters[i];
-    const ast::Expression* arg_expr = call->args()[i];
+    const ast::Expression* arg_expr = call->args[i];
     auto* arg_type = TypeOf(arg_expr)->UnwrapRef();
 
     if (param->type != arg_type) {
@@ -2661,15 +2659,15 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
                    " in call to '" + name + "', expected '" +
                    param->type->FriendlyName(builder_->Symbols()) + "', got '" +
                    arg_type->FriendlyName(builder_->Symbols()) + "'",
-               arg_expr->source());
+               arg_expr->source);
       return false;
     }
 
-    if (param->declaration->type()->Is<ast::Pointer>()) {
+    if (param->declaration->type->Is<ast::Pointer>()) {
       auto is_valid = false;
       if (auto* ident_expr = arg_expr->As<ast::IdentifierExpression>()) {
         VariableInfo* var;
-        if (!variable_stack_.get(ident_expr->symbol(), &var)) {
+        if (!variable_stack_.get(ident_expr->symbol, &var)) {
           TINT_ICE(Resolver, diagnostics_) << "failed to resolve identifier";
           return false;
         }
@@ -2677,16 +2675,16 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
           is_valid = true;
         }
       } else if (auto* unary = arg_expr->As<ast::UnaryOpExpression>()) {
-        if (unary->op() == ast::UnaryOp::kAddressOf) {
+        if (unary->op == ast::UnaryOp::kAddressOf) {
           if (auto* ident_unary =
-                  unary->expr()->As<ast::IdentifierExpression>()) {
+                  unary->expr->As<ast::IdentifierExpression>()) {
             VariableInfo* var;
-            if (!variable_stack_.get(ident_unary->symbol(), &var)) {
+            if (!variable_stack_.get(ident_unary->symbol, &var)) {
               TINT_ICE(Resolver, diagnostics_)
                   << "failed to resolve identifier";
               return false;
             }
-            if (var->declaration->is_const()) {
+            if (var->declaration->is_const) {
               TINT_ICE(Resolver, diagnostics_)
                   << "Resolver::FunctionCall() encountered an address-of "
                      "expression of a constant identifier expression";
@@ -2699,12 +2697,12 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
 
       if (!is_valid &&
           IsValidationEnabled(
-              param->declaration->decorations(),
+              param->declaration->decorations,
               ast::DisabledValidation::kIgnoreInvalidPointerArgument)) {
         AddError(
             "expected an address-of expression of a variable identifier "
             "expression or a function parameter",
-            arg_expr->source());
+            arg_expr->source);
         return false;
       }
     }
@@ -2714,12 +2712,12 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
 
 bool Resolver::Constructor(ast::ConstructorExpression* expr) {
   if (auto* type_ctor = expr->As<ast::TypeConstructorExpression>()) {
-    auto* type = Type(type_ctor->type());
+    auto* type = Type(type_ctor->type);
     if (!type) {
       return false;
     }
 
-    auto type_name = type_ctor->type()->FriendlyName(builder_->Symbols());
+    auto type_name = type_ctor->type->FriendlyName(builder_->Symbols());
 
     // Now that the argument types have been determined, make sure that they
     // obey the constructor type rules laid out in
@@ -2736,7 +2734,7 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     } else if (auto* struct_type = type->As<sem::Struct>()) {
       ok = ValidateStructureConstructor(type_ctor, struct_type);
     } else {
-      AddError("type is not constructible", type_ctor->source());
+      AddError("type is not constructible", type_ctor->source);
       return false;
     }
     if (!ok) {
@@ -2747,8 +2745,8 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
   }
 
   if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
-    Mark(scalar_ctor->literal());
-    auto* type = TypeOf(scalar_ctor->literal());
+    Mark(scalar_ctor->literal);
+    auto* type = TypeOf(scalar_ctor->literal);
     if (!type) {
       return false;
     }
@@ -2764,30 +2762,29 @@ bool Resolver::ValidateStructureConstructor(
     const ast::TypeConstructorExpression* ctor,
     const sem::Struct* struct_type) {
   if (!struct_type->IsConstructible()) {
-    AddError("struct constructor has non-constructible type", ctor->source());
+    AddError("struct constructor has non-constructible type", ctor->source);
     return false;
   }
 
-  if (ctor->values().size() > 0) {
-    if (ctor->values().size() != struct_type->Members().size()) {
-      std::string fm = ctor->values().size() < struct_type->Members().size()
-                           ? "few"
-                           : "many";
+  if (ctor->values.size() > 0) {
+    if (ctor->values.size() != struct_type->Members().size()) {
+      std::string fm =
+          ctor->values.size() < struct_type->Members().size() ? "few" : "many";
       AddError("struct constructor has too " + fm + " inputs: expected " +
                    std::to_string(struct_type->Members().size()) + ", found " +
-                   std::to_string(ctor->values().size()),
-               ctor->source());
+                   std::to_string(ctor->values.size()),
+               ctor->source);
       return false;
     }
     for (auto* member : struct_type->Members()) {
-      auto* value = ctor->values()[member->Index()];
+      auto* value = ctor->values[member->Index()];
       if (member->Type() != TypeOf(value)->UnwrapRef()) {
         AddError(
             "type in struct constructor does not match struct member type: "
             "expected '" +
                 member->Type()->FriendlyName(builder_->Symbols()) +
                 "', found '" + TypeNameOf(value) + "'",
-            value->source());
+            value->source);
         return false;
       }
     }
@@ -2798,7 +2795,7 @@ bool Resolver::ValidateStructureConstructor(
 bool Resolver::ValidateArrayConstructor(
     const ast::TypeConstructorExpression* ctor,
     const sem::Array* array_type) {
-  auto& values = ctor->values();
+  auto& values = ctor->values;
   auto* elem_type = array_type->ElemType();
   for (auto* value : values) {
     auto* value_type = TypeOf(value)->UnwrapRef();
@@ -2808,30 +2805,30 @@ bool Resolver::ValidateArrayConstructor(
           "expected '" +
               elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
               TypeNameOf(value) + "'",
-          value->source());
+          value->source);
       return false;
     }
   }
 
   if (array_type->IsRuntimeSized()) {
-    AddError("cannot init a runtime-sized array", ctor->source());
+    AddError("cannot init a runtime-sized array", ctor->source);
     return false;
   } else if (!elem_type->IsConstructible()) {
     AddError("array constructor has non-constructible element type",
-             ctor->type()->As<ast::Array>()->type()->source());
+             ctor->type->As<ast::Array>()->type->source);
     return false;
   } else if (!values.empty() && (values.size() != array_type->Count())) {
     std::string fm = values.size() < array_type->Count() ? "few" : "many";
     AddError("array constructor has too " + fm + " elements: expected " +
                  std::to_string(array_type->Count()) + ", found " +
                  std::to_string(values.size()),
-             ctor->source());
+             ctor->source);
     return false;
   } else if (values.size() > array_type->Count()) {
     AddError("array constructor has too many elements: expected " +
                  std::to_string(array_type->Count()) + ", found " +
                  std::to_string(values.size()),
-             ctor->source());
+             ctor->source);
     return false;
   }
   return true;
@@ -2841,7 +2838,7 @@ bool Resolver::ValidateVectorConstructor(
     const ast::TypeConstructorExpression* ctor,
     const sem::Vector* vec_type,
     const std::string& type_name) {
-  auto& values = ctor->values();
+  auto& values = ctor->values;
   auto* elem_type = vec_type->type();
   size_t value_cardinality_sum = 0;
   for (auto* value : values) {
@@ -2853,7 +2850,7 @@ bool Resolver::ValidateVectorConstructor(
             "expected '" +
                 elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
                 TypeNameOf(value) + "'",
-            value->source());
+            value->source);
         return false;
       }
 
@@ -2869,7 +2866,7 @@ bool Resolver::ValidateVectorConstructor(
             "expected '" +
                 elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
                 value_elem_type->FriendlyName(builder_->Symbols()) + "'",
-            value->source());
+            value->source);
         return false;
       }
 
@@ -2878,7 +2875,7 @@ bool Resolver::ValidateVectorConstructor(
       // A vector constructor can only accept vectors and scalars.
       AddError("expected vector or scalar type in vector constructor; found: " +
                    value_type->FriendlyName(builder_->Symbols()),
-               value->source());
+               value->source);
       return false;
     }
   }
@@ -2891,8 +2888,8 @@ bool Resolver::ValidateVectorConstructor(
       TINT_ICE(Resolver, diagnostics_)
           << "constructor arguments expected to be non-empty!";
     }
-    const Source& values_start = values[0]->source();
-    const Source& values_end = values[values.size() - 1]->source();
+    const Source& values_start = values[0]->source;
+    const Source& values_end = values[values.size() - 1]->source;
     AddError("attempted to construct '" + type_name + "' with " +
                  std::to_string(value_cardinality_sum) + " component(s)",
              Source::Combine(values_start, values_end));
@@ -2922,20 +2919,20 @@ bool Resolver::ValidateMatrixConstructor(
     const ast::TypeConstructorExpression* ctor,
     const sem::Matrix* matrix_type,
     const std::string& type_name) {
-  auto& values = ctor->values();
+  auto& values = ctor->values;
   // Zero Value expression
   if (values.empty()) {
     return true;
   }
 
-  if (!ValidateMatrix(matrix_type, ctor->source())) {
+  if (!ValidateMatrix(matrix_type, ctor->source)) {
     return false;
   }
 
   auto* elem_type = matrix_type->type();
   if (matrix_type->columns() != values.size()) {
-    const Source& values_start = values[0]->source();
-    const Source& values_end = values[values.size() - 1]->source();
+    const Source& values_start = values[0]->source;
+    const Source& values_end = values[values.size() - 1]->source;
     AddError("expected " + std::to_string(matrix_type->columns()) + " '" +
                  VectorPretty(matrix_type->rows(), elem_type) +
                  "' arguments in '" + type_name + "' constructor, found " +
@@ -2954,7 +2951,7 @@ bool Resolver::ValidateMatrixConstructor(
                    VectorPretty(matrix_type->rows(), elem_type) + "' in '" +
                    type_name + "' constructor, found '" + TypeNameOf(value) +
                    "'",
-               value->source());
+               value->source);
       return false;
     }
   }
@@ -2966,18 +2963,18 @@ bool Resolver::ValidateScalarConstructor(
     const ast::TypeConstructorExpression* ctor,
     const sem::Type* type,
     const std::string& type_name) {
-  if (ctor->values().size() == 0) {
+  if (ctor->values.size() == 0) {
     return true;
   }
-  if (ctor->values().size() > 1) {
+  if (ctor->values.size() > 1) {
     AddError("expected zero or one value in constructor, got " +
-                 std::to_string(ctor->values().size()),
-             ctor->source());
+                 std::to_string(ctor->values.size()),
+             ctor->source);
     return false;
   }
 
   // Validate constructor
-  auto* value = ctor->values()[0];
+  auto* value = ctor->values[0];
   auto* value_type = TypeOf(value)->UnwrapRef();
 
   using Bool = sem::Bool;
@@ -2992,7 +2989,7 @@ bool Resolver::ValidateScalarConstructor(
   if (!is_valid) {
     AddError("cannot construct '" + type_name + "' with a value of type '" +
                  TypeNameOf(value) + "'",
-             ctor->source());
+             ctor->source);
 
     return false;
   }
@@ -3001,7 +2998,7 @@ bool Resolver::ValidateScalarConstructor(
 }
 
 bool Resolver::Identifier(ast::IdentifierExpression* expr) {
-  auto symbol = expr->symbol();
+  auto symbol = expr->symbol;
   VariableInfo* var;
   if (variable_stack_.get(symbol, &var)) {
     SetExprInfo(expr, var->type, var->type_name);
@@ -3022,22 +3019,22 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
           auto& decls = loop_block->Decls();
           // If our identifier is in loop_block->decls, make sure its index is
           // less than first_continue
-          auto iter = std::find_if(
-              decls.begin(), decls.end(),
-              [&symbol](auto* v) { return v->symbol() == symbol; });
+          auto iter =
+              std::find_if(decls.begin(), decls.end(),
+                           [&symbol](auto* v) { return v->symbol == symbol; });
           if (iter != decls.end()) {
             auto var_decl_index =
                 static_cast<size_t>(std::distance(decls.begin(), iter));
             if (var_decl_index >= loop_block->NumDeclsAtFirstContinue()) {
               AddError("continue statement bypasses declaration of '" +
                            builder_->Symbols().NameFor(symbol) + "'",
-                       loop_block->FirstContinue()->source());
+                       loop_block->FirstContinue()->source);
               AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
                           "' declared here",
-                      (*iter)->source());
+                      (*iter)->source);
               AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
                           "' referenced in continuing block here",
-                      expr->source());
+                      expr->source);
               return false;
             }
           }
@@ -3050,30 +3047,30 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
 
   auto iter = symbol_to_function_.find(symbol);
   if (iter != symbol_to_function_.end()) {
-    AddError("missing '(' for function call", expr->source().End());
+    AddError("missing '(' for function call", expr->source.End());
     return false;
   }
 
   std::string name = builder_->Symbols().NameFor(symbol);
   if (sem::ParseIntrinsicType(name) != IntrinsicType::kNone) {
-    AddError("missing '(' for intrinsic call", expr->source().End());
+    AddError("missing '(' for intrinsic call", expr->source.End());
     return false;
   }
 
-  AddError("identifier must be declared before use: " + name, expr->source());
+  AddError("identifier must be declared before use: " + name, expr->source);
   return false;
 }
 
 bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
-  auto* structure = TypeOf(expr->structure());
+  auto* structure = TypeOf(expr->structure);
   auto* storage_type = structure->UnwrapRef();
 
   sem::Type* ret = nullptr;
   std::vector<uint32_t> swizzle;
 
   if (auto* str = storage_type->As<sem::Struct>()) {
-    Mark(expr->member());
-    auto symbol = expr->member()->symbol();
+    Mark(expr->member);
+    auto symbol = expr->member->symbol;
 
     const sem::StructMember* member = nullptr;
     for (auto* m : str->Members()) {
@@ -3087,7 +3084,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     if (ret == nullptr) {
       AddError(
           "struct member " + builder_->Symbols().NameFor(symbol) + " not found",
-          expr->source());
+          expr->source);
       return false;
     }
 
@@ -3100,8 +3097,8 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     builder_->Sem().Add(expr, builder_->create<sem::StructMemberAccess>(
                                   expr, ret, current_statement_, member));
   } else if (auto* vec = storage_type->As<sem::Vector>()) {
-    Mark(expr->member());
-    std::string s = builder_->Symbols().NameFor(expr->member()->symbol());
+    Mark(expr->member);
+    std::string s = builder_->Symbols().NameFor(expr->member->symbol);
     auto size = s.size();
     swizzle.reserve(s.size());
 
@@ -3125,18 +3122,18 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
           break;
         default:
           AddError("invalid vector swizzle character",
-                   expr->member()->source().Begin() + swizzle.size());
+                   expr->member->source.Begin() + swizzle.size());
           return false;
       }
 
       if (swizzle.back() >= vec->Width()) {
-        AddError("invalid vector swizzle member", expr->member()->source());
+        AddError("invalid vector swizzle member", expr->member->source);
         return false;
       }
     }
 
     if (size < 1 || size > 4) {
-      AddError("invalid vector swizzle size", expr->member()->source());
+      AddError("invalid vector swizzle size", expr->member->source);
       return false;
     }
 
@@ -3150,7 +3147,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     if (!std::all_of(s.begin(), s.end(), is_rgba) &&
         !std::all_of(s.begin(), s.end(), is_xyzw)) {
       AddError("invalid mixing of vector swizzle characters rgba with xyzw",
-               expr->member()->source());
+               expr->member->source);
       return false;
     }
 
@@ -3174,8 +3171,8 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
   } else {
     AddError(
         "invalid member accessor expression. Expected vector or struct, got '" +
-            TypeNameOf(expr->structure()) + "'",
-        expr->structure()->source());
+            TypeNameOf(expr->structure) + "'",
+        expr->structure->source);
     return false;
   }
 
@@ -3192,8 +3189,8 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   using Matrix = sem::Matrix;
   using Vector = sem::Vector;
 
-  auto* lhs_type = const_cast<sem::Type*>(TypeOf(expr->lhs())->UnwrapRef());
-  auto* rhs_type = const_cast<sem::Type*>(TypeOf(expr->rhs())->UnwrapRef());
+  auto* lhs_type = const_cast<sem::Type*>(TypeOf(expr->lhs)->UnwrapRef());
+  auto* rhs_type = const_cast<sem::Type*>(TypeOf(expr->rhs)->UnwrapRef());
 
   auto* lhs_vec = lhs_type->As<Vector>();
   auto* lhs_vec_elem_type = lhs_vec ? lhs_vec->type() : nullptr;
@@ -3383,14 +3380,14 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
 
   AddError("Binary expression operand types are invalid for this operation: " +
                lhs_type->FriendlyName(builder_->Symbols()) + " " +
-               FriendlyName(expr->op()) + " " +
+               FriendlyName(expr->op) + " " +
                rhs_type->FriendlyName(builder_->Symbols()),
-           expr->source());
+           expr->source);
   return false;
 }
 
 bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
-  auto* expr_type = TypeOf(unary->expr());
+  auto* expr_type = TypeOf(unary->expr);
   if (!expr_type) {
     return false;
   }
@@ -3398,40 +3395,39 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
   std::string type_name;
   const sem::Type* type = nullptr;
 
-  switch (unary->op()) {
+  switch (unary->op) {
     case ast::UnaryOp::kNot:
       // Result type matches the deref'd inner type.
-      type_name = TypeNameOf(unary->expr());
+      type_name = TypeNameOf(unary->expr);
       type = expr_type->UnwrapRef();
       if (!type->Is<sem::Bool>() && !type->is_bool_vector()) {
         AddError("cannot logical negate expression of type '" +
-                     TypeNameOf(unary->expr()),
-                 unary->expr()->source());
+                     TypeNameOf(unary->expr),
+                 unary->expr->source);
         return false;
       }
       break;
 
     case ast::UnaryOp::kComplement:
       // Result type matches the deref'd inner type.
-      type_name = TypeNameOf(unary->expr());
+      type_name = TypeNameOf(unary->expr);
       type = expr_type->UnwrapRef();
       if (!type->is_integer_scalar_or_vector()) {
         AddError("cannot bitwise complement expression of type '" +
-                     TypeNameOf(unary->expr()),
-                 unary->expr()->source());
+                     TypeNameOf(unary->expr),
+                 unary->expr->source);
         return false;
       }
       break;
 
     case ast::UnaryOp::kNegation:
       // Result type matches the deref'd inner type.
-      type_name = TypeNameOf(unary->expr());
+      type_name = TypeNameOf(unary->expr);
       type = expr_type->UnwrapRef();
       if (!(type->IsAnyOf<sem::F32, sem::I32>() ||
             type->is_signed_integer_vector() || type->is_float_vector())) {
-        AddError(
-            "cannot negate expression of type '" + TypeNameOf(unary->expr()),
-            unary->expr()->source());
+        AddError("cannot negate expression of type '" + TypeNameOf(unary->expr),
+                 unary->expr->source);
         return false;
       }
       break;
@@ -3441,14 +3437,13 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
         if (ref->StoreType()->UnwrapRef()->is_handle()) {
           AddError(
               "cannot take the address of expression in handle storage class",
-              unary->expr()->source());
+              unary->expr->source);
           return false;
         }
         type = builder_->create<sem::Pointer>(
             ref->StoreType(), ref->StorageClass(), ref->Access());
       } else {
-        AddError("cannot take the address of expression",
-                 unary->expr()->source());
+        AddError("cannot take the address of expression", unary->expr->source);
         return false;
       }
       break;
@@ -3459,8 +3454,8 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
             ptr->StoreType(), ptr->StorageClass(), ptr->Access());
       } else {
         AddError("cannot dereference expression of type '" +
-                     TypeNameOf(unary->expr()) + "'",
-                 unary->expr()->source());
+                     TypeNameOf(unary->expr) + "'",
+                 unary->expr->source);
         return false;
       }
       break;
@@ -3471,10 +3466,10 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
 }
 
 bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
-  ast::Variable* var = stmt->variable();
+  ast::Variable* var = stmt->variable;
   Mark(var);
 
-  if (!ValidateNoDuplicateDefinition(var->symbol(), var->source())) {
+  if (!ValidateNoDuplicateDefinition(var->symbol, var->source)) {
     return false;
   }
 
@@ -3483,15 +3478,15 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     return false;
   }
 
-  for (auto* deco : var->decorations()) {
+  for (auto* deco : var->decorations) {
     Mark(deco);
     if (!deco->Is<ast::InternalDecoration>()) {
-      AddError("decorations are not valid on local variables", deco->source());
+      AddError("decorations are not valid on local variables", deco->source);
       return false;
     }
   }
 
-  variable_stack_.set(var->symbol(), info);
+  variable_stack_.set(var->symbol, info);
   if (current_block_) {  // Not all statements are inside a block
     current_block_->AddDecl(var);
   }
@@ -3500,18 +3495,18 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     return false;
   }
 
-  if (!var->is_const() &&
-      IsValidationEnabled(var->decorations(),
+  if (!var->is_const &&
+      IsValidationEnabled(var->decorations,
                           ast::DisabledValidation::kIgnoreStorageClass)) {
     if (!info->type->UnwrapRef()->IsConstructible()) {
       AddError("function variable must have a constructible type",
-               var->type() ? var->type()->source() : var->source());
+               var->type ? var->type->source : var->source);
       return false;
     }
     if (info->storage_class != ast::StorageClass::kFunction) {
       if (info->storage_class != ast::StorageClass::kNone) {
         AddError("function variable has a non-function storage class",
-                 stmt->source());
+                 stmt->source);
         return false;
       }
       info->storage_class = ast::StorageClass::kFunction;
@@ -3519,10 +3514,10 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   }
 
   if (!ApplyStorageClassUsageToType(info->storage_class, info->type,
-                                    var->source())) {
+                                    var->source)) {
     AddNote("while instantiating variable " +
-                builder_->Symbols().NameFor(var->symbol()),
-            var->source());
+                builder_->Symbols().NameFor(var->symbol),
+            var->source);
     return false;
   }
 
@@ -3532,7 +3527,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
   sem::Type* result = nullptr;
   if (auto* alias = named_type->As<ast::Alias>()) {
-    result = Type(alias->type());
+    result = Type(alias->type);
   } else if (auto* str = named_type->As<ast::Struct>()) {
     result = Structure(str);
   } else {
@@ -3543,8 +3538,7 @@ sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
     return nullptr;
   }
 
-  named_type_info_.emplace(named_type->name(),
-                           TypeDeclInfo{named_type, result});
+  named_type_info_.emplace(named_type->name, TypeDeclInfo{named_type, result});
 
   if (!ValidateTypeDecl(named_type)) {
     return nullptr;
@@ -3555,17 +3549,17 @@ sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
 }
 
 bool Resolver::ValidateTypeDecl(const ast::TypeDecl* named_type) const {
-  auto iter = named_type_info_.find(named_type->name());
+  auto iter = named_type_info_.find(named_type->name);
   if (iter == named_type_info_.end()) {
     TINT_ICE(Resolver, diagnostics_)
         << "ValidateTypeDecl called() before TypeDecl()";
   }
   if (iter->second.ast != named_type) {
     AddError("type with the name '" +
-                 builder_->Symbols().NameFor(named_type->name()) +
+                 builder_->Symbols().NameFor(named_type->name) +
                  "' was already declared",
-             named_type->source());
-    AddNote("first declared here", iter->second.ast->source());
+             named_type->source);
+    AddNote("first declared here", iter->second.ast->source);
     return false;
   }
   return true;
@@ -3624,7 +3618,7 @@ void Resolver::SetExprInfo(const ast::Expression* expr,
 bool Resolver::ValidatePipelineStages() {
   auto check_workgroup_storage = [&](FunctionInfo* func,
                                      FunctionInfo* entry_point) {
-    auto stage = entry_point->declaration->pipeline_stage();
+    auto stage = entry_point->declaration->PipelineStage();
     if (stage != ast::PipelineStage::kCompute) {
       for (auto* var : func->local_referenced_module_vars) {
         if (var->storage_class == ast::StorageClass::kWorkgroup) {
@@ -3633,29 +3627,28 @@ bool Resolver::ValidatePipelineStages() {
           for (auto* user : var->users) {
             auto it = expr_info_.find(user->As<ast::Expression>());
             if (it != expr_info_.end()) {
-              if (func->declaration->symbol() ==
-                  it->second.statement->Function()->symbol()) {
+              if (func->declaration->symbol ==
+                  it->second.statement->Function()->symbol) {
                 AddError("workgroup memory cannot be used by " +
                              stage_name.str() + " pipeline stage",
-                         user->source());
+                         user->source);
                 break;
               }
             }
           }
-          AddNote("variable is declared here", var->declaration->source());
+          AddNote("variable is declared here", var->declaration->source);
           if (func != entry_point) {
             TraverseCallChain(entry_point, func, [&](FunctionInfo* f) {
-              AddNote(
-                  "called by function '" +
-                      builder_->Symbols().NameFor(f->declaration->symbol()) +
-                      "'",
-                  f->declaration->source());
+              AddNote("called by function '" +
+                          builder_->Symbols().NameFor(f->declaration->symbol) +
+                          "'",
+                      f->declaration->source);
             });
             AddNote("called by entry point '" +
                         builder_->Symbols().NameFor(
-                            entry_point->declaration->symbol()) +
+                            entry_point->declaration->symbol) +
                         "'",
-                    entry_point->declaration->source());
+                    entry_point->declaration->source);
           }
           return false;
         }
@@ -3677,24 +3670,24 @@ bool Resolver::ValidatePipelineStages() {
 
   auto check_intrinsic_calls = [&](FunctionInfo* func,
                                    FunctionInfo* entry_point) {
-    auto stage = entry_point->declaration->pipeline_stage();
+    auto stage = entry_point->declaration->PipelineStage();
     for (auto& call : func->intrinsic_calls) {
       if (!call.intrinsic->SupportedStages().Contains(stage)) {
         std::stringstream err;
         err << "built-in cannot be used by " << stage << " pipeline stage";
-        AddError(err.str(), call.call->source());
+        AddError(err.str(), call.call->source);
         if (func != entry_point) {
           TraverseCallChain(entry_point, func, [&](FunctionInfo* f) {
             AddNote("called by function '" +
-                        builder_->Symbols().NameFor(f->declaration->symbol()) +
+                        builder_->Symbols().NameFor(f->declaration->symbol) +
                         "'",
-                    f->declaration->source());
+                    f->declaration->source);
           });
           AddNote("called by entry point '" +
                       builder_->Symbols().NameFor(
-                          entry_point->declaration->symbol()) +
+                          entry_point->declaration->symbol) +
                       "'",
-                  entry_point->declaration->source());
+                  entry_point->declaration->source);
         }
         return false;
       }
@@ -3742,8 +3735,8 @@ void Resolver::CreateSemanticNodes() const {
   std::unordered_map<Symbol, std::vector<Symbol>> ancestor_entry_points;
   for (auto* entry_point : entry_points_) {
     for (auto* call : entry_point->transitive_calls) {
-      auto& vec = ancestor_entry_points[call->declaration->symbol()];
-      vec.emplace_back(entry_point->declaration->symbol());
+      auto& vec = ancestor_entry_points[call->declaration->symbol];
+      vec.emplace_back(entry_point->declaration->symbol);
     }
   }
 
@@ -3755,7 +3748,7 @@ void Resolver::CreateSemanticNodes() const {
 
     sem::Variable* sem_var = nullptr;
 
-    if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
+    if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations)) {
       // Create a pipeline overridable constant.
       sem_var = builder_->create<sem::GlobalVariable>(var, info->type,
                                                       info->constant_id);
@@ -3829,7 +3822,7 @@ void Resolver::CreateSemanticNodes() const {
         info->declaration, const_cast<sem::Type*>(info->return_type),
         parameters, remap_vars(info->referenced_module_vars),
         remap_vars(info->local_referenced_module_vars), info->return_statements,
-        info->callsites, ancestor_entry_points[func->symbol()],
+        info->callsites, ancestor_entry_points[func->symbol],
         info->workgroup_size);
     func_info_to_sem_func.emplace(info, sem_func);
     sem.Add(func, sem_func);
@@ -3858,9 +3851,9 @@ void Resolver::CreateSemanticNodes() const {
 }
 
 sem::Array* Resolver::Array(const ast::Array* arr) {
-  auto source = arr->source();
+  auto source = arr->source;
 
-  auto* elem_type = Type(arr->type());
+  auto* elem_type = Type(arr->type);
   if (!elem_type) {
     return nullptr;
   }
@@ -3875,23 +3868,23 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
   uint32_t el_align = elem_type->Align();
   uint32_t el_size = elem_type->Size();
 
-  if (!ValidateNoDuplicateDecorations(arr->decorations())) {
+  if (!ValidateNoDuplicateDecorations(arr->decorations)) {
     return nullptr;
   }
 
   // Look for explicit stride via [[stride(n)]] decoration
   uint32_t explicit_stride = 0;
-  for (auto* deco : arr->decorations()) {
+  for (auto* deco : arr->decorations) {
     Mark(deco);
     if (auto* sd = deco->As<ast::StrideDecoration>()) {
-      explicit_stride = sd->stride();
+      explicit_stride = sd->stride;
       if (!ValidateArrayStrideDecoration(sd, el_size, el_align, source)) {
         return nullptr;
       }
       continue;
     }
 
-    AddError("decoration is not valid for array types", deco->source());
+    AddError("decoration is not valid for array types", deco->source);
     return nullptr;
   }
 
@@ -3903,13 +3896,13 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
   // Evaluate the constant array size expression.
   // sem::Array uses a size of 0 for a runtime-sized array.
   uint32_t count = 0;
-  if (auto* count_expr = arr->Size()) {
+  if (auto* count_expr = arr->count) {
     Mark(count_expr);
     if (!Expression(count_expr)) {
       return nullptr;
     }
 
-    auto size_source = count_expr->source();
+    auto size_source = count_expr->source;
 
     auto* ty = TypeOf(count_expr)->UnwrapRef();
     if (!ty->is_integer_scalar()) {
@@ -3921,20 +3914,20 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
       // Make sure the identifier is a non-overridable module-scope constant.
       VariableInfo* var = nullptr;
       bool is_global = false;
-      if (!variable_stack_.get(ident->symbol(), &var, &is_global) ||
-          !is_global || !var->declaration->is_const()) {
+      if (!variable_stack_.get(ident->symbol, &var, &is_global) || !is_global ||
+          !var->declaration->is_const) {
         AddError("array size identifier must be a module-scope constant",
                  size_source);
         return nullptr;
       }
       if (ast::HasDecoration<ast::OverrideDecoration>(
-              var->declaration->decorations())) {
+              var->declaration->decorations)) {
         AddError("array size expression must not be pipeline-overridable",
                  size_source);
         return nullptr;
       }
 
-      count_expr = var->declaration->constructor();
+      count_expr = var->declaration->constructor;
     } else if (!count_expr->Is<ast::ScalarConstructorExpression>()) {
       AddError(
           "array size expression must be either a literal or a module-scope "
@@ -3965,7 +3958,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     msg << "array size in bytes must not exceed 0x" << std::hex
         << std::numeric_limits<uint32_t>::max() << ", but is 0x" << std::hex
         << size;
-    AddError(msg.str(), arr->source());
+    AddError(msg.str(), arr->source);
     return nullptr;
   }
   if (stride > std::numeric_limits<uint32_t>::max() ||
@@ -3983,7 +3976,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
   }
 
   if (elem_type->Is<sem::Atomic>()) {
-    atomic_composite_info_.emplace(out, arr->type()->source());
+    atomic_composite_info_.emplace(out, arr->type->source);
   } else {
     auto found = atomic_composite_info_.find(elem_type);
     if (found != atomic_composite_info_.end()) {
@@ -4017,7 +4010,7 @@ bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
                                              uint32_t el_size,
                                              uint32_t el_align,
                                              const Source& source) {
-  auto stride = deco->stride();
+  auto stride = deco->stride;
   bool is_valid_stride =
       (stride >= el_size) && (stride >= el_align) && (stride % el_align == 0);
   if (!is_valid_stride) {
@@ -4038,7 +4031,7 @@ bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
 bool Resolver::ValidateStructure(const sem::Struct* str) {
   if (str->Members().empty()) {
     AddError("structures must have at least one member",
-             str->Declaration()->source());
+             str->Declaration()->source);
     return false;
   }
 
@@ -4049,15 +4042,15 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         if (member != str->Members().back()) {
           AddError(
               "runtime arrays may only appear as the last member of a struct",
-              member->Declaration()->source());
+              member->Declaration()->source);
           return false;
         }
         if (!str->IsBlockDecorated()) {
           AddError(
               "a struct containing a runtime-sized array "
               "requires the [[block]] attribute: '" +
-                  builder_->Symbols().NameFor(str->Declaration()->name()) + "'",
-              member->Declaration()->source());
+                  builder_->Symbols().NameFor(str->Declaration()->name) + "'",
+              member->Declaration()->source);
           return false;
         }
       }
@@ -4065,7 +4058,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
 
     auto has_position = false;
     ast::InvariantDecoration* invariant_attribute = nullptr;
-    for (auto* deco : member->Declaration()->decorations()) {
+    for (auto* deco : member->Declaration()->decorations) {
       if (!deco->IsAnyOf<ast::BuiltinDecoration,             //
                          ast::InternalDecoration,            //
                          ast::InterpolateDecoration,         //
@@ -4076,12 +4069,11 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
                          ast::StructMemberAlignDecoration>()) {
         if (deco->Is<ast::StrideDecoration>() &&
             IsValidationDisabled(
-                member->Declaration()->decorations(),
+                member->Declaration()->decorations,
                 ast::DisabledValidation::kIgnoreStrideDecoration)) {
           continue;
         }
-        AddError("decoration is not valid for structure members",
-                 deco->source());
+        AddError("decoration is not valid for structure members", deco->source);
         return false;
       }
 
@@ -4089,7 +4081,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         invariant_attribute = invariant;
       } else if (auto* location = deco->As<ast::LocationDecoration>()) {
         if (!ValidateLocationDecoration(location, member->Type(), locations,
-                                        member->Declaration()->source())) {
+                                        member->Declaration()->source)) {
           return false;
         }
       } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
@@ -4097,7 +4089,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
                                        /* is_input */ false)) {
           return false;
         }
-        if (builtin->value() == ast::Builtin::kPosition) {
+        if (builtin->builtin == ast::Builtin::kPosition) {
           has_position = true;
         }
       } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
@@ -4109,27 +4101,26 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
 
     if (invariant_attribute && !has_position) {
       AddError("invariant attribute must only be applied to a position builtin",
-               invariant_attribute->source());
+               invariant_attribute->source);
       return false;
     }
 
     if (auto* member_struct_type = member->Type()->As<sem::Struct>()) {
       if (auto* member_struct_type_block_decoration =
               ast::GetDecoration<ast::StructBlockDecoration>(
-                  member_struct_type->Declaration()->decorations())) {
+                  member_struct_type->Declaration()->decorations)) {
         AddError("structs must not contain [[block]] decorated struct members",
-                 member->Declaration()->source());
+                 member->Declaration()->source);
         AddNote("see member's struct decoration here",
-                member_struct_type_block_decoration->source());
+                member_struct_type_block_decoration->source);
         return false;
       }
     }
   }
 
-  for (auto* deco : str->Declaration()->decorations()) {
+  for (auto* deco : str->Declaration()->decorations) {
     if (!(deco->Is<ast::StructBlockDecoration>())) {
-      AddError("decoration is not valid for struct declarations",
-               deco->source());
+      AddError("decoration is not valid for struct declarations", deco->source);
       return false;
     }
   }
@@ -4144,10 +4135,10 @@ bool Resolver::ValidateLocationDecoration(
     const Source& source,
     const bool is_input) {
   std::string inputs_or_output = is_input ? "inputs" : "output";
-  if (current_function_ && current_function_->declaration->pipeline_stage() ==
+  if (current_function_ && current_function_->declaration->PipelineStage() ==
                                ast::PipelineStage::kCompute) {
     AddError("decoration is not valid for compute shader " + inputs_or_output,
-             location->source());
+             location->source);
     return false;
   }
 
@@ -4159,30 +4150,30 @@ bool Resolver::ValidateLocationDecoration(
     AddNote(
         "'location' attribute must only be applied to declarations of "
         "numeric scalar or numeric vector type",
-        location->source());
+        location->source);
     return false;
   }
 
-  if (locations.count(location->value())) {
+  if (locations.count(location->value)) {
     AddError(deco_to_str(location) + " attribute appears multiple times",
-             location->source());
+             location->source);
     return false;
   }
-  locations.emplace(location->value());
+  locations.emplace(location->value);
 
   return true;
 }
 
 sem::Struct* Resolver::Structure(const ast::Struct* str) {
-  if (!ValidateNoDuplicateDecorations(str->decorations())) {
+  if (!ValidateNoDuplicateDecorations(str->decorations)) {
     return nullptr;
   }
-  for (auto* deco : str->decorations()) {
+  for (auto* deco : str->decorations) {
     Mark(deco);
   }
 
   sem::StructMemberList sem_members;
-  sem_members.reserve(str->members().size());
+  sem_members.reserve(str->members.size());
 
   // Calculate the effective size and alignment of each field, and the overall
   // size of the structure.
@@ -4198,19 +4189,19 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
   uint64_t struct_align = 1;
   std::unordered_map<Symbol, ast::StructMember*> member_map;
 
-  for (auto* member : str->members()) {
+  for (auto* member : str->members) {
     Mark(member);
-    auto result = member_map.emplace(member->symbol(), member);
+    auto result = member_map.emplace(member->symbol, member);
     if (!result.second) {
       AddError("redefinition of '" +
-                   builder_->Symbols().NameFor(member->symbol()) + "'",
-               member->source());
-      AddNote("previous definition is here", result.first->second->source());
+                   builder_->Symbols().NameFor(member->symbol) + "'",
+               member->source);
+      AddNote("previous definition is here", result.first->second->source);
       return nullptr;
     }
 
     // Resolve member type
-    auto* type = Type(member->type());
+    auto* type = Type(member->type);
     if (!type) {
       return nullptr;
     }
@@ -4219,7 +4210,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     if (!IsPlain(type)) {
       AddError(type->FriendlyName(builder_->Symbols()) +
                    " cannot be used as the type of a structure member",
-               member->source());
+               member->source);
       return nullptr;
     }
 
@@ -4227,41 +4218,41 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     uint64_t align = type->Align();
     uint64_t size = type->Size();
 
-    if (!ValidateNoDuplicateDecorations(member->decorations())) {
+    if (!ValidateNoDuplicateDecorations(member->decorations)) {
       return nullptr;
     }
 
     bool has_offset_deco = false;
     bool has_align_deco = false;
     bool has_size_deco = false;
-    for (auto* deco : member->decorations()) {
+    for (auto* deco : member->decorations) {
       Mark(deco);
       if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
         // Offset decorations are not part of the WGSL spec, but are emitted
         // by the SPIR-V reader.
-        if (o->offset() < struct_size) {
-          AddError("offsets must be in ascending order", o->source());
+        if (o->offset < struct_size) {
+          AddError("offsets must be in ascending order", o->source);
           return nullptr;
         }
-        offset = o->offset();
+        offset = o->offset;
         align = 1;
         has_offset_deco = true;
       } else if (auto* a = deco->As<ast::StructMemberAlignDecoration>()) {
-        if (a->align() <= 0 || !utils::IsPowerOfTwo(a->align())) {
+        if (a->align <= 0 || !utils::IsPowerOfTwo(a->align)) {
           AddError("align value must be a positive, power-of-two integer",
-                   a->source());
+                   a->source);
           return nullptr;
         }
-        align = a->align();
+        align = a->align;
         has_align_deco = true;
       } else if (auto* s = deco->As<ast::StructMemberSizeDecoration>()) {
-        if (s->size() < size) {
+        if (s->size < size) {
           AddError("size must be at least as big as the type's size (" +
                        std::to_string(size) + ")",
-                   s->source());
+                   s->source);
           return nullptr;
         }
-        size = s->size();
+        size = s->size;
         has_size_deco = true;
       }
     }
@@ -4269,7 +4260,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     if (has_offset_deco && (has_align_deco || has_size_deco)) {
       AddError(
           "offset decorations cannot be used with align or size decorations",
-          member->source());
+          member->source);
       return nullptr;
     }
 
@@ -4279,12 +4270,12 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
       msg << "struct member has byte offset 0x" << std::hex << offset
           << ", but must not exceed 0x" << std::hex
           << std::numeric_limits<uint32_t>::max();
-      AddError(msg.str(), member->source());
+      AddError(msg.str(), member->source);
       return nullptr;
     }
 
     auto* sem_member = builder_->create<sem::StructMember>(
-        member, member->symbol(), const_cast<sem::Type*>(type),
+        member, member->symbol, const_cast<sem::Type*>(type),
         static_cast<uint32_t>(sem_members.size()),
         static_cast<uint32_t>(offset), static_cast<uint32_t>(align),
         static_cast<uint32_t>(size));
@@ -4303,7 +4294,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     msg << "struct size in bytes must not exceed 0x" << std::hex
         << std::numeric_limits<uint32_t>::max() << ", but is 0x" << std::hex
         << struct_size;
-    AddError(msg.str(), str->source());
+    AddError(msg.str(), str->source);
     return nullptr;
   }
   if (struct_align > std::numeric_limits<uint32_t>::max()) {
@@ -4313,7 +4304,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
   }
 
   auto* out = builder_->create<sem::Struct>(
-      str, str->name(), sem_members, static_cast<uint32_t>(struct_align),
+      str, str->name, sem_members, static_cast<uint32_t>(struct_align),
       static_cast<uint32_t>(struct_size),
       static_cast<uint32_t>(size_no_padding));
 
@@ -4321,7 +4312,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     auto* mem_type = sem_members[i]->Type();
     if (mem_type->Is<sem::Atomic>()) {
       atomic_composite_info_.emplace(out,
-                                     sem_members[i]->Declaration()->source());
+                                     sem_members[i]->Declaration()->source);
       break;
     } else {
       auto found = atomic_composite_info_.find(mem_type);
@@ -4342,8 +4333,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
   auto* func_type = current_function_->return_type;
 
-  auto* ret_type = ret->has_value() ? TypeOf(ret->value())->UnwrapRef()
-                                    : builder_->create<sem::Void>();
+  auto* ret_type = ret->value ? TypeOf(ret->value)->UnwrapRef()
+                              : builder_->create<sem::Void>();
 
   if (func_type->UnwrapRef() != ret_type) {
     AddError(
@@ -4351,7 +4342,7 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
         "return type, returned '" +
             ret_type->FriendlyName(builder_->Symbols()) + "', expected '" +
             current_function_->return_type_name + "'",
-        ret->source());
+        ret->source);
     return false;
   }
 
@@ -4359,9 +4350,9 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
   if (auto* continuing =
           sem->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
     AddError("continuing blocks must not contain a return statement",
-             ret->source());
+             ret->source);
     if (continuing != sem->Parent()) {
-      AddNote("see continuing block here", continuing->Declaration()->source());
+      AddNote("see continuing block here", continuing->Declaration()->source);
     }
     return false;
   }
@@ -4372,7 +4363,7 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
 bool Resolver::Return(ast::ReturnStatement* ret) {
   current_function_->return_statements.push_back(ret);
 
-  if (auto* value = ret->value()) {
+  if (auto* value = ret->value) {
     Mark(value);
     if (!Expression(value)) {
       return false;
@@ -4385,66 +4376,66 @@ bool Resolver::Return(ast::ReturnStatement* ret) {
 }
 
 bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
-  auto* cond_type = TypeOf(s->condition())->UnwrapRef();
+  auto* cond_type = TypeOf(s->condition)->UnwrapRef();
   if (!cond_type->is_integer_scalar()) {
     AddError(
         "switch statement selector expression must be of a "
         "scalar integer type",
-        s->condition()->source());
+        s->condition->source);
     return false;
   }
 
   bool has_default = false;
   std::unordered_map<uint32_t, Source> selectors;
 
-  for (auto* case_stmt : s->body()) {
+  for (auto* case_stmt : s->body) {
     if (case_stmt->IsDefault()) {
       if (has_default) {
         // More than one default clause
         AddError("switch statement must have exactly one default clause",
-                 case_stmt->source());
+                 case_stmt->source);
         return false;
       }
       has_default = true;
     }
 
-    for (auto* selector : case_stmt->selectors()) {
+    for (auto* selector : case_stmt->selectors) {
       if (cond_type != TypeOf(selector)) {
         AddError(
             "the case selector values must have the same "
             "type as the selector expression.",
-            case_stmt->source());
+            case_stmt->source);
         return false;
       }
 
-      auto v = selector->value_as_u32();
+      auto v = selector->ValueAsU32();
       auto it = selectors.find(v);
       if (it != selectors.end()) {
         auto val = selector->Is<ast::IntLiteral>()
-                       ? std::to_string(selector->value_as_i32())
-                       : std::to_string(selector->value_as_u32());
-        AddError("duplicate switch case '" + val + "'", selector->source());
+                       ? std::to_string(selector->ValueAsI32())
+                       : std::to_string(selector->ValueAsU32());
+        AddError("duplicate switch case '" + val + "'", selector->source);
         AddNote("previous case declared here", it->second);
         return false;
       }
-      selectors.emplace(v, selector->source());
+      selectors.emplace(v, selector->source);
     }
   }
 
   if (!has_default) {
     // No default clause
-    AddError("switch statement must have a default clause", s->source());
+    AddError("switch statement must have a default clause", s->source);
     return false;
   }
 
-  if (!s->body().empty()) {
-    auto* last_clause = s->body().back()->As<ast::CaseStatement>();
-    auto* last_stmt = last_clause->body()->last();
+  if (!s->body.empty()) {
+    auto* last_clause = s->body.back()->As<ast::CaseStatement>();
+    auto* last_stmt = last_clause->body->Last();
     if (last_stmt && last_stmt->Is<ast::FallthroughStatement>()) {
       AddError(
           "a fallthrough statement must not appear as "
           "the last statement in last clause of a switch",
-          last_stmt->source());
+          last_stmt->source);
       return false;
     }
   }
@@ -4457,11 +4448,11 @@ bool Resolver::SwitchStatement(ast::SwitchStatement* stmt) {
       builder_->create<sem::SwitchStatement>(stmt, current_compound_statement_);
   builder_->Sem().Add(stmt, sem);
   return Scope(sem, [&] {
-    Mark(stmt->condition());
-    if (!Expression(stmt->condition())) {
+    Mark(stmt->condition);
+    if (!Expression(stmt->condition)) {
       return false;
     }
-    for (auto* case_stmt : stmt->body()) {
+    for (auto* case_stmt : stmt->body) {
       Mark(case_stmt);
       if (!CaseStatement(case_stmt)) {
         return false;
@@ -4475,10 +4466,10 @@ bool Resolver::SwitchStatement(ast::SwitchStatement* stmt) {
 }
 
 bool Resolver::Assignment(ast::AssignmentStatement* a) {
-  Mark(a->lhs());
-  Mark(a->rhs());
+  Mark(a->lhs);
+  Mark(a->rhs);
 
-  if (!Expression(a->lhs()) || !Expression(a->rhs())) {
+  if (!Expression(a->lhs) || !Expression(a->rhs)) {
     return false;
   }
   return ValidateAssignment(a);
@@ -4486,24 +4477,24 @@ bool Resolver::Assignment(ast::AssignmentStatement* a) {
 
 bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
-  auto const* lhs_type = TypeOf(a->lhs());
-  auto const* rhs_type = TypeOf(a->rhs());
+  auto const* lhs_type = TypeOf(a->lhs);
+  auto const* rhs_type = TypeOf(a->rhs);
 
-  if (auto* ident = a->lhs()->As<ast::IdentifierExpression>()) {
+  if (auto* ident = a->lhs->As<ast::IdentifierExpression>()) {
     VariableInfo* var;
-    if (variable_stack_.get(ident->symbol(), &var)) {
+    if (variable_stack_.get(ident->symbol, &var)) {
       if (var->kind == VariableKind::kParameter) {
-        AddError("cannot assign to function parameter", a->lhs()->source());
-        AddNote("'" + builder_->Symbols().NameFor(ident->symbol()) +
+        AddError("cannot assign to function parameter", a->lhs->source);
+        AddNote("'" + builder_->Symbols().NameFor(ident->symbol) +
                     "' is declared here:",
-                var->declaration->source());
+                var->declaration->source);
         return false;
       }
-      if (var->declaration->is_const()) {
-        AddError("cannot assign to const", a->lhs()->source());
-        AddNote("'" + builder_->Symbols().NameFor(ident->symbol()) +
+      if (var->declaration->is_const) {
+        AddError("cannot assign to const", a->lhs->source);
+        AddNote("'" + builder_->Symbols().NameFor(ident->symbol) +
                     "' is declared here:",
-                var->declaration->source());
+                var->declaration->source);
         return false;
       }
     }
@@ -4512,8 +4503,8 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   auto* lhs_ref = lhs_type->As<sem::Reference>();
   if (!lhs_ref) {
     // LHS is not a reference, so it has no storage.
-    AddError("cannot assign to value of type '" + TypeNameOf(a->lhs()) + "'",
-             a->lhs()->source());
+    AddError("cannot assign to value of type '" + TypeNameOf(a->lhs) + "'",
+             a->lhs->source);
     return false;
   }
 
@@ -4522,19 +4513,18 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
 
   // Value type has to match storage type
   if (storage_type != value_type) {
-    AddError("cannot assign '" + TypeNameOf(a->rhs()) + "' to '" +
-                 TypeNameOf(a->lhs()) + "'",
-             a->source());
+    AddError("cannot assign '" + TypeNameOf(a->rhs) + "' to '" +
+                 TypeNameOf(a->lhs) + "'",
+             a->source);
     return false;
   }
   if (!storage_type->IsConstructible()) {
-    AddError("storage type of assignment must be constructible", a->source());
+    AddError("storage type of assignment must be constructible", a->source);
     return false;
   }
   if (lhs_ref->Access() == ast::Access::kRead) {
-    AddError(
-        "cannot store into a read-only type '" + TypeNameOf(a->lhs()) + "'",
-        a->source());
+    AddError("cannot store into a read-only type '" + TypeNameOf(a->lhs) + "'",
+             a->source);
     return false;
   }
   return true;
@@ -4550,7 +4540,7 @@ bool Resolver::ValidateNoDuplicateDefinition(Symbol sym,
       if (is_global) {
         AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
                  source);
-        AddNote("previous definition is here", var->declaration->source());
+        AddNote("previous definition is here", var->declaration->source);
         return false;
       }
     }
@@ -4558,7 +4548,7 @@ bool Resolver::ValidateNoDuplicateDefinition(Symbol sym,
     if (it != symbol_to_function_.end()) {
       AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
                source);
-      AddNote("previous definition is here", it->second->declaration->source());
+      AddNote("previous definition is here", it->second->declaration->source);
       return false;
     }
   } else {
@@ -4566,7 +4556,7 @@ bool Resolver::ValidateNoDuplicateDefinition(Symbol sym,
     if (variable_stack_.get(sym, &var)) {
       AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
                source);
-      AddNote("previous definition is here", var->declaration->source());
+      AddNote("previous definition is here", var->declaration->source);
       return false;
     }
   }
@@ -4577,9 +4567,9 @@ bool Resolver::ValidateNoDuplicateDecorations(
     const ast::DecorationList& decorations) {
   std::unordered_map<const TypeInfo*, Source> seen;
   for (auto* d : decorations) {
-    auto res = seen.emplace(&d->TypeInfo(), d->source());
+    auto res = seen.emplace(&d->TypeInfo(), d->source);
     if (!res.second && !d->Is<ast::InternalDecoration>()) {
-      AddError("duplicate " + d->name() + " decoration", d->source());
+      AddError("duplicate " + d->Name() + " decoration", d->source);
       AddNote("first decoration declared here", res.first->second);
       return false;
     }
@@ -4604,8 +4594,8 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
         std::stringstream err;
         err << "while analysing structure member "
             << str->FriendlyName(builder_->Symbols()) << "."
-            << builder_->Symbols().NameFor(member->Declaration()->symbol());
-        AddNote(err.str(), member->Declaration()->source());
+            << builder_->Symbols().NameFor(member->Declaration()->symbol);
+        AddNote(err.str(), member->Declaration()->source);
         return false;
       }
     }
@@ -4665,7 +4655,7 @@ void Resolver::Mark(const ast::Node* node) {
   TINT_ICE(Resolver, diagnostics_)
       << "AST node '" << node->TypeInfo().name
       << "' was encountered twice in the same AST of a Program\n"
-      << "At: " << node->source() << "\n"
+      << "At: " << node->source << "\n"
       << "Pointer: " << node;
 }
 

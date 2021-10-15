@@ -65,9 +65,9 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
       auto* func = ctx.src->Sem().Get(func_ast);
       std::unordered_map<sem::BindingPoint, int> binding_point_counts;
       for (auto* var : func->ReferencedModuleVariables()) {
-        if (auto binding_point = var->Declaration()->binding_point()) {
-          BindingPoint from{binding_point.group->value(),
-                            binding_point.binding->value()};
+        if (auto binding_point = var->Declaration()->BindingPoint()) {
+          BindingPoint from{binding_point.group->value,
+                            binding_point.binding->value};
           auto bp_it = remappings->binding_points.find(from);
           if (bp_it != remappings->binding_points.end()) {
             // Remapped
@@ -87,17 +87,17 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
   }
 
   for (auto* var : ctx.src->AST().GlobalVariables()) {
-    if (auto binding_point = var->binding_point()) {
+    if (auto binding_point = var->BindingPoint()) {
       // The original binding point
-      BindingPoint from{binding_point.group->value(),
-                        binding_point.binding->value()};
+      BindingPoint from{binding_point.group->value,
+                        binding_point.binding->value};
 
       // The binding point after remapping
       BindingPoint bp = from;
 
       // Replace any group or binding decorations.
       // Note: This has to be performed *before* remapping access controls, as
-      // `ctx.Clone(var->decorations())` depend on these replacements.
+      // `ctx.Clone(var->decorations)` depend on these replacements.
       auto bp_it = remappings->binding_points.find(from);
       if (bp_it != remappings->binding_points.end()) {
         BindingPoint to = bp_it->second;
@@ -125,15 +125,15 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
           ctx.dst->Diagnostics().add_error(
               diag::System::Transform,
               "cannot apply access control to variable with storage class " +
-                  std::string(ast::str(sem->StorageClass())));
+                  std::string(ast::ToString(sem->StorageClass())));
           return;
         }
         auto* ty = sem->Type()->UnwrapRef();
         ast::Type* inner_ty = CreateASTTypeFor(ctx, ty);
         auto* new_var = ctx.dst->create<ast::Variable>(
-            ctx.Clone(var->source()), ctx.Clone(var->symbol()),
-            var->declared_storage_class(), ac, inner_ty, var->is_const(),
-            ctx.Clone(var->constructor()), ctx.Clone(var->decorations()));
+            ctx.Clone(var->source), ctx.Clone(var->symbol),
+            var->declared_storage_class, ac, inner_ty, var->is_const,
+            ctx.Clone(var->constructor), ctx.Clone(var->decorations));
         ctx.Replace(var, new_var);
       }
 
@@ -142,7 +142,7 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
         auto* decoration =
             ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
                 ctx.dst->ID(), ast::DisabledValidation::kBindingPointCollision);
-        ctx.InsertBefore(var->decorations(), *var->decorations().begin(),
+        ctx.InsertBefore(var->decorations, *var->decorations.begin(),
                          decoration);
       }
     }

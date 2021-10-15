@@ -965,13 +965,13 @@ class ProgramBuilder {
   /// @return an ast::IdentifierExpression with the variable's symbol
   ast::IdentifierExpression* Expr(const Source& source,
                                   ast::Variable* variable) {
-    return create<ast::IdentifierExpression>(source, variable->symbol());
+    return create<ast::IdentifierExpression>(source, variable->symbol);
   }
 
   /// @param variable the AST variable
   /// @return an ast::IdentifierExpression with the variable's symbol
   ast::IdentifierExpression* Expr(ast::Variable* variable) {
-    return create<ast::IdentifierExpression>(variable->symbol());
+    return create<ast::IdentifierExpression>(variable->symbol);
   }
 
   /// @param source the source information

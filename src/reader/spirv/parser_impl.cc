@@ -1200,7 +1200,7 @@ const Type* ParserImpl::ConvertType(
   auto* ast_struct = create<ast::Struct>(Source{}, sym, std::move(ast_members),
                                          std::move(ast_struct_decorations));
   if (num_non_writable_members == members.size()) {
-    read_only_struct_types_.insert(ast_struct->name());
+    read_only_struct_types_.insert(ast_struct->name);
   }
   AddTypeDecl(sym, ast_struct);
   const auto* result = ty_.Struct(sym, std::move(ast_member_types));

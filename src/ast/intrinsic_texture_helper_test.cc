@@ -134,7 +134,7 @@ std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
   return out;
 }
 
-ast::Type* TextureOverloadCase::buildResultVectorComponentType(
+ast::Type* TextureOverloadCase::BuildResultVectorComponentType(
     ProgramBuilder* b) const {
   switch (texture_data_type) {
     case ast::intrinsic::test::TextureDataType::kF32:
@@ -149,7 +149,7 @@ ast::Type* TextureOverloadCase::buildResultVectorComponentType(
   return {};
 }
 
-ast::Variable* TextureOverloadCase::buildTextureVariable(
+ast::Variable* TextureOverloadCase::BuildTextureVariable(
     ProgramBuilder* b) const {
   DecorationList decos = {
       b->create<ast::GroupDecoration>(0),
@@ -159,7 +159,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
     case ast::intrinsic::test::TextureKind::kRegular:
       return b->Global("texture",
                        b->ty.sampled_texture(texture_dimension,
-                                             buildResultVectorComponentType(b)),
+                                             BuildResultVectorComponentType(b)),
                        decos);
 
     case ast::intrinsic::test::TextureKind::kDepth:
@@ -175,7 +175,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
       return b->Global(
           "texture",
           b->ty.multisampled_texture(texture_dimension,
-                                     buildResultVectorComponentType(b)),
+                                     BuildResultVectorComponentType(b)),
           decos);
 
     case ast::intrinsic::test::TextureKind::kStorage: {
@@ -188,7 +188,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
   return nullptr;
 }
 
-ast::Variable* TextureOverloadCase::buildSamplerVariable(
+ast::Variable* TextureOverloadCase::BuildSamplerVariable(
     ProgramBuilder* b) const {
   DecorationList decos = {
       b->create<ast::GroupDecoration>(0),

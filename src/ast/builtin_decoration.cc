@@ -23,21 +23,21 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BuiltinDecoration);
 namespace tint {
 namespace ast {
 
-BuiltinDecoration::BuiltinDecoration(ProgramID program_id,
-                                     const Source& source,
-                                     Builtin builtin)
-    : Base(program_id, source), builtin_(builtin) {}
+BuiltinDecoration::BuiltinDecoration(ProgramID pid,
+                                     const Source& src,
+                                     Builtin b)
+    : Base(pid, src), builtin(b) {}
 
 BuiltinDecoration::~BuiltinDecoration() = default;
 
-std::string BuiltinDecoration::name() const {
+std::string BuiltinDecoration::Name() const {
   return "builtin";
 }
 
 BuiltinDecoration* BuiltinDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<BuiltinDecoration>(src, builtin_);
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<BuiltinDecoration>(src, builtin);
 }
 
 }  // namespace ast

@@ -31,7 +31,7 @@ TEST_F(AstDepthTextureTest, IsTexture) {
 
 TEST_F(AstDepthTextureTest, Dim) {
   auto* d = create<DepthTexture>(TextureDimension::kCube);
-  EXPECT_EQ(d->dim(), TextureDimension::kCube);
+  EXPECT_EQ(d->dim, TextureDimension::kCube);
 }
 
 TEST_F(AstDepthTextureTest, FriendlyName) {

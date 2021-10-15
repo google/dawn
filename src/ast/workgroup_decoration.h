@@ -30,13 +30,13 @@ class Expression;
 class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
  public:
   /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param x the workgroup x dimension expression
   /// @param y the optional workgroup y dimension expression
   /// @param z the optional workgroup z dimension expression
-  WorkgroupDecoration(ProgramID program_id,
-                      const Source& source,
+  WorkgroupDecoration(ProgramID pid,
+                      const Source& src,
                       ast::Expression* x,
                       ast::Expression* y = nullptr,
                       ast::Expression* z = nullptr);
@@ -44,10 +44,10 @@ class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
   ~WorkgroupDecoration() override;
 
   /// @returns the workgroup dimensions
-  std::array<ast::Expression*, 3> values() const { return {x_, y_, z_}; }
+  std::array<ast::Expression*, 3> Values() const { return {x, y, z}; }
 
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -55,10 +55,12 @@ class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
   /// @return the newly cloned node
   WorkgroupDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  ast::Expression* const x_ = nullptr;
-  ast::Expression* const y_ = nullptr;
-  ast::Expression* const z_ = nullptr;
+  /// The workgroup x dimension.
+  ast::Expression* const x;
+  /// The optional workgroup y dimension. May be null.
+  ast::Expression* const y = nullptr;
+  /// The optional workgroup z dimension. May be null.
+  ast::Expression* const z = nullptr;
 };
 
 }  // namespace ast

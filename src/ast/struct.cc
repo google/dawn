@@ -24,19 +24,17 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Struct);
 namespace tint {
 namespace ast {
 
-Struct::Struct(ProgramID program_id,
-               const Source& source,
-               Symbol name,
-               StructMemberList members,
-               DecorationList decorations)
-    : Base(program_id, source, name),
-      members_(std::move(members)),
-      decorations_(std::move(decorations)) {
-  for (auto* mem : members_) {
+Struct::Struct(ProgramID pid,
+               const Source& src,
+               Symbol n,
+               StructMemberList m,
+               DecorationList decos)
+    : Base(pid, src, n), members(std::move(m)), decorations(std::move(decos)) {
+  for (auto* mem : members) {
     TINT_ASSERT(AST, mem);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, mem, program_id);
   }
-  for (auto* deco : decorations_) {
+  for (auto* deco : decorations) {
     TINT_ASSERT(AST, deco);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
   }
@@ -46,25 +44,16 @@ Struct::Struct(Struct&&) = default;
 
 Struct::~Struct() = default;
 
-StructMember* Struct::get_member(const Symbol& symbol) const {
-  for (auto* mem : members_) {
-    if (mem->symbol() == symbol) {
-      return mem;
-    }
-  }
-  return nullptr;
-}
-
 bool Struct::IsBlockDecorated() const {
-  return HasDecoration<StructBlockDecoration>(decorations_);
+  return HasDecoration<StructBlockDecoration>(decorations);
 }
 
 Struct* Struct::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto n = ctx->Clone(name());
-  auto mem = ctx->Clone(members());
-  auto decos = ctx->Clone(decorations());
+  auto src = ctx->Clone(source);
+  auto n = ctx->Clone(name);
+  auto mem = ctx->Clone(members);
+  auto decos = ctx->Clone(decorations);
   return ctx->dst->create<Struct>(src, n, mem, decos);
 }
 

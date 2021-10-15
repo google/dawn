@@ -37,22 +37,20 @@ class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
   AssignmentStatement(AssignmentStatement&&);
   ~AssignmentStatement() override;
 
-  /// @returns the left side expression
-  Expression* lhs() const { return lhs_; }
-  /// @returns the right side expression
-  Expression* rhs() const { return rhs_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   AssignmentStatement* Clone(CloneContext* ctx) const override;
 
+  /// left side expression
+  Expression* const lhs;
+
+  /// right side expression
+  Expression* const rhs;
+
  private:
   AssignmentStatement(const AssignmentStatement&) = delete;
-
-  Expression* const lhs_;
-  Expression* const rhs_;
 };
 
 }  // namespace ast

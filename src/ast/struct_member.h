@@ -30,13 +30,13 @@ class Type;
 class StructMember : public Castable<StructMember, Node> {
  public:
   /// Create a new struct member statement
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source The input source for the struct member statement
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node for the struct member statement
   /// @param sym The struct member symbol
   /// @param type The struct member type
   /// @param decorations The struct member decorations
-  StructMember(ProgramID program_id,
-               const Source& source,
+  StructMember(ProgramID pid,
+               const Source& src,
                const Symbol& sym,
                ast::Type* type,
                DecorationList decorations);
@@ -45,32 +45,23 @@ class StructMember : public Castable<StructMember, Node> {
 
   ~StructMember() override;
 
-  /// @returns the symbol
-  const Symbol& symbol() const { return symbol_; }
-
-  /// @returns the type
-  ast::Type* type() const { return type_; }
-
-  /// @returns the decorations
-  const DecorationList& decorations() const { return decorations_; }
-
-  /// @returns true if the struct member has an offset decoration
-  bool has_offset_decoration() const;
-  /// @returns the offset decoration value.
-  uint32_t offset() const;
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   StructMember* Clone(CloneContext* ctx) const override;
 
+  /// The symbol
+  Symbol const symbol;
+
+  /// The type
+  ast::Type* const type;
+
+  /// The decorations
+  DecorationList const decorations;
+
  private:
   StructMember(const StructMember&) = delete;
-
-  Symbol const symbol_;
-  ast::Type* const type_;
-  DecorationList const decorations_;
 };
 
 /// A list of struct members

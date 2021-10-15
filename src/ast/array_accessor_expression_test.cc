@@ -26,8 +26,8 @@ TEST_F(ArrayAccessorExpressionTest, Create) {
   auto* idx = Expr("idx");
 
   auto* exp = create<ArrayAccessorExpression>(ary, idx);
-  ASSERT_EQ(exp->array(), ary);
-  ASSERT_EQ(exp->idx_expr(), idx);
+  ASSERT_EQ(exp->array, ary);
+  ASSERT_EQ(exp->index, idx);
 }
 
 TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
@@ -36,7 +36,7 @@ TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
 
   auto* exp = create<ArrayAccessorExpression>(Source{Source::Location{20, 2}},
                                               ary, idx);
-  auto src = exp->source();
+  auto src = exp->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }

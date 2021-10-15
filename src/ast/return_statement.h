@@ -25,25 +25,18 @@ namespace ast {
 class ReturnStatement : public Castable<ReturnStatement, Statement> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source information
-  ReturnStatement(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  ReturnStatement(ProgramID pid, const Source& src);
 
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the return statement source
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param value the return value
-  ReturnStatement(ProgramID program_id,
-                  const Source& source,
-                  Expression* value);
+  ReturnStatement(ProgramID pid, const Source& src, Expression* value);
   /// Move constructor
   ReturnStatement(ReturnStatement&&);
   ~ReturnStatement() override;
-
-  /// @returns the value
-  Expression* value() const { return value_; }
-  /// @returns true if the return has a value
-  bool has_value() const { return value_ != nullptr; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -51,10 +44,11 @@ class ReturnStatement : public Castable<ReturnStatement, Statement> {
   /// @return the newly cloned node
   ReturnStatement* Clone(CloneContext* ctx) const override;
 
+  /// The value returned. May be null.
+  Expression* const value;
+
  private:
   ReturnStatement(const ReturnStatement&) = delete;
-
-  Expression* const value_;
 };
 
 }  // namespace ast

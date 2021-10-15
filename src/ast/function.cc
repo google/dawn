@@ -23,33 +23,33 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Function);
 namespace tint {
 namespace ast {
 
-Function::Function(ProgramID program_id,
-                   const Source& source,
-                   Symbol symbol,
-                   VariableList params,
-                   ast::Type* return_type,
-                   BlockStatement* body,
-                   DecorationList decorations,
-                   DecorationList return_type_decorations)
-    : Base(program_id, source),
-      symbol_(symbol),
-      params_(std::move(params)),
-      return_type_(return_type),
-      body_(body),
-      decorations_(std::move(decorations)),
-      return_type_decorations_(std::move(return_type_decorations)) {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol_, program_id);
+Function::Function(ProgramID pid,
+                   const Source& src,
+                   Symbol sym,
+                   VariableList parameters,
+                   ast::Type* return_ty,
+                   BlockStatement* b,
+                   DecorationList decos,
+                   DecorationList return_type_decos)
+    : Base(pid, src),
+      symbol(sym),
+      params(std::move(parameters)),
+      return_type(return_ty),
+      body(b),
+      decorations(std::move(decos)),
+      return_type_decorations(std::move(return_type_decos)) {
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
-  for (auto* param : params_) {
-    TINT_ASSERT(AST, param && param->is_const());
+  for (auto* param : params) {
+    TINT_ASSERT(AST, param && param->is_const);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, param, program_id);
   }
-  TINT_ASSERT(AST, symbol_.IsValid());
-  TINT_ASSERT(AST, return_type_);
-  for (auto* deco : decorations_) {
+  TINT_ASSERT(AST, symbol.IsValid());
+  TINT_ASSERT(AST, return_type);
+  for (auto* deco : decorations) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
   }
-  for (auto* deco : return_type_decorations_) {
+  for (auto* deco : return_type_decorations) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
   }
 }
@@ -58,32 +58,28 @@ Function::Function(Function&&) = default;
 
 Function::~Function() = default;
 
-PipelineStage Function::pipeline_stage() const {
-  if (auto* stage = GetDecoration<StageDecoration>(decorations_)) {
-    return stage->value();
+PipelineStage Function::PipelineStage() const {
+  if (auto* stage = GetDecoration<StageDecoration>(decorations)) {
+    return stage->stage;
   }
   return PipelineStage::kNone;
 }
 
-const Statement* Function::get_last_statement() const {
-  return body_->last();
-}
-
 Function* Function::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto sym = ctx->Clone(symbol());
-  auto p = ctx->Clone(params_);
-  auto* ret = ctx->Clone(return_type_);
-  auto* b = ctx->Clone(body_);
-  auto decos = ctx->Clone(decorations_);
-  auto ret_decos = ctx->Clone(return_type_decorations_);
+  auto src = ctx->Clone(source);
+  auto sym = ctx->Clone(symbol);
+  auto p = ctx->Clone(params);
+  auto* ret = ctx->Clone(return_type);
+  auto* b = ctx->Clone(body);
+  auto decos = ctx->Clone(decorations);
+  auto ret_decos = ctx->Clone(return_type_decorations);
   return ctx->dst->create<Function>(src, sym, p, ret, b, decos, ret_decos);
 }
 
 Function* FunctionList::Find(Symbol sym) const {
   for (auto* func : *this) {
-    if (func->symbol() == sym) {
+    if (func->symbol == sym) {
       return func;
     }
   }
@@ -92,7 +88,7 @@ Function* FunctionList::Find(Symbol sym) const {
 
 Function* FunctionList::Find(Symbol sym, PipelineStage stage) const {
   for (auto* func : *this) {
-    if (func->symbol() == sym && func->pipeline_stage() == stage) {
+    if (func->symbol == sym && func->PipelineStage() == stage) {
       return func;
     }
   }
@@ -101,7 +97,7 @@ Function* FunctionList::Find(Symbol sym, PipelineStage stage) const {
 
 bool FunctionList::HasStage(ast::PipelineStage stage) const {
   for (auto* func : *this) {
-    if (func->pipeline_stage() == stage) {
+    if (func->PipelineStage() == stage) {
       return true;
     }
   }

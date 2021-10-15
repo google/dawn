@@ -27,27 +27,17 @@ namespace ast {
 class ElseStatement : public Castable<ElseStatement, Statement> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source information
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param condition the else condition
   /// @param body the else body
-  ElseStatement(ProgramID program_id,
-                const Source& source,
+  ElseStatement(ProgramID pid,
+                const Source& src,
                 Expression* condition,
                 BlockStatement* body);
   /// Move constructor
   ElseStatement(ElseStatement&&);
   ~ElseStatement() override;
-
-  /// @returns the else condition or nullptr if none set
-  Expression* condition() const { return condition_; }
-  /// @returns true if the else has a condition
-  bool HasCondition() const { return condition_ != nullptr; }
-
-  /// @returns the else body
-  const BlockStatement* body() const { return body_; }
-  /// @returns the else body
-  BlockStatement* body() { return body_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -55,11 +45,14 @@ class ElseStatement : public Castable<ElseStatement, Statement> {
   /// @return the newly cloned node
   ElseStatement* Clone(CloneContext* ctx) const override;
 
+  /// The else condition or nullptr if none set
+  Expression* const condition;
+
+  /// The else body
+  BlockStatement* const body;
+
  private:
   ElseStatement(const ElseStatement&) = delete;
-
-  Expression* const condition_;
-  BlockStatement* const body_;
 };
 
 /// A list of else statements

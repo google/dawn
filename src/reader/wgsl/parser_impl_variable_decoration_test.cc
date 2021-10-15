@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, Decoration_Location) {
   ASSERT_TRUE(var_deco->Is<ast::LocationDecoration>());
 
   auto* loc = var_deco->As<ast::LocationDecoration>();
-  EXPECT_EQ(loc->value(), 4u);
+  EXPECT_EQ(loc->value, 4u);
 }
 
 TEST_F(ParserImplTest, Decoration_Location_MissingLeftParen) {
@@ -101,7 +101,7 @@ TEST_P(BuiltinTest, Decoration_Builtin) {
   ASSERT_TRUE(var_deco->Is<ast::BuiltinDecoration>());
 
   auto* builtin = var_deco->As<ast::BuiltinDecoration>();
-  EXPECT_EQ(builtin->value(), params.result);
+  EXPECT_EQ(builtin->builtin, params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
@@ -185,8 +185,8 @@ TEST_F(ParserImplTest, Decoration_Interpolate_Flat) {
   ASSERT_TRUE(var_deco->Is<ast::InterpolateDecoration>());
 
   auto* interp = var_deco->As<ast::InterpolateDecoration>();
-  EXPECT_EQ(interp->type(), ast::InterpolationType::kFlat);
-  EXPECT_EQ(interp->sampling(), ast::InterpolationSampling::kNone);
+  EXPECT_EQ(interp->type, ast::InterpolationType::kFlat);
+  EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kNone);
 }
 
 TEST_F(ParserImplTest, Decoration_Interpolate_Perspective_Center) {
@@ -201,8 +201,8 @@ TEST_F(ParserImplTest, Decoration_Interpolate_Perspective_Center) {
   ASSERT_TRUE(var_deco->Is<ast::InterpolateDecoration>());
 
   auto* interp = var_deco->As<ast::InterpolateDecoration>();
-  EXPECT_EQ(interp->type(), ast::InterpolationType::kPerspective);
-  EXPECT_EQ(interp->sampling(), ast::InterpolationSampling::kCenter);
+  EXPECT_EQ(interp->type, ast::InterpolationType::kPerspective);
+  EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kCenter);
 }
 
 TEST_F(ParserImplTest, Decoration_Interpolate_Perspective_Centroid) {
@@ -217,8 +217,8 @@ TEST_F(ParserImplTest, Decoration_Interpolate_Perspective_Centroid) {
   ASSERT_TRUE(var_deco->Is<ast::InterpolateDecoration>());
 
   auto* interp = var_deco->As<ast::InterpolateDecoration>();
-  EXPECT_EQ(interp->type(), ast::InterpolationType::kPerspective);
-  EXPECT_EQ(interp->sampling(), ast::InterpolationSampling::kCentroid);
+  EXPECT_EQ(interp->type, ast::InterpolationType::kPerspective);
+  EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kCentroid);
 }
 
 TEST_F(ParserImplTest, Decoration_Interpolate_Linear_Sample) {
@@ -233,8 +233,8 @@ TEST_F(ParserImplTest, Decoration_Interpolate_Linear_Sample) {
   ASSERT_TRUE(var_deco->Is<ast::InterpolateDecoration>());
 
   auto* interp = var_deco->As<ast::InterpolateDecoration>();
-  EXPECT_EQ(interp->type(), ast::InterpolationType::kLinear);
-  EXPECT_EQ(interp->sampling(), ast::InterpolationSampling::kSample);
+  EXPECT_EQ(interp->type, ast::InterpolationType::kLinear);
+  EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kSample);
 }
 
 TEST_F(ParserImplTest, Decoration_Interpolate_MissingLeftParen) {
@@ -309,7 +309,7 @@ TEST_F(ParserImplTest, Decoration_Binding) {
   ASSERT_TRUE(var_deco->Is<ast::BindingDecoration>());
 
   auto* binding = var_deco->As<ast::BindingDecoration>();
-  EXPECT_EQ(binding->value(), 4u);
+  EXPECT_EQ(binding->value, 4u);
 }
 
 TEST_F(ParserImplTest, Decoration_Binding_MissingLeftParen) {
@@ -366,7 +366,7 @@ TEST_F(ParserImplTest, Decoration_group) {
   ASSERT_TRUE(var_deco->Is<ast::GroupDecoration>());
 
   auto* group = var_deco->As<ast::GroupDecoration>();
-  EXPECT_EQ(group->value(), 4u);
+  EXPECT_EQ(group->value, 4u);
 }
 
 TEST_F(ParserImplTest, Decoration_Group_MissingLeftParen) {

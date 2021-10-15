@@ -38,13 +38,13 @@ TEST_F(AstStructTest, Creation) {
   auto name = Sym("s");
   auto* s = create<Struct>(name, StructMemberList{Member("a", ty.i32())},
                            DecorationList{});
-  EXPECT_EQ(s->name(), name);
-  EXPECT_EQ(s->members().size(), 1u);
-  EXPECT_TRUE(s->decorations().empty());
-  EXPECT_EQ(s->source().range.begin.line, 0u);
-  EXPECT_EQ(s->source().range.begin.column, 0u);
-  EXPECT_EQ(s->source().range.end.line, 0u);
-  EXPECT_EQ(s->source().range.end.column, 0u);
+  EXPECT_EQ(s->name, name);
+  EXPECT_EQ(s->members.size(), 1u);
+  EXPECT_TRUE(s->decorations.empty());
+  EXPECT_EQ(s->source.range.begin.line, 0u);
+  EXPECT_EQ(s->source.range.begin.column, 0u);
+  EXPECT_EQ(s->source.range.end.line, 0u);
+  EXPECT_EQ(s->source.range.end.column, 0u);
 }
 
 TEST_F(AstStructTest, Creation_WithDecorations) {
@@ -54,14 +54,14 @@ TEST_F(AstStructTest, Creation_WithDecorations) {
 
   auto* s =
       create<Struct>(name, StructMemberList{Member("a", ty.i32())}, decos);
-  EXPECT_EQ(s->name(), name);
-  EXPECT_EQ(s->members().size(), 1u);
-  ASSERT_EQ(s->decorations().size(), 1u);
-  EXPECT_TRUE(s->decorations()[0]->Is<StructBlockDecoration>());
-  EXPECT_EQ(s->source().range.begin.line, 0u);
-  EXPECT_EQ(s->source().range.begin.column, 0u);
-  EXPECT_EQ(s->source().range.end.line, 0u);
-  EXPECT_EQ(s->source().range.end.column, 0u);
+  EXPECT_EQ(s->name, name);
+  EXPECT_EQ(s->members.size(), 1u);
+  ASSERT_EQ(s->decorations.size(), 1u);
+  EXPECT_TRUE(s->decorations[0]->Is<StructBlockDecoration>());
+  EXPECT_EQ(s->source.range.begin.line, 0u);
+  EXPECT_EQ(s->source.range.begin.column, 0u);
+  EXPECT_EQ(s->source.range.end.line, 0u);
+  EXPECT_EQ(s->source.range.end.column, 0u);
 }
 
 TEST_F(AstStructTest, CreationWithSourceAndDecorations) {
@@ -70,14 +70,14 @@ TEST_F(AstStructTest, CreationWithSourceAndDecorations) {
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
       name, StructMemberList{Member("a", ty.i32())},
       DecorationList{create<StructBlockDecoration>()});
-  EXPECT_EQ(s->name(), name);
-  EXPECT_EQ(s->members().size(), 1u);
-  ASSERT_EQ(s->decorations().size(), 1u);
-  EXPECT_TRUE(s->decorations()[0]->Is<StructBlockDecoration>());
-  EXPECT_EQ(s->source().range.begin.line, 27u);
-  EXPECT_EQ(s->source().range.begin.column, 4u);
-  EXPECT_EQ(s->source().range.end.line, 27u);
-  EXPECT_EQ(s->source().range.end.column, 8u);
+  EXPECT_EQ(s->name, name);
+  EXPECT_EQ(s->members.size(), 1u);
+  ASSERT_EQ(s->decorations.size(), 1u);
+  EXPECT_TRUE(s->decorations[0]->Is<StructBlockDecoration>());
+  EXPECT_EQ(s->source.range.begin.line, 27u);
+  EXPECT_EQ(s->source.range.begin.column, 4u);
+  EXPECT_EQ(s->source.range.end.line, 27u);
+  EXPECT_EQ(s->source.range.end.column, 8u);
 }
 
 TEST_F(AstStructTest, Assert_Null_StructMember) {

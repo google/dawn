@@ -26,16 +26,13 @@ namespace ast {
 class Atomic : public Castable<Atomic, Type> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param subtype the pointee type
-  Atomic(ProgramID program_id, const Source& source, Type* const subtype);
+  Atomic(ProgramID pid, const Source& src, Type* const subtype);
   /// Move constructor
   Atomic(Atomic&&);
   ~Atomic() override;
-
-  /// @returns the pointee type
-  Type* type() const { return const_cast<Type*>(subtype_); }
 
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
@@ -47,8 +44,8 @@ class Atomic : public Castable<Atomic, Type> {
   /// @return the newly cloned type
   Atomic* Clone(CloneContext* ctx) const override;
 
- private:
-  Type const* const subtype_;
+  /// the pointee type
+  Type const* const type;
 };
 
 }  // namespace ast

@@ -23,22 +23,22 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::InterpolateDecoration);
 namespace tint {
 namespace ast {
 
-InterpolateDecoration::InterpolateDecoration(ProgramID program_id,
-                                             const Source& source,
-                                             InterpolationType type,
-                                             InterpolationSampling sampling)
-    : Base(program_id, source), type_(type), sampling_(sampling) {}
+InterpolateDecoration::InterpolateDecoration(ProgramID pid,
+                                             const Source& src,
+                                             InterpolationType ty,
+                                             InterpolationSampling smpl)
+    : Base(pid, src), type(ty), sampling(smpl) {}
 
 InterpolateDecoration::~InterpolateDecoration() = default;
 
-std::string InterpolateDecoration::name() const {
+std::string InterpolateDecoration::Name() const {
   return "interpolate";
 }
 
 InterpolateDecoration* InterpolateDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<InterpolateDecoration>(src, type_, sampling_);
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<InterpolateDecoration>(src, type, sampling);
 }
 
 std::ostream& operator<<(std::ostream& out, InterpolationType type) {

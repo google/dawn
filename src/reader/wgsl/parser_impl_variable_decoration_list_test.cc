@@ -33,9 +33,9 @@ TEST_F(ParserImplTest, DecorationList_Parses) {
   ASSERT_NE(deco_1, nullptr);
 
   ASSERT_TRUE(deco_0->Is<ast::LocationDecoration>());
-  EXPECT_EQ(deco_0->As<ast::LocationDecoration>()->value(), 4u);
+  EXPECT_EQ(deco_0->As<ast::LocationDecoration>()->value, 4u);
   ASSERT_TRUE(deco_1->Is<ast::BuiltinDecoration>());
-  EXPECT_EQ(deco_1->As<ast::BuiltinDecoration>()->value(),
+  EXPECT_EQ(deco_1->As<ast::BuiltinDecoration>()->builtin,
             ast::Builtin::kPosition);
 }
 

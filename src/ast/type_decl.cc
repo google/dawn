@@ -21,8 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeDecl);
 namespace tint {
 namespace ast {
 
-TypeDecl::TypeDecl(ProgramID program_id, const Source& source, Symbol name)
-    : Base(program_id, source), name_(name) {
+TypeDecl::TypeDecl(ProgramID pid, const Source& src, Symbol n)
+    : Base(pid, src), name(n) {
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
 }
 

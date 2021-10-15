@@ -28,10 +28,10 @@ TEST_F(ParserImplTest, IfStmt) {
   ASSERT_NE(e.value, nullptr);
 
   ASSERT_TRUE(e->Is<ast::IfStatement>());
-  ASSERT_NE(e->condition(), nullptr);
-  ASSERT_TRUE(e->condition()->Is<ast::BinaryExpression>());
-  EXPECT_EQ(e->body()->size(), 2u);
-  EXPECT_EQ(e->else_statements().size(), 0u);
+  ASSERT_NE(e->condition, nullptr);
+  ASSERT_TRUE(e->condition->Is<ast::BinaryExpression>());
+  EXPECT_EQ(e->body->statements.size(), 2u);
+  EXPECT_EQ(e->else_statements.size(), 0u);
 }
 
 TEST_F(ParserImplTest, IfStmt_WithElse) {
@@ -43,18 +43,18 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
   ASSERT_NE(e.value, nullptr);
 
   ASSERT_TRUE(e->Is<ast::IfStatement>());
-  ASSERT_NE(e->condition(), nullptr);
-  ASSERT_TRUE(e->condition()->Is<ast::BinaryExpression>());
-  EXPECT_EQ(e->body()->size(), 2u);
+  ASSERT_NE(e->condition, nullptr);
+  ASSERT_TRUE(e->condition->Is<ast::BinaryExpression>());
+  EXPECT_EQ(e->body->statements.size(), 2u);
 
-  ASSERT_EQ(e->else_statements().size(), 2u);
-  ASSERT_NE(e->else_statements()[0]->condition(), nullptr);
+  ASSERT_EQ(e->else_statements.size(), 2u);
+  ASSERT_NE(e->else_statements[0]->condition, nullptr);
   ASSERT_TRUE(
-      e->else_statements()[0]->condition()->Is<ast::IdentifierExpression>());
-  EXPECT_EQ(e->else_statements()[0]->body()->size(), 1u);
+      e->else_statements[0]->condition->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(e->else_statements[0]->body->statements.size(), 1u);
 
-  ASSERT_EQ(e->else_statements()[1]->condition(), nullptr);
-  EXPECT_EQ(e->else_statements()[1]->body()->size(), 0u);
+  ASSERT_EQ(e->else_statements[1]->condition, nullptr);
+  EXPECT_EQ(e->else_statements[1]->body->statements.size(), 0u);
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidCondition) {

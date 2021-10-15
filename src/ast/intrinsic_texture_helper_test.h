@@ -205,15 +205,15 @@ struct TextureOverloadCase {
 
   /// @param builder the AST builder used for the test
   /// @returns the vector component type of the texture function return value
-  ast::Type* buildResultVectorComponentType(ProgramBuilder* builder) const;
+  ast::Type* BuildResultVectorComponentType(ProgramBuilder* builder) const;
   /// @param builder the AST builder used for the test
   /// @returns a variable holding the test texture, automatically registered as
   /// a global variable.
-  ast::Variable* buildTextureVariable(ProgramBuilder* builder) const;
+  ast::Variable* BuildTextureVariable(ProgramBuilder* builder) const;
   /// @param builder the AST builder used for the test
   /// @returns a Variable holding the test sampler, automatically registered as
   /// a global variable.
-  ast::Variable* buildSamplerVariable(ProgramBuilder* builder) const;
+  ast::Variable* BuildSamplerVariable(ProgramBuilder* builder) const;
 
   /// The enumerator for this overload
   ValidTextureOverload const overload;

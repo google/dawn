@@ -26,9 +26,9 @@ using AstPointerTest = TestHelper;
 TEST_F(AstPointerTest, Creation) {
   auto* i32 = create<I32>();
   auto* p = create<Pointer>(i32, ast::StorageClass::kStorage, Access::kRead);
-  EXPECT_EQ(p->type(), i32);
-  EXPECT_EQ(p->storage_class(), ast::StorageClass::kStorage);
-  EXPECT_EQ(p->access(), Access::kRead);
+  EXPECT_EQ(p->type, i32);
+  EXPECT_EQ(p->storage_class, ast::StorageClass::kStorage);
+  EXPECT_EQ(p->access, Access::kRead);
 }
 
 TEST_F(AstPointerTest, FriendlyName) {

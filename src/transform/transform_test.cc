@@ -62,9 +62,9 @@ TEST_F(CreateASTTypeForTest, Matrix) {
     return b.create<sem::Matrix>(column_type, 3u);
   });
   ASSERT_TRUE(mat->Is<ast::Matrix>());
-  ASSERT_TRUE(mat->As<ast::Matrix>()->type()->Is<ast::F32>());
-  ASSERT_EQ(mat->As<ast::Matrix>()->columns(), 3u);
-  ASSERT_EQ(mat->As<ast::Matrix>()->rows(), 2u);
+  ASSERT_TRUE(mat->As<ast::Matrix>()->type->Is<ast::F32>());
+  ASSERT_EQ(mat->As<ast::Matrix>()->columns, 3u);
+  ASSERT_EQ(mat->As<ast::Matrix>()->rows, 2u);
 }
 
 TEST_F(CreateASTTypeForTest, Vector) {
@@ -72,8 +72,8 @@ TEST_F(CreateASTTypeForTest, Vector) {
     return b.create<sem::Vector>(b.create<sem::F32>(), 2);
   });
   ASSERT_TRUE(vec->Is<ast::Vector>());
-  ASSERT_TRUE(vec->As<ast::Vector>()->type()->Is<ast::F32>());
-  ASSERT_EQ(vec->As<ast::Vector>()->size(), 2u);
+  ASSERT_TRUE(vec->As<ast::Vector>()->type->Is<ast::F32>());
+  ASSERT_EQ(vec->As<ast::Vector>()->width, 2u);
 }
 
 TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
@@ -81,15 +81,15 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
     return b.create<sem::Array>(b.create<sem::F32>(), 2, 4, 4, 32u, 32u);
   });
   ASSERT_TRUE(arr->Is<ast::Array>());
-  ASSERT_TRUE(arr->As<ast::Array>()->type()->Is<ast::F32>());
-  ASSERT_EQ(arr->As<ast::Array>()->decorations().size(), 0u);
+  ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());
+  ASSERT_EQ(arr->As<ast::Array>()->decorations.size(), 0u);
 
-  auto* size_expr =
-      arr->As<ast::Array>()->Size()->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(size_expr, nullptr);
-  auto* size = size_expr->literal()->As<ast::IntLiteral>();
+  auto* count_expr =
+      arr->As<ast::Array>()->count->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(count_expr, nullptr);
+  auto* size = count_expr->literal->As<ast::IntLiteral>();
   ASSERT_NE(size, nullptr);
-  EXPECT_EQ(size->value_as_i32(), 2);
+  EXPECT_EQ(size->ValueAsI32(), 2);
 }
 
 TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
@@ -97,35 +97,34 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
     return b.create<sem::Array>(b.create<sem::F32>(), 2, 4, 4, 64u, 32u);
   });
   ASSERT_TRUE(arr->Is<ast::Array>());
-  ASSERT_TRUE(arr->As<ast::Array>()->type()->Is<ast::F32>());
-  ASSERT_EQ(arr->As<ast::Array>()->decorations().size(), 1u);
+  ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());
+  ASSERT_EQ(arr->As<ast::Array>()->decorations.size(), 1u);
   ASSERT_TRUE(
-      arr->As<ast::Array>()->decorations()[0]->Is<ast::StrideDecoration>());
+      arr->As<ast::Array>()->decorations[0]->Is<ast::StrideDecoration>());
   ASSERT_EQ(arr->As<ast::Array>()
-                ->decorations()[0]
+                ->decorations[0]
                 ->As<ast::StrideDecoration>()
-                ->stride(),
+                ->stride,
             64u);
 
-  auto* size_expr =
-      arr->As<ast::Array>()->Size()->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(size_expr, nullptr);
-  auto* size = size_expr->literal()->As<ast::IntLiteral>();
+  auto* count_expr =
+      arr->As<ast::Array>()->count->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(count_expr, nullptr);
+  auto* size = count_expr->literal->As<ast::IntLiteral>();
   ASSERT_NE(size, nullptr);
-  EXPECT_EQ(size->value_as_i32(), 2);
+  EXPECT_EQ(size->ValueAsI32(), 2);
 }
 
 TEST_F(CreateASTTypeForTest, Struct) {
   auto* str = create([](ProgramBuilder& b) {
     auto* decl = b.Structure("S", {}, {});
-    return b.create<sem::Struct>(decl, decl->name(), sem::StructMemberList{},
+    return b.create<sem::Struct>(decl, decl->name, sem::StructMemberList{},
                                  4 /* align */, 4 /* size */,
                                  4 /* size_no_padding */);
   });
   ASSERT_TRUE(str->Is<ast::TypeName>());
-  EXPECT_EQ(
-      ast_type_builder.Symbols().NameFor(str->As<ast::TypeName>()->name()),
-      "S");
+  EXPECT_EQ(ast_type_builder.Symbols().NameFor(str->As<ast::TypeName>()->name),
+            "S");
 }
 
 }  // namespace

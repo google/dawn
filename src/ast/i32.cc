@@ -21,8 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::I32);
 namespace tint {
 namespace ast {
 
-I32::I32(ProgramID program_id, const Source& source)
-    : Base(program_id, source) {}
+I32::I32(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 I32::I32(I32&&) = default;
 
@@ -33,7 +32,7 @@ std::string I32::FriendlyName(const SymbolTable&) const {
 }
 
 I32* I32::Clone(CloneContext* ctx) const {
-  auto src = ctx->Clone(source());
+  auto src = ctx->Clone(source);
   return ctx->dst->create<I32>(src);
 }
 

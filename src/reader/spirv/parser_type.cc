@@ -565,15 +565,15 @@ std::string I32::String() const {
 
 std::string Pointer::String() const {
   std::stringstream ss;
-  ss << "ptr<" << std::string(ast::str(storage_class)) << ", "
+  ss << "ptr<" << std::string(ast::ToString(storage_class)) << ", "
      << type->String() + ">";
   return ss.str();
 }
 
 std::string Reference::String() const {
   std::stringstream ss;
-  ss << "ref<" + std::string(ast::str(storage_class)) << ", " << type->String()
-     << ">";
+  ss << "ref<" + std::string(ast::ToString(storage_class)) << ", "
+     << type->String() << ">";
   return ss.str();
 }
 

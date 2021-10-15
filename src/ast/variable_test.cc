@@ -25,13 +25,13 @@ using VariableTest = TestHelper;
 TEST_F(VariableTest, Creation) {
   auto* v = Var("my_var", ty.i32(), StorageClass::kFunction);
 
-  EXPECT_EQ(v->symbol(), Symbol(1, ID()));
-  EXPECT_EQ(v->declared_storage_class(), StorageClass::kFunction);
-  EXPECT_TRUE(v->type()->Is<ast::I32>());
-  EXPECT_EQ(v->source().range.begin.line, 0u);
-  EXPECT_EQ(v->source().range.begin.column, 0u);
-  EXPECT_EQ(v->source().range.end.line, 0u);
-  EXPECT_EQ(v->source().range.end.column, 0u);
+  EXPECT_EQ(v->symbol, Symbol(1, ID()));
+  EXPECT_EQ(v->declared_storage_class, StorageClass::kFunction);
+  EXPECT_TRUE(v->type->Is<ast::I32>());
+  EXPECT_EQ(v->source.range.begin.line, 0u);
+  EXPECT_EQ(v->source.range.begin.column, 0u);
+  EXPECT_EQ(v->source.range.end.line, 0u);
+  EXPECT_EQ(v->source.range.end.column, 0u);
 }
 
 TEST_F(VariableTest, CreationWithSource) {
@@ -39,13 +39,13 @@ TEST_F(VariableTest, CreationWithSource) {
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}},
       "i", ty.f32(), StorageClass::kPrivate, nullptr, DecorationList{});
 
-  EXPECT_EQ(v->symbol(), Symbol(1, ID()));
-  EXPECT_EQ(v->declared_storage_class(), StorageClass::kPrivate);
-  EXPECT_TRUE(v->type()->Is<ast::F32>());
-  EXPECT_EQ(v->source().range.begin.line, 27u);
-  EXPECT_EQ(v->source().range.begin.column, 4u);
-  EXPECT_EQ(v->source().range.end.line, 27u);
-  EXPECT_EQ(v->source().range.end.column, 5u);
+  EXPECT_EQ(v->symbol, Symbol(1, ID()));
+  EXPECT_EQ(v->declared_storage_class, StorageClass::kPrivate);
+  EXPECT_TRUE(v->type->Is<ast::F32>());
+  EXPECT_EQ(v->source.range.begin.line, 27u);
+  EXPECT_EQ(v->source.range.begin.column, 4u);
+  EXPECT_EQ(v->source.range.end.line, 27u);
+  EXPECT_EQ(v->source.range.end.column, 5u);
 }
 
 TEST_F(VariableTest, CreationEmpty) {
@@ -53,13 +53,13 @@ TEST_F(VariableTest, CreationEmpty) {
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}},
       "a_var", ty.i32(), StorageClass::kWorkgroup, nullptr, DecorationList{});
 
-  EXPECT_EQ(v->symbol(), Symbol(1, ID()));
-  EXPECT_EQ(v->declared_storage_class(), StorageClass::kWorkgroup);
-  EXPECT_TRUE(v->type()->Is<ast::I32>());
-  EXPECT_EQ(v->source().range.begin.line, 27u);
-  EXPECT_EQ(v->source().range.begin.column, 4u);
-  EXPECT_EQ(v->source().range.end.line, 27u);
-  EXPECT_EQ(v->source().range.end.column, 7u);
+  EXPECT_EQ(v->symbol, Symbol(1, ID()));
+  EXPECT_EQ(v->declared_storage_class, StorageClass::kWorkgroup);
+  EXPECT_TRUE(v->type->Is<ast::I32>());
+  EXPECT_EQ(v->source.range.begin.line, 27u);
+  EXPECT_EQ(v->source.range.begin.column, 4u);
+  EXPECT_EQ(v->source.range.end.line, 27u);
+  EXPECT_EQ(v->source.range.end.column, 7u);
 }
 
 TEST_F(VariableTest, Assert_MissingSymbol) {
@@ -99,14 +99,14 @@ TEST_F(VariableTest, WithDecorations) {
                       create<OverrideDecoration>(1200),
                   });
 
-  auto& decorations = var->decorations();
+  auto& decorations = var->decorations;
   EXPECT_TRUE(ast::HasDecoration<ast::LocationDecoration>(decorations));
   EXPECT_TRUE(ast::HasDecoration<ast::BuiltinDecoration>(decorations));
   EXPECT_TRUE(ast::HasDecoration<ast::OverrideDecoration>(decorations));
 
   auto* location = ast::GetDecoration<ast::LocationDecoration>(decorations);
   ASSERT_NE(nullptr, location);
-  EXPECT_EQ(1u, location->value());
+  EXPECT_EQ(1u, location->value);
 }
 
 TEST_F(VariableTest, BindingPoint) {
@@ -115,19 +115,19 @@ TEST_F(VariableTest, BindingPoint) {
                       create<BindingDecoration>(2),
                       create<GroupDecoration>(1),
                   });
-  EXPECT_TRUE(var->binding_point());
-  ASSERT_NE(var->binding_point().binding, nullptr);
-  ASSERT_NE(var->binding_point().group, nullptr);
-  EXPECT_EQ(var->binding_point().binding->value(), 2u);
-  EXPECT_EQ(var->binding_point().group->value(), 1u);
+  EXPECT_TRUE(var->BindingPoint());
+  ASSERT_NE(var->BindingPoint().binding, nullptr);
+  ASSERT_NE(var->BindingPoint().group, nullptr);
+  EXPECT_EQ(var->BindingPoint().binding->value, 2u);
+  EXPECT_EQ(var->BindingPoint().group->value, 1u);
 }
 
 TEST_F(VariableTest, BindingPointoDecorations) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                   DecorationList{});
-  EXPECT_FALSE(var->binding_point());
-  EXPECT_EQ(var->binding_point().group, nullptr);
-  EXPECT_EQ(var->binding_point().binding, nullptr);
+  EXPECT_FALSE(var->BindingPoint());
+  EXPECT_EQ(var->BindingPoint().group, nullptr);
+  EXPECT_EQ(var->BindingPoint().binding, nullptr);
 }
 
 TEST_F(VariableTest, BindingPointMissingGroupDecoration) {
@@ -135,19 +135,19 @@ TEST_F(VariableTest, BindingPointMissingGroupDecoration) {
                   DecorationList{
                       create<BindingDecoration>(2),
                   });
-  EXPECT_FALSE(var->binding_point());
-  ASSERT_NE(var->binding_point().binding, nullptr);
-  EXPECT_EQ(var->binding_point().binding->value(), 2u);
-  EXPECT_EQ(var->binding_point().group, nullptr);
+  EXPECT_FALSE(var->BindingPoint());
+  ASSERT_NE(var->BindingPoint().binding, nullptr);
+  EXPECT_EQ(var->BindingPoint().binding->value, 2u);
+  EXPECT_EQ(var->BindingPoint().group, nullptr);
 }
 
 TEST_F(VariableTest, BindingPointMissingBindingDecoration) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                   DecorationList{create<GroupDecoration>(1)});
-  EXPECT_FALSE(var->binding_point());
-  ASSERT_NE(var->binding_point().group, nullptr);
-  EXPECT_EQ(var->binding_point().group->value(), 1u);
-  EXPECT_EQ(var->binding_point().binding, nullptr);
+  EXPECT_FALSE(var->BindingPoint());
+  ASSERT_NE(var->BindingPoint().group, nullptr);
+  EXPECT_EQ(var->BindingPoint().group->value, 1u);
+  EXPECT_EQ(var->BindingPoint().binding, nullptr);
 }
 
 }  // namespace

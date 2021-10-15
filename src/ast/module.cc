@@ -24,13 +24,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Module);
 namespace tint {
 namespace ast {
 
-Module::Module(ProgramID program_id, const Source& source)
-    : Base(program_id, source) {}
+Module::Module(ProgramID pid, const Source& src) : Base(pid, src) {}
 
-Module::Module(ProgramID program_id,
-               const Source& source,
+Module::Module(ProgramID pid,
+               const Source& src,
                std::vector<ast::Node*> global_decls)
-    : Base(program_id, source), global_declarations_(std::move(global_decls)) {
+    : Base(pid, src), global_declarations_(std::move(global_decls)) {
   for (auto* decl : global_declarations_) {
     if (decl == nullptr) {
       continue;
@@ -53,7 +52,7 @@ Module::~Module() = default;
 
 const ast::TypeDecl* Module::LookupType(Symbol name) const {
   for (auto* ty : TypeDecls()) {
-    if (ty->name() == name) {
+    if (ty->name == name) {
       return ty;
     }
   }
@@ -62,21 +61,21 @@ const ast::TypeDecl* Module::LookupType(Symbol name) const {
 
 void Module::AddGlobalVariable(ast::Variable* var) {
   TINT_ASSERT(AST, var);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id());
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
   global_variables_.push_back(var);
   global_declarations_.push_back(var);
 }
 
 void Module::AddTypeDecl(ast::TypeDecl* type) {
   TINT_ASSERT(AST, type);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id());
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
   type_decls_.push_back(type);
   global_declarations_.push_back(type);
 }
 
 void Module::AddFunction(ast::Function* func) {
   TINT_ASSERT(AST, func);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id());
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
   functions_.push_back(func);
   global_declarations_.push_back(func);
 }
@@ -103,13 +102,13 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
       continue;
     }
     if (auto* type = decl->As<ast::TypeDecl>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id());
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
       type_decls_.push_back(type);
     } else if (auto* func = decl->As<Function>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id());
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
       functions_.push_back(func);
     } else if (auto* var = decl->As<Variable>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id());
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
       global_variables_.push_back(var);
     } else {
       TINT_ICE(AST, ctx->dst->Diagnostics())

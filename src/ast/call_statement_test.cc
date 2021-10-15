@@ -27,7 +27,7 @@ TEST_F(CallStatementTest, Creation) {
   auto* expr = create<CallExpression>(Expr("func"), ExpressionList{});
 
   auto* c = create<CallStatement>(expr);
-  EXPECT_EQ(c->expr(), expr);
+  EXPECT_EQ(c->expr, expr);
 }
 
 TEST_F(CallStatementTest, IsCall) {

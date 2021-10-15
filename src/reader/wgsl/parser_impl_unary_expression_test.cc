@@ -30,15 +30,15 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
 
   ASSERT_TRUE(e->Is<ast::ArrayAccessorExpression>());
   auto* ary = e->As<ast::ArrayAccessorExpression>();
-  ASSERT_TRUE(ary->array()->Is<ast::IdentifierExpression>());
-  auto* ident = ary->array()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_TRUE(ary->array->Is<ast::IdentifierExpression>());
+  auto* ident = ary->array->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
-  auto* init = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
-  ASSERT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 2);
+  ASSERT_TRUE(ary->index->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->index->Is<ast::ScalarConstructorExpression>());
+  auto* init = ary->index->As<ast::ScalarConstructorExpression>();
+  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
+  ASSERT_EQ(init->literal->As<ast::SintLiteral>()->value, 2);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
@@ -51,14 +51,14 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  ASSERT_EQ(u->op(), ast::UnaryOp::kNegation);
+  ASSERT_EQ(u->op, ast::UnaryOp::kNegation);
 
-  ASSERT_TRUE(u->expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(u->expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(u->expr->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(u->expr->Is<ast::ScalarConstructorExpression>());
 
-  auto* init = u->expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 1);
+  auto* init = u->expr->As<ast::ScalarConstructorExpression>();
+  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_AddressOf) {
@@ -71,8 +71,8 @@ TEST_F(ParserImplTest, UnaryExpression_AddressOf) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  EXPECT_EQ(u->op(), ast::UnaryOp::kAddressOf);
-  EXPECT_TRUE(u->expr()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(u->op, ast::UnaryOp::kAddressOf);
+  EXPECT_TRUE(u->expr->Is<ast::IdentifierExpression>());
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dereference) {
@@ -85,8 +85,8 @@ TEST_F(ParserImplTest, UnaryExpression_Dereference) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  EXPECT_EQ(u->op(), ast::UnaryOp::kIndirection);
-  EXPECT_TRUE(u->expr()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(u->op, ast::UnaryOp::kIndirection);
+  EXPECT_TRUE(u->expr->Is<ast::IdentifierExpression>());
 }
 
 TEST_F(ParserImplTest, UnaryExpression_AddressOf_Precedence) {
@@ -99,8 +99,8 @@ TEST_F(ParserImplTest, UnaryExpression_AddressOf_Precedence) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  EXPECT_EQ(u->op(), ast::UnaryOp::kAddressOf);
-  EXPECT_TRUE(u->expr()->Is<ast::MemberAccessorExpression>());
+  EXPECT_EQ(u->op, ast::UnaryOp::kAddressOf);
+  EXPECT_TRUE(u->expr->Is<ast::MemberAccessorExpression>());
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dereference_Precedence) {
@@ -113,8 +113,8 @@ TEST_F(ParserImplTest, UnaryExpression_Dereference_Precedence) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  EXPECT_EQ(u->op(), ast::UnaryOp::kIndirection);
-  EXPECT_TRUE(u->expr()->Is<ast::MemberAccessorExpression>());
+  EXPECT_EQ(u->op, ast::UnaryOp::kIndirection);
+  EXPECT_TRUE(u->expr->Is<ast::MemberAccessorExpression>());
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
@@ -137,14 +137,14 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  ASSERT_EQ(u->op(), ast::UnaryOp::kNot);
+  ASSERT_EQ(u->op, ast::UnaryOp::kNot);
 
-  ASSERT_TRUE(u->expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(u->expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(u->expr->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(u->expr->Is<ast::ScalarConstructorExpression>());
 
-  auto* init = u->expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 1);
+  auto* init = u->expr->As<ast::ScalarConstructorExpression>();
+  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {
@@ -167,14 +167,14 @@ TEST_F(ParserImplTest, UnaryExpression_Tilde) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  ASSERT_EQ(u->op(), ast::UnaryOp::kComplement);
+  ASSERT_EQ(u->op, ast::UnaryOp::kComplement);
 
-  ASSERT_TRUE(u->expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(u->expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(u->expr->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(u->expr->Is<ast::ScalarConstructorExpression>());
 
-  auto* init = u->expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 1);
+  auto* init = u->expr->As<ast::ScalarConstructorExpression>();
+  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_PrefixPlusPlus) {

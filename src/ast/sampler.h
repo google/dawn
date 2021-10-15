@@ -39,19 +39,16 @@ std::ostream& operator<<(std::ostream& out, SamplerKind kind);
 class Sampler : public Castable<Sampler, Type> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param kind the kind of sampler
-  Sampler(ProgramID program_id, const Source& source, SamplerKind kind);
+  Sampler(ProgramID pid, const Source& src, SamplerKind kind);
   /// Move constructor
   Sampler(Sampler&&);
   ~Sampler() override;
 
-  /// @returns the sampler type
-  SamplerKind kind() const { return kind_; }
-
   /// @returns true if this is a comparison sampler
-  bool IsComparison() const { return kind_ == SamplerKind::kComparisonSampler; }
+  bool IsComparison() const { return kind == SamplerKind::kComparisonSampler; }
 
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
@@ -63,8 +60,8 @@ class Sampler : public Castable<Sampler, Type> {
   /// @return the newly cloned type
   Sampler* Clone(CloneContext* ctx) const override;
 
- private:
-  SamplerKind const kind_;
+  /// The sampler type
+  SamplerKind const kind;
 };
 
 }  // namespace ast

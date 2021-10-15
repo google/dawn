@@ -30,10 +30,10 @@ TEST_F(ForStmtTest, Empty) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  EXPECT_EQ(fl->initializer(), nullptr);
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_EQ(fl->continuing(), nullptr);
-  EXPECT_TRUE(fl->body()->empty());
+  EXPECT_EQ(fl->initializer, nullptr);
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_EQ(fl->continuing, nullptr);
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 // Test a for loop with non-empty body.
@@ -43,11 +43,11 @@ TEST_F(ForStmtTest, Body) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  EXPECT_EQ(fl->initializer(), nullptr);
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_EQ(fl->continuing(), nullptr);
-  ASSERT_EQ(fl->body()->size(), 1u);
-  EXPECT_TRUE(fl->body()->statements()[0]->Is<ast::DiscardStatement>());
+  EXPECT_EQ(fl->initializer, nullptr);
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_EQ(fl->continuing, nullptr);
+  ASSERT_EQ(fl->body->statements.size(), 1u);
+  EXPECT_TRUE(fl->body->statements[0]->Is<ast::DiscardStatement>());
 }
 
 // Test a for loop declaring a variable in the initializer statement.
@@ -57,13 +57,13 @@ TEST_F(ForStmtTest, InitializerStatementDecl) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer()));
-  auto* var = fl->initializer()->As<ast::VariableDeclStatement>()->variable();
-  EXPECT_FALSE(var->is_const());
-  EXPECT_EQ(var->constructor(), nullptr);
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_EQ(fl->continuing(), nullptr);
-  EXPECT_TRUE(fl->body()->empty());
+  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer));
+  auto* var = fl->initializer->As<ast::VariableDeclStatement>()->variable;
+  EXPECT_FALSE(var->is_const);
+  EXPECT_EQ(var->constructor, nullptr);
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_EQ(fl->continuing, nullptr);
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 // Test a for loop declaring and initializing a variable in the initializer
@@ -74,13 +74,13 @@ TEST_F(ForStmtTest, InitializerStatementDeclEqual) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer()));
-  auto* var = fl->initializer()->As<ast::VariableDeclStatement>()->variable();
-  EXPECT_FALSE(var->is_const());
-  EXPECT_NE(var->constructor(), nullptr);
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_EQ(fl->continuing(), nullptr);
-  EXPECT_TRUE(fl->body()->empty());
+  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer));
+  auto* var = fl->initializer->As<ast::VariableDeclStatement>()->variable;
+  EXPECT_FALSE(var->is_const);
+  EXPECT_NE(var->constructor, nullptr);
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_EQ(fl->continuing, nullptr);
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 // Test a for loop declaring a const variable in the initializer statement.
@@ -90,13 +90,13 @@ TEST_F(ForStmtTest, InitializerStatementConstDecl) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer()));
-  auto* var = fl->initializer()->As<ast::VariableDeclStatement>()->variable();
-  EXPECT_TRUE(var->is_const());
-  EXPECT_NE(var->constructor(), nullptr);
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_EQ(fl->continuing(), nullptr);
-  EXPECT_TRUE(fl->body()->empty());
+  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer));
+  auto* var = fl->initializer->As<ast::VariableDeclStatement>()->variable;
+  EXPECT_TRUE(var->is_const);
+  EXPECT_NE(var->constructor, nullptr);
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_EQ(fl->continuing, nullptr);
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 // Test a for loop assigning a variable in the initializer statement.
@@ -106,10 +106,10 @@ TEST_F(ForStmtTest, InitializerStatementAssignment) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  EXPECT_TRUE(Is<ast::AssignmentStatement>(fl->initializer()));
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_EQ(fl->continuing(), nullptr);
-  EXPECT_TRUE(fl->body()->empty());
+  EXPECT_TRUE(Is<ast::AssignmentStatement>(fl->initializer));
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_EQ(fl->continuing, nullptr);
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 // Test a for loop calling a function in the initializer statement.
@@ -119,10 +119,10 @@ TEST_F(ForStmtTest, InitializerStatementFuncCall) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  EXPECT_TRUE(Is<ast::CallStatement>(fl->initializer()));
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_EQ(fl->continuing(), nullptr);
-  EXPECT_TRUE(fl->body()->empty());
+  EXPECT_TRUE(Is<ast::CallStatement>(fl->initializer));
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_EQ(fl->continuing, nullptr);
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 // Test a for loop with a break condition
@@ -132,10 +132,10 @@ TEST_F(ForStmtTest, BreakCondition) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  EXPECT_EQ(fl->initializer(), nullptr);
-  EXPECT_TRUE(Is<ast::BinaryExpression>(fl->condition()));
-  EXPECT_EQ(fl->continuing(), nullptr);
-  EXPECT_TRUE(fl->body()->empty());
+  EXPECT_EQ(fl->initializer, nullptr);
+  EXPECT_TRUE(Is<ast::BinaryExpression>(fl->condition));
+  EXPECT_EQ(fl->continuing, nullptr);
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 // Test a for loop assigning a variable in the continuing statement.
@@ -145,10 +145,10 @@ TEST_F(ForStmtTest, ContinuingAssignment) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  EXPECT_EQ(fl->initializer(), nullptr);
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_TRUE(Is<ast::AssignmentStatement>(fl->continuing()));
-  EXPECT_TRUE(fl->body()->empty());
+  EXPECT_EQ(fl->initializer, nullptr);
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_TRUE(Is<ast::AssignmentStatement>(fl->continuing));
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 // Test a for loop calling a function in the continuing statement.
@@ -158,10 +158,10 @@ TEST_F(ForStmtTest, ContinuingFuncCall) {
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(fl.errored);
   ASSERT_TRUE(fl.matched);
-  EXPECT_EQ(fl->initializer(), nullptr);
-  EXPECT_EQ(fl->condition(), nullptr);
-  EXPECT_TRUE(Is<ast::CallStatement>(fl->continuing()));
-  EXPECT_TRUE(fl->body()->empty());
+  EXPECT_EQ(fl->initializer, nullptr);
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_TRUE(Is<ast::CallStatement>(fl->continuing));
+  EXPECT_TRUE(fl->body->Empty());
 }
 
 class ForStmtErrorTest : public ParserImplTest {

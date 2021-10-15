@@ -703,7 +703,7 @@ struct LoopStatementBuilder
 /// @returns true if the decorations include a SampleMask builtin
 bool HasBuiltinSampleMask(const ast::DecorationList& decos) {
   if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(decos)) {
-    return builtin->value() == ast::Builtin::kSampleMask;
+    return builtin->builtin == ast::Builtin::kSampleMask;
   }
   return false;
 }
@@ -1061,7 +1061,7 @@ void FunctionEmitter::IncrementLocation(ast::DecorationList* decos) {
       // Replace this location decoration with a new one with one higher index.
       // The old one doesn't leak because it's kept in the builder's AST node
       // list.
-      deco = builder_.Location(loc_deco->source(), loc_deco->value() + 1);
+      deco = builder_.Location(loc_deco->source, loc_deco->value + 1);
     }
   }
 }

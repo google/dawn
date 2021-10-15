@@ -25,18 +25,13 @@ namespace ast {
 class CallStatement : public Castable<CallStatement, Statement> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the input source for the statement
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node for the statement
   /// @param call the function
-  CallStatement(ProgramID program_id,
-                const Source& source,
-                CallExpression* call);
+  CallStatement(ProgramID pid, const Source& src, CallExpression* call);
   /// Move constructor
   CallStatement(CallStatement&&);
   ~CallStatement() override;
-
-  /// @returns the call expression
-  CallExpression* expr() const { return call_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -44,10 +39,11 @@ class CallStatement : public Castable<CallStatement, Statement> {
   /// @return the newly cloned node
   CallStatement* Clone(CloneContext* ctx) const override;
 
+  /// The call expression
+  CallExpression* const expr;
+
  private:
   CallStatement(const CallStatement&) = delete;
-
-  CallExpression* const call_;
 };
 
 }  // namespace ast

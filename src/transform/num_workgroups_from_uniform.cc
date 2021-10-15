@@ -73,7 +73,7 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
   std::unordered_set<Accessor, Accessor::Hasher> to_replace;
   for (auto* func : ctx.src->AST().Functions()) {
     // num_workgroups is only valid for compute stages.
-    if (func->pipeline_stage() != ast::PipelineStage::kCompute) {
+    if (func->PipelineStage() != ast::PipelineStage::kCompute) {
       continue;
     }
 
@@ -87,8 +87,8 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
 
       for (auto* member : str->Members()) {
         auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-            member->Declaration()->decorations());
-        if (!builtin || builtin->value() != ast::Builtin::kNumWorkgroups) {
+            member->Declaration()->decorations);
+        if (!builtin || builtin->builtin != ast::Builtin::kNumWorkgroups) {
           continue;
         }
 
@@ -96,18 +96,18 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
         // we will replace later. We currently have no way to get from the
         // parameter directly to the member accessor expressions that use it.
         to_replace.insert(
-            {param->Declaration()->symbol(), member->Declaration()->symbol()});
+            {param->Declaration()->symbol, member->Declaration()->symbol});
 
         // Remove the struct member.
         // The CanonicalizeEntryPointIO transform will have generated this
         // struct uniquely for this particular entry point, so we know that
         // there will be no other uses of this struct in the module and that we
         // can safely modify it here.
-        ctx.Remove(str->Declaration()->members(), member->Declaration());
+        ctx.Remove(str->Declaration()->members, member->Declaration());
 
         // If this is the only member, remove the struct and parameter too.
         if (str->Members().size() == 1) {
-          ctx.Remove(func->params(), param->Declaration());
+          ctx.Remove(func->params, param->Declaration());
           ctx.Remove(ctx.src->AST().GlobalDeclarations(), str->Declaration());
         }
       }
@@ -140,13 +140,13 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
     if (!accessor) {
       continue;
     }
-    auto* ident = accessor->structure()->As<ast::IdentifierExpression>();
+    auto* ident = accessor->structure->As<ast::IdentifierExpression>();
     if (!ident) {
       continue;
     }
 
-    if (to_replace.count({ident->symbol(), accessor->member()->symbol()})) {
-      ctx.Replace(accessor, ctx.dst->MemberAccessor(get_ubo()->symbol(),
+    if (to_replace.count({ident->symbol, accessor->member->symbol})) {
+      ctx.Replace(accessor, ctx.dst->MemberAccessor(get_ubo()->symbol,
                                                     kNumWorkgroupsMemberName));
     }
   }

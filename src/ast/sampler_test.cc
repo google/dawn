@@ -24,12 +24,12 @@ using AstSamplerTest = TestHelper;
 
 TEST_F(AstSamplerTest, Creation) {
   auto* s = create<Sampler>(SamplerKind::kSampler);
-  EXPECT_EQ(s->kind(), SamplerKind::kSampler);
+  EXPECT_EQ(s->kind, SamplerKind::kSampler);
 }
 
 TEST_F(AstSamplerTest, Creation_ComparisonSampler) {
   auto* s = create<Sampler>(SamplerKind::kComparisonSampler);
-  EXPECT_EQ(s->kind(), SamplerKind::kComparisonSampler);
+  EXPECT_EQ(s->kind, SamplerKind::kComparisonSampler);
   EXPECT_TRUE(s->IsComparison());
 }
 

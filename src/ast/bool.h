@@ -32,9 +32,9 @@ namespace ast {
 class Bool : public Castable<Bool, Type> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
-  Bool(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  Bool(ProgramID pid, const Source& src);
   /// Move constructor
   Bool(Bool&&);
   ~Bool() override;

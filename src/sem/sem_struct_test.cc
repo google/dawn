@@ -28,7 +28,7 @@ TEST_F(StructTest, Creation) {
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
   auto* ptr = impl;
   auto* s =
-      create<sem::Struct>(impl, impl->name(), StructMemberList{}, 4 /* align */,
+      create<sem::Struct>(impl, impl->name, StructMemberList{}, 4 /* align */,
                           8 /* size */, 16 /* size_no_padding */);
   EXPECT_EQ(s->Declaration(), ptr);
   EXPECT_EQ(s->Align(), 4u);
@@ -41,7 +41,7 @@ TEST_F(StructTest, TypeName) {
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
   auto* s =
-      create<sem::Struct>(impl, impl->name(), StructMemberList{}, 4 /* align */,
+      create<sem::Struct>(impl, impl->name, StructMemberList{}, 4 /* align */,
                           4 /* size */, 4 /* size_no_padding */);
   EXPECT_EQ(s->type_name(), "__struct_$1");
 }
@@ -51,7 +51,7 @@ TEST_F(StructTest, FriendlyName) {
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
   auto* s =
-      create<sem::Struct>(impl, impl->name(), StructMemberList{}, 4 /* align */,
+      create<sem::Struct>(impl, impl->name, StructMemberList{}, 4 /* align */,
                           4 /* size */, 4 /* size_no_padding */);
   EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
 }

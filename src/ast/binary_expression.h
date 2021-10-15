@@ -61,45 +61,42 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   BinaryExpression(BinaryExpression&&);
   ~BinaryExpression() override;
 
-  /// @returns the binary op type
-  BinaryOp op() const { return op_; }
-
   /// @returns true if the op is and
-  bool IsAnd() const { return op_ == BinaryOp::kAnd; }
+  bool IsAnd() const { return op == BinaryOp::kAnd; }
   /// @returns true if the op is or
-  bool IsOr() const { return op_ == BinaryOp::kOr; }
+  bool IsOr() const { return op == BinaryOp::kOr; }
   /// @returns true if the op is xor
-  bool IsXor() const { return op_ == BinaryOp::kXor; }
+  bool IsXor() const { return op == BinaryOp::kXor; }
   /// @returns true if the op is logical and
-  bool IsLogicalAnd() const { return op_ == BinaryOp::kLogicalAnd; }
+  bool IsLogicalAnd() const { return op == BinaryOp::kLogicalAnd; }
   /// @returns true if the op is logical or
-  bool IsLogicalOr() const { return op_ == BinaryOp::kLogicalOr; }
+  bool IsLogicalOr() const { return op == BinaryOp::kLogicalOr; }
   /// @returns true if the op is equal
-  bool IsEqual() const { return op_ == BinaryOp::kEqual; }
+  bool IsEqual() const { return op == BinaryOp::kEqual; }
   /// @returns true if the op is not equal
-  bool IsNotEqual() const { return op_ == BinaryOp::kNotEqual; }
+  bool IsNotEqual() const { return op == BinaryOp::kNotEqual; }
   /// @returns true if the op is less than
-  bool IsLessThan() const { return op_ == BinaryOp::kLessThan; }
+  bool IsLessThan() const { return op == BinaryOp::kLessThan; }
   /// @returns true if the op is greater than
-  bool IsGreaterThan() const { return op_ == BinaryOp::kGreaterThan; }
+  bool IsGreaterThan() const { return op == BinaryOp::kGreaterThan; }
   /// @returns true if the op is less than equal
-  bool IsLessThanEqual() const { return op_ == BinaryOp::kLessThanEqual; }
+  bool IsLessThanEqual() const { return op == BinaryOp::kLessThanEqual; }
   /// @returns true if the op is greater than equal
-  bool IsGreaterThanEqual() const { return op_ == BinaryOp::kGreaterThanEqual; }
+  bool IsGreaterThanEqual() const { return op == BinaryOp::kGreaterThanEqual; }
   /// @returns true if the op is shift left
-  bool IsShiftLeft() const { return op_ == BinaryOp::kShiftLeft; }
+  bool IsShiftLeft() const { return op == BinaryOp::kShiftLeft; }
   /// @returns true if the op is shift right
-  bool IsShiftRight() const { return op_ == BinaryOp::kShiftRight; }
+  bool IsShiftRight() const { return op == BinaryOp::kShiftRight; }
   /// @returns true if the op is add
-  bool IsAdd() const { return op_ == BinaryOp::kAdd; }
+  bool IsAdd() const { return op == BinaryOp::kAdd; }
   /// @returns true if the op is subtract
-  bool IsSubtract() const { return op_ == BinaryOp::kSubtract; }
+  bool IsSubtract() const { return op == BinaryOp::kSubtract; }
   /// @returns true if the op is multiply
-  bool IsMultiply() const { return op_ == BinaryOp::kMultiply; }
+  bool IsMultiply() const { return op == BinaryOp::kMultiply; }
   /// @returns true if the op is divide
-  bool IsDivide() const { return op_ == BinaryOp::kDivide; }
+  bool IsDivide() const { return op == BinaryOp::kDivide; }
   /// @returns true if the op is modulo
-  bool IsModulo() const { return op_ == BinaryOp::kModulo; }
+  bool IsModulo() const { return op == BinaryOp::kModulo; }
   /// @returns true if the op is an arithmetic operation
   bool IsArithmetic() const;
   /// @returns true if the op is a comparison operation
@@ -109,27 +106,25 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   /// @returns true if the op is a bit shift operation
   bool IsBitshift() const;
 
-  /// @returns the left side expression
-  Expression* lhs() const { return lhs_; }
-  /// @returns the right side expression
-  Expression* rhs() const { return rhs_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   BinaryExpression* Clone(CloneContext* ctx) const override;
 
+  /// the binary op type
+  BinaryOp const op;
+  /// the left side expression
+  Expression* const lhs;
+  /// the right side expression
+  Expression* const rhs;
+
  private:
   BinaryExpression(const BinaryExpression&) = delete;
-
-  BinaryOp const op_;
-  Expression* const lhs_;
-  Expression* const rhs_;
 };
 
 inline bool BinaryExpression::IsArithmetic() const {
-  switch (op_) {
+  switch (op) {
     case ast::BinaryOp::kAdd:
     case ast::BinaryOp::kSubtract:
     case ast::BinaryOp::kMultiply:
@@ -142,7 +137,7 @@ inline bool BinaryExpression::IsArithmetic() const {
 }
 
 inline bool BinaryExpression::IsComparison() const {
-  switch (op_) {
+  switch (op) {
     case ast::BinaryOp::kEqual:
     case ast::BinaryOp::kNotEqual:
     case ast::BinaryOp::kLessThan:
@@ -156,7 +151,7 @@ inline bool BinaryExpression::IsComparison() const {
 }
 
 inline bool BinaryExpression::IsBitwise() const {
-  switch (op_) {
+  switch (op) {
     case ast::BinaryOp::kAnd:
     case ast::BinaryOp::kOr:
     case ast::BinaryOp::kXor:
@@ -167,7 +162,7 @@ inline bool BinaryExpression::IsBitwise() const {
 }
 
 inline bool BinaryExpression::IsBitshift() const {
-  switch (op_) {
+  switch (op) {
     case ast::BinaryOp::kShiftLeft:
     case ast::BinaryOp::kShiftRight:
       return true;

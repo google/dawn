@@ -24,7 +24,7 @@ using StructMemberAlignDecorationTest = TestHelper;
 
 TEST_F(StructMemberAlignDecorationTest, Creation) {
   auto* d = create<StructMemberAlignDecoration>(2);
-  EXPECT_EQ(2u, d->align());
+  EXPECT_EQ(2u, d->align);
 }
 
 }  // namespace

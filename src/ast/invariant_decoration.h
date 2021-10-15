@@ -26,13 +26,13 @@ namespace ast {
 class InvariantDecoration : public Castable<InvariantDecoration, Decoration> {
  public:
   /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
-  InvariantDecoration(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  InvariantDecoration(ProgramID pid, const Source& src);
   ~InvariantDecoration() override;
 
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.

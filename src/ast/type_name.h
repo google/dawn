@@ -26,17 +26,15 @@ namespace ast {
 class TypeName : public Castable<TypeName, Type> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param name the type name
-  TypeName(ProgramID program_id, const Source& source, Symbol name);
+  TypeName(ProgramID pid, const Source& src, Symbol name);
   /// Move constructor
   TypeName(TypeName&&);
   /// Destructor
   ~TypeName() override;
 
-  /// @return the type name
-  const Symbol& name() const { return name_; }
 
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
@@ -48,8 +46,8 @@ class TypeName : public Castable<TypeName, Type> {
   /// @return the newly cloned type
   TypeName* Clone(CloneContext* ctx) const override;
 
- private:
-  Symbol name_;
+  /// The type name
+  Symbol name;
 };
 
 }  // namespace ast

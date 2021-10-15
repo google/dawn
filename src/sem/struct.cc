@@ -51,7 +51,7 @@ Struct::~Struct() = default;
 
 const StructMember* Struct::FindMember(Symbol name) const {
   for (auto* member : members_) {
-    if (member->Declaration()->symbol() == name) {
+    if (member->Declaration()->symbol == name) {
       return member;
     }
   }

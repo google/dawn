@@ -30,23 +30,17 @@ class TypeConstructorExpression
     : public Castable<TypeConstructorExpression, ConstructorExpression> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the constructor source
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param type the type
   /// @param values the constructor values
-  TypeConstructorExpression(ProgramID program_id,
-                            const Source& source,
+  TypeConstructorExpression(ProgramID pid,
+                            const Source& src,
                             ast::Type* type,
                             ExpressionList values);
   /// Move constructor
   TypeConstructorExpression(TypeConstructorExpression&&);
   ~TypeConstructorExpression() override;
-
-  /// @returns the type
-  ast::Type* type() const { return type_; }
-
-  /// @returns the values
-  const ExpressionList& values() const { return values_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -54,11 +48,14 @@ class TypeConstructorExpression
   /// @return the newly cloned node
   TypeConstructorExpression* Clone(CloneContext* ctx) const override;
 
+  /// The type
+  ast::Type* const type;
+
+  /// The values
+  ExpressionList const values;
+
  private:
   TypeConstructorExpression(const TypeConstructorExpression&) = delete;
-
-  ast::Type* const type_;
-  ExpressionList const values_;
 };
 
 }  // namespace ast

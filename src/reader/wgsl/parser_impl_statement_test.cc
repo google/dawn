@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, Statement_Return_NoValue) {
   EXPECT_FALSE(e.errored);
   ASSERT_TRUE(e->Is<ast::ReturnStatement>());
   auto* ret = e->As<ast::ReturnStatement>();
-  ASSERT_EQ(ret->value(), nullptr);
+  ASSERT_EQ(ret->value, nullptr);
 }
 
 TEST_F(ParserImplTest, Statement_Return_Value) {
@@ -57,8 +57,8 @@ TEST_F(ParserImplTest, Statement_Return_Value) {
   EXPECT_FALSE(e.errored);
   ASSERT_TRUE(e->Is<ast::ReturnStatement>());
   auto* ret = e->As<ast::ReturnStatement>();
-  ASSERT_NE(ret->value(), nullptr);
-  EXPECT_TRUE(ret->value()->Is<ast::BinaryExpression>());
+  ASSERT_NE(ret->value, nullptr);
+  EXPECT_TRUE(ret->value->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, Statement_Return_MissingSemi) {
@@ -261,8 +261,9 @@ TEST_F(ParserImplTest, Statement_Body) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   ASSERT_TRUE(e->Is<ast::BlockStatement>());
-  EXPECT_TRUE(
-      e->As<ast::BlockStatement>()->get(0)->Is<ast::VariableDeclStatement>());
+  EXPECT_TRUE(e->As<ast::BlockStatement>()
+                  ->statements[0]
+                  ->Is<ast::VariableDeclStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Body_Invalid) {

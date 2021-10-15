@@ -37,22 +37,20 @@ class MemberAccessorExpression
   MemberAccessorExpression(MemberAccessorExpression&&);
   ~MemberAccessorExpression() override;
 
-  /// @returns the structure
-  Expression* structure() const { return struct_; }
-  /// @returns the member expression
-  IdentifierExpression* member() const { return member_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   MemberAccessorExpression* Clone(CloneContext* ctx) const override;
 
+  /// The structure
+  Expression* const structure;
+
+  /// The member expression
+  IdentifierExpression* const member;
+
  private:
   MemberAccessorExpression(const MemberAccessorExpression&) = delete;
-
-  Expression* const struct_;
-  IdentifierExpression* const member_;
 };
 
 }  // namespace ast

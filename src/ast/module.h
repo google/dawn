@@ -31,17 +31,17 @@ class TypeDecl;
 class Module : public Castable<Module, Node> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of the module
-  Module(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  Module(ProgramID pid, const Source& src);
 
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of the module
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param global_decls the list of global types, functions, and variables, in
   /// the order they were declared in the source program
-  Module(ProgramID program_id,
-         const Source& source,
+  Module(ProgramID pid,
+         const Source& src,
          std::vector<ast::Node*> global_decls);
 
   /// Destructor

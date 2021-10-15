@@ -127,10 +127,10 @@ struct ModuleScopeVarToEntryPointParam::State {
         ident_to_address_of;
     for (auto* node : ctx.src->ASTNodes().Objects()) {
       auto* address_of = node->As<ast::UnaryOpExpression>();
-      if (!address_of || address_of->op() != ast::UnaryOp::kAddressOf) {
+      if (!address_of || address_of->op != ast::UnaryOp::kAddressOf) {
         continue;
       }
-      if (auto* ident = address_of->expr()->As<ast::IdentifierExpression>()) {
+      if (auto* ident = address_of->expr->As<ast::IdentifierExpression>()) {
         ident_to_address_of[ident] = address_of;
       }
     }
@@ -180,10 +180,10 @@ struct ModuleScopeVarToEntryPointParam::State {
                 ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
                     ctx.dst->ID(),
                     ast::DisabledValidation::kEntryPointParameter);
-            auto decos = ctx.Clone(var->Declaration()->decorations());
+            auto decos = ctx.Clone(var->Declaration()->decorations);
             decos.push_back(disable_validation);
             auto* param = ctx.dst->Param(new_var_symbol, store_type(), decos);
-            ctx.InsertFront(func_ast->params(), param);
+            ctx.InsertFront(func_ast->params, param);
           } else if (var->StorageClass() == ast::StorageClass::kWorkgroup &&
                      ContainsMatrix(var->Type())) {
             // Due to a bug in the MSL compiler, we use a threadgroup memory
@@ -192,7 +192,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             // TODO(jrprice): Do this for all other workgroup variables too.
 
             // Create a member in the workgroup parameter struct.
-            auto member = ctx.Clone(var->Declaration()->symbol());
+            auto member = ctx.Clone(var->Declaration()->symbol);
             workgroup_parameter_members.push_back(
                 ctx.dst->Member(member, store_type()));
             CloneStructTypes(var->Type()->UnwrapRef());
@@ -205,7 +205,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                                ctx.dst->ty.pointer(
                                    store_type(), ast::StorageClass::kWorkgroup),
                                member_ptr);
-            ctx.InsertFront(func_ast->body()->statements(),
+            ctx.InsertFront(func_ast->body->statements,
                             ctx.dst->Decl(local_var));
             is_pointer = true;
           } else {
@@ -216,11 +216,11 @@ struct ModuleScopeVarToEntryPointParam::State {
                 ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
                     ctx.dst->ID(),
                     ast::DisabledValidation::kIgnoreStorageClass);
-            auto* constructor = ctx.Clone(var->Declaration()->constructor());
+            auto* constructor = ctx.Clone(var->Declaration()->constructor);
             auto* local_var = ctx.dst->Var(
                 new_var_symbol, store_type(), var->StorageClass(), constructor,
                 ast::DecorationList{disable_validation});
-            ctx.InsertFront(func_ast->body()->statements(),
+            ctx.InsertFront(func_ast->body->statements,
                             ctx.dst->Decl(local_var));
           }
         } else {
@@ -240,7 +240,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                     ast::DisabledValidation::kIgnoreInvalidPointerArgument));
           }
           ctx.InsertBack(
-              func_ast->params(),
+              func_ast->params,
               ctx.dst->Param(new_var_symbol, param_type, attributes));
         }
 
@@ -282,12 +282,12 @@ struct ModuleScopeVarToEntryPointParam::State {
                 ctx.dst->ID(), ast::DisabledValidation::kEntryPointParameter);
         auto* param =
             ctx.dst->Param(workgroup_param(), param_type, {disable_validation});
-        ctx.InsertFront(func_ast->params(), param);
+        ctx.InsertFront(func_ast->params, param);
       }
 
       // Pass the variables as pointers to any functions that need them.
       for (auto* call : calls_to_replace[func_ast]) {
-        auto* target = ctx.src->AST().Functions().Find(call->func()->symbol());
+        auto* target = ctx.src->AST().Functions().Find(call->func->symbol);
         auto* target_sem = ctx.src->Sem().Get(target);
 
         // Add new arguments for any variables that are needed by the callee.
@@ -305,7 +305,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             if (is_entry_point && !is_handle && !is_workgroup_matrix) {
               arg = ctx.dst->AddressOf(arg);
             }
-            ctx.InsertBack(call->args(), arg);
+            ctx.InsertBack(call->args, arg);
           }
         }
       }

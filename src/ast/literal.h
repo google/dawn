@@ -27,14 +27,11 @@ class Literal : public Castable<Literal, Node> {
  public:
   ~Literal() override;
 
-  /// @returns the name for this literal. This name is unique to this value.
-  virtual std::string name() const = 0;
-
  protected:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the input source
-  Literal(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the input source
+  Literal(ProgramID pid, const Source& src);
 };
 
 }  // namespace ast

@@ -31,7 +31,7 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -46,7 +46,7 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -63,7 +63,7 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     /* fallthrough */
   }
@@ -80,7 +80,7 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5:
   case 6: {
     break;
@@ -96,7 +96,7 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_Default) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
   EXPECT_EQ(gen.result(), R"(  default: {
     break;
   }

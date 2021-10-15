@@ -21,8 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiscardStatement);
 namespace tint {
 namespace ast {
 
-DiscardStatement::DiscardStatement(ProgramID program_id, const Source& source)
-    : Base(program_id, source) {}
+DiscardStatement::DiscardStatement(ProgramID pid, const Source& src)
+    : Base(pid, src) {}
 
 DiscardStatement::DiscardStatement(DiscardStatement&&) = default;
 
@@ -30,7 +30,7 @@ DiscardStatement::~DiscardStatement() = default;
 
 DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
+  auto src = ctx->Clone(source);
   return ctx->dst->create<DiscardStatement>(src);
 }
 

@@ -86,11 +86,11 @@ void GatherCustomStrideMatrixMembers(const Program* program, F&& callback) {
           continue;
         }
         auto* deco = ast::GetDecoration<ast::StrideDecoration>(
-            member->Declaration()->decorations());
+            member->Declaration()->decorations);
         if (!deco) {
           continue;
         }
-        uint32_t stride = deco->stride();
+        uint32_t stride = deco->stride;
         if (matrix->ColumnStride() == stride) {
           continue;
         }
@@ -147,11 +147,11 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll(
       [&](ast::ArrayAccessorExpression* expr) -> ast::ArrayAccessorExpression* {
         if (auto* access =
-                ctx.src->Sem().Get<sem::StructMemberAccess>(expr->array())) {
+                ctx.src->Sem().Get<sem::StructMemberAccess>(expr->array)) {
           auto it = decomposed.find(access->Member()->Declaration());
           if (it != decomposed.end()) {
-            auto* obj = ctx.CloneWithoutTransform(expr->array());
-            auto* idx = ctx.Clone(expr->idx_expr());
+            auto* obj = ctx.CloneWithoutTransform(expr->array);
+            auto* idx = ctx.Clone(expr->index);
             return ctx.dst->IndexAccessor(obj, idx);
           }
         }
@@ -165,8 +165,7 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   //   ssbo.mat = mat_to_arr(m)
   std::unordered_map<MatrixInfo, Symbol, MatrixInfo::Hasher> mat_to_arr;
   ctx.ReplaceAll([&](ast::AssignmentStatement* stmt) -> ast::Statement* {
-    if (auto* access =
-            ctx.src->Sem().Get<sem::StructMemberAccess>(stmt->lhs())) {
+    if (auto* access = ctx.src->Sem().Get<sem::StructMemberAccess>(stmt->lhs)) {
       auto it = decomposed.find(access->Member()->Declaration());
       if (it == decomposed.end()) {
         return nullptr;
@@ -196,8 +195,8 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                       });
         return name;
       });
-      auto* lhs = ctx.CloneWithoutTransform(stmt->lhs());
-      auto* rhs = ctx.dst->Call(fn, ctx.Clone(stmt->rhs()));
+      auto* lhs = ctx.CloneWithoutTransform(stmt->lhs);
+      auto* rhs = ctx.dst->Call(fn, ctx.Clone(stmt->rhs));
       return ctx.dst->Assign(lhs, rhs);
     }
     return nullptr;

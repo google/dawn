@@ -80,18 +80,18 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr,
 sem::Constant Resolver::EvaluateConstantValue(
     const ast::ScalarConstructorExpression* scalar_ctor,
     const sem::Type* type) {
-  auto* literal = scalar_ctor->literal();
+  auto* literal = scalar_ctor->literal;
   if (auto* lit = literal->As<ast::SintLiteral>()) {
-    return {type, {lit->value_as_i32()}};
+    return {type, {lit->ValueAsI32()}};
   }
   if (auto* lit = literal->As<ast::UintLiteral>()) {
-    return {type, {lit->value_as_u32()}};
+    return {type, {lit->ValueAsU32()}};
   }
   if (auto* lit = literal->As<ast::FloatLiteral>()) {
-    return {type, {lit->value()}};
+    return {type, {lit->value}};
   }
   if (auto* lit = literal->As<ast::BoolLiteral>()) {
-    return {type, {lit->IsTrue()}};
+    return {type, {lit->value}};
   }
   TINT_UNREACHABLE(Resolver, builder_->Diagnostics());
   return {};
@@ -100,7 +100,7 @@ sem::Constant Resolver::EvaluateConstantValue(
 sem::Constant Resolver::EvaluateConstantValue(
     const ast::TypeConstructorExpression* type_ctor,
     const sem::Type* type) {
-  auto& ctor_values = type_ctor->values();
+  auto& ctor_values = type_ctor->values;
   auto* vec = type->As<sem::Vector>();
 
   // For now, only fold scalars and vectors

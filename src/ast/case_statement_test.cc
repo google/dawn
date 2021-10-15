@@ -34,10 +34,10 @@ TEST_F(CaseStatementTest, Creation_i32) {
   auto* body = create<BlockStatement>(StatementList{discard});
 
   auto* c = create<CaseStatement>(b, body);
-  ASSERT_EQ(c->selectors().size(), 1u);
-  EXPECT_EQ(c->selectors()[0], selector);
-  ASSERT_EQ(c->body()->size(), 1u);
-  EXPECT_EQ(c->body()->get(0), discard);
+  ASSERT_EQ(c->selectors.size(), 1u);
+  EXPECT_EQ(c->selectors[0], selector);
+  ASSERT_EQ(c->body->statements.size(), 1u);
+  EXPECT_EQ(c->body->statements[0], discard);
 }
 
 TEST_F(CaseStatementTest, Creation_u32) {
@@ -49,10 +49,10 @@ TEST_F(CaseStatementTest, Creation_u32) {
   auto* body = create<BlockStatement>(StatementList{discard});
 
   auto* c = create<CaseStatement>(b, body);
-  ASSERT_EQ(c->selectors().size(), 1u);
-  EXPECT_EQ(c->selectors()[0], selector);
-  ASSERT_EQ(c->body()->size(), 1u);
-  EXPECT_EQ(c->body()->get(0), discard);
+  ASSERT_EQ(c->selectors.size(), 1u);
+  EXPECT_EQ(c->selectors[0], selector);
+  ASSERT_EQ(c->body->statements.size(), 1u);
+  EXPECT_EQ(c->body->statements[0], discard);
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
@@ -63,7 +63,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
       create<DiscardStatement>(),
   });
   auto* c = create<CaseStatement>(Source{Source::Location{20, 2}}, b, body);
-  auto src = c->source();
+  auto src = c->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }

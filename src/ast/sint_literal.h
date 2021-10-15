@@ -26,23 +26,23 @@ namespace ast {
 class SintLiteral : public Castable<SintLiteral, IntLiteral> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the input source
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param value the signed int literals value
-  SintLiteral(ProgramID program_id, const Source& source, int32_t value);
+  SintLiteral(ProgramID pid, const Source& src, int32_t value);
   ~SintLiteral() override;
 
-  /// @returns the int literal value
-  int32_t value() const { return static_cast<int32_t>(value_as_u32()); }
-
-  /// @returns the name for this literal. This name is unique to this value.
-  std::string name() const override;
+  /// @returns the literal value as a u32
+  uint32_t ValueAsU32() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   SintLiteral* Clone(CloneContext* ctx) const override;
+
+  /// The int literal value
+  int32_t const value;
 };
 
 }  // namespace ast

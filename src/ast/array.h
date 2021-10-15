@@ -30,16 +30,16 @@ class Expression;
 class Array : public Castable<Array, Type> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param subtype the type of the array elements
-  /// @param size the number of elements in the array. nullptr represents a
+  /// @param count the number of elements in the array. nullptr represents a
   /// runtime-sized array.
   /// @param decorations the array decorations
-  Array(ProgramID program_id,
-        const Source& source,
+  Array(ProgramID pid,
+        const Source& src,
         Type* subtype,
-        ast::Expression* size,
+        ast::Expression* count,
         ast::DecorationList decorations);
   /// Move constructor
   Array(Array&&);
@@ -47,16 +47,7 @@ class Array : public Castable<Array, Type> {
 
   /// @returns true if this is a runtime array.
   /// i.e. the size is determined at runtime
-  bool IsRuntimeArray() const { return size_ == nullptr; }
-
-  /// @returns the array decorations
-  const ast::DecorationList& decorations() const { return decos_; }
-
-  /// @returns the array type
-  Type* type() const { return subtype_; }
-
-  /// @returns the array size, or nullptr for a runtime array
-  ast::Expression* Size() const { return size_; }
+  bool IsRuntimeArray() const { return count == nullptr; }
 
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
@@ -68,10 +59,14 @@ class Array : public Castable<Array, Type> {
   /// @return the newly cloned type
   Array* Clone(CloneContext* ctx) const override;
 
- private:
-  Type* const subtype_;
-  ast::Expression* const size_;
-  ast::DecorationList const decos_;
+  /// the array element type
+  Type* const type;
+
+  /// the array size in elements, or nullptr for a runtime array
+  ast::Expression* const count;
+
+  /// the array decorations
+  ast::DecorationList const decorations;
 };
 
 }  // namespace ast

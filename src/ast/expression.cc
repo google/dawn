@@ -22,17 +22,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Expression);
 namespace tint {
 namespace ast {
 
-Expression::Expression(ProgramID program_id, const Source& source)
-    : Base(program_id, source) {}
+Expression::Expression(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 Expression::Expression(Expression&&) = default;
 
 Expression::~Expression() = default;
-
-std::string Expression::result_type_str(const sem::Info& sem) const {
-  auto* sem_expr = sem.Get(this);
-  return sem_expr ? sem_expr->Type()->type_name() : "not set";
-}
 
 }  // namespace ast
 }  // namespace tint

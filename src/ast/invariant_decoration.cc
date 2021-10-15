@@ -21,19 +21,18 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::InvariantDecoration);
 namespace tint {
 namespace ast {
 
-InvariantDecoration::InvariantDecoration(ProgramID program_id,
-                                         const Source& source)
-    : Base(program_id, source) {}
+InvariantDecoration::InvariantDecoration(ProgramID pid, const Source& src)
+    : Base(pid, src) {}
 
 InvariantDecoration::~InvariantDecoration() = default;
 
-std::string InvariantDecoration::name() const {
+std::string InvariantDecoration::Name() const {
   return "invariant";
 }
 
 InvariantDecoration* InvariantDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
+  auto src = ctx->Clone(source);
   return ctx->dst->create<InvariantDecoration>(src);
 }
 

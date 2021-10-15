@@ -26,22 +26,14 @@ namespace ast {
 class Vector : public Castable<Vector, Type> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param subtype the vector element type
-  /// @param size the number of elements in the vector
-  Vector(ProgramID program_id,
-         const Source& source,
-         Type const* subtype,
-         uint32_t size);
+  /// @param width the number of elements in the vector
+  Vector(ProgramID pid, const Source& src, Type const* subtype, uint32_t width);
   /// Move constructor
   Vector(Vector&&);
   ~Vector() override;
-
-  /// @returns the type of the vector elements
-  Type* type() const { return const_cast<Type*>(subtype_); }
-  /// @returns the size of the vector
-  uint32_t size() const { return size_; }
 
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
@@ -53,9 +45,11 @@ class Vector : public Castable<Vector, Type> {
   /// @return the newly cloned type
   Vector* Clone(CloneContext* ctx) const override;
 
- private:
-  Type const* const subtype_;
-  uint32_t const size_;
+  /// The type of the vector elements
+  Type* const type;
+
+  /// The number of elements in the vector
+  uint32_t const width;
 };
 
 }  // namespace ast

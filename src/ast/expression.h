@@ -31,16 +31,11 @@ class Expression : public Castable<Expression, Node> {
 
  protected:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of the expression
-  Expression(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  Expression(ProgramID pid, const Source& src);
   /// Move constructor
   Expression(Expression&&);
-
-  /// @param sem the semantic info for the program
-  /// @returns a string representation of the result type or 'not set' if no
-  /// result type present
-  std::string result_type_str(const sem::Info& sem) const;
 
  private:
   Expression(const Expression&) = delete;

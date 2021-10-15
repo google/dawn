@@ -28,8 +28,8 @@ TEST_F(ParserImplTest, FunctionHeader) {
 
   EXPECT_EQ(f->name, "main");
   ASSERT_EQ(f->params.size(), 2u);
-  EXPECT_EQ(f->params[0]->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_EQ(f->params[1]->symbol(), p->builder().Symbols().Get("b"));
+  EXPECT_EQ(f->params[0]->symbol, p->builder().Symbols().Get("a"));
+  EXPECT_EQ(f->params[1]->symbol, p->builder().Symbols().Get("b"));
   EXPECT_TRUE(f->return_type->Is<ast::Void>());
 }
 
@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, FunctionHeader_TrailingComma) {
 
   EXPECT_EQ(f->name, "main");
   ASSERT_EQ(f->params.size(), 1u);
-  EXPECT_EQ(f->params[0]->symbol(), p->builder().Symbols().Get("a"));
+  EXPECT_EQ(f->params[0]->symbol, p->builder().Symbols().Get("a"));
   EXPECT_TRUE(f->return_type->Is<ast::Void>());
 }
 
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
   ASSERT_EQ(f->return_type_decorations.size(), 1u);
   auto* loc = f->return_type_decorations[0]->As<ast::LocationDecoration>();
   ASSERT_TRUE(loc != nullptr);
-  EXPECT_EQ(loc->value(), 1u);
+  EXPECT_EQ(loc->value, 1u);
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {
@@ -87,13 +87,13 @@ TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType_WithArrayStride) {
   ASSERT_EQ(f->return_type_decorations.size(), 1u);
   auto* loc = f->return_type_decorations[0]->As<ast::LocationDecoration>();
   ASSERT_TRUE(loc != nullptr);
-  EXPECT_EQ(loc->value(), 1u);
+  EXPECT_EQ(loc->value, 1u);
 
   auto* array_type = f->return_type->As<ast::Array>();
-  ASSERT_EQ(array_type->decorations().size(), 1u);
-  auto* stride = array_type->decorations()[0]->As<ast::StrideDecoration>();
+  ASSERT_EQ(array_type->decorations.size(), 1u);
+  auto* stride = array_type->decorations[0]->As<ast::StrideDecoration>();
   ASSERT_TRUE(stride != nullptr);
-  EXPECT_EQ(stride->stride(), 16u);
+  EXPECT_EQ(stride->stride, 16u);
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {

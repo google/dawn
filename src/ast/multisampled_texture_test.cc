@@ -50,13 +50,13 @@ TEST_F(AstMultisampledTextureTest, IsTexture) {
 TEST_F(AstMultisampledTextureTest, Dim) {
   auto* f32 = create<F32>();
   auto* s = create<MultisampledTexture>(TextureDimension::k3d, f32);
-  EXPECT_EQ(s->dim(), TextureDimension::k3d);
+  EXPECT_EQ(s->dim, TextureDimension::k3d);
 }
 
 TEST_F(AstMultisampledTextureTest, Type) {
   auto* f32 = create<F32>();
   auto* s = create<MultisampledTexture>(TextureDimension::k3d, f32);
-  EXPECT_EQ(s->type(), f32);
+  EXPECT_EQ(s->type, f32);
 }
 
 TEST_F(AstMultisampledTextureTest, FriendlyName) {

@@ -26,24 +26,18 @@ namespace ast {
 class OverrideDecoration : public Castable<OverrideDecoration, Decoration> {
  public:
   /// Create an override decoration with no specified id.
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
-  OverrideDecoration(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  OverrideDecoration(ProgramID pid, const Source& src);
   /// Create an override decoration with a specific id value.
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param val the override value
-  OverrideDecoration(ProgramID program_id, const Source& source, uint32_t val);
+  OverrideDecoration(ProgramID pid, const Source& src, uint32_t val);
   ~OverrideDecoration() override;
 
-  /// @returns true if an override id was specified
-  uint32_t HasValue() const { return has_value_; }
-
-  /// @returns the override id value
-  uint32_t value() const { return value_; }
-
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -51,9 +45,11 @@ class OverrideDecoration : public Castable<OverrideDecoration, Decoration> {
   /// @return the newly cloned node
   OverrideDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  bool has_value_;
-  uint32_t const value_;
+  /// True if an override id was specified
+  bool const has_value;
+
+  /// The override id value
+  uint32_t const value;
 };
 
 }  // namespace ast

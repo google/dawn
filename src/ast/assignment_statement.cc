@@ -21,15 +21,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::AssignmentStatement);
 namespace tint {
 namespace ast {
 
-AssignmentStatement::AssignmentStatement(ProgramID program_id,
-                                         const Source& source,
-                                         Expression* lhs,
-                                         Expression* rhs)
-    : Base(program_id, source), lhs_(lhs), rhs_(rhs) {
-  TINT_ASSERT(AST, lhs_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs_, program_id);
-  TINT_ASSERT(AST, rhs_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, rhs_, program_id);
+AssignmentStatement::AssignmentStatement(ProgramID pid,
+                                         const Source& src,
+                                         Expression* l,
+                                         Expression* r)
+    : Base(pid, src), lhs(l), rhs(r) {
+  TINT_ASSERT(AST, lhs);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
+  TINT_ASSERT(AST, rhs);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, rhs, program_id);
 }
 
 AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
@@ -38,9 +38,9 @@ AssignmentStatement::~AssignmentStatement() = default;
 
 AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* l = ctx->Clone(lhs_);
-  auto* r = ctx->Clone(rhs_);
+  auto src = ctx->Clone(source);
+  auto* l = ctx->Clone(lhs);
+  auto* r = ctx->Clone(rhs);
   return ctx->dst->create<AssignmentStatement>(src, l, r);
 }
 

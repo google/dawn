@@ -39,22 +39,19 @@ class CallExpression : public Castable<CallExpression, Expression> {
   CallExpression(CallExpression&&);
   ~CallExpression() override;
 
-  /// @returns the func
-  IdentifierExpression* func() const { return func_; }
-  /// @returns the arguments
-  const ExpressionList& args() const { return args_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   CallExpression* Clone(CloneContext* ctx) const override;
 
+  /// The target function
+  IdentifierExpression* const func;
+  /// The arguments
+  ExpressionList const args;
+
  private:
   CallExpression(const CallExpression&) = delete;
-
-  IdentifierExpression* const func_;
-  ExpressionList const args_;
 };
 
 }  // namespace ast

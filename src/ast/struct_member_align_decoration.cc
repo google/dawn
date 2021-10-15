@@ -24,22 +24,22 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberAlignDecoration);
 namespace tint {
 namespace ast {
 
-StructMemberAlignDecoration::StructMemberAlignDecoration(ProgramID program_id,
-                                                         const Source& source,
-                                                         uint32_t align)
-    : Base(program_id, source), align_(align) {}
+StructMemberAlignDecoration::StructMemberAlignDecoration(ProgramID pid,
+                                                         const Source& src,
+                                                         uint32_t a)
+    : Base(pid, src), align(a) {}
 
 StructMemberAlignDecoration::~StructMemberAlignDecoration() = default;
 
-std::string StructMemberAlignDecoration::name() const {
+std::string StructMemberAlignDecoration::Name() const {
   return "align";
 }
 
 StructMemberAlignDecoration* StructMemberAlignDecoration::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<StructMemberAlignDecoration>(src, align_);
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<StructMemberAlignDecoration>(src, align);
 }
 
 }  // namespace ast

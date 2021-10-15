@@ -3169,8 +3169,8 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(IntrinsicTextureTest, Call) {
   auto param = GetParam();
 
-  auto* texture = param.buildTextureVariable(this);
-  auto* sampler = param.buildSamplerVariable(this);
+  auto* texture = param.BuildTextureVariable(this);
+  auto* sampler = param.BuildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
   auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)
@@ -3197,8 +3197,8 @@ TEST_P(IntrinsicTextureTest, Call) {
 TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
   auto param = GetParam();
 
-  param.buildTextureVariable(this);
-  param.buildSamplerVariable(this);
+  param.BuildTextureVariable(this);
+  param.BuildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
 
@@ -3220,8 +3220,8 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
   // The point of this test is to try to generate the texture
   // intrinsic call outside a function.
 
-  auto* texture = param.buildTextureVariable(this);
-  auto* sampler = param.buildSamplerVariable(this);
+  auto* texture = param.BuildTextureVariable(this);
+  auto* sampler = param.BuildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
   auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)

@@ -26,23 +26,23 @@ namespace ast {
 class UintLiteral : public Castable<UintLiteral, IntLiteral> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the input source
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param value the uint literals value
-  UintLiteral(ProgramID program_id, const Source& source, uint32_t value);
+  UintLiteral(ProgramID pid, const Source& src, uint32_t value);
   ~UintLiteral() override;
 
-  /// @returns the uint literal value
-  uint32_t value() const { return value_as_u32(); }
-
-  /// @returns the name for this literal. This name is unique to this value.
-  std::string name() const override;
+  /// @returns the literal value as a u32
+  uint32_t ValueAsU32() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   UintLiteral* Clone(CloneContext* ctx) const override;
+
+  /// The int literal value
+  uint32_t const value;
 };
 
 }  // namespace ast

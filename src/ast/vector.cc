@@ -21,14 +21,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Vector);
 namespace tint {
 namespace ast {
 
-Vector::Vector(ProgramID program_id,
-               const Source& source,
+Vector::Vector(ProgramID pid,
+               const Source& src,
                Type const* subtype,
-               uint32_t size)
-    : Base(program_id, source), subtype_(subtype), size_(size) {
+               uint32_t w)
+    : Base(pid, src), type(const_cast<Type*>(subtype)), width(w) {
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, subtype, program_id);
-  TINT_ASSERT(AST, size_ > 1);
-  TINT_ASSERT(AST, size_ < 5);
+  TINT_ASSERT(AST, width > 1);
+  TINT_ASSERT(AST, width < 5);
 }
 
 Vector::Vector(Vector&&) = default;
@@ -37,15 +37,15 @@ Vector::~Vector() = default;
 
 std::string Vector::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
-  out << "vec" << size_ << "<" << subtype_->FriendlyName(symbols) << ">";
+  out << "vec" << width << "<" << type->FriendlyName(symbols) << ">";
   return out.str();
 }
 
 Vector* Vector::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<Vector>(src, ty, size_);
+  auto src = ctx->Clone(source);
+  auto* ty = ctx->Clone(type);
+  return ctx->dst->create<Vector>(src, ty, width);
 }
 
 }  // namespace ast

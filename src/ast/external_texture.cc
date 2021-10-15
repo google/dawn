@@ -22,8 +22,8 @@ namespace tint {
 namespace ast {
 
 // ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
-ExternalTexture::ExternalTexture(ProgramID program_id, const Source& source)
-    : Base(program_id, source, ast::TextureDimension::k2d) {}
+ExternalTexture::ExternalTexture(ProgramID pid, const Source& src)
+    : Base(pid, src, ast::TextureDimension::k2d) {}
 
 ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 

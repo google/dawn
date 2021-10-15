@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, CaseBody_Empty) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
-  EXPECT_EQ(e->size(), 0u);
+  EXPECT_EQ(e->statements.size(), 0u);
 }
 
 TEST_F(ParserImplTest, CaseBody_Statements) {
@@ -38,9 +38,9 @@ TEST_F(ParserImplTest, CaseBody_Statements) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
-  ASSERT_EQ(e->size(), 2u);
-  EXPECT_TRUE(e->get(0)->Is<ast::VariableDeclStatement>());
-  EXPECT_TRUE(e->get(1)->Is<ast::AssignmentStatement>());
+  ASSERT_EQ(e->statements.size(), 2u);
+  EXPECT_TRUE(e->statements[0]->Is<ast::VariableDeclStatement>());
+  EXPECT_TRUE(e->statements[1]->Is<ast::AssignmentStatement>());
 }
 
 TEST_F(ParserImplTest, CaseBody_InvalidStatement) {
@@ -58,8 +58,8 @@ TEST_F(ParserImplTest, CaseBody_Fallthrough) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
-  ASSERT_EQ(e->size(), 1u);
-  EXPECT_TRUE(e->get(0)->Is<ast::FallthroughStatement>());
+  ASSERT_EQ(e->statements.size(), 1u);
+  EXPECT_TRUE(e->statements[0]->Is<ast::FallthroughStatement>());
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {

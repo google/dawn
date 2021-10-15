@@ -23,19 +23,18 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructBlockDecoration);
 namespace tint {
 namespace ast {
 
-StructBlockDecoration::StructBlockDecoration(ProgramID program_id,
-                                             const Source& source)
-    : Base(program_id, source) {}
+StructBlockDecoration::StructBlockDecoration(ProgramID pid, const Source& src)
+    : Base(pid, src) {}
 
 StructBlockDecoration::~StructBlockDecoration() = default;
 
-std::string StructBlockDecoration::name() const {
+std::string StructBlockDecoration::Name() const {
   return "block";
 }
 
 StructBlockDecoration* StructBlockDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
+  auto src = ctx->Clone(source);
   return ctx->dst->create<StructBlockDecoration>(src);
 }
 

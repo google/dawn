@@ -26,23 +26,21 @@ namespace ast {
 class TypeDecl : public Castable<TypeDecl, Node> {
  public:
   /// Create a new struct statement
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source The input source for the import statement
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node for the import statement
   /// @param name The name of the structure
-  TypeDecl(ProgramID program_id, const Source& source, Symbol name);
+  TypeDecl(ProgramID pid, const Source& src, Symbol name);
   /// Move constructor
   TypeDecl(TypeDecl&&);
 
   ~TypeDecl() override;
 
-  /// @returns the name of the type declaration
-  Symbol name() const { return name_; }
+  /// The name of the type declaration
+  Symbol const name;
 
  private:
   TypeDecl(const TypeDecl&) = delete;
   TypeDecl& operator=(const TypeDecl&) = delete;
-
-  Symbol const name_;
 };
 
 }  // namespace ast

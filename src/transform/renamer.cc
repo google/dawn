@@ -1115,11 +1115,11 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
         continue;
       }
       if (sem->Is<sem::Swizzle>()) {
-        preserve.emplace(member->member());
-      } else if (auto* str_expr = in->Sem().Get(member->structure())) {
+        preserve.emplace(member->member);
+      } else if (auto* str_expr = in->Sem().Get(member->structure)) {
         if (auto* ty = str_expr->Type()->UnwrapRef()->As<sem::Struct>()) {
           if (ty->Declaration() == nullptr) {  // Builtin structure
-            preserve.emplace(member->member());
+            preserve.emplace(member->member);
           }
         }
       }
@@ -1131,7 +1131,7 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
         continue;
       }
       if (sem->Target()->Is<sem::Intrinsic>()) {
-        preserve.emplace(call->func());
+        preserve.emplace(call->func);
       }
     }
   }
@@ -1190,11 +1190,11 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
   ctx.ReplaceAll(
       [&](ast::IdentifierExpression* ident) -> ast::IdentifierExpression* {
         if (preserve.count(ident)) {
-          auto sym_in = ident->symbol();
+          auto sym_in = ident->symbol;
           auto str = in->Symbols().NameFor(sym_in);
           auto sym_out = out.Symbols().Register(str);
           return ctx.dst->create<ast::IdentifierExpression>(
-              ctx.Clone(ident->source()), sym_out);
+              ctx.Clone(ident->source), sym_out);
         }
         return nullptr;  // Clone ident. Uses the symbol remapping above.
       });

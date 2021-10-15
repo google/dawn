@@ -26,19 +26,14 @@ namespace ast {
 class LocationDecoration : public Castable<LocationDecoration, Decoration> {
  public:
   /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param value the location value
-  LocationDecoration(ProgramID program_id,
-                     const Source& source,
-                     uint32_t value);
+  LocationDecoration(ProgramID pid, const Source& src, uint32_t value);
   ~LocationDecoration() override;
 
-  /// @returns the location value
-  uint32_t value() const { return value_; }
-
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -46,8 +41,8 @@ class LocationDecoration : public Castable<LocationDecoration, Decoration> {
   /// @return the newly cloned node
   LocationDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  uint32_t const value_;
+  /// The location value
+  uint32_t const value;
 };
 
 }  // namespace ast

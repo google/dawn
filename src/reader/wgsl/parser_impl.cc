@@ -419,7 +419,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("struct declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      register_type(builder_.Symbols().NameFor(str.value->name()), str.value);
+      register_type(builder_.Symbols().NameFor(str.value->name), str.value);
       builder_.AST().AddTypeDecl(str.value);
       return true;
     }
@@ -1791,7 +1791,7 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
                             constructor,             // constructor
                             ast::DecorationList{});  // decorations
 
-  return create<ast::VariableDeclStatement>(var->source(), var);
+  return create<ast::VariableDeclStatement>(var->source, var);
 }
 
 // if_stmt
@@ -1946,7 +1946,7 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
     } else if (!cond.matched) {
       break;
     } else if (!cond->Is<ast::IntLiteral>()) {
-      return add_error(cond.value->source(),
+      return add_error(cond.value->source,
                        "invalid case selector must be an integer value");
     }
 
@@ -3191,7 +3191,7 @@ bool ParserImpl::expect_decorations_consumed(const ast::DecorationList& in) {
   if (in.empty()) {
     return true;
   }
-  add_error(in[0]->source(), "unexpected decorations");
+  add_error(in[0]->source, "unexpected decorations");
   return false;
 }
 

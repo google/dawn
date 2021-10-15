@@ -21,12 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallStatement);
 namespace tint {
 namespace ast {
 
-CallStatement::CallStatement(ProgramID program_id,
-                             const Source& source,
+CallStatement::CallStatement(ProgramID pid,
+                             const Source& src,
                              CallExpression* call)
-    : Base(program_id, source), call_(call) {
-  TINT_ASSERT(AST, call_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, call_, program_id);
+    : Base(pid, src), expr(call) {
+  TINT_ASSERT(AST, expr);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
 }
 
 CallStatement::CallStatement(CallStatement&&) = default;
@@ -35,8 +35,8 @@ CallStatement::~CallStatement() = default;
 
 CallStatement* CallStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* call = ctx->Clone(call_);
+  auto src = ctx->Clone(source);
+  auto* call = ctx->Clone(expr);
   return ctx->dst->create<CallStatement>(src, call);
 }
 

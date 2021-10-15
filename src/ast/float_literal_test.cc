@@ -23,12 +23,7 @@ using FloatLiteralTest = TestHelper;
 TEST_F(FloatLiteralTest, Value) {
   auto* f = create<FloatLiteral>(47.2f);
   ASSERT_TRUE(f->Is<FloatLiteral>());
-  EXPECT_EQ(f->value(), 47.2f);
-}
-
-TEST_F(FloatLiteralTest, ToName) {
-  auto* f = create<FloatLiteral>(42.1f);
-  EXPECT_EQ(f->name(), "__float42.0999985");
+  EXPECT_EQ(f->value, 47.2f);
 }
 
 }  // namespace

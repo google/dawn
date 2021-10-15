@@ -25,7 +25,7 @@ using StageDecorationTest = TestHelper;
 
 TEST_F(StageDecorationTest, Creation_1param) {
   auto* d = create<StageDecoration>(PipelineStage::kFragment);
-  EXPECT_EQ(d->value(), PipelineStage::kFragment);
+  EXPECT_EQ(d->stage, PipelineStage::kFragment);
 }
 
 }  // namespace

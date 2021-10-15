@@ -17,7 +17,7 @@
 namespace tint {
 namespace ast {
 
-const char* str(StorageClass sc) {
+const char* ToString(StorageClass sc) {
   switch (sc) {
     case StorageClass::kInvalid:
       return "invalid";
@@ -45,7 +45,7 @@ const char* str(StorageClass sc) {
   return "<unknown>";
 }
 std::ostream& operator<<(std::ostream& out, StorageClass sc) {
-  out << str(sc);
+  out << ToString(sc);
   return out;
 }
 

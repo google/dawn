@@ -23,7 +23,7 @@ using BindingDecorationTest = TestHelper;
 
 TEST_F(BindingDecorationTest, Creation) {
   auto* d = create<BindingDecoration>(2);
-  EXPECT_EQ(2u, d->value());
+  EXPECT_EQ(2u, d->value);
 }
 
 }  // namespace

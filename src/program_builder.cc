@@ -65,7 +65,7 @@ ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
   builder.id_ = program->ID();
   builder.types_ = sem::Manager::Wrap(program->Types());
   builder.ast_ = builder.create<ast::Module>(
-      program->AST().source(), program->AST().GlobalDeclarations());
+      program->AST().source, program->AST().GlobalDeclarations());
   builder.sem_ = sem::Info::Wrap(program->Sem());
   builder.symbols_ = program->Symbols();
   builder.diagnostics_ = program->Diagnostics();
@@ -108,12 +108,12 @@ const sem::Type* ProgramBuilder::TypeOf(const ast::TypeDecl* type_decl) const {
 }
 
 ast::TypeName* ProgramBuilder::TypesBuilder::Of(ast::TypeDecl* decl) const {
-  return type_name(decl->name());
+  return type_name(decl->name);
 }
 
 const ast::TypeName* ProgramBuilder::TypesBuilder::Of(
     const ast::TypeDecl* decl) const {
-  return type_name(decl->name());
+  return type_name(decl->name);
 }
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}

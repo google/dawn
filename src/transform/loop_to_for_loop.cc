@@ -30,10 +30,10 @@ namespace transform {
 namespace {
 
 bool IsBlockWithSingleBreak(ast::BlockStatement* block) {
-  if (block->size() != 1) {
+  if (block->statements.size() != 1) {
     return false;
   }
-  return block->statements()[0]->Is<ast::BreakStatement>();
+  return block->statements[0]->Is<ast::BreakStatement>();
 }
 
 bool IsVarUsedByStmt(const sem::Info& sem,
@@ -67,7 +67,7 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     // Examples:
     //   loop {  if (condition) { break; } ... }
     //   loop {  if (condition) {} else { break; } ... }
-    auto& stmts = loop->body()->statements();
+    auto& stmts = loop->body->statements;
     if (stmts.empty()) {
       return nullptr;
     }
@@ -77,13 +77,12 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     }
 
     bool negate_condition = false;
-    if (IsBlockWithSingleBreak(if_stmt->body()) &&
-        if_stmt->else_statements().empty()) {
+    if (IsBlockWithSingleBreak(if_stmt->body) &&
+        if_stmt->else_statements.empty()) {
       negate_condition = true;
-    } else if (if_stmt->body()->empty() &&
-               if_stmt->else_statements().size() == 1 &&
-               if_stmt->else_statements()[0]->condition() == nullptr &&
-               IsBlockWithSingleBreak(if_stmt->else_statements()[0]->body())) {
+    } else if (if_stmt->body->Empty() && if_stmt->else_statements.size() == 1 &&
+               if_stmt->else_statements[0]->condition == nullptr &&
+               IsBlockWithSingleBreak(if_stmt->else_statements[0]->body)) {
       negate_condition = false;
     } else {
       return nullptr;
@@ -92,12 +91,12 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     // The continuing block must be empty or contain a single, assignment or
     // function call statement.
     ast::Statement* continuing = nullptr;
-    if (auto* loop_cont = loop->continuing()) {
-      if (loop_cont->statements().size() != 1) {
+    if (auto* loop_cont = loop->continuing) {
+      if (loop_cont->statements.size() != 1) {
         return nullptr;
       }
 
-      continuing = loop_cont->statements()[0];
+      continuing = loop_cont->statements[0];
       if (!continuing
                ->IsAnyOf<ast::AssignmentStatement, ast::CallStatement>()) {
         return nullptr;
@@ -105,10 +104,9 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
 
       // And the continuing statement must not use any of the variables declared
       // in the loop body.
-      for (auto* stmt : loop->body()->statements()) {
+      for (auto* stmt : loop->body->statements) {
         if (auto* var_decl = stmt->As<ast::VariableDeclStatement>()) {
-          if (IsVarUsedByStmt(ctx.src->Sem(), var_decl->variable(),
-                              continuing)) {
+          if (IsVarUsedByStmt(ctx.src->Sem(), var_decl->variable, continuing)) {
             return nullptr;
           }
         }
@@ -117,7 +115,7 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       continuing = ctx.Clone(continuing);
     }
 
-    auto* condition = ctx.Clone(if_stmt->condition());
+    auto* condition = ctx.Clone(if_stmt->condition);
     if (negate_condition) {
       condition = ctx.dst->create<ast::UnaryOpExpression>(ast::UnaryOp::kNot,
                                                           condition);
@@ -125,8 +123,8 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
 
     ast::Statement* initializer = nullptr;
 
-    ctx.Remove(loop->body()->statements(), if_stmt);
-    auto* body = ctx.Clone(loop->body());
+    ctx.Remove(loop->body->statements, if_stmt);
+    auto* body = ctx.Clone(loop->body);
     return ctx.dst->create<ast::ForLoopStatement>(initializer, condition,
                                                   continuing, body);
   });

@@ -29,17 +29,17 @@ TEST_F(ParserImplTest, EqualityExpression_Parses_Equal) {
 
   ASSERT_TRUE(e->Is<ast::BinaryExpression>());
   auto* rel = e->As<ast::BinaryExpression>();
-  EXPECT_EQ(ast::BinaryOp::kEqual, rel->op());
+  EXPECT_EQ(ast::BinaryOp::kEqual, rel->op);
 
-  ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
-  auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+  auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
-  auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
-  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
+  ASSERT_TRUE(rel->rhs->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(rel->rhs->Is<ast::ScalarConstructorExpression>());
+  auto* init = rel->rhs->As<ast::ScalarConstructorExpression>();
+  ASSERT_TRUE(init->literal->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal->As<ast::BoolLiteral>()->value);
 }
 
 TEST_F(ParserImplTest, EqualityExpression_Parses_NotEqual) {
@@ -52,17 +52,17 @@ TEST_F(ParserImplTest, EqualityExpression_Parses_NotEqual) {
 
   ASSERT_TRUE(e->Is<ast::BinaryExpression>());
   auto* rel = e->As<ast::BinaryExpression>();
-  EXPECT_EQ(ast::BinaryOp::kNotEqual, rel->op());
+  EXPECT_EQ(ast::BinaryOp::kNotEqual, rel->op);
 
-  ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
-  auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+  auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
-  auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
-  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
+  ASSERT_TRUE(rel->rhs->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(rel->rhs->Is<ast::ScalarConstructorExpression>());
+  auto* init = rel->rhs->As<ast::ScalarConstructorExpression>();
+  ASSERT_TRUE(init->literal->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal->As<ast::BoolLiteral>()->value);
 }
 
 TEST_F(ParserImplTest, EqualityExpression_InvalidLHS) {

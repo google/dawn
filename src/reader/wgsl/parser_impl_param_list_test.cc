@@ -27,14 +27,14 @@ TEST_F(ParserImplTest, ParamList_Single) {
   ASSERT_FALSE(e.errored);
   EXPECT_EQ(e.value.size(), 1u);
 
-  EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_TRUE(e.value[0]->type()->Is<ast::I32>());
-  EXPECT_TRUE(e.value[0]->is_const());
+  EXPECT_EQ(e.value[0]->symbol, p->builder().Symbols().Get("a"));
+  EXPECT_TRUE(e.value[0]->type->Is<ast::I32>());
+  EXPECT_TRUE(e.value[0]->is_const);
 
-  ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
-  ASSERT_EQ(e.value[0]->source().range.begin.column, 1u);
-  ASSERT_EQ(e.value[0]->source().range.end.line, 1u);
-  ASSERT_EQ(e.value[0]->source().range.end.column, 2u);
+  ASSERT_EQ(e.value[0]->source.range.begin.line, 1u);
+  ASSERT_EQ(e.value[0]->source.range.begin.column, 1u);
+  ASSERT_EQ(e.value[0]->source.range.end.line, 1u);
+  ASSERT_EQ(e.value[0]->source.range.end.column, 2u);
 }
 
 TEST_F(ParserImplTest, ParamList_Multiple) {
@@ -45,34 +45,34 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_FALSE(e.errored);
   EXPECT_EQ(e.value.size(), 3u);
 
-  EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_TRUE(e.value[0]->type()->Is<ast::I32>());
-  EXPECT_TRUE(e.value[0]->is_const());
+  EXPECT_EQ(e.value[0]->symbol, p->builder().Symbols().Get("a"));
+  EXPECT_TRUE(e.value[0]->type->Is<ast::I32>());
+  EXPECT_TRUE(e.value[0]->is_const);
 
-  ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
-  ASSERT_EQ(e.value[0]->source().range.begin.column, 1u);
-  ASSERT_EQ(e.value[0]->source().range.end.line, 1u);
-  ASSERT_EQ(e.value[0]->source().range.end.column, 2u);
+  ASSERT_EQ(e.value[0]->source.range.begin.line, 1u);
+  ASSERT_EQ(e.value[0]->source.range.begin.column, 1u);
+  ASSERT_EQ(e.value[0]->source.range.end.line, 1u);
+  ASSERT_EQ(e.value[0]->source.range.end.column, 2u);
 
-  EXPECT_EQ(e.value[1]->symbol(), p->builder().Symbols().Get("b"));
-  EXPECT_TRUE(e.value[1]->type()->Is<ast::F32>());
-  EXPECT_TRUE(e.value[1]->is_const());
+  EXPECT_EQ(e.value[1]->symbol, p->builder().Symbols().Get("b"));
+  EXPECT_TRUE(e.value[1]->type->Is<ast::F32>());
+  EXPECT_TRUE(e.value[1]->is_const);
 
-  ASSERT_EQ(e.value[1]->source().range.begin.line, 1u);
-  ASSERT_EQ(e.value[1]->source().range.begin.column, 10u);
-  ASSERT_EQ(e.value[1]->source().range.end.line, 1u);
-  ASSERT_EQ(e.value[1]->source().range.end.column, 11u);
+  ASSERT_EQ(e.value[1]->source.range.begin.line, 1u);
+  ASSERT_EQ(e.value[1]->source.range.begin.column, 10u);
+  ASSERT_EQ(e.value[1]->source.range.end.line, 1u);
+  ASSERT_EQ(e.value[1]->source.range.end.column, 11u);
 
-  EXPECT_EQ(e.value[2]->symbol(), p->builder().Symbols().Get("c"));
-  ASSERT_TRUE(e.value[2]->type()->Is<ast::Vector>());
-  ASSERT_TRUE(e.value[2]->type()->As<ast::Vector>()->type()->Is<ast::F32>());
-  EXPECT_EQ(e.value[2]->type()->As<ast::Vector>()->size(), 2u);
-  EXPECT_TRUE(e.value[2]->is_const());
+  EXPECT_EQ(e.value[2]->symbol, p->builder().Symbols().Get("c"));
+  ASSERT_TRUE(e.value[2]->type->Is<ast::Vector>());
+  ASSERT_TRUE(e.value[2]->type->As<ast::Vector>()->type->Is<ast::F32>());
+  EXPECT_EQ(e.value[2]->type->As<ast::Vector>()->width, 2u);
+  EXPECT_TRUE(e.value[2]->is_const);
 
-  ASSERT_EQ(e.value[2]->source().range.begin.line, 1u);
-  ASSERT_EQ(e.value[2]->source().range.begin.column, 18u);
-  ASSERT_EQ(e.value[2]->source().range.end.line, 1u);
-  ASSERT_EQ(e.value[2]->source().range.end.column, 19u);
+  ASSERT_EQ(e.value[2]->source.range.begin.line, 1u);
+  ASSERT_EQ(e.value[2]->source.range.begin.column, 18u);
+  ASSERT_EQ(e.value[2]->source.range.end.line, 1u);
+  ASSERT_EQ(e.value[2]->source.range.end.column, 19u);
 }
 
 TEST_F(ParserImplTest, ParamList_Empty) {
@@ -101,34 +101,34 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
   ASSERT_FALSE(e.errored);
   ASSERT_EQ(e.value.size(), 2u);
 
-  EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("coord"));
-  ASSERT_TRUE(e.value[0]->type()->Is<ast::Vector>());
-  EXPECT_TRUE(e.value[0]->type()->As<ast::Vector>()->type()->Is<ast::F32>());
-  EXPECT_EQ(e.value[0]->type()->As<ast::Vector>()->size(), 4u);
-  EXPECT_TRUE(e.value[0]->is_const());
-  auto decos0 = e.value[0]->decorations();
+  EXPECT_EQ(e.value[0]->symbol, p->builder().Symbols().Get("coord"));
+  ASSERT_TRUE(e.value[0]->type->Is<ast::Vector>());
+  EXPECT_TRUE(e.value[0]->type->As<ast::Vector>()->type->Is<ast::F32>());
+  EXPECT_EQ(e.value[0]->type->As<ast::Vector>()->width, 4u);
+  EXPECT_TRUE(e.value[0]->is_const);
+  auto decos0 = e.value[0]->decorations;
   ASSERT_EQ(decos0.size(), 1u);
   EXPECT_TRUE(decos0[0]->Is<ast::BuiltinDecoration>());
-  EXPECT_EQ(decos0[0]->As<ast::BuiltinDecoration>()->value(),
+  EXPECT_EQ(decos0[0]->As<ast::BuiltinDecoration>()->builtin,
             ast::Builtin::kPosition);
 
-  ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
-  ASSERT_EQ(e.value[0]->source().range.begin.column, 23u);
-  ASSERT_EQ(e.value[0]->source().range.end.line, 1u);
-  ASSERT_EQ(e.value[0]->source().range.end.column, 28u);
+  ASSERT_EQ(e.value[0]->source.range.begin.line, 1u);
+  ASSERT_EQ(e.value[0]->source.range.begin.column, 23u);
+  ASSERT_EQ(e.value[0]->source.range.end.line, 1u);
+  ASSERT_EQ(e.value[0]->source.range.end.column, 28u);
 
-  EXPECT_EQ(e.value[1]->symbol(), p->builder().Symbols().Get("loc1"));
-  EXPECT_TRUE(e.value[1]->type()->Is<ast::F32>());
-  EXPECT_TRUE(e.value[1]->is_const());
-  auto decos1 = e.value[1]->decorations();
+  EXPECT_EQ(e.value[1]->symbol, p->builder().Symbols().Get("loc1"));
+  EXPECT_TRUE(e.value[1]->type->Is<ast::F32>());
+  EXPECT_TRUE(e.value[1]->is_const);
+  auto decos1 = e.value[1]->decorations;
   ASSERT_EQ(decos1.size(), 1u);
   EXPECT_TRUE(decos1[0]->Is<ast::LocationDecoration>());
-  EXPECT_EQ(decos1[0]->As<ast::LocationDecoration>()->value(), 1u);
+  EXPECT_EQ(decos1[0]->As<ast::LocationDecoration>()->value, 1u);
 
-  ASSERT_EQ(e.value[1]->source().range.begin.line, 1u);
-  ASSERT_EQ(e.value[1]->source().range.begin.column, 58u);
-  ASSERT_EQ(e.value[1]->source().range.end.line, 1u);
-  ASSERT_EQ(e.value[1]->source().range.end.column, 62u);
+  ASSERT_EQ(e.value[1]->source.range.begin.line, 1u);
+  ASSERT_EQ(e.value[1]->source.range.begin.column, 58u);
+  ASSERT_EQ(e.value[1]->source.range.end.line, 1u);
+  ASSERT_EQ(e.value[1]->source.range.end.column, 62u);
 }
 
 }  // namespace

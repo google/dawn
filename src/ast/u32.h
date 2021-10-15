@@ -26,9 +26,9 @@ namespace ast {
 class U32 : public Castable<U32, Type> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
-  U32(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  U32(ProgramID pid, const Source& src);
   /// Move constructor
   U32(U32&&);
   ~U32() override;

@@ -125,8 +125,8 @@ TEST_P(IntrinsicTextureSamplerValidationTest, ConstExpr) {
   auto& p = GetParam();
   auto param = std::get<0>(p);
   auto offset = std::get<1>(p);
-  param.buildTextureVariable(this);
-  param.buildSamplerVariable(this);
+  param.BuildTextureVariable(this);
+  param.BuildSamplerVariable(this);
 
   auto args = param.args(this);
   // Make Resolver visit the Node about to be removed
@@ -160,8 +160,8 @@ TEST_P(IntrinsicTextureSamplerValidationTest, ConstExprOfConstExpr) {
   auto& p = GetParam();
   auto param = std::get<0>(p);
   auto offset = std::get<1>(p);
-  param.buildTextureVariable(this);
-  param.buildSamplerVariable(this);
+  param.BuildTextureVariable(this);
+  param.BuildSamplerVariable(this);
 
   auto args = param.args(this);
   // Make Resolver visit the Node about to be removed
@@ -192,8 +192,8 @@ TEST_P(IntrinsicTextureSamplerValidationTest, ConstExprOfConstExpr) {
 TEST_P(IntrinsicTextureSamplerValidationTest, EmptyVectorConstructor) {
   auto& p = GetParam();
   auto param = std::get<0>(p);
-  param.buildTextureVariable(this);
-  param.buildSamplerVariable(this);
+  param.BuildTextureVariable(this);
+  param.BuildSamplerVariable(this);
 
   auto args = param.args(this);
   // Make Resolver visit the Node about to be removed
@@ -215,8 +215,8 @@ TEST_P(IntrinsicTextureSamplerValidationTest, GlobalConst) {
   auto& p = GetParam();
   auto param = std::get<0>(p);
   auto offset = std::get<1>(p);
-  param.buildTextureVariable(this);
-  param.buildSamplerVariable(this);
+  param.BuildTextureVariable(this);
+  param.BuildSamplerVariable(this);
 
   auto args = param.args(this);
   // Make Resolver visit the Node about to be removed
@@ -245,8 +245,8 @@ TEST_P(IntrinsicTextureSamplerValidationTest, ScalarConst) {
   auto& p = GetParam();
   auto param = std::get<0>(p);
   auto offset = std::get<1>(p);
-  param.buildTextureVariable(this);
-  param.buildSamplerVariable(this);
+  param.BuildTextureVariable(this);
+  param.BuildSamplerVariable(this);
   auto* x = Const("x", ty.i32(), Construct(ty.i32(), offset.x));
 
   auto args = param.args(this);

@@ -28,19 +28,14 @@ class StructMemberSizeDecoration
     : public Castable<StructMemberSizeDecoration, Decoration> {
  public:
   /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param size the size value
-  StructMemberSizeDecoration(ProgramID program_id,
-                             const Source& source,
-                             uint32_t size);
+  StructMemberSizeDecoration(ProgramID pid, const Source& src, uint32_t size);
   ~StructMemberSizeDecoration() override;
 
-  /// @returns the size value
-  uint32_t size() const { return size_; }
-
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -48,8 +43,8 @@ class StructMemberSizeDecoration
   /// @return the newly cloned node
   StructMemberSizeDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  uint32_t const size_;
+  /// The size value
+  uint32_t const size;
 };
 
 }  // namespace ast

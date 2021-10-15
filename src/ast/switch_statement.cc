@@ -21,14 +21,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::SwitchStatement);
 namespace tint {
 namespace ast {
 
-SwitchStatement::SwitchStatement(ProgramID program_id,
-                                 const Source& source,
-                                 Expression* condition,
-                                 CaseStatementList body)
-    : Base(program_id, source), condition_(condition), body_(body) {
-  TINT_ASSERT(AST, condition_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition_, program_id);
-  for (auto* stmt : body_) {
+SwitchStatement::SwitchStatement(ProgramID pid,
+                                 const Source& src,
+                                 Expression* cond,
+                                 CaseStatementList b)
+    : Base(pid, src), condition(cond), body(b) {
+  TINT_ASSERT(AST, condition);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
+  for (auto* stmt : body) {
     TINT_ASSERT(AST, stmt);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, stmt, program_id);
   }
@@ -40,9 +40,9 @@ SwitchStatement::~SwitchStatement() = default;
 
 SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* cond = ctx->Clone(condition());
-  auto b = ctx->Clone(body());
+  auto src = ctx->Clone(source);
+  auto* cond = ctx->Clone(condition);
+  auto b = ctx->Clone(body);
   return ctx->dst->create<SwitchStatement>(src, cond, b);
 }
 

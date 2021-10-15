@@ -21,8 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Bool);
 namespace tint {
 namespace ast {
 
-Bool::Bool(ProgramID program_id, const Source& source)
-    : Base(program_id, source) {}
+Bool::Bool(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 Bool::Bool(Bool&&) = default;
 
@@ -33,7 +32,7 @@ std::string Bool::FriendlyName(const SymbolTable&) const {
 }
 
 Bool* Bool::Clone(CloneContext* ctx) const {
-  auto src = ctx->Clone(source());
+  auto src = ctx->Clone(source);
   return ctx->dst->create<Bool>(src);
 }
 

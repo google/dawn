@@ -21,13 +21,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::UnaryOpExpression);
 namespace tint {
 namespace ast {
 
-UnaryOpExpression::UnaryOpExpression(ProgramID program_id,
-                                     const Source& source,
-                                     UnaryOp op,
-                                     Expression* expr)
-    : Base(program_id, source), op_(op), expr_(expr) {
-  TINT_ASSERT(AST, expr_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr_, program_id);
+UnaryOpExpression::UnaryOpExpression(ProgramID pid,
+                                     const Source& src,
+                                     UnaryOp o,
+                                     Expression* e)
+    : Base(pid, src), op(o), expr(e) {
+  TINT_ASSERT(AST, expr);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
 }
 
 UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
@@ -36,9 +36,9 @@ UnaryOpExpression::~UnaryOpExpression() = default;
 
 UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* e = ctx->Clone(expr());
-  return ctx->dst->create<UnaryOpExpression>(src, op_, e);
+  auto src = ctx->Clone(source);
+  auto* e = ctx->Clone(expr);
+  return ctx->dst->create<UnaryOpExpression>(src, op, e);
 }
 
 }  // namespace ast

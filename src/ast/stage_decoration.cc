@@ -23,21 +23,21 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StageDecoration);
 namespace tint {
 namespace ast {
 
-StageDecoration::StageDecoration(ProgramID program_id,
-                                 const Source& source,
-                                 PipelineStage stage)
-    : Base(program_id, source), stage_(stage) {}
+StageDecoration::StageDecoration(ProgramID pid,
+                                 const Source& src,
+                                 PipelineStage s)
+    : Base(pid, src), stage(s) {}
 
 StageDecoration::~StageDecoration() = default;
 
-std::string StageDecoration::name() const {
+std::string StageDecoration::Name() const {
   return "stage";
 }
 
 StageDecoration* StageDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<StageDecoration>(src, stage_);
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<StageDecoration>(src, stage);
 }
 
 }  // namespace ast

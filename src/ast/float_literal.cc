@@ -23,25 +23,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::FloatLiteral);
 namespace tint {
 namespace ast {
 
-FloatLiteral::FloatLiteral(ProgramID program_id,
-                           const Source& source,
-                           float value)
-    : Base(program_id, source), value_(value) {}
+FloatLiteral::FloatLiteral(ProgramID pid, const Source& src, float val)
+    : Base(pid, src), value(val) {}
 
 FloatLiteral::~FloatLiteral() = default;
 
-std::string FloatLiteral::name() const {
-  std::ostringstream out;
-  out.flags(out.flags() | std::ios_base::showpoint);
-  out.precision(std::numeric_limits<float>::max_digits10);
-  out << "__float" << value_;
-  return out.str();
-}
-
 FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<FloatLiteral>(src, value_);
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<FloatLiteral>(src, value);
 }
 
 }  // namespace ast

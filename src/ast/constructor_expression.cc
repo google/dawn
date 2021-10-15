@@ -23,9 +23,8 @@ ConstructorExpression::~ConstructorExpression() = default;
 
 ConstructorExpression::ConstructorExpression(ConstructorExpression&&) = default;
 
-ConstructorExpression::ConstructorExpression(ProgramID program_id,
-                                             const Source& source)
-    : Base(program_id, source) {}
+ConstructorExpression::ConstructorExpression(ProgramID pid, const Source& src)
+    : Base(pid, src) {}
 
 }  // namespace ast
 }  // namespace tint

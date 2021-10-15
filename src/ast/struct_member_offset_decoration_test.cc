@@ -22,7 +22,7 @@ using StructMemberOffsetDecorationTest = TestHelper;
 
 TEST_F(StructMemberOffsetDecorationTest, Creation) {
   auto* d = create<StructMemberOffsetDecoration>(2);
-  EXPECT_EQ(2u, d->offset());
+  EXPECT_EQ(2u, d->offset);
 }
 
 }  // namespace

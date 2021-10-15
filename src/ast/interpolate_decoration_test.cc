@@ -25,8 +25,8 @@ using InterpolateDecorationTest = TestHelper;
 TEST_F(InterpolateDecorationTest, Creation) {
   auto* d = create<InterpolateDecoration>(InterpolationType::kLinear,
                                           InterpolationSampling::kCenter);
-  EXPECT_EQ(InterpolationType::kLinear, d->type());
-  EXPECT_EQ(InterpolationSampling::kCenter, d->sampling());
+  EXPECT_EQ(InterpolationType::kLinear, d->type);
+  EXPECT_EQ(InterpolationSampling::kCenter, d->sampling);
 }
 
 }  // namespace

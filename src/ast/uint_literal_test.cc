@@ -23,7 +23,7 @@ using UintLiteralTest = TestHelper;
 TEST_F(UintLiteralTest, Value) {
   auto* u = create<UintLiteral>(47);
   ASSERT_TRUE(u->Is<UintLiteral>());
-  EXPECT_EQ(u->value(), 47u);
+  EXPECT_EQ(u->value, 47u);
 }
 
 }  // namespace

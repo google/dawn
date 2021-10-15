@@ -28,20 +28,20 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   ASSERT_NE(e.value, nullptr);
 
   ASSERT_TRUE(e->Is<ast::AssignmentStatement>());
-  ASSERT_NE(e->lhs(), nullptr);
-  ASSERT_NE(e->rhs(), nullptr);
+  ASSERT_NE(e->lhs, nullptr);
+  ASSERT_NE(e->rhs, nullptr);
 
-  ASSERT_TRUE(e->lhs()->Is<ast::IdentifierExpression>());
-  auto* ident = e->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_TRUE(e->lhs->Is<ast::IdentifierExpression>());
+  auto* ident = e->lhs->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(e->rhs()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(e->rhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(e->rhs->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e->rhs->Is<ast::ScalarConstructorExpression>());
 
-  auto* init = e->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 123);
+  auto* init = e->rhs->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(init->literal, nullptr);
+  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 123);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
@@ -53,49 +53,49 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   ASSERT_NE(e.value, nullptr);
 
   ASSERT_TRUE(e->Is<ast::AssignmentStatement>());
-  ASSERT_NE(e->lhs(), nullptr);
-  ASSERT_NE(e->rhs(), nullptr);
+  ASSERT_NE(e->lhs, nullptr);
+  ASSERT_NE(e->rhs, nullptr);
 
-  ASSERT_TRUE(e->rhs()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(e->rhs()->Is<ast::ScalarConstructorExpression>());
-  auto* init = e->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 123);
+  ASSERT_TRUE(e->rhs->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e->rhs->Is<ast::ScalarConstructorExpression>());
+  auto* init = e->rhs->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(init->literal, nullptr);
+  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 123);
 
-  ASSERT_TRUE(e->lhs()->Is<ast::MemberAccessorExpression>());
-  auto* mem = e->lhs()->As<ast::MemberAccessorExpression>();
+  ASSERT_TRUE(e->lhs->Is<ast::MemberAccessorExpression>());
+  auto* mem = e->lhs->As<ast::MemberAccessorExpression>();
 
-  ASSERT_TRUE(mem->member()->Is<ast::IdentifierExpression>());
-  auto* ident = mem->member()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("d"));
+  ASSERT_TRUE(mem->member->Is<ast::IdentifierExpression>());
+  auto* ident = mem->member->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("d"));
 
-  ASSERT_TRUE(mem->structure()->Is<ast::ArrayAccessorExpression>());
-  auto* ary = mem->structure()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(mem->structure->Is<ast::ArrayAccessorExpression>());
+  auto* ary = mem->structure->As<ast::ArrayAccessorExpression>();
 
-  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
-  init = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 2);
+  ASSERT_TRUE(ary->index->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->index->Is<ast::ScalarConstructorExpression>());
+  init = ary->index->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(init->literal, nullptr);
+  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 2);
 
-  ASSERT_TRUE(ary->array()->Is<ast::MemberAccessorExpression>());
-  mem = ary->array()->As<ast::MemberAccessorExpression>();
-  ASSERT_TRUE(mem->member()->Is<ast::IdentifierExpression>());
-  ident = mem->member()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("c"));
+  ASSERT_TRUE(ary->array->Is<ast::MemberAccessorExpression>());
+  mem = ary->array->As<ast::MemberAccessorExpression>();
+  ASSERT_TRUE(mem->member->Is<ast::IdentifierExpression>());
+  ident = mem->member->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("c"));
 
-  ASSERT_TRUE(mem->structure()->Is<ast::MemberAccessorExpression>());
-  mem = mem->structure()->As<ast::MemberAccessorExpression>();
+  ASSERT_TRUE(mem->structure->Is<ast::MemberAccessorExpression>());
+  mem = mem->structure->As<ast::MemberAccessorExpression>();
 
-  ASSERT_TRUE(mem->structure()->Is<ast::IdentifierExpression>());
-  ident = mem->structure()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
+  ASSERT_TRUE(mem->structure->Is<ast::IdentifierExpression>());
+  ident = mem->structure->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(mem->member()->Is<ast::IdentifierExpression>());
-  ident = mem->member()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("b"));
+  ASSERT_TRUE(mem->member->Is<ast::IdentifierExpression>());
+  ident = mem->member->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {

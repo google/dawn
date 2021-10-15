@@ -37,16 +37,16 @@ Simplify::~Simplify() = default;
 void Simplify::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll([&](ast::Expression* expr) -> ast::Expression* {
     if (auto* outer = expr->As<ast::UnaryOpExpression>()) {
-      if (auto* inner = outer->expr()->As<ast::UnaryOpExpression>()) {
-        if (outer->op() == ast::UnaryOp::kAddressOf &&
-            inner->op() == ast::UnaryOp::kIndirection) {
+      if (auto* inner = outer->expr->As<ast::UnaryOpExpression>()) {
+        if (outer->op == ast::UnaryOp::kAddressOf &&
+            inner->op == ast::UnaryOp::kIndirection) {
           // &(*(expr)) => expr
-          return ctx.Clone(inner->expr());
+          return ctx.Clone(inner->expr);
         }
-        if (outer->op() == ast::UnaryOp::kIndirection &&
-            inner->op() == ast::UnaryOp::kAddressOf) {
+        if (outer->op == ast::UnaryOp::kIndirection &&
+            inner->op == ast::UnaryOp::kAddressOf) {
           // *(&(expr)) => expr
-          return ctx.Clone(inner->expr());
+          return ctx.Clone(inner->expr);
         }
       }
     }

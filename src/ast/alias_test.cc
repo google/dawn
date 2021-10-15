@@ -36,8 +36,8 @@ using AstAliasTest = TestHelper;
 TEST_F(AstAliasTest, Create) {
   auto* u32 = create<U32>();
   auto* a = Alias("a_type", u32);
-  EXPECT_EQ(a->symbol(), Symbol(1, ID()));
-  EXPECT_EQ(a->type(), u32);
+  EXPECT_EQ(a->name, Symbol(1, ID()));
+  EXPECT_EQ(a->type, u32);
 }
 
 }  // namespace

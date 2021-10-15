@@ -51,7 +51,7 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
 
     // If original ctor expression had no init values, don't replace the
     // expression
-    if (ctor->values().size() == 0) {
+    if (ctor->values.size() == 0) {
       return nullptr;
     }
 
@@ -68,7 +68,7 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       // create it with 3. So what we do is construct with vec_size args,
       // except if the original vector was single-value initialized, in
       // which case, we only construct with one arg again.
-      uint32_t ctor_size = (ctor->values().size() == 1) ? 1 : vec_size;
+      uint32_t ctor_size = (ctor->values.size() == 1) ? 1 : vec_size;
 
       ast::ExpressionList ctors;
       for (uint32_t i = 0; i < ctor_size; ++i) {

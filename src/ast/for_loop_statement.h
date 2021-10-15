@@ -42,39 +42,26 @@ class ForLoopStatement : public Castable<ForLoopStatement, Statement> {
   ForLoopStatement(ForLoopStatement&&);
   ~ForLoopStatement() override;
 
-  /// @returns the initializer statement
-  const Statement* initializer() const { return initializer_; }
-  /// @returns the initializer statement
-  Statement* initializer() { return initializer_; }
-
-  /// @returns the condition expression
-  const Expression* condition() const { return condition_; }
-  /// @returns the condition expression
-  Expression* condition() { return condition_; }
-
-  /// @returns the continuing statement
-  const Statement* continuing() const { return continuing_; }
-  /// @returns the continuing statement
-  Statement* continuing() { return continuing_; }
-
-  /// @returns the loop body block
-  const BlockStatement* body() const { return body_; }
-  /// @returns the loop body block
-  BlockStatement* body() { return body_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   ForLoopStatement* Clone(CloneContext* ctx) const override;
 
+  /// The initializer statement
+  Statement* const initializer;
+
+  /// The condition expression
+  Expression* const condition;
+
+  /// The continuing statement
+  Statement* const continuing;
+
+  /// The loop body block
+  BlockStatement* const body;
+
  private:
   ForLoopStatement(const ForLoopStatement&) = delete;
-
-  Statement* const initializer_;
-  Expression* const condition_;
-  Statement* const continuing_;
-  BlockStatement* const body_;
 };
 
 }  // namespace ast

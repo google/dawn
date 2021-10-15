@@ -25,21 +25,17 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
  public:
   ~IntLiteral() override;
 
-  /// @returns the literal value as an i32
-  int32_t value_as_i32() const { return static_cast<int32_t>(value_); }
-
   /// @returns the literal value as a u32
-  uint32_t value_as_u32() const { return value_; }
+  virtual uint32_t ValueAsU32() const = 0;
+
+  /// @returns the literal value as an i32
+  int32_t ValueAsI32() const { return static_cast<int32_t>(ValueAsU32()); }
 
  protected:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the input source
-  /// @param value value of the literal
-  IntLiteral(ProgramID program_id, const Source& source, uint32_t value);
-
- private:
-  uint32_t const value_;
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  IntLiteral(ProgramID pid, const Source& src);
 };  // namespace ast
 
 }  // namespace ast

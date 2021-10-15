@@ -64,9 +64,6 @@ class DisableValidationDecoration
   /// Destructor
   ~DisableValidationDecoration() override;
 
-  /// @return the validation that this decoration disables
-  DisabledValidation Validation() const { return validation_; }
-
   /// @return a short description of the internal decoration which will be
   /// displayed in WGSL as `[[internal(<name>)]]` (but is not parsable).
   std::string InternalName() const override;
@@ -76,8 +73,8 @@ class DisableValidationDecoration
   /// @return the newly cloned object
   DisableValidationDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  DisabledValidation const validation_;
+  /// The validation that this decoration disables
+  DisabledValidation const validation;
 };
 
 }  // namespace ast

@@ -29,14 +29,14 @@ TEST_F(BlockStatementTest, Creation) {
 
   auto* b = create<BlockStatement>(StatementList{d});
 
-  ASSERT_EQ(b->size(), 1u);
-  EXPECT_EQ((*b)[0], ptr);
+  ASSERT_EQ(b->statements.size(), 1u);
+  EXPECT_EQ(b->statements[0], ptr);
 }
 
 TEST_F(BlockStatementTest, Creation_WithSource) {
   auto* b = create<BlockStatement>(Source{Source::Location{20, 2}},
                                    ast::StatementList{});
-  auto src = b->source();
+  auto src = b->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }

@@ -118,7 +118,7 @@ void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll(
       [&](ast::ArrayAccessorExpression* accessor) -> ast::Expression* {
         if (auto* array = tint::As<sem::Array>(
-                sem.Get(accessor->array())->Type()->UnwrapRef())) {
+                sem.Get(accessor->array)->Type()->UnwrapRef())) {
           if (pad(array)) {
             // Array element is wrapped in a structure. Emit a member accessor
             // to get to the actual array element.
@@ -136,11 +136,11 @@ void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
             tint::As<sem::Array>(sem.Get(ctor)->Type()->UnwrapRef())) {
       if (auto p = pad(array)) {
         auto* arr_ty = p();
-        auto el_typename = arr_ty->type()->As<ast::TypeName>()->name();
+        auto el_typename = arr_ty->type->As<ast::TypeName>()->name;
 
         ast::ExpressionList args;
-        args.reserve(ctor->values().size());
-        for (auto* arg : ctor->values()) {
+        args.reserve(ctor->values.size());
+        for (auto* arg : ctor->values) {
           args.emplace_back(ctx.dst->Construct(
               ctx.dst->create<ast::TypeName>(el_typename), ctx.Clone(arg)));
         }

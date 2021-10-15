@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   ASSERT_EQ(program.AST().GlobalVariables().size(), 1u);
 
   auto* v = program.AST().GlobalVariables()[0];
-  EXPECT_EQ(v->symbol(), program.Symbols().Get("a"));
+  EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred_Invalid) {
@@ -67,7 +67,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
   ASSERT_EQ(program.AST().GlobalVariables().size(), 1u);
 
   auto* v = program.AST().GlobalVariables()[0];
-  EXPECT_EQ(v->symbol(), program.Symbols().Get("a"));
+  EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_Invalid) {
@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
   ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Alias>());
   EXPECT_EQ(program.Symbols().NameFor(
-                program.AST().TypeDecls()[0]->As<ast::Alias>()->symbol()),
+                program.AST().TypeDecls()[0]->As<ast::Alias>()->name),
             "A");
 }
 
@@ -110,14 +110,14 @@ type B = A;)");
   ASSERT_EQ(program.AST().TypeDecls().size(), 2u);
   ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Struct>());
   auto* str = program.AST().TypeDecls()[0]->As<ast::Struct>();
-  EXPECT_EQ(str->name(), program.Symbols().Get("A"));
+  EXPECT_EQ(str->name, program.Symbols().Get("A"));
 
   ASSERT_TRUE(program.AST().TypeDecls()[1]->Is<ast::Alias>());
   auto* alias = program.AST().TypeDecls()[1]->As<ast::Alias>();
-  EXPECT_EQ(alias->symbol(), program.Symbols().Get("B"));
-  auto* tn = alias->type()->As<ast::TypeName>();
+  EXPECT_EQ(alias->name, program.Symbols().Get("B"));
+  auto* tn = alias->type->As<ast::TypeName>();
   EXPECT_NE(tn, nullptr);
-  EXPECT_EQ(tn->name(), str->name());
+  EXPECT_EQ(tn->name, str->name);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Invalid) {
@@ -141,7 +141,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 
   auto program = p->program();
   ASSERT_EQ(program.AST().Functions().size(), 1u);
-  EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->symbol()),
+  EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->symbol),
             "main");
 }
 
@@ -152,7 +152,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
 
   auto program = p->program();
   ASSERT_EQ(program.AST().Functions().size(), 1u);
-  EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->symbol()),
+  EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->symbol),
             "main");
 }
 
@@ -176,8 +176,8 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   ASSERT_TRUE(t->Is<ast::Struct>());
 
   auto* str = t->As<ast::Struct>();
-  EXPECT_EQ(str->name(), program.Symbols().Get("A"));
-  EXPECT_EQ(str->members().size(), 2u);
+  EXPECT_EQ(str->name, program.Symbols().Get("A"));
+  EXPECT_EQ(str->members.size(), 2u);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
@@ -194,18 +194,18 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   ASSERT_TRUE(t->Is<ast::Struct>());
 
   auto* str = t->As<ast::Struct>();
-  EXPECT_EQ(str->name(), program.Symbols().Get("A"));
-  EXPECT_EQ(str->members().size(), 1u);
+  EXPECT_EQ(str->name, program.Symbols().Get("A"));
+  EXPECT_EQ(str->members.size(), 1u);
   EXPECT_FALSE(str->IsBlockDecorated());
 
-  const auto* ty = str->members()[0]->type();
+  const auto* ty = str->members[0]->type;
   ASSERT_TRUE(ty->Is<ast::Array>());
   const auto* arr = ty->As<ast::Array>();
 
-  ASSERT_EQ(arr->decorations().size(), 1u);
-  auto* stride = arr->decorations()[0];
+  ASSERT_EQ(arr->decorations.size(), 1u);
+  auto* stride = arr->decorations[0];
   ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
-  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 4u);
+  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride, 4u);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
@@ -221,8 +221,8 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   ASSERT_TRUE(t->Is<ast::Struct>());
 
   auto* str = t->As<ast::Struct>();
-  EXPECT_EQ(str->name(), program.Symbols().Get("A"));
-  EXPECT_EQ(str->members().size(), 1u);
+  EXPECT_EQ(str->name, program.Symbols().Get("A"));
+  EXPECT_EQ(str->members.size(), 1u);
   EXPECT_TRUE(str->IsBlockDecorated());
 }
 

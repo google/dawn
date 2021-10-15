@@ -33,20 +33,20 @@ std::ostream& operator<<(std::ostream& out, SamplerKind kind) {
   return out;
 }
 
-Sampler::Sampler(ProgramID program_id, const Source& source, SamplerKind kind)
-    : Base(program_id, source), kind_(kind) {}
+Sampler::Sampler(ProgramID pid, const Source& src, SamplerKind k)
+    : Base(pid, src), kind(k) {}
 
 Sampler::Sampler(Sampler&&) = default;
 
 Sampler::~Sampler() = default;
 
 std::string Sampler::FriendlyName(const SymbolTable&) const {
-  return kind_ == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
+  return kind == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 
 Sampler* Sampler::Clone(CloneContext* ctx) const {
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<Sampler>(src, kind_);
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<Sampler>(src, kind);
 }
 
 }  // namespace ast

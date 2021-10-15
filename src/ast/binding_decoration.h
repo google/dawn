@@ -26,17 +26,14 @@ namespace ast {
 class BindingDecoration : public Castable<BindingDecoration, Decoration> {
  public:
   /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param value the binding value
-  BindingDecoration(ProgramID program_id, const Source& source, uint32_t value);
+  BindingDecoration(ProgramID pid, const Source& src, uint32_t value);
   ~BindingDecoration() override;
 
-  /// @returns the binding value
-  uint32_t value() const { return value_; }
-
   /// @returns the WGSL name for the decoration
-  std::string name() const override;
+  std::string Name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -44,8 +41,8 @@ class BindingDecoration : public Castable<BindingDecoration, Decoration> {
   /// @return the newly cloned node
   BindingDecoration* Clone(CloneContext* ctx) const override;
 
- private:
-  uint32_t const value_;
+  /// the binding value
+  uint32_t const value;
 };
 
 }  // namespace ast

@@ -331,8 +331,8 @@ class HlslGeneratorIntrinsicTextureTest
 TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   auto param = GetParam();
 
-  param.buildTextureVariable(this);
-  param.buildSamplerVariable(this);
+  param.BuildTextureVariable(this);
+  param.BuildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
   auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)

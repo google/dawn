@@ -21,20 +21,20 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IfStatement);
 namespace tint {
 namespace ast {
 
-IfStatement::IfStatement(ProgramID program_id,
-                         const Source& source,
-                         Expression* condition,
-                         BlockStatement* body,
+IfStatement::IfStatement(ProgramID pid,
+                         const Source& src,
+                         Expression* cond,
+                         BlockStatement* b,
                          ElseStatementList else_stmts)
-    : Base(program_id, source),
-      condition_(condition),
-      body_(body),
-      else_statements_(std::move(else_stmts)) {
-  TINT_ASSERT(AST, condition_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition_, program_id);
-  TINT_ASSERT(AST, body_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body_, program_id);
-  for (auto* el : else_statements_) {
+    : Base(pid, src),
+      condition(cond),
+      body(b),
+      else_statements(std::move(else_stmts)) {
+  TINT_ASSERT(AST, condition);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
+  TINT_ASSERT(AST, body);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
+  for (auto* el : else_statements) {
     TINT_ASSERT(AST, el);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, el, program_id);
   }
@@ -46,10 +46,10 @@ IfStatement::~IfStatement() = default;
 
 IfStatement* IfStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  auto* cond = ctx->Clone(condition_);
-  auto* b = ctx->Clone(body_);
-  auto el = ctx->Clone(else_statements_);
+  auto src = ctx->Clone(source);
+  auto* cond = ctx->Clone(condition);
+  auto* b = ctx->Clone(body);
+  auto el = ctx->Clone(else_statements);
   return ctx->dst->create<IfStatement>(src, cond, b, el);
 }
 

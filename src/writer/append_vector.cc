@@ -80,7 +80,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   // In that case, preserve the original argument, or you'll get a type error.
   ast::ExpressionList packed;
   if (auto* vc = AsVectorConstructor(b, vector)) {
-    const auto num_supplied = vc->values().size();
+    const auto num_supplied = vc->values.size();
     if (num_supplied == 0) {
       // Zero-value vector constructor. Populate with zeros
       auto buildZero = [&]() -> ast::ScalarConstructorExpression* {
@@ -109,7 +109,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
       }
     } else if (num_supplied + 1 == packed_size) {
       // All vector components were supplied as scalars.  Pass them through.
-      packed = vc->values();
+      packed = vc->values;
     }
   }
   if (packed.empty()) {

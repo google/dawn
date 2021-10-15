@@ -57,7 +57,7 @@ Function::ReferencedLocationVariables() const {
   std::vector<std::pair<const Variable*, ast::LocationDecoration*>> ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    for (auto* deco : var->Declaration()->decorations()) {
+    for (auto* deco : var->Declaration()->decorations) {
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         ret.push_back({var, location});
         break;
@@ -75,7 +75,7 @@ Function::VariableBindings Function::ReferencedUniformVariables() const {
       continue;
     }
 
-    if (auto binding_point = var->Declaration()->binding_point()) {
+    if (auto binding_point = var->Declaration()->BindingPoint()) {
       ret.push_back({var, binding_point});
     }
   }
@@ -90,7 +90,7 @@ Function::VariableBindings Function::ReferencedStorageBufferVariables() const {
       continue;
     }
 
-    if (auto binding_point = var->Declaration()->binding_point()) {
+    if (auto binding_point = var->Declaration()->BindingPoint()) {
       ret.push_back({var, binding_point});
     }
   }
@@ -102,7 +102,7 @@ Function::ReferencedBuiltinVariables() const {
   std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>> ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    for (auto* deco : var->Declaration()->decorations()) {
+    for (auto* deco : var->Declaration()->decorations) {
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         ret.push_back({var, builtin});
         break;
@@ -136,7 +136,7 @@ Function::VariableBindings Function::ReferencedVariablesOfType(
   for (auto* var : ReferencedModuleVariables()) {
     auto* unwrapped_type = var->Type()->UnwrapRef();
     if (unwrapped_type->TypeInfo().Is(type_info)) {
-      if (auto binding_point = var->Declaration()->binding_point()) {
+      if (auto binding_point = var->Declaration()->BindingPoint()) {
         ret.push_back({var, binding_point});
       }
     }
@@ -164,7 +164,7 @@ Function::VariableBindings Function::ReferencedSamplerVariablesImpl(
       continue;
     }
 
-    if (auto binding_point = var->Declaration()->binding_point()) {
+    if (auto binding_point = var->Declaration()->BindingPoint()) {
       ret.push_back({var, binding_point});
     }
   }
@@ -189,7 +189,7 @@ Function::VariableBindings Function::ReferencedSampledTextureVariablesImpl(
       continue;
     }
 
-    if (auto binding_point = var->Declaration()->binding_point()) {
+    if (auto binding_point = var->Declaration()->BindingPoint()) {
       ret.push_back({var, binding_point});
     }
   }

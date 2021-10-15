@@ -157,9 +157,9 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
   auto* str = Structure("S", {member}, {create<ast::StructBlockDecoration>()});
 
   auto* expected_type = create<sem::Struct>(
-      str, str->name(),
+      str, str->name,
       sem::StructMemberList{create<sem::StructMember>(
-          member, member->symbol(), create<sem::I32>(), 0, 0, 0, 4)},
+          member, member->symbol, create<sem::I32>(), 0, 0, 0, 4)},
       0, 4, 4);
 
   auto* ctor_expr = Construct(ty.Of(str));

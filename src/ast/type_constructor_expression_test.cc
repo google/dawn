@@ -26,9 +26,9 @@ TEST_F(TypeConstructorExpressionTest, Creation) {
   expr.push_back(Expr("expr"));
 
   auto* t = create<TypeConstructorExpression>(ty.f32(), expr);
-  EXPECT_TRUE(t->type()->Is<ast::F32>());
-  ASSERT_EQ(t->values().size(), 1u);
-  EXPECT_EQ(t->values()[0], expr[0]);
+  EXPECT_TRUE(t->type->Is<ast::F32>());
+  ASSERT_EQ(t->values.size(), 1u);
+  EXPECT_EQ(t->values[0], expr[0]);
 }
 
 TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
@@ -37,7 +37,7 @@ TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
 
   auto* t = create<TypeConstructorExpression>(Source{Source::Location{20, 2}},
                                               ty.f32(), expr);
-  auto src = t->source();
+  auto src = t->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }

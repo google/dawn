@@ -27,15 +27,15 @@ using LoopStatementTest = TestHelper;
 
 TEST_F(LoopStatementTest, Creation) {
   auto* body = Block(create<DiscardStatement>());
-  auto* b = body->last();
+  auto* b = body->Last();
 
   auto* continuing = Block(create<DiscardStatement>());
 
   auto* l = create<LoopStatement>(body, continuing);
-  ASSERT_EQ(l->body()->size(), 1u);
-  EXPECT_EQ(l->body()->get(0), b);
-  ASSERT_EQ(l->continuing()->size(), 1u);
-  EXPECT_EQ(l->continuing()->get(0), continuing->last());
+  ASSERT_EQ(l->body->statements.size(), 1u);
+  EXPECT_EQ(l->body->statements[0], b);
+  ASSERT_EQ(l->continuing->statements.size(), 1u);
+  EXPECT_EQ(l->continuing->statements[0], continuing->Last());
 }
 
 TEST_F(LoopStatementTest, Creation_WithSource) {
@@ -45,7 +45,7 @@ TEST_F(LoopStatementTest, Creation_WithSource) {
 
   auto* l =
       create<LoopStatement>(Source{Source::Location{20, 2}}, body, continuing);
-  auto src = l->source();
+  auto src = l->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
@@ -59,7 +59,7 @@ TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
   auto* body = Block(create<DiscardStatement>());
 
   auto* l = create<LoopStatement>(body, nullptr);
-  EXPECT_FALSE(l->has_continuing());
+  EXPECT_FALSE(l->continuing);
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
@@ -68,7 +68,7 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
   auto* continuing = Block(create<DiscardStatement>());
 
   auto* l = create<LoopStatement>(body, continuing);
-  EXPECT_TRUE(l->has_continuing());
+  EXPECT_TRUE(l->continuing);
 }
 
 TEST_F(LoopStatementTest, Assert_Null_Body) {

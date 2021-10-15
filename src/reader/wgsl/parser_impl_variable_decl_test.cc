@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   EXPECT_TRUE(v->type->Is<ast::F32>());
 
   EXPECT_EQ(v->source.range, (Source::Range{{1u, 5u}, {1u, 11u}}));
-  EXPECT_EQ(v->type->source().range, (Source::Range{{1u, 14u}, {1u, 17u}}));
+  EXPECT_EQ(v->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
 }
 
 TEST_F(ParserImplTest, VariableDecl_Inferred_Parses) {

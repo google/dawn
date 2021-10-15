@@ -39,22 +39,19 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
   BitcastExpression(BitcastExpression&&);
   ~BitcastExpression() override;
 
-  /// @returns the left side expression
-  ast::Type* type() const { return type_; }
-  /// @returns the expression
-  Expression* expr() const { return expr_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
   BitcastExpression* Clone(CloneContext* ctx) const override;
 
+  /// the target cast type
+  ast::Type* const type;
+  /// the expression
+  Expression* const expr;
+
  private:
   BitcastExpression(const BitcastExpression&) = delete;
-
-  ast::Type* const type_;
-  Expression* const expr_;
 };
 
 }  // namespace ast

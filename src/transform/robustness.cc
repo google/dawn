@@ -46,7 +46,7 @@ struct Robustness::State {
   /// @return the clamped replacement expression, or nullptr if `expr` should be
   /// cloned without changes.
   ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr) {
-    auto* ret_type = ctx.src->Sem().Get(expr->array())->Type()->UnwrapRef();
+    auto* ret_type = ctx.src->Sem().Get(expr->array)->Type()->UnwrapRef();
 
     ProgramBuilder& b = *ctx.dst;
     using u32 = ProgramBuilder::u32;
@@ -78,11 +78,11 @@ struct Robustness::State {
     if (size.u32 == 0) {
       if (!ret_type->Is<sem::Array>()) {
         b.Diagnostics().add_error(diag::System::Transform,
-                                  "invalid 0 sized non-array", expr->source());
+                                  "invalid 0 sized non-array", expr->source);
         return nullptr;
       }
       // Runtime sized array
-      auto* arr = ctx.Clone(expr->array());
+      auto* arr = ctx.Clone(expr->array);
       size.expr = b.Call("arrayLength", b.AddressOf(arr));
     }
 
@@ -101,7 +101,7 @@ struct Robustness::State {
 
     Value idx;  // index value
 
-    auto* idx_sem = ctx.src->Sem().Get(expr->idx_expr());
+    auto* idx_sem = ctx.src->Sem().Get(expr->index);
     auto* idx_ty = idx_sem->Type()->UnwrapRef();
     if (!idx_ty->IsAnyOf<sem::I32, sem::U32>()) {
       TINT_ICE(Transform, b.Diagnostics())
@@ -121,12 +121,12 @@ struct Robustness::State {
         b.Diagnostics().add_error(diag::System::Transform,
                                   "unsupported constant value for accessor: " +
                                       idx_constant.Type()->type_name(),
-                                  expr->source());
+                                  expr->source);
         return nullptr;
       }
     } else {
       // Dynamic value index
-      idx.expr = ctx.Clone(expr->idx_expr());
+      idx.expr = ctx.Clone(expr->index);
       idx.is_signed = idx_ty->Is<sem::I32>();
     }
 
@@ -178,8 +178,8 @@ struct Robustness::State {
     }
 
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(expr->source());
-    auto* arr = ctx.Clone(expr->array());
+    auto src = ctx.Clone(expr->source);
+    auto* arr = ctx.Clone(expr->array);
     return b.IndexAccessor(src, arr, idx.expr);
   }
 
@@ -214,8 +214,8 @@ struct Robustness::State {
     auto array_idx = signature.IndexOf(sem::ParameterUsage::kArrayIndex);
     auto level_idx = signature.IndexOf(sem::ParameterUsage::kLevel);
 
-    auto* texture_arg = expr->args()[texture_idx];
-    auto* coords_arg = expr->args()[coords_idx];
+    auto* texture_arg = expr->args[texture_idx];
+    auto* coords_arg = expr->args[coords_idx];
     auto* coords_ty = intrinsic->Parameters()[coords_idx]->Type();
 
     // If the level is provided, then we need to clamp this. As the level is
@@ -226,7 +226,7 @@ struct Robustness::State {
     std::function<ast::Expression*()> level_arg;
     if (level_idx >= 0) {
       level_arg = [&] {
-        auto* arg = expr->args()[level_idx];
+        auto* arg = expr->args[level_idx];
         auto* num_levels = b.Call("textureNumLevels", ctx.Clone(texture_arg));
         auto* zero = b.Expr(0);
         auto* max = ctx.dst->Sub(num_levels, 1);
@@ -250,7 +250,7 @@ struct Robustness::State {
 
     // Clamp the array_index argument, if provided
     if (array_idx >= 0) {
-      auto* arg = expr->args()[array_idx];
+      auto* arg = expr->args[array_idx];
       auto* num_layers = b.Call("textureNumLayers", ctx.Clone(texture_arg));
       auto* zero = b.Expr(0);
       auto* max = ctx.dst->Sub(num_layers, 1);
@@ -260,7 +260,7 @@ struct Robustness::State {
 
     // Clamp the level argument, if provided
     if (level_idx >= 0) {
-      auto* arg = expr->args()[level_idx];
+      auto* arg = expr->args[level_idx];
       ctx.Replace(arg, level_arg ? level_arg() : ctx.dst->Expr(0));
     }
 

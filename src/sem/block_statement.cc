@@ -40,7 +40,7 @@ void BlockStatement::AddDecl(ast::Variable* var) {
 }
 
 FunctionBlockStatement::FunctionBlockStatement(const ast::Function* function)
-    : Base(function->body(), nullptr), function_(function) {}
+    : Base(function->body, nullptr), function_(function) {}
 
 FunctionBlockStatement::~FunctionBlockStatement() = default;
 

@@ -65,19 +65,16 @@ int NumCoordinateAxes(TextureDimension dim);
 class Texture : public Castable<Texture, Type> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param dim the dimensionality of the texture
-  Texture(ProgramID program_id, const Source& source, TextureDimension dim);
+  Texture(ProgramID pid, const Source& src, TextureDimension dim);
   /// Move constructor
   Texture(Texture&&);
   ~Texture() override;
 
-  /// @returns the texture dimension
-  TextureDimension dim() const { return dim_; }
-
- private:
-  TextureDimension const dim_;
+  /// The texture dimension
+  TextureDimension const dim;
 };
 
 }  // namespace ast

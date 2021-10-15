@@ -27,21 +27,15 @@ class ArrayAccessorExpression
   /// Constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the array accessor source
-  /// @param array the array
-  /// @param idx_expr the index expression
+  /// @param arr the array
+  /// @param idx the index expression
   ArrayAccessorExpression(ProgramID program_id,
                           const Source& source,
-                          Expression* array,
-                          Expression* idx_expr);
+                          Expression* arr,
+                          Expression* idx);
   /// Move constructor
   ArrayAccessorExpression(ArrayAccessorExpression&&);
   ~ArrayAccessorExpression() override;
-
-  /// @returns the array
-  Expression* array() const { return array_; }
-
-  /// @returns the index expression
-  Expression* idx_expr() const { return idx_expr_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -49,11 +43,14 @@ class ArrayAccessorExpression
   /// @return the newly cloned node
   ArrayAccessorExpression* Clone(CloneContext* ctx) const override;
 
+  /// the array
+  Expression* const array;
+
+  /// the index expression
+  Expression* const index;
+
  private:
   ArrayAccessorExpression(const ArrayAccessorExpression&) = delete;
-
-  Expression* const array_;
-  Expression* const idx_expr_;
 };
 
 }  // namespace ast

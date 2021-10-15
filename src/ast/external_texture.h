@@ -26,9 +26,9 @@ namespace ast {
 class ExternalTexture : public Castable<ExternalTexture, Texture> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
-  ExternalTexture(ProgramID program_id, const Source& source);
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
+  ExternalTexture(ProgramID pid, const Source& src);
 
   /// Move constructor
   ExternalTexture(ExternalTexture&&);

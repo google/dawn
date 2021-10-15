@@ -32,6 +32,18 @@ class GroupDecoration;
 class LocationDecoration;
 class Type;
 
+/// VariableBindingPoint holds a group and binding decoration.
+struct VariableBindingPoint {
+  /// The `[[group]]` part of the binding point
+  GroupDecoration* group = nullptr;
+  /// The `[[binding]]` part of the binding point
+  BindingDecoration* binding = nullptr;
+
+  /// @returns true if the BindingPoint has a valid group and binding
+  /// decoration.
+  inline operator bool() const { return group && binding; }
+};
+
 /// A Variable statement.
 ///
 /// An instance of this class represents one of three constructs in WGSL: "var"
@@ -87,18 +99,6 @@ class Type;
 ///   - formal parameter is always StorageClass::kNone.
 class Variable : public Castable<Variable, Node> {
  public:
-  /// BindingPoint holds a group and binding decoration.
-  struct BindingPoint {
-    /// The `[[group]]` part of the binding point
-    GroupDecoration* group = nullptr;
-    /// The `[[binding]]` part of the binding point
-    BindingDecoration* binding = nullptr;
-
-    /// @returns true if the BindingPoint has a valid group and binding
-    /// decoration.
-    inline operator bool() const { return group && binding; }
-  };
-
   /// Create a variable
   /// @param program_id the identifier of the program that owns this node
   /// @param source the variable source
@@ -123,33 +123,8 @@ class Variable : public Castable<Variable, Node> {
 
   ~Variable() override;
 
-  /// @returns the variable symbol
-  const Symbol& symbol() const { return symbol_; }
-
-  /// @returns the variable type
-  ast::Type* type() const { return const_cast<ast::Type*>(type_); }
-
-  /// @returns the declared storage class
-  StorageClass declared_storage_class() const {
-    return declared_storage_class_;
-  }
-
-  /// @returns the declared access control
-  Access declared_access() const { return declared_access_; }
-
-  /// @returns the constructor expression or nullptr if none set
-  Expression* constructor() const { return constructor_; }
-  /// @returns true if the variable has an constructor
-  bool has_constructor() const { return constructor_ != nullptr; }
-
-  /// @returns true if this is a constant, false otherwise
-  bool is_const() const { return is_const_; }
-
-  /// @returns the decorations attached to this variable
-  const DecorationList& decorations() const { return decorations_; }
-
   /// @returns the binding point information for the variable
-  BindingPoint binding_point() const;
+  VariableBindingPoint BindingPoint() const;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -157,17 +132,29 @@ class Variable : public Castable<Variable, Node> {
   /// @return the newly cloned node
   Variable* Clone(CloneContext* ctx) const override;
 
+  /// The variable symbol
+  Symbol const symbol;
+
+  /// The variable type
+  ast::Type* const type;
+
+  /// True if this is a constant, false otherwise
+  bool const is_const;
+
+  /// The constructor expression or nullptr if none set
+  Expression* const constructor;
+
+  /// The decorations attached to this variable
+  DecorationList const decorations;
+
+  /// The declared storage class
+  StorageClass const declared_storage_class;
+
+  /// The declared access control
+  Access const declared_access;
+
  private:
   Variable(const Variable&) = delete;
-
-  Symbol const symbol_;
-  // The value type if a const or formal paramter, and the store type if a var
-  ast::Type const* const type_;
-  bool const is_const_;
-  Expression* const constructor_;
-  DecorationList const decorations_;
-  StorageClass const declared_storage_class_;
-  Access const declared_access_;
 };
 
 /// A list of variables

@@ -255,8 +255,8 @@ class CloneContext {
   ///   CloneCtx ctx(&out, in);
   ///   ctx.ReplaceAll([&] (ast::UintLiteral* l) {
   ///       return ctx->dst->create<ast::UintLiteral>(
-  ///           ctx->Clone(l->source()),
-  ///           ctx->Clone(l->type()),
+  ///           ctx->Clone(l->source),
+  ///           ctx->Clone(l->type),
   ///           42);
   ///     });
   ///   ctx.Clone();

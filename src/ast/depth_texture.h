@@ -26,12 +26,10 @@ namespace ast {
 class DepthTexture : public Castable<DepthTexture, Texture> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this node
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param dim the dimensionality of the texture
-  DepthTexture(ProgramID program_id,
-               const Source& source,
-               TextureDimension dim);
+  DepthTexture(ProgramID pid, const Source& src, TextureDimension dim);
   /// Move constructor
   DepthTexture(DepthTexture&&);
   ~DepthTexture() override;

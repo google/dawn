@@ -26,19 +26,12 @@ namespace ast {
 class BoolLiteral : public Castable<BoolLiteral, Literal> {
  public:
   /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the input source
+  /// @param pid the identifier of the program that owns this node
+  /// @param src the source of this node
   /// @param value the bool literals value
-  BoolLiteral(ProgramID program_id, const Source& source, bool value);
+  BoolLiteral(ProgramID pid, const Source& src, bool value);
   ~BoolLiteral() override;
 
-  /// @returns true if the bool literal is true
-  bool IsTrue() const { return value_; }
-  /// @returns true if the bool literal is false
-  bool IsFalse() const { return !value_; }
-
-  /// @returns the name for this literal. This name is unique to this value.
-  std::string name() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -46,8 +39,8 @@ class BoolLiteral : public Castable<BoolLiteral, Literal> {
   /// @return the newly cloned node
   BoolLiteral* Clone(CloneContext* ctx) const override;
 
- private:
-  bool const value_;
+  /// The boolean literal value
+  bool const value;
 };
 
 }  // namespace ast

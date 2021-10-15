@@ -59,7 +59,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
   EXPECT_TRUE(result[0]->Is<ast::StructMemberOffsetDecoration>());
   auto* offset_deco = result[0]->As<ast::StructMemberOffsetDecoration>();
   ASSERT_NE(offset_deco, nullptr);
-  EXPECT_EQ(offset_deco->offset(), 8u);
+  EXPECT_EQ(offset_deco->offset, 8u);
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -85,7 +85,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Custom) {
   EXPECT_TRUE(result[0]->Is<ast::StrideDecoration>());
   auto* stride_deco = result[0]->As<ast::StrideDecoration>();
   ASSERT_NE(stride_deco, nullptr);
-  EXPECT_EQ(stride_deco->stride(), 16u);
+  EXPECT_EQ(stride_deco->stride, 16u);
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -111,7 +111,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Custom) {
   EXPECT_TRUE(result[0]->Is<ast::StrideDecoration>());
   auto* stride_deco = result[0]->As<ast::StrideDecoration>();
   ASSERT_NE(stride_deco, nullptr);
-  EXPECT_EQ(stride_deco->stride(), 64u);
+  EXPECT_EQ(stride_deco->stride, 64u);
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -126,7 +126,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x3_Stride_Custom) {
   EXPECT_TRUE(result[0]->Is<ast::StrideDecoration>());
   auto* stride_deco = result[0]->As<ast::StrideDecoration>();
   ASSERT_NE(stride_deco, nullptr);
-  EXPECT_EQ(stride_deco->stride(), 32u);
+  EXPECT_EQ(stride_deco->stride, 32u);
   EXPECT_TRUE(p->error().empty());
 }
 

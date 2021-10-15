@@ -29,7 +29,7 @@ TEST_F(IfStatementTest, Creation) {
   auto* stmt = create<IfStatement>(Source{Source::Location{20, 2}}, cond,
                                    Block(create<DiscardStatement>()),
                                    ElseStatementList{});
-  auto src = stmt->source();
+  auto src = stmt->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }

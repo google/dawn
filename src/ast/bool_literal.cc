@@ -21,19 +21,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteral);
 namespace tint {
 namespace ast {
 
-BoolLiteral::BoolLiteral(ProgramID program_id, const Source& source, bool value)
-    : Base(program_id, source), value_(value) {}
+BoolLiteral::BoolLiteral(ProgramID pid, const Source& src, bool val)
+    : Base(pid, src), value(val) {}
 
 BoolLiteral::~BoolLiteral() = default;
 
-std::string BoolLiteral::name() const {
-  return value_ ? "__bool_true" : "__bool_false";
-}
-
 BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source());
-  return ctx->dst->create<BoolLiteral>(src, value_);
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<BoolLiteral>(src, value);
 }
 
 }  // namespace ast

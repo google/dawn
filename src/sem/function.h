@@ -52,9 +52,9 @@ struct WorkgroupDimension {
 /// Function holds the semantic information for function nodes.
 class Function : public Castable<Function, CallTarget> {
  public:
-  /// A vector of [Variable*, ast::Variable::BindingPoint] pairs
+  /// A vector of [Variable*, ast::VariableBindingPoint] pairs
   using VariableBindings =
-      std::vector<std::pair<const Variable*, ast::Variable::BindingPoint>>;
+      std::vector<std::pair<const Variable*, ast::VariableBindingPoint>>;
 
   /// Constructor
   /// @param declaration the ast::Function
