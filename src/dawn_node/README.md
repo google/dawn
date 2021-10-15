@@ -45,6 +45,7 @@ ninja dawn.node
 
 1. [Build](#build) the `dawn.node` NodeJS module.
 2. Checkout the [WebGPU CTS repo](https://github.com/gpuweb/cts)
+  - Run `npm install` from inside the CTS directory to install its dependencies
 
 ```sh
 ./src/dawn_node/tools/run-cts --cts=<path-to-webgpu-cts> --dawn-node=<path-to-dawn.node> [WebGPU CTS query]
