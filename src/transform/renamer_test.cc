@@ -221,8 +221,34 @@ fn tint_symbol() -> [[builtin(position)]] vec4<f32> {
   EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
+using RenamerTestGlsl = TransformTestWithParam<std::string>;
 using RenamerTestHlsl = TransformTestWithParam<std::string>;
 using RenamerTestMsl = TransformTestWithParam<std::string>;
+
+TEST_P(RenamerTestGlsl, Keywords) {
+  auto keyword = GetParam();
+
+  auto src = R"(
+[[stage(fragment)]]
+fn frag_main() {
+  var )" + keyword +
+             R"( : i32;
+}
+)";
+
+  auto* expect = R"(
+[[stage(fragment)]]
+fn frag_main() {
+  var tint_symbol : i32;
+}
+)";
+
+  DataMap inputs;
+  inputs.Add<Renamer::Config>(Renamer::Target::kGlslKeywords);
+  auto got = Run<Renamer>(src, inputs);
+
+  EXPECT_EQ(expect, str(got));
+}
 
 TEST_P(RenamerTestHlsl, Keywords) {
   auto keyword = GetParam();
@@ -273,6 +299,236 @@ fn frag_main() {
 
   EXPECT_EQ(expect, str(got));
 }
+
+INSTANTIATE_TEST_SUITE_P(RenamerTestGlsl,
+                         RenamerTestGlsl,
+                         testing::Values("active",
+                                         //    "asm",       // WGSL keyword
+                                         "atomic_uint",
+                                         "attribute",
+                                         //    "bool",      // WGSL keyword
+                                         //    "break",     // WGSL keyword
+                                         "buffer",
+                                         "bvec2",
+                                         "bvec3",
+                                         "bvec4",
+                                         //    "case",      // WGSL keyword
+                                         "cast",
+                                         "centroid",
+                                         "class",
+                                         "coherent",
+                                         "common",
+                                         //    "const",     // WGSL keyword
+                                         //    "continue",  // WGSL keyword
+                                         //    "default",   // WGSL keyword
+                                         //    "discard",   // WGSL keyword
+                                         "dmat2",
+                                         "dmat2x2",
+                                         "dmat2x3",
+                                         "dmat2x4",
+                                         "dmat3",
+                                         "dmat3x2",
+                                         "dmat3x3",
+                                         "dmat3x4",
+                                         "dmat4",
+                                         "dmat4x2",
+                                         "dmat4x3",
+                                         "dmat4x4",
+                                         //    "do",         // WGSL keyword
+                                         "double",
+                                         "dvec2",
+                                         "dvec3",
+                                         "dvec4",
+                                         //    "else"        // WGSL keyword
+                                         //    "enum",       // WGSL keyword
+                                         "extern",
+                                         "external",
+                                         //    "false",      // WGSL keyword
+                                         "filter",
+                                         "fixed",
+                                         "flat",
+                                         "float",
+                                         //    "for",        // WGSL keyword
+                                         "fvec2",
+                                         "fvec3",
+                                         "fvec4",
+                                         "gl_BaseInstance",
+                                         "gl_BaseVertex",
+                                         "gl_ClipDistance",
+                                         "gl_DepthRangeParameters",
+                                         "gl_DrawID",
+                                         "gl_FragCoord",
+                                         "gl_FragDepth",
+                                         "gl_FrontFacing",
+                                         "gl_GlobalInvocationID",
+                                         "gl_InstanceID",
+                                         "gl_LocalInvocationID",
+                                         "gl_LocalInvocationIndex",
+                                         "gl_NumSamples",
+                                         "gl_NumWorkGroups",
+                                         "gl_PerVertex",
+                                         "gl_PointCoord",
+                                         "gl_PointSize",
+                                         "gl_Position",
+                                         "gl_PrimitiveID",
+                                         "gl_SampleID",
+                                         "gl_SampleMask",
+                                         "gl_SampleMaskIn",
+                                         "gl_SamplePosition",
+                                         "gl_VertexID",
+                                         "gl_WorkGroupID",
+                                         "gl_WorkGroupSize",
+                                         "goto",
+                                         "half",
+                                         "highp",
+                                         "hvec2",
+                                         "hvec3",
+                                         "hvec4",
+                                         //    "if",         // WGSL keyword
+                                         "iimage1D",
+                                         "iimage1DArray",
+                                         "iimage2D",
+                                         "iimage2DArray",
+                                         "iimage2DMS",
+                                         "iimage2DMSArray",
+                                         "iimage2DRect",
+                                         "iimage3D",
+                                         "iimageBuffer",
+                                         "iimageCube",
+                                         "iimageCubeArray",
+                                         "image1D",
+                                         "image1DArray",
+                                         "image2D",
+                                         "image2DArray",
+                                         "image2DMS",
+                                         "image2DMSArray",
+                                         "image2DRect",
+                                         "image3D",
+                                         "imageBuffer",
+                                         "imageCube",
+                                         "imageCubeArray",
+                                         "in",
+                                         "inline",
+                                         "inout",
+                                         "input",
+                                         "int",
+                                         "interface",
+                                         "invariant",
+                                         "isampler1D",
+                                         "isampler1DArray",
+                                         "isampler2D",
+                                         "isampler2DArray",
+                                         "isampler2DMS",
+                                         "isampler2DMSArray",
+                                         "isampler2DRect",
+                                         "isampler3D",
+                                         "isamplerBuffer",
+                                         "isamplerCube",
+                                         "isamplerCubeArray",
+                                         "ivec2",
+                                         "ivec3",
+                                         "ivec4",
+                                         "layout",
+                                         "long",
+                                         "lowp",
+                                         //    "mat2x2",      // WGSL keyword
+                                         //    "mat2x3",      // WGSL keyword
+                                         //    "mat2x4",      // WGSL keyword
+                                         //    "mat2",
+                                         "mat3",
+                                         //    "mat3x2",      // WGSL keyword
+                                         //    "mat3x3",      // WGSL keyword
+                                         //    "mat3x4",      // WGSL keyword
+                                         "mat4",
+                                         //    "mat4x2",      // WGSL keyword
+                                         //    "mat4x3",      // WGSL keyword
+                                         //    "mat4x4",      // WGSL keyword
+                                         "mediump",
+                                         "namespace",
+                                         "noinline",
+                                         "noperspective",
+                                         "out",
+                                         "output",
+                                         "partition",
+                                         "patch",
+                                         "precise",
+                                         "precision",
+                                         "public",
+                                         "readonly",
+                                         "resource",
+                                         "restrict",
+                                         //    "return",     // WGSL keyword
+                                         "sample",
+                                         "sampler1D",
+                                         "sampler1DArray",
+                                         "sampler1DArrayShadow",
+                                         "sampler1DShadow",
+                                         "sampler2D",
+                                         "sampler2DArray",
+                                         "sampler2DArrayShadow",
+                                         "sampler2DMS",
+                                         "sampler2DMSArray",
+                                         "sampler2DRect",
+                                         "sampler2DRectShadow",
+                                         "sampler2DShadow",
+                                         "sampler3D",
+                                         "sampler3DRect",
+                                         "samplerBuffer",
+                                         "samplerCube",
+                                         "samplerCubeArray",
+                                         "samplerCubeArrayShadow",
+                                         "samplerCubeShadow",
+                                         "shared",
+                                         "short",
+                                         "sizeof",
+                                         "smooth",
+                                         "static",
+                                         //    "struct",     // WGSL keyword
+                                         "subroutine",
+                                         "superp",
+                                         //    "switch",     // WGSL keyword
+                                         "template",
+                                         "this",
+                                         //    "true",       // WGSL keyword
+                                         //    "typedef",    // WGSL keyword
+                                         "uimage1D",
+                                         "uimage1DArray",
+                                         "uimage2D",
+                                         "uimage2DArray",
+                                         "uimage2DMS",
+                                         "uimage2DMSArray",
+                                         "uimage2DRect",
+                                         "uimage3D",
+                                         "uimageBuffer",
+                                         "uimageCube",
+                                         "uimageCubeArray",
+                                         "uint",
+                                         //    "uniform",    // WGSL keyword
+                                         "union",
+                                         "unsigned",
+                                         "usampler1D",
+                                         "usampler1DArray",
+                                         "usampler2D",
+                                         "usampler2DArray",
+                                         "usampler2DMS",
+                                         "usampler2DMSArray",
+                                         "usampler2DRect",
+                                         "usampler3D",
+                                         "usamplerBuffer",
+                                         "usamplerCube",
+                                         "usamplerCubeArray",
+                                         //    "using",      // WGSL keyword
+                                         "uvec2",
+                                         "uvec3",
+                                         "uvec4",
+                                         "varying",
+                                         //    "vec2",       // WGSL keyword
+                                         //    "vec3",       // WGSL keyword
+                                         //    "vec4",       // WGSL keyword
+                                         //    "void",       // WGSL keyword
+                                         "volatile",
+                                         //    "while",      // WGSL keyword
+                                         "writeonly"));
 
 INSTANTIATE_TEST_SUITE_P(RenamerTestHlsl,
                          RenamerTestHlsl,
