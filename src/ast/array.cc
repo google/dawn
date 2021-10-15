@@ -26,12 +26,9 @@ namespace ast {
 namespace {
 // Returns the string representation of an array size expression.
 std::string SizeExprToString(const ast::Expression* size,
-                             const SymbolTable* symbols = nullptr) {
+                             const SymbolTable& symbols) {
   if (auto* ident = size->As<ast::IdentifierExpression>()) {
-    if (symbols) {
-      return symbols->NameFor(ident->symbol);
-    }
-    return "<unknown>";
+    return symbols.NameFor(ident->symbol);
   }
   if (auto* scalar = size->As<ast::ScalarConstructorExpression>()) {
     auto* literal = scalar->literal->As<ast::IntLiteral>();
@@ -65,7 +62,7 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
   }
   out << "array<" << type->FriendlyName(symbols);
   if (!IsRuntimeArray()) {
-    out << ", " << SizeExprToString(count, &symbols);
+    out << ", " << SizeExprToString(count, symbols);
   }
   out << ">";
   return out.str();
