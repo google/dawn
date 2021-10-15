@@ -626,6 +626,27 @@ TEST_F(RenderBundleValidationTest, DepthStencilFormatUndefined) {
     ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
 }
 
+// Test that depthReadOnly must be equal to stencilReadOnly if depth stencil format contain
+// both depth and stencil formats.
+TEST_F(RenderBundleValidationTest, DepthStencilReadOnly) {
+    for (wgpu::TextureFormat format :
+         {wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureFormat::Depth32Float}) {
+        for (bool depthReadOnly : {true, false}) {
+            for (bool stencilReadOnly : {true, false}) {
+                utils::ComboRenderBundleEncoderDescriptor desc = {};
+                desc.depthStencilFormat = format;
+                desc.depthReadOnly = depthReadOnly;
+                desc.stencilReadOnly = stencilReadOnly;
+                if (format == wgpu::TextureFormat::Depth24PlusStencil8 &&
+                    depthReadOnly != stencilReadOnly) {
+                    ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+                } else {
+                    device.CreateRenderBundleEncoder(&desc);
+                }
+            }
+        }
+    }
+}
 // Test that resource usages are validated inside render bundles.
 TEST_F(RenderBundleValidationTest, UsageTracking) {
     DummyRenderPass renderPass(device);

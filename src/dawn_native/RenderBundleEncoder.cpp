@@ -37,12 +37,21 @@ namespace dawn_native {
     }
 
     MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
-                                                    wgpu::TextureFormat textureFormat) {
+                                                    wgpu::TextureFormat textureFormat,
+                                                    bool depthReadOnly,
+                                                    bool stencilReadOnly) {
         DAWN_TRY(ValidateTextureFormat(textureFormat));
         const Format* format = nullptr;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
         DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->isRenderable,
                         "Texture format %s is not depth/stencil renderable.", textureFormat);
+
+        DAWN_INVALID_IF(
+            format->HasDepth() && format->HasStencil() && depthReadOnly != stencilReadOnly,
+            "depthReadOnly (%u) and stencilReadOnly (%u) must be the same when format %s has "
+            "both depth and stencil aspects.",
+            depthReadOnly, stencilReadOnly, textureFormat);
+
         return {};
     }
 
@@ -67,9 +76,10 @@ namespace dawn_native {
         }
 
         if (descriptor->depthStencilFormat != wgpu::TextureFormat::Undefined) {
-            DAWN_TRY_CONTEXT(
-                ValidateDepthStencilAttachmentFormat(device, descriptor->depthStencilFormat),
-                "validating depthStencilFormat");
+            DAWN_TRY_CONTEXT(ValidateDepthStencilAttachmentFormat(
+                                 device, descriptor->depthStencilFormat, descriptor->depthReadOnly,
+                                 descriptor->stencilReadOnly),
+                             "validating depthStencilFormat");
         }
 
         return {};

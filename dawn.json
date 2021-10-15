@@ -1573,7 +1573,9 @@
             {"name": "color formats count", "type": "uint32_t"},
             {"name": "color formats", "type": "texture format", "annotation": "const*", "length": "color formats count"},
             {"name": "depth stencil format", "type": "texture format", "default": "undefined"},
-            {"name": "sample count", "type": "uint32_t", "default": "1"}
+            {"name": "sample count", "type": "uint32_t", "default": "1"},
+            {"name": "depth read only", "type": "bool", "default": "false"},
+            {"name": "stencil read only", "type": "bool", "default": "false"}
         ]
     },
 
