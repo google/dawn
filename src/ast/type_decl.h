@@ -37,10 +37,6 @@ class TypeDecl : public Castable<TypeDecl, Node> {
 
   /// The name of the type declaration
   Symbol const name;
-
- private:
-  TypeDecl(const TypeDecl&) = delete;
-  TypeDecl& operator=(const TypeDecl&) = delete;
 };
 
 }  // namespace ast

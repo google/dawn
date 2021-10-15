@@ -152,9 +152,6 @@ class Variable : public Castable<Variable, Node> {
 
   /// The declared access control
   Access const declared_access;
-
- private:
-  Variable(const Variable&) = delete;
 };
 
 /// A list of variables

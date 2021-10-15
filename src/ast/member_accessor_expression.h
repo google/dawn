@@ -48,9 +48,6 @@ class MemberAccessorExpression
 
   /// The member expression
   IdentifierExpression* const member;
-
- private:
-  MemberAccessorExpression(const MemberAccessorExpression&) = delete;
 };
 
 }  // namespace ast

@@ -36,9 +36,6 @@ class DiscardStatement : public Castable<DiscardStatement, Statement> {
   /// @param ctx the clone context
   /// @return the newly cloned node
   DiscardStatement* Clone(CloneContext* ctx) const override;
-
- private:
-  DiscardStatement(const DiscardStatement&) = delete;
 };
 
 }  // namespace ast

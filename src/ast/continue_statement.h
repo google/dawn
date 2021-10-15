@@ -36,9 +36,6 @@ class ContinueStatement : public Castable<ContinueStatement, Statement> {
   /// @param ctx the clone context
   /// @return the newly cloned node
   ContinueStatement* Clone(CloneContext* ctx) const override;
-
- private:
-  ContinueStatement(const ContinueStatement&) = delete;
 };
 
 }  // namespace ast

@@ -49,9 +49,6 @@ class CallExpression : public Castable<CallExpression, Expression> {
   IdentifierExpression* const func;
   /// The arguments
   ExpressionList const args;
-
- private:
-  CallExpression(const CallExpression&) = delete;
 };
 
 }  // namespace ast

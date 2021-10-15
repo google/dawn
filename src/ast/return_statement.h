@@ -46,9 +46,6 @@ class ReturnStatement : public Castable<ReturnStatement, Statement> {
 
   /// The value returned. May be null.
   Expression* const value;
-
- private:
-  ReturnStatement(const ReturnStatement&) = delete;
 };
 
 }  // namespace ast

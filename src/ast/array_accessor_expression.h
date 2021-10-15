@@ -48,9 +48,6 @@ class ArrayAccessorExpression
 
   /// the index expression
   Expression* const index;
-
- private:
-  ArrayAccessorExpression(const ArrayAccessorExpression&) = delete;
 };
 
 }  // namespace ast

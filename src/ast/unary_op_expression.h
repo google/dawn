@@ -48,9 +48,6 @@ class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
 
   /// The expression
   Expression* const expr;
-
- private:
-  UnaryOpExpression(const UnaryOpExpression&) = delete;
 };
 
 }  // namespace ast

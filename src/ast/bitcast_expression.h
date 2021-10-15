@@ -49,9 +49,6 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
   ast::Type* const type;
   /// the expression
   Expression* const expr;
-
- private:
-  BitcastExpression(const BitcastExpression&) = delete;
 };
 
 }  // namespace ast

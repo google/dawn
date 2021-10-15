@@ -52,9 +52,6 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
 
   /// the statement list
   StatementList const statements;
-
- private:
-  BlockStatement(const BlockStatement&) = delete;
 };
 
 }  // namespace ast

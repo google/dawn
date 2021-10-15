@@ -48,9 +48,6 @@ class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
 
   /// right side expression
   Expression* const rhs;
-
- private:
-  AssignmentStatement(const AssignmentStatement&) = delete;
 };
 
 }  // namespace ast

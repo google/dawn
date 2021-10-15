@@ -56,9 +56,6 @@ class CaseStatement : public Castable<CaseStatement, Statement> {
 
   /// The case body
   BlockStatement* const body;
-
- private:
-  CaseStatement(const CaseStatement&) = delete;
 };
 
 /// A list of case statements

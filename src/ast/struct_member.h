@@ -59,9 +59,6 @@ class StructMember : public Castable<StructMember, Node> {
 
   /// The decorations
   DecorationList const decorations;
-
- private:
-  StructMember(const StructMember&) = delete;
 };
 
 /// A list of struct members

@@ -118,9 +118,6 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   Expression* const lhs;
   /// the right side expression
   Expression* const rhs;
-
- private:
-  BinaryExpression(const BinaryExpression&) = delete;
 };
 
 inline bool BinaryExpression::IsArithmetic() const {

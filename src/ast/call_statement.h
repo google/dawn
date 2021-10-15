@@ -41,9 +41,6 @@ class CallStatement : public Castable<CallStatement, Statement> {
 
   /// The call expression
   CallExpression* const expr;
-
- private:
-  CallStatement(const CallStatement&) = delete;
 };
 
 }  // namespace ast

@@ -44,9 +44,6 @@ class ScalarConstructorExpression
 
   /// The literal value
   Literal* const literal;
-
- private:
-  ScalarConstructorExpression(const ScalarConstructorExpression&) = delete;
 };
 
 }  // namespace ast

@@ -47,9 +47,6 @@ class LoopStatement : public Castable<LoopStatement, Statement> {
 
   /// The continuing statements
   BlockStatement* const continuing;
-
- private:
-  LoopStatement(const LoopStatement&) = delete;
 };
 
 }  // namespace ast

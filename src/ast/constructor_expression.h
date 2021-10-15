@@ -33,9 +33,6 @@ class ConstructorExpression
   ConstructorExpression(ProgramID pid, const Source& src);
   /// Move constructor
   ConstructorExpression(ConstructorExpression&&);
-
- private:
-  ConstructorExpression(const ConstructorExpression&) = delete;
 };
 
 }  // namespace ast

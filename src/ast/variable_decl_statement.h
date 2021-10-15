@@ -44,9 +44,6 @@ class VariableDeclStatement
 
   /// The variable
   Variable* const variable;
-
- private:
-  VariableDeclStatement(const VariableDeclStatement&) = delete;
 };
 
 }  // namespace ast

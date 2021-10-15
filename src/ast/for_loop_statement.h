@@ -59,9 +59,6 @@ class ForLoopStatement : public Castable<ForLoopStatement, Statement> {
 
   /// The loop body block
   BlockStatement* const body;
-
- private:
-  ForLoopStatement(const ForLoopStatement&) = delete;
 };
 
 }  // namespace ast

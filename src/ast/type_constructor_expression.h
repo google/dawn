@@ -53,9 +53,6 @@ class TypeConstructorExpression
 
   /// The values
   ExpressionList const values;
-
- private:
-  TypeConstructorExpression(const TypeConstructorExpression&) = delete;
 };
 
 }  // namespace ast

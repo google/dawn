@@ -40,9 +40,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
 
   /// The symbol for the identifier
   Symbol const symbol;
-
- private:
-  IdentifierExpression(const IdentifierExpression&) = delete;
 };
 
 }  // namespace ast

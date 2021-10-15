@@ -58,9 +58,6 @@ class Struct : public Castable<Struct, TypeDecl> {
 
   /// The struct decorations
   DecorationList const decorations;
-
- private:
-  Struct(const Struct&) = delete;
 };
 
 }  // namespace ast

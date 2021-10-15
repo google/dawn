@@ -51,8 +51,6 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
 
   /// The Switch body
   CaseStatementList const body;
-
- private:
   SwitchStatement(const SwitchStatement&) = delete;
 };
 

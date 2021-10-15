@@ -36,9 +36,6 @@ class BreakStatement : public Castable<BreakStatement, Statement> {
   /// @param ctx the clone context
   /// @return the newly cloned node
   BreakStatement* Clone(CloneContext* ctx) const override;
-
- private:
-  BreakStatement(const BreakStatement&) = delete;
 };
 
 }  // namespace ast

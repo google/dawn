@@ -86,9 +86,6 @@ class Function : public Castable<Function, Node> {
 
   /// The decorations attached to the function return type.
   DecorationList const return_type_decorations;
-
- private:
-  Function(const Function&) = delete;
 };
 
 /// A list of functions

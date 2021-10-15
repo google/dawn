@@ -36,9 +36,6 @@ class Expression : public Castable<Expression, Node> {
   Expression(ProgramID pid, const Source& src);
   /// Move constructor
   Expression(Expression&&);
-
- private:
-  Expression(const Expression&) = delete;
 };
 
 /// A list of expressions

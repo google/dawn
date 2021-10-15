@@ -54,9 +54,6 @@ class IfStatement : public Castable<IfStatement, Statement> {
 
   /// The else statements
   ElseStatementList const else_statements;
-
- private:
-  IfStatement(const IfStatement&) = delete;
 };
 
 }  // namespace ast

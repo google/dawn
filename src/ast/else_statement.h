@@ -50,9 +50,6 @@ class ElseStatement : public Castable<ElseStatement, Statement> {
 
   /// The else body
   BlockStatement* const body;
-
- private:
-  ElseStatement(const ElseStatement&) = delete;
 };
 
 /// A list of else statements

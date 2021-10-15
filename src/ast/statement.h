@@ -37,9 +37,6 @@ class Statement : public Castable<Statement, Node> {
   Statement(ProgramID pid, const Source& src);
   /// Move constructor
   Statement(Statement&&);
-
- private:
-  Statement(const Statement&) = delete;
 };
 
 /// A list of statements
