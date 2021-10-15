@@ -1594,6 +1594,12 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
 
         if (IsValidationEnabled(
                 decos, ast::DisabledValidation::kEntryPointParameter)) {
+          if (is_struct_member && ty->Is<sem::Struct>()) {
+            AddError("nested structures cannot be used for entry point IO",
+                     source);
+            return false;
+          }
+
           if (!ty->Is<sem::Struct>() && !pipeline_io_attribute) {
             std::string err = "missing entry point IO attribute";
             if (!is_struct_member) {

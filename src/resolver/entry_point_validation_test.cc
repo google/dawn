@@ -522,24 +522,22 @@ TEST_F(LocationDecorationTests, BadType_Input_Struct_NestedStruct) {
   //   [[location(0)]] b : f32;
   // };
   // struct Input {
-  //   [[location(0)]] a : Inner;
+  //   a : Inner;
   // };
   // [[stage(fragment)]]
   // fn main(param : Input) {}
   auto* inner = Structure(
       "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
-  auto* input = Structure("Input", {Member(Source{{14, 52}}, "a", ty.Of(inner),
-                                           {Location(Source{{12, 34}}, 0)})});
+  auto* input =
+      Structure("Input", {Member(Source{{14, 52}}, "a", ty.Of(inner))});
   auto* param = Param("param", ty.Of(input));
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "14:52 error: cannot apply 'location' attribute to declaration of "
-            "type 'Inner'\n"
-            "12:34 note: 'location' attribute must only be applied to "
-            "declarations of numeric scalar or numeric vector type");
+            "14:52 error: nested structures cannot be used for entry point IO\n"
+            "12:34 note: while analysing entry point 'main'");
 }
 
 TEST_F(LocationDecorationTests, BadType_Input_Struct_RuntimeArray) {
@@ -666,19 +664,22 @@ TEST_F(LocationDecorationTests, ReturnType_Struct_NestedStruct) {
   //   [[location(0)]] b : f32;
   // };
   // struct Output {
-  //   [[location(0)]] a : Inner;
+  //   a : Inner;
   // };
+  // [[stage(fragment)]]
+  // fn main() -> Output { return Output(); }
   auto* inner = Structure(
       "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
-  Structure("Output", {Member(Source{{14, 52}}, "a", ty.Of(inner),
-                              {Location(Source{{12, 34}}, 0)})});
+  auto* output =
+      Structure("Output", {Member(Source{{14, 52}}, "a", ty.Of(inner))});
+  Func(Source{{12, 34}}, "main", {}, ty.Of(output),
+       {Return(Construct(ty.Of(output)))},
+       {Stage(ast::PipelineStage::kFragment)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "14:52 error: cannot apply 'location' attribute to declaration of "
-            "type 'Inner'\n"
-            "12:34 note: 'location' attribute must only be applied to "
-            "declarations of numeric scalar or numeric vector type");
+            "14:52 error: nested structures cannot be used for entry point IO\n"
+            "12:34 note: while analysing entry point 'main'");
 }
 
 TEST_F(LocationDecorationTests, ReturnType_Struct_RuntimeArray) {
