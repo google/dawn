@@ -32,4 +32,27 @@ ProgramID ProgramID::New() {
   return ProgramID(next_program_id++);
 }
 
+namespace detail {
+
+/// AssertProgramIDsEqual is called by TINT_ASSERT_PROGRAM_IDS_EQUAL() and
+/// TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID() to assert that the ProgramIDs
+/// `a` and `b` are equal.
+void AssertProgramIDsEqual(ProgramID a,
+                           ProgramID b,
+                           bool if_valid,
+                           diag::System system,
+                           const char* msg,
+                           const char* file,
+                           size_t line) {
+  if (a == b) {
+    return;  // matched
+  }
+  if (if_valid && (!a || !b)) {
+    return;  //  a or b were not valid
+  }
+  diag::List diagnostics;
+  tint::InternalCompilerError(file, line, system, diagnostics) << msg;
+}
+
+}  // namespace detail
 }  // namespace tint

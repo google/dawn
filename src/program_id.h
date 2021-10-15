@@ -83,27 +83,15 @@ inline std::ostream& operator<<(std::ostream& out, ProgramID id) {
 namespace detail {
 
 /// AssertProgramIDsEqual is called by TINT_ASSERT_PROGRAM_IDS_EQUAL() and
-/// TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID() to assert that the ProgramIDs of
+/// TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID() to assert that the ProgramIDs
 /// `a` and `b` are equal.
-template <typename A, typename B>
-void AssertProgramIDsEqual(A&& a,
-                           B&& b,
+void AssertProgramIDsEqual(ProgramID a,
+                           ProgramID b,
                            bool if_valid,
                            diag::System system,
                            const char* msg,
                            const char* file,
-                           size_t line) {
-  auto a_id = ProgramIDOf(std::forward<A>(a));
-  auto b_id = ProgramIDOf(std::forward<B>(b));
-  if (a_id == b_id) {
-    return;  // matched
-  }
-  if (if_valid && (!a_id || !b_id)) {
-    return;  //  a or b were not valid
-  }
-  diag::List diagnostics;
-  tint::InternalCompilerError(file, line, system, diagnostics) << msg;
-}
+                           size_t line);
 
 }  // namespace detail
 
@@ -114,14 +102,14 @@ void AssertProgramIDsEqual(A&& a,
 /// that the program identifiers for A and B are equal, if both A and B have
 /// valid program identifiers.
 #if TINT_CHECK_FOR_CROSS_PROGRAM_LEAKS
-#define TINT_ASSERT_PROGRAM_IDS_EQUAL(system, a, b)                      \
-  detail::AssertProgramIDsEqual(a, b, false, tint::diag::System::system, \
-                                "TINT_ASSERT_PROGRAM_IDS_EQUAL(" #system \
-                                "," #a ", " #b ")",                      \
-                                __FILE__, __LINE__)
+#define TINT_ASSERT_PROGRAM_IDS_EQUAL(system, a, b)                          \
+  detail::AssertProgramIDsEqual(                                             \
+      ProgramIDOf(a), ProgramIDOf(b), false, tint::diag::System::system,     \
+      "TINT_ASSERT_PROGRAM_IDS_EQUAL(" #system "," #a ", " #b ")", __FILE__, \
+      __LINE__)
 #define TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(system, a, b)                 \
   detail::AssertProgramIDsEqual(                                             \
-      a, b, true, tint::diag::System::system,                                \
+      ProgramIDOf(a), ProgramIDOf(b), true, tint::diag::System::system,      \
       "TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(" #system ", " #a ", " #b ")", \
       __FILE__, __LINE__)
 #else
