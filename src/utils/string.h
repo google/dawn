@@ -23,7 +23,7 @@ namespace utils {
 /// @param str the string to apply replacements to
 /// @param substr the string to search for
 /// @param replacement the replacement string to use instead of `substr`
-/// @returns `str` with all occurrances of `substr` replaced with `replacement`
+/// @returns `str` with all occurrences of `substr` replaced with `replacement`
 inline std::string ReplaceAll(std::string str,
                               const std::string& substr,
                               const std::string& replacement) {

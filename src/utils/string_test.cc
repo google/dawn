@@ -27,6 +27,10 @@ TEST(StringTest, ReplaceAll) {
   ASSERT_EQ("xyxybbcc", ReplaceAll("aabbcc", "a", "xy"));
   ASSERT_EQ("aaxyxycc", ReplaceAll("aabbcc", "b", "xy"));
   ASSERT_EQ("aabbxyxy", ReplaceAll("aabbcc", "c", "xy"));
+  // Replacement string includes the searched-for string.
+  // This proves that the algorithm needs to advance 'pos'
+  // past the replacement.
+  ASSERT_EQ("aabxybbxybcc", ReplaceAll("aabbcc", "b", "bxyb"));
 }
 
 }  // namespace
