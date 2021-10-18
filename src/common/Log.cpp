@@ -76,15 +76,15 @@ namespace dawn {
 
         const char* severityName = SeverityName(mSeverity);
 
+#if defined(DAWN_PLATFORM_ANDROID)
+        android_LogPriority androidPriority = AndroidLogPriority(mSeverity);
+        __android_log_print(androidPriority, "Dawn", "%s: %s\n", severityName, fullMessage.c_str());
+#else   // defined(DAWN_PLATFORM_ANDROID)
         FILE* outputStream = stdout;
         if (mSeverity == LogSeverity::Warning || mSeverity == LogSeverity::Error) {
             outputStream = stderr;
         }
 
-#if defined(DAWN_PLATFORM_ANDROID)
-        android_LogPriority androidPriority = AndroidLogPriority(mSeverity);
-        __android_log_print(androidPriority, "Dawn", "%s: %s\n", severityName, fullMessage.c_str());
-#else   // defined(DAWN_PLATFORM_ANDROID)
         // Note: we use fprintf because <iostream> includes static initializers.
         fprintf(outputStream, "%s: %s\n", severityName, fullMessage.c_str());
         fflush(outputStream);
