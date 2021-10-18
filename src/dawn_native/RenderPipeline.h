@@ -41,7 +41,7 @@ namespace dawn_native {
 
     bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology);
 
-    bool StencilTestEnabled(const DepthStencilState* mDepthStencil);
+    bool StencilTestEnabled(const DepthStencilState* depthStencil);
 
     struct VertexAttributeInfo {
         wgpu::VertexFormat format;

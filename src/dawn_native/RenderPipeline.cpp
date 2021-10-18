@@ -543,15 +543,15 @@ namespace dawn_native {
         return stages;
     }
 
-    bool StencilTestEnabled(const DepthStencilState* mDepthStencil) {
-        return mDepthStencil->stencilBack.compare != wgpu::CompareFunction::Always ||
-               mDepthStencil->stencilBack.failOp != wgpu::StencilOperation::Keep ||
-               mDepthStencil->stencilBack.depthFailOp != wgpu::StencilOperation::Keep ||
-               mDepthStencil->stencilBack.passOp != wgpu::StencilOperation::Keep ||
-               mDepthStencil->stencilFront.compare != wgpu::CompareFunction::Always ||
-               mDepthStencil->stencilFront.failOp != wgpu::StencilOperation::Keep ||
-               mDepthStencil->stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
-               mDepthStencil->stencilFront.passOp != wgpu::StencilOperation::Keep;
+    bool StencilTestEnabled(const DepthStencilState* depthStencil) {
+        return depthStencil->stencilBack.compare != wgpu::CompareFunction::Always ||
+               depthStencil->stencilBack.failOp != wgpu::StencilOperation::Keep ||
+               depthStencil->stencilBack.depthFailOp != wgpu::StencilOperation::Keep ||
+               depthStencil->stencilBack.passOp != wgpu::StencilOperation::Keep ||
+               depthStencil->stencilFront.compare != wgpu::CompareFunction::Always ||
+               depthStencil->stencilFront.failOp != wgpu::StencilOperation::Keep ||
+               depthStencil->stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
+               depthStencil->stencilFront.passOp != wgpu::StencilOperation::Keep;
     }
 
     // RenderPipelineBase

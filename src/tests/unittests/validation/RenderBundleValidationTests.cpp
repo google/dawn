@@ -611,6 +611,30 @@ TEST_F(RenderBundleValidationTest, RequiresAtLeastOneTextureFormat) {
     }
 }
 
+// Test that it is invalid to create a render bundle with no texture formats
+TEST_F(RenderBundleValidationTest, ColorFormatsCountOutOfBounds) {
+    std::array<wgpu::TextureFormat, kMaxColorAttachments + 1> colorFormats;
+    for (uint32_t i = 0; i < colorFormats.size(); ++i) {
+        colorFormats[i] = wgpu::TextureFormat::RGBA8Unorm;
+    }
+
+    // colorFormatsCount <= kMaxColorAttachments is valid.
+    {
+        wgpu::RenderBundleEncoderDescriptor desc;
+        desc.colorFormatsCount = kMaxColorAttachments;
+        desc.colorFormats = colorFormats.data();
+        device.CreateRenderBundleEncoder(&desc);
+    }
+
+    // colorFormatsCount > kMaxColorAttachments is invalid.
+    {
+        wgpu::RenderBundleEncoderDescriptor desc;
+        desc.colorFormatsCount = kMaxColorAttachments + 1;
+        desc.colorFormats = colorFormats.data();
+        ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+    }
+}
+
 // Test that render bundle color formats cannot be set to undefined.
 TEST_F(RenderBundleValidationTest, ColorFormatUndefined) {
     utils::ComboRenderBundleEncoderDescriptor desc = {};

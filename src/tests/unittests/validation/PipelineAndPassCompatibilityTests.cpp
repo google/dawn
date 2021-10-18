@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "utils/ComboRenderBundleEncoderDescriptor.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -105,8 +106,40 @@ namespace {
         }
     }
 
+    // Test depthWrite/stencilWrite in DepthStencilState in pipeline vs
+    // depthReadOnly/stencilReadOnly in RenderBundleEncoderDescriptor in RenderBundle
+    TEST_F(RenderPipelineAndPassCompatibilityTests,
+           WriteAndReadOnlyConflictForDepthStencilWithRenderBundle) {
+        wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth24PlusStencil8;
+        // If the format has both depth and stencil aspects, depthReadOnly and stencilReadOnly
+        // should be the same. So it is not necessary to set two separate booleans like
+        // depthReadOnlyInBundle and stencilReadOnlyInBundle.
+        for (bool depthStencilReadOnlyInBundle : {true, false}) {
+            utils::ComboRenderBundleEncoderDescriptor desc = {};
+            desc.depthStencilFormat = kFormat;
+            desc.depthReadOnly = depthStencilReadOnlyInBundle;
+            desc.stencilReadOnly = depthStencilReadOnlyInBundle;
+
+            for (bool depthWriteInPipeline : {true, false}) {
+                for (bool stencilWriteInPipeline : {true, false}) {
+                    wgpu::RenderBundleEncoder renderBundleEncoder =
+                        device.CreateRenderBundleEncoder(&desc);
+                    wgpu::RenderPipeline pipeline =
+                        CreatePipeline(kFormat, depthWriteInPipeline, stencilWriteInPipeline);
+                    renderBundleEncoder.SetPipeline(pipeline);
+                    renderBundleEncoder.Draw(3);
+                    if (depthStencilReadOnlyInBundle &&
+                        (depthWriteInPipeline || stencilWriteInPipeline)) {
+                        ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
+                    } else {
+                        renderBundleEncoder.Finish();
+                    }
+                }
+            }
+        }
+    }
+
     // TODO(dawn:485): add more tests. For example:
-    //   - readOnly vs write for depth/stencil with renderbundle.
     //   - depth/stencil attachment should be designated if depth/stencil test is enabled.
     //   - pipeline and pass compatibility tests for color attachment(s).
     //   - pipeline and pass compatibility tests for compute.

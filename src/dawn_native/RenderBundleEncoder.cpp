@@ -90,8 +90,8 @@ namespace dawn_native {
         : RenderEncoderBase(device,
                             &mBundleEncodingContext,
                             device->GetOrCreateAttachmentState(descriptor),
-                            false,
-                            false),
+                            descriptor->depthReadOnly,
+                            descriptor->stencilReadOnly),
           mBundleEncodingContext(device, this) {
     }
 
