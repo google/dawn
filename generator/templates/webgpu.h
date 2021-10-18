@@ -74,6 +74,7 @@
 #include <stdbool.h>
 
 #define WGPU_WHOLE_SIZE (0xffffffffffffffffULL)
+#define WGPU_WHOLE_MAP_SIZE SIZE_MAX
 {% if 'deprecated' in enabled_tags %}
     // TODO(crbug.com/dawn/520): Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.
     #define WGPU_STRIDE_UNDEFINED (0xffffffffUL)

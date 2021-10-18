@@ -63,11 +63,37 @@ TEST_P(DeprecationTests, SetBufferWithZeroSizeAsDefault) {
     }
 
     {
-        // Error case, use 0 to indicate default size will cause deprecated warning.
+        // Deprecated case, use 0 to indicate default size will cause deprecated warning.
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         EXPECT_DEPRECATION_WARNING(pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 0, 0));
         EXPECT_DEPRECATION_WARNING(pass.SetVertexBuffer(0, buffer, 0, 0));
         pass.EndPass();
+    }
+}
+
+// Test that using size=0 to indicate default size in mapAsync of buffer is
+// deprecated.
+TEST_P(DeprecationTests, BufferMapAsyncWithZeroSizeAsDefault) {
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 128;
+    bufferDesc.usage = wgpu::BufferUsage::MapWrite;
+
+    {
+        // Control case, use wgpu::kWholeMapSize to indicate default size.
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+        buffer.MapAsync(wgpu::MapMode::Write, 0, wgpu::kWholeMapSize, nullptr, nullptr);
+
+        WaitForAllOperations();
+    }
+
+    {
+        // Deprecated case, use 0 to indicate default size will cause deprecated warning.
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+        EXPECT_DEPRECATION_WARNING(buffer.MapAsync(wgpu::MapMode::Write, 0, 0, nullptr, nullptr));
+
+        WaitForAllOperations();
     }
 }
 

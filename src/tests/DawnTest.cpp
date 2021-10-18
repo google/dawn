@@ -1430,7 +1430,8 @@ void DawnTestBase::MapSlotsSynchronously() {
         MapReadUserdata* userdata = new MapReadUserdata{this, i};
 
         const ReadbackSlot& slot = mReadbackSlots[i];
-        slot.buffer.MapAsync(wgpu::MapMode::Read, 0, 0, SlotMapCallback, userdata);
+        slot.buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize, SlotMapCallback,
+                             userdata);
     }
 
     // Busy wait until all map operations are done.

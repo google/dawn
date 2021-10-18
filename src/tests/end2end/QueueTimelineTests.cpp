@@ -69,7 +69,7 @@ TEST_P(QueueTimelineTests, MapRead_OnWorkDone) {
     EXPECT_CALL(*mockMapCallback, Call(WGPUBufferMapAsyncStatus_Success, this)).Times(1);
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this)).Times(1);
 
-    mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, 0, ToMockMapCallback, this);
+    mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize, ToMockMapCallback, this);
 
     queue.OnSubmittedWorkDone(0u, ToMockQueueWorkDone, this);
 
@@ -87,7 +87,7 @@ TEST_P(QueueTimelineTests, OnWorkDone_MapRead) {
 
     queue.OnSubmittedWorkDone(0u, ToMockQueueWorkDone, this);
 
-    mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, 0, ToMockMapCallback, this);
+    mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize, ToMockMapCallback, this);
 
     WaitForAllOperations();
     mMapReadBuffer.Unmap();

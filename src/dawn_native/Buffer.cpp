@@ -298,7 +298,18 @@ namespace dawn_native {
         // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
         // possible to default the function argument (because there is the callback later in the
         // argument list)
-        if (size == 0 && offset < mSize) {
+        if (size == 0) {
+            // Using 0 to indicating default size is deprecated.
+            // Temporarily treat 0 as undefined for size, and give a warning
+            // TODO(dawn:1058): Remove this if block
+            size = wgpu::kWholeMapSize;
+            GetDevice()->EmitDeprecationWarning(
+                "Using size=0 to indicate default mapping size for mapAsync "
+                "is deprecated. In the future it will result in a zero-size mapping. "
+                "Use `undefined` (wgpu::kWholeMapSize) or just omit the parameter instead.");
+        }
+
+        if ((size == wgpu::kWholeMapSize) && (offset <= mSize)) {
             size = mSize - offset;
         }
 
@@ -450,10 +461,14 @@ namespace dawn_native {
         *status = WGPUBufferMapAsyncStatus_Error;
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
+        DAWN_INVALID_IF(uint64_t(offset) > mSize,
+                        "Mapping offset (%u) is larger than the size (%u) of %s.", offset, mSize,
+                        this);
+
         DAWN_INVALID_IF(offset % 8 != 0, "Offset (%u) must be a multiple of 8.", offset);
         DAWN_INVALID_IF(size % 4 != 0, "Size (%u) must be a multiple of 4.", size);
 
-        DAWN_INVALID_IF(uint64_t(offset) > mSize || uint64_t(size) > mSize - uint64_t(offset),
+        DAWN_INVALID_IF(uint64_t(size) > mSize - uint64_t(offset),
                         "Mapping range (offset:%u, size: %u) doesn't fit in the size (%u) of %s.",
                         offset, size, mSize, this);
 

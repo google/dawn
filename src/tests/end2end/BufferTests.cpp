@@ -77,7 +77,7 @@ TEST_P(BufferMappingTests, MapRead_Basic) {
 TEST_P(BufferMappingTests, MapRead_ZeroSized) {
     wgpu::Buffer buffer = CreateMapReadBuffer(0);
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 0);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, wgpu::kWholeMapSize);
     ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
     buffer.Unmap();
 }
@@ -235,7 +235,7 @@ TEST_P(BufferMappingTests, MapWrite_BasicRange) {
 TEST_P(BufferMappingTests, MapWrite_ZeroSized) {
     wgpu::Buffer buffer = CreateMapWriteBuffer(0);
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 0);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
     ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
     ASSERT_NE(buffer.GetMappedRange(), nullptr);
     buffer.Unmap();
@@ -523,10 +523,10 @@ TEST_P(BufferMappingTests, MapWrite_InCallbackRange) {
 TEST_P(BufferMappingTests, MapWrite_ZeroSizedTwice) {
     wgpu::Buffer buffer = CreateMapWriteBuffer(0);
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 0);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
     buffer.Unmap();
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 0);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
 }
 
 DAWN_INSTANTIATE_TEST(BufferMappingTests,
