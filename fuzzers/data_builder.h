@@ -34,7 +34,8 @@ class DataBuilder {
   explicit DataBuilder(const uint8_t* data, size_t size)
       : generator_(data, size) {}
 
-  ~DataBuilder() {}
+  ~DataBuilder() = default;
+  DataBuilder(DataBuilder&&) = default;
 
   /// Generate pseudo-random data of a specific type
   /// @tparam T - type of data to produce
@@ -84,6 +85,10 @@ class DataBuilder {
 
  private:
   RandomGenerator generator_;
+
+  // Disallow copy & assign
+  DataBuilder(const DataBuilder&) = delete;
+  DataBuilder& operator=(const DataBuilder&) = delete;
 
   /// Get N bytes of pseudo-random data
   /// @param out - pointer to location to save data

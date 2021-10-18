@@ -33,6 +33,9 @@ class RandomGenerator {
   /// @param size - size of data buffer
   explicit RandomGenerator(const uint8_t* data, size_t size);
 
+  ~RandomGenerator() = default;
+  RandomGenerator(RandomGenerator&&) = default;
+
   /// Get uint32_t value from uniform distribution.
   /// @param lower - lower bound of integer generated
   /// @param upper - upper bound of integer generated
@@ -97,6 +100,10 @@ class RandomGenerator {
 
  private:
   std::mt19937_64 engine_;
+
+  // Disallow copy & assign
+  RandomGenerator(const RandomGenerator&) = delete;
+  RandomGenerator& operator=(const RandomGenerator&) = delete;
 
 };  // class RandomGenerator
 
