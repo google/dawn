@@ -233,15 +233,32 @@ namespace dawn_native {
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
                 if (IsValidationEnabled()) {
+                    const AttachmentState* attachmentState = GetAttachmentState();
+                    bool depthReadOnlyInPass = IsDepthReadOnly();
+                    bool stencilReadOnlyInPass = IsStencilReadOnly();
                     for (uint32_t i = 0; i < count; ++i) {
                         DAWN_TRY(GetDevice()->ValidateObject(renderBundles[i]));
 
                         // TODO(dawn:563): Give more detail about why the states are incompatible.
                         DAWN_INVALID_IF(
-                            GetAttachmentState() != renderBundles[i]->GetAttachmentState(),
+                            attachmentState != renderBundles[i]->GetAttachmentState(),
                             "Attachment state of renderBundles[%i] (%s) is not compatible with "
                             "attachment state of %s.",
                             i, renderBundles[i], this);
+
+                        bool depthReadOnlyInBundle = renderBundles[i]->IsDepthReadOnly();
+                        DAWN_INVALID_IF(
+                            depthReadOnlyInPass != depthReadOnlyInBundle,
+                            "DepthReadOnly (%u) of renderBundle[%i] (%s) is not compatible "
+                            "with DepthReadOnly (%u) of %s.",
+                            depthReadOnlyInBundle, i, renderBundles[i], depthReadOnlyInPass, this);
+
+                        bool stencilReadOnlyInBundle = renderBundles[i]->IsStencilReadOnly();
+                        DAWN_INVALID_IF(stencilReadOnlyInPass != stencilReadOnlyInBundle,
+                                        "StencilReadOnly (%u) of renderBundle[%i] (%s) is not "
+                                        "compatible with StencilReadOnly (%u) of %s.",
+                                        stencilReadOnlyInBundle, i, renderBundles[i],
+                                        stencilReadOnlyInPass, this);
                     }
                 }
 

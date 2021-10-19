@@ -59,6 +59,8 @@ namespace dawn_native {
                              const uint32_t* dynamicOffsets = nullptr);
 
         const AttachmentState* GetAttachmentState() const;
+        bool IsDepthReadOnly() const;
+        bool IsStencilReadOnly() const;
         Ref<AttachmentState> AcquireAttachmentState();
 
       protected:

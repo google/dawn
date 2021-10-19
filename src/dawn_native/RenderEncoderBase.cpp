@@ -59,6 +59,16 @@ namespace dawn_native {
         return mAttachmentState.Get();
     }
 
+    bool RenderEncoderBase::IsDepthReadOnly() const {
+        ASSERT(!IsError());
+        return mDepthReadOnly;
+    }
+
+    bool RenderEncoderBase::IsStencilReadOnly() const {
+        ASSERT(!IsError());
+        return mStencilReadOnly;
+    }
+
     Ref<AttachmentState> RenderEncoderBase::AcquireAttachmentState() {
         return std::move(mAttachmentState);
     }

@@ -38,6 +38,8 @@ namespace dawn_native {
         RenderBundleBase(RenderBundleEncoder* encoder,
                          const RenderBundleDescriptor* descriptor,
                          Ref<AttachmentState> attachmentState,
+                         bool depthReadOnly,
+                         bool stencilReadOnly,
                          RenderPassResourceUsage resourceUsage,
                          IndirectDrawMetadata indirectDrawMetadata);
 
@@ -48,6 +50,8 @@ namespace dawn_native {
         CommandIterator* GetCommands();
 
         const AttachmentState* GetAttachmentState() const;
+        bool IsDepthReadOnly() const;
+        bool IsStencilReadOnly() const;
         const RenderPassResourceUsage& GetResourceUsage() const;
         const IndirectDrawMetadata& GetIndirectDrawMetadata();
 
@@ -60,6 +64,8 @@ namespace dawn_native {
         CommandIterator mCommands;
         IndirectDrawMetadata mIndirectDrawMetadata;
         Ref<AttachmentState> mAttachmentState;
+        bool mDepthReadOnly;
+        bool mStencilReadOnly;
         RenderPassResourceUsage mResourceUsage;
     };
 
