@@ -818,6 +818,331 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+const char* kOmitSourceShader = R"(
+[[block]]
+struct S {
+  a : array<f32, 4>;
+  b : array<f32>;
+};
+[[group(0), binding(0)]] var<storage, read> s : S;
+
+type UArr = [[stride(16)]] array<f32, 4>;
+[[block]] struct U {
+  a : UArr;
+};
+[[group(1), binding(0)]] var<uniform> u : U;
+
+fn f() {
+  // Signed
+  var i32_sa1 : f32 = s.a[4];
+  var i32_sa2 : f32 = s.a[1];
+  var i32_sa3 : f32 = s.a[0];
+  var i32_sa4 : f32 = s.a[-1];
+  var i32_sa5 : f32 = s.a[-4];
+
+  var i32_sb1 : f32 = s.b[4];
+  var i32_sb2 : f32 = s.b[1];
+  var i32_sb3 : f32 = s.b[0];
+  var i32_sb4 : f32 = s.b[-1];
+  var i32_sb5 : f32 = s.b[-4];
+
+  var i32_ua1 : f32 = u.a[4];
+  var i32_ua2 : f32 = u.a[1];
+  var i32_ua3 : f32 = u.a[0];
+  var i32_ua4 : f32 = u.a[-1];
+  var i32_ua5 : f32 = u.a[-4];
+
+  // Unsigned
+  var u32_sa1 : f32 = s.a[0u];
+  var u32_sa2 : f32 = s.a[1u];
+  var u32_sa3 : f32 = s.a[3u];
+  var u32_sa4 : f32 = s.a[4u];
+  var u32_sa5 : f32 = s.a[10u];
+  var u32_sa6 : f32 = s.a[100u];
+
+  var u32_sb1 : f32 = s.b[0u];
+  var u32_sb2 : f32 = s.b[1u];
+  var u32_sb3 : f32 = s.b[3u];
+  var u32_sb4 : f32 = s.b[4u];
+  var u32_sb5 : f32 = s.b[10u];
+  var u32_sb6 : f32 = s.b[100u];
+
+  var u32_ua1 : f32 = u.a[0u];
+  var u32_ua2 : f32 = u.a[1u];
+  var u32_ua3 : f32 = u.a[3u];
+  var u32_ua4 : f32 = u.a[4u];
+  var u32_ua5 : f32 = u.a[10u];
+  var u32_ua6 : f32 = u.a[100u];
+}
+)";
+
+TEST_F(RobustnessTest, OmitNone) {
+  auto* expect = R"(
+[[block]]
+struct S {
+  a : array<f32, 4>;
+  b : array<f32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> s : S;
+
+type UArr = [[stride(16)]] array<f32, 4>;
+
+[[block]]
+struct U {
+  a : UArr;
+};
+
+[[group(1), binding(0)]] var<uniform> u : U;
+
+fn f() {
+  var i32_sa1 : f32 = s.a[3];
+  var i32_sa2 : f32 = s.a[1];
+  var i32_sa3 : f32 = s.a[0];
+  var i32_sa4 : f32 = s.a[0];
+  var i32_sa5 : f32 = s.a[0];
+  var i32_sb1 : f32 = s.b[min(4u, (arrayLength(&(s.b)) - 1u))];
+  var i32_sb2 : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
+  var i32_sb3 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var i32_sb4 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var i32_sb5 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var i32_ua1 : f32 = u.a[3];
+  var i32_ua2 : f32 = u.a[1];
+  var i32_ua3 : f32 = u.a[0];
+  var i32_ua4 : f32 = u.a[0];
+  var i32_ua5 : f32 = u.a[0];
+  var u32_sa1 : f32 = s.a[0u];
+  var u32_sa2 : f32 = s.a[1u];
+  var u32_sa3 : f32 = s.a[3u];
+  var u32_sa4 : f32 = s.a[3u];
+  var u32_sa5 : f32 = s.a[3u];
+  var u32_sa6 : f32 = s.a[3u];
+  var u32_sb1 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb2 : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb3 : f32 = s.b[min(3u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb4 : f32 = s.b[min(4u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb5 : f32 = s.b[min(10u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb6 : f32 = s.b[min(100u, (arrayLength(&(s.b)) - 1u))];
+  var u32_ua1 : f32 = u.a[0u];
+  var u32_ua2 : f32 = u.a[1u];
+  var u32_ua3 : f32 = u.a[3u];
+  var u32_ua4 : f32 = u.a[3u];
+  var u32_ua5 : f32 = u.a[3u];
+  var u32_ua6 : f32 = u.a[3u];
+}
+)";
+
+  Robustness::Config cfg;
+  DataMap data;
+  data.Add<Robustness::Config>(cfg);
+
+  auto got = Run<Robustness>(kOmitSourceShader, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RobustnessTest, OmitStorage) {
+  auto* expect = R"(
+[[block]]
+struct S {
+  a : array<f32, 4>;
+  b : array<f32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> s : S;
+
+type UArr = [[stride(16)]] array<f32, 4>;
+
+[[block]]
+struct U {
+  a : UArr;
+};
+
+[[group(1), binding(0)]] var<uniform> u : U;
+
+fn f() {
+  var i32_sa1 : f32 = s.a[4];
+  var i32_sa2 : f32 = s.a[1];
+  var i32_sa3 : f32 = s.a[0];
+  var i32_sa4 : f32 = s.a[-1];
+  var i32_sa5 : f32 = s.a[-4];
+  var i32_sb1 : f32 = s.b[4];
+  var i32_sb2 : f32 = s.b[1];
+  var i32_sb3 : f32 = s.b[0];
+  var i32_sb4 : f32 = s.b[-1];
+  var i32_sb5 : f32 = s.b[-4];
+  var i32_ua1 : f32 = u.a[3];
+  var i32_ua2 : f32 = u.a[1];
+  var i32_ua3 : f32 = u.a[0];
+  var i32_ua4 : f32 = u.a[0];
+  var i32_ua5 : f32 = u.a[0];
+  var u32_sa1 : f32 = s.a[0u];
+  var u32_sa2 : f32 = s.a[1u];
+  var u32_sa3 : f32 = s.a[3u];
+  var u32_sa4 : f32 = s.a[4u];
+  var u32_sa5 : f32 = s.a[10u];
+  var u32_sa6 : f32 = s.a[100u];
+  var u32_sb1 : f32 = s.b[0u];
+  var u32_sb2 : f32 = s.b[1u];
+  var u32_sb3 : f32 = s.b[3u];
+  var u32_sb4 : f32 = s.b[4u];
+  var u32_sb5 : f32 = s.b[10u];
+  var u32_sb6 : f32 = s.b[100u];
+  var u32_ua1 : f32 = u.a[0u];
+  var u32_ua2 : f32 = u.a[1u];
+  var u32_ua3 : f32 = u.a[3u];
+  var u32_ua4 : f32 = u.a[3u];
+  var u32_ua5 : f32 = u.a[3u];
+  var u32_ua6 : f32 = u.a[3u];
+}
+)";
+
+  Robustness::Config cfg;
+  cfg.omitted_classes.insert(Robustness::StorageClass::kStorage);
+
+  DataMap data;
+  data.Add<Robustness::Config>(cfg);
+
+  auto got = Run<Robustness>(kOmitSourceShader, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RobustnessTest, OmitUniform) {
+  auto* expect = R"(
+[[block]]
+struct S {
+  a : array<f32, 4>;
+  b : array<f32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> s : S;
+
+type UArr = [[stride(16)]] array<f32, 4>;
+
+[[block]]
+struct U {
+  a : UArr;
+};
+
+[[group(1), binding(0)]] var<uniform> u : U;
+
+fn f() {
+  var i32_sa1 : f32 = s.a[3];
+  var i32_sa2 : f32 = s.a[1];
+  var i32_sa3 : f32 = s.a[0];
+  var i32_sa4 : f32 = s.a[0];
+  var i32_sa5 : f32 = s.a[0];
+  var i32_sb1 : f32 = s.b[min(4u, (arrayLength(&(s.b)) - 1u))];
+  var i32_sb2 : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
+  var i32_sb3 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var i32_sb4 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var i32_sb5 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var i32_ua1 : f32 = u.a[4];
+  var i32_ua2 : f32 = u.a[1];
+  var i32_ua3 : f32 = u.a[0];
+  var i32_ua4 : f32 = u.a[-1];
+  var i32_ua5 : f32 = u.a[-4];
+  var u32_sa1 : f32 = s.a[0u];
+  var u32_sa2 : f32 = s.a[1u];
+  var u32_sa3 : f32 = s.a[3u];
+  var u32_sa4 : f32 = s.a[3u];
+  var u32_sa5 : f32 = s.a[3u];
+  var u32_sa6 : f32 = s.a[3u];
+  var u32_sb1 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb2 : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb3 : f32 = s.b[min(3u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb4 : f32 = s.b[min(4u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb5 : f32 = s.b[min(10u, (arrayLength(&(s.b)) - 1u))];
+  var u32_sb6 : f32 = s.b[min(100u, (arrayLength(&(s.b)) - 1u))];
+  var u32_ua1 : f32 = u.a[0u];
+  var u32_ua2 : f32 = u.a[1u];
+  var u32_ua3 : f32 = u.a[3u];
+  var u32_ua4 : f32 = u.a[4u];
+  var u32_ua5 : f32 = u.a[10u];
+  var u32_ua6 : f32 = u.a[100u];
+}
+)";
+
+  Robustness::Config cfg;
+  cfg.omitted_classes.insert(Robustness::StorageClass::kUniform);
+
+  DataMap data;
+  data.Add<Robustness::Config>(cfg);
+
+  auto got = Run<Robustness>(kOmitSourceShader, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RobustnessTest, OmitBoth) {
+  auto* expect = R"(
+[[block]]
+struct S {
+  a : array<f32, 4>;
+  b : array<f32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> s : S;
+
+type UArr = [[stride(16)]] array<f32, 4>;
+
+[[block]]
+struct U {
+  a : UArr;
+};
+
+[[group(1), binding(0)]] var<uniform> u : U;
+
+fn f() {
+  var i32_sa1 : f32 = s.a[4];
+  var i32_sa2 : f32 = s.a[1];
+  var i32_sa3 : f32 = s.a[0];
+  var i32_sa4 : f32 = s.a[-1];
+  var i32_sa5 : f32 = s.a[-4];
+  var i32_sb1 : f32 = s.b[4];
+  var i32_sb2 : f32 = s.b[1];
+  var i32_sb3 : f32 = s.b[0];
+  var i32_sb4 : f32 = s.b[-1];
+  var i32_sb5 : f32 = s.b[-4];
+  var i32_ua1 : f32 = u.a[4];
+  var i32_ua2 : f32 = u.a[1];
+  var i32_ua3 : f32 = u.a[0];
+  var i32_ua4 : f32 = u.a[-1];
+  var i32_ua5 : f32 = u.a[-4];
+  var u32_sa1 : f32 = s.a[0u];
+  var u32_sa2 : f32 = s.a[1u];
+  var u32_sa3 : f32 = s.a[3u];
+  var u32_sa4 : f32 = s.a[4u];
+  var u32_sa5 : f32 = s.a[10u];
+  var u32_sa6 : f32 = s.a[100u];
+  var u32_sb1 : f32 = s.b[0u];
+  var u32_sb2 : f32 = s.b[1u];
+  var u32_sb3 : f32 = s.b[3u];
+  var u32_sb4 : f32 = s.b[4u];
+  var u32_sb5 : f32 = s.b[10u];
+  var u32_sb6 : f32 = s.b[100u];
+  var u32_ua1 : f32 = u.a[0u];
+  var u32_ua2 : f32 = u.a[1u];
+  var u32_ua3 : f32 = u.a[3u];
+  var u32_ua4 : f32 = u.a[4u];
+  var u32_ua5 : f32 = u.a[10u];
+  var u32_ua6 : f32 = u.a[100u];
+}
+)";
+
+  Robustness::Config cfg;
+  cfg.omitted_classes.insert(Robustness::StorageClass::kStorage);
+  cfg.omitted_classes.insert(Robustness::StorageClass::kUniform);
+
+  DataMap data;
+  data.Add<Robustness::Config>(cfg);
+
+  auto got = Run<Robustness>(kOmitSourceShader, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

@@ -22,9 +22,11 @@
 #include "src/sem/block_statement.h"
 #include "src/sem/call.h"
 #include "src/sem/expression.h"
+#include "src/sem/reference_type.h"
 #include "src/sem/statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness::Config);
 
 namespace tint {
 namespace transform {
@@ -33,6 +35,9 @@ namespace transform {
 struct Robustness::State {
   /// The clone context
   CloneContext& ctx;
+
+  /// Set of storage classes to not apply the transform to
+  std::unordered_set<ast::StorageClass> omitted_classes;
 
   /// Applies the transformation state to `ctx`.
   void Transform() {
@@ -46,7 +51,14 @@ struct Robustness::State {
   /// @return the clamped replacement expression, or nullptr if `expr` should be
   /// cloned without changes.
   ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr) {
-    auto* ret_type = ctx.src->Sem().Get(expr->array)->Type()->UnwrapRef();
+    auto* ret_type = ctx.src->Sem().Get(expr->array)->Type();
+
+    auto* ref = ret_type->As<sem::Reference>();
+    if (ref && omitted_classes.count(ref->StorageClass()) != 0) {
+      return nullptr;
+    }
+
+    auto* ret_unwrapped = ret_type->UnwrapRef();
 
     ProgramBuilder& b = *ctx.dst;
     using u32 = ProgramBuilder::u32;
@@ -62,12 +74,12 @@ struct Robustness::State {
 
     Value size;              // size of the array, vector or matrix
     size.is_signed = false;  // size is always unsigned
-    if (auto* vec = ret_type->As<sem::Vector>()) {
+    if (auto* vec = ret_unwrapped->As<sem::Vector>()) {
       size.u32 = vec->Width();
 
-    } else if (auto* arr = ret_type->As<sem::Array>()) {
+    } else if (auto* arr = ret_unwrapped->As<sem::Array>()) {
       size.u32 = arr->Count();
-    } else if (auto* mat = ret_type->As<sem::Matrix>()) {
+    } else if (auto* mat = ret_unwrapped->As<sem::Matrix>()) {
       // The row accessor would have been an embedded array accessor and already
       // handled, so we just need to do columns here.
       size.u32 = mat->columns();
@@ -76,7 +88,7 @@ struct Robustness::State {
     }
 
     if (size.u32 == 0) {
-      if (!ret_type->Is<sem::Array>()) {
+      if (!ret_unwrapped->Is<sem::Array>()) {
         b.Diagnostics().add_error(diag::System::Transform,
                                   "invalid 0 sized non-array", expr->source);
         return nullptr;
@@ -268,11 +280,34 @@ struct Robustness::State {
   }
 };
 
+Robustness::Config::Config() = default;
+Robustness::Config::Config(const Config&) = default;
+Robustness::Config::~Config() = default;
+Robustness::Config& Robustness::Config::operator=(const Config&) = default;
+
 Robustness::Robustness() = default;
 Robustness::~Robustness() = default;
 
-void Robustness::Run(CloneContext& ctx, const DataMap&, DataMap&) {
-  State state{ctx};
+void Robustness::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
+  Config cfg;
+  if (auto* cfg_data = inputs.Get<Config>()) {
+    cfg = *cfg_data;
+  }
+
+  std::unordered_set<ast::StorageClass> omitted_classes;
+  for (auto sc : cfg.omitted_classes) {
+    switch (sc) {
+      case StorageClass::kUniform:
+        omitted_classes.insert(ast::StorageClass::kUniform);
+        break;
+      case StorageClass::kStorage:
+        omitted_classes.insert(ast::StorageClass::kStorage);
+        break;
+    }
+  }
+
+  State state{ctx, std::move(omitted_classes)};
+
   state.Transform();
   ctx.Clone();
 }
