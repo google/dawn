@@ -1179,7 +1179,9 @@ namespace dawn_native {
         bool allowInternalBinding) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor, allowInternalBinding));
+            DAWN_TRY_CONTEXT(
+                ValidateBindGroupLayoutDescriptor(this, descriptor, allowInternalBinding),
+                "validating %s", descriptor);
         }
         return GetOrCreateBindGroupLayout(descriptor);
     }

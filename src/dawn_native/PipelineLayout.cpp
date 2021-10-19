@@ -230,7 +230,8 @@ namespace dawn_native {
             desc.entryCount = entryVec.size();
 
             if (device->IsValidationEnabled()) {
-                DAWN_TRY(ValidateBindGroupLayoutDescriptor(device, &desc));
+                DAWN_TRY_CONTEXT(ValidateBindGroupLayoutDescriptor(device, &desc), "validating %s",
+                                 &desc);
             }
             return device->GetOrCreateBindGroupLayout(&desc, pipelineCompatibilityToken);
         };

@@ -18,6 +18,7 @@
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
 #include "common/Constants.h"
+#include "dawn_native/Error.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -26,6 +27,11 @@
 namespace dawn_native {
 
     enum class SingleShaderStage { Vertex, Fragment, Compute };
+
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        SingleShaderStage value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s);
 
     static_assert(static_cast<uint32_t>(SingleShaderStage::Vertex) < kNumStages, "");
     static_assert(static_cast<uint32_t>(SingleShaderStage::Fragment) < kNumStages, "");

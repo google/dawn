@@ -37,9 +37,9 @@ namespace dawn_native {
             DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
 
             ASSERT(format != nullptr);
-            if (!format->supportsStorageUsage) {
-                return DAWN_VALIDATION_ERROR("Texture format does not support storage textures");
-            }
+            DAWN_INVALID_IF(!format->supportsStorageUsage,
+                            "Texture format (%s) does not support storage textures.",
+                            storageTextureFormat);
 
             return {};
         }
@@ -48,8 +48,8 @@ namespace dawn_native {
             switch (dimension) {
                 case wgpu::TextureViewDimension::Cube:
                 case wgpu::TextureViewDimension::CubeArray:
-                    return DAWN_VALIDATION_ERROR(
-                        "Cube map and cube map texture views cannot be used as storage textures");
+                    return DAWN_FORMAT_VALIDATION_ERROR(
+                        "%s texture views cannot be used as storage textures.", dimension);
 
                 case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::e2D:
@@ -62,40 +62,25 @@ namespace dawn_native {
             }
             UNREACHABLE();
         }
-    }  // anonymous namespace
 
-    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
-                                                 const BindGroupLayoutDescriptor* descriptor,
-                                                 bool allowInternalBinding) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-        }
-
-        std::set<BindingNumber> bindingsSet;
-        BindingCounts bindingCounts = {};
-        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-            const BindGroupLayoutEntry& entry = descriptor->entries[i];
-            BindingNumber bindingNumber = BindingNumber(entry.binding);
-
-            if (bindingsSet.count(bindingNumber) != 0) {
-                return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
-            }
-
+        MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
+                                                const BindGroupLayoutEntry& entry,
+                                                bool allowInternalBinding) {
             DAWN_TRY(ValidateShaderStage(entry.visibility));
 
             int bindingMemberCount = 0;
+            BindingInfoType bindingType;
             wgpu::ShaderStage allowedStages = kAllStages;
 
             if (entry.buffer.type != wgpu::BufferBindingType::Undefined) {
                 bindingMemberCount++;
+                bindingType = BindingInfoType::Buffer;
                 const BufferBindingLayout& buffer = entry.buffer;
 
                 // The kInternalStorageBufferBinding is used internally and not a value
                 // in wgpu::BufferBindingType.
                 if (buffer.type == kInternalStorageBufferBinding) {
-                    if (!allowInternalBinding) {
-                        return DAWN_VALIDATION_ERROR("Internal binding types are disallowed");
-                    }
+                    DAWN_INVALID_IF(!allowInternalBinding, "Internal binding types are disallowed");
                 } else {
                     DAWN_TRY(ValidateBufferBindingType(buffer.type));
                 }
@@ -107,22 +92,23 @@ namespace dawn_native {
 
                 // Dynamic storage buffers aren't bounds checked properly in D3D12. Disallow them as
                 // unsafe until the bounds checks are implemented.
-                if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) &&
-                    buffer.hasDynamicOffset &&
-                    (buffer.type == wgpu::BufferBindingType::Storage ||
-                     buffer.type == kInternalStorageBufferBinding ||
-                     buffer.type == wgpu::BufferBindingType::ReadOnlyStorage)) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Dynamic storage buffers are disallowed because they aren't secure yet. "
-                        "See https://crbug.com/dawn/429");
-                }
+                DAWN_INVALID_IF(
+                    device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) &&
+                        buffer.hasDynamicOffset &&
+                        (buffer.type == wgpu::BufferBindingType::Storage ||
+                         buffer.type == kInternalStorageBufferBinding ||
+                         buffer.type == wgpu::BufferBindingType::ReadOnlyStorage),
+                    "Dynamic storage buffers are disallowed because they aren't secure yet. "
+                    "See https://crbug.com/dawn/429");
             }
             if (entry.sampler.type != wgpu::SamplerBindingType::Undefined) {
                 bindingMemberCount++;
+                bindingType = BindingInfoType::Sampler;
                 DAWN_TRY(ValidateSamplerBindingType(entry.sampler.type));
             }
             if (entry.texture.sampleType != wgpu::TextureSampleType::Undefined) {
                 bindingMemberCount++;
+                bindingType = BindingInfoType::Texture;
                 const TextureBindingLayout& texture = entry.texture;
                 DAWN_TRY(ValidateTextureSampleType(texture.sampleType));
 
@@ -133,12 +119,14 @@ namespace dawn_native {
                     viewDimension = texture.viewDimension;
                 }
 
-                if (texture.multisampled && viewDimension != wgpu::TextureViewDimension::e2D) {
-                    return DAWN_VALIDATION_ERROR("Multisampled texture bindings must be 2D.");
-                }
+                DAWN_INVALID_IF(
+                    texture.multisampled && viewDimension != wgpu::TextureViewDimension::e2D,
+                    "View dimension (%s) for a multisampled texture bindings was not %s.",
+                    viewDimension, wgpu::TextureViewDimension::e2D);
             }
             if (entry.storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
                 bindingMemberCount++;
+                bindingType = BindingInfoType::StorageTexture;
                 const StorageTextureBindingLayout& storageTexture = entry.storageTexture;
                 DAWN_TRY(ValidateStorageTextureAccess(storageTexture.access));
                 DAWN_TRY(ValidateStorageTextureFormat(device, storageTexture.format));
@@ -158,24 +146,48 @@ namespace dawn_native {
             FindInChain(entry.nextInChain, &externalTextureBindingLayout);
             if (externalTextureBindingLayout != nullptr) {
                 bindingMemberCount++;
+                bindingType = BindingInfoType::ExternalTexture;
             }
 
-            if (bindingMemberCount != 1) {
-                return DAWN_VALIDATION_ERROR(
-                    "Exactly one of buffer, sampler, texture, storageTexture, or externalTexture "
-                    "must be set for each BindGroupLayoutEntry");
-            }
+            DAWN_INVALID_IF(bindingMemberCount != 1,
+                            "BindGroupLayoutEntry had more than one of buffer, sampler, texture, "
+                            "storageTexture, or externalTexture set");
 
-            if (!IsSubset(entry.visibility, allowedStages)) {
-                return DAWN_VALIDATION_ERROR("Binding type cannot be used with this visibility.");
-            }
+            DAWN_INVALID_IF(
+                !IsSubset(entry.visibility, allowedStages),
+                "%s bindings cannot be used with a visibility of %s. Only %s are allowed.",
+                bindingType, entry.visibility, allowedStages);
+
+            return {};
+        }
+
+    }  // anonymous namespace
+
+    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
+                                                 const BindGroupLayoutDescriptor* descriptor,
+                                                 bool allowInternalBinding) {
+        DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr");
+
+        std::set<BindingNumber> bindingsSet;
+        BindingCounts bindingCounts = {};
+
+        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+            const BindGroupLayoutEntry& entry = descriptor->entries[i];
+            BindingNumber bindingNumber = BindingNumber(entry.binding);
+
+            DAWN_INVALID_IF(bindingsSet.count(bindingNumber) != 0,
+                            "On entries[%u]: binding index (%u) was specified by a previous entry.",
+                            i, entry.binding);
+
+            DAWN_TRY_CONTEXT(ValidateBindGroupLayoutEntry(device, entry, allowInternalBinding),
+                             "validating entries[%u]", i);
 
             IncrementBindingCounts(&bindingCounts, entry);
 
             bindingsSet.insert(bindingNumber);
         }
 
-        DAWN_TRY(ValidateBindingCounts(bindingCounts));
+        DAWN_TRY_CONTEXT(ValidateBindingCounts(bindingCounts), "validating binding counts");
 
         return {};
     }

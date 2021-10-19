@@ -22,26 +22,6 @@
 #include "dawn_native/ShaderModule.h"
 
 namespace dawn_native {
-    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-        SingleShaderStage value,
-        const absl::FormatConversionSpec& spec,
-        absl::FormatSink* s) {
-        switch (value) {
-            case SingleShaderStage::Compute:
-                s->Append("Compute");
-                break;
-            case SingleShaderStage::Vertex:
-                s->Append("Vertex");
-                break;
-            case SingleShaderStage::Fragment:
-                s->Append("Fragment");
-                break;
-            default:
-                UNREACHABLE();
-        }
-        return {true};
-    }
-
     MaybeError ValidateProgrammableStage(DeviceBase* device,
                                          const ShaderModuleBase* module,
                                          const std::string& entryPoint,

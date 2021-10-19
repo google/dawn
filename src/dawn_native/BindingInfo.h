@@ -50,6 +50,11 @@ namespace dawn_native {
 
     enum class BindingInfoType { Buffer, Sampler, Texture, StorageTexture, ExternalTexture };
 
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        BindingInfoType value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s);
+
     struct BindingInfo {
         BindingNumber binding;
         wgpu::ShaderStage visibility;
