@@ -65,6 +65,7 @@ namespace dawn_native { namespace d3d12 {
 
         // Functions from d3d3compiler.dll
         pD3DCompile d3dCompile = nullptr;
+        pD3DDisassemble d3dDisassemble = nullptr;
 
         // Functions from WinPixEventRuntime.dll
         using PFN_PIX_END_EVENT_ON_COMMAND_LIST =

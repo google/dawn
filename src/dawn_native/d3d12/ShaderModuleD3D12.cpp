@@ -461,6 +461,22 @@ namespace dawn_native { namespace d3d12 {
                     break;
             }
 
+            if (dumpShaders && request.compiler == ShaderCompilationRequest::Compiler::FXC) {
+                std::ostringstream dumpedMsg;
+                dumpedMsg << "/* Dumped disassembled DXBC */" << std::endl;
+
+                ComPtr<ID3DBlob> disassembly;
+                if (FAILED(functions->d3dDisassemble(
+                        compiledShader->compiledFXCShader->GetBufferPointer(),
+                        compiledShader->compiledFXCShader->GetBufferSize(), 0, nullptr,
+                        &disassembly))) {
+                    dumpedMsg << "D3D disassemble failed" << std::endl;
+                } else {
+                    dumpedMsg << reinterpret_cast<const char*>(disassembly->GetBufferPointer());
+                }
+                DumpShadersEmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+            }
+
             return {};
         }
 
