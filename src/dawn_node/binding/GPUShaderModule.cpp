@@ -91,7 +91,7 @@ namespace wgpu { namespace binding {
             Promise promise;
             AsyncTask task;
         };
-        auto ctx = new Context{env, env, async_};
+        auto ctx = new Context{env, Promise(env, PROMISE_INFO), async_};
         auto promise = ctx->promise;
 
         shader_.GetCompilationInfo(

@@ -47,11 +47,13 @@ namespace wgpu { namespace binding {
         wgpu::MapMode md{};
         Converter conv(env);
         if (!conv(md, mode)) {
-            return {env};
+            interop::Promise<void> promise(env, PROMISE_INFO);
+            promise.Reject(Errors::OperationError(env));
+            return promise;
         }
 
         if (state_ != State::Unmapped) {
-            interop::Promise<void> promise(env);
+            interop::Promise<void> promise(env, PROMISE_INFO);
             promise.Reject(Errors::OperationError(env));
             device_.InjectError(wgpu::ErrorType::Validation,
                                 "mapAsync called on buffer that is not in the unmapped state");
@@ -64,7 +66,7 @@ namespace wgpu { namespace binding {
             AsyncTask task;
             State& state;
         };
-        auto ctx = new Context{env, interop::Promise<void>(env), async_, state_};
+        auto ctx = new Context{env, interop::Promise<void>(env, PROMISE_INFO), async_, state_};
         auto promise = ctx->promise;
 
         uint64_t s = size.has_value() ? size.value() : (desc_.size - offset);

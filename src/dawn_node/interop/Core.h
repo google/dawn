@@ -38,6 +38,13 @@
 #    define INTEROP_LOG(...)
 #endif
 
+// A helper macro for constructing a PromiseInfo with the current file, function and line.
+// See PromiseInfo
+#define PROMISE_INFO                     \
+    ::wgpu::interop::PromiseInfo {       \
+        __FILE__, __FUNCTION__, __LINE__ \
+    }
+
 namespace wgpu { namespace interop {
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -147,83 +154,106 @@ namespace wgpu { namespace interop {
     // Promise<T>
     ////////////////////////////////////////////////////////////////////////////////
 
+    // Info holds details about where the promise was constructed.
+    // Used for printing debug messages when a promise is finalized without being resolved
+    // or rejected.
+    // Use the PROMISE_INFO macro to populate this structure.
+    struct PromiseInfo {
+        const char* file = nullptr;
+        const char* function = nullptr;
+        int line = 0;
+    };
+
+    namespace detail {
+        // Base class for Promise<T> specializations.
+        class PromiseBase {
+          public:
+            // Implicit conversion operators to Napi promises.
+            inline operator napi_value() const {
+                return state->deferred.Promise();
+            }
+            inline operator Napi::Value() const {
+                return state->deferred.Promise();
+            }
+            inline operator Napi::Promise() const {
+                return state->deferred.Promise();
+            }
+
+            // Reject() rejects the promise with the given failure value.
+            void Reject(Napi::Value value) const {
+                state->deferred.Reject(value);
+                state->resolved_or_rejected = true;
+            }
+            void Reject(Napi::Error err) const {
+                Reject(err.Value());
+            }
+            void Reject(std::string err) const {
+                Reject(Napi::Error::New(state->deferred.Env(), err));
+            }
+
+          protected:
+            void Resolve(Napi::Value value) const {
+                state->deferred.Resolve(value);
+                state->resolved_or_rejected = true;
+            }
+
+            struct State {
+                Napi::Promise::Deferred deferred;
+                PromiseInfo info;
+                bool resolved_or_rejected = false;
+            };
+
+            PromiseBase(Napi::Env env, const PromiseInfo& info)
+                : state(new State{Napi::Promise::Deferred::New(env), info}) {
+                state->deferred.Promise().AddFinalizer(
+                    [](Napi::Env, State* state) {
+                        // TODO(https://github.com/gpuweb/cts/issues/784):
+                        // Devices are never destroyed, so we always end up
+                        // leaking the Device.lost promise. Enable this once
+                        // fixed.
+                        if ((false)) {
+                            if (!state->resolved_or_rejected) {
+                                ::wgpu::utils::Fatal("Promise not resolved or rejected",
+                                                     state->info.file, state->info.line,
+                                                     state->info.function);
+                            }
+                        }
+                        delete state;
+                    },
+                    state);
+            }
+
+            State* const state;
+        };
+    }  // namespace detail
+
     // Promise<T> is a templated wrapper around a JavaScript promise, which can
     // resolve to the template type T.
     template <typename T>
-    class Promise {
+    class Promise : public detail::PromiseBase {
       public:
         // Constructor
-        Promise(Napi::Env env) : deferred(Napi::Promise::Deferred::New(env)) {
-        }
-
-        // Implicit conversion operators to Napi promises.
-        inline operator napi_value() const {
-            return deferred.Promise();
-        }
-        inline operator Napi::Value() const {
-            return deferred.Promise();
-        }
-        inline operator Napi::Promise() const {
-            return deferred.Promise();
+        Promise(Napi::Env env, const PromiseInfo& info) : PromiseBase(env, info) {
         }
 
         // Resolve() fulfills the promise with the given value.
         void Resolve(T&& value) const {
-            deferred.Resolve(ToJS(deferred.Env(), std::forward<T>(value)));
+            PromiseBase::Resolve(ToJS(state->deferred.Env(), std::forward<T>(value)));
         }
-
-        // Reject() rejects the promise with the given failure value.
-        void Reject(Napi::Object obj) const {
-            deferred.Reject(obj);
-        }
-        void Reject(Napi::Error err) const {
-            deferred.Reject(err.Value());
-        }
-        void Reject(std::string err) const {
-            Reject(Napi::Error::New(deferred.Env(), err));
-        }
-
-      private:
-        Napi::Promise::Deferred deferred;
     };
 
     // Specialization for Promises that resolve with no value
     template <>
-    class Promise<void> {
+    class Promise<void> : public detail::PromiseBase {
       public:
         // Constructor
-        Promise(Napi::Env env) : deferred(Napi::Promise::Deferred::New(env)) {
-        }
-
-        // Implicit conversion operators to Napi promises.
-        inline operator napi_value() const {
-            return deferred.Promise();
-        }
-        inline operator Napi::Value() const {
-            return deferred.Promise();
-        }
-        inline operator Napi::Promise() const {
-            return deferred.Promise();
+        Promise(Napi::Env env, const PromiseInfo& info) : PromiseBase(env, info) {
         }
 
         // Resolve() fulfills the promise.
         void Resolve() const {
-            deferred.Resolve(deferred.Env().Undefined());
+            PromiseBase::Resolve(state->deferred.Env().Undefined());
         }
-
-        // Reject() rejects the promise with the given failure value.
-        void Reject(Napi::Object obj) const {
-            deferred.Reject(obj);
-        }
-        void Reject(Napi::Error err) const {
-            deferred.Reject(err.Value());
-        }
-        void Reject(std::string err) const {
-            Reject(Napi::Error::New(deferred.Env(), err));
-        }
-
-      private:
-        Napi::Promise::Deferred deferred;
     };
 
     ////////////////////////////////////////////////////////////////////////////////

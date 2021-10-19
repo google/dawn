@@ -139,7 +139,7 @@ namespace wgpu { namespace binding {
         Napi::Env env,
         interop::GPUDeviceDescriptor descriptor) {
         dawn_native::DeviceDescriptor desc{};  // TODO(crbug.com/dawn/1133): Fill in.
-        interop::Promise<interop::Interface<interop::GPUDevice>> promise(env);
+        interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
 
         // See src/dawn_native/Features.cpp for enum <-> string mappings.
         for (auto required : descriptor.requiredFeatures) {
