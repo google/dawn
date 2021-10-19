@@ -858,6 +858,10 @@ std::vector<const char*> DawnTestBase::GetRequiredFeatures() {
     return {};
 }
 
+wgpu::RequiredLimits DawnTestBase::GetRequiredLimits(const wgpu::SupportedLimits&) {
+    return {};
+}
+
 const wgpu::AdapterProperties& DawnTestBase::GetAdapterProperties() const {
     return mParam.adapterProperties;
 }
@@ -920,6 +924,11 @@ void DawnTestBase::SetUp() {
     deviceDescriptor.forceEnabledToggles = mParam.forceEnabledWorkarounds;
     deviceDescriptor.forceDisabledToggles = mParam.forceDisabledWorkarounds;
     deviceDescriptor.requiredFeatures = GetRequiredFeatures();
+
+    wgpu::SupportedLimits supportedLimits;
+    mBackendAdapter.GetLimits(reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits));
+    wgpu::RequiredLimits requiredLimits = GetRequiredLimits(supportedLimits);
+    deviceDescriptor.requiredLimits = reinterpret_cast<WGPURequiredLimits*>(&requiredLimits);
 
     // Disabled disallowing unsafe APIs so we can test them.
     deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");

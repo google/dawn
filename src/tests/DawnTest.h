@@ -483,6 +483,8 @@ class DawnTestBase {
     // code path to handle the situation when not all features are supported.
     virtual std::vector<const char*> GetRequiredFeatures();
 
+    virtual wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits&);
+
     const wgpu::AdapterProperties& GetAdapterProperties() const;
 
     // TODO(crbug.com/dawn/689): Use limits returned from the wire
