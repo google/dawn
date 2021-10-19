@@ -25,7 +25,7 @@ namespace dawn_native { namespace {
     using ::testing::InSequence;
     using ::testing::Return;
 
-    TEST(DestroyObjectTests, BindGroupLayout) {
+    TEST(DestroyObjectTests, BindGroupLayoutExplicit) {
         // Skipping validation on descriptors as coverage for validation is already present.
         DeviceMock device;
         device.SetToggle(Toggle::SkipValidation, true);
@@ -44,6 +44,28 @@ namespace dawn_native { namespace {
 
         bindGroupLayout->DestroyApiObject();
         EXPECT_FALSE(bindGroupLayout->IsAlive());
+    }
+
+    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+    // will also complain if there is a memory leak.
+    TEST(DestroyObjectTests, BindGroupLayoutImplicit) {
+        // Skipping validation on descriptors as coverage for validation is already present.
+        DeviceMock device;
+        device.SetToggle(Toggle::SkipValidation, true);
+
+        BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&device);
+        EXPECT_CALL(*bindGroupLayoutMock, DestroyApiObjectImpl).Times(1);
+
+        {
+            BindGroupLayoutDescriptor desc = {};
+            Ref<BindGroupLayoutBase> bindGroupLayout;
+            EXPECT_CALL(device, CreateBindGroupLayoutImpl)
+                .WillOnce(Return(ByMove(AcquireRef(bindGroupLayoutMock))));
+            DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, device.CreateBindGroupLayout(&desc));
+
+            EXPECT_TRUE(bindGroupLayout->IsAlive());
+            EXPECT_TRUE(bindGroupLayout->IsCachedReference());
+        }
     }
 
     // Destroying the objects on the device should result in all created objects being destroyed in

@@ -26,9 +26,7 @@ namespace dawn_native {
       public:
         BindGroupLayoutMock(DeviceBase* device) : BindGroupLayoutBase(device) {
         }
-        ~BindGroupLayoutMock() override {
-            DestroyApiObject();
-        }
+        ~BindGroupLayoutMock() override = default;
 
         MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
     };

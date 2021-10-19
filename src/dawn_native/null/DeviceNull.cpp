@@ -271,10 +271,6 @@ namespace dawn_native { namespace null {
         : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken) {
     }
 
-    BindGroupLayout::~BindGroupLayout() {
-        DestroyApiObject();
-    }
-
     // Buffer
 
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)

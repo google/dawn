@@ -207,7 +207,7 @@ namespace dawn_native { namespace null {
                         PipelineCompatibilityToken pipelineCompatibilityToken);
 
       private:
-        ~BindGroupLayout() override;
+        ~BindGroupLayout() override = default;
     };
 
     class Buffer final : public BufferBase {

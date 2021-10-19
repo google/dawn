@@ -200,7 +200,11 @@ namespace dawn_native {
         mCaches = std::make_unique<DeviceBase::Caches>();
     }
 
-    DeviceBase::~DeviceBase() = default;
+    DeviceBase::~DeviceBase() {
+        // We need to explicitly release the Queue before we complete the destructor so that the
+        // Queue does not get destroyed after the Device.
+        mQueue = nullptr;
+    }
 
     MaybeError DeviceBase::Initialize(QueueBase* defaultQueue) {
         mQueue = AcquireRef(defaultQueue);

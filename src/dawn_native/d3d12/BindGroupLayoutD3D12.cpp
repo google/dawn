@@ -131,10 +131,6 @@ namespace dawn_native { namespace d3d12 {
             device->GetSamplerStagingDescriptorAllocator(GetSamplerDescriptorCount());
     }
 
-    BindGroupLayout::~BindGroupLayout() {
-        DestroyApiObject();
-    }
-
     ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
         Device* device,
         const BindGroupDescriptor* descriptor) {
