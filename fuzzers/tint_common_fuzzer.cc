@@ -37,19 +37,24 @@ namespace fuzzers {
 
 namespace {
 
-[[noreturn]] void FatalError(const tint::diag::List& diags,
-                             const std::string& msg = "") {
-  auto printer = tint::diag::Printer::create(stderr, true);
-  if (!msg.empty()) {
-    printer->write(msg + "\n", {diag::Color::kRed, true});
-  }
-  tint::diag::Formatter().format(diags, printer.get());
-  __builtin_trap();
-}
+// A macro is used to avoid FatalError creating its own stack frame. This leads
+// to better de-duplication of bug reports, because ClusterFuzz only uses the
+// top few stack frames for de-duplication, and a FatalError stack frame
+// provides no useful information.
+#define FatalError(diags, msg_string)                         \
+  do {                                                        \
+    std::string msg = msg_string;                             \
+    auto printer = tint::diag::Printer::create(stderr, true); \
+    if (!msg.empty()) {                                       \
+      printer->write(msg + "\n", {diag::Color::kRed, true});  \
+    }                                                         \
+    tint::diag::Formatter().format(diags, printer.get());     \
+    __builtin_trap();                                         \
+  } while (false)
 
 [[noreturn]] void TintInternalCompilerErrorReporter(
     const tint::diag::List& diagnostics) {
-  FatalError(diagnostics);
+  FatalError(diagnostics, "");
 }
 
 bool SPIRVToolsValidationCheck(const tint::Program& program,
