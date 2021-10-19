@@ -37,6 +37,10 @@ namespace wgpu { namespace binding {
     void AsyncRunner::QueueTick() {
         // TODO(crbug.com/dawn/1127): We probably want to reduce the frequency at which this gets
         // called.
+        if (tick_queued_) {
+            return;
+        }
+        tick_queued_ = true;
         env_.Global()
             .Get("setImmediate")
             .As<Napi::Function>()
@@ -44,6 +48,7 @@ namespace wgpu { namespace binding {
                 // TODO(crbug.com/dawn/1127): Create once, reuse.
                 Napi::Function::New(env_,
                                     [this](const Napi::CallbackInfo&) {
+                                        tick_queued_ = false;
                                         if (count_ > 0) {
                                             device_.Tick();
                                             QueueTick();

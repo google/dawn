@@ -45,6 +45,7 @@ namespace wgpu { namespace binding {
         Napi::Env env_;
         wgpu::Device const device_;
         uint64_t count_ = 0;
+        bool tick_queued_ = false;
     };
 
     // AsyncTask is a RAII helper for calling AsyncRunner::Begin() on construction, and
