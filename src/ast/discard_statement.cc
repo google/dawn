@@ -28,7 +28,7 @@ DiscardStatement::DiscardStatement(DiscardStatement&&) = default;
 
 DiscardStatement::~DiscardStatement() = default;
 
-DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {
+const DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<DiscardStatement>(src);

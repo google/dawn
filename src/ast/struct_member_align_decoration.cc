@@ -35,7 +35,7 @@ std::string StructMemberAlignDecoration::Name() const {
   return "align";
 }
 
-StructMemberAlignDecoration* StructMemberAlignDecoration::Clone(
+const StructMemberAlignDecoration* StructMemberAlignDecoration::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);

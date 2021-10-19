@@ -29,7 +29,7 @@ class Atomic : public Castable<Atomic, Type> {
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
   /// @param subtype the pointee type
-  Atomic(ProgramID pid, const Source& src, Type* const subtype);
+  Atomic(ProgramID pid, const Source& src, const Type* const subtype);
   /// Move constructor
   Atomic(Atomic&&);
   ~Atomic() override;
@@ -42,10 +42,10 @@ class Atomic : public Castable<Atomic, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Atomic* Clone(CloneContext* ctx) const override;
+  const Atomic* Clone(CloneContext* ctx) const override;
 
   /// the pointee type
-  Type const* const type;
+  const Type* const type;
 };
 
 }  // namespace ast

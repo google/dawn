@@ -51,10 +51,10 @@ class StructMemberOffsetDecoration
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  StructMemberOffsetDecoration* Clone(CloneContext* ctx) const override;
+  const StructMemberOffsetDecoration* Clone(CloneContext* ctx) const override;
 
   /// The offset value
-  uint32_t const offset;
+  const uint32_t offset;
 };
 
 }  // namespace ast

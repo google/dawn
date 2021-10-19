@@ -102,7 +102,7 @@ bool IsAtomicIntrinsic(IntrinsicType i) {
 }
 
 Intrinsic::Intrinsic(IntrinsicType type,
-                     sem::Type* return_type,
+                     const sem::Type* return_type,
                      std::vector<Parameter*> parameters,
                      PipelineStageSet supported_stages,
                      bool is_deprecated)

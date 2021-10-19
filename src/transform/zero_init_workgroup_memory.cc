@@ -46,7 +46,7 @@ struct ZeroInitWorkgroupMemory::State {
   uint32_t workgroup_size_const = 0;
   /// The size of the workgroup as an expression generator. Use if
   /// #workgroup_size_const is 0.
-  std::function<ast::Expression*()> workgroup_size_expr;
+  std::function<const ast::Expression*()> workgroup_size_expr;
 
   /// ArrayIndex represents a function on the local invocation index, of
   /// the form: `array_index = (local_invocation_index % modulo) / division`
@@ -80,7 +80,7 @@ struct ZeroInitWorkgroupMemory::State {
   /// statement will zero workgroup values.
   struct Expression {
     /// The AST expression node
-    ast::Expression* expr = nullptr;
+    const ast::Expression* expr = nullptr;
     /// The number of iterations required to zero the value
     uint32_t num_iterations = 0;
     /// All array indices used by this expression
@@ -91,7 +91,7 @@ struct ZeroInitWorkgroupMemory::State {
   /// values.
   struct Statement {
     /// The AST statement node
-    ast::Statement* stmt;
+    const ast::Statement* stmt;
     /// The number of iterations required to zero the value
     uint32_t num_iterations;
     /// All array indices used by this statement
@@ -112,7 +112,7 @@ struct ZeroInitWorkgroupMemory::State {
   /// Run inserts the workgroup memory zero-initialization logic at the top of
   /// the given function
   /// @param fn a compute shader entry point function
-  void Run(ast::Function* fn) {
+  void Run(const ast::Function* fn) {
     auto& sem = ctx.src->Sem();
 
     CalculateWorkgroupSize(
@@ -137,7 +137,7 @@ struct ZeroInitWorkgroupMemory::State {
 
     // Scan the entry point for an existing local_invocation_index builtin
     // parameter
-    std::function<ast::Expression*()> local_index;
+    std::function<const ast::Expression*()> local_index;
     for (auto* param : fn->params) {
       if (auto* builtin =
               ast::GetDecoration<ast::BuiltinDecoration>(param->decorations)) {
@@ -341,7 +341,7 @@ struct ZeroInitWorkgroupMemory::State {
   ast::StatementList DeclareArrayIndices(
       uint32_t num_iterations,
       const ArrayIndices& array_indices,
-      const std::function<ast::Expression*()>& iteration) {
+      const std::function<const ast::Expression*()>& iteration) {
     ast::StatementList stmts;
     std::map<Symbol, ArrayIndex> indices_by_name;
     for (auto index : array_indices) {

@@ -48,7 +48,7 @@ class Cloneable : public Castable<Cloneable> {
   /// Performs a deep clone of this object using the CloneContext `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned object
-  virtual Cloneable* Clone(CloneContext* ctx) const = 0;
+  virtual const Cloneable* Clone(CloneContext* ctx) const = 0;
 };
 
 /// @returns an invalid ProgramID
@@ -97,7 +97,7 @@ class CloneContext {
   /// @param object the type deriving from Cloneable to clone
   /// @return the cloned node
   template <typename T>
-  T* Clone(T* object) {
+  const T* Clone(const T* object) {
     if (src) {
       TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object);
     }
@@ -121,7 +121,7 @@ class CloneContext {
   /// @param a the type deriving from Cloneable to clone
   /// @return the cloned node
   template <typename T>
-  T* CloneWithoutTransform(T* a) {
+  const T* CloneWithoutTransform(const T* a) {
     // If the input is nullptr, there's nothing to clone - just return nullptr.
     if (a == nullptr) {
       return nullptr;
@@ -289,7 +289,9 @@ class CloneContext {
     }
     CloneableTransform transform;
     transform.typeinfo = &TypeInfo::Of<T>();
-    transform.function = [=](Cloneable* in) { return replacer(in->As<T>()); };
+    transform.function = [=](const Cloneable* in) {
+      return replacer(in->As<T>());
+    };
     transforms_.emplace_back(std::move(transform));
     return *this;
   }
@@ -329,10 +331,10 @@ class CloneContext {
   template <typename WHAT,
             typename WITH,
             typename = traits::EnableIfIsType<WITH, Cloneable>>
-  CloneContext& Replace(WHAT* what, WITH* with) {
+  CloneContext& Replace(const WHAT* what, const WITH* with) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, with);
-    replacements_[what] = [with]() -> Cloneable* { return with; };
+    replacements_[what] = [with]() -> const Cloneable* { return with; };
     return *this;
   }
 
@@ -350,7 +352,7 @@ class CloneContext {
   /// assertion in debug builds, and undefined behavior in release builds.
   /// @returns this CloneContext so calls can be chained
   template <typename WHAT, typename WITH, typename = std::result_of_t<WITH()>>
-  CloneContext& Replace(WHAT* what, WITH&& with) {
+  CloneContext& Replace(const WHAT* what, WITH&& with) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
     replacements_[what] = with;
     return *this;
@@ -411,7 +413,7 @@ class CloneContext {
   template <typename T, typename BEFORE, typename OBJECT>
   CloneContext& InsertBefore(const std::vector<T>& vector,
                              const BEFORE* before,
-                             OBJECT* object) {
+                             const OBJECT* object) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, before);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
     if (std::find(vector.begin(), vector.end(), before) == vector.end()) {
@@ -435,7 +437,7 @@ class CloneContext {
   template <typename T, typename AFTER, typename OBJECT>
   CloneContext& InsertAfter(const std::vector<T>& vector,
                             const AFTER* after,
-                            OBJECT* object) {
+                            const OBJECT* object) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, after);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
     if (std::find(vector.begin(), vector.end(), after) == vector.end()) {
@@ -473,7 +475,7 @@ class CloneContext {
 
     // TypeInfo of the Cloneable that the transform operates on
     const TypeInfo* typeinfo;
-    std::function<Cloneable*(Cloneable*)> function;
+    std::function<const Cloneable*(const Cloneable*)> function;
   };
 
   CloneContext(const CloneContext&) = delete;
@@ -482,11 +484,11 @@ class CloneContext {
   /// Cast `obj` from type `FROM` to type `TO`, returning the cast object.
   /// Reports an internal compiler error if the cast failed.
   template <typename TO, typename FROM>
-  TO* CheckedCast(FROM* obj) {
+  const TO* CheckedCast(const FROM* obj) {
     if (obj == nullptr) {
       return nullptr;
     }
-    if (TO* cast = obj->template As<TO>()) {
+    if (const TO* cast = obj->template As<TO>()) {
       return cast;
     }
     CheckedCastFailure(obj, TypeInfo::Of<TO>());
@@ -495,17 +497,17 @@ class CloneContext {
 
   /// Clones a Cloneable object, using any replacements or transforms that have
   /// been configured.
-  tint::Cloneable* CloneCloneable(Cloneable* object);
+  const Cloneable* CloneCloneable(const Cloneable* object);
 
   /// Adds an error diagnostic to Diagnostics() that the cloned object was not
   /// of the expected type.
-  void CheckedCastFailure(Cloneable* got, const TypeInfo& expected);
+  void CheckedCastFailure(const Cloneable* got, const TypeInfo& expected);
 
   /// @returns the diagnostic list of #dst
   diag::List& Diagnostics() const;
 
-  /// A vector of Cloneable*
-  using CloneableList = std::vector<Cloneable*>;
+  /// A vector of const Cloneable*
+  using CloneableList = std::vector<const Cloneable*>;
 
   /// Transformations to be applied to a list (vector)
   struct ListTransforms {
@@ -538,7 +540,7 @@ class CloneContext {
 
   /// A map of object in #src to functions that create their replacement in
   /// #dst
-  std::unordered_map<const Cloneable*, std::function<Cloneable*()>>
+  std::unordered_map<const Cloneable*, std::function<const Cloneable*()>>
       replacements_;
 
   /// A map of symbol in #src to their cloned equivalent in #dst

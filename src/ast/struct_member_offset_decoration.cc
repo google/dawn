@@ -34,7 +34,7 @@ std::string StructMemberOffsetDecoration::Name() const {
   return "offset";
 }
 
-StructMemberOffsetDecoration* StructMemberOffsetDecoration::Clone(
+const StructMemberOffsetDecoration* StructMemberOffsetDecoration::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);

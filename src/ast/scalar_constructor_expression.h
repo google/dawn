@@ -31,7 +31,7 @@ class ScalarConstructorExpression
   /// @param literal the const literal
   ScalarConstructorExpression(ProgramID pid,
                               const Source& src,
-                              Literal* literal);
+                              const Literal* literal);
   /// Move constructor
   ScalarConstructorExpression(ScalarConstructorExpression&&);
   ~ScalarConstructorExpression() override;
@@ -40,10 +40,10 @@ class ScalarConstructorExpression
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  ScalarConstructorExpression* Clone(CloneContext* ctx) const override;
+  const ScalarConstructorExpression* Clone(CloneContext* ctx) const override;
 
   /// The literal value
-  Literal* const literal;
+  const Literal* const literal;
 };
 
 }  // namespace ast

@@ -30,7 +30,7 @@ class Vector : public Castable<Vector, Type> {
   /// @param src the source of this node
   /// @param subtype the vector element type
   /// @param width the number of elements in the vector
-  Vector(ProgramID pid, const Source& src, Type const* subtype, uint32_t width);
+  Vector(ProgramID pid, Source const& src, const Type* subtype, uint32_t width);
   /// Move constructor
   Vector(Vector&&);
   ~Vector() override;
@@ -43,13 +43,13 @@ class Vector : public Castable<Vector, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Vector* Clone(CloneContext* ctx) const override;
+  const Vector* Clone(CloneContext* ctx) const override;
 
   /// The type of the vector elements
-  Type* const type;
+  const Type* const type;
 
   /// The number of elements in the vector
-  uint32_t const width;
+  const uint32_t width;
 };
 
 }  // namespace ast

@@ -26,7 +26,7 @@ ReturnStatement::ReturnStatement(ProgramID pid, const Source& src)
 
 ReturnStatement::ReturnStatement(ProgramID pid,
                                  const Source& src,
-                                 Expression* val)
+                                 const Expression* val)
     : Base(pid, src), value(val) {
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, value, program_id);
 }
@@ -35,7 +35,7 @@ ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
 
 ReturnStatement::~ReturnStatement() = default;
 
-ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {
+const ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* ret = ctx->Clone(value);

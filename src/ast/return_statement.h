@@ -33,7 +33,7 @@ class ReturnStatement : public Castable<ReturnStatement, Statement> {
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
   /// @param value the return value
-  ReturnStatement(ProgramID pid, const Source& src, Expression* value);
+  ReturnStatement(ProgramID pid, const Source& src, const Expression* value);
   /// Move constructor
   ReturnStatement(ReturnStatement&&);
   ~ReturnStatement() override;
@@ -42,10 +42,10 @@ class ReturnStatement : public Castable<ReturnStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  ReturnStatement* Clone(CloneContext* ctx) const override;
+  const ReturnStatement* Clone(CloneContext* ctx) const override;
 
   /// The value returned. May be null.
-  Expression* const value;
+  const Expression* const value;
 };
 
 }  // namespace ast

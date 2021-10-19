@@ -29,7 +29,7 @@ namespace tint {
 namespace transform {
 namespace {
 
-bool IsBlockWithSingleBreak(ast::BlockStatement* block) {
+bool IsBlockWithSingleBreak(const ast::BlockStatement* block) {
   if (block->statements.size() != 1) {
     return false;
   }
@@ -37,8 +37,8 @@ bool IsBlockWithSingleBreak(ast::BlockStatement* block) {
 }
 
 bool IsVarUsedByStmt(const sem::Info& sem,
-                     ast::Variable* var,
-                     ast::Statement* stmt) {
+                     const ast::Variable* var,
+                     const ast::Statement* stmt) {
   auto* var_sem = sem.Get(var);
   for (auto* user : var_sem->Users()) {
     if (auto* s = user->Stmt()) {
@@ -57,7 +57,7 @@ LoopToForLoop::LoopToForLoop() = default;
 LoopToForLoop::~LoopToForLoop() = default;
 
 void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
-  ctx.ReplaceAll([&](ast::LoopStatement* loop) -> ast::Statement* {
+  ctx.ReplaceAll([&](const ast::LoopStatement* loop) -> const ast::Statement* {
     // For loop condition is taken from the first statement in the loop.
     // This requires an if-statement with either:
     //  * A true block with no else statements, and the true block contains a
@@ -90,7 +90,7 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
 
     // The continuing block must be empty or contain a single, assignment or
     // function call statement.
-    ast::Statement* continuing = nullptr;
+    const ast::Statement* continuing = nullptr;
     if (auto* loop_cont = loop->continuing) {
       if (loop_cont->statements.size() != 1) {
         return nullptr;

@@ -77,7 +77,7 @@ struct ModuleScopeVarToEntryPointParam::State {
       // Clone the struct and add it to the global declaration list.
       // Remove the old declaration.
       auto* ast_str = str->Declaration();
-      ctx.dst->AST().AddTypeDecl(ctx.Clone(const_cast<ast::Struct*>(ast_str)));
+      ctx.dst->AST().AddTypeDecl(ctx.Clone(ast_str));
       ctx.Remove(ctx.src->AST().GlobalDeclarations(), ast_str);
     } else if (auto* arr = ty->As<sem::Array>()) {
       CloneStructTypes(arr->ElemType());
@@ -90,7 +90,7 @@ struct ModuleScopeVarToEntryPointParam::State {
     using CallList = std::vector<const ast::CallExpression*>;
     std::unordered_map<const ast::Function*, CallList> calls_to_replace;
 
-    std::vector<ast::Function*> functions_to_process;
+    std::vector<const ast::Function*> functions_to_process;
 
     // Build a list of functions that transitively reference any private or
     // workgroup variables, or texture/sampler variables.
@@ -123,7 +123,8 @@ struct ModuleScopeVarToEntryPointParam::State {
     // rules when this expression is passed to a function.
     // TODO(jrprice): We should add support for bidirectional SEM tree traversal
     // so that we can do this on the fly instead.
-    std::unordered_map<ast::IdentifierExpression*, ast::UnaryOpExpression*>
+    std::unordered_map<const ast::IdentifierExpression*,
+                       const ast::UnaryOpExpression*>
         ident_to_address_of;
     for (auto* node : ctx.src->ASTNodes().Objects()) {
       auto* address_of = node->As<ast::UnaryOpExpression>();
@@ -248,7 +249,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         // For non-entry points, dereference non-handle pointer parameters.
         for (auto* user : var->Users()) {
           if (user->Stmt()->Function() == func_ast) {
-            ast::Expression* expr = ctx.dst->Expr(new_var_symbol);
+            const ast::Expression* expr = ctx.dst->Expr(new_var_symbol);
             if (is_pointer) {
               // If this identifier is used by an address-of operator, just
               // remove the address-of instead of adding a deref, since we
@@ -301,7 +302,8 @@ struct ModuleScopeVarToEntryPointParam::State {
               target_var->StorageClass() == ast::StorageClass::kWorkgroup ||
               target_var->StorageClass() ==
                   ast::StorageClass::kUniformConstant) {
-            ast::Expression* arg = ctx.dst->Expr(var_to_symbol[target_var]);
+            const ast::Expression* arg =
+                ctx.dst->Expr(var_to_symbol[target_var]);
             if (is_entry_point && !is_handle && !is_workgroup_matrix) {
               arg = ctx.dst->AddressOf(arg);
             }

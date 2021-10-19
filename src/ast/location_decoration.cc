@@ -34,7 +34,7 @@ std::string LocationDecoration::Name() const {
   return "location";
 }
 
-LocationDecoration* LocationDecoration::Clone(CloneContext* ctx) const {
+const LocationDecoration* LocationDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<LocationDecoration>(src, value);

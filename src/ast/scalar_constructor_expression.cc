@@ -23,7 +23,7 @@ namespace ast {
 
 ScalarConstructorExpression::ScalarConstructorExpression(ProgramID pid,
                                                          const Source& src,
-                                                         Literal* lit)
+                                                         const Literal* lit)
     : Base(pid, src), literal(lit) {
   TINT_ASSERT(AST, literal);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, literal, program_id);
@@ -34,7 +34,7 @@ ScalarConstructorExpression::ScalarConstructorExpression(
 
 ScalarConstructorExpression::~ScalarConstructorExpression() = default;
 
-ScalarConstructorExpression* ScalarConstructorExpression::Clone(
+const ScalarConstructorExpression* ScalarConstructorExpression::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);

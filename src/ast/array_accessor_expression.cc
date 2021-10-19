@@ -23,8 +23,8 @@ namespace ast {
 
 ArrayAccessorExpression::ArrayAccessorExpression(ProgramID pid,
                                                  const Source& src,
-                                                 Expression* arr,
-                                                 Expression* idx)
+                                                 const Expression* arr,
+                                                 const Expression* idx)
     : Base(pid, src), array(arr), index(idx) {
   TINT_ASSERT(AST, array);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, array, program_id);
@@ -37,7 +37,7 @@ ArrayAccessorExpression::ArrayAccessorExpression(ArrayAccessorExpression&&) =
 
 ArrayAccessorExpression::~ArrayAccessorExpression() = default;
 
-ArrayAccessorExpression* ArrayAccessorExpression::Clone(
+const ArrayAccessorExpression* ArrayAccessorExpression::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);

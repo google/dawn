@@ -30,7 +30,7 @@ uint32_t UintLiteral::ValueAsU32() const {
   return value;
 }
 
-UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
+const UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<UintLiteral>(src, value);

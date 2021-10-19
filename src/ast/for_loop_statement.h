@@ -33,11 +33,11 @@ class ForLoopStatement : public Castable<ForLoopStatement, Statement> {
   /// @param continuing the optional continuing statement
   /// @param body the loop body
   ForLoopStatement(ProgramID program_id,
-                   const Source& source,
-                   Statement* initializer,
-                   Expression* condition,
-                   Statement* continuing,
-                   BlockStatement* body);
+                   Source const& source,
+                   const Statement* initializer,
+                   const Expression* condition,
+                   const Statement* continuing,
+                   const BlockStatement* body);
   /// Move constructor
   ForLoopStatement(ForLoopStatement&&);
   ~ForLoopStatement() override;
@@ -46,19 +46,19 @@ class ForLoopStatement : public Castable<ForLoopStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  ForLoopStatement* Clone(CloneContext* ctx) const override;
+  const ForLoopStatement* Clone(CloneContext* ctx) const override;
 
   /// The initializer statement
-  Statement* const initializer;
+  const Statement* const initializer;
 
   /// The condition expression
-  Expression* const condition;
+  const Expression* const condition;
 
   /// The continuing statement
-  Statement* const continuing;
+  const Statement* const continuing;
 
   /// The loop body block
-  BlockStatement* const body;
+  const BlockStatement* const body;
 };
 
 }  // namespace ast

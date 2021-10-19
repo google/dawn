@@ -31,8 +31,8 @@ class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
   /// @param rhs the right side of the expression
   AssignmentStatement(ProgramID program_id,
                       const Source& source,
-                      Expression* lhs,
-                      Expression* rhs);
+                      const Expression* lhs,
+                      const Expression* rhs);
   /// Move constructor
   AssignmentStatement(AssignmentStatement&&);
   ~AssignmentStatement() override;
@@ -41,13 +41,13 @@ class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  AssignmentStatement* Clone(CloneContext* ctx) const override;
+  const AssignmentStatement* Clone(CloneContext* ctx) const override;
 
   /// left side expression
-  Expression* const lhs;
+  const Expression* const lhs;
 
   /// right side expression
-  Expression* const rhs;
+  const Expression* const rhs;
 };
 
 }  // namespace ast

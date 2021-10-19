@@ -48,13 +48,13 @@ class NodeIdMap {
 
   /// @brief Initializes this instance with all the nodes in the `program`.
   /// @param program - must be valid.
-  explicit NodeIdMap(const tint::Program& program);
+  explicit NodeIdMap(const Program& program);
 
   /// @brief Returns a node for the given `id`.
   /// @param id - any value is accepted.
   /// @return a pointer to some node if `id` exists in this map.
   /// @return `nullptr` otherwise.
-  ast::Node* GetNode(IdType id) const;
+  const ast::Node* GetNode(IdType id) const;
 
   /// @brief Returns an id of the given `node`.
   /// @param node - can be a `nullptr`.
@@ -85,8 +85,8 @@ class NodeIdMap {
  private:
   IdType fresh_id_ = 1;
 
-  std::unordered_map<ast::Node*, IdType> node_to_id_;
-  std::unordered_map<IdType, ast::Node*> id_to_node_;
+  std::unordered_map<const ast::Node*, IdType> node_to_id_;
+  std::unordered_map<IdType, const ast::Node*> id_to_node_;
 };
 
 }  // namespace ast_fuzzer

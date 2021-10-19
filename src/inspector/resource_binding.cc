@@ -53,7 +53,7 @@ ResourceBinding::SampledKind BaseTypeToSampledKind(const sem::Type* base_type) {
   }
 
   if (auto* at = base_type->As<sem::Array>()) {
-    base_type = const_cast<sem::Type*>(at->ElemType());
+    base_type = at->ElemType();
   } else if (auto* mt = base_type->As<sem::Matrix>()) {
     base_type = mt->type();
   } else if (auto* vt = base_type->As<sem::Vector>()) {

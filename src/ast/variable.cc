@@ -30,11 +30,11 @@ Variable::Variable(ProgramID pid,
                    Access da,
                    const ast::Type* ty,
                    bool constant,
-                   Expression* ctor,
+                   const Expression* ctor,
                    DecorationList decos)
     : Base(pid, src),
       symbol(sym),
-      type(const_cast<Type*>(ty)),
+      type(ty),
       is_const(constant),
       constructor(ctor),
       decorations(std::move(decos)),
@@ -50,8 +50,8 @@ Variable::Variable(Variable&&) = default;
 Variable::~Variable() = default;
 
 VariableBindingPoint Variable::BindingPoint() const {
-  GroupDecoration* group = nullptr;
-  BindingDecoration* binding = nullptr;
+  const GroupDecoration* group = nullptr;
+  const BindingDecoration* binding = nullptr;
   for (auto* deco : decorations) {
     if (auto* g = deco->As<GroupDecoration>()) {
       group = g;
@@ -62,7 +62,7 @@ VariableBindingPoint Variable::BindingPoint() const {
   return VariableBindingPoint{group, binding};
 }
 
-Variable* Variable::Clone(CloneContext* ctx) const {
+const Variable* Variable::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   auto sym = ctx->Clone(symbol);
   auto* ty = ctx->Clone(type);

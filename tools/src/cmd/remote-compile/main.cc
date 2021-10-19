@@ -168,7 +168,7 @@ struct Message {
 
   explicit Message(Type ty) : type(ty) {}
 
-  Type const type;
+  const Type type;
 };
 
 struct ConnectionResponse : Message {  // Server -> Client

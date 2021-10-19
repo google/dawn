@@ -46,7 +46,7 @@ std::string DepthMultisampledTexture::FriendlyName(const SymbolTable&) const {
   return out.str();
 }
 
-DepthMultisampledTexture* DepthMultisampledTexture::Clone(
+const DepthMultisampledTexture* DepthMultisampledTexture::Clone(
     CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   return ctx->dst->create<DepthMultisampledTexture>(src, dim);

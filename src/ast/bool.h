@@ -47,7 +47,7 @@ class Bool : public Castable<Bool, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Bool* Clone(CloneContext* ctx) const override;
+  const Bool* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

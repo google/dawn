@@ -33,7 +33,8 @@ IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 
 IdentifierExpression::~IdentifierExpression() = default;
 
-IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
+const IdentifierExpression* IdentifierExpression::Clone(
+    CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto sym = ctx->Clone(symbol);

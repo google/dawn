@@ -157,8 +157,9 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
-bool GeneratorImpl::EmitArrayAccessor(std::ostream& out,
-                                      ast::ArrayAccessorExpression* expr) {
+bool GeneratorImpl::EmitArrayAccessor(
+    std::ostream& out,
+    const ast::ArrayAccessorExpression* expr) {
   if (!EmitExpression(out, expr->array)) {
     return false;
   }
@@ -173,7 +174,7 @@ bool GeneratorImpl::EmitArrayAccessor(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitBitcast(std::ostream& out,
-                                ast::BitcastExpression* expr) {
+                                const ast::BitcastExpression* expr) {
   auto* type = TypeOf(expr);
   if (auto* vec = type->UnwrapRef()->As<sem::Vector>()) {
     type = vec->type();
@@ -198,7 +199,7 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
+bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
   auto out = line();
   if (!EmitExpression(out, stmt->lhs)) {
     return false;
@@ -211,7 +212,8 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
+bool GeneratorImpl::EmitBinary(std::ostream& out,
+                               const ast::BinaryExpression* expr) {
   if (expr->op == ast::BinaryOp::kLogicalAnd ||
       expr->op == ast::BinaryOp::kLogicalOr) {
     auto name = UniqueIdentifier(kTempNamePrefix);
@@ -351,12 +353,13 @@ bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
+bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
   line() << "break;";
   return true;
 }
 
-bool GeneratorImpl::EmitCall(std::ostream& out, ast::CallExpression* expr) {
+bool GeneratorImpl::EmitCall(std::ostream& out,
+                             const ast::CallExpression* expr) {
   const auto& args = expr->args;
   auto* ident = expr->func;
   auto* call = builder_.Sem().Get(expr);
@@ -456,7 +459,7 @@ bool GeneratorImpl::EmitCall(std::ostream& out, ast::CallExpression* expr) {
 }
 
 bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
-                                            ast::CallExpression* expr,
+                                            const ast::CallExpression* expr,
                                             const sem::Intrinsic* intrinsic) {
   std::string result = UniqueIdentifier("atomic_result");
 
@@ -625,7 +628,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitSelectCall(std::ostream& out,
-                                   ast::CallExpression* expr) {
+                                   const ast::CallExpression* expr) {
   auto* expr_false = expr->args[0];
   auto* expr_true = expr->args[1];
   auto* expr_cond = expr->args[2];
@@ -650,7 +653,7 @@ bool GeneratorImpl::EmitSelectCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitModfCall(std::ostream& out,
-                                 ast::CallExpression* expr,
+                                 const ast::CallExpression* expr,
                                  const sem::Intrinsic* intrinsic) {
   if (expr->args.size() == 1) {
     return CallIntrinsicHelper(
@@ -700,7 +703,7 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
-                                  ast::CallExpression* expr,
+                                  const ast::CallExpression* expr,
                                   const sem::Intrinsic* intrinsic) {
   if (expr->args.size() == 1) {
     return CallIntrinsicHelper(
@@ -771,7 +774,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
-                                     ast::CallExpression* expr,
+                                     const ast::CallExpression* expr,
                                      const sem::Intrinsic* intrinsic) {
   // GLSL doesn't have a isNormal intrinsic, we need to emulate
   return CallIntrinsicHelper(
@@ -799,7 +802,7 @@ bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
-                                        ast::CallExpression* expr,
+                                        const ast::CallExpression* expr,
                                         const sem::Intrinsic* intrinsic) {
   return CallIntrinsicHelper(
       out, expr, intrinsic,
@@ -865,7 +868,7 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
-                                          ast::CallExpression* expr,
+                                          const ast::CallExpression* expr,
                                           const sem::Intrinsic* intrinsic) {
   return CallIntrinsicHelper(
       out, expr, intrinsic,
@@ -951,7 +954,7 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitTextureCall(std::ostream& out,
-                                    ast::CallExpression* expr,
+                                    const ast::CallExpression* expr,
                                     const sem::Intrinsic* intrinsic) {
   using Usage = sem::ParameterUsage;
 
@@ -1072,7 +1075,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     return false;
   }
 
-  auto emit_vector_appended_with_i32_zero = [&](tint::ast::Expression* vector) {
+  auto emit_vector_appended_with_i32_zero = [&](const ast::Expression* vector) {
     auto* i32 = builder_.create<sem::I32>();
     auto* zero = builder_.Expr(0);
     auto* stmt = builder_.Sem().Get(vector)->Stmt();
@@ -1082,7 +1085,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     return EmitExpression(out, packed);
   };
 
-  auto emit_vector_appended_with_level = [&](tint::ast::Expression* vector) {
+  auto emit_vector_appended_with_level = [&](const ast::Expression* vector) {
     if (auto* level = arg(Usage::kLevel)) {
       auto* packed = AppendVector(&builder_, vector, level);
       return EmitExpression(out, packed);
@@ -1252,7 +1255,7 @@ std::string GeneratorImpl::generate_builtin_name(
   return "";
 }
 
-bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
+bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
   if (stmt->IsDefault()) {
     line() << "default: {";
   } else {
@@ -1285,7 +1288,7 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitConstructor(std::ostream& out,
-                                    ast::ConstructorExpression* expr) {
+                                    const ast::ConstructorExpression* expr) {
   if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
     return EmitScalarConstructor(out, scalar);
   }
@@ -1294,12 +1297,13 @@ bool GeneratorImpl::EmitConstructor(std::ostream& out,
 
 bool GeneratorImpl::EmitScalarConstructor(
     std::ostream& out,
-    ast::ScalarConstructorExpression* expr) {
+    const ast::ScalarConstructorExpression* expr) {
   return EmitLiteral(out, expr->literal);
 }
 
-bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
-                                        ast::TypeConstructorExpression* expr) {
+bool GeneratorImpl::EmitTypeConstructor(
+    std::ostream& out,
+    const ast::TypeConstructorExpression* expr) {
   auto* type = TypeOf(expr)->UnwrapRef();
 
   // If the type constructor is empty then we need to construct with the zero
@@ -1349,7 +1353,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
+bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
   if (!emit_continuing_()) {
     return false;
   }
@@ -1357,14 +1361,15 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
   return true;
 }
 
-bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
+bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
   // TODO(dsinclair): Verify this is correct when the discard semantics are
   // defined for WGSL (https://github.com/gpuweb/gpuweb/issues/361)
   line() << "discard;";
   return true;
 }
 
-bool GeneratorImpl::EmitExpression(std::ostream& out, ast::Expression* expr) {
+bool GeneratorImpl::EmitExpression(std::ostream& out,
+                                   const ast::Expression* expr) {
   if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
     return EmitArrayAccessor(out, a);
   }
@@ -1397,12 +1402,12 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, ast::Expression* expr) {
 }
 
 bool GeneratorImpl::EmitIdentifier(std::ostream& out,
-                                   ast::IdentifierExpression* expr) {
+                                   const ast::IdentifierExpression* expr) {
   out << builder_.Symbols().NameFor(expr->symbol);
   return true;
 }
 
-bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
+bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
   {
     auto out = line();
     out << "if (";
@@ -1449,7 +1454,7 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitFunction(ast::Function* func) {
+bool GeneratorImpl::EmitFunction(const ast::Function* func) {
   auto* sem = builder_.Sem().Get(func);
 
   if (ast::HasDecoration<ast::InternalDecoration>(func->decorations)) {
@@ -1524,7 +1529,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   return true;
 }
 
-bool GeneratorImpl::EmitGlobalVariable(ast::Variable* global) {
+bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
   if (global->is_const) {
     return EmitProgramConstVariable(global);
   }
@@ -1729,7 +1734,7 @@ std::string GeneratorImpl::interpolation_to_modifiers(
   return modifiers;
 }
 
-bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
+bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   auto* func_sem = builder_.Sem().Get(func);
 
   {
@@ -1917,7 +1922,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   return true;
 }
 
-bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
+bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {
   if (auto* l = lit->As<ast::BoolLiteral>()) {
     out << (l->value ? "true" : "false");
   } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
@@ -2014,7 +2019,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
   return true;
 }
 
-bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
+bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
   auto emit_continuing = [this, stmt]() {
     if (stmt->continuing && !stmt->continuing->Empty()) {
       if (!EmitBlock(stmt->continuing)) {
@@ -2040,7 +2045,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
+bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
   // Nest a for loop with a new block. In HLSL the initializer scope is not
   // nested by the for-loop, so we may get variable redefinitions.
   line() << "{";
@@ -2149,8 +2154,9 @@ bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
-                                       ast::MemberAccessorExpression* expr) {
+bool GeneratorImpl::EmitMemberAccessor(
+    std::ostream& out,
+    const ast::MemberAccessorExpression* expr) {
   if (!EmitExpression(out, expr->structure)) {
     return false;
   }
@@ -2166,7 +2172,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
+bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
   if (stmt->value) {
     auto out = line();
     out << "return ";
@@ -2180,7 +2186,7 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
+bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return EmitAssign(a);
   }
@@ -2236,7 +2242,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   return false;
 }
 
-bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
+bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
   {  // switch(expr) {
     auto out = line();
     out << "switch(";
@@ -2484,7 +2490,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 }
 
 bool GeneratorImpl::EmitUnaryOp(std::ostream& out,
-                                ast::UnaryOpExpression* expr) {
+                                const ast::UnaryOpExpression* expr) {
   switch (expr->op) {
     case ast::UnaryOp::kIndirection:
     case ast::UnaryOp::kAddressOf:
@@ -2510,7 +2516,7 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitVariable(ast::Variable* var) {
+bool GeneratorImpl::EmitVariable(const ast::Variable* var) {
   auto* sem = builder_.Sem().Get(var);
   auto* type = sem->Type()->UnwrapRef();
 
@@ -2604,7 +2610,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
 
 template <typename F>
 bool GeneratorImpl::CallIntrinsicHelper(std::ostream& out,
-                                        ast::CallExpression* call,
+                                        const ast::CallExpression* call,
                                         const sem::Intrinsic* intrinsic,
                                         F&& build) {
   // Generate the helper function if it hasn't been created already

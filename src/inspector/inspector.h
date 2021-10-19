@@ -147,7 +147,7 @@ class Inspector {
   /// @param name name of the entry point to find
   /// @returns a pointer to the entry point if it exists, otherwise returns
   ///          nullptr and sets the error string.
-  ast::Function* FindEntryPointByName(const std::string& name);
+  const ast::Function* FindEntryPointByName(const std::string& name);
 
   /// Recursively add entry point IO variables.
   /// If `type` is a struct, recurse into members, appending the member name.
@@ -157,7 +157,7 @@ class Inspector {
   /// @param decorations the variable decorations
   /// @param variables the list to add the variables to
   void AddEntryPointInOutVariables(std::string name,
-                                   sem::Type* type,
+                                   const sem::Type* type,
                                    const ast::DecorationList& decorations,
                                    std::vector<StageVariable>& variables) const;
 
@@ -165,7 +165,7 @@ class Inspector {
   /// If `type` is a struct, recurse into members to check for the decoration.
   /// Otherwise, check `decorations` for the decoration.
   bool ContainsBuiltin(ast::Builtin builtin,
-                       sem::Type* type,
+                       const sem::Type* type,
                        const ast::DecorationList& decorations) const;
 
   /// Gathers all the texture resource bindings of the given type for the given

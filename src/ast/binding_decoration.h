@@ -39,10 +39,10 @@ class BindingDecoration : public Castable<BindingDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  BindingDecoration* Clone(CloneContext* ctx) const override;
+  const BindingDecoration* Clone(CloneContext* ctx) const override;
 
   /// the binding value
-  uint32_t const value;
+  const uint32_t value;
 };
 
 }  // namespace ast

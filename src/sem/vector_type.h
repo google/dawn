@@ -34,7 +34,7 @@ class Vector : public Castable<Vector, Type> {
   ~Vector() override;
 
   /// @returns the type of the vector elements
-  Type* type() const { return const_cast<Type*>(subtype_); }
+  const Type* type() const { return subtype_; }
 
   /// @returns the name for th type
   std::string type_name() const override;
@@ -68,7 +68,7 @@ class Vector : public Castable<Vector, Type> {
 
  private:
   Type const* const subtype_;
-  uint32_t const width_;
+  const uint32_t width_;
 };
 
 }  // namespace sem

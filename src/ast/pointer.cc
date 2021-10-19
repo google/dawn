@@ -23,7 +23,7 @@ namespace ast {
 
 Pointer::Pointer(ProgramID pid,
                  const Source& src,
-                 Type* const subtype,
+                 const Type* const subtype,
                  ast::StorageClass sc,
                  ast::Access ac)
     : Base(pid, src), type(subtype), storage_class(sc), access(ac) {}
@@ -46,7 +46,7 @@ Pointer::Pointer(Pointer&&) = default;
 
 Pointer::~Pointer() = default;
 
-Pointer* Pointer::Clone(CloneContext* ctx) const {
+const Pointer* Pointer::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* ty = ctx->Clone(type);

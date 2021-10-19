@@ -32,7 +32,7 @@ std::string TypeName::FriendlyName(const SymbolTable& symbols) const {
   return symbols.NameFor(name);
 }
 
-TypeName* TypeName::Clone(CloneContext* ctx) const {
+const TypeName* TypeName::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   auto n = ctx->Clone(name);
   return ctx->dst->create<TypeName>(src, n);

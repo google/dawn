@@ -26,37 +26,39 @@ ForLoopToLoop::ForLoopToLoop() = default;
 ForLoopToLoop::~ForLoopToLoop() = default;
 
 void ForLoopToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
-  ctx.ReplaceAll([&](ast::ForLoopStatement* for_loop) -> ast::Statement* {
-    ast::StatementList stmts;
-    if (auto* cond = for_loop->condition) {
-      // !condition
-      auto* not_cond = ctx.dst->create<ast::UnaryOpExpression>(
-          ast::UnaryOp::kNot, ctx.Clone(cond));
+  ctx.ReplaceAll(
+      [&](const ast::ForLoopStatement* for_loop) -> const ast::Statement* {
+        ast::StatementList stmts;
+        if (auto* cond = for_loop->condition) {
+          // !condition
+          auto* not_cond = ctx.dst->create<ast::UnaryOpExpression>(
+              ast::UnaryOp::kNot, ctx.Clone(cond));
 
-      // { break; }
-      auto* break_body = ctx.dst->Block(ctx.dst->create<ast::BreakStatement>());
+          // { break; }
+          auto* break_body =
+              ctx.dst->Block(ctx.dst->create<ast::BreakStatement>());
 
-      // if (!condition) { break; }
-      stmts.emplace_back(ctx.dst->If(not_cond, break_body));
-    }
-    for (auto* stmt : for_loop->body->statements) {
-      stmts.emplace_back(ctx.Clone(stmt));
-    }
+          // if (!condition) { break; }
+          stmts.emplace_back(ctx.dst->If(not_cond, break_body));
+        }
+        for (auto* stmt : for_loop->body->statements) {
+          stmts.emplace_back(ctx.Clone(stmt));
+        }
 
-    ast::BlockStatement* continuing = nullptr;
-    if (auto* cont = for_loop->continuing) {
-      continuing = ctx.dst->Block(ctx.Clone(cont));
-    }
+        const ast::BlockStatement* continuing = nullptr;
+        if (auto* cont = for_loop->continuing) {
+          continuing = ctx.dst->Block(ctx.Clone(cont));
+        }
 
-    auto* body = ctx.dst->Block(stmts);
-    auto* loop = ctx.dst->create<ast::LoopStatement>(body, continuing);
+        auto* body = ctx.dst->Block(stmts);
+        auto* loop = ctx.dst->create<ast::LoopStatement>(body, continuing);
 
-    if (auto* init = for_loop->initializer) {
-      return ctx.dst->Block(ctx.Clone(init), loop);
-    }
+        if (auto* init = for_loop->initializer) {
+          return ctx.dst->Block(ctx.Clone(init), loop);
+        }
 
-    return loop;
-  });
+        return loop;
+      });
 
   ctx.Clone();
 }

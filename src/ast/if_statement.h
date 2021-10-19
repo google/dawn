@@ -33,8 +33,8 @@ class IfStatement : public Castable<IfStatement, Statement> {
   /// @param else_stmts the else statements
   IfStatement(ProgramID pid,
               const Source& src,
-              Expression* condition,
-              BlockStatement* body,
+              const Expression* condition,
+              const BlockStatement* body,
               ElseStatementList else_stmts);
   /// Move constructor
   IfStatement(IfStatement&&);
@@ -44,16 +44,16 @@ class IfStatement : public Castable<IfStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  IfStatement* Clone(CloneContext* ctx) const override;
+  const IfStatement* Clone(CloneContext* ctx) const override;
 
   /// The if condition or nullptr if none set
-  Expression* const condition;
+  const Expression* const condition;
 
   /// The if body
-  BlockStatement* const body;
+  const BlockStatement* const body;
 
   /// The else statements
-  ElseStatementList const else_statements;
+  const ElseStatementList else_statements;
 };
 
 }  // namespace ast

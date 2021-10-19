@@ -22,10 +22,10 @@ namespace tint {
 namespace ast {
 
 Vector::Vector(ProgramID pid,
-               const Source& src,
-               Type const* subtype,
+               Source const& src,
+               const Type* subtype,
                uint32_t w)
-    : Base(pid, src), type(const_cast<Type*>(subtype)), width(w) {
+    : Base(pid, src), type(subtype), width(w) {
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, subtype, program_id);
   TINT_ASSERT(AST, width > 1);
   TINT_ASSERT(AST, width < 5);
@@ -41,7 +41,7 @@ std::string Vector::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-Vector* Vector::Clone(CloneContext* ctx) const {
+const Vector* Vector::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* ty = ctx->Clone(type);

@@ -37,11 +37,11 @@ struct MatrixInfo {
   /// The stride in bytes between columns of the matrix
   uint32_t stride = 0;
   /// The type of the matrix
-  sem::Matrix const* matrix = nullptr;
+  const sem::Matrix* matrix = nullptr;
 
   /// @returns a new ast::Array that holds an vector column for each row of the
   /// matrix.
-  ast::Array* array(ProgramBuilder* b) const {
+  const ast::Array* array(ProgramBuilder* b) const {
     return b->ty.array(b->ty.vec<ProgramBuilder::f32>(matrix->rows()),
                        matrix->columns(), stride);
   }
@@ -126,7 +126,7 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   // Scan the program for all storage and uniform structure matrix members with
   // a custom stride attribute. Replace these matrices with an equivalent array,
   // and populate the `decomposed` map with the members that have been replaced.
-  std::unordered_map<ast::StructMember*, MatrixInfo> decomposed;
+  std::unordered_map<const ast::StructMember*, MatrixInfo> decomposed;
   GatherCustomStrideMatrixMembers(
       ctx.src, [&](const sem::StructMember* member, sem::Matrix* matrix,
                    uint32_t stride) {
@@ -144,19 +144,19 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   // preserve these without calling conversion functions.
   // Example:
   //   ssbo.mat[2] -> ssbo.mat[2]
-  ctx.ReplaceAll(
-      [&](ast::ArrayAccessorExpression* expr) -> ast::ArrayAccessorExpression* {
-        if (auto* access =
-                ctx.src->Sem().Get<sem::StructMemberAccess>(expr->array)) {
-          auto it = decomposed.find(access->Member()->Declaration());
-          if (it != decomposed.end()) {
-            auto* obj = ctx.CloneWithoutTransform(expr->array);
-            auto* idx = ctx.Clone(expr->index);
-            return ctx.dst->IndexAccessor(obj, idx);
-          }
-        }
-        return nullptr;
-      });
+  ctx.ReplaceAll([&](const ast::ArrayAccessorExpression* expr)
+                     -> const ast::ArrayAccessorExpression* {
+    if (auto* access =
+            ctx.src->Sem().Get<sem::StructMemberAccess>(expr->array)) {
+      auto it = decomposed.find(access->Member()->Declaration());
+      if (it != decomposed.end()) {
+        auto* obj = ctx.CloneWithoutTransform(expr->array);
+        auto* idx = ctx.Clone(expr->index);
+        return ctx.dst->IndexAccessor(obj, idx);
+      }
+    }
+    return nullptr;
+  });
 
   // For all struct member accesses to the matrix on the LHS of an assignment,
   // we need to convert the matrix to the array before assigning to the
@@ -164,7 +164,8 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   // Example:
   //   ssbo.mat = mat_to_arr(m)
   std::unordered_map<MatrixInfo, Symbol, MatrixInfo::Hasher> mat_to_arr;
-  ctx.ReplaceAll([&](ast::AssignmentStatement* stmt) -> ast::Statement* {
+  ctx.ReplaceAll([&](const ast::AssignmentStatement* stmt)
+                     -> const ast::Statement* {
     if (auto* access = ctx.src->Sem().Get<sem::StructMemberAccess>(stmt->lhs)) {
       auto it = decomposed.find(access->Member()->Declaration());
       if (it == decomposed.end()) {
@@ -206,42 +207,44 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   // matrix type. Example:
   //   m = arr_to_mat(ssbo.mat)
   std::unordered_map<MatrixInfo, Symbol, MatrixInfo::Hasher> arr_to_mat;
-  ctx.ReplaceAll([&](ast::MemberAccessorExpression* expr) -> ast::Expression* {
-    if (auto* access = ctx.src->Sem().Get<sem::StructMemberAccess>(expr)) {
-      auto it = decomposed.find(access->Member()->Declaration());
-      if (it == decomposed.end()) {
-        return nullptr;
-      }
-      MatrixInfo info = it->second;
-      auto fn = utils::GetOrCreate(arr_to_mat, info, [&] {
-        auto name = ctx.dst->Symbols().New(
-            "arr_to_mat" + std::to_string(info.matrix->columns()) + "x" +
-            std::to_string(info.matrix->rows()) + "_stride_" +
-            std::to_string(info.stride));
+  ctx.ReplaceAll(
+      [&](const ast::MemberAccessorExpression* expr) -> const ast::Expression* {
+        if (auto* access = ctx.src->Sem().Get<sem::StructMemberAccess>(expr)) {
+          auto it = decomposed.find(access->Member()->Declaration());
+          if (it == decomposed.end()) {
+            return nullptr;
+          }
+          MatrixInfo info = it->second;
+          auto fn = utils::GetOrCreate(arr_to_mat, info, [&] {
+            auto name = ctx.dst->Symbols().New(
+                "arr_to_mat" + std::to_string(info.matrix->columns()) + "x" +
+                std::to_string(info.matrix->rows()) + "_stride_" +
+                std::to_string(info.stride));
 
-        auto matrix = [&] { return CreateASTTypeFor(ctx, info.matrix); };
-        auto array = [&] { return info.array(ctx.dst); };
+            auto matrix = [&] { return CreateASTTypeFor(ctx, info.matrix); };
+            auto array = [&] { return info.array(ctx.dst); };
 
-        auto arr = ctx.dst->Sym("arr");
-        ast::ExpressionList columns(info.matrix->columns());
-        for (uint32_t i = 0; i < static_cast<uint32_t>(columns.size()); i++) {
-          columns[i] = ctx.dst->IndexAccessor(arr, i);
+            auto arr = ctx.dst->Sym("arr");
+            ast::ExpressionList columns(info.matrix->columns());
+            for (uint32_t i = 0; i < static_cast<uint32_t>(columns.size());
+                 i++) {
+              columns[i] = ctx.dst->IndexAccessor(arr, i);
+            }
+            ctx.dst->Func(
+                name,
+                {
+                    ctx.dst->Param(arr, array()),
+                },
+                matrix(),
+                {
+                    ctx.dst->Return(ctx.dst->Construct(matrix(), columns)),
+                });
+            return name;
+          });
+          return ctx.dst->Call(fn, ctx.CloneWithoutTransform(expr));
         }
-        ctx.dst->Func(
-            name,
-            {
-                ctx.dst->Param(arr, array()),
-            },
-            matrix(),
-            {
-                ctx.dst->Return(ctx.dst->Construct(matrix(), columns)),
-            });
-        return name;
+        return nullptr;
       });
-      return ctx.dst->Call(fn, ctx.CloneWithoutTransform(expr));
-    }
-    return nullptr;
-  });
 
   ctx.Clone();
 }

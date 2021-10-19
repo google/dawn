@@ -23,10 +23,10 @@ namespace ast {
 
 ForLoopStatement::ForLoopStatement(ProgramID pid,
                                    const Source& src,
-                                   Statement* init,
-                                   Expression* cond,
-                                   Statement* cont,
-                                   BlockStatement* b)
+                                   const Statement* init,
+                                   const Expression* cond,
+                                   const Statement* cont,
+                                   const BlockStatement* b)
     : Base(pid, src),
       initializer(init),
       condition(cond),
@@ -44,7 +44,7 @@ ForLoopStatement::ForLoopStatement(ForLoopStatement&&) = default;
 
 ForLoopStatement::~ForLoopStatement() = default;
 
-ForLoopStatement* ForLoopStatement::Clone(CloneContext* ctx) const {
+const ForLoopStatement* ForLoopStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
 

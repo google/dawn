@@ -34,7 +34,7 @@ std::string BuiltinDecoration::Name() const {
   return "builtin";
 }
 
-BuiltinDecoration* BuiltinDecoration::Clone(CloneContext* ctx) const {
+const BuiltinDecoration* BuiltinDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<BuiltinDecoration>(src, builtin);

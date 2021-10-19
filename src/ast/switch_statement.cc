@@ -23,7 +23,7 @@ namespace ast {
 
 SwitchStatement::SwitchStatement(ProgramID pid,
                                  const Source& src,
-                                 Expression* cond,
+                                 const Expression* cond,
                                  CaseStatementList b)
     : Base(pid, src), condition(cond), body(b) {
   TINT_ASSERT(AST, condition);
@@ -38,7 +38,7 @@ SwitchStatement::SwitchStatement(SwitchStatement&&) = default;
 
 SwitchStatement::~SwitchStatement() = default;
 
-SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
+const SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* cond = ctx->Clone(condition);

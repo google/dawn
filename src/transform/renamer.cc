@@ -1131,7 +1131,7 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
 
   // Swizzles, intrinsic calls and builtin structure members need to keep their
   // symbols preserved.
-  std::unordered_set<ast::IdentifierExpression*> preserve;
+  std::unordered_set<const ast::IdentifierExpression*> preserve;
   for (auto* node : in->ASTNodes().Objects()) {
     if (auto* member = node->As<ast::MemberAccessorExpression>()) {
       auto* sem = in->Sem().Get(member);
@@ -1213,17 +1213,17 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
     return sym_out;
   });
 
-  ctx.ReplaceAll(
-      [&](ast::IdentifierExpression* ident) -> ast::IdentifierExpression* {
-        if (preserve.count(ident)) {
-          auto sym_in = ident->symbol;
-          auto str = in->Symbols().NameFor(sym_in);
-          auto sym_out = out.Symbols().Register(str);
-          return ctx.dst->create<ast::IdentifierExpression>(
-              ctx.Clone(ident->source), sym_out);
-        }
-        return nullptr;  // Clone ident. Uses the symbol remapping above.
-      });
+  ctx.ReplaceAll([&](const ast::IdentifierExpression* ident)
+                     -> const ast::IdentifierExpression* {
+    if (preserve.count(ident)) {
+      auto sym_in = ident->symbol;
+      auto str = in->Symbols().NameFor(sym_in);
+      auto sym_out = out.Symbols().Register(str);
+      return ctx.dst->create<ast::IdentifierExpression>(
+          ctx.Clone(ident->source), sym_out);
+    }
+    return nullptr;  // Clone ident. Uses the symbol remapping above.
+  });
   ctx.Clone();
 
   return Output(Program(std::move(out)),

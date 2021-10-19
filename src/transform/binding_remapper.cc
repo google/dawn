@@ -129,7 +129,7 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
           return;
         }
         auto* ty = sem->Type()->UnwrapRef();
-        ast::Type* inner_ty = CreateASTTypeFor(ctx, ty);
+        const ast::Type* inner_ty = CreateASTTypeFor(ctx, ty);
         auto* new_var = ctx.dst->create<ast::Variable>(
             ctx.Clone(var->source), ctx.Clone(var->symbol),
             var->declared_storage_class, ac, inner_ty, var->is_const,

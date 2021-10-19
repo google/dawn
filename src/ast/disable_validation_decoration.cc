@@ -47,7 +47,7 @@ std::string DisableValidationDecoration::InternalName() const {
   return "<invalid>";
 }
 
-DisableValidationDecoration* DisableValidationDecoration::Clone(
+const DisableValidationDecoration* DisableValidationDecoration::Clone(
     CloneContext* ctx) const {
   return ctx->dst->ASTNodes().Create<DisableValidationDecoration>(
       ctx->dst->ID(), validation);

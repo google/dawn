@@ -19,8 +19,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IntLiteral);
 namespace tint {
 namespace ast {
 
-IntLiteral::IntLiteral(ProgramID pid, const Source& src)
-    : Base(pid, src) {}
+IntLiteral::IntLiteral(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 IntLiteral::~IntLiteral() = default;
 

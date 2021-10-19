@@ -39,10 +39,10 @@ class LocationDecoration : public Castable<LocationDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  LocationDecoration* Clone(CloneContext* ctx) const override;
+  const LocationDecoration* Clone(CloneContext* ctx) const override;
 
   /// The location value
-  uint32_t const value;
+  const uint32_t value;
 };
 
 }  // namespace ast

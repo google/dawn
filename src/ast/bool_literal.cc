@@ -26,7 +26,7 @@ BoolLiteral::BoolLiteral(ProgramID pid, const Source& src, bool val)
 
 BoolLiteral::~BoolLiteral() = default;
 
-BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
+const BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<BoolLiteral>(src, value);

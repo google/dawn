@@ -44,7 +44,7 @@ std::string DepthTexture::FriendlyName(const SymbolTable&) const {
   return out.str();
 }
 
-DepthTexture* DepthTexture::Clone(CloneContext* ctx) const {
+const DepthTexture* DepthTexture::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   return ctx->dst->create<DepthTexture>(src, dim);
 }

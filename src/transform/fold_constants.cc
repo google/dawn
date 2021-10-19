@@ -31,7 +31,7 @@ FoldConstants::FoldConstants() = default;
 FoldConstants::~FoldConstants() = default;
 
 void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
-  ctx.ReplaceAll([&](ast::Expression* expr) -> ast::Expression* {
+  ctx.ReplaceAll([&](const ast::Expression* expr) -> const ast::Expression* {
     auto* sem = ctx.src->Sem().Get(expr);
     if (!sem) {
       return nullptr;

@@ -24,8 +24,8 @@ namespace ast {
 SampledTexture::SampledTexture(ProgramID pid,
                                const Source& src,
                                TextureDimension d,
-                               Type const* ty)
-    : Base(pid, src, d), type(const_cast<Type*>(ty)) {
+                               const Type* ty)
+    : Base(pid, src, d), type(ty) {
   TINT_ASSERT(AST, type);
 }
 
@@ -39,7 +39,7 @@ std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-SampledTexture* SampledTexture::Clone(CloneContext* ctx) const {
+const SampledTexture* SampledTexture::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* ty = ctx->Clone(type);

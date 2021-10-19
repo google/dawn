@@ -38,7 +38,7 @@ class StructMember : public Castable<StructMember, Node> {
   StructMember(ProgramID pid,
                const Source& src,
                const Symbol& sym,
-               ast::Type* type,
+               const ast::Type* type,
                DecorationList decorations);
   /// Move constructor
   StructMember(StructMember&&);
@@ -49,20 +49,20 @@ class StructMember : public Castable<StructMember, Node> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  StructMember* Clone(CloneContext* ctx) const override;
+  const StructMember* Clone(CloneContext* ctx) const override;
 
   /// The symbol
-  Symbol const symbol;
+  const Symbol symbol;
 
   /// The type
-  ast::Type* const type;
+  const ast::Type* const type;
 
   /// The decorations
-  DecorationList const decorations;
+  const DecorationList decorations;
 };
 
 /// A list of struct members
-using StructMemberList = std::vector<StructMember*>;
+using StructMemberList = std::vector<const StructMember*>;
 
 }  // namespace ast
 }  // namespace tint

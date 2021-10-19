@@ -114,7 +114,7 @@ bool Program::IsValid() const {
   return is_valid_;
 }
 
-sem::Type* Program::TypeOf(const ast::Expression* expr) const {
+const sem::Type* Program::TypeOf(const ast::Expression* expr) const {
   auto* sem = Sem().Get(expr);
   return sem ? sem->Type() : nullptr;
 }

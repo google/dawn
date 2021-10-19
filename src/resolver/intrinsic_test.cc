@@ -224,7 +224,8 @@ class ResolverIntrinsicTest_TextureOperation
   /// @param dim dimensionality of the texture being sampled
   /// @param scalar the scalar type
   /// @returns a pointer to a type appropriate for the coord param
-  ast::Type* GetCoordsType(ast::TextureDimension dim, ast::Type* scalar) {
+  const ast::Type* GetCoordsType(ast::TextureDimension dim,
+                                 const ast::Type* scalar) {
     switch (dim) {
       case ast::TextureDimension::k1d:
         return scalar;
@@ -257,7 +258,7 @@ class ResolverIntrinsicTest_TextureOperation
 
     call_params->push_back(Expr(name));
   }
-  ast::Type* subtype(Texture type) {
+  const ast::Type* subtype(Texture type) {
     if (type == Texture::kF32) {
       return ty.f32();
     }

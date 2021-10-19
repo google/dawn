@@ -27,7 +27,7 @@ namespace tint {
 namespace transform {
 namespace {
 
-ast::VariableDeclStatement* AsTrivialLetDecl(ast::Statement* stmt) {
+const ast::VariableDeclStatement* AsTrivialLetDecl(const ast::Statement* stmt) {
   auto* var_decl = stmt->As<ast::VariableDeclStatement>();
   if (!var_decl) {
     return nullptr;

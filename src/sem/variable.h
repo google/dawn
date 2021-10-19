@@ -59,7 +59,7 @@ class Variable : public Castable<Variable, Node> {
   const ast::Variable* Declaration() const { return declaration_; }
 
   /// @returns the canonical type for the variable
-  sem::Type* Type() const { return const_cast<sem::Type*>(type_); }
+  const sem::Type* Type() const { return type_; }
 
   /// @returns the storage class for the variable
   ast::StorageClass StorageClass() const { return storage_class_; }
@@ -135,7 +135,7 @@ class GlobalVariable : public Castable<GlobalVariable, Variable> {
 
  private:
   sem::BindingPoint binding_point_;
-  bool const is_pipeline_constant_;
+  const bool is_pipeline_constant_;
   uint16_t const constant_id_ = 0;
 };
 
@@ -172,8 +172,8 @@ class Parameter : public Castable<Parameter, Variable> {
   void SetOwner(CallTarget const* owner) { owner_ = owner; }
 
  private:
-  uint32_t const index_;
-  ParameterUsage const usage_;
+  const uint32_t index_;
+  const ParameterUsage usage_;
   CallTarget const* owner_;
 };
 
@@ -190,7 +190,7 @@ class VariableUser : public Castable<VariableUser, Expression> {
   /// @param statement the statement that owns this expression
   /// @param variable the semantic variable
   /// @param constant_value the constant value for the variable. May be invalid
-  VariableUser(ast::IdentifierExpression* declaration,
+  VariableUser(const ast::IdentifierExpression* declaration,
                const sem::Type* type,
                Statement* statement,
                sem::Variable* variable,

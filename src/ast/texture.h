@@ -74,7 +74,7 @@ class Texture : public Castable<Texture, Type> {
   ~Texture() override;
 
   /// The texture dimension
-  TextureDimension const dim;
+  const TextureDimension dim;
 };
 
 }  // namespace ast

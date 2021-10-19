@@ -40,10 +40,10 @@ class BuiltinDecoration : public Castable<BuiltinDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  BuiltinDecoration* Clone(CloneContext* ctx) const override;
+  const BuiltinDecoration* Clone(CloneContext* ctx) const override;
 
   /// The builtin value
-  Builtin const builtin;
+  const Builtin builtin;
 };
 
 }  // namespace ast

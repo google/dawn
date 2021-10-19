@@ -30,7 +30,10 @@ class Alias : public Castable<Alias, TypeDecl> {
   /// @param src the source of this node
   /// @param name the symbol for the alias
   /// @param subtype the alias'd type
-  Alias(ProgramID pid, const Source& src, const Symbol& name, Type* subtype);
+  Alias(ProgramID pid,
+        const Source& src,
+        const Symbol& name,
+        const Type* subtype);
   /// Move constructor
   Alias(Alias&&);
   /// Destructor
@@ -39,10 +42,10 @@ class Alias : public Castable<Alias, TypeDecl> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Alias* Clone(CloneContext* ctx) const override;
+  const Alias* Clone(CloneContext* ctx) const override;
 
   /// the alias type
-  Type* const type;
+  const Type* const type;
 };
 
 }  // namespace ast

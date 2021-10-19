@@ -35,7 +35,7 @@ Simplify::Simplify() = default;
 Simplify::~Simplify() = default;
 
 void Simplify::Run(CloneContext& ctx, const DataMap&, DataMap&) {
-  ctx.ReplaceAll([&](ast::Expression* expr) -> ast::Expression* {
+  ctx.ReplaceAll([&](const ast::Expression* expr) -> const ast::Expression* {
     if (auto* outer = expr->As<ast::UnaryOpExpression>()) {
       if (auto* inner = outer->expr->As<ast::UnaryOpExpression>()) {
         if (outer->op == ast::UnaryOp::kAddressOf &&

@@ -33,7 +33,7 @@ class Matrix : public Castable<Matrix, Type> {
   /// @param columns the number of columns in the matrix
   Matrix(ProgramID pid,
          const Source& src,
-         Type* subtype,
+         const Type* subtype,
          uint32_t rows,
          uint32_t columns);
   /// Move constructor
@@ -48,16 +48,16 @@ class Matrix : public Castable<Matrix, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Matrix* Clone(CloneContext* ctx) const override;
+  const Matrix* Clone(CloneContext* ctx) const override;
 
   /// The type of the matrix
-  Type* const type;
+  const Type* const type;
 
   /// The number of rows in the matrix
-  uint32_t const rows;
+  const uint32_t rows;
 
   /// The number of columns in the matrix
-  uint32_t const columns;
+  const uint32_t columns;
 };
 
 }  // namespace ast

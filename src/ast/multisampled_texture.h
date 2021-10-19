@@ -33,7 +33,7 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   MultisampledTexture(ProgramID pid,
                       const Source& src,
                       TextureDimension dim,
-                      Type* type);
+                      const Type* type);
   /// Move constructor
   MultisampledTexture(MultisampledTexture&&);
   ~MultisampledTexture() override;
@@ -46,10 +46,10 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  MultisampledTexture* Clone(CloneContext* ctx) const override;
+  const MultisampledTexture* Clone(CloneContext* ctx) const override;
 
   /// The subtype of the multisampled texture
-  Type* const type;
+  const Type* const type;
 };
 
 }  // namespace ast

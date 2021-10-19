@@ -31,8 +31,8 @@ class MemberAccessorExpression
   /// @param member the member
   MemberAccessorExpression(ProgramID program_id,
                            const Source& source,
-                           Expression* structure,
-                           IdentifierExpression* member);
+                           const Expression* structure,
+                           const IdentifierExpression* member);
   /// Move constructor
   MemberAccessorExpression(MemberAccessorExpression&&);
   ~MemberAccessorExpression() override;
@@ -41,13 +41,13 @@ class MemberAccessorExpression
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  MemberAccessorExpression* Clone(CloneContext* ctx) const override;
+  const MemberAccessorExpression* Clone(CloneContext* ctx) const override;
 
   /// The structure
-  Expression* const structure;
+  const Expression* const structure;
 
   /// The member expression
-  IdentifierExpression* const member;
+  const IdentifierExpression* const member;
 };
 
 }  // namespace ast

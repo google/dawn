@@ -30,8 +30,8 @@ class LoopStatement : public Castable<LoopStatement, Statement> {
   /// @param continuing the continuing statements
   LoopStatement(ProgramID program_id,
                 const Source& source,
-                BlockStatement* body,
-                BlockStatement* continuing);
+                const BlockStatement* body,
+                const BlockStatement* continuing);
   /// Move constructor
   LoopStatement(LoopStatement&&);
   ~LoopStatement() override;
@@ -40,13 +40,13 @@ class LoopStatement : public Castable<LoopStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  LoopStatement* Clone(CloneContext* ctx) const override;
+  const LoopStatement* Clone(CloneContext* ctx) const override;
 
   /// The loop body
-  BlockStatement* const body;
+  const BlockStatement* const body;
 
   /// The continuing statements
-  BlockStatement* const continuing;
+  const BlockStatement* const continuing;
 };
 
 }  // namespace ast

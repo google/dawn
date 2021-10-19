@@ -98,13 +98,13 @@ class FirstIndexOffset : public Castable<FirstIndexOffset, Transform> {
     ~Data() override;
 
     /// True if the shader uses vertex_index
-    bool const has_vertex_index;
+    const bool has_vertex_index;
     /// True if the shader uses instance_index
-    bool const has_instance_index;
+    const bool has_instance_index;
     /// Offset of first vertex into constant buffer
-    uint32_t const first_vertex_offset;
+    const uint32_t first_vertex_offset;
     /// Offset of first instance into constant buffer
-    uint32_t const first_instance_offset;
+    const uint32_t first_instance_offset;
   };
 
   /// Constructor

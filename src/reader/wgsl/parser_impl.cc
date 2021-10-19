@@ -216,7 +216,7 @@ ParserImpl::TypedIdentifier::TypedIdentifier() = default;
 
 ParserImpl::TypedIdentifier::TypedIdentifier(const TypedIdentifier&) = default;
 
-ParserImpl::TypedIdentifier::TypedIdentifier(ast::Type* type_in,
+ParserImpl::TypedIdentifier::TypedIdentifier(const ast::Type* type_in,
                                              std::string name_in,
                                              Source source_in)
     : type(type_in), name(std::move(name_in)), source(std::move(source_in)) {}
@@ -230,7 +230,7 @@ ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
                                            ast::VariableList p,
-                                           ast::Type* ret_ty,
+                                           const ast::Type* ret_ty,
                                            ast::DecorationList ret_decos)
     : source(src),
       name(n),
@@ -251,7 +251,7 @@ ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
                                      std::string name_in,
                                      ast::StorageClass storage_class_in,
                                      ast::Access access_in,
-                                     ast::Type* type_in)
+                                     const ast::Type* type_in)
     : source(std::move(source_in)),
       name(std::move(name_in)),
       storage_class(storage_class_in),
@@ -407,7 +407,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("type alias", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      builder_.AST().AddTypeDecl(const_cast<ast::Alias*>(ta.value));
+      builder_.AST().AddTypeDecl(ta.value);
       return true;
     }
 
@@ -478,7 +478,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
 // global_variable_decl
 //  : variable_decoration_list* variable_decl
 //  | variable_decoration_list* variable_decl EQUAL const_expr
-Maybe<ast::Variable*> ParserImpl::global_variable_decl(
+Maybe<const ast::Variable*> ParserImpl::global_variable_decl(
     ast::DecorationList& decos) {
   auto decl = variable_decl();
   if (decl.errored)
@@ -486,7 +486,7 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
   if (!decl.matched)
     return Failure::kNoMatch;
 
-  ast::Expression* constructor = nullptr;
+  const ast::Expression* constructor = nullptr;
   if (match(Token::Type::kEqual)) {
     auto expr = expect_const_expr();
     if (expr.errored)
@@ -509,7 +509,7 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
 //  : attribute_list* LET variable_ident_decl global_const_initializer?
 // global_const_initializer
 //  : EQUAL const_expr
-Maybe<ast::Variable*> ParserImpl::global_constant_decl(
+Maybe<const ast::Variable*> ParserImpl::global_constant_decl(
     ast::DecorationList& decos) {
   if (!match(Token::Type::kLet)) {
     return Failure::kNoMatch;
@@ -571,7 +571,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | storage_texture_type LESS_THAN image_storage_type
 //                         COMMA access GREATER_THAN
-Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
+Maybe<const ast::Type*> ParserImpl::texture_sampler_types() {
   auto type = sampler_type();
   if (type.matched)
     return type;
@@ -646,7 +646,7 @@ Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
 // sampler_type
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
-Maybe<ast::Type*> ParserImpl::sampler_type() {
+Maybe<const ast::Type*> ParserImpl::sampler_type() {
   Source source;
   if (match(Token::Type::kSampler, &source))
     return builder_.ty.sampler(source, ast::SamplerKind::kSampler);
@@ -664,7 +664,7 @@ Maybe<ast::Type*> ParserImpl::sampler_type() {
 //  | TEXTURE_SAMPLED_3D
 //  | TEXTURE_SAMPLED_CUBE
 //  | TEXTURE_SAMPLED_CUBE_ARRAY
-Maybe<ast::TextureDimension> ParserImpl::sampled_texture_type() {
+Maybe<const ast::TextureDimension> ParserImpl::sampled_texture_type() {
   if (match(Token::Type::kTextureSampled1d))
     return ast::TextureDimension::k1d;
 
@@ -688,7 +688,7 @@ Maybe<ast::TextureDimension> ParserImpl::sampled_texture_type() {
 
 // external_texture_type
 //  : TEXTURE_EXTERNAL
-Maybe<ast::Type*> ParserImpl::external_texture_type() {
+Maybe<const ast::Type*> ParserImpl::external_texture_type() {
   Source source;
   if (match(Token::Type::kTextureExternal, &source)) {
     return builder_.ty.external_texture(source);
@@ -699,7 +699,7 @@ Maybe<ast::Type*> ParserImpl::external_texture_type() {
 
 // multisampled_texture_type
 //  : TEXTURE_MULTISAMPLED_2D
-Maybe<ast::TextureDimension> ParserImpl::multisampled_texture_type() {
+Maybe<const ast::TextureDimension> ParserImpl::multisampled_texture_type() {
   if (match(Token::Type::kTextureMultisampled2d))
     return ast::TextureDimension::k2d;
 
@@ -711,7 +711,7 @@ Maybe<ast::TextureDimension> ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_STORAGE_2D
 //  | TEXTURE_STORAGE_2D_ARRAY
 //  | TEXTURE_STORAGE_3D
-Maybe<ast::TextureDimension> ParserImpl::storage_texture_type() {
+Maybe<const ast::TextureDimension> ParserImpl::storage_texture_type() {
   if (match(Token::Type::kTextureStorage1d))
     return ast::TextureDimension::k1d;
   if (match(Token::Type::kTextureStorage2d))
@@ -730,7 +730,7 @@ Maybe<ast::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
 //  | TEXTURE_DEPTH_MULTISAMPLED_2D
-Maybe<ast::Type*> ParserImpl::depth_texture_type() {
+Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
   Source source;
   if (match(Token::Type::kTextureDepth2d, &source)) {
     return builder_.ty.depth_texture(source, ast::TextureDimension::k2d);
@@ -979,7 +979,7 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
 
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
-Maybe<ast::Alias*> ParserImpl::type_alias() {
+Maybe<const ast::Alias*> ParserImpl::type_alias() {
   if (!peek_is(Token::Type::kType))
     return Failure::kNoMatch;
 
@@ -1029,7 +1029,7 @@ Maybe<ast::Alias*> ParserImpl::type_alias() {
 //   | MAT4x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
 //   | texture_sampler_types
-Maybe<ast::Type*> ParserImpl::type_decl() {
+Maybe<const ast::Type*> ParserImpl::type_decl() {
   auto decos = decoration_list();
   if (decos.errored)
     return Failure::kErrored;
@@ -1048,7 +1048,7 @@ Maybe<ast::Type*> ParserImpl::type_decl() {
   return type;
 }
 
-Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
+Maybe<const ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
   Source source;
   if (match(Token::Type::kIdentifier, &source)) {
@@ -1104,7 +1104,7 @@ Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   return Failure::kNoMatch;
 }
 
-Expect<ast::Type*> ParserImpl::expect_type(const std::string& use) {
+Expect<const ast::Type*> ParserImpl::expect_type(const std::string& use) {
   auto type = type_decl();
   if (type.errored)
     return Failure::kErrored;
@@ -1113,13 +1113,13 @@ Expect<ast::Type*> ParserImpl::expect_type(const std::string& use) {
   return type.value;
 }
 
-Expect<ast::Type*> ParserImpl::expect_type_decl_pointer(Token t) {
+Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(Token t) {
   const char* use = "ptr declaration";
 
   auto storage_class = ast::StorageClass::kNone;
   auto access = ast::Access::kUndefined;
 
-  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<ast::Type*> {
+  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
     auto sc = expect_storage_class(use);
     if (sc.errored) {
       return Failure::kErrored;
@@ -1154,7 +1154,7 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_pointer(Token t) {
                              storage_class, access);
 }
 
-Expect<ast::Type*> ParserImpl::expect_type_decl_atomic(Token t) {
+Expect<const ast::Type*> ParserImpl::expect_type_decl_atomic(Token t) {
   const char* use = "atomic declaration";
 
   auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
@@ -1165,7 +1165,7 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_atomic(Token t) {
   return builder_.ty.atomic(make_source_range_from(t.source()), subtype.value);
 }
 
-Expect<ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {
+Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   uint32_t count = 2;
   if (t.Is(Token::Type::kVec3))
     count = 3;
@@ -1182,14 +1182,14 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {
                          count);
 }
 
-Expect<ast::Type*> ParserImpl::expect_type_decl_array(
+Expect<const ast::Type*> ParserImpl::expect_type_decl_array(
     Token t,
     ast::DecorationList decos) {
   const char* use = "array declaration";
 
-  ast::Expression* size = nullptr;
+  const ast::Expression* size = nullptr;
 
-  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<ast::Type*> {
+  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
     auto type = expect_type(use);
     if (type.errored)
       return Failure::kErrored;
@@ -1216,7 +1216,7 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_array(
                            size, std::move(decos));
 }
 
-Expect<ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
+Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   uint32_t rows = 2;
   uint32_t columns = 2;
   if (t.IsMat3xN()) {
@@ -1276,7 +1276,7 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-Maybe<ast::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
+Maybe<const ast::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
   auto t = peek();
   auto source = t.source();
 
@@ -1351,7 +1351,8 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member(
 
 // function_decl
 //   : function_header body_stmt
-Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
+Maybe<const ast::Function*> ParserImpl::function_decl(
+    ast::DecorationList& decos) {
   auto header = function_header();
   if (header.errored) {
     if (sync_to(Token::Type::kBraceLeft, /* consume: */ false)) {
@@ -1412,7 +1413,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     }
   }
 
-  ast::Type* return_type = nullptr;
+  const ast::Type* return_type = nullptr;
   ast::DecorationList return_decorations;
 
   if (match(Token::Type::kArrow)) {
@@ -1556,8 +1557,8 @@ Expect<ast::BlockStatement*> ParserImpl::expect_body_stmt() {
 
 // paren_rhs_stmt
 //   : PAREN_LEFT logical_or_expression PAREN_RIGHT
-Expect<ast::Expression*> ParserImpl::expect_paren_rhs_stmt() {
-  return expect_paren_block("", [&]() -> Expect<ast::Expression*> {
+Expect<const ast::Expression*> ParserImpl::expect_paren_rhs_stmt() {
+  return expect_paren_block("", [&]() -> Expect<const ast::Expression*> {
     auto expr = logical_or_expression();
     if (expr.errored)
       return Failure::kErrored;
@@ -1606,7 +1607,7 @@ Expect<ast::StatementList> ParserImpl::expect_statements() {
 //      | continue_stmt SEMICOLON
 //      | DISCARD SEMICOLON
 //      | assignment_stmt SEMICOLON
-Maybe<ast::Statement*> ParserImpl::statement() {
+Maybe<const ast::Statement*> ParserImpl::statement() {
   while (match(Token::Type::kSemicolon)) {
     // Skip empty statements
   }
@@ -1662,8 +1663,8 @@ Maybe<ast::Statement*> ParserImpl::statement() {
 //   | continue_stmt SEMICOLON
 //   | DISCARD SEMICOLON
 //   | assignment_stmt SEMICOLON
-Maybe<ast::Statement*> ParserImpl::non_block_statement() {
-  auto stmt = [&]() -> Maybe<ast::Statement*> {
+Maybe<const ast::Statement*> ParserImpl::non_block_statement() {
+  auto stmt = [&]() -> Maybe<const ast::Statement*> {
     auto ret_stmt = return_stmt();
     if (ret_stmt.errored)
       return Failure::kErrored;
@@ -1715,7 +1716,7 @@ Maybe<ast::Statement*> ParserImpl::non_block_statement() {
 
 // return_stmt
 //   : RETURN logical_or_expression?
-Maybe<ast::ReturnStatement*> ParserImpl::return_stmt() {
+Maybe<const ast::ReturnStatement*> ParserImpl::return_stmt() {
   Source source;
   if (!match(Token::Type::kReturn, &source))
     return Failure::kNoMatch;
@@ -1735,7 +1736,7 @@ Maybe<ast::ReturnStatement*> ParserImpl::return_stmt() {
 //   : variable_decl
 //   | variable_decl EQUAL logical_or_expression
 //   | CONST variable_ident_decl EQUAL logical_or_expression
-Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
+Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   if (match(Token::Type::kLet)) {
     auto decl = expect_variable_ident_decl("let declaration",
                                            /*allow_inferred = */ true);
@@ -1770,7 +1771,7 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   if (!decl.matched)
     return Failure::kNoMatch;
 
-  ast::Expression* constructor = nullptr;
+  const ast::Expression* constructor = nullptr;
   if (match(Token::Type::kEqual)) {
     auto constructor_expr = logical_or_expression();
     if (constructor_expr.errored)
@@ -1796,7 +1797,7 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
 
 // if_stmt
 //   : IF paren_rhs_stmt body_stmt elseif_stmt? else_stmt?
-Maybe<ast::IfStatement*> ParserImpl::if_stmt() {
+Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
   Source source;
   if (!match(Token::Type::kIf, &source))
     return Failure::kNoMatch;
@@ -1852,7 +1853,7 @@ Maybe<ast::ElseStatementList> ParserImpl::elseif_stmt() {
 
 // else_stmt
 //   : ELSE body_stmt
-Maybe<ast::ElseStatement*> ParserImpl::else_stmt() {
+Maybe<const ast::ElseStatement*> ParserImpl::else_stmt() {
   Source source;
   if (!match(Token::Type::kElse, &source))
     return Failure::kNoMatch;
@@ -1866,7 +1867,7 @@ Maybe<ast::ElseStatement*> ParserImpl::else_stmt() {
 
 // switch_stmt
 //   : SWITCH paren_rhs_stmt BRACKET_LEFT switch_body+ BRACKET_RIGHT
-Maybe<ast::SwitchStatement*> ParserImpl::switch_stmt() {
+Maybe<const ast::SwitchStatement*> ParserImpl::switch_stmt() {
   Source source;
   if (!match(Token::Type::kSwitch, &source))
     return Failure::kNoMatch;
@@ -1903,7 +1904,7 @@ Maybe<ast::SwitchStatement*> ParserImpl::switch_stmt() {
 // switch_body
 //   : CASE case_selectors COLON BRACKET_LEFT case_body BRACKET_RIGHT
 //   | DEFAULT COLON BRACKET_LEFT case_body BRACKET_RIGHT
-Maybe<ast::CaseStatement*> ParserImpl::switch_body() {
+Maybe<const ast::CaseStatement*> ParserImpl::switch_body() {
   if (!peek_is(Token::Type::kCase) && !peek_is(Token::Type::kDefault))
     return Failure::kNoMatch;
 
@@ -1967,7 +1968,7 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
 //   :
 //   | statement case_body
 //   | FALLTHROUGH SEMICOLON
-Maybe<ast::BlockStatement*> ParserImpl::case_body() {
+Maybe<const ast::BlockStatement*> ParserImpl::case_body() {
   ast::StatementList stmts;
   while (continue_parsing()) {
     Source source;
@@ -1993,12 +1994,12 @@ Maybe<ast::BlockStatement*> ParserImpl::case_body() {
 
 // loop_stmt
 //   : LOOP BRACKET_LEFT statements continuing_stmt? BRACKET_RIGHT
-Maybe<ast::LoopStatement*> ParserImpl::loop_stmt() {
+Maybe<const ast::LoopStatement*> ParserImpl::loop_stmt() {
   Source source;
   if (!match(Token::Type::kLoop, &source))
     return Failure::kNoMatch;
 
-  return expect_brace_block("loop", [&]() -> Maybe<ast::LoopStatement*> {
+  return expect_brace_block("loop", [&]() -> Maybe<const ast::LoopStatement*> {
     auto stmts = expect_statements();
     if (stmts.errored)
       return Failure::kErrored;
@@ -2012,15 +2013,15 @@ Maybe<ast::LoopStatement*> ParserImpl::loop_stmt() {
   });
 }
 
-ForHeader::ForHeader(ast::Statement* init,
-                     ast::Expression* cond,
-                     ast::Statement* cont)
+ForHeader::ForHeader(const ast::Statement* init,
+                     const ast::Expression* cond,
+                     const ast::Statement* cont)
     : initializer(init), condition(cond), continuing(cont) {}
 
 ForHeader::~ForHeader() = default;
 
 // (variable_stmt | assignment_stmt | func_call_stmt)?
-Maybe<ast::Statement*> ParserImpl::for_header_initializer() {
+Maybe<const ast::Statement*> ParserImpl::for_header_initializer() {
   auto call = func_call_stmt();
   if (call.errored)
     return Failure::kErrored;
@@ -2043,7 +2044,7 @@ Maybe<ast::Statement*> ParserImpl::for_header_initializer() {
 }
 
 // (assignment_stmt | func_call_stmt)?
-Maybe<ast::Statement*> ParserImpl::for_header_continuing() {
+Maybe<const ast::Statement*> ParserImpl::for_header_continuing() {
   auto call_stmt = func_call_stmt();
   if (call_stmt.errored)
     return Failure::kErrored;
@@ -2089,7 +2090,7 @@ Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
 
 // for_statement
 //   : FOR PAREN_LEFT for_header PAREN_RIGHT BRACE_LEFT statements BRACE_RIGHT
-Maybe<ast::ForLoopStatement*> ParserImpl::for_stmt() {
+Maybe<const ast::ForLoopStatement*> ParserImpl::for_stmt() {
   Source source;
   if (!match(Token::Type::kFor, &source))
     return Failure::kNoMatch;
@@ -2111,7 +2112,7 @@ Maybe<ast::ForLoopStatement*> ParserImpl::for_stmt() {
 
 // func_call_stmt
 //    : IDENT argument_expression_list
-Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
+Maybe<const ast::CallStatement*> ParserImpl::func_call_stmt() {
   auto t = peek();
   auto t2 = peek(1);
   if (!t.IsIdentifier() || !t2.Is(Token::Type::kParenLeft))
@@ -2136,7 +2137,7 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
 
 // break_stmt
 //   : BREAK
-Maybe<ast::BreakStatement*> ParserImpl::break_stmt() {
+Maybe<const ast::BreakStatement*> ParserImpl::break_stmt() {
   Source source;
   if (!match(Token::Type::kBreak, &source))
     return Failure::kNoMatch;
@@ -2146,7 +2147,7 @@ Maybe<ast::BreakStatement*> ParserImpl::break_stmt() {
 
 // continue_stmt
 //   : CONTINUE
-Maybe<ast::ContinueStatement*> ParserImpl::continue_stmt() {
+Maybe<const ast::ContinueStatement*> ParserImpl::continue_stmt() {
   Source source;
   if (!match(Token::Type::kContinue, &source))
     return Failure::kNoMatch;
@@ -2156,7 +2157,7 @@ Maybe<ast::ContinueStatement*> ParserImpl::continue_stmt() {
 
 // continuing_stmt
 //   : CONTINUING body_stmt
-Maybe<ast::BlockStatement*> ParserImpl::continuing_stmt() {
+Maybe<const ast::BlockStatement*> ParserImpl::continuing_stmt() {
   if (!match(Token::Type::kContinuing))
     return create<ast::BlockStatement>(Source{}, ast::StatementList{});
 
@@ -2169,7 +2170,7 @@ Maybe<ast::BlockStatement*> ParserImpl::continuing_stmt() {
 //   | const_literal
 //   | paren_rhs_stmt
 //   | BITCAST LESS_THAN type_decl GREATER_THAN paren_rhs_stmt
-Maybe<ast::Expression*> ParserImpl::primary_expression() {
+Maybe<const ast::Expression*> ParserImpl::primary_expression() {
   auto t = peek();
   auto source = t.source();
 
@@ -2238,8 +2239,8 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
 //   :
 //   | BRACE_LEFT logical_or_expression BRACE_RIGHT postfix_expr
 //   | PERIOD IDENTIFIER postfix_expr
-Maybe<ast::Expression*> ParserImpl::postfix_expression(
-    ast::Expression* prefix) {
+Maybe<const ast::Expression*> ParserImpl::postfix_expression(
+    const ast::Expression* prefix) {
   Source source;
 
   while (continue_parsing()) {
@@ -2252,8 +2253,8 @@ Maybe<ast::Expression*> ParserImpl::postfix_expression(
     }
 
     if (match(Token::Type::kBracketLeft, &source)) {
-      auto res =
-          sync(Token::Type::kBracketRight, [&]() -> Maybe<ast::Expression*> {
+      auto res = sync(
+          Token::Type::kBracketRight, [&]() -> Maybe<const ast::Expression*> {
             auto param = logical_or_expression();
             if (param.errored)
               return Failure::kErrored;
@@ -2297,7 +2298,7 @@ Maybe<ast::Expression*> ParserImpl::postfix_expression(
 
 // singular_expression
 //   : primary_expression postfix_expr
-Maybe<ast::Expression*> ParserImpl::singular_expression() {
+Maybe<const ast::Expression*> ParserImpl::singular_expression() {
   auto prefix = primary_expression();
   if (prefix.errored)
     return Failure::kErrored;
@@ -2338,7 +2339,7 @@ Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list(
 //   | TILDE unary_expression
 //   | STAR unary_expression
 //   | AND unary_expression
-Maybe<ast::Expression*> ParserImpl::unary_expression() {
+Maybe<const ast::Expression*> ParserImpl::unary_expression() {
   auto t = peek();
 
   if (match(Token::Type::kPlusPlus) || match(Token::Type::kMinusMinus)) {
@@ -2391,8 +2392,8 @@ Maybe<ast::Expression*> ParserImpl::unary_expression() {
 //   | STAR unary_expression multiplicative_expr
 //   | FORWARD_SLASH unary_expression multiplicative_expr
 //   | MODULO unary_expression multiplicative_expr
-Expect<ast::Expression*> ParserImpl::expect_multiplicative_expr(
-    ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_multiplicative_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kStar))
@@ -2423,7 +2424,7 @@ Expect<ast::Expression*> ParserImpl::expect_multiplicative_expr(
 
 // multiplicative_expression
 //   : unary_expression multiplicative_expr
-Maybe<ast::Expression*> ParserImpl::multiplicative_expression() {
+Maybe<const ast::Expression*> ParserImpl::multiplicative_expression() {
   auto lhs = unary_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2437,8 +2438,8 @@ Maybe<ast::Expression*> ParserImpl::multiplicative_expression() {
 //   :
 //   | PLUS multiplicative_expression additive_expr
 //   | MINUS multiplicative_expression additive_expr
-Expect<ast::Expression*> ParserImpl::expect_additive_expr(
-    ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_additive_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kPlus))
@@ -2464,7 +2465,7 @@ Expect<ast::Expression*> ParserImpl::expect_additive_expr(
 
 // additive_expression
 //   : multiplicative_expression additive_expr
-Maybe<ast::Expression*> ParserImpl::additive_expression() {
+Maybe<const ast::Expression*> ParserImpl::additive_expression() {
   auto lhs = multiplicative_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2478,7 +2479,8 @@ Maybe<ast::Expression*> ParserImpl::additive_expression() {
 //   :
 //   | SHIFT_LEFT additive_expression shift_expr
 //   | SHIFT_RIGHT additive_expression shift_expr
-Expect<ast::Expression*> ParserImpl::expect_shift_expr(ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_shift_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     auto* name = "";
     ast::BinaryOp op = ast::BinaryOp::kNone;
@@ -2509,7 +2511,7 @@ Expect<ast::Expression*> ParserImpl::expect_shift_expr(ast::Expression* lhs) {
 
 // shift_expression
 //   : additive_expression shift_expr
-Maybe<ast::Expression*> ParserImpl::shift_expression() {
+Maybe<const ast::Expression*> ParserImpl::shift_expression() {
   auto lhs = additive_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2525,8 +2527,8 @@ Maybe<ast::Expression*> ParserImpl::shift_expression() {
 //   | GREATER_THAN shift_expression relational_expr
 //   | LESS_THAN_EQUAL shift_expression relational_expr
 //   | GREATER_THAN_EQUAL shift_expression relational_expr
-Expect<ast::Expression*> ParserImpl::expect_relational_expr(
-    ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_relational_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kLessThan))
@@ -2559,7 +2561,7 @@ Expect<ast::Expression*> ParserImpl::expect_relational_expr(
 
 // relational_expression
 //   : shift_expression relational_expr
-Maybe<ast::Expression*> ParserImpl::relational_expression() {
+Maybe<const ast::Expression*> ParserImpl::relational_expression() {
   auto lhs = shift_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2573,8 +2575,8 @@ Maybe<ast::Expression*> ParserImpl::relational_expression() {
 //   :
 //   | EQUAL_EQUAL relational_expression equality_expr
 //   | NOT_EQUAL relational_expression equality_expr
-Expect<ast::Expression*> ParserImpl::expect_equality_expr(
-    ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_equality_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kEqualEqual))
@@ -2603,7 +2605,7 @@ Expect<ast::Expression*> ParserImpl::expect_equality_expr(
 
 // equality_expression
 //   : relational_expression equality_expr
-Maybe<ast::Expression*> ParserImpl::equality_expression() {
+Maybe<const ast::Expression*> ParserImpl::equality_expression() {
   auto lhs = relational_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2616,7 +2618,8 @@ Maybe<ast::Expression*> ParserImpl::equality_expression() {
 // and_expr
 //   :
 //   | AND equality_expression and_expr
-Expect<ast::Expression*> ParserImpl::expect_and_expr(ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_and_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     if (!peek_is(Token::Type::kAnd)) {
       return lhs;
@@ -2639,7 +2642,7 @@ Expect<ast::Expression*> ParserImpl::expect_and_expr(ast::Expression* lhs) {
 
 // and_expression
 //   : equality_expression and_expr
-Maybe<ast::Expression*> ParserImpl::and_expression() {
+Maybe<const ast::Expression*> ParserImpl::and_expression() {
   auto lhs = equality_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2652,8 +2655,8 @@ Maybe<ast::Expression*> ParserImpl::and_expression() {
 // exclusive_or_expr
 //   :
 //   | XOR and_expression exclusive_or_expr
-Expect<ast::Expression*> ParserImpl::expect_exclusive_or_expr(
-    ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_exclusive_or_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     Source source;
     if (!match(Token::Type::kXor, &source))
@@ -2673,7 +2676,7 @@ Expect<ast::Expression*> ParserImpl::expect_exclusive_or_expr(
 
 // exclusive_or_expression
 //   : and_expression exclusive_or_expr
-Maybe<ast::Expression*> ParserImpl::exclusive_or_expression() {
+Maybe<const ast::Expression*> ParserImpl::exclusive_or_expression() {
   auto lhs = and_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2686,8 +2689,8 @@ Maybe<ast::Expression*> ParserImpl::exclusive_or_expression() {
 // inclusive_or_expr
 //   :
 //   | OR exclusive_or_expression inclusive_or_expr
-Expect<ast::Expression*> ParserImpl::expect_inclusive_or_expr(
-    ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_inclusive_or_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     Source source;
     if (!match(Token::Type::kOr))
@@ -2707,7 +2710,7 @@ Expect<ast::Expression*> ParserImpl::expect_inclusive_or_expr(
 
 // inclusive_or_expression
 //   : exclusive_or_expression inclusive_or_expr
-Maybe<ast::Expression*> ParserImpl::inclusive_or_expression() {
+Maybe<const ast::Expression*> ParserImpl::inclusive_or_expression() {
   auto lhs = exclusive_or_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2720,8 +2723,8 @@ Maybe<ast::Expression*> ParserImpl::inclusive_or_expression() {
 // logical_and_expr
 //   :
 //   | AND_AND inclusive_or_expression logical_and_expr
-Expect<ast::Expression*> ParserImpl::expect_logical_and_expr(
-    ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_logical_and_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     if (!peek_is(Token::Type::kAndAnd)) {
       return lhs;
@@ -2744,7 +2747,7 @@ Expect<ast::Expression*> ParserImpl::expect_logical_and_expr(
 
 // logical_and_expression
 //   : inclusive_or_expression logical_and_expr
-Maybe<ast::Expression*> ParserImpl::logical_and_expression() {
+Maybe<const ast::Expression*> ParserImpl::logical_and_expression() {
   auto lhs = inclusive_or_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2757,8 +2760,8 @@ Maybe<ast::Expression*> ParserImpl::logical_and_expression() {
 // logical_or_expr
 //   :
 //   | OR_OR logical_and_expression logical_or_expr
-Expect<ast::Expression*> ParserImpl::expect_logical_or_expr(
-    ast::Expression* lhs) {
+Expect<const ast::Expression*> ParserImpl::expect_logical_or_expr(
+    const ast::Expression* lhs) {
   while (continue_parsing()) {
     Source source;
     if (!match(Token::Type::kOrOr))
@@ -2778,7 +2781,7 @@ Expect<ast::Expression*> ParserImpl::expect_logical_or_expr(
 
 // logical_or_expression
 //   : logical_and_expression logical_or_expr
-Maybe<ast::Expression*> ParserImpl::logical_or_expression() {
+Maybe<const ast::Expression*> ParserImpl::logical_or_expression() {
   auto lhs = logical_and_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2790,7 +2793,7 @@ Maybe<ast::Expression*> ParserImpl::logical_or_expression() {
 
 // assignment_stmt
 //   : unary_expression EQUAL logical_or_expression
-Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
+Maybe<const ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
   auto t = peek();
   auto source = t.source();
 
@@ -2826,7 +2829,7 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 //   | FLOAT_LITERAL
 //   | TRUE
 //   | FALSE
-Maybe<ast::Literal*> ParserImpl::const_literal() {
+Maybe<const ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
   if (t.IsError()) {
     return add_error(t.source(), t.to_str());
@@ -2979,7 +2982,7 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   });
 }
 
-Expect<ast::Decoration*> ParserImpl::expect_decoration() {
+Expect<const ast::Decoration*> ParserImpl::expect_decoration() {
   auto t = peek();
   auto deco = decoration();
   if (deco.errored)
@@ -2989,8 +2992,8 @@ Expect<ast::Decoration*> ParserImpl::expect_decoration() {
   return add_error(t, "expected decoration");
 }
 
-Maybe<ast::Decoration*> ParserImpl::decoration() {
-  using Result = Maybe<ast::Decoration*>;
+Maybe<const ast::Decoration*> ParserImpl::decoration() {
+  using Result = Maybe<const ast::Decoration*>;
   auto t = next();
 
   if (!t.IsIdentifier()) {
@@ -3083,9 +3086,9 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
 
   if (s == kWorkgroupSizeDecoration) {
     return expect_paren_block("workgroup_size decoration", [&]() -> Result {
-      ast::Expression* x = nullptr;
-      ast::Expression* y = nullptr;
-      ast::Expression* z = nullptr;
+      const ast::Expression* x = nullptr;
+      const ast::Expression* y = nullptr;
+      const ast::Expression* z = nullptr;
 
       auto expr = primary_expression();
       if (expr.errored) {
@@ -3187,7 +3190,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
   return Failure::kNoMatch;
 }
 
-bool ParserImpl::expect_decorations_consumed(const ast::DecorationList& in) {
+bool ParserImpl::expect_decorations_consumed(ast::DecorationList& in) {
   if (in.empty()) {
     return true;
   }

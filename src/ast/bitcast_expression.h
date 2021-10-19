@@ -33,8 +33,8 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
   /// @param expr the expr
   BitcastExpression(ProgramID program_id,
                     const Source& source,
-                    ast::Type* type,
-                    Expression* expr);
+                    const Type* type,
+                    const Expression* expr);
   /// Move constructor
   BitcastExpression(BitcastExpression&&);
   ~BitcastExpression() override;
@@ -43,12 +43,12 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  BitcastExpression* Clone(CloneContext* ctx) const override;
+  const BitcastExpression* Clone(CloneContext* ctx) const override;
 
   /// the target cast type
-  ast::Type* const type;
+  const Type* const type;
   /// the expression
-  Expression* const expr;
+  const Expression* const expr;
 };
 
 }  // namespace ast

@@ -66,7 +66,7 @@ class Function : public Castable<Function, CallTarget> {
   /// @param callsites the callsites of the function
   /// @param ancestor_entry_points the ancestor entry points
   /// @param workgroup_size the workgroup size
-  Function(ast::Function* declaration,
+  Function(const ast::Function* declaration,
            Type* return_type,
            std::vector<Parameter*> parameters,
            std::vector<const Variable*> referenced_module_vars,
@@ -80,7 +80,7 @@ class Function : public Castable<Function, CallTarget> {
   ~Function() override;
 
   /// @returns the ast::Function declaration
-  ast::Function* Declaration() const { return declaration_; }
+  const ast::Function* Declaration() const { return declaration_; }
 
   /// Note: If this function calls other functions, the return will also include
   /// all of the referenced variables from the callees.
@@ -106,12 +106,12 @@ class Function : public Castable<Function, CallTarget> {
   }
   /// Retrieves any referenced location variables
   /// @returns the <variable, decoration> pair.
-  std::vector<std::pair<const Variable*, ast::LocationDecoration*>>
+  std::vector<std::pair<const Variable*, const ast::LocationDecoration*>>
   ReferencedLocationVariables() const;
 
   /// Retrieves any referenced builtin variables
   /// @returns the <variable, decoration> pair.
-  std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
+  std::vector<std::pair<const Variable*, const ast::BuiltinDecoration*>>
   ReferencedBuiltinVariables() const;
 
   /// Retrieves any referenced uniform variables. Note, the variables must be
@@ -174,7 +174,7 @@ class Function : public Castable<Function, CallTarget> {
   VariableBindings ReferencedSampledTextureVariablesImpl(
       bool multisampled) const;
 
-  ast::Function* const declaration_;
+  const ast::Function* const declaration_;
   std::vector<const Variable*> const referenced_module_vars_;
   std::vector<const Variable*> const local_referenced_module_vars_;
   std::vector<const ast::ReturnStatement*> const return_statements_;

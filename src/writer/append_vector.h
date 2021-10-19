@@ -36,9 +36,10 @@ namespace writer {
 /// @param scalar the scalar to append to the vector. Must be a scalar.
 /// @returns a vector expression containing the elements of `vector` followed by
 /// the single element of `scalar` cast to the `vector` element type.
-ast::TypeConstructorExpression* AppendVector(ProgramBuilder* builder,
-                                             ast::Expression* vector,
-                                             ast::Expression* scalar);
+const ast::TypeConstructorExpression* AppendVector(
+    ProgramBuilder* builder,
+    const ast::Expression* vector,
+    const ast::Expression* scalar);
 
 }  // namespace writer
 }  // namespace tint

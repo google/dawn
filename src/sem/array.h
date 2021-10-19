@@ -99,12 +99,12 @@ class Array : public Castable<Array, Type> {
 
  private:
   Type const* const element_;
-  uint32_t const count_;
-  uint32_t const align_;
-  uint32_t const size_;
-  uint32_t const stride_;
-  uint32_t const implicit_stride_;
-  bool const constructible_;
+  const uint32_t count_;
+  const uint32_t align_;
+  const uint32_t size_;
+  const uint32_t stride_;
+  const uint32_t implicit_stride_;
+  const bool constructible_;
 };
 
 }  // namespace sem

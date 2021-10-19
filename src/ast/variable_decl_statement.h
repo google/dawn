@@ -31,7 +31,7 @@ class VariableDeclStatement
   /// @param variable the variable
   VariableDeclStatement(ProgramID program_id,
                         const Source& source,
-                        Variable* variable);
+                        const Variable* variable);
   /// Move constructor
   VariableDeclStatement(VariableDeclStatement&&);
   ~VariableDeclStatement() override;
@@ -40,10 +40,10 @@ class VariableDeclStatement
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  VariableDeclStatement* Clone(CloneContext* ctx) const override;
+  const VariableDeclStatement* Clone(CloneContext* ctx) const override;
 
   /// The variable
-  Variable* const variable;
+  const Variable* const variable;
 };
 
 }  // namespace ast

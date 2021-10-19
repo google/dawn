@@ -67,7 +67,7 @@ class InternalCompilerError {
 
  private:
   char const* const file_;
-  size_t const line_;
+  const size_t line_;
   diag::System system_;
   diag::List& diagnostics_;
   std::stringstream msg_;

@@ -24,7 +24,7 @@ namespace ast {
 CaseStatement::CaseStatement(ProgramID pid,
                              const Source& src,
                              CaseSelectorList s,
-                             BlockStatement* b)
+                             const BlockStatement* b)
     : Base(pid, src), selectors(s), body(b) {
   TINT_ASSERT(AST, body);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
@@ -38,7 +38,7 @@ CaseStatement::CaseStatement(CaseStatement&&) = default;
 
 CaseStatement::~CaseStatement() = default;
 
-CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
+const CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto sel = ctx->Clone(selectors);

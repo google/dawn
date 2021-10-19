@@ -38,10 +38,10 @@ class Node : public Castable<Node, Cloneable> {
   ~Node() override;
 
   /// The identifier of the program that owns this node
-  ProgramID const program_id;
+  const ProgramID program_id;
 
   /// The node source data
-  Source const source;
+  const Source source;
 
  protected:
   /// Create a new node

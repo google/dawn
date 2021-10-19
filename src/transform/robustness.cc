@@ -41,16 +41,19 @@ struct Robustness::State {
 
   /// Applies the transformation state to `ctx`.
   void Transform() {
+    ctx.ReplaceAll([&](const ast::ArrayAccessorExpression* expr) {
+      return Transform(expr);
+    });
     ctx.ReplaceAll(
-        [&](ast::ArrayAccessorExpression* expr) { return Transform(expr); });
-    ctx.ReplaceAll([&](ast::CallExpression* expr) { return Transform(expr); });
+        [&](const ast::CallExpression* expr) { return Transform(expr); });
   }
 
   /// Apply bounds clamping to array, vector and matrix indexing
   /// @param expr the array, vector or matrix index expression
   /// @return the clamped replacement expression, or nullptr if `expr` should be
   /// cloned without changes.
-  ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr) {
+  const ast::ArrayAccessorExpression* Transform(
+      const ast::ArrayAccessorExpression* expr) {
     auto* ret_type = ctx.src->Sem().Get(expr->array)->Type();
 
     auto* ref = ret_type->As<sem::Reference>();
@@ -64,7 +67,7 @@ struct Robustness::State {
     using u32 = ProgramBuilder::u32;
 
     struct Value {
-      ast::Expression* expr = nullptr;  // If null, then is a constant
+      const ast::Expression* expr = nullptr;  // If null, then is a constant
       union {
         uint32_t u32 = 0;  // use if is_signed == false
         int32_t i32;       // use if is_signed == true
@@ -208,7 +211,7 @@ struct Robustness::State {
   /// @param expr the intrinsic call expression
   /// @return the clamped replacement call expression, or nullptr if `expr`
   /// should be cloned without changes.
-  ast::CallExpression* Transform(ast::CallExpression* expr) {
+  const ast::CallExpression* Transform(const ast::CallExpression* expr) {
     auto* call = ctx.src->Sem().Get(expr);
     auto* call_target = call->Target();
     auto* intrinsic = call_target->As<sem::Intrinsic>();
@@ -235,7 +238,7 @@ struct Robustness::State {
     // to clamp both usages.
     // TODO(bclayton): We probably want to place this into a let so that the
     // calculation can be reused. This is fiddly to get right.
-    std::function<ast::Expression*()> level_arg;
+    std::function<const ast::Expression*()> level_arg;
     if (level_idx >= 0) {
       level_arg = [&] {
         auto* arg = expr->args[level_idx];

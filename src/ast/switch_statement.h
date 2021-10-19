@@ -31,7 +31,7 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
   /// @param body the switch body
   SwitchStatement(ProgramID pid,
                   const Source& src,
-                  Expression* condition,
+                  const Expression* condition,
                   CaseStatementList body);
   /// Move constructor
   SwitchStatement(SwitchStatement&&);
@@ -44,13 +44,13 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  SwitchStatement* Clone(CloneContext* ctx) const override;
+  const SwitchStatement* Clone(CloneContext* ctx) const override;
 
   /// The switch condition or nullptr if none set
-  Expression* const condition;
+  const Expression* const condition;
 
   /// The Switch body
-  CaseStatementList const body;
+  const CaseStatementList body;
   SwitchStatement(const SwitchStatement&) = delete;
 };
 

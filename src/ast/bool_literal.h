@@ -32,15 +32,14 @@ class BoolLiteral : public Castable<BoolLiteral, Literal> {
   BoolLiteral(ProgramID pid, const Source& src, bool value);
   ~BoolLiteral() override;
 
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  BoolLiteral* Clone(CloneContext* ctx) const override;
+  const BoolLiteral* Clone(CloneContext* ctx) const override;
 
   /// The boolean literal value
-  bool const value;
+  const bool value;
 };
 
 }  // namespace ast

@@ -23,8 +23,9 @@ namespace writer {
 
 namespace {
 
-ast::TypeConstructorExpression* AsVectorConstructor(ProgramBuilder* b,
-                                                    ast::Expression* expr) {
+const ast::TypeConstructorExpression* AsVectorConstructor(
+    ProgramBuilder* b,
+    const ast::Expression* expr) {
   if (auto* constructor = expr->As<ast::TypeConstructorExpression>()) {
     if (b->TypeOf(constructor)->Is<sem::Vector>()) {
       return constructor;
@@ -35,9 +36,10 @@ ast::TypeConstructorExpression* AsVectorConstructor(ProgramBuilder* b,
 
 }  // namespace
 
-ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
-                                             ast::Expression* vector,
-                                             ast::Expression* scalar) {
+const ast::TypeConstructorExpression* AppendVector(
+    ProgramBuilder* b,
+    const ast::Expression* vector,
+    const ast::Expression* scalar) {
   uint32_t packed_size;
   const sem::Type* packed_el_sem_ty;
   auto* vector_sem = b->Sem().Get(vector);
@@ -50,7 +52,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
     packed_el_sem_ty = vector_ty;
   }
 
-  ast::Type* packed_el_ty = nullptr;
+  const ast::Type* packed_el_ty = nullptr;
   if (packed_el_sem_ty->Is<sem::I32>()) {
     packed_el_ty = b->create<ast::I32>();
   } else if (packed_el_sem_ty->Is<sem::U32>()) {
@@ -83,7 +85,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
     const auto num_supplied = vc->values.size();
     if (num_supplied == 0) {
       // Zero-value vector constructor. Populate with zeros
-      auto buildZero = [&]() -> ast::ScalarConstructorExpression* {
+      auto buildZero = [&]() -> const ast::ScalarConstructorExpression* {
         if (packed_el_sem_ty->Is<sem::I32>()) {
           return b->Expr(0);
         } else if (packed_el_sem_ty->Is<sem::U32>()) {

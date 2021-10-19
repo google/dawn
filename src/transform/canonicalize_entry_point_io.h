@@ -110,14 +110,14 @@ class CanonicalizeEntryPointIO
     ~Config() override;
 
     /// The approach to use for emitting shader IO.
-    ShaderStyle const shader_style;
+    const ShaderStyle shader_style;
 
     /// A fixed sample mask to combine into masks produced by fragment shaders.
-    uint32_t const fixed_sample_mask;
+    const uint32_t fixed_sample_mask;
 
     /// Set to `true` to generate a pointsize builtin and have it set to 1.0
     /// from all vertex shaders in the module.
-    bool const emit_vertex_point_size;
+    const bool emit_vertex_point_size;
   };
 
   /// Constructor

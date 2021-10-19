@@ -55,8 +55,8 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   BinaryExpression(ProgramID program_id,
                    const Source& source,
                    BinaryOp op,
-                   Expression* lhs,
-                   Expression* rhs);
+                   const Expression* lhs,
+                   const Expression* rhs);
   /// Move constructor
   BinaryExpression(BinaryExpression&&);
   ~BinaryExpression() override;
@@ -110,14 +110,14 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  BinaryExpression* Clone(CloneContext* ctx) const override;
+  const BinaryExpression* Clone(CloneContext* ctx) const override;
 
   /// the binary op type
-  BinaryOp const op;
+  const BinaryOp op;
   /// the left side expression
-  Expression* const lhs;
+  const Expression* const lhs;
   /// the right side expression
-  Expression* const rhs;
+  const Expression* const rhs;
 };
 
 inline bool BinaryExpression::IsArithmetic() const {

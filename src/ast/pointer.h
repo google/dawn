@@ -35,7 +35,7 @@ class Pointer : public Castable<Pointer, Type> {
   /// @param access the access control of the pointer
   Pointer(ProgramID pid,
           const Source& src,
-          Type* const subtype,
+          const Type* const subtype,
           ast::StorageClass storage_class,
           ast::Access access);
   /// Move constructor
@@ -50,10 +50,10 @@ class Pointer : public Castable<Pointer, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Pointer* Clone(CloneContext* ctx) const override;
+  const Pointer* Clone(CloneContext* ctx) const override;
 
   /// The pointee type
-  Type* const type;
+  const Type* const type;
 
   /// The storage class of the pointer
   ast::StorageClass const storage_class;

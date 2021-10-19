@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, DecorationList_Parses) {
   ASSERT_NE(deco_1, nullptr);
 
   ASSERT_TRUE(deco_0->Is<ast::WorkgroupDecoration>());
-  ast::Expression* x = deco_0->As<ast::WorkgroupDecoration>()->x;
+  const ast::Expression* x = deco_0->As<ast::WorkgroupDecoration>()->x;
   ASSERT_NE(x, nullptr);
   auto* x_scalar = x->As<ast::ScalarConstructorExpression>();
   ASSERT_NE(x_scalar, nullptr);

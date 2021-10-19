@@ -23,8 +23,8 @@ namespace ast {
 
 IfStatement::IfStatement(ProgramID pid,
                          const Source& src,
-                         Expression* cond,
-                         BlockStatement* b,
+                         const Expression* cond,
+                         const BlockStatement* b,
                          ElseStatementList else_stmts)
     : Base(pid, src),
       condition(cond),
@@ -44,7 +44,7 @@ IfStatement::IfStatement(IfStatement&&) = default;
 
 IfStatement::~IfStatement() = default;
 
-IfStatement* IfStatement::Clone(CloneContext* ctx) const {
+const IfStatement* IfStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* cond = ctx->Clone(condition);

@@ -923,7 +923,8 @@ OpBranch %9
 namespace BinaryArithVectorScalar {
 
 enum class Type { f32, i32, u32 };
-static ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type) {
+static const ast::Expression* MakeVectorExpr(ProgramBuilder* builder,
+                                             Type type) {
   switch (type) {
     case Type::f32:
       return builder->vec3<ProgramBuilder::f32>(1.f, 1.f, 1.f);
@@ -934,7 +935,8 @@ static ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type) {
   }
   return nullptr;
 }
-static ast::Expression* MakeScalarExpr(ProgramBuilder* builder, Type type) {
+static const ast::Expression* MakeScalarExpr(ProgramBuilder* builder,
+                                             Type type) {
   switch (type) {
     case Type::f32:
       return builder->Expr(1.f);
@@ -967,8 +969,8 @@ using BinaryArithVectorScalarTest = TestParamHelper<Param>;
 TEST_P(BinaryArithVectorScalarTest, VectorScalar) {
   auto& param = GetParam();
 
-  ast::Expression* lhs = MakeVectorExpr(this, param.type);
-  ast::Expression* rhs = MakeScalarExpr(this, param.type);
+  const ast::Expression* lhs = MakeVectorExpr(this, param.type);
+  const ast::Expression* rhs = MakeScalarExpr(this, param.type);
   std::string op_type_decl = OpTypeDecl(param.type);
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
@@ -1005,8 +1007,8 @@ OpFunctionEnd
 TEST_P(BinaryArithVectorScalarTest, ScalarVector) {
   auto& param = GetParam();
 
-  ast::Expression* lhs = MakeScalarExpr(this, param.type);
-  ast::Expression* rhs = MakeVectorExpr(this, param.type);
+  const ast::Expression* lhs = MakeScalarExpr(this, param.type);
+  const ast::Expression* rhs = MakeVectorExpr(this, param.type);
   std::string op_type_decl = OpTypeDecl(param.type);
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
@@ -1068,8 +1070,8 @@ using BinaryArithVectorScalarMultiplyTest = TestParamHelper<Param>;
 TEST_P(BinaryArithVectorScalarMultiplyTest, VectorScalar) {
   auto& param = GetParam();
 
-  ast::Expression* lhs = MakeVectorExpr(this, param.type);
-  ast::Expression* rhs = MakeScalarExpr(this, param.type);
+  const ast::Expression* lhs = MakeVectorExpr(this, param.type);
+  const ast::Expression* rhs = MakeScalarExpr(this, param.type);
   std::string op_type_decl = OpTypeDecl(param.type);
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
@@ -1102,8 +1104,8 @@ OpFunctionEnd
 TEST_P(BinaryArithVectorScalarMultiplyTest, ScalarVector) {
   auto& param = GetParam();
 
-  ast::Expression* lhs = MakeScalarExpr(this, param.type);
-  ast::Expression* rhs = MakeVectorExpr(this, param.type);
+  const ast::Expression* lhs = MakeScalarExpr(this, param.type);
+  const ast::Expression* rhs = MakeVectorExpr(this, param.type);
   std::string op_type_decl = OpTypeDecl(param.type);
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
@@ -1151,8 +1153,8 @@ using BinaryArithMatrixMatrix = TestParamHelper<Param>;
 TEST_P(BinaryArithMatrixMatrix, AddOrSubtract) {
   auto& param = GetParam();
 
-  ast::Expression* lhs = mat3x4<f32>();
-  ast::Expression* rhs = mat3x4<f32>();
+  const ast::Expression* lhs = mat3x4<f32>();
+  const ast::Expression* rhs = mat3x4<f32>();
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -1200,8 +1202,8 @@ using BinaryArithMatrixMatrixMultiply = TestParamHelper<Param>;
 TEST_P(BinaryArithMatrixMatrixMultiply, Multiply) {
   auto& param = GetParam();
 
-  ast::Expression* lhs = mat3x4<f32>();
-  ast::Expression* rhs = mat4x3<f32>();
+  const ast::Expression* lhs = mat3x4<f32>();
+  const ast::Expression* rhs = mat4x3<f32>();
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 

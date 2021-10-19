@@ -394,7 +394,7 @@ using HlslSampledTexturesTest = TestParamHelper<HlslSampledTextureData>;
 TEST_P(HlslSampledTexturesTest, Emit) {
   auto params = GetParam();
 
-  ast::Type* datatype = nullptr;
+  const ast::Type* datatype = nullptr;
   switch (params.datatype) {
     case TextureDataType::F32:
       datatype = ty.f32();

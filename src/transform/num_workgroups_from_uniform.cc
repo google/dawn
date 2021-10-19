@@ -116,7 +116,7 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
 
   // Get (or create, on first call) the uniform buffer that will receive the
   // number of workgroups.
-  ast::Variable* num_workgroups_ubo = nullptr;
+  const ast::Variable* num_workgroups_ubo = nullptr;
   auto get_ubo = [&]() {
     if (!num_workgroups_ubo) {
       auto* num_workgroups_struct = ctx.dst->Structure(

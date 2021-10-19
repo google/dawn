@@ -39,7 +39,7 @@ class Decoration : public Castable<Decoration, Node> {
 };
 
 /// A list of decorations
-using DecorationList = std::vector<Decoration*>;
+using DecorationList = std::vector<const Decoration*>;
 
 /// @param decorations the list of decorations to search
 /// @returns true if `decorations` includes a decoration of type `T`
@@ -56,7 +56,7 @@ bool HasDecoration(const DecorationList& decorations) {
 /// @param decorations the list of decorations to search
 /// @returns a pointer to `T` from `decorations` if found, otherwise nullptr.
 template <typename T>
-T* GetDecoration(const DecorationList& decorations) {
+const T* GetDecoration(const DecorationList& decorations) {
   for (auto* deco : decorations) {
     if (deco->Is<T>()) {
       return deco->As<T>();

@@ -42,7 +42,7 @@ class DepthTexture : public Castable<DepthTexture, Texture> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  DepthTexture* Clone(CloneContext* ctx) const override;
+  const DepthTexture* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

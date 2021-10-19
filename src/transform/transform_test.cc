@@ -26,7 +26,7 @@ namespace {
 struct CreateASTTypeForTest : public testing::Test, public Transform {
   Output Run(const Program*, const DataMap&) override { return {}; }
 
-  ast::Type* create(
+  const ast::Type* create(
       std::function<sem::Type*(ProgramBuilder&)> create_sem_type) {
     ProgramBuilder sem_type_builder;
     auto* sem_type = create_sem_type(sem_type_builder);

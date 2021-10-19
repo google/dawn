@@ -28,7 +28,7 @@ namespace tint {
 namespace transform {
 namespace {
 
-using ArrayBuilder = std::function<ast::Array*()>;
+using ArrayBuilder = std::function<const ast::Array*()>;
 
 /// PadArray returns a function that constructs a new array in `ctx.dst` with
 /// the element type padded to account for the explicit stride. PadArray will
@@ -55,7 +55,7 @@ ArrayBuilder PadArray(
     auto name = ctx.dst->Symbols().New("tint_padded_array_element");
 
     // Examine the element type. Is it also an array?
-    ast::Type* el_ty = nullptr;
+    const ast::Type* el_ty = nullptr;
     if (auto* el_array = array->ElemType()->As<sem::Array>()) {
       // Array of array - call PadArray() on the element type
       if (auto p =
@@ -104,7 +104,7 @@ void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   };
 
   // Replace all array types with their corresponding padded array type
-  ctx.ReplaceAll([&](ast::Type* ast_type) -> ast::Type* {
+  ctx.ReplaceAll([&](const ast::Type* ast_type) -> const ast::Type* {
     auto* type = ctx.src->TypeOf(ast_type);
     if (auto* array = type->UnwrapRef()->As<sem::Array>()) {
       if (auto p = pad(array)) {
@@ -115,23 +115,24 @@ void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   });
 
   // Fix up array accessors so `a[1]` becomes `a[1].el`
-  ctx.ReplaceAll(
-      [&](ast::ArrayAccessorExpression* accessor) -> ast::Expression* {
-        if (auto* array = tint::As<sem::Array>(
-                sem.Get(accessor->array)->Type()->UnwrapRef())) {
-          if (pad(array)) {
-            // Array element is wrapped in a structure. Emit a member accessor
-            // to get to the actual array element.
-            auto* idx = ctx.CloneWithoutTransform(accessor);
-            return ctx.dst->MemberAccessor(idx, "el");
-          }
-        }
-        return nullptr;
-      });
+  ctx.ReplaceAll([&](const ast::ArrayAccessorExpression* accessor)
+                     -> const ast::Expression* {
+    if (auto* array = tint::As<sem::Array>(
+            sem.Get(accessor->array)->Type()->UnwrapRef())) {
+      if (pad(array)) {
+        // Array element is wrapped in a structure. Emit a member accessor
+        // to get to the actual array element.
+        auto* idx = ctx.CloneWithoutTransform(accessor);
+        return ctx.dst->MemberAccessor(idx, "el");
+      }
+    }
+    return nullptr;
+  });
 
   // Fix up array constructors so `A(1,2)` becomes
   // `A(padded(1), padded(2))`
-  ctx.ReplaceAll([&](ast::TypeConstructorExpression* ctor) -> ast::Expression* {
+  ctx.ReplaceAll([&](const ast::TypeConstructorExpression* ctor)
+                     -> const ast::Expression* {
     if (auto* array =
             tint::As<sem::Array>(sem.Get(ctor)->Type()->UnwrapRef())) {
       if (auto p = pad(array)) {

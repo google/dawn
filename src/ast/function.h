@@ -48,8 +48,8 @@ class Function : public Castable<Function, Node> {
            const Source& source,
            Symbol symbol,
            VariableList params,
-           ast::Type* return_type,
-           BlockStatement* body,
+           const Type* return_type,
+           const BlockStatement* body,
            DecorationList decorations,
            DecorationList return_type_decorations);
   /// Move constructor
@@ -67,44 +67,44 @@ class Function : public Castable<Function, Node> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  Function* Clone(CloneContext* ctx) const override;
+  const Function* Clone(CloneContext* ctx) const override;
 
   /// The function symbol
-  Symbol const symbol;
+  const Symbol symbol;
 
   /// The function params
-  VariableList const params;
+  const VariableList params;
 
   /// The function return type
-  ast::Type* const return_type;
+  const Type* const return_type;
 
   /// The function body
-  BlockStatement* const body;
+  const BlockStatement* const body;
 
   /// The decorations attached to this function
-  DecorationList const decorations;
+  const DecorationList decorations;
 
   /// The decorations attached to the function return type.
-  DecorationList const return_type_decorations;
+  const DecorationList return_type_decorations;
 };
 
 /// A list of functions
-class FunctionList : public std::vector<Function*> {
+class FunctionList : public std::vector<const Function*> {
  public:
   /// Appends f to the end of the list
   /// @param f the function to append to this list
-  void Add(Function* f) { this->emplace_back(f); }
+  void Add(const Function* f) { this->emplace_back(f); }
 
   /// Returns the function with the given name
   /// @param sym the function symbol to search for
   /// @returns the associated function or nullptr if none exists
-  Function* Find(Symbol sym) const;
+  const Function* Find(Symbol sym) const;
 
   /// Returns the function with the given name
   /// @param sym the function symbol to search for
   /// @param stage the pipeline stage
   /// @returns the associated function or nullptr if none exists
-  Function* Find(Symbol sym, PipelineStage stage) const;
+  const Function* Find(Symbol sym, PipelineStage stage) const;
 
   /// @param stage the pipeline stage
   /// @returns true if the Builder contains an entrypoint function with

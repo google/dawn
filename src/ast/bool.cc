@@ -31,7 +31,7 @@ std::string Bool::FriendlyName(const SymbolTable&) const {
   return "bool";
 }
 
-Bool* Bool::Clone(CloneContext* ctx) const {
+const Bool* Bool::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   return ctx->dst->create<Bool>(src);
 }

@@ -42,7 +42,7 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
   }
 
   // Find the target entry point.
-  ast::Function* entry_point = nullptr;
+  const ast::Function* entry_point = nullptr;
   for (auto* f : ctx.src->AST().Functions()) {
     if (!f->IsEntryPoint()) {
       continue;

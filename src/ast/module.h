@@ -42,23 +42,23 @@ class Module : public Castable<Module, Node> {
   /// the order they were declared in the source program
   Module(ProgramID pid,
          const Source& src,
-         std::vector<ast::Node*> global_decls);
+         std::vector<const Node*> global_decls);
 
   /// Destructor
   ~Module() override;
 
   /// @returns the ordered global declarations for the translation unit
-  const std::vector<ast::Node*>& GlobalDeclarations() const {
+  const std::vector<const Node*>& GlobalDeclarations() const {
     return global_declarations_;
   }
 
   /// Add a global variable to the Builder
   /// @param var the variable to add
-  void AddGlobalVariable(ast::Variable* var);
+  void AddGlobalVariable(const Variable* var);
 
   /// @returns true if the module has the global declaration `decl`
   /// @param decl the declaration to check
-  bool HasGlobalDeclaration(ast::Node* decl) const {
+  bool HasGlobalDeclaration(Node* decl) const {
     for (auto* d : global_declarations_) {
       if (d == decl) {
         return true;
@@ -75,18 +75,18 @@ class Module : public Castable<Module, Node> {
 
   /// Adds a type declaration to the Builder.
   /// @param decl the type declaration to add
-  void AddTypeDecl(ast::TypeDecl* decl);
+  void AddTypeDecl(const TypeDecl* decl);
 
   /// @returns the TypeDecl registered as a TypeDecl()
   /// @param name the name of the type to search for
-  const ast::TypeDecl* LookupType(Symbol name) const;
+  const TypeDecl* LookupType(Symbol name) const;
 
   /// @returns the declared types in the translation unit
-  const std::vector<ast::TypeDecl*>& TypeDecls() const { return type_decls_; }
+  const std::vector<const TypeDecl*>& TypeDecls() const { return type_decls_; }
 
   /// Add a function to the Builder
   /// @param func the function to add
-  void AddFunction(ast::Function* func);
+  void AddFunction(const Function* func);
 
   /// @returns the functions declared in the translation unit
   const FunctionList& Functions() const { return functions_; }
@@ -95,7 +95,7 @@ class Module : public Castable<Module, Node> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  Module* Clone(CloneContext* ctx) const override;
+  const Module* Clone(CloneContext* ctx) const override;
 
   /// Copy copies the content of the Module src into this module.
   /// @param ctx the clone context
@@ -103,8 +103,8 @@ class Module : public Castable<Module, Node> {
   void Copy(CloneContext* ctx, const Module* src);
 
  private:
-  std::vector<ast::Node*> global_declarations_;
-  std::vector<ast::TypeDecl*> type_decls_;
+  std::vector<const Node*> global_declarations_;
+  std::vector<const TypeDecl*> type_decls_;
   FunctionList functions_;
   VariableList global_variables_;
 };

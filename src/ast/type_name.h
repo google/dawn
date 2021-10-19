@@ -35,7 +35,6 @@ class TypeName : public Castable<TypeName, Type> {
   /// Destructor
   ~TypeName() override;
 
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.
@@ -44,7 +43,7 @@ class TypeName : public Castable<TypeName, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  TypeName* Clone(CloneContext* ctx) const override;
+  const TypeName* Clone(CloneContext* ctx) const override;
 
   /// The type name
   Symbol name;

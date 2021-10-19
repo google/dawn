@@ -58,10 +58,10 @@ class Sampler : public Castable<Sampler, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Sampler* Clone(CloneContext* ctx) const override;
+  const Sampler* Clone(CloneContext* ctx) const override;
 
   /// The sampler type
-  SamplerKind const kind;
+  const SamplerKind kind;
 };
 
 }  // namespace ast

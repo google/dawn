@@ -36,10 +36,10 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  IdentifierExpression* Clone(CloneContext* ctx) const override;
+  const IdentifierExpression* Clone(CloneContext* ctx) const override;
 
   /// The symbol for the identifier
-  Symbol const symbol;
+  const Symbol symbol;
 };
 
 }  // namespace ast

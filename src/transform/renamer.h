@@ -43,7 +43,7 @@ class Renamer : public Castable<Renamer, Transform> {
     ~Data() override;
 
     /// A map of old symbol name to new symbol name
-    Remappings const remappings;
+    const Remappings remappings;
   };
 
   /// Target is an enumerator of rename targets that can be used

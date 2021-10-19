@@ -51,13 +51,13 @@ class Struct : public Castable<Struct, TypeDecl> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  Struct* Clone(CloneContext* ctx) const override;
+  const Struct* Clone(CloneContext* ctx) const override;
 
   /// The members
-  StructMemberList const members;
+  const StructMemberList members;
 
   /// The struct decorations
-  DecorationList const decorations;
+  const DecorationList decorations;
 };
 
 }  // namespace ast

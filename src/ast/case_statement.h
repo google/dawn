@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// A list of case literals
-using CaseSelectorList = std::vector<IntLiteral*>;
+using CaseSelectorList = std::vector<const IntLiteral*>;
 
 /// A case statement
 class CaseStatement : public Castable<CaseStatement, Statement> {
@@ -37,7 +37,7 @@ class CaseStatement : public Castable<CaseStatement, Statement> {
   CaseStatement(ProgramID pid,
                 const Source& src,
                 CaseSelectorList selectors,
-                BlockStatement* body);
+                const BlockStatement* body);
   /// Move constructor
   CaseStatement(CaseStatement&&);
   ~CaseStatement() override;
@@ -49,17 +49,17 @@ class CaseStatement : public Castable<CaseStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  CaseStatement* Clone(CloneContext* ctx) const override;
+  const CaseStatement* Clone(CloneContext* ctx) const override;
 
   /// The case selectors, empty if none set
-  CaseSelectorList const selectors;
+  const CaseSelectorList selectors;
 
   /// The case body
-  BlockStatement* const body;
+  const BlockStatement* const body;
 };
 
 /// A list of case statements
-using CaseStatementList = std::vector<CaseStatement*>;
+using CaseStatementList = std::vector<const CaseStatement*>;
 
 }  // namespace ast
 }  // namespace tint

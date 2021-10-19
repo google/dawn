@@ -387,7 +387,7 @@ bool Builder::GenerateLabel(uint32_t id) {
   return true;
 }
 
-bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
+bool Builder::GenerateAssignStatement(const ast::AssignmentStatement* assign) {
   auto lhs_id = GenerateExpression(assign->lhs);
   if (lhs_id == 0) {
     return false;
@@ -404,7 +404,7 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
   return GenerateStore(lhs_id, rhs_id);
 }
 
-bool Builder::GenerateBreakStatement(ast::BreakStatement*) {
+bool Builder::GenerateBreakStatement(const ast::BreakStatement*) {
   if (merge_stack_.empty()) {
     error_ = "Attempted to break without a merge block";
     return false;
@@ -416,7 +416,7 @@ bool Builder::GenerateBreakStatement(ast::BreakStatement*) {
   return true;
 }
 
-bool Builder::GenerateContinueStatement(ast::ContinueStatement*) {
+bool Builder::GenerateContinueStatement(const ast::ContinueStatement*) {
   if (continue_stack_.empty()) {
     error_ = "Attempted to continue without a continue block";
     return false;
@@ -431,14 +431,14 @@ bool Builder::GenerateContinueStatement(ast::ContinueStatement*) {
 // TODO(dsinclair): This is generating an OpKill but the semantics of kill
 // haven't been defined for WGSL yet. So, this may need to change.
 // https://github.com/gpuweb/gpuweb/issues/676
-bool Builder::GenerateDiscardStatement(ast::DiscardStatement*) {
+bool Builder::GenerateDiscardStatement(const ast::DiscardStatement*) {
   if (!push_function_inst(spv::Op::OpKill, {})) {
     return false;
   }
   return true;
 }
 
-bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
+bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
   auto stage = pipeline_stage_to_execution_model(func->PipelineStage());
   if (stage == SpvExecutionModelMax) {
     error_ = "Unknown pipeline stage provided";
@@ -472,7 +472,7 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
   return true;
 }
 
-bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
+bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
   auto* func_sem = builder_.Sem().Get(func);
 
   // WGSL fragment shader origin is upper left
@@ -553,7 +553,7 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
   return true;
 }
 
-uint32_t Builder::GenerateExpression(ast::Expression* expr) {
+uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
   if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
     return GenerateAccessorExpression(a);
   }
@@ -583,7 +583,7 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   return 0;
 }
 
-bool Builder::GenerateFunction(ast::Function* func_ast) {
+bool Builder::GenerateFunction(const ast::Function* func_ast) {
   auto* func = builder_.Sem().Get(func_ast);
 
   uint32_t func_type_id = GenerateFunctionTypeIfNeeded(func);
@@ -678,7 +678,7 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(const sem::Function* func) {
       });
 }
 
-bool Builder::GenerateFunctionVariable(ast::Variable* var) {
+bool Builder::GenerateFunctionVariable(const ast::Variable* var) {
   uint32_t init_id = 0;
   if (var->constructor) {
     init_id = GenerateExpression(var->constructor);
@@ -741,7 +741,7 @@ bool Builder::GenerateStore(uint32_t to, uint32_t from) {
                             {Operand::Int(to), Operand::Int(from)});
 }
 
-bool Builder::GenerateGlobalVariable(ast::Variable* var) {
+bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
   auto* sem = builder_.Sem().Get(var);
   auto* type = sem->Type()->UnwrapRef();
 
@@ -893,7 +893,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   return true;
 }
 
-bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
+bool Builder::GenerateArrayAccessor(const ast::ArrayAccessorExpression* expr,
                                     AccessorInfo* info) {
   auto idx_id = GenerateExpression(expr->index);
   if (idx_id == 0) {
@@ -962,7 +962,7 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   return false;
 }
 
-bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
+bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
                                      AccessorInfo* info) {
   auto* expr_sem = builder_.Sem().Get(expr);
   auto* expr_type = expr_sem->Type();
@@ -1088,7 +1088,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
   return false;
 }
 
-uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
+uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
   if (!expr->IsAnyOf<ast::ArrayAccessorExpression,
                      ast::MemberAccessorExpression>()) {
     TINT_ICE(Writer, builder_.Diagnostics()) << "expression is not an accessor";
@@ -1098,8 +1098,8 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   // Gather a list of all the member and array accessors that are in this chain.
   // The list is built in reverse order as that's the order we need to access
   // the chain.
-  std::vector<ast::Expression*> accessors;
-  ast::Expression* source = expr;
+  std::vector<const ast::Expression*> accessors;
+  const ast::Expression* source = expr;
   while (true) {
     if (auto* array = source->As<ast::ArrayAccessorExpression>()) {
       accessors.insert(accessors.begin(), source);
@@ -1162,7 +1162,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 }
 
 uint32_t Builder::GenerateIdentifierExpression(
-    ast::IdentifierExpression* expr) {
+    const ast::IdentifierExpression* expr) {
   uint32_t val = 0;
   if (scope_stack_.get(expr->symbol, &val)) {
     return val;
@@ -1190,7 +1190,8 @@ uint32_t Builder::GenerateLoadIfNeeded(const sem::Type* type, uint32_t id) {
   return result_id;
 }
 
-uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
+uint32_t Builder::GenerateUnaryOpExpression(
+    const ast::UnaryOpExpression* expr) {
   auto result = result_op();
   auto result_id = result.to_i();
 
@@ -1256,8 +1257,8 @@ uint32_t Builder::GetGLSLstd450Import() {
 }
 
 uint32_t Builder::GenerateConstructorExpression(
-    ast::Variable* var,
-    ast::ConstructorExpression* expr,
+    const ast::Variable* var,
+    const ast::ConstructorExpression* expr,
     bool is_global_init) {
   if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
     return GenerateLiteralIfNeeded(var, scalar->literal);
@@ -1270,7 +1271,8 @@ uint32_t Builder::GenerateConstructorExpression(
   return 0;
 }
 
-bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
+bool Builder::is_constructor_const(const ast::Expression* expr,
+                                   bool is_global_init) {
   auto* constructor = expr->As<ast::ConstructorExpression>();
   if (constructor == nullptr) {
     return false;
@@ -1326,7 +1328,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
 }
 
 uint32_t Builder::GenerateTypeConstructorExpression(
-    ast::TypeConstructorExpression* init,
+    const ast::TypeConstructorExpression* init,
     bool is_global_init) {
   auto& values = init->values;
 
@@ -1502,9 +1504,10 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   return result.to_i();
 }
 
-uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
-                                                  ast::Expression* from_expr,
-                                                  bool is_global_init) {
+uint32_t Builder::GenerateCastOrCopyOrPassthrough(
+    const sem::Type* to_type,
+    const ast::Expression* from_expr,
+    bool is_global_init) {
   // This should not happen as we rely on constant folding to obviate
   // casts/conversions for module-scope variables
   if (is_global_init) {
@@ -1648,8 +1651,8 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
   return result_id;
 }
 
-uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
-                                          ast::Literal* lit) {
+uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
+                                          const ast::Literal* lit) {
   ScalarConstant constant;
 
   auto* global = builder_.Sem().Get<sem::GlobalVariable>(var);
@@ -1803,7 +1806,7 @@ uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const sem::Vector* type,
 }
 
 uint32_t Builder::GenerateShortCircuitBinaryExpression(
-    ast::BinaryExpression* expr) {
+    const ast::BinaryExpression* expr) {
   auto lhs_id = GenerateExpression(expr->lhs);
   if (lhs_id == 0) {
     return false;
@@ -1965,7 +1968,7 @@ uint32_t Builder::GenerateMatrixAddOrSub(uint32_t lhs_id,
   return result_mat_id.to_i();
 }
 
-uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
+uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
   // There is special logic for short circuiting operators.
   if (expr->IsLogicalAnd() || expr->IsLogicalOr()) {
     return GenerateShortCircuitBinaryExpression(expr);
@@ -2216,7 +2219,7 @@ bool Builder::GenerateBlockStatementWithoutScoping(
   return true;
 }
 
-uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
+uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
   auto* ident = expr->func;
   auto* call = builder_.Sem().Get(expr);
   auto* target = call->Target();
@@ -2263,7 +2266,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   return result_id;
 }
 
-uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
+uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
                                     const sem::Intrinsic* intrinsic) {
   auto result = result_op();
   auto result_id = result.to_i();
@@ -2648,7 +2651,7 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
   return result_id;
 }
 
-bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
+bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
                                        const sem::Intrinsic* intrinsic,
                                        Operand result_type,
                                        Operand result_id) {
@@ -2658,7 +2661,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
   auto arguments = call->args;
 
   // Generates the given expression, returning the operand ID
-  auto gen = [&](ast::Expression* expr) {
+  auto gen = [&](const ast::Expression* expr) {
     auto val_id = GenerateExpression(expr);
     if (val_id == 0) {
       return Operand::Int(0);
@@ -3094,7 +3097,7 @@ bool Builder::GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic) {
                                 });
 }
 
-bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
+bool Builder::GenerateAtomicIntrinsic(const ast::CallExpression* call,
                                       const sem::Intrinsic* intrinsic,
                                       Operand result_type,
                                       Operand result_id) {
@@ -3368,7 +3371,8 @@ uint32_t Builder::GenerateSampledImage(const sem::Type* texture_type,
   return sampled_image.to_i();
 }
 
-uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
+uint32_t Builder::GenerateBitcastExpression(
+    const ast::BitcastExpression* expr) {
   auto result = result_op();
   auto result_id = result.to_i();
 
@@ -3404,7 +3408,7 @@ uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
 }
 
 bool Builder::GenerateConditionalBlock(
-    ast::Expression* cond,
+    const ast::Expression* cond,
     const ast::BlockStatement* true_body,
     size_t cur_else_idx,
     const ast::ElseStatementList& else_stmts) {
@@ -3482,7 +3486,7 @@ bool Builder::GenerateConditionalBlock(
   return GenerateLabel(merge_block_id);
 }
 
-bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
+bool Builder::GenerateIfStatement(const ast::IfStatement* stmt) {
   if (!continuing_stack_.empty() &&
       stmt == continuing_stack_.back().last_statement->As<ast::IfStatement>()) {
     const ContinuingInfo& ci = continuing_stack_.back();
@@ -3497,7 +3501,7 @@ bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
     //  continuing { ...
     //    if (cond) {} else {break;}
     //  }
-    auto is_just_a_break = [](ast::BlockStatement* block) {
+    auto is_just_a_break = [](const ast::BlockStatement* block) {
       return block && (block->statements.size() == 1) &&
              block->Last()->Is<ast::BreakStatement>();
     };
@@ -3533,7 +3537,7 @@ bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
   return true;
 }
 
-bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
+bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
   auto merge_block = result_op();
   auto merge_block_id = merge_block.to_i();
 
@@ -3635,7 +3639,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
   return GenerateLabel(merge_block_id);
 }
 
-bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
+bool Builder::GenerateReturnStatement(const ast::ReturnStatement* stmt) {
   if (stmt->value) {
     auto val_id = GenerateExpression(stmt->value);
     if (val_id == 0) {
@@ -3654,7 +3658,7 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
   return true;
 }
 
-bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
+bool Builder::GenerateLoopStatement(const ast::LoopStatement* stmt) {
   auto loop_header = result_op();
   auto loop_header_id = loop_header.to_i();
   if (!push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)})) {
@@ -3738,7 +3742,7 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   return GenerateLabel(merge_block_id);
 }
 
-bool Builder::GenerateStatement(ast::Statement* stmt) {
+bool Builder::GenerateStatement(const ast::Statement* stmt) {
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return GenerateAssignStatement(a);
   }
@@ -3781,7 +3785,8 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   return false;
 }
 
-bool Builder::GenerateVariableDeclStatement(ast::VariableDeclStatement* stmt) {
+bool Builder::GenerateVariableDeclStatement(
+    const ast::VariableDeclStatement* stmt) {
   return GenerateFunctionVariable(stmt->variable);
 }
 

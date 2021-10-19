@@ -28,7 +28,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 namespace tint {
 namespace sem {
 
-Function::Function(ast::Function* declaration,
+Function::Function(const ast::Function* declaration,
                    Type* return_type,
                    std::vector<Parameter*> parameters,
                    std::vector<const Variable*> referenced_module_vars,
@@ -52,9 +52,9 @@ Function::Function(ast::Function* declaration,
 
 Function::~Function() = default;
 
-std::vector<std::pair<const Variable*, ast::LocationDecoration*>>
+std::vector<std::pair<const Variable*, const ast::LocationDecoration*>>
 Function::ReferencedLocationVariables() const {
-  std::vector<std::pair<const Variable*, ast::LocationDecoration*>> ret;
+  std::vector<std::pair<const Variable*, const ast::LocationDecoration*>> ret;
 
   for (auto* var : ReferencedModuleVariables()) {
     for (auto* deco : var->Declaration()->decorations) {
@@ -97,9 +97,9 @@ Function::VariableBindings Function::ReferencedStorageBufferVariables() const {
   return ret;
 }
 
-std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
+std::vector<std::pair<const Variable*, const ast::BuiltinDecoration*>>
 Function::ReferencedBuiltinVariables() const {
-  std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>> ret;
+  std::vector<std::pair<const Variable*, const ast::BuiltinDecoration*>> ret;
 
   for (auto* var : ReferencedModuleVariables()) {
     for (auto* deco : var->Declaration()->decorations) {

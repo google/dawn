@@ -161,11 +161,11 @@ class Struct : public Castable<Struct, Type> {
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;
 
   ast::Struct const* const declaration_;
-  Symbol const name_;
-  StructMemberList const members_;
-  uint32_t const align_;
-  uint32_t const size_;
-  uint32_t const size_no_padding_;
+  const Symbol name_;
+  const StructMemberList members_;
+  const uint32_t align_;
+  const uint32_t size_;
+  const uint32_t size_no_padding_;
   std::unordered_set<ast::StorageClass> storage_class_usage_;
   std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
   bool constructible_;
@@ -182,7 +182,7 @@ class StructMember : public Castable<StructMember, Node> {
   /// @param offset the byte offset from the base of the structure
   /// @param align the byte alignment of the member
   /// @param size the byte size of the member
-  StructMember(ast::StructMember* declaration,
+  StructMember(const ast::StructMember* declaration,
                Symbol name,
                sem::Type* type,
                uint32_t index,
@@ -194,7 +194,7 @@ class StructMember : public Castable<StructMember, Node> {
   ~StructMember() override;
 
   /// @returns the AST declaration node
-  ast::StructMember* Declaration() const { return declaration_; }
+  const ast::StructMember* Declaration() const { return declaration_; }
 
   /// @returns the name of the structure
   Symbol Name() const { return name_; }
@@ -215,13 +215,13 @@ class StructMember : public Castable<StructMember, Node> {
   uint32_t Size() const { return size_; }
 
  private:
-  ast::StructMember* const declaration_;
-  Symbol const name_;
+  const ast::StructMember* const declaration_;
+  const Symbol name_;
   sem::Type* const type_;
-  uint32_t const index_;
-  uint32_t const offset_;
-  uint32_t const align_;
-  uint32_t const size_;
+  const uint32_t index_;
+  const uint32_t offset_;
+  const uint32_t align_;
+  const uint32_t size_;
 };
 
 }  // namespace sem

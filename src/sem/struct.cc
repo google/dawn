@@ -78,7 +78,7 @@ bool Struct::IsConstructible() const {
   return constructible_;
 }
 
-StructMember::StructMember(ast::StructMember* declaration,
+StructMember::StructMember(const ast::StructMember* declaration,
                            Symbol name,
                            sem::Type* type,
                            uint32_t index,

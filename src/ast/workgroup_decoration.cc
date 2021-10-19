@@ -25,9 +25,9 @@ namespace ast {
 
 WorkgroupDecoration::WorkgroupDecoration(ProgramID pid,
                                          const Source& src,
-                                         ast::Expression* x_,
-                                         ast::Expression* y_,
-                                         ast::Expression* z_)
+                                         const ast::Expression* x_,
+                                         const ast::Expression* y_,
+                                         const ast::Expression* z_)
     : Base(pid, src), x(x_), y(y_), z(z_) {}
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
@@ -36,7 +36,7 @@ std::string WorkgroupDecoration::Name() const {
   return "workgroup_size";
 }
 
-WorkgroupDecoration* WorkgroupDecoration::Clone(CloneContext* ctx) const {
+const WorkgroupDecoration* WorkgroupDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* x_ = ctx->Clone(x);

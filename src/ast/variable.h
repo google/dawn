@@ -35,9 +35,9 @@ class Type;
 /// VariableBindingPoint holds a group and binding decoration.
 struct VariableBindingPoint {
   /// The `[[group]]` part of the binding point
-  GroupDecoration* group = nullptr;
+  const GroupDecoration* group = nullptr;
   /// The `[[binding]]` part of the binding point
-  BindingDecoration* binding = nullptr;
+  const BindingDecoration* binding = nullptr;
 
   /// @returns true if the BindingPoint has a valid group and binding
   /// decoration.
@@ -116,7 +116,7 @@ class Variable : public Castable<Variable, Node> {
            Access declared_access,
            const ast::Type* type,
            bool is_const,
-           Expression* constructor,
+           const Expression* constructor,
            DecorationList decorations);
   /// Move constructor
   Variable(Variable&&);
@@ -130,32 +130,32 @@ class Variable : public Castable<Variable, Node> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  Variable* Clone(CloneContext* ctx) const override;
+  const Variable* Clone(CloneContext* ctx) const override;
 
   /// The variable symbol
-  Symbol const symbol;
+  const Symbol symbol;
 
   /// The variable type
-  ast::Type* const type;
+  const ast::Type* const type;
 
   /// True if this is a constant, false otherwise
-  bool const is_const;
+  const bool is_const;
 
   /// The constructor expression or nullptr if none set
-  Expression* const constructor;
+  const Expression* const constructor;
 
   /// The decorations attached to this variable
-  DecorationList const decorations;
+  const DecorationList decorations;
 
   /// The declared storage class
-  StorageClass const declared_storage_class;
+  const StorageClass declared_storage_class;
 
   /// The declared access control
-  Access const declared_access;
+  const Access declared_access;
 };
 
 /// A list of variables
-using VariableList = std::vector<Variable*>;
+using VariableList = std::vector<const Variable*>;
 
 }  // namespace ast
 }  // namespace tint

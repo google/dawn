@@ -39,10 +39,10 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  SintLiteral* Clone(CloneContext* ctx) const override;
+  const SintLiteral* Clone(CloneContext* ctx) const override;
 
   /// The int literal value
-  int32_t const value;
+  const int32_t value;
 };
 
 }  // namespace ast

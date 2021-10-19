@@ -50,8 +50,8 @@ using Decoration_StageTest = TestParamHelper<FunctionStageData>;
 TEST_P(Decoration_StageTest, Emit) {
   auto params = GetParam();
 
-  ast::Variable* var = nullptr;
-  ast::Type* ret_type = nullptr;
+  const ast::Variable* var = nullptr;
+  const ast::Type* ret_type = nullptr;
   ast::DecorationList ret_type_decos;
   ast::StatementList body;
   if (params.stage == ast::PipelineStage::kVertex) {

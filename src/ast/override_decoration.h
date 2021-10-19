@@ -43,13 +43,13 @@ class OverrideDecoration : public Castable<OverrideDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  OverrideDecoration* Clone(CloneContext* ctx) const override;
+  const OverrideDecoration* Clone(CloneContext* ctx) const override;
 
   /// True if an override id was specified
-  bool const has_value;
+  const bool has_value;
 
   /// The override id value
-  uint32_t const value;
+  const uint32_t value;
 };
 
 }  // namespace ast

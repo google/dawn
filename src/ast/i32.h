@@ -41,7 +41,7 @@ class I32 : public Castable<I32, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  I32* Clone(CloneContext* ctx) const override;
+  const I32* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

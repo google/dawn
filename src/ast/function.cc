@@ -27,8 +27,8 @@ Function::Function(ProgramID pid,
                    const Source& src,
                    Symbol sym,
                    VariableList parameters,
-                   ast::Type* return_ty,
-                   BlockStatement* b,
+                   const Type* return_ty,
+                   const BlockStatement* b,
                    DecorationList decos,
                    DecorationList return_type_decos)
     : Base(pid, src),
@@ -65,7 +65,7 @@ PipelineStage Function::PipelineStage() const {
   return PipelineStage::kNone;
 }
 
-Function* Function::Clone(CloneContext* ctx) const {
+const Function* Function::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto sym = ctx->Clone(symbol);
@@ -77,7 +77,7 @@ Function* Function::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Function>(src, sym, p, ret, b, decos, ret_decos);
 }
 
-Function* FunctionList::Find(Symbol sym) const {
+const Function* FunctionList::Find(Symbol sym) const {
   for (auto* func : *this) {
     if (func->symbol == sym) {
       return func;
@@ -86,7 +86,7 @@ Function* FunctionList::Find(Symbol sym) const {
   return nullptr;
 }
 
-Function* FunctionList::Find(Symbol sym, PipelineStage stage) const {
+const Function* FunctionList::Find(Symbol sym, PipelineStage stage) const {
   for (auto* func : *this) {
     if (func->symbol == sym && func->PipelineStage() == stage) {
       return func;

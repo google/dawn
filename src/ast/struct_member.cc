@@ -24,7 +24,7 @@ namespace ast {
 StructMember::StructMember(ProgramID pid,
                            const Source& src,
                            const Symbol& sym,
-                           ast::Type* ty,
+                           const ast::Type* ty,
                            DecorationList decos)
     : Base(pid, src), symbol(sym), type(ty), decorations(std::move(decos)) {
   TINT_ASSERT(AST, type);
@@ -40,7 +40,7 @@ StructMember::StructMember(StructMember&&) = default;
 
 StructMember::~StructMember() = default;
 
-StructMember* StructMember::Clone(CloneContext* ctx) const {
+const StructMember* StructMember::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto sym = ctx->Clone(symbol);

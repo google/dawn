@@ -38,9 +38,9 @@ class Array : public Castable<Array, Type> {
   /// @param decorations the array decorations
   Array(ProgramID pid,
         const Source& src,
-        Type* subtype,
-        ast::Expression* count,
-        ast::DecorationList decorations);
+        const Type* subtype,
+        const Expression* count,
+        DecorationList decorations);
   /// Move constructor
   Array(Array&&);
   ~Array() override;
@@ -57,16 +57,16 @@ class Array : public Castable<Array, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Array* Clone(CloneContext* ctx) const override;
+  const Array* Clone(CloneContext* ctx) const override;
 
   /// the array element type
-  Type* const type;
+  const Type* const type;
 
   /// the array size in elements, or nullptr for a runtime array
-  ast::Expression* const count;
+  const Expression* const count;
 
   /// the array decorations
-  ast::DecorationList const decorations;
+  const DecorationList decorations;
 };
 
 }  // namespace ast

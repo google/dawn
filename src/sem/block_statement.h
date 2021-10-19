@@ -55,7 +55,7 @@ class BlockStatement : public Castable<BlockStatement, CompoundStatement> {
 
   /// Associates a declaration with this block.
   /// @param var a variable declaration to be added to the block
-  void AddDecl(ast::Variable* var);
+  void AddDecl(const ast::Variable* var);
 
  private:
   std::vector<const ast::Variable*> decls_;

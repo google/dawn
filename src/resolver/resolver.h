@@ -112,7 +112,7 @@ class Resolver {
     std::string const type_name;
     ast::StorageClass storage_class;
     ast::Access const access;
-    std::vector<ast::IdentifierExpression*> users;
+    std::vector<const ast::IdentifierExpression*> users;
     sem::BindingPoint binding_point;
     VariableKind kind;
     uint32_t index = 0;  // Parameter index, if kind == kParameter
@@ -130,10 +130,10 @@ class Resolver {
   /// Structure holding semantic information about a function.
   /// Used to build the sem::Function nodes at the end of resolving.
   struct FunctionInfo {
-    explicit FunctionInfo(ast::Function* decl);
+    explicit FunctionInfo(const ast::Function* decl);
     ~FunctionInfo();
 
-    ast::Function* const declaration;
+    const ast::Function* const declaration;
     std::vector<VariableInfo*> parameters;
     UniqueVector<VariableInfo*> referenced_module_vars;
     UniqueVector<VariableInfo*> local_referenced_module_vars;
@@ -192,7 +192,7 @@ class Resolver {
     }
 
     ast::BlockStatement const* const block;
-    Type const type;
+    const Type type;
     BlockInfo* const parent;
     std::vector<const ast::Variable*> decls;
 
@@ -235,31 +235,31 @@ class Resolver {
 
   // AST and Type traversal methods
   // Each return true on success, false on failure.
-  bool ArrayAccessor(ast::ArrayAccessorExpression*);
-  bool Assignment(ast::AssignmentStatement* a);
-  bool Binary(ast::BinaryExpression*);
-  bool Bitcast(ast::BitcastExpression*);
-  bool BlockStatement(ast::BlockStatement*);
-  bool Call(ast::CallExpression*);
-  bool CaseStatement(ast::CaseStatement*);
-  bool Constructor(ast::ConstructorExpression*);
-  bool ElseStatement(ast::ElseStatement*);
-  bool Expression(ast::Expression*);
-  bool ForLoopStatement(ast::ForLoopStatement*);
-  bool Function(ast::Function*);
+  bool ArrayAccessor(const ast::ArrayAccessorExpression*);
+  bool Assignment(const ast::AssignmentStatement* a);
+  bool Binary(const ast::BinaryExpression*);
+  bool Bitcast(const ast::BitcastExpression*);
+  bool BlockStatement(const ast::BlockStatement*);
+  bool Call(const ast::CallExpression*);
+  bool CaseStatement(const ast::CaseStatement*);
+  bool Constructor(const ast::ConstructorExpression*);
+  bool ElseStatement(const ast::ElseStatement*);
+  bool Expression(const ast::Expression*);
+  bool ForLoopStatement(const ast::ForLoopStatement*);
+  bool Function(const ast::Function*);
   bool FunctionCall(const ast::CallExpression* call);
-  bool GlobalVariable(ast::Variable* var);
-  bool Identifier(ast::IdentifierExpression*);
-  bool IfStatement(ast::IfStatement*);
-  bool IntrinsicCall(ast::CallExpression*, sem::IntrinsicType);
-  bool LoopStatement(ast::LoopStatement*);
-  bool MemberAccessor(ast::MemberAccessorExpression*);
-  bool Parameter(ast::Variable* param);
-  bool Return(ast::ReturnStatement* ret);
-  bool Statement(ast::Statement*);
+  bool GlobalVariable(const ast::Variable* var);
+  bool Identifier(const ast::IdentifierExpression*);
+  bool IfStatement(const ast::IfStatement*);
+  bool IntrinsicCall(const ast::CallExpression*, sem::IntrinsicType);
+  bool LoopStatement(const ast::LoopStatement*);
+  bool MemberAccessor(const ast::MemberAccessorExpression*);
+  bool Parameter(const ast::Variable* param);
+  bool Return(const ast::ReturnStatement* ret);
+  bool Statement(const ast::Statement*);
   bool Statements(const ast::StatementList&);
-  bool SwitchStatement(ast::SwitchStatement* s);
-  bool UnaryOp(ast::UnaryOpExpression*);
+  bool SwitchStatement(const ast::SwitchStatement* s);
+  bool UnaryOp(const ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
 
   /// Performs a depth-first traversal of the expression nodes from `root`,
@@ -268,8 +268,8 @@ class Resolver {
   /// @param out the ordered list of visited expression nodes, starting with the
   ///        root node, and ending with leaf nodes
   /// @return true on success, false on error
-  bool TraverseExpressions(ast::Expression* root,
-                           std::vector<ast::Expression*>& out);
+  bool TraverseExpressions(const ast::Expression* root,
+                           std::vector<const ast::Expression*>& out);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
@@ -284,8 +284,8 @@ class Resolver {
   bool ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                  const sem::Type* storage_type,
                                  const bool is_input);
-  bool ValidateCall(ast::CallExpression* call);
-  bool ValidateCallStatement(ast::CallStatement* stmt);
+  bool ValidateCall(const ast::CallExpression* call);
+  bool ValidateCallStatement(const ast::CallStatement* stmt);
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunctionCall(const ast::CallExpression* call,
@@ -371,7 +371,7 @@ class Resolver {
   /// @param var the variable to create or return the `VariableInfo` for
   /// @param kind what kind of variable we are declaring
   /// @param index the index of the parameter, if this variable is a parameter
-  VariableInfo* Variable(ast::Variable* var,
+  VariableInfo* Variable(const ast::Variable* var,
                          VariableKind kind,
                          uint32_t index = 0);
 

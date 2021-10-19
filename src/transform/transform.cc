@@ -90,7 +90,8 @@ void Transform::RemoveStatement(CloneContext& ctx, ast::Statement* stmt) {
       << sem->TypeInfo().name;
 }
 
-ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty) {
+const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx,
+                                             const sem::Type* ty) {
   if (ty->Is<sem::Void>()) {
     return ctx.dst->create<ast::Void>();
   }

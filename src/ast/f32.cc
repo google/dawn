@@ -31,7 +31,7 @@ std::string F32::FriendlyName(const SymbolTable&) const {
   return "f32";
 }
 
-F32* F32::Clone(CloneContext* ctx) const {
+const F32* F32::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   return ctx->dst->create<F32>(src);
 }

@@ -23,7 +23,7 @@ namespace sem {
 
 Expression::Expression(const ast::Expression* declaration,
                        const sem::Type* type,
-                       Statement* statement,
+                       const Statement* statement,
                        Constant constant)
     : declaration_(declaration),
       type_(type),

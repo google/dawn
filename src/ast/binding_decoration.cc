@@ -34,7 +34,7 @@ std::string BindingDecoration::Name() const {
   return "binding";
 }
 
-BindingDecoration* BindingDecoration::Clone(CloneContext* ctx) const {
+const BindingDecoration* BindingDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<BindingDecoration>(src, value);

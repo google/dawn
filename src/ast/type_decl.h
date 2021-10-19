@@ -36,7 +36,7 @@ class TypeDecl : public Castable<TypeDecl, Node> {
   ~TypeDecl() override;
 
   /// The name of the type declaration
-  Symbol const name;
+  const Symbol name;
 };
 
 }  // namespace ast

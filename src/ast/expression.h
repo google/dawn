@@ -39,7 +39,7 @@ class Expression : public Castable<Expression, Node> {
 };
 
 /// A list of expressions
-using ExpressionList = std::vector<Expression*>;
+using ExpressionList = std::vector<const Expression*>;
 
 }  // namespace ast
 }  // namespace tint

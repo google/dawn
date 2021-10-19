@@ -51,17 +51,17 @@ namespace {
 /// offsets for storage and uniform buffer accesses.
 struct Offset : Castable<Offset> {
   /// @returns builds and returns the ast::Expression in `ctx.dst`
-  virtual ast::Expression* Build(CloneContext& ctx) const = 0;
+  virtual const ast::Expression* Build(CloneContext& ctx) const = 0;
 };
 
 /// OffsetExpr is an implementation of Offset that clones and casts the given
 /// expression to `u32`.
 struct OffsetExpr : Offset {
-  ast::Expression* const expr = nullptr;
+  const ast::Expression* const expr = nullptr;
 
-  explicit OffsetExpr(ast::Expression* e) : expr(e) {}
+  explicit OffsetExpr(const ast::Expression* e) : expr(e) {}
 
-  ast::Expression* Build(CloneContext& ctx) const override {
+  const ast::Expression* Build(CloneContext& ctx) const override {
     auto* type = ctx.src->Sem().Get(expr)->Type()->UnwrapRef();
     auto* res = ctx.Clone(expr);
     if (!type->Is<sem::U32>()) {
@@ -78,7 +78,7 @@ struct OffsetLiteral : Castable<OffsetLiteral, Offset> {
 
   explicit OffsetLiteral(uint32_t lit) : literal(lit) {}
 
-  ast::Expression* Build(CloneContext& ctx) const override {
+  const ast::Expression* Build(CloneContext& ctx) const override {
     return ctx.dst->Expr(literal);
   }
 };
@@ -90,7 +90,7 @@ struct OffsetBinOp : Offset {
   Offset const* lhs = nullptr;
   Offset const* rhs = nullptr;
 
-  ast::Expression* Build(CloneContext& ctx) const override {
+  const ast::Expression* Build(CloneContext& ctx) const override {
     return ctx.dst->create<ast::BinaryExpression>(op, lhs->Build(ctx),
                                                   rhs->Build(ctx));
   }
@@ -304,9 +304,9 @@ struct DecomposeMemoryAccess::State {
   /// expressions chain the access.
   /// Subset of #expression_order, as expressions are not removed from
   /// #expression_order.
-  std::unordered_map<ast::Expression*, BufferAccess> accesses;
+  std::unordered_map<const ast::Expression*, BufferAccess> accesses;
   /// The visited order of AST expressions (superset of #accesses)
-  std::vector<ast::Expression*> expression_order;
+  std::vector<const ast::Expression*> expression_order;
   /// [buffer-type, element-type] -> load function name
   std::unordered_map<LoadStoreKey, Symbol, LoadStoreKey::Hasher> load_funcs;
   /// [buffer-type, element-type] -> store function name
@@ -330,7 +330,7 @@ struct DecomposeMemoryAccess::State {
 
   /// @param expr the expression to convert to an Offset
   /// @returns an Offset for the given ast::Expression
-  const Offset* ToOffset(ast::Expression* expr) {
+  const Offset* ToOffset(const ast::Expression* expr) {
     if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
       if (auto* u32 = scalar->literal->As<ast::UintLiteral>()) {
         return offsets_.Create<OffsetLiteral>(u32->value);
@@ -415,7 +415,7 @@ struct DecomposeMemoryAccess::State {
   /// to #expression_order.
   /// @param expr the expression that performs the access
   /// @param access the access
-  void AddAccess(ast::Expression* expr, const BufferAccess& access) {
+  void AddAccess(const ast::Expression* expr, const BufferAccess& access) {
     TINT_ASSERT(Transform, access.type);
     accesses.emplace(expr, access);
     expression_order.emplace_back(expr);
@@ -426,7 +426,7 @@ struct DecomposeMemoryAccess::State {
   /// `node`, an invalid BufferAccess is returned.
   /// @param node the expression that performed an access
   /// @return the BufferAccess for the given expression
-  BufferAccess TakeAccess(ast::Expression* node) {
+  BufferAccess TakeAccess(const ast::Expression* node) {
     auto lhs_it = accesses.find(node);
     if (lhs_it == accesses.end()) {
       return {};
@@ -793,7 +793,7 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
   return ss.str();
 }
 
-DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
+const DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
     CloneContext* ctx) const {
   return ctx->dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
       ctx->dst->ID(), op, storage_class, type);

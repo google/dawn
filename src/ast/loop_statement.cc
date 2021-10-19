@@ -23,8 +23,8 @@ namespace ast {
 
 LoopStatement::LoopStatement(ProgramID pid,
                              const Source& src,
-                             BlockStatement* b,
-                             BlockStatement* cont)
+                             const BlockStatement* b,
+                             const BlockStatement* cont)
     : Base(pid, src), body(b), continuing(cont) {
   TINT_ASSERT(AST, body);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
@@ -35,7 +35,7 @@ LoopStatement::LoopStatement(LoopStatement&&) = default;
 
 LoopStatement::~LoopStatement() = default;
 
-LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
+const LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* b = ctx->Clone(body);

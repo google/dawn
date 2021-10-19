@@ -33,8 +33,8 @@ class ElseStatement : public Castable<ElseStatement, Statement> {
   /// @param body the else body
   ElseStatement(ProgramID pid,
                 const Source& src,
-                Expression* condition,
-                BlockStatement* body);
+                const Expression* condition,
+                const BlockStatement* body);
   /// Move constructor
   ElseStatement(ElseStatement&&);
   ~ElseStatement() override;
@@ -43,17 +43,17 @@ class ElseStatement : public Castable<ElseStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  ElseStatement* Clone(CloneContext* ctx) const override;
+  const ElseStatement* Clone(CloneContext* ctx) const override;
 
   /// The else condition or nullptr if none set
-  Expression* const condition;
+  const Expression* const condition;
 
   /// The else body
-  BlockStatement* const body;
+  const BlockStatement* const body;
 };
 
 /// A list of else statements
-using ElseStatementList = std::vector<ElseStatement*>;
+using ElseStatementList = std::vector<const ElseStatement*>;
 
 }  // namespace ast
 }  // namespace tint

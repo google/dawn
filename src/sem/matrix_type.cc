@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Matrix);
 namespace tint {
 namespace sem {
 
-Matrix::Matrix(Vector* column_type, uint32_t columns)
+Matrix::Matrix(const Vector* column_type, uint32_t columns)
     : subtype_(column_type->type()),
       column_type_(column_type),
       rows_(column_type->Width()),

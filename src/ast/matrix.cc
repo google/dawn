@@ -23,7 +23,7 @@ namespace ast {
 
 Matrix::Matrix(ProgramID pid,
                const Source& src,
-               Type* subtype,
+               const Type* subtype,
                uint32_t r,
                uint32_t c)
     : Base(pid, src), type(subtype), rows(r), columns(c) {
@@ -45,7 +45,7 @@ std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-Matrix* Matrix::Clone(CloneContext* ctx) const {
+const Matrix* Matrix::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* ty = ctx->Clone(type);

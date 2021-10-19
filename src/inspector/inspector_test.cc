@@ -300,7 +300,7 @@ TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
   ComponentType component;
   CompositionType composition;
   std::tie(component, composition) = GetParam();
-  std::function<ast::Type*()> tint_type =
+  std::function<const ast::Type*()> tint_type =
       GetTypeFunction(component, composition);
 
   auto* in_var = Param("in_var", tint_type(), {Location(0u)});
@@ -683,7 +683,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantUninitialized) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NonOverridableConstantSkipped) {
-  ast::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
   AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
   MakeCallerBodyFunction("ep_func", {"ub_func"},
@@ -1193,8 +1193,7 @@ TEST_F(InspectorGetStorageSizeTest, Empty) {
 }
 
 TEST_F(InspectorGetStorageSizeTest, Simple) {
-  ast::Struct* ub_struct_type =
-      MakeUniformBufferType("ub_type", {ty.i32(), ty.i32()});
+  auto* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32(), ty.i32()});
   AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
 
@@ -1232,7 +1231,7 @@ TEST_F(InspectorGetResourceBindingsTest, Empty) {
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Simple) {
-  ast::Struct* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32()});
+  auto* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32()});
   AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
 
@@ -1339,7 +1338,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
-  ast::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
   AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
@@ -1357,7 +1356,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
-  ast::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
   AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
@@ -1382,7 +1381,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
-  ast::Struct* foo_struct_type =
+  auto* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.i32(), ty.u32(), ty.f32()});
   AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
@@ -1409,8 +1408,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
-  ast::Struct* foo_struct_type =
-      MakeUniformBufferType("foo_type", {ty.vec3<f32>()});
+  auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.vec3<f32>()});
   AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
@@ -1436,7 +1434,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
-  ast::Struct* ub_struct_type =
+  auto* ub_struct_type =
       MakeUniformBufferType("ub_type", {ty.i32(), ty.u32(), ty.f32()});
   AddUniformBuffer("ub_foo", ty.Of(ub_struct_type), 0, 0);
   AddUniformBuffer("ub_bar", ty.Of(ub_struct_type), 0, 1);
@@ -1493,7 +1491,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   // Manually create uniform buffer to make sure it had a valid layout (array
   // with elem stride of 16, and that is 16-byte aligned within the struct)
-  ast::Struct* foo_struct_type = Structure(
+  auto* foo_struct_type = Structure(
       "foo_type",
       {Member("0i32", ty.i32()),
        Member("b", ty.array(ty.u32(), 4, /*stride*/ 16), {MemberAlign(16)})},
@@ -2370,7 +2368,7 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
   auto* st_type = MakeStorageTextureTypes(dim, format);
   AddStorageTexture("st_var", st_type, 0, 0);
 
-  ast::Type* dim_type = nullptr;
+  const ast::Type* dim_type = nullptr;
   switch (dim) {
     case ast::TextureDimension::k1d:
       dim_type = ty.i32();
@@ -2849,7 +2847,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, Simple) {
 TEST_F(InspectorGetWorkgroupStorageSizeTest, CompoundTypes) {
   // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
   // from the 4-element array with 16-byte stride.
-  ast::Struct* wg_struct_type = MakeStructType(
+  auto* wg_struct_type = MakeStructType(
       "WgStruct", {ty.i32(), ty.array(ty.i32(), 4, /*stride=*/16)},
       /*is_block=*/false);
   AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
@@ -2891,7 +2889,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
   // Per WGSL spec, a struct's size is the offset its last member plus the size
   // of its last member, rounded up to the alignment of its largest member. So
   // here the struct is expected to occupy 1024 bytes of workgroup storage.
-  ast::Struct* wg_struct_type = MakeStructTypeFromMembers(
+  const auto* wg_struct_type = MakeStructTypeFromMembers(
       "WgStruct",
       {MakeStructMember(0, ty.f32(),
                         {create<ast::StructMemberAlignDecoration>(1024)})},

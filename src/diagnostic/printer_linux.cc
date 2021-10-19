@@ -87,7 +87,7 @@ class PrinterLinux : public Printer {
   }
 
   FILE* const file;
-  bool const use_colors;
+  const bool use_colors;
 };
 
 }  // namespace

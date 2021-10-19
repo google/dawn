@@ -41,7 +41,7 @@ class Void : public Castable<Void, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Void* Clone(CloneContext* ctx) const override;
+  const Void* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

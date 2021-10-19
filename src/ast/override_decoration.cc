@@ -37,7 +37,7 @@ std::string OverrideDecoration::Name() const {
   return "override";
 }
 
-OverrideDecoration* OverrideDecoration::Clone(CloneContext* ctx) const {
+const OverrideDecoration* OverrideDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   if (has_value) {

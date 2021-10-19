@@ -23,7 +23,7 @@ namespace ast {
 
 TypeConstructorExpression::TypeConstructorExpression(ProgramID pid,
                                                      const Source& src,
-                                                     ast::Type* ty,
+                                                     const ast::Type* ty,
                                                      ExpressionList vals)
     : Base(pid, src), type(ty), values(std::move(vals)) {
   TINT_ASSERT(AST, type);
@@ -38,7 +38,7 @@ TypeConstructorExpression::TypeConstructorExpression(
 
 TypeConstructorExpression::~TypeConstructorExpression() = default;
 
-TypeConstructorExpression* TypeConstructorExpression::Clone(
+const TypeConstructorExpression* TypeConstructorExpression::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);

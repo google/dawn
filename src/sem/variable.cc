@@ -80,7 +80,7 @@ Parameter::Parameter(const ast::Variable* declaration,
 
 Parameter::~Parameter() = default;
 
-VariableUser::VariableUser(ast::IdentifierExpression* declaration,
+VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
                            const sem::Type* type,
                            Statement* statement,
                            sem::Variable* variable,

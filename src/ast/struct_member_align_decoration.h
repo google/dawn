@@ -41,10 +41,10 @@ class StructMemberAlignDecoration
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  StructMemberAlignDecoration* Clone(CloneContext* ctx) const override;
+  const StructMemberAlignDecoration* Clone(CloneContext* ctx) const override;
 
   /// The align value
-  uint32_t const align;
+  const uint32_t align;
 };
 
 }  // namespace ast

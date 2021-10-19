@@ -28,7 +28,7 @@ class CallStatement : public Castable<CallStatement, Statement> {
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node for the statement
   /// @param call the function
-  CallStatement(ProgramID pid, const Source& src, CallExpression* call);
+  CallStatement(ProgramID pid, const Source& src, const CallExpression* call);
   /// Move constructor
   CallStatement(CallStatement&&);
   ~CallStatement() override;
@@ -37,10 +37,10 @@ class CallStatement : public Castable<CallStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  CallStatement* Clone(CloneContext* ctx) const override;
+  const CallStatement* Clone(CloneContext* ctx) const override;
 
   /// The call expression
-  CallExpression* const expr;
+  const CallExpression* const expr;
 };
 
 }  // namespace ast

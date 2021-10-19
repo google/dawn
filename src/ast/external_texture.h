@@ -42,7 +42,7 @@ class ExternalTexture : public Castable<ExternalTexture, Texture> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  ExternalTexture* Clone(CloneContext* ctx) const override;
+  const ExternalTexture* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

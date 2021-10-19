@@ -23,8 +23,8 @@ namespace ast {
 
 AssignmentStatement::AssignmentStatement(ProgramID pid,
                                          const Source& src,
-                                         Expression* l,
-                                         Expression* r)
+                                         const Expression* l,
+                                         const Expression* r)
     : Base(pid, src), lhs(l), rhs(r) {
   TINT_ASSERT(AST, lhs);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
@@ -36,7 +36,7 @@ AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
 
 AssignmentStatement::~AssignmentStatement() = default;
 
-AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {
+const AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* l = ctx->Clone(lhs);

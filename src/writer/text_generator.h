@@ -195,7 +195,7 @@ class TextGenerator {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  sem::Type* TypeOf(ast::Expression* expr) const {
+  const sem::Type* TypeOf(const ast::Expression* expr) const {
     return builder_.TypeOf(expr);
   }
 

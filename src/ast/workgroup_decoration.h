@@ -37,14 +37,14 @@ class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
   /// @param z the optional workgroup z dimension expression
   WorkgroupDecoration(ProgramID pid,
                       const Source& src,
-                      ast::Expression* x,
-                      ast::Expression* y = nullptr,
-                      ast::Expression* z = nullptr);
+                      const ast::Expression* x,
+                      const ast::Expression* y = nullptr,
+                      const ast::Expression* z = nullptr);
 
   ~WorkgroupDecoration() override;
 
   /// @returns the workgroup dimensions
-  std::array<ast::Expression*, 3> Values() const { return {x, y, z}; }
+  std::array<const ast::Expression*, 3> Values() const { return {x, y, z}; }
 
   /// @returns the WGSL name for the decoration
   std::string Name() const override;
@@ -53,14 +53,14 @@ class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  WorkgroupDecoration* Clone(CloneContext* ctx) const override;
+  const WorkgroupDecoration* Clone(CloneContext* ctx) const override;
 
   /// The workgroup x dimension.
-  ast::Expression* const x;
+  const ast::Expression* const x;
   /// The optional workgroup y dimension. May be null.
-  ast::Expression* const y = nullptr;
+  const ast::Expression* const y = nullptr;
   /// The optional workgroup z dimension. May be null.
-  ast::Expression* const z = nullptr;
+  const ast::Expression* const z = nullptr;
 };
 
 }  // namespace ast

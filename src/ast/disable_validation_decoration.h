@@ -71,10 +71,10 @@ class DisableValidationDecoration
   /// Performs a deep clone of this object using the CloneContext `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned object
-  DisableValidationDecoration* Clone(CloneContext* ctx) const override;
+  const DisableValidationDecoration* Clone(CloneContext* ctx) const override;
 
   /// The validation that this decoration disables
-  DisabledValidation const validation;
+  const DisabledValidation validation;
 };
 
 }  // namespace ast

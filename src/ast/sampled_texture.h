@@ -33,7 +33,7 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   SampledTexture(ProgramID pid,
                  const Source& src,
                  TextureDimension dim,
-                 Type const* type);
+                 const Type* type);
   /// Move constructor
   SampledTexture(SampledTexture&&);
   ~SampledTexture() override;
@@ -46,10 +46,10 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  SampledTexture* Clone(CloneContext* ctx) const override;
+  const SampledTexture* Clone(CloneContext* ctx) const override;
 
   /// The subtype of the sampled texture
-  Type* const type;
+  const Type* const type;
 };
 
 }  // namespace ast

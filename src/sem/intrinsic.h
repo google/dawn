@@ -88,7 +88,7 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   /// @param is_deprecated true if the particular overload is considered
   /// deprecated
   Intrinsic(IntrinsicType type,
-            sem::Type* return_type,
+            const sem::Type* return_type,
             std::vector<Parameter*> parameters,
             PipelineStageSet supported_stages,
             bool is_deprecated);
@@ -140,9 +140,9 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   bool IsAtomic() const;
 
  private:
-  IntrinsicType const type_;
-  PipelineStageSet const supported_stages_;
-  bool const is_deprecated_;
+  const IntrinsicType type_;
+  const PipelineStageSet supported_stages_;
+  const bool is_deprecated_;
 };
 
 }  // namespace sem

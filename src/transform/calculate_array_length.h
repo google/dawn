@@ -48,7 +48,7 @@ class CalculateArrayLength : public Castable<CalculateArrayLength, Transform> {
     /// Performs a deep clone of this object using the CloneContext `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned object
-    BufferSizeIntrinsic* Clone(CloneContext* ctx) const override;
+    const BufferSizeIntrinsic* Clone(CloneContext* ctx) const override;
   };
 
   /// Constructor

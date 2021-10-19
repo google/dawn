@@ -25,13 +25,13 @@ namespace ast {
 
 namespace {
 // Returns the string representation of an array size expression.
-std::string SizeExprToString(const ast::Expression* size,
+std::string SizeExprToString(const Expression* size,
                              const SymbolTable& symbols) {
-  if (auto* ident = size->As<ast::IdentifierExpression>()) {
+  if (auto* ident = size->As<IdentifierExpression>()) {
     return symbols.NameFor(ident->symbol);
   }
-  if (auto* scalar = size->As<ast::ScalarConstructorExpression>()) {
-    auto* literal = scalar->literal->As<ast::IntLiteral>();
+  if (auto* scalar = size->As<ScalarConstructorExpression>()) {
+    auto* literal = scalar->literal->As<IntLiteral>();
     if (literal) {
       return std::to_string(literal->ValueAsU32());
     }
@@ -44,9 +44,9 @@ std::string SizeExprToString(const ast::Expression* size,
 
 Array::Array(ProgramID pid,
              const Source& src,
-             Type* subtype,
-             ast::Expression* cnt,
-             ast::DecorationList decos)
+             const Type* subtype,
+             const Expression* cnt,
+             DecorationList decos)
     : Base(pid, src), type(subtype), count(cnt), decorations(decos) {}
 
 Array::Array(Array&&) = default;
@@ -68,7 +68,7 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-Array* Array::Clone(CloneContext* ctx) const {
+const Array* Array::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* ty = ctx->Clone(type);

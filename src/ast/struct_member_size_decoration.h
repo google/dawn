@@ -41,10 +41,10 @@ class StructMemberSizeDecoration
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  StructMemberSizeDecoration* Clone(CloneContext* ctx) const override;
+  const StructMemberSizeDecoration* Clone(CloneContext* ctx) const override;
 
   /// The size value
-  uint32_t const size;
+  const uint32_t size;
 };
 
 }  // namespace ast

@@ -114,7 +114,8 @@ bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
   return true;
 }
 
-bool GeneratorImpl::EmitExpression(std::ostream& out, ast::Expression* expr) {
+bool GeneratorImpl::EmitExpression(std::ostream& out,
+                                   const ast::Expression* expr) {
   if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
     return EmitArrayAccessor(out, a);
   }
@@ -144,8 +145,9 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, ast::Expression* expr) {
   return false;
 }
 
-bool GeneratorImpl::EmitArrayAccessor(std::ostream& out,
-                                      ast::ArrayAccessorExpression* expr) {
+bool GeneratorImpl::EmitArrayAccessor(
+    std::ostream& out,
+    const ast::ArrayAccessorExpression* expr) {
   bool paren_lhs =
       !expr->array
            ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
@@ -170,8 +172,9 @@ bool GeneratorImpl::EmitArrayAccessor(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
-                                       ast::MemberAccessorExpression* expr) {
+bool GeneratorImpl::EmitMemberAccessor(
+    std::ostream& out,
+    const ast::MemberAccessorExpression* expr) {
   bool paren_lhs =
       !expr->structure
            ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
@@ -193,7 +196,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitBitcast(std::ostream& out,
-                                ast::BitcastExpression* expr) {
+                                const ast::BitcastExpression* expr) {
   out << "bitcast<";
   if (!EmitType(out, expr->type)) {
     return false;
@@ -208,7 +211,8 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitCall(std::ostream& out, ast::CallExpression* expr) {
+bool GeneratorImpl::EmitCall(std::ostream& out,
+                             const ast::CallExpression* expr) {
   if (!EmitExpression(out, expr->func)) {
     return false;
   }
@@ -233,15 +237,16 @@ bool GeneratorImpl::EmitCall(std::ostream& out, ast::CallExpression* expr) {
 }
 
 bool GeneratorImpl::EmitConstructor(std::ostream& out,
-                                    ast::ConstructorExpression* expr) {
+                                    const ast::ConstructorExpression* expr) {
   if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
     return EmitScalarConstructor(out, scalar);
   }
   return EmitTypeConstructor(out, expr->As<ast::TypeConstructorExpression>());
 }
 
-bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
-                                        ast::TypeConstructorExpression* expr) {
+bool GeneratorImpl::EmitTypeConstructor(
+    std::ostream& out,
+    const ast::TypeConstructorExpression* expr) {
   if (!EmitType(out, expr->type)) {
     return false;
   }
@@ -266,11 +271,11 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
 
 bool GeneratorImpl::EmitScalarConstructor(
     std::ostream& out,
-    ast::ScalarConstructorExpression* expr) {
+    const ast::ScalarConstructorExpression* expr) {
   return EmitLiteral(out, expr->literal);
 }
 
-bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
+bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {
   if (auto* bl = lit->As<ast::BoolLiteral>()) {
     out << (bl->value ? "true" : "false");
   } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
@@ -287,12 +292,12 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
 }
 
 bool GeneratorImpl::EmitIdentifier(std::ostream& out,
-                                   ast::IdentifierExpression* expr) {
+                                   const ast::IdentifierExpression* expr) {
   out << program_->Symbols().NameFor(expr->symbol);
   return true;
 }
 
-bool GeneratorImpl::EmitFunction(ast::Function* func) {
+bool GeneratorImpl::EmitFunction(const ast::Function* func) {
   if (func->decorations.size()) {
     if (!EmitDecorations(line(), func->decorations)) {
       return false;
@@ -592,7 +597,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
   return true;
 }
 
-bool GeneratorImpl::EmitVariable(std::ostream& out, ast::Variable* var) {
+bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* var) {
   if (!var->decorations.empty()) {
     if (!EmitDecorations(out, var->decorations)) {
       return false;
@@ -706,7 +711,8 @@ bool GeneratorImpl::EmitDecorations(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
+bool GeneratorImpl::EmitBinary(std::ostream& out,
+                               const ast::BinaryExpression* expr) {
   out << "(";
 
   if (!EmitExpression(out, expr->lhs)) {
@@ -785,7 +791,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
 }
 
 bool GeneratorImpl::EmitUnaryOp(std::ostream& out,
-                                ast::UnaryOpExpression* expr) {
+                                const ast::UnaryOpExpression* expr) {
   switch (expr->op) {
     case ast::UnaryOp::kAddressOf:
       out << "&";
@@ -824,7 +830,7 @@ bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
+bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return EmitAssign(a);
   }
@@ -890,7 +896,7 @@ bool GeneratorImpl::EmitStatementsWithIndent(const ast::StatementList& stmts) {
   return EmitStatements(stmts);
 }
 
-bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
+bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
   auto out = line();
 
   if (!EmitExpression(out, stmt->lhs)) {
@@ -908,12 +914,12 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
+bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
   line() << "break;";
   return true;
 }
 
-bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
+bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
   if (stmt->IsDefault()) {
     line() << "default: {";
   } else {
@@ -942,17 +948,17 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
+bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
   line() << "continue;";
   return true;
 }
 
-bool GeneratorImpl::EmitFallthrough(ast::FallthroughStatement*) {
+bool GeneratorImpl::EmitFallthrough(const ast::FallthroughStatement*) {
   line() << "fallthrough;";
   return true;
 }
 
-bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
+bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
   {
     auto out = line();
     out << "if (";
@@ -988,12 +994,12 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
+bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
   line() << "discard;";
   return true;
 }
 
-bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
+bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
   line() << "loop {";
   increment_indent();
 
@@ -1016,7 +1022,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
+bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
   TextBuffer init_buf;
   if (auto* init = stmt->initializer) {
     TINT_SCOPED_ASSIGNMENT(current_buffer_, &init_buf);
@@ -1090,7 +1096,7 @@ bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
+bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
   auto out = line();
   out << "return";
   if (stmt->value) {
@@ -1103,7 +1109,7 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
+bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
   {
     auto out = line();
     out << "switch(";

@@ -39,10 +39,10 @@ class StrideDecoration : public Castable<StrideDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  StrideDecoration* Clone(CloneContext* ctx) const override;
+  const StrideDecoration* Clone(CloneContext* ctx) const override;
 
   /// The stride value
-  uint32_t const stride;
+  const uint32_t stride;
 };
 
 }  // namespace ast

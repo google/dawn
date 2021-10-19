@@ -82,11 +82,11 @@ struct CanonicalizeEntryPointIO::State {
     /// The name of the output value.
     std::string name;
     /// The type of the output value.
-    ast::Type* type;
+    const ast::Type* type;
     /// The shader IO attributes.
     ast::DecorationList attributes;
     /// The value itself.
-    ast::Expression* value;
+    const ast::Expression* value;
   };
 
   /// The clone context.
@@ -94,9 +94,9 @@ struct CanonicalizeEntryPointIO::State {
   /// The transform config.
   CanonicalizeEntryPointIO::Config const cfg;
   /// The entry point function (AST).
-  ast::Function* func_ast;
+  const ast::Function* func_ast;
   /// The entry point function (SEM).
-  sem::Function const* func_sem;
+  const sem::Function* func_sem;
 
   /// The new entry point wrapper function's parameters.
   ast::VariableList wrapper_ep_parameters;
@@ -121,7 +121,7 @@ struct CanonicalizeEntryPointIO::State {
   /// @param function the entry point function
   State(CloneContext& context,
         const CanonicalizeEntryPointIO::Config& config,
-        ast::Function* function)
+        const ast::Function* function)
       : ctx(context),
         cfg(config),
         func_ast(function),
@@ -154,9 +154,9 @@ struct CanonicalizeEntryPointIO::State {
   /// @param type the type of the shader input
   /// @param attributes the attributes to apply to the shader input
   /// @returns an expression which evaluates to the value of the shader input
-  ast::Expression* AddInput(std::string name,
-                            sem::Type* type,
-                            ast::DecorationList attributes) {
+  const ast::Expression* AddInput(std::string name,
+                                  const sem::Type* type,
+                                  ast::DecorationList attributes) {
     auto* ast_type = CreateASTTypeFor(ctx, type);
     if (cfg.shader_style == ShaderStyle::kSpirv) {
       // Vulkan requires that integer user-defined fragment inputs are
@@ -175,7 +175,7 @@ struct CanonicalizeEntryPointIO::State {
 
       // Create the global variable and use its value for the shader input.
       auto symbol = ctx.dst->Symbols().New(name);
-      ast::Expression* value = ctx.dst->Expr(symbol);
+      const ast::Expression* value = ctx.dst->Expr(symbol);
       if (HasSampleMask(attributes)) {
         // Vulkan requires the type of a SampleMask builtin to be an array.
         // Declare it as array<u32, 1> and then load the first element.
@@ -212,9 +212,9 @@ struct CanonicalizeEntryPointIO::State {
   /// @param attributes the attributes to apply to the shader output
   /// @param value the value of the shader output
   void AddOutput(std::string name,
-                 sem::Type* type,
+                 const sem::Type* type,
                  ast::DecorationList attributes,
-                 ast::Expression* value) {
+                 const ast::Expression* value) {
     // Vulkan requires that integer user-defined vertex outputs are
     // always decorated with `Flat`.
     if (cfg.shader_style == ShaderStyle::kSpirv &&
@@ -417,7 +417,7 @@ struct CanonicalizeEntryPointIO::State {
       // Create the global variable and assign it the output value.
       auto name = ctx.dst->Symbols().New(outval.name);
       auto* type = outval.type;
-      ast::Expression* lhs = ctx.dst->Expr(name);
+      const ast::Expression* lhs = ctx.dst->Expr(name);
       if (HasSampleMask(attributes)) {
         // Vulkan requires the type of a SampleMask builtin to be an array.
         // Declare it as array<u32, 1> and then store to the first element.
@@ -432,7 +432,7 @@ struct CanonicalizeEntryPointIO::State {
 
   // Recreate the original function without entry point attributes and call it.
   /// @returns the inner function call expression
-  ast::CallExpression* CallInnerFunction() {
+  const ast::CallExpression* CallInnerFunction() {
     // Add a suffix to the function name, as the wrapper function will take the
     // original entry point name.
     auto ep_name = ctx.src->Symbols().NameFor(func_ast->symbol);
@@ -492,7 +492,7 @@ struct CanonicalizeEntryPointIO::State {
     auto* call_inner = CallInnerFunction();
 
     // Process the return type, and start building the wrapper function body.
-    std::function<ast::Type*()> wrapper_ret_type = [&] {
+    std::function<const ast::Type*()> wrapper_ret_type = [&] {
       return ctx.dst->ty.void_();
     };
     if (func_sem->ReturnType()->Is<sem::Void>()) {

@@ -60,7 +60,7 @@ class WrapArraysInStructs : public Castable<WrapArraysInStructs, Transform> {
     ~WrappedArrayInfo();
 
     Symbol wrapper_name;
-    std::function<ast::Type*(CloneContext&)> array_type;
+    std::function<const ast::Type*(CloneContext&)> array_type;
 
     operator bool() { return wrapper_name.IsValid(); }
   };

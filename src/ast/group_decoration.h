@@ -39,10 +39,10 @@ class GroupDecoration : public Castable<GroupDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  GroupDecoration* Clone(CloneContext* ctx) const override;
+  const GroupDecoration* Clone(CloneContext* ctx) const override;
 
   /// The group value
-  uint32_t const value;
+  const uint32_t value;
 };
 
 }  // namespace ast

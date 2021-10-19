@@ -40,7 +40,7 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   bool Empty() const { return statements.empty(); }
 
   /// @returns the last statement in the block or nullptr if block empty
-  Statement* Last() const {
+  const Statement* Last() const {
     return statements.empty() ? nullptr : statements.back();
   }
 
@@ -48,10 +48,10 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  BlockStatement* Clone(CloneContext* ctx) const override;
+  const BlockStatement* Clone(CloneContext* ctx) const override;
 
   /// the statement list
-  StatementList const statements;
+  const StatementList statements;
 };
 
 }  // namespace ast

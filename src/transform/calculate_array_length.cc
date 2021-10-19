@@ -61,7 +61,7 @@ std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
   return "intrinsic_buffer_size";
 }
 
-CalculateArrayLength::BufferSizeIntrinsic*
+const CalculateArrayLength::BufferSizeIntrinsic*
 CalculateArrayLength::BufferSizeIntrinsic::Clone(CloneContext* ctx) const {
   return ctx->dst->ASTNodes().Create<CalculateArrayLength::BufferSizeIntrinsic>(
       ctx->dst->ID());

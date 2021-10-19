@@ -28,7 +28,7 @@ Module::Module(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 Module::Module(ProgramID pid,
                const Source& src,
-               std::vector<ast::Node*> global_decls)
+               std::vector<const ast::Node*> global_decls)
     : Base(pid, src), global_declarations_(std::move(global_decls)) {
   for (auto* decl : global_declarations_) {
     if (decl == nullptr) {
@@ -59,28 +59,28 @@ const ast::TypeDecl* Module::LookupType(Symbol name) const {
   return nullptr;
 }
 
-void Module::AddGlobalVariable(ast::Variable* var) {
+void Module::AddGlobalVariable(const ast::Variable* var) {
   TINT_ASSERT(AST, var);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
   global_variables_.push_back(var);
   global_declarations_.push_back(var);
 }
 
-void Module::AddTypeDecl(ast::TypeDecl* type) {
+void Module::AddTypeDecl(const ast::TypeDecl* type) {
   TINT_ASSERT(AST, type);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
   type_decls_.push_back(type);
   global_declarations_.push_back(type);
 }
 
-void Module::AddFunction(ast::Function* func) {
+void Module::AddFunction(const ast::Function* func) {
   TINT_ASSERT(AST, func);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
   functions_.push_back(func);
   global_declarations_.push_back(func);
 }
 
-Module* Module::Clone(CloneContext* ctx) const {
+const Module* Module::Clone(CloneContext* ctx) const {
   auto* out = ctx->dst->create<Module>();
   out->Copy(ctx, this);
   return out;

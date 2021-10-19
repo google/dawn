@@ -32,7 +32,7 @@ class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
   UnaryOpExpression(ProgramID program_id,
                     const Source& source,
                     UnaryOp op,
-                    Expression* expr);
+                    const Expression* expr);
   /// Move constructor
   UnaryOpExpression(UnaryOpExpression&&);
   ~UnaryOpExpression() override;
@@ -41,13 +41,13 @@ class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  UnaryOpExpression* Clone(CloneContext* ctx) const override;
+  const UnaryOpExpression* Clone(CloneContext* ctx) const override;
 
   /// The op
-  UnaryOp const op;
+  const UnaryOp op;
 
   /// The expression
-  Expression* const expr;
+  const Expression* const expr;
 };
 
 }  // namespace ast

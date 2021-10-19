@@ -1641,9 +1641,9 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
   uint32_t mat_rows = std::get<2>(GetParam());
   uint32_t mat_cols = std::get<3>(GetParam());
 
-  ast::Type* lhs_type;
-  ast::Type* rhs_type;
-  sem::Type* result_type;
+  const ast::Type* lhs_type = nullptr;
+  const ast::Type* rhs_type = nullptr;
+  const sem::Type* result_type = nullptr;
   bool is_valid_expr;
 
   if (vec_by_mat) {

@@ -100,7 +100,7 @@ class PrinterWindows : public Printer {
   }
 
   FILE* const file;
-  ConsoleInfo const console;
+  const ConsoleInfo console;
 };
 
 }  // namespace

@@ -33,7 +33,7 @@ std::string ExternalTexture::FriendlyName(const SymbolTable&) const {
   return "texture_external";
 }
 
-ExternalTexture* ExternalTexture::Clone(CloneContext* ctx) const {
+const ExternalTexture* ExternalTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ExternalTexture>();
 }
 

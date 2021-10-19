@@ -42,10 +42,10 @@ class StageDecoration : public Castable<StageDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  StageDecoration* Clone(CloneContext* ctx) const override;
+  const StageDecoration* Clone(CloneContext* ctx) const override;
 
   /// The pipeline stage
-  PipelineStage const stage;
+  const PipelineStage stage;
 };
 
 }  // namespace ast

@@ -25,25 +25,25 @@ namespace tint {
 namespace sem {
 
 MemberAccessorExpression::MemberAccessorExpression(
-    ast::MemberAccessorExpression* declaration,
+    const ast::MemberAccessorExpression* declaration,
     const sem::Type* type,
-    Statement* statement)
+    const Statement* statement)
     : Base(declaration, type, statement, Constant{}) {}
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 
 StructMemberAccess::StructMemberAccess(
-    ast::MemberAccessorExpression* declaration,
+    const ast::MemberAccessorExpression* declaration,
     const sem::Type* type,
-    Statement* statement,
+    const Statement* statement,
     const StructMember* member)
     : Base(declaration, type, statement), member_(member) {}
 
 StructMemberAccess::~StructMemberAccess() = default;
 
-Swizzle::Swizzle(ast::MemberAccessorExpression* declaration,
+Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const sem::Type* type,
-                 Statement* statement,
+                 const Statement* statement,
                  std::vector<uint32_t> indices)
     : Base(declaration, type, statement), indices_(std::move(indices)) {}
 

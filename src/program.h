@@ -149,7 +149,7 @@ class Program {
   /// @param expr the AST expression
   /// @return the resolved semantic type for the expression, or nullptr if the
   /// expression has no resolved type.
-  sem::Type* TypeOf(const ast::Expression* expr) const;
+  const sem::Type* TypeOf(const ast::Expression* expr) const;
 
   /// Helper for returning the resolved semantic type of the AST type `type`.
   /// @param type the AST type

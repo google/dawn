@@ -89,12 +89,12 @@ void ProgramBuilder::AssertNotMoved() const {
   }
 }
 
-sem::Type* ProgramBuilder::TypeOf(const ast::Expression* expr) const {
+const sem::Type* ProgramBuilder::TypeOf(const ast::Expression* expr) const {
   auto* sem = Sem().Get(expr);
   return sem ? sem->Type() : nullptr;
 }
 
-sem::Type* ProgramBuilder::TypeOf(const ast::Variable* var) const {
+const sem::Type* ProgramBuilder::TypeOf(const ast::Variable* var) const {
   auto* sem = Sem().Get(var);
   return sem ? sem->Type() : nullptr;
 }
@@ -107,10 +107,6 @@ const sem::Type* ProgramBuilder::TypeOf(const ast::TypeDecl* type_decl) const {
   return Sem().Get(type_decl);
 }
 
-ast::TypeName* ProgramBuilder::TypesBuilder::Of(ast::TypeDecl* decl) const {
-  return type_name(decl->name);
-}
-
 const ast::TypeName* ProgramBuilder::TypesBuilder::Of(
     const ast::TypeDecl* decl) const {
   return type_name(decl->name);
@@ -118,11 +114,12 @@ const ast::TypeName* ProgramBuilder::TypesBuilder::Of(
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}
 
-ast::Statement* ProgramBuilder::WrapInStatement(ast::Literal* lit) {
+const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Literal* lit) {
   return WrapInStatement(create<ast::ScalarConstructorExpression>(lit));
 }
 
-ast::Statement* ProgramBuilder::WrapInStatement(ast::Expression* expr) {
+const ast::Statement* ProgramBuilder::WrapInStatement(
+    const ast::Expression* expr) {
   if (auto* ce = expr->As<ast::CallExpression>()) {
     return Ignore(ce);
   }
@@ -130,15 +127,18 @@ ast::Statement* ProgramBuilder::WrapInStatement(ast::Expression* expr) {
   return Decl(Const(symbols_.New(), nullptr, expr));
 }
 
-ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {
+const ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(
+    const ast::Variable* v) {
   return create<ast::VariableDeclStatement>(v);
 }
 
-ast::Statement* ProgramBuilder::WrapInStatement(ast::Statement* stmt) {
+const ast::Statement* ProgramBuilder::WrapInStatement(
+    const ast::Statement* stmt) {
   return stmt;
 }
 
-ast::Function* ProgramBuilder::WrapInFunction(ast::StatementList stmts) {
+const ast::Function* ProgramBuilder::WrapInFunction(
+    const ast::StatementList stmts) {
   return Func("test_function", {}, ty.void_(), std::move(stmts),
               {create<ast::StageDecoration>(ast::PipelineStage::kCompute),
                WorkgroupSize(1, 1, 1)});

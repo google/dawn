@@ -41,7 +41,7 @@ namespace {
 /// expression
 template <typename F>
 void CollectSavedArrayIndices(const Program* program,
-                              ast::Expression* expr,
+                              const ast::Expression* expr,
                               F&& cb) {
   if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
     CollectSavedArrayIndices(program, a->array, cb);
@@ -95,7 +95,7 @@ void InlinePointerLets::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   // * Sub-expressions inside the pointer-typed `let` initializer expression
   // that have been hoisted to a saved variable are replaced with the saved
   // variable identifier.
-  ctx.ReplaceAll([&](ast::Expression* expr) -> ast::Expression* {
+  ctx.ReplaceAll([&](const ast::Expression* expr) -> const ast::Expression* {
     if (current_ptr_let) {
       // We're currently processing the initializer expression of a
       // pointer-typed `let` declaration. Look to see if we need to swap this
@@ -150,7 +150,7 @@ void InlinePointerLets::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       // to be hoist to temporary "saved" variables.
       CollectSavedArrayIndices(
           ctx.src, var->Declaration()->constructor,
-          [&](ast::Expression* idx_expr) {
+          [&](const ast::Expression* idx_expr) {
             // We have a sub-expression that needs to be saved.
             // Create a new variable
             auto saved_name = ctx.dst->Symbols().New(

@@ -51,13 +51,13 @@ class InterpolateDecoration
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  InterpolateDecoration* Clone(CloneContext* ctx) const override;
+  const InterpolateDecoration* Clone(CloneContext* ctx) const override;
 
   /// The interpolation type
-  InterpolationType const type;
+  const InterpolationType type;
 
   /// The interpolation sampling
-  InterpolationSampling const sampling;
+  const InterpolationSampling sampling;
 };
 
 /// @param out the std::ostream to write to

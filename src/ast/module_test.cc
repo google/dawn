@@ -106,15 +106,15 @@ TEST_F(ModuleTest, CloneOrder) {
   // declaration that triggered the ReplaceAll().
   ProgramBuilder cloned;
   CloneContext ctx(&cloned, &p);
-  ctx.ReplaceAll([&](ast::Function*) -> ast::Function* {
+  ctx.ReplaceAll([&](const ast::Function*) -> const ast::Function* {
     ctx.dst->Alias("inserted_before_F", cloned.ty.u32());
     return nullptr;
   });
-  ctx.ReplaceAll([&](ast::Alias*) -> ast::Alias* {
+  ctx.ReplaceAll([&](const ast::Alias*) -> const ast::Alias* {
     ctx.dst->Alias("inserted_before_A", cloned.ty.u32());
     return nullptr;
   });
-  ctx.ReplaceAll([&](ast::Variable*) -> ast::Variable* {
+  ctx.ReplaceAll([&](const ast::Variable*) -> const ast::Variable* {
     ctx.dst->Alias("inserted_before_V", cloned.ty.u32());
     return nullptr;
   });

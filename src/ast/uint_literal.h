@@ -39,10 +39,10 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  UintLiteral* Clone(CloneContext* ctx) const override;
+  const UintLiteral* Clone(CloneContext* ctx) const override;
 
   /// The int literal value
-  uint32_t const value;
+  const uint32_t value;
 };
 
 }  // namespace ast

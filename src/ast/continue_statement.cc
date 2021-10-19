@@ -28,7 +28,7 @@ ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
 
 ContinueStatement::~ContinueStatement() = default;
 
-ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
+const ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<ContinueStatement>(src);

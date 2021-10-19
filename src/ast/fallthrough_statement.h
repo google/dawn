@@ -35,7 +35,7 @@ class FallthroughStatement : public Castable<FallthroughStatement, Statement> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  FallthroughStatement* Clone(CloneContext* ctx) const override;
+  const FallthroughStatement* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

@@ -352,7 +352,7 @@ class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
 
   /// @param builder the program builder
   /// @returns the build AST node
-  virtual ast::Statement* Build(ProgramBuilder* builder) const = 0;
+  virtual const ast::Statement* Build(ProgramBuilder* builder) const = 0;
 
  private:
   Node* Clone(CloneContext*) const override;
@@ -473,13 +473,13 @@ class FunctionEmitter {
   /// Returns the Location dcoration, if it exists.
   /// @param decos the list of decorations to search
   /// @returns the Location decoration, or nullptr if it doesn't exist
-  ast::Decoration* GetLocation(const ast::DecorationList& decos);
+  const ast::Decoration* GetLocation(const ast::DecorationList& decos);
 
   /// Create an ast::BlockStatement representing the body of the function.
   /// This creates the statement stack, which is non-empty for the lifetime
   /// of the function.
   /// @returns the body of the function, or null on error
-  ast::BlockStatement* MakeFunctionBody();
+  const ast::BlockStatement* MakeFunctionBody();
 
   /// Emits the function body, populating the bottom entry of the statements
   /// stack.
@@ -660,8 +660,8 @@ class FunctionEmitter {
   /// @param src_info the source block
   /// @param dest_info the destination block
   /// @returns the new statement, or a null statement
-  ast::Statement* MakeBranch(const BlockInfo& src_info,
-                             const BlockInfo& dest_info) const {
+  const ast::Statement* MakeBranch(const BlockInfo& src_info,
+                                   const BlockInfo& dest_info) const {
     return MakeBranchDetailed(src_info, dest_info, false, nullptr);
   }
 
@@ -671,8 +671,8 @@ class FunctionEmitter {
   /// @param src_info the source block
   /// @param dest_info the destination block
   /// @returns the new statement, or a null statement
-  ast::Statement* MakeForcedBranch(const BlockInfo& src_info,
-                                   const BlockInfo& dest_info) const {
+  const ast::Statement* MakeForcedBranch(const BlockInfo& src_info,
+                                         const BlockInfo& dest_info) const {
     return MakeBranchDetailed(src_info, dest_info, true, nullptr);
   }
 
@@ -690,10 +690,11 @@ class FunctionEmitter {
   /// @param forced if true, always emit the branch (if it exists in WGSL)
   /// @param flow_guard_name_ptr return parameter for control flow guard name
   /// @returns the new statement, or a null statement
-  ast::Statement* MakeBranchDetailed(const BlockInfo& src_info,
-                                     const BlockInfo& dest_info,
-                                     bool forced,
-                                     std::string* flow_guard_name_ptr) const;
+  const ast::Statement* MakeBranchDetailed(
+      const BlockInfo& src_info,
+      const BlockInfo& dest_info,
+      bool forced,
+      std::string* flow_guard_name_ptr) const;
 
   /// Returns a new if statement with the given statements as the then-clause
   /// and the else-clause.  Either or both clauses might be nullptr. If both
@@ -702,9 +703,9 @@ class FunctionEmitter {
   /// @param then_stmt the statement for the then clause of the if, or nullptr
   /// @param else_stmt the statement for the else clause of the if, or nullptr
   /// @returns the new statement, or nullptr
-  ast::Statement* MakeSimpleIf(ast::Expression* condition,
-                               ast::Statement* then_stmt,
-                               ast::Statement* else_stmt) const;
+  const ast::Statement* MakeSimpleIf(const ast::Expression* condition,
+                                     const ast::Statement* then_stmt,
+                                     const ast::Statement* else_stmt) const;
 
   /// Emits the statements for an normal-terminator OpBranchConditional
   /// where one branch is a case fall through (the true branch if and only
@@ -719,7 +720,7 @@ class FunctionEmitter {
   /// branch
   /// @returns the false if emission fails
   bool EmitConditionalCaseFallThrough(const BlockInfo& src_info,
-                                      ast::Expression* cond,
+                                      const ast::Expression* cond,
                                       EdgeKind other_edge_kind,
                                       const BlockInfo& other_dest,
                                       bool fall_through_is_true_branch);
@@ -1031,13 +1032,15 @@ class FunctionEmitter {
   /// given instruction.
   /// @param inst the SPIR-V instruction
   /// @returns an identifier expression, or null on error
-  ast::Expression* GetImageExpression(const spvtools::opt::Instruction& inst);
+  const ast::Expression* GetImageExpression(
+      const spvtools::opt::Instruction& inst);
 
   /// Get the expression for the sampler operand from the first operand to the
   /// given instruction.
   /// @param inst the SPIR-V instruction
   /// @returns an identifier expression, or null on error
-  ast::Expression* GetSamplerExpression(const spvtools::opt::Instruction& inst);
+  const ast::Expression* GetSamplerExpression(
+      const spvtools::opt::Instruction& inst);
 
   /// Emits a texture builtin function call for a SPIR-V instruction that
   /// accesses an image or sampled image.
@@ -1059,7 +1062,7 @@ class FunctionEmitter {
   /// @param texel the texel
   /// @param texture_type the type of the storage texture
   /// @returns the texel, after necessary conversion.
-  ast::Expression* ConvertTexelForStorage(
+  const ast::Expression* ConvertTexelForStorage(
       const spvtools::opt::Instruction& inst,
       TypedExpression texel,
       const Texture* texture_type);
@@ -1087,7 +1090,7 @@ class FunctionEmitter {
   /// Does nothing if the statement is null.
   /// @param statement the new statement
   /// @returns a pointer to the statement.
-  ast::Statement* AddStatement(ast::Statement* statement);
+  const ast::Statement* AddStatement(const ast::Statement* statement);
 
   /// AddStatementBuilder() constructs and adds the StatementBuilder of type
   /// `T` to the top of the statement stack.
@@ -1106,7 +1109,7 @@ class FunctionEmitter {
   Source GetSourceForInst(const spvtools::opt::Instruction& inst) const;
 
   /// @returns the last statetment in the top of the statement stack.
-  ast::Statement* LastStatement();
+  const ast::Statement* LastStatement();
 
   using CompletionAction = std::function<void(const ast::StatementList&)>;
 
@@ -1131,7 +1134,7 @@ class FunctionEmitter {
 
     /// Add() adds `statement` to the block.
     /// Add() must not be called after calling Finalize().
-    void Add(ast::Statement* statement);
+    void Add(const ast::Statement* statement);
 
     /// AddStatementBuilder() constructs and adds the StatementBuilder of type
     /// `T` to the block.
@@ -1168,7 +1171,7 @@ class FunctionEmitter {
     /// The ID of the block at which the completion action should be triggered
     /// and this statement block discarded. This is often the `end_id` of
     /// `construct` itself.
-    uint32_t const end_id_;
+    const uint32_t end_id_;
     /// The completion action finishes processing this statement block.
     FunctionEmitter::CompletionAction const completion_action_;
     /// The list of statements being built, if this construct is not a switch.
@@ -1200,10 +1203,10 @@ class FunctionEmitter {
   void PushTrueGuard(uint32_t end_id);
 
   /// @returns a boolean true expression.
-  ast::Expression* MakeTrue(const Source&) const;
+  const ast::Expression* MakeTrue(const Source&) const;
 
   /// @returns a boolean false expression.
-  ast::Expression* MakeFalse(const Source&) const;
+  const ast::Expression* MakeFalse(const Source&) const;
 
   /// @param expr the expression to take the address of
   /// @returns a TypedExpression that is the address-of `expr` (`&expr`)

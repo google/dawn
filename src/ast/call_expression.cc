@@ -23,7 +23,7 @@ namespace ast {
 
 CallExpression::CallExpression(ProgramID pid,
                                const Source& src,
-                               IdentifierExpression* fn,
+                               const IdentifierExpression* fn,
                                ExpressionList a)
     : Base(pid, src), func(fn), args(a) {
   TINT_ASSERT(AST, func);
@@ -38,7 +38,7 @@ CallExpression::CallExpression(CallExpression&&) = default;
 
 CallExpression::~CallExpression() = default;
 
-CallExpression* CallExpression::Clone(CloneContext* ctx) const {
+const CallExpression* CallExpression::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* fn = ctx->Clone(func);

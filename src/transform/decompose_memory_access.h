@@ -88,16 +88,16 @@ class DecomposeMemoryAccess
     /// Performs a deep clone of this object using the CloneContext `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned object
-    Intrinsic* Clone(CloneContext* ctx) const override;
+    const Intrinsic* Clone(CloneContext* ctx) const override;
 
     /// The op of the intrinsic
-    Op const op;
+    const Op op;
 
     /// The storage class of the buffer this intrinsic operates on
     ast::StorageClass const storage_class;
 
     /// The type of the intrinsic
-    DataType const type;
+    const DataType type;
   };
 
   /// Constructor

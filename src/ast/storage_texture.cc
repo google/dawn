@@ -144,7 +144,7 @@ StorageTexture::StorageTexture(ProgramID pid,
                                const Source& src,
                                TextureDimension d,
                                ImageFormat fmt,
-                               Type* subtype,
+                               const Type* subtype,
                                Access ac)
     : Base(pid, src, d), format(fmt), type(subtype), access(ac) {}
 
@@ -158,7 +158,7 @@ std::string StorageTexture::FriendlyName(const SymbolTable&) const {
   return out.str();
 }
 
-StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
+const StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* ty = ctx->Clone(type);

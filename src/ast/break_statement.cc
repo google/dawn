@@ -28,7 +28,7 @@ BreakStatement::BreakStatement(BreakStatement&&) = default;
 
 BreakStatement::~BreakStatement() = default;
 
-BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
+const BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<BreakStatement>(src);

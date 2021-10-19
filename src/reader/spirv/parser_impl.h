@@ -73,7 +73,7 @@ struct TypedExpression {
   /// Constructor
   /// @param type_in the type of the expression
   /// @param expr_in the expression
-  TypedExpression(const Type* type_in, ast::Expression* expr_in);
+  TypedExpression(const Type* type_in, const ast::Expression* expr_in);
 
   /// Assignment operator
   /// @returns this TypedExpression
@@ -83,9 +83,9 @@ struct TypedExpression {
   operator bool() const { return type && expr; }
 
   /// The type
-  Type const* type = nullptr;
+  const Type* type = nullptr;
   /// The expression
-  ast::Expression* expr = nullptr;
+  const ast::Expression* expr = nullptr;
 };
 
 /// Info about the WorkgroupSize builtin.
@@ -208,7 +208,7 @@ class ParserImpl : Reader {
   /// Adds `decl` as a declared type if it hasn't been added yet.
   /// @param name the type's unique name
   /// @param decl the type declaration to add
-  void AddTypeDecl(Symbol name, ast::TypeDecl* decl);
+  void AddTypeDecl(Symbol name, const ast::TypeDecl* decl);
 
   /// @returns the fail stream object
   FailStream& fail_stream() { return fail_stream_; }
@@ -269,8 +269,8 @@ class ParserImpl : Reader {
   /// @param replacement the location decoration to place into the list
   /// @returns the location decoration that was replaced, if one was replaced,
   /// or null otherwise.
-  ast::Decoration* SetLocation(ast::DecorationList* decos,
-                               ast::Decoration* replacement);
+  const ast::Decoration* SetLocation(ast::DecorationList* decos,
+                                     const ast::Decoration* replacement);
 
   /// Converts a SPIR-V struct member decoration into a number of AST
   /// decorations. If the decoration is recognized but deliberately dropped,
@@ -429,7 +429,7 @@ class ParserImpl : Reader {
                               ast::StorageClass sc,
                               const Type* storage_type,
                               bool is_const,
-                              ast::Expression* constructor,
+                              const ast::Expression* constructor,
                               ast::DecorationList decorations);
 
   /// Returns true if a constant expression can be generated.
@@ -456,7 +456,7 @@ class ParserImpl : Reader {
   /// Creates an AST expression node for the null value for the given type.
   /// @param type the AST type
   /// @returns a new expression
-  ast::Expression* MakeNullValue(const Type* type);
+  const ast::Expression* MakeNullValue(const Type* type);
 
   /// Make a typed expression for the null value for the given type.
   /// @param type the AST type

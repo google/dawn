@@ -34,7 +34,7 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   ~MultisampledTexture() override;
 
   /// @returns the subtype of the sampled texture
-  Type* type() const { return const_cast<Type*>(type_); }
+  const Type* type() const { return type_; }
 
   /// @returns the name for this type
   std::string type_name() const override;

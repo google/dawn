@@ -36,7 +36,7 @@ class TypeConstructorExpression
   /// @param values the constructor values
   TypeConstructorExpression(ProgramID pid,
                             const Source& src,
-                            ast::Type* type,
+                            const ast::Type* type,
                             ExpressionList values);
   /// Move constructor
   TypeConstructorExpression(TypeConstructorExpression&&);
@@ -46,13 +46,13 @@ class TypeConstructorExpression
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  TypeConstructorExpression* Clone(CloneContext* ctx) const override;
+  const TypeConstructorExpression* Clone(CloneContext* ctx) const override;
 
   /// The type
-  ast::Type* const type;
+  const ast::Type* const type;
 
   /// The values
-  ExpressionList const values;
+  const ExpressionList values;
 };
 
 }  // namespace ast

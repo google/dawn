@@ -31,7 +31,7 @@ std::string U32::FriendlyName(const SymbolTable&) const {
   return "u32";
 }
 
-U32* U32::Clone(CloneContext* ctx) const {
+const U32* U32::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   return ctx->dst->create<U32>(src);
 }

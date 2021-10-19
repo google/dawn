@@ -71,7 +71,7 @@ bool MaybeApplyMutation(const tint::Program& program,
   tint::CloneContext clone_context(&mutated, &program);
   NodeIdMap new_node_id_map;
   clone_context.ReplaceAll(
-      [&node_id_map, &new_node_id_map, &clone_context](ast::Node* node) {
+      [&node_id_map, &new_node_id_map, &clone_context](const ast::Node* node) {
         // Make sure all `tint::ast::` nodes' ids are preserved.
         auto* cloned = tint::As<ast::Node>(node->Clone(&clone_context));
         new_node_id_map.Add(cloned, node_id_map.GetId(node));

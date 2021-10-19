@@ -74,7 +74,8 @@ struct TypeInfo {
   /// @returns the static TypeInfo for the type T
   template <typename T>
   static const TypeInfo& Of() {
-    return detail::TypeInfoOf<T>::info;
+    using NO_CV = typename std::remove_cv<T>::type;
+    return detail::TypeInfoOf<NO_CV>::info;
   }
 };
 

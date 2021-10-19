@@ -57,9 +57,9 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   return out;
 }
 
-ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
-                                  ParamType type,
-                                  ProgramBuilder* builder) {
+const ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
+                                        ParamType type,
+                                        ProgramBuilder* builder) {
   std::string name;
   std::ostringstream str(name);
   str << intrinsic;

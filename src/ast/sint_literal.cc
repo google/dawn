@@ -30,7 +30,7 @@ uint32_t SintLiteral::ValueAsU32() const {
   return static_cast<uint32_t>(value);
 }
 
-SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
+const SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<SintLiteral>(src, value);

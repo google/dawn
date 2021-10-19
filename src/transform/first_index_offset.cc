@@ -80,7 +80,7 @@ void FirstIndexOffset::Run(CloneContext& ctx,
   // parameters) or structure member accesses.
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* var = node->As<ast::Variable>()) {
-      for (ast::Decoration* dec : var->decorations) {
+      for (auto* dec : var->decorations) {
         if (auto* builtin_dec = dec->As<ast::BuiltinDecoration>()) {
           ast::Builtin builtin = builtin_dec->builtin;
           if (builtin == ast::Builtin::kVertexIndex) {
@@ -97,7 +97,7 @@ void FirstIndexOffset::Run(CloneContext& ctx,
       }
     }
     if (auto* member = node->As<ast::StructMember>()) {
-      for (ast::Decoration* dec : member->decorations) {
+      for (auto* dec : member->decorations) {
         if (auto* builtin_dec = dec->As<ast::BuiltinDecoration>()) {
           ast::Builtin builtin = builtin_dec->builtin;
           if (builtin == ast::Builtin::kVertexIndex) {
@@ -147,28 +147,29 @@ void FirstIndexOffset::Run(CloneContext& ctx,
                     });
 
     // Fix up all references to the builtins with the offsets
-    ctx.ReplaceAll([=, &ctx](ast::Expression* expr) -> ast::Expression* {
-      if (auto* sem = ctx.src->Sem().Get(expr)) {
-        if (auto* user = sem->As<sem::VariableUser>()) {
-          auto it = builtin_vars.find(user->Variable());
-          if (it != builtin_vars.end()) {
-            return ctx.dst->Add(
-                ctx.CloneWithoutTransform(expr),
-                ctx.dst->MemberAccessor(buffer_name, it->second));
+    ctx.ReplaceAll(
+        [=, &ctx](const ast::Expression* expr) -> const ast::Expression* {
+          if (auto* sem = ctx.src->Sem().Get(expr)) {
+            if (auto* user = sem->As<sem::VariableUser>()) {
+              auto it = builtin_vars.find(user->Variable());
+              if (it != builtin_vars.end()) {
+                return ctx.dst->Add(
+                    ctx.CloneWithoutTransform(expr),
+                    ctx.dst->MemberAccessor(buffer_name, it->second));
+              }
+            }
+            if (auto* access = sem->As<sem::StructMemberAccess>()) {
+              auto it = builtin_members.find(access->Member());
+              if (it != builtin_members.end()) {
+                return ctx.dst->Add(
+                    ctx.CloneWithoutTransform(expr),
+                    ctx.dst->MemberAccessor(buffer_name, it->second));
+              }
+            }
           }
-        }
-        if (auto* access = sem->As<sem::StructMemberAccess>()) {
-          auto it = builtin_members.find(access->Member());
-          if (it != builtin_members.end()) {
-            return ctx.dst->Add(
-                ctx.CloneWithoutTransform(expr),
-                ctx.dst->MemberAccessor(buffer_name, it->second));
-          }
-        }
-      }
-      // Not interested in this experssion. Just clone.
-      return nullptr;
-    });
+          // Not interested in this experssion. Just clone.
+          return nullptr;
+        });
   }
 
   ctx.Clone();

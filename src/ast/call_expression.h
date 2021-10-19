@@ -33,7 +33,7 @@ class CallExpression : public Castable<CallExpression, Expression> {
   /// @param args the arguments
   CallExpression(ProgramID program_id,
                  const Source& source,
-                 IdentifierExpression* func,
+                 const IdentifierExpression* func,
                  ExpressionList args);
   /// Move constructor
   CallExpression(CallExpression&&);
@@ -43,12 +43,12 @@ class CallExpression : public Castable<CallExpression, Expression> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  CallExpression* Clone(CloneContext* ctx) const override;
+  const CallExpression* Clone(CloneContext* ctx) const override;
 
   /// The target function
-  IdentifierExpression* const func;
+  const IdentifierExpression* const func;
   /// The arguments
-  ExpressionList const args;
+  const ExpressionList args;
 };
 
 }  // namespace ast

@@ -84,7 +84,7 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
                  const Source& src,
                  TextureDimension dim,
                  ImageFormat format,
-                 Type* subtype,
+                 const Type* subtype,
                  Access access_control);
 
   /// Move constructor
@@ -99,7 +99,7 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  StorageTexture* Clone(CloneContext* ctx) const override;
+  const StorageTexture* Clone(CloneContext* ctx) const override;
 
   /// @param format the storage texture image format
   /// @param builder the ProgramBuilder used to build the returned type
@@ -107,13 +107,13 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   static Type* SubtypeFor(ImageFormat format, ProgramBuilder& builder);
 
   /// The image format
-  ImageFormat const format;
+  const ImageFormat format;
 
   /// The storage subtype
-  Type* const type;
+  const Type* const type;
 
   /// The access control
-  Access const access;
+  const Access access;
 };
 
 }  // namespace ast

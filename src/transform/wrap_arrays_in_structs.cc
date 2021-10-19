@@ -48,7 +48,7 @@ void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   };
 
   // Replace all array types with their corresponding wrapper
-  ctx.ReplaceAll([&](ast::Type* ast_type) -> ast::Type* {
+  ctx.ReplaceAll([&](const ast::Type* ast_type) -> const ast::Type* {
     auto* type = ctx.src->TypeOf(ast_type);
     if (auto* array = type->UnwrapRef()->As<sem::Array>()) {
       return wrapper_typename(array);
@@ -57,8 +57,8 @@ void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   });
 
   // Fix up array accessors so `a[1]` becomes `a.arr[1]`
-  ctx.ReplaceAll([&](ast::ArrayAccessorExpression* accessor)
-                     -> ast::ArrayAccessorExpression* {
+  ctx.ReplaceAll([&](const ast::ArrayAccessorExpression* accessor)
+                     -> const ast::ArrayAccessorExpression* {
     if (auto* array = ::tint::As<sem::Array>(
             sem.Get(accessor->array)->Type()->UnwrapRef())) {
       if (wrapper(array)) {
@@ -74,7 +74,8 @@ void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   });
 
   // Fix up array constructors so `A(1,2)` becomes `tint_array_wrapper(A(1,2))`
-  ctx.ReplaceAll([&](ast::TypeConstructorExpression* ctor) -> ast::Expression* {
+  ctx.ReplaceAll([&](const ast::TypeConstructorExpression* ctor)
+                     -> const ast::Expression* {
     if (auto* array =
             ::tint::As<sem::Array>(sem.Get(ctor)->Type()->UnwrapRef())) {
       if (auto w = wrapper(array)) {
@@ -107,7 +108,7 @@ WrapArraysInStructs::WrappedArrayInfo WrapArraysInStructs::WrapArray(
     info.wrapper_name = ctx.dst->Symbols().New("tint_array_wrapper");
 
     // Examine the element type. Is it also an array?
-    std::function<ast::Type*(CloneContext&)> el_type;
+    std::function<const ast::Type*(CloneContext&)> el_type;
     if (auto* el_array = array->ElemType()->As<sem::Array>()) {
       // Array of array - call WrapArray() on the element type
       if (auto el = WrapArray(ctx, wrapped_arrays, el_array)) {

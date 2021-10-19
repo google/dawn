@@ -38,7 +38,7 @@ class InvariantDecoration : public Castable<InvariantDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  InvariantDecoration* Clone(CloneContext* ctx) const override;
+  const InvariantDecoration* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

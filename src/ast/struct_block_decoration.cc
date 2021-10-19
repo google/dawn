@@ -32,7 +32,8 @@ std::string StructBlockDecoration::Name() const {
   return "block";
 }
 
-StructBlockDecoration* StructBlockDecoration::Clone(CloneContext* ctx) const {
+const StructBlockDecoration* StructBlockDecoration::Clone(
+    CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<StructBlockDecoration>(src);

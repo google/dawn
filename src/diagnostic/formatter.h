@@ -63,7 +63,7 @@ class Formatter {
 
   void format(const Diagnostic& diag, State& state) const;
 
-  Style const style_;
+  const Style style_;
 };
 
 }  // namespace diag

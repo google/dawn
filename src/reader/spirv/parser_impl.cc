@@ -262,7 +262,8 @@ TypedExpression::TypedExpression(const TypedExpression&) = default;
 
 TypedExpression& TypedExpression::operator=(const TypedExpression&) = default;
 
-TypedExpression::TypedExpression(const Type* type_in, ast::Expression* expr_in)
+TypedExpression::TypedExpression(const Type* type_in,
+                                 const ast::Expression* expr_in)
     : type(type_in), expr(expr_in) {}
 
 ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
@@ -1208,7 +1209,7 @@ const Type* ParserImpl::ConvertType(
   return result;
 }
 
-void ParserImpl::AddTypeDecl(Symbol name, ast::TypeDecl* decl) {
+void ParserImpl::AddTypeDecl(Symbol name, const ast::TypeDecl* decl) {
   auto iter = declared_types_.insert(name);
   if (iter.second) {
     builder_.AST().AddTypeDecl(decl);
@@ -1521,7 +1522,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
 
     auto* ast_store_type = ast_type->As<Pointer>()->type;
     auto ast_storage_class = ast_type->As<Pointer>()->storage_class;
-    ast::Expression* ast_constructor = nullptr;
+    const ast::Expression* ast_constructor = nullptr;
     if (var.NumInOperands() > 1) {
       // SPIR-V initializers are always constants.
       // (OpenCL also allows the ID of an OpVariable, but we don't handle that
@@ -1543,7 +1544,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     // Make sure the variable has a name.
     namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id,
                                 "gl_Position");
-    ast::Expression* ast_constructor = nullptr;
+    const ast::Expression* ast_constructor = nullptr;
     if (builtin_position_.per_vertex_var_init_id) {
       // The initializer is complex.
       const auto* init =
@@ -1603,7 +1604,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                                         ast::StorageClass sc,
                                         const Type* storage_type,
                                         bool is_const,
-                                        ast::Expression* constructor,
+                                        const ast::Expression* constructor,
                                         ast::DecorationList decorations) {
   if (storage_type == nullptr) {
     Fail() << "internal error: can't make ast::Variable for null type";
@@ -1755,8 +1756,9 @@ DecorationList ParserImpl::GetMemberPipelineDecorations(
   return result;
 }
 
-ast::Decoration* ParserImpl::SetLocation(ast::DecorationList* decos,
-                                         ast::Decoration* replacement) {
+const ast::Decoration* ParserImpl::SetLocation(
+    ast::DecorationList* decos,
+    const ast::Decoration* replacement) {
   if (!replacement) {
     return nullptr;
   }
@@ -1765,7 +1767,7 @@ ast::Decoration* ParserImpl::SetLocation(ast::DecorationList* decos,
       // Replace this location decoration with the replacement.
       // The old one doesn't leak because it's kept in the builder's AST node
       // list.
-      ast::Decoration* result = nullptr;
+      const ast::Decoration* result = nullptr;
       result = deco;
       deco = replacement;
       return result;  // Assume there is only one such decoration.
@@ -2004,7 +2006,7 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
   return {};
 }
 
-ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
+const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
   // TODO(dneto): Use the no-operands constructor syntax when it becomes
   // available in Tint.
   // https://github.com/gpuweb/gpuweb/issues/685

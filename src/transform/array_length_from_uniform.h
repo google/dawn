@@ -89,7 +89,7 @@ class ArrayLengthFromUniform
     ~Result() override;
 
     /// True if the transform generated the buffer sizes UBO.
-    bool const needs_buffer_sizes;
+    const bool needs_buffer_sizes;
   };
 
  protected:

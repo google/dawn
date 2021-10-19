@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Atomic);
 namespace tint {
 namespace ast {
 
-Atomic::Atomic(ProgramID pid, const Source& src, Type* const subtype)
+Atomic::Atomic(ProgramID pid, const Source& src, const Type* const subtype)
     : Base(pid, src), type(subtype) {}
 
 std::string Atomic::FriendlyName(const SymbolTable& symbols) const {
@@ -34,10 +34,10 @@ Atomic::Atomic(Atomic&&) = default;
 
 Atomic::~Atomic() = default;
 
-Atomic* Atomic::Clone(CloneContext* ctx) const {
+const Atomic* Atomic::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
-  auto* ty = ctx->Clone(const_cast<Type*>(type));
+  auto* ty = ctx->Clone(type);
   return ctx->dst->create<Atomic>(src, ty);
 }
 

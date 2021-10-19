@@ -40,7 +40,7 @@ class Statement : public Castable<Statement, Node> {
 };
 
 /// A list of statements
-using StatementList = std::vector<Statement*>;
+using StatementList = std::vector<const Statement*>;
 
 }  // namespace ast
 }  // namespace tint

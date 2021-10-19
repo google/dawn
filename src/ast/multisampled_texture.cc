@@ -24,7 +24,7 @@ namespace ast {
 MultisampledTexture::MultisampledTexture(ProgramID pid,
                                          const Source& src,
                                          TextureDimension d,
-                                         Type* ty)
+                                         const Type* ty)
     : Base(pid, src, d), type(ty) {
   TINT_ASSERT(AST, type);
 }
@@ -41,7 +41,7 @@ std::string MultisampledTexture::FriendlyName(
   return out.str();
 }
 
-MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
+const MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* ty = ctx->Clone(type);

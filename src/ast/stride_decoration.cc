@@ -32,7 +32,7 @@ std::string StrideDecoration::Name() const {
   return "stride";
 }
 
-StrideDecoration* StrideDecoration::Clone(CloneContext* ctx) const {
+const StrideDecoration* StrideDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<StrideDecoration>(src, stride);

@@ -23,8 +23,8 @@ namespace ast {
 
 ElseStatement::ElseStatement(ProgramID pid,
                              const Source& src,
-                             Expression* cond,
-                             BlockStatement* b)
+                             const Expression* cond,
+                             const BlockStatement* b)
     : Base(pid, src), condition(cond), body(b) {
   TINT_ASSERT(AST, body);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
@@ -35,7 +35,7 @@ ElseStatement::ElseStatement(ElseStatement&&) = default;
 
 ElseStatement::~ElseStatement() = default;
 
-ElseStatement* ElseStatement::Clone(CloneContext* ctx) const {
+const ElseStatement* ElseStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* cond = ctx->Clone(condition);

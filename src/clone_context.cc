@@ -63,13 +63,13 @@ void CloneContext::Clone() {
 ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
   ast::FunctionList out;
   out.reserve(v.size());
-  for (ast::Function* el : v) {
+  for (const ast::Function* el : v) {
     out.Add(Clone(el));
   }
   return out;
 }
 
-tint::Cloneable* CloneContext::CloneCloneable(Cloneable* object) {
+const tint::Cloneable* CloneContext::CloneCloneable(const Cloneable* object) {
   // If the input is nullptr, there's nothing to clone - just return nullptr.
   if (object == nullptr) {
     return nullptr;
@@ -97,7 +97,7 @@ tint::Cloneable* CloneContext::CloneCloneable(Cloneable* object) {
   return object->Clone(this);
 }
 
-void CloneContext::CheckedCastFailure(Cloneable* got,
+void CloneContext::CheckedCastFailure(const Cloneable* got,
                                       const TypeInfo& expected) {
   TINT_ICE(Clone, Diagnostics())
       << "Cloned object was not of the expected type\n"

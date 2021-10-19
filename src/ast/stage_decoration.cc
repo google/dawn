@@ -34,7 +34,7 @@ std::string StageDecoration::Name() const {
   return "stage";
 }
 
-StageDecoration* StageDecoration::Clone(CloneContext* ctx) const {
+const StageDecoration* StageDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<StageDecoration>(src, stage);

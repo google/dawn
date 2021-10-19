@@ -742,7 +742,7 @@ const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n) {
 /// ParameterInfo describes a parameter
 struct ParameterInfo {
   /// The parameter usage (parameter name in definition file)
-  ParameterUsage const usage;
+  const ParameterUsage usage;
 
   /// Pointer to a list of indices that are used to match the parameter type.
   /// The matcher indices index on Matchers::type and / or Matchers::number.
@@ -757,7 +757,7 @@ struct OpenTypeInfo {
   const char* name;
   /// Optional type matcher constraint.
   /// Either an index in Matchers::type, or kNoMatcher
-  MatcherIndex const matcher_index;
+  const MatcherIndex matcher_index;
 };
 
 /// OpenNumberInfo describes an open number
@@ -766,17 +766,17 @@ struct OpenNumberInfo {
   const char* name;
   /// Optional number matcher constraint.
   /// Either an index in Matchers::number, or kNoMatcher
-  MatcherIndex const matcher_index;
+  const MatcherIndex matcher_index;
 };
 
 /// OverloadInfo describes a single function overload
 struct OverloadInfo {
   /// Total number of parameters for the overload
-  uint8_t const num_parameters;
+  const uint8_t num_parameters;
   /// Total number of open types for the overload
-  uint8_t const num_open_types;
+  const uint8_t num_open_types;
   /// Total number of open numbers for the overload
-  uint8_t const num_open_numbers;
+  const uint8_t num_open_numbers;
   /// Pointer to the first open type
   OpenTypeInfo const* const open_types;
   /// Pointer to the first open number
@@ -796,7 +796,7 @@ struct OverloadInfo {
 /// IntrinsicInfo describes an intrinsic function
 struct IntrinsicInfo {
   /// Number of overloads of the intrinsic function
-  uint8_t const num_overloads;
+  const uint8_t num_overloads;
   /// Pointer to the start of the overloads for the function
   OverloadInfo const* const overloads;
 };
@@ -809,7 +809,7 @@ struct IntrinsicPrototype {
   /// Parameter describes a single parameter
   struct Parameter {
     /// Parameter type
-    sem::Type* const type;
+    const sem::Type* const type;
     /// Parameter usage
     ParameterUsage const usage = ParameterUsage::kNone;
   };
@@ -995,8 +995,8 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
     auto* indices = parameter.matcher_indices;
     auto* type = Match(closed, overload, indices).Type(args[p]->UnwrapRef());
     if (type) {
-      parameters.emplace_back(IntrinsicPrototype::Parameter{
-          const_cast<sem::Type*>(type), parameter.usage});
+      parameters.emplace_back(
+          IntrinsicPrototype::Parameter{type, parameter.usage});
       match_score += kScorePerMatchedParam;
     } else {
       overload_matched = false;
@@ -1070,7 +1070,7 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
           ast::StorageClass::kNone, ast::Access::kUndefined, p.usage));
     }
     return builder.create<sem::Intrinsic>(
-        intrinsic.type, const_cast<sem::Type*>(intrinsic.return_type),
+        intrinsic.type, intrinsic.return_type,
         std::move(params), intrinsic.supported_stages, intrinsic.is_deprecated);
   });
 }

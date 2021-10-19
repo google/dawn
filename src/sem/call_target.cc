@@ -22,7 +22,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 namespace tint {
 namespace sem {
 
-CallTarget::CallTarget(sem::Type* return_type, const ParameterList& parameters)
+CallTarget::CallTarget(const sem::Type* return_type,
+                       const ParameterList& parameters)
     : signature_{return_type, parameters} {
   TINT_ASSERT(Semantic, return_type);
 }
@@ -30,7 +31,7 @@ CallTarget::CallTarget(sem::Type* return_type, const ParameterList& parameters)
 CallTarget::CallTarget(const CallTarget&) = default;
 CallTarget::~CallTarget() = default;
 
-CallTargetSignature::CallTargetSignature(sem::Type* ret_ty,
+CallTargetSignature::CallTargetSignature(const sem::Type* ret_ty,
                                          const ParameterList& params)
     : return_type(ret_ty), parameters(params) {}
 CallTargetSignature::CallTargetSignature(const CallTargetSignature&) = default;

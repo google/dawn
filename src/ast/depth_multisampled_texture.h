@@ -45,7 +45,7 @@ class DepthMultisampledTexture
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  DepthMultisampledTexture* Clone(CloneContext* ctx) const override;
+  const DepthMultisampledTexture* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

@@ -45,16 +45,16 @@ class TestHelper : public ProgramBuilder {
   /// @param expr the ast::Expression
   /// @return the ast::Statement of the ast::Expression, or nullptr if the
   /// expression is not owned by a statement.
-  const ast::Statement* StmtOf(ast::Expression* expr) {
+  const ast::Statement* StmtOf(const ast::Expression* expr) {
     auto* sem_stmt = Sem().Get(expr)->Stmt();
     return sem_stmt ? sem_stmt->Declaration() : nullptr;
   }
 
   /// Returns the BlockStatement that holds the given statement.
-  /// @param stmt the ast::Statment
+  /// @param stmt the ast::Statement
   /// @return the ast::BlockStatement that holds the ast::Statement, or nullptr
   /// if the statement is not owned by a BlockStatement.
-  const ast::BlockStatement* BlockOf(ast::Statement* stmt) {
+  const ast::BlockStatement* BlockOf(const ast::Statement* stmt) {
     auto* sem_stmt = Sem().Get(stmt);
     return sem_stmt ? sem_stmt->Block()->Declaration() : nullptr;
   }
@@ -63,7 +63,7 @@ class TestHelper : public ProgramBuilder {
   /// @param expr the ast::Expression
   /// @return the ast::Statement of the ast::Expression, or nullptr if the
   /// expression is not indirectly owned by a BlockStatement.
-  const ast::BlockStatement* BlockOf(ast::Expression* expr) {
+  const ast::BlockStatement* BlockOf(const ast::Expression* expr) {
     auto* sem_stmt = Sem().Get(expr)->Stmt();
     return sem_stmt ? sem_stmt->Block()->Declaration() : nullptr;
   }
@@ -72,7 +72,7 @@ class TestHelper : public ProgramBuilder {
   /// @param expr the identifier expression
   /// @return the resolved sem::Variable of the identifier, or nullptr if
   /// the expression did not resolve to a variable.
-  const sem::Variable* VarOf(ast::Expression* expr) {
+  const sem::Variable* VarOf(const ast::Expression* expr) {
     auto* sem_ident = Sem().Get(expr);
     auto* var_user = sem_ident ? sem_ident->As<sem::VariableUser>() : nullptr;
     return var_user ? var_user->Variable() : nullptr;
@@ -82,8 +82,8 @@ class TestHelper : public ProgramBuilder {
   /// @param var the variable to check
   /// @param expected_users the expected users of the variable
   /// @return true if all users are as expected
-  bool CheckVarUsers(ast::Variable* var,
-                     std::vector<ast::Expression*>&& expected_users) {
+  bool CheckVarUsers(const ast::Variable* var,
+                     std::vector<const ast::Expression*>&& expected_users) {
     auto& var_users = Sem().Get(var)->Users();
     if (var_users.size() != expected_users.size()) {
       return false;
@@ -171,10 +171,10 @@ using alias2 = alias<TO, 2>;
 template <typename TO>
 using alias3 = alias<TO, 3>;
 
-using ast_type_func_ptr = ast::Type* (*)(ProgramBuilder& b);
-using ast_expr_func_ptr = ast::Expression* (*)(ProgramBuilder& b,
-                                               int elem_value);
-using sem_type_func_ptr = sem::Type* (*)(ProgramBuilder& b);
+using ast_type_func_ptr = const ast::Type* (*)(ProgramBuilder& b);
+using ast_expr_func_ptr = const ast::Expression* (*)(ProgramBuilder& b,
+                                                     int elem_value);
+using sem_type_func_ptr = const sem::Type* (*)(ProgramBuilder& b);
 
 template <typename T>
 struct DataType {};
@@ -187,16 +187,16 @@ struct DataType<bool> {
 
   /// @param b the ProgramBuilder
   /// @return a new AST bool type
-  static inline ast::Type* AST(ProgramBuilder& b) { return b.ty.bool_(); }
+  static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.bool_(); }
   /// @param b the ProgramBuilder
   /// @return the semantic bool type
-  static inline sem::Type* Sem(ProgramBuilder& b) {
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
     return b.create<sem::Bool>();
   }
   /// @param b the ProgramBuilder
   /// @param elem_value the b
   /// @return a new AST expression of the bool type
-  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+  static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
     return b.Expr(elem_value == 0);
   }
 };
@@ -209,16 +209,16 @@ struct DataType<i32> {
 
   /// @param b the ProgramBuilder
   /// @return a new AST i32 type
-  static inline ast::Type* AST(ProgramBuilder& b) { return b.ty.i32(); }
+  static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.i32(); }
   /// @param b the ProgramBuilder
   /// @return the semantic i32 type
-  static inline sem::Type* Sem(ProgramBuilder& b) {
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
     return b.create<sem::I32>();
   }
   /// @param b the ProgramBuilder
   /// @param elem_value the value i32 will be initialized with
   /// @return a new AST i32 literal value expression
-  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+  static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
     return b.Expr(static_cast<i32>(elem_value));
   }
 };
@@ -231,16 +231,16 @@ struct DataType<u32> {
 
   /// @param b the ProgramBuilder
   /// @return a new AST u32 type
-  static inline ast::Type* AST(ProgramBuilder& b) { return b.ty.u32(); }
+  static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.u32(); }
   /// @param b the ProgramBuilder
   /// @return the semantic u32 type
-  static inline sem::Type* Sem(ProgramBuilder& b) {
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
     return b.create<sem::U32>();
   }
   /// @param b the ProgramBuilder
   /// @param elem_value the value u32 will be initialized with
   /// @return a new AST u32 literal value expression
-  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+  static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
     return b.Expr(static_cast<u32>(elem_value));
   }
 };
@@ -253,16 +253,16 @@ struct DataType<f32> {
 
   /// @param b the ProgramBuilder
   /// @return a new AST f32 type
-  static inline ast::Type* AST(ProgramBuilder& b) { return b.ty.f32(); }
+  static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.f32(); }
   /// @param b the ProgramBuilder
   /// @return the semantic f32 type
-  static inline sem::Type* Sem(ProgramBuilder& b) {
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
     return b.create<sem::F32>();
   }
   /// @param b the ProgramBuilder
   /// @param elem_value the value f32 will be initialized with
   /// @return a new AST f32 literal value expression
-  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+  static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
     return b.Expr(static_cast<f32>(elem_value));
   }
 };
@@ -275,19 +275,19 @@ struct DataType<vec<N, T>> {
 
   /// @param b the ProgramBuilder
   /// @return a new AST vector type
-  static inline ast::Type* AST(ProgramBuilder& b) {
+  static inline const ast::Type* AST(ProgramBuilder& b) {
     return b.ty.vec(DataType<T>::AST(b), N);
   }
   /// @param b the ProgramBuilder
   /// @return the semantic vector type
-  static inline sem::Type* Sem(ProgramBuilder& b) {
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
     return b.create<sem::Vector>(DataType<T>::Sem(b), N);
   }
   /// @param b the ProgramBuilder
   /// @param elem_value the value each element in the vector will be initialized
   /// with
   /// @return a new AST vector value expression
-  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+  static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
     return b.Construct(AST(b), ExprArgs(b, elem_value));
   }
 
@@ -312,12 +312,12 @@ struct DataType<mat<N, M, T>> {
 
   /// @param b the ProgramBuilder
   /// @return a new AST matrix type
-  static inline ast::Type* AST(ProgramBuilder& b) {
+  static inline const ast::Type* AST(ProgramBuilder& b) {
     return b.ty.mat(DataType<T>::AST(b), N, M);
   }
   /// @param b the ProgramBuilder
   /// @return the semantic matrix type
-  static inline sem::Type* Sem(ProgramBuilder& b) {
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
     auto* column_type = b.create<sem::Vector>(DataType<T>::Sem(b), M);
     return b.create<sem::Matrix>(column_type, N);
   }
@@ -325,7 +325,7 @@ struct DataType<mat<N, M, T>> {
   /// @param elem_value the value each element in the matrix will be initialized
   /// with
   /// @return a new AST matrix value expression
-  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+  static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
     return b.Construct(AST(b), ExprArgs(b, elem_value));
   }
 
@@ -350,7 +350,7 @@ struct DataType<alias<T, ID>> {
 
   /// @param b the ProgramBuilder
   /// @return a new AST alias type
-  static inline ast::Type* AST(ProgramBuilder& b) {
+  static inline const ast::Type* AST(ProgramBuilder& b) {
     auto name = b.Symbols().Register("alias_" + std::to_string(ID));
     if (!b.AST().LookupType(name)) {
       auto* type = DataType<T>::AST(b);
@@ -360,7 +360,7 @@ struct DataType<alias<T, ID>> {
   }
   /// @param b the ProgramBuilder
   /// @return the semantic aliased type
-  static inline sem::Type* Sem(ProgramBuilder& b) {
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
     return DataType<T>::Sem(b);
   }
 
@@ -368,7 +368,7 @@ struct DataType<alias<T, ID>> {
   /// @param elem_value the value nested elements will be initialized with
   /// @return a new AST expression of the alias type
   template <bool IS_COMPOSITE = is_composite>
-  static inline traits::EnableIf<!IS_COMPOSITE, ast::Expression*> Expr(
+  static inline traits::EnableIf<!IS_COMPOSITE, const ast::Expression*> Expr(
       ProgramBuilder& b,
       int elem_value) {
     // Cast
@@ -379,7 +379,7 @@ struct DataType<alias<T, ID>> {
   /// @param elem_value the value nested elements will be initialized with
   /// @return a new AST expression of the alias type
   template <bool IS_COMPOSITE = is_composite>
-  static inline traits::EnableIf<IS_COMPOSITE, ast::Expression*> Expr(
+  static inline traits::EnableIf<IS_COMPOSITE, const ast::Expression*> Expr(
       ProgramBuilder& b,
       int elem_value) {
     // Construct
@@ -395,19 +395,19 @@ struct DataType<array<N, T>> {
 
   /// @param b the ProgramBuilder
   /// @return a new AST array type
-  static inline ast::Type* AST(ProgramBuilder& b) {
+  static inline const ast::Type* AST(ProgramBuilder& b) {
     return b.ty.array(DataType<T>::AST(b), N);
   }
   /// @param b the ProgramBuilder
   /// @return the semantic array type
-  static inline sem::Type* Sem(ProgramBuilder& b) {
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
     return b.create<sem::Array>(DataType<T>::Sem(b), N);
   }
   /// @param b the ProgramBuilder
   /// @param elem_value the value each element in the array will be initialized
   /// with
   /// @return a new AST array value expression
-  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+  static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
     return b.Construct(AST(b), ExprArgs(b, elem_value));
   }
 

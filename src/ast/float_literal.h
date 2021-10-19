@@ -36,10 +36,10 @@ class FloatLiteral : public Castable<FloatLiteral, Literal> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  FloatLiteral* Clone(CloneContext* ctx) const override;
+  const FloatLiteral* Clone(CloneContext* ctx) const override;
 
   /// The float literal value
-  float const value;
+  const float value;
 };
 
 }  // namespace ast

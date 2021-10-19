@@ -35,7 +35,7 @@ BlockStatement::BlockStatement(BlockStatement&&) = default;
 
 BlockStatement::~BlockStatement() = default;
 
-BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
+const BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto stmts = ctx->Clone(statements);

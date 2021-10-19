@@ -64,7 +64,7 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
 
   // Get (or create, on first call) the uniform buffer that will receive the
   // size of each storage buffer in the module.
-  ast::Variable* buffer_size_ubo = nullptr;
+  const ast::Variable* buffer_size_ubo = nullptr;
   auto get_ubo = [&]() {
     if (!buffer_size_ubo) {
       // Emit an array<vec4<u32>, N>, where N is 1/4 number of elements.

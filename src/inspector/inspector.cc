@@ -579,7 +579,7 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
   return total_size;
 }
 
-ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
+const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
   auto* func = program_->AST().Functions().Find(program_->Symbols().Get(name));
   if (!func) {
     diagnostics_.add_error(diag::System::Inspector, name + " was not found!");
@@ -597,7 +597,7 @@ ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
 
 void Inspector::AddEntryPointInOutVariables(
     std::string name,
-    sem::Type* type,
+    const sem::Type* type,
     const ast::DecorationList& decorations,
     std::vector<StageVariable>& variables) const {
   // Skip builtins.
@@ -638,7 +638,7 @@ void Inspector::AddEntryPointInOutVariables(
 }
 
 bool Inspector::ContainsBuiltin(ast::Builtin builtin,
-                                sem::Type* type,
+                                const sem::Type* type,
                                 const ast::DecorationList& decorations) const {
   auto* unwrapped_type = type->UnwrapRef();
 

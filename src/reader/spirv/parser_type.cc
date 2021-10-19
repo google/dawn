@@ -131,23 +131,23 @@ static bool operator==(const StorageTexture& a, const StorageTexture& b) {
   return a.dims == b.dims && a.format == b.format;
 }
 
-ast::Type* Void::Build(ProgramBuilder& b) const {
+const ast::Type* Void::Build(ProgramBuilder& b) const {
   return b.ty.void_();
 }
 
-ast::Type* Bool::Build(ProgramBuilder& b) const {
+const ast::Type* Bool::Build(ProgramBuilder& b) const {
   return b.ty.bool_();
 }
 
-ast::Type* U32::Build(ProgramBuilder& b) const {
+const ast::Type* U32::Build(ProgramBuilder& b) const {
   return b.ty.u32();
 }
 
-ast::Type* F32::Build(ProgramBuilder& b) const {
+const ast::Type* F32::Build(ProgramBuilder& b) const {
   return b.ty.f32();
 }
 
-ast::Type* I32::Build(ProgramBuilder& b) const {
+const ast::Type* I32::Build(ProgramBuilder& b) const {
   return b.ty.i32();
 }
 
@@ -155,7 +155,7 @@ Pointer::Pointer(const Type* t, ast::StorageClass s)
     : type(t), storage_class(s) {}
 Pointer::Pointer(const Pointer&) = default;
 
-ast::Type* Pointer::Build(ProgramBuilder& b) const {
+const ast::Type* Pointer::Build(ProgramBuilder& b) const {
   return b.ty.pointer(type->Build(b), storage_class);
 }
 
@@ -163,14 +163,14 @@ Reference::Reference(const Type* t, ast::StorageClass s)
     : type(t), storage_class(s) {}
 Reference::Reference(const Reference&) = default;
 
-ast::Type* Reference::Build(ProgramBuilder& b) const {
+const ast::Type* Reference::Build(ProgramBuilder& b) const {
   return type->Build(b);
 }
 
 Vector::Vector(const Type* t, uint32_t s) : type(t), size(s) {}
 Vector::Vector(const Vector&) = default;
 
-ast::Type* Vector::Build(ProgramBuilder& b) const {
+const ast::Type* Vector::Build(ProgramBuilder& b) const {
   return b.ty.vec(type->Build(b), size);
 }
 
@@ -178,7 +178,7 @@ Matrix::Matrix(const Type* t, uint32_t c, uint32_t r)
     : type(t), columns(c), rows(r) {}
 Matrix::Matrix(const Matrix&) = default;
 
-ast::Type* Matrix::Build(ProgramBuilder& b) const {
+const ast::Type* Matrix::Build(ProgramBuilder& b) const {
   return b.ty.mat(type->Build(b), columns, rows);
 }
 
@@ -186,7 +186,7 @@ Array::Array(const Type* t, uint32_t sz, uint32_t st)
     : type(t), size(sz), stride(st) {}
 Array::Array(const Array&) = default;
 
-ast::Type* Array::Build(ProgramBuilder& b) const {
+const ast::Type* Array::Build(ProgramBuilder& b) const {
   if (size > 0) {
     return b.ty.array(type->Build(b), size, stride);
   } else {
@@ -197,7 +197,7 @@ ast::Type* Array::Build(ProgramBuilder& b) const {
 Sampler::Sampler(ast::SamplerKind k) : kind(k) {}
 Sampler::Sampler(const Sampler&) = default;
 
-ast::Type* Sampler::Build(ProgramBuilder& b) const {
+const ast::Type* Sampler::Build(ProgramBuilder& b) const {
   return b.ty.sampler(kind);
 }
 
@@ -207,7 +207,7 @@ Texture::Texture(const Texture&) = default;
 DepthTexture::DepthTexture(ast::TextureDimension d) : Base(d) {}
 DepthTexture::DepthTexture(const DepthTexture&) = default;
 
-ast::Type* DepthTexture::Build(ProgramBuilder& b) const {
+const ast::Type* DepthTexture::Build(ProgramBuilder& b) const {
   return b.ty.depth_texture(dims);
 }
 
@@ -216,7 +216,7 @@ DepthMultisampledTexture::DepthMultisampledTexture(ast::TextureDimension d)
 DepthMultisampledTexture::DepthMultisampledTexture(
     const DepthMultisampledTexture&) = default;
 
-ast::Type* DepthMultisampledTexture::Build(ProgramBuilder& b) const {
+const ast::Type* DepthMultisampledTexture::Build(ProgramBuilder& b) const {
   return b.ty.depth_multisampled_texture(dims);
 }
 
@@ -224,7 +224,7 @@ MultisampledTexture::MultisampledTexture(ast::TextureDimension d, const Type* t)
     : Base(d), type(t) {}
 MultisampledTexture::MultisampledTexture(const MultisampledTexture&) = default;
 
-ast::Type* MultisampledTexture::Build(ProgramBuilder& b) const {
+const ast::Type* MultisampledTexture::Build(ProgramBuilder& b) const {
   return b.ty.multisampled_texture(dims, type->Build(b));
 }
 
@@ -232,7 +232,7 @@ SampledTexture::SampledTexture(ast::TextureDimension d, const Type* t)
     : Base(d), type(t) {}
 SampledTexture::SampledTexture(const SampledTexture&) = default;
 
-ast::Type* SampledTexture::Build(ProgramBuilder& b) const {
+const ast::Type* SampledTexture::Build(ProgramBuilder& b) const {
   return b.ty.sampled_texture(dims, type->Build(b));
 }
 
@@ -242,7 +242,7 @@ StorageTexture::StorageTexture(ast::TextureDimension d,
     : Base(d), format(f), access(a) {}
 StorageTexture::StorageTexture(const StorageTexture&) = default;
 
-ast::Type* StorageTexture::Build(ProgramBuilder& b) const {
+const ast::Type* StorageTexture::Build(ProgramBuilder& b) const {
   return b.ty.storage_texture(dims, format, access);
 }
 
@@ -253,7 +253,7 @@ Named::~Named() = default;
 Alias::Alias(Symbol n, const Type* ty) : Base(n), type(ty) {}
 Alias::Alias(const Alias&) = default;
 
-ast::Type* Alias::Build(ProgramBuilder& b) const {
+const ast::Type* Alias::Build(ProgramBuilder& b) const {
   return b.ty.type_name(name);
 }
 
@@ -261,7 +261,7 @@ Struct::Struct(Symbol n, TypeList m) : Base(n), members(std::move(m)) {}
 Struct::Struct(const Struct&) = default;
 Struct::~Struct() = default;
 
-ast::Type* Struct::Build(ProgramBuilder& b) const {
+const ast::Type* Struct::Build(ProgramBuilder& b) const {
   return b.ty.type_name(name);
 }
 

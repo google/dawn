@@ -40,7 +40,7 @@ class StructBlockDecoration
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  StructBlockDecoration* Clone(CloneContext* ctx) const override;
+  const StructBlockDecoration* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace ast

@@ -23,7 +23,7 @@ namespace ast {
 
 VariableDeclStatement::VariableDeclStatement(ProgramID pid,
                                              const Source& src,
-                                             Variable* var)
+                                             const Variable* var)
     : Base(pid, src), variable(var) {
   TINT_ASSERT(AST, variable);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, variable, program_id);
@@ -33,7 +33,8 @@ VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 
 VariableDeclStatement::~VariableDeclStatement() = default;
 
-VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
+const VariableDeclStatement* VariableDeclStatement::Clone(
+    CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   auto* var = ctx->Clone(variable);

@@ -30,7 +30,7 @@ std::string InvariantDecoration::Name() const {
   return "invariant";
 }
 
-InvariantDecoration* InvariantDecoration::Clone(CloneContext* ctx) const {
+const InvariantDecoration* InvariantDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<InvariantDecoration>(src);

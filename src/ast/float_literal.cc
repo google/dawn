@@ -28,7 +28,7 @@ FloatLiteral::FloatLiteral(ProgramID pid, const Source& src, float val)
 
 FloatLiteral::~FloatLiteral() = default;
 
-FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
+const FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
   return ctx->dst->create<FloatLiteral>(src, value);

@@ -35,7 +35,7 @@ std::string StructMemberSizeDecoration::Name() const {
   return "size";
 }
 
-StructMemberSizeDecoration* StructMemberSizeDecoration::Clone(
+const StructMemberSizeDecoration* StructMemberSizeDecoration::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
