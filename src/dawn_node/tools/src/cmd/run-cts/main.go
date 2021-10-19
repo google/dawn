@@ -17,6 +17,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -150,21 +151,41 @@ func run() error {
 		r.log = newLogger(writer)
 	}
 
+	cache := cache{}
+	cachePath := dawnNode + ".runcts.cache"
+	if err := cache.load(cachePath); err != nil && verbose {
+		fmt.Println("failed to load cache from", cachePath, err)
+	}
+	defer cache.save(cachePath)
+
+	// Scan the CTS source to determine the most recent change to the CTS source
+	mostRecentSourceChange, err := r.scanSourceTimestamps(verbose)
+	if err != nil {
+		return fmt.Errorf("failed to scan source files for modified timestamps: %w", err)
+	}
+
+	ctsNeedsRebuild := mostRecentSourceChange.After(cache.BuildTimestamp)
 	if build {
-		// Attempt to build the CTS (instead of using the `setup-ts-in-node` transpiler)
+		if verbose {
+			fmt.Println("CTS needs rebuild:", ctsNeedsRebuild)
+		}
+
 		if npx != "" {
-			if err := r.buildCTS(); err != nil {
-				return fmt.Errorf("failed to build CTS: %w", err)
-			} else {
-				r.evalScript = `require('./out-node/common/runtime/cmdline.js');`
+			if ctsNeedsRebuild {
+				if err := r.buildCTS(verbose); err != nil {
+					return fmt.Errorf("failed to build CTS: %w", err)
+				}
+				cache.BuildTimestamp = mostRecentSourceChange
 			}
+			// Use the prebuilt CTS (instead of using the `setup-ts-in-node` transpiler)
+			r.evalScript = `require('./out-node/common/runtime/cmdline.js');`
 		} else {
 			fmt.Println("npx not found on PATH. Using runtime TypeScript transpilation (slow)")
 		}
 	}
 
 	// Find all the test cases that match the given queries.
-	if err := r.gatherTestCases(queries); err != nil {
+	if err := r.gatherTestCases(queries, verbose); err != nil {
 		return fmt.Errorf("failed to gather test cases: %w", err)
 	}
 
@@ -201,6 +222,31 @@ func (l *logger) logResults(res result) {
 	}
 }
 
+// Cache holds cached information between runs to optimize runs
+type cache struct {
+	BuildTimestamp time.Time
+}
+
+// load loads the cache information from the JSON file at path
+func (c *cache) load(path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return json.NewDecoder(f).Decode(c)
+}
+
+// save saves the cache information to the JSON file at path
+func (c *cache) save(path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return json.NewEncoder(f).Encode(c)
+}
+
 type runner struct {
 	numRunners               int
 	verbose                  bool
@@ -210,10 +256,47 @@ type runner struct {
 	log                      logger
 }
 
+// scanSourceTimestamps scans all the .js and .ts files in all subdirectories of
+// r.cts, and returns the file with the most recent timestamp.
+func (r *runner) scanSourceTimestamps(verbose bool) (time.Time, error) {
+	if verbose {
+		start := time.Now()
+		fmt.Println("Scanning .js / .ts files for changes...")
+		defer func() {
+			fmt.Println("completed in", time.Since(start))
+		}()
+	}
+
+	dir := filepath.Join(r.cts, "src")
+
+	mostRecentChange := time.Time{}
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		switch filepath.Ext(path) {
+		case ".ts", ".js":
+			if info.ModTime().After(mostRecentChange) {
+				mostRecentChange = info.ModTime()
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return time.Time{}, err
+	}
+	return mostRecentChange, nil
+}
+
 // buildCTS calls `npx grunt run:build-out-node` in the CTS directory to compile
 // the TypeScript files down to JavaScript. Doing this once ahead of time can be
 // much faster than dynamically transpiling when there are many tests to run.
-func (r *runner) buildCTS() error {
+func (r *runner) buildCTS(verbose bool) error {
+	if verbose {
+		start := time.Now()
+		fmt.Println("Building CTS...")
+		defer func() {
+			fmt.Println("completed in", time.Since(start))
+		}()
+	}
+
 	cmd := exec.Command(r.npx, "grunt", "run:build-out-node")
 	cmd.Dir = r.cts
 	out, err := cmd.CombinedOutput()
@@ -225,7 +308,15 @@ func (r *runner) buildCTS() error {
 
 // gatherTestCases() queries the CTS for all test cases that match the given
 // query. On success, gatherTestCases() populates r.testcases.
-func (r *runner) gatherTestCases(queries []string) error {
+func (r *runner) gatherTestCases(queries []string, verbose bool) error {
+	if verbose {
+		start := time.Now()
+		fmt.Println("Gathering test cases...")
+		defer func() {
+			fmt.Println("completed in", time.Since(start))
+		}()
+	}
+
 	args := append([]string{
 		"-e", r.evalScript,
 		"--", // Start of arguments
