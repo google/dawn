@@ -263,8 +263,6 @@ namespace dawn_native { namespace metal {
             NSString* osVersion = [[NSProcessInfo processInfo] operatingSystemVersionString];
             mDriverDescription =
                 "Metal driver on " + std::string(systemName) + [osVersion UTF8String];
-
-            InitializeSupportedFeatures();
         }
 
         // AdapterBase Implementation
@@ -278,7 +276,11 @@ namespace dawn_native { namespace metal {
             return Device::Create(this, mDevice, descriptor);
         }
 
-        void InitializeSupportedFeatures() {
+        MaybeError InitializeImpl() override {
+            return {};
+        }
+
+        MaybeError InitializeSupportedFeaturesImpl() override {
 #if defined(DAWN_PLATFORM_MACOS)
             if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
                 mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
@@ -315,6 +317,13 @@ namespace dawn_native { namespace metal {
             if (@available(macOS 10.11, iOS 11.0, *)) {
                 mSupportedFeatures.EnableFeature(Feature::DepthClamping);
             }
+
+            return {};
+        }
+
+        MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override {
+            GetDefaultLimits(&limits->v1);
+            return {};
         }
 
         NSPRef<id<MTLDevice>> mDevice;
@@ -339,7 +348,10 @@ namespace dawn_native { namespace metal {
             NSRef<NSArray<id<MTLDevice>>> devices = AcquireNSRef(MTLCopyAllDevices());
 
             for (id<MTLDevice> device in devices.Get()) {
-                adapters.push_back(std::make_unique<Adapter>(GetInstance(), device));
+                std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(GetInstance(), device);
+                if (!GetInstance()->ConsumedError(adapter->Initialize())) {
+                    adapters.push_back(std::move(adapter));
+                }
             }
         }
 #endif
@@ -348,8 +360,10 @@ namespace dawn_native { namespace metal {
         if (@available(iOS 8.0, *)) {
             supportedVersion = YES;
             // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
-            adapters.push_back(
-                std::make_unique<Adapter>(GetInstance(), MTLCreateSystemDefaultDevice()));
+            std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(GetInstance(), MTLCreateSystemDefaultDevice());
+            if (!GetInstance()->ConsumedError(adapter->Initialize())) {
+                adapters.push_back(std::move(adapter));
+            }
         }
 #endif
         if (!supportedVersion) {

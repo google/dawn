@@ -14,14 +14,49 @@
 
 #include "dawn_native/Adapter.h"
 
+#include "common/Constants.h"
 #include "dawn_native/Instance.h"
 
 namespace dawn_native {
 
     AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
         : mInstance(instance), mBackend(backend) {
-        GetDefaultLimits(&mLimits.v1);
         mSupportedFeatures.EnableFeature(Feature::DawnInternalUsages);
+    }
+
+    MaybeError AdapterBase::Initialize() {
+        DAWN_TRY(InitializeImpl());
+        DAWN_TRY(InitializeSupportedFeaturesImpl());
+        DAWN_TRY(InitializeSupportedLimitsImpl(&mLimits));
+
+        // Enforce internal Dawn constants.
+        mLimits.v1.maxVertexBufferArrayStride =
+            std::min(mLimits.v1.maxVertexBufferArrayStride, kMaxVertexBufferArrayStride);
+        mLimits.v1.maxBindGroups = std::min(mLimits.v1.maxBindGroups, kMaxBindGroups);
+        mLimits.v1.maxVertexAttributes =
+            std::min(mLimits.v1.maxVertexAttributes, uint32_t(kMaxVertexAttributes));
+        mLimits.v1.maxVertexBuffers =
+            std::min(mLimits.v1.maxVertexBuffers, uint32_t(kMaxVertexBuffers));
+        mLimits.v1.maxInterStageShaderComponents =
+            std::min(mLimits.v1.maxInterStageShaderComponents, kMaxInterStageShaderComponents);
+        mLimits.v1.maxSampledTexturesPerShaderStage = std::min(
+            mLimits.v1.maxSampledTexturesPerShaderStage, kMaxSampledTexturesPerShaderStage);
+        mLimits.v1.maxSamplersPerShaderStage =
+            std::min(mLimits.v1.maxSamplersPerShaderStage, kMaxSamplersPerShaderStage);
+        mLimits.v1.maxStorageBuffersPerShaderStage =
+            std::min(mLimits.v1.maxStorageBuffersPerShaderStage, kMaxStorageBuffersPerShaderStage);
+        mLimits.v1.maxStorageTexturesPerShaderStage = std::min(
+            mLimits.v1.maxStorageTexturesPerShaderStage, kMaxStorageTexturesPerShaderStage);
+        mLimits.v1.maxUniformBuffersPerShaderStage =
+            std::min(mLimits.v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
+        mLimits.v1.maxDynamicUniformBuffersPerPipelineLayout =
+            std::min(mLimits.v1.maxDynamicUniformBuffersPerPipelineLayout,
+                     kMaxDynamicUniformBuffersPerPipelineLayout);
+        mLimits.v1.maxDynamicStorageBuffersPerPipelineLayout =
+            std::min(mLimits.v1.maxDynamicStorageBuffersPerPipelineLayout,
+                     kMaxDynamicStorageBuffersPerPipelineLayout);
+
+        return {};
     }
 
     wgpu::BackendType AdapterBase::GetBackendType() const {

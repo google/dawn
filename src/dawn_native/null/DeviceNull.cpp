@@ -27,9 +27,8 @@ namespace dawn_native { namespace null {
     Adapter::Adapter(InstanceBase* instance) : AdapterBase(instance, wgpu::BackendType::Null) {
         mPCIInfo.name = "Null backend";
         mAdapterType = wgpu::AdapterType::CPU;
-
-        // Enable all features by default for the convenience of tests.
-        mSupportedFeatures.featuresBitSet.set();
+        MaybeError err = Initialize();
+        ASSERT(err.IsSuccess());
     }
 
     Adapter::~Adapter() = default;
@@ -41,6 +40,21 @@ namespace dawn_native { namespace null {
     // Used for the tests that intend to use an adapter without all features enabled.
     void Adapter::SetSupportedFeatures(const std::vector<const char*>& requiredFeatures) {
         mSupportedFeatures = GetInstance()->FeatureNamesToFeaturesSet(requiredFeatures);
+    }
+
+    MaybeError Adapter::InitializeImpl() {
+        return {};
+    }
+
+    MaybeError Adapter::InitializeSupportedFeaturesImpl() {
+        // Enable all features by default for the convenience of tests.
+        mSupportedFeatures.featuresBitSet.set();
+        return {};
+    }
+
+    MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
+        GetDefaultLimits(&limits->v1);
+        return {};
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
@@ -56,7 +70,8 @@ namespace dawn_native { namespace null {
             // There is always a single Null adapter because it is purely CPU based and doesn't
             // depend on the system.
             std::vector<std::unique_ptr<AdapterBase>> adapters;
-            adapters.push_back(std::make_unique<Adapter>(GetInstance()));
+            std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(GetInstance());
+            adapters.push_back(std::move(adapter));
             return adapters;
         }
     };

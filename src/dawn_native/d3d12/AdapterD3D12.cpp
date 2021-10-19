@@ -61,7 +61,7 @@ namespace dawn_native { namespace d3d12 {
         return mDriverVersion;
     }
 
-    MaybeError Adapter::Initialize() {
+    MaybeError Adapter::InitializeImpl() {
         // D3D12 cannot check for feature support without a device.
         // Create the device to populate the adapter properties then reuse it when needed for actual
         // rendering.
@@ -104,8 +104,6 @@ namespace dawn_native { namespace d3d12 {
             mDriverDescription = o.str();
         }
 
-        InitializeSupportedFeatures();
-
         return {};
     }
 
@@ -130,13 +128,19 @@ namespace dawn_native { namespace d3d12 {
         return true;
     }
 
-    void Adapter::InitializeSupportedFeatures() {
+    MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         if (AreTimestampQueriesSupported()) {
             mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
         }
         mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
         mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);
         mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
+        return {};
+    }
+
+    MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
+        GetDefaultLimits(&limits->v1);
+        return {};
     }
 
     MaybeError Adapter::InitializeDebugLayerFilters() {

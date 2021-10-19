@@ -123,9 +123,21 @@ namespace dawn_native { namespace opengl {
             : AdapterBase(instance, backendType) {
         }
 
-        MaybeError Initialize(const AdapterDiscoveryOptions* options) {
+        MaybeError InitializeGLFunctions(void* (*getProc)(const char*)) {
             // Use getProc to populate the dispatch table
-            DAWN_TRY(mFunctions.Initialize(options->getProc));
+            return mFunctions.Initialize(getProc);
+        }
+
+        ~Adapter() override = default;
+
+        // AdapterBase Implementation
+        bool SupportsExternalImages() const override {
+            // Via dawn_native::opengl::WrapExternalEGLImage
+            return GetBackendType() == wgpu::BackendType::OpenGLES;
+        }
+
+      private:
+        MaybeError InitializeImpl() override {
             if (mFunctions.GetVersion().IsES()) {
                 ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);
             } else {
@@ -187,29 +199,10 @@ namespace dawn_native { namespace opengl {
                 mAdapterType = wgpu::AdapterType::CPU;
             }
 
-            InitializeSupportedFeatures();
-
             return {};
         }
 
-        ~Adapter() override = default;
-
-        // AdapterBase Implementation
-        bool SupportsExternalImages() const override {
-            // Via dawn_native::opengl::WrapExternalEGLImage
-            return GetBackendType() == wgpu::BackendType::OpenGLES;
-        }
-
-      private:
-        OpenGLFunctions mFunctions;
-
-        ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
-            // There is no limit on the number of devices created from this adapter because they can
-            // all share the same backing OpenGL context.
-            return Device::Create(this, descriptor, mFunctions);
-        }
-
-        void InitializeSupportedFeatures() {
+        MaybeError InitializeSupportedFeaturesImpl() override {
             // TextureCompressionBC
             {
                 // BC1, BC2 and BC3 are not supported in OpenGL or OpenGL ES core features.
@@ -252,7 +245,22 @@ namespace dawn_native { namespace opengl {
                     mSupportedFeatures.EnableFeature(dawn_native::Feature::TextureCompressionBC);
                 }
             }
+
+            return {};
         }
+
+        MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override {
+            GetDefaultLimits(&limits->v1);
+            return {};
+        }
+
+        ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
+            // There is no limit on the number of devices created from this adapter because they can
+            // all share the same backing OpenGL context.
+            return Device::Create(this, descriptor, mFunctions);
+        }
+
+        OpenGLFunctions mFunctions;
     };
 
     // Implementation of the OpenGL backend's BackendConnection
@@ -284,7 +292,8 @@ namespace dawn_native { namespace opengl {
 
         std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(
             GetInstance(), static_cast<wgpu::BackendType>(optionsBase->backendType));
-        DAWN_TRY(adapter->Initialize(options));
+        DAWN_TRY(adapter->InitializeGLFunctions(options->getProc));
+        DAWN_TRY(adapter->Initialize());
 
         mCreatedAdapter = true;
         std::vector<std::unique_ptr<AdapterBase>> adapters;

@@ -39,15 +39,16 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12Device> GetDevice() const;
         const gpu_info::D3DDriverVersion& GetDriverVersion() const;
 
-        MaybeError Initialize();
-
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
         MaybeError ResetInternalDeviceForTestingImpl() override;
 
         bool AreTimestampQueriesSupported() const;
 
-        void InitializeSupportedFeatures();
+        MaybeError InitializeImpl() override;
+        MaybeError InitializeSupportedFeaturesImpl() override;
+        MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
+
         MaybeError InitializeDebugLayerFilters();
         void CleanUpDebugLayerFilters();
 

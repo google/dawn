@@ -177,6 +177,10 @@ namespace dawn_native { namespace null {
         void SetSupportedFeatures(const std::vector<const char*>& requiredFeatures);
 
       private:
+        MaybeError InitializeImpl() override;
+        MaybeError InitializeSupportedFeaturesImpl() override;
+        MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
+
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
     };
 

@@ -163,7 +163,7 @@ namespace dawn_native { namespace d3d12 {
             ResultOrError<std::unique_ptr<AdapterBase>> adapter =
                 CreateAdapterFromIDXGIAdapter(this, dxgiAdapter);
             if (adapter.IsError()) {
-                adapter.AcquireError();
+                GetInstance()->ConsumedError(adapter.AcquireError());
                 continue;
             }
 
