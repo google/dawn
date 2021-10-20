@@ -34,9 +34,9 @@ void GenerateWgslOptions(DataBuilder* b, writer::wgsl::Options* options);
 void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options);
 void GenerateMslOptions(DataBuilder* b, writer::msl::Options* options);
 
-enum class InputFormat { kWGSL, kSpv, kNone };
+enum class InputFormat { kWGSL, kSpv };
 
-enum class OutputFormat { kWGSL, kSpv, kHLSL, kMSL, kNone };
+enum class OutputFormat { kWGSL, kSpv, kHLSL, kMSL };
 
 class CommonFuzzer {
  public:

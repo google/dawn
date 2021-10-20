@@ -87,17 +87,6 @@ if (build_with_chromium) {
     ]
   }
 
-  if (tint_build_wgsl_reader) {
-    fuzzer_test("tint_wgsl_reader_fuzzer") {
-      sources = [ "tint_wgsl_reader_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
-      dict = "dictionary.txt"
-      libfuzzer_options = tint_fuzzer_common_libfuzzer_options
-      seed_corpus = fuzzer_corpus_wgsl_dir
-      seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
-    }
-  }
-
   if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
     fuzzer_test("tint_ast_clone_fuzzer") {
       sources = [ "tint_ast_clone_fuzzer.cc" ]
@@ -300,9 +289,6 @@ if (build_with_chromium) {
     testonly = true
     deps = []
 
-    if (tint_build_wgsl_reader) {
-      deps += [ ":tint_wgsl_reader_fuzzer" ]
-    }
     if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
       deps += [
         ":tint_ast_clone_fuzzer",

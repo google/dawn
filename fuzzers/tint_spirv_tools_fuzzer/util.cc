@@ -100,9 +100,6 @@ void LogWgslError(const std::string& message,
     case OutputFormat::kWGSL:
       error_type = "WGSL -> WGSL";
       break;
-    default:
-      assert(false && "All output formats should've been handled");
-      break;
   }
   auto error_path = error_dir.empty() ? error_dir : error_dir + "/wgsl/";
   LogError(wgsl_count++, error_type, message,

@@ -154,12 +154,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       break;
     }
 #endif  // TINT_BUILD_SPV_READER
-    default:
-      return 0;
-  }
-
-  if (output_ == OutputFormat::kNone) {
-    return 0;
   }
 
   if (!program.IsValid()) {
@@ -323,8 +317,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif  // TINT_BUILD_MSL_WRITER
       break;
     }
-    case OutputFormat::kNone:
-      break;
   }
 
   return 0;
