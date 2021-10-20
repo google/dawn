@@ -23,7 +23,7 @@ namespace dawn_native {
     MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                                  const ComputePipelineDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            return DAWN_FORMAT_VALIDATION_ERROR("nextInChain must be nullptr.");
         }
 
         if (descriptor->layout != nullptr) {

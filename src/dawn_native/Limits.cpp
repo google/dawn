@@ -98,9 +98,9 @@ namespace dawn_native {
 
             template <typename T>
             static MaybeError Validate(T supported, T required) {
-                if (IsBetter(required, supported)) {
-                    return DAWN_VALIDATION_ERROR("requiredLimit lower than supported limit");
-                }
+                DAWN_INVALID_IF(IsBetter(required, supported),
+                                "Required limit (%u) is lower than the supported limit (%u).",
+                                required, supported);
                 return {};
             }
         };
@@ -114,9 +114,9 @@ namespace dawn_native {
 
             template <typename T>
             static MaybeError Validate(T supported, T required) {
-                if (IsBetter(required, supported)) {
-                    return DAWN_VALIDATION_ERROR("requiredLimit greater than supported limit");
-                }
+                DAWN_INVALID_IF(IsBetter(required, supported),
+                                "Required limit (%u) is greater than the supported limit (%u).",
+                                required, supported);
                 return {};
             }
         };
@@ -163,10 +163,11 @@ namespace dawn_native {
     }
 
     MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits) {
-#define X(Better, limitName, ...)                                                               \
-    if (!IsLimitUndefined(requiredLimits.limitName)) {                                          \
-        DAWN_TRY(CheckLimit<LimitBetterDirection::Better>::Validate(supportedLimits.limitName,  \
-                                                                    requiredLimits.limitName)); \
+#define X(Better, limitName, ...)                                                  \
+    if (!IsLimitUndefined(requiredLimits.limitName)) {                             \
+        DAWN_TRY_CONTEXT(CheckLimit<LimitBetterDirection::Better>::Validate(       \
+                             supportedLimits.limitName, requiredLimits.limitName), \
+                         "validating " #limitName);                                \
     }
         LIMITS(X)
 #undef X

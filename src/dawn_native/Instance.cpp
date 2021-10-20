@@ -185,9 +185,7 @@ namespace dawn_native {
             }
         }
 
-        if (!foundBackend) {
-            return DAWN_VALIDATION_ERROR("Backend isn't present.");
-        }
+        DAWN_INVALID_IF(!foundBackend, "No matching backend found.");
         return {};
     }
 

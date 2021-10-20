@@ -30,7 +30,7 @@ namespace dawn_native {
 
     ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> BackendConnection::DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* options) {
-        return DAWN_VALIDATION_ERROR("DiscoverAdapters not implemented for this backend.");
+        return DAWN_FORMAT_VALIDATION_ERROR("DiscoverAdapters not implemented for this backend.");
     }
 
 }  // namespace dawn_native

@@ -36,10 +36,13 @@ namespace dawn_native {
         MaybeError ValidateBufferBinding(const DeviceBase* device,
                                          const BindGroupEntry& entry,
                                          const BindingInfo& bindingInfo) {
-            if (entry.buffer == nullptr || entry.sampler != nullptr ||
-                entry.textureView != nullptr || entry.nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("Expected buffer binding");
-            }
+            DAWN_INVALID_IF(entry.buffer == nullptr, "Binding entry buffer not set.");
+
+            DAWN_INVALID_IF(entry.sampler != nullptr || entry.textureView != nullptr,
+                            "Expected only buffer to be set for binding entry.");
+
+            DAWN_INVALID_IF(entry.nextInChain != nullptr, "nextInChain must be nullptr.");
+
             DAWN_TRY(device->ValidateObject(entry.buffer));
 
             ASSERT(bindingInfo.bindingType == BindingInfoType::Buffer);
@@ -116,10 +119,13 @@ namespace dawn_native {
         MaybeError ValidateTextureBinding(DeviceBase* device,
                                           const BindGroupEntry& entry,
                                           const BindingInfo& bindingInfo) {
-            if (entry.textureView == nullptr || entry.sampler != nullptr ||
-                entry.buffer != nullptr || entry.nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("Expected texture binding");
-            }
+            DAWN_INVALID_IF(entry.textureView == nullptr, "Binding entry textureView not set.");
+
+            DAWN_INVALID_IF(entry.sampler != nullptr || entry.buffer != nullptr,
+                            "Expected only textureView to be set for binding entry.");
+
+            DAWN_INVALID_IF(entry.nextInChain != nullptr, "nextInChain must be nullptr.");
+
             DAWN_TRY(device->ValidateObject(entry.textureView));
 
             TextureViewBase* view = entry.textureView;
@@ -189,10 +195,13 @@ namespace dawn_native {
         MaybeError ValidateSamplerBinding(const DeviceBase* device,
                                           const BindGroupEntry& entry,
                                           const BindingInfo& bindingInfo) {
-            if (entry.sampler == nullptr || entry.textureView != nullptr ||
-                entry.buffer != nullptr || entry.nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("Expected sampler binding");
-            }
+            DAWN_INVALID_IF(entry.sampler == nullptr, "Binding entry sampler not set.");
+
+            DAWN_INVALID_IF(entry.textureView != nullptr || entry.buffer != nullptr,
+                            "Expected only sampler to be set for binding entry.");
+
+            DAWN_INVALID_IF(entry.nextInChain != nullptr, "nextInChain must be nullptr.");
+
             DAWN_TRY(device->ValidateObject(entry.sampler));
 
             ASSERT(bindingInfo.bindingType == BindingInfoType::Sampler);
@@ -233,10 +242,12 @@ namespace dawn_native {
             const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
             FindInChain(entry.nextInChain, &externalTextureBindingEntry);
 
-            if (entry.sampler != nullptr || entry.textureView != nullptr ||
-                entry.buffer != nullptr || externalTextureBindingEntry == nullptr) {
-                return DAWN_VALIDATION_ERROR("Expected external texture binding");
-            }
+            DAWN_INVALID_IF(externalTextureBindingEntry == nullptr,
+                            "Binding entry external texture not set.");
+
+            DAWN_INVALID_IF(
+                entry.sampler != nullptr || entry.textureView != nullptr || entry.buffer != nullptr,
+                "Expected only external texture to be set for binding entry.");
 
             DAWN_TRY(ValidateSingleSType(externalTextureBindingEntry->nextInChain,
                                          wgpu::SType::ExternalTextureBindingEntry));
@@ -250,9 +261,7 @@ namespace dawn_native {
 
     MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
                                            const BindGroupDescriptor* descriptor) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-        }
+        DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
         DAWN_TRY(device->ValidateObject(descriptor->layout));
 

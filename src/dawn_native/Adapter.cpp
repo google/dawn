@@ -144,8 +144,8 @@ namespace dawn_native {
 
         if (err.IsError()) {
             std::unique_ptr<ErrorData> errorData = err.AcquireError();
-            callback(WGPURequestDeviceStatus_Error, device, errorData->GetMessage().c_str(),
-                     userdata);
+            callback(WGPURequestDeviceStatus_Error, device,
+                     errorData->GetFormattedMessage().c_str(), userdata);
             return;
         }
         WGPURequestDeviceStatus status =
@@ -166,9 +166,11 @@ namespace dawn_native {
         }
 
         if (descriptor != nullptr && descriptor->requiredLimits != nullptr) {
-            DAWN_TRY(ValidateLimits(
-                mUseTieredLimits ? ApplyLimitTiers(mLimits.v1) : mLimits.v1,
-                reinterpret_cast<const RequiredLimits*>(descriptor->requiredLimits)->limits));
+            DAWN_TRY_CONTEXT(
+                ValidateLimits(
+                    mUseTieredLimits ? ApplyLimitTiers(mLimits.v1) : mLimits.v1,
+                    reinterpret_cast<const RequiredLimits*>(descriptor->requiredLimits)->limits),
+                "validating required limits");
 
             DAWN_INVALID_IF(descriptor->requiredLimits->nextInChain != nullptr,
                             "nextInChain is not nullptr.");

@@ -59,9 +59,7 @@ namespace dawn_native {
     MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {
         ASSERT(!IsError());
 
-        if (mDestroyed) {
-            return DAWN_VALIDATION_ERROR("Command buffer reused in submit");
-        }
+        DAWN_INVALID_IF(mDestroyed, "%s cannot be submitted more than once.", this);
         return {};
     }
 

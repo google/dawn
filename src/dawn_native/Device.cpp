@@ -507,10 +507,8 @@ namespace dawn_native {
     }
 
     MaybeError DeviceBase::ValidateIsAlive() const {
-        if (DAWN_LIKELY(mState == State::Alive)) {
-            return {};
-        }
-        return DAWN_VALIDATION_ERROR("Device is lost");
+        DAWN_INVALID_IF(mState != State::Alive, "%s is lost.", this);
+        return {};
     }
 
     void DeviceBase::APILoseForTesting() {
@@ -615,14 +613,10 @@ namespace dawn_native {
 
     ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat format) const {
         size_t index = ComputeFormatIndex(format);
-        if (index >= mFormatTable.size()) {
-            return DAWN_VALIDATION_ERROR("Unknown texture format");
-        }
+        DAWN_INVALID_IF(index >= mFormatTable.size(), "Unknown texture format %s.", format);
 
         const Format* internalFormat = &mFormatTable[index];
-        if (!internalFormat->isSupported) {
-            return DAWN_VALIDATION_ERROR("Unsupported texture format");
-        }
+        DAWN_INVALID_IF(!internalFormat->isSupported, "Unsupported texture format %s.", format);
 
         return internalFormat;
     }

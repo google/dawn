@@ -246,7 +246,7 @@ namespace dawn_native {
             // because to have invalid aspects one of the above conditions must have failed earlier.
             // If this is reached, make sure lazy aspects and the error checks above are consistent.
             UNREACHABLE();
-            return DAWN_VALIDATION_ERROR("Index buffer invalid");
+            return DAWN_FORMAT_VALIDATION_ERROR("Index buffer is invalid.");
         }
 
         // TODO(dawn:563): Indicate which slots were not set.
@@ -277,7 +277,7 @@ namespace dawn_native {
             // because to have invalid aspects one of the above conditions must have failed earlier.
             // If this is reached, make sure lazy aspects and the error checks above are consistent.
             UNREACHABLE();
-            return DAWN_VALIDATION_ERROR("Bind groups invalid");
+            return DAWN_FORMAT_VALIDATION_ERROR("Bind groups are invalid.");
         }
 
         DAWN_INVALID_IF(aspects[VALIDATION_ASPECT_PIPELINE], "No pipeline set.");
