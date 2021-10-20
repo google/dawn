@@ -274,7 +274,7 @@ void CommonFuzzer::RunInspector(Program* program) {
     CHECK_INSPECTOR(inspector);
 
     auto storage_size = inspector.GetStorageSize(ep.name);
-    storage_size = 0;  // Silencing unused variable warning
+    (void)storage_size;  // Silencing unused variable warning
     CHECK_INSPECTOR(inspector);
 
     auto resource_bindings = inspector.GetResourceBindings(ep.name);
@@ -324,7 +324,7 @@ void CommonFuzzer::RunInspector(Program* program) {
     CHECK_INSPECTOR(inspector);
 
     auto workgroup_storage = inspector.GetWorkgroupStorageSize(ep.name);
-    workgroup_storage = 0;  // Silencing unused variable warning
+    (void)workgroup_storage;  // Silencing unused variable warning
     CHECK_INSPECTOR(inspector);
   }
 }
