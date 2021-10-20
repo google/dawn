@@ -254,6 +254,18 @@ namespace dawn_native { namespace d3d12 {
             return {};
         }
 
+        void RecordNumWorkgroupsForDispatch(ID3D12GraphicsCommandList* commandList,
+                                            ComputePipeline* pipeline,
+                                            DispatchCmd* dispatch) {
+            if (!pipeline->UsesNumWorkgroups()) {
+                return;
+            }
+
+            PipelineLayout* layout = ToBackend(pipeline->GetLayout());
+            commandList->SetComputeRoot32BitConstants(layout->GetNumWorkgroupsParameterIndex(), 3,
+                                                      dispatch, 0);
+        }
+
         // Records the necessary barriers for a synchronization scope using the resource usage
         // data pre-computed in the frontend. Also performs lazy initialization if required.
         // Returns whether any UAV are used in the synchronization scope.
@@ -1030,6 +1042,7 @@ namespace dawn_native { namespace d3d12 {
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
         Command type;
+        ComputePipeline* lastPipeline = nullptr;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::Dispatch: {
@@ -1045,6 +1058,7 @@ namespace dawn_native { namespace d3d12 {
                                                    resourceUsages.dispatchUsages[currentDispatch]);
                     DAWN_TRY(bindingTracker->Apply(commandContext));
 
+                    RecordNumWorkgroupsForDispatch(commandList, lastPipeline, dispatch);
                     commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
                     currentDispatch++;
                     break;
@@ -1052,6 +1066,14 @@ namespace dawn_native { namespace d3d12 {
 
                 case Command::DispatchIndirect: {
                     DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
+
+                    // TODO(dawn:839): support [[num_workgroups]] for DispatchIndirect calls
+                    if (lastPipeline->UsesNumWorkgroups()) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Using a compute pipeline with [[num_workgroups]] in a "
+                            "DispatchIndirect call is not implemented");
+                    }
+
                     Buffer* buffer = ToBackend(dispatch->indirectBuffer.Get());
 
                     TransitionAndClearForSyncScope(commandContext,
@@ -1078,6 +1100,7 @@ namespace dawn_native { namespace d3d12 {
                     commandList->SetPipelineState(pipeline->GetPipelineState());
 
                     bindingTracker->OnSetPipeline(pipeline);
+                    lastPipeline = pipeline;
                     break;
                 }
 

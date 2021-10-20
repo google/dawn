@@ -106,6 +106,9 @@ namespace dawn_native { namespace d3d12 {
             tint::transform::BindingRemapper::BindingPoints bindingPoints;
             tint::transform::BindingRemapper::AccessControls accessControls;
             bool isRobustnessEnabled;
+            bool usesNumWorkgroups;
+            uint32_t numWorkgroupsRegisterSpace;
+            uint32_t numWorkgroupsShaderRegister;
 
             // FXC/DXC common inputs
             bool disableWorkgroupInit;
@@ -125,7 +128,7 @@ namespace dawn_native { namespace d3d12 {
                 uint32_t compileFlags,
                 const Device* device,
                 const tint::Program* program,
-                const BindingInfoArray& moduleBindingInfo) {
+                const EntryPointMetadata& entryPoint) {
                 Compiler compiler;
                 uint64_t dxcVersion = 0;
                 if (device->IsToggleEnabled(Toggle::UseDXC)) {
@@ -145,6 +148,7 @@ namespace dawn_native { namespace d3d12 {
                 // Tint AST to make the "bindings" decoration match the offset chosen by
                 // d3d12::BindGroupLayout so that Tint produces HLSL with the correct registers
                 // assigned to each interface variable.
+                const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
                 for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
                     const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
                     const auto& groupBindingInfo = moduleBindingInfo[group];
@@ -189,6 +193,9 @@ namespace dawn_native { namespace d3d12 {
                 request.isRobustnessEnabled = device->IsRobustnessEnabled();
                 request.disableWorkgroupInit =
                     device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+                request.usesNumWorkgroups = entryPoint.usesNumWorkgroups;
+                request.numWorkgroupsShaderRegister = layout->GetNumWorkgroupsShaderRegister();
+                request.numWorkgroupsRegisterSpace = layout->GetNumWorkgroupsRegisterSpace();
                 request.fxcVersion = compiler == Compiler::FXC ? GetD3DCompilerVersion() : 0;
                 request.dxcVersion = compiler == Compiler::DXC ? dxcVersion : 0;
                 request.deviceInfo = &device->GetDeviceInfo();
@@ -233,6 +240,10 @@ namespace dawn_native { namespace d3d12 {
 
                 stream << " accessControls=";
                 Serialize(stream, accessControls);
+
+                stream << " useNumWorkgroups=" << usesNumWorkgroups;
+                stream << " numWorkgroupsRegisterSpace=" << numWorkgroupsRegisterSpace;
+                stream << " numWorkgroupsShaderRegister=" << numWorkgroupsShaderRegister;
 
                 stream << " shaderModel=" << deviceInfo->shaderModel;
                 stream << " disableWorkgroupInit=" << disableWorkgroupInit;
@@ -423,6 +434,10 @@ namespace dawn_native { namespace d3d12 {
 
             tint::writer::hlsl::Options options;
             options.disable_workgroup_init = request.disableWorkgroupInit;
+            if (request.usesNumWorkgroups) {
+                options.root_constant_binding_point.group = request.numWorkgroupsRegisterSpace;
+                options.root_constant_binding_point.binding = request.numWorkgroupsShaderRegister;
+            }
             auto result = tint::writer::hlsl::Generate(&transformedProgram, options);
             if (!result.success) {
                 errorStream << "Generator: " << result.error << std::endl;
@@ -547,9 +562,9 @@ namespace dawn_native { namespace d3d12 {
         }
 
         ShaderCompilationRequest request;
-        DAWN_TRY_ASSIGN(request, ShaderCompilationRequest::Create(
-                                     entryPointName, stage, layout, compileFlags, device, program,
-                                     GetEntryPoint(entryPointName).bindings));
+        DAWN_TRY_ASSIGN(request, ShaderCompilationRequest::Create(entryPointName, stage, layout,
+                                                                  compileFlags, device, program,
+                                                                  GetEntryPoint(entryPointName)));
 
         PersistentCacheKey shaderCacheKey;
         DAWN_TRY_ASSIGN(shaderCacheKey, request.CreateCacheKey());

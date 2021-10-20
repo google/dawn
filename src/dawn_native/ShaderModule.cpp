@@ -677,6 +677,8 @@ namespace dawn_native {
                     metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
                     metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;
                     metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;
+
+                    metadata->usesNumWorkgroups = entryPoint.num_workgroups_used;
                 }
 
                 if (metadata->stage == SingleShaderStage::Vertex) {

@@ -26,6 +26,9 @@ namespace dawn_native { namespace d3d12 {
     // We reserve a register space that a user cannot use.
     static constexpr uint32_t kReservedRegisterSpace = kMaxBindGroups + 1;
     static constexpr uint32_t kFirstOffsetInfoBaseRegister = 0;
+    static constexpr uint32_t kFirstIndexOffsetRegisterSpace = kReservedRegisterSpace;
+    static constexpr uint32_t kNumWorkgroupsRegisterSpace = kReservedRegisterSpace + 1;
+    static constexpr uint32_t kNumWorkgroupsBaseRegister = 0;
 
     class Device;
 
@@ -46,6 +49,10 @@ namespace dawn_native { namespace d3d12 {
         uint32_t GetFirstIndexOffsetShaderRegister() const;
         uint32_t GetFirstIndexOffsetParameterIndex() const;
 
+        uint32_t GetNumWorkgroupsRegisterSpace() const;
+        uint32_t GetNumWorkgroupsShaderRegister() const;
+        uint32_t GetNumWorkgroupsParameterIndex() const;
+
         ID3D12RootSignature* GetRootSignature() const;
 
       private:
@@ -59,6 +66,7 @@ namespace dawn_native { namespace d3d12 {
                     kMaxBindGroups>
             mDynamicRootParameterIndices;
         uint32_t mFirstIndexOffsetParameterIndex;
+        uint32_t mNumWorkgroupsParamterIndex;
         ComPtr<ID3D12RootSignature> mRootSignature;
     };
 

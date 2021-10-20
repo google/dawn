@@ -26,9 +26,30 @@ class ComputeDispatchTests : public DawnTest {
         DawnTest::SetUp();
 
         // Write workgroup number into the output buffer if we saw the biggest dispatch
-        // This is a workaround since D3D12 doesn't have gl_NumWorkGroups
         // To make sure the dispatch was not called, write maximum u32 value for 0 dispatches
-        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        wgpu::ShaderModule moduleForDispatch = utils::CreateShaderModule(device, R"(
+            [[block]] struct OutputBuf {
+                workGroups : vec3<u32>;
+            };
+
+            [[group(0), binding(0)]] var<storage, read_write> output : OutputBuf;
+
+            [[stage(compute), workgroup_size(1, 1, 1)]]
+            fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>,
+                    [[builtin(num_workgroups)]] dispatch : vec3<u32>) {
+                if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
+                    output.workGroups = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
+                    return;
+                }
+
+                if (all(GlobalInvocationID == dispatch - vec3<u32>(1u, 1u, 1u))) {
+                    output.workGroups = dispatch;
+                }
+            })");
+
+        // TODO(dawn:839): use moduleForDispatch for indirect dispatch tests when D3D12 supports
+        // [[num_workgroups]] for indirect dispatch.
+        wgpu::ShaderModule moduleForDispatchIndirect = utils::CreateShaderModule(device, R"(
             [[block]] struct InputBuf {
                 expectedDispatch : vec3<u32>;
             };
@@ -54,9 +75,12 @@ class ComputeDispatchTests : public DawnTest {
             })");
 
         wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.compute.module = module;
+        csDesc.compute.module = moduleForDispatch;
         csDesc.compute.entryPoint = "main";
-        pipeline = device.CreateComputePipeline(&csDesc);
+        pipelineForDispatch = device.CreateComputePipeline(&csDesc);
+
+        csDesc.compute.module = moduleForDispatchIndirect;
+        pipelineForDispatchIndirect = device.CreateComputePipeline(&csDesc);
     }
 
     void DirectTest(uint32_t x, uint32_t y, uint32_t z) {
@@ -66,23 +90,18 @@ class ComputeDispatchTests : public DawnTest {
             wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst,
             kSentinelData);
 
-        std::initializer_list<uint32_t> expectedBufferData{x, y, z};
-        wgpu::Buffer expectedBuffer = utils::CreateBufferFromData<uint32_t>(
-            device, wgpu::BufferUsage::Uniform, expectedBufferData);
-
         // Set up bind group and issue dispatch
         wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+            utils::MakeBindGroup(device, pipelineForDispatch.GetBindGroupLayout(0),
                                  {
-                                     {0, expectedBuffer, 0, 3 * sizeof(uint32_t)},
-                                     {1, dst, 0, 3 * sizeof(uint32_t)},
+                                     {0, dst, 0, 3 * sizeof(uint32_t)},
                                  });
 
         wgpu::CommandBuffer commands;
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-            pass.SetPipeline(pipeline);
+            pass.SetPipeline(pipelineForDispatch);
             pass.SetBindGroup(0, bindGroup);
             pass.Dispatch(x, y, z);
             pass.EndPass();
@@ -93,7 +112,7 @@ class ComputeDispatchTests : public DawnTest {
         queue.Submit(1, &commands);
 
         std::vector<uint32_t> expected =
-            x == 0 || y == 0 || z == 0 ? kSentinelData : expectedBufferData;
+            x == 0 || y == 0 || z == 0 ? kSentinelData : std::initializer_list<uint32_t>{x, y, z};
 
         // Verify the dispatch got called if all group counts are not zero
         EXPECT_BUFFER_U32_RANGE_EQ(&expected[0], dst, 0, 3);
@@ -118,7 +137,7 @@ class ComputeDispatchTests : public DawnTest {
 
         // Set up bind group and issue dispatch
         wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+            utils::MakeBindGroup(device, pipelineForDispatchIndirect.GetBindGroupLayout(0),
                                  {
                                      {0, expectedBuffer, 0, 3 * sizeof(uint32_t)},
                                      {1, dst, 0, 3 * sizeof(uint32_t)},
@@ -128,7 +147,7 @@ class ComputeDispatchTests : public DawnTest {
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-            pass.SetPipeline(pipeline);
+            pass.SetPipeline(pipelineForDispatchIndirect);
             pass.SetBindGroup(0, bindGroup);
             pass.DispatchIndirect(indirectBuffer, indirectOffset);
             pass.EndPass();
@@ -153,7 +172,8 @@ class ComputeDispatchTests : public DawnTest {
     }
 
   private:
-    wgpu::ComputePipeline pipeline;
+    wgpu::ComputePipeline pipelineForDispatch;
+    wgpu::ComputePipeline pipelineForDispatchIndirect;
 };
 
 // Test basic direct

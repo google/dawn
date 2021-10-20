@@ -84,4 +84,8 @@ namespace dawn_native { namespace d3d12 {
         CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
+    bool ComputePipeline::UsesNumWorkgroups() const {
+        return GetStage(SingleShaderStage::Compute).metadata->usesNumWorkgroups;
+    }
+
 }}  // namespace dawn_native::d3d12

@@ -204,6 +204,8 @@ namespace dawn_native {
 
         // Store overridableConstants from tint program
         std::unordered_map<std::string, OverridableConstant> overridableConstants;
+
+        bool usesNumWorkgroups = false;
     };
 
     class ShaderModuleBase : public ApiObjectBase, public CachedObject {
