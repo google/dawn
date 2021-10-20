@@ -48,9 +48,9 @@ namespace dawn_native {
     }
 
     MaybeError ProgrammablePassEncoder::ValidateProgrammableEncoderEnd() const {
-        if (mDebugGroupStackSize != 0) {
-            return DAWN_VALIDATION_ERROR("Each Push must be balanced by a corresponding Pop.");
-        }
+        DAWN_INVALID_IF(mDebugGroupStackSize != 0,
+                        "PushDebugGroup called %u time(s) without a corresponding PopDebugGroup.",
+                        mDebugGroupStackSize);
         return {};
     }
 
@@ -75,10 +75,9 @@ namespace dawn_native {
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
                 if (IsValidationEnabled()) {
-                    if (mDebugGroupStackSize == 0) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Pop must be balanced by a corresponding Push.");
-                    }
+                    DAWN_INVALID_IF(
+                        mDebugGroupStackSize == 0,
+                        "PopDebugGroup called when no debug groups are currently pushed.");
                 }
                 allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
                 mDebugGroupStackSize--;
@@ -115,18 +114,21 @@ namespace dawn_native {
         const uint32_t* dynamicOffsetsIn) const {
         DAWN_TRY(GetDevice()->ValidateObject(group));
 
-        if (index >= kMaxBindGroupsTyped) {
-            return DAWN_VALIDATION_ERROR("Setting bind group over the max");
-        }
+        DAWN_INVALID_IF(index >= kMaxBindGroupsTyped,
+                        "Bind group index (%u) exceeds the maximum (%u).",
+                        static_cast<uint32_t>(index), kMaxBindGroups);
 
         ityp::span<BindingIndex, const uint32_t> dynamicOffsets(dynamicOffsetsIn,
                                                                 BindingIndex(dynamicOffsetCountIn));
 
         // Dynamic offsets count must match the number required by the layout perfectly.
         const BindGroupLayoutBase* layout = group->GetLayout();
-        if (layout->GetDynamicBufferCount() != dynamicOffsets.size()) {
-            return DAWN_VALIDATION_ERROR("dynamicOffset count mismatch");
-        }
+        DAWN_INVALID_IF(
+            layout->GetDynamicBufferCount() != dynamicOffsets.size(),
+            "The number of dynamic offsets (%u) does not match the number of dynamic buffers (%u) "
+            "in %s.",
+            static_cast<uint32_t>(dynamicOffsets.size()),
+            static_cast<uint32_t>(layout->GetDynamicBufferCount()), layout);
 
         for (BindingIndex i{0}; i < dynamicOffsets.size(); ++i) {
             const BindingInfo& bindingInfo = layout->GetBindingInfo(i);
@@ -150,9 +152,9 @@ namespace dawn_native {
                     UNREACHABLE();
             }
 
-            if (!IsAligned(dynamicOffsets[i], requiredAlignment)) {
-                return DAWN_VALIDATION_ERROR("Dynamic Buffer Offset need to be aligned");
-            }
+            DAWN_INVALID_IF(!IsAligned(dynamicOffsets[i], requiredAlignment),
+                            "Dynamic Offset[%u] (%u) is not %u byte aligned.",
+                            static_cast<uint32_t>(i), dynamicOffsets[i], requiredAlignment);
 
             BufferBinding bufferBinding = group->GetBindingAsBufferBinding(i);
 
@@ -163,15 +165,20 @@ namespace dawn_native {
 
             if ((dynamicOffsets[i] >
                  bufferBinding.buffer->GetSize() - bufferBinding.offset - bufferBinding.size)) {
-                if ((bufferBinding.buffer->GetSize() - bufferBinding.offset) ==
-                    bufferBinding.size) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Dynamic offset out of bounds. The binding goes to the end of the "
-                        "buffer even with a dynamic offset of 0. Did you forget to specify "
-                        "the binding's size?");
-                } else {
-                    return DAWN_VALIDATION_ERROR("Dynamic offset out of bounds");
-                }
+                DAWN_INVALID_IF(
+                    (bufferBinding.buffer->GetSize() - bufferBinding.offset) == bufferBinding.size,
+                    "Dynamic Offset[%u] (%u) is out of bounds of %s with a size of %u and a bound "
+                    "range of (offset: %u, size: %u). The binding goes to the end of the buffer "
+                    "even with a dynamic offset of 0. Did you forget to specify "
+                    "the binding's size?",
+                    static_cast<uint32_t>(i), dynamicOffsets[i], bufferBinding.buffer,
+                    bufferBinding.buffer->GetSize(), bufferBinding.offset, bufferBinding.size);
+
+                return DAWN_FORMAT_VALIDATION_ERROR(
+                    "Dynamic Offset[%u] (%u) is out of bounds of "
+                    "%s with a size of %u and a bound range of (offset: %u, size: %u).",
+                    static_cast<uint32_t>(i), dynamicOffsets[i], bufferBinding.buffer,
+                    bufferBinding.buffer->GetSize(), bufferBinding.offset, bufferBinding.size);
             }
         }
 

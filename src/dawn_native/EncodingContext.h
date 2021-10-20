@@ -28,13 +28,13 @@ namespace dawn_native {
 
     class CommandEncoder;
     class DeviceBase;
-    class ObjectBase;
+    class ApiObjectBase;
 
     // Base class for allocating/iterating commands.
     // It performs error tracking as well as encoding state for render/compute passes.
     class EncodingContext {
       public:
-        EncodingContext(DeviceBase* device, const ObjectBase* initialEncoder);
+        EncodingContext(DeviceBase* device, const ApiObjectBase* initialEncoder);
         ~EncodingContext();
 
         CommandIterator AcquireCommands();
@@ -70,14 +70,15 @@ namespace dawn_native {
             return false;
         }
 
-        inline bool CheckCurrentEncoder(const ObjectBase* encoder) {
+        inline bool CheckCurrentEncoder(const ApiObjectBase* encoder) {
             if (DAWN_UNLIKELY(encoder != mCurrentEncoder)) {
                 if (mCurrentEncoder != mTopLevelEncoder) {
                     // The top level encoder was used when a pass encoder was current.
-                    HandleError(DAWN_VALIDATION_ERROR("Command cannot be recorded inside a pass"));
+                    HandleError(DAWN_FORMAT_VALIDATION_ERROR(
+                        "Command cannot be recorded while %s is active.", mCurrentEncoder));
                 } else {
-                    HandleError(DAWN_VALIDATION_ERROR(
-                        "Recording in an error or already ended pass encoder"));
+                    HandleError(DAWN_FORMAT_VALIDATION_ERROR(
+                        "Recording in an error or already ended %s.", encoder));
                 }
                 return false;
             }
@@ -85,7 +86,7 @@ namespace dawn_native {
         }
 
         template <typename EncodeFunction>
-        inline bool TryEncode(const ObjectBase* encoder, EncodeFunction&& encodeFunction) {
+        inline bool TryEncode(const ApiObjectBase* encoder, EncodeFunction&& encodeFunction) {
             if (!CheckCurrentEncoder(encoder)) {
                 return false;
             }
@@ -94,7 +95,7 @@ namespace dawn_native {
         }
 
         template <typename EncodeFunction, typename... Args>
-        inline bool TryEncode(const ObjectBase* encoder,
+        inline bool TryEncode(const ApiObjectBase* encoder,
                               EncodeFunction&& encodeFunction,
                               const char* formatStr,
                               const Args&... args) {
@@ -111,12 +112,12 @@ namespace dawn_native {
         void WillBeginRenderPass();
 
         // Functions to set current encoder state
-        void EnterPass(const ObjectBase* passEncoder);
-        MaybeError ExitRenderPass(const ObjectBase* passEncoder,
+        void EnterPass(const ApiObjectBase* passEncoder);
+        MaybeError ExitRenderPass(const ApiObjectBase* passEncoder,
                                   RenderPassResourceUsageTracker usageTracker,
                                   CommandEncoder* commandEncoder,
                                   IndirectDrawMetadata indirectDrawMetadata);
-        void ExitComputePass(const ObjectBase* passEncoder, ComputePassResourceUsage usages);
+        void ExitComputePass(const ApiObjectBase* passEncoder, ComputePassResourceUsage usages);
         MaybeError Finish();
 
         const RenderPassUsages& GetRenderPassUsages() const;
@@ -138,12 +139,12 @@ namespace dawn_native {
         // There can only be two levels of encoders. Top-level and render/compute pass.
         // The top level encoder is the encoder the EncodingContext is created with.
         // It doubles as flag to check if encoding has been Finished.
-        const ObjectBase* mTopLevelEncoder;
+        const ApiObjectBase* mTopLevelEncoder;
         // The current encoder must be the same as the encoder provided to TryEncode,
         // otherwise an error is produced. It may be nullptr if the EncodingContext is an error.
         // The current encoder changes with Enter/ExitPass which should be called by
         // CommandEncoder::Begin/EndPass.
-        const ObjectBase* mCurrentEncoder;
+        const ApiObjectBase* mCurrentEncoder;
 
         RenderPassUsages mRenderPassUsages;
         bool mWereRenderPassUsagesAcquired = false;

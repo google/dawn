@@ -891,8 +891,7 @@ namespace dawn_native {
                 if (GetDevice()->IsValidationEnabled()) {
                     DAWN_INVALID_IF(
                         mDebugGroupStackSize == 0,
-                        "Every call to PopDebugGroup must be balanced by a corresponding call to "
-                        "PushDebugGroup.");
+                        "PopDebugGroup called when no debug groups are currently pushed.");
                 }
                 allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
                 mDebugGroupStackSize--;
