@@ -1,0 +1,769 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 509
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "v"
+               OpName %P "P"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %f "f"
+               OpName %v "v"
+               OpName %x "x"
+               OpName %y "y"
+               OpName %z "z"
+               OpName %xx "xx"
+               OpName %xy "xy"
+               OpName %xz "xz"
+               OpName %yx "yx"
+               OpName %yy "yy"
+               OpName %yz "yz"
+               OpName %zx "zx"
+               OpName %zy "zy"
+               OpName %zz "zz"
+               OpName %xxx "xxx"
+               OpName %xxy "xxy"
+               OpName %xxz "xxz"
+               OpName %xyx "xyx"
+               OpName %xyy "xyy"
+               OpName %xyz "xyz"
+               OpName %xzx "xzx"
+               OpName %xzy "xzy"
+               OpName %xzz "xzz"
+               OpName %yxx "yxx"
+               OpName %yxy "yxy"
+               OpName %yxz "yxz"
+               OpName %yyx "yyx"
+               OpName %yyy "yyy"
+               OpName %yyz "yyz"
+               OpName %yzx "yzx"
+               OpName %yzy "yzy"
+               OpName %yzz "yzz"
+               OpName %zxx "zxx"
+               OpName %zxy "zxy"
+               OpName %zxz "zxz"
+               OpName %zyx "zyx"
+               OpName %zyy "zyy"
+               OpName %zyz "zyz"
+               OpName %zzx "zzx"
+               OpName %zzy "zzy"
+               OpName %zzz "zzz"
+               OpName %xxxx "xxxx"
+               OpName %xxxy "xxxy"
+               OpName %xxxz "xxxz"
+               OpName %xxyx "xxyx"
+               OpName %xxyy "xxyy"
+               OpName %xxyz "xxyz"
+               OpName %xxzx "xxzx"
+               OpName %xxzy "xxzy"
+               OpName %xxzz "xxzz"
+               OpName %xyxx "xyxx"
+               OpName %xyxy "xyxy"
+               OpName %xyxz "xyxz"
+               OpName %xyyx "xyyx"
+               OpName %xyyy "xyyy"
+               OpName %xyyz "xyyz"
+               OpName %xyzx "xyzx"
+               OpName %xyzy "xyzy"
+               OpName %xyzz "xyzz"
+               OpName %xzxx "xzxx"
+               OpName %xzxy "xzxy"
+               OpName %xzxz "xzxz"
+               OpName %xzyx "xzyx"
+               OpName %xzyy "xzyy"
+               OpName %xzyz "xzyz"
+               OpName %xzzx "xzzx"
+               OpName %xzzy "xzzy"
+               OpName %xzzz "xzzz"
+               OpName %yxxx "yxxx"
+               OpName %yxxy "yxxy"
+               OpName %yxxz "yxxz"
+               OpName %yxyx "yxyx"
+               OpName %yxyy "yxyy"
+               OpName %yxyz "yxyz"
+               OpName %yxzx "yxzx"
+               OpName %yxzy "yxzy"
+               OpName %yxzz "yxzz"
+               OpName %yyxx "yyxx"
+               OpName %yyxy "yyxy"
+               OpName %yyxz "yyxz"
+               OpName %yyyx "yyyx"
+               OpName %yyyy "yyyy"
+               OpName %yyyz "yyyz"
+               OpName %yyzx "yyzx"
+               OpName %yyzy "yyzy"
+               OpName %yyzz "yyzz"
+               OpName %yzxx "yzxx"
+               OpName %yzxy "yzxy"
+               OpName %yzxz "yzxz"
+               OpName %yzyx "yzyx"
+               OpName %yzyy "yzyy"
+               OpName %yzyz "yzyz"
+               OpName %yzzx "yzzx"
+               OpName %yzzy "yzzy"
+               OpName %yzzz "yzzz"
+               OpName %zxxx "zxxx"
+               OpName %zxxy "zxxy"
+               OpName %zxxz "zxxz"
+               OpName %zxyx "zxyx"
+               OpName %zxyy "zxyy"
+               OpName %zxyz "zxyz"
+               OpName %zxzx "zxzx"
+               OpName %zxzy "zxzy"
+               OpName %zxzz "zxzz"
+               OpName %zyxx "zyxx"
+               OpName %zyxy "zyxy"
+               OpName %zyxz "zyxz"
+               OpName %zyyx "zyyx"
+               OpName %zyyy "zyyy"
+               OpName %zyyz "zyyz"
+               OpName %zyzx "zyzx"
+               OpName %zyzy "zyzy"
+               OpName %zyzz "zyzz"
+               OpName %zzxx "zzxx"
+               OpName %zzxy "zzxy"
+               OpName %zzxz "zzxz"
+               OpName %zzyx "zzyx"
+               OpName %zzyy "zzyy"
+               OpName %zzyz "zzyz"
+               OpName %zzzx "zzzx"
+               OpName %zzzy "zzzy"
+               OpName %zzzz "zzzz"
+               OpMemberDecorate %S 0 Offset 0
+        %int = OpTypeInt 32 1
+      %v3int = OpTypeVector %int 3
+          %S = OpTypeStruct %v3int
+%_ptr_Private_S = OpTypePointer Private %S
+          %6 = OpConstantNull %S
+          %P = OpVariable %_ptr_Private_S Private %6
+       %void = OpTypeVoid
+          %7 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Private_v3int = OpTypePointer Private %v3int
+%_ptr_Function_v3int = OpTypePointer Function %v3int
+         %20 = OpConstantNull %v3int
+%_ptr_Private_int = OpTypePointer Private %int
+%_ptr_Function_int = OpTypePointer Function %int
+         %26 = OpConstantNull %int
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+      %v2int = OpTypeVector %int 2
+%_ptr_Function_v2int = OpTypePointer Function %v2int
+         %41 = OpConstantNull %v2int
+      %v4int = OpTypeVector %int 4
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+        %188 = OpConstantNull %v4int
+%unused_entry_point = OpFunction %void None %7
+         %10 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %7
+         %12 = OpLabel
+          %v = OpVariable %_ptr_Function_v3int Function %20
+          %x = OpVariable %_ptr_Function_int Function %26
+          %y = OpVariable %_ptr_Function_int Function %26
+          %z = OpVariable %_ptr_Function_int Function %26
+         %xx = OpVariable %_ptr_Function_v2int Function %41
+         %xy = OpVariable %_ptr_Function_v2int Function %41
+         %xz = OpVariable %_ptr_Function_v2int Function %41
+         %yx = OpVariable %_ptr_Function_v2int Function %41
+         %yy = OpVariable %_ptr_Function_v2int Function %41
+         %yz = OpVariable %_ptr_Function_v2int Function %41
+         %zx = OpVariable %_ptr_Function_v2int Function %41
+         %zy = OpVariable %_ptr_Function_v2int Function %41
+         %zz = OpVariable %_ptr_Function_v2int Function %41
+        %xxx = OpVariable %_ptr_Function_v3int Function %20
+        %xxy = OpVariable %_ptr_Function_v3int Function %20
+        %xxz = OpVariable %_ptr_Function_v3int Function %20
+        %xyx = OpVariable %_ptr_Function_v3int Function %20
+        %xyy = OpVariable %_ptr_Function_v3int Function %20
+        %xyz = OpVariable %_ptr_Function_v3int Function %20
+        %xzx = OpVariable %_ptr_Function_v3int Function %20
+        %xzy = OpVariable %_ptr_Function_v3int Function %20
+        %xzz = OpVariable %_ptr_Function_v3int Function %20
+        %yxx = OpVariable %_ptr_Function_v3int Function %20
+        %yxy = OpVariable %_ptr_Function_v3int Function %20
+        %yxz = OpVariable %_ptr_Function_v3int Function %20
+        %yyx = OpVariable %_ptr_Function_v3int Function %20
+        %yyy = OpVariable %_ptr_Function_v3int Function %20
+        %yyz = OpVariable %_ptr_Function_v3int Function %20
+        %yzx = OpVariable %_ptr_Function_v3int Function %20
+        %yzy = OpVariable %_ptr_Function_v3int Function %20
+        %yzz = OpVariable %_ptr_Function_v3int Function %20
+        %zxx = OpVariable %_ptr_Function_v3int Function %20
+        %zxy = OpVariable %_ptr_Function_v3int Function %20
+        %zxz = OpVariable %_ptr_Function_v3int Function %20
+        %zyx = OpVariable %_ptr_Function_v3int Function %20
+        %zyy = OpVariable %_ptr_Function_v3int Function %20
+        %zyz = OpVariable %_ptr_Function_v3int Function %20
+        %zzx = OpVariable %_ptr_Function_v3int Function %20
+        %zzy = OpVariable %_ptr_Function_v3int Function %20
+        %zzz = OpVariable %_ptr_Function_v3int Function %20
+       %xxxx = OpVariable %_ptr_Function_v4int Function %188
+       %xxxy = OpVariable %_ptr_Function_v4int Function %188
+       %xxxz = OpVariable %_ptr_Function_v4int Function %188
+       %xxyx = OpVariable %_ptr_Function_v4int Function %188
+       %xxyy = OpVariable %_ptr_Function_v4int Function %188
+       %xxyz = OpVariable %_ptr_Function_v4int Function %188
+       %xxzx = OpVariable %_ptr_Function_v4int Function %188
+       %xxzy = OpVariable %_ptr_Function_v4int Function %188
+       %xxzz = OpVariable %_ptr_Function_v4int Function %188
+       %xyxx = OpVariable %_ptr_Function_v4int Function %188
+       %xyxy = OpVariable %_ptr_Function_v4int Function %188
+       %xyxz = OpVariable %_ptr_Function_v4int Function %188
+       %xyyx = OpVariable %_ptr_Function_v4int Function %188
+       %xyyy = OpVariable %_ptr_Function_v4int Function %188
+       %xyyz = OpVariable %_ptr_Function_v4int Function %188
+       %xyzx = OpVariable %_ptr_Function_v4int Function %188
+       %xyzy = OpVariable %_ptr_Function_v4int Function %188
+       %xyzz = OpVariable %_ptr_Function_v4int Function %188
+       %xzxx = OpVariable %_ptr_Function_v4int Function %188
+       %xzxy = OpVariable %_ptr_Function_v4int Function %188
+       %xzxz = OpVariable %_ptr_Function_v4int Function %188
+       %xzyx = OpVariable %_ptr_Function_v4int Function %188
+       %xzyy = OpVariable %_ptr_Function_v4int Function %188
+       %xzyz = OpVariable %_ptr_Function_v4int Function %188
+       %xzzx = OpVariable %_ptr_Function_v4int Function %188
+       %xzzy = OpVariable %_ptr_Function_v4int Function %188
+       %xzzz = OpVariable %_ptr_Function_v4int Function %188
+       %yxxx = OpVariable %_ptr_Function_v4int Function %188
+       %yxxy = OpVariable %_ptr_Function_v4int Function %188
+       %yxxz = OpVariable %_ptr_Function_v4int Function %188
+       %yxyx = OpVariable %_ptr_Function_v4int Function %188
+       %yxyy = OpVariable %_ptr_Function_v4int Function %188
+       %yxyz = OpVariable %_ptr_Function_v4int Function %188
+       %yxzx = OpVariable %_ptr_Function_v4int Function %188
+       %yxzy = OpVariable %_ptr_Function_v4int Function %188
+       %yxzz = OpVariable %_ptr_Function_v4int Function %188
+       %yyxx = OpVariable %_ptr_Function_v4int Function %188
+       %yyxy = OpVariable %_ptr_Function_v4int Function %188
+       %yyxz = OpVariable %_ptr_Function_v4int Function %188
+       %yyyx = OpVariable %_ptr_Function_v4int Function %188
+       %yyyy = OpVariable %_ptr_Function_v4int Function %188
+       %yyyz = OpVariable %_ptr_Function_v4int Function %188
+       %yyzx = OpVariable %_ptr_Function_v4int Function %188
+       %yyzy = OpVariable %_ptr_Function_v4int Function %188
+       %yyzz = OpVariable %_ptr_Function_v4int Function %188
+       %yzxx = OpVariable %_ptr_Function_v4int Function %188
+       %yzxy = OpVariable %_ptr_Function_v4int Function %188
+       %yzxz = OpVariable %_ptr_Function_v4int Function %188
+       %yzyx = OpVariable %_ptr_Function_v4int Function %188
+       %yzyy = OpVariable %_ptr_Function_v4int Function %188
+       %yzyz = OpVariable %_ptr_Function_v4int Function %188
+       %yzzx = OpVariable %_ptr_Function_v4int Function %188
+       %yzzy = OpVariable %_ptr_Function_v4int Function %188
+       %yzzz = OpVariable %_ptr_Function_v4int Function %188
+       %zxxx = OpVariable %_ptr_Function_v4int Function %188
+       %zxxy = OpVariable %_ptr_Function_v4int Function %188
+       %zxxz = OpVariable %_ptr_Function_v4int Function %188
+       %zxyx = OpVariable %_ptr_Function_v4int Function %188
+       %zxyy = OpVariable %_ptr_Function_v4int Function %188
+       %zxyz = OpVariable %_ptr_Function_v4int Function %188
+       %zxzx = OpVariable %_ptr_Function_v4int Function %188
+       %zxzy = OpVariable %_ptr_Function_v4int Function %188
+       %zxzz = OpVariable %_ptr_Function_v4int Function %188
+       %zyxx = OpVariable %_ptr_Function_v4int Function %188
+       %zyxy = OpVariable %_ptr_Function_v4int Function %188
+       %zyxz = OpVariable %_ptr_Function_v4int Function %188
+       %zyyx = OpVariable %_ptr_Function_v4int Function %188
+       %zyyy = OpVariable %_ptr_Function_v4int Function %188
+       %zyyz = OpVariable %_ptr_Function_v4int Function %188
+       %zyzx = OpVariable %_ptr_Function_v4int Function %188
+       %zyzy = OpVariable %_ptr_Function_v4int Function %188
+       %zyzz = OpVariable %_ptr_Function_v4int Function %188
+       %zzxx = OpVariable %_ptr_Function_v4int Function %188
+       %zzxy = OpVariable %_ptr_Function_v4int Function %188
+       %zzxz = OpVariable %_ptr_Function_v4int Function %188
+       %zzyx = OpVariable %_ptr_Function_v4int Function %188
+       %zzyy = OpVariable %_ptr_Function_v4int Function %188
+       %zzyz = OpVariable %_ptr_Function_v4int Function %188
+       %zzzx = OpVariable %_ptr_Function_v4int Function %188
+       %zzzy = OpVariable %_ptr_Function_v4int Function %188
+       %zzzz = OpVariable %_ptr_Function_v4int Function %188
+         %16 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %17 = OpLoad %v3int %16
+               OpStore %v %17
+         %22 = OpAccessChain %_ptr_Private_int %P %uint_0 %uint_0
+         %23 = OpLoad %int %22
+               OpStore %x %23
+         %28 = OpAccessChain %_ptr_Private_int %P %uint_0 %uint_1
+         %29 = OpLoad %int %28
+               OpStore %y %29
+         %32 = OpAccessChain %_ptr_Private_int %P %uint_0 %uint_2
+         %33 = OpLoad %int %32
+               OpStore %z %33
+         %35 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %37 = OpLoad %v3int %35
+         %38 = OpVectorShuffle %v2int %37 %37 0 0
+               OpStore %xx %38
+         %42 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %43 = OpLoad %v3int %42
+         %44 = OpVectorShuffle %v2int %43 %43 0 1
+               OpStore %xy %44
+         %46 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %47 = OpLoad %v3int %46
+         %48 = OpVectorShuffle %v2int %47 %47 0 2
+               OpStore %xz %48
+         %50 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %51 = OpLoad %v3int %50
+         %52 = OpVectorShuffle %v2int %51 %51 1 0
+               OpStore %yx %52
+         %54 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %55 = OpLoad %v3int %54
+         %56 = OpVectorShuffle %v2int %55 %55 1 1
+               OpStore %yy %56
+         %58 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %59 = OpLoad %v3int %58
+         %60 = OpVectorShuffle %v2int %59 %59 1 2
+               OpStore %yz %60
+         %62 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %63 = OpLoad %v3int %62
+         %64 = OpVectorShuffle %v2int %63 %63 2 0
+               OpStore %zx %64
+         %66 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %67 = OpLoad %v3int %66
+         %68 = OpVectorShuffle %v2int %67 %67 2 1
+               OpStore %zy %68
+         %70 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %71 = OpLoad %v3int %70
+         %72 = OpVectorShuffle %v2int %71 %71 2 2
+               OpStore %zz %72
+         %74 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %75 = OpLoad %v3int %74
+         %76 = OpVectorShuffle %v3int %75 %75 0 0 0
+               OpStore %xxx %76
+         %78 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %79 = OpLoad %v3int %78
+         %80 = OpVectorShuffle %v3int %79 %79 0 0 1
+               OpStore %xxy %80
+         %82 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %83 = OpLoad %v3int %82
+         %84 = OpVectorShuffle %v3int %83 %83 0 0 2
+               OpStore %xxz %84
+         %86 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %87 = OpLoad %v3int %86
+         %88 = OpVectorShuffle %v3int %87 %87 0 1 0
+               OpStore %xyx %88
+         %90 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %91 = OpLoad %v3int %90
+         %92 = OpVectorShuffle %v3int %91 %91 0 1 1
+               OpStore %xyy %92
+         %94 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %95 = OpLoad %v3int %94
+         %96 = OpVectorShuffle %v3int %95 %95 0 1 2
+               OpStore %xyz %96
+         %98 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+         %99 = OpLoad %v3int %98
+        %100 = OpVectorShuffle %v3int %99 %99 0 2 0
+               OpStore %xzx %100
+        %102 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %103 = OpLoad %v3int %102
+        %104 = OpVectorShuffle %v3int %103 %103 0 2 1
+               OpStore %xzy %104
+        %106 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %107 = OpLoad %v3int %106
+        %108 = OpVectorShuffle %v3int %107 %107 0 2 2
+               OpStore %xzz %108
+        %110 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %111 = OpLoad %v3int %110
+        %112 = OpVectorShuffle %v3int %111 %111 1 0 0
+               OpStore %yxx %112
+        %114 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %115 = OpLoad %v3int %114
+        %116 = OpVectorShuffle %v3int %115 %115 1 0 1
+               OpStore %yxy %116
+        %118 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %119 = OpLoad %v3int %118
+        %120 = OpVectorShuffle %v3int %119 %119 1 0 2
+               OpStore %yxz %120
+        %122 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %123 = OpLoad %v3int %122
+        %124 = OpVectorShuffle %v3int %123 %123 1 1 0
+               OpStore %yyx %124
+        %126 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %127 = OpLoad %v3int %126
+        %128 = OpVectorShuffle %v3int %127 %127 1 1 1
+               OpStore %yyy %128
+        %130 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %131 = OpLoad %v3int %130
+        %132 = OpVectorShuffle %v3int %131 %131 1 1 2
+               OpStore %yyz %132
+        %134 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %135 = OpLoad %v3int %134
+        %136 = OpVectorShuffle %v3int %135 %135 1 2 0
+               OpStore %yzx %136
+        %138 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %139 = OpLoad %v3int %138
+        %140 = OpVectorShuffle %v3int %139 %139 1 2 1
+               OpStore %yzy %140
+        %142 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %143 = OpLoad %v3int %142
+        %144 = OpVectorShuffle %v3int %143 %143 1 2 2
+               OpStore %yzz %144
+        %146 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %147 = OpLoad %v3int %146
+        %148 = OpVectorShuffle %v3int %147 %147 2 0 0
+               OpStore %zxx %148
+        %150 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %151 = OpLoad %v3int %150
+        %152 = OpVectorShuffle %v3int %151 %151 2 0 1
+               OpStore %zxy %152
+        %154 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %155 = OpLoad %v3int %154
+        %156 = OpVectorShuffle %v3int %155 %155 2 0 2
+               OpStore %zxz %156
+        %158 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %159 = OpLoad %v3int %158
+        %160 = OpVectorShuffle %v3int %159 %159 2 1 0
+               OpStore %zyx %160
+        %162 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %163 = OpLoad %v3int %162
+        %164 = OpVectorShuffle %v3int %163 %163 2 1 1
+               OpStore %zyy %164
+        %166 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %167 = OpLoad %v3int %166
+        %168 = OpVectorShuffle %v3int %167 %167 2 1 2
+               OpStore %zyz %168
+        %170 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %171 = OpLoad %v3int %170
+        %172 = OpVectorShuffle %v3int %171 %171 2 2 0
+               OpStore %zzx %172
+        %174 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %175 = OpLoad %v3int %174
+        %176 = OpVectorShuffle %v3int %175 %175 2 2 1
+               OpStore %zzy %176
+        %178 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %179 = OpLoad %v3int %178
+        %180 = OpVectorShuffle %v3int %179 %179 2 2 2
+               OpStore %zzz %180
+        %182 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %184 = OpLoad %v3int %182
+        %185 = OpVectorShuffle %v4int %184 %184 0 0 0 0
+               OpStore %xxxx %185
+        %189 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %190 = OpLoad %v3int %189
+        %191 = OpVectorShuffle %v4int %190 %190 0 0 0 1
+               OpStore %xxxy %191
+        %193 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %194 = OpLoad %v3int %193
+        %195 = OpVectorShuffle %v4int %194 %194 0 0 0 2
+               OpStore %xxxz %195
+        %197 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %198 = OpLoad %v3int %197
+        %199 = OpVectorShuffle %v4int %198 %198 0 0 1 0
+               OpStore %xxyx %199
+        %201 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %202 = OpLoad %v3int %201
+        %203 = OpVectorShuffle %v4int %202 %202 0 0 1 1
+               OpStore %xxyy %203
+        %205 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %206 = OpLoad %v3int %205
+        %207 = OpVectorShuffle %v4int %206 %206 0 0 1 2
+               OpStore %xxyz %207
+        %209 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %210 = OpLoad %v3int %209
+        %211 = OpVectorShuffle %v4int %210 %210 0 0 2 0
+               OpStore %xxzx %211
+        %213 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %214 = OpLoad %v3int %213
+        %215 = OpVectorShuffle %v4int %214 %214 0 0 2 1
+               OpStore %xxzy %215
+        %217 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %218 = OpLoad %v3int %217
+        %219 = OpVectorShuffle %v4int %218 %218 0 0 2 2
+               OpStore %xxzz %219
+        %221 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %222 = OpLoad %v3int %221
+        %223 = OpVectorShuffle %v4int %222 %222 0 1 0 0
+               OpStore %xyxx %223
+        %225 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %226 = OpLoad %v3int %225
+        %227 = OpVectorShuffle %v4int %226 %226 0 1 0 1
+               OpStore %xyxy %227
+        %229 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %230 = OpLoad %v3int %229
+        %231 = OpVectorShuffle %v4int %230 %230 0 1 0 2
+               OpStore %xyxz %231
+        %233 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %234 = OpLoad %v3int %233
+        %235 = OpVectorShuffle %v4int %234 %234 0 1 1 0
+               OpStore %xyyx %235
+        %237 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %238 = OpLoad %v3int %237
+        %239 = OpVectorShuffle %v4int %238 %238 0 1 1 1
+               OpStore %xyyy %239
+        %241 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %242 = OpLoad %v3int %241
+        %243 = OpVectorShuffle %v4int %242 %242 0 1 1 2
+               OpStore %xyyz %243
+        %245 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %246 = OpLoad %v3int %245
+        %247 = OpVectorShuffle %v4int %246 %246 0 1 2 0
+               OpStore %xyzx %247
+        %249 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %250 = OpLoad %v3int %249
+        %251 = OpVectorShuffle %v4int %250 %250 0 1 2 1
+               OpStore %xyzy %251
+        %253 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %254 = OpLoad %v3int %253
+        %255 = OpVectorShuffle %v4int %254 %254 0 1 2 2
+               OpStore %xyzz %255
+        %257 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %258 = OpLoad %v3int %257
+        %259 = OpVectorShuffle %v4int %258 %258 0 2 0 0
+               OpStore %xzxx %259
+        %261 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %262 = OpLoad %v3int %261
+        %263 = OpVectorShuffle %v4int %262 %262 0 2 0 1
+               OpStore %xzxy %263
+        %265 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %266 = OpLoad %v3int %265
+        %267 = OpVectorShuffle %v4int %266 %266 0 2 0 2
+               OpStore %xzxz %267
+        %269 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %270 = OpLoad %v3int %269
+        %271 = OpVectorShuffle %v4int %270 %270 0 2 1 0
+               OpStore %xzyx %271
+        %273 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %274 = OpLoad %v3int %273
+        %275 = OpVectorShuffle %v4int %274 %274 0 2 1 1
+               OpStore %xzyy %275
+        %277 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %278 = OpLoad %v3int %277
+        %279 = OpVectorShuffle %v4int %278 %278 0 2 1 2
+               OpStore %xzyz %279
+        %281 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %282 = OpLoad %v3int %281
+        %283 = OpVectorShuffle %v4int %282 %282 0 2 2 0
+               OpStore %xzzx %283
+        %285 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %286 = OpLoad %v3int %285
+        %287 = OpVectorShuffle %v4int %286 %286 0 2 2 1
+               OpStore %xzzy %287
+        %289 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %290 = OpLoad %v3int %289
+        %291 = OpVectorShuffle %v4int %290 %290 0 2 2 2
+               OpStore %xzzz %291
+        %293 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %294 = OpLoad %v3int %293
+        %295 = OpVectorShuffle %v4int %294 %294 1 0 0 0
+               OpStore %yxxx %295
+        %297 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %298 = OpLoad %v3int %297
+        %299 = OpVectorShuffle %v4int %298 %298 1 0 0 1
+               OpStore %yxxy %299
+        %301 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %302 = OpLoad %v3int %301
+        %303 = OpVectorShuffle %v4int %302 %302 1 0 0 2
+               OpStore %yxxz %303
+        %305 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %306 = OpLoad %v3int %305
+        %307 = OpVectorShuffle %v4int %306 %306 1 0 1 0
+               OpStore %yxyx %307
+        %309 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %310 = OpLoad %v3int %309
+        %311 = OpVectorShuffle %v4int %310 %310 1 0 1 1
+               OpStore %yxyy %311
+        %313 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %314 = OpLoad %v3int %313
+        %315 = OpVectorShuffle %v4int %314 %314 1 0 1 2
+               OpStore %yxyz %315
+        %317 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %318 = OpLoad %v3int %317
+        %319 = OpVectorShuffle %v4int %318 %318 1 0 2 0
+               OpStore %yxzx %319
+        %321 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %322 = OpLoad %v3int %321
+        %323 = OpVectorShuffle %v4int %322 %322 1 0 2 1
+               OpStore %yxzy %323
+        %325 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %326 = OpLoad %v3int %325
+        %327 = OpVectorShuffle %v4int %326 %326 1 0 2 2
+               OpStore %yxzz %327
+        %329 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %330 = OpLoad %v3int %329
+        %331 = OpVectorShuffle %v4int %330 %330 1 1 0 0
+               OpStore %yyxx %331
+        %333 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %334 = OpLoad %v3int %333
+        %335 = OpVectorShuffle %v4int %334 %334 1 1 0 1
+               OpStore %yyxy %335
+        %337 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %338 = OpLoad %v3int %337
+        %339 = OpVectorShuffle %v4int %338 %338 1 1 0 2
+               OpStore %yyxz %339
+        %341 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %342 = OpLoad %v3int %341
+        %343 = OpVectorShuffle %v4int %342 %342 1 1 1 0
+               OpStore %yyyx %343
+        %345 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %346 = OpLoad %v3int %345
+        %347 = OpVectorShuffle %v4int %346 %346 1 1 1 1
+               OpStore %yyyy %347
+        %349 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %350 = OpLoad %v3int %349
+        %351 = OpVectorShuffle %v4int %350 %350 1 1 1 2
+               OpStore %yyyz %351
+        %353 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %354 = OpLoad %v3int %353
+        %355 = OpVectorShuffle %v4int %354 %354 1 1 2 0
+               OpStore %yyzx %355
+        %357 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %358 = OpLoad %v3int %357
+        %359 = OpVectorShuffle %v4int %358 %358 1 1 2 1
+               OpStore %yyzy %359
+        %361 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %362 = OpLoad %v3int %361
+        %363 = OpVectorShuffle %v4int %362 %362 1 1 2 2
+               OpStore %yyzz %363
+        %365 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %366 = OpLoad %v3int %365
+        %367 = OpVectorShuffle %v4int %366 %366 1 2 0 0
+               OpStore %yzxx %367
+        %369 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %370 = OpLoad %v3int %369
+        %371 = OpVectorShuffle %v4int %370 %370 1 2 0 1
+               OpStore %yzxy %371
+        %373 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %374 = OpLoad %v3int %373
+        %375 = OpVectorShuffle %v4int %374 %374 1 2 0 2
+               OpStore %yzxz %375
+        %377 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %378 = OpLoad %v3int %377
+        %379 = OpVectorShuffle %v4int %378 %378 1 2 1 0
+               OpStore %yzyx %379
+        %381 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %382 = OpLoad %v3int %381
+        %383 = OpVectorShuffle %v4int %382 %382 1 2 1 1
+               OpStore %yzyy %383
+        %385 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %386 = OpLoad %v3int %385
+        %387 = OpVectorShuffle %v4int %386 %386 1 2 1 2
+               OpStore %yzyz %387
+        %389 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %390 = OpLoad %v3int %389
+        %391 = OpVectorShuffle %v4int %390 %390 1 2 2 0
+               OpStore %yzzx %391
+        %393 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %394 = OpLoad %v3int %393
+        %395 = OpVectorShuffle %v4int %394 %394 1 2 2 1
+               OpStore %yzzy %395
+        %397 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %398 = OpLoad %v3int %397
+        %399 = OpVectorShuffle %v4int %398 %398 1 2 2 2
+               OpStore %yzzz %399
+        %401 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %402 = OpLoad %v3int %401
+        %403 = OpVectorShuffle %v4int %402 %402 2 0 0 0
+               OpStore %zxxx %403
+        %405 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %406 = OpLoad %v3int %405
+        %407 = OpVectorShuffle %v4int %406 %406 2 0 0 1
+               OpStore %zxxy %407
+        %409 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %410 = OpLoad %v3int %409
+        %411 = OpVectorShuffle %v4int %410 %410 2 0 0 2
+               OpStore %zxxz %411
+        %413 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %414 = OpLoad %v3int %413
+        %415 = OpVectorShuffle %v4int %414 %414 2 0 1 0
+               OpStore %zxyx %415
+        %417 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %418 = OpLoad %v3int %417
+        %419 = OpVectorShuffle %v4int %418 %418 2 0 1 1
+               OpStore %zxyy %419
+        %421 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %422 = OpLoad %v3int %421
+        %423 = OpVectorShuffle %v4int %422 %422 2 0 1 2
+               OpStore %zxyz %423
+        %425 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %426 = OpLoad %v3int %425
+        %427 = OpVectorShuffle %v4int %426 %426 2 0 2 0
+               OpStore %zxzx %427
+        %429 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %430 = OpLoad %v3int %429
+        %431 = OpVectorShuffle %v4int %430 %430 2 0 2 1
+               OpStore %zxzy %431
+        %433 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %434 = OpLoad %v3int %433
+        %435 = OpVectorShuffle %v4int %434 %434 2 0 2 2
+               OpStore %zxzz %435
+        %437 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %438 = OpLoad %v3int %437
+        %439 = OpVectorShuffle %v4int %438 %438 2 1 0 0
+               OpStore %zyxx %439
+        %441 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %442 = OpLoad %v3int %441
+        %443 = OpVectorShuffle %v4int %442 %442 2 1 0 1
+               OpStore %zyxy %443
+        %445 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %446 = OpLoad %v3int %445
+        %447 = OpVectorShuffle %v4int %446 %446 2 1 0 2
+               OpStore %zyxz %447
+        %449 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %450 = OpLoad %v3int %449
+        %451 = OpVectorShuffle %v4int %450 %450 2 1 1 0
+               OpStore %zyyx %451
+        %453 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %454 = OpLoad %v3int %453
+        %455 = OpVectorShuffle %v4int %454 %454 2 1 1 1
+               OpStore %zyyy %455
+        %457 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %458 = OpLoad %v3int %457
+        %459 = OpVectorShuffle %v4int %458 %458 2 1 1 2
+               OpStore %zyyz %459
+        %461 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %462 = OpLoad %v3int %461
+        %463 = OpVectorShuffle %v4int %462 %462 2 1 2 0
+               OpStore %zyzx %463
+        %465 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %466 = OpLoad %v3int %465
+        %467 = OpVectorShuffle %v4int %466 %466 2 1 2 1
+               OpStore %zyzy %467
+        %469 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %470 = OpLoad %v3int %469
+        %471 = OpVectorShuffle %v4int %470 %470 2 1 2 2
+               OpStore %zyzz %471
+        %473 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %474 = OpLoad %v3int %473
+        %475 = OpVectorShuffle %v4int %474 %474 2 2 0 0
+               OpStore %zzxx %475
+        %477 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %478 = OpLoad %v3int %477
+        %479 = OpVectorShuffle %v4int %478 %478 2 2 0 1
+               OpStore %zzxy %479
+        %481 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %482 = OpLoad %v3int %481
+        %483 = OpVectorShuffle %v4int %482 %482 2 2 0 2
+               OpStore %zzxz %483
+        %485 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %486 = OpLoad %v3int %485
+        %487 = OpVectorShuffle %v4int %486 %486 2 2 1 0
+               OpStore %zzyx %487
+        %489 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %490 = OpLoad %v3int %489
+        %491 = OpVectorShuffle %v4int %490 %490 2 2 1 1
+               OpStore %zzyy %491
+        %493 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %494 = OpLoad %v3int %493
+        %495 = OpVectorShuffle %v4int %494 %494 2 2 1 2
+               OpStore %zzyz %495
+        %497 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %498 = OpLoad %v3int %497
+        %499 = OpVectorShuffle %v4int %498 %498 2 2 2 0
+               OpStore %zzzx %499
+        %501 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %502 = OpLoad %v3int %501
+        %503 = OpVectorShuffle %v4int %502 %502 2 2 2 1
+               OpStore %zzzy %503
+        %505 = OpAccessChain %_ptr_Private_v3int %P %uint_0
+        %506 = OpLoad %v3int %505
+        %507 = OpVectorShuffle %v4int %506 %506 2 2 2 2
+               OpStore %zzzz %507
+               OpReturn
+               OpFunctionEnd

@@ -147,7 +147,7 @@ struct tint_symbol {
 };
 
 float frag_main_inner(float4 coord) {
-  return coord.x;
+  return coord[0];
 }
 
 fragment tint_symbol frag_main(float4 coord [[position]]) {
@@ -457,7 +457,7 @@ struct UBO {
 };
 
 float sub_func(constant UBO& ubo, float param) {
-  return ubo.coord.x;
+  return ubo.coord[0];
 }
 
 fragment void frag_main(constant UBO& ubo [[buffer(0)]]) {

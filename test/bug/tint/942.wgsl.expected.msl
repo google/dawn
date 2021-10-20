@@ -24,14 +24,14 @@ void tint_symbol_inner(constant Params& params, constant Flip& flip, uint3 WorkG
   threadgroup_barrier(mem_flags::mem_threadgroup);
   uint const filterOffset = ((params.filterDim - 1u) / 2u);
   int2 const dims = int2(tint_symbol_2.get_width(0), tint_symbol_2.get_height(0));
-  int2 const baseIndex = as_type<int2>((as_type<uint2>(int2(((WorkGroupID.xy * uint2(params.blockDim, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u))))) - as_type<uint2>(int2(int(filterOffset), 0))));
+  int2 const baseIndex = as_type<int2>((as_type<uint2>(int2(((uint3(WorkGroupID).xy * uint2(params.blockDim, 4u)) + (uint3(LocalInvocationID).xy * uint2(4u, 1u))))) - as_type<uint2>(int2(int(filterOffset), 0))));
   for(uint r = 0u; (r < 4u); r = (r + 1u)) {
     for(uint c = 0u; (c < 4u); c = (c + 1u)) {
       int2 loadIndex = as_type<int2>((as_type<uint2>(baseIndex) + as_type<uint2>(int2(int(c), int(r)))));
       if ((flip.value != 0u)) {
-        loadIndex = loadIndex.yx;
+        loadIndex = int2(loadIndex).yx;
       }
-      (*(tint_symbol_1)).arr[r].arr[((4u * LocalInvocationID.x) + c)] = tint_symbol_2.sample(tint_symbol_3, ((float2(loadIndex) + float2(0.25f, 0.25f)) / float2(dims)), level(0.0f)).rgb;
+      (*(tint_symbol_1)).arr[r].arr[((4u * LocalInvocationID[0]) + c)] = float4(tint_symbol_2.sample(tint_symbol_3, ((float2(loadIndex) + float2(0.25f, 0.25f)) / float2(dims)), level(0.0f))).rgb;
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -39,9 +39,9 @@ void tint_symbol_inner(constant Params& params, constant Flip& flip, uint3 WorkG
     for(uint c = 0u; (c < 4u); c = (c + 1u)) {
       int2 writeIndex = as_type<int2>((as_type<uint2>(baseIndex) + as_type<uint2>(int2(int(c), int(r)))));
       if ((flip.value != 0u)) {
-        writeIndex = writeIndex.yx;
+        writeIndex = int2(writeIndex).yx;
       }
-      uint const center = ((4u * LocalInvocationID.x) + c);
+      uint const center = ((4u * LocalInvocationID[0]) + c);
       if ((((center >= filterOffset) && (center < (256u - filterOffset))) && all((writeIndex < dims)))) {
         float3 acc = float3(0.0f, 0.0f, 0.0f);
         for(uint f = 0u; (f < params.filterDim); f = (f + 1u)) {

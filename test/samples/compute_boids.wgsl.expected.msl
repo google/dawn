@@ -33,8 +33,8 @@ struct Particles {
 };
 
 float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
-  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
-  float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
+  float angle = -(atan2(a_particleVel[0], a_particleVel[1]));
+  float2 pos = float2(((a_pos[0] * cos(angle)) - (a_pos[1] * sin(angle))), ((a_pos[0] * sin(angle)) + (a_pos[1] * cos(angle))));
   return float4((pos + a_particlePos), 0.0f, 1.0f);
 }
 
@@ -57,7 +57,7 @@ fragment tint_symbol_3 frag_main() {
 }
 
 void comp_main_inner(constant SimParams& params, device Particles& particlesA, device Particles& particlesB, uint3 gl_GlobalInvocationID) {
-  uint index = gl_GlobalInvocationID.x;
+  uint index = gl_GlobalInvocationID[0];
   if ((index >= 5u)) {
     return;
   }
@@ -74,8 +74,8 @@ void comp_main_inner(constant SimParams& params, device Particles& particlesA, d
     if ((i == index)) {
       continue;
     }
-    pos = particlesA.particles.arr[i].pos.xy;
-    vel = particlesA.particles.arr[i].vel.xy;
+    pos = float2(particlesA.particles.arr[i].pos).xy;
+    vel = float2(particlesA.particles.arr[i].vel).xy;
     if ((distance(pos, vPos) < params.rule1Distance)) {
       cMass = (cMass + pos);
       cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));
@@ -97,17 +97,17 @@ void comp_main_inner(constant SimParams& params, device Particles& particlesA, d
   vVel = (((vVel + (cMass * params.rule1Scale)) + (colVel * params.rule2Scale)) + (cVel * params.rule3Scale));
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.100000001f));
   vPos = (vPos + (vVel * params.deltaT));
-  if ((vPos.x < -1.0f)) {
-    vPos.x = 1.0f;
+  if ((vPos[0] < -1.0f)) {
+    vPos[0] = 1.0f;
   }
-  if ((vPos.x > 1.0f)) {
-    vPos.x = -1.0f;
+  if ((vPos[0] > 1.0f)) {
+    vPos[0] = -1.0f;
   }
-  if ((vPos.y < -1.0f)) {
-    vPos.y = 1.0f;
+  if ((vPos[1] < -1.0f)) {
+    vPos[1] = 1.0f;
   }
-  if ((vPos.y > 1.0f)) {
-    vPos.y = -1.0f;
+  if ((vPos[1] > 1.0f)) {
+    vPos[1] = -1.0f;
   }
   particlesB.particles.arr[index].pos = vPos;
   particlesB.particles.arr[index].vel = vVel;

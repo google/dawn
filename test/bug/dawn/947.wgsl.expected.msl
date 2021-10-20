@@ -27,7 +27,7 @@ VertexOutputs vs_main_inner(constant Uniforms& uniforms, uint VertexIndex) {
   tint_array_wrapper texcoord = {.arr={float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)}};
   VertexOutputs output = {};
   output.position = float4(((texcoord.arr[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
-  bool flipY = (uniforms.u_scale.y < 0.0f);
+  bool flipY = (uniforms.u_scale[1] < 0.0f);
   if (flipY) {
     output.texcoords = ((((texcoord.arr[VertexIndex] * uniforms.u_scale) + uniforms.u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
   } else {

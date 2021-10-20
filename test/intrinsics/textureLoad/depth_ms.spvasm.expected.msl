@@ -11,7 +11,7 @@ struct tint_symbol_3 {
 void textureLoad_6273b1(depth2d_ms<float, access::read> tint_symbol_5) {
   float res = 0.0f;
   float4 const x_17 = float4(tint_symbol_5.read(uint2(int2(0, 0)), 1), 0.0f, 0.0f, 0.0f);
-  res = x_17.x;
+  res = x_17[0];
   return;
 }
 

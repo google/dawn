@@ -58,8 +58,8 @@ float mm_readA_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, thread 
   int2 param_10 = 0;
   int2 param_11 = 0;
   float x_430 = 0.0f;
-  int const x_417 = x_48.aShape.y;
-  int const x_419 = x_48.aShape.z;
+  int const x_417 = x_48.aShape[1];
+  int const x_419 = x_48.aShape[2];
   batchASize = as_type<int>((as_type<uint>(x_417) * as_type<uint>(x_419)));
   int const x_421 = *(row);
   int const x_422 = *(col);
@@ -88,8 +88,8 @@ float mm_readB_i1_i1_(constant Uniforms& x_48, const device ssbB& x_185, thread 
   int2 param_12 = 0;
   int2 param_13 = 0;
   float x_468 = 0.0f;
-  int const x_455 = x_48.bShape.y;
-  int const x_457 = x_48.bShape.z;
+  int const x_455 = x_48.bShape[1];
+  int const x_457 = x_48.bShape[2];
   batchBSize = as_type<int>((as_type<uint>(x_455) * as_type<uint>(x_457)));
   int const x_459 = *(row_1);
   int const x_460 = *(col_1);
@@ -115,8 +115,8 @@ float mm_readB_i1_i1_(constant Uniforms& x_48, const device ssbB& x_185, thread 
 
 int getOutputFlatIndex_vi3_(constant Uniforms& x_48, thread int3* const coords) {
   int3 const x_99 = *(coords);
-  int const x_105 = x_48.outShapeStrides.x;
-  int const x_107 = x_48.outShapeStrides.y;
+  int const x_105 = x_48.outShapeStrides[0];
+  int const x_107 = x_48.outShapeStrides[1];
   return int(dot(float3(x_99), float3(int3(x_105, x_107, 1))));
 }
 
@@ -203,13 +203,13 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
   int param_7 = 0;
   int param_8 = 0;
   float param_9 = 0.0f;
-  uint const x_132 = (*(tint_symbol_9)).y;
+  uint const x_132 = (*(tint_symbol_9))[1];
   tileRow = as_type<int>((as_type<uint>(as_type<int>(x_132)) * as_type<uint>(1)));
-  uint const x_137 = (*(tint_symbol_9)).x;
+  uint const x_137 = (*(tint_symbol_9))[0];
   tileCol = as_type<int>((as_type<uint>(as_type<int>(x_137)) * as_type<uint>(1)));
-  uint const x_143 = (*(tint_symbol_10)).y;
+  uint const x_143 = (*(tint_symbol_10))[1];
   globalRow = as_type<int>((as_type<uint>(as_type<int>(x_143)) * as_type<uint>(1)));
-  uint const x_148 = (*(tint_symbol_10)).x;
+  uint const x_148 = (*(tint_symbol_10))[0];
   globalCol = as_type<int>((as_type<uint>(as_type<int>(x_148)) * as_type<uint>(1)));
   int const x_152 = *(dimInner);
   numTiles = as_type<int>((as_type<uint>((as_type<int>((as_type<uint>(x_152) - as_type<uint>(1))) / 64)) + as_type<uint>(1)));
@@ -240,9 +240,9 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
       innerRow = as_type<int>((as_type<uint>(x_183) + as_type<uint>(1)));
     }
   }
-  uint const x_187 = (*(tint_symbol_9)).x;
+  uint const x_187 = (*(tint_symbol_9))[0];
   tileColA = as_type<int>((as_type<uint>(as_type<int>(x_187)) * as_type<uint>(64)));
-  uint const x_192 = (*(tint_symbol_9)).y;
+  uint const x_192 = (*(tint_symbol_9))[1];
   tileRowB = as_type<int>((as_type<uint>(as_type<int>(x_192)) * as_type<uint>(1)));
   t = 0;
   while (true) {
@@ -464,13 +464,13 @@ void main_1(constant Uniforms& x_48, const device ssbA& x_165, const device ssbB
   int param_18 = 0;
   int param_19 = 0;
   int param_20 = 0;
-  int const x_67 = x_48.aShape.y;
+  int const x_67 = x_48.aShape[1];
   *(tint_symbol_17) = x_67;
-  int const x_71 = x_48.aShape.z;
+  int const x_71 = x_48.aShape[2];
   *(tint_symbol_18) = x_71;
-  int const x_75 = x_48.bShape.z;
+  int const x_75 = x_48.bShape[2];
   *(tint_symbol_19) = x_75;
-  uint const x_505 = (*(tint_symbol_20)).z;
+  uint const x_505 = (*(tint_symbol_20))[2];
   *(tint_symbol_21) = as_type<int>(x_505);
   int const x_508 = *(tint_symbol_17);
   param_18 = x_508;

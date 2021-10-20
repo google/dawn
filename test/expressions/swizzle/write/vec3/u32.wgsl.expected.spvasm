@@ -1,0 +1,46 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 24
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "v"
+               OpName %P "P"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %f "f"
+               OpMemberDecorate %S 0 Offset 0
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+          %S = OpTypeStruct %v3uint
+%_ptr_Private_S = OpTypePointer Private %S
+          %6 = OpConstantNull %S
+          %P = OpVariable %_ptr_Private_S Private %6
+       %void = OpTypeVoid
+          %7 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_Private_v3uint = OpTypePointer Private %v3uint
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+         %19 = OpConstantComposite %v3uint %uint_1 %uint_2 %uint_3
+%_ptr_Private_uint = OpTypePointer Private %uint
+%unused_entry_point = OpFunction %void None %7
+         %10 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %7
+         %12 = OpLabel
+         %15 = OpAccessChain %_ptr_Private_v3uint %P %uint_0
+               OpStore %15 %19
+         %21 = OpAccessChain %_ptr_Private_uint %P %uint_0 %uint_0
+               OpStore %21 %uint_1
+         %22 = OpAccessChain %_ptr_Private_uint %P %uint_0 %uint_1
+               OpStore %22 %uint_2
+         %23 = OpAccessChain %_ptr_Private_uint %P %uint_0 %uint_2
+               OpStore %23 %uint_3
+               OpReturn
+               OpFunctionEnd

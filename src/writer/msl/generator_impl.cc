@@ -1953,28 +1953,55 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
 bool GeneratorImpl::EmitMemberAccessor(
     std::ostream& out,
     const ast::MemberAccessorExpression* expr) {
-  bool paren_lhs =
-      !expr->structure
-           ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
-                     ast::IdentifierExpression, ast::MemberAccessorExpression,
-                     ast::TypeConstructorExpression>();
-  if (paren_lhs) {
-    out << "(";
-  }
-  if (!EmitExpression(out, expr->structure)) {
-    return false;
-  }
-  if (paren_lhs) {
-    out << ")";
-  }
+  auto write_lhs = [&] {
+    bool paren_lhs =
+        !expr->structure
+             ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
+                       ast::IdentifierExpression, ast::MemberAccessorExpression,
+                       ast::TypeConstructorExpression>();
+    if (paren_lhs) {
+      out << "(";
+    }
+    if (!EmitExpression(out, expr->structure)) {
+      return false;
+    }
+    if (paren_lhs) {
+      out << ")";
+    }
+    return true;
+  };
 
-  out << ".";
+  auto& sem = program_->Sem();
 
-  // Swizzles get written out directly
-  if (program_->Sem().Get(expr)->Is<sem::Swizzle>()) {
-    out << program_->Symbols().NameFor(expr->member->symbol);
-  } else if (!EmitExpression(out, expr->member)) {
-    return false;
+  if (auto* swizzle = sem.Get(expr)->As<sem::Swizzle>()) {
+    // Metal 1.x does not support swizzling of packed vector types.
+    // For single element swizzles, we can use the index operator.
+    // For multi-element swizzles, we need to cast to a regular vector type
+    // first. Note that we do not currently allow assignments to swizzles, so
+    // the casting which will convert the l-value to r-value is fine.
+    if (swizzle->Indices().size() == 1) {
+      if (!write_lhs()) {
+        return false;
+      }
+      out << "[" << swizzle->Indices()[0] << "]";
+    } else {
+      if (!EmitType(out, sem.Get(expr->structure)->Type()->UnwrapRef(), "")) {
+        return false;
+      }
+      out << "(";
+      if (!write_lhs()) {
+        return false;
+      }
+      out << ")." << program_->Symbols().NameFor(expr->member->symbol);
+    }
+  } else {
+    if (!write_lhs()) {
+      return false;
+    }
+    out << ".";
+    if (!EmitExpression(out, expr->member)) {
+      return false;
+    }
   }
 
   return true;

@@ -42,7 +42,7 @@ float4 getColor(constant Uniforms& uniforms, FragmentInput tint_symbol, texture2
   } else {
     if ((uniforms.color_source == 1u)) {
       color = tint_symbol.normal;
-      color.a = 1.0f;
+      color[3] = 1.0f;
     } else {
       if ((uniforms.color_source == 2u)) {
         color = uniforms.color;

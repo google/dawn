@@ -58,10 +58,10 @@ void tint_symbol_inner(constant Uniforms& uniforms, const device Matrix& firstMa
     (*(tint_symbol_2)).arr[i].arr[i_1] = float();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  uint const tileRow = (local_id.y * RowPerThread);
-  uint const tileCol = (local_id.x * ColPerThread);
-  uint const globalRow = (global_id.y * RowPerThread);
-  uint const globalCol = (global_id.x * ColPerThread);
+  uint const tileRow = (local_id[1] * RowPerThread);
+  uint const tileCol = (local_id[0] * ColPerThread);
+  uint const globalRow = (global_id[1] * RowPerThread);
+  uint const globalCol = (global_id[0] * ColPerThread);
   uint const numTiles = (((uniforms.dimInner - 1u) / TileInner) + 1u);
   tint_array_wrapper_2 acc = {};
   float ACached = 0.0f;
@@ -70,9 +70,9 @@ void tint_symbol_inner(constant Uniforms& uniforms, const device Matrix& firstMa
     acc.arr[index] = 0.0f;
   }
   uint const ColPerThreadA = (TileInner / 16u);
-  uint const tileColA = (local_id.x * ColPerThreadA);
+  uint const tileColA = (local_id[0] * ColPerThreadA);
   uint const RowPerThreadB = (TileInner / 16u);
-  uint const tileRowB = (local_id.y * RowPerThreadB);
+  uint const tileRowB = (local_id[1] * RowPerThreadB);
   for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
     for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
       for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {

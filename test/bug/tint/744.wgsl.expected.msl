@@ -11,16 +11,16 @@ struct Matrix {
 };
 
 void tint_symbol_inner(constant Uniforms& uniforms, const device Matrix& firstMatrix, const device Matrix& secondMatrix, device Matrix& resultMatrix, uint3 global_id) {
-  uint2 const resultCell = uint2(global_id.y, global_id.x);
-  uint const dimInner = uniforms.aShape.y;
-  uint const dimOutter = uniforms.outShape.y;
+  uint2 const resultCell = uint2(global_id[1], global_id[0]);
+  uint const dimInner = uniforms.aShape[1];
+  uint const dimOutter = uniforms.outShape[1];
   uint result = 0u;
   for(uint i = 0u; (i < dimInner); i = (i + 1u)) {
-    uint const a = (i + (resultCell.x * dimInner));
-    uint const b = (resultCell.y + (i * dimOutter));
+    uint const a = (i + (resultCell[0] * dimInner));
+    uint const b = (resultCell[1] + (i * dimOutter));
     result = (result + (firstMatrix.numbers[a] * secondMatrix.numbers[b]));
   }
-  uint const index = (resultCell.y + (resultCell.x * dimOutter));
+  uint const index = (resultCell[1] + (resultCell[0] * dimOutter));
   resultMatrix.numbers[index] = result;
 }
 

@@ -53,20 +53,20 @@ struct AI32s {
 };
 
 float3 toVoxelPos(constant Uniforms& uniforms, float3 position) {
-  float3 bbMin = float3(uniforms.bbMin.x, uniforms.bbMin.y, uniforms.bbMin.z);
-  float3 bbMax = float3(uniforms.bbMax.x, uniforms.bbMax.y, uniforms.bbMax.z);
+  float3 bbMin = float3(uniforms.bbMin[0], uniforms.bbMin[1], uniforms.bbMin[2]);
+  float3 bbMax = float3(uniforms.bbMax[0], uniforms.bbMax[1], uniforms.bbMax[2]);
   float3 bbSize = (bbMax - bbMin);
-  float cubeSize = fmax(fmax(bbSize.x, bbSize.y), bbSize.z);
+  float cubeSize = fmax(fmax(bbSize[0], bbSize[1]), bbSize[2]);
   float gridSize = float(uniforms.gridSize);
-  float gx = ((gridSize * (position.x - uniforms.bbMin.x)) / cubeSize);
-  float gy = ((gridSize * (position.y - uniforms.bbMin.y)) / cubeSize);
-  float gz = ((gridSize * (position.z - uniforms.bbMin.z)) / cubeSize);
+  float gx = ((gridSize * (position[0] - uniforms.bbMin[0])) / cubeSize);
+  float gy = ((gridSize * (position[1] - uniforms.bbMin[1])) / cubeSize);
+  float gz = ((gridSize * (position[2] - uniforms.bbMin[2])) / cubeSize);
   return float3(gx, gy, gz);
 }
 
 uint toIndex1D(uint gridSize, float3 voxelPos) {
   uint3 icoord = uint3(voxelPos);
-  return ((icoord.x + (gridSize * icoord.y)) + ((gridSize * gridSize) * icoord.z));
+  return ((icoord[0] + (gridSize * icoord[1])) + ((gridSize * gridSize) * icoord[2]));
 }
 
 uint3 toIndex3D(uint gridSize, uint index) {
@@ -91,7 +91,7 @@ void doIgnore(constant Uniforms& uniforms, device Dbg& dbg, device AU32s& counte
 }
 
 void main_count_inner(constant Uniforms& uniforms, device Dbg& dbg, device AU32s& counters, device U32s& indices, device F32s& positions, device AI32s& LUT, uint3 GlobalInvocationID) {
-  uint triangleIndex = GlobalInvocationID.x;
+  uint triangleIndex = GlobalInvocationID[0];
   if ((triangleIndex >= uniforms.numTriangles)) {
     return;
   }
@@ -108,9 +108,9 @@ void main_count_inner(constant Uniforms& uniforms, device Dbg& dbg, device AU32s
   uint acefg = atomic_fetch_add_explicit(&(counters.values[voxelIndex]), 1u, memory_order_relaxed);
   if ((triangleIndex == 0u)) {
     dbg.value0 = uniforms.gridSize;
-    dbg.value_f32_0 = center.x;
-    dbg.value_f32_1 = center.y;
-    dbg.value_f32_2 = center.z;
+    dbg.value_f32_0 = center[0];
+    dbg.value_f32_1 = center[1];
+    dbg.value_f32_2 = center[2];
   }
 }
 
@@ -120,7 +120,7 @@ kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], con
 }
 
 void main_create_lut_inner(constant Uniforms& uniforms, device Dbg& dbg, device AU32s& counters, device U32s& indices, device F32s& positions, device AI32s& LUT, uint3 GlobalInvocationID) {
-  uint voxelIndex = GlobalInvocationID.x;
+  uint voxelIndex = GlobalInvocationID[0];
   doIgnore(uniforms, dbg, counters, indices, positions, LUT);
   uint maxVoxels = ((uniforms.gridSize * uniforms.gridSize) * uniforms.gridSize);
   if ((voxelIndex >= maxVoxels)) {
@@ -140,7 +140,7 @@ kernel void main_create_lut(uint3 GlobalInvocationID [[thread_position_in_grid]]
 }
 
 void main_sort_triangles_inner(constant Uniforms& uniforms, device Dbg& dbg, device AU32s& counters, device U32s& indices, device F32s& positions, device AI32s& LUT, uint3 GlobalInvocationID) {
-  uint triangleIndex = GlobalInvocationID.x;
+  uint triangleIndex = GlobalInvocationID[0];
   doIgnore(uniforms, dbg, counters, indices, positions, LUT);
   if ((triangleIndex >= uniforms.numTriangles)) {
     return;

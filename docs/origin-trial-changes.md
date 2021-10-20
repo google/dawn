@@ -8,6 +8,10 @@
 * Deprecated texture builtin functions that accepted a `read` access controlled storage texture have been removed.
 * Storage textures must now only use the `write` access control.
 
+### Fixes
+
+* Swizzling of `vec3` types in `storage` and `uniform` buffers has been fixed for Metal 1.x. [tint:1249](https://crbug.com/tint/1249)
+
 ## Changes for M95
 
 ### New Features

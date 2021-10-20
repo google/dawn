@@ -23,7 +23,7 @@ float4 tint_symbol_inner(constant vertexUniformBuffer1& x_20, constant vertexUni
   indexable = tint_symbol_2;
   float2 const x_51 = indexable.arr[x_46];
   float2 const x_52 = (float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);
-  return float4(x_52.x, x_52.y, 0.0f, 1.0f);
+  return float4(x_52[0], x_52[1], 0.0f, 1.0f);
 }
 
 vertex tint_symbol_1 tint_symbol(uint gl_VertexIndex [[vertex_id]], constant vertexUniformBuffer1& x_20 [[buffer(0)]], constant vertexUniformBuffer2& x_26 [[buffer(1)]]) {

@@ -43,7 +43,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
   GeneratorImpl& gen = Build();
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "my_vec.xyz");
+  EXPECT_EQ(out.str(), "float4(my_vec).xyz");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
@@ -55,7 +55,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
   GeneratorImpl& gen = Build();
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "my_vec.gbr");
+  EXPECT_EQ(out.str(), "float4(my_vec).gbr");
 }
 
 }  // namespace
