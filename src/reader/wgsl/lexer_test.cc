@@ -493,6 +493,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{";", Token::Type::kSemicolon},
                     TokenData{"*", Token::Type::kStar},
                     TokenData{"~", Token::Type::kTilde},
+                    TokenData{"_", Token::Type::kUnderscore},
                     TokenData{"^", Token::Type::kXor}));
 
 using KeywordTest = testing::TestWithParam<TokenData>;

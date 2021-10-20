@@ -114,6 +114,8 @@ class Token {
     kStar,
     /// A '~'
     kTilde,
+    /// A '_'
+    kUnderscore,
     /// A '^'
     kXor,
 
