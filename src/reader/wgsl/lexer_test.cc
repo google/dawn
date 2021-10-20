@@ -149,6 +149,12 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          FloatData{"-5.7", -5.7f},
                                          FloatData{"-5.", -5.f},
                                          FloatData{"-.7", -.7f},
+                                         // No decimal, with exponent
+                                         FloatData{"1e5", 1e5f},
+                                         FloatData{"1E5", 1e5f},
+                                         FloatData{"1e-5", 1e-5f},
+                                         FloatData{"1E-5", 1e-5f},
+                                         // With decimal and exponents
                                          FloatData{"0.2e+12", 0.2e12f},
                                          FloatData{"1.2e-5", 1.2e-5f},
                                          FloatData{"2.57e23", 2.57e23f},
@@ -163,15 +169,39 @@ TEST_P(FloatTest_Invalid, Handles) {
   auto t = l.next();
   EXPECT_FALSE(t.Is(Token::Type::kFloatLiteral));
 }
-INSTANTIATE_TEST_SUITE_P(LexerTest,
-                         FloatTest_Invalid,
-                         testing::Values(".",
-                                         "-.",
-                                         "2.5e+256",
-                                         "-2.5e+127",
-                                         "2.5e-300",
-                                         "2.5e 12",
-                                         "2.5e+ 123"));
+INSTANTIATE_TEST_SUITE_P(
+    LexerTest,
+    FloatTest_Invalid,
+    testing::Values(".",
+                    "-.",
+                    // Need a mantissa digit
+                    ".e5",
+                    ".E5",
+                    // Need exponent digits
+                    ".e",
+                    ".e+",
+                    ".e-",
+                    ".E",
+                    ".e+",
+                    ".e-",
+                    // Overflow
+                    "2.5e+256",
+                    "-2.5e+127",
+                    // Magnitude smaller than smallest positive f32.
+                    "2.5e-300",
+                    "-2.5e-300",
+                    // Decimal exponent must immediately
+                    // follow the 'e'.
+                    "2.5e 12",
+                    "2.5e +12",
+                    "2.5e -12",
+                    "2.5e+ 123",
+                    "2.5e- 123",
+                    "2.5E 12",
+                    "2.5E +12",
+                    "2.5E -12",
+                    "2.5E+ 123",
+                    "2.5E- 123"));
 
 using IdentifierTest = testing::TestWithParam<const char*>;
 TEST_P(IdentifierTest, Parse) {

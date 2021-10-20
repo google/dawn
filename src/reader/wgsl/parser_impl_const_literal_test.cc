@@ -77,12 +77,41 @@ TEST_F(ParserImplTest, ConstLiteral_Float) {
   EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 
-TEST_F(ParserImplTest, ConstLiteral_InvalidFloat) {
+TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_IncompleteExponent) {
+  auto p = parser("1.0e+");
+  auto c = p->const_literal();
+  EXPECT_FALSE(c.matched);
+  EXPECT_TRUE(c.errored);
+  EXPECT_EQ(p->error(),
+            "1:1: incomplete exponent for floating point literal: 1.0e+");
+  ASSERT_EQ(c.value, nullptr);
+}
+
+TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooSmallMagnitude) {
+  auto p = parser("1e-256");
+  auto c = p->const_literal();
+  EXPECT_FALSE(c.matched);
+  EXPECT_TRUE(c.errored);
+  EXPECT_EQ(p->error(),
+            "1:1: f32 (1e-256) magnitude too small, not representable");
+  ASSERT_EQ(c.value, nullptr);
+}
+
+TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooLargeNegative) {
+  auto p = parser("-1.2e+256");
+  auto c = p->const_literal();
+  EXPECT_FALSE(c.matched);
+  EXPECT_TRUE(c.errored);
+  EXPECT_EQ(p->error(), "1:1: f32 (-1.2e+256) too large (negative)");
+  ASSERT_EQ(c.value, nullptr);
+}
+
+TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooLargePositive) {
   auto p = parser("1.2e+256");
   auto c = p->const_literal();
   EXPECT_FALSE(c.matched);
   EXPECT_TRUE(c.errored);
-  EXPECT_EQ(p->error(), "1:1: f32 (1.2e+256) too large");
+  EXPECT_EQ(p->error(), "1:1: f32 (1.2e+256) too large (positive)");
   ASSERT_EQ(c.value, nullptr);
 }
 

@@ -210,43 +210,58 @@ Token Lexer::try_float() {
   auto end = pos_;
 
   auto source = begin_source();
+  bool has_mantissa_digits = false;
 
   if (matches(end, "-")) {
     end++;
   }
   while (end < len_ && is_digit(content_->data[end])) {
+    has_mantissa_digits = true;
     end++;
   }
 
-  if (end >= len_ || !matches(end, ".")) {
-    return {};
+  bool has_point = false;
+  if (end < len_ && matches(end, ".")) {
+    has_point = true;
+    end++;
   }
-  end++;
 
   while (end < len_ && is_digit(content_->data[end])) {
+    has_mantissa_digits = true;
     end++;
+  }
+
+  if (!has_mantissa_digits) {
+    return {};
   }
 
   // Parse the exponent if one exists
-  if (end < len_ && matches(end, "e")) {
+  bool has_exponent = false;
+  if (end < len_ && (matches(end, "e") || matches(end, "E"))) {
     end++;
     if (end < len_ && (matches(end, "+") || matches(end, "-"))) {
       end++;
     }
 
-    auto exp_start = end;
     while (end < len_ && isdigit(content_->data[end])) {
+      has_exponent = true;
       end++;
     }
 
-    // Must have an exponent
-    if (exp_start == end)
-      return {};
+    // If an 'e' or 'E' was present, then the number part must also be present.
+    if (!has_exponent) {
+      const auto str = content_->data.substr(start, end - start);
+      return {Token::Type::kError, source,
+              "incomplete exponent for floating point literal: " + str};
+    }
   }
 
-  auto str = content_->data.substr(start, end - start);
-  if (str == "." || str == "-.")
+  if (!has_point && !has_exponent) {
+    // If it only has digits then it's an integer.
     return {};
+  }
+
+  const auto str = content_->data.substr(start, end - start);
 
   pos_ = end;
   location_.column += (end - start);
@@ -254,16 +269,22 @@ Token Lexer::try_float() {
   end_source(source);
 
   auto res = strtod(content_->data.c_str() + start, nullptr);
-  // This handles if the number is a really small in the exponent
-  if (res > 0 && res < static_cast<double>(std::numeric_limits<float>::min())) {
-    return {Token::Type::kError, source, "f32 (" + str + " too small"};
+  // This errors out if a non-zero magnitude is too small to represent in a
+  // float. It can't be represented faithfully in an f32.
+  const auto magnitude = std::fabs(res);
+  if (0.0 < magnitude &&
+      magnitude < static_cast<double>(std::numeric_limits<float>::min())) {
+    return {Token::Type::kError, source,
+            "f32 (" + str + ") magnitude too small, not representable"};
   }
   // This handles if the number is really large negative number
   if (res < static_cast<double>(std::numeric_limits<float>::lowest())) {
-    return {Token::Type::kError, source, "f32 (" + str + ") too small"};
+    return {Token::Type::kError, source,
+            "f32 (" + str + ") too large (negative)"};
   }
   if (res > static_cast<double>(std::numeric_limits<float>::max())) {
-    return {Token::Type::kError, source, "f32 (" + str + ") too large"};
+    return {Token::Type::kError, source,
+            "f32 (" + str + ") too large (positive)"};
   }
 
   return {source, static_cast<float>(res)};
