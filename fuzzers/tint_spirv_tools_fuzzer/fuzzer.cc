@@ -224,7 +224,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   }
 
   CommonFuzzer spv_to_wgsl(InputFormat::kSpv, OutputFormat::kWGSL);
-  spv_to_wgsl.EnableInspector();
   spv_to_wgsl.Run(data, size);
   if (spv_to_wgsl.HasErrors()) {
     auto error = spv_to_wgsl.Diagnostics().str();
@@ -247,7 +246,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     }
 
     CommonFuzzer fuzzer(InputFormat::kWGSL, target.second);
-    fuzzer.EnableInspector();
     fuzzer.Run(reinterpret_cast<const uint8_t*>(wgsl.data()), wgsl.size());
     if (fuzzer.HasErrors()) {
       auto error = spv_to_wgsl.Diagnostics().str();

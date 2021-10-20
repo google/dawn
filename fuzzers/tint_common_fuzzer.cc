@@ -37,11 +37,11 @@ namespace fuzzers {
 
 namespace {
 
-// A macro is used to avoid FatalError creating its own stack frame. This leads
+// A macro is used to avoid FATAL_ERROR creating its own stack frame. This leads
 // to better de-duplication of bug reports, because ClusterFuzz only uses the
-// top few stack frames for de-duplication, and a FatalError stack frame
+// top few stack frames for de-duplication, and a FATAL_ERROR stack frame
 // provides no useful information.
-#define FatalError(diags, msg_string)                         \
+#define FATAL_ERROR(diags, msg_string)                        \
   do {                                                        \
     std::string msg = msg_string;                             \
     auto printer = tint::diag::Printer::create(stderr, true); \
@@ -54,8 +54,19 @@ namespace {
 
 [[noreturn]] void TintInternalCompilerErrorReporter(
     const tint::diag::List& diagnostics) {
-  FatalError(diagnostics, "");
+  FATAL_ERROR(diagnostics, "");
 }
+
+// Wrapping this in a macro so it can be a one-liner in the code, but not
+// introducing another level in the stack trace. This will help with de-duping
+// ClusterFuzz issues.
+#define CHECK_INSPECTOR(inspector)                           \
+  do {                                                       \
+    if (inspector.has_error()) {                             \
+      FATAL_ERROR(program->Diagnostics(),                    \
+                  "Inspector failed: " + inspector.error()); \
+    }                                                        \
+  } while (false)
 
 bool SPIRVToolsValidationCheck(const tint::Program& program,
                                const std::vector<uint32_t>& spirv) {
@@ -164,91 +175,13 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #if TINT_BUILD_SPV_READER
   if (input_ == InputFormat::kSpv &&
       !SPIRVToolsValidationCheck(program, spirv_input)) {
-    FatalError(program.Diagnostics(),
-               "Fuzzing detected invalid input spirv not being caught by Tint");
+    FATAL_ERROR(
+        program.Diagnostics(),
+        "Fuzzing detected invalid input spirv not being caught by Tint");
   }
 #endif  // TINT_BUILD_SPV_READER
 
-  if (inspector_enabled_) {
-    inspector::Inspector inspector(&program);
-
-    auto entry_points = inspector.GetEntryPoints();
-    if (inspector.has_error()) {
-      diagnostics_.add_error(tint::diag::System::Inspector, inspector.error());
-      return 0;
-    }
-
-    for (auto& ep : entry_points) {
-      auto remapped_name = inspector.GetRemappedNameForEntryPoint(ep.name);
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-
-      auto constant_ids = inspector.GetConstantIDs();
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-
-      auto uniform_bindings =
-          inspector.GetUniformBufferResourceBindings(ep.name);
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-
-      auto storage_bindings =
-          inspector.GetStorageBufferResourceBindings(ep.name);
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-
-      auto readonly_bindings =
-          inspector.GetReadOnlyStorageBufferResourceBindings(ep.name);
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-
-      auto sampler_bindings = inspector.GetSamplerResourceBindings(ep.name);
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-
-      auto comparison_sampler_bindings =
-          inspector.GetComparisonSamplerResourceBindings(ep.name);
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-
-      auto sampled_texture_bindings =
-          inspector.GetSampledTextureResourceBindings(ep.name);
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-
-      auto multisampled_texture_bindings =
-          inspector.GetMultisampledTextureResourceBindings(ep.name);
-      if (inspector.has_error()) {
-        diagnostics_.add_error(tint::diag::System::Inspector,
-                               inspector.error());
-        return 0;
-      }
-    }
-  }
+  RunInspector(&program);
 
   if (transform_manager_) {
     auto out = transform_manager_->Run(&program, *transform_inputs_);
@@ -258,14 +191,15 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       for (const auto& diag : out.program.Diagnostics()) {
         if (diag.severity > diag::Severity::Error ||
             diag.system != diag::System::Transform) {
-          FatalError(out.program.Diagnostics(),
-                     "Fuzzing detected valid input program being transformed "
-                     "into an invalid output program");
+          FATAL_ERROR(out.program.Diagnostics(),
+                      "Fuzzing detected valid input program being transformed "
+                      "into an invalid output program");
         }
       }
     }
 
     program = std::move(out.program);
+    RunInspector(&program);
   }
 
   switch (output_) {
@@ -274,8 +208,8 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::wgsl::Generate(&program, options_wgsl_);
       generated_wgsl_ = std::move(result.wgsl);
       if (!result.success) {
-        FatalError(program.Diagnostics(),
-                   "WGSL writer failed: " + result.error);
+        FATAL_ERROR(program.Diagnostics(),
+                    "WGSL writer failed: " + result.error);
       }
 #endif  // TINT_BUILD_WGSL_WRITER
       break;
@@ -285,12 +219,12 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::spirv::Generate(&program, options_spirv_);
       generated_spirv_ = std::move(result.spirv);
       if (!result.success) {
-        FatalError(program.Diagnostics(),
-                   "SPIR-V writer failed: " + result.error);
+        FATAL_ERROR(program.Diagnostics(),
+                    "SPIR-V writer failed: " + result.error);
       }
       if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {
-        FatalError(program.Diagnostics(),
-                   "Fuzzing detected invalid spirv being emitted by Tint");
+        FATAL_ERROR(program.Diagnostics(),
+                    "Fuzzing detected invalid spirv being emitted by Tint");
       }
 
 #endif  // TINT_BUILD_SPV_WRITER
@@ -301,8 +235,8 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::hlsl::Generate(&program, options_hlsl_);
       generated_hlsl_ = std::move(result.hlsl);
       if (!result.success) {
-        FatalError(program.Diagnostics(),
-                   "HLSL writer failed: " + result.error);
+        FATAL_ERROR(program.Diagnostics(),
+                    "HLSL writer failed: " + result.error);
       }
 #endif  // TINT_BUILD_HLSL_WRITER
       break;
@@ -312,7 +246,8 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::msl::Generate(&program, options_msl_);
       generated_msl_ = std::move(result.msl);
       if (!result.success) {
-        FatalError(program.Diagnostics(), "MSL writer failed: " + result.error);
+        FATAL_ERROR(program.Diagnostics(),
+                    "MSL writer failed: " + result.error);
       }
 #endif  // TINT_BUILD_MSL_WRITER
       break;
@@ -320,6 +255,78 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   }
 
   return 0;
+}
+
+void CommonFuzzer::RunInspector(Program* program) {
+  inspector::Inspector inspector(program);
+
+  auto entry_points = inspector.GetEntryPoints();
+  CHECK_INSPECTOR(inspector);
+
+  auto constant_ids = inspector.GetConstantIDs();
+  CHECK_INSPECTOR(inspector);
+
+  auto constant_name_to_id = inspector.GetConstantNameToIdMap();
+  CHECK_INSPECTOR(inspector);
+
+  for (auto& ep : entry_points) {
+    auto remapped_name = inspector.GetRemappedNameForEntryPoint(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto storage_size = inspector.GetStorageSize(ep.name);
+    storage_size = 0;  // Silencing unused variable warning
+    CHECK_INSPECTOR(inspector);
+
+    auto resource_bindings = inspector.GetResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto uniform_bindings = inspector.GetUniformBufferResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto storage_bindings = inspector.GetStorageBufferResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto readonly_bindings =
+        inspector.GetReadOnlyStorageBufferResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto sampler_bindings = inspector.GetSamplerResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto comparison_sampler_bindings =
+        inspector.GetComparisonSamplerResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto sampled_texture_bindings =
+        inspector.GetSampledTextureResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto multisampled_texture_bindings =
+        inspector.GetMultisampledTextureResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto writeonly__bindings =
+        inspector.GetWriteOnlyStorageTextureResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto depth_bindings = inspector.GetDepthTextureResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto depth_multisampled_bindings =
+        inspector.GetDepthMultisampledTextureResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto external_bindings =
+        inspector.GetExternalTextureResourceBindings(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto sampler_texture_uses = inspector.GetSamplerTextureUses(ep.name);
+    CHECK_INSPECTOR(inspector);
+
+    auto workgroup_storage = inspector.GetWorkgroupStorageSize(ep.name);
+    workgroup_storage = 0;  // Silencing unused variable warning
+    CHECK_INSPECTOR(inspector);
+  }
 }
 
 }  // namespace fuzzers

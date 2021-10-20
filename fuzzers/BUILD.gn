@@ -159,15 +159,6 @@ if (build_with_chromium) {
       seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
     }
 
-    fuzzer_test("tint_inspector_fuzzer") {
-      sources = [ "tint_inspector_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
-      dict = "dictionary.txt"
-      libfuzzer_options = tint_fuzzer_common_libfuzzer_options
-      seed_corpus = fuzzer_corpus_wgsl_dir
-      seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
-    }
-
     fuzzer_test("tint_regex_spv_writer_fuzzer") {
       sources = [ "tint_regex_fuzzer/tint_regex_spv_writer_fuzzer.cc" ]
       deps = [ "tint_regex_fuzzer:tint_regex_fuzzer" ]
@@ -303,7 +294,6 @@ if (build_with_chromium) {
         ":tint_ast_spv_writer_fuzzer",
         ":tint_binding_remapper_fuzzer",
         ":tint_first_index_offset_fuzzer",
-        ":tint_inspector_fuzzer",
         ":tint_regex_spv_writer_fuzzer",
         ":tint_renamer_fuzzer",
         ":tint_robustness_fuzzer",

@@ -63,7 +63,7 @@ class Inspector {
 
   /// @param entry_point name of the entry point to get information about.
   /// @returns the total size of shared storage required by an entry point,
-  //           including all uniforms storage buffers.
+  ///          including all uniform storage buffers.
   uint32_t GetStorageSize(const std::string& entry_point);
 
   /// @param entry_point name of the entry point to get information about.
