@@ -497,7 +497,7 @@ struct CanonicalizeEntryPointIO::State {
     };
     if (func_sem->ReturnType()->Is<sem::Void>()) {
       // The function call is just a statement with no result.
-      wrapper_body.push_back(ctx.dst->create<ast::CallStatement>(call_inner));
+      wrapper_body.push_back(ctx.dst->CallStmt(call_inner));
     } else {
       // Capture the result of calling the original function.
       auto* inner_result = ctx.dst->Const(

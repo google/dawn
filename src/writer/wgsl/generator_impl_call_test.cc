@@ -66,7 +66,7 @@ TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
   Global("param2", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* call = Call("my_func", "param1", "param2");
-  auto* stmt = create<ast::CallStatement>(call);
+  auto* stmt = CallStmt(call);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();

@@ -521,7 +521,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"),
                                     Expr("d"))));
 
-  auto* expr = create<ast::CallStatement>(Call("foo", params));
+  auto* expr = CallStmt(Call("foo", params));
   WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();

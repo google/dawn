@@ -1620,6 +1620,20 @@ class ProgramBuilder {
   }
 
   /// @param source the source information
+  /// @param call the call expression to wrap in a call statement
+  /// @returns a `ast::CallStatement` for the given call expression
+  const ast::CallStatement* CallStmt(const Source& source,
+                                     const ast::CallExpression* call) {
+    return create<ast::CallStatement>(source, call);
+  }
+
+  /// @param call the call expression to wrap in a call statement
+  /// @returns a `ast::CallStatement` for the given call expression
+  const ast::CallStatement* CallStmt(const ast::CallExpression* call) {
+    return create<ast::CallStatement>(call);
+  }
+
+  /// @param source the source information
   /// @returns a `ast::PhonyExpression`
   const ast::PhonyExpression* Phony(const Source& source) {
     return create<ast::PhonyExpression>(source);

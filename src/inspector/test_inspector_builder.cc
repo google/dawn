@@ -40,7 +40,7 @@ void InspectorBuilder::MakeCallerBodyFunction(std::string caller,
   ast::StatementList body;
   body.reserve(callees.size() + 1);
   for (auto callee : callees) {
-    body.push_back(create<ast::CallStatement>(Call(callee)));
+    body.push_back(CallStmt(Call(callee)));
   }
   body.push_back(Return());
 

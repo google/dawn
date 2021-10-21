@@ -167,7 +167,7 @@ TEST_P(GlslIntrinsicTest, Emit) {
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
-  Func("func", {}, ty.void_(), {Ignore(call)},
+  Func("func", {}, ty.void_(), {CallStmt(call)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
@@ -536,7 +536,7 @@ TEST_F(GlslGeneratorImplTest_Intrinsic, Unpack2x16Float) {
 
 TEST_F(GlslGeneratorImplTest_Intrinsic, StorageBarrier) {
   Func("main", {}, ty.void_(),
-       {create<ast::CallStatement>(Call("storageBarrier"))},
+       {CallStmt(Call("storageBarrier"))},
        {
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
@@ -555,7 +555,7 @@ void main() {
 
 TEST_F(GlslGeneratorImplTest_Intrinsic, WorkgroupBarrier) {
   Func("main", {}, ty.void_(),
-       {create<ast::CallStatement>(Call("workgroupBarrier"))},
+       {CallStmt(Call("workgroupBarrier"))},
        {
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
@@ -577,7 +577,7 @@ TEST_F(GlslGeneratorImplTest_Intrinsic, Ignore) {
        ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
 
   Func("main", {}, ty.void_(),
-       {create<ast::CallStatement>(Call("ignore", Call("f", 1, 2, 3)))},
+       {CallStmt(Call("ignore", Call("f", 1, 2, 3)))},
        {
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),

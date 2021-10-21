@@ -44,7 +44,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
   Func("a_statement", {}, ty.void_(), {});
 
   auto* body = Block(create<ast::DiscardStatement>());
-  auto* continuing = Block(create<ast::CallStatement>(Call("a_statement")));
+  auto* continuing = Block(CallStmt(Call("a_statement")));
   auto* l = Loop(body, continuing);
 
   WrapInFunction(l);
@@ -70,7 +70,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   Global("rhs", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* body = Block(create<ast::DiscardStatement>());
-  auto* continuing = Block(create<ast::CallStatement>(Call("a_statement")));
+  auto* continuing = Block(CallStmt(Call("a_statement")));
   auto* inner = Loop(body, continuing);
 
   body = Block(inner);
@@ -159,8 +159,8 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoop) {
 
   Func("a_statement", {}, ty.void_(), {});
 
-  auto* f = For(nullptr, nullptr, nullptr,
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+  auto* f =
+      For(nullptr, nullptr, nullptr, Block(CallStmt(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -184,7 +184,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInit) {
   Func("a_statement", {}, ty.void_(), {});
 
   auto* f = For(Decl(Var("i", ty.i32())), nullptr, nullptr,
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+                Block(CallStmt(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -209,7 +209,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInit) {
   auto* multi_stmt = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                                    Expr(true), Expr(false));
   auto* f = For(Decl(Var("b", nullptr, multi_stmt)), nullptr, nullptr,
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+                Block(CallStmt(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -237,8 +237,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCond) {
 
   Func("a_statement", {}, ty.void_(), {});
 
-  auto* f = For(nullptr, true, nullptr,
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+  auto* f = For(nullptr, true, nullptr, Block(CallStmt(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -263,8 +262,8 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCond) {
 
   auto* multi_stmt = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                                    Expr(true), Expr(false));
-  auto* f = For(nullptr, multi_stmt, nullptr,
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+  auto* f =
+      For(nullptr, multi_stmt, nullptr, Block(CallStmt(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -294,7 +293,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCont) {
 
   auto* v = Decl(Var("i", ty.i32()));
   auto* f = For(nullptr, nullptr, Assign("i", Add("i", 1)),
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+                Block(CallStmt(Call("a_statement"))));
   WrapInFunction(v, f);
 
   GeneratorImpl& gen = Build();
@@ -321,7 +320,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCont) {
                                                    Expr(true), Expr(false));
   auto* v = Decl(Var("i", ty.bool_()));
   auto* f = For(nullptr, nullptr, Assign("i", multi_stmt),
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+                Block(CallStmt(Call("a_statement"))));
   WrapInFunction(v, f);
 
   GeneratorImpl& gen = Build();
@@ -350,7 +349,7 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInitCondCont) {
   Func("a_statement", {}, ty.void_(), {});
 
   auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1)),
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+                Block(CallStmt(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -379,9 +378,9 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInitCondCont) {
   auto* multi_stmt_c = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                                      Expr(true), Expr(false));
 
-  auto* f = For(Decl(Var("i", nullptr, multi_stmt_a)), multi_stmt_b,
-                Assign("i", multi_stmt_c),
-                Block(create<ast::CallStatement>(Call("a_statement"))));
+  auto* f =
+      For(Decl(Var("i", nullptr, multi_stmt_a)), multi_stmt_b,
+          Assign("i", multi_stmt_c), Block(CallStmt(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();

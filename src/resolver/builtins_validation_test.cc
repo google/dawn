@@ -986,7 +986,7 @@ TEST_P(FloatAllMatching, Scalar) {
     params.push_back(Expr(1.0f));
   }
   auto* builtin = Call(name, params);
-  Func("func", {}, ty.void_(), {Ignore(builtin)},
+  Func("func", {}, ty.void_(), {CallStmt(builtin)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1002,7 +1002,7 @@ TEST_P(FloatAllMatching, Vec2) {
     params.push_back(vec2<f32>(1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  Func("func", {}, ty.void_(), {Ignore(builtin)},
+  Func("func", {}, ty.void_(), {CallStmt(builtin)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1018,7 +1018,7 @@ TEST_P(FloatAllMatching, Vec3) {
     params.push_back(vec3<f32>(1.0f, 1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  Func("func", {}, ty.void_(), {Ignore(builtin)},
+  Func("func", {}, ty.void_(), {CallStmt(builtin)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1034,7 +1034,7 @@ TEST_P(FloatAllMatching, Vec4) {
     params.push_back(vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  Func("func", {}, ty.void_(), {Ignore(builtin)},
+  Func("func", {}, ty.void_(), {CallStmt(builtin)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

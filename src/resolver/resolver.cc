@@ -2475,21 +2475,7 @@ bool Resolver::ValidateCall(const ast::CallExpression* call) {
   return true;
 }
 
-bool Resolver::ValidateCallStatement(const ast::CallStatement* stmt) {
-  const sem::Type* return_type = TypeOf(stmt->expr);
-  if (!return_type->Is<sem::Void>()) {
-    // https://gpuweb.github.io/gpuweb/wgsl/#function-call-statement
-    // A function call statement executes a function call where the called
-    // function does not return a value. If the called function returns a value,
-    // that value must be consumed either through assignment, evaluation in
-    // another expression or through use of the ignore built-in function (see
-    // § 16.13 Value-steering functions).
-    AddError(
-        "result of called function was not used. If this was intentional wrap "
-        "the function call in ignore()",
-        stmt->source);
-    return false;
-  }
+bool Resolver::ValidateCallStatement(const ast::CallStatement*) {
   return true;
 }
 

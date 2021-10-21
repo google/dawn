@@ -193,14 +193,13 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                                  ast::StorageClass::kNone, ctx.dst->Expr(0u)));
 
                 // Call storage_buffer.GetDimensions(&buffer_size_result)
-                auto* call_get_dims =
-                    ctx.dst->create<ast::CallStatement>(ctx.dst->Call(
-                        // BufferSizeIntrinsic(X, ARGS...) is
-                        // translated to:
-                        //  X.GetDimensions(ARGS..) by the writer
-                        buffer_size, ctx.Clone(storage_buffer_expr),
-                        ctx.dst->AddressOf(ctx.dst->Expr(
-                            buffer_size_result->variable->symbol))));
+                auto* call_get_dims = ctx.dst->CallStmt(ctx.dst->Call(
+                    // BufferSizeIntrinsic(X, ARGS...) is
+                    // translated to:
+                    //  X.GetDimensions(ARGS..) by the writer
+                    buffer_size, ctx.Clone(storage_buffer_expr),
+                    ctx.dst->AddressOf(
+                        ctx.dst->Expr(buffer_size_result->variable->symbol))));
 
                 // Calculate actual array length
                 //                total_storage_buffer_size - array_offset

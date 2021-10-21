@@ -167,7 +167,7 @@ TEST_P(HlslIntrinsicTest, Emit) {
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
-  Func("func", {}, ty.void_(), {Ignore(call)},
+  Func("func", {}, ty.void_(), {CallStmt(call)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
@@ -317,7 +317,7 @@ modf_result tint_modf(float param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_modf(1.0f);
+  (void) tint_modf(1.0f);
   return;
 }
 )");
@@ -343,7 +343,7 @@ modf_result_vec3 tint_modf(float3 param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_modf(float3(0.0f, 0.0f, 0.0f));
+  (void) tint_modf(float3(0.0f, 0.0f, 0.0f));
   return;
 }
 )");
@@ -369,7 +369,7 @@ frexp_result tint_frexp(float param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_frexp(1.0f);
+  (void) tint_frexp(1.0f);
   return;
 }
 )");
@@ -395,7 +395,7 @@ frexp_result_vec3 tint_frexp(float3 param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_frexp(float3(0.0f, 0.0f, 0.0f));
+  (void) tint_frexp(float3(0.0f, 0.0f, 0.0f));
   return;
 }
 )");
@@ -418,7 +418,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, IsNormal_Scalar) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float val = 0.0f;
-  tint_isNormal(val);
+  (void) tint_isNormal(val);
   return;
 }
 )");
@@ -441,7 +441,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, IsNormal_Vector) {
 [numthreads(1, 1, 1)]
 void test_function() {
   float3 val = float3(0.0f, 0.0f, 0.0f);
-  tint_isNormal(val);
+  (void) tint_isNormal(val);
   return;
 }
 )");
@@ -463,7 +463,7 @@ static float4 p1 = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_pack4x8snorm(p1);
+  (void) tint_pack4x8snorm(p1);
   return;
 }
 )");
@@ -485,7 +485,7 @@ static float4 p1 = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_pack4x8unorm(p1);
+  (void) tint_pack4x8unorm(p1);
   return;
 }
 )");
@@ -507,7 +507,7 @@ static float2 p1 = float2(0.0f, 0.0f);
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_pack2x16snorm(p1);
+  (void) tint_pack2x16snorm(p1);
   return;
 }
 )");
@@ -529,7 +529,7 @@ static float2 p1 = float2(0.0f, 0.0f);
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_pack2x16unorm(p1);
+  (void) tint_pack2x16unorm(p1);
   return;
 }
 )");
@@ -551,7 +551,7 @@ static float2 p1 = float2(0.0f, 0.0f);
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_pack2x16float(p1);
+  (void) tint_pack2x16float(p1);
   return;
 }
 )");
@@ -574,7 +574,7 @@ static uint p1 = 0u;
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_unpack4x8snorm(p1);
+  (void) tint_unpack4x8snorm(p1);
   return;
 }
 )");
@@ -597,7 +597,7 @@ static uint p1 = 0u;
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_unpack4x8unorm(p1);
+  (void) tint_unpack4x8unorm(p1);
   return;
 }
 )");
@@ -620,7 +620,7 @@ static uint p1 = 0u;
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_unpack2x16snorm(p1);
+  (void) tint_unpack2x16snorm(p1);
   return;
 }
 )");
@@ -643,7 +643,7 @@ static uint p1 = 0u;
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_unpack2x16unorm(p1);
+  (void) tint_unpack2x16unorm(p1);
   return;
 }
 )");
@@ -665,15 +665,14 @@ static uint p1 = 0u;
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_unpack2x16float(p1);
+  (void) tint_unpack2x16float(p1);
   return;
 }
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, StorageBarrier) {
-  Func("main", {}, ty.void_(),
-       {create<ast::CallStatement>(Call("storageBarrier"))},
+  Func("main", {}, ty.void_(), {CallStmt(Call("storageBarrier"))},
        {
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
@@ -691,8 +690,7 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, WorkgroupBarrier) {
-  Func("main", {}, ty.void_(),
-       {create<ast::CallStatement>(Call("workgroupBarrier"))},
+  Func("main", {}, ty.void_(), {CallStmt(Call("workgroupBarrier"))},
        {
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
@@ -713,8 +711,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Ignore) {
   Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
        ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
 
-  Func("main", {}, ty.void_(),
-       {create<ast::CallStatement>(Call("ignore", Call("f", 1, 2, 3)))},
+  Func("main", {}, ty.void_(), {CallStmt(Call("ignore", Call("f", 1, 2, 3)))},
        {
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),

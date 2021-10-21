@@ -260,7 +260,7 @@ struct ZeroInitWorkgroupMemory::State {
 
     // Append a single workgroup barrier after the zero initialization.
     ctx.InsertFront(fn->body->statements,
-                    b.create<ast::CallStatement>(b.Call("workgroupBarrier")));
+                    b.CallStmt(b.Call("workgroupBarrier")));
   }
 
   /// BuildZeroingExpr is a function that builds a sub-expression used to zero
@@ -286,8 +286,7 @@ struct ZeroInitWorkgroupMemory::State {
       auto* zero_init = b.Construct(CreateASTTypeFor(ctx, atomic->Type()));
       auto expr = get_expr(1u);
       auto* store = b.Call("atomicStore", b.AddressOf(expr.expr), zero_init);
-      statements.emplace_back(Statement{b.create<ast::CallStatement>(store),
-                                        expr.num_iterations,
+      statements.emplace_back(Statement{b.CallStmt(store), expr.num_iterations,
                                         expr.array_indices});
       return;
     }

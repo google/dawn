@@ -1235,28 +1235,28 @@ struct SB {
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   atomicStore(&sb.a, 123);
-  ignore(atomicLoad(&sb.a));
-  ignore(atomicAdd(&sb.a, 123));
-  ignore(atomicSub(&sb.a, 123));
-  ignore(atomicMax(&sb.a, 123));
-  ignore(atomicMin(&sb.a, 123));
-  ignore(atomicAnd(&sb.a, 123));
-  ignore(atomicOr(&sb.a, 123));
-  ignore(atomicXor(&sb.a, 123));
-  ignore(atomicExchange(&sb.a, 123));
-  ignore(atomicCompareExchangeWeak(&sb.a, 123, 345));
+  atomicLoad(&sb.a);
+  atomicAdd(&sb.a, 123);
+  atomicSub(&sb.a, 123);
+  atomicMax(&sb.a, 123);
+  atomicMin(&sb.a, 123);
+  atomicAnd(&sb.a, 123);
+  atomicOr(&sb.a, 123);
+  atomicXor(&sb.a, 123);
+  atomicExchange(&sb.a, 123);
+  atomicCompareExchangeWeak(&sb.a, 123, 345);
 
   atomicStore(&sb.b, 123u);
-  ignore(atomicLoad(&sb.b));
-  ignore(atomicAdd(&sb.b, 123u));
-  ignore(atomicSub(&sb.b, 123u));
-  ignore(atomicMax(&sb.b, 123u));
-  ignore(atomicMin(&sb.b, 123u));
-  ignore(atomicAnd(&sb.b, 123u));
-  ignore(atomicOr(&sb.b, 123u));
-  ignore(atomicXor(&sb.b, 123u));
-  ignore(atomicExchange(&sb.b, 123u));
-  ignore(atomicCompareExchangeWeak(&sb.b, 123u, 345u));
+  atomicLoad(&sb.b);
+  atomicAdd(&sb.b, 123u);
+  atomicSub(&sb.b, 123u);
+  atomicMax(&sb.b, 123u);
+  atomicMin(&sb.b, 123u);
+  atomicAnd(&sb.b, 123u);
+  atomicOr(&sb.b, 123u);
+  atomicXor(&sb.b, 123u);
+  atomicExchange(&sb.b, 123u);
+  atomicCompareExchangeWeak(&sb.b, 123u, 345u);
 }
 )";
 
@@ -1339,27 +1339,27 @@ fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_p
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   tint_symbol(sb, 16u, 123);
-  ignore(tint_symbol_1(sb, 16u));
-  ignore(tint_symbol_2(sb, 16u, 123));
-  ignore(tint_symbol_3(sb, 16u, 123));
-  ignore(tint_symbol_4(sb, 16u, 123));
-  ignore(tint_symbol_5(sb, 16u, 123));
-  ignore(tint_symbol_6(sb, 16u, 123));
-  ignore(tint_symbol_7(sb, 16u, 123));
-  ignore(tint_symbol_8(sb, 16u, 123));
-  ignore(tint_symbol_9(sb, 16u, 123));
-  ignore(tint_symbol_10(sb, 16u, 123, 345));
+  tint_symbol_1(sb, 16u);
+  tint_symbol_2(sb, 16u, 123);
+  tint_symbol_3(sb, 16u, 123);
+  tint_symbol_4(sb, 16u, 123);
+  tint_symbol_5(sb, 16u, 123);
+  tint_symbol_6(sb, 16u, 123);
+  tint_symbol_7(sb, 16u, 123);
+  tint_symbol_8(sb, 16u, 123);
+  tint_symbol_9(sb, 16u, 123);
+  tint_symbol_10(sb, 16u, 123, 345);
   tint_symbol_11(sb, 20u, 123u);
-  ignore(tint_symbol_12(sb, 20u));
-  ignore(tint_symbol_13(sb, 20u, 123u));
-  ignore(tint_symbol_14(sb, 20u, 123u));
-  ignore(tint_symbol_15(sb, 20u, 123u));
-  ignore(tint_symbol_16(sb, 20u, 123u));
-  ignore(tint_symbol_17(sb, 20u, 123u));
-  ignore(tint_symbol_18(sb, 20u, 123u));
-  ignore(tint_symbol_19(sb, 20u, 123u));
-  ignore(tint_symbol_20(sb, 20u, 123u));
-  ignore(tint_symbol_21(sb, 20u, 123u, 345u));
+  tint_symbol_12(sb, 20u);
+  tint_symbol_13(sb, 20u, 123u);
+  tint_symbol_14(sb, 20u, 123u);
+  tint_symbol_15(sb, 20u, 123u);
+  tint_symbol_16(sb, 20u, 123u);
+  tint_symbol_17(sb, 20u, 123u);
+  tint_symbol_18(sb, 20u, 123u);
+  tint_symbol_19(sb, 20u, 123u);
+  tint_symbol_20(sb, 20u, 123u);
+  tint_symbol_21(sb, 20u, 123u, 345u);
 }
 )";
 
@@ -1381,27 +1381,27 @@ var<workgroup> w : S;
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   atomicStore(&(w.a), 123);
-  ignore(atomicLoad(&(w.a)));
-  ignore(atomicAdd(&(w.a), 123));
-  ignore(atomicSub(&(w.a), 123));
-  ignore(atomicMax(&(w.a), 123));
-  ignore(atomicMin(&(w.a), 123));
-  ignore(atomicAnd(&(w.a), 123));
-  ignore(atomicOr(&(w.a), 123));
-  ignore(atomicXor(&(w.a), 123));
-  ignore(atomicExchange(&(w.a), 123));
-  ignore(atomicCompareExchangeWeak(&(w.a), 123, 345));
+  atomicLoad(&(w.a));
+  atomicAdd(&(w.a), 123);
+  atomicSub(&(w.a), 123);
+  atomicMax(&(w.a), 123);
+  atomicMin(&(w.a), 123);
+  atomicAnd(&(w.a), 123);
+  atomicOr(&(w.a), 123);
+  atomicXor(&(w.a), 123);
+  atomicExchange(&(w.a), 123);
+  atomicCompareExchangeWeak(&(w.a), 123, 345);
   atomicStore(&(w.b), 123u);
-  ignore(atomicLoad(&(w.b)));
-  ignore(atomicAdd(&(w.b), 123u));
-  ignore(atomicSub(&(w.b), 123u));
-  ignore(atomicMax(&(w.b), 123u));
-  ignore(atomicMin(&(w.b), 123u));
-  ignore(atomicAnd(&(w.b), 123u));
-  ignore(atomicOr(&(w.b), 123u));
-  ignore(atomicXor(&(w.b), 123u));
-  ignore(atomicExchange(&(w.b), 123u));
-  ignore(atomicCompareExchangeWeak(&(w.b), 123u, 345u));
+  atomicLoad(&(w.b));
+  atomicAdd(&(w.b), 123u);
+  atomicSub(&(w.b), 123u);
+  atomicMax(&(w.b), 123u);
+  atomicMin(&(w.b), 123u);
+  atomicAnd(&(w.b), 123u);
+  atomicOr(&(w.b), 123u);
+  atomicXor(&(w.b), 123u);
+  atomicExchange(&(w.b), 123u);
+  atomicCompareExchangeWeak(&(w.b), 123u, 345u);
 }
 )";
 

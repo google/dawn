@@ -606,8 +606,8 @@ struct DecomposeMemoryAccess::State {
               auto* arr_el = b.IndexAccessor(array, i);
               auto* el_offset =
                   b.Add(b.Expr("offset"), b.Mul(i, arr_ty->Stride()));
-              auto* store_stmt = b.create<ast::CallStatement>(
-                  b.Call(store, "buffer", el_offset, arr_el));
+              auto* store_stmt =
+                  b.CallStmt(b.Call(store, "buffer", el_offset, arr_el));
               auto* for_loop =
                   b.For(for_init, for_cond, for_cont, b.Block(store_stmt));
 
@@ -619,7 +619,7 @@ struct DecomposeMemoryAccess::State {
                 auto* offset = b.Add("offset", i * mat_ty->ColumnStride());
                 auto* access = b.IndexAccessor("value", i);
                 auto* call = b.Call(store, "buffer", offset, access);
-                body.emplace_back(b.create<ast::CallStatement>(call));
+                body.emplace_back(b.CallStmt(call));
               }
             } else if (auto* str = el_ty->As<sem::Struct>()) {
               for (auto* member : str->Members()) {
@@ -629,7 +629,7 @@ struct DecomposeMemoryAccess::State {
                 Symbol store =
                     StoreFunc(buf_ty, member->Type()->UnwrapRef(), var_user);
                 auto* call = b.Call(store, "buffer", offset, access);
-                body.emplace_back(b.create<ast::CallStatement>(call));
+                body.emplace_back(b.CallStmt(call));
               }
             }
             b.Func(name, params, b.ty.void_(), body);
@@ -995,7 +995,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                                     store.target.var->As<sem::VariableUser>());
       auto* call = ctx.dst->Call(func, ctx.CloneWithoutTransform(buf), offset,
                                  ctx.Clone(value));
-      return ctx.dst->create<ast::CallStatement>(call);
+      return ctx.dst->CallStmt(call);
     });
   }
 

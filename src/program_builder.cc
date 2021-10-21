@@ -121,7 +121,7 @@ const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Literal* lit) {
 const ast::Statement* ProgramBuilder::WrapInStatement(
     const ast::Expression* expr) {
   if (auto* ce = expr->As<ast::CallExpression>()) {
-    return Ignore(ce);
+    return CallStmt(ce);
   }
   // Create a temporary variable of inferred type from expr.
   return Decl(Const(symbols_.New(), nullptr, expr));

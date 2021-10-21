@@ -33,7 +33,7 @@ TEST_F(ResolverCallValidationTest, Recursive_Invalid) {
 
   Func("main", params0, ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(call_expr),
+           CallStmt(call_expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kVertex),
@@ -56,7 +56,7 @@ TEST_F(ResolverCallValidationTest, Undeclared_Invalid) {
 
   Func("main", params0, ty.f32(),
        ast::StatementList{
-           create<ast::CallStatement>(call_expr),
+           CallStmt(call_expr),
            Return(),
        },
        ast::DecorationList{});
@@ -109,23 +109,19 @@ TEST_F(ResolverCallValidationTest, MismatchedArgs) {
 }
 
 TEST_F(ResolverCallValidationTest, UnusedRetval) {
+  // fn func() -> f32 { return 1.0; }
   // fn main() {func(); return; }
-  // fn func() { return; }
 
   Func("func", {}, ty.f32(), {Return(Expr(1.0f))}, {});
 
-  Func("main", {}, ty.f32(),
+  Func("main", {}, ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(Source{{12, 34}}, Call("func")),
+           CallStmt(Source{{12, 34}}, Call("func")),
            Return(),
        },
        {});
 
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "12:34 error: result of called function was not used. If this was "
-            "intentional wrap the function call in ignore()");
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverCallValidationTest, PointerArgument_VariableIdentExpr) {
@@ -139,8 +135,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_VariableIdentExpr) {
   Func("main", {}, ty.void_(),
        ast::StatementList{
            Decl(Var("z", ty.i32(), Expr(1))),
-           create<ast::CallStatement>(
-               Call("foo", AddressOf(Source{{12, 34}}, Expr("z")))),
+           CallStmt(Call("foo", AddressOf(Source{{12, 34}}, Expr("z")))),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -157,8 +152,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_ConstIdentExpr) {
   Func("main", {}, ty.void_(),
        ast::StatementList{
            Decl(Const("z", ty.i32(), Expr(1))),
-           create<ast::CallStatement>(
-               Call("foo", AddressOf(Expr(Source{{12, 34}}, "z")))),
+           CallStmt(Call("foo", AddressOf(Expr(Source{{12, 34}}, "z")))),
        });
 
   EXPECT_FALSE(r()->Resolve());
@@ -178,7 +172,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_NotIdentExprVar) {
   Func("main", {}, ty.void_(),
        ast::StatementList{
            Decl(Var("v", ty.Of(S))),
-           create<ast::CallStatement>(Call(
+           CallStmt(Call(
                "foo", AddressOf(Source{{12, 34}}, MemberAccessor("v", "m")))),
        });
 
@@ -201,9 +195,8 @@ TEST_F(ResolverCallValidationTest, PointerArgument_AddressOfMemberAccessor) {
   Func("main", {}, ty.void_(),
        ast::StatementList{
            Decl(Const("v", ty.Of(S), Construct(ty.Of(S)))),
-           create<ast::CallStatement>(Call(
-               "foo",
-               AddressOf(Expr(Source{{12, 34}}, MemberAccessor("v", "m"))))),
+           CallStmt(Call("foo", AddressOf(Expr(Source{{12, 34}},
+                                               MemberAccessor("v", "m"))))),
        });
 
   EXPECT_FALSE(r()->Resolve());
@@ -218,8 +211,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParam) {
   Func("foo", {Param("p", ty.pointer<i32>(ast::StorageClass::kFunction))},
        ty.void_(), {});
   Func("bar", {Param("p", ty.pointer<i32>(ast::StorageClass::kFunction))},
-       ty.void_(),
-       ast::StatementList{create<ast::CallStatement>(Call("foo", Expr("p")))});
+       ty.void_(), ast::StatementList{CallStmt(Call("foo", Expr("p")))});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -237,12 +229,11 @@ TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParamWithMain) {
   Func("foo", {Param("p", ty.pointer<i32>(ast::StorageClass::kFunction))},
        ty.void_(), {});
   Func("bar", {Param("p", ty.pointer<i32>(ast::StorageClass::kFunction))},
-       ty.void_(),
-       ast::StatementList{create<ast::CallStatement>(Call("foo", Expr("p")))});
+       ty.void_(), ast::StatementList{CallStmt(Call("foo", Expr("p")))});
   Func("main", ast::VariableList{}, ty.void_(),
        {
            Decl(Var("v", ty.i32(), Expr(1))),
-           create<ast::CallStatement>(Call("foo", AddressOf(Expr("v")))),
+           CallStmt(Call("foo", AddressOf(Expr("v")))),
        },
        {
            Stage(ast::PipelineStage::kFragment),

@@ -299,7 +299,7 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
 
 TEST_F(MslGeneratorImplTest, StorageBarrier) {
   auto* call = Call("storageBarrier");
-  WrapInFunction(create<ast::CallStatement>(call));
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = Build();
 
@@ -310,7 +310,7 @@ TEST_F(MslGeneratorImplTest, StorageBarrier) {
 
 TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
   auto* call = Call("workgroupBarrier");
-  WrapInFunction(create<ast::CallStatement>(call));
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = Build();
 
@@ -347,7 +347,7 @@ TEST_F(MslGeneratorImplTest, Ignore) {
   Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
        ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
 
-  Func("func", {}, ty.void_(), {Ignore(Call("f", 1, 2, 3))},
+  Func("func", {}, ty.void_(), {CallStmt(Call("f", 1, 2, 3))},
        {
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
@@ -364,7 +364,7 @@ int f(int a, int b, int c) {
 }
 
 kernel void func() {
-  (void) f(1, 2, 3);
+  f(1, 2, 3);
   return;
 }
 

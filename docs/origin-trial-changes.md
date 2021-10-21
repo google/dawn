@@ -11,6 +11,7 @@
 ### New Features
 
 * `any()` and `all()` now support a `bool` parameter. These simply return the passed argument. [tint:1253](https://crbug.com/tint/1253)
+* Call statements may now include functions that return a value (`ignore()` is no longer needed).
 
 ### Fixes
 

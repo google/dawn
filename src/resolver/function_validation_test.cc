@@ -399,7 +399,7 @@ TEST_F(ResolverFunctionValidationTest, CannotCallEntryPoint) {
 
   Func("func", ast::VariableList{}, ty.void_(),
        {
-           create<ast::CallStatement>(Call(Source{{12, 34}}, "entrypoint")),
+           CallStmt(Call(Source{{12, 34}}, "entrypoint")),
        });
 
   EXPECT_FALSE(r()->Resolve());

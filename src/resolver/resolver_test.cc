@@ -270,7 +270,7 @@ TEST_F(ResolverTest, Stmt_Call) {
 
   auto* expr = Call("my_func");
 
-  auto* call = create<ast::CallStatement>(expr);
+  auto* call = CallStmt(expr);
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1947,22 +1947,22 @@ TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
   for (int i = levels - 1; i >= 0; i--) {
     Func(fn_a(i), {}, ty.void_(),
          {
-             create<ast::CallStatement>(Call(fn_a(i + 1))),
-             create<ast::CallStatement>(Call(fn_b(i + 1))),
+             CallStmt(Call(fn_a(i + 1))),
+             CallStmt(Call(fn_b(i + 1))),
          },
          {});
     Func(fn_b(i), {}, ty.void_(),
          {
-             create<ast::CallStatement>(Call(fn_a(i + 1))),
-             create<ast::CallStatement>(Call(fn_b(i + 1))),
+             CallStmt(Call(fn_a(i + 1))),
+             CallStmt(Call(fn_b(i + 1))),
          },
          {});
   }
 
   Func("main", {}, ty.void_(),
        {
-           create<ast::CallStatement>(Call(fn_a(0))),
-           create<ast::CallStatement>(Call(fn_b(0))),
+           CallStmt(Call(fn_a(0))),
+           CallStmt(Call(fn_b(0))),
        },
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 

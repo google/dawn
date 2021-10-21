@@ -65,7 +65,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
   Global("param1", ty.f32(), ast::StorageClass::kPrivate);
   Global("param2", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* call = create<ast::CallStatement>(Call("my_func", "param1", "param2"));
+  auto* call = CallStmt(Call("my_func", "param1", "param2"));
   WrapInFunction(call);
 
   GeneratorImpl& gen = Build();

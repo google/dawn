@@ -335,9 +335,7 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   param.BuildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
-  auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)
-                   ? create<ast::CallStatement>(call)
-                   : Ignore(call);
+  auto* stmt = CallStmt(call);
 
   Func("main", {}, ty.void_(), {stmt}, {Stage(ast::PipelineStage::kFragment)});
 
