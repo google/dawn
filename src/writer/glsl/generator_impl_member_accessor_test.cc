@@ -296,12 +296,11 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
       R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   int a;
   mat2x3 b;
-};
-
-Data data;
+} data;
 
 void tint_symbol() {
   data.b = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -343,12 +342,11 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   float z;
   mat4x3 a;
-};
-
-Data data;
+} data;
 
 void tint_symbol() {
   float x = data.a[2][1];
@@ -388,12 +386,11 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   float z;
   int a[5];
-};
-
-Data data;
+} data;
 
 void tint_symbol() {
   int x = data.a[2];
@@ -434,12 +431,11 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   float z;
   int a[5];
-};
-
-Data data;
+} data;
 
 void tint_symbol() {
   int x = data.a[((2 + 4) - 3)];
@@ -477,12 +473,11 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
       R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   float z;
   int a[5];
-};
-
-Data data;
+} data;
 
 void tint_symbol() {
   data.a[2] = 2;
@@ -535,11 +530,10 @@ struct Inner {
   vec3 a;
   vec3 b;
 };
-struct Data {
-  Inner c[4];
-};
 
-Data data;
+layout (set = 1, binding = 0) buffer Data {
+  Inner c[4];
+} data;
 
 void tint_symbol() {
   vec3 x = data.c[2].b;
@@ -595,11 +589,10 @@ struct Inner {
   vec3 a;
   vec3 b;
 };
-struct Data {
-  Inner c[4];
-};
 
-Data data;
+layout (set = 1, binding = 0) buffer Data {
+  Inner c[4];
+} data;
 
 void tint_symbol() {
   vec2 x = data.c[2].b.xy;
@@ -655,11 +648,10 @@ struct Inner {
   vec3 a;
   vec3 b;
 };
-struct Data {
-  Inner c[4];
-};
 
-Data data;
+layout (set = 1, binding = 0) buffer Data {
+  Inner c[4];
+} data;
 
 void tint_symbol() {
   float x = data.c[2].b.g;
@@ -715,11 +707,10 @@ struct Inner {
   vec3 a;
   vec3 b;
 };
-struct Data {
-  Inner c[4];
-};
 
-Data data;
+layout (set = 1, binding = 0) buffer Data {
+  Inner c[4];
+} data;
 
 void tint_symbol() {
   float x = data.c[2].b[1];
@@ -771,11 +762,10 @@ struct Inner {
   vec3 a;
   vec3 b;
 };
-struct Data {
-  Inner c[4];
-};
 
-Data data;
+layout (set = 1, binding = 0) buffer Data {
+  Inner c[4];
+} data;
 
 void tint_symbol() {
   data.c[2].b = vec3(1.0f, 2.0f, 3.0f);
@@ -831,11 +821,10 @@ struct Inner {
   ivec3 a;
   vec3 b;
 };
-struct Data {
-  Inner c[4];
-};
 
-Data data;
+layout (set = 1, binding = 0) buffer Data {
+  Inner c[4];
+} data;
 
 void tint_symbol() {
   data.c[2].b.y = 1.0f;

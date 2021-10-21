@@ -433,11 +433,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct UBO {
-  vec4 coord;
-};
 
-uniform UBO ubo;
+layout (set = 1, binding = 0) uniform UBO {
+  vec4 coord;
+} ubo;
 
 float sub_func(float param) {
   return ubo.coord.x;
@@ -484,11 +483,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct Uniforms {
-  vec4 coord;
-};
 
-uniform Uniforms uniforms;
+layout (set = 1, binding = 0) uniform Uniforms {
+  vec4 coord;
+} uniforms;
 
 void frag_main() {
   float v = uniforms.coord.x;
@@ -536,12 +534,11 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   int a;
   float b;
-};
-
-Data coord;
+} coord;
 
 void frag_main() {
   float v = coord.b;
@@ -589,12 +586,11 @@ TEST_F(GlslGeneratorImplTest_Function,
             R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   int a;
   float b;
-};
-
-Data coord;
+} coord;
 
 void frag_main() {
   float v = coord.b;
@@ -638,12 +634,11 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   int a;
   float b;
-};
-
-Data coord;
+} coord;
 
 void frag_main() {
   coord.b = 2.0f;
@@ -688,12 +683,11 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct Data {
+
+layout (set = 1, binding = 0) buffer Data {
   int a;
   float b;
-};
-
-Data coord;
+} coord;
 
 void frag_main() {
   coord.b = 2.0f;
@@ -740,11 +734,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct S {
-  float x;
-};
 
-uniform S coord;
+layout (set = 1, binding = 0) uniform S {
+  float x;
+} coord;
 
 float sub_func(float param) {
   return coord.x;
@@ -797,11 +790,10 @@ TEST_F(GlslGeneratorImplTest_Function,
             R"(#version 310 es
 precision mediump float;
 
-struct S {
-  float x;
-};
 
-S coord;
+layout (set = 1, binding = 0) buffer S {
+  float x;
+} coord;
 
 float sub_func(float param) {
   return coord.x;
@@ -1064,11 +1056,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct Data {
-  float d;
-};
 
-Data data;
+layout (set = 0, binding = 0) buffer Data {
+  float d;
+} data;
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void a() {

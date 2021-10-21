@@ -130,8 +130,10 @@ bool GeneratorImpl::Generate() {
         return false;
       }
     } else if (auto* str = decl->As<ast::Struct>()) {
-      if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
-        return false;
+      if (!str->IsBlockDecorated()) {
+        if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
+          return false;
+        }
       }
     } else if (auto* func = decl->As<ast::Function>()) {
       if (func->IsEntryPoint()) {
@@ -1544,12 +1546,19 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
 bool GeneratorImpl::EmitUniformVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
   auto* type = var->Type()->UnwrapRef();
-  auto out = line();
-  if (!EmitTypeAndName(out, type, ast::StorageClass::kUniform, var->Access(),
-                       builder_.Symbols().NameFor(decl->symbol))) {
+  auto* str = type->As<sem::Struct>();
+  if (!str) {
+    TINT_ICE(Writer, builder_.Diagnostics())
+        << "storage variable must be of struct type";
     return false;
   }
-  out << ";";
+  ast::VariableBindingPoint bp = decl->BindingPoint();
+  line() << "layout (set = " << bp.group->value
+         << ", binding = " << bp.binding->value << ") uniform "
+         << StructName(str) << " {";
+  EmitStructMembers(current_buffer_, str);
+  auto name = builder_.Symbols().NameFor(decl->symbol);
+  line() << "} " << name << ";";
 
   return true;
 }
@@ -1557,14 +1566,19 @@ bool GeneratorImpl::EmitUniformVariable(const sem::Variable* var) {
 bool GeneratorImpl::EmitStorageVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
   auto* type = var->Type()->UnwrapRef();
-  auto out = line();
-  if (!EmitTypeAndName(out, type, ast::StorageClass::kStorage, var->Access(),
-                       builder_.Symbols().NameFor(decl->symbol))) {
+  auto* str = type->As<sem::Struct>();
+  if (!str) {
+    TINT_ICE(Writer, builder_.Diagnostics())
+        << "storage variable must be of struct type";
     return false;
   }
-
-  out << ";";
-
+  ast::VariableBindingPoint bp = decl->BindingPoint();
+  line() << "layout (set = " << bp.group->value
+         << ", binding = " << bp.binding->value << ") buffer "
+         << StructName(str) << " {";
+  EmitStructMembers(current_buffer_, str);
+  auto name = builder_.Symbols().NameFor(decl->symbol);
+  line() << "} " << name << ";";
   return true;
 }
 

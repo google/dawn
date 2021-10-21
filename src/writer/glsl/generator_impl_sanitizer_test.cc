@@ -51,11 +51,10 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
-struct my_struct {
-  float a[0];
-};
 
-my_struct b;
+layout (set = 2, binding = 1) buffer my_struct {
+  float a[0];
+} b;
 
 void a_func() {
   uint tint_symbol_1 = 0u;
@@ -103,12 +102,11 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
-struct my_struct {
+
+layout (set = 2, binding = 1) buffer my_struct {
   float z;
   float a[0];
-};
-
-my_struct b;
+} b;
 
 void a_func() {
   uint tint_symbol_1 = 0u;
@@ -158,11 +156,10 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_ViaLets) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
-struct my_struct {
-  float a[0];
-};
 
-my_struct b;
+layout (set = 2, binding = 1) buffer my_struct {
+  float a[0];
+} b;
 
 void a_func() {
   uint tint_symbol_1 = 0u;
