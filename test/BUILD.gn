@@ -207,6 +207,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/switch_statement_test.cc",
     "../src/ast/test_helper.h",
     "../src/ast/texture_test.cc",
+    "../src/ast/traverse_expressions_test.cc",
     "../src/ast/type_constructor_expression_test.cc",
     "../src/ast/u32_test.cc",
     "../src/ast/uint_literal_test.cc",

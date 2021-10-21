@@ -317,6 +317,7 @@ libtint_source_set("libtint_core_all_src") {
     "ast/texture.cc",
     "ast/texture.h",
     "ast/type.h",
+    "ast/traverse_expressions.h",
     "ast/type_constructor_expression.cc",
     "ast/type_constructor_expression.h",
     "ast/type_decl.cc",

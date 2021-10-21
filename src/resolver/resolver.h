@@ -262,15 +262,6 @@ class Resolver {
   bool UnaryOp(const ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
 
-  /// Performs a depth-first traversal of the expression nodes from `root`,
-  /// collecting all the visited expressions in pre-ordering (root first).
-  /// @param root the root expression node
-  /// @param out the ordered list of visited expression nodes, starting with the
-  ///        root node, and ending with leaf nodes
-  /// @return true on success, false on error
-  bool TraverseExpressions(const ast::Expression* root,
-                           std::vector<const ast::Expression*>& out);
-
   // AST and Type validation methods
   // Each return true on success, false on failure.
   bool ValidateArray(const sem::Array* arr, const Source& source);

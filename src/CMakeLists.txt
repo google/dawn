@@ -180,6 +180,7 @@ set(TINT_LIB_SRCS
   ast/switch_statement.h
   ast/texture.cc
   ast/texture.h
+  ast/traverse_expressions.h
   ast/type_constructor_expression.cc
   ast/type_constructor_expression.h
   ast/type_name.cc
@@ -639,6 +640,7 @@ if(${TINT_BUILD_TESTS})
     ast/switch_statement_test.cc
     ast/test_helper.h
     ast/texture_test.cc
+    ast/traverse_expressions_test.cc
     ast/type_constructor_expression_test.cc
     ast/u32_test.cc
     ast/uint_literal_test.cc
