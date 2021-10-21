@@ -19,6 +19,8 @@ add_library(dawn_node_binding STATIC
     "Converter.h"
     "Errors.cpp"
     "Errors.h"
+    "Flags.cpp"
+    "Flags.h"
     "GPU.cpp"
     "GPU.h"
     "GPUAdapter.cpp"

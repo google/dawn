@@ -18,14 +18,14 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "napi.h"
+#include "src/dawn_node/binding/Flags.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
 namespace wgpu { namespace binding {
-
     // GPU is an implementation of interop::GPU that wraps a dawn_native::Instance.
     class GPU final : public interop::GPU {
       public:
-        GPU();
+        GPU(Flags flags);
 
         // interop::GPU interface compliance
         interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> requestAdapter(
@@ -33,6 +33,7 @@ namespace wgpu { namespace binding {
             interop::GPURequestAdapterOptions options) override;
 
       private:
+        const Flags flags_;
         dawn_native::Instance instance_;
     };
 

@@ -492,7 +492,7 @@ namespace wgpu { namespace interop {
             auto arr = value.As<Napi::Array>();
             std::vector<T> vec(arr.Length());
             for (size_t i = 0; i < vec.size(); i++) {
-                auto res = Converter<T>::FromJS(env, arr[i], vec[i]);
+                auto res = Converter<T>::FromJS(env, arr[static_cast<uint32_t>(i)], vec[i]);
                 if (!res) {
                     return res.Append("for array element ", i);
                 }
