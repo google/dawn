@@ -16,8 +16,37 @@
 
 #include <unordered_set>
 
+#include "src/dawn_node/binding/Flags.h"
 #include "src/dawn_node/binding/GPUDevice.h"
 #include "src/dawn_node/binding/GPUSupportedLimits.h"
+
+namespace {
+    // TODO(amaiorano): Move to utility header
+    std::vector<std::string> Split(const std::string& s, char delim) {
+        if (s.empty())
+            return {};
+
+        std::vector<std::string> result;
+        const size_t lastIndex = s.length() - 1;
+        size_t startIndex = 0;
+        size_t i = startIndex;
+
+        while (i <= lastIndex) {
+            if (s[i] == delim) {
+                auto token = s.substr(startIndex, i - startIndex);
+                if (!token.empty())  // Discard empty tokens
+                    result.push_back(token);
+                startIndex = i + 1;
+            } else if (i == lastIndex) {
+                auto token = s.substr(startIndex, i - startIndex + 1);
+                if (!token.empty())  // Discard empty tokens
+                    result.push_back(token);
+            }
+            ++i;
+        }
+        return result;
+    }
+}  // namespace
 
 namespace wgpu { namespace binding {
 
@@ -79,7 +108,8 @@ namespace wgpu { namespace binding {
     // wgpu::bindings::GPUAdapter
     // TODO(crbug.com/dawn/1133): This is a stub implementation. Properly implement.
     ////////////////////////////////////////////////////////////////////////////////
-    GPUAdapter::GPUAdapter(dawn_native::Adapter a) : adapter_(a) {
+    GPUAdapter::GPUAdapter(dawn_native::Adapter a, const Flags& flags)
+        : adapter_(a), flags_(flags) {
     }
 
     std::string GPUAdapter::getName(Napi::Env) {
@@ -161,6 +191,25 @@ namespace wgpu { namespace binding {
                     continue;  // TODO(crbug.com/dawn/1130)
             }
             UNIMPLEMENTED("required: ", required);
+        }
+
+        // Propogate enabled/disabled dawn features
+        // Note: DeviceDescriptor::forceEnabledToggles and forceDisabledToggles are vectors of
+        // 'const char*', so we make sure the parsed strings survive the CreateDevice() call by
+        // storing them on the stack.
+        std::vector<std::string> enabledToggles;
+        std::vector<std::string> disabledToggles;
+        if (auto values = flags_.Get("enable-dawn-features")) {
+            enabledToggles = Split(*values, ',');
+            for (auto& t : enabledToggles) {
+                desc.forceEnabledToggles.emplace_back(t.c_str());
+            }
+        }
+        if (auto values = flags_.Get("disable-dawn-features")) {
+            disabledToggles = Split(*values, ',');
+            for (auto& t : disabledToggles) {
+                desc.forceDisabledToggles.emplace_back(t.c_str());
+            }
         }
 
         auto wgpu_device = adapter_.CreateDevice(&desc);

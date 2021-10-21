@@ -143,7 +143,7 @@ namespace wgpu { namespace binding {
             }
         }
 
-        auto adapter = GPUAdapter::Create<GPUAdapter>(env, adapters[adapterIndex]);
+        auto adapter = GPUAdapter::Create<GPUAdapter>(env, adapters[adapterIndex], flags_);
         promise.Resolve(std::optional<interop::Interface<interop::GPUAdapter>>(adapter));
         return promise;
     }
