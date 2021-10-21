@@ -322,6 +322,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param ty the struct to generate
   /// @returns true if the struct is emitted
   bool EmitStructType(TextBuffer* buffer, const sem::Struct* ty);
+  /// Handles generating the members of a structure
+  /// @param buffer the text buffer that the struct members will be written to
+  /// @param ty the struct to generate
+  /// @returns true if the struct members are emitted
+  bool EmitStructMembers(TextBuffer* buffer, const sem::Struct* ty);
   /// Handles a unary op expression
   /// @param out the output of the expression stream
   /// @param expr the expression to emit

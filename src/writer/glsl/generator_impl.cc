@@ -2450,42 +2450,44 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
 bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
   auto storage_class_uses = str->StorageClassUsage();
   line(b) << "struct " << StructName(str) << " {";
-  {
-    ScopedIndent si(b);
-    for (auto* mem : str->Members()) {
-      auto name = builder_.Symbols().NameFor(mem->Name());
+  EmitStructMembers(b, str);
+  line(b) << "};";
 
-      auto* ty = mem->Type();
+  return true;
+}
 
-      auto out = line(b);
+bool GeneratorImpl::EmitStructMembers(TextBuffer* b, const sem::Struct* str) {
+  ScopedIndent si(b);
+  for (auto* mem : str->Members()) {
+    auto name = builder_.Symbols().NameFor(mem->Name());
 
-      std::string pre, post;
+    auto* ty = mem->Type();
 
-      if (auto* decl = mem->Declaration()) {
-        for (auto* deco : decl->decorations) {
-          if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
-            auto mod = interpolation_to_modifiers(interpolate->type,
-                                                  interpolate->sampling);
-            if (mod.empty()) {
-              diagnostics_.add_error(diag::System::Writer,
-                                     "unsupported interpolation");
-              return false;
-            }
+    auto out = line(b);
+
+    std::string pre, post;
+
+    if (auto* decl = mem->Declaration()) {
+      for (auto* deco : decl->decorations) {
+        if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+          auto mod = interpolation_to_modifiers(interpolate->type,
+                                                interpolate->sampling);
+          if (mod.empty()) {
+            diagnostics_.add_error(diag::System::Writer,
+                                   "unsupported interpolation");
+            return false;
           }
         }
       }
-
-      out << pre;
-      if (!EmitTypeAndName(out, ty, ast::StorageClass::kNone,
-                           ast::Access::kReadWrite, name)) {
-        return false;
-      }
-      out << post << ";";
     }
+
+    out << pre;
+    if (!EmitTypeAndName(out, ty, ast::StorageClass::kNone,
+                         ast::Access::kReadWrite, name)) {
+      return false;
+    }
+    out << post << ";";
   }
-
-  line(b) << "};";
-
   return true;
 }
 
