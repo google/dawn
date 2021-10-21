@@ -341,9 +341,8 @@ namespace dawn_native { namespace d3d12 {
                 ComPtr<IDxcBlobEncoding> errors;
                 DAWN_TRY(CheckHRESULT(result->GetErrorBuffer(&errors), "DXC get error buffer"));
 
-                std::string message = std::string("DXC compile failed with ") +
-                                      static_cast<char*>(errors->GetBufferPointer());
-                return DAWN_VALIDATION_ERROR(message);
+                return DAWN_FORMAT_VALIDATION_ERROR("DXC compile failed with: %s",
+                                                    static_cast<char*>(errors->GetBufferPointer()));
             }
 
             ComPtr<IDxcBlob> compiledShader;
@@ -370,14 +369,12 @@ namespace dawn_native { namespace d3d12 {
             ComPtr<ID3DBlob> compiledShader;
             ComPtr<ID3DBlob> errors;
 
-            if (FAILED(functions->d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr,
-                                             nullptr, nullptr, request.entryPointName,
-                                             targetProfile, request.compileFlags, 0,
-                                             &compiledShader, &errors))) {
-                std::string message = std::string("D3D compile failed with ") +
-                                      static_cast<char*>(errors->GetBufferPointer());
-                return DAWN_VALIDATION_ERROR(message);
-            }
+            DAWN_INVALID_IF(FAILED(functions->d3dCompile(
+                                hlslSource.c_str(), hlslSource.length(), nullptr, nullptr, nullptr,
+                                request.entryPointName, targetProfile, request.compileFlags, 0,
+                                &compiledShader, &errors)),
+                            "D3D compile failed with: %s",
+                            static_cast<char*>(errors->GetBufferPointer()));
 
             return std::move(compiledShader);
         }
@@ -421,15 +418,13 @@ namespace dawn_native { namespace d3d12 {
                 if (it != data->remappings.end()) {
                     *remappedEntryPointName = it->second;
                 } else {
-                    if (request.disableSymbolRenaming) {
-                        *remappedEntryPointName = request.entryPointName;
-                    } else {
-                        return DAWN_VALIDATION_ERROR(
-                            "Could not find remapped name for entry point.");
-                    }
+                    DAWN_INVALID_IF(!request.disableSymbolRenaming,
+                                    "Could not find remapped name for entry point.");
+
+                    *remappedEntryPointName = request.entryPointName;
                 }
             } else {
-                return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
+                return DAWN_FORMAT_VALIDATION_ERROR("Transform output missing renamer data.");
             }
 
             tint::writer::hlsl::Options options;
@@ -439,10 +434,8 @@ namespace dawn_native { namespace d3d12 {
                 options.root_constant_binding_point.binding = request.numWorkgroupsShaderRegister;
             }
             auto result = tint::writer::hlsl::Generate(&transformedProgram, options);
-            if (!result.success) {
-                errorStream << "Generator: " << result.error << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
+            DAWN_INVALID_IF(!result.success, "An error occured while generating HLSL: %s",
+                            result.error);
 
             return std::move(result.hlsl);
         }

@@ -1068,11 +1068,10 @@ namespace dawn_native { namespace d3d12 {
                     DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
 
                     // TODO(dawn:839): support [[num_workgroups]] for DispatchIndirect calls
-                    if (lastPipeline->UsesNumWorkgroups()) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Using a compute pipeline with [[num_workgroups]] in a "
-                            "DispatchIndirect call is not implemented");
-                    }
+                    DAWN_INVALID_IF(lastPipeline->UsesNumWorkgroups(),
+                                    "Using %s with [[num_workgroups]] in a DispatchIndirect call "
+                                    "is not implemented.",
+                                    lastPipeline);
 
                     Buffer* buffer = ToBackend(dispatch->indirectBuffer.Get());
 

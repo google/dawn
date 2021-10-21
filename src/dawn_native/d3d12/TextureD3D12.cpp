@@ -423,21 +423,18 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor) {
-        if (descriptor->dimension != wgpu::TextureDimension::e2D) {
-            return DAWN_VALIDATION_ERROR("Texture must be 2D");
-        }
+        DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
+                        "Texture dimension (%s) is not %s.", descriptor->dimension,
+                        wgpu::TextureDimension::e2D);
 
-        if (descriptor->mipLevelCount != 1) {
-            return DAWN_VALIDATION_ERROR("Mip level count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->mipLevelCount != 1, "Mip level count (%u) is not 1.",
+                        descriptor->mipLevelCount);
 
-        if (descriptor->size.depthOrArrayLayers != 1) {
-            return DAWN_VALIDATION_ERROR("Depth must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->size.depthOrArrayLayers != 1,
+                        "Array layer count (%u) is not 1.", descriptor->size.depthOrArrayLayers);
 
-        if (descriptor->sampleCount != 1) {
-            return DAWN_VALIDATION_ERROR("Sample count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
+                        descriptor->sampleCount);
 
         return {};
     }
@@ -445,25 +442,27 @@ namespace dawn_native { namespace d3d12 {
     MaybeError ValidateD3D12TextureCanBeWrapped(ID3D12Resource* d3d12Resource,
                                                 const TextureDescriptor* dawnDescriptor) {
         const D3D12_RESOURCE_DESC d3dDescriptor = d3d12Resource->GetDesc();
-        if ((dawnDescriptor->size.width != d3dDescriptor.Width) ||
-            (dawnDescriptor->size.height != d3dDescriptor.Height) ||
-            (dawnDescriptor->size.depthOrArrayLayers != 1)) {
-            return DAWN_VALIDATION_ERROR("D3D12 texture size doesn't match descriptor");
-        }
+        DAWN_INVALID_IF(
+            (dawnDescriptor->size.width != d3dDescriptor.Width) ||
+                (dawnDescriptor->size.height != d3dDescriptor.Height) ||
+                (dawnDescriptor->size.depthOrArrayLayers != 1),
+            "D3D12 texture size (Width: %u, Height: %u, DepthOrArraySize: 1) doesn't match Dawn "
+            "descriptor size (width: %u, height: %u, depthOrArrayLayers: %u).",
+            d3dDescriptor.Width, d3dDescriptor.Height, dawnDescriptor->size.width,
+            dawnDescriptor->size.height, dawnDescriptor->size.depthOrArrayLayers);
 
         const DXGI_FORMAT dxgiFormatFromDescriptor = D3D12TextureFormat(dawnDescriptor->format);
-        if (dxgiFormatFromDescriptor != d3dDescriptor.Format) {
-            return DAWN_VALIDATION_ERROR(
-                "D3D12 texture format must be compatible with descriptor format.");
-        }
+        DAWN_INVALID_IF(
+            dxgiFormatFromDescriptor != d3dDescriptor.Format,
+            "D3D12 texture format (%x) is not compatible with Dawn descriptor format (%s).",
+            d3dDescriptor.Format, dawnDescriptor->format);
 
-        if (d3dDescriptor.MipLevels != 1) {
-            return DAWN_VALIDATION_ERROR("D3D12 texture number of miplevels must be 1.");
-        }
+        DAWN_INVALID_IF(d3dDescriptor.MipLevels != 1,
+                        "D3D12 texture number of miplevels (%u) is not 1.",
+                        d3dDescriptor.MipLevels);
 
-        if (d3dDescriptor.DepthOrArraySize != 1) {
-            return DAWN_VALIDATION_ERROR("D3D12 texture array size must be 1.");
-        }
+        DAWN_INVALID_IF(d3dDescriptor.DepthOrArraySize != 1,
+                        "D3D12 texture array size (%u) is not 1.", d3dDescriptor.DepthOrArraySize);
 
         // Shared textures cannot be multi-sample so no need to check those.
         ASSERT(d3dDescriptor.SampleDesc.Count == 1);
@@ -487,7 +486,7 @@ namespace dawn_native { namespace d3d12 {
                 break;
         }
 
-        return DAWN_VALIDATION_ERROR("DXGI format does not support cross-API sharing.");
+        return DAWN_FORMAT_VALIDATION_ERROR("DXGI format does not support cross-API sharing.");
     }
 
     // static
@@ -496,9 +495,8 @@ namespace dawn_native { namespace d3d12 {
         Ref<Texture> dawnTexture =
             AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
 
-        if (dawnTexture->GetFormat().IsMultiPlanar()) {
-            return DAWN_VALIDATION_ERROR("Cannot create a multi-planar formatted texture directly");
-        }
+        DAWN_INVALID_IF(dawnTexture->GetFormat().IsMultiPlanar(),
+                        "Cannot create a multi-planar formatted texture directly");
 
         DAWN_TRY(dawnTexture->InitializeAsInternalTexture());
         return std::move(dawnTexture);
@@ -522,10 +520,10 @@ namespace dawn_native { namespace d3d12 {
 
         // Importing a multi-planar format must be initialized. This is required because
         // a shared multi-planar format cannot be initialized by Dawn.
-        if (!isInitialized && dawnTexture->GetFormat().IsMultiPlanar()) {
-            return DAWN_VALIDATION_ERROR(
-                "Cannot create a multi-planar formatted texture without being initialized");
-        }
+        DAWN_INVALID_IF(
+            !isInitialized && dawnTexture->GetFormat().IsMultiPlanar(),
+            "Cannot create a texture with a multi-planar format (%s) with uninitialized data.",
+            dawnTexture->GetFormat().format);
 
         dawnTexture->SetIsSubresourceContentInitialized(isInitialized,
                                                         dawnTexture->GetAllSubresources());

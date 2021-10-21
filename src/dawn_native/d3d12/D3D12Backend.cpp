@@ -138,7 +138,9 @@ namespace dawn_native { namespace d3d12 {
         }
 
         if (backendDevice->ConsumedError(
-                ValidateTextureDescriptorCanBeWrapped(textureDescriptor))) {
+                ValidateTextureDescriptorCanBeWrapped(textureDescriptor),
+                "validating that a D3D12 external image can be wrapped with %s",
+                textureDescriptor)) {
             return nullptr;
         }
 
