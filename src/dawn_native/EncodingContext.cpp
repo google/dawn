@@ -24,7 +24,7 @@
 
 namespace dawn_native {
 
-    EncodingContext::EncodingContext(DeviceBase* device, const ApiObjectBase* initialEncoder)
+    EncodingContext::EncodingContext(DeviceBase* device, const ObjectBase* initialEncoder)
         : mDevice(device), mTopLevelEncoder(initialEncoder), mCurrentEncoder(initialEncoder) {
     }
 
@@ -87,7 +87,7 @@ namespace dawn_native {
         }
     }
 
-    void EncodingContext::EnterPass(const ApiObjectBase* passEncoder) {
+    void EncodingContext::EnterPass(const ObjectBase* passEncoder) {
         // Assert we're at the top level.
         ASSERT(mCurrentEncoder == mTopLevelEncoder);
         ASSERT(passEncoder != nullptr);
@@ -95,7 +95,7 @@ namespace dawn_native {
         mCurrentEncoder = passEncoder;
     }
 
-    MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
+    MaybeError EncodingContext::ExitRenderPass(const ObjectBase* passEncoder,
                                                RenderPassResourceUsageTracker usageTracker,
                                                CommandEncoder* commandEncoder,
                                                IndirectDrawMetadata indirectDrawMetadata) {
@@ -121,7 +121,7 @@ namespace dawn_native {
         return {};
     }
 
-    void EncodingContext::ExitComputePass(const ApiObjectBase* passEncoder,
+    void EncodingContext::ExitComputePass(const ObjectBase* passEncoder,
                                           ComputePassResourceUsage usages) {
         ASSERT(mCurrentEncoder != mTopLevelEncoder);
         ASSERT(mCurrentEncoder == passEncoder);
@@ -161,10 +161,12 @@ namespace dawn_native {
     }
 
     MaybeError EncodingContext::Finish() {
-        DAWN_INVALID_IF(IsFinished(), "Command encoding already finished.");
+        if (IsFinished()) {
+            return DAWN_VALIDATION_ERROR("Command encoding already finished");
+        }
 
-        const ApiObjectBase* currentEncoder = mCurrentEncoder;
-        const ApiObjectBase* topLevelEncoder = mTopLevelEncoder;
+        const void* currentEncoder = mCurrentEncoder;
+        const void* topLevelEncoder = mTopLevelEncoder;
 
         // Even if finish validation fails, it is now invalid to call any encoding commands,
         // so we clear the encoders. Note: mTopLevelEncoder == nullptr is used as a flag for
@@ -176,8 +178,9 @@ namespace dawn_native {
         if (mError != nullptr) {
             return std::move(mError);
         }
-        DAWN_INVALID_IF(currentEncoder != topLevelEncoder,
-                        "Command buffer recording ended before %s was ended.", currentEncoder);
+        if (currentEncoder != topLevelEncoder) {
+            return DAWN_VALIDATION_ERROR("Command buffer recording ended mid-pass");
+        }
         return {};
     }
 

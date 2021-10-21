@@ -26,6 +26,18 @@
 
 namespace dawn_native {
 
+    namespace {
+
+        MaybeError ValidatePerDimensionDispatchSizeLimit(const DeviceBase* device, uint32_t size) {
+            if (size > device->GetLimits().v1.maxComputeWorkgroupsPerDimension) {
+                return DAWN_VALIDATION_ERROR("Dispatch size exceeds defined limits");
+            }
+
+            return {};
+        }
+
+    }  // namespace
+
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext)
@@ -73,24 +85,9 @@ namespace dawn_native {
             [&](CommandAllocator* allocator) -> MaybeError {
                 if (IsValidationEnabled()) {
                     DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
-
-                    uint32_t workgroupsPerDimension =
-                        GetDevice()->GetLimits().v1.maxComputeWorkgroupsPerDimension;
-
-                    DAWN_INVALID_IF(
-                        x > workgroupsPerDimension,
-                        "Dispatch size X (%u) exceeds max compute workgroups per dimension (%u).",
-                        x, workgroupsPerDimension);
-
-                    DAWN_INVALID_IF(
-                        y > workgroupsPerDimension,
-                        "Dispatch size Y (%u) exceeds max compute workgroups per dimension (%u).",
-                        y, workgroupsPerDimension);
-
-                    DAWN_INVALID_IF(
-                        z > workgroupsPerDimension,
-                        "Dispatch size Z (%u) exceeds max compute workgroups per dimension (%u).",
-                        z, workgroupsPerDimension);
+                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(GetDevice(), x));
+                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(GetDevice(), y));
+                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(GetDevice(), z));
                 }
 
                 // Record the synchronization scope for Dispatch, which is just the current
@@ -120,20 +117,21 @@ namespace dawn_native {
                     // Indexed dispatches need a compute-shader based validation to check that the
                     // dispatch sizes aren't too big. Disallow them as unsafe until the validation
                     // is implemented.
-                    DAWN_INVALID_IF(
-                        GetDevice()->IsToggleEnabled(Toggle::DisallowUnsafeAPIs),
-                        "DispatchIndirect is disallowed because it doesn't validate that the "
-                        "dispatch size is valid yet.");
+                    if (GetDevice()->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+                        return DAWN_VALIDATION_ERROR(
+                            "DispatchIndirect is disallowed because it doesn't validate that the "
+                            "dispatch "
+                            "size is valid yet.");
+                    }
 
-                    DAWN_INVALID_IF(indirectOffset % 4 != 0,
-                                    "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
+                    if (indirectOffset % 4 != 0) {
+                        return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
+                    }
 
-                    DAWN_INVALID_IF(
-                        indirectOffset >= indirectBuffer->GetSize() ||
-                            indirectOffset + kDispatchIndirectSize > indirectBuffer->GetSize(),
-                        "Indirect offset (%u) and dispatch size (%u) exceeds the indirect buffer "
-                        "size (%u).",
-                        indirectOffset, kDispatchIndirectSize, indirectBuffer->GetSize());
+                    if (indirectOffset >= indirectBuffer->GetSize() ||
+                        indirectOffset + kDispatchIndirectSize > indirectBuffer->GetSize()) {
+                        return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
+                    }
                 }
 
                 // Record the synchronization scope for Dispatch, both the bindgroups and the

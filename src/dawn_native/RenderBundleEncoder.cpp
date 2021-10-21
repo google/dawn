@@ -123,8 +123,7 @@ namespace dawn_native {
     RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* descriptor) {
         RenderBundleBase* result = nullptr;
 
-        if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result, "calling Finish(%s).",
-                                       descriptor)) {
+        if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result)) {
             return RenderBundleBase::MakeError(GetDevice());
         }
 
