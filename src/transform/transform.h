@@ -190,7 +190,7 @@ class Transform : public Castable<Transform> {
   /// continuing of for-loops.
   /// @param ctx the clone context
   /// @param stmt the statement to remove when the program is cloned
-  static void RemoveStatement(CloneContext& ctx, ast::Statement* stmt);
+  static void RemoveStatement(CloneContext& ctx, const ast::Statement* stmt);
 
   /// CreateASTTypeFor constructs new ast::Type nodes that reconstructs the
   /// semantic type `ty`.

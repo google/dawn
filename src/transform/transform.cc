@@ -75,7 +75,7 @@ bool Transform::Requires(CloneContext& ctx,
   return true;
 }
 
-void Transform::RemoveStatement(CloneContext& ctx, ast::Statement* stmt) {
+void Transform::RemoveStatement(CloneContext& ctx, const ast::Statement* stmt) {
   auto* sem = ctx.src->Sem().Get(stmt);
   if (auto* block = tint::As<sem::BlockStatement>(sem->Parent())) {
     ctx.Remove(block->Declaration()->statements, stmt);

@@ -329,6 +329,8 @@ set(TINT_LIB_SRCS
   transform/pad_array_elements.h
   transform/promote_initializers_to_const_var.cc
   transform/promote_initializers_to_const_var.h
+  transform/remove_phonies.cc
+  transform/remove_phonies.h
   transform/renamer.cc
   transform/renamer.h
   transform/robustness.cc
@@ -955,6 +957,7 @@ if(${TINT_BUILD_TESTS})
       transform/num_workgroups_from_uniform_test.cc
       transform/pad_array_elements_test.cc
       transform/promote_initializers_to_const_var_test.cc
+      transform/remove_phonies_test.cc
       transform/renamer_test.cc
       transform/robustness_test.cc
       transform/simplify_test.cc

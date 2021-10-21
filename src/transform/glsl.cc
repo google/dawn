@@ -27,6 +27,7 @@
 #include "src/transform/manager.h"
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
+#include "src/transform/remove_phonies.h"
 #include "src/transform/simplify.h"
 #include "src/transform/single_entry_point.h"
 #include "src/transform/zero_init_workgroup_memory.h"
@@ -58,6 +59,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   }
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<InlinePointerLets>();
+  manager.Add<RemovePhonies>();
   // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
   manager.Add<Simplify>();
   manager.Add<CalculateArrayLength>();

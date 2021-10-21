@@ -2303,6 +2303,8 @@ bool Resolver::Expression(const ast::Expression* root) {
       ok = MemberAccessor(member);
     } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
       ok = UnaryOp(unary);
+    } else if (expr->Is<ast::PhonyExpression>()) {
+      ok = true;  // No-op
     } else {
       TINT_ICE(Resolver, diagnostics_)
           << "unhandled expression type: " << expr->TypeInfo().name;
@@ -4393,13 +4395,30 @@ bool Resolver::Assignment(const ast::AssignmentStatement* a) {
   if (!Expression(a->lhs) || !Expression(a->rhs)) {
     return false;
   }
+
   return ValidateAssignment(a);
 }
 
 bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
+  auto const* rhs_type = TypeOf(a->rhs);
+
+  if (a->lhs->Is<ast::PhonyExpression>()) {
+    // https://www.w3.org/TR/WGSL/#phony-assignment-section
+    auto* ty = rhs_type->UnwrapRef();
+    if (!ty->IsConstructible() &&
+        !ty->IsAnyOf<sem::Pointer, sem::Texture, sem::Sampler>()) {
+      AddError(
+          "cannot assign '" + TypeNameOf(a->rhs) +
+              "' to '_'. '_' can only be assigned a constructable, pointer, "
+              "texture or sampler type",
+          a->rhs->source);
+      return false;
+    }
+    return true;  // RHS can be anything.
+  }
+
   // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
   auto const* lhs_type = TypeOf(a->lhs);
-  auto const* rhs_type = TypeOf(a->rhs);
 
   if (auto* ident = a->lhs->As<ast::IdentifierExpression>()) {
     VariableInfo* var;

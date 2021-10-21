@@ -2792,7 +2792,7 @@ Maybe<const ast::Expression*> ParserImpl::logical_or_expression() {
 }
 
 // assignment_stmt
-//   : unary_expression EQUAL logical_or_expression
+//   : (unary_expression | underscore) EQUAL logical_or_expression
 Maybe<const ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
   auto t = peek();
   auto source = t.source();
@@ -2806,19 +2806,27 @@ Maybe<const ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
   }
 
   auto lhs = unary_expression();
-  if (lhs.errored)
+  if (lhs.errored) {
     return Failure::kErrored;
-  if (!lhs.matched)
-    return Failure::kNoMatch;
+  }
+  if (!lhs.matched) {
+    if (!match(Token::Type::kUnderscore, &source)) {
+      return Failure::kNoMatch;
+    }
+    lhs = create<ast::PhonyExpression>(source);
+  }
 
-  if (!expect("assignment", Token::Type::kEqual))
+  if (!expect("assignment", Token::Type::kEqual)) {
     return Failure::kErrored;
+  }
 
   auto rhs = logical_or_expression();
-  if (rhs.errored)
+  if (rhs.errored) {
     return Failure::kErrored;
-  if (!rhs.matched)
+  }
+  if (!rhs.matched) {
     return add_error(peek(), "unable to parse right side of assignment");
+  }
 
   return create<ast::AssignmentStatement>(source, lhs.value, rhs.value);
 }

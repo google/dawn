@@ -54,6 +54,7 @@
 #include "src/transform/num_workgroups_from_uniform.h"
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
+#include "src/transform/remove_phonies.h"
 #include "src/transform/simplify.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
@@ -138,10 +139,14 @@ SanitizedResult Sanitize(const Program* in,
   manager.Add<transform::InlinePointerLets>();
   // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
   manager.Add<transform::Simplify>();
-  // DecomposeMemoryAccess must come after InlinePointerLets as we cannot take
-  // the address of calls to DecomposeMemoryAccess::Intrinsic. Must also come
-  // after Simplify, as we need to fold away the address-of and defers of
+  manager.Add<transform::RemovePhonies>();
+  // DecomposeMemoryAccess must come after:
+  // * InlinePointerLets, as we cannot take the address of calls to
+  //   DecomposeMemoryAccess::Intrinsic.
+  // * Simplify, as we need to fold away the address-of and dereferences of
   // `*(&(intrinsic_load()))` expressions.
+  // * RemovePhonies, as phonies can be assigned a pointer to a
+  //   non-constructable buffer, or dynamic array, which DMA cannot cope with.
   manager.Add<transform::DecomposeMemoryAccess>();
   // CalculateArrayLength must come after DecomposeMemoryAccess, as
   // DecomposeMemoryAccess special-cases the arrayLength() intrinsic, which

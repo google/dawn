@@ -1762,6 +1762,18 @@ class ProgramBuilder {
                                                 Expr(std::forward<IDX>(idx)));
   }
 
+  /// @param source the source information
+  /// @param obj the object for the member accessor expression
+  /// @param idx the index argument for the array accessor expression
+  /// @returns a `ast::MemberAccessorExpression` that indexes `obj` with `idx`
+  template <typename OBJ, typename IDX>
+  const ast::MemberAccessorExpression* MemberAccessor(const Source& source,
+                                                      OBJ&& obj,
+                                                      IDX&& idx) {
+    return create<ast::MemberAccessorExpression>(
+        source, Expr(std::forward<OBJ>(obj)), Expr(std::forward<IDX>(idx)));
+  }
+
   /// @param obj the object for the member accessor expression
   /// @param idx the index argument for the array accessor expression
   /// @returns a `ast::MemberAccessorExpression` that indexes `obj` with `idx`

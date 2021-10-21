@@ -293,6 +293,111 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
             "56:78 error: storage type of assignment must be constructible");
 }
 
+TEST_F(ResolverAssignmentValidationTest,
+       AssignToPhony_NonConstructableStruct_Fail) {
+  // [[block]]
+  // struct S {
+  //   arr: array<i32>;
+  // };
+  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // fn f() {
+  //   _ = s;
+  // }
+  auto* s = Structure("S", {Member("arr", ty.array<i32>())}, {StructBlock()});
+  Global("s", ty.Of(s), ast::StorageClass::kStorage, GroupAndBinding(0, 0));
+
+  WrapInFunction(Assign(Phony(), Expr(Source{{12, 34}}, "s")));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot assign 'S' to '_'. "
+            "'_' can only be assigned a constructable, pointer, texture or "
+            "sampler type");
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
+  // [[block]]
+  // struct S {
+  //   arr: array<i32>;
+  // };
+  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // fn f() {
+  //   _ = s.arr;
+  // }
+  auto* s = Structure("S", {Member("arr", ty.array<i32>())}, {StructBlock()});
+  Global("s", ty.Of(s), ast::StorageClass::kStorage, GroupAndBinding(0, 0));
+
+  WrapInFunction(Assign(Phony(), MemberAccessor(Source{{12, 34}}, "s", "arr")));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: cannot assign 'ref<storage, array<i32>, read>' to '_'. "
+      "'_' can only be assigned a constructable, pointer, texture or sampler "
+      "type");
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
+  // [[block]]
+  // struct S {
+  //   i:   i32;
+  //   arr: array<i32>;
+  // };
+  // [[block]]
+  // struct U {
+  //   i:   i32;
+  // };
+  // [[group(0), binding(0)]] var tex texture_2d;
+  // [[group(0), binding(1)]] var smp sampler;
+  // [[group(0), binding(2)]] var<uniform> u : U;
+  // [[group(0), binding(3)]] var<storage, read_write> s : S;
+  // var<workgroup> wg : array<f32, 10>
+  // fn f() {
+  //   _ = 1;
+  //   _ = 2u;
+  //   _ = 3.0;
+  //   _ = vec2<bool>();
+  //   _ = tex;
+  //   _ = smp;
+  //   _ = &s;
+  //   _ = s.i;
+  //   _ = &s.arr;
+  //   _ = u;
+  //   _ = u.i;
+  //   _ = wg;
+  //   _ = wg[3];
+  // }
+  auto* S = Structure("S",
+                      {
+                          Member("i", ty.i32()),
+                          Member("arr", ty.array<i32>()),
+                      },
+                      {StructBlock()});
+  auto* U = Structure("U", {Member("i", ty.i32())}, {StructBlock()});
+  Global("tex", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         GroupAndBinding(0, 0));
+  Global("smp", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(0, 1));
+  Global("u", ty.Of(U), ast::StorageClass::kUniform, GroupAndBinding(0, 2));
+  Global("s", ty.Of(S), ast::StorageClass::kStorage, GroupAndBinding(0, 3));
+  Global("wg", ty.array<f32, 10>(), ast::StorageClass::kWorkgroup);
+
+  WrapInFunction(Assign(Phony(), 1),                                      //
+                 Assign(Phony(), 2),                                      //
+                 Assign(Phony(), 3),                                      //
+                 Assign(Phony(), vec2<bool>()),                           //
+                 Assign(Phony(), "tex"),                                  //
+                 Assign(Phony(), "smp"),                                  //
+                 Assign(Phony(), AddressOf("s")),                         //
+                 Assign(Phony(), MemberAccessor("s", "i")),               //
+                 Assign(Phony(), AddressOf(MemberAccessor("s", "arr"))),  //
+                 Assign(Phony(), "u"),                                    //
+                 Assign(Phony(), MemberAccessor("u", "i")),               //
+                 Assign(Phony(), "wg"),                                   //
+                 Assign(Phony(), IndexAccessor("wg", 3)));
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

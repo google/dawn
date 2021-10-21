@@ -388,20 +388,28 @@ bool Builder::GenerateLabel(uint32_t id) {
 }
 
 bool Builder::GenerateAssignStatement(const ast::AssignmentStatement* assign) {
-  auto lhs_id = GenerateExpression(assign->lhs);
-  if (lhs_id == 0) {
-    return false;
-  }
-  auto rhs_id = GenerateExpression(assign->rhs);
-  if (rhs_id == 0) {
-    return false;
-  }
+  if (assign->lhs->Is<ast::PhonyExpression>()) {
+    auto rhs_id = GenerateExpression(assign->rhs);
+    if (rhs_id == 0) {
+      return false;
+    }
+    return true;
+  } else {
+    auto lhs_id = GenerateExpression(assign->lhs);
+    if (lhs_id == 0) {
+      return false;
+    }
+    auto rhs_id = GenerateExpression(assign->rhs);
+    if (rhs_id == 0) {
+      return false;
+    }
 
-  // If the thing we're assigning is a reference then we must load it first.
-  auto* type = TypeOf(assign->rhs);
-  rhs_id = GenerateLoadIfNeeded(type, rhs_id);
+    // If the thing we're assigning is a reference then we must load it first.
+    auto* type = TypeOf(assign->rhs);
+    rhs_id = GenerateLoadIfNeeded(type, rhs_id);
 
-  return GenerateStore(lhs_id, rhs_id);
+    return GenerateStore(lhs_id, rhs_id);
+  }
 }
 
 bool Builder::GenerateBreakStatement(const ast::BreakStatement*) {

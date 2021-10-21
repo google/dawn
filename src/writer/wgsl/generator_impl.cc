@@ -137,6 +137,10 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
     return EmitMemberAccessor(out, m);
   }
+  if (expr->Is<ast::PhonyExpression>()) {
+    out << "_";
+    return true;
+  }
   if (auto* u = expr->As<ast::UnaryOpExpression>()) {
     return EmitUnaryOp(out, u);
   }

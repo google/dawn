@@ -63,6 +63,7 @@
 #include "src/transform/module_scope_var_to_entry_point_param.h"
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
+#include "src/transform/remove_phonies.h"
 #include "src/transform/simplify.h"
 #include "src/transform/wrap_arrays_in_structs.h"
 #include "src/transform/zero_init_workgroup_memory.h"
@@ -145,6 +146,7 @@ SanitizedResult Sanitize(const Program* in,
   manager.Add<transform::PadArrayElements>();
   manager.Add<transform::ModuleScopeVarToEntryPointParam>();
   manager.Add<transform::InlinePointerLets>();
+  manager.Add<transform::RemovePhonies>();
   manager.Add<transform::Simplify>();
   // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as
   // it assumes that the form of the array length argument is &var.array.
