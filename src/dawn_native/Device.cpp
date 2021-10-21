@@ -1444,7 +1444,8 @@ namespace dawn_native {
         const SwapChainDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateSwapChainDescriptor(this, surface, descriptor));
+            DAWN_TRY_CONTEXT(ValidateSwapChainDescriptor(this, surface, descriptor),
+                             "validating %s", descriptor);
         }
 
         // TODO(dawn:269): Remove this code path once implementation-based swapchains are removed.

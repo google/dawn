@@ -36,9 +36,9 @@ namespace dawn_native {
 
     MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
                                          const SurfaceDescriptor* descriptor) {
-        if (descriptor->nextInChain == nullptr) {
-            return DAWN_VALIDATION_ERROR("Surface cannot be created with just the base descriptor");
-        }
+        DAWN_INVALID_IF(descriptor->nextInChain == nullptr,
+                        "Surface cannot be created with %s. nextInChain is not specified.",
+                        descriptor);
 
         DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
                                      wgpu::SType::SurfaceDescriptorFromMetalLayer,
@@ -52,9 +52,8 @@ namespace dawn_native {
         FindInChain(descriptor->nextInChain, &metalDesc);
         if (metalDesc) {
             // Check that the layer is a CAMetalLayer (or a derived class).
-            if (!InheritsFromCAMetalLayer(metalDesc->layer)) {
-                return DAWN_VALIDATION_ERROR("layer must be a CAMetalLayer");
-            }
+            DAWN_INVALID_IF(!InheritsFromCAMetalLayer(metalDesc->layer),
+                            "Layer must be a CAMetalLayer");
             return {};
         }
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
@@ -64,9 +63,7 @@ namespace dawn_native {
         const SurfaceDescriptorFromWindowsHWND* hwndDesc = nullptr;
         FindInChain(descriptor->nextInChain, &hwndDesc);
         if (hwndDesc) {
-            if (IsWindow(static_cast<HWND>(hwndDesc->hwnd)) == 0) {
-                return DAWN_VALIDATION_ERROR("Invalid HWND");
-            }
+            DAWN_INVALID_IF(IsWindow(static_cast<HWND>(hwndDesc->hwnd)) == 0, "Invalid HWND");
             return {};
         }
 #    endif  // defined(DAWN_PLATFORM_WIN32)
@@ -75,11 +72,10 @@ namespace dawn_native {
         if (coreWindowDesc) {
             // Validate the coreWindow by query for ICoreWindow interface
             ComPtr<ABI::Windows::UI::Core::ICoreWindow> coreWindow;
-            if (coreWindowDesc->coreWindow == nullptr ||
-                FAILED(static_cast<IUnknown*>(coreWindowDesc->coreWindow)
-                           ->QueryInterface(IID_PPV_ARGS(&coreWindow)))) {
-                return DAWN_VALIDATION_ERROR("Invalid CoreWindow");
-            }
+            DAWN_INVALID_IF(coreWindowDesc->coreWindow == nullptr ||
+                                FAILED(static_cast<IUnknown*>(coreWindowDesc->coreWindow)
+                                           ->QueryInterface(IID_PPV_ARGS(&coreWindow))),
+                            "Invalid CoreWindow");
             return {};
         }
         const SurfaceDescriptorFromWindowsSwapChainPanel* swapChainPanelDesc = nullptr;
@@ -87,11 +83,10 @@ namespace dawn_native {
         if (swapChainPanelDesc) {
             // Validate the swapChainPanel by querying for ISwapChainPanel interface
             ComPtr<ABI::Windows::UI::Xaml::Controls::ISwapChainPanel> swapChainPanel;
-            if (swapChainPanelDesc->swapChainPanel == nullptr ||
-                FAILED(static_cast<IUnknown*>(swapChainPanelDesc->swapChainPanel)
-                           ->QueryInterface(IID_PPV_ARGS(&swapChainPanel)))) {
-                return DAWN_VALIDATION_ERROR("Invalid SwapChainPanel");
-            }
+            DAWN_INVALID_IF(swapChainPanelDesc->swapChainPanel == nullptr ||
+                                FAILED(static_cast<IUnknown*>(swapChainPanelDesc->swapChainPanel)
+                                           ->QueryInterface(IID_PPV_ARGS(&swapChainPanel))),
+                            "Invalid SwapChainPanel");
             return {};
         }
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
@@ -111,14 +106,13 @@ namespace dawn_native {
                                               xDesc->window, &attributes);
             XSetErrorHandler(oldErrorHandler);
 
-            if (status == 0) {
-                return DAWN_VALIDATION_ERROR("Invalid X Window");
-            }
+            DAWN_INVALID_IF(status == 0, "Invalid X Window");
             return {};
         }
 #endif  // defined(DAWN_USE_X11)
 
-        return DAWN_VALIDATION_ERROR("Unsupported sType");
+        return DAWN_FORMAT_VALIDATION_ERROR("Unsupported sType (%s)",
+                                            descriptor->nextInChain->sType);
     }
 
     Surface::Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor)

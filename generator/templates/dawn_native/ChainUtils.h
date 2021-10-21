@@ -36,9 +36,8 @@ namespace dawn_native {
 
     template <typename T>
     MaybeError ValidateSingleSTypeInner(const ChainedStruct* chain, T sType) {
-        if (chain->sType != sType) {
-            return DAWN_VALIDATION_ERROR("Unsupported sType");
-        }
+        DAWN_INVALID_IF(chain->sType != sType,
+            "Unsupported sType (%s). Expected (%s)", chain->sType, sType);
         return {};
     }
 
@@ -57,9 +56,8 @@ namespace dawn_native {
         if (chain == nullptr) {
             return {};
         }
-        if (chain->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("Chain can only contain a single chained struct");
-        }
+        DAWN_INVALID_IF(chain->nextInChain != nullptr,
+            "Chain can only contain a single chained struct.");
         return ValidateSingleSTypeInner(chain, sType);
     }
 
@@ -70,9 +68,8 @@ namespace dawn_native {
         if (chain == nullptr) {
             return {};
         }
-        if (chain->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("Chain can only contain a single chained struct");
-        }
+        DAWN_INVALID_IF(chain->nextInChain != nullptr,
+            "Chain can only contain a single chained struct.");
         return ValidateSingleSTypeInner(chain, sType, sTypes...);
     }
 

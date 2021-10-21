@@ -65,10 +65,8 @@ namespace dawn_native {
             device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
         }
 
-        if (!valid) {
-            return DAWN_VALIDATION_ERROR(
-                "Produced invalid SPIRV. Please file a bug at https://crbug.com/tint.");
-        }
+        DAWN_INVALID_IF(!valid,
+                        "Produced invalid SPIRV. Please file a bug at https://crbug.com/tint.");
 
         return {};
     }

@@ -36,16 +36,19 @@ namespace dawn_native {
                               wgpu::TextureUsage allowedUsage,
                               uint32_t width,
                               uint32_t height) override {
-                GetDevice()->ConsumedError(DAWN_VALIDATION_ERROR("error swapchain"));
+                GetDevice()->ConsumedError(
+                    DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
             }
 
             TextureViewBase* APIGetCurrentTextureView() override {
-                GetDevice()->ConsumedError(DAWN_VALIDATION_ERROR("error swapchain"));
+                GetDevice()->ConsumedError(
+                    DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
                 return TextureViewBase::MakeError(GetDevice());
             }
 
             void APIPresent() override {
-                GetDevice()->ConsumedError(DAWN_VALIDATION_ERROR("error swapchain"));
+                GetDevice()->ConsumedError(
+                    DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
             }
         };
 
@@ -55,45 +58,43 @@ namespace dawn_native {
                                            const Surface* surface,
                                            const SwapChainDescriptor* descriptor) {
         if (descriptor->implementation != 0) {
-            if (surface != nullptr) {
-                return DAWN_VALIDATION_ERROR(
-                    "Exactly one of surface or implementation must be set");
-            }
+            DAWN_INVALID_IF(surface != nullptr,
+                            "Exactly one of surface or implementation must be set");
 
             DawnSwapChainImplementation* impl =
                 reinterpret_cast<DawnSwapChainImplementation*>(descriptor->implementation);
 
-            if (!impl->Init || !impl->Destroy || !impl->Configure || !impl->GetNextTexture ||
-                !impl->Present) {
-                return DAWN_VALIDATION_ERROR("Implementation is incomplete");
-            }
+            DAWN_INVALID_IF(!impl->Init || !impl->Destroy || !impl->Configure ||
+                                !impl->GetNextTexture || !impl->Present,
+                            "Implementation is incomplete");
 
         } else {
-            if (surface == nullptr) {
-                return DAWN_VALIDATION_ERROR(
-                    "At least one of surface or implementation must be set");
-            }
+            DAWN_INVALID_IF(surface == nullptr,
+                            "At least one of surface or implementation must be set");
 
             DAWN_TRY(ValidatePresentMode(descriptor->presentMode));
 
             // TODO(crbug.com/dawn/160): Lift this restriction once
             // wgpu::Instance::GetPreferredSurfaceFormat is implemented.
-            if (descriptor->format != wgpu::TextureFormat::BGRA8Unorm) {
-                return DAWN_VALIDATION_ERROR("Format must (currently) be BGRA8Unorm");
-            }
+            DAWN_INVALID_IF(descriptor->format != wgpu::TextureFormat::BGRA8Unorm,
+                            "Format (%s) is not %s, which is (currently) the only accepted format.",
+                            descriptor->format, wgpu::TextureFormat::BGRA8Unorm);
 
-            if (descriptor->usage != wgpu::TextureUsage::RenderAttachment) {
-                return DAWN_VALIDATION_ERROR("Usage must (currently) be RenderAttachment");
-            }
+            DAWN_INVALID_IF(descriptor->usage != wgpu::TextureUsage::RenderAttachment,
+                            "Usage (%s) is not %s, which is (currently) the only accepted usage.",
+                            descriptor->usage, wgpu::TextureUsage::RenderAttachment);
 
-            if (descriptor->width == 0 || descriptor->height == 0) {
-                return DAWN_VALIDATION_ERROR("Swapchain size can't be empty");
-            }
+            DAWN_INVALID_IF(descriptor->width == 0 || descriptor->height == 0,
+                            "Swap Chain size (width: %u, height: %u) is empty.", descriptor->width,
+                            descriptor->height);
 
-            if (descriptor->width > device->GetLimits().v1.maxTextureDimension2D ||
-                descriptor->height > device->GetLimits().v1.maxTextureDimension2D) {
-                return DAWN_VALIDATION_ERROR("Swapchain size too big");
-            }
+            DAWN_INVALID_IF(
+                descriptor->width > device->GetLimits().v1.maxTextureDimension2D ||
+                    descriptor->height > device->GetLimits().v1.maxTextureDimension2D,
+                "Swap Chain size (width: %u, height: %u) is greater than the maximum 2D texture "
+                "size (width: %u, height: %u).",
+                descriptor->width, descriptor->height, device->GetLimits().v1.maxTextureDimension2D,
+                device->GetLimits().v1.maxTextureDimension2D);
         }
 
         return {};
@@ -230,9 +231,9 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureUsage(allowedUsage));
         DAWN_TRY(ValidateTextureFormat(format));
 
-        if (width == 0 || height == 0) {
-            return DAWN_VALIDATION_ERROR("Swap chain cannot be configured to zero size");
-        }
+        DAWN_INVALID_IF(width == 0 || height == 0,
+                        "Configuration size (width: %u, height: %u) for %s is empty.", width,
+                        height, this);
 
         return {};
     }
@@ -241,10 +242,9 @@ namespace dawn_native {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        if (mWidth == 0) {
-            // If width is 0, it implies swap chain has never been configured
-            return DAWN_VALIDATION_ERROR("Swap chain needs to be configured before GetNextTexture");
-        }
+        // If width is 0, it implies swap chain has never been configured
+        DAWN_INVALID_IF(mWidth == 0, "%s was not configured prior to calling GetNextTexture.",
+                        this);
 
         return {};
     }
@@ -253,10 +253,10 @@ namespace dawn_native {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        if (mCurrentTextureView == nullptr) {
-            return DAWN_VALIDATION_ERROR(
-                "Cannot call present without a GetCurrentTextureView call for this frame");
-        }
+        DAWN_INVALID_IF(
+            mCurrentTextureView == nullptr,
+            "GetCurrentTextureView was not called on %s this frame prior to calling Present.",
+            this);
 
         return {};
     }
@@ -302,7 +302,7 @@ namespace dawn_native {
                                         uint32_t width,
                                         uint32_t height) {
         GetDevice()->ConsumedError(
-            DAWN_VALIDATION_ERROR("Configure is invalid for surface-based swapchains"));
+            DAWN_FORMAT_VALIDATION_ERROR("Configure is invalid for surface-based swapchains."));
     }
 
     TextureViewBase* NewSwapChainBase::APIGetCurrentTextureView() {
@@ -386,13 +386,12 @@ namespace dawn_native {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        if (!mAttached) {
-            return DAWN_VALIDATION_ERROR("Presenting on detached swapchain");
-        }
+        DAWN_INVALID_IF(!mAttached, "Cannot call Present called on detached %s.", this);
 
-        if (mCurrentTextureView == nullptr) {
-            return DAWN_VALIDATION_ERROR("Presenting without prior GetCurrentTextureView");
-        }
+        DAWN_INVALID_IF(
+            mCurrentTextureView == nullptr,
+            "GetCurrentTextureView was not called on %s this frame prior to calling Present.",
+            this);
 
         return {};
     }
@@ -401,9 +400,7 @@ namespace dawn_native {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        if (!mAttached) {
-            return DAWN_VALIDATION_ERROR("Getting view on detached swapchain");
-        }
+        DAWN_INVALID_IF(!mAttached, "Cannot call GetCurrentTextureView on detached %s.", this);
 
         return {};
     }
