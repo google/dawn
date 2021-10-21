@@ -270,61 +270,52 @@ void CommonFuzzer::RunInspector(Program* program) {
   CHECK_INSPECTOR(inspector);
 
   for (auto& ep : entry_points) {
-    auto remapped_name = inspector.GetRemappedNameForEntryPoint(ep.name);
+    inspector.GetRemappedNameForEntryPoint(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto storage_size = inspector.GetStorageSize(ep.name);
-    (void)storage_size;  // Silencing unused variable warning
+    inspector.GetStorageSize(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto resource_bindings = inspector.GetResourceBindings(ep.name);
+    inspector.GetResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto uniform_bindings = inspector.GetUniformBufferResourceBindings(ep.name);
+    inspector.GetUniformBufferResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto storage_bindings = inspector.GetStorageBufferResourceBindings(ep.name);
+    inspector.GetStorageBufferResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto readonly_bindings =
-        inspector.GetReadOnlyStorageBufferResourceBindings(ep.name);
+    inspector.GetReadOnlyStorageBufferResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto sampler_bindings = inspector.GetSamplerResourceBindings(ep.name);
+    inspector.GetSamplerResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto comparison_sampler_bindings =
-        inspector.GetComparisonSamplerResourceBindings(ep.name);
+    inspector.GetComparisonSamplerResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto sampled_texture_bindings =
-        inspector.GetSampledTextureResourceBindings(ep.name);
+    inspector.GetSampledTextureResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto multisampled_texture_bindings =
-        inspector.GetMultisampledTextureResourceBindings(ep.name);
+    inspector.GetMultisampledTextureResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto writeonly__bindings =
-        inspector.GetWriteOnlyStorageTextureResourceBindings(ep.name);
+    inspector.GetWriteOnlyStorageTextureResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto depth_bindings = inspector.GetDepthTextureResourceBindings(ep.name);
+    inspector.GetDepthTextureResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto depth_multisampled_bindings =
-        inspector.GetDepthMultisampledTextureResourceBindings(ep.name);
+    inspector.GetDepthMultisampledTextureResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto external_bindings =
-        inspector.GetExternalTextureResourceBindings(ep.name);
+    inspector.GetExternalTextureResourceBindings(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto sampler_texture_uses = inspector.GetSamplerTextureUses(ep.name);
+    inspector.GetSamplerTextureUses(ep.name);
     CHECK_INSPECTOR(inspector);
 
-    auto workgroup_storage = inspector.GetWorkgroupStorageSize(ep.name);
-    (void)workgroup_storage;  // Silencing unused variable warning
+    inspector.GetWorkgroupStorageSize(ep.name);
     CHECK_INSPECTOR(inspector);
   }
 }
