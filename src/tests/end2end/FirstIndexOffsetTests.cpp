@@ -25,6 +25,8 @@ constexpr uint32_t kRTSize = 1;
 enum class DrawMode {
     NonIndexed,
     Indexed,
+    NonIndexedIndirect,
+    IndexedIndirect,
 };
 
 enum class CheckIndex : uint32_t {
@@ -103,7 +105,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
         vertexBody << "  output.vertex_index = input.vertex_index;\n";
 
         fragmentInputs << "  [[location(1)]] vertex_index : u32;\n";
-        fragmentBody << "  idx_vals.vertex_index = input.vertex_index;\n";
+        fragmentBody << "  ignore(atomicMin(&idx_vals.vertex_index, input.vertex_index));\n";
     }
     if ((checkIndex & CheckIndex::Instance) != 0) {
         vertexInputs << "  [[builtin(instance_index)]] instance_index : u32;\n";
@@ -111,7 +113,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
         vertexBody << "  output.instance_index = input.instance_index;\n";
 
         fragmentInputs << "  [[location(2)]] instance_index : u32;\n";
-        fragmentBody << "  idx_vals.instance_index = input.instance_index;\n";
+        fragmentBody << "  ignore(atomicMin(&idx_vals.instance_index, input.instance_index));\n";
     }
 
     std::string vertexShader = R"(
@@ -130,8 +132,8 @@ struct VertexOutputs {
 
     std::string fragmentShader = R"(
 [[block]] struct IndexVals {
-  vertex_index : u32;
-  instance_index : u32;
+  vertex_index : atomic<u32>;
+  instance_index : atomic<u32>;
 };
 [[group(0), binding(0)]] var<storage, read_write> idx_vals : IndexVals;
 
@@ -161,31 +163,74 @@ struct FragInputs {
 
     std::vector<float> vertexData(firstVertex * kComponentsPerVertex);
     vertexData.insert(vertexData.end(), {0, 0, 0, 1});
+    vertexData.insert(vertexData.end(), {0, 0, 0, 1});
     wgpu::Buffer vertices = utils::CreateBufferFromData(
         device, vertexData.data(), vertexData.size() * sizeof(float), wgpu::BufferUsage::Vertex);
     wgpu::Buffer indices =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0});
+
+    const uint32_t bufferInitialVertex = checkIndex & CheckIndex::Vertex ? std::numeric_limits<uint32_t>::max() : 0;
+    const uint32_t bufferInitialInstance = checkIndex & CheckIndex::Instance ? std::numeric_limits<uint32_t>::max() : 0;
     wgpu::Buffer buffer = utils::CreateBufferFromData(
-        device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage, {0u, 0u});
+        device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage, {bufferInitialVertex, bufferInitialInstance});
+
+    wgpu::Buffer indirectBuffer;
+    switch (mode) {
+    case DrawMode::NonIndexed:
+    case DrawMode::Indexed:
+        break;
+    case DrawMode::NonIndexedIndirect:
+        // With DrawIndirect firstInstance is reserved and must be 0 according to spec.
+        ASSERT_EQ(firstInstance, 0u);
+        indirectBuffer = utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {1, 1, firstVertex, firstInstance});
+        break;
+    case DrawMode::IndexedIndirect:
+        // With DrawIndexedIndirect firstInstance is reserved and must be 0 according to spec.
+        ASSERT_EQ(firstInstance, 0u);
+        indirectBuffer = utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {1, 1, 0, firstVertex, firstInstance});
+        break;
+    default:
+        FAIL();
+    }
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.SetPipeline(pipeline);
     pass.SetVertexBuffer(0, vertices);
-    pass.SetBindGroup(0,
-                      utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}}));
-    if (mode == DrawMode::Indexed) {
+    pass.SetBindGroup(0, bindGroup);
+    // Do a first draw to make sure the offset values are correctly updated on the next draw.
+    // We should only see the values from the second draw.
+    pass.Draw(1, 1, firstVertex + 1, firstInstance + 1);
+    switch (mode) {
+    case DrawMode::NonIndexed:
+        pass.Draw(1, 1, firstVertex, firstInstance);
+        break;
+    case DrawMode::Indexed:
         pass.SetIndexBuffer(indices, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(1, 1, 0, firstVertex, firstInstance);
-
-    } else {
-        pass.Draw(1, 1, firstVertex, firstInstance);
+        break;
+    case DrawMode::NonIndexedIndirect:
+        pass.DrawIndirect(indirectBuffer, 0);
+        break;
+    case DrawMode::IndexedIndirect:
+        pass.SetIndexBuffer(indices, wgpu::IndexFormat::Uint32);
+        pass.DrawIndexedIndirect(indirectBuffer, 0);
+        break;
+    default:
+        FAIL();
     }
     pass.EndPass();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     std::array<uint32_t, 2> expected = {firstVertex, firstInstance};
+    // TODO(dawn:548): remove this once builtins are emulated for indirect draws.
+    // Until then the expected values should always be {0, 0}.
+    if (IsD3D12() && (mode == DrawMode::NonIndexedIndirect || mode == DrawMode::IndexedIndirect)) {
+        expected = {0, 0};
+    }
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), buffer, 0, expected.size());
 }
 
@@ -218,6 +263,18 @@ TEST_P(FirstIndexOffsetTests, IndexedInstance) {
 // DrawIndexed()
 TEST_P(FirstIndexOffsetTests, IndexedBothOffset) {
     TestBothIndices(DrawMode::Indexed, 7, 11);
+}
+
+// There are no instance_index tests because the spec forces it to be 0.
+
+// Test that vertex_index starts at 7 when drawn using DrawIndirect()
+TEST_P(FirstIndexOffsetTests, NonIndexedIndirectVertexOffset) {
+    TestVertexIndex(DrawMode::NonIndexedIndirect, 7);
+}
+
+// Test that vertex_index starts at 7 when drawn using DrawIndexedIndirect()
+TEST_P(FirstIndexOffsetTests, IndexedIndirectVertex) {
+    TestVertexIndex(DrawMode::IndexedIndirect, 7);
 }
 
 DAWN_INSTANTIATE_TEST(FirstIndexOffsetTests,

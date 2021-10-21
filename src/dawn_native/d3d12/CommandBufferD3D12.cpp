@@ -1400,6 +1400,11 @@ namespace dawn_native { namespace d3d12 {
 
                     DAWN_TRY(bindingTracker->Apply(commandContext));
                     vertexBufferTracker.Apply(commandList, lastPipeline);
+
+                    // TODO(dawn:548): remove this once builtins are emulated for indirect draws.
+                    // Zero the index offset values to avoid reusing values from the previous draw
+                    RecordFirstIndexOffset(commandList, lastPipeline, 0, 0);
+
                     Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                     ComPtr<ID3D12CommandSignature> signature =
                         ToBackend(GetDevice())->GetDrawIndirectSignature();
@@ -1414,6 +1419,11 @@ namespace dawn_native { namespace d3d12 {
 
                     DAWN_TRY(bindingTracker->Apply(commandContext));
                     vertexBufferTracker.Apply(commandList, lastPipeline);
+
+                    // TODO(dawn:548): remove this once builtins are emulated for indirect draws.
+                    // Zero the index offset values to avoid reusing values from the previous draw
+                    RecordFirstIndexOffset(commandList, lastPipeline, 0, 0);
+
                     Buffer* buffer = ToBackend(draw->indirectBufferLocation->GetBuffer());
                     ComPtr<ID3D12CommandSignature> signature =
                         ToBackend(GetDevice())->GetDrawIndexedIndirectSignature();
