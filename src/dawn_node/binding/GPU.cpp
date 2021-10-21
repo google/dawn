@@ -18,6 +18,10 @@
 
 #include <cstdlib>
 
+#if defined(_WIN32)
+#    include <Windows.h>
+#endif
+
 namespace {
     std::string GetEnvVar(const char* varName) {
 #if defined(_WIN32)
@@ -37,6 +41,14 @@ namespace {
         return "";
 #endif
     }
+
+    void SetDllDir(const char* dir) {
+        (void)dir;
+#if defined(_WIN32)
+        ::SetDllDirectory(dir);
+#endif
+    }
+
 }  // namespace
 
 namespace wgpu { namespace binding {
@@ -49,6 +61,10 @@ namespace wgpu { namespace binding {
         instance_.EnableBackendValidation(true);
         instance_.SetBackendValidationLevel(dawn_native::BackendValidationLevel::Full);
 
+        // Setting the DllDir changes where we load adapter DLLs from (e.g. d3dcompiler_47.dll)
+        if (auto dir = flags_.Get("dlldir")) {
+            SetDllDir(dir->c_str());
+        }
         instance_.DiscoverDefaultAdapters();
     }
 
