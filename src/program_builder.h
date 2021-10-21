@@ -1643,11 +1643,11 @@ class ProgramBuilder {
   const ast::PhonyExpression* Phony() { return create<ast::PhonyExpression>(); }
 
   /// @param expr the expression to ignore
-  /// @returns a `ast::CallStatement` that calls the `ignore` intrinsic which is
-  /// passed the single `expr` argument
+  /// @returns a `ast::AssignmentStatement` that assigns 'expr' to the phony
+  /// (underscore) variable.
   template <typename EXPR>
-  const ast::CallStatement* Ignore(EXPR&& expr) {
-    return create<ast::CallStatement>(Call("ignore", Expr(expr)));
+  const ast::AssignmentStatement* Ignore(EXPR&& expr) {
+    return create<ast::AssignmentStatement>(Phony(), Expr(expr));
   }
 
   /// @param lhs the left hand argument to the addition operation

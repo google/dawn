@@ -190,28 +190,33 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInit) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
+  // fn f(i : i32) {}
+  //
   // var<workgroup> a : atomic<i32>;
-  // for({ignore(1); ignore(2);}; ; ) {
+  // for({f(1); f(2);}; ; ) {
   //   return;
   // }
+
+  Func("f", {Param("i", ty.i32())}, ty.void_(), {});
+  auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
   Func("a_statement", {}, ty.void_(), {});
 
   Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
-  auto* multi_stmt = Block(Ignore(1), Ignore(2));
-  auto* f =
+  auto* multi_stmt = Block(f(1), f(2));
+  auto* loop =
       For(multi_stmt, nullptr, nullptr, Block(CallStmt(Call("a_statement"))));
-  WrapInFunction(f);
+  WrapInFunction(loop);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
     {
-      (void) 1;
-      (void) 2;
+      f(1);
+      f(2);
     }
     for(; ; ) {
       a_statement();
@@ -267,29 +272,34 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCont) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
+  // fn f(i : i32) {}
+  //
   // var<workgroup> a : atomic<i32>;
-  // for(; ; { ignore(1); ignore(2); }) {
+  // for(; ; { f(1); f(2); }) {
   //   return;
   // }
+
+  Func("f", {Param("i", ty.i32())}, ty.void_(), {});
+  auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
   Func("a_statement", {}, ty.void_(), {});
 
   Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
-  auto* multi_stmt = Block(Ignore(1), Ignore(2));
-  auto* f =
+  auto* multi_stmt = Block(f(1), f(2));
+  auto* loop =
       For(nullptr, nullptr, multi_stmt, Block(CallStmt(Call("a_statement"))));
-  WrapInFunction(f);
+  WrapInFunction(loop);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  while (true) {
     a_statement();
     {
-      (void) 1;
-      (void) 2;
+      f(1);
+      f(2);
     }
   }
 )");
@@ -320,36 +330,41 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
+  // fn f(i : i32) {}
+  //
   // var<workgroup> a : atomic<i32>;
-  // for({ ignore(1); ignore(2); }; true; { ignore(3); ignore(4); }) {
+  // for({ f(1); f(2); }; true; { f(3); f(4); }) {
   //   return;
   // }
+
+  Func("f", {Param("i", ty.i32())}, ty.void_(), {});
+  auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
   Func("a_statement", {}, ty.void_(), {});
 
   Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
-  auto* multi_stmt_a = Block(Ignore(1), Ignore(2));
-  auto* multi_stmt_b = Block(Ignore(3), Ignore(4));
-  auto* f = For(multi_stmt_a, Expr(true), multi_stmt_b,
-                Block(CallStmt(Call("a_statement"))));
-  WrapInFunction(f);
+  auto* multi_stmt_a = Block(f(1), f(2));
+  auto* multi_stmt_b = Block(f(3), f(4));
+  auto* loop = For(multi_stmt_a, Expr(true), multi_stmt_b,
+                   Block(CallStmt(Call("a_statement"))));
+  WrapInFunction(loop);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
     {
-      (void) 1;
-      (void) 2;
+      f(1);
+      f(2);
     }
     while (true) {
       if (!(true)) { break; }
       a_statement();
       {
-        (void) 3;
-        (void) 4;
+        f(3);
+        f(4);
       }
     }
   }
