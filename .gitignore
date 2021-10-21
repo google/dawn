@@ -13,6 +13,7 @@
 /third_party/glfw
 /third_party/glm
 /third_party/googletest
+/third_party/gpuweb
 /third_party/jinja2
 /third_party/jsoncpp
 /third_party/llvm-build
