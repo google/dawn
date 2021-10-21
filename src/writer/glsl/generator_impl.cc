@@ -1465,23 +1465,9 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
   {
     auto out = line();
     auto name = builder_.Symbols().NameFor(func->symbol);
-    // If the function returns an array, then we need to declare a typedef for
-    // this.
-    if (sem->ReturnType()->Is<sem::Array>()) {
-      auto typedef_name = UniqueIdentifier(name + "_ret");
-      auto pre = line();
-      pre << "typedef ";
-      if (!EmitTypeAndName(pre, sem->ReturnType(), ast::StorageClass::kNone,
-                           ast::Access::kReadWrite, typedef_name)) {
-        return false;
-      }
-      pre << ";";
-      out << typedef_name;
-    } else {
-      if (!EmitType(out, sem->ReturnType(), ast::StorageClass::kNone,
-                    ast::Access::kReadWrite, "")) {
-        return false;
-      }
+    if (!EmitType(out, sem->ReturnType(), ast::StorageClass::kNone,
+                  ast::Access::kReadWrite, "")) {
+      return false;
     }
 
     out << " " << name << "(";

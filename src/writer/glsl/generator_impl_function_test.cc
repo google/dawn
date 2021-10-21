@@ -999,8 +999,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithArrayReturn) {
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-typedef float my_func_ret[5];
-my_func_ret my_func() {
+float[5] my_func() {
   return float[5](0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 )");
