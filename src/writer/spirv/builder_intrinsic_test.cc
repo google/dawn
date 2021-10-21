@@ -39,7 +39,32 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
 }
 
 using IntrinsicBoolTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
-TEST_P(IntrinsicBoolTest, Call_Bool) {
+TEST_P(IntrinsicBoolTest, Call_Bool_Scalar) {
+  auto param = GetParam();
+
+  auto* var = Global("v", ty.bool_(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call(param.name, "v");
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+)");
+
+  // both any and all are 'passthrough' for scalar booleans
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%6 = OpLoad %3 %1\n");
+}
+
+TEST_P(IntrinsicBoolTest, Call_Bool_Vector) {
   auto param = GetParam();
 
   auto* var = Global("v", ty.vec3<bool>(), ast::StorageClass::kPrivate);

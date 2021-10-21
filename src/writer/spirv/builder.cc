@@ -2307,10 +2307,10 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
     return result_id;
   }
 
-  // Generates the SPIR-V ID for the expression for the indexed call parameter,
+  // Generates the SPIR-V ID for the expression for the indexed call argument,
   // and loads it if necessary. Returns 0 on error.
-  auto get_param_as_value_id = [&](size_t i,
-                                   bool generate_load = true) -> uint32_t {
+  auto get_arg_as_value_id = [&](size_t i,
+                                 bool generate_load = true) -> uint32_t {
     auto* arg = call->args[i];
     auto* param = intrinsic->Parameters()[i];
     auto val_id = GenerateExpression(arg);
@@ -2327,7 +2327,7 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
   OperandList params = {Operand::Int(result_type_id), result};
   spv::Op op = spv::Op::OpNop;
 
-  // Pushes the parameters for a GlslStd450 extended instruction, and sets op
+  // Pushes the arguments for a GlslStd450 extended instruction, and sets op
   // to OpExtInst.
   auto glsl_std450 = [&](uint32_t inst_id) {
     auto set_id = GetGLSLstd450Import();
@@ -2338,9 +2338,17 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
 
   switch (intrinsic->Type()) {
     case IntrinsicType::kAny:
+      if (intrinsic->Parameters()[0]->Type()->Is<sem::Bool>()) {
+        // any(v: bool) just resolves to v.
+        return get_arg_as_value_id(0);
+      }
       op = spv::Op::OpAny;
       break;
     case IntrinsicType::kAll:
+      if (intrinsic->Parameters()[0]->Type()->Is<sem::Bool>()) {
+        // all(v: bool) just resolves to v.
+        return get_arg_as_value_id(0);
+      }
       op = spv::Op::OpAll;
       break;
     case IntrinsicType::kArrayLength: {
@@ -2424,7 +2432,7 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
       // Evaluate the single argument, return the non-zero result_id which isn't
       // associated with any op (ignore returns void, so this cannot be used in
       // an expression).
-      if (!get_param_as_value_id(0, false)) {
+      if (!get_arg_as_value_id(0, false)) {
         return 0;
       }
       return result_id;
@@ -2436,7 +2444,7 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
       break;
     case IntrinsicType::kIsFinite: {
       // Implemented as:   not(IsInf or IsNan)
-      auto val_id = get_param_as_value_id(0);
+      auto val_id = get_arg_as_value_id(0);
       if (!val_id) {
         return 0;
       }
@@ -2468,7 +2476,7 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
       //   clamped = uclamp(1,254,exponent_bits);
       //   result = (clamped == exponent_bits);
       //
-      auto val_id = get_param_as_value_id(0);
+      auto val_id = get_arg_as_value_id(0);
       if (!val_id) {
         return 0;
       }
@@ -2541,9 +2549,9 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
     case IntrinsicType::kMix: {
       auto std450 = Operand::Int(GetGLSLstd450Import());
 
-      auto a_id = get_param_as_value_id(0);
-      auto b_id = get_param_as_value_id(1);
-      auto f_id = get_param_as_value_id(2);
+      auto a_id = get_arg_as_value_id(0);
+      auto b_id = get_arg_as_value_id(1);
+      auto f_id = get_arg_as_value_id(2);
       if (!a_id || !b_id || !f_id) {
         return 0;
       }
@@ -2572,9 +2580,9 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
       break;
     case IntrinsicType::kSelect: {
       // Note: Argument order is different in WGSL and SPIR-V
-      auto cond_id = get_param_as_value_id(2);
-      auto true_id = get_param_as_value_id(1);
-      auto false_id = get_param_as_value_id(0);
+      auto cond_id = get_arg_as_value_id(2);
+      auto true_id = get_arg_as_value_id(1);
+      auto false_id = get_arg_as_value_id(0);
       if (!cond_id || !true_id || !false_id) {
         return 0;
       }
@@ -2611,7 +2619,7 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
       if (intrinsic->ReturnType()->is_unsigned_scalar_or_vector()) {
         // abs() only operates on *signed* integers.
         // This is a no-op for unsigned integers.
-        return get_param_as_value_id(0);
+        return get_arg_as_value_id(0);
       }
       if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         glsl_std450(GLSLstd450FAbs);
@@ -2637,7 +2645,7 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
   }
 
   for (size_t i = 0; i < call->args.size(); i++) {
-    if (auto val_id = get_param_as_value_id(i)) {
+    if (auto val_id = get_arg_as_value_id(i)) {
       params.emplace_back(Operand::Int(val_id));
     } else {
       return 0;

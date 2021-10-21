@@ -267,7 +267,9 @@ fn abs<T: fiu32>(T) -> T
 fn abs<N: num, T: fiu32>(vec<N, T>) -> vec<N, T>
 fn acos(f32) -> f32
 fn acos<N: num>(vec<N, f32>) -> vec<N, f32>
+fn all(bool) -> bool
 fn all<N: num>(vec<N, bool>) -> bool
+fn any(bool) -> bool
 fn any<N: num>(vec<N, bool>) -> bool
 fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
 fn asin(f32) -> f32

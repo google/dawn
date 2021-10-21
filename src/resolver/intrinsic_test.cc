@@ -107,8 +107,21 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                                          "fwidthCoarse",
                                          "fwidthFine"));
 
-using ResolverIntrinsic = ResolverTestWithParam<std::string>;
-TEST_P(ResolverIntrinsic, Test) {
+using ResolverIntrinsicTest_BoolMethod = ResolverTestWithParam<std::string>;
+TEST_P(ResolverIntrinsicTest_BoolMethod, Scalar) {
+  auto name = GetParam();
+
+  Global("my_var", ty.bool_(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call(name, "my_var");
+  WrapInFunction(expr);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(expr), nullptr);
+  EXPECT_TRUE(TypeOf(expr)->Is<sem::Bool>());
+}
+TEST_P(ResolverIntrinsicTest_BoolMethod, Vector) {
   auto name = GetParam();
 
   Global("my_var", ty.vec3<bool>(), ast::StorageClass::kPrivate);
@@ -122,7 +135,7 @@ TEST_P(ResolverIntrinsic, Test) {
   EXPECT_TRUE(TypeOf(expr)->Is<sem::Bool>());
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
-                         ResolverIntrinsic,
+                         ResolverIntrinsicTest_BoolMethod,
                          testing::Values("any", "all"));
 
 using ResolverIntrinsicTest_FloatMethod = ResolverTestWithParam<std::string>;

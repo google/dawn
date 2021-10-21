@@ -8,6 +8,10 @@
 * Deprecated texture builtin functions that accepted a `read` access controlled storage texture have been removed.
 * Storage textures must now only use the `write` access control.
 
+### New Features
+
+* `any()` and `all()` now support a `bool` parameter. These simply return the passed argument. [tint:1253](https://crbug.com/tint/1253)
+
 ### Fixes
 
 * Swizzling of `vec3` types in `storage` and `uniform` buffers has been fixed for Metal 1.x. [tint:1249](https://crbug.com/tint/1249)
