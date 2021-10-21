@@ -138,6 +138,8 @@ set(TINT_LIB_SRCS
   ast/node.h
   ast/override_decoration.cc
   ast/override_decoration.h
+  ast/phony_expression.cc
+  ast/phony_expression.h
   ast/pipeline_stage.cc
   ast/pipeline_stage.h
   ast/pointer.cc
@@ -619,6 +621,7 @@ if(${TINT_BUILD_TESTS})
     ast/module_test.cc
     ast/multisampled_texture_test.cc
     ast/override_decoration_test.cc
+    ast/phony_expression_test.cc
     ast/pointer_test.cc
     ast/return_statement_test.cc
     ast/sampled_texture_test.cc

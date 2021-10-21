@@ -274,6 +274,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/node.h",
     "ast/override_decoration.cc",
     "ast/override_decoration.h",
+    "ast/phony_expression.cc",
+    "ast/phony_expression.h",
     "ast/pipeline_stage.cc",
     "ast/pipeline_stage.h",
     "ast/pointer.cc",

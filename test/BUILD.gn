@@ -189,6 +189,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/module_test.cc",
     "../src/ast/multisampled_texture_test.cc",
     "../src/ast/override_decoration_test.cc",
+    "../src/ast/phony_expression_test.cc",
     "../src/ast/pointer_test.cc",
     "../src/ast/return_statement_test.cc",
     "../src/ast/sampled_texture_test.cc",

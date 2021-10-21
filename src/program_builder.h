@@ -49,6 +49,7 @@
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
 #include "src/ast/override_decoration.h"
+#include "src/ast/phony_expression.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
@@ -1617,6 +1618,15 @@ class ProgramBuilder {
     return create<ast::CallExpression>(Expr(func),
                                        ExprList(std::forward<ARGS>(args)...));
   }
+
+  /// @param source the source information
+  /// @returns a `ast::PhonyExpression`
+  const ast::PhonyExpression* Phony(const Source& source) {
+    return create<ast::PhonyExpression>(source);
+  }
+
+  /// @returns a `ast::PhonyExpression`
+  const ast::PhonyExpression* Phony() { return create<ast::PhonyExpression>(); }
 
   /// @param expr the expression to ignore
   /// @returns a `ast::CallStatement` that calls the `ignore` intrinsic which is
