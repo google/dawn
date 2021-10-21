@@ -1,6 +1,6 @@
 struct FragmentInputs0 {
   [[builtin(position)]] position : vec4<f32>;
-  [[location(0)]] loc0 : i32;
+  [[location(0), interpolate(flat)]] loc0 : i32;
 };
 struct FragmentInputs1 {
   [[location(3)]] loc3 : vec4<f32>;
@@ -11,7 +11,7 @@ struct FragmentInputs1 {
 fn main(
   inputs0 : FragmentInputs0,
   [[builtin(front_facing)]] front_facing : bool,
-  [[location(1)]] loc1 : u32,
+  [[location(1), interpolate(flat)]] loc1 : u32,
   [[builtin(sample_index)]] sample_index : u32,
   inputs1 : FragmentInputs1,
   [[location(2)]] loc2 : f32,

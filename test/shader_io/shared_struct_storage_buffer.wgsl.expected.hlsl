@@ -8,7 +8,7 @@ RWByteAddressBuffer output : register(u0, space0);
 
 struct tint_symbol_1 {
   float f : TEXCOORD0;
-  uint u : TEXCOORD1;
+  nointerpolation uint u : TEXCOORD1;
   float4 v : SV_Position;
 };
 

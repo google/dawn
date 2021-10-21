@@ -1,6 +1,6 @@
 struct VertexOutput {
   [[builtin(position)]] pos : vec4<f32>;
-  [[location(0)]] loc0 : i32;
+  [[location(0), interpolate(flat)]] loc0 : i32;
 };
 
 fn foo(x : f32) -> VertexOutput {

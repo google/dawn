@@ -161,8 +161,11 @@ struct CanonicalizeEntryPointIO::State {
     if (cfg.shader_style == ShaderStyle::kSpirv) {
       // Vulkan requires that integer user-defined fragment inputs are
       // always decorated with `Flat`.
+      // TODO(crbug.com/tint/1224): Remove this once a flat interpolation
+      // attribute is required for integers.
       if (type->is_integer_scalar_or_vector() &&
           ast::HasDecoration<ast::LocationDecoration>(attributes) &&
+          !ast::HasDecoration<ast::InterpolateDecoration>(attributes) &&
           func_ast->PipelineStage() == ast::PipelineStage::kFragment) {
         attributes.push_back(ctx.dst->Interpolate(
             ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone));
@@ -217,9 +220,12 @@ struct CanonicalizeEntryPointIO::State {
                  const ast::Expression* value) {
     // Vulkan requires that integer user-defined vertex outputs are
     // always decorated with `Flat`.
+    // TODO(crbug.com/tint/1224): Remove this once a flat interpolation
+    // attribute is required for integers.
     if (cfg.shader_style == ShaderStyle::kSpirv &&
         type->is_integer_scalar_or_vector() &&
         ast::HasDecoration<ast::LocationDecoration>(attributes) &&
+        !ast::HasDecoration<ast::InterpolateDecoration>(attributes) &&
         func_ast->PipelineStage() == ast::PipelineStage::kVertex) {
       attributes.push_back(ctx.dst->Interpolate(
           ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone));

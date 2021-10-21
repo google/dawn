@@ -6,11 +6,11 @@ struct VertexOutput {
   int loc0;
 };
 struct tint_symbol {
-  int loc0 [[user(locn0)]];
+  int loc0 [[user(locn0)]] [[flat]];
   float4 pos [[position]];
 };
 struct tint_symbol_1 {
-  int loc0 [[user(locn0)]];
+  int loc0 [[user(locn0)]] [[flat]];
   float4 pos [[position]];
 };
 

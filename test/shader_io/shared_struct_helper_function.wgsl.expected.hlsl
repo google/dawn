@@ -9,7 +9,7 @@ VertexOutput foo(float x) {
 }
 
 struct tint_symbol {
-  int loc0 : TEXCOORD0;
+  nointerpolation int loc0 : TEXCOORD0;
   float4 pos : SV_Position;
 };
 
@@ -26,7 +26,7 @@ tint_symbol vert_main1() {
 }
 
 struct tint_symbol_1 {
-  int loc0 : TEXCOORD0;
+  nointerpolation int loc0 : TEXCOORD0;
   float4 pos : SV_Position;
 };
 

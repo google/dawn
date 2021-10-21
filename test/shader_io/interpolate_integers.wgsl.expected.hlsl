@@ -6,10 +6,10 @@ struct Interface {
   float4 pos;
 };
 struct tint_symbol {
-  int i : TEXCOORD0;
-  uint u : TEXCOORD1;
-  int4 vi : TEXCOORD2;
-  uint4 vu : TEXCOORD3;
+  nointerpolation int i : TEXCOORD0;
+  nointerpolation uint u : TEXCOORD1;
+  nointerpolation int4 vi : TEXCOORD2;
+  nointerpolation uint4 vu : TEXCOORD3;
   float4 pos : SV_Position;
 };
 
@@ -30,10 +30,10 @@ tint_symbol vert_main() {
 }
 
 struct tint_symbol_2 {
-  int i : TEXCOORD0;
-  uint u : TEXCOORD1;
-  int4 vi : TEXCOORD2;
-  uint4 vu : TEXCOORD3;
+  nointerpolation int i : TEXCOORD0;
+  nointerpolation uint u : TEXCOORD1;
+  nointerpolation int4 vi : TEXCOORD2;
+  nointerpolation uint4 vu : TEXCOORD3;
   float4 pos : SV_Position;
 };
 struct tint_symbol_3 {

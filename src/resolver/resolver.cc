@@ -1389,10 +1389,10 @@ bool Resolver::ValidateInterpolateDecoration(
     const sem::Type* storage_type) {
   auto* type = storage_type->UnwrapRef();
 
-  if (!type->is_float_scalar_or_vector()) {
+  if (type->is_integer_scalar_or_vector() &&
+      deco->type != ast::InterpolationType::kFlat) {
     AddError(
-        "store type of interpolate attribute must be floating point scalar or "
-        "vector",
+        "interpolation type must be 'flat' for integral user-defined IO types",
         deco->source);
     return false;
   }
@@ -1519,6 +1519,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     // Scan decorations for pipeline IO attributes.
     // Check for overlap with attributes that have been seen previously.
     const ast::Decoration* pipeline_io_attribute = nullptr;
+    const ast::InterpolateDecoration* interpolate_attribute = nullptr;
     const ast::InvariantDecoration* invariant_attribute = nullptr;
     for (auto* deco : decos) {
       auto is_invalid_compute_shader_decoration = false;
@@ -1566,6 +1567,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         } else if (!ValidateInterpolateDecoration(interpolate, ty)) {
           return false;
         }
+        interpolate_attribute = interpolate;
       } else if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
         if (func->PipelineStage() == ast::PipelineStage::kCompute) {
           is_invalid_compute_shader_decoration = true;
@@ -1598,6 +1600,28 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         }
         AddError(err, source);
         return false;
+      }
+
+      if (pipeline_io_attribute &&
+          pipeline_io_attribute->Is<ast::LocationDecoration>()) {
+        if (ty->is_integer_scalar_or_vector() && !interpolate_attribute) {
+          // TODO(crbug.com/tint/1224): Make these errors once downstream
+          // usages have caught up (no sooner than M99).
+          if (func->PipelineStage() == ast::PipelineStage::kVertex &&
+              param_or_ret == ParamOrRetType::kReturnType) {
+            AddWarning(
+                "integral user-defined vertex outputs must have a flat "
+                "interpolation attribute",
+                source);
+          }
+          if (func->PipelineStage() == ast::PipelineStage::kFragment &&
+              param_or_ret == ParamOrRetType::kParameter) {
+            AddWarning(
+                "integral user-defined fragment inputs must have a flat "
+                "interpolation attribute",
+                source);
+          }
+        }
       }
 
       if (invariant_attribute) {

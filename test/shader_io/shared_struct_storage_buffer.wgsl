@@ -1,7 +1,7 @@
 [[block]]
 struct S {
   [[align(64)]] [[location(0)]] f : f32;
-  [[size(32)]] [[location(1)]] u : u32;
+  [[size(32)]] [[location(1), interpolate(flat)]] u : u32;
   [[align(128)]] [[builtin(position)]] v : vec4<f32>;
 };
 

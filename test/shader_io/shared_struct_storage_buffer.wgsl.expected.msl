@@ -10,7 +10,7 @@ struct S {
 };
 struct tint_symbol_1 {
   float f [[user(locn0)]];
-  uint u [[user(locn1)]];
+  uint u [[user(locn1)]] [[flat]];
 };
 
 void frag_main_inner(device S& output, S input) {

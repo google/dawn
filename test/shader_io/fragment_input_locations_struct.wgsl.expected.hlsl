@@ -5,8 +5,8 @@ struct FragmentInputs {
   float4 loc3;
 };
 struct tint_symbol_1 {
-  int loc0 : TEXCOORD0;
-  uint loc1 : TEXCOORD1;
+  nointerpolation int loc0 : TEXCOORD0;
+  nointerpolation uint loc1 : TEXCOORD1;
   float loc2 : TEXCOORD2;
   float4 loc3 : TEXCOORD3;
 };

@@ -6,8 +6,8 @@ struct VertexOutputs {
   float4 position;
 };
 struct tint_symbol {
-  int loc0 : TEXCOORD0;
-  uint loc1 : TEXCOORD1;
+  nointerpolation int loc0 : TEXCOORD0;
+  nointerpolation uint loc1 : TEXCOORD1;
   float loc2 : TEXCOORD2;
   float4 loc3 : TEXCOORD3;
   float4 position : SV_Position;

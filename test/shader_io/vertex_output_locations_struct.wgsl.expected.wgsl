@@ -1,7 +1,7 @@
 struct VertexOutputs {
-  [[location(0)]]
+  [[location(0), interpolate(flat)]]
   loc0 : i32;
-  [[location(1)]]
+  [[location(1), interpolate(flat)]]
   loc1 : u32;
   [[location(2)]]
   loc2 : f32;

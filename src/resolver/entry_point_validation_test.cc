@@ -764,8 +764,8 @@ TEST_F(LocationDecorationTests, Duplicate_input) {
   // [[stage(fragment)]]
   // fn main([[location(1)]] param_a : f32,
   //         [[location(1)]] param_b : f32) {}
-  auto* param_a = Param("param_a", ty.u32(), {Location(1)});
-  auto* param_b = Param("param_b", ty.u32(), {Location(Source{{12, 34}}, 1)});
+  auto* param_a = Param("param_a", ty.f32(), {Location(1)});
+  auto* param_b = Param("param_b", ty.f32(), {Location(Source{{12, 34}}, 1)});
   Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
