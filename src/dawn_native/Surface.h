@@ -100,6 +100,11 @@ namespace dawn_native {
         uint32_t mXWindow = 0;
     };
 
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        Surface::Type value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s);
+
     // For the benefit of template generation.
     using SurfaceBase = Surface;
 

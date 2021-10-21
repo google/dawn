@@ -745,16 +745,16 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Check services support this combination of handle type / image info
-        if (!mExternalSemaphoreService->Supported()) {
-            return DAWN_VALIDATION_ERROR("External semaphore usage not supported");
-        }
-        if (!mExternalMemoryService->SupportsImportMemory(
+        DAWN_INVALID_IF(!mExternalSemaphoreService->Supported(),
+                        "External semaphore usage not supported");
+
+        DAWN_INVALID_IF(
+            !mExternalMemoryService->SupportsImportMemory(
                 VulkanImageFormat(this, textureDescriptor->format), VK_IMAGE_TYPE_2D,
                 VK_IMAGE_TILING_OPTIMAL,
                 VulkanImageUsage(usage, GetValidInternalFormat(textureDescriptor->format)),
-                VK_IMAGE_CREATE_ALIAS_BIT_KHR)) {
-            return DAWN_VALIDATION_ERROR("External memory usage not supported");
-        }
+                VK_IMAGE_CREATE_ALIAS_BIT_KHR),
+            "External memory usage not supported");
 
         // Create an external semaphore to signal when the texture is done being used
         DAWN_TRY_ASSIGN(*outSignalSemaphore,
@@ -815,7 +815,9 @@ namespace dawn_native { namespace vulkan {
         if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
             return nullptr;
         }
-        if (ConsumedError(ValidateVulkanImageCanBeWrapped(this, textureDescriptor))) {
+        if (ConsumedError(ValidateVulkanImageCanBeWrapped(this, textureDescriptor),
+                          "validating that a Vulkan image can be wrapped with %s.",
+                          textureDescriptor)) {
             return nullptr;
         }
 

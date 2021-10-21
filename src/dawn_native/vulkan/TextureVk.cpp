@@ -527,21 +527,18 @@ namespace dawn_native { namespace vulkan {
 
     MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
                                                const TextureDescriptor* descriptor) {
-        if (descriptor->dimension != wgpu::TextureDimension::e2D) {
-            return DAWN_VALIDATION_ERROR("Texture must be 2D");
-        }
+        DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
+                        "Texture dimension (%s) is not %s.", descriptor->dimension,
+                        wgpu::TextureDimension::e2D);
 
-        if (descriptor->mipLevelCount != 1) {
-            return DAWN_VALIDATION_ERROR("Mip level count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->mipLevelCount != 1, "Mip level count (%u) is not 1.",
+                        descriptor->mipLevelCount);
 
-        if (descriptor->size.depthOrArrayLayers != 1) {
-            return DAWN_VALIDATION_ERROR("Array layer count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->size.depthOrArrayLayers != 1,
+                        "Array layer count (%u) is not 1.", descriptor->size.depthOrArrayLayers);
 
-        if (descriptor->sampleCount != 1) {
-            return DAWN_VALIDATION_ERROR("Sample count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
+                        descriptor->sampleCount);
 
         return {};
     }
@@ -667,9 +664,8 @@ namespace dawn_native { namespace vulkan {
                                                external_memory::Service* externalMemoryService) {
         VkFormat format = VulkanImageFormat(ToBackend(GetDevice()), GetFormat().format);
         VkImageUsageFlags usage = VulkanImageUsage(GetInternalUsage(), GetFormat());
-        if (!externalMemoryService->SupportsCreateImage(descriptor, format, usage)) {
-            return DAWN_VALIDATION_ERROR("Creating an image from external memory is not supported");
-        }
+        DAWN_INVALID_IF(!externalMemoryService->SupportsCreateImage(descriptor, format, usage),
+                        "Creating an image from external memory is not supported.");
 
         mExternalState = ExternalState::PendingAcquire;
 
@@ -731,14 +727,12 @@ namespace dawn_native { namespace vulkan {
                                               VkImageLayout* releasedNewLayout) {
         Device* device = ToBackend(GetDevice());
 
-        if (mExternalState == ExternalState::Released) {
-            return DAWN_VALIDATION_ERROR("Can't export signal semaphore from signaled texture");
-        }
+        DAWN_INVALID_IF(mExternalState == ExternalState::Released,
+                        "Can't export a signal semaphore from signaled texture %s.", this);
 
-        if (mExternalAllocation == VK_NULL_HANDLE) {
-            return DAWN_VALIDATION_ERROR(
-                "Can't export signal semaphore from destroyed / non-external texture");
-        }
+        DAWN_INVALID_IF(
+            mExternalAllocation == VK_NULL_HANDLE,
+            "Can't export a signal semaphore from destroyed or non-external texture %s.", this);
 
         ASSERT(mSignalSemaphore != VK_NULL_HANDLE);
 

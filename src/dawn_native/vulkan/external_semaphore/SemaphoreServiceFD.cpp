@@ -67,9 +67,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
     }
 
     ResultOrError<VkSemaphore> Service::ImportSemaphore(ExternalSemaphoreHandle handle) {
-        if (handle < 0) {
-            return DAWN_VALIDATION_ERROR("Trying to import semaphore with invalid handle");
-        }
+        DAWN_INVALID_IF(handle < 0, "Importing a semaphore with an invalid handle.");
 
         VkSemaphore semaphore = VK_NULL_HANDLE;
         VkSemaphoreCreateInfo info;

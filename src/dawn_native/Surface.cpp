@@ -30,6 +30,30 @@
 
 namespace dawn_native {
 
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        Surface::Type value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s) {
+        switch (value) {
+            case Surface::Type::MetalLayer:
+                s->Append("MetalLayer");
+                break;
+            case Surface::Type::WindowsHWND:
+                s->Append("WindowsHWND");
+                break;
+            case Surface::Type::WindowsCoreWindow:
+                s->Append("WindowsCoreWindow");
+                break;
+            case Surface::Type::WindowsSwapChainPanel:
+                s->Append("WindowsSwapChainPanel");
+                break;
+            case Surface::Type::Xlib:
+                s->Append("Xlib");
+                break;
+        }
+        return {true};
+    }
+
 #if defined(DAWN_ENABLE_BACKEND_METAL)
     bool InheritsFromCAMetalLayer(void* obj);
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)

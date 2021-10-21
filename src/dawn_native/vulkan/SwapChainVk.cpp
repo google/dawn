@@ -182,7 +182,8 @@ namespace dawn_native { namespace vulkan {
                     break;
             }
 
-            return DAWN_VALIDATION_ERROR("Unsupported surface type for Vulkan");
+            return DAWN_FORMAT_VALIDATION_ERROR("Unsupported surface type (%s) for Vulkan.",
+                                                surface->GetType());
         }
 
         VkPresentModeKHR ToVulkanPresentMode(wgpu::PresentMode mode) {
@@ -241,9 +242,10 @@ namespace dawn_native { namespace vulkan {
             // TODO(crbug.com/dawn/269): figure out what should happen when surfaces are used by
             // multiple backends one after the other. It probably needs to block until the backend
             // and GPU are completely finished with the previous swapchain.
-            if (previousSwapChain->GetBackendType() != wgpu::BackendType::Vulkan) {
-                return DAWN_VALIDATION_ERROR("vulkan::SwapChain cannot switch between APIs");
-            }
+            DAWN_INVALID_IF(previousSwapChain->GetBackendType() != wgpu::BackendType::Vulkan,
+                            "Vulkan SwapChain cannot switch backend types from %s to %s.",
+                            previousSwapChain->GetBackendType(), wgpu::BackendType::Vulkan);
+
             // TODO(crbug.com/dawn/269): use ToBackend once OldSwapChainBase is removed.
             SwapChain* previousVulkanSwapChain = static_cast<SwapChain*>(previousSwapChain);
 
@@ -251,9 +253,8 @@ namespace dawn_native { namespace vulkan {
             // Vulkan devices on different VkInstances. Probably needs to block too!
             VkInstance previousInstance =
                 ToBackend(previousSwapChain->GetDevice())->GetVkInstance();
-            if (previousInstance != ToBackend(GetDevice())->GetVkInstance()) {
-                return DAWN_VALIDATION_ERROR("vulkan::SwapChain cannot switch between instances");
-            }
+            DAWN_INVALID_IF(previousInstance != ToBackend(GetDevice())->GetVkInstance(),
+                            "Vulkan SwapChain cannot switch between Vulkan instances.");
 
             // The previous swapchain is a dawn_native::vulkan::SwapChain so we can reuse its
             // VkSurfaceKHR provided since they are on the same instance.
@@ -389,23 +390,23 @@ namespace dawn_native { namespace vulkan {
         }
         if (!hasBGRA8Unorm) {
             return DAWN_INTERNAL_ERROR(
-                "Vulkan swapchain must support BGRA8Unorm with SRGB colorspace");
+                "Vulkan SwapChain must support BGRA8Unorm with sRGB colorspace.");
         }
         config.format = VK_FORMAT_B8G8R8A8_UNORM;
         config.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
         config.wgpuFormat = wgpu::TextureFormat::BGRA8Unorm;
 
         // Only the identity transform with opaque alpha is supported for now.
-        if ((surfaceInfo.capabilities.supportedTransforms &
-             VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) == 0) {
-            return DAWN_VALIDATION_ERROR("Vulkan swapchain must support the identity transform");
-        }
+        DAWN_INVALID_IF((surfaceInfo.capabilities.supportedTransforms &
+                         VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) == 0,
+                        "Vulkan SwapChain must support the identity transform.");
+
         config.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
-        if ((surfaceInfo.capabilities.supportedCompositeAlpha &
-             VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0) {
-            return DAWN_VALIDATION_ERROR("Vulkan swapchain must support opaque alpha");
-        }
+        DAWN_INVALID_IF((surfaceInfo.capabilities.supportedCompositeAlpha &
+                         VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0,
+                        "Vulkan SwapChain must support opaque alpha.");
+
         config.alphaMode = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
         // Choose the number of images for the swapchain= and clamp it to the min and max from the
@@ -453,7 +454,7 @@ namespace dawn_native { namespace vulkan {
             // then we'll need to have a second fallback that uses a blit shader :(
             if ((supportedUsages & VK_IMAGE_USAGE_TRANSFER_DST_BIT) == 0) {
                 return DAWN_INTERNAL_ERROR(
-                    "Swapchain cannot fallback to a blit because of a missing "
+                    "SwapChain cannot fallback to a blit because of a missing "
                     "VK_IMAGE_USAGE_TRANSFER_DST_BIT");
             }
             config.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;

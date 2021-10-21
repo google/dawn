@@ -88,9 +88,9 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
     ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
         const ExternalImageDescriptor* descriptor,
         VkImage image) {
-        if (descriptor->type != ExternalImageType::OpaqueFD) {
-            return DAWN_VALIDATION_ERROR("ExternalImageDescriptor is not an OpaqueFD descriptor");
-        }
+        DAWN_INVALID_IF(descriptor->type != ExternalImageType::OpaqueFD,
+                        "ExternalImageDescriptor is not an OpaqueFD descriptor.");
+
         const ExternalImageDescriptorOpaqueFD* opaqueFDDescriptor =
             static_cast<const ExternalImageDescriptorOpaqueFD*>(descriptor);
 
@@ -102,15 +102,13 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
     ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
                                                         const MemoryImportParams& importParams,
                                                         VkImage image) {
-        if (handle < 0) {
-            return DAWN_VALIDATION_ERROR("Trying to import memory with invalid handle");
-        }
+        DAWN_INVALID_IF(handle < 0, "Importing memory with an invalid handle.");
 
         VkMemoryRequirements requirements;
         mDevice->fn.GetImageMemoryRequirements(mDevice->GetVkDevice(), image, &requirements);
-        if (requirements.size > importParams.allocationSize) {
-            return DAWN_VALIDATION_ERROR("Requested allocation size is too small for image");
-        }
+        DAWN_INVALID_IF(requirements.size > importParams.allocationSize,
+                        "Requested allocation size (%u) is smaller than the image requires (%u).",
+                        importParams.allocationSize, requirements.size);
 
         VkImportMemoryFdInfoKHR importMemoryFdInfo;
         importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;

@@ -112,8 +112,6 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Creation of VkShaderModule is deferred to this point when using tint generator
-        std::ostringstream errorStream;
-        errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
         // Remap BindingNumber to BindingIndex in WGSL shader
         using BindingRemapper = tint::transform::BindingRemapper;
@@ -159,10 +157,8 @@ namespace dawn_native { namespace vulkan {
         options.emit_vertex_point_size = true;
         options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
         auto result = tint::writer::spirv::Generate(&program, options);
-        if (!result.success) {
-            errorStream << "Generator: " << result.error << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
+        DAWN_INVALID_IF(!result.success, "An error occured while generating SPIR-V: %s.",
+                        result.error);
 
         std::vector<uint32_t> spirv = std::move(result.spirv);
         DAWN_TRY(

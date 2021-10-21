@@ -55,7 +55,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
                     return count;
                 }
             }
-            return DAWN_VALIDATION_ERROR("DRM format modifier not supported");
+            return DAWN_FORMAT_VALIDATION_ERROR("DRM format modifier not supported.");
         }
 
     }  // anonymous namespace
@@ -154,9 +154,9 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
     ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
         const ExternalImageDescriptor* descriptor,
         VkImage image) {
-        if (descriptor->type != ExternalImageType::DmaBuf) {
-            return DAWN_VALIDATION_ERROR("ExternalImageDescriptor is not a dma-buf descriptor");
-        }
+        DAWN_INVALID_IF(descriptor->type != ExternalImageType::DmaBuf,
+                        "ExternalImageDescriptor is not a ExternalImageDescriptorDmaBuf.");
+
         const ExternalImageDescriptorDmaBuf* dmaBufDescriptor =
             static_cast<const ExternalImageDescriptorDmaBuf*>(descriptor);
         VkDevice device = mDevice->GetVkDevice();
@@ -177,9 +177,9 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
         int memoryTypeIndex = mDevice->GetResourceMemoryAllocator()->FindBestTypeIndex(
             memoryRequirements, MemoryKind::Opaque);
-        if (memoryTypeIndex == -1) {
-            return DAWN_VALIDATION_ERROR("Unable to find appropriate memory type for import");
-        }
+        DAWN_INVALID_IF(memoryTypeIndex == -1,
+                        "Unable to find an appropriate memory type for import.");
+
         MemoryImportParams params = {memoryRequirements.size,
                                      static_cast<uint32_t>(memoryTypeIndex)};
         return params;
@@ -188,9 +188,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
     ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
                                                         const MemoryImportParams& importParams,
                                                         VkImage image) {
-        if (handle < 0) {
-            return DAWN_VALIDATION_ERROR("Trying to import memory with invalid handle");
-        }
+        DAWN_INVALID_IF(handle < 0, "Importing memory with an invalid handle.");
 
         VkMemoryDedicatedAllocateInfo memoryDedicatedAllocateInfo;
         memoryDedicatedAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
@@ -220,9 +218,9 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
     ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descriptor,
                                                 const VkImageCreateInfo& baseCreateInfo) {
-        if (descriptor->type != ExternalImageType::DmaBuf) {
-            return DAWN_VALIDATION_ERROR("ExternalImageDescriptor is not a dma-buf descriptor");
-        }
+        DAWN_INVALID_IF(descriptor->type != ExternalImageType::DmaBuf,
+                        "ExternalImageDescriptor is not a dma-buf descriptor.");
+
         const ExternalImageDescriptorDmaBuf* dmaBufDescriptor =
             static_cast<const ExternalImageDescriptorDmaBuf*>(descriptor);
         VkPhysicalDevice physicalDevice = ToBackend(mDevice->GetAdapter())->GetPhysicalDevice();
