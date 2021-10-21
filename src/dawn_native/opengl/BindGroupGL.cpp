@@ -33,12 +33,13 @@ namespace dawn_native { namespace opengl {
             if (bindingInfo.bindingType == BindingInfoType::StorageTexture) {
                 ASSERT(entry.textureView != nullptr);
                 const uint32_t textureViewLayerCount = entry.textureView->GetLayerCount();
-                if (textureViewLayerCount != 1 &&
-                    textureViewLayerCount != entry.textureView->GetTexture()->GetArrayLayers()) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Currently the OpenGL backend only supports either binding a layer or "
-                        "the entire texture as storage texture.");
-                }
+                DAWN_INVALID_IF(
+                    textureViewLayerCount != 1 &&
+                        textureViewLayerCount != entry.textureView->GetTexture()->GetArrayLayers(),
+                    "%s binds %u layers. Currently the OpenGL backend only supports either binding "
+                    "1 layer or the all layers (%u) for storage texture.",
+                    entry.textureView, textureViewLayerCount,
+                    entry.textureView->GetTexture()->GetArrayLayers());
             }
         }
 

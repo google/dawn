@@ -80,29 +80,25 @@ namespace dawn_native { namespace opengl {
                const spirv_cross::Compiler& compiler, BindingInfoType bindingType,
                BindingInfoArray* bindings, bool isStorageBuffer = false) -> MaybeError {
             for (const auto& resource : resources) {
-                if (!compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding)) {
-                    return DAWN_VALIDATION_ERROR("No Binding decoration set for resource");
-                }
+                DAWN_INVALID_IF(
+                    !compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding),
+                    "No Binding decoration set for resource");
 
-                if (!compiler.get_decoration_bitset(resource.id)
-                         .get(spv::DecorationDescriptorSet)) {
-                    return DAWN_VALIDATION_ERROR("No Descriptor Decoration set for resource");
-                }
+                DAWN_INVALID_IF(
+                    !compiler.get_decoration_bitset(resource.id).get(spv::DecorationDescriptorSet),
+                    "No Descriptor Decoration set for resource");
 
                 BindingNumber bindingNumber(
                     compiler.get_decoration(resource.id, spv::DecorationBinding));
                 BindGroupIndex bindGroupIndex(
                     compiler.get_decoration(resource.id, spv::DecorationDescriptorSet));
 
-                if (bindGroupIndex >= kMaxBindGroupsTyped) {
-                    return DAWN_VALIDATION_ERROR("Bind group index over limits in the SPIRV");
-                }
+                DAWN_INVALID_IF(bindGroupIndex >= kMaxBindGroupsTyped,
+                                "Bind group index over limits in the SPIRV");
 
                 const auto& it =
                     (*bindings)[bindGroupIndex].emplace(bindingNumber, ShaderBindingInfo{});
-                if (!it.second) {
-                    return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
-                }
+                DAWN_INVALID_IF(!it.second, "Shader has duplicate bindings");
 
                 ShaderBindingInfo* info = &it.first->second;
                 info->id = resource.id;
@@ -123,17 +119,14 @@ namespace dawn_native { namespace opengl {
                             SpirvBaseTypeToSampleTypeBit(textureComponentType);
 
                         if (imageType.depth) {
-                            if ((info->texture.compatibleSampleTypes & SampleTypeBit::Float) == 0) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Depth textures must have a float type");
-                            }
+                            DAWN_INVALID_IF(
+                                (info->texture.compatibleSampleTypes & SampleTypeBit::Float) == 0,
+                                "Depth textures must have a float type");
                             info->texture.compatibleSampleTypes = SampleTypeBit::Depth;
                         }
 
-                        if (imageType.ms && imageType.arrayed) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Multisampled array textures aren't supported");
-                        }
+                        DAWN_INVALID_IF(imageType.ms && imageType.arrayed,
+                                        "Multisampled array textures aren't supported");
                         break;
                     }
                     case BindingInfoType::Buffer: {
@@ -162,33 +155,28 @@ namespace dawn_native { namespace opengl {
                     }
                     case BindingInfoType::StorageTexture: {
                         spirv_cross::Bitset flags = compiler.get_decoration_bitset(resource.id);
-                        if (flags.get(spv::DecorationNonReadable)) {
-                            info->storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
-                        } else {
-                            return DAWN_VALIDATION_ERROR(
-                                "Read-write storage textures are not supported");
-                        }
+                        DAWN_INVALID_IF(!flags.get(spv::DecorationNonReadable),
+                                        "Read-write storage textures are not supported.");
+                        info->storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
 
                         spirv_cross::SPIRType::ImageType imageType =
                             compiler.get_type(info->base_type_id).image;
                         wgpu::TextureFormat storageTextureFormat =
                             SpirvImageFormatToTextureFormat(imageType.format);
-                        if (storageTextureFormat == wgpu::TextureFormat::Undefined) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Invalid image format declaration on storage image");
-                        }
+                        DAWN_INVALID_IF(storageTextureFormat == wgpu::TextureFormat::Undefined,
+                                        "Invalid image format declaration on storage image.");
+
                         const Format& format = device->GetValidInternalFormat(storageTextureFormat);
-                        if (!format.supportsStorageUsage) {
-                            return DAWN_VALIDATION_ERROR(
-                                "The storage texture format is not supported");
-                        }
-                        if (imageType.ms) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Multisampled storage textures aren't supported");
-                        }
-                        if (imageType.depth) {
-                            return DAWN_VALIDATION_ERROR("Depth storage textures aren't supported");
-                        }
+                        DAWN_INVALID_IF(!format.supportsStorageUsage,
+                                        "The storage texture format (%s) is not supported.",
+                                        storageTextureFormat);
+
+                        DAWN_INVALID_IF(imageType.ms,
+                                        "Multisampled storage textures aren't supported.");
+
+                        DAWN_INVALID_IF(imageType.depth,
+                                        "Depth storage textures aren't supported.");
+
                         info->storageTexture.format = storageTextureFormat;
                         info->storageTexture.viewDimension =
                             SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
@@ -199,7 +187,7 @@ namespace dawn_native { namespace opengl {
                         break;
                     }
                     case BindingInfoType::ExternalTexture: {
-                        return DAWN_VALIDATION_ERROR("External textures are not supported.");
+                        return DAWN_FORMAT_VALIDATION_ERROR("External textures are not supported.");
                     }
                 }
             }
@@ -264,11 +252,8 @@ namespace dawn_native { namespace opengl {
         tint::writer::spirv::Options options;
         options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
         auto result = tint::writer::spirv::Generate(GetTintProgram(), options);
-        if (!result.success) {
-            std::ostringstream errorStream;
-            errorStream << "Generator: " << result.error << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
+        DAWN_INVALID_IF(!result.success, "An error occured while generating SPIR-V: %s.",
+                        result.error);
 
         DAWN_TRY_ASSIGN(mGLBindings, ReflectShaderUsingSPIRVCross(GetDevice(), result.spirv));
 
@@ -293,11 +278,8 @@ namespace dawn_native { namespace opengl {
         tintOptions.disable_workgroup_init =
             GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
         auto result = tint::writer::spirv::Generate(&program, tintOptions);
-        if (!result.success) {
-            std::ostringstream errorStream;
-            errorStream << "Generator: " << result.error << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
+        DAWN_INVALID_IF(!result.success, "An error occured while generating SPIR-V: %s.",
+                        result.error);
 
         std::vector<uint32_t> spirv = std::move(result.spirv);
         DAWN_TRY(

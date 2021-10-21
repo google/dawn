@@ -162,7 +162,7 @@ namespace dawn_native { namespace opengl {
         Surface* surface,
         NewSwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) {
-        return DAWN_VALIDATION_ERROR("New swapchains not implemented.");
+        return DAWN_FORMAT_VALIDATION_ERROR("New swapchains not implemented.");
     }
     ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return AcquireRef(new Texture(this, descriptor));
@@ -181,26 +181,23 @@ namespace dawn_native { namespace opengl {
 
     MaybeError Device::ValidateEGLImageCanBeWrapped(const TextureDescriptor* descriptor,
                                                     ::EGLImage image) {
-        if (descriptor->dimension != wgpu::TextureDimension::e2D) {
-            return DAWN_VALIDATION_ERROR("EGLImage texture must be 2D");
-        }
+        DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
+                        "Texture dimension (%s) is not %s.", descriptor->dimension,
+                        wgpu::TextureDimension::e2D);
 
-        if (descriptor->usage &
-            (wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding)) {
-            return DAWN_VALIDATION_ERROR("EGLImage texture cannot have sampled or storage usage");
-        }
+        DAWN_INVALID_IF(descriptor->mipLevelCount != 1, "Mip level count (%u) is not 1.",
+                        descriptor->mipLevelCount);
 
-        if (descriptor->mipLevelCount != 1) {
-            return DAWN_VALIDATION_ERROR("EGLImage mip level count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->size.depthOrArrayLayers != 1,
+                        "Array layer count (%u) is not 1.", descriptor->size.depthOrArrayLayers);
 
-        if (descriptor->size.depthOrArrayLayers != 1) {
-            return DAWN_VALIDATION_ERROR("EGLImage array layer count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
+                        descriptor->sampleCount);
 
-        if (descriptor->sampleCount != 1) {
-            return DAWN_VALIDATION_ERROR("EGLImage sample count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->usage & (wgpu::TextureUsage::TextureBinding |
+                                             wgpu::TextureUsage::StorageBinding),
+                        "Texture usage (%s) cannot have %s or %s.", descriptor->usage,
+                        wgpu::TextureUsage::TextureBinding, wgpu::TextureUsage::StorageBinding);
 
         return {};
     }
@@ -229,7 +226,9 @@ namespace dawn_native { namespace opengl {
         if (textureDescriptor->size.width != static_cast<uint32_t>(width) ||
             textureDescriptor->size.height != static_cast<uint32_t>(height) ||
             textureDescriptor->size.depthOrArrayLayers != 1) {
-            ConsumedError(DAWN_VALIDATION_ERROR("EGLImage size doesn't match descriptor"));
+            ConsumedError(DAWN_FORMAT_VALIDATION_ERROR(
+                "EGLImage size (width: %u, height: %u, depth: 1) doesn't match descriptor size %s.",
+                width, height, &textureDescriptor->size));
             gl.DeleteTextures(1, &tex);
             return nullptr;
         }

@@ -645,10 +645,10 @@ namespace dawn_native { namespace opengl {
                     auto& dst = copy->destination;
                     Buffer* buffer = ToBackend(src.buffer.Get());
 
-                    if (dst.aspect == Aspect::Stencil) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Copies to stencil textures unsupported on OpenGL");
-                    }
+                    DAWN_INVALID_IF(
+                        dst.aspect == Aspect::Stencil,
+                        "Copies to stencil textures are unsupported on the OpenGL backend.");
+
                     ASSERT(dst.aspect == Aspect::Color);
 
                     buffer->EnsureDataInitialized();

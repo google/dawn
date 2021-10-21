@@ -278,17 +278,14 @@ namespace dawn_native { namespace opengl {
         const AdapterDiscoveryOptionsBase* optionsBase) {
         // TODO(cwallez@chromium.org): For now only create a single OpenGL adapter because don't
         // know how to handle MakeCurrent.
-        if (mCreatedAdapter) {
-            return DAWN_VALIDATION_ERROR("The OpenGL backend can only create a single adapter");
-        }
+        DAWN_INVALID_IF(mCreatedAdapter, "The OpenGL backend can only create a single adapter.");
 
         ASSERT(static_cast<wgpu::BackendType>(optionsBase->backendType) == GetType());
         const AdapterDiscoveryOptions* options =
             static_cast<const AdapterDiscoveryOptions*>(optionsBase);
 
-        if (options->getProc == nullptr) {
-            return DAWN_VALIDATION_ERROR("AdapterDiscoveryOptions::getProc must be set");
-        }
+        DAWN_INVALID_IF(options->getProc == nullptr,
+                        "AdapterDiscoveryOptions::getProc must be set");
 
         std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(
             GetInstance(), static_cast<wgpu::BackendType>(optionsBase->backendType));
