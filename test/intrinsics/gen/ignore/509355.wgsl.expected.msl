@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/509355.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;

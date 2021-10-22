@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/ad88be.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 TextureCubeArray arg_0 : register(t0, space1);
 
 void ignore_ad88be() {

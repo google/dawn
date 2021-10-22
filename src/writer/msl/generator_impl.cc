@@ -596,7 +596,7 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
       out << "threadgroup_barrier(mem_flags::mem_threadgroup)";
       return true;
     }
-    case sem::IntrinsicType::kIgnore: {
+    case sem::IntrinsicType::kIgnore: {  // [DEPRECATED]
       out << "(void) ";
       if (!EmitExpression(out, expr->args[0])) {
         return false;

@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/2a6ac2.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 Texture2DMS<float4> arg_0 : register(t0, space1);
 
 void ignore_2a6ac2() {

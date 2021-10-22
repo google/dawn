@@ -610,7 +610,7 @@ bool GeneratorImpl::EmitCall(std::ostream& out,
     } else if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
       return EmitIsNormalCall(out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {
-      return EmitExpression(out, expr->args[0]);
+      return EmitExpression(out, expr->args[0]);  // [DEPRECATED]
     } else if (intrinsic->IsDataPacking()) {
       return EmitDataPackingCall(out, expr, intrinsic);
     } else if (intrinsic->IsDataUnpacking()) {

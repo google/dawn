@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/6698df.wgsl:28:3 warning: use of deprecated intrinsic
+  ignore(1u);
+  ^^^^^^
+
 void ignore_6698df() {
   1u;
 }

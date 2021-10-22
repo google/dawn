@@ -7774,7 +7774,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[534],
     /* return matcher indices */ nullptr,
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [250] */

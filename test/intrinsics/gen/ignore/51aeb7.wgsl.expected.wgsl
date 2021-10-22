@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/51aeb7.wgsl:28:3 warning: use of deprecated intrinsic
+  ignore(1);
+  ^^^^^^
+
 fn ignore_51aeb7() {
   ignore(1);
 }

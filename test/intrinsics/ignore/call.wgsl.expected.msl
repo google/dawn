@@ -1,3 +1,7 @@
+intrinsics/ignore/call.wgsl:7:5 warning: use of deprecated intrinsic
+    ignore(f(1, 2, 3));
+    ^^^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;

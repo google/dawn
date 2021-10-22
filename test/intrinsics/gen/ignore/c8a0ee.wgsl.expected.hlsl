@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/c8a0ee.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 Texture2DArray arg_0 : register(t0, space1);
 
 void ignore_c8a0ee() {

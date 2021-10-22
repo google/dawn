@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/2a6ac2.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 [[group(1), binding(0)]] var arg_0 : texture_depth_multisampled_2d;
 
 fn ignore_2a6ac2() {

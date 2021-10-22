@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/e0187b.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 Texture2D arg_0 : register(t0, space1);
 
 void ignore_e0187b() {

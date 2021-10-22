@@ -324,7 +324,7 @@ fn frexp<N: num>(vec<N, f32>) -> _frexp_result_vec<N>
 [[stage("fragment")]] fn fwidthCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
 [[stage("fragment")]] fn fwidthFine(f32) -> f32
 [[stage("fragment")]] fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
-fn ignore<T>(T)
+[[deprecated]] fn ignore<T>(T)
 fn inverseSqrt(f32) -> f32
 fn inverseSqrt<N: num>(vec<N, f32>) -> vec<N, f32>
 fn isFinite(f32) -> bool

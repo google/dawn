@@ -8,6 +8,10 @@
 * Deprecated texture builtin functions that accepted a `read` access controlled storage texture have been removed.
 * Storage textures must now only use the `write` access control.
 
+### Deprecated Features
+
+* The `ignore()` builtin has been replaced with phony-assignment. [gpuweb#2127](https://github.com/gpuweb/gpuweb/pull/2127)
+
 ### New Features
 
 * `any()` and `all()` now support a `bool` parameter. These simply return the passed argument. [tint:1253](https://crbug.com/tint/1253)

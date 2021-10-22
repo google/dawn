@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/b469af.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 SamplerComparisonState arg_0 : register(s0, space1);
 
 void ignore_b469af() {

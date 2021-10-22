@@ -919,7 +919,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     if (auto* call_expr = node->As<ast::CallExpression>()) {
       auto* call = sem.Get(call_expr);
       if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
-        if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {
+        if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {  // [DEPRECATED]
           // ignore(X)
           // If X is an memory access, don't transform it into a load, as it
           // may refer to a structure holding a runtime array, which cannot be

@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/5c9edf.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 [[group(1), binding(0)]] var arg_0 : texture_external;
 
 fn ignore_5c9edf() {

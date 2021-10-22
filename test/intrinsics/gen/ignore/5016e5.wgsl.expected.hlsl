@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/5016e5.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 SamplerState arg_0 : register(s0, space1);
 
 void ignore_5016e5() {

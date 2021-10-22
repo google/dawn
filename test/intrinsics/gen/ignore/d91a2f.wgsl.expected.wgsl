@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/d91a2f.wgsl:28:3 warning: use of deprecated intrinsic
+  ignore(1.0);
+  ^^^^^^
+
 fn ignore_d91a2f() {
   ignore(1.0);
 }

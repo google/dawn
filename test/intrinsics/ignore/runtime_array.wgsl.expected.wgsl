@@ -1,3 +1,7 @@
+intrinsics/ignore/runtime_array.wgsl:10:5 warning: use of deprecated intrinsic
+    ignore(s.arr);
+    ^^^^^^
+
 [[block]]
 struct S {
   arr : array<i32>;

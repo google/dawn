@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/e0187b.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0

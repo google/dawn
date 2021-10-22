@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/5c9edf.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 Texture2D<float4> arg_0 : register(t0, space1);
 
 void ignore_5c9edf() {

@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/f414a6.wgsl:28:3 warning: use of deprecated intrinsic
+  ignore(bool());
+  ^^^^^^
+
 void ignore_f414a6() {
   false;
 }

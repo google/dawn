@@ -1,3 +1,7 @@
+intrinsics/gen/ignore/c8a0ee.wgsl:29:3 warning: use of deprecated intrinsic
+  ignore(arg_0);
+  ^^^^^^
+
 [[group(1), binding(0)]] var arg_0 : texture_depth_2d_array;
 
 fn ignore_c8a0ee() {
