@@ -2,22 +2,6 @@
 
 using namespace metal;
 kernel void tint_symbol(texture2d<float, access::write> tint_symbol_1 [[texture(0)]], texture2d<float, access::write> tint_symbol_2 [[texture(1)]], texture2d<uint, access::write> tint_symbol_3 [[texture(2)]], texture2d<int, access::write> tint_symbol_4 [[texture(3)]], texture2d<uint, access::write> tint_symbol_5 [[texture(4)]], texture2d<int, access::write> tint_symbol_6 [[texture(5)]], texture2d<float, access::write> tint_symbol_7 [[texture(6)]], texture2d<uint, access::write> tint_symbol_8 [[texture(7)]], texture2d<int, access::write> tint_symbol_9 [[texture(8)]], texture2d<float, access::write> tint_symbol_10 [[texture(9)]], texture2d<uint, access::write> tint_symbol_11 [[texture(10)]], texture2d<int, access::write> tint_symbol_12 [[texture(11)]], texture2d<float, access::write> tint_symbol_13 [[texture(12)]], texture2d<uint, access::write> tint_symbol_14 [[texture(13)]], texture2d<int, access::write> tint_symbol_15 [[texture(14)]], texture2d<float, access::write> tint_symbol_16 [[texture(15)]]) {
-  (void) tint_symbol_1;
-  (void) tint_symbol_2;
-  (void) tint_symbol_3;
-  (void) tint_symbol_4;
-  (void) tint_symbol_5;
-  (void) tint_symbol_6;
-  (void) tint_symbol_7;
-  (void) tint_symbol_8;
-  (void) tint_symbol_9;
-  (void) tint_symbol_10;
-  (void) tint_symbol_11;
-  (void) tint_symbol_12;
-  (void) tint_symbol_13;
-  (void) tint_symbol_14;
-  (void) tint_symbol_15;
-  (void) tint_symbol_16;
   return;
 }
 

@@ -4,6 +4,6 @@
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  ignore(s);
-  ignore(sc);
+  _ = s;
+  _ = sc;
 }

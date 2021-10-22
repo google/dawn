@@ -69,11 +69,11 @@ fn main(fragment : FragmentInput) -> FragmentOutput {
     var output : FragmentOutput;
     output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
 
-    ignore(uniforms);
-    ignore(mySampler);
-    ignore(myTexture);
+    _ = uniforms;
+    _ = mySampler;
+    _ = myTexture;
 
-    ignore(pointLights);
+    _ = &pointLights;
     // output.color.x = output.color.x + pointLights.values[0].position.x;
 
     return output;

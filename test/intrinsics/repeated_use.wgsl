@@ -2,19 +2,19 @@
 // same intrinsic overload results in single helper being generated.
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-    ignore(isNormal(vec4<f32>()));
-    ignore(isNormal(vec4<f32>(1.)));
-    ignore(isNormal(vec4<f32>(1., 2., 3., 4.)));
+    _ = isNormal(vec4<f32>());
+    _ = isNormal(vec4<f32>(1.));
+    _ = isNormal(vec4<f32>(1., 2., 3., 4.));
 
-    ignore(isNormal(vec3<f32>()));
-    ignore(isNormal(vec3<f32>(1.)));
-    ignore(isNormal(vec3<f32>(1., 2., 3.)));
+    _ = isNormal(vec3<f32>());
+    _ = isNormal(vec3<f32>(1.));
+    _ = isNormal(vec3<f32>(1., 2., 3.));
 
-    ignore(isNormal(vec2<f32>()));
-    ignore(isNormal(vec2<f32>(1.)));
-    ignore(isNormal(vec2<f32>(1., 2.)));
+    _ = isNormal(vec2<f32>());
+    _ = isNormal(vec2<f32>(1.));
+    _ = isNormal(vec2<f32>(1., 2.));
 
-    ignore(isNormal(1.));
-    ignore(isNormal(2.));
-    ignore(isNormal(3.));
+    _ = isNormal(1.);
+    _ = isNormal(2.);
+    _ = isNormal(3.);
 }

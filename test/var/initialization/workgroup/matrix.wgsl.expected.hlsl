@@ -9,7 +9,6 @@ void main_inner(uint local_invocation_index) {
     v = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   }
   GroupMemoryBarrierWithGroupSync();
-  v;
 }
 
 [numthreads(1, 1, 1)]

@@ -3,7 +3,6 @@
 using namespace metal;
 kernel void tint_symbol() {
   int3 v = 0;
-  (void) v;
   return;
 }
 

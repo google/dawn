@@ -17,21 +17,5 @@ RWTexture2DArray<float4> t_rgba32float : register(u15, space0);
 
 [numthreads(1, 1, 1)]
 void main() {
-  t_rgba8unorm;
-  t_rgba8snorm;
-  t_rgba8uint;
-  t_rgba8sint;
-  t_rgba16uint;
-  t_rgba16sint;
-  t_rgba16float;
-  t_r32uint;
-  t_r32sint;
-  t_r32float;
-  t_rg32uint;
-  t_rg32sint;
-  t_rg32float;
-  t_rgba32uint;
-  t_rgba32sint;
-  t_rgba32float;
   return;
 }

@@ -24,17 +24,17 @@ bool tint_isNormal_3(float param_0) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  tint_isNormal(float4(0.0f, 0.0f, 0.0f, 0.0f));
-  tint_isNormal(float4((1.0f).xxxx));
-  tint_isNormal(float4(1.0f, 2.0f, 3.0f, 4.0f));
-  tint_isNormal_1(float3(0.0f, 0.0f, 0.0f));
-  tint_isNormal_1(float3((1.0f).xxx));
-  tint_isNormal_1(float3(1.0f, 2.0f, 3.0f));
-  tint_isNormal_2(float2(0.0f, 0.0f));
-  tint_isNormal_2(float2((1.0f).xx));
-  tint_isNormal_2(float2(1.0f, 2.0f));
-  tint_isNormal_3(1.0f);
-  tint_isNormal_3(2.0f);
-  tint_isNormal_3(3.0f);
+  (void) tint_isNormal(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  (void) tint_isNormal(float4((1.0f).xxxx));
+  (void) tint_isNormal(float4(1.0f, 2.0f, 3.0f, 4.0f));
+  (void) tint_isNormal_1(float3(0.0f, 0.0f, 0.0f));
+  (void) tint_isNormal_1(float3((1.0f).xxx));
+  (void) tint_isNormal_1(float3(1.0f, 2.0f, 3.0f));
+  (void) tint_isNormal_2(float2(0.0f, 0.0f));
+  (void) tint_isNormal_2(float2((1.0f).xx));
+  (void) tint_isNormal_2(float2(1.0f, 2.0f));
+  (void) tint_isNormal_3(1.0f);
+  (void) tint_isNormal_3(2.0f);
+  (void) tint_isNormal_3(3.0f);
   return;
 }

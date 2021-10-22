@@ -6,5 +6,5 @@ struct S {
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   var v : S;
-  ignore(v);
+  _ = v;
 }

@@ -12,7 +12,6 @@ void main_inner(uint local_invocation_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  v;
 }
 
 [numthreads(1, 1, 1)]

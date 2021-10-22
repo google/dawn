@@ -51,10 +51,6 @@ struct tint_symbol_2 {
 FragmentOutput main_inner(FragmentInput fragment) {
   FragmentOutput output = (FragmentOutput)0;
   output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
-  uniforms;
-  mySampler;
-  myTexture;
-  pointLights;
   return output;
 }
 

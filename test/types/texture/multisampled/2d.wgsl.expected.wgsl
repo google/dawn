@@ -6,7 +6,7 @@
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  ignore(t_f);
-  ignore(t_i);
-  ignore(t_u);
+  _ = t_f;
+  _ = t_i;
+  _ = t_u;
 }

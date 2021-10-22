@@ -7,5 +7,5 @@ var<workgroup> v : S;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  ignore(v);
+  _ = v;
 }

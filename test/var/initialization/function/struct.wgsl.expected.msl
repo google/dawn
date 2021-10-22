@@ -8,7 +8,6 @@ struct S {
 
 kernel void tint_symbol() {
   S v = {};
-  (void) v;
   return;
 }
 

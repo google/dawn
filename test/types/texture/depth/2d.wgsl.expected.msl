@@ -2,7 +2,6 @@
 
 using namespace metal;
 kernel void tint_symbol(depth2d<float, access::sample> tint_symbol_1 [[texture(0)]]) {
-  (void) tint_symbol_1;
   return;
 }
 

@@ -2,5 +2,5 @@
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  ignore(t_f);
+  _ = t_f;
 }

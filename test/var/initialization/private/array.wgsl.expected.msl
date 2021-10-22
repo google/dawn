@@ -7,7 +7,6 @@ struct tint_array_wrapper {
 
 kernel void tint_symbol() {
   thread tint_array_wrapper tint_symbol_1 = {};
-  (void) tint_symbol_1;
   return;
 }
 

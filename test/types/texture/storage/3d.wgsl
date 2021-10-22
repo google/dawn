@@ -17,20 +17,20 @@
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  ignore(t_rgba8unorm);
-  ignore(t_rgba8snorm);
-  ignore(t_rgba8uint);
-  ignore(t_rgba8sint);
-  ignore(t_rgba16uint);
-  ignore(t_rgba16sint);
-  ignore(t_rgba16float);
-  ignore(t_r32uint);
-  ignore(t_r32sint);
-  ignore(t_r32float);
-  ignore(t_rg32uint);
-  ignore(t_rg32sint);
-  ignore(t_rg32float);
-  ignore(t_rgba32uint);
-  ignore(t_rgba32sint);
-  ignore(t_rgba32float);
+  _ = t_rgba8unorm;
+  _ = t_rgba8snorm;
+  _ = t_rgba8uint;
+  _ = t_rgba8sint;
+  _ = t_rgba16uint;
+  _ = t_rgba16sint;
+  _ = t_rgba16float;
+  _ = t_r32uint;
+  _ = t_r32sint;
+  _ = t_r32float;
+  _ = t_rg32uint;
+  _ = t_rg32sint;
+  _ = t_rg32float;
+  _ = t_rgba32uint;
+  _ = t_rgba32sint;
+  _ = t_rgba32float;
 }

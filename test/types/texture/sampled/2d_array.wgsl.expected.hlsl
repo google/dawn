@@ -4,8 +4,5 @@ Texture2DArray<uint4> t_u : register(t2, space0);
 
 [numthreads(1, 1, 1)]
 void main() {
-  t_f;
-  t_i;
-  t_u;
   return;
 }

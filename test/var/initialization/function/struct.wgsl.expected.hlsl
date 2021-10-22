@@ -6,6 +6,5 @@ struct S {
 [numthreads(1, 1, 1)]
 void main() {
   S v = (S)0;
-  v;
   return;
 }

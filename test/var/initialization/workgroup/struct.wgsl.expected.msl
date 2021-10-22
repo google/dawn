@@ -12,7 +12,6 @@ void tint_symbol_inner(uint local_invocation_index, threadgroup S* const tint_sy
     *(tint_symbol_2) = tint_symbol_1;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  (void) *(tint_symbol_2);
 }
 
 kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
