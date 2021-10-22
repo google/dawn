@@ -84,9 +84,9 @@ namespace dawn_native { namespace metal {
             // TODO(crbug.com/dawn/269): figure out what should happen when surfaces are used by
             // multiple backends one after the other. It probably needs to block until the backend
             // and GPU are completely finished with the previous swapchain.
-            if (previousSwapChain->GetBackendType() != wgpu::BackendType::Metal) {
-                return DAWN_VALIDATION_ERROR("metal::SwapChain cannot switch between APIs");
-            }
+            DAWN_INVALID_IF(previousSwapChain->GetBackendType() != wgpu::BackendType::Metal,
+                            "Metal SwapChain cannot switch backend types from %s to %s.",
+                            previousSwapChain->GetBackendType(), wgpu::BackendType::Metal);
 
             previousSwapChain->DetachFromSurface();
         }

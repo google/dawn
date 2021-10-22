@@ -124,7 +124,8 @@ namespace dawn_native { namespace metal {
                 case kCVPixelFormatType_OneComponent8:
                     return wgpu::TextureFormat::R8Unorm;
                 default:
-                    return DAWN_VALIDATION_ERROR("Unsupported IOSurface format");
+                    return DAWN_FORMAT_VALIDATION_ERROR("Unsupported IOSurface format (%x).",
+                                                        format);
             }
         }
 
@@ -327,38 +328,38 @@ namespace dawn_native { namespace metal {
         // IOSurfaceGetPlaneCount can return 0 for non-planar IOSurfaces but we will treat
         // non-planar like it is a single plane.
         size_t surfacePlaneCount = std::max(size_t(1), IOSurfaceGetPlaneCount(ioSurface));
-        if (plane >= surfacePlaneCount) {
-            return DAWN_VALIDATION_ERROR("IOSurface plane doesn't exist");
-        }
+        DAWN_INVALID_IF(plane >= surfacePlaneCount,
+                        "IOSurface plane (%u) exceeds the surface's plane count (%u).", plane,
+                        surfacePlaneCount);
 
-        if (descriptor->dimension != wgpu::TextureDimension::e2D) {
-            return DAWN_VALIDATION_ERROR("IOSurface texture must be 2D");
-        }
+        DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
+                        "Texture dimension (%s) is not %s.", descriptor->dimension,
+                        wgpu::TextureDimension::e2D);
 
-        if (descriptor->mipLevelCount != 1) {
-            return DAWN_VALIDATION_ERROR("IOSurface mip level count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->mipLevelCount != 1, "Mip level count (%u) is not 1.",
+                        descriptor->mipLevelCount);
 
-        if (descriptor->size.depthOrArrayLayers != 1) {
-            return DAWN_VALIDATION_ERROR("IOSurface array layer count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->size.depthOrArrayLayers != 1,
+                        "Array layer count (%u) is not 1.", descriptor->size.depthOrArrayLayers);
 
-        if (descriptor->sampleCount != 1) {
-            return DAWN_VALIDATION_ERROR("IOSurface sample count must be 1");
-        }
+        DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
+                        descriptor->sampleCount);
 
-        if (descriptor->size.width != IOSurfaceGetWidthOfPlane(ioSurface, plane) ||
-            descriptor->size.height != IOSurfaceGetHeightOfPlane(ioSurface, plane) ||
-            descriptor->size.depthOrArrayLayers != 1) {
-            return DAWN_VALIDATION_ERROR("IOSurface size doesn't match descriptor");
-        }
+        uint32_t surfaceWidth = IOSurfaceGetWidthOfPlane(ioSurface, plane);
+        uint32_t surfaceHeight = IOSurfaceGetHeightOfPlane(ioSurface, plane);
+
+        DAWN_INVALID_IF(
+            descriptor->size.width != surfaceWidth || descriptor->size.height != surfaceHeight ||
+                descriptor->size.depthOrArrayLayers != 1,
+            "IOSurface size (width: %u, height %u, depth: 1) doesn't match descriptor size %s.",
+            surfaceWidth, surfaceHeight, &descriptor->size);
 
         wgpu::TextureFormat ioSurfaceFormat;
         DAWN_TRY_ASSIGN(ioSurfaceFormat,
                         GetFormatEquivalentToIOSurfaceFormat(IOSurfaceGetPixelFormat(ioSurface)));
-        if (descriptor->format != ioSurfaceFormat) {
-            return DAWN_VALIDATION_ERROR("IOSurface format doesn't match descriptor");
-        }
+        DAWN_INVALID_IF(descriptor->format != ioSurfaceFormat,
+                        "IOSurface format (%s) doesn't match the descriptor format (%s).",
+                        ioSurfaceFormat, descriptor->format);
 
         return {};
     }
