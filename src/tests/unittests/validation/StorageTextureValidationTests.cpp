@@ -83,7 +83,7 @@ class StorageTextureValidationTests : public ValidationTest {
                 << imageFormatQualifier << ", " << access
                 << ">;\n"
                    "[[stage(compute), workgroup_size(1)]] fn main() {\n"
-                   "    _ = textureDimensions(image0);\n"
+                   "    textureDimensions(image0);\n"
                    "}\n";
 
         return ostream.str();
@@ -176,7 +176,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, read_write>;
             [[stage(vertex)]] fn main() {
-                _ = textureDimensions(image0);
+                textureDimensions(image0);
             })"));
     }
 
@@ -185,7 +185,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, read_write>;
             [[stage(fragment)]] fn main() {
-                _ = textureDimensions(image0);
+                textureDimensions(image0);
             })"));
     }
 
@@ -194,7 +194,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, read_write>;
             [[stage(compute), workgroup_size(1)]] fn main() {
-                _ = textureDimensions(image0);
+                textureDimensions(image0);
             })"));
     }
 }

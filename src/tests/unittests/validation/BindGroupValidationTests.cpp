@@ -2072,12 +2072,12 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     constexpr char kTexture2DShaderFS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(fragment)]] fn main() {
-            _ = textureDimensions(myTexture);
+            textureDimensions(myTexture);
         })";
     constexpr char kTexture2DShaderCS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(compute), workgroup_size(1)]] fn main() {
-            _ = textureDimensions(myTexture);
+            textureDimensions(myTexture);
         })";
 
     // Render: Test that 2D texture with 2D view dimension works
@@ -2111,12 +2111,12 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     constexpr char kTexture2DArrayShaderFS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
         [[stage(fragment)]] fn main() {
-            _ = textureDimensions(myTexture);
+            textureDimensions(myTexture);
         })";
     constexpr char kTexture2DArrayShaderCS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
         [[stage(compute), workgroup_size(1)]] fn main() {
-            _ = textureDimensions(myTexture);
+            textureDimensions(myTexture);
         })";
 
     // Render: Test that 2D texture array with 2D array view dimension works
@@ -2471,7 +2471,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             [[group(0), binding(0)]] var mySampler: sampler;
             [[group(0), binding(1)]] var myTexture: texture_2d<f32>;
             [[stage(fragment)]] fn main() {
-                _ = textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
+                textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
             })");
     }
 
@@ -2485,7 +2485,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             [[group(0), binding(0)]] var mySampler: sampler;
             [[group(0), binding(1)]] var myTexture: texture_2d<f32>;
             [[stage(fragment)]] fn main() {
-                _ = textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
+                textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
             })");
     }
 
@@ -2499,7 +2499,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             [[group(0), binding(0)]] var mySampler: sampler;
             [[group(0), binding(1)]] var myTexture: texture_depth_2d;
             [[stage(fragment)]] fn main() {
-                _ = textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
+                textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
             })");
     }
 
@@ -2513,7 +2513,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             [[group(0), binding(0)]] var mySampler: sampler;
             [[group(0), binding(1)]] var myTexture: texture_depth_2d;
             [[stage(fragment)]] fn main() {
-                _ = textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
+                textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
             })");
     }
 
@@ -2527,7 +2527,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             [[group(0), binding(0)]] var mySampler: sampler_comparison;
             [[group(0), binding(1)]] var myTexture: texture_depth_2d;
             [[stage(fragment)]] fn main() {
-                _ = textureSampleCompare(myTexture, mySampler, vec2<f32>(0.0, 0.0), 0.0);
+                textureSampleCompare(myTexture, mySampler, vec2<f32>(0.0, 0.0), 0.0);
             })");
     }
 
@@ -2541,7 +2541,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             [[group(0), binding(0)]] var mySampler: sampler;
             [[group(0), binding(1)]] var myTexture: texture_2d<f32>;
             [[stage(fragment)]] fn main() {
-                _ = textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
+                textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
             })"));
     }
 
@@ -2555,7 +2555,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
             [[group(0), binding(0)]] var mySampler: sampler;
             [[group(0), binding(1)]] var myTexture: texture_2d<f32>;
             [[stage(fragment)]] fn main() {
-                _ = textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
+                textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0));
             })");
     }
 }
