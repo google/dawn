@@ -2907,9 +2907,6 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
   }
   if (auto* c = stmt->As<ast::CallStatement>()) {
     auto out = line();
-    if (!TypeOf(c->expr)->Is<sem::Void>()) {
-      out << "(void) ";
-    }
     if (!EmitCall(out, c->expr)) {
       return false;
     }
