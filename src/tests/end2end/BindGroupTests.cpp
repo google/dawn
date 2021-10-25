@@ -1496,7 +1496,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         interface << "[[group(0), binding(" << binding++ << ")]] "
                   << "var image" << i << " : texture_storage_2d<r32uint, write>;\n";
 
-        body << "ignore(image" << i << ");";
+        body << "_ = image" << i << ";";
     }
 
     for (uint32_t i = 0; i < kMaxUniformBuffersPerShaderStage; ++i) {

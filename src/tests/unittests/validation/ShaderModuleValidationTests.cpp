@@ -481,11 +481,11 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
         std::ostringstream body;
         if (vec4_count > 0) {
             ss << "var<workgroup> vec4_data: array<vec4<f32>, " << vec4_count << ">;";
-            body << "ignore(vec4_data);";
+            body << "_ = vec4_data;";
         }
         if (mat4_count > 0) {
             ss << "var<workgroup> mat4_data: array<mat4x4<f32>, " << mat4_count << ">;";
-            body << "ignore(mat4_data);";
+            body << "_ = mat4_data;";
         }
         ss << "[[stage(compute), workgroup_size(1)]] fn main() { " << body.str() << " }";
         utils::CreateShaderModule(device, ss.str().c_str());

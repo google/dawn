@@ -342,7 +342,7 @@ struct Inputs {
 [[group(0), binding(1)]] var<uniform> providedData1 : S1;
 
 [[stage(vertex)]] fn vsMain(input : Inputs) -> [[builtin(position)]] vec4<f32> {
-  ignore(providedData1.data[input.vertexIndex][0]);
+  _ = providedData1.data[input.vertexIndex][0];
   return vec4<f32>();
 }
 

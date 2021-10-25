@@ -639,7 +639,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
                    << kScalarTypes[i] << R"(>;
 
                 [[stage(fragment)]] fn main() {
-                    ignore(textureDimensions(myTexture));
+                    _ = textureDimensions(myTexture);
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
             descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
@@ -688,7 +688,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
                 [[group(0), binding(0)]] var myTexture : )"
                    << kTextureKeywords[i] << R"(<f32>;
                 [[stage(fragment)]] fn main() {
-                    ignore(textureDimensions(myTexture));
+                    _ = textureDimensions(myTexture);
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
             descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;

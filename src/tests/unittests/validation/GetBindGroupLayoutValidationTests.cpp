@@ -181,8 +181,8 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[group(0), binding(1)]] var mySampler : sampler;
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            ignore(myTexture);
-            ignore(mySampler);
+            _ = myTexture;
+            _ = mySampler;
             return vec4<f32>();
         })");
 
@@ -190,8 +190,8 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[group(0), binding(1)]] var mySampler : sampler;
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            ignore(textureLoad(myTexture, vec2<i32>(), 0));
-            ignore(mySampler);
+            _ = textureLoad(myTexture, vec2<i32>(), 0);
+            _ = mySampler;
             return vec4<f32>();
         })");
 
@@ -199,7 +199,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[group(0), binding(1)]] var mySampler : sampler;
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            ignore(textureSampleLevel(myTexture, mySampler, vec2<f32>(), 0.0));
+            _ = textureSampleLevel(myTexture, mySampler, vec2<f32>(), 0.0);
             return vec4<f32>();
         })");
 
@@ -207,23 +207,23 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[group(0), binding(1)]] var mySampler : sampler;
         [[stage(fragment)]] fn main() {
-            ignore(myTexture);
-            ignore(mySampler);
+            _ = myTexture;
+            _ = mySampler;
         })");
 
     wgpu::ShaderModule textureLoadFragmentModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[group(0), binding(1)]] var mySampler : sampler;
         [[stage(fragment)]] fn main() {
-            ignore(textureLoad(myTexture, vec2<i32>(), 0));
-            ignore(mySampler);
+            _ = textureLoad(myTexture, vec2<i32>(), 0);
+            _ = mySampler;
         })");
 
     wgpu::ShaderModule textureSampleFragmentModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[group(0), binding(1)]] var mySampler : sampler;
         [[stage(fragment)]] fn main() {
-            ignore(textureSample(myTexture, mySampler, vec2<f32>()));
+            _ = textureSample(myTexture, mySampler, vec2<f32>());
         })");
 
     auto BGLFromModules = [this](wgpu::ShaderModule vertexModule,
@@ -394,7 +394,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -406,7 +406,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var myTexture : texture_multisampled_2d<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -419,7 +419,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var mySampler: sampler;
 
             [[stage(fragment)]] fn main() {
-                ignore(mySampler);
+                _ = mySampler;
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -447,7 +447,7 @@ TEST_F(GetBindGroupLayoutTests, ExternalTextureBindingType) {
             [[group(0), binding(0)]] var myExternalTexture: texture_external;
 
             [[stage(fragment)]] fn main() {
-               ignore(myExternalTexture);
+               _ = myExternalTexture;
             })");
     EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
         device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -475,7 +475,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_1d<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -487,7 +487,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -499,7 +499,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -511,7 +511,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_3d<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -523,7 +523,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_cube<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -535,7 +535,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_cube_array<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -563,7 +563,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -575,7 +575,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<i32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -587,7 +587,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<u32>;
 
             [[stage(fragment)]] fn main() {
-                ignore(textureDimensions(myTexture));
+                _ = textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn_native::BindGroupLayoutBindingsEqualForTesting(
             device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get()));
@@ -802,7 +802,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     wgpu::ShaderModule vsModuleSampler = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var mySampler: sampler;
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            ignore(mySampler);
+            _ = mySampler;
             return vec4<f32>();
         })");
 
@@ -813,7 +813,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     wgpu::ShaderModule fsModuleSampler = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var mySampler: sampler;
         [[stage(fragment)]] fn main() {
-            ignore(mySampler);
+            _ = mySampler;
         })");
 
     // Create BGLs with minBufferBindingSize 4 and 64.
@@ -900,7 +900,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            ignore(textureDimensions(myTexture));
+            _ = textureDimensions(myTexture);
             return vec4<f32>();
         })");
 
@@ -908,7 +908,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
         [[group(0), binding(0)]] var myTexture : texture_multisampled_2d<f32>;
 
         [[stage(fragment)]] fn main() {
-            ignore(textureDimensions(myTexture));
+            _ = textureDimensions(myTexture);
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;
@@ -925,7 +925,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            ignore(textureDimensions(myTexture));
+            _ = textureDimensions(myTexture);
             return vec4<f32>();
         })");
 
@@ -933,7 +933,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
         [[group(0), binding(0)]] var myTexture : texture_3d<f32>;
 
         [[stage(fragment)]] fn main() {
-            ignore(textureDimensions(myTexture));
+            _ = textureDimensions(myTexture);
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;
@@ -950,7 +950,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            ignore(textureDimensions(myTexture));
+            _ = textureDimensions(myTexture);
             return vec4<f32>();
         })");
 
@@ -958,7 +958,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
         [[group(0), binding(0)]] var myTexture : texture_2d<i32>;
 
         [[stage(fragment)]] fn main() {
-            ignore(textureDimensions(myTexture));
+            _ = textureDimensions(myTexture);
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;

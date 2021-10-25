@@ -105,7 +105,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
         vertexBody << "  output.vertex_index = input.vertex_index;\n";
 
         fragmentInputs << "  [[location(1)]] vertex_index : u32;\n";
-        fragmentBody << "  ignore(atomicMin(&idx_vals.vertex_index, input.vertex_index));\n";
+        fragmentBody << "  _ = atomicMin(&idx_vals.vertex_index, input.vertex_index);\n";
     }
     if ((checkIndex & CheckIndex::Instance) != 0) {
         vertexInputs << "  [[builtin(instance_index)]] instance_index : u32;\n";
@@ -113,7 +113,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
         vertexBody << "  output.instance_index = input.instance_index;\n";
 
         fragmentInputs << "  [[location(2)]] instance_index : u32;\n";
-        fragmentBody << "  ignore(atomicMin(&idx_vals.instance_index, input.instance_index));\n";
+        fragmentBody << "  _ = atomicMin(&idx_vals.instance_index, input.instance_index);\n";
     }
 
     std::string vertexShader = R"(
