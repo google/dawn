@@ -434,7 +434,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) uniform UBO {
+layout (set = 1, binding = 0) uniform UBO_1 {
   vec4 coord;
 } ubo;
 
@@ -484,7 +484,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) uniform Uniforms {
+layout (set = 1, binding = 0) uniform Uniforms_1 {
   vec4 coord;
 } uniforms;
 
@@ -535,7 +535,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data {
+layout (set = 1, binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -587,7 +587,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data {
+layout (set = 1, binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -635,7 +635,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data {
+layout (set = 1, binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -684,7 +684,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data {
+layout (set = 1, binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -735,7 +735,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) uniform S {
+layout (set = 1, binding = 0) uniform S_1 {
   float x;
 } coord;
 
@@ -791,7 +791,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer S {
+layout (set = 1, binding = 0) buffer S_1 {
   float x;
 } coord;
 
@@ -1057,7 +1057,7 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 
-layout (set = 0, binding = 0) buffer Data {
+layout (set = 0, binding = 0) buffer Data_1 {
   float d;
 } data;
 

@@ -1555,7 +1555,7 @@ bool GeneratorImpl::EmitUniformVariable(const sem::Variable* var) {
   ast::VariableBindingPoint bp = decl->BindingPoint();
   line() << "layout (set = " << bp.group->value
          << ", binding = " << bp.binding->value << ") uniform "
-         << StructName(str) << " {";
+         << UniqueIdentifier(StructName(str)) << " {";
   EmitStructMembers(current_buffer_, str);
   auto name = builder_.Symbols().NameFor(decl->symbol);
   line() << "} " << name << ";";
@@ -1575,7 +1575,7 @@ bool GeneratorImpl::EmitStorageVariable(const sem::Variable* var) {
   ast::VariableBindingPoint bp = decl->BindingPoint();
   line() << "layout (set = " << bp.group->value
          << ", binding = " << bp.binding->value << ") buffer "
-         << StructName(str) << " {";
+         << UniqueIdentifier(StructName(str)) << " {";
   EmitStructMembers(current_buffer_, str);
   auto name = builder_.Symbols().NameFor(decl->symbol);
   line() << "} " << name << ";";

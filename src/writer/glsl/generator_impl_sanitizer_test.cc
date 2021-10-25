@@ -52,7 +52,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength) {
 precision mediump float;
 
 
-layout (set = 2, binding = 1) buffer my_struct {
+layout (set = 2, binding = 1) buffer my_struct_1 {
   float a[0];
 } b;
 
@@ -103,7 +103,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
 precision mediump float;
 
 
-layout (set = 2, binding = 1) buffer my_struct {
+layout (set = 2, binding = 1) buffer my_struct_1 {
   float z;
   float a[0];
 } b;
@@ -157,7 +157,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_ViaLets) {
 precision mediump float;
 
 
-layout (set = 2, binding = 1) buffer my_struct {
+layout (set = 2, binding = 1) buffer my_struct_1 {
   float a[0];
 } b;
 
