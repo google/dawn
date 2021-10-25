@@ -146,7 +146,7 @@ SanitizedResult Sanitize(const Program* in,
   // * Simplify, as we need to fold away the address-of and dereferences of
   // `*(&(intrinsic_load()))` expressions.
   // * RemovePhonies, as phonies can be assigned a pointer to a
-  //   non-constructable buffer, or dynamic array, which DMA cannot cope with.
+  //   non-constructible buffer, or dynamic array, which DMA cannot cope with.
   manager.Add<transform::DecomposeMemoryAccess>();
   // CalculateArrayLength must come after DecomposeMemoryAccess, as
   // DecomposeMemoryAccess special-cases the arrayLength() intrinsic, which

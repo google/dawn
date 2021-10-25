@@ -4433,7 +4433,7 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
         !ty->IsAnyOf<sem::Pointer, sem::Texture, sem::Sampler>()) {
       AddError(
           "cannot assign '" + TypeNameOf(a->rhs) +
-              "' to '_'. '_' can only be assigned a constructable, pointer, "
+              "' to '_'. '_' can only be assigned a constructible, pointer, "
               "texture or sampler type",
           a->rhs->source);
       return false;

@@ -294,7 +294,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
 }
 
 TEST_F(ResolverAssignmentValidationTest,
-       AssignToPhony_NonConstructableStruct_Fail) {
+       AssignToPhony_NonConstructibleStruct_Fail) {
   // [[block]]
   // struct S {
   //   arr: array<i32>;
@@ -311,7 +311,7 @@ TEST_F(ResolverAssignmentValidationTest,
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: cannot assign 'S' to '_'. "
-            "'_' can only be assigned a constructable, pointer, texture or "
+            "'_' can only be assigned a constructible, pointer, texture or "
             "sampler type");
 }
 
@@ -333,7 +333,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
   EXPECT_EQ(
       r()->error(),
       "12:34 error: cannot assign 'ref<storage, array<i32>, read>' to '_'. "
-      "'_' can only be assigned a constructable, pointer, texture or sampler "
+      "'_' can only be assigned a constructible, pointer, texture or sampler "
       "type");
 }
 
