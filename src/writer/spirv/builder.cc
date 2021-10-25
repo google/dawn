@@ -44,6 +44,7 @@
 #include "src/transform/inline_pointer_lets.h"
 #include "src/transform/manager.h"
 #include "src/transform/simplify.h"
+#include "src/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/get_or_create.h"
 #include "src/writer/append_vector.h"
@@ -268,6 +269,7 @@ SanitizedResult Sanitize(const Program* in,
   manager.Add<transform::Simplify>();           // Required for arrayLength()
   manager.Add<transform::FoldConstants>();
   manager.Add<transform::ExternalTextureTransform>();
+  manager.Add<transform::VectorizeScalarMatrixConstructors>();
   manager.Add<transform::ForLoopToLoop>();  // Must come after
                                             // ZeroInitWorkgroupMemory
   manager.Add<transform::CanonicalizeEntryPointIO>();

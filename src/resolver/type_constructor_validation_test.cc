@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/reference_type.h"
 
 namespace tint {
 namespace resolver {
 namespace {
+
+using ::testing::HasSubstr;
 
 // Helpers and typedefs
 using builder::alias;
@@ -1641,13 +1644,9 @@ static std::string MatrixStr(const MatrixDimensions& dimensions,
          std::to_string(dimensions.rows) + "<" + subtype + ">";
 }
 
-static std::string VecStr(uint32_t dimensions, std::string subtype = "f32") {
-  return "vec" + std::to_string(dimensions) + "<" + subtype + ">";
-}
-
 using MatrixConstructorTest = ResolverTestWithParam<MatrixDimensions>;
 
-TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooFewArguments) {
+TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewArguments) {
   // matNxM<f32>(vecM<f32>(), ...); with N - 1 arguments
 
   const auto param = GetParam();
@@ -1665,13 +1664,34 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooFewArguments) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:1 error: expected " + std::to_string(param.columns) + " '" +
-                VecStr(param.rows) + "' arguments in '" + MatrixStr(param) +
-                "' constructor, found " + std::to_string(param.columns - 1));
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
 }
 
-TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooManyArguments) {
+TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooFewArguments) {
+  // matNxM<f32>(f32,...,f32); with N*M - 1 arguments
+
+  const auto param = GetParam();
+
+  ast::ExpressionList args;
+  for (uint32_t i = 1; i <= param.columns * param.rows - 1; i++) {
+    args.push_back(create<ast::TypeConstructorExpression>(
+        Source{{12, i}}, ty.f32(), ExprList()));
+  }
+
+  auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,
+                                                    std::move(args));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
+}
+
+TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyArguments) {
   // matNxM<f32>(vecM<f32>(), ...); with N + 1 arguments
 
   const auto param = GetParam();
@@ -1689,21 +1709,20 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooManyArguments) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:1 error: expected " + std::to_string(param.columns) + " '" +
-                VecStr(param.rows) + "' arguments in '" + MatrixStr(param) +
-                "' constructor, found " + std::to_string(param.columns + 1));
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
 }
 
-TEST_P(MatrixConstructorTest, Expr_Constructor_Error_InvalidArgumentType) {
-  // matNxM<f32>(1.0, 1.0, ...); N arguments
+TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooManyArguments) {
+  // matNxM<f32>(f32,...,f32); with N*M + 1 arguments
 
   const auto param = GetParam();
 
   ast::ExpressionList args;
-  for (uint32_t i = 1; i <= param.columns; i++) {
-    args.push_back(create<ast::ScalarConstructorExpression>(Source{{12, i}},
-                                                            Literal(1.0f)));
+  for (uint32_t i = 1; i <= param.columns * param.rows + 1; i++) {
+    args.push_back(create<ast::TypeConstructorExpression>(
+        Source{{12, i}}, ty.f32(), ExprList()));
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -1712,13 +1731,60 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_InvalidArgumentType) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:1 error: expected argument type '" +
-                              VecStr(param.rows) + "' in '" + MatrixStr(param) +
-                              "' constructor, found 'f32'");
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest,
-       Expr_Constructor_Error_TooFewRowsInVectorArgument) {
+       Expr_ColumnConstructor_Error_InvalidArgumentType) {
+  // matNxM<f32>(vec<u32>, vec<u32>, ...); N arguments
+
+  const auto param = GetParam();
+
+  ast::ExpressionList args;
+  for (uint32_t i = 1; i <= param.columns; i++) {
+    auto* vec_type = ty.vec<u32>(param.rows);
+    args.push_back(create<ast::TypeConstructorExpression>(
+        Source{{12, i}}, vec_type, ExprList()));
+  }
+
+  auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,
+                                                    std::move(args));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
+}
+
+TEST_P(MatrixConstructorTest,
+       Expr_ElementConstructor_Error_InvalidArgumentType) {
+  // matNxM<f32>(u32, u32, ...); N*M arguments
+
+  const auto param = GetParam();
+
+  ast::ExpressionList args;
+  for (uint32_t i = 1; i <= param.columns; i++) {
+    args.push_back(
+        create<ast::ScalarConstructorExpression>(Source{{12, i}}, Literal(1u)));
+  }
+
+  auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,
+                                                    std::move(args));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
+}
+
+TEST_P(MatrixConstructorTest,
+       Expr_ColumnConstructor_Error_TooFewRowsInVectorArgument) {
   // matNxM<f32>(vecM<f32>(),...,vecM-1<f32>());
 
   const auto param = GetParam();
@@ -1745,15 +1811,13 @@ TEST_P(MatrixConstructorTest,
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:" + std::to_string(kInvalidLoc) +
-                              " error: expected argument type '" +
-                              VecStr(param.rows) + "' in '" + MatrixStr(param) +
-                              "' constructor, found '" +
-                              VecStr(param.rows - 1) + "'");
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest,
-       Expr_Constructor_Error_TooManyRowsInVectorArgument) {
+       Expr_ColumnConstructor_Error_TooManyRowsInVectorArgument) {
   // matNxM<f32>(vecM<f32>(),...,vecM+1<f32>());
 
   const auto param = GetParam();
@@ -1780,36 +1844,9 @@ TEST_P(MatrixConstructorTest,
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:" + std::to_string(kInvalidLoc) +
-                              " error: expected argument type '" +
-                              VecStr(param.rows) + "' in '" + MatrixStr(param) +
-                              "' constructor, found '" +
-                              VecStr(param.rows + 1) + "'");
-}
-
-TEST_P(MatrixConstructorTest,
-       Expr_Constructor_Error_ArgumentVectorElementTypeMismatch) {
-  // matNxM<f32>(vecM<u32>(), ...); with N arguments
-
-  const auto param = GetParam();
-
-  ast::ExpressionList args;
-  for (uint32_t i = 1; i <= param.columns; i++) {
-    auto* vec_type = ty.vec<u32>(param.rows);
-    args.push_back(create<ast::TypeConstructorExpression>(
-        Source{{12, i}}, vec_type, ExprList()));
-  }
-
-  auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-  auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,
-                                                    std::move(args));
-  WrapInFunction(tc);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:1 error: expected argument type '" +
-                              VecStr(param.rows) + "' in '" + MatrixStr(param) +
-                              "' constructor, found '" +
-                              VecStr(param.rows, "u32") + "'");
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ZeroValue_Success) {
@@ -1824,7 +1861,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ZeroValue_Success) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_P(MatrixConstructorTest, Expr_Constructor_WithArguments_Success) {
+TEST_P(MatrixConstructorTest, Expr_Constructor_WithColumns_Success) {
   // matNxM<f32>(vecM<f32>(), ...); with N arguments
 
   const auto param = GetParam();
@@ -1834,6 +1871,25 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_WithArguments_Success) {
     auto* vec_type = ty.vec<f32>(param.rows);
     args.push_back(create<ast::TypeConstructorExpression>(
         Source{{12, i}}, vec_type, ExprList()));
+  }
+
+  auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,
+                                                    std::move(args));
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_P(MatrixConstructorTest, Expr_Constructor_WithElements_Success) {
+  // matNxM<f32>(f32,...,f32); with N*M arguments
+
+  const auto param = GetParam();
+
+  ast::ExpressionList args;
+  for (uint32_t i = 1; i <= param.columns * param.rows; i++) {
+    args.push_back(create<ast::TypeConstructorExpression>(
+        Source{{12, i}}, ty.f32(), ExprList()));
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -1863,10 +1919,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:1 error: expected argument type '" + VecStr(param.rows) +
-                "' in '" + MatrixStr(param, "Float32") +
-                "' constructor, found '" + VecStr(param.rows, "u32") + "'");
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: invalid constructor for " +
+                                      MatrixStr(param, "Float32") +
+                                      "\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
@@ -1900,8 +1955,13 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: expected argument type 'vec2<f32>' in 'mat2x2<f32>' "
-            "constructor, found 'VectorUnsigned2'");
+            R"(12:34 error: invalid constructor for mat2x2<f32>
+
+3 candidates available:
+  mat2x2<f32>()
+  mat2x2<f32>(f32,...,f32) // 4 arguments
+  mat2x2<f32>(vec2<f32>, vec2<f32>)
+)");
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
@@ -1940,10 +2000,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:1 error: expected argument type '" +
-                              VecStr(param.rows) + "' in '" + MatrixStr(param) +
-                              "' constructor, found '" +
-                              VecStr(param.rows, "UnsignedInt") + "'");
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest,

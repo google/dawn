@@ -314,6 +314,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/transform/single_entry_point_test.cc",
     "../src/transform/test_helper.h",
     "../src/transform/transform_test.cc",
+    "../src/transform/vectorize_scalar_matrix_constructors_test.cc",
     "../src/transform/vertex_pulling_test.cc",
     "../src/transform/wrap_arrays_in_structs_test.cc",
     "../src/transform/zero_init_workgroup_memory_test.cc",

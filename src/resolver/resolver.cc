@@ -2885,28 +2885,47 @@ bool Resolver::ValidateMatrixConstructor(
   }
 
   auto* elem_type = matrix_type->type();
-  if (matrix_type->columns() != values.size()) {
+  auto num_elements = matrix_type->columns() * matrix_type->rows();
+
+  // Print a generic error for an invalid matrix constructor, showing the
+  // available overloads.
+  auto print_error = [&]() {
     const Source& values_start = values[0]->source;
     const Source& values_end = values[values.size() - 1]->source;
-    AddError("expected " + std::to_string(matrix_type->columns()) + " '" +
-                 VectorPretty(matrix_type->rows(), elem_type) +
-                 "' arguments in '" + type_name + "' constructor, found " +
-                 std::to_string(values.size()),
-             Source::Combine(values_start, values_end));
+    auto elem_type_name = elem_type->FriendlyName(builder_->Symbols());
+    std::stringstream ss;
+    ss << "invalid constructor for " + type_name << std::endl << std::endl;
+    ss << "3 candidates available:" << std::endl;
+    ss << "  " << type_name << "()" << std::endl;
+    ss << "  " << type_name << "(" << elem_type_name << ",...,"
+       << elem_type_name << ")"
+       << " // " << std::to_string(num_elements) << " arguments" << std::endl;
+    ss << "  " << type_name << "(";
+    for (uint32_t c = 0; c < matrix_type->columns(); c++) {
+      if (c > 0) {
+        ss << ", ";
+      }
+      ss << VectorPretty(matrix_type->rows(), elem_type);
+    }
+    ss << ")" << std::endl;
+    AddError(ss.str(), Source::Combine(values_start, values_end));
+  };
+
+  const sem::Type* expected_arg_type = nullptr;
+  if (num_elements == values.size()) {
+    // Column-major construction from scalar elements.
+    expected_arg_type = matrix_type->type();
+  } else if (matrix_type->columns() == values.size()) {
+    // Column-by-column construction from vectors.
+    expected_arg_type = matrix_type->ColumnType();
+  } else {
+    print_error();
     return false;
   }
 
   for (auto* value : values) {
-    auto* value_type = TypeOf(value)->UnwrapRef();
-    auto* value_vec = value_type->As<sem::Vector>();
-
-    if (!value_vec || value_vec->Width() != matrix_type->rows() ||
-        elem_type != value_vec->type()) {
-      AddError("expected argument type '" +
-                   VectorPretty(matrix_type->rows(), elem_type) + "' in '" +
-                   type_name + "' constructor, found '" + TypeNameOf(value) +
-                   "'",
-               value->source);
+    if (TypeOf(value)->UnwrapRef() != expected_arg_type) {
+      print_error();
       return false;
     }
   }
