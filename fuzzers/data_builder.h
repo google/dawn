@@ -28,11 +28,15 @@ namespace fuzzers {
 /// Builder for generic pseudo-random data using a data buffer as seed
 class DataBuilder {
  public:
-  /// @brief Initialize random number generations
+  /// @brief Initialize internal random number generation using data as seed
   /// @param data - pointer to a data buffer to use as a seed
   /// @param size - size of data buffer
   explicit DataBuilder(const uint8_t* data, size_t size)
       : generator_(data, size) {}
+
+  /// @brief Initialize internal random number generation using seed value
+  /// @param seed - value to use as seed
+  explicit DataBuilder(uint64_t seed) : generator_(seed) {}
 
   ~DataBuilder() = default;
   DataBuilder(DataBuilder&&) = default;
