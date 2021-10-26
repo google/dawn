@@ -26,15 +26,37 @@ namespace dawn_native { namespace metal {
     // largest alignment of supported data types
     static constexpr uint32_t kMinUniformOrStorageBufferAlignment = 16u;
 
-    // The maximum buffer size if querying the maximum buffer size or recommended working set size
-    // is not available. This is a somewhat arbitrary limit of 1 GiB.
-    static constexpr uint32_t kMaxBufferSizeFallback = 1024u * 1024u * 1024u;
-
     // static
     ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
         Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
         DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
         return std::move(buffer);
+    }
+
+    // static
+    uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
+        if (@available(iOS 12, tvOS 12, macOS 10.14, *)) {
+            return [mtlDevice maxBufferLength];
+        }
+
+        // Earlier versions of Metal had maximums defined in the Metal feature set tables
+        // https://metalbyexample.com/wp-content/uploads/Metal-Feature-Set-Tables-2018.pdf
+#if defined(DAWN_PLATFORM_MACOS)
+        // 10.12 and 10.13 have a 1Gb limit.
+        if (@available(macOS 10.12, *)) {
+            // |maxBufferLength| isn't always available on older systems. If available, use
+            // |recommendedMaxWorkingSetSize| instead. We can probably allocate more than this,
+            // but don't have a way to discover a better limit. MoltenVK also uses this heuristic.
+            return 1024 * 1024 * 1024;
+        }
+        // 10.11 has a 256Mb limit
+        if (@available(maxOS 10.11, *)) {
+            return 256 * 1024 * 1024;
+        }
+#else
+        // macOS / tvOS: 256Mb limit in versions without [MTLDevice maxBufferLength]
+        return 256 * 1024 * 1024;
+#endif
     }
 
     MaybeError Buffer::Initialize(bool mappedAtCreation) {
@@ -80,23 +102,8 @@ namespace dawn_native { namespace metal {
         }
         currentSize = Align(currentSize, alignment);
 
-        if (@available(iOS 12, macOS 10.14, *)) {
-            NSUInteger maxBufferSize = [ToBackend(GetDevice())->GetMTLDevice() maxBufferLength];
-            if (currentSize > maxBufferSize) {
-                return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
-            }
-#if defined(DAWN_PLATFORM_MACOS)
-        } else if (@available(macOS 10.12, *)) {
-            // |maxBufferLength| isn't always available on older systems. If available, use
-            // |recommendedMaxWorkingSetSize| instead. We can probably allocate more than this,
-            // but don't have a way to discover a better limit. MoltenVK also uses this heuristic.
-            uint64_t maxWorkingSetSize =
-                [ToBackend(GetDevice())->GetMTLDevice() recommendedMaxWorkingSetSize];
-            if (currentSize > maxWorkingSetSize) {
-                return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
-            }
-#endif
-        } else if (currentSize > kMaxBufferSizeFallback) {
+        uint64_t maxBufferSize = QueryMaxBufferLength(ToBackend(GetDevice())->GetMTLDevice());
+        if (currentSize > maxBufferSize) {
             return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
         }
 

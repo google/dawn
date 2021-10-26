@@ -39,6 +39,8 @@ namespace dawn_native { namespace metal {
         void EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                 const CopyTextureToBufferCmd* copy);
 
+        static uint64_t QueryMaxBufferLength(id<MTLDevice> mtlDevice);
+
       private:
         using BufferBase::BufferBase;
         MaybeError Initialize(bool mappedAtCreation);
