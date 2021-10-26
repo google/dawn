@@ -45,6 +45,12 @@ namespace dawn_native {
             DAWN_TRY(ValidateCompatibilityWithPipelineLayout(device, metadata, layout));
         }
 
+        if (constantCount > 0u && device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+            return DAWN_VALIDATION_ERROR(
+                "Pipeline overridable constants are disallowed because they are partially "
+                "implemented.");
+        }
+
         // Validate if overridable constants exist in shader module
         // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
         for (uint32_t i = 0; i < constantCount; i++) {
