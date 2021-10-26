@@ -83,6 +83,15 @@ struct ScalarConstant {
     return c;
   }
 
+  /// @param value the value of the constant
+  /// @returns a new ScalarConstant with the provided value and kind Kind::kBool
+  static inline ScalarConstant Bool(bool value) {
+    ScalarConstant c;
+    c.value.b = value;
+    c.kind = Kind::kBool;
+    return c;
+  }
+
   /// Equality operator
   /// @param rhs the ScalarConstant to compare against
   /// @returns true if this ScalarConstant is equal to `rhs`
@@ -96,6 +105,16 @@ struct ScalarConstant {
   /// @returns true if this ScalarConstant is not equal to `rhs`
   inline bool operator!=(const ScalarConstant& rhs) const {
     return !(*this == rhs);
+  }
+
+  /// @returns this ScalarConstant as a specialization op with the given
+  /// specialization constant identifier
+  /// @param id the constant identifier
+  ScalarConstant AsSpecOp(uint32_t id) const {
+    auto ret = *this;
+    ret.is_spec_op = true;
+    ret.constant_id = id;
+    return ret;
   }
 
   /// The constant value

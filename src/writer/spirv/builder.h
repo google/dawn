@@ -338,18 +338,17 @@ class Builder {
   /// Generates a constructor expression
   /// @param var the variable generated for, nullptr if no variable associated.
   /// @param expr the expression to generate
-  /// @param is_global_init set true if this is a global variable constructor
   /// @returns the ID of the expression or 0 on failure.
-  uint32_t GenerateConstructorExpression(const ast::Variable* var,
-                                         const ast::ConstructorExpression* expr,
-                                         bool is_global_init);
+  uint32_t GenerateConstructorExpression(
+      const ast::Variable* var,
+      const ast::ConstructorExpression* expr);
   /// Generates a type constructor expression
+  /// @param var the variable generated for, nullptr if no variable associated.
   /// @param init the expression to generate
-  /// @param is_global_init set true if this is a global variable constructor
   /// @returns the ID of the expression or 0 on failure.
   uint32_t GenerateTypeConstructorExpression(
-      const ast::TypeConstructorExpression* init,
-      bool is_global_init);
+      const ast::Variable* var,
+      const ast::TypeConstructorExpression* init);
   /// Generates a literal constant if needed
   /// @param var the variable generated for, nullptr if no variable associated.
   /// @param lit the literal to generate

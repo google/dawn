@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+constant int o [[function_constant(1234)]];
+kernel void tint_symbol() {
+  return;
+}
+

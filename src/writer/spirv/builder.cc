@@ -577,7 +577,7 @@ uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
     return GenerateCallExpression(c);
   }
   if (auto* c = expr->As<ast::ConstructorExpression>()) {
-    return GenerateConstructorExpression(nullptr, c, false);
+    return GenerateConstructorExpression(nullptr, c);
   }
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return GenerateIdentifierExpression(i);
@@ -763,7 +763,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
     }
 
     init_id = GenerateConstructorExpression(
-        var, var->constructor->As<ast::ConstructorExpression>(), true);
+        var, var->constructor->As<ast::ConstructorExpression>());
     if (init_id == 0) {
       return false;
     }
@@ -1268,13 +1268,12 @@ uint32_t Builder::GetGLSLstd450Import() {
 
 uint32_t Builder::GenerateConstructorExpression(
     const ast::Variable* var,
-    const ast::ConstructorExpression* expr,
-    bool is_global_init) {
+    const ast::ConstructorExpression* expr) {
   if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
     return GenerateLiteralIfNeeded(var, scalar->literal);
   }
   if (auto* type = expr->As<ast::TypeConstructorExpression>()) {
-    return GenerateTypeConstructorExpression(type, is_global_init);
+    return GenerateTypeConstructorExpression(var, type);
   }
 
   error_ = "unknown constructor expression";
@@ -1338,14 +1337,35 @@ bool Builder::is_constructor_const(const ast::Expression* expr,
 }
 
 uint32_t Builder::GenerateTypeConstructorExpression(
-    const ast::TypeConstructorExpression* init,
-    bool is_global_init) {
+    const ast::Variable* var,
+    const ast::TypeConstructorExpression* init) {
+  auto* global_var = builder_.Sem().Get<sem::GlobalVariable>(var);
+
   auto& values = init->values;
 
   auto* result_type = TypeOf(init);
 
   // Generate the zero initializer if there are no values provided.
   if (values.empty()) {
+    if (global_var && global_var->IsPipelineConstant()) {
+      auto constant_id = global_var->ConstantId();
+      if (result_type->Is<sem::I32>()) {
+        return GenerateConstantIfNeeded(
+            ScalarConstant::I32(0).AsSpecOp(constant_id));
+      }
+      if (result_type->Is<sem::U32>()) {
+        return GenerateConstantIfNeeded(
+            ScalarConstant::U32(0).AsSpecOp(constant_id));
+      }
+      if (result_type->Is<sem::F32>()) {
+        return GenerateConstantIfNeeded(
+            ScalarConstant::F32(0).AsSpecOp(constant_id));
+      }
+      if (result_type->Is<sem::Bool>()) {
+        return GenerateConstantIfNeeded(
+            ScalarConstant::Bool(false).AsSpecOp(constant_id));
+      }
+    }
     return GenerateConstantNullIfNeeded(result_type->UnwrapRef());
   }
 
@@ -1353,7 +1373,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   out << "__const_" << init->type->FriendlyName(builder_.Symbols()) << "_";
 
   result_type = result_type->UnwrapRef();
-  bool constructor_is_const = is_constructor_const(init, is_global_init);
+  bool constructor_is_const = is_constructor_const(init, global_var);
   if (has_error()) {
     return 0;
   }
@@ -1372,8 +1392,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   if (can_cast_or_copy) {
-    return GenerateCastOrCopyOrPassthrough(result_type, values[0],
-                                           is_global_init);
+    return GenerateCastOrCopyOrPassthrough(result_type, values[0], global_var);
   }
 
   auto type_id = GenerateTypeIfNeeded(result_type);
@@ -1392,8 +1411,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   for (auto* e : values) {
     uint32_t id = 0;
     if (constructor_is_const) {
-      id = GenerateConstructorExpression(
-          nullptr, e->As<ast::ConstructorExpression>(), is_global_init);
+      id = GenerateConstructorExpression(nullptr,
+                                         e->As<ast::ConstructorExpression>());
     } else {
       id = GenerateExpression(e);
       id = GenerateLoadIfNeeded(TypeOf(e), id);
@@ -1417,8 +1436,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // Both scalars, but not the same type so we need to generate a conversion
     // of the value.
     if (value_type->is_scalar() && result_type->is_scalar()) {
-      id = GenerateCastOrCopyOrPassthrough(result_type, values[0],
-                                           is_global_init);
+      id = GenerateCastOrCopyOrPassthrough(result_type, values[0], global_var);
       out << "_" << id;
       ops.push_back(Operand::Int(id));
       continue;
@@ -1445,7 +1463,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
         auto extract = result_op();
         auto extract_id = extract.to_i();
 
-        if (!is_global_init) {
+        if (!global_var) {
           // A non-global initializer. Case 2.
           if (!push_function_inst(spv::Op::OpCompositeExtract,
                                   {Operand::Int(value_type_id), extract,
@@ -2816,7 +2834,7 @@ bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
     if (auto* array_index = arg(Usage::kArrayIndex)) {
       // Array index needs to be appended to the coordinates.
       auto* packed = AppendVector(&builder_, arg(Usage::kCoords), array_index);
-      auto param = GenerateTypeConstructorExpression(packed, false);
+      auto param = GenerateTypeConstructorExpression(nullptr, packed);
       if (param == 0) {
         return false;
       }
