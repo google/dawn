@@ -422,6 +422,14 @@ namespace wgpu { namespace binding {
         out = {};
         out.entryPoint = in.entryPoint.c_str();
         out.module = *in.module.As<GPUShaderModule>();
+        return Convert(out.constants, out.constantCount, in.constants);
+    }
+
+    bool Converter::Convert(wgpu::ConstantEntry& out,
+                            const std::string& in_name,
+                            wgpu::interop::GPUPipelineConstantValue in_value) {
+        out.key = in_name.c_str();
+        out.value = in_value;
         return true;
     }
 
@@ -545,8 +553,10 @@ namespace wgpu { namespace binding {
 
     bool Converter::Convert(wgpu::FragmentState& out, const interop::GPUFragmentState& in) {
         out = {};
-        return Convert(out.targets, out.targetCount, in.targets) &&
-               Convert(out.module, in.module) && Convert(out.entryPoint, in.entryPoint);
+        return Convert(out.targets, out.targetCount, in.targets) &&  //
+               Convert(out.module, in.module) &&                     //
+               Convert(out.entryPoint, in.entryPoint) &&             //
+               Convert(out.constants, out.constantCount, in.constants);
     }
 
     bool Converter::Convert(wgpu::PrimitiveTopology& out, const interop::GPUPrimitiveTopology& in) {
@@ -698,7 +708,8 @@ namespace wgpu { namespace binding {
         out = {};
         return Convert(out.module, in.module) &&
                Convert(out.buffers, out.bufferCount, in.buffers) &&
-               Convert(out.entryPoint, in.entryPoint);
+               Convert(out.entryPoint, in.entryPoint) &&
+               Convert(out.constants, out.constantCount, in.constants);
     }
 
     bool Converter::Convert(wgpu::VertexStepMode& out, const interop::GPUVertexStepMode& in) {
@@ -1135,7 +1146,8 @@ namespace wgpu { namespace binding {
                Convert(out.vertex, in.vertex) &&              //
                Convert(out.primitive, in.primitive) &&        //
                Convert(out.depthStencil, in.depthStencil) &&  //
-               Convert(out.multisample, in.multisample) && Convert(out.fragment, in.fragment);
+               Convert(out.multisample, in.multisample) &&    //
+               Convert(out.fragment, in.fragment);
     }
 
 }}  // namespace wgpu::binding

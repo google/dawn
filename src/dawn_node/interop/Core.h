@@ -521,7 +521,7 @@ namespace wgpu { namespace interop {
             auto obj = value.ToObject();
             auto keys = obj.GetPropertyNames();
             std::unordered_map<K, V> map(keys.Length());
-            for (uint32_t i = 0; i < static_cast<uint32_t>(map.size()); i++) {
+            for (uint32_t i = 0; i < static_cast<uint32_t>(keys.Length()); i++) {
                 K key{};
                 V value{};
                 auto key_res = Converter<K>::FromJS(env, keys[i], key);

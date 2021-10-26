@@ -227,7 +227,7 @@ namespace dawn_native { namespace vulkan {
                                                                sizeof(SpecializationDataEntry)),
                                          sizeof(SpecializationDataEntry)});
 
-            SpecializationDataEntry entry;
+            SpecializationDataEntry entry{};
             switch (moduleConstant.type) {
                 case EntryPointMetadata::OverridableConstant::Type::Boolean:
                     entry.b = static_cast<bool>(value);

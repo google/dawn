@@ -287,7 +287,7 @@ std::ostream& operator<<(std::ostream& o, const {{$.Name}}& dict) {
 {{-      else         }}res = interop::FromJS(env, object.Get("{{$m.Name}}"), out.{{$m.Name}});
 {{-      end          }}
   if (!res) {
-    return res.Append("while converting member '{{$.Name}}'");
+    return res.Append("while converting member '{{$m.Name}}'");
   }
 {{-    end}}
 {{- end}}
