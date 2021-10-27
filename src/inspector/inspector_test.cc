@@ -612,6 +612,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
   ASSERT_EQ(1u, result.size());
   ASSERT_EQ(1u, result[0].overridable_constants.size());
   EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+  EXPECT_EQ(1, result[0].overridable_constants[0].numeric_id);
 }
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantTypes) {
@@ -680,6 +681,31 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantUninitialized) {
   EXPECT_EQ("foo", result[0].overridable_constants[0].name);
 
   EXPECT_FALSE(result[0].overridable_constants[0].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverridableConstantNumericIDSpecified) {
+  AddOverridableConstantWithoutID("foo_no_id", ty.f32(), nullptr);
+  AddOverridableConstantWithID("foo_id", 1234, ty.f32(), nullptr);
+
+  MakePlainGlobalReferenceBodyFunction("no_id_func", "foo_no_id", ty.f32(), {});
+  MakePlainGlobalReferenceBodyFunction("id_func", "foo_id", ty.f32(), {});
+
+  MakeCallerBodyFunction(
+      "ep_func", {"no_id_func", "id_func"},
+      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(2u, result[0].overridable_constants.size());
+  EXPECT_EQ("foo_no_id", result[0].overridable_constants[0].name);
+  EXPECT_EQ("foo_id", result[0].overridable_constants[1].name);
+  EXPECT_EQ(1234, result[0].overridable_constants[1].numeric_id);
+
+  EXPECT_FALSE(result[0].overridable_constants[0].is_numeric_id_specified);
+  EXPECT_TRUE(result[0].overridable_constants[1].is_numeric_id_specified);
 }
 
 TEST_F(InspectorGetEntryPointTest, NonOverridableConstantSkipped) {

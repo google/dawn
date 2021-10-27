@@ -197,6 +197,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       if (global && global->IsPipelineConstant()) {
         OverridableConstant overridable_constant;
         overridable_constant.name = name;
+        overridable_constant.numeric_id = global->ConstantId();
         auto* type = var->Type();
         TINT_ASSERT(Inspector, type->is_scalar());
         if (type->is_bool_scalar_or_vector()) {
@@ -213,6 +214,10 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
         overridable_constant.is_initialized =
             global->Declaration()->constructor;
+        auto* override_deco = ast::GetDecoration<ast::OverrideDecoration>(
+            global->Declaration()->decorations);
+        overridable_constant.is_numeric_id_specified =
+            override_deco ? override_deco->has_value : false;
 
         entry_point.overridable_constants.push_back(overridable_constant);
       }

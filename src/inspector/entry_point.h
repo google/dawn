@@ -93,6 +93,9 @@ struct OverridableConstant {
   /// Name of the constant
   std::string name;
 
+  /// ID of the constant
+  uint16_t numeric_id;
+
   /// Type of the scalar
   enum class Type {
     kBool,
@@ -106,6 +109,10 @@ struct OverridableConstant {
 
   /// Does this pipeline overridable constant have an initializer?
   bool is_initialized = false;
+
+  /// Does this pipeline overridable constant have a numeric ID specified
+  /// explicitly?
+  bool is_numeric_id_specified = false;
 };
 
 /// Reflection data for an entry point in the shader.
