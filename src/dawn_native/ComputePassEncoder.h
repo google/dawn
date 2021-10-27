@@ -69,9 +69,6 @@ namespace dawn_native {
         Ref<CommandEncoder> mCommandEncoder;
     };
 
-    // For the benefit of template generation.
-    using ComputePassEncoderBase = ComputePassEncoder;
-
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMPUTEPASSENCODER_H_

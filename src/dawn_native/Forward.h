@@ -59,6 +59,13 @@ namespace dawn_native {
 
     struct Format;
 
+    // Aliases for frontend-only types.
+    using CommandEncoderBase = CommandEncoder;
+    using ComputePassEncoderBase = ComputePassEncoder;
+    using RenderBundleEncoderBase = RenderBundleEncoder;
+    using RenderPassEncoderBase = RenderPassEncoder;
+    using SurfaceBase = Surface;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_FORWARD_H_

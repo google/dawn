@@ -105,9 +105,6 @@ namespace dawn_native {
         const absl::FormatConversionSpec& spec,
         absl::FormatSink* s);
 
-    // For the benefit of template generation.
-    using SurfaceBase = Surface;
-
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_SURFACE_H_

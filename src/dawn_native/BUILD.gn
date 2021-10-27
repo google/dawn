@@ -105,6 +105,7 @@ dawn_json_generator("dawn_native_utils_gen") {
     "src/dawn_native/ChainUtils_autogen.h",
     "src/dawn_native/ChainUtils_autogen.cpp",
     "src/dawn_native/ProcTable.cpp",
+    "src/dawn_native/dawn_platform_autogen.h",
     "src/dawn_native/wgpu_structs_autogen.h",
     "src/dawn_native/wgpu_structs_autogen.cpp",
     "src/dawn_native/ValidationUtils_autogen.h",

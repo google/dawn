@@ -819,6 +819,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/dawn_native/ValidationUtils_autogen.cpp',
                            frontend_params))
             renders.append(
+                FileRender('dawn_native/dawn_platform.h',
+                           'src/dawn_native/dawn_platform_autogen.h',
+                           frontend_params))
+            renders.append(
                 FileRender('dawn_native/wgpu_structs.h',
                            'src/dawn_native/wgpu_structs_autogen.h',
                            frontend_params))
