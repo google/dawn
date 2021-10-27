@@ -66,7 +66,7 @@ namespace dawn_native { namespace d3d12 {
         // Create the device to populate the adapter properties then reuse it when needed for actual
         // rendering.
         const PlatformFunctions* functions = GetBackend()->GetFunctions();
-        if (FAILED(functions->d3d12CreateDevice(GetHardwareAdapter(), D3D_FEATURE_LEVEL_11_0,
+        if (FAILED(functions->d3d12CreateDevice(GetHardwareAdapter(), D3D_FEATURE_LEVEL_11_1,
                                                 _uuidof(ID3D12Device), &mD3d12Device))) {
             return DAWN_INTERNAL_ERROR("D3D12CreateDevice failed");
         }
@@ -139,7 +139,143 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS featureData = {};
+
+        DAWN_TRY(CheckHRESULT(mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,
+                                                                &featureData, sizeof(featureData)),
+                              "CheckFeatureSupport"));
+
         GetDefaultLimits(&limits->v1);
+
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d12/hardware-feature-levels
+
+        // Limits that are the same across D3D feature levels
+        limits->v1.maxTextureDimension1D = D3D12_REQ_TEXTURE1D_U_DIMENSION;
+        limits->v1.maxTextureDimension2D = D3D12_REQ_TEXTURE2D_U_OR_V_DIMENSION;
+        limits->v1.maxTextureDimension3D = D3D12_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+        limits->v1.maxTextureArrayLayers = D3D12_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
+        // Slot values can be 0-15, inclusive:
+        // https://docs.microsoft.com/en-ca/windows/win32/api/d3d12/ns-d3d12-d3d12_input_element_desc
+        limits->v1.maxVertexBuffers = 16;
+        limits->v1.maxVertexAttributes = D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT;
+
+        // Note: WebGPU requires FL11.1+
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d12/hardware-support
+        // Resource Binding Tier:   1      2      3
+
+        // Max(CBV+UAV+SRV)         1M    1M    1M+
+        // Max CBV per stage        14    14   full
+        // Max SRV per stage       128  full   full
+        // Max UAV in all stages    64    64   full
+        // Max Samplers per stage   16  2048   2048
+
+        // https://docs.microsoft.com/en-us/windows-hardware/test/hlk/testref/efad06e8-51d1-40ce-ad5c-573a134b4bb6
+        // "full" means the full heap can be used. This is tested
+        // to work for 1 million descriptors, and 1.1M for tier 3.
+        uint32_t maxCBVsPerStage;
+        uint32_t maxSRVsPerStage;
+        uint32_t maxUAVsAllStages;
+        uint32_t maxSamplersPerStage;
+        switch (featureData.ResourceBindingTier) {
+            case D3D12_RESOURCE_BINDING_TIER_1:
+                maxCBVsPerStage = 14;
+                maxSRVsPerStage = 128;
+                maxUAVsAllStages = 64;
+                maxSamplersPerStage = 16;
+                break;
+            case D3D12_RESOURCE_BINDING_TIER_2:
+                maxCBVsPerStage = 14;
+                maxSRVsPerStage = 1'000'000;
+                maxUAVsAllStages = 64;
+                maxSamplersPerStage = 2048;
+                break;
+            case D3D12_RESOURCE_BINDING_TIER_3:
+                maxCBVsPerStage = 1'100'000;
+                maxSRVsPerStage = 1'100'000;
+                maxUAVsAllStages = 1'100'000;
+                maxSamplersPerStage = 2048;
+                break;
+            default:
+                UNREACHABLE();
+        }
+
+        ASSERT(maxUAVsAllStages / 2 > limits->v1.maxStorageTexturesPerShaderStage);
+        ASSERT(maxUAVsAllStages / 2 > limits->v1.maxStorageBuffersPerShaderStage);
+
+        limits->v1.maxUniformBuffersPerShaderStage = maxCBVsPerStage;
+        // Allocate half of the UAVs to storage buffers, and half to storage textures.
+        limits->v1.maxStorageTexturesPerShaderStage = maxUAVsAllStages / 2;
+        limits->v1.maxStorageBuffersPerShaderStage = maxUAVsAllStages - maxUAVsAllStages / 2;
+        limits->v1.maxSampledTexturesPerShaderStage = maxSRVsPerStage;
+        limits->v1.maxSamplersPerShaderStage = maxSamplersPerStage;
+
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d12/root-signature-limits
+        // In DWORDS. Descriptor tables cost 1, Root constants cost 1, Root descriptors cost 2.
+        static constexpr uint32_t kMaxRootSignatureSize = 64u;
+        // Dawn maps WebGPU's binding model by:
+        //  - (maxBindGroups)
+        //    CBVs/UAVs/SRVs for bind group are a root descriptor table
+        //  - (maxBindGroups)
+        //    Samplers for each bind group are a root descriptor table
+        //  - (2 * maxDynamicBuffers)
+        //    Each dynamic buffer is a root descriptor
+        //  RESERVED:
+        //  - 2 root constants for the baseVertex/baseInstance constants.
+        //  - 3 root constants for num workgroups X, Y, Z
+        //  - (1)
+        //    TODO(crbug.com/dawn/429): Dynamic storage buffers need bounds checks.
+        //    This will probably be 1 CBV (root descriptor table) to store all the lengths.
+        static constexpr uint32_t kReservedSlots = 6;
+
+        // Available slots after base limits considered.
+        uint32_t availableRootSignatureSlots =
+            kMaxRootSignatureSize - kReservedSlots -
+            2 * (limits->v1.maxBindGroups + limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
+                 limits->v1.maxDynamicStorageBuffersPerPipelineLayout);
+
+        // Because we need either:
+        //  - 1 cbv/uav/srv table + 1 sampler table
+        //  - 2 slots for a root descriptor
+        uint32_t availableDynamicBufferOrBindGroup = availableRootSignatureSlots / 2;
+
+        // We can either have a bind group, a dyn uniform buffer or a dyn storage buffer.
+        // Distribute evenly.
+        limits->v1.maxBindGroups += availableDynamicBufferOrBindGroup / 3;
+        limits->v1.maxDynamicUniformBuffersPerPipelineLayout +=
+            availableDynamicBufferOrBindGroup / 3;
+        limits->v1.maxDynamicStorageBuffersPerPipelineLayout +=
+            (availableDynamicBufferOrBindGroup - 2 * (availableDynamicBufferOrBindGroup / 3));
+
+        ASSERT(2 * (limits->v1.maxBindGroups +
+                    limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
+                    limits->v1.maxDynamicStorageBuffersPerPipelineLayout) <=
+               kMaxRootSignatureSize - kReservedSlots);
+
+        // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-attributes-numthreads
+        limits->v1.maxComputeWorkgroupSizeX = D3D12_CS_THREAD_GROUP_MAX_X;
+        limits->v1.maxComputeWorkgroupSizeY = D3D12_CS_THREAD_GROUP_MAX_Y;
+        limits->v1.maxComputeWorkgroupSizeZ = D3D12_CS_THREAD_GROUP_MAX_Z;
+        limits->v1.maxComputeInvocationsPerWorkgroup = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
+
+        // https://docs.maxComputeWorkgroupSizeXmicrosoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_dispatch_arguments
+        limits->v1.maxComputeWorkgroupsPerDimension =
+            D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-devices-downlevel-compute-shaders
+        // Thread Group Shared Memory is limited to 16Kb on downlevel hardware. This is less than
+        // the 32Kb that is available to Direct3D 11 hardware. D3D12 is also 32kb.
+        limits->v1.maxComputeWorkgroupStorageSize = 32768;
+
+        // Max number of "constants" where each constant is a 16-byte float4
+        limits->v1.maxUniformBufferBindingSize = D3D12_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16;
+        // D3D12 has no documented limit on the size of a storage buffer binding.
+        limits->v1.maxStorageBufferBindingSize = 4294967295;
+
+        // TODO(crbug.com/dawn/685):
+        // LIMITS NOT SET:
+        // - maxInterStageShaderComponents
+        // - maxVertexBufferArrayStride
+
         return {};
     }
 
