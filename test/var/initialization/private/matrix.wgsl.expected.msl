@@ -2,7 +2,6 @@
 
 using namespace metal;
 kernel void tint_symbol() {
-  thread float2x3 tint_symbol_1 = float2x3(0.0f);
   return;
 }
 

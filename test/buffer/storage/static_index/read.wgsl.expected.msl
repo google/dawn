@@ -36,17 +36,17 @@ struct S {
   /* 0x00ac */ int8_t tint_pad_1[4];
 };
 
-kernel void tint_symbol(const device S& s [[buffer(0)]]) {
-  int3 const a = s.a;
-  int const b = s.b;
-  uint3 const c = s.c;
-  uint const d = s.d;
-  float3 const e = s.e;
-  float const f = s.f;
-  float2x3 const g = s.g;
-  float3x2 const h = s.h;
-  Inner const i = s.i;
-  tint_array_wrapper const j = s.j;
+kernel void tint_symbol(const device S* tint_symbol_1 [[buffer(0)]]) {
+  int3 const a = (*(tint_symbol_1)).a;
+  int const b = (*(tint_symbol_1)).b;
+  uint3 const c = (*(tint_symbol_1)).c;
+  uint const d = (*(tint_symbol_1)).d;
+  float3 const e = (*(tint_symbol_1)).e;
+  float const f = (*(tint_symbol_1)).f;
+  float2x3 const g = (*(tint_symbol_1)).g;
+  float3x2 const h = (*(tint_symbol_1)).h;
+  Inner const i = (*(tint_symbol_1)).i;
+  tint_array_wrapper const j = (*(tint_symbol_1)).j;
   return;
 }
 

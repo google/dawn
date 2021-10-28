@@ -5,8 +5,8 @@ struct S {
   /* 0x0000 */ int a;
 };
 
-kernel void tint_symbol(device S& buf [[buffer(0)]]) {
-  buf.a = 12;
+kernel void tint_symbol(device S* tint_symbol_1 [[buffer(0)]]) {
+  (*(tint_symbol_1)).a = 12;
   return;
 }
 

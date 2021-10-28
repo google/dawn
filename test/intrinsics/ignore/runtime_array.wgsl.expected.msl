@@ -9,8 +9,8 @@ struct S {
   /* 0x0000 */ int arr[1];
 };
 
-kernel void tint_symbol(device S& s [[buffer(0)]]) {
-  (void) s.arr;
+kernel void tint_symbol(device S* tint_symbol_1 [[buffer(0)]]) {
+  (void) (*(tint_symbol_1)).arr;
   return;
 }
 

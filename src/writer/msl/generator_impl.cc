@@ -146,13 +146,13 @@ SanitizedResult Sanitize(const Program* in,
   manager.Add<transform::VectorizeScalarMatrixConstructors>();
   manager.Add<transform::WrapArraysInStructs>();
   manager.Add<transform::PadArrayElements>();
-  manager.Add<transform::ModuleScopeVarToEntryPointParam>();
   manager.Add<transform::InlinePointerLets>();
   manager.Add<transform::RemovePhonies>();
   manager.Add<transform::Simplify>();
   // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as
   // it assumes that the form of the array length argument is &var.array.
   manager.Add<transform::ArrayLengthFromUniform>();
+  manager.Add<transform::ModuleScopeVarToEntryPointParam>();
   internal_inputs.Add<transform::ArrayLengthFromUniform::Config>(
       std::move(array_length_from_uniform_cfg));
   internal_inputs.Add<transform::CanonicalizeEntryPointIO::Config>(
@@ -196,18 +196,10 @@ bool GeneratorImpl::Generate() {
         return false;
       }
     } else {
-      auto* sem = program_->Sem().Get(var);
-      switch (sem->StorageClass()) {
-        case ast::StorageClass::kPrivate:
-        case ast::StorageClass::kWorkgroup:
-          // These are pushed into the entry point by the sanitizer.
-          TINT_ICE(Writer, diagnostics_)
-              << "module-scope variables in the private/workgroup storage "
-                 "class should have been handled by the MSL sanitizer";
-          break;
-        default:
-          break;  // Handled by another code path
-      }
+      // These are pushed into the entry point by sanitizer transforms.
+      TINT_ICE(Writer, diagnostics_) << "module-scope variables should have "
+                                        "been handled by the MSL sanitizer";
+      break;
     }
   }
 
@@ -521,25 +513,6 @@ bool GeneratorImpl::EmitCall(std::ostream& out,
   out << program_->Symbols().NameFor(ident->symbol) << "(";
 
   bool first = true;
-  auto* func_sem = program_->Sem().Get(func);
-  for (const auto& data : func_sem->ReferencedUniformVariables()) {
-    auto* var = data.first;
-    if (!first) {
-      out << ", ";
-    }
-    first = false;
-    out << program_->Symbols().NameFor(var->Declaration()->symbol);
-  }
-
-  for (const auto& data : func_sem->ReferencedStorageBufferVariables()) {
-    auto* var = data.first;
-    if (!first) {
-      out << ", ";
-    }
-    first = false;
-    out << program_->Symbols().NameFor(var->Declaration()->symbol);
-  }
-
   const auto& args = expr->args;
   for (auto* arg : args) {
     if (!first) {
@@ -1464,39 +1437,6 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     out << " " << program_->Symbols().NameFor(func->symbol) << "(";
 
     bool first = true;
-    for (const auto& data : func_sem->ReferencedUniformVariables()) {
-      auto* var = data.first;
-      if (!first) {
-        out << ", ";
-      }
-      first = false;
-
-      out << "constant ";
-      // TODO(dsinclair): Can arrays be uniform? If so, fix this ...
-      if (!EmitType(out, var->Type()->UnwrapRef(), "")) {
-        return false;
-      }
-      out << "& " << program_->Symbols().NameFor(var->Declaration()->symbol);
-    }
-
-    for (const auto& data : func_sem->ReferencedStorageBufferVariables()) {
-      auto* var = data.first;
-      if (!first) {
-        out << ", ";
-      }
-      first = false;
-
-      if (var->Access() == ast::Access::kRead) {
-        out << "const ";
-      }
-
-      out << "device ";
-      if (!EmitType(out, var->Type()->UnwrapRef(), "")) {
-        return false;
-      }
-      out << "& " << program_->Symbols().NameFor(var->Declaration()->symbol);
-    }
-
     for (auto* v : func->params) {
       if (!first) {
         out << ", ";
@@ -1594,8 +1534,26 @@ std::string GeneratorImpl::interpolation_to_attribute(
 }
 
 bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
-  auto* func_sem = program_->Sem().Get(func);
   auto func_name = program_->Symbols().NameFor(func->symbol);
+
+  // Returns the binding index of a variable, requiring that the group attribute
+  // have a value of zero.
+  const uint32_t kInvalidBindingIndex = std::numeric_limits<uint32_t>::max();
+  auto get_binding_index = [&](const ast::Variable* var) -> uint32_t {
+    auto bp = var->BindingPoint();
+    if (bp.group == nullptr || bp.binding == nullptr) {
+      TINT_ICE(Writer, diagnostics_)
+          << "missing binding attributes for entry point parameter";
+      return kInvalidBindingIndex;
+    }
+    if (bp.group->value != 0) {
+      TINT_ICE(Writer, diagnostics_)
+          << "encountered non-zero resource group index (use "
+             "BindingRemapper to fix)";
+      return kInvalidBindingIndex;
+    }
+    return bp.binding->value;
+  };
 
   {
     auto out = line();
@@ -1626,32 +1584,32 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
       if (type->Is<sem::Struct>()) {
         out << " [[stage_in]]";
       } else if (type->is_handle()) {
-        auto bp = var->BindingPoint();
-        if (bp.group == nullptr || bp.binding == nullptr) {
-          TINT_ICE(Writer, diagnostics_)
-              << "missing binding attributes for entry point parameter";
-          return false;
-        }
-        if (bp.group->value != 0) {
-          TINT_ICE(Writer, diagnostics_)
-              << "encountered non-zero resource group index (use "
-                 "BindingRemapper to fix)";
+        uint32_t binding = get_binding_index(var);
+        if (binding == kInvalidBindingIndex) {
           return false;
         }
         if (var->type->Is<ast::Sampler>()) {
-          out << " [[sampler(" << bp.binding->value << ")]]";
+          out << " [[sampler(" << binding << ")]]";
         } else if (var->type->Is<ast::Texture>()) {
-          out << " [[texture(" << bp.binding->value << ")]]";
+          out << " [[texture(" << binding << ")]]";
         } else {
           TINT_ICE(Writer, diagnostics_)
               << "invalid handle type entry point parameter";
           return false;
         }
       } else if (auto* ptr = var->type->As<ast::Pointer>()) {
-        if (ptr->storage_class == ast::StorageClass::kWorkgroup) {
+        auto sc = ptr->storage_class;
+        if (sc == ast::StorageClass::kWorkgroup) {
           auto& allocations = workgroup_allocations_[func_name];
           out << " [[threadgroup(" << allocations.size() << ")]]";
           allocations.push_back(program_->Sem().Get(ptr->type)->Size());
+        } else if (sc == ast::StorageClass::kStorage ||
+                   sc == ast::StorageClass::kUniform) {
+          uint32_t binding = get_binding_index(var);
+          if (binding == kInvalidBindingIndex) {
+            return false;
+          }
+          out << " [[buffer(" << binding << ")]]";
         } else {
           TINT_ICE(Writer, diagnostics_)
               << "invalid pointer storage class for entry point parameter";
@@ -1680,62 +1638,6 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         }
       }
     }
-
-    for (auto data : func_sem->ReferencedUniformVariables()) {
-      if (!first) {
-        out << ", ";
-      }
-      first = false;
-
-      auto* var = data.first;
-      // TODO(dsinclair): We're using the binding to make up the buffer number
-      // but we should instead be using a provided mapping that uses both buffer
-      // and set. https://bugs.chromium.org/p/tint/issues/detail?id=104
-      auto* binding = data.second.binding;
-      if (binding == nullptr) {
-        diagnostics_.add_error(
-            diag::System::Writer,
-            "unable to find binding information for uniform: " +
-                program_->Symbols().NameFor(var->Declaration()->symbol));
-        return false;
-      }
-      // auto* set = data.second.set;
-
-      out << "constant ";
-      // TODO(dsinclair): Can you have a uniform array? If so, this needs to be
-      // updated to handle arrays property.
-      if (!EmitType(out, var->Type()->UnwrapRef(), "")) {
-        return false;
-      }
-      out << "& " << program_->Symbols().NameFor(var->Declaration()->symbol)
-          << " [[buffer(" << binding->value << ")]]";
-    }
-
-    for (auto data : func_sem->ReferencedStorageBufferVariables()) {
-      if (!first) {
-        out << ", ";
-      }
-      first = false;
-
-      auto* var = data.first;
-      // TODO(dsinclair): We're using the binding to make up the buffer number
-      // but we should instead be using a provided mapping that uses both buffer
-      // and set. https://bugs.chromium.org/p/tint/issues/detail?id=104
-      auto* binding = data.second.binding;
-      // auto* set = data.second.set;
-
-      if (var->Access() == ast::Access::kRead) {
-        out << "const ";
-      }
-
-      out << "device ";
-      if (!EmitType(out, var->Type()->UnwrapRef(), "")) {
-        return false;
-      }
-      out << "& " << program_->Symbols().NameFor(var->Declaration()->symbol)
-          << " [[buffer(" << binding->value << ")]]";
-    }
-
     out << ") {";
   }
 
@@ -2199,6 +2101,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   }
 
   if (auto* ptr = type->As<sem::Pointer>()) {
+    if (ptr->Access() == ast::Access::kRead) {
+      out << "const ";
+    }
     if (!EmitStorageClass(out, ptr->StorageClass())) {
       return false;
     }

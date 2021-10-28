@@ -335,7 +335,7 @@ TEST_F(MslGeneratorImplTest,
          ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+             create<ast::GroupDecoration>(0),
          });
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
@@ -350,7 +350,7 @@ TEST_F(MslGeneratorImplTest,
            Stage(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -361,8 +361,8 @@ struct Data {
   /* 0x0004 */ float b;
 };
 
-fragment void frag_main(device Data& coord [[buffer(0)]]) {
-  float v = coord.b;
+fragment void frag_main(device Data* tint_symbol [[buffer(0)]]) {
+  float v = (*(tint_symbol)).b;
   return;
 }
 
@@ -381,7 +381,7 @@ TEST_F(MslGeneratorImplTest,
   Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+             create<ast::GroupDecoration>(0),
          });
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
@@ -396,7 +396,7 @@ TEST_F(MslGeneratorImplTest,
            Stage(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -407,8 +407,8 @@ struct Data {
   /* 0x0004 */ float b;
 };
 
-fragment void frag_main(const device Data& coord [[buffer(0)]]) {
-  float v = coord.b;
+fragment void frag_main(const device Data* tint_symbol [[buffer(0)]]) {
+  float v = (*(tint_symbol)).b;
   return;
 }
 
@@ -422,7 +422,7 @@ TEST_F(MslGeneratorImplTest,
   auto* ubo = Global("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform,
                      ast::DecorationList{
                          create<ast::BindingDecoration>(0),
-                         create<ast::GroupDecoration>(1),
+                         create<ast::GroupDecoration>(0),
                      });
 
   Func("sub_func",
@@ -446,7 +446,7 @@ TEST_F(MslGeneratorImplTest,
            Stage(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -456,12 +456,12 @@ struct UBO {
   /* 0x0000 */ float4 coord;
 };
 
-float sub_func(constant UBO& ubo, float param) {
-  return ubo.coord[0];
+float sub_func(float param, const constant UBO* const tint_symbol) {
+  return (*(tint_symbol)).coord[0];
 }
 
-fragment void frag_main(constant UBO& ubo [[buffer(0)]]) {
-  float v = sub_func(ubo, 1.0f);
+fragment void frag_main(const constant UBO* tint_symbol_1 [[buffer(0)]]) {
+  float v = sub_func(1.0f, tint_symbol_1);
   return;
 }
 
@@ -481,7 +481,7 @@ TEST_F(MslGeneratorImplTest,
          ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+             create<ast::GroupDecoration>(0),
          });
 
   ast::VariableList params;
@@ -503,7 +503,7 @@ TEST_F(MslGeneratorImplTest,
            Stage(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -514,12 +514,12 @@ struct Data {
   /* 0x0004 */ float b;
 };
 
-float sub_func(device Data& coord, float param) {
-  return coord.b;
+float sub_func(float param, device Data* const tint_symbol) {
+  return (*(tint_symbol)).b;
 }
 
-fragment void frag_main(device Data& coord [[buffer(0)]]) {
-  float v = sub_func(coord, 1.0f);
+fragment void frag_main(device Data* tint_symbol_1 [[buffer(0)]]) {
+  float v = sub_func(1.0f, tint_symbol_1);
   return;
 }
 
@@ -538,7 +538,7 @@ TEST_F(MslGeneratorImplTest,
   Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+             create<ast::GroupDecoration>(0),
          });
 
   ast::VariableList params;
@@ -560,7 +560,7 @@ TEST_F(MslGeneratorImplTest,
            Stage(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -571,12 +571,12 @@ struct Data {
   /* 0x0004 */ float b;
 };
 
-float sub_func(const device Data& coord, float param) {
-  return coord.b;
+float sub_func(float param, const device Data* const tint_symbol) {
+  return (*(tint_symbol)).b;
 }
 
-fragment void frag_main(const device Data& coord [[buffer(0)]]) {
-  float v = sub_func(coord, 1.0f);
+fragment void frag_main(const device Data* tint_symbol_1 [[buffer(0)]]) {
+  float v = sub_func(1.0f, tint_symbol_1);
   return;
 }
 
@@ -691,7 +691,7 @@ TEST_F(MslGeneratorImplTest,
          });
   }
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -701,13 +701,13 @@ struct Data {
   /* 0x0000 */ float d;
 };
 
-kernel void a(device Data& data [[buffer(0)]]) {
-  float v = data.d;
+kernel void a(device Data* tint_symbol [[buffer(0)]]) {
+  float v = (*(tint_symbol)).d;
   return;
 }
 
-kernel void b(device Data& data [[buffer(0)]]) {
-  float v = data.d;
+kernel void b(device Data* tint_symbol_1 [[buffer(0)]]) {
+  float v = (*(tint_symbol_1)).d;
   return;
 }
 

@@ -5,7 +5,7 @@ struct Buffer {
   /* 0x0000 */ uint data;
 };
 
-void tint_symbol_1(device Buffer& tint_symbol) {
-  tint_symbol.data = (tint_symbol.data + 1u);
+void tint_symbol_1(device Buffer* const tint_symbol_2) {
+  (*(tint_symbol_2)).data = ((*(tint_symbol_2)).data + 1u);
 }
 

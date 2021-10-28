@@ -13,9 +13,9 @@ struct S {
   /* 0x0000 */ int i;
 };
 
-kernel void tint_symbol(constant S& u [[buffer(0)]]) {
-  (void) u;
-  (void) u.i;
+kernel void tint_symbol(const constant S* tint_symbol_1 [[buffer(0)]]) {
+  (void) *(tint_symbol_1);
+  (void) (*(tint_symbol_1)).i;
   return;
 }
 

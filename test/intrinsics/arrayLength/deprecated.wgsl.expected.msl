@@ -5,12 +5,12 @@ struct tint_symbol_1 {
   /* 0x0000 */ uint4 buffer_size[1];
 };
 struct S {
-  /* 0x0000 */ int a[1];
+  int a[1];
 };
 
-kernel void tint_symbol(constant tint_symbol_1& tint_symbol_2 [[buffer(30)]]) {
-  uint const l1 = ((tint_symbol_2.buffer_size[0u][0u] - 0u) / 4u);
-  uint const l2 = ((tint_symbol_2.buffer_size[0u][0u] - 0u) / 4u);
+kernel void tint_symbol(const constant tint_symbol_1* tint_symbol_3 [[buffer(30)]]) {
+  uint const l1 = (((*(tint_symbol_3)).buffer_size[0u][0u] - 0u) / 4u);
+  uint const l2 = (((*(tint_symbol_3)).buffer_size[0u][0u] - 0u) / 4u);
   return;
 }
 

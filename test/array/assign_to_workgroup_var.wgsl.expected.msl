@@ -31,7 +31,7 @@ S ret_struct_arr() {
   return tint_symbol_1;
 }
 
-void foo(constant S& src_uniform, device S& src_storage, tint_array_wrapper src_param, threadgroup tint_array_wrapper* const tint_symbol_3, thread tint_array_wrapper* const tint_symbol_4, threadgroup tint_array_wrapper* const tint_symbol_5, threadgroup tint_array_wrapper_1* const tint_symbol_6) {
+void foo(tint_array_wrapper src_param, threadgroup tint_array_wrapper* const tint_symbol_3, thread tint_array_wrapper* const tint_symbol_4, threadgroup tint_array_wrapper* const tint_symbol_5, const constant S* const tint_symbol_6, device S* const tint_symbol_7, threadgroup tint_array_wrapper_1* const tint_symbol_8) {
   tint_array_wrapper src_function = {};
   tint_array_wrapper const tint_symbol_2 = {.arr={{.el=1}, {.el=2}, {.el=3}, {.el=3}}};
   *(tint_symbol_3) = tint_symbol_2;
@@ -43,9 +43,9 @@ void foo(constant S& src_uniform, device S& src_storage, tint_array_wrapper src_
   *(tint_symbol_3) = *(tint_symbol_4);
   *(tint_symbol_3) = *(tint_symbol_5);
   *(tint_symbol_3) = ret_struct_arr().arr;
-  *(tint_symbol_3) = src_uniform.arr;
-  *(tint_symbol_3) = src_storage.arr;
+  *(tint_symbol_3) = (*(tint_symbol_6)).arr;
+  *(tint_symbol_3) = (*(tint_symbol_7)).arr;
   tint_array_wrapper_1 src_nested = {};
-  *(tint_symbol_6) = src_nested;
+  *(tint_symbol_8) = src_nested;
 }
 

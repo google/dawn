@@ -19,8 +19,8 @@ struct S {
   /* 0x002c */ int8_t tint_pad_1[4];
 };
 
-fragment void tint_symbol_1(constant S& data [[buffer(0)]]) {
-  float2 const x = (data.tint_symbol * data.vector);
+fragment void tint_symbol_1(const constant S* tint_symbol_2 [[buffer(0)]]) {
+  float2 const x = ((*(tint_symbol_2)).tint_symbol * (*(tint_symbol_2)).vector);
   return;
 }
 

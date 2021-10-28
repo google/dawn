@@ -31,20 +31,20 @@ struct S {
   /* 0x0000 */ Inner arr[1];
 };
 
-void tint_symbol_inner(const device S& s, uint idx) {
-  int3 const a = s.arr[idx].a;
-  int const b = s.arr[idx].b;
-  uint3 const c = s.arr[idx].c;
-  uint const d = s.arr[idx].d;
-  float3 const e = s.arr[idx].e;
-  float const f = s.arr[idx].f;
-  float2x3 const g = s.arr[idx].g;
-  float3x2 const h = s.arr[idx].h;
-  tint_array_wrapper const i = s.arr[idx].i;
+void tint_symbol_inner(uint idx, const device S* const tint_symbol_1) {
+  int3 const a = (*(tint_symbol_1)).arr[idx].a;
+  int const b = (*(tint_symbol_1)).arr[idx].b;
+  uint3 const c = (*(tint_symbol_1)).arr[idx].c;
+  uint const d = (*(tint_symbol_1)).arr[idx].d;
+  float3 const e = (*(tint_symbol_1)).arr[idx].e;
+  float const f = (*(tint_symbol_1)).arr[idx].f;
+  float2x3 const g = (*(tint_symbol_1)).arr[idx].g;
+  float3x2 const h = (*(tint_symbol_1)).arr[idx].h;
+  tint_array_wrapper const i = (*(tint_symbol_1)).arr[idx].i;
 }
 
-kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], const device S& s [[buffer(0)]]) {
-  tint_symbol_inner(s, idx);
+kernel void tint_symbol(const device S* tint_symbol_2 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
+  tint_symbol_inner(idx, tint_symbol_2);
   return;
 }
 

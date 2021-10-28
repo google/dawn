@@ -2,10 +2,10 @@
 
 using namespace metal;
 struct S {
-  /* 0x0000 */ float a;
+  float a;
 };
 
-fragment void tint_symbol(texture2d<float, access::sample> tint_symbol_1 [[texture(0)]], texture2d<float, access::sample> tint_symbol_2 [[texture(1)]], texture2d<float, access::sample> tint_symbol_3 [[texture(2)]], texture2d<float, access::sample> tint_symbol_4 [[texture(3)]], texture2d<float, access::sample> tint_symbol_5 [[texture(4)]], texture2d<float, access::sample> tint_symbol_6 [[texture(5)]], texture2d<float, access::sample> tint_symbol_7 [[texture(6)]], texture2d<float, access::sample> tint_symbol_8 [[texture(7)]], depth2d<float, access::sample> tint_symbol_9 [[texture(8)]], depth2d<float, access::sample> tint_symbol_10 [[texture(9)]], depth2d<float, access::sample> tint_symbol_11 [[texture(10)]], depth2d<float, access::sample> tint_symbol_12 [[texture(11)]], depth2d<float, access::sample> tint_symbol_13 [[texture(12)]], depth2d<float, access::sample> tint_symbol_14 [[texture(13)]], depth2d<float, access::sample> tint_symbol_15 [[texture(14)]], depth2d<float, access::sample> tint_symbol_16 [[texture(15)]], sampler tint_symbol_17 [[sampler(0)]], sampler tint_symbol_18 [[sampler(1)]], sampler tint_symbol_19 [[sampler(2)]], sampler tint_symbol_20 [[sampler(3)]], sampler tint_symbol_21 [[sampler(4)]], sampler tint_symbol_22 [[sampler(5)]], sampler tint_symbol_23 [[sampler(6)]], sampler tint_symbol_24 [[sampler(7)]], sampler tint_symbol_25 [[sampler(8)]], sampler tint_symbol_26 [[sampler(9)]], sampler tint_symbol_27 [[sampler(10)]], sampler tint_symbol_28 [[sampler(11)]], sampler tint_symbol_29 [[sampler(12)]], sampler tint_symbol_30 [[sampler(13)]], sampler tint_symbol_31 [[sampler(14)]], sampler tint_symbol_32 [[sampler(15)]]) {
+fragment void tint_symbol() {
   return;
 }
 

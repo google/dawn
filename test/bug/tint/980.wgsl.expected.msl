@@ -23,12 +23,12 @@ float3 Bad(uint index, float3 rd) {
   return normalize(normal);
 }
 
-void tint_symbol_inner(device S& io, uint idx) {
-  io.v = Bad(io.i, io.v);
+void tint_symbol_inner(uint idx, device S* const tint_symbol_1) {
+  (*(tint_symbol_1)).v = Bad((*(tint_symbol_1)).i, (*(tint_symbol_1)).v);
 }
 
-kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], device S& io [[buffer(0)]]) {
-  tint_symbol_inner(io, idx);
+kernel void tint_symbol(device S* tint_symbol_2 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
+  tint_symbol_inner(idx, tint_symbol_2);
   return;
 }
 

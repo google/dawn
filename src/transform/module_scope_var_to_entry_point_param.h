@@ -22,22 +22,27 @@ namespace transform {
 
 /// Move module-scope variables into the entry point as parameters.
 ///
-/// MSL does not allow private and workgroup variables at module-scope, so we
-/// push these declarations into the entry point function and then pass them as
-/// pointer parameters to any function that references them.
-/// Similarly, texture and sampler types are converted to entry point
-/// parameters and passed by value to functions that need them.
+/// MSL does not allow module-scope variables to have any address space other
+/// than `constant`. This transform moves all module-scope declarations into the
+/// entry point function (either as parameters or function-scope variables) and
+/// then passes them as pointer parameters to any function that references them.
 ///
-/// Since WGSL does not allow function-scope variables to have these storage
-/// classes, we annotate the new variable declarations with an attribute that
-/// bypasses that validation rule.
+/// Since WGSL does not allow entry point parameters or function-scope variables
+/// to have these storage classes, we annotate the new variable declarations
+/// with an attribute that bypasses that validation rule.
 ///
 /// Before:
 /// ```
-/// var<private> v : f32 = 2.0;
+/// [[block]]
+/// struct S {
+///   f : f32;
+/// };
+/// [[binding(0), group(0)]]
+/// var<storage, read> s : S;
+/// var<private> p : f32 = 2.0;
 ///
 /// fn foo() {
-///   v = v + 1.0;
+///   p = p + f;
 /// }
 ///
 /// [[stage(compute), workgroup_size(1)]]
@@ -48,14 +53,14 @@ namespace transform {
 ///
 /// After:
 /// ```
-/// fn foo(v : ptr<private, f32>) {
-///   *v = *v + 1.0;
+/// fn foo(p : ptr<private, f32>, sptr : ptr<storage, S, read>) {
+///   *p = *p + (*sptr).f;
 /// }
 ///
 /// [[stage(compute), workgroup_size(1)]]
-/// fn main() {
-///   var<private> v : f32 = 2.0;
-///   foo(&v);
+/// fn main(sptr : ptr<storage, S, read>) {
+///   var<private> p : f32 = 2.0;
+///   foo(&p, sptr);
 /// }
 /// ```
 class ModuleScopeVarToEntryPointParam

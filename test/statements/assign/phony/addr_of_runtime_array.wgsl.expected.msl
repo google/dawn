@@ -2,7 +2,7 @@
 
 using namespace metal;
 struct S {
-  /* 0x0000 */ int arr[1];
+  int arr[1];
 };
 
 kernel void tint_symbol() {

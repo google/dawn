@@ -14,9 +14,9 @@ struct Result {
   /* 0x0000 */ int out;
 };
 
-kernel void f(constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(1)]]) {
+kernel void f(device Result* tint_symbol [[buffer(1)]], const constant UBO* tint_symbol_1 [[buffer(0)]]) {
   S s = {};
-  result.out = s.data.arr[ubo.dynamic_idx];
+  (*(tint_symbol)).out = s.data.arr[(*(tint_symbol_1)).dynamic_idx];
   return;
 }
 

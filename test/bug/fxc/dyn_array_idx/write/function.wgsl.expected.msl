@@ -14,10 +14,10 @@ struct Result {
   /* 0x0000 */ int out;
 };
 
-kernel void f(constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(1)]]) {
+kernel void f(const constant UBO* tint_symbol [[buffer(0)]], device Result* tint_symbol_1 [[buffer(1)]]) {
   S s = {};
-  s.data.arr[ubo.dynamic_idx] = 1;
-  result.out = s.data.arr[3];
+  s.data.arr[(*(tint_symbol)).dynamic_idx] = 1;
+  (*(tint_symbol_1)).out = s.data.arr[3];
   return;
 }
 

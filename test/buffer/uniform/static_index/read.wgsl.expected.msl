@@ -39,19 +39,19 @@ struct S {
   /* 0x0090 */ tint_array_wrapper l;
 };
 
-kernel void tint_symbol(constant S& s [[buffer(0)]]) {
-  int3 const a = s.a;
-  int const b = s.b;
-  uint3 const c = s.c;
-  uint const d = s.d;
-  float3 const e = s.e;
-  float const f = s.f;
-  int2 const g = s.g;
-  int2 const h = s.h;
-  float2x3 const i = s.i;
-  float3x2 const j = s.j;
-  Inner const k = s.k;
-  tint_array_wrapper const l = s.l;
+kernel void tint_symbol(const constant S* tint_symbol_1 [[buffer(0)]]) {
+  int3 const a = (*(tint_symbol_1)).a;
+  int const b = (*(tint_symbol_1)).b;
+  uint3 const c = (*(tint_symbol_1)).c;
+  uint const d = (*(tint_symbol_1)).d;
+  float3 const e = (*(tint_symbol_1)).e;
+  float const f = (*(tint_symbol_1)).f;
+  int2 const g = (*(tint_symbol_1)).g;
+  int2 const h = (*(tint_symbol_1)).h;
+  float2x3 const i = (*(tint_symbol_1)).i;
+  float3x2 const j = (*(tint_symbol_1)).j;
+  Inner const k = (*(tint_symbol_1)).k;
+  tint_array_wrapper const l = (*(tint_symbol_1)).l;
   return;
 }
 

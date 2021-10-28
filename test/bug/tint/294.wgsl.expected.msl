@@ -1,24 +1,11 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-template<typename T, int N, int M>
-inline auto operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
-  return lhs * vec<T, N>(rhs);
-}
-
-template<typename T, int N, int M>
-inline auto operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
-  return vec<T, M>(lhs) * rhs;
-}
-
 struct Light {
-  /* 0x0000 */ packed_float3 position;
-  /* 0x000c */ int8_t tint_pad[4];
-  /* 0x0010 */ packed_float3 colour;
-  /* 0x001c */ int8_t tint_pad_1[4];
+  float3 position;
+  float3 colour;
 };
 struct Lights {
-  /* 0x0000 */ Light light[1];
+  Light light[1];
 };
 

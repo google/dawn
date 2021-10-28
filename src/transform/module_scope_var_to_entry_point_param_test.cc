@@ -78,12 +78,12 @@ fn main() {
 fn no_uses() {
 }
 
-fn bar(a : f32, b : f32, [[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol : ptr<private, f32>, [[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_1 : ptr<workgroup, f32>) {
+fn bar(a : f32, b : f32, [[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol : ptr<private, f32>, [[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_1 : ptr<workgroup, f32>) {
   *(tint_symbol) = a;
   *(tint_symbol_1) = b;
 }
 
-fn foo(a : f32, [[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_2 : ptr<private, f32>, [[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_3 : ptr<workgroup, f32>) {
+fn foo(a : f32, [[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_2 : ptr<private, f32>, [[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_3 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
   bar(a, b, tint_symbol_2, tint_symbol_3);
   no_uses();
@@ -181,7 +181,7 @@ fn bar(p : ptr<private, f32>) {
   *(p) = 0.0;
 }
 
-fn foo([[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol : ptr<private, f32>) {
+fn foo([[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol : ptr<private, f32>) {
   bar(tint_symbol);
 }
 
@@ -197,28 +197,7 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ModuleScopeVarToEntryPointParamTest, UnusedVariables) {
-  auto* src = R"(
-var<private> p : f32;
-var<workgroup> w : f32;
-
-[[stage(compute), workgroup_size(1)]]
-fn main() {
-}
-)";
-
-  auto* expect = R"(
-[[stage(compute), workgroup_size(1)]]
-fn main() {
-}
-)";
-
-  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(ModuleScopeVarToEntryPointParamTest, OtherVariables) {
+TEST_F(ModuleScopeVarToEntryPointParamTest, Buffers_Basic) {
   auto* src = R"(
 [[block]]
 struct S {
@@ -227,9 +206,13 @@ struct S {
 
 [[group(0), binding(0)]]
 var<uniform> u : S;
+[[group(0), binding(1)]]
+var<storage> s : S;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
+  _ = u;
+  _ = s;
 }
 )";
 
@@ -239,10 +222,75 @@ struct S {
   a : f32;
 };
 
-[[group(0), binding(0)]] var<uniform> u : S;
+[[stage(compute), workgroup_size(1)]]
+fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol : ptr<uniform, S>, [[group(0), binding(1), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol_1 : ptr<storage, S>) {
+  _ = *(tint_symbol);
+  _ = *(tint_symbol_1);
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ModuleScopeVarToEntryPointParamTest, Buffers_FunctionCalls) {
+  auto* src = R"(
+[[block]]
+struct S {
+  a : f32;
+};
+
+[[group(0), binding(0)]]
+var<uniform> u : S;
+[[group(0), binding(1)]]
+var<storage> s : S;
+
+fn no_uses() {
+}
+
+fn bar(a : f32, b : f32) {
+  _ = u;
+  _ = s;
+}
+
+fn foo(a : f32) {
+  let b : f32 = 2.0;
+  _ = u;
+  bar(a, b);
+  no_uses();
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
+  foo(1.0);
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct S {
+  a : f32;
+};
+
+fn no_uses() {
+}
+
+fn bar(a : f32, b : f32, [[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol : ptr<uniform, S>, [[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_1 : ptr<storage, S>) {
+  _ = *(tint_symbol);
+  _ = *(tint_symbol_1);
+}
+
+fn foo(a : f32, [[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_2 : ptr<uniform, S>, [[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_3 : ptr<storage, S>) {
+  let b : f32 = 2.0;
+  _ = *(tint_symbol_2);
+  bar(a, b, tint_symbol_2, tint_symbol_3);
+  no_uses();
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol_4 : ptr<uniform, S>, [[group(0), binding(1), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol_5 : ptr<storage, S>) {
+  foo(1.0, tint_symbol_4, tint_symbol_5);
 }
 )";
 
@@ -258,16 +306,16 @@ TEST_F(ModuleScopeVarToEntryPointParamTest, HandleTypes_Basic) {
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  ignore(t);
-  ignore(s);
+  _ = t;
+  _ = s;
 }
 )";
 
   auto* expect = R"(
 [[stage(compute), workgroup_size(1)]]
 fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter)]] tint_symbol : texture_2d<f32>, [[group(0), binding(1), internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : sampler) {
-  ignore(tint_symbol);
-  ignore(tint_symbol_1);
+  _ = tint_symbol;
+  _ = tint_symbol_1;
 }
 )";
 
@@ -285,13 +333,13 @@ fn no_uses() {
 }
 
 fn bar(a : f32, b : f32) {
-  ignore(t);
-  ignore(s);
+  _ = t;
+  _ = s;
 }
 
 fn foo(a : f32) {
   let b : f32 = 2.0;
-  ignore(t);
+  _ = t;
   bar(a, b);
   no_uses();
 }
@@ -307,13 +355,13 @@ fn no_uses() {
 }
 
 fn bar(a : f32, b : f32, tint_symbol : texture_2d<f32>, tint_symbol_1 : sampler) {
-  ignore(tint_symbol);
-  ignore(tint_symbol_1);
+  _ = tint_symbol;
+  _ = tint_symbol_1;
 }
 
 fn foo(a : f32, tint_symbol_2 : texture_2d<f32>, tint_symbol_3 : sampler) {
   let b : f32 = 2.0;
-  ignore(tint_symbol_2);
+  _ = tint_symbol_2;
   bar(a, b, tint_symbol_2, tint_symbol_3);
   no_uses();
 }
@@ -432,6 +480,45 @@ fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : 
   let tint_symbol_2 : ptr<workgroup, S> = &((*(tint_symbol_1)).b);
   let x = *(tint_symbol);
   let y = *(tint_symbol_2);
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ModuleScopeVarToEntryPointParamTest, UnusedVariables) {
+  auto* src = R"(
+[[block]]
+struct S {
+  a : f32;
+};
+
+var<private> p : f32;
+var<workgroup> w : f32;
+
+[[group(0), binding(0)]]
+var<uniform> ub : S;
+[[group(0), binding(1)]]
+var<storage> sb : S;
+
+[[group(0), binding(2)]] var t : texture_2d<f32>;
+[[group(0), binding(3)]] var s : sampler;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct S {
+  a : f32;
+};
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
 }
 )";
 

@@ -155,7 +155,8 @@ void comp_main_inner(uint local_invocation_index, threadgroup float2x2* const ti
 }
 
 kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  comp_main_inner(local_invocation_index, &((*(tint_symbol_2)).m));
+  threadgroup float2x2* const tint_symbol_1 = &((*(tint_symbol_2)).m);
+  comp_main_inner(local_invocation_index, tint_symbol_1);
   return;
 }
 
@@ -196,7 +197,8 @@ void comp_main_inner(uint local_invocation_index, threadgroup tint_array_wrapper
 }
 
 kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  comp_main_inner(local_invocation_index, &((*(tint_symbol_2)).m));
+  threadgroup tint_array_wrapper* const tint_symbol_1 = &((*(tint_symbol_2)).m);
+  comp_main_inner(local_invocation_index, tint_symbol_1);
   return;
 }
 
@@ -248,7 +250,8 @@ void comp_main_inner(uint local_invocation_index, threadgroup S2* const tint_sym
 }
 
 kernel void comp_main(threadgroup tint_symbol_4* tint_symbol_3 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  comp_main_inner(local_invocation_index, &((*(tint_symbol_3)).s));
+  threadgroup S2* const tint_symbol_2 = &((*(tint_symbol_3)).s);
+  comp_main_inner(local_invocation_index, tint_symbol_2);
   return;
 }
 
@@ -330,7 +333,10 @@ void main1_inner(uint local_invocation_index, threadgroup float2x2* const tint_s
 }
 
 kernel void main1(threadgroup tint_symbol_7* tint_symbol_4 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  main1_inner(local_invocation_index, &((*(tint_symbol_4)).m1), &((*(tint_symbol_4)).m2), &((*(tint_symbol_4)).m3));
+  threadgroup float2x2* const tint_symbol_3 = &((*(tint_symbol_4)).m1);
+  threadgroup float2x3* const tint_symbol_5 = &((*(tint_symbol_4)).m2);
+  threadgroup float2x4* const tint_symbol_6 = &((*(tint_symbol_4)).m3);
+  main1_inner(local_invocation_index, tint_symbol_3, tint_symbol_5, tint_symbol_6);
   return;
 }
 
@@ -347,7 +353,10 @@ void main2_inner(uint local_invocation_index_1, threadgroup float3x2* const tint
 }
 
 kernel void main2(threadgroup tint_symbol_15* tint_symbol_12 [[threadgroup(0)]], uint local_invocation_index_1 [[thread_index_in_threadgroup]]) {
-  main2_inner(local_invocation_index_1, &((*(tint_symbol_12)).m4), &((*(tint_symbol_12)).m5), &((*(tint_symbol_12)).m6));
+  threadgroup float3x2* const tint_symbol_11 = &((*(tint_symbol_12)).m4);
+  threadgroup float3x3* const tint_symbol_13 = &((*(tint_symbol_12)).m5);
+  threadgroup float3x4* const tint_symbol_14 = &((*(tint_symbol_12)).m6);
+  main2_inner(local_invocation_index_1, tint_symbol_11, tint_symbol_13, tint_symbol_14);
   return;
 }
 
@@ -364,7 +373,10 @@ void main3_inner(uint local_invocation_index_2, threadgroup float4x2* const tint
 }
 
 kernel void main3(threadgroup tint_symbol_23* tint_symbol_20 [[threadgroup(0)]], uint local_invocation_index_2 [[thread_index_in_threadgroup]]) {
-  main3_inner(local_invocation_index_2, &((*(tint_symbol_20)).m7), &((*(tint_symbol_20)).m8), &((*(tint_symbol_20)).m9));
+  threadgroup float4x2* const tint_symbol_19 = &((*(tint_symbol_20)).m7);
+  threadgroup float4x3* const tint_symbol_21 = &((*(tint_symbol_20)).m8);
+  threadgroup float4x4* const tint_symbol_22 = &((*(tint_symbol_20)).m9);
+  main3_inner(local_invocation_index_2, tint_symbol_19, tint_symbol_21, tint_symbol_22);
   return;
 }
 

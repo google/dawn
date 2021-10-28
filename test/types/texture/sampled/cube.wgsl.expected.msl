@@ -1,7 +1,7 @@
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void tint_symbol(texturecube<float, access::sample> tint_symbol_1 [[texture(0)]], texturecube<int, access::sample> tint_symbol_2 [[texture(1)]], texturecube<uint, access::sample> tint_symbol_3 [[texture(2)]]) {
+kernel void tint_symbol() {
   return;
 }
 

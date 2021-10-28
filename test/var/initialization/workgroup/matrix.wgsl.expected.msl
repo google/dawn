@@ -13,7 +13,8 @@ void tint_symbol_inner(uint local_invocation_index, threadgroup float2x3* const 
 }
 
 kernel void tint_symbol(threadgroup tint_symbol_4* tint_symbol_3 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  tint_symbol_inner(local_invocation_index, &((*(tint_symbol_3)).v));
+  threadgroup float2x3* const tint_symbol_2 = &((*(tint_symbol_3)).v);
+  tint_symbol_inner(local_invocation_index, tint_symbol_2);
   return;
 }
 

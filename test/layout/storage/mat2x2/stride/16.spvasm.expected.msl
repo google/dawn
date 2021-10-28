@@ -21,14 +21,14 @@ tint_array_wrapper mat2x2_stride_16_to_arr(float2x2 mat) {
   return tint_symbol;
 }
 
-void f_1(device SSBO& ssbo) {
-  float2x2 const x_15 = arr_to_mat2x2_stride_16(ssbo.m);
-  ssbo.m = mat2x2_stride_16_to_arr(x_15);
+void f_1(device SSBO* const tint_symbol_1) {
+  float2x2 const x_15 = arr_to_mat2x2_stride_16((*(tint_symbol_1)).m);
+  (*(tint_symbol_1)).m = mat2x2_stride_16_to_arr(x_15);
   return;
 }
 
-kernel void f(device SSBO& ssbo [[buffer(0)]]) {
-  f_1(ssbo);
+kernel void f(device SSBO* tint_symbol_2 [[buffer(0)]]) {
+  f_1(tint_symbol_2);
   return;
 }
 

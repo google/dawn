@@ -1235,7 +1235,9 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
     auto sc = ref->StorageClass();
     if (!(sc == ast::StorageClass::kFunction ||
           sc == ast::StorageClass::kPrivate ||
-          sc == ast::StorageClass::kWorkgroup)) {
+          sc == ast::StorageClass::kWorkgroup) &&
+        IsValidationEnabled(info->declaration->decorations,
+                            ast::DisabledValidation::kIgnoreStorageClass)) {
       std::stringstream ss;
       ss << "function parameter of pointer type cannot be in '" << sc
          << "' storage class";
@@ -1805,6 +1807,18 @@ bool Resolver::Function(const ast::Function* func) {
                   builder_->Symbols().NameFor(param->symbol),
               param->source);
       return false;
+    }
+    if (auto* ptr = param_info->type->As<sem::Pointer>()) {
+      // For MSL, we push module-scope variables into the entry point as pointer
+      // parameters, so we also need to handle their store type.
+      if (!ApplyStorageClassUsageToType(
+              ptr->StorageClass(), const_cast<sem::Type*>(ptr->StoreType()),
+              param->source)) {
+        AddNote("while instantiating parameter " +
+                    builder_->Symbols().NameFor(param->symbol),
+                param->source);
+        return false;
+      }
     }
 
     if (auto* str = param_info->type->As<sem::Struct>()) {

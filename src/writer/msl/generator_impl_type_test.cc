@@ -125,7 +125,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayWithStride) {
                       {create<ast::StructBlockDecoration>()});
   auto* ubo = Global("ubo", ty.Of(s), ast::StorageClass::kUniform,
                      ast::DecorationList{
-                         create<ast::GroupDecoration>(1),
+                         create<ast::GroupDecoration>(0),
                          create<ast::BindingDecoration>(1),
                      });
   WrapInFunction(MemberAccessor(ubo, "arr"));
