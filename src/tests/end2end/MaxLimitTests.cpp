@@ -15,6 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "common/Math.h"
+#include "common/Platform.h"
 #include "utils/WGPUHelpers.h"
 
 class MaxLimitTests : public DawnTest {
@@ -101,6 +102,9 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
     // The uniform buffer layout used in this test is not supported on ES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
+    // TODO(crbug.com/dawn/1172)
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
+
     for (wgpu::BufferUsage usage : {wgpu::BufferUsage::Storage, wgpu::BufferUsage::Uniform}) {
         uint64_t maxBufferBindingSize;
         std::string shader;
@@ -112,8 +116,10 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                 maxBufferBindingSize =
                     std::min(maxBufferBindingSize, uint64_t(2) * 1024 * 1024 * 1024);
                 // With WARP or on 32-bit platforms, such large buffer allocations often fail.
-#ifndef DAWN_PLATFORM_32BIT
-                DAWN_TEST_UNSUPPORTED_IF(IsWindows());
+#ifdef DAWN_PLATFORM_32_BIT
+                if (IsWindows()) {
+                    continue;
+                }
 #endif
                 if (IsWARP()) {
                     maxBufferBindingSize =
@@ -121,11 +127,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                 }
                 shader = R"(
                   [[block]] struct Buf {
-                      value0 : u32;
-                      // padding such that value0 and value1 are the first and last bytes of the memory.
-                      [[size()" +
-                         std::to_string(maxBufferBindingSize - 8) + R"()]] padding : u32;
-                      value1 : u32;
+                      values : array<u32>;
                   };
 
                   [[block]] struct Result {
@@ -138,13 +140,18 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 
                   [[stage(compute), workgroup_size(1,1,1)]]
                   fn main() {
-                      result.value0 = buf.value0;
-                      result.value1 = buf.value1;
+                      result.value0 = buf.values[0];
+                      result.value1 = buf.values[arrayLength(&buf.values) - 1u];
                   }
               )";
                 break;
             case wgpu::BufferUsage::Uniform:
                 maxBufferBindingSize = GetSupportedLimits().limits.maxUniformBufferBindingSize;
+
+                // Clamp to not exceed the maximum i32 value for the WGSL [[size(x)]] annotation.
+                maxBufferBindingSize = std::min(maxBufferBindingSize,
+                                                uint64_t(std::numeric_limits<int32_t>::max()) + 8);
+
                 shader = R"(
                   [[block]] struct Buf {
                       value0 : u32;
@@ -176,7 +183,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
         wgpu::BufferDescriptor bufDesc;
-        bufDesc.size = maxBufferBindingSize;
+        bufDesc.size = Align(maxBufferBindingSize, 4);
         bufDesc.usage = usage | wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&bufDesc);
 
@@ -217,8 +224,12 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_BUFFER_U32_EQ(value0, resultBuffer, 0);
-        EXPECT_BUFFER_U32_EQ(value1, resultBuffer, 4);
+        EXPECT_BUFFER_U32_EQ(value0, resultBuffer, 0)
+            << "maxBufferBindingSize=" << maxBufferBindingSize << "; offset=" << 0
+            << "; usage=" << usage;
+        EXPECT_BUFFER_U32_EQ(value1, resultBuffer, 4)
+            << "maxBufferBindingSize=" << maxBufferBindingSize << "; offset=" << value1Offset
+            << "; usage=" << usage;
     }
 }
 
