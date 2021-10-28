@@ -63,6 +63,7 @@ namespace dawn_native {
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
+        bool DestroyApiObject() override;
         ObjectType GetType() const override;
 
         const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
@@ -106,6 +107,10 @@ namespace dawn_native {
         struct EqualityFunc {
             bool operator()(const RenderPipelineBase* a, const RenderPipelineBase* b) const;
         };
+
+      protected:
+        // Constructor used only for mocking and testing.
+        RenderPipelineBase(DeviceBase* device);
 
       private:
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);

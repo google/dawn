@@ -670,10 +670,26 @@ namespace dawn_native {
         }
 
         SetContentHash(ComputeContentHash());
+        TrackInDevice();
+    }
+
+    RenderPipelineBase::RenderPipelineBase(DeviceBase* device) : PipelineBase(device) {
+        TrackInDevice();
     }
 
     RenderPipelineBase::RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : PipelineBase(device, tag) {
+    }
+
+    RenderPipelineBase::~RenderPipelineBase() = default;
+
+    bool RenderPipelineBase::DestroyApiObject() {
+        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
+        if (wasDestroyed && IsCachedReference()) {
+            // Do not uncache the actual cached object if we are a blueprint or already destroyed.
+            GetDevice()->UncacheRenderPipeline(this);
+        }
+        return wasDestroyed;
     }
 
     // static
@@ -695,12 +711,6 @@ namespace dawn_native {
 
     ObjectType RenderPipelineBase::GetType() const {
         return ObjectType::RenderPipeline;
-    }
-
-    RenderPipelineBase::~RenderPipelineBase() {
-        if (IsCachedReference()) {
-            GetDevice()->UncacheRenderPipeline(this);
-        }
     }
 
     const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
@@ -928,62 +938,64 @@ namespace dawn_native {
             return false;
         }
 
-        for (ColorAttachmentIndex i :
-             IterateBitSet(a->mAttachmentState->GetColorAttachmentsMask())) {
-            const ColorTargetState& descA = *a->GetColorTargetState(i);
-            const ColorTargetState& descB = *b->GetColorTargetState(i);
-            if (descA.writeMask != descB.writeMask) {
-                return false;
-            }
-            if ((descA.blend == nullptr) != (descB.blend == nullptr)) {
-                return false;
-            }
-            if (descA.blend != nullptr) {
-                if (descA.blend->color.operation != descB.blend->color.operation ||
-                    descA.blend->color.srcFactor != descB.blend->color.srcFactor ||
-                    descA.blend->color.dstFactor != descB.blend->color.dstFactor) {
+        if (a->mAttachmentState.Get() != nullptr) {
+            for (ColorAttachmentIndex i :
+                 IterateBitSet(a->mAttachmentState->GetColorAttachmentsMask())) {
+                const ColorTargetState& descA = *a->GetColorTargetState(i);
+                const ColorTargetState& descB = *b->GetColorTargetState(i);
+                if (descA.writeMask != descB.writeMask) {
                     return false;
                 }
-                if (descA.blend->alpha.operation != descB.blend->alpha.operation ||
-                    descA.blend->alpha.srcFactor != descB.blend->alpha.srcFactor ||
-                    descA.blend->alpha.dstFactor != descB.blend->alpha.dstFactor) {
+                if ((descA.blend == nullptr) != (descB.blend == nullptr)) {
                     return false;
                 }
+                if (descA.blend != nullptr) {
+                    if (descA.blend->color.operation != descB.blend->color.operation ||
+                        descA.blend->color.srcFactor != descB.blend->color.srcFactor ||
+                        descA.blend->color.dstFactor != descB.blend->color.dstFactor) {
+                        return false;
+                    }
+                    if (descA.blend->alpha.operation != descB.blend->alpha.operation ||
+                        descA.blend->alpha.srcFactor != descB.blend->alpha.srcFactor ||
+                        descA.blend->alpha.dstFactor != descB.blend->alpha.dstFactor) {
+                        return false;
+                    }
+                }
             }
-        }
 
-        // Check depth/stencil state
-        if (a->mAttachmentState->HasDepthStencilAttachment()) {
-            const DepthStencilState& stateA = a->mDepthStencil;
-            const DepthStencilState& stateB = b->mDepthStencil;
+            // Check depth/stencil state
+            if (a->mAttachmentState->HasDepthStencilAttachment()) {
+                const DepthStencilState& stateA = a->mDepthStencil;
+                const DepthStencilState& stateB = b->mDepthStencil;
 
-            ASSERT(!std::isnan(stateA.depthBiasSlopeScale));
-            ASSERT(!std::isnan(stateB.depthBiasSlopeScale));
-            ASSERT(!std::isnan(stateA.depthBiasClamp));
-            ASSERT(!std::isnan(stateB.depthBiasClamp));
+                ASSERT(!std::isnan(stateA.depthBiasSlopeScale));
+                ASSERT(!std::isnan(stateB.depthBiasSlopeScale));
+                ASSERT(!std::isnan(stateA.depthBiasClamp));
+                ASSERT(!std::isnan(stateB.depthBiasClamp));
 
-            if (stateA.depthWriteEnabled != stateB.depthWriteEnabled ||
-                stateA.depthCompare != stateB.depthCompare ||
-                stateA.depthBias != stateB.depthBias ||
-                stateA.depthBiasSlopeScale != stateB.depthBiasSlopeScale ||
-                stateA.depthBiasClamp != stateB.depthBiasClamp) {
-                return false;
-            }
-            if (stateA.stencilFront.compare != stateB.stencilFront.compare ||
-                stateA.stencilFront.failOp != stateB.stencilFront.failOp ||
-                stateA.stencilFront.depthFailOp != stateB.stencilFront.depthFailOp ||
-                stateA.stencilFront.passOp != stateB.stencilFront.passOp) {
-                return false;
-            }
-            if (stateA.stencilBack.compare != stateB.stencilBack.compare ||
-                stateA.stencilBack.failOp != stateB.stencilBack.failOp ||
-                stateA.stencilBack.depthFailOp != stateB.stencilBack.depthFailOp ||
-                stateA.stencilBack.passOp != stateB.stencilBack.passOp) {
-                return false;
-            }
-            if (stateA.stencilReadMask != stateB.stencilReadMask ||
-                stateA.stencilWriteMask != stateB.stencilWriteMask) {
-                return false;
+                if (stateA.depthWriteEnabled != stateB.depthWriteEnabled ||
+                    stateA.depthCompare != stateB.depthCompare ||
+                    stateA.depthBias != stateB.depthBias ||
+                    stateA.depthBiasSlopeScale != stateB.depthBiasSlopeScale ||
+                    stateA.depthBiasClamp != stateB.depthBiasClamp) {
+                    return false;
+                }
+                if (stateA.stencilFront.compare != stateB.stencilFront.compare ||
+                    stateA.stencilFront.failOp != stateB.stencilFront.failOp ||
+                    stateA.stencilFront.depthFailOp != stateB.stencilFront.depthFailOp ||
+                    stateA.stencilFront.passOp != stateB.stencilFront.passOp) {
+                    return false;
+                }
+                if (stateA.stencilBack.compare != stateB.stencilBack.compare ||
+                    stateA.stencilBack.failOp != stateB.stencilBack.failOp ||
+                    stateA.stencilBack.depthFailOp != stateB.stencilBack.depthFailOp ||
+                    stateA.stencilBack.passOp != stateB.stencilBack.passOp) {
+                    return false;
+                }
+                if (stateA.stencilReadMask != stateB.stencilReadMask ||
+                    stateA.stencilWriteMask != stateB.stencilWriteMask) {
+                    return false;
+                }
             }
         }
 

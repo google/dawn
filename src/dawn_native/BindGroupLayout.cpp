@@ -416,13 +416,13 @@ namespace dawn_native {
         TrackInDevice();
     }
 
+    BindGroupLayoutBase::~BindGroupLayoutBase() = default;
+
     bool BindGroupLayoutBase::DestroyApiObject() {
         bool wasDestroyed = ApiObjectBase::DestroyApiObject();
-        if (wasDestroyed) {
-            // Do not uncache the actual cached object if we are a blueprint
-            if (IsCachedReference()) {
-                GetDevice()->UncacheBindGroupLayout(this);
-            }
+        if (wasDestroyed && IsCachedReference()) {
+            // Do not uncache the actual cached object if we are a blueprint or already destroyed.
+            GetDevice()->UncacheBindGroupLayout(this);
         }
         return wasDestroyed;
     }

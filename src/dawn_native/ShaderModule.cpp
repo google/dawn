@@ -1145,7 +1145,9 @@ namespace dawn_native {
 
     // ShaderModuleBase
 
-    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
+    ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
+                                       const ShaderModuleDescriptor* descriptor,
+                                       ApiObjectBase::UntrackedByDeviceTag tag)
         : ApiObjectBase(device, descriptor->label), mType(Type::Undefined) {
         ASSERT(descriptor->nextInChain != nullptr);
         const ShaderModuleSPIRVDescriptor* spirvDesc = nullptr;
@@ -1163,14 +1165,29 @@ namespace dawn_native {
         }
     }
 
+    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
+        : ShaderModuleBase(device, descriptor, kUntrackedByDevice) {
+        TrackInDevice();
+    }
+
+    ShaderModuleBase::ShaderModuleBase(DeviceBase* device)
+        : ApiObjectBase(device, kLabelNotImplemented) {
+        TrackInDevice();
+    }
+
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : ApiObjectBase(device, tag), mType(Type::Undefined) {
     }
 
-    ShaderModuleBase::~ShaderModuleBase() {
-        if (IsCachedReference()) {
+    ShaderModuleBase::~ShaderModuleBase() = default;
+
+    bool ShaderModuleBase::DestroyApiObject() {
+        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
+        if (wasDestroyed && IsCachedReference()) {
+            // Do not uncache the actual cached object if we are a blueprint or already destroyed.
             GetDevice()->UncacheShaderModule(this);
         }
+        return wasDestroyed;
     }
 
     // static

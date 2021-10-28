@@ -1,0 +1,42 @@
+// Copyright 2021 The Dawn Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef TESTS_UNITTESTS_NATIVE_MOCKS_SHADERMODULE_MOCK_H_
+#define TESTS_UNITTESTS_NATIVE_MOCKS_SHADERMODULE_MOCK_H_
+
+#include "dawn_native/Error.h"
+#include "dawn_native/ShaderModule.h"
+#include "src/dawn_native/Device.h"
+
+#include <memory>
+
+#include <gmock/gmock.h>
+
+namespace dawn_native {
+
+    class ShaderModuleMock : public ShaderModuleBase {
+      public:
+        ShaderModuleMock(DeviceBase* device) : ShaderModuleBase(device) {
+        }
+        ~ShaderModuleMock() override = default;
+
+        MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
+
+        // Creates a shader module mock based on the wgsl source.
+        static ResultOrError<Ref<ShaderModuleMock>> Create(DeviceBase* device, const char* source);
+    };
+
+}  // namespace dawn_native
+
+#endif  // TESTS_UNITTESTS_NATIVE_MOCKS_SHADERMODULE_MOCK_H_

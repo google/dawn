@@ -138,9 +138,20 @@ source_set("dawn_native_mocks_sources") {
     "${dawn_root}/src/utils:dawn_utils",
   ]
 
+  # Add internal dawn_native config for internal unittests.
+  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
+
   sources = [
     "unittests/native/mocks/BindGroupLayoutMock.h",
+    "unittests/native/mocks/BindGroupMock.h",
+    "unittests/native/mocks/ComputePipelineMock.h",
     "unittests/native/mocks/DeviceMock.h",
+    "unittests/native/mocks/PipelineLayoutMock.h",
+    "unittests/native/mocks/RenderPipelineMock.h",
+    "unittests/native/mocks/SamplerMock.h",
+    "unittests/native/mocks/ShaderModuleMock.cpp",
+    "unittests/native/mocks/ShaderModuleMock.h",
+    "unittests/native/mocks/SwapChainMock.h",
   ]
 }
 

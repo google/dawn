@@ -49,6 +49,7 @@ namespace dawn_native {
         BindGroupLayoutBase(DeviceBase* device,
                             const BindGroupLayoutDescriptor* descriptor,
                             PipelineCompatibilityToken pipelineCompatibilityToken);
+        ~BindGroupLayoutBase() override;
 
         static BindGroupLayoutBase* MakeError(DeviceBase* device);
 

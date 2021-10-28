@@ -391,6 +391,12 @@ namespace dawn_native {
                 ++packedIdx;
             }
         }
+
+        TrackInDevice();
+    }
+
+    BindGroupBase::BindGroupBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
+        TrackInDevice();
     }
 
     BindGroupBase::~BindGroupBase() {
@@ -407,7 +413,7 @@ namespace dawn_native {
         // is destroyed after the bind group. The bind group is slab-allocated inside
         // memory owned by the layout (except for the null backend).
         Ref<BindGroupLayoutBase> layout = mLayout;
-        RefCounted::DeleteThis();
+        ApiObjectBase::DeleteThis();
     }
 
     BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag)
