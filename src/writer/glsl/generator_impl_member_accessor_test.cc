@@ -297,7 +297,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   int a;
   mat2x3 b;
 } data;
@@ -343,7 +343,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   float z;
   mat4x3 a;
 } data;
@@ -387,7 +387,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   float z;
   int a[5];
 } data;
@@ -432,7 +432,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   float z;
   int a[5];
 } data;
@@ -474,7 +474,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
 precision mediump float;
 
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   float z;
   int a[5];
 } data;
@@ -531,7 +531,7 @@ struct Inner {
   vec3 b;
 };
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   Inner c[4];
 } data;
 
@@ -590,7 +590,7 @@ struct Inner {
   vec3 b;
 };
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   Inner c[4];
 } data;
 
@@ -649,7 +649,7 @@ struct Inner {
   vec3 b;
 };
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   Inner c[4];
 } data;
 
@@ -708,7 +708,7 @@ struct Inner {
   vec3 b;
 };
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   Inner c[4];
 } data;
 
@@ -763,7 +763,7 @@ struct Inner {
   vec3 b;
 };
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   Inner c[4];
 } data;
 
@@ -822,7 +822,7 @@ struct Inner {
   vec3 b;
 };
 
-layout (set = 1, binding = 0) buffer Data_1 {
+layout (binding = 0) buffer Data_1 {
   Inner c[4];
 } data;
 
