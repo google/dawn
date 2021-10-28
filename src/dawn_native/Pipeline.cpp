@@ -53,10 +53,43 @@ namespace dawn_native {
 
         // Validate if overridable constants exist in shader module
         // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
+        size_t numUninitializedConstants = metadata.uninitializedOverridableConstants.size();
+        // Keep a initialized constants sets to handle duplicate initialization cases
+        // Only storing that of uninialized constants is needed
+        std::unordered_set<std::string> stageInitializedConstantIdentifiers;
         for (uint32_t i = 0; i < constantCount; i++) {
             DAWN_INVALID_IF(metadata.overridableConstants.count(constants[i].key) == 0,
                             "Pipeline overridable constant \"%s\" not found in shader module %s.",
                             constants[i].key, module);
+
+            if (metadata.uninitializedOverridableConstants.count(constants[i].key) > 0 &&
+                stageInitializedConstantIdentifiers.count(constants[i].key) == 0) {
+                numUninitializedConstants--;
+                stageInitializedConstantIdentifiers.insert(constants[i].key);
+            }
+        }
+
+        // Validate if any overridable constant is left uninitialized
+        if (DAWN_UNLIKELY(numUninitializedConstants > 0)) {
+            std::string uninitializedConstantsArray;
+            bool isFirst = true;
+            for (std::string identifier : metadata.uninitializedOverridableConstants) {
+                if (stageInitializedConstantIdentifiers.count(identifier) > 0) {
+                    continue;
+                }
+
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    uninitializedConstantsArray.append(", ");
+                }
+                uninitializedConstantsArray.append(identifier);
+            }
+
+            return DAWN_FORMAT_VALIDATION_ERROR(
+                "There are uninitialized pipeline overridable constants in shader module %s, their "
+                "identifiers:[%s]",
+                module, uninitializedConstantsArray);
         }
 
         return {};

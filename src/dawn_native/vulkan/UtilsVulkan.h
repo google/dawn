@@ -114,7 +114,8 @@ namespace dawn_native { namespace vulkan {
     // Helpers for creating VkSpecializationInfo
     // The WebGPU overridable constants only support these scalar types
     union SpecializationDataEntry {
-        bool b;
+        // Use int32_t for boolean to initialize the full 32bit
+        int32_t b;
         float f32;
         int32_t i32;
         uint32_t u32;

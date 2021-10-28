@@ -393,19 +393,13 @@ fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
 }
 
 // Test overridable constants without numeric identifiers
-// TODO(tint:1155): Implicit numeric ID is undetermined in tint
-TEST_P(ShaderTests, DISABLED_OverridableConstants) {
+TEST_P(ShaderTests, OverridableConstants) {
     // TODO(dawn:1041): Only Vulkan backend is implemented
     DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
 
-    uint32_t const kCount = 15;
+    uint32_t const kCount = 11;
     std::vector<uint32_t> expected(kCount);
     std::iota(expected.begin(), expected.end(), 0);
-    // Test last entry with unspecified default value
-    expected[kCount - 1] = 0u;
-    expected[kCount - 2] = 0u;
-    expected[kCount - 3] = 0u;
-    expected[kCount - 4] = 0u;
     wgpu::Buffer buffer = CreateBuffer(kCount);
 
     std::string shader = R"(
@@ -420,13 +414,9 @@ TEST_P(ShaderTests, DISABLED_OverridableConstants) {
 [[override]] let c8: u32;               // type: uint32
 [[override]] let c9: u32 = 0u;          // default override
 [[override]] let c10: u32 = 10u;        // default
-[[override]] let c11: bool;             // default unspecified
-[[override]] let c12: f32;              // default unspecified
-[[override]] let c13: i32;              // default unspecified
-[[override]] let c14: u32;              // default unspecified
 
 [[block]] struct Buf {
-    data : array<u32, 15>;
+    data : array<u32, 11>;
 };
 
 [[group(0), binding(0)]] var<storage, read_write> buf : Buf;
@@ -443,10 +433,6 @@ TEST_P(ShaderTests, DISABLED_OverridableConstants) {
     buf.data[8] = u32(c8);
     buf.data[9] = u32(c9);
     buf.data[10] = u32(c10);
-    buf.data[11] = u32(c11);
-    buf.data[12] = u32(c12);
-    buf.data[13] = u32(c13);
-    buf.data[14] = u32(c14);
 })";
 
     std::vector<wgpu::ConstantEntry> constants;
@@ -461,10 +447,6 @@ TEST_P(ShaderTests, DISABLED_OverridableConstants) {
     constants.push_back({nullptr, "c8", 8});
     constants.push_back({nullptr, "c9", 9});
     // c10 is not assigned, testing default value
-    // c11 is not assigned, testing unspecified default value
-    // c12 is not assigned, testing unspecified default value
-    // c13 is not assigned, testing unspecified default value
-    // c14 is not assigned, testing unspecified default value
 
     wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main", &constants);
 
@@ -520,7 +502,7 @@ TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
     constants.push_back({nullptr, "1001", 1});
     constants.push_back({nullptr, "1", 2});
     // c3 is not assigned, testing default value
-    // c4 is not assigned, testing unspecified default value
+    constants.push_back({nullptr, "1004", 0});
 
     wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main", &constants);
 

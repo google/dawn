@@ -18,9 +18,37 @@
 
 class ComputePipelineOverridableConstantsValidationTest : public ValidationTest {
   protected:
-    void SetUp() override {
-        ValidationTest::SetUp();
+    void SetUpShadersWithDefaultValueConstants() {
+        computeModule = utils::CreateShaderModule(device, R"(
+[[override]] let c0: bool = true;      // type: bool
+[[override]] let c1: bool = false;      // default override
+[[override]] let c2: f32 = 0.0;         // type: float32
+[[override]] let c3: f32 = 0.0;         // default override
+[[override]] let c4: f32 = 4.0;         // default
+[[override]] let c5: i32 = 0;           // type: int32
+[[override]] let c6: i32 = 0;           // default override
+[[override]] let c7: i32 = 7;           // default
+[[override]] let c8: u32 = 0u;          // type: uint32
+[[override]] let c9: u32 = 0u;          // default override
+[[override(1000)]] let c10: u32 = 10u;  // default
 
+[[stage(compute), workgroup_size(1)]] fn main() {
+    // make sure the overridable constants are not optimized out
+    _ = u32(c0);
+    _ = u32(c1);
+    _ = u32(c2);
+    _ = u32(c3);
+    _ = u32(c4);
+    _ = u32(c5);
+    _ = u32(c6);
+    _ = u32(c7);
+    _ = u32(c8);
+    _ = u32(c9);
+    _ = u32(c10);
+})");
+    }
+
+    void SetUpShadersWithUninitializedConstants() {
         computeModule = utils::CreateShaderModule(device, R"(
 [[override]] let c0: bool;              // type: bool
 [[override]] let c1: bool = false;      // default override
@@ -34,25 +62,19 @@ class ComputePipelineOverridableConstantsValidationTest : public ValidationTest 
 [[override]] let c9: u32 = 0u;          // default override
 [[override(1000)]] let c10: u32 = 10u;  // default
 
-[[block]] struct Buf {
-    data : array<u32, 11>;
-};
-
-[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
-
 [[stage(compute), workgroup_size(1)]] fn main() {
     // make sure the overridable constants are not optimized out
-    buf.data[0] = u32(c0);
-    buf.data[1] = u32(c1);
-    buf.data[2] = u32(c2);
-    buf.data[3] = u32(c3);
-    buf.data[4] = u32(c4);
-    buf.data[5] = u32(c5);
-    buf.data[6] = u32(c6);
-    buf.data[7] = u32(c7);
-    buf.data[8] = u32(c8);
-    buf.data[9] = u32(c9);
-    buf.data[10] = u32(c10);
+    _ = u32(c0);
+    _ = u32(c1);
+    _ = u32(c2);
+    _ = u32(c3);
+    _ = u32(c4);
+    _ = u32(c5);
+    _ = u32(c6);
+    _ = u32(c7);
+    _ = u32(c8);
+    _ = u32(c9);
+    _ = u32(c10);
 })");
     }
 
@@ -71,6 +93,7 @@ class ComputePipelineOverridableConstantsValidationTest : public ValidationTest 
 
 // Basic constants lookup tests
 TEST_F(ComputePipelineOverridableConstantsValidationTest, ConstantsIdentifierLookUp) {
+    SetUpShadersWithDefaultValueConstants();
     {
         // Valid: no constants specified
         std::vector<wgpu::ConstantEntry> constants;
@@ -106,10 +129,47 @@ TEST_F(ComputePipelineOverridableConstantsValidationTest, ConstantsIdentifierLoo
     }
 }
 
+// Test that it is invalid to leave any constants uninitialized
+TEST_F(ComputePipelineOverridableConstantsValidationTest, UninitializedConstants) {
+    SetUpShadersWithUninitializedConstants();
+    {
+        // Error: uninitialized constants exist
+        std::vector<wgpu::ConstantEntry> constants;
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
+    }
+    {
+        // Error: uninitialized constants exist
+        std::vector<wgpu::ConstantEntry> constants{
+            {nullptr, "c0", false},
+            {nullptr, "c2", 1},
+            // c5 is missing
+            {nullptr, "c8", 1},
+        };
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
+    }
+    {
+        // Valid: all constants initialized
+        std::vector<wgpu::ConstantEntry> constants{
+            {nullptr, "c0", false},
+            {nullptr, "c2", 1},
+            {nullptr, "c5", 1},
+            {nullptr, "c8", 1},
+        };
+        TestCreatePipeline(constants);
+    }
+    {
+        // Valid: all constants initialized (with duplicate initializations)
+        std::vector<wgpu::ConstantEntry> constants{
+            {nullptr, "c0", false}, {nullptr, "c2", 1}, {nullptr, "c5", 1},
+            {nullptr, "c8", 1},     {nullptr, "c2", 2},
+        };
+        TestCreatePipeline(constants);
+    }
+}
+
 // Test that only explicitly specified numeric ID can be referenced
-// TODO(tint:1155): missing feature in tint to differentiate explicitly specified numeric ID
-TEST_F(ComputePipelineOverridableConstantsValidationTest,
-       DISABLED_ConstantsIdentifierExplicitNumericID) {
+TEST_F(ComputePipelineOverridableConstantsValidationTest, ConstantsIdentifierExplicitNumericID) {
+    SetUpShadersWithDefaultValueConstants();
     {
         // Error: constant numeric id not explicitly specified
         // But could be impliciltly assigned to one of the constants
@@ -137,8 +197,13 @@ TEST_F(ComputePipelineOverridableConstantsValidationTest,
 }
 
 // Test that identifiers are unique
-// TODO(tint:1155): missing feature in tint to differentiate explicitly specified numeric ID
-TEST_F(ComputePipelineOverridableConstantsValidationTest, DISABLED_ConstantsIdentifierUnique) {
+TEST_F(ComputePipelineOverridableConstantsValidationTest, ConstantsIdentifierUnique) {
+    SetUpShadersWithDefaultValueConstants();
+    {
+        // Valid: constant without numeric id can be referenced with variable name
+        std::vector<wgpu::ConstantEntry> constants{{nullptr, "c0", 0}};
+        TestCreatePipeline(constants);
+    }
     {
         // Error: constant with numeric id cannot be referenced with variable name
         std::vector<wgpu::ConstantEntry> constants{{nullptr, "c10", 0}};

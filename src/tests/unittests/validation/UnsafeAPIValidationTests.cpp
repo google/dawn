@@ -129,8 +129,8 @@ TEST_F(UnsafeAPIValidationTest, PipelineOverridableConstants) {
 [[override(1000)]] let c1: u32;
 
 [[stage(compute), workgroup_size(1)]] fn main() {
-    ignore(c0);
-    ignore(c1);
+    _ = c0;
+    _ = c1;
 })"));
     }
 
