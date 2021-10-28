@@ -498,16 +498,13 @@ TEST_F(EntryPointParameterDecorationTest, DuplicateDecoration) {
 }
 
 TEST_F(EntryPointParameterDecorationTest, DuplicateInternalDecoration) {
-  auto* s =
-      Param("s", ty.sampler(ast::SamplerKind::kSampler),
-            ast::DecorationList{
-                create<ast::BindingDecoration>(0),
-                create<ast::GroupDecoration>(0),
-                ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ID(), ast::DisabledValidation::kBindingPointCollision),
-                ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ID(), ast::DisabledValidation::kEntryPointParameter),
-            });
+  auto* s = Param("s", ty.sampler(ast::SamplerKind::kSampler),
+                  ast::DecorationList{
+                      create<ast::BindingDecoration>(0),
+                      create<ast::GroupDecoration>(0),
+                      Disable(ast::DisabledValidation::kBindingPointCollision),
+                      Disable(ast::DisabledValidation::kEntryPointParameter),
+                  });
   Func("f", {s}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -531,10 +528,8 @@ TEST_F(EntryPointReturnTypeDecorationTest, DuplicateDecoration) {
 TEST_F(EntryPointReturnTypeDecorationTest, DuplicateInternalDecoration) {
   Func("f", {}, ty.i32(), {Return(1)}, {Stage(ast::PipelineStage::kFragment)},
        ast::DecorationList{
-           ASTNodes().Create<ast::DisableValidationDecoration>(
-               ID(), ast::DisabledValidation::kBindingPointCollision),
-           ASTNodes().Create<ast::DisableValidationDecoration>(
-               ID(), ast::DisabledValidation::kEntryPointParameter),
+           Disable(ast::DisabledValidation::kBindingPointCollision),
+           Disable(ast::DisabledValidation::kEntryPointParameter),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1155,7 +1150,6 @@ TEST_F(ResourceDecorationTest, BindingPointOnNonResource) {
 
 }  // namespace
 }  // namespace ResourceTests
-
 
 namespace InvariantDecorationTests {
 namespace {

@@ -140,8 +140,7 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
       // Add `DisableValidationDecoration`s if required
       if (add_collision_deco.count(bp)) {
         auto* decoration =
-            ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                ctx.dst->ID(), ast::DisabledValidation::kBindingPointCollision);
+            ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision);
         ctx.InsertBefore(var->decorations, *var->decorations.begin(),
                          decoration);
       }

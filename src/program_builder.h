@@ -35,6 +35,7 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/depth_multisampled_texture.h"
 #include "src/ast/depth_texture.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/ast/external_texture.h"
 #include "src/ast/f32.h"
 #include "src/ast/float_literal.h"
@@ -2409,6 +2410,15 @@ class ProgramBuilder {
     return create<ast::WorkgroupDecoration>(
         source_, Expr(std::forward<EXPR_X>(x)), Expr(std::forward<EXPR_Y>(y)),
         Expr(std::forward<EXPR_Z>(z)));
+  }
+
+  /// Creates an ast::DisableValidationDecoration
+  /// @param validation the validation to disable
+  /// @returns the disable validation decoration pointer
+  const ast::DisableValidationDecoration* Disable(
+      ast::DisabledValidation validation) {
+    return ASTNodes().Create<ast::DisableValidationDecoration>(ID(),
+                                                               validation);
   }
 
   /// Sets the current builder source to `src`

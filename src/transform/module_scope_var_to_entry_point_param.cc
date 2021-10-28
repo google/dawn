@@ -186,9 +186,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             // For a texture or sampler variable, redeclare it as an entry point
             // parameter. Disable entry point parameter validation.
             auto* disable_validation =
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(),
-                    ast::DisabledValidation::kEntryPointParameter);
+                ctx.dst->Disable(ast::DisabledValidation::kEntryPointParameter);
             auto decos = ctx.Clone(var->Declaration()->decorations);
             decos.push_back(disable_validation);
             auto* param = ctx.dst->Param(new_var_symbol, store_type(), decos);
@@ -198,14 +196,10 @@ struct ModuleScopeVarToEntryPointParam::State {
             // Variables into the Storage and Uniform storage classes are
             // redeclared as entry point parameters with a pointer type.
             auto attributes = ctx.Clone(var->Declaration()->decorations);
+            attributes.push_back(ctx.dst->Disable(
+                ast::DisabledValidation::kEntryPointParameter));
             attributes.push_back(
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(),
-                    ast::DisabledValidation::kEntryPointParameter));
-            attributes.push_back(
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(),
-                    ast::DisabledValidation::kIgnoreStorageClass));
+                ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass));
             auto* param_type = ctx.dst->ty.pointer(
                 store_type(), sc, var->Declaration()->declared_access);
             auto* param =
@@ -241,9 +235,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             // redeclared at function scope. Disable storage class validation on
             // this variable.
             auto* disable_validation =
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(),
-                    ast::DisabledValidation::kIgnoreStorageClass);
+                ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass);
             auto* constructor = ctx.Clone(var->Declaration()->constructor);
             auto* local_var =
                 ctx.dst->Var(new_var_symbol, store_type(), sc, constructor,
@@ -264,13 +256,9 @@ struct ModuleScopeVarToEntryPointParam::State {
             // Disable validation of the parameter's storage class and of
             // arguments passed it.
             attributes.push_back(
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(),
-                    ast::DisabledValidation::kIgnoreStorageClass));
-            attributes.push_back(
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(),
-                    ast::DisabledValidation::kIgnoreInvalidPointerArgument));
+                ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass));
+            attributes.push_back(ctx.dst->Disable(
+                ast::DisabledValidation::kIgnoreInvalidPointerArgument));
           }
           ctx.InsertBack(
               func_ast->params,
@@ -311,8 +299,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         auto* param_type = ctx.dst->ty.pointer(ctx.dst->ty.Of(str),
                                                ast::StorageClass::kWorkgroup);
         auto* disable_validation =
-            ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                ctx.dst->ID(), ast::DisabledValidation::kEntryPointParameter);
+            ctx.dst->Disable(ast::DisabledValidation::kEntryPointParameter);
         auto* param =
             ctx.dst->Param(workgroup_param(), param_type, {disable_validation});
         ctx.InsertFront(func_ast->params, param);

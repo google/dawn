@@ -82,10 +82,8 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       auto name = ctx.dst->Sym();
       auto* buffer_typename =
           ctx.dst->ty.type_name(ctx.Clone(buffer_type->Declaration()->name));
-      auto* disable_validation =
-          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-              ctx.dst->ID(),
-              ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
+      auto* disable_validation = ctx.dst->Disable(
+          ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
       auto* func = ctx.dst->create<ast::Function>(
           name,
           ast::VariableList{

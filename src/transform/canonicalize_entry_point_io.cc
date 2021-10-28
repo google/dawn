@@ -173,8 +173,7 @@ struct CanonicalizeEntryPointIO::State {
 
       // Disable validation for use of the `input` storage class.
       attributes.push_back(
-          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-              ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
+          ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass));
 
       // Create the global variable and use its value for the shader input.
       auto symbol = ctx.dst->Symbols().New(name);
@@ -417,8 +416,7 @@ struct CanonicalizeEntryPointIO::State {
       // Disable validation for use of the `output` storage class.
       ast::DecorationList attributes = std::move(outval.attributes);
       attributes.push_back(
-          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-              ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
+          ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass));
 
       // Create the global variable and assign it the output value.
       auto name = ctx.dst->Symbols().New(outval.name);

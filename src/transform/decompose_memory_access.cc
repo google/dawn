@@ -451,10 +451,8 @@ struct DecomposeMemoryAccess::State {
     return utils::GetOrCreate(
         load_funcs, LoadStoreKey{storage_class, buf_ty, el_ty}, [&] {
           auto* buf_ast_ty = CreateASTTypeFor(ctx, buf_ty);
-          auto* disable_validation =
-              b.ASTNodes().Create<ast::DisableValidationDecoration>(
-                  b.ID(), ast::DisabledValidation::
-                              kIgnoreConstructibleFunctionParameter);
+          auto* disable_validation = b.Disable(
+              ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
 
           ast::VariableList params = {
               // Note: The buffer parameter requires the StorageClass in
@@ -476,8 +474,7 @@ struct DecomposeMemoryAccess::State {
                 name, params, el_ast_ty, nullptr,
                 ast::DecorationList{
                     intrinsic,
-                    b.ASTNodes().Create<ast::DisableValidationDecoration>(
-                        b.ID(), ast::DisabledValidation::kFunctionHasNoBody),
+                    b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
                 },
                 ast::DecorationList{});
             b.AST().AddFunction(func);
@@ -554,10 +551,8 @@ struct DecomposeMemoryAccess::State {
         store_funcs, LoadStoreKey{storage_class, buf_ty, el_ty}, [&] {
           auto* buf_ast_ty = CreateASTTypeFor(ctx, buf_ty);
           auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
-          auto* disable_validation =
-              b.ASTNodes().Create<ast::DisableValidationDecoration>(
-                  b.ID(), ast::DisabledValidation::
-                              kIgnoreConstructibleFunctionParameter);
+          auto* disable_validation = b.Disable(
+              ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
           ast::VariableList params{
               // Note: The buffer parameter requires the StorageClass in
               // order for HLSL to emit this as a ByteAddressBuffer.
@@ -578,8 +573,7 @@ struct DecomposeMemoryAccess::State {
                 name, params, b.ty.void_(), nullptr,
                 ast::DecorationList{
                     intrinsic,
-                    b.ASTNodes().Create<ast::DisableValidationDecoration>(
-                        b.ID(), ast::DisabledValidation::kFunctionHasNoBody),
+                    b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
                 },
                 ast::DecorationList{});
             b.AST().AddFunction(func);
@@ -655,10 +649,8 @@ struct DecomposeMemoryAccess::State {
     auto op = intrinsic->Type();
     return utils::GetOrCreate(atomic_funcs, AtomicKey{buf_ty, el_ty, op}, [&] {
       auto* buf_ast_ty = CreateASTTypeFor(ctx, buf_ty);
-      auto* disable_validation =
-          b.ASTNodes().Create<ast::DisableValidationDecoration>(
-              b.ID(),
-              ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
+      auto* disable_validation = b.Disable(
+          ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
       // The first parameter to all WGSL atomics is the expression to the
       // atomic. This is replaced with two parameters: the buffer and offset.
 
@@ -691,8 +683,7 @@ struct DecomposeMemoryAccess::State {
           b.Sym(), params, ret_ty, nullptr,
           ast::DecorationList{
               atomic,
-              b.ASTNodes().Create<ast::DisableValidationDecoration>(
-                  b.ID(), ast::DisabledValidation::kFunctionHasNoBody),
+              b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
           },
           ast::DecorationList{});
 
