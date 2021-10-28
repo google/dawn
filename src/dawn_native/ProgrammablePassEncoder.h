@@ -40,6 +40,8 @@ namespace dawn_native {
         bool IsValidationEnabled() const;
         MaybeError ValidateProgrammableEncoderEnd() const;
 
+        virtual void DeleteThis() override;
+
         // Compute and render passes do different things on SetBindGroup. These are helper functions
         // for the logic they have in common.
         MaybeError ValidateSetBindGroup(BindGroupIndex index,
