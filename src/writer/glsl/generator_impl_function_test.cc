@@ -292,6 +292,7 @@ void main() {
   col1 = outputs.col1;
   col2 = outputs.col2;
   gl_Position = outputs.pos;
+  gl_Position.y = -gl_Position.y;
 }
 
 

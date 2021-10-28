@@ -1914,6 +1914,9 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
       out << " = outputs." << name << ";" << std::endl;
     }
   }
+  if (func->PipelineStage() == ast::PipelineStage::kVertex) {
+    out << "  gl_Position.y = -gl_Position.y;" << std::endl;
+  }
 
   out << "}" << std::endl << std::endl;
 
