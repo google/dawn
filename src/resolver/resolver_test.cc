@@ -930,6 +930,30 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
   EXPECT_TRUE(func_sem->ReturnType()->Is<sem::F32>());
 }
 
+TEST_F(ResolverTest, Function_CallSites) {
+  auto* foo = Func("foo", ast::VariableList{}, ty.void_(), {});
+
+  auto* call_1 = Call("foo");
+  auto* call_2 = Call("foo");
+  auto* bar = Func("bar", ast::VariableList{}, ty.void_(),
+                   {
+                       WrapInStatement(call_1),
+                       WrapInStatement(call_2),
+                   });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* foo_sem = Sem().Get(foo);
+  ASSERT_NE(foo_sem, nullptr);
+  ASSERT_EQ(foo_sem->CallSites().size(), 2u);
+  EXPECT_EQ(foo_sem->CallSites()[0], call_1);
+  EXPECT_EQ(foo_sem->CallSites()[1], call_2);
+
+  auto* bar_sem = Sem().Get(bar);
+  ASSERT_NE(bar_sem, nullptr);
+  EXPECT_EQ(bar_sem->CallSites().size(), 0u);
+}
+
 TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
   // [[stage(compute), workgroup_size(1)]]
   // fn main() {}
