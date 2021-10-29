@@ -30,15 +30,11 @@ namespace dawn_native {
 
     class SamplerBase : public ApiObjectBase, public CachedObject {
       public:
-        SamplerBase(DeviceBase* device,
-                    const SamplerDescriptor* descriptor,
-                    ApiObjectBase::UntrackedByDeviceTag tag);
         SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor);
         ~SamplerBase() override;
 
         static SamplerBase* MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
         ObjectType GetType() const override;
 
         bool IsComparison() const;
@@ -54,10 +50,6 @@ namespace dawn_native {
         uint16_t GetMaxAnisotropy() const {
             return mMaxAnisotropy;
         }
-
-      protected:
-        // Constructor used only for mocking and testing.
-        SamplerBase(DeviceBase* device);
 
       private:
         SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag);

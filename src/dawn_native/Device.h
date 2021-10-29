@@ -24,6 +24,7 @@
 #include "dawn_native/Limits.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/ObjectType_autogen.h"
+#include "dawn_native/RenderPipeline.h"
 #include "dawn_native/StagingBuffer.h"
 #include "dawn_native/Toggles.h"
 

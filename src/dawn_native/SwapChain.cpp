@@ -115,7 +115,6 @@ namespace dawn_native {
     // SwapChainBase
 
     SwapChainBase::SwapChainBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-        TrackInDevice();
     }
 
     SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)

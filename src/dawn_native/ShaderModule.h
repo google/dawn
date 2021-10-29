@@ -221,15 +221,11 @@ namespace dawn_native {
 
     class ShaderModuleBase : public ApiObjectBase, public CachedObject {
       public:
-        ShaderModuleBase(DeviceBase* device,
-                         const ShaderModuleDescriptor* descriptor,
-                         ApiObjectBase::UntrackedByDeviceTag tag);
         ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModuleBase() override;
 
         static Ref<ShaderModuleBase> MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
         ObjectType GetType() const override;
 
         // Return true iff the program has an entrypoint called `entryPoint`.
@@ -256,9 +252,6 @@ namespace dawn_native {
         OwnedCompilationMessages* GetCompilationMessages() const;
 
       protected:
-        // Constructor used only for mocking and testing.
-        ShaderModuleBase(DeviceBase* device);
-
         MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
 
       private:

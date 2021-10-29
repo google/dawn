@@ -69,9 +69,7 @@ namespace dawn_native {
 
     // SamplerBase
 
-    SamplerBase::SamplerBase(DeviceBase* device,
-                             const SamplerDescriptor* descriptor,
-                             ApiObjectBase::UntrackedByDeviceTag tag)
+    SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor)
         : ApiObjectBase(device, kLabelNotImplemented),
           mAddressModeU(descriptor->addressModeU),
           mAddressModeV(descriptor->addressModeV),
@@ -85,28 +83,14 @@ namespace dawn_native {
           mMaxAnisotropy(descriptor->maxAnisotropy) {
     }
 
-    SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor)
-        : SamplerBase(device, descriptor, kUntrackedByDevice) {
-        TrackInDevice();
-    }
-
-    SamplerBase::SamplerBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-        TrackInDevice();
-    }
-
     SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : ApiObjectBase(device, tag) {
     }
 
-    SamplerBase::~SamplerBase() = default;
-
-    bool SamplerBase::DestroyApiObject() {
-        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
-        if (wasDestroyed && IsCachedReference()) {
-            // Do not uncache the actual cached object if we are a blueprint or already destroyed.
+    SamplerBase::~SamplerBase() {
+        if (IsCachedReference()) {
             GetDevice()->UncacheSampler(this);
         }
-        return wasDestroyed;
     }
 
     // static

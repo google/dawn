@@ -57,8 +57,7 @@ namespace dawn_native {
     // PipelineLayoutBase
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
-                                           const PipelineLayoutDescriptor* descriptor,
-                                           ApiObjectBase::UntrackedByDeviceTag tag)
+                                           const PipelineLayoutDescriptor* descriptor)
         : ApiObjectBase(device, kLabelNotImplemented) {
         ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
         for (BindGroupIndex group(0); group < BindGroupIndex(descriptor->bindGroupLayoutCount);
@@ -68,30 +67,15 @@ namespace dawn_native {
         }
     }
 
-    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
-                                           const PipelineLayoutDescriptor* descriptor)
-        : PipelineLayoutBase(device, descriptor, kUntrackedByDevice) {
-        TrackInDevice();
-    }
-
-    PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device)
-        : ApiObjectBase(device, kLabelNotImplemented) {
-        TrackInDevice();
-    }
-
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : ApiObjectBase(device, tag) {
     }
 
-    PipelineLayoutBase::~PipelineLayoutBase() = default;
-
-    bool PipelineLayoutBase::DestroyApiObject() {
-        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
-        if (wasDestroyed && IsCachedReference()) {
-            // Do not uncache the actual cached object if we are a blueprint
+    PipelineLayoutBase::~PipelineLayoutBase() {
+        // Do not uncache the actual cached object if we are a blueprint
+        if (IsCachedReference()) {
             GetDevice()->UncachePipelineLayout(this);
         }
-        return wasDestroyed;
     }
 
     // static

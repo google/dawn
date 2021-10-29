@@ -16,453 +16,80 @@
 
 #include "dawn_native/Toggles.h"
 #include "mocks/BindGroupLayoutMock.h"
-#include "mocks/BindGroupMock.h"
-#include "mocks/ComputePipelineMock.h"
 #include "mocks/DeviceMock.h"
-#include "mocks/PipelineLayoutMock.h"
-#include "mocks/RenderPipelineMock.h"
-#include "mocks/SamplerMock.h"
-#include "mocks/ShaderModuleMock.h"
-#include "mocks/SwapChainMock.h"
 #include "tests/DawnNativeTest.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
 
 namespace dawn_native { namespace {
 
-    using ::testing::_;
     using ::testing::ByMove;
     using ::testing::InSequence;
     using ::testing::Return;
-    using ::testing::Test;
 
-    class DestroyObjectTests : public Test {
-      public:
-        DestroyObjectTests() : Test() {
-            // Skipping validation on descriptors as coverage for validation is already present.
-            mDevice.SetToggle(Toggle::SkipValidation, true);
-        }
+    TEST(DestroyObjectTests, BindGroupLayoutExplicit) {
+        // Skipping validation on descriptors as coverage for validation is already present.
+        DeviceMock device;
+        device.SetToggle(Toggle::SkipValidation, true);
 
-        Ref<PipelineLayoutMock> GetPipelineLayout() {
-            if (mPipelineLayout != nullptr) {
-                return mPipelineLayout;
-            }
-            mPipelineLayout = AcquireRef(new PipelineLayoutMock(&mDevice));
-            EXPECT_CALL(*mPipelineLayout.Get(), DestroyApiObjectImpl).Times(1);
-            return mPipelineLayout;
-        }
-
-        Ref<ShaderModuleMock> GetVertexShaderModule() {
-            if (mVsModule != nullptr) {
-                return mVsModule;
-            }
-            DAWN_TRY_ASSIGN_WITH_CLEANUP(
-                mVsModule, ShaderModuleMock::Create(&mDevice, R"(
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
-            })"),
-                { ASSERT(false); }, mVsModule);
-            EXPECT_CALL(*mVsModule.Get(), DestroyApiObjectImpl).Times(1);
-            return mVsModule;
-        }
-
-        Ref<ShaderModuleMock> GetComputeShaderModule() {
-            if (mCsModule != nullptr) {
-                return mCsModule;
-            }
-            DAWN_TRY_ASSIGN_WITH_CLEANUP(
-                mCsModule, ShaderModuleMock::Create(&mDevice, R"(
-            [[stage(compute), workgroup_size(1)]] fn main() {
-            })"),
-                { ASSERT(false); }, mCsModule);
-            EXPECT_CALL(*mCsModule.Get(), DestroyApiObjectImpl).Times(1);
-            return mCsModule;
-        }
-
-      protected:
-        DeviceMock mDevice;
-
-        // The following lazy-initialized objects are used to facilitate creation of dependent
-        // objects under test.
-        Ref<PipelineLayoutMock> mPipelineLayout;
-        Ref<ShaderModuleMock> mVsModule;
-        Ref<ShaderModuleMock> mCsModule;
-    };
-
-    TEST_F(DestroyObjectTests, BindGroupExplicit) {
-        BindGroupMock bindGroupMock(&mDevice);
-        EXPECT_CALL(bindGroupMock, DestroyApiObjectImpl).Times(1);
-
-        EXPECT_TRUE(bindGroupMock.IsAlive());
-        bindGroupMock.DestroyApiObject();
-        EXPECT_FALSE(bindGroupMock.IsAlive());
-    }
-
-    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-    // will also complain if there is a memory leak.
-    TEST_F(DestroyObjectTests, BindGroupImplicit) {
-        BindGroupMock* bindGroupMock = new BindGroupMock(&mDevice);
-        EXPECT_CALL(*bindGroupMock, DestroyApiObjectImpl).Times(1);
-        {
-            BindGroupDescriptor desc = {};
-            Ref<BindGroupBase> bindGroup;
-            EXPECT_CALL(mDevice, CreateBindGroupImpl)
-                .WillOnce(Return(ByMove(AcquireRef(bindGroupMock))));
-            DAWN_ASSERT_AND_ASSIGN(bindGroup, mDevice.CreateBindGroup(&desc));
-
-            EXPECT_TRUE(bindGroup->IsAlive());
-        }
-    }
-
-    TEST_F(DestroyObjectTests, BindGroupLayoutExplicit) {
-        BindGroupLayoutMock bindGroupLayoutMock(&mDevice);
-        EXPECT_CALL(bindGroupLayoutMock, DestroyApiObjectImpl).Times(1);
-
-        EXPECT_TRUE(bindGroupLayoutMock.IsAlive());
-        bindGroupLayoutMock.DestroyApiObject();
-        EXPECT_FALSE(bindGroupLayoutMock.IsAlive());
-    }
-
-    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-    // will also complain if there is a memory leak.
-    TEST_F(DestroyObjectTests, BindGroupLayoutImplicit) {
-        BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&mDevice);
+        BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&device);
         EXPECT_CALL(*bindGroupLayoutMock, DestroyApiObjectImpl).Times(1);
+
+        BindGroupLayoutDescriptor desc = {};
+        Ref<BindGroupLayoutBase> bindGroupLayout;
+        EXPECT_CALL(device, CreateBindGroupLayoutImpl)
+            .WillOnce(Return(ByMove(AcquireRef(bindGroupLayoutMock))));
+        DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, device.CreateBindGroupLayout(&desc));
+
+        EXPECT_TRUE(bindGroupLayout->IsAlive());
+        EXPECT_TRUE(bindGroupLayout->IsCachedReference());
+
+        bindGroupLayout->DestroyApiObject();
+        EXPECT_FALSE(bindGroupLayout->IsAlive());
+    }
+
+    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+    // will also complain if there is a memory leak.
+    TEST(DestroyObjectTests, BindGroupLayoutImplicit) {
+        // Skipping validation on descriptors as coverage for validation is already present.
+        DeviceMock device;
+        device.SetToggle(Toggle::SkipValidation, true);
+
+        BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&device);
+        EXPECT_CALL(*bindGroupLayoutMock, DestroyApiObjectImpl).Times(1);
+
         {
             BindGroupLayoutDescriptor desc = {};
             Ref<BindGroupLayoutBase> bindGroupLayout;
-            EXPECT_CALL(mDevice, CreateBindGroupLayoutImpl)
+            EXPECT_CALL(device, CreateBindGroupLayoutImpl)
                 .WillOnce(Return(ByMove(AcquireRef(bindGroupLayoutMock))));
-            DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, mDevice.CreateBindGroupLayout(&desc));
+            DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, device.CreateBindGroupLayout(&desc));
 
             EXPECT_TRUE(bindGroupLayout->IsAlive());
             EXPECT_TRUE(bindGroupLayout->IsCachedReference());
         }
     }
 
-    TEST_F(DestroyObjectTests, ComputePipelineExplicit) {
-        ComputePipelineMock computePipelineMock(&mDevice);
-        EXPECT_CALL(computePipelineMock, DestroyApiObjectImpl).Times(1);
-
-        EXPECT_TRUE(computePipelineMock.IsAlive());
-        computePipelineMock.DestroyApiObject();
-        EXPECT_FALSE(computePipelineMock.IsAlive());
-    }
-
-    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-    // will also complain if there is a memory leak.
-    TEST_F(DestroyObjectTests, ComputePipelineImplicit) {
-        // ComputePipelines usually set their hash values at construction, but the mock does not, so
-        // we set it here.
-        constexpr size_t hash = 0x12345;
-        ComputePipelineMock* computePipelineMock = new ComputePipelineMock(&mDevice);
-        computePipelineMock->SetContentHash(hash);
-        ON_CALL(*computePipelineMock, ComputeContentHash).WillByDefault(Return(hash));
-
-        // Compute pipelines are initialized during their creation via the device.
-        EXPECT_CALL(*computePipelineMock, Initialize).Times(1);
-        EXPECT_CALL(*computePipelineMock, DestroyApiObjectImpl).Times(1);
-
-        {
-            ComputePipelineDescriptor desc = {};
-            desc.layout = GetPipelineLayout().Get();
-            desc.compute.module = GetComputeShaderModule().Get();
-
-            Ref<ComputePipelineBase> computePipeline;
-            EXPECT_CALL(mDevice, CreateUninitializedComputePipelineImpl)
-                .WillOnce(Return(ByMove(AcquireRef(computePipelineMock))));
-            DAWN_ASSERT_AND_ASSIGN(computePipeline, mDevice.CreateComputePipeline(&desc));
-
-            EXPECT_TRUE(computePipeline->IsAlive());
-            EXPECT_TRUE(computePipeline->IsCachedReference());
-        }
-    }
-
-    TEST_F(DestroyObjectTests, PipelineLayoutExplicit) {
-        PipelineLayoutMock pipelineLayoutMock(&mDevice);
-        EXPECT_CALL(pipelineLayoutMock, DestroyApiObjectImpl).Times(1);
-
-        EXPECT_TRUE(pipelineLayoutMock.IsAlive());
-        pipelineLayoutMock.DestroyApiObject();
-        EXPECT_FALSE(pipelineLayoutMock.IsAlive());
-    }
-
-    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-    // will also complain if there is a memory leak.
-    TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
-        PipelineLayoutMock* pipelineLayoutMock = new PipelineLayoutMock(&mDevice);
-        EXPECT_CALL(*pipelineLayoutMock, DestroyApiObjectImpl).Times(1);
-        {
-            PipelineLayoutDescriptor desc = {};
-            Ref<PipelineLayoutBase> pipelineLayout;
-            EXPECT_CALL(mDevice, CreatePipelineLayoutImpl)
-                .WillOnce(Return(ByMove(AcquireRef(pipelineLayoutMock))));
-            DAWN_ASSERT_AND_ASSIGN(pipelineLayout, mDevice.CreatePipelineLayout(&desc));
-
-            EXPECT_TRUE(pipelineLayout->IsAlive());
-            EXPECT_TRUE(pipelineLayout->IsCachedReference());
-        }
-    }
-
-    TEST_F(DestroyObjectTests, RenderPipelineExplicit) {
-        RenderPipelineMock renderPipelineMock(&mDevice);
-        EXPECT_CALL(renderPipelineMock, DestroyApiObjectImpl).Times(1);
-
-        EXPECT_TRUE(renderPipelineMock.IsAlive());
-        renderPipelineMock.DestroyApiObject();
-        EXPECT_FALSE(renderPipelineMock.IsAlive());
-    }
-
-    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-    // will also complain if there is a memory leak.
-    TEST_F(DestroyObjectTests, RenderPipelineImplicit) {
-        // RenderPipelines usually set their hash values at construction, but the mock does not, so
-        // we set it here.
-        constexpr size_t hash = 0x12345;
-        RenderPipelineMock* renderPipelineMock = new RenderPipelineMock(&mDevice);
-        renderPipelineMock->SetContentHash(hash);
-        ON_CALL(*renderPipelineMock, ComputeContentHash).WillByDefault(Return(hash));
-
-        // Render pipelines are initialized during their creation via the device.
-        EXPECT_CALL(*renderPipelineMock, Initialize).Times(1);
-        EXPECT_CALL(*renderPipelineMock, DestroyApiObjectImpl).Times(1);
-
-        {
-            RenderPipelineDescriptor desc = {};
-            desc.layout = GetPipelineLayout().Get();
-            desc.vertex.module = GetVertexShaderModule().Get();
-
-            Ref<RenderPipelineBase> renderPipeline;
-            EXPECT_CALL(mDevice, CreateUninitializedRenderPipelineImpl)
-                .WillOnce(Return(ByMove(AcquireRef(renderPipelineMock))));
-            DAWN_ASSERT_AND_ASSIGN(renderPipeline, mDevice.CreateRenderPipeline(&desc));
-
-            EXPECT_TRUE(renderPipeline->IsAlive());
-            EXPECT_TRUE(renderPipeline->IsCachedReference());
-        }
-    }
-
-    TEST_F(DestroyObjectTests, SamplerExplicit) {
-        SamplerMock samplerMock(&mDevice);
-        EXPECT_CALL(samplerMock, DestroyApiObjectImpl).Times(1);
-
-        EXPECT_TRUE(samplerMock.IsAlive());
-        samplerMock.DestroyApiObject();
-        EXPECT_FALSE(samplerMock.IsAlive());
-    }
-
-    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-    // will also complain if there is a memory leak.
-    TEST_F(DestroyObjectTests, SamplerImplicit) {
-        SamplerMock* samplerMock = new SamplerMock(&mDevice);
-        EXPECT_CALL(*samplerMock, DestroyApiObjectImpl).Times(1);
-        {
-            SamplerDescriptor desc = {};
-            Ref<SamplerBase> sampler;
-            EXPECT_CALL(mDevice, CreateSamplerImpl)
-                .WillOnce(Return(ByMove(AcquireRef(samplerMock))));
-            DAWN_ASSERT_AND_ASSIGN(sampler, mDevice.CreateSampler(&desc));
-
-            EXPECT_TRUE(sampler->IsAlive());
-            EXPECT_TRUE(sampler->IsCachedReference());
-        }
-    }
-
-    TEST_F(DestroyObjectTests, ShaderModuleExplicit) {
-        ShaderModuleMock shaderModuleMock(&mDevice);
-        EXPECT_CALL(shaderModuleMock, DestroyApiObjectImpl).Times(1);
-
-        EXPECT_TRUE(shaderModuleMock.IsAlive());
-        shaderModuleMock.DestroyApiObject();
-        EXPECT_FALSE(shaderModuleMock.IsAlive());
-    }
-
-    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-    // will also complain if there is a memory leak.
-    TEST_F(DestroyObjectTests, ShaderModuleImplicit) {
-        ShaderModuleMock* shaderModuleMock = new ShaderModuleMock(&mDevice);
-        EXPECT_CALL(*shaderModuleMock, DestroyApiObjectImpl).Times(1);
-        {
-            ShaderModuleWGSLDescriptor wgslDesc;
-            wgslDesc.source = R"(
-                [[stage(compute), workgroup_size(1)]] fn main() {
-                }
-            )";
-            ShaderModuleDescriptor desc = {};
-            desc.nextInChain = &wgslDesc;
-            Ref<ShaderModuleBase> shaderModule;
-            EXPECT_CALL(mDevice, CreateShaderModuleImpl)
-                .WillOnce(Return(ByMove(AcquireRef(shaderModuleMock))));
-            DAWN_ASSERT_AND_ASSIGN(shaderModule, mDevice.CreateShaderModule(&desc));
-
-            EXPECT_TRUE(shaderModule->IsAlive());
-            EXPECT_TRUE(shaderModule->IsCachedReference());
-        }
-    }
-
-    TEST_F(DestroyObjectTests, SwapChainExplicit) {
-        SwapChainMock swapChainMock(&mDevice);
-        EXPECT_CALL(swapChainMock, DestroyApiObjectImpl).Times(1);
-
-        EXPECT_TRUE(swapChainMock.IsAlive());
-        swapChainMock.DestroyApiObject();
-        EXPECT_FALSE(swapChainMock.IsAlive());
-    }
-
-    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
-    // will also complain if there is a memory leak.
-    TEST_F(DestroyObjectTests, SwapChainImplicit) {
-        SwapChainMock* swapChainMock = new SwapChainMock(&mDevice);
-        EXPECT_CALL(*swapChainMock, DestroyApiObjectImpl).Times(1);
-        {
-            SwapChainDescriptor desc = {};
-            Ref<SwapChainBase> swapChain;
-            EXPECT_CALL(mDevice, CreateSwapChainImpl(_))
-                .WillOnce(Return(ByMove(AcquireRef(swapChainMock))));
-            DAWN_ASSERT_AND_ASSIGN(swapChain, mDevice.CreateSwapChain(nullptr, &desc));
-
-            EXPECT_TRUE(swapChain->IsAlive());
-        }
-    }
-
-    // Destroying the objects on the mDevice should result in all created objects being destroyed in
+    // Destroying the objects on the device should result in all created objects being destroyed in
     // order.
-    TEST_F(DestroyObjectTests, DestroyObjects) {
-        BindGroupMock* bindGroupMock = new BindGroupMock(&mDevice);
-        BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&mDevice);
-        ComputePipelineMock* computePipelineMock = new ComputePipelineMock(&mDevice);
-        PipelineLayoutMock* pipelineLayoutMock = new PipelineLayoutMock(&mDevice);
-        RenderPipelineMock* renderPipelineMock = new RenderPipelineMock(&mDevice);
-        SamplerMock* samplerMock = new SamplerMock(&mDevice);
-        ShaderModuleMock* shaderModuleMock = new ShaderModuleMock(&mDevice);
-        SwapChainMock* swapChainMock = new SwapChainMock(&mDevice);
+    TEST(DestroyObjectTests, DestroyObjects) {
+        DeviceMock device;
+        device.SetToggle(Toggle::SkipValidation, true);
+
+        BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&device);
         {
             InSequence seq;
-            EXPECT_CALL(*renderPipelineMock, DestroyApiObjectImpl).Times(1);
-            EXPECT_CALL(*computePipelineMock, DestroyApiObjectImpl).Times(1);
-            EXPECT_CALL(*pipelineLayoutMock, DestroyApiObjectImpl).Times(1);
-            EXPECT_CALL(*swapChainMock, DestroyApiObjectImpl).Times(1);
-            EXPECT_CALL(*bindGroupMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*bindGroupLayoutMock, DestroyApiObjectImpl).Times(1);
-            EXPECT_CALL(*shaderModuleMock, DestroyApiObjectImpl).Times(1);
-            EXPECT_CALL(*samplerMock, DestroyApiObjectImpl).Times(1);
         }
 
-        Ref<BindGroupBase> bindGroup;
-        {
-            BindGroupDescriptor desc = {};
-            EXPECT_CALL(mDevice, CreateBindGroupImpl)
-                .WillOnce(Return(ByMove(AcquireRef(bindGroupMock))));
-            DAWN_ASSERT_AND_ASSIGN(bindGroup, mDevice.CreateBindGroup(&desc));
-            EXPECT_TRUE(bindGroup->IsAlive());
-        }
-
+        BindGroupLayoutDescriptor desc = {};
         Ref<BindGroupLayoutBase> bindGroupLayout;
-        {
-            BindGroupLayoutDescriptor desc = {};
-            EXPECT_CALL(mDevice, CreateBindGroupLayoutImpl)
-                .WillOnce(Return(ByMove(AcquireRef(bindGroupLayoutMock))));
-            DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, mDevice.CreateBindGroupLayout(&desc));
-            EXPECT_TRUE(bindGroupLayout->IsAlive());
-            EXPECT_TRUE(bindGroupLayout->IsCachedReference());
-        }
+        EXPECT_CALL(device, CreateBindGroupLayoutImpl)
+            .WillOnce(Return(ByMove(AcquireRef(bindGroupLayoutMock))));
+        DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, device.CreateBindGroupLayout(&desc));
+        EXPECT_TRUE(bindGroupLayout->IsAlive());
+        EXPECT_TRUE(bindGroupLayout->IsCachedReference());
 
-        Ref<ComputePipelineBase> computePipeline;
-        {
-            // Compute pipelines usually set their hash values at construction, but the mock does
-            // not, so we set it here.
-            constexpr size_t hash = 0x12345;
-            computePipelineMock->SetContentHash(hash);
-            ON_CALL(*computePipelineMock, ComputeContentHash).WillByDefault(Return(hash));
-
-            // Compute pipelines are initialized during their creation via the device.
-            EXPECT_CALL(*computePipelineMock, Initialize).Times(1);
-
-            ComputePipelineDescriptor desc = {};
-            desc.layout = GetPipelineLayout().Get();
-            desc.compute.module = GetComputeShaderModule().Get();
-            EXPECT_CALL(mDevice, CreateUninitializedComputePipelineImpl)
-                .WillOnce(Return(ByMove(AcquireRef(computePipelineMock))));
-            DAWN_ASSERT_AND_ASSIGN(computePipeline, mDevice.CreateComputePipeline(&desc));
-            EXPECT_TRUE(computePipeline->IsAlive());
-            EXPECT_TRUE(computePipeline->IsCachedReference());
-        }
-
-        Ref<PipelineLayoutBase> pipelineLayout;
-        {
-            PipelineLayoutDescriptor desc = {};
-            EXPECT_CALL(mDevice, CreatePipelineLayoutImpl)
-                .WillOnce(Return(ByMove(AcquireRef(pipelineLayoutMock))));
-            DAWN_ASSERT_AND_ASSIGN(pipelineLayout, mDevice.CreatePipelineLayout(&desc));
-            EXPECT_TRUE(pipelineLayout->IsAlive());
-            EXPECT_TRUE(pipelineLayout->IsCachedReference());
-        }
-
-        Ref<RenderPipelineBase> renderPipeline;
-        {
-            // Render pipelines usually set their hash values at construction, but the mock does
-            // not, so we set it here.
-            constexpr size_t hash = 0x12345;
-            renderPipelineMock->SetContentHash(hash);
-            ON_CALL(*renderPipelineMock, ComputeContentHash).WillByDefault(Return(hash));
-
-            // Render pipelines are initialized during their creation via the device.
-            EXPECT_CALL(*renderPipelineMock, Initialize).Times(1);
-
-            RenderPipelineDescriptor desc = {};
-            desc.layout = GetPipelineLayout().Get();
-            desc.vertex.module = GetVertexShaderModule().Get();
-            EXPECT_CALL(mDevice, CreateUninitializedRenderPipelineImpl)
-                .WillOnce(Return(ByMove(AcquireRef(renderPipelineMock))));
-            DAWN_ASSERT_AND_ASSIGN(renderPipeline, mDevice.CreateRenderPipeline(&desc));
-            EXPECT_TRUE(renderPipeline->IsAlive());
-            EXPECT_TRUE(renderPipeline->IsCachedReference());
-        }
-
-        Ref<SamplerBase> sampler;
-        {
-            SamplerDescriptor desc = {};
-            EXPECT_CALL(mDevice, CreateSamplerImpl)
-                .WillOnce(Return(ByMove(AcquireRef(samplerMock))));
-            DAWN_ASSERT_AND_ASSIGN(sampler, mDevice.CreateSampler(&desc));
-            EXPECT_TRUE(sampler->IsAlive());
-            EXPECT_TRUE(sampler->IsCachedReference());
-        }
-
-        Ref<ShaderModuleBase> shaderModule;
-        {
-            ShaderModuleWGSLDescriptor wgslDesc;
-            wgslDesc.source = R"(
-                [[stage(compute), workgroup_size(1)]] fn main() {
-                }
-            )";
-            ShaderModuleDescriptor desc = {};
-            desc.nextInChain = &wgslDesc;
-
-            EXPECT_CALL(mDevice, CreateShaderModuleImpl)
-                .WillOnce(Return(ByMove(AcquireRef(shaderModuleMock))));
-            DAWN_ASSERT_AND_ASSIGN(shaderModule, mDevice.CreateShaderModule(&desc));
-            EXPECT_TRUE(shaderModule->IsAlive());
-            EXPECT_TRUE(shaderModule->IsCachedReference());
-        }
-
-        Ref<SwapChainBase> swapChain;
-        {
-            SwapChainDescriptor desc = {};
-            EXPECT_CALL(mDevice, CreateSwapChainImpl(_))
-                .WillOnce(Return(ByMove(AcquireRef(swapChainMock))));
-            DAWN_ASSERT_AND_ASSIGN(swapChain, mDevice.CreateSwapChain(nullptr, &desc));
-            EXPECT_TRUE(swapChain->IsAlive());
-        }
-
-        mDevice.DestroyObjects();
-        EXPECT_FALSE(bindGroup->IsAlive());
+        device.DestroyObjects();
         EXPECT_FALSE(bindGroupLayout->IsAlive());
-        EXPECT_FALSE(computePipeline->IsAlive());
-        EXPECT_FALSE(pipelineLayout->IsAlive());
-        EXPECT_FALSE(renderPipeline->IsAlive());
-        EXPECT_FALSE(sampler->IsAlive());
-        EXPECT_FALSE(shaderModule->IsAlive());
-        EXPECT_FALSE(swapChain->IsAlive());
     }
 
 }}  // namespace dawn_native::

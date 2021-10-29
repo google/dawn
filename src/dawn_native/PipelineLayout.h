@@ -50,9 +50,6 @@ namespace dawn_native {
 
     class PipelineLayoutBase : public ApiObjectBase, public CachedObject {
       public:
-        PipelineLayoutBase(DeviceBase* device,
-                           const PipelineLayoutDescriptor* descriptor,
-                           ApiObjectBase::UntrackedByDeviceTag tag);
         PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDescriptor* descriptor);
         ~PipelineLayoutBase() override;
 
@@ -61,7 +58,6 @@ namespace dawn_native {
             DeviceBase* device,
             std::vector<StageAndDescriptor> stages);
 
-        bool DestroyApiObject() override;
         ObjectType GetType() const override;
 
         const BindGroupLayoutBase* GetBindGroupLayout(BindGroupIndex group) const;
@@ -84,8 +80,6 @@ namespace dawn_native {
         };
 
       protected:
-        // Constructor used only for mocking and testing.
-        PipelineLayoutBase(DeviceBase* device);
         PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         BindGroupLayoutArray mBindGroupLayouts;

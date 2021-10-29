@@ -73,9 +73,7 @@ namespace dawn_native {
             static_assert(std::is_base_of<BindGroupBase, Derived>::value, "");
         }
 
-        // Constructor used only for mocking and testing.
-        BindGroupBase(DeviceBase* device);
-
+      protected:
         ~BindGroupBase() override;
 
       private:

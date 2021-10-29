@@ -37,7 +37,6 @@
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/RenderBundleEncoder.h"
-#include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Sampler.h"
 #include "dawn_native/Surface.h"
 #include "dawn_native/SwapChain.h"
@@ -266,19 +265,9 @@ namespace dawn_native {
         // that this only considers the immediate frontend dependencies, while backend objects could
         // add complications and extra dependencies.
         // TODO(dawn/628) Add types into the array as they are implemented.
-
-        // clang-format off
-        static constexpr std::array<ObjectType, 8> kObjectTypeDependencyOrder = {
-            ObjectType::RenderPipeline,
-            ObjectType::ComputePipeline,
-            ObjectType::PipelineLayout,
-            ObjectType::SwapChain,
-            ObjectType::BindGroup,
+        static constexpr std::array<ObjectType, 1> kObjectTypeDependencyOrder = {
             ObjectType::BindGroupLayout,
-            ObjectType::ShaderModule,
-            ObjectType::Sampler,
         };
-        // clang-format on
 
         // We first move all objects out from the tracking list into a separate list so that we can
         // avoid locking the same mutex twice. We can then iterate across the separate list to call
@@ -725,7 +714,7 @@ namespace dawn_native {
 
     ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::GetOrCreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor) {
-        PipelineLayoutBase blueprint(this, descriptor, ApiObjectBase::kUntrackedByDevice);
+        PipelineLayoutBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
@@ -758,7 +747,7 @@ namespace dawn_native {
 
     ResultOrError<Ref<SamplerBase>> DeviceBase::GetOrCreateSampler(
         const SamplerDescriptor* descriptor) {
-        SamplerBase blueprint(this, descriptor, ApiObjectBase::kUntrackedByDevice);
+        SamplerBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
@@ -789,7 +778,7 @@ namespace dawn_native {
         OwnedCompilationMessages* compilationMessages) {
         ASSERT(parseResult != nullptr);
 
-        ShaderModuleBase blueprint(this, descriptor, ApiObjectBase::kUntrackedByDevice);
+        ShaderModuleBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
