@@ -162,8 +162,6 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
     DAWN_SKIP_TEST_IF(UsesWire());
-    // Relies on Tint shader reflection.
-    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
 
     wgpu::BindGroupLayout filteringBGL = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
@@ -1082,10 +1080,7 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
 }
 
 // Test that fragment output validation is for the correct entryPoint
-// TODO(dawn:216): Re-enable when we correctly reflect which bindings are used for an entryPoint.
 TEST_F(GetBindGroupLayoutTests, FromCorrectEntryPoint) {
-    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
-
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Data {
             data : f32;

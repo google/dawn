@@ -385,7 +385,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "    enable all available backend validation with less performance overhead.\n"
                    "    Set to 'disabled' to run with no validation (same as no flag).\n"
                    "  --enable-toggles: Comma-delimited list of Dawn toggles to enable.\n"
-                   "    ex.) skip_validation,use_tint_generator,disable_robustness,turn_off_vsync\n"
+                   "    ex.) skip_validation,disable_robustness,turn_off_vsync\n"
                    "  --disable-toggles: Comma-delimited list of Dawn toggles to disable\n"
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
                    "on multi-GPU systems \n"

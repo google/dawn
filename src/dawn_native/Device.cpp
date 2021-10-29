@@ -186,15 +186,6 @@ namespace dawn_native {
 
         mFormatTable = BuildFormatTable(this);
         SetDefaultToggles();
-        if ((adapter->GetBackendType() == wgpu::BackendType::Metal ||
-             adapter->GetBackendType() == wgpu::BackendType::Vulkan ||
-             adapter->GetBackendType() == wgpu::BackendType::D3D12) &&
-            !IsToggleEnabled(Toggle::UseTintGenerator)) {
-            EmitLog(
-                WGPULoggingType_Warning,
-                "Non-tint generator is not available on this backend; toggle disable ignored.\n");
-            ForceSetToggle(Toggle::UseTintGenerator, true);
-        }
     }
 
     DeviceBase::DeviceBase() : mState(State::Alive) {
@@ -1537,7 +1528,6 @@ namespace dawn_native {
     void DeviceBase::SetDefaultToggles() {
         SetToggle(Toggle::LazyClearResourceOnFirstUse, true);
         SetToggle(Toggle::DisallowUnsafeAPIs, true);
-        SetToggle(Toggle::UseTintGenerator, true);
     }
 
     void DeviceBase::ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor) {

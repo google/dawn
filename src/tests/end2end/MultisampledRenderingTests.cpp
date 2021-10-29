@@ -756,7 +756,7 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMas
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOutputMask) {
     // TODO(github.com/KhronosGroup/SPIRV-Cross/issues/1626): SPIRV-Cross produces bad GLSL for
     // unsigned SampleMask builtins
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("use_tint_generator") && (IsOpenGL() || IsOpenGLES()));
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
     // supported on some platforms.
@@ -818,7 +818,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOutputMask) {
     // TODO(github.com/KhronosGroup/SPIRV-Cross/issues/1626): SPIRV-Cross produces bad GLSL for
     // unsigned SampleMask builtins
-    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("use_tint_generator") && (IsOpenGL() || IsOpenGLES()));
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
     // supported on some platforms.

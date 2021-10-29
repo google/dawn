@@ -160,9 +160,6 @@ namespace dawn_native {
               "Produces validation errors on API entry points or parameter combinations that "
               "aren't considered secure yet.",
               "http://crbug.com/1138528"}},
-            {Toggle::UseTintGenerator,
-             {"use_tint_generator", "Use Tint instead of SPRIV-cross to generate shaders.",
-              "https://crbug.com/dawn/571"}},
             {Toggle::FlushBeforeClientWaitSync,
              {"flush_before_client_wait_sync",
               "Call glFlush before glClientWaitSync to work around bugs in the latter",

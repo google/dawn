@@ -352,13 +352,13 @@ namespace dawn_native { namespace opengl {
         // Modify the decoration of variables so that SPIRV-Cross outputs only
         //  layout(binding=<index>) for interface variables.
         //
-        // When the use_tint_generator toggle is on, Tint is used for the reflection of bindings
-        // for the implicit pipeline layout and pipeline/layout validation, but bindingInfo is set
-        // to mGLEntryPoints which is the SPIRV-Cross reflection. Tint reflects bindings used more
-        // precisely than SPIRV-Cross so some bindings in bindingInfo might not exist in the layout
-        // and querying the layout for them would cause an ASSERT. That's why we defensively check
-        // that bindings are in the layout before modifying them. This slight hack is ok because in
-        // the long term we will use Tint to produce GLSL.
+        // Tint is used for the reflection of bindings for the implicit pipeline layout and
+        // pipeline/layout validation, but bindingInfo is set to mGLEntryPoints which is the
+        // SPIRV-Cross reflection. Tint reflects bindings used more precisely than SPIRV-Cross so
+        // some bindings in bindingInfo might not exist in the layout and querying the layout for
+        // them would cause an ASSERT. That's why we defensively check that bindings are in the
+        // layout before modifying them. This slight hack is ok because in the long term we will use
+        // Tint to produce GLSL.
         for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             for (const auto& it : bindingInfo[group]) {
                 const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(group);

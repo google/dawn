@@ -409,7 +409,7 @@ void ShaderRobustnessPerf::SetUp() {
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
     // TODO(crbug.com/dawn/945): Generation via SPIRV-Cross fails
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || !HasToggleEnabled("use_tint_generator"));
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
 
     const size_t dataASize = mDimAOuter * mDimInner;
     std::vector<float> dataA(dataASize);

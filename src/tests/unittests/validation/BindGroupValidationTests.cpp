@@ -2426,7 +2426,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
     }
 
     // Test that filtering sampler binding does not work with comparison sampler in the shader.
-    if (HasToggleEnabled("use_tint_generator")) {
+    {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
 
@@ -2438,7 +2438,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
     }
 
     // Test that non-filtering sampler binding does not work with comparison sampler in the shader.
-    if (HasToggleEnabled("use_tint_generator")) {
+    {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering}});
 
@@ -2450,7 +2450,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
     }
 
     // Test that comparison sampler binding does not work with normal sampler in the shader.
-    if (HasToggleEnabled("use_tint_generator")) {
+    {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison}});
 
@@ -2532,7 +2532,7 @@ TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
     }
 
     // Test that a filtering sampler cannot be used to sample an unfilterable-float texture.
-    if (HasToggleEnabled("use_tint_generator")) {
+    {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
                      {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::UnfilterableFloat}});

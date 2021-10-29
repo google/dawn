@@ -63,7 +63,7 @@ void InitDawnValidationTestEnvironment(int argc, char** argv) {
                    "    [--enable-toggles=toggles] [--disable-toggles=toggles]\n"
                    "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
                    "  --enable-toggles: Comma-delimited list of Dawn toggles to enable.\n"
-                   "    ex.) skip_validation,use_tint_generator,disable_robustness,turn_off_vsync\n"
+                   "    ex.) skip_validation,disable_robustness,turn_off_vsync\n"
                    "  --disable-toggles: Comma-delimited list of Dawn toggles to disable\n";
             continue;
         }

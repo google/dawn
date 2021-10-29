@@ -48,7 +48,6 @@ namespace dawn_native {
         DisableRobustness,
         MetalEnableVertexPulling,
         DisallowUnsafeAPIs,
-        UseTintGenerator,
         FlushBeforeClientWaitSync,
         UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
         EmitHLSLDebugSymbols,

@@ -435,8 +435,6 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
 
 // Tests that we validate workgroup size limits.
 TEST_F(ShaderModuleValidationTest, ComputeWorkgroupSizeLimits) {
-    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
-
     auto MakeShaderWithWorkgroupSize = [this](uint32_t x, uint32_t y, uint32_t z) {
         std::ostringstream ss;
         ss << "[[stage(compute), workgroup_size(" << x << "," << y << "," << z
@@ -467,8 +465,6 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupSizeLimits) {
 
 // Tests that we validate workgroup storage size limits.
 TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
-    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
-
     wgpu::Limits supportedLimits = GetSupportedLimits().limits;
 
     constexpr uint32_t kVec4Size = 16;

@@ -339,10 +339,6 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 //  2 - Write ones into it with a compute shader.
 //  3 - Use the indirect buffer in a Dispatch while also reading its data.
 TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
-    // For some reason SPIRV-Cross crashes when translating the step3 shader to HLSL. Suppress the
-    // failure since we'll remove SPIRV-Cross at some point.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && !HasToggleEnabled("use_tint_generator"));
-
     wgpu::ComputePipelineDescriptor step2PipelineDesc;
     step2PipelineDesc.compute.entryPoint = "main";
     step2PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(

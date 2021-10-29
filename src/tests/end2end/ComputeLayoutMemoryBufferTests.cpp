@@ -135,8 +135,6 @@ class ComputeLayoutMemoryBufferTests
     : public DawnTestWithParams<ComputeLayoutMemoryBufferTestParams> {
     void SetUp() override {
         DawnTestBase::SetUp();
-        DAWN_TEST_UNSUPPORTED_IF((IsD3D12() || IsMetal()) &&
-                                 !HasToggleEnabled("use_tint_generator"));
     }
 };
 

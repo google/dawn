@@ -50,8 +50,6 @@ class FirstIndexOffsetTests : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_TEST_UNSUPPORTED_IF(IsD3D12() && !HasToggleEnabled("use_tint_generator"));
-
         // WGSL doesn't have the ability to tag attributes as "flat". "flat" is required on u32
         // attributes for correct runtime behavior under Vulkan and codegen under OpenGL(ES).
         // TODO(tint:451): Remove once resolved by spec/tint

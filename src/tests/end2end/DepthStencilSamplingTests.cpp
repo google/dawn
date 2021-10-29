@@ -741,9 +741,6 @@ TEST_P(DepthStencilSamplingTest, CompareFunctionsRender) {
     // Initialization via renderPass loadOp doesn't work on Mac Intel.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
-    // Depends on Tint's shader reflection
-    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
-
     wgpu::RenderPipeline pipeline = CreateComparisonRenderPipeline();
 
     for (wgpu::TextureFormat format : kDepthFormats) {
