@@ -17,8 +17,10 @@
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
 #include "dawn_native/BindGroup.h"
+#include "dawn_native/ComputePassEncoder.h"
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/RenderPipeline.h"
 
@@ -83,13 +85,15 @@ namespace dawn_native {
     MaybeError CommandBufferStateTracker::ValidateBufferInRangeForVertexBuffer(
         uint32_t vertexCount,
         uint32_t firstVertex) {
+        RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
+
         const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
             vertexBufferSlotsUsedAsVertexBuffer =
-                mLastRenderPipeline->GetVertexBufferSlotsUsedAsVertexBuffer();
+                lastRenderPipeline->GetVertexBufferSlotsUsedAsVertexBuffer();
 
         for (auto usedSlotVertex : IterateBitSet(vertexBufferSlotsUsedAsVertexBuffer)) {
             const VertexBufferInfo& vertexBuffer =
-                mLastRenderPipeline->GetVertexBuffer(usedSlotVertex);
+                lastRenderPipeline->GetVertexBuffer(usedSlotVertex);
             uint64_t arrayStride = vertexBuffer.arrayStride;
             uint64_t bufferSize = mVertexBufferSizes[usedSlotVertex];
 
@@ -120,13 +124,15 @@ namespace dawn_native {
     MaybeError CommandBufferStateTracker::ValidateBufferInRangeForInstanceBuffer(
         uint32_t instanceCount,
         uint32_t firstInstance) {
+        RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
+
         const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
             vertexBufferSlotsUsedAsInstanceBuffer =
-                mLastRenderPipeline->GetVertexBufferSlotsUsedAsInstanceBuffer();
+                lastRenderPipeline->GetVertexBufferSlotsUsedAsInstanceBuffer();
 
         for (auto usedSlotInstance : IterateBitSet(vertexBufferSlotsUsedAsInstanceBuffer)) {
             const VertexBufferInfo& vertexBuffer =
-                mLastRenderPipeline->GetVertexBuffer(usedSlotInstance);
+                lastRenderPipeline->GetVertexBuffer(usedSlotInstance);
             uint64_t arrayStride = vertexBuffer.arrayStride;
             uint64_t bufferSize = mVertexBufferSizes[usedSlotInstance];
             if (arrayStride == 0) {
@@ -209,18 +215,19 @@ namespace dawn_native {
         }
 
         if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
-            ASSERT(mLastRenderPipeline != nullptr);
+            RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
 
             const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>& requiredVertexBuffers =
-                mLastRenderPipeline->GetVertexBufferSlotsUsed();
+                lastRenderPipeline->GetVertexBufferSlotsUsed();
             if (IsSubset(requiredVertexBuffers, mVertexBufferSlotsUsed)) {
                 mAspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
             }
         }
 
         if (aspects[VALIDATION_ASPECT_INDEX_BUFFER] && mIndexBufferSet) {
-            if (!IsStripPrimitiveTopology(mLastRenderPipeline->GetPrimitiveTopology()) ||
-                mIndexFormat == mLastRenderPipeline->GetStripIndexFormat()) {
+            RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
+            if (!IsStripPrimitiveTopology(lastRenderPipeline->GetPrimitiveTopology()) ||
+                mIndexFormat == lastRenderPipeline->GetStripIndexFormat()) {
                 mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
             }
         }
@@ -234,12 +241,13 @@ namespace dawn_native {
         if (DAWN_UNLIKELY(aspects[VALIDATION_ASPECT_INDEX_BUFFER])) {
             DAWN_INVALID_IF(!mIndexBufferSet, "Index buffer was not set.");
 
-            wgpu::IndexFormat pipelineIndexFormat = mLastRenderPipeline->GetStripIndexFormat();
+            RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
+            wgpu::IndexFormat pipelineIndexFormat = lastRenderPipeline->GetStripIndexFormat();
             DAWN_INVALID_IF(
-                IsStripPrimitiveTopology(mLastRenderPipeline->GetPrimitiveTopology()) &&
+                IsStripPrimitiveTopology(lastRenderPipeline->GetPrimitiveTopology()) &&
                     mIndexFormat != pipelineIndexFormat,
                 "Strip index format (%s) of %s does not match index buffer format (%s).",
-                pipelineIndexFormat, mLastRenderPipeline, mIndexFormat);
+                pipelineIndexFormat, lastRenderPipeline, mIndexFormat);
 
             // The chunk of code above should be similar to the one in |RecomputeLazyAspects|.
             // It returns the first invalid state found. We shouldn't be able to reach this line
@@ -251,7 +259,7 @@ namespace dawn_native {
 
         // TODO(dawn:563): Indicate which slots were not set.
         DAWN_INVALID_IF(aspects[VALIDATION_ASPECT_VERTEX_BUFFERS],
-                        "Vertex buffer slots required by %s were not set.", mLastRenderPipeline);
+                        "Vertex buffer slots required by %s were not set.", GetRenderPipeline());
 
         if (DAWN_UNLIKELY(aspects[VALIDATION_ASPECT_BIND_GROUPS])) {
             for (BindGroupIndex i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
@@ -290,12 +298,15 @@ namespace dawn_native {
     }
 
     void CommandBufferStateTracker::SetRenderPipeline(RenderPipelineBase* pipeline) {
-        mLastRenderPipeline = pipeline;
         SetPipelineCommon(pipeline);
     }
 
-    void CommandBufferStateTracker::SetBindGroup(BindGroupIndex index, BindGroupBase* bindgroup) {
+    void CommandBufferStateTracker::SetBindGroup(BindGroupIndex index,
+                                                 BindGroupBase* bindgroup,
+                                                 uint32_t dynamicOffsetCount,
+                                                 const uint32_t* dynamicOffsets) {
         mBindgroups[index] = bindgroup;
+        mDynamicOffsets[index].assign(dynamicOffsets, dynamicOffsets + dynamicOffsetCount);
         mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
     }
 
@@ -311,8 +322,9 @@ namespace dawn_native {
     }
 
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
-        mLastPipelineLayout = pipeline->GetLayout();
-        mMinBufferSizes = &pipeline->GetMinBufferSizes();
+        mLastPipeline = pipeline;
+        mLastPipelineLayout = pipeline != nullptr ? pipeline->GetLayout() : nullptr;
+        mMinBufferSizes = pipeline != nullptr ? &pipeline->GetMinBufferSizes() : nullptr;
 
         mAspects.set(VALIDATION_ASPECT_PIPELINE);
 
@@ -322,6 +334,25 @@ namespace dawn_native {
 
     BindGroupBase* CommandBufferStateTracker::GetBindGroup(BindGroupIndex index) const {
         return mBindgroups[index];
+    }
+
+    const std::vector<uint32_t>& CommandBufferStateTracker::GetDynamicOffsets(
+        BindGroupIndex index) const {
+        return mDynamicOffsets[index];
+    }
+
+    bool CommandBufferStateTracker::HasPipeline() const {
+        return mLastPipeline != nullptr;
+    }
+
+    RenderPipelineBase* CommandBufferStateTracker::GetRenderPipeline() const {
+        ASSERT(HasPipeline() && mLastPipeline->GetType() == ObjectType::RenderPipeline);
+        return static_cast<RenderPipelineBase*>(mLastPipeline);
+    }
+
+    ComputePipelineBase* CommandBufferStateTracker::GetComputePipeline() const {
+        ASSERT(HasPipeline() && mLastPipeline->GetType() == ObjectType::ComputePipeline);
+        return static_cast<ComputePipelineBase*>(mLastPipeline);
     }
 
     PipelineLayoutBase* CommandBufferStateTracker::GetPipelineLayout() const {

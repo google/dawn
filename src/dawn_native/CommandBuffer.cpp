@@ -73,6 +73,10 @@ namespace dawn_native {
         return mResourceUsages;
     }
 
+    CommandIterator* CommandBufferBase::GetCommandIteratorForTesting() {
+        return &mCommands;
+    }
+
     bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
                                        const Extent3D copySize,
                                        const uint32_t mipLevel) {

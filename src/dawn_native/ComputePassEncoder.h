@@ -50,6 +50,11 @@ namespace dawn_native {
 
         void APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
+        CommandBufferStateTracker* GetCommandBufferStateTrackerForTesting();
+        void RestoreCommandBufferStateForTesting(CommandBufferStateTracker state) {
+            RestoreCommandBufferState(std::move(state));
+        }
+
       protected:
         ComputePassEncoder(DeviceBase* device,
                            CommandEncoder* commandEncoder,
@@ -57,6 +62,12 @@ namespace dawn_native {
                            ErrorTag errorTag);
 
       private:
+        ResultOrError<std::pair<Ref<BufferBase>, uint64_t>> ValidateIndirectDispatch(
+            BufferBase* indirectBuffer,
+            uint64_t indirectOffset);
+
+        void RestoreCommandBufferState(CommandBufferStateTracker state);
+
         CommandBufferStateTracker mCommandBufferState;
 
         // Adds the bindgroups used for the current dispatch to the SyncScopeResourceUsage and

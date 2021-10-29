@@ -158,8 +158,14 @@ class ComputeDispatchTests : public DawnTest {
         queue.Submit(1, &commands);
 
         std::vector<uint32_t> expected;
+
+        uint32_t maxComputeWorkgroupsPerDimension =
+            GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
         if (indirectBufferData[indirectStart] == 0 || indirectBufferData[indirectStart + 1] == 0 ||
-            indirectBufferData[indirectStart + 2] == 0) {
+            indirectBufferData[indirectStart + 2] == 0 ||
+            indirectBufferData[indirectStart] > maxComputeWorkgroupsPerDimension ||
+            indirectBufferData[indirectStart + 1] > maxComputeWorkgroupsPerDimension ||
+            indirectBufferData[indirectStart + 2] > maxComputeWorkgroupsPerDimension) {
             expected = kSentinelData;
         } else {
             expected.assign(indirectBufferData.begin() + indirectStart,
@@ -219,6 +225,52 @@ TEST_P(ComputeDispatchTests, IndirectNoop) {
 // Test indirect with buffer offset
 TEST_P(ComputeDispatchTests, IndirectOffset) {
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t));
+}
+
+// Test indirect dispatches at max limit.
+TEST_P(ComputeDispatchTests, MaxWorkgroups) {
+    // TODO(crbug.com/dawn/1165): Fails with WARP
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+    uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
+
+    // Test that the maximum works in each dimension.
+    // Note: Testing (max, max, max) is very slow.
+    IndirectTest({max, 3, 4}, 0);
+    IndirectTest({2, max, 4}, 0);
+    IndirectTest({2, 3, max}, 0);
+}
+
+// Test indirect dispatches exceeding the max limit are noop-ed.
+TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsNoop) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
+
+    // All dimensions are above the max
+    IndirectTest({max + 1, max + 1, max + 1}, 0);
+
+    // Only x dimension is above the max
+    IndirectTest({max + 1, 3, 4}, 0);
+    IndirectTest({2 * max, 3, 4}, 0);
+
+    // Only y dimension is above the max
+    IndirectTest({2, max + 1, 4}, 0);
+    IndirectTest({2, 2 * max, 4}, 0);
+
+    // Only z dimension is above the max
+    IndirectTest({2, 3, max + 1}, 0);
+    IndirectTest({2, 3, 2 * max}, 0);
+}
+
+// Test indirect dispatches exceeding the max limit with an offset are noop-ed.
+TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsWithOffsetNoop) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
+
+    IndirectTest({1, 2, 3, max + 1, 4, 5}, 1 * sizeof(uint32_t));
+    IndirectTest({1, 2, 3, max + 1, 4, 5}, 2 * sizeof(uint32_t));
+    IndirectTest({1, 2, 3, max + 1, 4, 5}, 3 * sizeof(uint32_t));
 }
 
 DAWN_INSTANTIATE_TEST(ComputeDispatchTests,

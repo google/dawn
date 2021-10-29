@@ -17,6 +17,8 @@
 
 #include <gtest/gtest.h>
 
+#include "dawn/webgpu_cpp.h"
+#include "dawn_native/DawnNative.h"
 #include "dawn_native/ErrorData.h"
 
 namespace dawn_native {
@@ -28,5 +30,24 @@ namespace dawn_native {
     void AddFatalDawnFailure(const char* expression, const ErrorData* error);
 
 }  // namespace dawn_native
+
+class DawnNativeTest : public ::testing::Test {
+  public:
+    DawnNativeTest();
+    ~DawnNativeTest() override;
+
+    void SetUp() override;
+    void TearDown() override;
+
+    virtual WGPUDevice CreateTestDevice();
+
+  protected:
+    std::unique_ptr<dawn_native::Instance> instance;
+    dawn_native::Adapter adapter;
+    wgpu::Device device;
+
+  private:
+    static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
+};
 
 #endif  // TESTS_DAWNNATIVETEST_H_

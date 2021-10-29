@@ -38,7 +38,10 @@ namespace dawn_native {
         // State-modifying methods
         void SetComputePipeline(ComputePipelineBase* pipeline);
         void SetRenderPipeline(RenderPipelineBase* pipeline);
-        void SetBindGroup(BindGroupIndex index, BindGroupBase* bindgroup);
+        void SetBindGroup(BindGroupIndex index,
+                          BindGroupBase* bindgroup,
+                          uint32_t dynamicOffsetCount,
+                          const uint32_t* dynamicOffsets);
         void SetIndexBuffer(wgpu::IndexFormat format, uint64_t size);
         void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
 
@@ -46,6 +49,10 @@ namespace dawn_native {
         using ValidationAspects = std::bitset<kNumAspects>;
 
         BindGroupBase* GetBindGroup(BindGroupIndex index) const;
+        const std::vector<uint32_t>& GetDynamicOffsets(BindGroupIndex index) const;
+        bool HasPipeline() const;
+        RenderPipelineBase* GetRenderPipeline() const;
+        ComputePipelineBase* GetComputePipeline() const;
         PipelineLayoutBase* GetPipelineLayout() const;
         wgpu::IndexFormat GetIndexFormat() const;
         uint64_t GetIndexBufferSize() const;
@@ -60,6 +67,7 @@ namespace dawn_native {
         ValidationAspects mAspects;
 
         ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindgroups = {};
+        ityp::array<BindGroupIndex, std::vector<uint32_t>, kMaxBindGroups> mDynamicOffsets = {};
         ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
         bool mIndexBufferSet = false;
         wgpu::IndexFormat mIndexFormat;
@@ -68,7 +76,7 @@ namespace dawn_native {
         ityp::array<VertexBufferSlot, uint64_t, kMaxVertexBuffers> mVertexBufferSizes = {};
 
         PipelineLayoutBase* mLastPipelineLayout = nullptr;
-        RenderPipelineBase* mLastRenderPipeline = nullptr;
+        PipelineBase* mLastPipeline = nullptr;
 
         const RequiredBufferSizes* mMinBufferSizes = nullptr;
     };
