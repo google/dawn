@@ -191,6 +191,7 @@ test("dawn_unittests") {
     "unittests/BuddyMemoryAllocatorTests.cpp",
     "unittests/ChainUtilsTests.cpp",
     "unittests/CommandAllocatorTests.cpp",
+    "unittests/ConcurrentCacheTests.cpp",
     "unittests/EnumClassBitmasksTests.cpp",
     "unittests/EnumMaskIteratorTests.cpp",
     "unittests/ErrorTests.cpp",

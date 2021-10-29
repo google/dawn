@@ -171,6 +171,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "Assert.h",
       "BitSetIterator.h",
       "Compiler.h",
+      "ConcurrentCache.h",
       "Constants.h",
       "CoreFoundationRef.h",
       "DynamicLib.cpp",
