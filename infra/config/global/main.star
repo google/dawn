@@ -10,7 +10,10 @@ main.star: lucicfg configuration for Dawn's standalone builers.
 
 # Enable realms experiment.
 lucicfg.enable_experiment("crbug.com/1085650")
-luci.builder.defaults.experiments.set({"luci.use_realms": 100})
+luci.builder.defaults.experiments.set({
+    "luci.use_realms": 100,
+    "luci.recipes.use_python3": 100,
+})
 
 lucicfg.config(fail_on_warnings = True)
 
