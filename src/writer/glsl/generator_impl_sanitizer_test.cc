@@ -53,7 +53,7 @@ precision mediump float;
 
 
 layout (binding = 1) buffer my_struct_1 {
-  float a[0];
+  float a[];
 } b;
 
 void a_func() {
@@ -105,7 +105,7 @@ precision mediump float;
 
 layout (binding = 1) buffer my_struct_1 {
   float z;
-  float a[0];
+  float a[];
 } b;
 
 void a_func() {
@@ -158,7 +158,7 @@ precision mediump float;
 
 
 layout (binding = 1) buffer my_struct_1 {
-  float a[0];
+  float a[];
 } b;
 
 void a_func() {

@@ -2310,7 +2310,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       }
     }
     for (uint32_t size : sizes) {
-      out << "[" << size << "]";
+      if (size > 0) {
+        out << "[" << size << "]";
+      } else {
+        out << "[]";
+      }
     }
   } else if (type->Is<sem::Bool>()) {
     out << "bool";
