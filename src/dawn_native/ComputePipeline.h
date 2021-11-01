@@ -34,12 +34,17 @@ namespace dawn_native {
 
         static ComputePipelineBase* MakeError(DeviceBase* device);
 
+        bool DestroyApiObject() override;
         ObjectType GetType() const override;
 
         // Functors necessary for the unordered_set<ComputePipelineBase*>-based cache.
         struct EqualityFunc {
             bool operator()(const ComputePipelineBase* a, const ComputePipelineBase* b) const;
         };
+
+      protected:
+        // Constructor used only for mocking and testing.
+        ComputePipelineBase(DeviceBase* device);
 
       private:
         ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);

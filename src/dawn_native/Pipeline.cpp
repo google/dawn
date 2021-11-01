@@ -142,9 +142,14 @@ namespace dawn_native {
         }
     }
 
+    PipelineBase::PipelineBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
+    }
+
     PipelineBase::PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : ApiObjectBase(device, tag) {
     }
+
+    PipelineBase::~PipelineBase() = default;
 
     PipelineLayoutBase* PipelineBase::GetLayout() {
         ASSERT(!IsError());

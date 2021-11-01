@@ -51,7 +51,7 @@ namespace dawn_native {
         ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag);
         ApiObjectBase(DeviceBase* device, const char* label);
         ApiObjectBase(DeviceBase* device, ErrorTag tag);
-        virtual ~ApiObjectBase() override;
+        ~ApiObjectBase() override;
 
         virtual ObjectType GetType() const = 0;
         const std::string& GetLabel() const;

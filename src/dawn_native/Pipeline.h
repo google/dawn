@@ -50,6 +50,8 @@ namespace dawn_native {
 
     class PipelineBase : public ApiObjectBase, public CachedObject {
       public:
+        ~PipelineBase() override;
+
         PipelineLayoutBase* GetLayout();
         const PipelineLayoutBase* GetLayout() const;
         const RequiredBufferSizes& GetMinBufferSizes() const;
@@ -75,6 +77,9 @@ namespace dawn_native {
                      const char* label,
                      std::vector<StageAndDescriptor> stages);
         PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
+        // Constructor used only for mocking and testing.
+        PipelineBase(DeviceBase* device);
 
       private:
         MaybeError ValidateGetBindGroupLayout(uint32_t group);
