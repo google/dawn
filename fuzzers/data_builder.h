@@ -25,18 +25,20 @@
 namespace tint {
 namespace fuzzers {
 
-/// Builder for generic pseudo-random data using a data buffer as seed
+/// Builder for generic pseudo-random data
 class DataBuilder {
  public:
-  /// @brief Initialize internal random number generation using data as seed
-  /// @param data - pointer to a data buffer to use as a seed
+  /// @brief Initializes the internal engine using a seed value
+  /// @param seed - seed value passed to engine
+  explicit DataBuilder(uint64_t seed) : generator_(seed) {}
+
+  /// @brief Initializes the internal engine using seed data
+  /// @param data - data fuzzer to calculate seed from
   /// @param size - size of data buffer
   explicit DataBuilder(const uint8_t* data, size_t size)
-      : generator_(data, size) {}
-
-  /// @brief Initialize internal random number generation using seed value
-  /// @param seed - value to use as seed
-  explicit DataBuilder(uint64_t seed) : generator_(seed) {}
+      : generator_(data, size) {
+    assert(data != nullptr && "|data| must be !nullptr");
+  }
 
   ~DataBuilder() = default;
   DataBuilder(DataBuilder&&) = default;
@@ -131,7 +133,7 @@ class DataBuilder {
       }
       std::vector<uint8_t> source(count);
       b->build(source.data(), count);
-      return std::string(source.begin(), source.end());
+      return {source.begin(), source.end()};
     }
   };
 

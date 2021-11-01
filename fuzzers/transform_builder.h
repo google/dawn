@@ -29,16 +29,22 @@ namespace fuzzers {
 /// manager.
 class TransformBuilder {
  public:
-  /// @brief Initialize the data source using a data buffer as a seed
-  /// @param data - pointer to a data buffer to use as a seed
+  /// @brief Initializes the internal builder using a seed value
+  /// @param seed - seed value passed to engine
+  explicit TransformBuilder(uint64_t seed) : builder_(seed) {}
+
+  /// @brief Initializes the internal builder using seed data
+  /// @param data - data fuzzer to calculate seed from
   /// @param size - size of data buffer
   explicit TransformBuilder(const uint8_t* data, size_t size)
-      : builder_(data, size) {}
-  ~TransformBuilder() {}
+      : builder_(data, size) {
+    assert(data != nullptr && "|data| must be !nullptr");
+  }
+
+  ~TransformBuilder() = default;
 
   transform::Manager* manager() { return &manager_; }
   transform::DataMap* data_map() { return &data_map_; }
-  DataBuilder* builder() { return &builder_; }
 
   /// Adds a transform and needed data to |manager_| and |data_map_|.
   /// @tparam T - A class that inherits from transform::Transform and has an
@@ -65,6 +71,8 @@ class TransformBuilder {
   DataBuilder builder_;
   transform::Manager manager_;
   transform::DataMap data_map_;
+
+  DataBuilder* builder() { return &builder_; }
 
   /// Implementation of AddTransform, specialized for each transform that is
   /// implemented. Default implementation intentionally deleted to cause compile

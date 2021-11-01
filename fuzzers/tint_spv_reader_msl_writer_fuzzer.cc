@@ -21,9 +21,9 @@ namespace tint {
 namespace fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  DataBuilder b(data, size);
+  DataBuilder db(data, size);
   writer::msl::Options options;
-  GenerateMslOptions(&b, &options);
+  GenerateMslOptions(&db, &options);
   tint::fuzzers::ReaderWriterFuzzer fuzzer(InputFormat::kSpv,
                                            OutputFormat::kMSL);
   fuzzer.SetOptionsMsl(options);
