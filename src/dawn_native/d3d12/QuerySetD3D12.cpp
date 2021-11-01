@@ -55,12 +55,11 @@ namespace dawn_native { namespace d3d12 {
         return mQueryHeap.Get();
     }
 
-    QuerySet::~QuerySet() {
-        DestroyInternal();
-    }
+    QuerySet::~QuerySet() = default;
 
-    void QuerySet::DestroyImpl() {
+    void QuerySet::DestroyApiObjectImpl() {
         ToBackend(GetDevice())->ReferenceUntilUnused(mQueryHeap);
+        mQueryHeap = nullptr;
     }
 
 }}  // namespace dawn_native::d3d12

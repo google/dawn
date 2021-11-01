@@ -467,7 +467,18 @@ TEST_F(BufferValidationTest, MappedAtCreationSizeAlignment) {
     ASSERT_DEVICE_ERROR(BufferMappedAtCreation(2, wgpu::BufferUsage::MapWrite));
 }
 
-// Test that it is valid to destroy an unmapped buffer
+// Test that it is valid to destroy an error buffer
+TEST_F(BufferValidationTest, DestroyErrorBuffer) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 4;
+    desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
+    wgpu::Buffer buf;
+    ASSERT_DEVICE_ERROR(buf = device.CreateBuffer(&desc));
+
+    buf.Destroy();
+}
+
+// Test that it is valid to Destroy an unmapped buffer
 TEST_F(BufferValidationTest, DestroyUnmappedBuffer) {
     {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
@@ -484,6 +495,17 @@ TEST_F(BufferValidationTest, DestroyDestroyedBuffer) {
     wgpu::Buffer buf = CreateMapWriteBuffer(4);
     buf.Destroy();
     buf.Destroy();
+}
+
+// Test that it is invalid to Unmap an error buffer
+TEST_F(BufferValidationTest, UnmapErrorBuffer) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 4;
+    desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
+    wgpu::Buffer buf;
+    ASSERT_DEVICE_ERROR(buf = device.CreateBuffer(&desc));
+
+    ASSERT_DEVICE_ERROR(buf.Unmap());
 }
 
 // Test that it is invalid to Unmap a destroyed buffer

@@ -294,11 +294,6 @@ namespace dawn_native { namespace null {
         mAllocatedSize = GetSize();
     }
 
-    Buffer::~Buffer() {
-        DestroyInternal();
-        ToBackend(GetDevice())->DecrementMemoryUsage(GetSize());
-    }
-
     bool Buffer::IsCPUWritableAtCreation() const {
         // Only return true for mappable buffers so we can test cases that need / don't need a
         // staging buffer.
@@ -334,7 +329,8 @@ namespace dawn_native { namespace null {
     void Buffer::UnmapImpl() {
     }
 
-    void Buffer::DestroyImpl() {
+    void Buffer::DestroyApiObjectImpl() {
+        ToBackend(GetDevice())->DecrementMemoryUsage(GetSize());
     }
 
     // CommandBuffer
@@ -349,11 +345,7 @@ namespace dawn_native { namespace null {
         : QuerySetBase(device, descriptor) {
     }
 
-    QuerySet::~QuerySet() {
-        DestroyInternal();
-    }
-
-    void QuerySet::DestroyImpl() {
+    void QuerySet::DestroyApiObjectImpl() {
     }
 
     // Queue

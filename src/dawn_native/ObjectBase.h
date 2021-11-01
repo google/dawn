@@ -83,6 +83,12 @@ namespace dawn_native {
         // somewhere.
         void DeleteThis() override;
         void TrackInDevice();
+
+        // Thread-safe manner to mark an object as destroyed. Returns true iff the call was the
+        // "winning" attempt to destroy the object. This is useful when sub-classes may have extra
+        // pre-destruction steps that need to occur only once, i.e. Buffer needs to be unmapped
+        // before being destroyed.
+        bool MarkDestroyed();
         virtual void DestroyApiObjectImpl();
 
       private:

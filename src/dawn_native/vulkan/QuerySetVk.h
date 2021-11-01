@@ -35,7 +35,7 @@ namespace dawn_native { namespace vulkan {
         using QuerySetBase::QuerySetBase;
         MaybeError Initialize();
 
-        void DestroyImpl() override;
+        void DestroyApiObjectImpl() override;
 
         VkQueryPool mHandle = VK_NULL_HANDLE;
     };

@@ -140,9 +140,7 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    Buffer::~Buffer() {
-        DestroyInternal();
-    }
+    Buffer::~Buffer() = default;
 
     id<MTLBuffer> Buffer::GetMTLBuffer() const {
         return mMtlBuffer.Get();
@@ -173,7 +171,7 @@ namespace dawn_native { namespace metal {
         // Nothing to do, Metal StorageModeShared buffers are always mapped.
     }
 
-    void Buffer::DestroyImpl() {
+    void Buffer::DestroyApiObjectImpl() {
         mMtlBuffer = nullptr;
     }
 

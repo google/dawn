@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn Authors
+// Copyright 2021 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_OPENGL_QUERYSETGL_H_
-#define DAWNNATIVE_OPENGL_QUERYSETGL_H_
+#ifndef TESTS_UNITTESTS_NATIVE_MOCKS_QUERYSET_MOCK_H_
+#define TESTS_UNITTESTS_NATIVE_MOCKS_QUERYSET_MOCK_H_
 
+#include "dawn_native/Device.h"
 #include "dawn_native/QuerySet.h"
 
-namespace dawn_native { namespace opengl {
+#include <gmock/gmock.h>
 
-    class Device;
+namespace dawn_native {
 
-    class QuerySet final : public QuerySetBase {
+    class QuerySetMock : public QuerySetBase {
       public:
-        QuerySet(Device* device, const QuerySetDescriptor* descriptor);
+        QuerySetMock(DeviceBase* device) : QuerySetBase(device) {
+        }
+        ~QuerySetMock() override = default;
 
-      private:
-        ~QuerySet() override;
-
-        void DestroyApiObjectImpl() override;
+        MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native
 
-#endif  // DAWNNATIVE_OPENGL_QUERYSETGL_H_
+#endif  // TESTS_UNITTESTS_NATIVE_MOCKS_QUERYSET_MOCK_H_

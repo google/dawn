@@ -22,11 +22,9 @@ namespace dawn_native { namespace opengl {
         : QuerySetBase(device, descriptor) {
     }
 
-    QuerySet::~QuerySet() {
-        DestroyInternal();
-    }
+    QuerySet::~QuerySet() = default;
 
-    void QuerySet::DestroyImpl() {
+    void QuerySet::DestroyApiObjectImpl() {
     }
 
 }}  // namespace dawn_native::opengl

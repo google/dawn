@@ -17,9 +17,11 @@
 #include "dawn_native/Toggles.h"
 #include "mocks/BindGroupLayoutMock.h"
 #include "mocks/BindGroupMock.h"
+#include "mocks/BufferMock.h"
 #include "mocks/ComputePipelineMock.h"
 #include "mocks/DeviceMock.h"
 #include "mocks/PipelineLayoutMock.h"
+#include "mocks/QuerySetMock.h"
 #include "mocks/RenderPipelineMock.h"
 #include "mocks/SamplerMock.h"
 #include "mocks/ShaderModuleMock.h"
@@ -139,6 +141,64 @@ namespace dawn_native { namespace {
         }
     }
 
+    TEST_F(DestroyObjectTests, BufferExplicit) {
+        {
+            BufferMock bufferMock(&mDevice, BufferBase::BufferState::Unmapped);
+            EXPECT_CALL(bufferMock, DestroyApiObjectImpl).Times(1);
+
+            EXPECT_TRUE(bufferMock.IsAlive());
+            bufferMock.DestroyApiObject();
+            EXPECT_FALSE(bufferMock.IsAlive());
+        }
+        {
+            BufferMock bufferMock(&mDevice, BufferBase::BufferState::Mapped);
+            {
+                InSequence seq;
+                EXPECT_CALL(bufferMock, UnmapImpl).Times(1);
+                EXPECT_CALL(bufferMock, DestroyApiObjectImpl).Times(1);
+            }
+
+            EXPECT_TRUE(bufferMock.IsAlive());
+            bufferMock.DestroyApiObject();
+            EXPECT_FALSE(bufferMock.IsAlive());
+        }
+    }
+
+    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+    // will also complain if there is a memory leak.
+    TEST_F(DestroyObjectTests, BufferImplicit) {
+        {
+            BufferMock* bufferMock = new BufferMock(&mDevice, BufferBase::BufferState::Unmapped);
+            EXPECT_CALL(*bufferMock, DestroyApiObjectImpl).Times(1);
+            {
+                BufferDescriptor desc = {};
+                Ref<BufferBase> buffer;
+                EXPECT_CALL(mDevice, CreateBufferImpl)
+                    .WillOnce(Return(ByMove(AcquireRef(bufferMock))));
+                DAWN_ASSERT_AND_ASSIGN(buffer, mDevice.CreateBuffer(&desc));
+
+                EXPECT_TRUE(buffer->IsAlive());
+            }
+        }
+        {
+            BufferMock* bufferMock = new BufferMock(&mDevice, BufferBase::BufferState::Mapped);
+            {
+                InSequence seq;
+                EXPECT_CALL(*bufferMock, UnmapImpl).Times(1);
+                EXPECT_CALL(*bufferMock, DestroyApiObjectImpl).Times(1);
+            }
+            {
+                BufferDescriptor desc = {};
+                Ref<BufferBase> buffer;
+                EXPECT_CALL(mDevice, CreateBufferImpl)
+                    .WillOnce(Return(ByMove(AcquireRef(bufferMock))));
+                DAWN_ASSERT_AND_ASSIGN(buffer, mDevice.CreateBuffer(&desc));
+
+                EXPECT_TRUE(buffer->IsAlive());
+            }
+        }
+    }
+
     TEST_F(DestroyObjectTests, ComputePipelineExplicit) {
         ComputePipelineMock computePipelineMock(&mDevice);
         EXPECT_CALL(computePipelineMock, DestroyApiObjectImpl).Times(1);
@@ -200,6 +260,31 @@ namespace dawn_native { namespace {
 
             EXPECT_TRUE(pipelineLayout->IsAlive());
             EXPECT_TRUE(pipelineLayout->IsCachedReference());
+        }
+    }
+
+    TEST_F(DestroyObjectTests, QuerySetExplicit) {
+        QuerySetMock querySetMock(&mDevice);
+        EXPECT_CALL(querySetMock, DestroyApiObjectImpl).Times(1);
+
+        EXPECT_TRUE(querySetMock.IsAlive());
+        querySetMock.DestroyApiObject();
+        EXPECT_FALSE(querySetMock.IsAlive());
+    }
+
+    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+    // will also complain if there is a memory leak.
+    TEST_F(DestroyObjectTests, QuerySetImplicit) {
+        QuerySetMock* querySetMock = new QuerySetMock(&mDevice);
+        EXPECT_CALL(*querySetMock, DestroyApiObjectImpl).Times(1);
+        {
+            QuerySetDescriptor desc = {};
+            Ref<QuerySetBase> querySet;
+            EXPECT_CALL(mDevice, CreateQuerySetImpl)
+                .WillOnce(Return(ByMove(AcquireRef(querySetMock))));
+            DAWN_ASSERT_AND_ASSIGN(querySet, mDevice.CreateQuerySet(&desc));
+
+            EXPECT_TRUE(querySet->IsAlive());
         }
     }
 
@@ -329,8 +414,10 @@ namespace dawn_native { namespace {
     TEST_F(DestroyObjectTests, DestroyObjects) {
         BindGroupMock* bindGroupMock = new BindGroupMock(&mDevice);
         BindGroupLayoutMock* bindGroupLayoutMock = new BindGroupLayoutMock(&mDevice);
+        BufferMock* bufferMock = new BufferMock(&mDevice, BufferBase::BufferState::Unmapped);
         ComputePipelineMock* computePipelineMock = new ComputePipelineMock(&mDevice);
         PipelineLayoutMock* pipelineLayoutMock = new PipelineLayoutMock(&mDevice);
+        QuerySetMock* querySetMock = new QuerySetMock(&mDevice);
         RenderPipelineMock* renderPipelineMock = new RenderPipelineMock(&mDevice);
         SamplerMock* samplerMock = new SamplerMock(&mDevice);
         ShaderModuleMock* shaderModuleMock = new ShaderModuleMock(&mDevice);
@@ -344,7 +431,9 @@ namespace dawn_native { namespace {
             EXPECT_CALL(*bindGroupMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*bindGroupLayoutMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*shaderModuleMock, DestroyApiObjectImpl).Times(1);
+            EXPECT_CALL(*querySetMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*samplerMock, DestroyApiObjectImpl).Times(1);
+            EXPECT_CALL(*bufferMock, DestroyApiObjectImpl).Times(1);
         }
 
         Ref<BindGroupBase> bindGroup;
@@ -364,6 +453,14 @@ namespace dawn_native { namespace {
             DAWN_ASSERT_AND_ASSIGN(bindGroupLayout, mDevice.CreateBindGroupLayout(&desc));
             EXPECT_TRUE(bindGroupLayout->IsAlive());
             EXPECT_TRUE(bindGroupLayout->IsCachedReference());
+        }
+
+        Ref<BufferBase> buffer;
+        {
+            BufferDescriptor desc = {};
+            EXPECT_CALL(mDevice, CreateBufferImpl).WillOnce(Return(ByMove(AcquireRef(bufferMock))));
+            DAWN_ASSERT_AND_ASSIGN(buffer, mDevice.CreateBuffer(&desc));
+            EXPECT_TRUE(buffer->IsAlive());
         }
 
         Ref<ComputePipelineBase> computePipeline;
@@ -395,6 +492,15 @@ namespace dawn_native { namespace {
             DAWN_ASSERT_AND_ASSIGN(pipelineLayout, mDevice.CreatePipelineLayout(&desc));
             EXPECT_TRUE(pipelineLayout->IsAlive());
             EXPECT_TRUE(pipelineLayout->IsCachedReference());
+        }
+
+        Ref<QuerySetBase> querySet;
+        {
+            QuerySetDescriptor desc = {};
+            EXPECT_CALL(mDevice, CreateQuerySetImpl)
+                .WillOnce(Return(ByMove(AcquireRef(querySetMock))));
+            DAWN_ASSERT_AND_ASSIGN(querySet, mDevice.CreateQuerySet(&desc));
+            EXPECT_TRUE(querySet->IsAlive());
         }
 
         Ref<RenderPipelineBase> renderPipeline;
@@ -457,8 +563,10 @@ namespace dawn_native { namespace {
         mDevice.DestroyObjects();
         EXPECT_FALSE(bindGroup->IsAlive());
         EXPECT_FALSE(bindGroupLayout->IsAlive());
+        EXPECT_FALSE(buffer->IsAlive());
         EXPECT_FALSE(computePipeline->IsAlive());
         EXPECT_FALSE(pipelineLayout->IsAlive());
+        EXPECT_FALSE(querySet->IsAlive());
         EXPECT_FALSE(renderPipeline->IsAlive());
         EXPECT_FALSE(sampler->IsAlive());
         EXPECT_FALSE(shaderModule->IsAlive());

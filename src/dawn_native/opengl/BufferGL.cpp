@@ -61,9 +61,7 @@ namespace dawn_native { namespace opengl {
         }
     }
 
-    Buffer::~Buffer() {
-        DestroyInternal();
-    }
+    Buffer::~Buffer() = default;
 
     GLuint Buffer::GetHandle() const {
         return mBuffer;
@@ -176,7 +174,7 @@ namespace dawn_native { namespace opengl {
         mMappedData = nullptr;
     }
 
-    void Buffer::DestroyImpl() {
+    void Buffer::DestroyApiObjectImpl() {
         ToBackend(GetDevice())->gl.DeleteBuffers(1, &mBuffer);
         mBuffer = 0;
     }

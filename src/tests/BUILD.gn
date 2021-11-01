@@ -147,6 +147,7 @@ source_set("dawn_native_mocks_sources") {
     "unittests/native/mocks/ComputePipelineMock.h",
     "unittests/native/mocks/DeviceMock.h",
     "unittests/native/mocks/PipelineLayoutMock.h",
+    "unittests/native/mocks/QuerySetMock.h",
     "unittests/native/mocks/RenderPipelineMock.h",
     "unittests/native/mocks/SamplerMock.h",
     "unittests/native/mocks/ShaderModuleMock.cpp",

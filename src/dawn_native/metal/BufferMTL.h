@@ -26,7 +26,7 @@ namespace dawn_native { namespace metal {
     class CommandRecordingContext;
     class Device;
 
-    class Buffer : public BufferBase {
+    class Buffer final : public BufferBase {
       public:
         static ResultOrError<Ref<Buffer>> Create(Device* device,
                                                  const BufferDescriptor* descriptor);
@@ -48,7 +48,7 @@ namespace dawn_native { namespace metal {
         ~Buffer() override;
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
-        void DestroyImpl() override;
+        void DestroyApiObjectImpl() override;
         void* GetMappedPointerImpl() override;
         bool IsCPUWritableAtCreation() const override;
         MaybeError MapAtCreationImpl() override;

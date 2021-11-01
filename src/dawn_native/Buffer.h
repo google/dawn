@@ -41,18 +41,18 @@ namespace dawn_native {
         wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
 
     class BufferBase : public ApiObjectBase {
+      public:
         enum class BufferState {
             Unmapped,
             Mapped,
             MappedAtCreation,
             Destroyed,
         };
-
-      public:
         BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
 
         static BufferBase* MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
 
+        bool DestroyApiObject() override;
         ObjectType GetType() const override;
 
         uint64_t GetSize() const;
@@ -86,9 +86,11 @@ namespace dawn_native {
         BufferBase(DeviceBase* device,
                    const BufferDescriptor* descriptor,
                    ObjectBase::ErrorTag tag);
-        ~BufferBase() override;
 
-        void DestroyInternal();
+        // Constructor used only for mocking and testing.
+        BufferBase(DeviceBase* device, BufferState state);
+
+        ~BufferBase() override;
 
         MaybeError MapAtCreationInternal();
 
@@ -98,7 +100,6 @@ namespace dawn_native {
         virtual MaybeError MapAtCreationImpl() = 0;
         virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
         virtual void UnmapImpl() = 0;
-        virtual void DestroyImpl() = 0;
         virtual void* GetMappedPointerImpl() = 0;
 
         virtual bool IsCPUWritableAtCreation() const = 0;
@@ -110,7 +111,6 @@ namespace dawn_native {
                                     size_t size,
                                     WGPUBufferMapAsyncStatus* status) const;
         MaybeError ValidateUnmap() const;
-        MaybeError ValidateDestroy() const;
         bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
         void UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus);
 
