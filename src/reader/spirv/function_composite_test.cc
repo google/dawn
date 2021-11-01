@@ -834,6 +834,29 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
               HasSubstr("let x_10 : vec2<u32> = vec2<u32>(0u, x_1.y);"));
 }
 
+TEST_F(SpvParserTest_VectorShuffle,
+       FunctionScopeOperands_MixedInputOperandSizes) {
+  // Note that variables are generated for the vector operands.
+  const auto assembly = Preamble() + R"(
+     %v3uint_3_4_5 = OpConstantComposite %v3uint %uint_3 %uint_4 %uint_5
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %v2uint %v2uint_3_4
+     %3 = OpCopyObject %v3uint %v3uint_3_4_5
+     %10 = OpVectorShuffle %v2uint %1 %3 1 4
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_10 : vec2<u32> = vec2<u32>(x_1.y, x_3.z);"));
+}
+
 TEST_F(SpvParserTest_VectorShuffle, IndexTooBig_IsError) {
   const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
