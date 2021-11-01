@@ -295,14 +295,6 @@ namespace dawn_native {
                     DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
                     DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
 
-                    // Indexed dispatches need a compute-shader based validation to check that the
-                    // dispatch sizes aren't too big. Disallow them as unsafe until the validation
-                    // is implemented.
-                    DAWN_INVALID_IF(
-                        GetDevice()->IsToggleEnabled(Toggle::DisallowUnsafeAPIs),
-                        "DispatchIndirect is disallowed because it doesn't validate that the "
-                        "dispatch size is valid yet.");
-
                     DAWN_INVALID_IF(indirectOffset % 4 != 0,
                                     "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
 

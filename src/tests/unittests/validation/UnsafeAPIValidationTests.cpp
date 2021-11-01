@@ -28,46 +28,6 @@ class UnsafeAPIValidationTest : public ValidationTest {
     }
 };
 
-// Check that DispatchIndirect is disallowed as part of unsafe APIs.
-TEST_F(UnsafeAPIValidationTest, DispatchIndirectDisallowed) {
-    // Create the index and indirect buffers.
-    wgpu::BufferDescriptor indirectBufferDesc;
-    indirectBufferDesc.size = 64;
-    indirectBufferDesc.usage = wgpu::BufferUsage::Indirect;
-    wgpu::Buffer indirectBuffer = device.CreateBuffer(&indirectBufferDesc);
-
-    // Create the dummy compute pipeline.
-    wgpu::ComputePipelineDescriptor pipelineDesc;
-    pipelineDesc.compute.entryPoint = "main";
-    pipelineDesc.compute.module =
-        utils::CreateShaderModule(device, "[[stage(compute), workgroup_size(1)]] fn main() {}");
-    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
-
-    // Control case: dispatch is allowed.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-
-        pass.SetPipeline(pipeline);
-        pass.Dispatch(1, 1, 1);
-
-        pass.EndPass();
-        encoder.Finish();
-    }
-
-    // Error case: dispatch indirect is disallowed.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-
-        pass.SetPipeline(pipeline);
-        pass.DispatchIndirect(indirectBuffer, 0);
-
-        pass.EndPass();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
-    }
-}
-
 // Check that dynamic storage buffers are disallowed.
 TEST_F(UnsafeAPIValidationTest, DynamicStorageBuffer) {
     wgpu::BindGroupLayoutEntry entry;
