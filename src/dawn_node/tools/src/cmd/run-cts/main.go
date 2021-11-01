@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"math"
 	"net/http"
 	"os"
@@ -174,7 +175,8 @@ func run() error {
 		return fmt.Errorf("failed to scan source files for modified timestamps: %w", err)
 	}
 
-	ctsNeedsRebuild := mostRecentSourceChange.After(cache.BuildTimestamp)
+	ctsNeedsRebuild := mostRecentSourceChange.After(cache.BuildTimestamp) ||
+		!isDir(filepath.Join(r.cts, "out-node"))
 	if build {
 		if verbose {
 			fmt.Println("CTS needs rebuild:", ctsNeedsRebuild)
@@ -491,29 +493,39 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 			continue
 		}
 
-		var resp Response
-		if err := json.NewDecoder(postResp.Body).Decode(&resp); err != nil {
-			res.error = fmt.Errorf("server response decode failure")
-			res.status = fail
-			results <- res
-			continue
-		}
+		if postResp.StatusCode == http.StatusOK {
+			var resp Response
+			if err := json.NewDecoder(postResp.Body).Decode(&resp); err != nil {
+				res.error = fmt.Errorf("server response decode failure")
+				res.status = fail
+				results <- res
+				continue
+			}
 
-		switch resp.Status {
-		case "pass":
-			res.status = pass
-			res.message = resp.Message
-		case "warn":
-			res.status = warn
-			res.message = resp.Message
-		case "fail":
+			switch resp.Status {
+			case "pass":
+				res.status = pass
+				res.message = resp.Message
+			case "warn":
+				res.status = warn
+				res.message = resp.Message
+			case "fail":
+				res.status = fail
+				res.message = resp.Message
+			case "skip":
+				res.status = skip
+				res.message = resp.Message
+			default:
+				res.status = fail
+				res.error = fmt.Errorf("unknown status: '%v'", resp.Status)
+			}
+		} else {
+			msg, err := ioutil.ReadAll(postResp.Body)
+			if err != nil {
+				msg = []byte(err.Error())
+			}
 			res.status = fail
-			res.message = resp.Message
-		case "skip":
-			res.status = skip
-			res.message = resp.Message
-		default:
-			err = fmt.Errorf("unknown status: '%v'", resp.Status)
+			res.error = fmt.Errorf("server error: %v", string(msg))
 		}
 		results <- res
 	}
