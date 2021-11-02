@@ -110,15 +110,17 @@ namespace dawn_native {
             wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
         DAWN_INVALID_IF(
             usage & wgpu::BufferUsage::MapWrite && !IsSubset(usage, kMapWriteAllowedUsages),
-            "Buffer usages (%s) contains %s but is not a subset of %s.", usage,
-            wgpu::BufferUsage::MapWrite, kMapWriteAllowedUsages);
+            "Buffer usages (%s) is invalid. If a buffer usage contains %s the only other allowed "
+            "usage is %s.",
+            usage, wgpu::BufferUsage::MapWrite, wgpu::BufferUsage::CopySrc);
 
         const wgpu::BufferUsage kMapReadAllowedUsages =
             wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
         DAWN_INVALID_IF(
             usage & wgpu::BufferUsage::MapRead && !IsSubset(usage, kMapReadAllowedUsages),
-            "Buffer usages (%s) contains %s but is not a subset of %s.", usage,
-            wgpu::BufferUsage::MapRead, kMapReadAllowedUsages);
+            "Buffer usages (%s) is invalid. If a buffer usage contains %s the only other allowed "
+            "usage is %s.",
+            usage, wgpu::BufferUsage::MapRead, wgpu::BufferUsage::CopyDst);
 
         DAWN_INVALID_IF(descriptor->mappedAtCreation && descriptor->size % 4 != 0,
                         "Buffer is mapped at creation but its size (%u) is not a multiple of 4.",
