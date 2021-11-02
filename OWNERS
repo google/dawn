@@ -1,4 +1,11 @@
 cwallez@chromium.org
-kainino@chromium.org
 enga@chromium.org
 jiawei.shao@intel.com
+
+# Backup reviewers if needed.
+bclayton@google.com
+kainino@chromium.org
+
+per-file dawn.json=kainino@chromium.org
+per-file DEPS=*
+per-file README.md=file://docs/OWNERS
