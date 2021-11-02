@@ -220,10 +220,13 @@ func run() error {
 			return fmt.Errorf("failed to gather test cases: %w", err)
 		}
 
-		fmt.Printf("Testing %d test cases...\n", len(r.testcases))
 		if isolated {
+			fmt.Println("Running in parallel isolated...")
+			fmt.Printf("Testing %d test cases...\n", len(r.testcases))
 			return r.runParallelIsolated()
 		}
+		fmt.Println("Running in parallel with server...")
+		fmt.Printf("Testing %d test cases...\n", len(r.testcases))
 		return r.runParallelWithServer()
 	}
 
@@ -439,6 +442,10 @@ func (r *runner) runParallelWithServer() error {
 	return nil
 }
 
+type redirectingWriter struct {
+	io.Writer
+}
+
 // runServer starts a test runner server instance, takes case indices from
 // caseIndices, and requests the server run the test with the given index.
 // The result of the test run is written to the results chan.
@@ -446,6 +453,7 @@ func (r *runner) runParallelWithServer() error {
 // runServer returns.
 func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error {
 	var port int
+	var rw redirectingWriter
 
 	stopServer := func() {}
 	startServer := func() error {
@@ -470,12 +478,12 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 		pl := newPortListener()
 
 		cmd.Dir = r.cts
-		cmd.Stdout = io.MultiWriter(serverLog, &pl)
-		cmd.Stderr = serverLog
+		cmd.Stdout = io.MultiWriter(&rw, serverLog, &pl)
+		cmd.Stderr = io.MultiWriter(&rw, serverLog)
 
 		err := cmd.Start()
 		if err != nil {
-			return fmt.Errorf("failed to start test runner server:", err)
+			return fmt.Errorf("failed to start test runner server: %v", err)
 		}
 
 		select {
@@ -495,6 +503,10 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 	}
 
 	for idx := range caseIndices {
+		// Redirect the server log per test case
+		caseServerLog := &bytes.Buffer{}
+		rw.Writer = caseServerLog
+
 		if port == 0 {
 			if err := startServer(); err != nil {
 				return err
@@ -528,16 +540,16 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 			switch resp.Status {
 			case "pass":
 				res.status = pass
-				res.message = resp.Message
+				res.message = resp.Message + caseServerLog.String()
 			case "warn":
 				res.status = warn
-				res.message = resp.Message
+				res.message = resp.Message + caseServerLog.String()
 			case "fail":
 				res.status = fail
-				res.message = resp.Message
+				res.message = resp.Message + caseServerLog.String()
 			case "skip":
 				res.status = skip
-				res.message = resp.Message
+				res.message = resp.Message + caseServerLog.String()
 			default:
 				res.status = fail
 				res.error = fmt.Errorf("unknown status: '%v'", resp.Status)
@@ -581,7 +593,7 @@ func (r *runner) runParallelIsolated() error {
 		go func() {
 			defer wg.Done()
 			for idx := range caseIndices {
-				res := r.runTestcase(r.testcases[idx], false)
+				res := r.runTestcase(r.testcases[idx])
 				res.index = idx
 				results <- res
 			}
@@ -667,11 +679,14 @@ timeout: %v (%v)
 // process.
 func (r *runner) runSerially(query string) error {
 	start := time.Now()
-	result := r.runTestcase(query, true)
+	result := r.runTestcase(query)
 	timeTaken := time.Since(start)
 
+	if r.verbose {
+		fmt.Println(result)
+	}
+	fmt.Println("Status:", result.status)
 	fmt.Println("Completed in", timeTaken)
-	fmt.Println(result)
 	return nil
 }
 
@@ -697,7 +712,7 @@ type result struct {
 
 // runTestcase() runs the CTS testcase with the given query, returning the test
 // result.
-func (r *runner) runTestcase(query string, printToStout bool) result {
+func (r *runner) runTestcase(query string) result {
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 
@@ -721,13 +736,8 @@ func (r *runner) runTestcase(query string, printToStout bool) result {
 	cmd.Dir = r.cts
 
 	var buf bytes.Buffer
-	if printToStout {
-		cmd.Stdout = io.MultiWriter(&buf, os.Stdout)
-		cmd.Stderr = io.MultiWriter(&buf, os.Stderr)
-	} else {
-		cmd.Stdout = &buf
-		cmd.Stderr = &buf
-	}
+	cmd.Stdout = &buf
+	cmd.Stderr = &buf
 
 	err := cmd.Run()
 	msg := buf.String()
