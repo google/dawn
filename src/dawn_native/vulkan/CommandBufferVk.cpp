@@ -826,10 +826,6 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
 
-                case Command::SetValidatedBufferLocationsInternal:
-                    DoNextSetValidatedBufferLocationsInternal();
-                    break;
-
                 case Command::WriteBuffer: {
                     WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                     const uint64_t offset = write->offset;
@@ -1075,10 +1071,10 @@ namespace dawn_native { namespace vulkan {
 
                 case Command::DrawIndirect: {
                     DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
-                    VkBuffer indirectBuffer = ToBackend(draw->indirectBuffer)->GetHandle();
+                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
 
                     descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                    device->fn.CmdDrawIndirect(commands, indirectBuffer,
+                    device->fn.CmdDrawIndirect(commands, buffer->GetHandle(),
                                                static_cast<VkDeviceSize>(draw->indirectOffset), 1,
                                                0);
                     break;
@@ -1086,14 +1082,13 @@ namespace dawn_native { namespace vulkan {
 
                 case Command::DrawIndexedIndirect: {
                     DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
-                    ASSERT(!draw->indirectBufferLocation->IsNull());
-                    VkBuffer indirectBuffer =
-                        ToBackend(draw->indirectBufferLocation->GetBuffer())->GetHandle();
+                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
+                    ASSERT(buffer != nullptr);
 
                     descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
                     device->fn.CmdDrawIndexedIndirect(
-                        commands, indirectBuffer,
-                        static_cast<VkDeviceSize>(draw->indirectBufferLocation->GetOffset()), 1, 0);
+                        commands, buffer->GetHandle(),
+                        static_cast<VkDeviceSize>(draw->indirectOffset), 1, 0);
                     break;
                 }
 

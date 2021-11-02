@@ -17,7 +17,6 @@
 #include "common/Constants.h"
 #include "common/Log.h"
 #include "dawn_native/Buffer.h"
-#include "dawn_native/BufferLocation.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
@@ -198,14 +197,20 @@ namespace dawn_native {
                 DrawIndexedIndirectCmd* cmd =
                     allocator->Allocate<DrawIndexedIndirectCmd>(Command::DrawIndexedIndirect);
                 if (IsValidationEnabled()) {
-                    cmd->indirectBufferLocation = BufferLocation::New();
+                    // Later, EncodeIndirectDrawValidationCommands will allocate a scratch storage
+                    // buffer which will store the validated indirect data. The buffer and offset
+                    // will be updated to point to it.
+                    // |EncodeIndirectDrawValidationCommands| is called at the end of encoding the
+                    // render pass, while the |cmd| pointer is still valid.
+                    cmd->indirectBuffer = nullptr;
+
                     mIndirectDrawMetadata.AddIndexedIndirectDraw(
                         mCommandBufferState.GetIndexFormat(),
                         mCommandBufferState.GetIndexBufferSize(), indirectBuffer, indirectOffset,
-                        cmd->indirectBufferLocation.Get());
+                        cmd);
                 } else {
-                    cmd->indirectBufferLocation =
-                        BufferLocation::New(indirectBuffer, indirectOffset);
+                    cmd->indirectBuffer = indirectBuffer;
+                    cmd->indirectOffset = indirectOffset;
                 }
 
                 // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage

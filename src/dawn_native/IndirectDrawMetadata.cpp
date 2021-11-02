@@ -159,12 +159,11 @@ namespace dawn_native {
         }
     }
 
-    void IndirectDrawMetadata::AddIndexedIndirectDraw(
-        wgpu::IndexFormat indexFormat,
-        uint64_t indexBufferSize,
-        BufferBase* indirectBuffer,
-        uint64_t indirectOffset,
-        BufferLocation* drawCmdIndirectBufferLocation) {
+    void IndirectDrawMetadata::AddIndexedIndirectDraw(wgpu::IndexFormat indexFormat,
+                                                      uint64_t indexBufferSize,
+                                                      BufferBase* indirectBuffer,
+                                                      uint64_t indirectOffset,
+                                                      DrawIndexedIndirectCmd* cmd) {
         uint64_t numIndexBufferElements;
         switch (indexFormat) {
             case wgpu::IndexFormat::Uint16:
@@ -187,7 +186,7 @@ namespace dawn_native {
 
         IndexedIndirectDraw draw;
         draw.clientBufferOffset = indirectOffset;
-        draw.bufferLocation = drawCmdIndirectBufferLocation;
+        draw.cmd = cmd;
         it->second.AddIndexedIndirectDraw(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange,
                                           std::move(draw));
     }

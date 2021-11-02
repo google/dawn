@@ -50,8 +50,6 @@ target_sources(dawn_native PRIVATE
     "BuddyMemoryAllocator.h"
     "Buffer.cpp"
     "Buffer.h"
-    "BufferLocation.cpp"
-    "BufferLocation.h"
     "CachedObject.cpp"
     "CachedObject.h"
     "CallbackTaskManager.cpp"

@@ -844,10 +844,6 @@ namespace dawn_native { namespace opengl {
                     break;
                 }
 
-                case Command::SetValidatedBufferLocationsInternal:
-                    DoNextSetValidatedBufferLocationsInternal();
-                    break;
-
                 case Command::WriteBuffer: {
                     WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                     uint64_t offset = write->offset;
@@ -1187,17 +1183,17 @@ namespace dawn_native { namespace opengl {
 
                 case Command::DrawIndexedIndirect: {
                     DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
-                    ASSERT(!draw->indirectBufferLocation->IsNull());
 
                     vertexStateBufferBindingTracker.Apply(gl);
                     bindGroupTracker.Apply(gl);
 
-                    Buffer* indirectBuffer = ToBackend(draw->indirectBufferLocation->GetBuffer());
+                    Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+                    ASSERT(indirectBuffer != nullptr);
+
                     gl.BindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBuffer->GetHandle());
                     gl.DrawElementsIndirect(
                         lastPipeline->GetGLPrimitiveTopology(), indexBufferFormat,
-                        reinterpret_cast<void*>(
-                            static_cast<intptr_t>(draw->indirectBufferLocation->GetOffset())));
+                        reinterpret_cast<void*>(static_cast<intptr_t>(draw->indirectOffset)));
                     break;
                 }
 

@@ -1018,18 +1018,6 @@ namespace dawn_native {
         return commandBuffer.Detach();
     }
 
-    void CommandEncoder::EncodeSetValidatedBufferLocationsInternal(
-        std::vector<DeferredBufferLocationUpdate> updates) {
-        ASSERT(GetDevice()->IsValidationEnabled());
-        mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            SetValidatedBufferLocationsInternalCmd* cmd =
-                allocator->Allocate<SetValidatedBufferLocationsInternalCmd>(
-                    Command::SetValidatedBufferLocationsInternal);
-            cmd->updates = std::move(updates);
-            return {};
-        });
-    }
-
     ResultOrError<Ref<CommandBufferBase>> CommandEncoder::FinishInternal(
         const CommandBufferDescriptor* descriptor) {
         DeviceBase* device = GetDevice();

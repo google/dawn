@@ -986,10 +986,6 @@ namespace dawn_native { namespace metal {
                     break;
                 }
 
-                case Command::SetValidatedBufferLocationsInternal:
-                    DoNextSetValidatedBufferLocationsInternal();
-                    break;
-
                 case Command::WriteBuffer: {
                     WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                     const uint64_t offset = write->offset;
@@ -1341,15 +1337,16 @@ namespace dawn_native { namespace metal {
                     bindGroups.Apply(encoder);
                     storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
 
-                    ASSERT(!draw->indirectBufferLocation->IsNull());
-                    Buffer* buffer = ToBackend(draw->indirectBufferLocation->GetBuffer());
+                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
+                    ASSERT(buffer != nullptr);
+
                     id<MTLBuffer> indirectBuffer = buffer->GetMTLBuffer();
                     [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
                                          indexType:indexBufferType
                                        indexBuffer:indexBuffer
                                  indexBufferOffset:indexBufferBaseOffset
                                     indirectBuffer:indirectBuffer
-                              indirectBufferOffset:draw->indirectBufferLocation->GetOffset()];
+                              indirectBufferOffset:draw->indirectOffset];
                     break;
                 }
 

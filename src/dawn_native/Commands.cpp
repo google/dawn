@@ -158,12 +158,6 @@ namespace dawn_native {
                     cmd->~SetStencilReferenceCmd();
                     break;
                 }
-                case Command::SetValidatedBufferLocationsInternal: {
-                    SetValidatedBufferLocationsInternalCmd* cmd =
-                        commands->NextCommand<SetValidatedBufferLocationsInternalCmd>();
-                    cmd->~SetValidatedBufferLocationsInternalCmd();
-                    break;
-                }
                 case Command::SetViewport: {
                     SetViewportCmd* cmd = commands->NextCommand<SetViewportCmd>();
                     cmd->~SetViewportCmd();
@@ -317,10 +311,6 @@ namespace dawn_native {
 
             case Command::SetStencilReference:
                 commands->NextCommand<SetStencilReferenceCmd>();
-                break;
-
-            case Command::SetValidatedBufferLocationsInternal:
-                commands->NextCommand<SetValidatedBufferLocationsInternalCmd>();
                 break;
 
             case Command::SetViewport:

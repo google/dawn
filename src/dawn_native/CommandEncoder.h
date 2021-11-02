@@ -78,9 +78,6 @@ namespace dawn_native {
 
         CommandBufferBase* APIFinish(const CommandBufferDescriptor* descriptor = nullptr);
 
-        void EncodeSetValidatedBufferLocationsInternal(
-            std::vector<DeferredBufferLocationUpdate> updates);
-
       private:
         ResultOrError<Ref<CommandBufferBase>> FinishInternal(
             const CommandBufferDescriptor* descriptor);
