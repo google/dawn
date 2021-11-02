@@ -1223,7 +1223,8 @@ namespace dawn_native { namespace d3d12 {
                 dsvAllocation,
                 device->GetDepthStencilViewAllocator()->AllocateTransientCPUDescriptors());
 
-            const D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc = view->GetDSVDescriptor();
+            const D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc = view->GetDSVDescriptor(
+                attachmentInfo.depthReadOnly, attachmentInfo.stencilReadOnly);
             const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor = dsvAllocation.GetBaseDescriptor();
 
             device->GetD3D12Device()->CreateDepthStencilView(

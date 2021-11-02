@@ -90,6 +90,8 @@ namespace dawn_native {
         wgpu::StoreOp stencilStoreOp;
         float clearDepth;
         uint32_t clearStencil;
+        bool depthReadOnly;
+        bool stencilReadOnly;
     };
 
     struct BeginRenderPassCmd {

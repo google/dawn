@@ -179,6 +179,14 @@ namespace utils {
                       kBCFormats.size() + kETC2Formats.size() + kASTCFormats.size(),
                   "Number of compressed format must equal number of BC, ETC2, and ASTC formats.");
 
+    // TODO(dawn:666, 570, 690): Add more depth/stencil formats if Stencil8, Depth16Unorm,
+    // Depth24UnormStencil8, Depth32FloatStencil8 are implemented.
+    static constexpr std::array<wgpu::TextureFormat, 3> kDepthStencilFormats = {
+        wgpu::TextureFormat::Depth32Float,
+        wgpu::TextureFormat::Depth24Plus,
+        wgpu::TextureFormat::Depth24PlusStencil8,
+    };
+
     bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format);
 
     bool IsBCTextureFormat(wgpu::TextureFormat textureFormat);

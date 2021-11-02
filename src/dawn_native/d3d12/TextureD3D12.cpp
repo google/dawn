@@ -65,6 +65,11 @@ namespace dawn_native { namespace d3d12 {
                 }
             }
 
+            if (usage & kReadOnlyRenderAttachment) {
+                // There is no STENCIL_READ state. Readonly for stencil is bundled with DEPTH_READ.
+                resourceState |= D3D12_RESOURCE_STATE_DEPTH_READ;
+            }
+
             return resourceState;
         }
 
@@ -944,10 +949,19 @@ namespace dawn_native { namespace d3d12 {
 
     D3D12_DEPTH_STENCIL_VIEW_DESC Texture::GetDSVDescriptor(uint32_t mipLevel,
                                                             uint32_t baseArrayLayer,
-                                                            uint32_t layerCount) const {
+                                                            uint32_t layerCount,
+                                                            Aspect aspects,
+                                                            bool depthReadOnly,
+                                                            bool stencilReadOnly) const {
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
         dsvDesc.Format = GetD3D12Format();
         dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+        if (depthReadOnly && aspects & Aspect::Depth) {
+            dsvDesc.Flags |= D3D12_DSV_FLAG_READ_ONLY_DEPTH;
+        }
+        if (stencilReadOnly && aspects & Aspect::Stencil) {
+            dsvDesc.Flags |= D3D12_DSV_FLAG_READ_ONLY_STENCIL;
+        }
 
         if (IsMultisampledTexture()) {
             ASSERT(GetNumMipLevels() == 1);
@@ -1014,7 +1028,8 @@ namespace dawn_native { namespace d3d12 {
                         device->GetDepthStencilViewAllocator()->AllocateTransientCPUDescriptors());
                     const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor =
                         dsvHandle.GetBaseDescriptor();
-                    D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(level, layer, 1);
+                    D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc =
+                        GetDSVDescriptor(level, layer, 1, range.aspects, false, false);
                     device->GetD3D12Device()->CreateDepthStencilView(GetD3D12Resource(), &dsvDesc,
                                                                      baseDescriptor);
 
@@ -1279,10 +1294,12 @@ namespace dawn_native { namespace d3d12 {
             ->GetRTVDescriptor(GetBaseMipLevel(), GetBaseArrayLayer(), GetLayerCount());
     }
 
-    D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor() const {
+    D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor(bool depthReadOnly,
+                                                                bool stencilReadOnly) const {
         ASSERT(GetLevelCount() == 1);
         return ToBackend(GetTexture())
-            ->GetDSVDescriptor(GetBaseMipLevel(), GetBaseArrayLayer(), GetLayerCount());
+            ->GetDSVDescriptor(GetBaseMipLevel(), GetBaseArrayLayer(), GetLayerCount(),
+                               GetAspects(), depthReadOnly, stencilReadOnly);
     }
 
     D3D12_UNORDERED_ACCESS_VIEW_DESC TextureView::GetUAVDescriptor() const {

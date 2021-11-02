@@ -589,6 +589,10 @@ namespace dawn_native {
                         descriptor->depthStencilAttachment->stencilLoadOp;
                     cmd->depthStencilAttachment.stencilStoreOp =
                         descriptor->depthStencilAttachment->stencilStoreOp;
+                    cmd->depthStencilAttachment.depthReadOnly =
+                        descriptor->depthStencilAttachment->depthReadOnly;
+                    cmd->depthStencilAttachment.stencilReadOnly =
+                        descriptor->depthStencilAttachment->stencilReadOnly;
 
                     if (IsReadOnlyDepthStencilAttachment(descriptor->depthStencilAttachment)) {
                         // TODO(dawn:485): Readonly depth/stencil attachment is not fully
