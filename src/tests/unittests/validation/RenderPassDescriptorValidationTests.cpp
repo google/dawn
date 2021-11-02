@@ -831,6 +831,34 @@ namespace {
             AssertBeginRenderPassSuccess(&renderPass);
         }
 
+        // Tests that a pass with depthReadOnly=true and stencilReadOnly=true can pass
+        // when there is only depth component in the format. We actually enable readonly
+        // depth/stencil attachment in this case.
+        {
+            utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilViewNoStencil);
+            renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+            renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+            renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
+            AssertBeginRenderPassSuccess(&renderPass);
+        }
+
+        // Tests that a pass with depthReadOnly=false and stencilReadOnly=true can pass
+        // when there is only depth component in the format. We actually don't enable readonly
+        // depth/stencil attachment in this case.
+        {
+            utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilViewNoStencil);
+            renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+            renderPass.cDepthStencilAttachmentInfo.depthReadOnly = false;
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+            renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
+            AssertBeginRenderPassSuccess(&renderPass);
+        }
+
         // TODO(https://crbug.com/dawn/666): Add a test case for stencil-only once stencil8 is
         // supported (depthReadOnly and stencilReadOnly mismatch but no depth component).
 
