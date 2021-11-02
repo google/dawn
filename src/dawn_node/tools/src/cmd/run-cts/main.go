@@ -63,6 +63,19 @@ Usage:
 var colors bool
 var stdout io.Writer
 
+type dawnNodeFlags []string
+
+func (f *dawnNodeFlags) String() string {
+	return fmt.Sprint(strings.Join(*f, ""))
+}
+
+func (f *dawnNodeFlags) Set(value string) error {
+	// Multiple flags must be passed in indivually:
+	// -flag=a=b -dawn_node_flag=c=d
+	*f = append(*f, value)
+	return nil
+}
+
 func run() error {
 	colors = os.Getenv("TERM") != "dumb" ||
 		isatty.IsTerminal(os.Stdout.Fd()) ||
@@ -76,6 +89,7 @@ func run() error {
 	var dawnNode, cts, node, npx, logFilename string
 	var verbose, isolated, build bool
 	var numRunners int
+	var flags dawnNodeFlags
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
 	flag.StringVar(&cts, "cts", "", "root directory of WebGPU CTS")
 	flag.StringVar(&node, "node", "", "path to node executable")
@@ -86,6 +100,7 @@ func run() error {
 	flag.BoolVar(&colors, "colors", colors, "enable / disable colors")
 	flag.IntVar(&numRunners, "j", runtime.NumCPU()/2, "number of concurrent runners. 0 runs serially")
 	flag.StringVar(&logFilename, "log", "", "path to log file of tests run and result")
+	flag.Var(&flags, "flag", "flag to pass to dawn-node as flag=value. multiple flags must be passed in individually")
 	flag.Parse()
 
 	if colors {
@@ -148,6 +163,7 @@ func run() error {
 		npx:        npx,
 		dawnNode:   dawnNode,
 		cts:        cts,
+		flags:      flags,
 		evalScript: func(main string) string {
 			return fmt.Sprintf(`require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/%v.ts');`, main)
 		},
@@ -272,6 +288,7 @@ type runner struct {
 	numRunners               int
 	verbose                  bool
 	node, npx, dawnNode, cts string
+	flags                    dawnNodeFlags
 	evalScript               func(string) string
 	testcases                []string
 	log                      logger
@@ -432,7 +449,7 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 
 	stopServer := func() {}
 	startServer := func() error {
-		cmd := exec.Command(r.node,
+		args := []string{
 			"-e", r.evalScript("server"), // Evaluate 'eval'.
 			"--",
 			// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
@@ -440,7 +457,13 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 			// start at 1, so just inject a dummy argument.
 			"dummy-arg",
 			// Actual arguments begin here
-			"--gpu-provider", r.dawnNode)
+			"--gpu-provider", r.dawnNode,
+		}
+		for _, f := range r.flags {
+			args = append(args, "--gpu-provider-flag", f)
+		}
+
+		cmd := exec.Command(r.node, args...)
 
 		serverLog := &bytes.Buffer{}
 
@@ -678,7 +701,7 @@ func (r *runner) runTestcase(query string, printToStout bool) result {
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 
-	args := append([]string{
+	args := []string{
 		"-e", r.evalScript("cmdline"), // Evaluate 'eval'.
 		"--",
 		// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
@@ -688,7 +711,11 @@ func (r *runner) runTestcase(query string, printToStout bool) result {
 		// Actual arguments begin here
 		"--gpu-provider", r.dawnNode,
 		"--verbose",
-	}, query)
+	}
+	for _, f := range r.flags {
+		args = append(args, "--gpu-provider-flag", f)
+	}
+	args = append(args, query)
 
 	cmd := exec.CommandContext(ctx, r.node, args...)
 	cmd.Dir = r.cts

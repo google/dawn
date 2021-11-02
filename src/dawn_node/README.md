@@ -53,8 +53,25 @@ ninja dawn.node
 
 If this fails with the error message `TypeError: expander is not a function or its return value is not iterable`, try appending `--build=false` to the start of the `run-cts` command line flags.
 
-To test against SwiftShader instead of the default Vulkan device, prefix `./src/dawn_node/tools/run-cts` with `VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json`
+To test against SwiftShader instead of the default Vulkan device, prefix `./src/dawn_node/tools/run-cts` with `VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json` and append `--flag=dawn-backend=vulkan` to the start of run-cts command line flags. For example:
 
+```sh
+VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json ./src/dawn_node/tools/run-cts --cts=<path-to-webgpu-cts> --dawn-node=<path-to-dawn.node> --flag=dawn-backend=vulkan [WebGPU CTS query]
+```
+
+The `--flag` parameter must be passed in multiple times, once for each flag begin set. Here are some common arguments:
+* `dawn-backend=<null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles>`
+* `dlldir=<path>` - used to add an extra DLL search path on Windows, primarily to load the right d3dcompiler_47.dll
+* `enable-dawn-features=<features>` - enable [Dawn toggles](https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn_native/Toggles.cpp), e.g. `dump_shaders`
+* `disable-dawn-features=<features>` - disable [Dawn toggles](https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn_native/Toggles.cpp)
+
+For example, on Windows, to use the d3dcompiler_47.dll from a Chromium checkout, and to dump shader output, we could run the following using Git Bash:
+
+```sh
+./src/dawn_node/tools/run-cts --j=0 --dawn-node=/c/src/dawn/build/Debug/dawn.node --cts=/c/src/gpuweb-cts --flag=dlldir="C:\src\chromium\src\out\Release" --flag=enable-dawn-features=dump_shaders 'webgpu:shader,execution,builtin,abs:integer_builtin_functions,abs_unsigned:storageClass="storage";storageMode="read_write";containerType="vector";isAtomic=false;baseType="u32";type="vec2%3Cu32%3E"'
+```
+
+Note that we pass `--j=0` above so that all output, including the dumped shader, is written to stdout.
 ## Known issues
 
 - Many WebGPU CTS tests are currently known to fail
