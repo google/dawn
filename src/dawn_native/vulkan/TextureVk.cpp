@@ -292,6 +292,8 @@ namespace dawn_native { namespace vulkan {
             case wgpu::TextureFormat::RGBA32Float:
                 return VK_FORMAT_R32G32B32A32_SFLOAT;
 
+            case wgpu::TextureFormat::Depth16Unorm:
+                return VK_FORMAT_D16_UNORM;
             case wgpu::TextureFormat::Depth32Float:
                 return VK_FORMAT_D32_SFLOAT;
             case wgpu::TextureFormat::Depth24Plus:
@@ -417,8 +419,6 @@ namespace dawn_native { namespace vulkan {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
             // TODO(dawn:666): implement stencil8
             case wgpu::TextureFormat::Stencil8:
-            // TODO(dawn:570): implement depth16unorm
-            case wgpu::TextureFormat::Depth16Unorm:
             case wgpu::TextureFormat::Undefined:
                 break;
         }

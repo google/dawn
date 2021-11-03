@@ -94,6 +94,7 @@ namespace dawn_native {
                             "buffer copy.",
                             src.texture, src.texture->GetFormat().format);
                     case wgpu::TextureFormat::Depth32Float:
+                    case wgpu::TextureFormat::Depth16Unorm:
                         break;
 
                     default:

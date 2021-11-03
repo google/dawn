@@ -54,6 +54,7 @@ namespace {
     constexpr static uint32_t kRTSize = 16;
     constexpr uint32_t kMipLevelCount = 2u;
     constexpr std::array<float, kMipLevelCount> kDepthValues = {0.125f, 0.875f};
+    constexpr std::array<uint16_t, kMipLevelCount> kU16DepthValues = {8192u, 57343u};
     constexpr std::array<uint8_t, kMipLevelCount> kStencilValues = {7u, 3u};
 
     class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTestParams> {
@@ -104,10 +105,19 @@ namespace {
                 }
 
                 case Check::CopyDepth: {
-                    std::vector<float> expectedDepth(mipSize * mipSize, kDepthValues[mipLevel]);
-                    EXPECT_TEXTURE_EQ(expectedDepth.data(), texture, {0, 0}, {mipSize, mipSize},
-                                      mipLevel, wgpu::TextureAspect::DepthOnly)
-                        << "copy depth mip " << mipLevel;
+                    if (GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm) {
+                        std::vector<uint16_t> expectedDepth(mipSize * mipSize,
+                                                            kU16DepthValues[mipLevel]);
+                        EXPECT_TEXTURE_EQ(expectedDepth.data(), texture, {0, 0}, {mipSize, mipSize},
+                                          mipLevel, wgpu::TextureAspect::DepthOnly)
+                            << "copy depth mip " << mipLevel;
+                    } else {
+                        std::vector<float> expectedDepth(mipSize * mipSize, kDepthValues[mipLevel]);
+                        EXPECT_TEXTURE_EQ(expectedDepth.data(), texture, {0, 0}, {mipSize, mipSize},
+                                          mipLevel, wgpu::TextureAspect::DepthOnly)
+                            << "copy depth mip " << mipLevel;
+                    }
+
                     break;
                 }
 
@@ -147,6 +157,11 @@ namespace {
 
 // Check that clearing a mip level works at all.
 TEST_P(DepthStencilLoadOpTests, ClearMip0) {
+    // TODO(https://issuetracker.google.com/issues/204919030): SwiftShader does not clear
+    // Depth16Unorm correctly with some values.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() &&
+                          GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
+
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).EndPass();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -178,6 +193,11 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
     // TODO(crbug.com/dawn/838): Sampling from the non-zero mip does not work.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::SampleDepth);
 
+    // TODO(https://issuetracker.google.com/issues/204919030): SwiftShader does not clear
+    // Depth16Unorm correctly with some values.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() &&
+                          GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
+
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).EndPass();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).EndPass();
@@ -192,6 +212,11 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
 TEST_P(DepthStencilLoadOpTests, ClearBothMip1Then0) {
     // TODO(crbug.com/dawn/838): Sampling from the non-zero mip does not work.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::SampleDepth);
+
+    // TODO(https://issuetracker.google.com/issues/204919030): SwiftShader does not clear
+    // Depth16Unorm correctly with some values.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() &&
+                          GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).EndPass();
@@ -209,7 +234,7 @@ namespace {
         auto params1 = MakeParamGenerator<DepthStencilLoadOpTestParams>(
             {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
              OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-            {wgpu::TextureFormat::Depth32Float},
+            {wgpu::TextureFormat::Depth32Float, wgpu::TextureFormat::Depth16Unorm},
             {Check::CopyDepth, Check::DepthTest, Check::SampleDepth});
 
         auto params2 = MakeParamGenerator<DepthStencilLoadOpTestParams>(

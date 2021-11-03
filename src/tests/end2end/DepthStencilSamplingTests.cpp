@@ -23,6 +23,7 @@ namespace {
         wgpu::TextureFormat::Depth32Float,
         wgpu::TextureFormat::Depth24Plus,
         wgpu::TextureFormat::Depth24PlusStencil8,
+        wgpu::TextureFormat::Depth16Unorm,
     };
 
     constexpr wgpu::TextureFormat kStencilFormats[] = {
@@ -43,7 +44,7 @@ namespace {
     const std::vector<float> kNormalizedTextureValues = {0.0, 0.3, 0.4, 0.5, 1.0};
 
     // Test the limits, and some values in between.
-    const std::vector<uint8_t> kStencilValues = {uint8_t(0), uint8_t(1), uint8_t(38), uint8_t(255)};
+    const std::vector<uint32_t> kStencilValues = {0, 1, 38, 255};
 
 }  // anonymous namespace
 
@@ -319,9 +320,7 @@ class DepthStencilSamplingTest : public DawnTest {
             wgpu::CommandBuffer commands = commandEncoder.Finish();
             queue.Submit(1, &commands);
 
-            uint32_t expectedValueU32 = 0;
-            memcpy(&expectedValueU32, &textureValues[i], std::min(sizeof(T), sizeof(uint32_t)));
-            CheckBuffer(expectedValueU32, outputBuffer);
+            CheckBuffer(textureValues[i], outputBuffer);
         }
     }
 
@@ -373,9 +372,7 @@ class DepthStencilSamplingTest : public DawnTest {
             wgpu::CommandBuffer commands = commandEncoder.Finish();
             queue.Submit(1, &commands);
 
-            uint32_t expectedValueU32 = 0;
-            memcpy(&expectedValueU32, &textureValues[i], std::min(sizeof(T), sizeof(uint32_t)));
-            CheckBuffer(expectedValueU32, outputBuffer);
+            CheckBuffer(textureValues[i], outputBuffer);
         }
     }
 
@@ -383,10 +380,12 @@ class DepthStencilSamplingTest : public DawnTest {
     void DoSamplingTest(TestAspect aspect,
                         wgpu::RenderPipeline pipeline,
                         wgpu::TextureFormat format,
-                        std::vector<T> textureValues) {
+                        std::vector<T> textureValues,
+                        T tolerance = {}) {
         DoSamplingTestImpl(aspect, pipeline, format, textureValues, 1,
-                           [this](uint32_t expected, wgpu::Buffer buffer) {
-                               EXPECT_BUFFER_U32_EQ(expected, buffer, 0);
+                           [this, tolerance](T expected, wgpu::Buffer buffer) {
+                               EXPECT_BUFFER(buffer, 0, sizeof(T),
+                                             new ::detail::ExpectEq<T>(expected, tolerance));
                            });
     }
 
@@ -394,10 +393,12 @@ class DepthStencilSamplingTest : public DawnTest {
     void DoSamplingTest(TestAspect aspect,
                         wgpu::ComputePipeline pipeline,
                         wgpu::TextureFormat format,
-                        std::vector<T> textureValues) {
+                        std::vector<T> textureValues,
+                        T tolerance = {}) {
         DoSamplingTestImpl(aspect, pipeline, format, textureValues, 1,
-                           [this](uint32_t expected, wgpu::Buffer buffer) {
-                               EXPECT_BUFFER_U32_EQ(expected, buffer, 0);
+                           [this, tolerance](T expected, wgpu::Buffer buffer) {
+                               EXPECT_BUFFER(buffer, 0, sizeof(T),
+                                             new ::detail::ExpectEq<T>(expected, tolerance));
                            });
     }
 
@@ -585,12 +586,16 @@ class DepthStencilSamplingTest : public DawnTest {
 // Test that sampling a depth texture with a render/compute pipeline works
 TEST_P(DepthStencilSamplingTest, SampleDepth) {
     for (wgpu::TextureFormat format : kDepthFormats) {
+        float tolerance = 0.0f;
+        if (format == wgpu::TextureFormat::Depth16Unorm) {
+            tolerance = 0.001f;
+        }
         // Test 0, between [0, 1], and 1.
         DoSamplingTest(TestAspect::Depth, CreateSamplingRenderPipeline({TestAspect::Depth}, 0),
-                       format, kNormalizedTextureValues);
+                       format, kNormalizedTextureValues, tolerance);
 
         DoSamplingTest(TestAspect::Depth, CreateSamplingComputePipeline({TestAspect::Depth}, 0),
-                       format, kNormalizedTextureValues);
+                       format, kNormalizedTextureValues, tolerance);
     }
 }
 
@@ -744,6 +749,11 @@ TEST_P(DepthStencilSamplingTest, CompareFunctionsRender) {
     wgpu::RenderPipeline pipeline = CreateComparisonRenderPipeline();
 
     for (wgpu::TextureFormat format : kDepthFormats) {
+        // Test does not account for precision issues when comparison testing Depth16Unorm.
+        if (format == wgpu::TextureFormat::Depth16Unorm) {
+            continue;
+        }
+
         // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
         for (float compareRef : kCompareRefs) {
             // Test 0, below the ref, equal to, above the ref, and 1.

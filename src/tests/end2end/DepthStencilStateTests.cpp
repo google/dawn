@@ -763,6 +763,7 @@ TEST_P(DepthStencilStateTest, CreatePipelineWithAllFormats) {
         wgpu::TextureFormat::Depth32Float,
         wgpu::TextureFormat::Depth24PlusStencil8,
         wgpu::TextureFormat::Depth24Plus,
+        wgpu::TextureFormat::Depth16Unorm,
     };
 
     for (wgpu::TextureFormat depthStencilFormat : kDepthStencilFormats) {

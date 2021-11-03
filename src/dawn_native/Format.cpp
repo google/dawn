@@ -328,8 +328,7 @@ namespace dawn_native {
         // Depth-stencil formats
         // TODO(dawn:666): Implement the stencil8 format
         AddStencilFormat(wgpu::TextureFormat::Stencil8, false);
-        // TODO(dawn:570): Implement the depth16unorm format
-        AddDepthFormat(wgpu::TextureFormat::Depth16Unorm, 2, false);
+        AddDepthFormat(wgpu::TextureFormat::Depth16Unorm, 2, true);
         // TODO(crbug.com/dawn/843): This is 4 because we read this to perform zero initialization,
         // and textures are always use depth32float. We should improve this to be more robust. Perhaps,
         // using 0 here to mean "unsized" and adding a backend-specific query for the block size.
