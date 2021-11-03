@@ -86,7 +86,12 @@ func run() error {
 		}
 	}
 
-	var dawnNode, cts, node, npx, logFilename string
+	backendDefault := "default"
+	if vkIcdFilenames := os.Getenv("VK_ICD_FILENAMES"); vkIcdFilenames != "" {
+		backendDefault = "vulkan"
+	}
+
+	var dawnNode, cts, node, npx, logFilename, backend string
 	var verbose, isolated, build bool
 	var numRunners int
 	var flags dawnNodeFlags
@@ -101,6 +106,8 @@ func run() error {
 	flag.IntVar(&numRunners, "j", runtime.NumCPU()/2, "number of concurrent runners. 0 runs serially")
 	flag.StringVar(&logFilename, "log", "", "path to log file of tests run and result")
 	flag.Var(&flags, "flag", "flag to pass to dawn-node as flag=value. multiple flags must be passed in individually")
+	flag.StringVar(&backend, "backend", backendDefault, "backend to use: default|null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles."+
+		" set to 'vulkan' if VK_ICD_FILENAMES environment variable is set, 'default' otherwise")
 	flag.Parse()
 
 	if colors {
@@ -154,6 +161,11 @@ func run() error {
 		if err != nil {
 			npx = ""
 		}
+	}
+
+	if backend != "default" {
+		fmt.Println("Forcing backend to", backend)
+		flags = append(flags, fmt.Sprint("dawn-backend=", backend))
 	}
 
 	r := runner{
