@@ -108,7 +108,6 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                 renamer
                                 robustness
   --parse-only              -- Stop after parsing the input
-  --dump-ast                -- Dump the generated AST to stdout
   --disable-workgroup-init  -- Disable workgroup memory zero initialization.
   --demangle                -- Preserve original source names. Demangle them.
                                Affects AST dumping, and text-based output languages.

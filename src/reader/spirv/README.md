@@ -7,9 +7,6 @@ implements the Reader interface in `tint::reader::Reader`.
 
 It's usable from the Tint command line:
 
-    # Dump the Tint AST after reading SPIR-V.
-    tint --dump-ast --parse-only a.spv
-
     # Translate SPIR-V into WGSL.
     tint --format wgsl a.spv
 
