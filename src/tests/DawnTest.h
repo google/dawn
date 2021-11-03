@@ -38,8 +38,11 @@
 // so resources should have the CopySrc allowed usage bit if you want to add expectations on
 // them.
 
+// AddBufferExpectation is defined in DawnTestBase as protected function. This ensures the macro can
+// only be used in derivd class of DawnTestBase. Use "this" pointer to ensure the macro works with
+// CRTP.
 #define EXPECT_BUFFER(buffer, offset, size, expectation) \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, size, expectation)
+    this->AddBufferExpectation(__FILE__, __LINE__, buffer, offset, size, expectation)
 
 #define EXPECT_BUFFER_U8_EQ(expected, buffer, offset) \
     EXPECT_BUFFER(buffer, offset, sizeof(uint8_t), new ::detail::ExpectEq<uint8_t>(expected))

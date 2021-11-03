@@ -28,22 +28,33 @@ namespace {
     static constexpr uint64_t kDefaultTextureWidth = 10;
     static constexpr uint64_t kDefaultTextureHeight = 1;
 
-    // Dst texture format copyTextureForBrowser accept
-    static const wgpu::TextureFormat kDstTextureFormats[] = {
-        wgpu::TextureFormat::RGBA8Unorm,  wgpu::TextureFormat::BGRA8Unorm,
-        wgpu::TextureFormat::RGBA32Float, wgpu::TextureFormat::RG8Unorm,
-        wgpu::TextureFormat::RGBA16Float, wgpu::TextureFormat::RG16Float,
-        wgpu::TextureFormat::RGB10A2Unorm};
+    using Alpha = wgpu::AlphaOp;
+    DAWN_TEST_PARAM_STRUCT(AlphaTestParams, Alpha)
 
-    static const wgpu::Origin3D kOrigins[] = {{1, 1}, {1, 2}, {2, 1}};
+    using SrcFormat = wgpu::TextureFormat;
+    using DstFormat = wgpu::TextureFormat;
+    using SrcOrigin = wgpu::Origin3D;
+    using DstOrigin = wgpu::Origin3D;
+    using CopySize = wgpu::Extent3D;
+    using FlipY = bool;
 
-    static const wgpu::Extent3D kCopySizes[] = {{1, 1}, {2, 1}, {1, 2}, {2, 2}};
+    std::ostream& operator<<(std::ostream& o, wgpu::Origin3D origin) {
+        o << origin.x << ", " << origin.y << ", " << origin.z;
+        return o;
+    }
 
-    static const wgpu::AlphaOp kAlphaOps[] = {wgpu::AlphaOp::DontChange, wgpu::AlphaOp::Premultiply,
-                                              wgpu::AlphaOp::Unpremultiply};
+    std::ostream& operator<<(std::ostream& o, wgpu::Extent3D copySize) {
+        o << copySize.width << ", " << copySize.height << ", " << copySize.depthOrArrayLayers;
+        return o;
+    }
+
+    DAWN_TEST_PARAM_STRUCT(FormatTestParams, SrcFormat, DstFormat)
+    DAWN_TEST_PARAM_STRUCT(SubRectTestParams, SrcOrigin, DstOrigin, CopySize, FlipY)
+
 }  // anonymous namespace
 
-class CopyTextureForBrowserTests : public DawnTest {
+template <typename Parent>
+class CopyTextureForBrowserTests : public Parent {
   protected:
     struct TextureSpec {
         wgpu::Origin3D copyOrigin = {};
@@ -139,9 +150,8 @@ class CopyTextureForBrowserTests : public DawnTest {
     }
 
     void SetUp() override {
-        DawnTest::SetUp();
-
-        testPipeline = MakeTestPipeline();
+        Parent::SetUp();
+        pipeline = MakeTestPipeline();
 
         uint32_t uniformBufferData[] = {
             0,  // copy have flipY option
@@ -158,14 +168,14 @@ class CopyTextureForBrowserTests : public DawnTest {
         wgpu::BufferDescriptor uniformBufferDesc = {};
         uniformBufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
         uniformBufferDesc.size = sizeof(uniformBufferData);
-        uniformBuffer = device.CreateBuffer(&uniformBufferDesc);
+        uniformBuffer = this->device.CreateBuffer(&uniformBufferDesc);
     }
 
     // Do the bit-by-bit comparison between the source and destination texture with GPU (compute
     // shader) instead of CPU after executing CopyTextureForBrowser() to avoid the errors caused by
     // comparing a value generated on CPU to the one generated on GPU.
     wgpu::ComputePipeline MakeTestPipeline() {
-        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(this->device, R"(
             [[block]] struct Uniforms {
                 dstTextureFlipY : u32;
                 channelCount    : u32;
@@ -183,7 +193,7 @@ class CopyTextureForBrowserTests : public DawnTest {
             [[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
             fn aboutEqual(value : f32, expect : f32) -> bool {
                 // The value diff should be smaller than the hard coded tolerance.
-                return abs(value - expect) < 0.001;
+                return abs(value - expect) < 0.01;
             }
             [[stage(compute), workgroup_size(1, 1, 1)]]
             fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
@@ -240,16 +250,28 @@ class CopyTextureForBrowserTests : public DawnTest {
 
                     // Not use loop and variable index format to workaround
                     // crbug.com/tint/638.
-                    if (uniforms.channelCount == 2u) { // All have rg components.
-                        success = success &&
-                                  aboutEqual(dstColor.r, srcColor.r) &&
-                                  aboutEqual(dstColor.g, srcColor.g);
-                    } else {
-                        success = success &&
-                                  aboutEqual(dstColor.r, srcColor.r) &&
-                                  aboutEqual(dstColor.g, srcColor.g) &&
-                                  aboutEqual(dstColor.b, srcColor.b) &&
-                                  aboutEqual(dstColor.a, srcColor.a);
+                    switch(uniforms.channelCount) {
+                        case 1u: {
+                            success = success && aboutEqual(dstColor.r, srcColor.r);
+                            break;
+                        }
+                        case 2u: {
+                            success = success &&
+                                      aboutEqual(dstColor.r, srcColor.r) &&
+                                      aboutEqual(dstColor.g, srcColor.g);
+                            break;
+                        }
+                        case 4u: {
+                            success = success &&
+                                      aboutEqual(dstColor.r, srcColor.r) &&
+                                      aboutEqual(dstColor.g, srcColor.g) &&
+                                      aboutEqual(dstColor.b, srcColor.b) &&
+                                      aboutEqual(dstColor.a, srcColor.a);
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
                     }
                 }
                 let outputIndex = GlobalInvocationID.y * u32(dstSize.x) + GlobalInvocationID.x;
@@ -265,26 +287,29 @@ class CopyTextureForBrowserTests : public DawnTest {
         csDesc.compute.module = csModule;
         csDesc.compute.entryPoint = "main";
 
-        return device.CreateComputePipeline(&csDesc);
+        return this->device.CreateComputePipeline(&csDesc);
     }
     static uint32_t GetTextureFormatComponentCount(wgpu::TextureFormat format) {
         switch (format) {
             case wgpu::TextureFormat::RGBA8Unorm:
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
             case wgpu::TextureFormat::BGRA8Unorm:
+            case wgpu::TextureFormat::BGRA8UnormSrgb:
             case wgpu::TextureFormat::RGB10A2Unorm:
             case wgpu::TextureFormat::RGBA16Float:
             case wgpu::TextureFormat::RGBA32Float:
                 return 4;
             case wgpu::TextureFormat::RG8Unorm:
             case wgpu::TextureFormat::RG16Float:
+            case wgpu::TextureFormat::RG32Float:
                 return 2;
+            case wgpu::TextureFormat::R8Unorm:
+            case wgpu::TextureFormat::R16Float:
+            case wgpu::TextureFormat::R32Float:
+                return 1;
             default:
                 UNREACHABLE();
         }
-    }
-
-    void DoColorConversionTest(const TextureSpec& srcSpec, const TextureSpec& dstSpec) {
-        DoTest(srcSpec, dstSpec, {kDefaultTextureWidth, kDefaultTextureHeight}, {}, true);
     }
 
     void DoTest(const TextureSpec& srcSpec,
@@ -299,7 +324,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         srcDescriptor.mipLevelCount = srcSpec.level + 1;
         srcDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                               wgpu::TextureUsage::TextureBinding;
-        wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+        wgpu::Texture srcTexture = this->device.CreateTexture(&srcDescriptor);
 
         const utils::TextureDataCopyLayout srcCopyLayout =
             utils::GetTextureDataCopyLayoutForTextureAtLevel(
@@ -325,9 +350,9 @@ class CopyTextureForBrowserTests : public DawnTest {
         srcTextureDataLayout.bytesPerRow = srcCopyLayout.bytesPerRow;
         srcTextureDataLayout.rowsPerImage = srcCopyLayout.rowsPerImage;
 
-        device.GetQueue().WriteTexture(&srcImageTextureInit, srcTextureArrayCopyData.data(),
-                                       srcTextureArrayCopyData.size() * sizeof(RGBA8),
-                                       &srcTextureDataLayout, &srcCopyLayout.mipSize);
+        this->device.GetQueue().WriteTexture(&srcImageTextureInit, srcTextureArrayCopyData.data(),
+                                             srcTextureArrayCopyData.size() * sizeof(RGBA8),
+                                             &srcTextureDataLayout, &srcCopyLayout.mipSize);
 
         bool testSubRectCopy = srcSpec.copyOrigin.x > 0 || srcSpec.copyOrigin.y > 0 ||
                                dstSpec.copyOrigin.x > 0 || dstSpec.copyOrigin.y > 0 ||
@@ -344,7 +369,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         dstDescriptor.mipLevelCount = dstSpec.level + 1;
         dstDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
                               wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
-        dstTexture = device.CreateTexture(&dstDescriptor);
+        dstTexture = this->device.CreateTexture(&dstDescriptor);
 
         if (testSubRectCopy) {
             // For subrect copy tests, dst texture use kTextureFormat always.
@@ -366,9 +391,10 @@ class CopyTextureForBrowserTests : public DawnTest {
             wgpu::ImageCopyTexture dstImageTextureInit =
                 utils::CreateImageCopyTexture(dstTexture, dstSpec.level, {0, 0});
 
-            device.GetQueue().WriteTexture(&dstImageTextureInit, dstTextureArrayCopyData.data(),
-                                           dstTextureArrayCopyData.size() * sizeof(RGBA8),
-                                           &dstTextureDataLayout, &dstCopyLayout.mipSize);
+            this->device.GetQueue().WriteTexture(&dstImageTextureInit,
+                                                 dstTextureArrayCopyData.data(),
+                                                 dstTextureArrayCopyData.size() * sizeof(RGBA8),
+                                                 &dstTextureDataLayout, &dstCopyLayout.mipSize);
         }
 
         // Perform the texture to texture copy
@@ -376,8 +402,8 @@ class CopyTextureForBrowserTests : public DawnTest {
             utils::CreateImageCopyTexture(srcTexture, srcSpec.level, srcSpec.copyOrigin);
         wgpu::ImageCopyTexture dstImageCopyTexture =
             utils::CreateImageCopyTexture(dstTexture, dstSpec.level, dstSpec.copyOrigin);
-        device.GetQueue().CopyTextureForBrowser(&srcImageCopyTexture, &dstImageCopyTexture,
-                                                &copySize, &options);
+        this->device.GetQueue().CopyTextureForBrowser(&srcImageCopyTexture, &dstImageCopyTexture,
+                                                      &copySize, &options);
 
         // Update uniform buffer based on test config
         uint32_t uniformBufferData[] = {
@@ -392,15 +418,15 @@ class CopyTextureForBrowserTests : public DawnTest {
             static_cast<uint32_t>(options.alphaOp)  // alphaOp
         };
 
-        device.GetQueue().WriteBuffer(uniformBuffer, 0, uniformBufferData,
-                                      sizeof(uniformBufferData));
+        this->device.GetQueue().WriteBuffer(uniformBuffer, 0, uniformBufferData,
+                                            sizeof(uniformBufferData));
 
         // Create output buffer to store result
         wgpu::BufferDescriptor outputDesc;
         outputDesc.size = dstSpec.textureSize.width * dstSpec.textureSize.height * sizeof(uint32_t);
         outputDesc.usage =
             wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-        wgpu::Buffer outputBuffer = device.CreateBuffer(&outputDesc);
+        wgpu::Buffer outputBuffer = this->device.CreateBuffer(&outputDesc);
 
         // Create texture views for test.
         wgpu::TextureViewDescriptor srcTextureViewDesc = {};
@@ -413,17 +439,17 @@ class CopyTextureForBrowserTests : public DawnTest {
 
         // Create bind group based on the config.
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-            device, testPipeline.GetBindGroupLayout(0),
+            this->device, pipeline.GetBindGroupLayout(0),
             {{0, srcTextureView}, {1, dstTextureView}, {2, outputBuffer}, {3, uniformBuffer}});
 
         // Start a pipeline to check pixel value in bit form.
-        wgpu::CommandEncoder testEncoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder testEncoder = this->device.CreateCommandEncoder();
 
         wgpu::CommandBuffer testCommands;
         {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::CommandEncoder encoder = this->device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-            pass.SetPipeline(testPipeline);
+            pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Dispatch(dstSpec.textureSize.width,
                           dstSpec.textureSize.height);  // Verify dst texture content
@@ -431,7 +457,7 @@ class CopyTextureForBrowserTests : public DawnTest {
 
             testCommands = encoder.Finish();
         }
-        queue.Submit(1, &testCommands);
+        this->device.GetQueue().Submit(1, &testCommands);
 
         std::vector<uint32_t> expectResult(dstSpec.textureSize.width * dstSpec.textureSize.height,
                                            1);
@@ -439,149 +465,172 @@ class CopyTextureForBrowserTests : public DawnTest {
                                    dstSpec.textureSize.width * dstSpec.textureSize.height);
     }
 
-    wgpu::Buffer uniformBuffer;  // Uniform buffer to store dst texture meta info.
-    wgpu::ComputePipeline testPipeline;
+    wgpu::Buffer uniformBuffer;
+    wgpu::ComputePipeline pipeline;
+};
+
+class CopyTextureForBrowser_Basic : public CopyTextureForBrowserTests<DawnTest> {
+  protected:
+    void DoBasicCopyTest(const wgpu::Extent3D& copySize,
+                         const wgpu::CopyTextureForBrowserOptions options = {}) {
+        TextureSpec textureSpec;
+        textureSpec.textureSize = copySize;
+
+        DoTest(textureSpec, textureSpec, copySize, options);
+    }
+};
+
+class CopyTextureForBrowser_Formats
+    : public CopyTextureForBrowserTests<DawnTestWithParams<FormatTestParams>> {
+  protected:
+    bool IsDstFormatSrgbFormats() {
+        return GetParam().mDstFormat == wgpu::TextureFormat::RGBA8UnormSrgb ||
+               GetParam().mDstFormat == wgpu::TextureFormat::BGRA8UnormSrgb;
+    }
+
+    void DoColorConversionTest() {
+        TextureSpec srcTextureSpec;
+        srcTextureSpec.format = GetParam().mSrcFormat;
+
+        TextureSpec dstTextureSpec;
+        dstTextureSpec.format = GetParam().mDstFormat;
+
+        DoTest(srcTextureSpec, dstTextureSpec, {kDefaultTextureWidth, kDefaultTextureHeight}, {},
+               true);
+    }
+};
+
+class CopyTextureForBrowser_SubRects
+    : public CopyTextureForBrowserTests<DawnTestWithParams<SubRectTestParams>> {
+  protected:
+    void DoCopySubRectTest() {
+        TextureSpec srcTextureSpec;
+        srcTextureSpec.copyOrigin = GetParam().mSrcOrigin;
+        srcTextureSpec.textureSize = {6, 7};
+
+        TextureSpec dstTextureSpec;
+        dstTextureSpec.copyOrigin = GetParam().mDstOrigin;
+        dstTextureSpec.textureSize = {8, 5};
+        wgpu::CopyTextureForBrowserOptions options = {};
+        options.flipY = GetParam().mFlipY;
+
+        wgpu::Extent3D copySize = GetParam().mCopySize;
+
+        DoTest(srcTextureSpec, dstTextureSpec, copySize, options);
+    }
+};
+
+class CopyTextureForBrowser_AlphaOps
+    : public CopyTextureForBrowserTests<DawnTestWithParams<AlphaTestParams>> {
+  protected:
+    void DoAlphaOpTest() {
+        constexpr uint32_t kWidth = 10;
+        constexpr uint32_t kHeight = 10;
+
+        TextureSpec textureSpec;
+        textureSpec.textureSize = {kWidth, kHeight};
+
+        wgpu::CopyTextureForBrowserOptions options = {};
+        options.alphaOp = GetParam().mAlpha;
+
+        DoTest(textureSpec, textureSpec, {kWidth, kHeight}, options);
+    }
 };
 
 // Verify CopyTextureForBrowserTests works with internal pipeline.
 // The case do copy without any transform.
-TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
-    constexpr uint32_t kWidth = 10;
-    constexpr uint32_t kHeight = 1;
-
-    TextureSpec textureSpec;
-    textureSpec.textureSize = {kWidth, kHeight};
-
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight});
+TEST_P(CopyTextureForBrowser_Basic, PassthroughCopy) {
+    DoBasicCopyTest({10, 1});
 }
 
-TEST_P(CopyTextureForBrowserTests, VerifyCopyOnXDirection) {
-    constexpr uint32_t kWidth = 1000;
-    constexpr uint32_t kHeight = 1;
-
-    TextureSpec textureSpec;
-    textureSpec.textureSize = {kWidth, kHeight};
-
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight});
+TEST_P(CopyTextureForBrowser_Basic, VerifyCopyOnXDirection) {
+    DoBasicCopyTest({1000, 1});
 }
 
-TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
-    constexpr uint32_t kWidth = 1;
-    constexpr uint32_t kHeight = 1000;
-
-    TextureSpec textureSpec;
-    textureSpec.textureSize = {kWidth, kHeight};
-
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight});
+TEST_P(CopyTextureForBrowser_Basic, VerifyCopyOnYDirection) {
+    DoBasicCopyTest({1, 1000});
 }
 
-TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
+TEST_P(CopyTextureForBrowser_Basic, VerifyCopyFromLargeTexture) {
     // TODO(crbug.com/dawn/1070): Flaky VK_DEVICE_LOST
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
-    constexpr uint32_t kWidth = 899;
-    constexpr uint32_t kHeight = 999;
-
-    TextureSpec textureSpec;
-    textureSpec.textureSize = {kWidth, kHeight};
-
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight});
+    DoBasicCopyTest({899, 999});
 }
 
-TEST_P(CopyTextureForBrowserTests, VerifyFlipY) {
-    constexpr uint32_t kWidth = 901;
-    constexpr uint32_t kHeight = 1001;
-
-    TextureSpec textureSpec;
-    textureSpec.textureSize = {kWidth, kHeight};
-
+TEST_P(CopyTextureForBrowser_Basic, VerifyFlipY) {
     wgpu::CopyTextureForBrowserOptions options = {};
     options.flipY = true;
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight}, options);
+
+    DoBasicCopyTest({901, 1001}, options);
 }
 
-TEST_P(CopyTextureForBrowserTests, VerifyFlipYInSlimTexture) {
-    constexpr uint32_t kWidth = 1;
-    constexpr uint32_t kHeight = 1001;
-
-    TextureSpec textureSpec;
-    textureSpec.textureSize = {kWidth, kHeight};
-
+TEST_P(CopyTextureForBrowser_Basic, VerifyFlipYInSlimTexture) {
     wgpu::CopyTextureForBrowserOptions options = {};
     options.flipY = true;
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight}, options);
+
+    DoBasicCopyTest({1, 1001}, options);
 }
+
+DAWN_INSTANTIATE_TEST(CopyTextureForBrowser_Basic,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
 
 // Verify |CopyTextureForBrowser| doing color conversion correctly when
 // the source texture is RGBA8Unorm format.
-TEST_P(CopyTextureForBrowserTests, FromRGBA8UnormCopy) {
+TEST_P(CopyTextureForBrowser_Formats, ColorConversion) {
     // Skip OpenGLES backend because it fails on using RGBA8Unorm as
     // source texture format.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 
-    for (wgpu::TextureFormat dstFormat : kDstTextureFormats) {
-        TextureSpec srcTextureSpec = {};  // default format is RGBA8Unorm
+    // Skip OpenGL backend on linux because it fails on using *-srgb format as
+    // dst texture format
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux() && IsDstFormatSrgbFormats());
 
-        TextureSpec dstTextureSpec;
-        dstTextureSpec.format = dstFormat;
-
-        DoColorConversionTest(srcTextureSpec, dstTextureSpec);
-    }
+    DoColorConversionTest();
 }
 
-// Verify |CopyTextureForBrowser| doing color conversion correctly when
-// the source texture is BGRAUnorm format.
-TEST_P(CopyTextureForBrowserTests, FromBGRA8UnormCopy) {
-    // Skip OpenGLES backend because it fails on using BGRA8Unorm as
-    // source texture format.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
-
-    for (wgpu::TextureFormat dstFormat : kDstTextureFormats) {
-        TextureSpec srcTextureSpec;
-        srcTextureSpec.format = wgpu::TextureFormat::BGRA8Unorm;
-
-        TextureSpec dstTextureSpec;
-        dstTextureSpec.format = dstFormat;
-
-        DoColorConversionTest(srcTextureSpec, dstTextureSpec);
-    }
-}
+DAWN_INSTANTIATE_TEST_P(
+    CopyTextureForBrowser_Formats,
+    {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    std::vector<wgpu::TextureFormat>({wgpu::TextureFormat::RGBA8Unorm,
+                                      wgpu::TextureFormat::BGRA8Unorm}),
+    std::vector<wgpu::TextureFormat>(
+        {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R16Float, wgpu::TextureFormat::R32Float,
+         wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::RG16Float,
+         wgpu::TextureFormat::RG32Float, wgpu::TextureFormat::RGBA8Unorm,
+         wgpu::TextureFormat::RGBA8UnormSrgb, wgpu::TextureFormat::BGRA8Unorm,
+         wgpu::TextureFormat::BGRA8UnormSrgb, wgpu::TextureFormat::RGB10A2Unorm,
+         wgpu::TextureFormat::RGBA16Float, wgpu::TextureFormat::RGBA32Float}));
 
 // Verify |CopyTextureForBrowser| doing subrect copy.
 // Source texture is a full red texture and dst texture is a full
 // green texture originally. After the subrect copy, affected part
 // in dst texture should be red and other part should remain green.
-TEST_P(CopyTextureForBrowserTests, CopySubRect) {
+TEST_P(CopyTextureForBrowser_SubRects, CopySubRect) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     // Tests skip due to crbug.com/dawn/1104.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
-    for (wgpu::Origin3D srcOrigin : kOrigins) {
-        for (wgpu::Origin3D dstOrigin : kOrigins) {
-            for (wgpu::Extent3D copySize : kCopySizes) {
-                for (bool flipY : {true, false}) {
-                    TextureSpec srcTextureSpec;
-                    srcTextureSpec.copyOrigin = srcOrigin;
-                    srcTextureSpec.textureSize = {6, 7};
-
-                    TextureSpec dstTextureSpec;
-                    dstTextureSpec.copyOrigin = dstOrigin;
-                    dstTextureSpec.textureSize = {8, 5};
-                    wgpu::CopyTextureForBrowserOptions options = {};
-                    options.flipY = flipY;
-
-                    DoTest(srcTextureSpec, dstTextureSpec, copySize, options);
-                }
-            }
-        }
-    }
+    DoCopySubRectTest();
 }
+
+DAWN_INSTANTIATE_TEST_P(CopyTextureForBrowser_SubRects,
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                         VulkanBackend()},
+                        std::vector<wgpu::Origin3D>({{1, 1}, {1, 2}, {2, 1}}),
+                        std::vector<wgpu::Origin3D>({{1, 1}, {1, 2}, {2, 1}}),
+                        std::vector<wgpu::Extent3D>({{1, 1}, {2, 1}, {1, 2}, {2, 2}}),
+                        std::vector<bool>({true, false}));
 
 // Verify |CopyTextureForBrowser| doing alphaOp.
 // Test alpha ops: DontChange, Premultiply, Unpremultiply.
-TEST_P(CopyTextureForBrowserTests, alphaOp) {
+TEST_P(CopyTextureForBrowser_AlphaOps, alphaOp) {
     // Skip OpenGLES backend because it fails on using RGBA8Unorm as
     // source texture format.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
@@ -589,22 +638,11 @@ TEST_P(CopyTextureForBrowserTests, alphaOp) {
     // Tests skip due to crbug.com/dawn/1104.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
-    constexpr uint32_t kWidth = 10;
-    constexpr uint32_t kHeight = 10;
-
-    TextureSpec textureSpec;
-    textureSpec.textureSize = {kWidth, kHeight};
-
-    for (wgpu::AlphaOp alphaOp : kAlphaOps) {
-        wgpu::CopyTextureForBrowserOptions options = {};
-        options.alphaOp = alphaOp;
-        DoTest(textureSpec, textureSpec, {kWidth, kHeight}, options);
-    }
+    DoAlphaOpTest();
 }
 
-DAWN_INSTANTIATE_TEST(CopyTextureForBrowserTests,
-                      D3D12Backend(),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend());
+DAWN_INSTANTIATE_TEST_P(
+    CopyTextureForBrowser_AlphaOps,
+    {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    std::vector<wgpu::AlphaOp>({wgpu::AlphaOp::DontChange, wgpu::AlphaOp::Premultiply,
+                                wgpu::AlphaOp::Unpremultiply}));

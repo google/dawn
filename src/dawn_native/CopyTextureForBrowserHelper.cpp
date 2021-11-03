@@ -152,13 +152,19 @@ namespace dawn_native {
             }
 
             switch (dstFormat) {
-                case wgpu::TextureFormat::RGBA8Unorm:
-                case wgpu::TextureFormat::BGRA8Unorm:
-                case wgpu::TextureFormat::RGBA32Float:
+                case wgpu::TextureFormat::R8Unorm:
+                case wgpu::TextureFormat::R16Float:
+                case wgpu::TextureFormat::R32Float:
                 case wgpu::TextureFormat::RG8Unorm:
-                case wgpu::TextureFormat::RGBA16Float:
                 case wgpu::TextureFormat::RG16Float:
+                case wgpu::TextureFormat::RG32Float:
+                case wgpu::TextureFormat::RGBA8Unorm:
+                case wgpu::TextureFormat::RGBA8UnormSrgb:
+                case wgpu::TextureFormat::BGRA8Unorm:
+                case wgpu::TextureFormat::BGRA8UnormSrgb:
                 case wgpu::TextureFormat::RGB10A2Unorm:
+                case wgpu::TextureFormat::RGBA16Float:
+                case wgpu::TextureFormat::RGBA32Float:
                     break;
                 default:
                     return DAWN_FORMAT_VALIDATION_ERROR(
