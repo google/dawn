@@ -344,7 +344,7 @@ namespace dawn_native {
 
         WGPUBufferMapAsyncStatus status;
         if (GetDevice()->ConsumedError(ValidateMapAsync(mode, offset, size, &status),
-                                       "calling %s.MapAsync(%s, %u, %u, ...)", this, mode, offset,
+                                       "calling %s.MapAsync(%s, %u, %u, ...).", this, mode, offset,
                                        size)) {
             if (callback) {
                 callback(status, userdata);
@@ -416,7 +416,7 @@ namespace dawn_native {
     }
 
     void BufferBase::APIUnmap() {
-        if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap()", this)) {
+        if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap().", this)) {
             return;
         }
         Unmap();

@@ -151,7 +151,7 @@ namespace dawn_native {
 
                     return {};
                 },
-                "encoding EndPass()")) {
+                "encoding %s.EndPass().", this)) {
             mEncodingContext->ExitComputePass(this, mUsageTracker.AcquireResourceUsage());
         }
     }
@@ -193,7 +193,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding Dispatch (x: %u, y: %u, z: %u)", x, y, z);
+            "encoding %s.Dispatch(%u, %u, %u).", this, x, y, z);
     }
 
     ResultOrError<std::pair<Ref<BufferBase>, uint64_t>>
@@ -348,7 +348,7 @@ namespace dawn_native {
                 dispatch->indirectOffset = indirectOffset;
                 return {};
             },
-            "encoding DispatchIndirect with %s", indirectBuffer);
+            "encoding %s.DispatchIndirect(%s, %u).", this, indirectBuffer, indirectOffset);
     }
 
     void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {
@@ -367,7 +367,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetPipeline with %s", pipeline);
+            "encoding %s.SetPipeline(%s).", this, pipeline);
     }
 
     void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
@@ -392,7 +392,8 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetBindGroup with %s at index %u", group, groupIndexIn);
+            "encoding %s.SetBindGroup(%u, %s, %u, ...).", this, groupIndexIn, group,
+            dynamicOffsetCount);
     }
 
     void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
@@ -413,7 +414,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding WriteTimestamp to %s.", querySet);
+            "encoding %s.WriteTimestamp(%s, %u).", this, querySet, queryIndex);
     }
 
     void ComputePassEncoder::AddDispatchSyncScope(SyncScopeUsageTracker scope) {

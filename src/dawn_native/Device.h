@@ -88,6 +88,9 @@ namespace dawn_native {
                     absl::UntypedFormatSpec format(formatStr);
                     if (absl::FormatUntyped(&out, format, {absl::FormatArg(args)...})) {
                         error->AppendContext(std::move(out));
+                    } else {
+                        error->AppendContext(
+                            absl::StrFormat("[Failed to format error: \"%s\"]", formatStr));
                     }
                 }
                 ConsumeError(std::move(error));
@@ -108,6 +111,9 @@ namespace dawn_native {
                     absl::UntypedFormatSpec format(formatStr);
                     if (absl::FormatUntyped(&out, format, {absl::FormatArg(args)...})) {
                         error->AppendContext(std::move(out));
+                    } else {
+                        error->AppendContext(
+                            absl::StrFormat("[Failed to format error: \"%s\"]", formatStr));
                     }
                 }
                 ConsumeError(std::move(error));

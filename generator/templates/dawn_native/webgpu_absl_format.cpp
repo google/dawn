@@ -94,6 +94,9 @@ namespace dawn_native {
             return {true};
         }
         s->Append("[");
+        if (value->IsError()) {
+            s->Append("Invalid ");
+        }
         s->Append(ObjectTypeAsString(value->GetType()));
         const std::string& label = value->GetLabel();
         if (!label.empty()) {
@@ -112,6 +115,9 @@ namespace dawn_native {
             return {true};
         }
         s->Append("[");
+        if (value->IsError()) {
+            s->Append("Invalid ");
+        }
         s->Append(ObjectTypeAsString(value->GetType()));
         const std::string& label = value->GetLabel();
         if (!label.empty()) {

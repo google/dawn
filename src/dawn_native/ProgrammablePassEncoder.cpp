@@ -74,7 +74,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding InsertDebugMarker(\"%s\")", groupLabel);
+            "encoding %s.InsertDebugMarker(\"%s\").", this, groupLabel);
     }
 
     void ProgrammablePassEncoder::APIPopDebugGroup() {
@@ -92,7 +92,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding PopDebugGroup()");
+            "encoding %s.PopDebugGroup().", this);
     }
 
     void ProgrammablePassEncoder::APIPushDebugGroup(const char* groupLabel) {
@@ -111,7 +111,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding PushDebugGroup(\"%s\")", groupLabel);
+            "encoding %s.PushDebugGroup(\"%s\").", this, groupLabel);
     }
 
     MaybeError ProgrammablePassEncoder::ValidateSetBindGroup(

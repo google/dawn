@@ -513,7 +513,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding BeginComputePass(%s).", descriptor);
+            "encoding %s.BeginComputePass(%s).", this, descriptor);
 
         if (success) {
             ComputePassEncoder* passEncoder =
@@ -618,7 +618,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding BeginRenderPass(%s).", descriptor);
+            "encoding %s.BeginRenderPass(%s).", this, descriptor);
 
         if (success) {
             RenderPassEncoder* passEncoder =
@@ -673,8 +673,8 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding CopyBufferToBuffer(%s, %u, %s, %u, %u).", source, sourceOffset, destination,
-            destinationOffset, size);
+            "encoding %s.CopyBufferToBuffer(%s, %u, %s, %u, %u).", this, source, sourceOffset,
+            destination, destinationOffset, size);
     }
 
     void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
@@ -732,8 +732,8 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding CopyBufferToTexture(%s, %s, %s).", source->buffer, destination->texture,
-            copySize);
+            "encoding %s.CopyBufferToTexture(%s, %s, %s).", this, source->buffer,
+            destination->texture, copySize);
     }
 
     void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
@@ -790,8 +790,8 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding CopyTextureToBuffer(%s, %s, %s).", source->texture, destination->buffer,
-            copySize);
+            "encoding %s.CopyTextureToBuffer(%s, %s, %s).", this, source->texture,
+            destination->buffer, copySize);
     }
 
     void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
@@ -862,8 +862,8 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding CopyTextureToTexture(%s, %s, %s).", source->texture, destination->texture,
-            copySize);
+            "encoding %s.CopyTextureToTexture(%s, %s, %s).", this, source->texture,
+            destination->texture, copySize);
     }
 
     void CommandEncoder::APIInjectValidationError(const char* message) {
@@ -885,7 +885,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding InsertDebugMarker(\"%s\").", groupLabel);
+            "encoding %s.InsertDebugMarker(\"%s\").", this, groupLabel);
     }
 
     void CommandEncoder::APIPopDebugGroup() {
@@ -903,7 +903,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding PopDebugGroup().");
+            "encoding %s.PopDebugGroup().", this);
     }
 
     void CommandEncoder::APIPushDebugGroup(const char* groupLabel) {
@@ -922,7 +922,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding PushDebugGroup(\"%s\").", groupLabel);
+            "encoding %s.PushDebugGroup(\"%s\").", this, groupLabel);
     }
 
     void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
@@ -962,8 +962,8 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding ResolveQuerySet(%s, %u, %u, %s, %u).", querySet, firstQuery, queryCount,
-            destination, destinationOffset);
+            "encoding %s.ResolveQuerySet(%s, %u, %u, %s, %u).", this, querySet, firstQuery,
+            queryCount, destination, destinationOffset);
     }
 
     void CommandEncoder::APIWriteBuffer(BufferBase* buffer,
@@ -989,7 +989,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding WriteBuffer(%s, %u, ..., %u).", buffer, bufferOffset, size);
+            "encoding %s.WriteBuffer(%s, %u, ..., %u).", this, buffer, bufferOffset, size);
     }
 
     void CommandEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
@@ -1010,7 +1010,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding WriteTimestamp(%s, %u).", querySet, queryIndex);
+            "encoding %s.WriteTimestamp(%s, %u).", this, querySet, queryIndex);
     }
 
     CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* descriptor) {

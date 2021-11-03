@@ -99,7 +99,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding Draw(%u, %u, %u, %u).", vertexCount, instanceCount, firstVertex,
+            "encoding %s.Draw(%u, %u, %u, %u).", this, vertexCount, instanceCount, firstVertex,
             firstInstance);
     }
 
@@ -140,8 +140,8 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding DrawIndexed(%u, %u, %u, %i, %u).", indexCount, instanceCount, firstIndex,
-            baseVertex, firstInstance);
+            "encoding %s.DrawIndexed(%u, %u, %u, %i, %u).", this, indexCount, instanceCount,
+            firstIndex, baseVertex, firstInstance);
     }
 
     void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
@@ -171,7 +171,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding DrawIndirect(%s, %u).", indirectBuffer, indirectOffset);
+            "encoding %s.DrawIndirect(%s, %u).", this, indirectBuffer, indirectOffset);
     }
 
     void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
@@ -220,7 +220,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding DrawIndexedIndirect(%s, %u).", indirectBuffer, indirectOffset);
+            "encoding %s.DrawIndexedIndirect(%s, %u).", this, indirectBuffer, indirectOffset);
     }
 
     void RenderEncoderBase::APISetPipeline(RenderPipelineBase* pipeline) {
@@ -254,7 +254,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetPipeline(%s).", pipeline);
+            "encoding %s.SetPipeline(%s).", this, pipeline);
     }
 
     void RenderEncoderBase::APISetIndexBuffer(BufferBase* buffer,
@@ -325,7 +325,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetIndexBuffer(%s, %s, %u, %u).", buffer, format, offset, size);
+            "encoding %s.SetIndexBuffer(%s, %s, %u, %u).", this, buffer, format, offset, size);
     }
 
     void RenderEncoderBase::APISetVertexBuffer(uint32_t slot,
@@ -393,7 +393,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetVertexBuffer(%u, %s, %u, %u).", slot, buffer, offset, size);
+            "encoding %s.SetVertexBuffer(%u, %s, %u, %u).", this, slot, buffer, offset, size);
     }
 
     void RenderEncoderBase::APISetBindGroup(uint32_t groupIndexIn,
@@ -418,7 +418,8 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetBindGroup(%u, %s, %u).", groupIndexIn, group, dynamicOffsetCount);
+            "encoding %s.SetBindGroup(%u, %s, %u, ...).", this, groupIndexIn, group,
+            dynamicOffsetCount);
     }
 
 }  // namespace dawn_native

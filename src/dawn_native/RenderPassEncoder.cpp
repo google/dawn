@@ -117,7 +117,7 @@ namespace dawn_native {
                                                               std::move(mIndirectDrawMetadata)));
                     return {};
                 },
-                "encoding EndPass().")) {
+                "encoding %s.EndPass().", this)) {
         }
     }
 
@@ -131,7 +131,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetStencilReference(%u)", reference);
+            "encoding %s.SetStencilReference(%u).", this, reference);
     }
 
     void RenderPassEncoder::APISetBlendConstant(const Color* color) {
@@ -144,7 +144,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetBlendConstant(%s).", color);
+            "encoding %s.SetBlendConstant(%s).", this, color);
     }
 
     void RenderPassEncoder::APISetViewport(float x,
@@ -195,7 +195,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetViewport(%f, %f, %f, %f, %f, %f).", x, y, width, height, minDepth,
+            "encoding %s.SetViewport(%f, %f, %f, %f, %f, %f).", this, x, y, width, height, minDepth,
             maxDepth);
     }
 
@@ -224,7 +224,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding SetScissorRect(%u, %u, %u, %u).", x, y, width, height);
+            "encoding %s.SetScissorRect(%u, %u, %u, %u).", this, x, y, width, height);
     }
 
     void RenderPassEncoder::APIExecuteBundles(uint32_t count,
@@ -290,7 +290,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding ExecuteBundles(%u, ...)", count);
+            "encoding %s.ExecuteBundles(%u, ...).", this, count);
     }
 
     void RenderPassEncoder::APIBeginOcclusionQuery(uint32_t queryIndex) {
@@ -330,7 +330,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding BeginOcclusionQuery(%u)", queryIndex);
+            "encoding %s.BeginOcclusionQuery(%u).", this, queryIndex);
     }
 
     void RenderPassEncoder::APIEndOcclusionQuery() {
@@ -352,7 +352,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding EndOcclusionQuery()");
+            "encoding %s.EndOcclusionQuery().", this);
     }
 
     void RenderPassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
@@ -377,7 +377,7 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding WriteTimestamp(%s, %u).", querySet, queryIndex);
+            "encoding %s.WriteTimestamp(%s, %u).", this, querySet, queryIndex);
     }
 
 }  // namespace dawn_native

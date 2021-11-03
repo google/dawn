@@ -113,6 +113,6 @@ Context messages should follow these guidelines:
  * Example: `("validating % against %", descriptor, descriptor->layout)`
  * Output: `- While validating [BindGroupDescriptor "Label"] against [BindGroupLayout]`
 
-**When possible, indicate the function call being made as the top-level context.**
- * Example: `("calling CreatePipelineLayout")`
- * Output: `- While calling CreatePipelineLayout`
+**When possible, indicate the function call being made as the top-level context, as well as the parameters passed.**
+ * Example: `("calling %s.CreatePipelineLayout(%s).", this, descriptor)`
+ * Output: `- While calling [Device].CreatePipelineLayout([PipelineLayoutDescriptor]).`
