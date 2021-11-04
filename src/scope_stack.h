@@ -36,60 +36,33 @@ class ScopeStack {
   ~ScopeStack() = default;
 
   /// Push a new scope on to the stack
-  void push_scope() { stack_.push_back({}); }
+  void Push() { stack_.push_back({}); }
 
   /// Pop the scope off the top of the stack
-  void pop_scope() {
+  void Pop() {
     if (stack_.size() > 1) {
       stack_.pop_back();
     }
   }
 
-  /// Set a global variable in the stack
+  /// Assigns the value into the top most scope of the stack
   /// @param symbol the symbol of the variable
   /// @param val the value
-  void set_global(const Symbol& symbol, T val) { stack_[0][symbol] = val; }
+  void Set(const Symbol& symbol, T val) { stack_.back()[symbol] = val; }
 
-  /// Sets variable into the top most scope of the stack
-  /// @param symbol the symbol of the variable
-  /// @param val the value
-  void set(const Symbol& symbol, T val) { stack_.back()[symbol] = val; }
-
-  /// Checks for the given `symbol` in the stack
+  /// Retrieves a value from the stack
   /// @param symbol the symbol to look for
-  /// @returns true if the stack contains `symbol`
-  bool has(const Symbol& symbol) const { return get(symbol, nullptr); }
-
-  /// Retrieves a given variable from the stack
-  /// @param symbol the symbol to look for
-  /// @param ret where to place the value
-  /// @returns true if the symbol was successfully found, false otherwise
-  bool get(const Symbol& symbol, T* ret) const {
-    return get(symbol, ret, nullptr);
-  }
-
-  /// Retrieves a given variable from the stack
-  /// @param symbol the symbol to look for
-  /// @param ret where to place the value
-  /// @param is_global set true if the symbol references a global variable
-  /// otherwise unchanged
-  /// @returns true if the symbol was successfully found, false otherwise
-  bool get(const Symbol& symbol, T* ret, bool* is_global) const {
+  /// @returns the variable, or the zero initializer if the value was not found
+  T Get(const Symbol& symbol) const {
     for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
       auto& map = *iter;
       auto val = map.find(symbol);
-
       if (val != map.end()) {
-        if (ret) {
-          *ret = val->second;
-        }
-        if (is_global && iter == stack_.rend() - 1) {
-          *is_global = true;
-        }
-        return true;
+        return val->second;
       }
     }
-    return false;
+
+    return T{};
   }
 
  private:

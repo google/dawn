@@ -46,6 +46,7 @@
 #include "src/transform/simplify.h"
 #include "src/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/transform/zero_init_workgroup_memory.h"
+#include "src/utils/defer.h"
 #include "src/utils/get_or_create.h"
 #include "src/writer/append_vector.h"
 
@@ -468,8 +469,8 @@ bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
       continue;
     }
 
-    uint32_t var_id;
-    if (!scope_stack_.get(var->Declaration()->symbol, &var_id)) {
+    uint32_t var_id = scope_stack_.Get(var->Declaration()->symbol);
+    if (var_id == 0) {
       error_ = "unable to find ID for global variable: " +
                builder_.Symbols().NameFor(var->Declaration()->symbol);
       return false;
@@ -613,7 +614,8 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     return false;
   }
 
-  scope_stack_.push_scope();
+  scope_stack_.Push();
+  TINT_DEFER(scope_stack_.Pop());
 
   auto definition_inst = Instruction{
       spv::Op::OpFunction,
@@ -636,7 +638,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     params.push_back(Instruction{spv::Op::OpFunctionParameter,
                                  {Operand::Int(param_type_id), param_op}});
 
-    scope_stack_.set(param->Declaration()->symbol, param_id);
+    scope_stack_.Set(param->Declaration()->symbol, param_id);
   }
 
   push_function(Function{definition_inst, result_op(), std::move(params)});
@@ -655,8 +657,6 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
       return false;
     }
   }
-
-  scope_stack_.pop_scope();
 
   func_symbol_to_id_[func_ast->symbol] = func_id;
 
@@ -706,7 +706,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* var) {
       error_ = "missing constructor for constant";
       return false;
     }
-    scope_stack_.set(var->symbol, init_id);
+    scope_stack_.Set(var->symbol, init_id);
     spirv_id_to_variable_[init_id] = var;
     return true;
   }
@@ -740,7 +740,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* var) {
     }
   }
 
-  scope_stack_.set(var->symbol, var_id);
+  scope_stack_.Set(var->symbol, var_id);
   spirv_id_to_variable_[var_id] = var;
 
   return true;
@@ -803,7 +803,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
                {Operand::Int(init_id),
                 Operand::String(builder_.Symbols().NameFor(var->symbol))});
 
-    scope_stack_.set_global(var->symbol, init_id);
+    scope_stack_.Set(var->symbol, init_id);
     spirv_id_to_variable_[init_id] = var;
     return true;
   }
@@ -898,7 +898,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
     }
   }
 
-  scope_stack_.set_global(var->symbol, var_id);
+  scope_stack_.Set(var->symbol, var_id);
   spirv_id_to_variable_[var_id] = var;
   return true;
 }
@@ -1173,14 +1173,12 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
 
 uint32_t Builder::GenerateIdentifierExpression(
     const ast::IdentifierExpression* expr) {
-  uint32_t val = 0;
-  if (scope_stack_.get(expr->symbol, &val)) {
-    return val;
+  uint32_t val = scope_stack_.Get(expr->symbol);
+  if (val == 0) {
+    error_ = "unable to find variable with identifier: " +
+             builder_.Symbols().NameFor(expr->symbol);
   }
-
-  error_ = "unable to find variable with identifier: " +
-           builder_.Symbols().NameFor(expr->symbol);
-  return 0;
+  return val;
 }
 
 uint32_t Builder::GenerateLoadIfNeeded(const sem::Type* type, uint32_t id) {
@@ -2231,10 +2229,9 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
 }
 
 bool Builder::GenerateBlockStatement(const ast::BlockStatement* stmt) {
-  scope_stack_.push_scope();
-  auto result = GenerateBlockStatementWithoutScoping(stmt);
-  scope_stack_.pop_scope();
-  return result;
+  scope_stack_.Push();
+  TINT_DEFER(scope_stack_.Pop());
+  return GenerateBlockStatementWithoutScoping(stmt);
 }
 
 bool Builder::GenerateBlockStatementWithoutScoping(
@@ -3736,33 +3733,34 @@ bool Builder::GenerateLoopStatement(const ast::LoopStatement* stmt) {
 
   // We need variables from the body to be visible in the continuing block, so
   // manage scope outside of GenerateBlockStatement.
-  scope_stack_.push_scope();
+  {
+    scope_stack_.Push();
+    TINT_DEFER(scope_stack_.Pop());
 
-  if (!GenerateBlockStatementWithoutScoping(stmt->body)) {
-    return false;
-  }
-
-  // We only branch if the last element of the body didn't already branch.
-  if (!LastIsTerminator(stmt->body)) {
-    if (!push_function_inst(spv::Op::OpBranch,
-                            {Operand::Int(continue_block_id)})) {
+    if (!GenerateBlockStatementWithoutScoping(stmt->body)) {
       return false;
     }
-  }
 
-  if (!GenerateLabel(continue_block_id)) {
-    return false;
-  }
-  if (stmt->continuing && !stmt->continuing->Empty()) {
-    continuing_stack_.emplace_back(stmt->continuing->Last(), loop_header_id,
-                                   merge_block_id);
-    if (!GenerateBlockStatementWithoutScoping(stmt->continuing)) {
+    // We only branch if the last element of the body didn't already branch.
+    if (!LastIsTerminator(stmt->body)) {
+      if (!push_function_inst(spv::Op::OpBranch,
+                              {Operand::Int(continue_block_id)})) {
+        return false;
+      }
+    }
+
+    if (!GenerateLabel(continue_block_id)) {
       return false;
     }
-    continuing_stack_.pop_back();
+    if (stmt->continuing && !stmt->continuing->Empty()) {
+      continuing_stack_.emplace_back(stmt->continuing->Last(), loop_header_id,
+                                     merge_block_id);
+      if (!GenerateBlockStatementWithoutScoping(stmt->continuing)) {
+        return false;
+      }
+      continuing_stack_.pop_back();
+    }
   }
-
-  scope_stack_.pop_scope();
 
   // Generate the backedge.
   TINT_ASSERT(Writer, !backedge_stack_.empty());

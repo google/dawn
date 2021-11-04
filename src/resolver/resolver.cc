@@ -656,7 +656,7 @@ bool Resolver::GlobalVariable(const ast::Variable* var) {
   if (!info) {
     return false;
   }
-  variable_stack_.set_global(var->symbol, info);
+  variable_stack_.Set(var->symbol, info);
 
   if (!var->is_const && info->storage_class == ast::StorageClass::kNone) {
     AddError("global variables must have a storage class", var->source);
@@ -1769,7 +1769,7 @@ bool Resolver::Function(const ast::Function* func) {
 
   TINT_SCOPED_ASSIGNMENT(current_function_, info);
 
-  variable_stack_.push_scope();
+  variable_stack_.Push();
   uint32_t parameter_index = 0;
   std::unordered_map<Symbol, Source> parameter_names;
   for (auto* param : func->params) {
@@ -1798,7 +1798,7 @@ bool Resolver::Function(const ast::Function* func) {
       return false;
     }
 
-    variable_stack_.set(param->symbol, param_info);
+    variable_stack_.Set(param->symbol, param_info);
     info->parameters.emplace_back(param_info);
 
     if (!ApplyStorageClassUsageToType(param->declared_storage_class,
@@ -1887,7 +1887,7 @@ bool Resolver::Function(const ast::Function* func) {
       return false;
     }
   }
-  variable_stack_.pop_scope();
+  variable_stack_.Pop();
 
   for (auto* deco : func->decorations) {
     Mark(deco);
@@ -1952,9 +1952,8 @@ bool Resolver::Function(const ast::Function* func) {
 
       if (auto* ident = expr->As<ast::IdentifierExpression>()) {
         // We have an identifier of a module-scope constant.
-        VariableInfo* var = nullptr;
-        if (!variable_stack_.get(ident->symbol, &var) ||
-            !(var->declaration->is_const)) {
+        VariableInfo* var = variable_stack_.Get(ident->symbol);
+        if (!var || !(var->declaration->is_const)) {
           AddError(kErrBadType, expr->source);
           return false;
         }
@@ -2635,8 +2634,8 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
     if (param->declaration->type->Is<ast::Pointer>()) {
       auto is_valid = false;
       if (auto* ident_expr = arg_expr->As<ast::IdentifierExpression>()) {
-        VariableInfo* var;
-        if (!variable_stack_.get(ident_expr->symbol, &var)) {
+        VariableInfo* var = variable_stack_.Get(ident_expr->symbol);
+        if (!var) {
           TINT_ICE(Resolver, diagnostics_) << "failed to resolve identifier";
           return false;
         }
@@ -2647,8 +2646,8 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
         if (unary->op == ast::UnaryOp::kAddressOf) {
           if (auto* ident_unary =
                   unary->expr->As<ast::IdentifierExpression>()) {
-            VariableInfo* var;
-            if (!variable_stack_.get(ident_unary->symbol, &var)) {
+            VariableInfo* var = variable_stack_.Get(ident_unary->symbol);
+            if (!var) {
               TINT_ICE(Resolver, diagnostics_)
                   << "failed to resolve identifier";
               return false;
@@ -2987,8 +2986,7 @@ bool Resolver::ValidateScalarConstructor(
 
 bool Resolver::Identifier(const ast::IdentifierExpression* expr) {
   auto symbol = expr->symbol;
-  VariableInfo* var;
-  if (variable_stack_.get(symbol, &var)) {
+  if (VariableInfo* var = variable_stack_.Get(symbol)) {
     SetExprInfo(expr, var->type, var->type_name);
 
     var->users.push_back(expr);
@@ -3485,7 +3483,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     }
   }
 
-  variable_stack_.set(var->symbol, info);
+  variable_stack_.Set(var->symbol, info);
   if (current_block_) {  // Not all statements are inside a block
     current_block_->AddDecl(var);
   }
@@ -3909,9 +3907,8 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 
     if (auto* ident = count_expr->As<ast::IdentifierExpression>()) {
       // Make sure the identifier is a non-overridable module-scope constant.
-      VariableInfo* var = nullptr;
-      bool is_global = false;
-      if (!variable_stack_.get(ident->symbol, &var, &is_global) || !is_global ||
+      VariableInfo* var = variable_stack_.Get(ident->symbol);
+      if (!var || var->kind != VariableKind::kGlobal ||
           !var->declaration->is_const) {
         AddError("array size identifier must be a module-scope constant",
                  size_source);
@@ -4489,8 +4486,7 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   auto const* lhs_type = TypeOf(a->lhs);
 
   if (auto* ident = a->lhs->As<ast::IdentifierExpression>()) {
-    VariableInfo* var;
-    if (variable_stack_.get(ident->symbol, &var)) {
+    if (VariableInfo* var = variable_stack_.Get(ident->symbol)) {
       if (var->kind == VariableKind::kParameter) {
         AddError("cannot assign to function parameter", a->lhs->source);
         AddNote("'" + builder_->Symbols().NameFor(ident->symbol) +
@@ -4542,10 +4538,8 @@ bool Resolver::ValidateNoDuplicateDefinition(Symbol sym,
                                              const Source& source,
                                              bool check_global_scope_only) {
   if (check_global_scope_only) {
-    bool is_global = false;
-    VariableInfo* var;
-    if (variable_stack_.get(sym, &var, &is_global)) {
-      if (is_global) {
+    if (VariableInfo* var = variable_stack_.Get(sym)) {
+      if (var->kind == VariableKind::kGlobal) {
         AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
                  source);
         AddNote("previous definition is here", var->declaration->source);
@@ -4560,8 +4554,7 @@ bool Resolver::ValidateNoDuplicateDefinition(Symbol sym,
       return false;
     }
   } else {
-    VariableInfo* var;
-    if (variable_stack_.get(sym, &var)) {
+    if (VariableInfo* var = variable_stack_.Get(sym)) {
       AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
                source);
       AddNote("previous definition is here", var->declaration->source);
@@ -4635,10 +4628,10 @@ bool Resolver::Scope(sem::CompoundStatement* stmt, F&& callback) {
   current_statement_ = stmt;
   current_compound_statement_ = stmt;
   current_block_ = stmt->As<sem::BlockStatement>();
-  variable_stack_.push_scope();
+  variable_stack_.Push();
 
   TINT_DEFER({
-    TINT_DEFER(variable_stack_.pop_scope());
+    TINT_DEFER(variable_stack_.Pop());
     current_block_ = prev_current_block;
     current_compound_statement_ = prev_current_compound_statement;
     current_statement_ = prev_current_statement;

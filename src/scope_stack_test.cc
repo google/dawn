@@ -21,78 +21,32 @@ namespace {
 
 class ScopeStackTest : public ProgramBuilder, public testing::Test {};
 
-TEST_F(ScopeStackTest, Global) {
+TEST_F(ScopeStackTest, Get) {
   ScopeStack<uint32_t> s;
-  Symbol sym(1, ID());
-  s.set_global(sym, 5);
+  Symbol a(1, ID());
+  Symbol b(3, ID());
+  s.Push();
+  s.Set(a, 5u);
+  s.Set(b, 10u);
 
-  uint32_t val = 0;
-  EXPECT_TRUE(s.get(sym, &val));
-  EXPECT_EQ(val, 5u);
-}
+  EXPECT_EQ(s.Get(a), 5u);
+  EXPECT_EQ(s.Get(b), 10u);
 
-TEST_F(ScopeStackTest, Global_SetWithPointer) {
-  auto* v = Var("my_var", ty.f32(), ast::StorageClass::kNone);
-  ScopeStack<const ast::Variable*> s;
-  s.set_global(v->symbol, v);
+  s.Push();
 
-  const ast::Variable* v2 = nullptr;
-  EXPECT_TRUE(s.get(v->symbol, &v2));
-  EXPECT_EQ(v2->symbol, v->symbol);
-}
+  s.Set(a, 15u);
+  EXPECT_EQ(s.Get(a), 15u);
+  EXPECT_EQ(s.Get(b), 10u);
 
-TEST_F(ScopeStackTest, Global_CanNotPop) {
-  ScopeStack<uint32_t> s;
-  Symbol sym(1, ID());
-  s.set_global(sym, 5);
-  s.pop_scope();
-
-  uint32_t val = 0;
-  EXPECT_TRUE(s.get(sym, &val));
-  EXPECT_EQ(val, 5u);
-}
-
-TEST_F(ScopeStackTest, Scope) {
-  ScopeStack<uint32_t> s;
-  Symbol sym(1, ID());
-  s.push_scope();
-  s.set(sym, 5);
-
-  uint32_t val = 0;
-  EXPECT_TRUE(s.get(sym, &val));
-  EXPECT_EQ(val, 5u);
+  s.Pop();
+  EXPECT_EQ(s.Get(a), 5u);
+  EXPECT_EQ(s.Get(b), 10u);
 }
 
 TEST_F(ScopeStackTest, Get_MissingSymbol) {
   ScopeStack<uint32_t> s;
   Symbol sym(1, ID());
-  uint32_t ret = 0;
-  EXPECT_FALSE(s.get(sym, &ret));
-  EXPECT_EQ(ret, 0u);
-}
-
-TEST_F(ScopeStackTest, Has) {
-  ScopeStack<uint32_t> s;
-  Symbol sym(1, ID());
-  Symbol sym2(2, ID());
-  s.set_global(sym2, 3);
-  s.push_scope();
-  s.set(sym, 5);
-
-  EXPECT_TRUE(s.has(sym));
-  EXPECT_TRUE(s.has(sym2));
-}
-
-TEST_F(ScopeStackTest, ReturnsScopeBeforeGlobalFirst) {
-  ScopeStack<uint32_t> s;
-  Symbol sym(1, ID());
-  s.set_global(sym, 3);
-  s.push_scope();
-  s.set(sym, 5);
-
-  uint32_t ret;
-  EXPECT_TRUE(s.get(sym, &ret));
-  EXPECT_EQ(ret, 5u);
+  EXPECT_EQ(s.Get(sym), 0u);
 }
 
 }  // namespace
