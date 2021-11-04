@@ -491,7 +491,7 @@ if (tint_tmp) {
   tint_tmp = (tint_tmp_1);
 }
 )");
-  EXPECT_EQ(out.str(), R"(asint((tint_tmp)))");
+  EXPECT_EQ(out.str(), R"(int((tint_tmp)))");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Call_WithLogical) {

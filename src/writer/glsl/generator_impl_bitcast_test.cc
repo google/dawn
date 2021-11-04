@@ -29,7 +29,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
 
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-  EXPECT_EQ(out.str(), "asfloat(1)");
+  EXPECT_EQ(out.str(), "intBitsToFloat(1)");
 }
 
 TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
@@ -40,7 +40,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
 
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-  EXPECT_EQ(out.str(), "asint(1u)");
+  EXPECT_EQ(out.str(), "int(1u)");
 }
 
 TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
@@ -51,7 +51,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
 
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-  EXPECT_EQ(out.str(), "asuint(1)");
+  EXPECT_EQ(out.str(), "uint(1)");
 }
 
 }  // namespace

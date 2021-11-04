@@ -177,21 +177,38 @@ bool GeneratorImpl::EmitArrayAccessor(
 
 bool GeneratorImpl::EmitBitcast(std::ostream& out,
                                 const ast::BitcastExpression* expr) {
-  auto* type = TypeOf(expr);
-  if (auto* vec = type->UnwrapRef()->As<sem::Vector>()) {
-    type = vec->type();
-  }
+  auto* src_type = TypeOf(expr->expr);
+  auto* dst_type = TypeOf(expr);
 
-  if (!type->is_integer_scalar() && !type->is_float_scalar()) {
-    diagnostics_.add_error(diag::System::Writer,
-                           "Unable to do bitcast to type " + type->type_name());
+  if (!dst_type->is_integer_scalar_or_vector() &&
+      !dst_type->is_float_scalar_or_vector()) {
+    diagnostics_.add_error(
+        diag::System::Writer,
+        "Unable to do bitcast to type " + dst_type->type_name());
     return false;
   }
 
-  out << "as";
-  if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite,
-                "")) {
-    return false;
+  if (src_type == dst_type) {
+    return EmitExpression(out, expr->expr);
+  }
+
+  if (src_type->is_float_scalar_or_vector() &&
+      dst_type->is_signed_scalar_or_vector()) {
+    out << "floatBitsToInt";
+  } else if (src_type->is_float_scalar_or_vector() &&
+             dst_type->is_unsigned_scalar_or_vector()) {
+    out << "floatBitsToUint";
+  } else if (src_type->is_signed_scalar_or_vector() &&
+             dst_type->is_float_scalar_or_vector()) {
+    out << "intBitsToFloat";
+  } else if (src_type->is_unsigned_scalar_or_vector() &&
+             dst_type->is_float_scalar_or_vector()) {
+    out << "uintBitsToFloat";
+  } else {
+    if (!EmitType(out, dst_type, ast::StorageClass::kNone,
+                  ast::Access::kReadWrite, "")) {
+      return false;
+    }
   }
   out << "(";
   if (!EmitExpression(out, expr->expr)) {
