@@ -63,7 +63,7 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
 
   // Build set of referenced module-scope variables for faster lookups later.
   std::unordered_set<const ast::Variable*> referenced_vars;
-  for (auto* var : sem.Get(entry_point)->ReferencedModuleVariables()) {
+  for (auto* var : sem.Get(entry_point)->TransitivelyReferencedGlobals()) {
     referenced_vars.emplace(var->Declaration());
   }
 

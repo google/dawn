@@ -3795,10 +3795,10 @@ void Resolver::CreateSemanticNodes() const {
   }
 
   auto remap_vars = [&sem](const std::vector<VariableInfo*>& in) {
-    std::vector<const sem::Variable*> out;
+    std::vector<const sem::GlobalVariable*> out;
     out.reserve(in.size());
     for (auto* info : in) {
-      out.emplace_back(sem.Get(info->declaration));
+      out.emplace_back(sem.Get<sem::GlobalVariable>(info->declaration));
     }
     return out;
   };
@@ -3818,9 +3818,8 @@ void Resolver::CreateSemanticNodes() const {
     auto* sem_func = builder_->create<sem::Function>(
         info->declaration, info->return_type, parameters,
         remap_vars(info->referenced_module_vars),
-        remap_vars(info->local_referenced_module_vars), info->return_statements,
-        info->callsites, ancestor_entry_points[func->symbol],
-        info->workgroup_size);
+        remap_vars(info->local_referenced_module_vars), info->callsites,
+        ancestor_entry_points[func->symbol], info->workgroup_size);
     func_info_to_sem_func.emplace(info, sem_func);
     sem.Add(func, sem_func);
   }

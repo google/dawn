@@ -2580,7 +2580,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     auto out = line();
     if (func->PipelineStage() == ast::PipelineStage::kCompute) {
       // Emit the workgroup_size attribute.
-      auto wgsize = func_sem->workgroup_size();
+      auto wgsize = func_sem->WorkgroupSize();
       out << "[numthreads(";
       for (int i = 0; i < 3; i++) {
         if (i > 0) {

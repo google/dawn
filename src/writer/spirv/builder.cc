@@ -461,7 +461,7 @@ bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
       Operand::String(builder_.Symbols().NameFor(func->symbol))};
 
   auto* func_sem = builder_.Sem().Get(func);
-  for (const auto* var : func_sem->ReferencedModuleVariables()) {
+  for (const auto* var : func_sem->TransitivelyReferencedGlobals()) {
     // For SPIR-V 1.3 we only output Input/output variables. If we update to
     // SPIR-V 1.4 or later this should be all variables.
     if (var->StorageClass() != ast::StorageClass::kInput &&
@@ -492,7 +492,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
         spv::Op::OpExecutionMode,
         {Operand::Int(id), Operand::Int(SpvExecutionModeOriginUpperLeft)});
   } else if (func->PipelineStage() == ast::PipelineStage::kCompute) {
-    auto& wgsize = func_sem->workgroup_size();
+    auto& wgsize = func_sem->WorkgroupSize();
 
     // Check if the workgroup_size uses pipeline-overridable constants.
     if (wgsize[0].overridable_const || wgsize[1].overridable_const ||
@@ -553,7 +553,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
     }
   }
 
-  for (auto builtin : func_sem->ReferencedBuiltinVariables()) {
+  for (auto builtin : func_sem->TransitivelyReferencedBuiltinVariables()) {
     if (builtin.second->builtin == ast::Builtin::kFragDepth) {
       push_execution_mode(
           spv::Op::OpExecutionMode,

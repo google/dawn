@@ -64,7 +64,7 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
       }
       auto* func = ctx.src->Sem().Get(func_ast);
       std::unordered_map<sem::BindingPoint, int> binding_point_counts;
-      for (auto* var : func->ReferencedModuleVariables()) {
+      for (auto* var : func->TransitivelyReferencedGlobals()) {
         if (auto binding_point = var->Declaration()->BindingPoint()) {
           BindingPoint from{binding_point.group->value,
                             binding_point.binding->value};

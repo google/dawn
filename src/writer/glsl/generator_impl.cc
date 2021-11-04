@@ -1756,7 +1756,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     auto out = line();
     if (func->PipelineStage() == ast::PipelineStage::kCompute) {
       // Emit the layout(local_size) attributes.
-      auto wgsize = func_sem->workgroup_size();
+      auto wgsize = func_sem->WorkgroupSize();
       out << "layout(";
       for (int i = 0; i < 3; i++) {
         if (i > 0) {

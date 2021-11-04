@@ -121,7 +121,7 @@ struct ZeroInitWorkgroupMemory::State {
     // Generate a list of statements to zero initialize each of the
     // workgroup storage variables used by `fn`. This will populate #statements.
     auto* func = sem.Get(fn);
-    for (auto* var : func->ReferencedModuleVariables()) {
+    for (auto* var : func->TransitivelyReferencedGlobals()) {
       if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
         BuildZeroingStatements(
             var->Type()->UnwrapRef(), [&](uint32_t num_values) {

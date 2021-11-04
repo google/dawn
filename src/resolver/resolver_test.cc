@@ -819,7 +819,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
   EXPECT_EQ(func_sem->Parameters().size(), 0u);
   EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 
-  const auto& vars = func_sem->ReferencedModuleVariables();
+  const auto& vars = func_sem->TransitivelyReferencedGlobals();
   ASSERT_EQ(vars.size(), 3u);
   EXPECT_EQ(vars[0]->Declaration(), wg_var);
   EXPECT_EQ(vars[1]->Declaration(), sb_var);
@@ -856,7 +856,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
   ASSERT_NE(func2_sem, nullptr);
   EXPECT_EQ(func2_sem->Parameters().size(), 0u);
 
-  const auto& vars = func2_sem->ReferencedModuleVariables();
+  const auto& vars = func2_sem->TransitivelyReferencedGlobals();
   ASSERT_EQ(vars.size(), 3u);
   EXPECT_EQ(vars[0]->Declaration(), wg_var);
   EXPECT_EQ(vars[1]->Declaration(), sb_var);
@@ -875,7 +875,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
+  EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().size(), 0u);
   EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 }
 
@@ -890,7 +890,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
+  EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().size(), 0u);
   EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 }
 
@@ -902,32 +902,8 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionParams) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
+  EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().size(), 0u);
   EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
-}
-
-TEST_F(ResolverTest, Function_ReturnStatements) {
-  auto* var = Var("foo", ty.f32());
-
-  auto* ret_1 = Return(1.f);
-  auto* ret_foo = Return("foo");
-  auto* func = Func("my_func", ast::VariableList{}, ty.f32(),
-                    {
-                        Decl(var),
-                        If(true, Block(ret_1)),
-                        ret_foo,
-                    });
-
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-  auto* func_sem = Sem().Get(func);
-  ASSERT_NE(func_sem, nullptr);
-  EXPECT_EQ(func_sem->Parameters().size(), 0u);
-
-  EXPECT_EQ(func_sem->ReturnStatements().size(), 2u);
-  EXPECT_EQ(func_sem->ReturnStatements()[0], ret_1);
-  EXPECT_EQ(func_sem->ReturnStatements()[1], ret_foo);
-  EXPECT_TRUE(func_sem->ReturnType()->Is<sem::F32>());
 }
 
 TEST_F(ResolverTest, Function_CallSites) {
@@ -964,12 +940,12 @@ TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->workgroup_size()[0].value, 1u);
-  EXPECT_EQ(func_sem->workgroup_size()[1].value, 1u);
-  EXPECT_EQ(func_sem->workgroup_size()[2].value, 1u);
-  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 1u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 1u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 1u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
@@ -984,12 +960,12 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->workgroup_size()[0].value, 8u);
-  EXPECT_EQ(func_sem->workgroup_size()[1].value, 2u);
-  EXPECT_EQ(func_sem->workgroup_size()[2].value, 3u);
-  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 8u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 2u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 3u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Consts) {
@@ -1010,12 +986,12 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->workgroup_size()[0].value, 16u);
-  EXPECT_EQ(func_sem->workgroup_size()[1].value, 8u);
-  EXPECT_EQ(func_sem->workgroup_size()[2].value, 2u);
-  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 16u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 8u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 2u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Consts_NestedInitializer) {
@@ -1036,12 +1012,12 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts_NestedInitializer) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->workgroup_size()[0].value, 8u);
-  EXPECT_EQ(func_sem->workgroup_size()[1].value, 4u);
-  EXPECT_EQ(func_sem->workgroup_size()[2].value, 1u);
-  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 8u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 4u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 1u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
@@ -1062,12 +1038,12 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->workgroup_size()[0].value, 16u);
-  EXPECT_EQ(func_sem->workgroup_size()[1].value, 8u);
-  EXPECT_EQ(func_sem->workgroup_size()[2].value, 2u);
-  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, width);
-  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, height);
-  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, depth);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 16u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 8u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 2u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, width);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, height);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, depth);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
@@ -1088,12 +1064,12 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->workgroup_size()[0].value, 0u);
-  EXPECT_EQ(func_sem->workgroup_size()[1].value, 0u);
-  EXPECT_EQ(func_sem->workgroup_size()[2].value, 0u);
-  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, width);
-  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, height);
-  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, depth);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 0u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 0u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 0u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, width);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, height);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, depth);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
@@ -1112,12 +1088,12 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
 
-  EXPECT_EQ(func_sem->workgroup_size()[0].value, 8u);
-  EXPECT_EQ(func_sem->workgroup_size()[1].value, 2u);
-  EXPECT_EQ(func_sem->workgroup_size()[2].value, 3u);
-  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
-  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, height);
-  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 8u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 2u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 3u);
+  EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, height);
+  EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {

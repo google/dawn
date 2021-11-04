@@ -20,23 +20,22 @@
 #include <vector>
 
 #include "src/ast/variable.h"
-#include "src/sem/call_target.h"
+#include "src/sem/call.h"
+#include "src/utils/unique_vector.h"
 
 namespace tint {
 
 // Forward declarations
 namespace ast {
-class BindingDecoration;
 class BuiltinDecoration;
-class CallExpression;
 class Function;
-class GroupDecoration;
 class LocationDecoration;
 class ReturnStatement;
 }  // namespace ast
 
 namespace sem {
 
+class Intrinsic;
 class Variable;
 
 /// WorkgroupDimension describes the size of a single dimension of an entry
@@ -49,6 +48,9 @@ struct WorkgroupDimension {
   const ast::Variable* overridable_const = nullptr;
 };
 
+/// WorkgroupSize is a three-dimensional array of WorkgroupDimensions.
+using WorkgroupSize = std::array<WorkgroupDimension, 3>;
+
 /// Function holds the semantic information for function nodes.
 class Function : public Castable<Function, CallTarget> {
  public:
@@ -60,21 +62,19 @@ class Function : public Castable<Function, CallTarget> {
   /// @param declaration the ast::Function
   /// @param return_type the return type of the function
   /// @param parameters the parameters to the function
-  /// @param referenced_module_vars the referenced module variables
-  /// @param local_referenced_module_vars the locally referenced module
-  /// @param return_statements the function return statements
+  /// @param transitively_referenced_globals the referenced module variables
+  /// @param directly_referenced_globals the locally referenced module
   /// @param callsites the callsites of the function
   /// @param ancestor_entry_points the ancestor entry points
   /// @param workgroup_size the workgroup size
   Function(const ast::Function* declaration,
            Type* return_type,
            std::vector<Parameter*> parameters,
-           std::vector<const Variable*> referenced_module_vars,
-           std::vector<const Variable*> local_referenced_module_vars,
-           std::vector<const ast::ReturnStatement*> return_statements,
+           std::vector<const GlobalVariable*> transitively_referenced_globals,
+           std::vector<const GlobalVariable*> directly_referenced_globals,
            std::vector<const ast::CallExpression*> callsites,
            std::vector<Symbol> ancestor_entry_points,
-           std::array<WorkgroupDimension, 3> workgroup_size);
+           sem::WorkgroupSize workgroup_size);
 
   /// Destructor
   ~Function() override;
@@ -82,81 +82,78 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns the ast::Function declaration
   const ast::Function* Declaration() const { return declaration_; }
 
-  /// Note: If this function calls other functions, the return will also include
-  /// all of the referenced variables from the callees.
-  /// @returns the referenced module variables
-  const std::vector<const Variable*>& ReferencedModuleVariables() const {
-    return referenced_module_vars_;
+  /// @returns the workgroup size {x, y, z} for the function.
+  const sem::WorkgroupSize& WorkgroupSize() const { return workgroup_size_; }
+
+  /// @returns all transitively referenced global variables
+  const utils::UniqueVector<const GlobalVariable*>&
+  TransitivelyReferencedGlobals() const {
+    return transitively_referenced_globals_;
   }
-  /// @returns the locally referenced module variables
-  const std::vector<const Variable*>& LocalReferencedModuleVariables() const {
-    return local_referenced_module_vars_;
-  }
-  /// @returns the return statements
-  const std::vector<const ast::ReturnStatement*> ReturnStatements() const {
-    return return_statements_;
-  }
+
   /// @returns the list of callsites of this function
   std::vector<const ast::CallExpression*> CallSites() const {
     return callsites_;
   }
-  /// @returns the ancestor entry points
+
+  /// @returns the names of the ancestor entry points
   const std::vector<Symbol>& AncestorEntryPoints() const {
     return ancestor_entry_points_;
   }
+
   /// Retrieves any referenced location variables
   /// @returns the <variable, decoration> pair.
   std::vector<std::pair<const Variable*, const ast::LocationDecoration*>>
-  ReferencedLocationVariables() const;
+  TransitivelyReferencedLocationVariables() const;
 
   /// Retrieves any referenced builtin variables
   /// @returns the <variable, decoration> pair.
   std::vector<std::pair<const Variable*, const ast::BuiltinDecoration*>>
-  ReferencedBuiltinVariables() const;
+  TransitivelyReferencedBuiltinVariables() const;
 
   /// Retrieves any referenced uniform variables. Note, the variables must be
   /// decorated with both binding and group decorations.
   /// @returns the referenced uniforms
-  VariableBindings ReferencedUniformVariables() const;
+  VariableBindings TransitivelyReferencedUniformVariables() const;
 
   /// Retrieves any referenced storagebuffer variables. Note, the variables
   /// must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  VariableBindings ReferencedStorageBufferVariables() const;
+  VariableBindings TransitivelyReferencedStorageBufferVariables() const;
 
   /// Retrieves any referenced regular Sampler variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  VariableBindings ReferencedSamplerVariables() const;
+  VariableBindings TransitivelyReferencedSamplerVariables() const;
 
   /// Retrieves any referenced comparison Sampler variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  VariableBindings ReferencedComparisonSamplerVariables() const;
+  VariableBindings TransitivelyReferencedComparisonSamplerVariables() const;
 
   /// Retrieves any referenced sampled textures variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced sampled textures
-  VariableBindings ReferencedSampledTextureVariables() const;
+  VariableBindings TransitivelyReferencedSampledTextureVariables() const;
 
   /// Retrieves any referenced multisampled textures variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced sampled textures
-  VariableBindings ReferencedMultisampledTextureVariables() const;
+  VariableBindings TransitivelyReferencedMultisampledTextureVariables() const;
 
   /// Retrieves any referenced variables of the given type. Note, the variables
   /// must be decorated with both binding and group decorations.
   /// @param type_info the type of the variables to find
   /// @returns the referenced variables
-  VariableBindings ReferencedVariablesOfType(
+  VariableBindings TransitivelyReferencedVariablesOfType(
       const tint::TypeInfo& type_info) const;
 
   /// Retrieves any referenced variables of the given type. Note, the variables
   /// must be decorated with both binding and group decorations.
   /// @returns the referenced variables
   template <typename T>
-  VariableBindings ReferencedVariablesOfType() const {
-    return ReferencedVariablesOfType(TypeInfo::Of<T>());
+  VariableBindings TransitivelyReferencedVariablesOfType() const {
+    return TransitivelyReferencedVariablesOfType(TypeInfo::Of<T>());
   }
 
   /// Checks if the given entry point is an ancestor
@@ -164,23 +161,21 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns true if `sym` is an ancestor entry point of this function
   bool HasAncestorEntryPoint(Symbol sym) const;
 
-  /// @returns the workgroup size {x, y, z} for the function.
-  const std::array<WorkgroupDimension, 3>& workgroup_size() const {
-    return workgroup_size_;
-  }
-
  private:
-  VariableBindings ReferencedSamplerVariablesImpl(ast::SamplerKind kind) const;
-  VariableBindings ReferencedSampledTextureVariablesImpl(
+  VariableBindings TransitivelyReferencedSamplerVariablesImpl(
+      ast::SamplerKind kind) const;
+  VariableBindings TransitivelyReferencedSampledTextureVariablesImpl(
       bool multisampled) const;
 
   const ast::Function* const declaration_;
-  std::vector<const Variable*> const referenced_module_vars_;
-  std::vector<const Variable*> const local_referenced_module_vars_;
-  std::vector<const ast::ReturnStatement*> const return_statements_;
-  std::vector<const ast::CallExpression*> const callsites_;
-  std::vector<Symbol> const ancestor_entry_points_;
-  std::array<WorkgroupDimension, 3> workgroup_size_;
+  const sem::WorkgroupSize workgroup_size_;
+
+  utils::UniqueVector<const GlobalVariable*> directly_referenced_globals_;
+  utils::UniqueVector<const GlobalVariable*> transitively_referenced_globals_;
+  utils::UniqueVector<const Function*> transitively_called_functions_;
+  utils::UniqueVector<const Intrinsic*> directly_called_intrinsics_;
+  std::vector<const ast::CallExpression*> callsites_;
+  std::vector<Symbol> ancestor_entry_points_;
 };
 
 }  // namespace sem

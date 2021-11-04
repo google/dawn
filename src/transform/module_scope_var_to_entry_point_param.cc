@@ -98,7 +98,7 @@ struct ModuleScopeVarToEntryPointParam::State {
       auto* func_sem = ctx.src->Sem().Get(func_ast);
 
       bool needs_processing = false;
-      for (auto* var : func_sem->ReferencedModuleVariables()) {
+      for (auto* var : func_sem->TransitivelyReferencedGlobals()) {
         if (var->StorageClass() != ast::StorageClass::kNone) {
           needs_processing = true;
           break;
@@ -155,7 +155,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         return workgroup_parameter_symbol;
       };
 
-      for (auto* var : func_sem->ReferencedModuleVariables()) {
+      for (auto* var : func_sem->TransitivelyReferencedGlobals()) {
         auto sc = var->StorageClass();
         if (sc == ast::StorageClass::kNone) {
           continue;
@@ -312,7 +312,7 @@ struct ModuleScopeVarToEntryPointParam::State {
 
         // Add new arguments for any variables that are needed by the callee.
         // For entry points, pass non-handle types as pointers.
-        for (auto* target_var : target_sem->ReferencedModuleVariables()) {
+        for (auto* target_var : target_sem->TransitivelyReferencedGlobals()) {
           auto sc = target_var->StorageClass();
           if (sc == ast::StorageClass::kNone) {
             continue;

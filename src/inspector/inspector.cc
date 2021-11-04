@@ -145,7 +145,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     entry_point.remapped_name = program_->Symbols().NameFor(func->symbol);
     entry_point.stage = func->PipelineStage();
 
-    auto wgsize = sem->workgroup_size();
+    auto wgsize = sem->WorkgroupSize();
     entry_point.workgroup_size_x = wgsize[0].value;
     entry_point.workgroup_size_y = wgsize[1].value;
     entry_point.workgroup_size_z = wgsize[2].value;
@@ -188,7 +188,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
                           func->return_type_decorations);
     }
 
-    for (auto* var : sem->ReferencedModuleVariables()) {
+    for (auto* var : sem->TransitivelyReferencedGlobals()) {
       auto* decl = var->Declaration();
 
       auto name = program_->Symbols().NameFor(decl->symbol);
@@ -333,13 +333,13 @@ uint32_t Inspector::GetStorageSize(const std::string& entry_point) {
 
   size_t size = 0;
   auto* func_sem = program_->Sem().Get(func);
-  for (auto& ruv : func_sem->ReferencedUniformVariables()) {
+  for (auto& ruv : func_sem->TransitivelyReferencedUniformVariables()) {
     const sem::Struct* s = ruv.first->Type()->UnwrapRef()->As<sem::Struct>();
     if (s && s->IsBlockDecorated()) {
       size += s->Size();
     }
   }
-  for (auto& rsv : func_sem->ReferencedStorageBufferVariables()) {
+  for (auto& rsv : func_sem->TransitivelyReferencedStorageBufferVariables()) {
     const sem::Struct* s = rsv.first->Type()->UnwrapRef()->As<sem::Struct>();
     if (s) {
       size += s->Size();
@@ -389,7 +389,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
   std::vector<ResourceBinding> result;
 
   auto* func_sem = program_->Sem().Get(func);
-  for (auto& ruv : func_sem->ReferencedUniformVariables()) {
+  for (auto& ruv : func_sem->TransitivelyReferencedUniformVariables()) {
     auto* var = ruv.first;
     auto binding_info = ruv.second;
 
@@ -437,7 +437,7 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
   std::vector<ResourceBinding> result;
 
   auto* func_sem = program_->Sem().Get(func);
-  for (auto& rs : func_sem->ReferencedSamplerVariables()) {
+  for (auto& rs : func_sem->TransitivelyReferencedSamplerVariables()) {
     auto binding_info = rs.second;
 
     ResourceBinding entry;
@@ -461,7 +461,8 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
   std::vector<ResourceBinding> result;
 
   auto* func_sem = program_->Sem().Get(func);
-  for (auto& rcs : func_sem->ReferencedComparisonSamplerVariables()) {
+  for (auto& rcs :
+       func_sem->TransitivelyReferencedComparisonSamplerVariables()) {
     auto binding_info = rcs.second;
 
     ResourceBinding entry;
@@ -502,7 +503,8 @@ std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
 
   std::vector<ResourceBinding> result;
   auto* func_sem = program_->Sem().Get(func);
-  for (auto& ref : func_sem->ReferencedVariablesOfType(texture_type)) {
+  for (auto& ref :
+       func_sem->TransitivelyReferencedVariablesOfType(texture_type)) {
     auto* var = ref.first;
     auto binding_info = ref.second;
 
@@ -567,7 +569,7 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
 
   uint32_t total_size = 0;
   auto* func_sem = program_->Sem().Get(func);
-  for (const sem::Variable* var : func_sem->ReferencedModuleVariables()) {
+  for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
     if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
       auto* ty = var->Type()->UnwrapRef();
       uint32_t align = ty->Align();
@@ -678,7 +680,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
 
   auto* func_sem = program_->Sem().Get(func);
   std::vector<ResourceBinding> result;
-  for (auto& rsv : func_sem->ReferencedStorageBufferVariables()) {
+  for (auto& rsv : func_sem->TransitivelyReferencedStorageBufferVariables()) {
     auto* var = rsv.first;
     auto binding_info = rsv.second;
 
@@ -717,8 +719,9 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
   std::vector<ResourceBinding> result;
   auto* func_sem = program_->Sem().Get(func);
   auto referenced_variables =
-      multisampled_only ? func_sem->ReferencedMultisampledTextureVariables()
-                        : func_sem->ReferencedSampledTextureVariables();
+      multisampled_only
+          ? func_sem->TransitivelyReferencedMultisampledTextureVariables()
+          : func_sem->TransitivelyReferencedSampledTextureVariables();
   for (auto& ref : referenced_variables) {
     auto* var = ref.first;
     auto binding_info = ref.second;
@@ -757,7 +760,8 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
 
   auto* func_sem = program_->Sem().Get(func);
   std::vector<ResourceBinding> result;
-  for (auto& ref : func_sem->ReferencedVariablesOfType<sem::StorageTexture>()) {
+  for (auto& ref :
+       func_sem->TransitivelyReferencedVariablesOfType<sem::StorageTexture>()) {
     auto* var = ref.first;
     auto binding_info = ref.second;
 
