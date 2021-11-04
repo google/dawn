@@ -28,12 +28,14 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/mattn/go-colorable"
@@ -60,8 +62,11 @@ Usage:
 	os.Exit(1)
 }
 
-var colors bool
-var stdout io.Writer
+var (
+	colors  bool
+	stdout  io.Writer
+	mainCtx context.Context
+)
 
 type dawnNodeFlags []string
 
@@ -76,7 +81,21 @@ func (f *dawnNodeFlags) Set(value string) error {
 	return nil
 }
 
+func makeMainCtx() context.Context {
+	ctx, cancel := context.WithCancel(context.Background())
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-sigs
+		fmt.Printf("Signal received: %v\n", sig)
+		cancel()
+	}()
+	return ctx
+}
+
 func run() error {
+	mainCtx = makeMainCtx()
+
 	colors = os.Getenv("TERM") != "dumb" ||
 		isatty.IsTerminal(os.Stdout.Fd()) ||
 		isatty.IsCygwinTerminal(os.Stdout.Fd())
@@ -483,7 +502,8 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 			args = append(args, "--gpu-provider-flag", f)
 		}
 
-		cmd := exec.Command(r.node, args...)
+		ctx := mainCtx
+		cmd := exec.CommandContext(ctx, r.node, args...)
 
 		serverLog := &bytes.Buffer{}
 
@@ -502,6 +522,8 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 		case port = <-pl.port:
 		case <-time.After(time.Second * 10):
 			return fmt.Errorf("timeout waiting for server port:\n%v", serverLog.String())
+		case <-ctx.Done():
+			return ctx.Err()
 		}
 
 		return nil
@@ -725,7 +747,7 @@ type result struct {
 // runTestcase() runs the CTS testcase with the given query, returning the test
 // result.
 func (r *runner) runTestcase(query string) result {
-	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	ctx, cancel := context.WithTimeout(mainCtx, testTimeout)
 	defer cancel()
 
 	args := []string{
