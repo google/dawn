@@ -28,7 +28,6 @@
 namespace tint {
 namespace {
 
-using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
 using IntrinsicType = sem::IntrinsicType;
@@ -45,9 +44,9 @@ TEST_F(IntrinsicTableTest, MatchF32) {
   auto* result = table->Lookup(IntrinsicType::kCos, {f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kCos);
-  EXPECT_THAT(result->ReturnType(), f32);
-  ASSERT_THAT(result->Parameters().size(), 1);
+  EXPECT_EQ(result->Type(), IntrinsicType::kCos);
+  EXPECT_EQ(result->ReturnType(), f32);
+  ASSERT_EQ(result->Parameters().size(), 1u);
   EXPECT_EQ(result->Parameters()[0]->Type(), f32);
 }
 
@@ -66,8 +65,8 @@ TEST_F(IntrinsicTableTest, MatchU32) {
       table->Lookup(IntrinsicType::kUnpack2x16float, {u32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kUnpack2x16float);
-  EXPECT_THAT(result->ReturnType(), vec2_f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kUnpack2x16float);
+  EXPECT_EQ(result->ReturnType(), vec2_f32);
   ASSERT_EQ(result->Parameters().size(), 1u);
   EXPECT_EQ(result->Parameters()[0]->Type(), u32);
 }
@@ -89,8 +88,8 @@ TEST_F(IntrinsicTableTest, MatchI32) {
       table->Lookup(IntrinsicType::kTextureLoad, {tex, i32, i32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kTextureLoad);
-  EXPECT_THAT(result->ReturnType(), vec4_f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kTextureLoad);
+  EXPECT_EQ(result->ReturnType(), vec4_f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), tex);
   EXPECT_EQ(result->Parameters()[0]->Usage(), ParameterUsage::kTexture);
@@ -114,8 +113,8 @@ TEST_F(IntrinsicTableTest, MatchIU32AsI32) {
   auto* result = table->Lookup(IntrinsicType::kCountOneBits, {i32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kCountOneBits);
-  EXPECT_THAT(result->ReturnType(), i32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kCountOneBits);
+  EXPECT_EQ(result->ReturnType(), i32);
   ASSERT_EQ(result->Parameters().size(), 1u);
   EXPECT_EQ(result->Parameters()[0]->Type(), i32);
 }
@@ -125,8 +124,8 @@ TEST_F(IntrinsicTableTest, MatchIU32AsU32) {
   auto* result = table->Lookup(IntrinsicType::kCountOneBits, {u32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kCountOneBits);
-  EXPECT_THAT(result->ReturnType(), u32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kCountOneBits);
+  EXPECT_EQ(result->ReturnType(), u32);
   ASSERT_EQ(result->Parameters().size(), 1u);
   EXPECT_EQ(result->Parameters()[0]->Type(), u32);
 }
@@ -144,8 +143,8 @@ TEST_F(IntrinsicTableTest, MatchFIU32AsI32) {
       table->Lookup(IntrinsicType::kClamp, {i32, i32, i32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kClamp);
-  EXPECT_THAT(result->ReturnType(), i32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kClamp);
+  EXPECT_EQ(result->ReturnType(), i32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), i32);
   EXPECT_EQ(result->Parameters()[1]->Type(), i32);
@@ -158,8 +157,8 @@ TEST_F(IntrinsicTableTest, MatchFIU32AsU32) {
       table->Lookup(IntrinsicType::kClamp, {u32, u32, u32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kClamp);
-  EXPECT_THAT(result->ReturnType(), u32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kClamp);
+  EXPECT_EQ(result->ReturnType(), u32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), u32);
   EXPECT_EQ(result->Parameters()[1]->Type(), u32);
@@ -172,8 +171,8 @@ TEST_F(IntrinsicTableTest, MatchFIU32AsF32) {
       table->Lookup(IntrinsicType::kClamp, {f32, f32, f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kClamp);
-  EXPECT_THAT(result->ReturnType(), f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kClamp);
+  EXPECT_EQ(result->ReturnType(), f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), f32);
   EXPECT_EQ(result->Parameters()[1]->Type(), f32);
@@ -195,8 +194,8 @@ TEST_F(IntrinsicTableTest, MatchBool) {
       table->Lookup(IntrinsicType::kSelect, {f32, f32, bool_}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kSelect);
-  EXPECT_THAT(result->ReturnType(), f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kSelect);
+  EXPECT_EQ(result->ReturnType(), f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), f32);
   EXPECT_EQ(result->Parameters()[1]->Type(), f32);
@@ -219,8 +218,8 @@ TEST_F(IntrinsicTableTest, MatchPointer) {
   auto* result = table->Lookup(IntrinsicType::kAtomicLoad, {ptr}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kAtomicLoad);
-  EXPECT_THAT(result->ReturnType(), i32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kAtomicLoad);
+  EXPECT_EQ(result->ReturnType(), i32);
   ASSERT_EQ(result->Parameters().size(), 1u);
   EXPECT_EQ(result->Parameters()[0]->Type(), ptr);
 }
@@ -242,7 +241,7 @@ TEST_F(IntrinsicTableTest, MatchArray) {
       table->Lookup(IntrinsicType::kArrayLength, {arr_ptr}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kArrayLength);
+  EXPECT_EQ(result->Type(), IntrinsicType::kArrayLength);
   EXPECT_TRUE(result->ReturnType()->Is<sem::U32>());
   ASSERT_EQ(result->Parameters().size(), 1u);
   auto* param_type = result->Parameters()[0]->Type();
@@ -267,8 +266,8 @@ TEST_F(IntrinsicTableTest, MatchSampler) {
                                {tex, sampler, vec2_f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kTextureSample);
-  EXPECT_THAT(result->ReturnType(), vec4_f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kTextureSample);
+  EXPECT_EQ(result->ReturnType(), vec4_f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), tex);
   EXPECT_EQ(result->Parameters()[0]->Usage(), ParameterUsage::kTexture);
@@ -298,8 +297,8 @@ TEST_F(IntrinsicTableTest, MatchSampledTexture) {
                                {tex, vec2_i32, i32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kTextureLoad);
-  EXPECT_THAT(result->ReturnType(), vec4_f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kTextureLoad);
+  EXPECT_EQ(result->ReturnType(), vec4_f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), tex);
   EXPECT_EQ(result->Parameters()[0]->Usage(), ParameterUsage::kTexture);
@@ -319,8 +318,8 @@ TEST_F(IntrinsicTableTest, MatchMultisampledTexture) {
                                {tex, vec2_i32, i32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kTextureLoad);
-  EXPECT_THAT(result->ReturnType(), vec4_f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kTextureLoad);
+  EXPECT_EQ(result->ReturnType(), vec4_f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), tex);
   EXPECT_EQ(result->Parameters()[0]->Usage(), ParameterUsage::kTexture);
@@ -339,8 +338,8 @@ TEST_F(IntrinsicTableTest, MatchDepthTexture) {
                                {tex, vec2_i32, i32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kTextureLoad);
-  EXPECT_THAT(result->ReturnType(), f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kTextureLoad);
+  EXPECT_EQ(result->ReturnType(), f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), tex);
   EXPECT_EQ(result->Parameters()[0]->Usage(), ParameterUsage::kTexture);
@@ -359,8 +358,8 @@ TEST_F(IntrinsicTableTest, MatchDepthMultisampledTexture) {
                                {tex, vec2_i32, i32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kTextureLoad);
-  EXPECT_THAT(result->ReturnType(), f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kTextureLoad);
+  EXPECT_EQ(result->ReturnType(), f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), tex);
   EXPECT_EQ(result->Parameters()[0]->Usage(), ParameterUsage::kTexture);
@@ -380,8 +379,8 @@ TEST_F(IntrinsicTableTest, MatchExternalTexture) {
       table->Lookup(IntrinsicType::kTextureLoad, {tex, vec2_i32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kTextureLoad);
-  EXPECT_THAT(result->ReturnType(), vec4_f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kTextureLoad);
+  EXPECT_EQ(result->ReturnType(), vec4_f32);
   ASSERT_EQ(result->Parameters().size(), 2u);
   EXPECT_EQ(result->Parameters()[0]->Type(), tex);
   EXPECT_EQ(result->Parameters()[0]->Usage(), ParameterUsage::kTexture);
@@ -404,7 +403,7 @@ TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
                                {tex, vec2_i32, vec4_f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kTextureStore);
+  EXPECT_EQ(result->Type(), IntrinsicType::kTextureStore);
   EXPECT_TRUE(result->ReturnType()->Is<sem::Void>());
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), tex);
@@ -434,8 +433,8 @@ TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
                     Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kCos);
-  EXPECT_THAT(result->ReturnType(), f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kCos);
+  EXPECT_EQ(result->ReturnType(), f32);
   ASSERT_EQ(result->Parameters().size(), 1u);
   EXPECT_EQ(result->Parameters()[0]->Type(), f32);
 }
@@ -446,8 +445,8 @@ TEST_F(IntrinsicTableTest, MatchOpenType) {
       table->Lookup(IntrinsicType::kClamp, {f32, f32, f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kClamp);
-  EXPECT_THAT(result->ReturnType(), f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kClamp);
+  EXPECT_EQ(result->ReturnType(), f32);
   EXPECT_EQ(result->Parameters()[0]->Type(), f32);
   EXPECT_EQ(result->Parameters()[1]->Type(), f32);
   EXPECT_EQ(result->Parameters()[2]->Type(), f32);
@@ -469,8 +468,8 @@ TEST_F(IntrinsicTableTest, MatchOpenSizeVector) {
                                {vec2_f32, vec2_f32, vec2_f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kClamp);
-  EXPECT_THAT(result->ReturnType(), vec2_f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kClamp);
+  EXPECT_EQ(result->ReturnType(), vec2_f32);
   ASSERT_EQ(result->Parameters().size(), 3u);
   EXPECT_EQ(result->Parameters()[0]->Type(), vec2_f32);
   EXPECT_EQ(result->Parameters()[1]->Type(), vec2_f32);
@@ -495,8 +494,8 @@ TEST_F(IntrinsicTableTest, MatchOpenSizeMatrix) {
       table->Lookup(IntrinsicType::kDeterminant, {mat3_f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kDeterminant);
-  EXPECT_THAT(result->ReturnType(), f32);
+  EXPECT_EQ(result->Type(), IntrinsicType::kDeterminant);
+  EXPECT_EQ(result->ReturnType(), f32);
   ASSERT_EQ(result->Parameters().size(), 1u);
   EXPECT_EQ(result->Parameters()[0]->Type(), mat3_f32);
 }
