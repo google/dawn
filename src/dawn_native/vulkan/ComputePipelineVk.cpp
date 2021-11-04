@@ -53,7 +53,7 @@ namespace dawn_native { namespace vulkan {
 
         createInfo.stage.pName = computeStage.entryPoint.c_str();
 
-        std::vector<SpecializationDataEntry> specializationDataEntries;
+        std::vector<OverridableConstantScalar> specializationDataEntries;
         std::vector<VkSpecializationMapEntry> specializationMapEntries;
         VkSpecializationInfo specializationInfo{};
         createInfo.stage.pSpecializationInfo =

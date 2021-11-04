@@ -21,6 +21,7 @@
 
 namespace dawn_native {
     struct ProgrammableStage;
+    union OverridableConstantScalar;
 }  // namespace dawn_native
 
 namespace dawn_native { namespace vulkan {
@@ -111,23 +112,13 @@ namespace dawn_native { namespace vulkan {
                       const char* prefix,
                       std::string label = "");
 
-    // Helpers for creating VkSpecializationInfo
-    // The WebGPU overridable constants only support these scalar types
-    union SpecializationDataEntry {
-        // Use int32_t for boolean to initialize the full 32bit
-        int32_t b;
-        float f32;
-        int32_t i32;
-        uint32_t u32;
-    };
-
     // Returns nullptr or &specializationInfo
     // specializationInfo, specializationDataEntries, specializationMapEntries needs to
     // be alive at least until VkSpecializationInfo is passed into Vulkan Create*Pipelines
     VkSpecializationInfo* GetVkSpecializationInfo(
         const ProgrammableStage& programmableStage,
         VkSpecializationInfo* specializationInfo,
-        std::vector<SpecializationDataEntry>* specializationDataEntries,
+        std::vector<OverridableConstantScalar>* specializationDataEntries,
         std::vector<VkSpecializationMapEntry>* specializationMapEntries);
 
 }}  // namespace dawn_native::vulkan

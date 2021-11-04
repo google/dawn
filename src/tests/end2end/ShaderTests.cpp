@@ -391,8 +391,8 @@ fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
 
 // Test overridable constants without numeric identifiers
 TEST_P(ShaderTests, OverridableConstants) {
-    // TODO(dawn:1041): Only Vulkan backend is implemented
-    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
+    // TODO(dawn:1137): D3D12 backend is unimplemented
+    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan() && !IsMetal());
 
     uint32_t const kCount = 11;
     std::vector<uint32_t> expected(kCount);
@@ -469,8 +469,8 @@ TEST_P(ShaderTests, OverridableConstants) {
 
 // Test overridable constants with numeric identifiers
 TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
-    // TODO(dawn:1041): Only Vulkan backend is implemented
-    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
+    // TODO(dawn:1137): D3D12 backend is unimplemented
+    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan() && !IsMetal());
 
     uint32_t const kCount = 4;
     std::vector<uint32_t> expected{1u, 2u, 3u, 0u};
@@ -525,8 +525,8 @@ TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
 
 // Test overridable constants for different entry points
 TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
-    // TODO(dawn:1041): Only Vulkan backend is implemented
-    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
+    // TODO(dawn:1137): D3D12 backend is unimplemented
+    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan() && !IsMetal());
 
     uint32_t const kCount = 1;
     std::vector<uint32_t> expected1{1u};
@@ -607,8 +607,8 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
 // Draw a triangle covering the render target, with vertex position and color values from
 // overridable constants
 TEST_P(ShaderTests, OverridableConstantsRenderPipeline) {
-    // TODO(dawn:1041): Only Vulkan backend is implemented
-    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
+    // TODO(dawn:1137): D3D12 backend is unimplemented
+    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan() && !IsMetal());
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 [[override(1111)]] let xright: f32;

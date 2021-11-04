@@ -150,6 +150,15 @@ namespace dawn_native {
     using BindingGroupInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
     using BindingInfoArray = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
 
+    // The WebGPU overridable constants only support these scalar types
+    union OverridableConstantScalar {
+        // Use int32_t for boolean to initialize the full 32bit
+        int32_t b;
+        float f32;
+        int32_t i32;
+        uint32_t u32;
+    };
+
     // Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
     // stored in the ShaderModuleBase and destroyed only when the shader program is destroyed so
     // pointers to EntryPointMetadata are safe to store as long as you also keep a Ref to the
@@ -206,6 +215,11 @@ namespace dawn_native {
             // Then it is required for the pipeline stage to have a constant record to initialize a
             // value
             bool isInitialized;
+
+            // Store the default initialized value in shader
+            // This is used by metal backend as the function_constant does not have dafault values
+            // Initialized when isInitialized == true
+            OverridableConstantScalar defaultValue;
         };
 
         // Map identifier to overridable constant
@@ -215,6 +229,11 @@ namespace dawn_native {
         // Overridable constants that are not initialized in shaders
         // They need value initialization from pipeline stage or it is a validation error
         std::unordered_set<std::string> uninitializedOverridableConstants;
+
+        // Store constants with shader initialized values as well
+        // This is used by metal backend to set values with default initializers that are not
+        // overridden
+        std::unordered_set<std::string> initializedOverridableConstants;
 
         bool usesNumWorkgroups = false;
     };

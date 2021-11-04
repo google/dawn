@@ -174,6 +174,7 @@ namespace dawn_native { namespace metal {
                                             SingleShaderStage stage,
                                             const PipelineLayout* layout,
                                             ShaderModule::MetalFunctionData* out,
+                                            id constantValuesPointer,
                                             uint32_t sampleMask,
                                             const RenderPipeline* renderPipeline) {
         ASSERT(!IsError());
@@ -231,7 +232,26 @@ namespace dawn_native { namespace metal {
 
         NSRef<NSString> name =
             AcquireNSRef([[NSString alloc] initWithUTF8String:remappedEntryPointName.c_str()]);
-        out->function = AcquireNSPRef([*library newFunctionWithName:name.Get()]);
+
+        if (constantValuesPointer != nil) {
+            if (@available(macOS 10.12, *)) {
+                MTLFunctionConstantValues* constantValues = constantValuesPointer;
+                out->function = AcquireNSPRef([*library newFunctionWithName:name.Get()
+                                                             constantValues:constantValues
+                                                                      error:&error]);
+                if (error != nullptr) {
+                    if (error.code != MTLLibraryErrorCompileWarning) {
+                        return DAWN_VALIDATION_ERROR(std::string("Function compile error: ") +
+                                                     [error.localizedDescription UTF8String]);
+                    }
+                }
+                ASSERT(out->function != nil);
+            } else {
+                UNREACHABLE();
+            }
+        } else {
+            out->function = AcquireNSPRef([*library newFunctionWithName:name.Get()]);
+        }
 
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             GetEntryPoint(entryPointName).usedVertexInputs.any()) {

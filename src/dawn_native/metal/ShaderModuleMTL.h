@@ -39,10 +39,14 @@ namespace dawn_native { namespace metal {
             bool needsStorageBufferLength;
             std::vector<uint32_t> workgroupAllocations;
         };
+
+        // MTLFunctionConstantValues needs @available tag to compile
+        // Use id (like void*) in function signature as workaround and do static cast inside
         MaybeError CreateFunction(const char* entryPointName,
                                   SingleShaderStage stage,
                                   const PipelineLayout* layout,
                                   MetalFunctionData* out,
+                                  id constantValues = nil,
                                   uint32_t sampleMask = 0xFFFFFFFF,
                                   const RenderPipeline* renderPipeline = nullptr);
 

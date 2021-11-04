@@ -54,7 +54,7 @@ namespace dawn_native {
         // Validate if overridable constants exist in shader module
         // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
         size_t numUninitializedConstants = metadata.uninitializedOverridableConstants.size();
-        // Keep a initialized constants sets to handle duplicate initialization cases
+        // Keep an initialized constants sets to handle duplicate initialization cases
         // Only storing that of uninialized constants is needed
         std::unordered_set<std::string> stageInitializedConstantIdentifiers;
         for (uint32_t i = 0; i < constantCount; i++) {

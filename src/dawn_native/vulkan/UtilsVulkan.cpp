@@ -201,7 +201,7 @@ namespace dawn_native { namespace vulkan {
     VkSpecializationInfo* GetVkSpecializationInfo(
         const ProgrammableStage& programmableStage,
         VkSpecializationInfo* specializationInfo,
-        std::vector<SpecializationDataEntry>* specializationDataEntries,
+        std::vector<OverridableConstantScalar>* specializationDataEntries,
         std::vector<VkSpecializationMapEntry>* specializationMapEntries) {
         ASSERT(specializationInfo);
         ASSERT(specializationDataEntries);
@@ -224,10 +224,10 @@ namespace dawn_native { namespace vulkan {
             specializationMapEntries->push_back(
                 VkSpecializationMapEntry{moduleConstant.id,
                                          static_cast<uint32_t>(specializationDataEntries->size() *
-                                                               sizeof(SpecializationDataEntry)),
-                                         sizeof(SpecializationDataEntry)});
+                                                               sizeof(OverridableConstantScalar)),
+                                         sizeof(OverridableConstantScalar)});
 
-            SpecializationDataEntry entry{};
+            OverridableConstantScalar entry{};
             switch (moduleConstant.type) {
                 case EntryPointMetadata::OverridableConstant::Type::Boolean:
                     entry.b = static_cast<int32_t>(value);
@@ -250,7 +250,7 @@ namespace dawn_native { namespace vulkan {
         specializationInfo->mapEntryCount = static_cast<uint32_t>(specializationMapEntries->size());
         specializationInfo->pMapEntries = specializationMapEntries->data();
         specializationInfo->dataSize =
-            specializationDataEntries->size() * sizeof(SpecializationDataEntry);
+            specializationDataEntries->size() * sizeof(OverridableConstantScalar);
         specializationInfo->pData = specializationDataEntries->data();
 
         return specializationInfo;

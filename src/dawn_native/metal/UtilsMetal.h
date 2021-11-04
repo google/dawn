@@ -17,9 +17,16 @@
 
 #include "dawn_native/dawn_platform.h"
 #include "dawn_native/metal/DeviceMTL.h"
+#include "dawn_native/metal/ShaderModuleMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
 
 #import <Metal/Metal.h>
+
+namespace dawn_native {
+    struct ProgrammableStage;
+    struct EntryPointMetadata;
+    enum class SingleShaderStage;
+}
 
 namespace dawn_native { namespace metal {
 
@@ -64,6 +71,15 @@ namespace dawn_native { namespace metal {
                                              const Extent3D& size);
 
     MTLBlitOption ComputeMTLBlitOption(const Format& format, Aspect aspect);
+
+    // Helper function to create function with constant values wrapped in
+    // if available branch
+    MaybeError CreateMTLFunction(const ProgrammableStage& programmableStage,
+                                 SingleShaderStage singleShaderStage,
+                                 PipelineLayout* pipelineLayout,
+                                 ShaderModule::MetalFunctionData* functionData,
+                                 uint32_t sampleMask = 0xFFFFFFFF,
+                                 const RenderPipeline* renderPipeline = nullptr);
 
 }}  // namespace dawn_native::metal
 

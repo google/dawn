@@ -339,12 +339,9 @@ namespace dawn_native { namespace metal {
 
         const PerStage<ProgrammableStage>& allStages = GetAllStages();
         const ProgrammableStage& vertexStage = allStages[wgpu::ShaderStage::Vertex];
-        ShaderModule* vertexModule = ToBackend(vertexStage.module).Get();
-        const char* vertexEntryPoint = vertexStage.entryPoint.c_str();
         ShaderModule::MetalFunctionData vertexData;
-        DAWN_TRY(vertexModule->CreateFunction(vertexEntryPoint, SingleShaderStage::Vertex,
-                                              ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF,
-                                              this));
+        DAWN_TRY(CreateMTLFunction(vertexStage, SingleShaderStage::Vertex, ToBackend(GetLayout()),
+                                   &vertexData, 0xFFFFFFFF, this));
 
         descriptorMTL.vertexFunction = vertexData.function.Get();
         if (vertexData.needsStorageBufferLength) {
@@ -353,12 +350,9 @@ namespace dawn_native { namespace metal {
 
         if (GetStageMask() & wgpu::ShaderStage::Fragment) {
             const ProgrammableStage& fragmentStage = allStages[wgpu::ShaderStage::Fragment];
-            ShaderModule* fragmentModule = ToBackend(fragmentStage.module).Get();
-            const char* fragmentEntryPoint = fragmentStage.entryPoint.c_str();
             ShaderModule::MetalFunctionData fragmentData;
-            DAWN_TRY(fragmentModule->CreateFunction(fragmentEntryPoint, SingleShaderStage::Fragment,
-                                                    ToBackend(GetLayout()), &fragmentData,
-                                                    GetSampleMask()));
+            DAWN_TRY(CreateMTLFunction(fragmentStage, SingleShaderStage::Fragment,
+                                       ToBackend(GetLayout()), &fragmentData, GetSampleMask()));
 
             descriptorMTL.fragmentFunction = fragmentData.function.Get();
             if (fragmentData.needsStorageBufferLength) {

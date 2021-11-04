@@ -636,11 +636,29 @@ namespace dawn_native {
                                     "are partially implemented.");
 
                     const auto& name2Id = inspector.GetConstantNameToIdMap();
+                    const auto& id2Scalar = inspector.GetConstantIDs();
 
                     for (auto& c : entryPoint.overridable_constants) {
+                        uint32_t id = name2Id.at(c.name);
+                        OverridableConstantScalar defaultValue;
+                        if (c.is_initialized) {
+                            // if it is initialized, the scalar must exist
+                            const auto& scalar = id2Scalar.at(id);
+                            if (scalar.IsBool()) {
+                                defaultValue.b = scalar.AsBool();
+                            } else if (scalar.IsU32()) {
+                                defaultValue.u32 = scalar.AsU32();
+                            } else if (scalar.IsI32()) {
+                                defaultValue.i32 = scalar.AsI32();
+                            } else if (scalar.IsFloat()) {
+                                defaultValue.f32 = scalar.AsFloat();
+                            } else {
+                                UNREACHABLE();
+                            }
+                        }
                         EntryPointMetadata::OverridableConstant constant = {
-                            name2Id.at(c.name), FromTintOverridableConstantType(c.type),
-                            c.is_initialized};
+                            id, FromTintOverridableConstantType(c.type), c.is_initialized,
+                            defaultValue};
 
                         std::string identifier =
                             c.is_numeric_id_specified ? std::to_string(constant.id) : c.name;
@@ -648,6 +666,11 @@ namespace dawn_native {
 
                         if (!c.is_initialized) {
                             auto it = metadata->uninitializedOverridableConstants.emplace(
+                                std::move(identifier));
+                            // The insertion should have taken place
+                            ASSERT(it.second);
+                        } else {
+                            auto it = metadata->initializedOverridableConstants.emplace(
                                 std::move(identifier));
                             // The insertion should have taken place
                             ASSERT(it.second);
