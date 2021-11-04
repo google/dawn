@@ -28,6 +28,7 @@
 #include "dawn_native/Sampler.h"
 #include "dawn_native/Texture.h"
 #include "dawn_native/ValidationUtils_autogen.h"
+#include "dawn_native/utils/WGPUHelpers.h"
 
 #include <unordered_set>
 
@@ -191,13 +192,9 @@ namespace dawn_native {
             if (GetCachedPipeline(store, dstFormat) == nullptr) {
                 // Create vertex shader module if not cached before.
                 if (store->copyTextureForBrowser == nullptr) {
-                    ShaderModuleDescriptor descriptor;
-                    ShaderModuleWGSLDescriptor wgslDesc;
-                    wgslDesc.source = sCopyTextureForBrowserShader;
-                    descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
-
-                    DAWN_TRY_ASSIGN(store->copyTextureForBrowser,
-                                    device->CreateShaderModule(&descriptor));
+                    DAWN_TRY_ASSIGN(
+                        store->copyTextureForBrowser,
+                        utils::CreateShaderModule(device, sCopyTextureForBrowserShader));
                 }
 
                 ShaderModuleBase* shaderModule = store->copyTextureForBrowser.Get();
@@ -307,13 +304,6 @@ namespace dawn_native {
         Ref<BindGroupLayoutBase> layout;
         DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
 
-        // Prepare bind group descriptor
-        BindGroupEntry bindGroupEntries[3] = {};
-        BindGroupDescriptor bgDesc = {};
-        bgDesc.layout = layout.Get();
-        bgDesc.entryCount = 3;
-        bgDesc.entries = bindGroupEntries;
-
         Extent3D srcTextureSize = source->texture->GetSize();
 
         // Prepare binding 0 resource: uniform buffer.
@@ -336,14 +326,11 @@ namespace dawn_native {
         // Set alpha op.
         uniformData.alphaOp = options->alphaOp;
 
-        BufferDescriptor uniformDesc = {};
-        uniformDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
-        uniformDesc.size = sizeof(uniformData);
         Ref<BufferBase> uniformBuffer;
-        DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&uniformDesc));
-
-        DAWN_TRY(device->GetQueue()->WriteBuffer(uniformBuffer.Get(), 0, &uniformData,
-                                                 sizeof(uniformData)));
+        DAWN_TRY_ASSIGN(
+            uniformBuffer,
+            utils::CreateBufferFromData(
+                device, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform, {uniformData}));
 
         // Prepare binding 1 resource: sampler
         // Use default configuration, filterMode set to Nearest for min and mag.
@@ -360,18 +347,11 @@ namespace dawn_native {
         DAWN_TRY_ASSIGN(srcTextureView,
                         device->CreateTextureView(source->texture, &srcTextureViewDesc));
 
-        // Set bind group entries.
-        bindGroupEntries[0].binding = 0;
-        bindGroupEntries[0].buffer = uniformBuffer.Get();
-        bindGroupEntries[0].size = sizeof(uniformData);
-        bindGroupEntries[1].binding = 1;
-        bindGroupEntries[1].sampler = sampler.Get();
-        bindGroupEntries[2].binding = 2;
-        bindGroupEntries[2].textureView = srcTextureView.Get();
-
         // Create bind group after all binding entries are set.
         Ref<BindGroupBase> bindGroup;
-        DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc));
+        DAWN_TRY_ASSIGN(bindGroup, utils::MakeBindGroup(
+                                       device, layout,
+                                       {{0, uniformBuffer}, {1, sampler}, {2, srcTextureView}}));
 
         // Create command encoder.
         CommandEncoderDescriptor encoderDesc = {};

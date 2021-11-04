@@ -331,6 +331,8 @@ source_set("dawn_native_sources") {
     "VertexFormat.cpp",
     "VertexFormat.h",
     "dawn_platform.h",
+    "utils/WGPUHelpers.cpp",
+    "utils/WGPUHelpers.h",
   ]
 
   if (dawn_use_x11) {

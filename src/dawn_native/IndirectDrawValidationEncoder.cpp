@@ -24,6 +24,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/InternalPipelineStore.h"
 #include "dawn_native/Queue.h"
+#include "dawn_native/utils/WGPUHelpers.h"
 
 #include <cstdlib>
 #include <limits>
@@ -138,37 +139,27 @@ namespace dawn_native {
             if (store->renderValidationPipeline == nullptr) {
                 // Create compute shader module if not cached before.
                 if (store->renderValidationShader == nullptr) {
-                    ShaderModuleDescriptor descriptor;
-                    ShaderModuleWGSLDescriptor wgslDesc;
-                    wgslDesc.source = sRenderValidationShaderSource;
-                    descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
-                    DAWN_TRY_ASSIGN(store->renderValidationShader,
-                                    device->CreateShaderModule(&descriptor));
+                    DAWN_TRY_ASSIGN(
+                        store->renderValidationShader,
+                        utils::CreateShaderModule(device, sRenderValidationShaderSource));
                 }
 
-                BindGroupLayoutEntry entries[3];
-                entries[0].binding = 0;
-                entries[0].visibility = wgpu::ShaderStage::Compute;
-                entries[0].buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
-                entries[1].binding = 1;
-                entries[1].visibility = wgpu::ShaderStage::Compute;
-                entries[1].buffer.type = kInternalStorageBufferBinding;
-                entries[2].binding = 2;
-                entries[2].visibility = wgpu::ShaderStage::Compute;
-                entries[2].buffer.type = wgpu::BufferBindingType::Storage;
-
-                BindGroupLayoutDescriptor bindGroupLayoutDescriptor;
-                bindGroupLayoutDescriptor.entryCount = 3;
-                bindGroupLayoutDescriptor.entries = entries;
                 Ref<BindGroupLayoutBase> bindGroupLayout;
-                DAWN_TRY_ASSIGN(bindGroupLayout,
-                                device->CreateBindGroupLayout(&bindGroupLayoutDescriptor, true));
+                DAWN_TRY_ASSIGN(
+                    bindGroupLayout,
+                    utils::MakeBindGroupLayout(
+                        device,
+                        {
+                            {0, wgpu::ShaderStage::Compute,
+                             wgpu::BufferBindingType::ReadOnlyStorage},
+                            {1, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                            {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+                        },
+                        /* allowInternalBinding */ true));
 
-                PipelineLayoutDescriptor pipelineDescriptor;
-                pipelineDescriptor.bindGroupLayoutCount = 1;
-                pipelineDescriptor.bindGroupLayouts = &bindGroupLayout.Get();
                 Ref<PipelineLayoutBase> pipelineLayout;
-                DAWN_TRY_ASSIGN(pipelineLayout, device->CreatePipelineLayout(&pipelineDescriptor));
+                DAWN_TRY_ASSIGN(pipelineLayout,
+                                utils::MakeBasicPipelineLayout(device, bindGroupLayout));
 
                 ComputePipelineDescriptor computePipelineDescriptor = {};
                 computePipelineDescriptor.layout = pipelineLayout.Get();

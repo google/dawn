@@ -22,6 +22,7 @@
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/InternalPipelineStore.h"
+#include "dawn_native/utils/WGPUHelpers.h"
 
 namespace dawn_native {
 
@@ -113,36 +114,27 @@ namespace dawn_native {
             if (store->timestampComputePipeline == nullptr) {
                 // Create compute shader module if not cached before.
                 if (store->timestampCS == nullptr) {
-                    ShaderModuleDescriptor descriptor;
-                    ShaderModuleWGSLDescriptor wgslDesc;
-                    wgslDesc.source = sConvertTimestampsToNanoseconds;
-                    descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
-
-                    DAWN_TRY_ASSIGN(store->timestampCS, device->CreateShaderModule(&descriptor));
+                    DAWN_TRY_ASSIGN(
+                        store->timestampCS,
+                        utils::CreateShaderModule(device, sConvertTimestampsToNanoseconds));
                 }
 
                 // Create binding group layout
-                std::array<BindGroupLayoutEntry, 3> entries = {};
-                for (uint32_t i = 0; i < entries.size(); i++) {
-                    entries[i].binding = i;
-                    entries[i].visibility = wgpu::ShaderStage::Compute;
-                }
-                entries[0].buffer.type = kInternalStorageBufferBinding;
-                entries[1].buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
-                entries[2].buffer.type = wgpu::BufferBindingType::Uniform;
-
-                BindGroupLayoutDescriptor bglDesc;
-                bglDesc.entryCount = static_cast<uint32_t>(entries.size());
-                bglDesc.entries = entries.data();
                 Ref<BindGroupLayoutBase> bgl;
-                DAWN_TRY_ASSIGN(bgl, device->CreateBindGroupLayout(&bglDesc, true));
+                DAWN_TRY_ASSIGN(
+                    bgl, utils::MakeBindGroupLayout(
+                             device,
+                             {
+                                 {0, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                                 {1, wgpu::ShaderStage::Compute,
+                                  wgpu::BufferBindingType::ReadOnlyStorage},
+                                 {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
+                             },
+                             /* allowInternalBinding */ true));
 
                 // Create pipeline layout
-                PipelineLayoutDescriptor plDesc;
-                plDesc.bindGroupLayoutCount = 1;
-                plDesc.bindGroupLayouts = &bgl.Get();
                 Ref<PipelineLayoutBase> layout;
-                DAWN_TRY_ASSIGN(layout, device->CreatePipelineLayout(&plDesc));
+                DAWN_TRY_ASSIGN(layout, utils::MakeBasicPipelineLayout(device, bgl));
 
                 // Create ComputePipeline.
                 ComputePipelineDescriptor computePipelineDesc = {};
@@ -173,27 +165,11 @@ namespace dawn_native {
         Ref<BindGroupLayoutBase> layout;
         DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
 
-        // Prepare bind group descriptor
-        std::array<BindGroupEntry, 3> bindGroupEntries = {};
-        BindGroupDescriptor bgDesc = {};
-        bgDesc.layout = layout.Get();
-        bgDesc.entryCount = 3;
-        bgDesc.entries = bindGroupEntries.data();
-
-        // Set bind group entries.
-        bindGroupEntries[0].binding = 0;
-        bindGroupEntries[0].buffer = timestamps;
-        bindGroupEntries[0].size = timestamps->GetSize();
-        bindGroupEntries[1].binding = 1;
-        bindGroupEntries[1].buffer = availability;
-        bindGroupEntries[1].size = availability->GetSize();
-        bindGroupEntries[2].binding = 2;
-        bindGroupEntries[2].buffer = params;
-        bindGroupEntries[2].size = params->GetSize();
-
         // Create bind group after all binding entries are set.
         Ref<BindGroupBase> bindGroup;
-        DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc));
+        DAWN_TRY_ASSIGN(bindGroup,
+                        utils::MakeBindGroup(device, layout,
+                                             {{0, timestamps}, {1, availability}, {2, params}}));
 
         // Create compute encoder and issue dispatch.
         ComputePassDescriptor passDesc = {};

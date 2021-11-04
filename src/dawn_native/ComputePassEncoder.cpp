@@ -26,6 +26,7 @@
 #include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/QuerySet.h"
+#include "dawn_native/utils/WGPUHelpers.h"
 
 namespace dawn_native {
 
@@ -39,13 +40,10 @@ namespace dawn_native {
                 return store->dispatchIndirectValidationPipeline.Get();
             }
 
-            ShaderModuleDescriptor descriptor;
-            ShaderModuleWGSLDescriptor wgslDesc;
-            descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
-
             // TODO(https://crbug.com/dawn/1108): Propagate validation feedback from this
             // shader in various failure modes.
-            wgslDesc.source = R"(
+            Ref<ShaderModuleBase> shaderModule;
+            DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, R"(
                 [[block]] struct UniformParams {
                     maxComputeWorkgroupsPerDimension: u32;
                     clientOffsetInU32: u32;
@@ -73,34 +71,23 @@ namespace dawn_native {
                         validatedParams.data[i] = numWorkgroups;
                     }
                 }
-            )";
+            )"));
 
-            Ref<ShaderModuleBase> shaderModule;
-            DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&descriptor));
-
-            std::array<BindGroupLayoutEntry, 3> entries;
-            entries[0].binding = 0;
-            entries[0].visibility = wgpu::ShaderStage::Compute;
-            entries[0].buffer.type = wgpu::BufferBindingType::Uniform;
-            entries[1].binding = 1;
-            entries[1].visibility = wgpu::ShaderStage::Compute;
-            entries[1].buffer.type = kInternalStorageBufferBinding;
-            entries[2].binding = 2;
-            entries[2].visibility = wgpu::ShaderStage::Compute;
-            entries[2].buffer.type = wgpu::BufferBindingType::Storage;
-
-            BindGroupLayoutDescriptor bindGroupLayoutDescriptor;
-            bindGroupLayoutDescriptor.entryCount = entries.size();
-            bindGroupLayoutDescriptor.entries = entries.data();
             Ref<BindGroupLayoutBase> bindGroupLayout;
-            DAWN_TRY_ASSIGN(bindGroupLayout,
-                            device->CreateBindGroupLayout(&bindGroupLayoutDescriptor, true));
+            DAWN_TRY_ASSIGN(
+                bindGroupLayout,
+                utils::MakeBindGroupLayout(
+                    device,
+                    {
+                        {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
+                        {1, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                        {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+                    },
+                    /* allowInternalBinding */ true));
 
-            PipelineLayoutDescriptor pipelineDescriptor;
-            pipelineDescriptor.bindGroupLayoutCount = 1;
-            pipelineDescriptor.bindGroupLayouts = &bindGroupLayout.Get();
             Ref<PipelineLayoutBase> pipelineLayout;
-            DAWN_TRY_ASSIGN(pipelineLayout, device->CreatePipelineLayout(&pipelineDescriptor));
+            DAWN_TRY_ASSIGN(pipelineLayout,
+                            utils::MakeBasicPipelineLayout(device, bindGroupLayout));
 
             ComputePipelineDescriptor computePipelineDescriptor = {};
             computePipelineDescriptor.layout = pipelineLayout.Get();
@@ -211,21 +198,15 @@ namespace dawn_native {
         uint32_t storageBufferOffsetAlignment =
             device->GetLimits().v1.minStorageBufferOffsetAlignment;
 
-        std::array<BindGroupEntry, 3> bindings;
-
-        // Storage binding holding the client's indirect buffer.
-        BindGroupEntry& clientIndirectBinding = bindings[0];
-        clientIndirectBinding.binding = 1;
-        clientIndirectBinding.buffer = indirectBuffer;
-
         // Let the offset be the indirectOffset, aligned down to |storageBufferOffsetAlignment|.
         const uint32_t clientOffsetFromAlignedBoundary =
             indirectOffset % storageBufferOffsetAlignment;
         const uint64_t clientOffsetAlignedDown = indirectOffset - clientOffsetFromAlignedBoundary;
-        clientIndirectBinding.offset = clientOffsetAlignedDown;
+        const uint64_t clientIndirectBindingOffset = clientOffsetAlignedDown;
 
         // Let the size of the binding be the additional offset, plus the size.
-        clientIndirectBinding.size = kDispatchIndirectSize + clientOffsetFromAlignedBoundary;
+        const uint64_t clientIndirectBindingSize =
+            kDispatchIndirectSize + clientOffsetFromAlignedBoundary;
 
         struct UniformParams {
             uint32_t maxComputeWorkgroupsPerDimension;
@@ -235,46 +216,30 @@ namespace dawn_native {
         // Create a uniform buffer to hold parameters for the shader.
         Ref<BufferBase> uniformBuffer;
         {
-            BufferDescriptor uniformDesc = {};
-            uniformDesc.size = sizeof(UniformParams);
-            uniformDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
-            uniformDesc.mappedAtCreation = true;
-            DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&uniformDesc));
-
-            UniformParams* params = static_cast<UniformParams*>(
-                uniformBuffer->GetMappedRange(0, sizeof(UniformParams)));
-            params->maxComputeWorkgroupsPerDimension =
+            UniformParams params;
+            params.maxComputeWorkgroupsPerDimension =
                 device->GetLimits().v1.maxComputeWorkgroupsPerDimension;
-            params->clientOffsetInU32 = clientOffsetFromAlignedBoundary / sizeof(uint32_t);
-            uniformBuffer->Unmap();
-        }
+            params.clientOffsetInU32 = clientOffsetFromAlignedBoundary / sizeof(uint32_t);
 
-        // Uniform buffer binding pointing to the uniform parameters.
-        BindGroupEntry& uniformBinding = bindings[1];
-        uniformBinding.binding = 0;
-        uniformBinding.buffer = uniformBuffer.Get();
-        uniformBinding.offset = 0;
-        uniformBinding.size = sizeof(UniformParams);
+            DAWN_TRY_ASSIGN(uniformBuffer, utils::CreateBufferFromData(
+                                               device, wgpu::BufferUsage::Uniform, {params}));
+        }
 
         // Reserve space in the scratch buffer to hold the validated indirect params.
         ScratchBuffer& scratchBuffer = store->scratchIndirectStorage;
         DAWN_TRY(scratchBuffer.EnsureCapacity(kDispatchIndirectSize));
         Ref<BufferBase> validatedIndirectBuffer = scratchBuffer.GetBuffer();
 
-        // Binding for the validated indirect params.
-        BindGroupEntry& validatedParamsBinding = bindings[2];
-        validatedParamsBinding.binding = 2;
-        validatedParamsBinding.buffer = validatedIndirectBuffer.Get();
-        validatedParamsBinding.offset = 0;
-        validatedParamsBinding.size = kDispatchIndirectSize;
-
-        BindGroupDescriptor bindGroupDescriptor = {};
-        bindGroupDescriptor.layout = layout.Get();
-        bindGroupDescriptor.entryCount = bindings.size();
-        bindGroupDescriptor.entries = bindings.data();
-
         Ref<BindGroupBase> validationBindGroup;
-        DAWN_TRY_ASSIGN(validationBindGroup, device->CreateBindGroup(&bindGroupDescriptor));
+        DAWN_TRY_ASSIGN(
+            validationBindGroup,
+            utils::MakeBindGroup(
+                device, layout,
+                {
+                    {0, uniformBuffer},
+                    {1, indirectBuffer, clientIndirectBindingOffset, clientIndirectBindingSize},
+                    {2, validatedIndirectBuffer, 0, kDispatchIndirectSize},
+                }));
 
         // Issue commands to validate the indirect buffer.
         APISetPipeline(validationPipeline.Get());
