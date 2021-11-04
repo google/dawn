@@ -55,7 +55,7 @@ fn main_1() {
           x_56_phi = x_68;
         } else {
           x_76_phi = x_55;
-          if (((f32(x_58) % round(x_49)) <= 0.01)) {
+          if (((f32(x_58) - (round(x_49) * floor((f32(x_58) / round(x_49))))) <= 0.01)) {
             x_75 = (x_55 + 100.0);
             x_76_phi = x_75;
           }
@@ -95,8 +95,7 @@ fn main_1() {
   var x_119_phi : f32;
   var x_120_phi : bool;
   let x_85 : f32 = x_85_phi;
-  let x_86 : ptr<function, f32> = &(c.x);
-  *(x_86) = x_85;
+  c.x = x_85;
   x_88 = gl_FragCoord.y;
   switch(0u) {
     default: {
@@ -123,7 +122,7 @@ fn main_1() {
           x_93_phi = x_113;
         } else {
           x_112_phi = x_92;
-          if (((f32(x_95) % round(x_49)) <= 0.01)) {
+          if (((f32(x_95) - (round(x_49) * floor((f32(x_95) / round(x_49))))) <= 0.01)) {
             x_111 = (x_92 + 100.0);
             x_112_phi = x_111;
           }
@@ -155,10 +154,9 @@ fn main_1() {
     }
   }
   let x_122 : f32 = x_122_phi;
-  let x_123 : ptr<function, f32> = &(c.y);
-  *(x_123) = x_122;
-  let x_124 : f32 = *(x_86);
-  let x_125 : f32 = *(x_123);
+  c.y = x_122;
+  let x_124 : f32 = c.x;
+  let x_125 : f32 = c.y;
   c.z = (x_124 + x_125);
   x_129_phi = 0;
   loop {
@@ -168,12 +166,11 @@ fn main_1() {
     } else {
       break;
     }
-    let x_135 : ptr<function, f32> = &(c[x_129]);
-    let x_136 : f32 = *(x_135);
+    let x_136 : f32 = c[x_129];
     if ((x_136 >= 1.0)) {
-      let x_140 : f32 = *(x_135);
-      let x_141 : f32 = *(x_135);
-      *(x_135) = (x_140 * x_141);
+      let x_140 : f32 = c[x_129];
+      let x_141 : f32 = c[x_129];
+      c[x_129] = (x_140 * x_141);
     }
 
     continuing {

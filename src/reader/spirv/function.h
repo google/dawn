@@ -205,6 +205,12 @@ enum class SkipReason {
   /// function parameter).
   kOpaqueObject,
 
+  /// `kSinkPointerIntoUse`: used to avoid emitting certain pointer expressions,
+  /// by instead generating their reference expression directly at the point of
+  /// use. For example, we apply this to OpAccessChain when indexing into a
+  /// vector, to avoid generating address-of vector component expressions.
+  kSinkPointerIntoUse,
+
   /// `kPointSizeBuiltinPointer`: the value is a pointer to the Position builtin
   /// variable.  Don't generate its address.  Avoid generating stores to this
   /// pointer.
@@ -296,6 +302,11 @@ struct DefInfo {
   /// This is kInvalid for non-pointers.
   ast::StorageClass storage_class = ast::StorageClass::kInvalid;
 
+  /// The expression to use when sinking pointers into their use.
+  /// When encountering a use of this instruction, we will emit this expression
+  /// instead.
+  TypedExpression sink_pointer_source_expr = {};
+
   /// The reason, if any, that this value should be ignored.
   /// Normally no values are ignored.  This field can be updated while
   /// generating code because sometimes we only discover necessary facts
@@ -319,6 +330,9 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
       break;
     case SkipReason::kOpaqueObject:
       o << " skip:opaque";
+      break;
+    case SkipReason::kSinkPointerIntoUse:
+      o << " skip:sink_pointer";
       break;
     case SkipReason::kPointSizeBuiltinPointer:
       o << " skip:pointsize_pointer";

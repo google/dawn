@@ -41,7 +41,7 @@ fn compute_value_f1_f1_(limit : ptr<function, f32>, thirty_two : ptr<function, f
     } else {
       let x_118 : f32 = *(thirty_two);
       x_125_phi = x_104;
-      if (((f32(x_107) % round(x_118)) <= 0.01)) {
+      if (((f32(x_107) - (round(x_118) * floor((f32(x_107) / round(x_118))))) <= 0.01)) {
         x_124 = (x_104 + 100.0);
         x_125_phi = x_124;
       }
@@ -79,14 +79,13 @@ fn main_1() {
   param = x_60;
   param_1 = x_58;
   let x_61 : f32 = compute_value_f1_f1_(&(param), &(param_1));
-  let x_62 : ptr<function, f32> = &(c.x);
-  *(x_62) = x_61;
+  c.x = x_61;
   let x_64 : f32 = gl_FragCoord.y;
   param_2 = x_64;
   param_3 = x_58;
   let x_65 : f32 = compute_value_f1_f1_(&(param_2), &(param_3));
   c.y = x_65;
-  let x_67 : f32 = *(x_62);
+  let x_67 : f32 = c.x;
   let x_68 : vec3<f32> = c;
   x_54 = x_68;
   let x_70 : f32 = x_54.y;
@@ -99,17 +98,16 @@ fn main_1() {
     } else {
       break;
     }
-    let x_80 : ptr<function, f32> = &(c[x_74]);
-    let x_81 : f32 = *(x_80);
+    let x_81 : f32 = c[x_74];
     if ((x_81 >= 1.0)) {
       let x_86 : f32 = x_16.injectionSwitch.x;
       let x_88 : f32 = x_16.injectionSwitch.y;
       if ((x_86 > x_88)) {
         discard;
       }
-      let x_92 : f32 = *(x_80);
-      let x_93 : f32 = *(x_80);
-      *(x_80) = (x_92 * x_93);
+      let x_92 : f32 = c[x_74];
+      let x_93 : f32 = c[x_74];
+      c[x_74] = (x_92 * x_93);
     }
 
     continuing {

@@ -2541,6 +2541,12 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
       Fail() << "internal error: unhandled use of opaque object with ID: "
              << id;
       return {};
+    case SkipReason::kSinkPointerIntoUse: {
+      // Replace the pointer with its source reference expression.
+      auto source_expr = GetDefInfo(id)->sink_pointer_source_expr;
+      TINT_ASSERT(Reader, source_expr.type->Is<Reference>());
+      return source_expr;
+    }
     case SkipReason::kPointSizeBuiltinValue: {
       return {ty_.F32(),
               create<ast::ScalarConstructorExpression>(
@@ -3470,6 +3476,12 @@ bool FunctionEmitter::EmitConstDefinition(
   if (!expr) {
     return false;
   }
+
+  // Do not generate pointers that we want to sink.
+  if (GetDefInfo(inst.result_id())->skip == SkipReason::kSinkPointerIntoUse) {
+    return true;
+  }
+
   expr = AddressOfIfNeeded(expr, &inst);
   auto* ast_const = parser_impl_.MakeVariable(
       inst.result_id(), ast::StorageClass::kNone, expr.type, true, expr.expr,
@@ -3735,6 +3747,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       const auto skip = GetSkipReason(value_id);
       if (skip != SkipReason::kDontSkip) {
         GetDefInfo(inst.result_id())->skip = skip;
+        GetDefInfo(inst.result_id())->sink_pointer_source_expr =
+            GetDefInfo(value_id)->sink_pointer_source_expr;
         return true;
       }
       auto expr = AddressOfIfNeeded(MakeExpression(value_id), &inst);
@@ -4214,6 +4228,8 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   if (base_skip != SkipReason::kDontSkip) {
     // This can occur for AccessChain with no indices.
     GetDefInfo(inst.result_id())->skip = base_skip;
+    GetDefInfo(inst.result_id())->sink_pointer_source_expr =
+        GetDefInfo(base_id)->sink_pointer_source_expr;
     return {};
   }
 
@@ -4221,6 +4237,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   uint32_t first_index = 1;
   const auto num_in_operands = inst.NumInOperands();
 
+  bool sink_pointer = false;
   TypedExpression current_expr;
 
   // If the variable was originally gl_PerVertex, then in the AST we
@@ -4352,6 +4369,8 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         }
         // All vector components are the same type.
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
+        // Sink pointers to vector components.
+        sink_pointer = true;
         break;
       case SpvOpTypeMatrix:
         // Use array syntax.
@@ -4407,6 +4426,13 @@ TypedExpression FunctionEmitter::MakeAccessChain(
     TINT_ASSERT(Reader, type && type->Is<Reference>());
     current_expr = TypedExpression{type, next_expr};
   }
+
+  if (sink_pointer) {
+    // Capture the reference so that we can sink it into the point of use.
+    GetDefInfo(inst.result_id())->skip = SkipReason::kSinkPointerIntoUse;
+    GetDefInfo(inst.result_id())->sink_pointer_source_expr = current_expr;
+  }
+
   return current_expr;
 }
 

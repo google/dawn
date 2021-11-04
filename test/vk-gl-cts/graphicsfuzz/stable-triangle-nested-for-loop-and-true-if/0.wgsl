@@ -23,20 +23,14 @@ fn pointInTriangle_vf2_vf2_vf2_vf2_(p : ptr<function, vec2<f32>>, a : ptr<functi
   var x_172 : bool;
   var x_136_phi : bool;
   var x_173_phi : bool;
-  let x_69 : ptr<function, f32> = &((*(p)).x);
-  let x_70 : f32 = *(x_69);
-  let x_71 : ptr<function, f32> = &((*(a)).x);
-  let x_72 : f32 = *(x_71);
-  let x_74 : ptr<function, f32> = &((*(p)).y);
-  let x_75 : f32 = *(x_74);
-  let x_76 : ptr<function, f32> = &((*(a)).y);
-  let x_77 : f32 = *(x_76);
-  let x_80 : ptr<function, f32> = &((*(b)).x);
-  let x_81 : f32 = *(x_80);
-  let x_82 : f32 = *(x_71);
-  let x_84 : ptr<function, f32> = &((*(b)).y);
-  let x_85 : f32 = *(x_84);
-  let x_86 : f32 = *(x_76);
+  let x_70 : f32 = (*(p)).x;
+  let x_72 : f32 = (*(a)).x;
+  let x_75 : f32 = (*(p)).y;
+  let x_77 : f32 = (*(a)).y;
+  let x_81 : f32 = (*(b)).x;
+  let x_82 : f32 = (*(a)).x;
+  let x_85 : f32 = (*(b)).y;
+  let x_86 : f32 = (*(a)).y;
   param = vec2<f32>((x_70 - x_72), (x_75 - x_77));
   param_1 = vec2<f32>((x_81 - x_82), (x_85 - x_86));
   let x_90 : f32 = param.x;
@@ -45,16 +39,14 @@ fn pointInTriangle_vf2_vf2_vf2_vf2_(p : ptr<function, vec2<f32>>, a : ptr<functi
   let x_97 : f32 = param.y;
   let x_99 : f32 = ((x_90 * x_92) - (x_95 * x_97));
   x_68 = x_99;
-  let x_100 : f32 = *(x_69);
-  let x_101 : f32 = *(x_80);
-  let x_103 : f32 = *(x_74);
-  let x_104 : f32 = *(x_84);
-  let x_107 : ptr<function, f32> = &((*(c)).x);
-  let x_108 : f32 = *(x_107);
-  let x_109 : f32 = *(x_80);
-  let x_111 : ptr<function, f32> = &((*(c)).y);
-  let x_112 : f32 = *(x_111);
-  let x_113 : f32 = *(x_84);
+  let x_100 : f32 = (*(p)).x;
+  let x_101 : f32 = (*(b)).x;
+  let x_103 : f32 = (*(p)).y;
+  let x_104 : f32 = (*(b)).y;
+  let x_108 : f32 = (*(c)).x;
+  let x_109 : f32 = (*(b)).x;
+  let x_112 : f32 = (*(c)).y;
+  let x_113 : f32 = (*(b)).y;
   param_2 = vec2<f32>((x_100 - x_101), (x_103 - x_104));
   param_3 = vec2<f32>((x_108 - x_109), (x_112 - x_113));
   let x_117 : f32 = param_2.x;
@@ -64,24 +56,24 @@ fn pointInTriangle_vf2_vf2_vf2_vf2_(p : ptr<function, vec2<f32>>, a : ptr<functi
   let x_126 : f32 = ((x_117 * x_119) - (x_122 * x_124));
   x_67 = x_126;
   let x_127 : bool = (x_99 < 0.0);
-  let x_129 : bool = (x_127 && (x_126 < 0.0));
+  let x_129 : bool = (x_127 & (x_126 < 0.0));
   x_136_phi = x_129;
   if (!(x_129)) {
-    x_135 = ((x_99 >= 0.0) && (x_126 >= 0.0));
+    x_135 = ((x_99 >= 0.0) & (x_126 >= 0.0));
     x_136_phi = x_135;
   }
   let x_136 : bool = x_136_phi;
   if (!(x_136)) {
     return 0;
   }
-  let x_140 : f32 = *(x_69);
-  let x_141 : f32 = *(x_107);
-  let x_143 : f32 = *(x_74);
-  let x_144 : f32 = *(x_111);
-  let x_147 : f32 = *(x_71);
-  let x_148 : f32 = *(x_107);
-  let x_150 : f32 = *(x_76);
-  let x_151 : f32 = *(x_111);
+  let x_140 : f32 = (*(p)).x;
+  let x_141 : f32 = (*(c)).x;
+  let x_143 : f32 = (*(p)).y;
+  let x_144 : f32 = (*(c)).y;
+  let x_147 : f32 = (*(a)).x;
+  let x_148 : f32 = (*(c)).x;
+  let x_150 : f32 = (*(a)).y;
+  let x_151 : f32 = (*(c)).y;
   param_4 = vec2<f32>((x_140 - x_141), (x_143 - x_144));
   param_5 = vec2<f32>((x_147 - x_148), (x_150 - x_151));
   let x_155 : f32 = param_4.x;
@@ -90,10 +82,10 @@ fn pointInTriangle_vf2_vf2_vf2_vf2_(p : ptr<function, vec2<f32>>, a : ptr<functi
   let x_162 : f32 = param_4.y;
   let x_164 : f32 = ((x_155 * x_157) - (x_160 * x_162));
   x_66 = x_164;
-  let x_166 : bool = (x_127 && (x_164 < 0.0));
+  let x_166 : bool = (x_127 & (x_164 < 0.0));
   x_173_phi = x_166;
   if (!(x_166)) {
-    x_172 = ((x_99 >= 0.0) && (x_164 >= 0.0));
+    x_172 = ((x_99 >= 0.0) & (x_164 >= 0.0));
     x_173_phi = x_172;
   }
   let x_173 : bool = x_173_phi;

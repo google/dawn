@@ -62,7 +62,7 @@ fn main_1() {
           x_59_phi = x_71;
         } else {
           x_79_phi = x_58;
-          if (((f32(x_61) % round(x_52)) <= 0.01)) {
+          if (((f32(x_61) - (round(x_52) * floor((f32(x_61) / round(x_52))))) <= 0.01)) {
             x_78 = (x_58 + 100.0);
             x_79_phi = x_78;
           }
@@ -107,8 +107,7 @@ fn main_1() {
   var x_136_phi : f32;
   var x_137_phi : bool;
   let x_95 : f32 = x_95_phi;
-  let x_96 : ptr<function, f32> = &(c.x);
-  *(x_96) = x_95;
+  c.x = x_95;
   x_98 = gl_FragCoord.y;
   switch(0u) {
     default: {
@@ -135,7 +134,7 @@ fn main_1() {
           x_103_phi = x_115;
         } else {
           x_123_phi = x_102;
-          if (((f32(x_105) % round(x_52)) <= 0.01)) {
+          if (((f32(x_105) - (round(x_52) * floor((f32(x_105) / round(x_52))))) <= 0.01)) {
             x_122 = (x_102 + 100.0);
             x_123_phi = x_122;
           }
@@ -172,10 +171,9 @@ fn main_1() {
     }
   }
   let x_139 : f32 = x_139_phi;
-  let x_140 : ptr<function, f32> = &(c.y);
-  *(x_140) = x_139;
-  let x_141 : f32 = *(x_96);
-  let x_142 : f32 = *(x_140);
+  c.y = x_139;
+  let x_141 : f32 = c.x;
+  let x_142 : f32 = c.y;
   c.z = (x_141 + x_142);
   x_146_phi = 0;
   loop {
@@ -185,12 +183,11 @@ fn main_1() {
     } else {
       break;
     }
-    let x_152 : ptr<function, f32> = &(c[x_146]);
-    let x_153 : f32 = *(x_152);
+    let x_153 : f32 = c[x_146];
     if ((x_153 >= 1.0)) {
-      let x_157 : f32 = *(x_152);
-      let x_158 : f32 = *(x_152);
-      *(x_152) = (x_157 * x_158);
+      let x_157 : f32 = c[x_146];
+      let x_158 : f32 = c[x_146];
+      c[x_146] = (x_157 * x_158);
       let x_161 : f32 = x_6.injectionSwitch.x;
       let x_163 : f32 = x_6.injectionSwitch.y;
       if ((x_161 > x_163)) {

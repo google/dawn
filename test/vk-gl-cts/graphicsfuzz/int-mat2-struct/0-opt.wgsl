@@ -25,13 +25,9 @@ fn main_1() {
   let x_52 : i32 = x_51.f1;
   x_6 = x_52;
   x_41 = x_51.f2;
-  let x_55 : ptr<function, f32> = &(x_41[0].x);
   let x_56 : mat2x2<f32> = x_41;
-  let x_58 : ptr<function, f32> = &(x_41[1].x);
   let x_59 : mat2x2<f32> = x_41;
-  let x_62 : ptr<function, f32> = &(x_41[0].y);
   let x_63 : mat2x2<f32> = x_41;
-  let x_65 : ptr<function, f32> = &(x_41[1].y);
   let x_66 : mat2x2<f32> = x_41;
   x_GLF_color = vec4<f32>(f32(x_52), (x_56[0u].x + x_59[1u].x), (x_63[0u].y + x_66[1u].y), f32(x_52));
   return;

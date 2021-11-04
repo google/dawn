@@ -34,7 +34,7 @@ fn compute_value_f1_f1_(limit : ptr<function, f32>, thirty_two : ptr<function, f
     } else {
       let x_106 : f32 = *(thirty_two);
       x_113_phi = x_91;
-      if (((f32(x_94) % round(x_106)) <= 0.01)) {
+      if (((f32(x_94) - (round(x_106) * floor((f32(x_94) / round(x_106))))) <= 0.01)) {
         x_112 = (x_91 + 100.0);
         x_113_phi = x_112;
       }
@@ -71,16 +71,14 @@ fn main_1() {
   param = x_56;
   param_1 = x_54;
   let x_57 : f32 = compute_value_f1_f1_(&(param), &(param_1));
-  let x_58 : ptr<function, f32> = &(c.x);
-  *(x_58) = x_57;
+  c.x = x_57;
   let x_60 : f32 = gl_FragCoord.y;
   param_2 = x_60;
   param_3 = x_54;
   let x_61 : f32 = compute_value_f1_f1_(&(param_2), &(param_3));
-  let x_62 : ptr<function, f32> = &(c.y);
-  *(x_62) = x_61;
-  let x_63 : f32 = *(x_58);
-  let x_64 : f32 = *(x_62);
+  c.y = x_61;
+  let x_63 : f32 = c.x;
+  let x_64 : f32 = c.y;
   c.z = (x_63 + x_64);
   x_68_phi = 0;
   loop {
@@ -90,12 +88,11 @@ fn main_1() {
     } else {
       break;
     }
-    let x_74 : ptr<function, f32> = &(c[x_68]);
-    let x_75 : f32 = *(x_74);
+    let x_75 : f32 = c[x_68];
     if ((x_75 >= 1.0)) {
-      let x_79 : f32 = *(x_74);
-      let x_80 : f32 = *(x_74);
-      *(x_74) = (x_79 * x_80);
+      let x_79 : f32 = c[x_68];
+      let x_80 : f32 = c[x_68];
+      c[x_68] = (x_79 * x_80);
     }
 
     continuing {

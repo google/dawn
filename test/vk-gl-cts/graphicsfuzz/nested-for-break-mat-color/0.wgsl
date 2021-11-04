@@ -37,9 +37,8 @@ fn main_1() {
 
       continuing {
         let x_72 : f32 = x_7.one;
-        let x_73 : ptr<function, f32> = &(m44[x_10][x_11]);
-        let x_74 : f32 = *(x_73);
-        *(x_73) = (x_74 + x_72);
+        let x_74 : f32 = m44[x_10][x_11];
+        m44[x_10][x_11] = (x_74 + x_72);
         x_8 = (x_11 + 1);
         x_11_phi = x_8;
       }

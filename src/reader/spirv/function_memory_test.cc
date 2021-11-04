@@ -390,6 +390,119 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorNonConstIndex) {
               HasSubstr("myvar[a_dynamic_index] = 42u;"));
 }
 
+TEST_F(SpvParserMemoryTest,
+       EmitStatement_AccessChain_VectorComponent_MultiUse) {
+  // WGSL does not support pointer-to-vector-component, so test that we sink
+  // these pointers into the point of use.
+  const std::string assembly = Preamble() + R"(
+     OpName %1 "myvar"
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %uint = OpTypeInt 32 0
+     %store_ty = OpTypeVector %uint 4
+     %uint_2 = OpConstant %uint 2
+     %uint_42 = OpConstant %uint 42
+     %elem_ty = OpTypePointer Private %uint
+     %var_ty = OpTypePointer Private %store_ty
+     %1 = OpVariable %var_ty Private
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %ptr = OpAccessChain %elem_ty %1 %uint_2
+     %load = OpLoad %uint %ptr
+     %result = OpIAdd %uint %load %uint_2
+     OpStore %ptr %result
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto ast_body = fe.ast_body();
+  auto wgsl = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(wgsl, Not(HasSubstr("&")));
+  EXPECT_THAT(wgsl, HasSubstr(" = myvar.z;"));
+  EXPECT_THAT(wgsl, HasSubstr("myvar.z = "));
+}
+
+TEST_F(SpvParserMemoryTest,
+       EmitStatement_AccessChain_VectorComponent_MultiUse_NonConstIndex) {
+  // WGSL does not support pointer-to-vector-component, so test that we sink
+  // these pointers into the point of use.
+  const std::string assembly = Preamble() + R"(
+     OpName %1 "myvar"
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %uint = OpTypeInt 32 0
+     %store_ty = OpTypeVector %uint 4
+     %uint_2 = OpConstant %uint 2
+     %uint_42 = OpConstant %uint 42
+     %elem_ty = OpTypePointer Private %uint
+     %var_ty = OpTypePointer Private %store_ty
+     %1 = OpVariable %var_ty Private
+     %2 = OpVariable %elem_ty Private
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %idx = OpLoad %uint %2
+     %ptr = OpAccessChain %elem_ty %1 %idx
+     %load = OpLoad %uint %ptr
+     %result = OpIAdd %uint %load %uint_2
+     OpStore %ptr %result
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto ast_body = fe.ast_body();
+  auto wgsl = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(wgsl, Not(HasSubstr("&")));
+  EXPECT_THAT(wgsl, HasSubstr(" = myvar[x_12];"));
+  EXPECT_THAT(wgsl, HasSubstr("myvar[x_12] = "));
+}
+
+TEST_F(SpvParserMemoryTest,
+       EmitStatement_AccessChain_VectorComponent_SinkThroughChain) {
+  // Test that we can sink a pointer-to-vector-component through a chain of
+  // instructions that propagate it.
+  const std::string assembly = Preamble() + R"(
+     OpName %1 "myvar"
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %uint = OpTypeInt 32 0
+     %store_ty = OpTypeVector %uint 4
+     %uint_2 = OpConstant %uint 2
+     %uint_42 = OpConstant %uint 42
+     %elem_ty = OpTypePointer Private %uint
+     %var_ty = OpTypePointer Private %store_ty
+     %1 = OpVariable %var_ty Private
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %ptr = OpAccessChain %elem_ty %1 %uint_2
+     %ptr2 = OpCopyObject %elem_ty %ptr
+     %ptr3 = OpInBoundsAccessChain %elem_ty %ptr2
+     %ptr4 = OpAccessChain %elem_ty %ptr3
+     %load = OpLoad %uint %ptr3
+     %result = OpIAdd %uint %load %uint_2
+     OpStore %ptr4 %result
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto ast_body = fe.ast_body();
+  auto wgsl = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(wgsl, Not(HasSubstr("&")));
+  EXPECT_THAT(wgsl, HasSubstr(" = myvar.z;"));
+  EXPECT_THAT(wgsl, HasSubstr("myvar.z = "));
+}
+
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Matrix) {
   const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
