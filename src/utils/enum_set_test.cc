@@ -14,13 +14,30 @@
 
 #include "src/utils/enum_set.h"
 
-#include "gtest/gtest.h"
+#include <sstream>
+#include <vector>
+
+#include "gmock/gmock.h"
 
 namespace tint {
 namespace utils {
 namespace {
 
-enum class E { A, B, C };
+using ::testing::ElementsAre;
+
+enum class E { A = 0, B = 3, C = 7 };
+
+std::ostream& operator<<(std::ostream& out, E e) {
+  switch (e) {
+    case E::A:
+      return out << "A";
+    case E::B:
+      return out << "B";
+    case E::C:
+      return out << "C";
+  }
+  return out << "E(" << static_cast<uint32_t>(e) << ")";
+}
 
 TEST(EnumSetTest, ConstructEmpty) {
   EnumSet<E> set;
@@ -59,14 +76,32 @@ TEST(EnumSetTest, Remove) {
   EXPECT_FALSE(set.Contains(E::C));
 }
 
-TEST(EnumSetTest, Equality) {
+TEST(EnumSetTest, EqualitySet) {
   EXPECT_TRUE(EnumSet<E>(E::A, E::B) == EnumSet<E>(E::A, E::B));
   EXPECT_FALSE(EnumSet<E>(E::A, E::B) == EnumSet<E>(E::A, E::C));
 }
 
-TEST(EnumSetTest, Inequality) {
+TEST(EnumSetTest, InequalitySet) {
   EXPECT_FALSE(EnumSet<E>(E::A, E::B) != EnumSet<E>(E::A, E::B));
   EXPECT_TRUE(EnumSet<E>(E::A, E::B) != EnumSet<E>(E::A, E::C));
+}
+
+TEST(EnumSetTest, EqualityEnum) {
+  EXPECT_TRUE(EnumSet<E>(E::A) == E::A);
+  EXPECT_FALSE(EnumSet<E>(E::B) == E::A);
+  EXPECT_FALSE(EnumSet<E>(E::B) == E::C);
+  EXPECT_FALSE(EnumSet<E>(E::A, E::B) == E::A);
+  EXPECT_FALSE(EnumSet<E>(E::A, E::B) == E::B);
+  EXPECT_FALSE(EnumSet<E>(E::A, E::B) == E::C);
+}
+
+TEST(EnumSetTest, InequalityEnum) {
+  EXPECT_FALSE(EnumSet<E>(E::A) != E::A);
+  EXPECT_TRUE(EnumSet<E>(E::B) != E::A);
+  EXPECT_TRUE(EnumSet<E>(E::B) != E::C);
+  EXPECT_TRUE(EnumSet<E>(E::A, E::B) != E::A);
+  EXPECT_TRUE(EnumSet<E>(E::A, E::B) != E::B);
+  EXPECT_TRUE(EnumSet<E>(E::A, E::B) != E::C);
 }
 
 TEST(EnumSetTest, Hash) {
@@ -78,9 +113,44 @@ TEST(EnumSetTest, Hash) {
 TEST(EnumSetTest, Value) {
   EXPECT_EQ(EnumSet<E>().Value(), 0u);
   EXPECT_EQ(EnumSet<E>(E::A).Value(), 1u);
-  EXPECT_EQ(EnumSet<E>(E::B).Value(), 2u);
-  EXPECT_EQ(EnumSet<E>(E::C).Value(), 4u);
-  EXPECT_EQ(EnumSet<E>(E::A, E::C).Value(), 5u);
+  EXPECT_EQ(EnumSet<E>(E::B).Value(), 8u);
+  EXPECT_EQ(EnumSet<E>(E::C).Value(), 128u);
+  EXPECT_EQ(EnumSet<E>(E::A, E::C).Value(), 129u);
+}
+
+TEST(EnumSetTest, Iterator) {
+  auto set = EnumSet<E>(E::C, E::A);
+
+  auto it = set.begin();
+  EXPECT_EQ(*it, E::A);
+  EXPECT_NE(it, set.end());
+  ++it;
+  EXPECT_EQ(*it, E::C);
+  EXPECT_NE(it, set.end());
+  ++it;
+  EXPECT_EQ(it, set.end());
+}
+
+TEST(EnumSetTest, IteratorEmpty) {
+  auto set = EnumSet<E>();
+  EXPECT_EQ(set.begin(), set.end());
+}
+
+TEST(EnumSetTest, Loop) {
+  auto set = EnumSet<E>(E::C, E::A);
+
+  std::vector<E> seen;
+  for (auto e : set) {
+    seen.emplace_back(e);
+  }
+
+  EXPECT_THAT(seen, ElementsAre(E::A, E::C));
+}
+
+TEST(EnumSetTest, Ostream) {
+  std::stringstream ss;
+  ss << EnumSet<E>(E::A, E::C);
+  EXPECT_EQ(ss.str(), "{A, C}");
 }
 
 }  // namespace
