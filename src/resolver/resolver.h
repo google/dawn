@@ -135,8 +135,8 @@ class Resolver {
 
     const ast::Function* const declaration;
     std::vector<VariableInfo*> parameters;
-    UniqueVector<VariableInfo*> referenced_module_vars;
-    UniqueVector<VariableInfo*> local_referenced_module_vars;
+    utils::UniqueVector<VariableInfo*> referenced_module_vars;
+    utils::UniqueVector<VariableInfo*> local_referenced_module_vars;
     std::vector<const ast::ReturnStatement*> return_statements;
     std::vector<const ast::CallExpression*> callsites;
     sem::Type* return_type = nullptr;
@@ -145,10 +145,10 @@ class Resolver {
     std::vector<IntrinsicCallInfo> intrinsic_calls;
 
     // List of transitive calls this function makes
-    UniqueVector<FunctionInfo*> transitive_calls;
+    utils::UniqueVector<FunctionInfo*> transitive_calls;
 
     // List of entry point functions that transitively call this function
-    UniqueVector<FunctionInfo*> ancestor_entry_points;
+    utils::UniqueVector<FunctionInfo*> ancestor_entry_points;
   };
 
   /// Structure holding semantic information about an expression.

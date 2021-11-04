@@ -141,7 +141,7 @@ class Inspector {
   const Program* program_;
   diag::List diagnostics_;
   std::unique_ptr<
-      std::unordered_map<std::string, UniqueVector<SamplerTexturePair>>>
+      std::unordered_map<std::string, utils::UniqueVector<SamplerTexturePair>>>
       sampler_targets_;
 
   /// @param name name of the entry point to find

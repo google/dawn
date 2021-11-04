@@ -17,12 +17,22 @@
 #include "gtest/gtest.h"
 
 namespace tint {
+namespace utils {
 namespace {
 
 TEST(UniqueVectorTest, Empty) {
   UniqueVector<int> unique_vec;
   EXPECT_EQ(unique_vec.size(), 0u);
   EXPECT_EQ(unique_vec.begin(), unique_vec.end());
+}
+
+TEST(UniqueVectorTest, MoveConstructor) {
+  UniqueVector<int> unique_vec(std::vector<int>{0, 3, 2, 1, 2});
+  EXPECT_EQ(unique_vec.size(), 4u);
+  EXPECT_EQ(unique_vec[0], 0);
+  EXPECT_EQ(unique_vec[1], 3);
+  EXPECT_EQ(unique_vec[2], 2);
+  EXPECT_EQ(unique_vec[3], 1);
 }
 
 TEST(UniqueVectorTest, AddUnique) {
@@ -36,6 +46,9 @@ TEST(UniqueVectorTest, AddUnique) {
     EXPECT_EQ(n, i);
     i++;
   }
+  EXPECT_EQ(unique_vec[0], 0);
+  EXPECT_EQ(unique_vec[1], 1);
+  EXPECT_EQ(unique_vec[2], 2);
 }
 
 TEST(UniqueVectorTest, AddDuplicates) {
@@ -52,6 +65,9 @@ TEST(UniqueVectorTest, AddDuplicates) {
     EXPECT_EQ(n, i);
     i++;
   }
+  EXPECT_EQ(unique_vec[0], 0);
+  EXPECT_EQ(unique_vec[1], 1);
+  EXPECT_EQ(unique_vec[2], 2);
 }
 
 TEST(UniqueVectorTest, AsVector) {
@@ -73,4 +89,5 @@ TEST(UniqueVectorTest, AsVector) {
 }
 
 }  // namespace
+}  // namespace utils
 }  // namespace tint

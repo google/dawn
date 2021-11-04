@@ -790,8 +790,8 @@ void Inspector::GenerateSamplerTargets() {
     return;
   }
 
-  sampler_targets_ = std::make_unique<
-      std::unordered_map<std::string, UniqueVector<SamplerTexturePair>>>();
+  sampler_targets_ = std::make_unique<std::unordered_map<
+      std::string, utils::UniqueVector<SamplerTexturePair>>>();
 
   auto& sem = program_->Sem();
 
@@ -873,7 +873,7 @@ void Inspector::GetOriginatingResources(
 
   std::array<const sem::GlobalVariable*, N> globals{};
   std::array<const sem::Parameter*, N> parameters{};
-  UniqueVector<const ast::CallExpression*> callsites;
+  utils::UniqueVector<const ast::CallExpression*> callsites;
 
   for (size_t i = 0; i < N; i++) {
     auto*& expr = exprs[i];

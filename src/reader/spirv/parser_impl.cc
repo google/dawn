@@ -876,8 +876,8 @@ bool ParserImpl::RegisterEntryPoints() {
     TINT_ASSERT(Reader, !inner_implementation_name.empty());
     TINT_ASSERT(Reader, ep_name != inner_implementation_name);
 
-    tint::UniqueVector<uint32_t> inputs;
-    tint::UniqueVector<uint32_t> outputs;
+    utils::UniqueVector<uint32_t> inputs;
+    utils::UniqueVector<uint32_t> outputs;
     for (unsigned iarg = 3; iarg < entry_point.NumInOperands(); iarg++) {
       const uint32_t var_id = entry_point.GetSingleWordInOperand(iarg);
       if (const auto* var_inst = def_use_mgr_->GetDef(var_id)) {

@@ -19,6 +19,7 @@
 #include <vector>
 
 namespace tint {
+namespace utils {
 
 /// UniqueVector is an ordered container that only contains unique items.
 /// Attempting to add a duplicate is a no-op.
@@ -26,6 +27,18 @@ template <typename T, typename HASH = std::hash<T>>
 struct UniqueVector {
   /// The iterator returned by begin() and end()
   using ConstIterator = typename std::vector<T>::const_iterator;
+
+  /// Constructor
+  UniqueVector() = default;
+
+  /// Constructor
+  /// @param v the vector to construct this UniqueVector with. Duplicate
+  /// elements will be removed.
+  explicit UniqueVector(std::vector<T>&& v) {
+    for (auto& el : v) {
+      add(el);
+    }
+  }
 
   /// add appends the item to the end of the vector, if the vector does not
   /// already contain the given item.
@@ -40,6 +53,14 @@ struct UniqueVector {
   /// @returns true if the vector contains `item`
   /// @param item the item
   bool contains(const T& item) const { return set.count(item); }
+
+  /// @param i the index of the element to retrieve
+  /// @returns the element at the index `i`
+  T& operator[](size_t i) { return vector[i]; }
+
+  /// @param i the index of the element to retrieve
+  /// @returns the element at the index `i`
+  const T& operator[](size_t i) const { return vector[i]; }
 
   /// @returns the number of items in the vector
   size_t size() const { return vector.size(); }
@@ -58,6 +79,7 @@ struct UniqueVector {
   std::unordered_set<T, HASH> set;
 };
 
+}  // namespace utils
 }  // namespace tint
 
 #endif  //  SRC_UTILS_UNIQUE_VECTOR_H_

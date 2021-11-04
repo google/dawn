@@ -74,7 +74,7 @@ struct ZeroInitWorkgroupMemory::State {
   };
 
   /// A list of unique ArrayIndex
-  using ArrayIndices = UniqueVector<ArrayIndex, ArrayIndex::Hasher>;
+  using ArrayIndices = utils::UniqueVector<ArrayIndex, ArrayIndex::Hasher>;
 
   /// Expression holds information about an expression that is being built for a
   /// statement will zero workgroup values.
