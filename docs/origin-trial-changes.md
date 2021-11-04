@@ -1,5 +1,11 @@
 # Tint changes during Origin Trial
 
+## Changes for M98
+
+### Breaking Changes
+
+* Taking the address of a vector component is no longer allowed.
+
 ## Changes for M97
 
 ### Breaking Changes

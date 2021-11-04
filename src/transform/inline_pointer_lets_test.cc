@@ -59,18 +59,18 @@ fn f() {
 TEST_F(InlinePointerLetsTest, ComplexChain) {
   auto* src = R"(
 fn f() {
-  var m : mat4x4<f32>;
-  let mp : ptr<function, mat4x4<f32>> = &m;
+  var a : array<mat4x4<f32>, 4>;
+  let ap : ptr<function, array<mat4x4<f32>, 4>> = &a;
+  let mp : ptr<function, mat4x4<f32>> = &(*ap)[3];
   let vp : ptr<function, vec4<f32>> = &(*mp)[2];
-  let fp : ptr<function, f32> = &(*vp)[1];
-  let f : f32 = *fp;
+  let v : vec4<f32> = *vp;
 }
 )";
 
   auto* expect = R"(
 fn f() {
-  var m : mat4x4<f32>;
-  let f : f32 = *(&((*(&((*(&(m)))[2])))[1]));
+  var a : array<mat4x4<f32>, 4>;
+  let v : vec4<f32> = *(&((*(&((*(&(a)))[3])))[2]));
 }
 )";
 
@@ -92,15 +92,6 @@ fn arr() {
   let p : ptr<function, i32> = &a[i + j].i;
   i = 2;
   *p = 4;
-}
-
-fn vector() {
-  var v : vec3<f32>;
-  var i : i32 = 0;
-  var j : i32 = 0;
-  let p : ptr<function, f32> = &v[i + j];
-  i = 2;
-  *p = 4.0;
 }
 
 fn matrix() {
@@ -127,22 +118,13 @@ fn arr() {
   *(&(a[p_save].i)) = 4;
 }
 
-fn vector() {
-  var v : vec3<f32>;
-  var i : i32 = 0;
-  var j : i32 = 0;
-  let p_save_1 = (i + j);
-  i = 2;
-  *(&(v[p_save_1])) = 4.0;
-}
-
 fn matrix() {
   var m : mat3x3<f32>;
   var i : i32 = 0;
   var j : i32 = 0;
-  let p_save_2 = (i + j);
+  let p_save_1 = (i + j);
   i = 2;
-  *(&(m[p_save_2])) = vec3<f32>(4.0, 5.0, 6.0);
+  *(&(m[p_save_1])) = vec3<f32>(4.0, 5.0, 6.0);
 }
 )";
 

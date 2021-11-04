@@ -3428,6 +3428,17 @@ bool Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
               unary->expr->source);
           return false;
         }
+
+        auto* array = unary->expr->As<ast::ArrayAccessorExpression>();
+        auto* member = unary->expr->As<ast::MemberAccessorExpression>();
+        if ((array && TypeOf(array->array)->UnwrapRef()->Is<sem::Vector>()) ||
+            (member &&
+             TypeOf(member->structure)->UnwrapRef()->Is<sem::Vector>())) {
+          AddError("cannot take the address of a vector component",
+                   unary->expr->source);
+          return false;
+        }
+
         type = builder_->create<sem::Pointer>(
             ref->StoreType(), ref->StorageClass(), ref->Access());
       } else {

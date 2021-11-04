@@ -302,29 +302,31 @@ void main() {
 }
 
 TEST_F(GlslSanitizerTest, InlinePtrLetsComplexChain) {
-  // var m : mat4x4<f32>;
-  // let mp : ptr<function, mat4x4<f32>> = &m;
+  // var a : array<mat4x4<f32>, 4>;
+  // let ap : ptr<function, array<mat4x4<f32>, 4>> = &a;
+  // let mp : ptr<function, mat4x4<f32>> = &(*ap)[3];
   // let vp : ptr<function, vec4<f32>> = &(*mp)[2];
-  // let fp : ptr<function, f32> = &(*vp)[1];
-  // let f : f32 = *fp;
-  auto* m = Var("m", ty.mat4x4<f32>());
+  // let v : vec4<f32> = *vp;
+  auto* a = Var("a", ty.array(ty.mat4x4<f32>(), 4));
+  auto* ap = Const(
+      "ap",
+      ty.pointer(ty.array(ty.mat4x4<f32>(), 4), ast::StorageClass::kFunction),
+      AddressOf(a));
   auto* mp =
       Const("mp", ty.pointer(ty.mat4x4<f32>(), ast::StorageClass::kFunction),
-            AddressOf(m));
+            AddressOf(IndexAccessor(Deref(ap), 3)));
   auto* vp =
       Const("vp", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction),
             AddressOf(IndexAccessor(Deref(mp), 2)));
-  auto* fp = Const("fp", ty.pointer<f32>(ast::StorageClass::kFunction),
-                   AddressOf(IndexAccessor(Deref(vp), 1)));
-  auto* f = Var("f", ty.f32(), ast::StorageClass::kNone, Deref(fp));
+  auto* v = Var("v", ty.vec4<f32>(), ast::StorageClass::kNone, Deref(vp));
 
   Func("main", ast::VariableList{}, ty.void_(),
        {
-           Decl(m),
+           Decl(a),
+           Decl(ap),
            Decl(mp),
            Decl(vp),
-           Decl(fp),
-           Decl(f),
+           Decl(v),
        },
        {
            Stage(ast::PipelineStage::kFragment),
@@ -339,8 +341,8 @@ TEST_F(GlslSanitizerTest, InlinePtrLetsComplexChain) {
 precision mediump float;
 
 void tint_symbol() {
-  mat4 m = mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  float f = m[2][1];
+  mat4 a[4] = mat4[4](mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 v = a[3][2];
   return;
 }
 void main() {
