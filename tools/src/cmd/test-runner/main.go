@@ -41,10 +41,11 @@ type outputFormat string
 const (
 	testTimeout = 30 * time.Second
 
-	wgsl   = outputFormat("wgsl")
-	spvasm = outputFormat("spvasm")
-	msl    = outputFormat("msl")
+	glsl   = outputFormat("glsl")
 	hlsl   = outputFormat("hlsl")
+	msl    = outputFormat("msl")
+	spvasm = outputFormat("spvasm")
+	wgsl   = outputFormat("wgsl")
 )
 
 func main() {
@@ -75,7 +76,7 @@ func run() error {
 	var maxFilenameColumnWidth int
 	numCPU := runtime.NumCPU()
 	fxc, verbose, generateExpected, generateSkip := false, false, false, false
-	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl")
+	flag.StringVar(&formatList, "format", "wgsl,spvasm,msl,hlsl", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, glsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
@@ -147,7 +148,7 @@ func run() error {
 	// Parse --format into a list of outputFormat
 	formats := []outputFormat{}
 	if formatList == "all" {
-		formats = []outputFormat{wgsl, spvasm, msl, hlsl}
+		formats = []outputFormat{wgsl, spvasm, msl, hlsl, glsl}
 	} else {
 		for _, f := range strings.Split(formatList, ",") {
 			switch strings.TrimSpace(f) {
@@ -159,6 +160,8 @@ func run() error {
 				formats = append(formats, msl)
 			case "hlsl":
 				formats = append(formats, hlsl)
+			case "glsl":
+				formats = append(formats, glsl)
 			default:
 				return fmt.Errorf("unknown format '%s'", f)
 			}
@@ -510,8 +513,8 @@ func (j job) run(wd, exe string, fxc bool, dxcPath, xcrunPath string, generateEx
 		switch j.format {
 		case wgsl:
 			validate = true
-		case spvasm:
-			args = append(args, "--validate") // spirv-val is statically linked, always available
+		case spvasm, glsl:
+			args = append(args, "--validate") // spirv-val and glslang are statically linked, always available
 			validate = true
 		case hlsl:
 			if fxc {
@@ -539,18 +542,7 @@ func (j job) run(wd, exe string, fxc bool, dxcPath, xcrunPath string, generateEx
 		matched := expected == "" || expected == out
 
 		if ok && generateExpected && (validate || !skipped) {
-			// Don't generate expected results for certain directories that contain
-			// large corpora of tests for which the generated code is uninteresting.
-			saveResult := true
-			for _, exclude := range []string{"/test/unittest/", "/test/vk-gl-cts/"} {
-				if strings.Contains(j.file, exclude) {
-					saveResult = false
-				}
-			}
-
-			if saveResult {
-				saveExpectedFile(j.file, j.format, out)
-			}
+			saveExpectedFile(j.file, j.format, out)
 			matched = true
 		}
 
@@ -620,6 +612,13 @@ func loadExpectedFile(path string, format outputFormat) string {
 // saveExpectedFile writes the expected output file for the test file at 'path'
 // and the output format 'format', with the content 'content'.
 func saveExpectedFile(path string, format outputFormat, content string) error {
+	// Don't generate expected results for certain directories that contain
+	// large corpora of tests for which the generated code is uninteresting.
+	for _, exclude := range []string{"/test/unittest/", "/test/vk-gl-cts/"} {
+		if strings.Contains(path, exclude) {
+			return nil
+		}
+	}
 	return ioutil.WriteFile(expectedFilePath(path, format), []byte(content), 0666)
 }
 
