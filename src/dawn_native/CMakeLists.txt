@@ -176,6 +176,8 @@ target_sources(dawn_native PRIVATE
     "VertexFormat.cpp"
     "VertexFormat.h"
     "dawn_platform.h"
+    "utils/WGPUHelpers.cpp"
+    "utils/WGPUHelpers.h"
 )
 target_link_libraries(dawn_native
     PUBLIC dawncpp_headers
