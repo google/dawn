@@ -72,6 +72,40 @@ For example, on Windows, to use the d3dcompiler_47.dll from a Chromium checkout,
 ```
 
 Note that we pass `--verbose` above so that all test output, including the dumped shader, is written to stdout.
+
+## Debugging TypeScript with VSCode
+
+Open or create the `.vscode/launch.json` file, and add:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug with node",
+            "type": "node",
+            "request": "launch",
+            "outFiles": [ "./**/*.js" ],
+            "args": [
+                "-e", "require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/cmdline.ts');",
+                "--", "dummy-arg",
+                "--gpu-provider",
+                "[path-to-dawn.node]", // REPLACE: [path-to-dawn.node]
+                "[test-query]", // REPLACE: [test-query]
+            ],
+            "cwd": "[cts-root]" // REPLACE: [cts-root]
+        }
+    ]
+}
+```
+
+Replacing:
+
+- `[cts-root]` with the path to the CTS root directory. If you are editing the `.vscode/launch.json` from within the CTS workspace, then you may use `${workspaceFolder}`.
+- `[path-to-dawn.node]` this the path to the `dawn.node` module built by the [build step](#Build)
+- `test-query` with the test query string. Example: `webgpu:shader,execution,builtin,abs:*`
+
+
 ## Known issues
 
 - Many WebGPU CTS tests are currently known to fail
