@@ -388,7 +388,7 @@ TEST_F(ResolverFunctionValidationTest,
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: return statement type must match its function return "
-            "type, returned 'u32', expected 'myf32'");
+            "type, returned 'u32', expected 'f32'");
 }
 
 TEST_F(ResolverFunctionValidationTest, CannotCallEntryPoint) {

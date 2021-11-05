@@ -22,6 +22,7 @@
 #include "src/castable.h"
 #include "src/program.h"
 #include "src/sem/block_statement.h"
+#include "src/sem/function.h"
 #include "src/sem/statement.h"
 #include "src/sem/variable.h"
 
@@ -74,16 +75,15 @@ std::vector<const sem::Variable*> GetAllVarsInScope(
   }
 
   // Process function parameters.
-  for (const auto* param : curr_stmt->Function()->params) {
-    const auto* sem_var = program.Sem().Get(param);
-    if (pred(sem_var)) {
-      result.push_back(sem_var);
+  for (const auto* param : curr_stmt->Function()->Parameters()) {
+    if (pred(param)) {
+      result.push_back(param);
     }
   }
 
   // Global variables do not belong to any ast::BlockStatement.
   for (const auto* global_decl : program.AST().GlobalDeclarations()) {
-    if (global_decl == curr_stmt->Function()) {
+    if (global_decl == curr_stmt->Function()->Declaration()) {
       // The same situation as in the previous loop. The current function has
       // been reached. If there are any variables declared below, they won't be
       // visible in this function. Thus, exit the loop.

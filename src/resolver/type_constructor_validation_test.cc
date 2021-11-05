@@ -1553,7 +1553,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: type in vector constructor does not match vector "
-            "type: expected 'f32', found 'UnsignedInt'");
+            "type: expected 'f32', found 'u32'");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1638,10 +1638,9 @@ struct MatrixDimensions {
   uint32_t columns;
 };
 
-static std::string MatrixStr(const MatrixDimensions& dimensions,
-                             std::string subtype = "f32") {
+static std::string MatrixStr(const MatrixDimensions& dimensions) {
   return "mat" + std::to_string(dimensions.columns) + "x" +
-         std::to_string(dimensions.rows) + "<" + subtype + ">";
+         std::to_string(dimensions.rows) + "<f32>";
 }
 
 using MatrixConstructorTest = ResolverTestWithParam<MatrixDimensions>;
@@ -1919,9 +1918,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: invalid constructor for " +
-                                      MatrixStr(param, "Float32") +
-                                      "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(),
+              HasSubstr("12:1 error: invalid constructor for " +
+                        MatrixStr(param) + "\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {

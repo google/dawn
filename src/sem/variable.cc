@@ -31,19 +31,26 @@ namespace sem {
 Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
                    ast::StorageClass storage_class,
-                   ast::Access access)
+                   ast::Access access,
+                   Constant constant_value)
     : declaration_(declaration),
       type_(type),
       storage_class_(storage_class),
-      access_(access) {}
+      access_(access),
+      constant_value_(constant_value) {}
 
 Variable::~Variable() = default;
 
 LocalVariable::LocalVariable(const ast::Variable* declaration,
                              const sem::Type* type,
                              ast::StorageClass storage_class,
-                             ast::Access access)
-    : Base(declaration, type, storage_class, access) {}
+                             ast::Access access,
+                             Constant constant_value)
+    : Base(declaration,
+           type,
+           storage_class,
+           access,
+           std::move(constant_value)) {}
 
 LocalVariable::~LocalVariable() = default;
 
@@ -51,20 +58,12 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration,
                                const sem::Type* type,
                                ast::StorageClass storage_class,
                                ast::Access access,
+                               Constant constant_value,
                                sem::BindingPoint binding_point)
-    : Base(declaration, type, storage_class, access),
+    : Base(declaration, type, storage_class, access, std::move(constant_value)),
       binding_point_(binding_point),
       is_pipeline_constant_(false) {}
 
-GlobalVariable::GlobalVariable(const ast::Variable* declaration,
-                               const sem::Type* type,
-                               uint16_t constant_id)
-    : Base(declaration,
-           type,
-           ast::StorageClass::kNone,
-           ast::Access::kReadWrite),
-      is_pipeline_constant_(true),
-      constant_id_(constant_id) {}
 
 GlobalVariable::~GlobalVariable() = default;
 
@@ -74,18 +73,16 @@ Parameter::Parameter(const ast::Variable* declaration,
                      ast::StorageClass storage_class,
                      ast::Access access,
                      const ParameterUsage usage /* = ParameterUsage::kNone */)
-    : Base(declaration, type, storage_class, access),
+    : Base(declaration, type, storage_class, access, Constant{}),
       index_(index),
       usage_(usage) {}
 
 Parameter::~Parameter() = default;
 
 VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
-                           const sem::Type* type,
                            Statement* statement,
-                           sem::Variable* variable,
-                           Constant constant_value)
-    : Base(declaration, type, statement, std::move(constant_value)),
+                           sem::Variable* variable)
+    : Base(declaration, variable->Type(), statement, variable->ConstantValue()),
       variable_(variable) {}
 
 }  // namespace sem

@@ -98,11 +98,16 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  ASSERT_TRUE(TypeOf(function_ptr)->Is<sem::Pointer>());
-  ASSERT_TRUE(TypeOf(private_ptr)->Is<sem::Pointer>());
-  ASSERT_TRUE(TypeOf(workgroup_ptr)->Is<sem::Pointer>());
-  ASSERT_TRUE(TypeOf(uniform_ptr)->Is<sem::Pointer>());
-  ASSERT_TRUE(TypeOf(storage_ptr)->Is<sem::Pointer>());
+  ASSERT_TRUE(TypeOf(function_ptr)->Is<sem::Pointer>())
+      << "function_ptr is " << TypeOf(function_ptr)->TypeInfo().name;
+  ASSERT_TRUE(TypeOf(private_ptr)->Is<sem::Pointer>())
+      << "private_ptr is " << TypeOf(private_ptr)->TypeInfo().name;
+  ASSERT_TRUE(TypeOf(workgroup_ptr)->Is<sem::Pointer>())
+      << "workgroup_ptr is " << TypeOf(workgroup_ptr)->TypeInfo().name;
+  ASSERT_TRUE(TypeOf(uniform_ptr)->Is<sem::Pointer>())
+      << "uniform_ptr is " << TypeOf(uniform_ptr)->TypeInfo().name;
+  ASSERT_TRUE(TypeOf(storage_ptr)->Is<sem::Pointer>())
+      << "storage_ptr is " << TypeOf(storage_ptr)->TypeInfo().name;
 
   EXPECT_EQ(TypeOf(function_ptr)->As<sem::Pointer>()->Access(),
             ast::Access::kReadWrite);

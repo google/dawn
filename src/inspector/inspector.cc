@@ -827,11 +827,11 @@ void Inspector::GenerateSamplerTargets() {
     }
 
     auto* call_func = call->Stmt()->Function();
-    std::vector<Symbol> entry_points;
-    if (call_func->IsEntryPoint()) {
-      entry_points = {call_func->symbol};
+    std::vector<const sem::Function*> entry_points;
+    if (call_func->Declaration()->IsEntryPoint()) {
+      entry_points = {call_func};
     } else {
-      entry_points = sem.Get(call_func)->AncestorEntryPoints();
+      entry_points = call_func->AncestorEntryPoints();
     }
 
     if (entry_points.empty()) {
@@ -854,8 +854,9 @@ void Inspector::GenerateSamplerTargets() {
               sampler->Declaration()->BindingPoint().group->value,
               sampler->Declaration()->BindingPoint().binding->value};
 
-          for (auto entry_point : entry_points) {
-            const auto& ep_name = program_->Symbols().NameFor(entry_point);
+          for (auto* entry_point : entry_points) {
+            const auto& ep_name =
+                program_->Symbols().NameFor(entry_point->Declaration()->symbol);
             (*sampler_targets_)[ep_name].add(
                 {sampler_binding_point, texture_binding_point});
           }
@@ -911,8 +912,8 @@ void Inspector::GetOriginatingResources(
             // is not called. Ignore.
             return;
           }
-          for (auto* call_expr : func->CallSites()) {
-            callsites.add(call_expr);
+          for (auto* call : func->CallSites()) {
+            callsites.add(call->Declaration());
           }
           // Need to evaluate each function call with the group of
           // expressions, so move on to the next expression.

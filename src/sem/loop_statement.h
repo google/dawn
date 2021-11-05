@@ -33,8 +33,10 @@ class LoopStatement : public Castable<LoopStatement, CompoundStatement> {
   /// Constructor
   /// @param declaration the AST node for this loop statement
   /// @param parent the owning statement
+  /// @param function the owning function
   LoopStatement(const ast::LoopStatement* declaration,
-                CompoundStatement* parent);
+                const CompoundStatement* parent,
+                const sem::Function* function);
 
   /// Destructor
   ~LoopStatement() override;
@@ -47,8 +49,10 @@ class LoopContinuingBlockStatement
   /// Constructor
   /// @param declaration the AST node for this block statement
   /// @param parent the owning statement
+  /// @param function the owning function
   LoopContinuingBlockStatement(const ast::BlockStatement* declaration,
-                               const CompoundStatement* parent);
+                               const CompoundStatement* parent,
+                               const sem::Function* function);
 
   /// Destructor
   ~LoopContinuingBlockStatement() override;

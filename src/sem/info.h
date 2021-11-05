@@ -27,10 +27,18 @@ namespace sem {
 
 /// Info holds all the resolved semantic information for a Program.
 class Info {
+ public:
   /// Placeholder type used by Get() to provide a default value for EXPLICIT_SEM
   using InferFromAST = std::nullptr_t;
 
- public:
+  /// Resolves to the return type of the Get() method given the desired sementic
+  /// type and AST type.
+  template <typename SEM, typename AST_OR_TYPE>
+  using GetResultType =
+      std::conditional_t<std::is_same<SEM, InferFromAST>::value,
+                         SemanticNodeTypeFor<AST_OR_TYPE>,
+                         SEM>;
+
   /// Constructor
   Info();
 
@@ -50,10 +58,7 @@ class Info {
   /// @returns a pointer to the semantic node if found, otherwise nullptr
   template <typename SEM = InferFromAST,
             typename AST_OR_TYPE = CastableBase,
-            typename RESULT =
-                std::conditional_t<std::is_same<SEM, InferFromAST>::value,
-                                   SemanticNodeTypeFor<AST_OR_TYPE>,
-                                   SEM>>
+            typename RESULT = GetResultType<SEM, AST_OR_TYPE>>
   const RESULT* Get(const AST_OR_TYPE* node) const {
     auto it = map.find(node);
     if (it == map.end()) {

@@ -289,8 +289,9 @@ TEST_F(ResolverArrayAccessorTest, EXpr_Deref_FuncBadParent) {
   Func("func", {p}, ty.f32(), {Decl(idx), Decl(x), Return(x)});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: cannot index type 'ptr<function, vec4<f32>>'");
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: cannot index type 'ptr<function, vec4<f32>, read_write>'");
 }
 
 TEST_F(ResolverArrayAccessorTest, Exr_Deref_BadParent) {

@@ -102,7 +102,7 @@ TEST_F(ResolverAssignmentValidationTest,
   ASSERT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "12:34 error: cannot assign 'array<f32, len>' to 'array<f32, 4>'");
+            "12:34 error: cannot assign 'array<f32, 5>' to 'array<f32, 4>'");
 }
 
 TEST_F(ResolverAssignmentValidationTest,
@@ -332,7 +332,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      "12:34 error: cannot assign 'ref<storage, array<i32>, read>' to '_'. "
+      "12:34 error: cannot assign 'array<i32>' to '_'. "
       "'_' can only be assigned a constructible, pointer, texture or sampler "
       "type");
 }

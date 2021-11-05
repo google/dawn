@@ -40,8 +40,10 @@ class BlockStatement : public Castable<BlockStatement, CompoundStatement> {
   /// Constructor
   /// @param declaration the AST node for this block statement
   /// @param parent the owning statement
+  /// @param function the owning function
   BlockStatement(const ast::BlockStatement* declaration,
-                 const CompoundStatement* parent);
+                 const CompoundStatement* parent,
+                 const sem::Function* function);
 
   /// Destructor
   ~BlockStatement() override;
@@ -67,16 +69,10 @@ class FunctionBlockStatement
  public:
   /// Constructor
   /// @param function the owning function
-  explicit FunctionBlockStatement(const ast::Function* function);
+  explicit FunctionBlockStatement(const sem::Function* function);
 
   /// Destructor
   ~FunctionBlockStatement() override;
-
-  /// @returns the function owning this block
-  const ast::Function* Function() const { return function_; }
-
- private:
-  ast::Function const* const function_;
 };
 
 /// Holds semantic information about a loop body block or for-loop body block
@@ -85,8 +81,10 @@ class LoopBlockStatement : public Castable<LoopBlockStatement, BlockStatement> {
   /// Constructor
   /// @param declaration the AST node for this block statement
   /// @param parent the owning statement
+  /// @param function the owning function
   LoopBlockStatement(const ast::BlockStatement* declaration,
-                     const CompoundStatement* parent);
+                     const CompoundStatement* parent,
+                     const sem::Function* function);
 
   /// Destructor
   ~LoopBlockStatement() override;

@@ -28,23 +28,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 namespace tint {
 namespace sem {
 
-Function::Function(
-    const ast::Function* declaration,
-    Type* return_type,
-    std::vector<Parameter*> parameters,
-    std::vector<const GlobalVariable*> transitively_referenced_globals,
-    std::vector<const GlobalVariable*> directly_referenced_globals,
-    std::vector<const ast::CallExpression*> callsites,
-    std::vector<Symbol> ancestor_entry_points,
-    sem::WorkgroupSize workgroup_size)
+Function::Function(const ast::Function* declaration,
+                   Type* return_type,
+                   std::vector<Parameter*> parameters,
+                   sem::WorkgroupSize workgroup_size)
     : Base(return_type, utils::ToConstPtrVec(parameters)),
       declaration_(declaration),
-      workgroup_size_(std::move(workgroup_size)),
-      directly_referenced_globals_(std::move(directly_referenced_globals)),
-      transitively_referenced_globals_(
-          std::move(transitively_referenced_globals)),
-      callsites_(callsites),
-      ancestor_entry_points_(std::move(ancestor_entry_points)) {
+      workgroup_size_(std::move(workgroup_size)) {
   for (auto* parameter : parameters) {
     parameter->SetOwner(this);
   }
@@ -150,8 +140,8 @@ Function::VariableBindings Function::TransitivelyReferencedVariablesOfType(
 }
 
 bool Function::HasAncestorEntryPoint(Symbol symbol) const {
-  for (const auto& point : ancestor_entry_points_) {
-    if (point == symbol) {
+  for (const auto* point : ancestor_entry_points_) {
+    if (point->Declaration()->symbol == symbol) {
       return true;
     }
   }

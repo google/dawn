@@ -34,7 +34,10 @@ class IfStatement : public Castable<IfStatement, CompoundStatement> {
   /// Constructor
   /// @param declaration the AST node for this if statement
   /// @param parent the owning statement
-  IfStatement(const ast::IfStatement* declaration, CompoundStatement* parent);
+  /// @param function the owning function
+  IfStatement(const ast::IfStatement* declaration,
+              const CompoundStatement* parent,
+              const sem::Function* function);
 
   /// Destructor
   ~IfStatement() override;
@@ -46,8 +49,10 @@ class ElseStatement : public Castable<ElseStatement, CompoundStatement> {
   /// Constructor
   /// @param declaration the AST node for this else statement
   /// @param parent the owning statement
+  /// @param function the owning function
   ElseStatement(const ast::ElseStatement* declaration,
-                CompoundStatement* parent);
+                const CompoundStatement* parent,
+                const sem::Function* function);
 
   /// Destructor
   ~ElseStatement() override;

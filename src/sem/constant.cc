@@ -59,5 +59,7 @@ Constant::Constant(const Constant&) = default;
 
 Constant::~Constant() = default;
 
+Constant& Constant::operator=(const Constant& rhs) = default;
+
 }  // namespace sem
 }  // namespace tint

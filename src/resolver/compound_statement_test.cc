@@ -43,7 +43,7 @@ TEST_F(ResolverCompoundStatementTest, FunctionBlock) {
   ASSERT_TRUE(s->Block()->Is<sem::FunctionBlockStatement>());
   EXPECT_EQ(s->Block(), s->FindFirstParent<sem::BlockStatement>());
   EXPECT_EQ(s->Block(), s->FindFirstParent<sem::FunctionBlockStatement>());
-  EXPECT_EQ(s->Block()->As<sem::FunctionBlockStatement>()->Function(), f);
+  EXPECT_EQ(s->Function()->Declaration(), f);
   EXPECT_EQ(s->Block()->Parent(), nullptr);
 }
 
@@ -74,8 +74,7 @@ TEST_F(ResolverCompoundStatementTest, Block) {
     EXPECT_EQ(s->Block()->Parent(),
               s->FindFirstParent<sem::FunctionBlockStatement>());
     ASSERT_TRUE(s->Block()->Parent()->Is<sem::FunctionBlockStatement>());
-    EXPECT_EQ(
-        s->Block()->Parent()->As<sem::FunctionBlockStatement>()->Function(), f);
+    EXPECT_EQ(s->Function()->Declaration(), f);
     EXPECT_EQ(s->Block()->Parent()->Parent(), nullptr);
   }
 }
@@ -118,7 +117,7 @@ TEST_F(ResolverCompoundStatementTest, Loop) {
     EXPECT_TRUE(
         Is<sem::FunctionBlockStatement>(s->Parent()->Parent()->Parent()));
 
-    EXPECT_EQ(s->FindFirstParent<sem::FunctionBlockStatement>()->Function(), f);
+    EXPECT_EQ(s->Function()->Declaration(), f);
 
     EXPECT_EQ(s->Parent()->Parent()->Parent()->Parent(), nullptr);
   }
@@ -144,7 +143,7 @@ TEST_F(ResolverCompoundStatementTest, Loop) {
               s->FindFirstParent<sem::FunctionBlockStatement>());
     EXPECT_TRUE(Is<sem::FunctionBlockStatement>(
         s->Parent()->Parent()->Parent()->Parent()));
-    EXPECT_EQ(s->FindFirstParent<sem::FunctionBlockStatement>()->Function(), f);
+    EXPECT_EQ(s->Function()->Declaration(), f);
 
     EXPECT_EQ(s->Parent()->Parent()->Parent()->Parent()->Parent(), nullptr);
   }
@@ -213,12 +212,7 @@ TEST_F(ResolverCompoundStatementTest, ForLoop) {
         Is<sem::FunctionBlockStatement>(s->Block()->Parent()->Parent()));
     EXPECT_EQ(s->Block()->Parent()->Parent(),
               s->FindFirstParent<sem::FunctionBlockStatement>());
-    EXPECT_EQ(s->Block()
-                  ->Parent()
-                  ->Parent()
-                  ->As<sem::FunctionBlockStatement>()
-                  ->Function(),
-              f);
+    EXPECT_EQ(s->Function()->Declaration(), f);
     EXPECT_EQ(s->Block()->Parent()->Parent()->Parent(), nullptr);
   }
 }

@@ -95,78 +95,8 @@ class Resolver {
   /// Describes the context in which a variable is declared
   enum class VariableKind { kParameter, kLocal, kGlobal };
 
-  /// Structure holding semantic information about a variable.
-  /// Used to build the sem::Variable nodes at the end of resolving.
-  struct VariableInfo {
-    VariableInfo(const ast::Variable* decl,
-                 sem::Type* type,
-                 const std::string& type_name,
-                 ast::StorageClass storage_class,
-                 ast::Access ac,
-                 VariableKind k,
-                 uint32_t idx);
-    ~VariableInfo();
-
-    ast::Variable const* const declaration;
-    sem::Type* type;
-    std::string const type_name;
-    ast::StorageClass storage_class;
-    ast::Access const access;
-    std::vector<const ast::IdentifierExpression*> users;
-    sem::BindingPoint binding_point;
-    VariableKind kind;
-    uint32_t index = 0;  // Parameter index, if kind == kParameter
-    uint16_t constant_id = 0;
-  };
-
-  struct IntrinsicCallInfo {
-    const ast::CallExpression* call;
-    const sem::Intrinsic* intrinsic;
-  };
-
   std::set<std::pair<const sem::Struct*, ast::StorageClass>>
       valid_struct_storage_layouts_;
-
-  /// Structure holding semantic information about a function.
-  /// Used to build the sem::Function nodes at the end of resolving.
-  struct FunctionInfo {
-    explicit FunctionInfo(const ast::Function* decl);
-    ~FunctionInfo();
-
-    const ast::Function* const declaration;
-    std::vector<VariableInfo*> parameters;
-    utils::UniqueVector<VariableInfo*> referenced_module_vars;
-    utils::UniqueVector<VariableInfo*> local_referenced_module_vars;
-    std::vector<const ast::ReturnStatement*> return_statements;
-    std::vector<const ast::CallExpression*> callsites;
-    sem::Type* return_type = nullptr;
-    std::string return_type_name;
-    std::array<sem::WorkgroupDimension, 3> workgroup_size;
-    std::vector<IntrinsicCallInfo> intrinsic_calls;
-
-    // List of transitive calls this function makes
-    utils::UniqueVector<FunctionInfo*> transitive_calls;
-
-    // List of entry point functions that transitively call this function
-    utils::UniqueVector<FunctionInfo*> ancestor_entry_points;
-  };
-
-  /// Structure holding semantic information about an expression.
-  /// Used to build the sem::Expression nodes at the end of resolving.
-  struct ExpressionInfo {
-    sem::Type const* type;
-    std::string const type_name;  // Declared type name
-    sem::Statement* statement;
-    sem::Constant constant_value;
-  };
-
-  /// Structure holding semantic information about a call expression to an
-  /// ast::Function.
-  /// Used to build the sem::Call nodes at the end of resolving.
-  struct FunctionCallInfo {
-    FunctionInfo* function;
-    sem::Statement* statement;
-  };
 
   /// Structure holding semantic information about a block (i.e. scope), such as
   /// parent block and variables declared in the block.
@@ -231,35 +161,40 @@ class Resolver {
                            const ast::ExpressionList& params,
                            uint32_t* id);
 
-  void set_referenced_from_function_if_needed(VariableInfo* var, bool local);
-
+  //////////////////////////////////////////////////////////////////////////////
   // AST and Type traversal methods
+  //////////////////////////////////////////////////////////////////////////////
+
+  // Expression resolving methods
+  // Returns the semantic node pointer on success, nullptr on failure.
+  sem::Expression* ArrayAccessor(const ast::ArrayAccessorExpression*);
+  sem::Expression* Binary(const ast::BinaryExpression*);
+  sem::Expression* Bitcast(const ast::BitcastExpression*);
+  sem::Expression* Call(const ast::CallExpression*);
+  sem::Expression* Constructor(const ast::ConstructorExpression*);
+  sem::Expression* Expression(const ast::Expression*);
+  sem::Function* Function(const ast::Function*);
+  sem::Call* FunctionCall(const ast::CallExpression*);
+  sem::Expression* Identifier(const ast::IdentifierExpression*);
+  sem::Call* IntrinsicCall(const ast::CallExpression*, sem::IntrinsicType);
+  sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
+  sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
+
+  // Statement resolving methods
   // Each return true on success, false on failure.
-  bool ArrayAccessor(const ast::ArrayAccessorExpression*);
   bool Assignment(const ast::AssignmentStatement* a);
-  bool Binary(const ast::BinaryExpression*);
-  bool Bitcast(const ast::BitcastExpression*);
   bool BlockStatement(const ast::BlockStatement*);
-  bool Call(const ast::CallExpression*);
   bool CaseStatement(const ast::CaseStatement*);
-  bool Constructor(const ast::ConstructorExpression*);
   bool ElseStatement(const ast::ElseStatement*);
-  bool Expression(const ast::Expression*);
   bool ForLoopStatement(const ast::ForLoopStatement*);
-  bool Function(const ast::Function*);
-  bool FunctionCall(const ast::CallExpression* call);
-  bool GlobalVariable(const ast::Variable* var);
-  bool Identifier(const ast::IdentifierExpression*);
-  bool IfStatement(const ast::IfStatement*);
-  bool IntrinsicCall(const ast::CallExpression*, sem::IntrinsicType);
-  bool LoopStatement(const ast::LoopStatement*);
-  bool MemberAccessor(const ast::MemberAccessorExpression*);
   bool Parameter(const ast::Variable* param);
+  bool GlobalVariable(const ast::Variable* var);
+  bool IfStatement(const ast::IfStatement*);
+  bool LoopStatement(const ast::LoopStatement*);
   bool Return(const ast::ReturnStatement* ret);
   bool Statement(const ast::Statement*);
   bool Statements(const ast::StatementList&);
   bool SwitchStatement(const ast::SwitchStatement* s);
-  bool UnaryOp(const ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
 
   // AST and Type validation methods
@@ -270,18 +205,16 @@ class Resolver {
                                      uint32_t el_align,
                                      const Source& source);
   bool ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s);
-  bool ValidateAtomicVariable(const VariableInfo* info);
+  bool ValidateAtomicVariable(const sem::Variable* var);
   bool ValidateAssignment(const ast::AssignmentStatement* a);
   bool ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                  const sem::Type* storage_type,
                                  const bool is_input);
-  bool ValidateCall(const ast::CallExpression* call);
-  bool ValidateCallStatement(const ast::CallStatement* stmt);
-  bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
-  bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
-  bool ValidateFunctionCall(const ast::CallExpression* call,
-                            const FunctionInfo* target);
-  bool ValidateGlobalVariable(const VariableInfo* var);
+  bool ValidateCall(const sem::Call* call);
+  bool ValidateEntryPoint(const sem::Function* func);
+  bool ValidateFunction(const sem::Function* func);
+  bool ValidateFunctionCall(const sem::Call* call);
+  bool ValidateGlobalVariable(const sem::Variable* var);
   bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
                                      const sem::Type* storage_type);
   bool ValidateLocationDecoration(const ast::LocationDecoration* location,
@@ -291,11 +224,11 @@ class Resolver {
                                   const bool is_input = false);
   bool ValidateMatrix(const sem::Matrix* ty, const Source& source);
   bool ValidateFunctionParameter(const ast::Function* func,
-                                 const VariableInfo* info);
+                                 const sem::Variable* var);
   bool ValidateNoDuplicateDefinition(Symbol sym,
                                      const Source& source,
                                      bool check_global_scope_only = false);
-  bool ValidateParameter(const ast::Function* func, const VariableInfo* info);
+  bool ValidateParameter(const ast::Function* func, const sem::Variable* var);
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateStatements(const ast::StatementList& stmts);
   bool ValidateStorageTexture(const ast::StorageTexture* t);
@@ -303,33 +236,30 @@ class Resolver {
   bool ValidateStructureConstructor(const ast::TypeConstructorExpression* ctor,
                                     const sem::Struct* struct_type);
   bool ValidateSwitch(const ast::SwitchStatement* s);
-  bool ValidateVariable(const VariableInfo* info);
+  bool ValidateVariable(const sem::Variable* var);
   bool ValidateVariableConstructor(const ast::Variable* var,
                                    ast::StorageClass storage_class,
                                    const sem::Type* storage_type,
-                                   const std::string& type_name,
-                                   const sem::Type* rhs_type,
-                                   const std::string& rhs_type_name);
+                                   const sem::Type* rhs_type);
   bool ValidateVector(const sem::Vector* ty, const Source& source);
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Vector* vec_type,
-                                 const std::string& type_name);
+                                 const sem::Vector* vec_type);
   bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Matrix* matrix_type,
-                                 const std::string& type_name);
+                                 const sem::Matrix* matrix_type);
   bool ValidateScalarConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Type* type,
-                                 const std::string& type_name);
+                                 const sem::Type* type);
   bool ValidateArrayConstructor(const ast::TypeConstructorExpression* ctor,
                                 const sem::Array* arr_type);
   bool ValidateTypeDecl(const ast::TypeDecl* named_type) const;
-  bool ValidateTextureIntrinsicFunction(const ast::CallExpression* ast_call,
-                                        const sem::Call* sem_call);
+  bool ValidateTextureIntrinsicFunction(const sem::Call* call);
   bool ValidateNoDuplicateDecorations(const ast::DecorationList& decorations);
   // sem::Struct is assumed to have at least one member
   bool ValidateStorageClassLayout(const sem::Struct* type,
                                   ast::StorageClass sc);
-  bool ValidateStorageClassLayout(const VariableInfo* info);
+  bool ValidateStorageClassLayout(const sem::Variable* var);
+
+  /// Resolves the WorkgroupSize for the given function
+  bool WorkgroupSizeFor(const ast::Function*, sem::WorkgroupSize& ws);
 
   /// @returns the sem::Type for the ast::Type `ty`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
@@ -355,16 +285,16 @@ class Resolver {
   /// raised. raised, nullptr is returned.
   sem::Struct* Structure(const ast::Struct* str);
 
-  /// @returns the VariableInfo for the variable `var`, building it if it hasn't
-  /// been constructed already. If an error is raised, nullptr is returned.
+  /// @returns the semantic info for the variable `var`. If an error is raised,
+  /// nullptr is returned.
   /// @note this method does not resolve the decorations as these are
   /// context-dependent (global, local, parameter)
   /// @param var the variable to create or return the `VariableInfo` for
   /// @param kind what kind of variable we are declaring
   /// @param index the index of the parameter, if this variable is a parameter
-  VariableInfo* Variable(const ast::Variable* var,
-                         VariableKind kind,
-                         uint32_t index = 0);
+  sem::Variable* Variable(const ast::Variable* var,
+                          VariableKind kind,
+                          uint32_t index = 0);
 
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the
@@ -389,22 +319,16 @@ class Resolver {
   /// @param expr the expression
   sem::Type* TypeOf(const ast::Expression* expr);
 
-  /// @returns the declared type name of the ast::Expression `expr`
-  /// @param expr the type name
-  std::string TypeNameOf(const ast::Expression* expr);
+  /// @returns the type name of the given semantic type, unwrapping references.
+  std::string TypeNameOf(const sem::Type* ty);
+
+  /// @returns the type name of the given semantic type, without unwrapping
+  /// references.
+  std::string RawTypeNameOf(const sem::Type* ty);
 
   /// @returns the semantic type of the AST literal `lit`
   /// @param lit the literal
   sem::Type* TypeOf(const ast::Literal* lit);
-
-  /// Records the semantic information for the expression node with the resolved
-  /// type `type` and optional declared type name `type_name`.
-  /// @param expr the expression
-  /// @param type the resolved type
-  /// @param type_name the declared type name
-  void SetExprInfo(const ast::Expression* expr,
-                   const sem::Type* type,
-                   std::string type_name = "");
 
   /// Assigns `stmt` to #current_statement_, #current_compound_statement_, and
   /// possibly #current_block_, pushes the variable scope, then calls
@@ -437,16 +361,13 @@ class Resolver {
   void AddNote(const std::string& msg, const Source& source) const;
 
   template <typename CALLBACK>
-  void TraverseCallChain(FunctionInfo* from,
-                         FunctionInfo* to,
+  void TraverseCallChain(const sem::Function* from,
+                         const sem::Function* to,
                          CALLBACK&& callback) const;
 
   //////////////////////////////////////////////////////////////////////////////
   /// Constant value evaluation methods
   //////////////////////////////////////////////////////////////////////////////
-  /// @return the Constant value of the given Expression
-  sem::Constant ConstantValueOf(const ast::Expression* expr);
-
   /// Cast `Value` to `target_type`
   /// @return the casted value
   sem::Constant ConstantCast(const sem::Constant& value,
@@ -461,29 +382,27 @@ class Resolver {
       const ast::TypeConstructorExpression* type_ctor,
       const sem::Type* type);
 
+  /// Sem is a helper for obtaining the semantic node for the given AST node.
+  template <typename SEM = sem::Info::InferFromAST,
+            typename AST_OR_TYPE = CastableBase>
+  const sem::Info::GetResultType<SEM, AST_OR_TYPE>* Sem(const AST_OR_TYPE* ast);
+
   ProgramBuilder* const builder_;
   diag::List& diagnostics_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
-  ScopeStack<VariableInfo*> variable_stack_;
-  std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
-  std::vector<FunctionInfo*> entry_points_;
+  ScopeStack<sem::Variable*> variable_stack_;
+  std::unordered_map<Symbol, sem::Function*> symbol_to_function_;
+  std::vector<sem::Function*> entry_points_;
   std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;
-  std::unordered_map<const ast::Function*, FunctionInfo*> function_to_info_;
-  std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
-  std::unordered_map<const ast::CallExpression*, FunctionCallInfo>
-      function_calls_;
-  std::unordered_map<const ast::Expression*, ExpressionInfo> expr_info_;
   std::unordered_map<Symbol, TypeDeclInfo> named_type_info_;
 
   std::unordered_set<const ast::Node*> marked_;
-  std::unordered_map<uint32_t, const VariableInfo*> constant_ids_;
+  std::unordered_map<uint32_t, const sem::Variable*> constant_ids_;
 
-  FunctionInfo* current_function_ = nullptr;
+  sem::Function* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;
   sem::CompoundStatement* current_compound_statement_ = nullptr;
   sem::BlockStatement* current_block_ = nullptr;
-  BlockAllocator<VariableInfo> variable_infos_;
-  BlockAllocator<FunctionInfo> function_infos_;
 };
 
 }  // namespace resolver

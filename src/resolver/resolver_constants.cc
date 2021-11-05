@@ -15,6 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "src/sem/constant.h"
+#include "src/utils/get_or_create.h"
 
 namespace tint {
 namespace resolver {
@@ -25,46 +26,6 @@ using u32 = ProgramBuilder::u32;
 using f32 = ProgramBuilder::f32;
 
 }  // namespace
-
-sem::Constant Resolver::ConstantCast(const sem::Constant& value,
-                                     const sem::Type* target_elem_type) {
-  if (value.ElementType() == target_elem_type) {
-    return value;
-  }
-
-  sem::Constant::Scalars elems;
-  for (size_t i = 0; i < value.Elements().size(); ++i) {
-    if (target_elem_type->Is<sem::I32>()) {
-      elems.emplace_back(
-          value.WithScalarAt(i, [](auto&& s) { return static_cast<i32>(s); }));
-    } else if (target_elem_type->Is<sem::U32>()) {
-      elems.emplace_back(
-          value.WithScalarAt(i, [](auto&& s) { return static_cast<u32>(s); }));
-    } else if (target_elem_type->Is<sem::F32>()) {
-      elems.emplace_back(
-          value.WithScalarAt(i, [](auto&& s) { return static_cast<f32>(s); }));
-    } else if (target_elem_type->Is<sem::Bool>()) {
-      elems.emplace_back(
-          value.WithScalarAt(i, [](auto&& s) { return static_cast<bool>(s); }));
-    }
-  }
-
-  auto* target_type =
-      value.Type()->Is<sem::Vector>()
-          ? builder_->create<sem::Vector>(target_elem_type,
-                                          static_cast<uint32_t>(elems.size()))
-          : target_elem_type;
-
-  return sem::Constant(target_type, elems);
-}
-
-sem::Constant Resolver::ConstantValueOf(const ast::Expression* expr) {
-  auto it = expr_info_.find(expr);
-  if (it != expr_info_.end()) {
-    return it->second.constant_value;
-  }
-  return {};
-}
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr,
                                               const sem::Type* type) {
@@ -131,11 +92,11 @@ sem::Constant Resolver::EvaluateConstantValue(
   // type_ctor's type.
   sem::Constant::Scalars elems;
   for (auto* cv : ctor_values) {
-    auto value = ConstantValueOf(cv);
-    if (!value.IsValid()) {
+    auto* expr = builder_->Sem().Get(cv);
+    if (!expr || !expr->ConstantValue()) {
       return {};
     }
-    auto cast = ConstantCast(value, elem_type);
+    auto cast = ConstantCast(expr->ConstantValue(), elem_type);
     elems.insert(elems.end(), cast.Elements().begin(), cast.Elements().end());
   }
 
@@ -147,6 +108,38 @@ sem::Constant Resolver::EvaluateConstantValue(
   }
 
   return sem::Constant(type, std::move(elems));
+}
+
+sem::Constant Resolver::ConstantCast(const sem::Constant& value,
+                                     const sem::Type* target_elem_type) {
+  if (value.ElementType() == target_elem_type) {
+    return value;
+  }
+
+  sem::Constant::Scalars elems;
+  for (size_t i = 0; i < value.Elements().size(); ++i) {
+    if (target_elem_type->Is<sem::I32>()) {
+      elems.emplace_back(
+          value.WithScalarAt(i, [](auto&& s) { return static_cast<i32>(s); }));
+    } else if (target_elem_type->Is<sem::U32>()) {
+      elems.emplace_back(
+          value.WithScalarAt(i, [](auto&& s) { return static_cast<u32>(s); }));
+    } else if (target_elem_type->Is<sem::F32>()) {
+      elems.emplace_back(
+          value.WithScalarAt(i, [](auto&& s) { return static_cast<f32>(s); }));
+    } else if (target_elem_type->Is<sem::Bool>()) {
+      elems.emplace_back(
+          value.WithScalarAt(i, [](auto&& s) { return static_cast<bool>(s); }));
+    }
+  }
+
+  auto* target_type =
+      value.Type()->Is<sem::Vector>()
+          ? builder_->create<sem::Vector>(target_elem_type,
+                                          static_cast<uint32_t>(elems.size()))
+          : target_elem_type;
+
+  return sem::Constant(target_type, elems);
 }
 
 }  // namespace resolver

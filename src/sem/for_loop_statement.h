@@ -32,8 +32,10 @@ class ForLoopStatement : public Castable<ForLoopStatement, CompoundStatement> {
   /// Constructor
   /// @param declaration the AST node for this for-loop statement
   /// @param parent the owning statement
+  /// @param function the owning function
   ForLoopStatement(const ast::ForLoopStatement* declaration,
-                   CompoundStatement* parent);
+                   const CompoundStatement* parent,
+                   const sem::Function* function);
 
   /// Destructor
   ~ForLoopStatement() override;

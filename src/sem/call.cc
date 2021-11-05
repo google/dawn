@@ -14,16 +14,21 @@
 
 #include "src/sem/call.h"
 
+#include <utility>
+#include <vector>
+
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Call);
 
 namespace tint {
 namespace sem {
 
-Call::Call(const ast::Expression* declaration,
+Call::Call(const ast::CallExpression* declaration,
            const CallTarget* target,
+           std::vector<const sem::Expression*> arguments,
            Statement* statement)
     : Base(declaration, target->ReturnType(), statement, Constant{}),
-      target_(target) {}
+      target_(target),
+      arguments_(std::move(arguments)) {}
 
 Call::~Call() = default;
 

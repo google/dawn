@@ -39,7 +39,7 @@ var<private> a : array<f32, 3>;
 let c : u32 = 1u;
 
 fn f() {
-  let b : f32 = a[min(c, 2u)];
+  let b : f32 = a[1u];
 }
 )";
 
@@ -807,7 +807,7 @@ struct S {
 let c : u32 = 1u;
 
 fn f() {
-  let b : f32 = s.b[min(c, (arrayLength(&(s.b)) - 1u))];
+  let b : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
   let x : i32 = min(1, 2);
   let y : u32 = arrayLength(&(s.b));
 }

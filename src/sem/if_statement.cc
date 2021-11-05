@@ -23,14 +23,16 @@ namespace tint {
 namespace sem {
 
 IfStatement::IfStatement(const ast::IfStatement* declaration,
-                         CompoundStatement* parent)
-    : Base(declaration, parent) {}
+                         const CompoundStatement* parent,
+                         const sem::Function* function)
+    : Base(declaration, parent, function) {}
 
 IfStatement::~IfStatement() = default;
 
 ElseStatement::ElseStatement(const ast::ElseStatement* declaration,
-                             CompoundStatement* parent)
-    : Base(declaration, parent) {}
+                             const CompoundStatement* parent,
+                             const sem::Function* function)
+    : Base(declaration, parent, function) {}
 
 ElseStatement::~ElseStatement() = default;
 

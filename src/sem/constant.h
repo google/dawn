@@ -77,6 +77,11 @@ class Constant {
   /// Destructor
   ~Constant();
 
+  /// Copy assignment
+  /// @param other the Constant to copy
+  /// @returns this Constant
+  Constant& operator=(const Constant& other);
+
   /// @returns true if the Constant has been initialized
   bool IsValid() const { return type_ != nullptr; }
 

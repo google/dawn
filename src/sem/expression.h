@@ -53,8 +53,11 @@ class Expression : public Castable<Expression, Node> {
   /// @returns the AST node
   const ast::Expression* Declaration() const { return declaration_; }
 
- private:
+ protected:
+  /// The AST expression node for this semantic expression
   const ast::Expression* const declaration_;
+
+ private:
   const sem::Type* const type_;
   const Statement* const statement_;
   const Constant constant_;

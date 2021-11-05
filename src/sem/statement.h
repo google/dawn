@@ -33,6 +33,7 @@ namespace sem {
 
 /// Forward declaration
 class CompoundStatement;
+class Function;
 
 namespace detail {
 /// FindFirstParentReturn is a traits helper for determining the return type for
@@ -64,7 +65,10 @@ class Statement : public Castable<Statement, Node> {
   /// Constructor
   /// @param declaration the AST node for this statement
   /// @param parent the owning statement
-  Statement(const ast::Statement* declaration, const CompoundStatement* parent);
+  /// @param function the owning function
+  Statement(const ast::Statement* declaration,
+            const CompoundStatement* parent,
+            const sem::Function* function);
 
   /// @return the AST node for this statement
   const ast::Statement* Declaration() const { return declaration_; }
@@ -90,11 +94,12 @@ class Statement : public Castable<Statement, Node> {
   const BlockStatement* Block() const;
 
   /// @returns the function that owns this statement
-  const ast::Function* Function() const;
+  const sem::Function* Function() const { return function_; }
 
  private:
-  ast::Statement const* const declaration_;
-  CompoundStatement const* const parent_;
+  const ast::Statement* const declaration_;
+  const CompoundStatement* const parent_;
+  const sem::Function* const function_;
 };
 
 /// CompoundStatement is the base class of statements that can hold other
@@ -103,9 +108,11 @@ class CompoundStatement : public Castable<Statement, Statement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this statement
-  /// @param parent the owning statement
+  /// @param statement the owning statement
+  /// @param function the owning function
   CompoundStatement(const ast::Statement* declaration,
-                    const CompoundStatement* parent);
+                    const CompoundStatement* statement,
+                    const sem::Function* function);
 
   /// Destructor
   ~CompoundStatement() override;

@@ -15,6 +15,8 @@
 #ifndef SRC_SEM_CALL_H_
 #define SRC_SEM_CALL_H_
 
+#include <vector>
+
 #include "src/sem/expression.h"
 #include "src/sem/intrinsic.h"
 
@@ -28,9 +30,11 @@ class Call : public Castable<Call, Expression> {
   /// Constructor
   /// @param declaration the AST node
   /// @param target the call target
+  /// @param arguments the call arguments
   /// @param statement the statement that owns this expression
-  Call(const ast::Expression* declaration,
+  Call(const ast::CallExpression* declaration,
        const CallTarget* target,
+       std::vector<const sem::Expression*> arguments,
        Statement* statement);
 
   /// Destructor
@@ -39,8 +43,19 @@ class Call : public Castable<Call, Expression> {
   /// @return the target of the call
   const CallTarget* Target() const { return target_; }
 
+  /// @return the call arguments
+  const std::vector<const sem::Expression*>& Arguments() const {
+    return arguments_;
+  }
+
+  /// @returns the AST node
+  const ast::CallExpression* Declaration() const {
+    return static_cast<const ast::CallExpression*>(declaration_);
+  }
+
  private:
   CallTarget const* const target_;
+  std::vector<const sem::Expression*> arguments_;
 };
 
 }  // namespace sem

@@ -23,16 +23,22 @@ namespace tint {
 namespace sem {
 
 LoopStatement::LoopStatement(const ast::LoopStatement* declaration,
-                             CompoundStatement* parent)
-    : Base(declaration, parent) {}
+                             const CompoundStatement* parent,
+                             const sem::Function* function)
+    : Base(declaration, parent, function) {
+  TINT_ASSERT(Semantic, parent);
+  TINT_ASSERT(Semantic, function);
+}
 
 LoopStatement::~LoopStatement() = default;
 
 LoopContinuingBlockStatement::LoopContinuingBlockStatement(
     const ast::BlockStatement* declaration,
-    const CompoundStatement* parent)
-    : Base(declaration, parent) {
+    const CompoundStatement* parent,
+    const sem::Function* function)
+    : Base(declaration, parent, function) {
   TINT_ASSERT(Semantic, parent);
+  TINT_ASSERT(Semantic, function);
 }
 LoopContinuingBlockStatement::~LoopContinuingBlockStatement() = default;
 

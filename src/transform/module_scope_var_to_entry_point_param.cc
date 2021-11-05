@@ -109,8 +109,8 @@ struct ModuleScopeVarToEntryPointParam::State {
 
         // Find all of the calls to this function that will need to be replaced.
         for (auto* call : func_sem->CallSites()) {
-          auto* call_sem = ctx.src->Sem().Get(call);
-          calls_to_replace[call_sem->Stmt()->Function()].push_back(call);
+          calls_to_replace[call->Stmt()->Function()->Declaration()].push_back(
+              call->Declaration());
         }
       }
     }
@@ -268,7 +268,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         // Replace all uses of the module-scope variable.
         // For non-entry points, dereference non-handle pointer parameters.
         for (auto* user : var->Users()) {
-          if (user->Stmt()->Function() == func_ast) {
+          if (user->Stmt()->Function()->Declaration() == func_ast) {
             const ast::Expression* expr = ctx.dst->Expr(new_var_symbol);
             if (is_pointer) {
               // If this identifier is used by an address-of operator, just

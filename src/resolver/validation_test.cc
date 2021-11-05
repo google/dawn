@@ -499,9 +499,10 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
   Func("func", {p}, ty.f32(), {Decl(x), Return(x)});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "error: invalid member accessor expression. Expected vector or "
-            "struct, got 'ptr<function, vec4<f32>>'");
+  EXPECT_EQ(
+      r()->error(),
+      "error: invalid member accessor expression. "
+      "Expected vector or struct, got 'ptr<function, vec4<f32>, read_write>'");
 }
 
 TEST_F(ResolverValidationTest,

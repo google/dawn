@@ -96,7 +96,8 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: variables declared in the <storage> storage class must be of a structure type)");
+      R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
+56:78 note: while instantiating variable g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, NotStorage_AccessMode) {
@@ -194,7 +195,8 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBool) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: variables declared in the <uniform> storage class must be of a structure type)");
+      R"(56:78 error: Type 'bool' cannot be used in storage class 'uniform' as it is non-host-shareable
+56:78 note: while instantiating variable g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
@@ -243,7 +245,8 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: variables declared in the <uniform> storage class must be of a structure type)");
+      R"(56:78 error: Type 'bool' cannot be used in storage class 'uniform' as it is non-host-shareable
+56:78 note: while instantiating variable g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferNoBlockDecoration) {

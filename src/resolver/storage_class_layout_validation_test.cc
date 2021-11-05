@@ -179,11 +179,11 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: the offset of a struct member of type 'Inner' in storage class 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting [[align(16)]] on this member
+      R"(56:78 error: the offset of a struct member of type '[[stride(16)]] array<f32, 10>' in storage class 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting [[align(16)]] on this member
 12:34 note: see layout of struct:
 /*             align(4) size(164) */ struct Outer {
 /* offset(  0) align(4) size(  4) */   scalar : f32;
-/* offset(  4) align(4) size(160) */   inner : Inner;
+/* offset(  4) align(4) size(160) */   inner : [[stride(16)]] array<f32, 10>;
 /*                                */ };
 78:90 note: see declaration of variable)");
 }
@@ -351,7 +351,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
       R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array stride of 'inner' is currently 8. Consider setting [[stride(16)]] on the array type
 12:34 note: see layout of struct:
 /*            align(4) size(84) */ struct Outer {
-/* offset( 0) align(4) size(80) */   inner : Inner;
+/* offset( 0) align(4) size(80) */   inner : [[stride(8)]] array<f32, 10>;
 /* offset(80) align(4) size( 4) */   scalar : i32;
 /*                              */ };
 78:90 note: see declaration of variable)");

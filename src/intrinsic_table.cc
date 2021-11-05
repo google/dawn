@@ -1070,8 +1070,8 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
           ast::StorageClass::kNone, ast::Access::kUndefined, p.usage));
     }
     return builder.create<sem::Intrinsic>(
-        intrinsic.type, intrinsic.return_type,
-        std::move(params), intrinsic.supported_stages, intrinsic.is_deprecated);
+        intrinsic.type, intrinsic.return_type, std::move(params),
+        intrinsic.supported_stages, intrinsic.is_deprecated);
   });
 }
 

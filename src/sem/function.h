@@ -62,18 +62,10 @@ class Function : public Castable<Function, CallTarget> {
   /// @param declaration the ast::Function
   /// @param return_type the return type of the function
   /// @param parameters the parameters to the function
-  /// @param transitively_referenced_globals the referenced module variables
-  /// @param directly_referenced_globals the locally referenced module
-  /// @param callsites the callsites of the function
-  /// @param ancestor_entry_points the ancestor entry points
   /// @param workgroup_size the workgroup size
   Function(const ast::Function* declaration,
            Type* return_type,
            std::vector<Parameter*> parameters,
-           std::vector<const GlobalVariable*> transitively_referenced_globals,
-           std::vector<const GlobalVariable*> directly_referenced_globals,
-           std::vector<const ast::CallExpression*> callsites,
-           std::vector<Symbol> ancestor_entry_points,
            sem::WorkgroupSize workgroup_size);
 
   /// Destructor
@@ -85,20 +77,96 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns the workgroup size {x, y, z} for the function.
   const sem::WorkgroupSize& WorkgroupSize() const { return workgroup_size_; }
 
+  /// @returns all directly referenced global variables
+  const utils::UniqueVector<const GlobalVariable*>& DirectlyReferencedGlobals()
+      const {
+    return directly_referenced_globals_;
+  }
+
+  /// Records that this function directly references the given global variable.
+  /// Note: Implicitly adds this global to the transtively-called globals.
+  /// @param global the module-scope variable
+  void AddDirectlyReferencedGlobal(const sem::GlobalVariable* global) {
+    directly_referenced_globals_.add(global);
+    transitively_referenced_globals_.add(global);
+  }
+
   /// @returns all transitively referenced global variables
   const utils::UniqueVector<const GlobalVariable*>&
   TransitivelyReferencedGlobals() const {
     return transitively_referenced_globals_;
   }
 
-  /// @returns the list of callsites of this function
-  std::vector<const ast::CallExpression*> CallSites() const {
-    return callsites_;
+  /// Records that this function transitively references the given global
+  /// variable.
+  /// @param global the module-scoped variable
+  void AddTransitivelyReferencedGlobal(const sem::GlobalVariable* global) {
+    transitively_referenced_globals_.add(global);
   }
 
-  /// @returns the names of the ancestor entry points
-  const std::vector<Symbol>& AncestorEntryPoints() const {
+  /// @returns the list of functions that this function transitively calls.
+  const utils::UniqueVector<const Function*>& TransitivelyCalledFunctions()
+      const {
+    return transitively_called_functions_;
+  }
+
+  /// Records that this function transitively calls `function`.
+  /// @param function the function this function transitively calls
+  void AddTransitivelyCalledFunction(const Function* function) {
+    transitively_called_functions_.add(function);
+  }
+
+  /// @returns the list of intrinsics that this function directly calls.
+  const utils::UniqueVector<const Intrinsic*>& DirectlyCalledIntrinsics()
+      const {
+    return directly_called_intrinsics_;
+  }
+
+  /// Records that this function transitively calls `intrinsic`.
+  /// @param intrinsic the intrinsic this function directly calls
+  void AddDirectlyCalledIntrinsic(const Intrinsic* intrinsic) {
+    directly_called_intrinsics_.add(intrinsic);
+  }
+
+  /// @returns the list of direct calls to functions / intrinsics made by this
+  /// function
+  std::vector<const Call*> DirectCallStatements() const {
+    return direct_calls_;
+  }
+
+  /// Adds a record of the direct function / intrinsic calls made by this
+  /// function
+  /// @param call the call
+  void AddDirectCall(const Call* call) { direct_calls_.emplace_back(call); }
+
+  /// @param target the target of a call
+  /// @returns the Call to the given CallTarget, or nullptr the target was not
+  /// called by this function.
+  const Call* FindDirectCallTo(const CallTarget* target) const {
+    for (auto* call : direct_calls_) {
+      if (call->Target() == target) {
+        return call;
+      }
+    }
+    return nullptr;
+  }
+
+  /// @returns the list of callsites of this function
+  std::vector<const Call*> CallSites() const { return callsites_; }
+
+  /// Adds a record of a callsite to this function
+  /// @param call the callsite
+  void AddCallSite(const Call* call) { callsites_.emplace_back(call); }
+
+  /// @returns the ancestor entry points
+  const std::vector<const Function*>& AncestorEntryPoints() const {
     return ancestor_entry_points_;
+  }
+
+  /// Adds a record that the given entry point transitively calls this function
+  /// @param entry_point the entry point that transtively calls this function
+  void AddAncestorEntryPoint(const sem::Function* entry_point) {
+    ancestor_entry_points_.emplace_back(entry_point);
   }
 
   /// Retrieves any referenced location variables
@@ -174,8 +242,9 @@ class Function : public Castable<Function, CallTarget> {
   utils::UniqueVector<const GlobalVariable*> transitively_referenced_globals_;
   utils::UniqueVector<const Function*> transitively_called_functions_;
   utils::UniqueVector<const Intrinsic*> directly_called_intrinsics_;
-  std::vector<const ast::CallExpression*> callsites_;
-  std::vector<Symbol> ancestor_entry_points_;
+  std::vector<const Call*> direct_calls_;
+  std::vector<const Call*> callsites_;
+  std::vector<const Function*> ancestor_entry_points_;
 };
 
 }  // namespace sem

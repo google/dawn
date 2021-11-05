@@ -33,8 +33,10 @@ class SwitchStatement : public Castable<SwitchStatement, CompoundStatement> {
   /// Constructor
   /// @param declaration the AST node for this switch statement
   /// @param parent the owning statement
+  /// @param function the owning function
   SwitchStatement(const ast::SwitchStatement* declaration,
-                  CompoundStatement* parent);
+                  const CompoundStatement* parent,
+                  const sem::Function* function);
 
   /// Destructor
   ~SwitchStatement() override;
@@ -47,8 +49,10 @@ class SwitchCaseBlockStatement
   /// Constructor
   /// @param declaration the AST node for this block statement
   /// @param parent the owning statement
+  /// @param function the owning function
   SwitchCaseBlockStatement(const ast::BlockStatement* declaration,
-                           const CompoundStatement* parent);
+                           const CompoundStatement* parent,
+                           const sem::Function* function);
 
   /// Destructor
   ~SwitchCaseBlockStatement() override;

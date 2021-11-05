@@ -26,8 +26,9 @@ namespace tint {
 namespace sem {
 
 BlockStatement::BlockStatement(const ast::BlockStatement* declaration,
-                               const CompoundStatement* parent)
-    : Base(declaration, parent) {}
+                               const CompoundStatement* parent,
+                               const sem::Function* function)
+    : Base(declaration, parent, function) {}
 
 BlockStatement::~BlockStatement() = default;
 
@@ -39,15 +40,19 @@ void BlockStatement::AddDecl(const ast::Variable* var) {
   decls_.push_back(var);
 }
 
-FunctionBlockStatement::FunctionBlockStatement(const ast::Function* function)
-    : Base(function->body, nullptr), function_(function) {}
+FunctionBlockStatement::FunctionBlockStatement(const sem::Function* function)
+    : Base(function->Declaration()->body, nullptr, function) {
+  TINT_ASSERT(Semantic, function);
+}
 
 FunctionBlockStatement::~FunctionBlockStatement() = default;
 
 LoopBlockStatement::LoopBlockStatement(const ast::BlockStatement* declaration,
-                                       const CompoundStatement* parent)
-    : Base(declaration, parent) {
+                                       const CompoundStatement* parent,
+                                       const sem::Function* function)
+    : Base(declaration, parent, function) {
   TINT_ASSERT(Semantic, parent);
+  TINT_ASSERT(Semantic, function);
 }
 LoopBlockStatement::~LoopBlockStatement() = default;
 

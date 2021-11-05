@@ -27,23 +27,18 @@ namespace tint {
 namespace sem {
 
 Statement::Statement(const ast::Statement* declaration,
-                     const CompoundStatement* parent)
-    : declaration_(declaration), parent_(parent) {}
+                     const CompoundStatement* parent,
+                     const sem::Function* function)
+    : declaration_(declaration), parent_(parent), function_(function) {}
 
 const BlockStatement* Statement::Block() const {
   return FindFirstParent<BlockStatement>();
 }
 
-const ast::Function* Statement::Function() const {
-  if (auto* fbs = FindFirstParent<FunctionBlockStatement>()) {
-    return fbs->Function();
-  }
-  return nullptr;
-}
-
 CompoundStatement::CompoundStatement(const ast::Statement* declaration,
-                                     const CompoundStatement* parent)
-    : Base(declaration, parent) {}
+                                     const CompoundStatement* parent,
+                                     const sem::Function* function)
+    : Base(declaration, parent, function) {}
 
 CompoundStatement::~CompoundStatement() = default;
 

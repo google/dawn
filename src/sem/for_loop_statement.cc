@@ -22,8 +22,9 @@ namespace tint {
 namespace sem {
 
 ForLoopStatement::ForLoopStatement(const ast::ForLoopStatement* declaration,
-                                   CompoundStatement* parent)
-    : Base(declaration, parent) {}
+                                   const CompoundStatement* parent,
+                                   const sem::Function* function)
+    : Base(declaration, parent, function) {}
 
 ForLoopStatement::~ForLoopStatement() = default;
 
