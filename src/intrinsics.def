@@ -292,7 +292,7 @@ fn cross(vec3<f32>, vec3<f32>) -> vec3<f32>
 fn determinant<N: num>(mat<N, N, f32>) -> f32
 fn distance(f32, f32) -> f32
 fn distance<N: num>(vec<N, f32>, vec<N, f32>) -> f32
-fn dot<N: num>(vec<N, f32>, vec<N, f32>) -> f32
+fn dot<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> T
 [[stage("fragment")]] fn dpdx(f32) -> f32
 [[stage("fragment")]] fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>
 [[stage("fragment")]] fn dpdxCoarse(f32) -> f32

@@ -543,6 +543,8 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
   auto name = generate_builtin_name(intrinsic);
 
   switch (intrinsic->Type()) {
+    case sem::IntrinsicType::kDot:
+      return EmitDotCall(out, expr, intrinsic);
     case sem::IntrinsicType::kModf:
       return EmitModfCall(out, expr, intrinsic);
     case sem::IntrinsicType::kFrexp:
@@ -1002,6 +1004,53 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
   out << ")";
 
+  return true;
+}
+
+bool GeneratorImpl::EmitDotCall(std::ostream& out,
+                                const ast::CallExpression* expr,
+                                const sem::Intrinsic* intrinsic) {
+  auto* vec_ty = intrinsic->Parameters()[0]->Type()->As<sem::Vector>();
+  std::string fn = "dot";
+  if (vec_ty->type()->is_integer_scalar()) {
+    // MSL does not have a builtin for dot() with integer vector types.
+    // Generate the helper function if it hasn't been created already
+    fn = utils::GetOrCreate(
+        int_dot_funcs_, vec_ty->Width(), [&]() -> std::string {
+          TextBuffer b;
+          TINT_DEFER(helpers_.Append(b));
+
+          auto fn_name =
+              UniqueIdentifier("tint_dot" + std::to_string(vec_ty->Width()));
+          auto v = "vec<T," + std::to_string(vec_ty->Width()) + ">";
+
+          line(&b) << "template<typename T>";
+          line(&b) << "T " << fn_name << "(" << v << " a, " << v << " b) {";
+          {
+            auto l = line(&b);
+            l << "  return ";
+            for (uint32_t i = 0; i < vec_ty->Width(); i++) {
+              if (i > 0) {
+                l << " + ";
+              }
+              l << "a[" << i << "]*b[" << i << "]";
+            }
+            l << ";";
+          }
+          line(&b) << "}";
+          return fn_name;
+        });
+  }
+
+  out << fn << "(";
+  if (!EmitExpression(out, expr->args[0])) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, expr->args[1])) {
+    return false;
+  }
+  out << ")";
   return true;
 }
 

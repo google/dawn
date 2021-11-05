@@ -6,6 +6,10 @@
 
 * Taking the address of a vector component is no longer allowed.
 
+### New Features
+
+* The `dot()` builtin now supports integer vector types.
+
 ## Changes for M97
 
 ### Breaking Changes

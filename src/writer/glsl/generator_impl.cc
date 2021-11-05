@@ -107,7 +107,11 @@ bool GeneratorImpl::Generate() {
   size_t last_padding_line = 0;
 
   line() << "#version 310 es";
-  line() << "precision mediump float;" << std::endl;
+  line() << "precision mediump float;";
+
+  auto helpers_insertion_point = current_buffer_->lines.size();
+
+  line();
 
   for (auto* decl : builder_.AST().GlobalDeclarations()) {
     if (decl->Is<ast::Alias>()) {
@@ -153,7 +157,8 @@ bool GeneratorImpl::Generate() {
   }
 
   if (!helpers_.lines.empty()) {
-    current_buffer_->Insert(helpers_, 0, 0);
+    current_buffer_->Insert("", helpers_insertion_point++, 0);
+    current_buffer_->Insert(helpers_, helpers_insertion_point++, 0);
   }
 
   return true;
@@ -407,6 +412,8 @@ bool GeneratorImpl::EmitCall(std::ostream& out,
       return EmitTextureCall(out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
       return EmitSelectCall(out, expr);
+    } else if (intrinsic->Type() == sem::IntrinsicType::kDot) {
+      return EmitDotCall(out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kModf) {
       return EmitModfCall(out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kFrexp) {
@@ -668,6 +675,78 @@ bool GeneratorImpl::EmitSelectCall(std::ostream& out,
     return false;
   }
 
+  return true;
+}
+
+bool GeneratorImpl::EmitDotCall(std::ostream& out,
+                                const ast::CallExpression* expr,
+                                const sem::Intrinsic* intrinsic) {
+  auto* vec_ty = intrinsic->Parameters()[0]->Type()->As<sem::Vector>();
+  std::string fn = "dot";
+  if (vec_ty->type()->is_integer_scalar()) {
+    // GLSL does not have a builtin for dot() with integer vector types.
+    // Generate the helper function if it hasn't been created already
+    fn = utils::GetOrCreate(int_dot_funcs_, vec_ty, [&]() -> std::string {
+      TextBuffer b;
+      TINT_DEFER(helpers_.Append(b));
+
+      auto fn_name = UniqueIdentifier("tint_int_dot");
+
+      std::string v;
+      {
+        std::stringstream s;
+        if (!EmitType(s, vec_ty->type(), ast::StorageClass::kNone,
+                      ast::Access::kRead, "")) {
+          return "";
+        }
+        v = s.str();
+      }
+      {  // (u)int tint_int_dot([i|u]vecN a, [i|u]vecN b) {
+        auto l = line(&b);
+        if (!EmitType(l, vec_ty->type(), ast::StorageClass::kNone,
+                      ast::Access::kRead, "")) {
+          return "";
+        }
+        l << " " << fn_name << "(";
+        if (!EmitType(l, vec_ty, ast::StorageClass::kNone, ast::Access::kRead,
+                      "")) {
+          return "";
+        }
+        l << " a, ";
+        if (!EmitType(l, vec_ty, ast::StorageClass::kNone, ast::Access::kRead,
+                      "")) {
+          return "";
+        }
+        l << " b) {";
+      }
+      {
+        auto l = line(&b);
+        l << "  return ";
+        for (uint32_t i = 0; i < vec_ty->Width(); i++) {
+          if (i > 0) {
+            l << " + ";
+          }
+          l << "a[" << i << "]*b[" << i << "]";
+        }
+        l << ";";
+      }
+      line(&b) << "}";
+      return fn_name;
+    });
+    if (fn.empty()) {
+      return false;
+    }
+  }
+
+  out << fn << "(";
+  if (!EmitExpression(out, expr->args[0])) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, expr->args[1])) {
+    return false;
+  }
+  out << ")";
   return true;
 }
 
@@ -2216,9 +2295,6 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
   }
   if (auto* c = stmt->As<ast::CallStatement>()) {
     auto out = line();
-    if (!TypeOf(c->expr)->Is<sem::Void>()) {
-      out << "(void) ";
-    }
     if (!EmitCall(out, c->expr)) {
       return false;
     }

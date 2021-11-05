@@ -154,6 +154,14 @@ class GeneratorImpl : public TextGenerator {
   bool EmitTextureCall(std::ostream& out,
                        const ast::CallExpression* expr,
                        const sem::Intrinsic* intrinsic);
+  /// Handles generating a call to the `dot()` intrinsic
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitDotCall(std::ostream& out,
+                   const ast::CallExpression* expr,
+                   const sem::Intrinsic* intrinsic);
   /// Handles generating a call to the `modf()` intrinsic
   /// @param out the output of the expression stream
   /// @param expr the call expression
@@ -394,6 +402,7 @@ class GeneratorImpl : public TextGenerator {
 
   std::unordered_map<const sem::Intrinsic*, std::string> intrinsics_;
   std::unordered_map<const sem::Type*, std::string> unary_minus_funcs_;
+  std::unordered_map<uint32_t, std::string> int_dot_funcs_;
 };
 
 }  // namespace msl

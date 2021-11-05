@@ -407,7 +407,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(IntrinsicData{"countOneBits", "OpBitCount"},
                     IntrinsicData{"reverseBits", "OpBitReverse"}));
 
-TEST_F(IntrinsicBuilderTest, Call_Dot) {
+TEST_F(IntrinsicBuilderTest, Call_Dot_F32) {
   auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call("dot", "v", "v");
@@ -429,6 +429,76 @@ TEST_F(IntrinsicBuilderTest, Call_Dot) {
             R"(%7 = OpLoad %3 %1
 %8 = OpLoad %3 %1
 %6 = OpDot %4 %7 %8
+)");
+}
+
+TEST_F(IntrinsicBuilderTest, Call_Dot_U32) {
+  auto* var = Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call("dot", "v", "v");
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpLoad %3 %1
+%8 = OpLoad %3 %1
+%9 = OpCompositeExtract %4 %7 0
+%10 = OpCompositeExtract %4 %8 0
+%11 = OpIMul %4 %9 %10
+%12 = OpCompositeExtract %4 %7 1
+%13 = OpCompositeExtract %4 %8 1
+%14 = OpIMul %4 %12 %13
+%15 = OpIAdd %4 %11 %14
+%16 = OpCompositeExtract %4 %7 2
+%17 = OpCompositeExtract %4 %8 2
+%18 = OpIMul %4 %16 %17
+%6 = OpIAdd %4 %15 %18
+)");
+}
+
+TEST_F(IntrinsicBuilderTest, Call_Dot_I32) {
+  auto* var = Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call("dot", "v", "v");
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpLoad %3 %1
+%8 = OpLoad %3 %1
+%9 = OpCompositeExtract %4 %7 0
+%10 = OpCompositeExtract %4 %8 0
+%11 = OpIMul %4 %9 %10
+%12 = OpCompositeExtract %4 %7 1
+%13 = OpCompositeExtract %4 %8 1
+%14 = OpIMul %4 %12 %13
+%15 = OpIAdd %4 %11 %14
+%16 = OpCompositeExtract %4 %7 2
+%17 = OpCompositeExtract %4 %8 2
+%18 = OpIMul %4 %16 %17
+%6 = OpIAdd %4 %15 %18
 )");
 }
 

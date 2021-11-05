@@ -2423,9 +2423,48 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
     case IntrinsicType::kCountOneBits:
       op = spv::Op::OpBitCount;
       break;
-    case IntrinsicType::kDot:
+    case IntrinsicType::kDot: {
       op = spv::Op::OpDot;
+      auto* vec_ty = intrinsic->Parameters()[0]->Type()->As<sem::Vector>();
+      if (vec_ty->type()->is_integer_scalar()) {
+        // TODO(crbug.com/tint/1267): OpDot requires floating-point types, but
+        // WGSL also supports integer types. SPV_KHR_integer_dot_product adds
+        // support for integer vectors. Use it if it is available.
+        auto el_ty = Operand::Int(GenerateTypeIfNeeded(vec_ty->type()));
+        auto vec_a = Operand::Int(get_arg_as_value_id(0));
+        auto vec_b = Operand::Int(get_arg_as_value_id(1));
+        if (vec_a.to_i() == 0 || vec_b.to_i() == 0) {
+          return 0;
+        }
+
+        auto sum = Operand::Int(0);
+        for (uint32_t i = 0; i < vec_ty->Width(); i++) {
+          auto a = result_op();
+          auto b = result_op();
+          auto mul = result_op();
+          if (!push_function_inst(spv::Op::OpCompositeExtract,
+                                  {el_ty, a, vec_a, Operand::Int(i)}) ||
+              !push_function_inst(spv::Op::OpCompositeExtract,
+                                  {el_ty, b, vec_b, Operand::Int(i)}) ||
+              !push_function_inst(spv::Op::OpIMul, {el_ty, mul, a, b})) {
+            return 0;
+          }
+          if (i == 0) {
+            sum = mul;
+          } else {
+            auto prev_sum = sum;
+            auto is_last_el = i == (vec_ty->Width() - 1);
+            sum = is_last_el ? Operand::Int(result_id) : result_op();
+            if (!push_function_inst(spv::Op::OpIAdd,
+                                    {el_ty, sum, prev_sum, mul})) {
+              return 0;
+            }
+          }
+        }
+        return result_id;
+      }
       break;
+    }
     case IntrinsicType::kDpdx:
       op = spv::Op::OpDPdx;
       break;

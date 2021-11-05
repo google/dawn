@@ -3780,12 +3780,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [398] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[21],
+    /* matcher indices */ &kMatcherIndices[39],
   },
   {
     /* [399] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[21],
+    /* matcher indices */ &kMatcherIndices[39],
   },
   {
     /* [400] */
@@ -7791,12 +7791,12 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [251] */
     /* num parameters */ 2,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[3],
     /* parameters */ &kParameters[398],
-    /* return matcher indices */ &kMatcherIndices[12],
+    /* return matcher indices */ &kMatcherIndices[1],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -8082,7 +8082,7 @@ constexpr IntrinsicInfo kIntrinsics[] = {
   },
   {
     /* [16] */
-    /* fn dot<N : num>(vec<N, f32>, vec<N, f32>) -> f32 */
+    /* fn dot<N : num, T : fiu32>(vec<N, T>, vec<N, T>) -> T */
     /* num overloads */ 1,
     /* overloads */ &kOverloads[251],
   },

@@ -599,6 +599,64 @@ void main() {
 }
 #endif
 
+TEST_F(GlslGeneratorImplTest_Intrinsic, DotI32) {
+  Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+  WrapInFunction(Call("dot", "v", "v"));
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+precision mediump float;
+
+int tint_int_dot(ivec3 a, ivec3 b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+}
+
+ivec3 v = ivec3(0, 0, 0);
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  tint_int_dot(v, v);
+  return;
+}
+void main() {
+  test_function();
+}
+
+
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Intrinsic, DotU32) {
+  Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+  WrapInFunction(Call("dot", "v", "v"));
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+precision mediump float;
+
+uint tint_int_dot(uvec3 a, uvec3 b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+}
+
+uvec3 v = uvec3(0u, 0u, 0u);
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  tint_int_dot(v, v);
+  return;
+}
+void main() {
+  test_function();
+}
+
+
+)");
+}
+
 }  // namespace
 }  // namespace glsl
 }  // namespace writer

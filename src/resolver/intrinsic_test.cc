@@ -339,7 +339,7 @@ TEST_F(ResolverIntrinsicTest, Dot_Vec2) {
 }
 
 TEST_F(ResolverIntrinsicTest, Dot_Vec3) {
-  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  Global("my_var", ty.vec3<i32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -347,11 +347,11 @@ TEST_F(ResolverIntrinsicTest, Dot_Vec3) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
-  EXPECT_TRUE(TypeOf(expr)->Is<sem::F32>());
+  EXPECT_TRUE(TypeOf(expr)->Is<sem::I32>());
 }
 
 TEST_F(ResolverIntrinsicTest, Dot_Vec4) {
-  Global("my_var", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+  Global("my_var", ty.vec4<u32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -359,7 +359,7 @@ TEST_F(ResolverIntrinsicTest, Dot_Vec4) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
-  EXPECT_TRUE(TypeOf(expr)->Is<sem::F32>());
+  EXPECT_TRUE(TypeOf(expr)->Is<sem::U32>());
 }
 
 TEST_F(ResolverIntrinsicTest, Dot_Error_Scalar) {
@@ -372,23 +372,7 @@ TEST_F(ResolverIntrinsicTest, Dot_Error_Scalar) {
             R"(error: no matching call to dot(f32, f32)
 
 1 candidate function:
-  dot(vecN<f32>, vecN<f32>) -> f32
-)");
-}
-
-TEST_F(ResolverIntrinsicTest, Dot_Error_VectorInt) {
-  Global("my_var", ty.vec4<i32>(), ast::StorageClass::kPrivate);
-
-  auto* expr = Call("dot", "my_var", "my_var");
-  WrapInFunction(expr);
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            R"(error: no matching call to dot(vec4<i32>, vec4<i32>)
-
-1 candidate function:
-  dot(vecN<f32>, vecN<f32>) -> f32
+  dot(vecN<T>, vecN<T>) -> T  where: T is f32, i32 or u32
 )");
 }
 

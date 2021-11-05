@@ -1,0 +1,38 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T>
+T tint_dot4(vec<T,4> a, vec<T,4> b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void dot_ef6b1d() {
+  int res = tint_dot4(int4(), int4());
+}
+
+float4 vertex_main_inner() {
+  dot_ef6b1d();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  dot_ef6b1d();
+  return;
+}
+
+kernel void compute_main() {
+  dot_ef6b1d();
+  return;
+}
+

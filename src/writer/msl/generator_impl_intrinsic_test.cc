@@ -343,6 +343,30 @@ TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
   EXPECT_EQ(out.str(), "float2(as_type<half2>(p1))");
 }
 
+TEST_F(MslGeneratorImplTest, DotI32) {
+  Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+  WrapInFunction(Call("dot", "v", "v"));
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T>
+T tint_dot3(vec<T,3> a, vec<T,3> b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+}
+kernel void test_function() {
+  thread int3 tint_symbol = 0;
+  tint_dot3(tint_symbol, tint_symbol);
+  return;
+}
+
+)");
+}
+
 TEST_F(MslGeneratorImplTest, Ignore) {
   Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
        ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
