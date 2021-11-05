@@ -327,6 +327,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitSwitch(const ast::SwitchStatement* stmt);
+  // Handles generating a switch statement with only a default case
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt);
   /// Handles generating type
   /// @param out the output stream
   /// @param type the type to generate

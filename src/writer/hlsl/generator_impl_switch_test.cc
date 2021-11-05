@@ -23,23 +23,10 @@ using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
   Global("cond", ty.i32(), ast::StorageClass::kPrivate);
-
-  auto* def_body = Block(create<ast::BreakStatement>());
-  auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
-
-  ast::CaseSelectorList case_val;
-  case_val.push_back(Literal(5));
-
-  auto* case_body = Block(create<ast::BreakStatement>());
-
-  auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
-
-  ast::CaseStatementList body;
-  body.push_back(case_stmt);
-  body.push_back(def);
-
-  auto* cond = Expr("cond");
-  auto* s = create<ast::SwitchStatement>(cond, body);
+  auto* s = Switch(                      //
+      Expr("cond"),                      //
+      Case(Literal(5), Block(Break())),  //
+      DefaultCase());
   WrapInFunction(s);
 
   GeneratorImpl& gen = Build();
@@ -55,6 +42,26 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
       break;
     }
   }
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_OnlyDefaultCase) {
+  Global("cond", ty.i32(), ast::StorageClass::kPrivate);
+  Global("a", ty.i32(), ast::StorageClass::kPrivate);
+  auto* s = Switch(  //
+      Expr("cond"),  //
+      DefaultCase(Block(Assign(Expr("a"), Expr(42)))));
+  WrapInFunction(s);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  cond;
+  do {
+    a = 42;
+  } while (false);
 )");
 }
 

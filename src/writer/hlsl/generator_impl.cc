@@ -2948,7 +2948,44 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
   return false;
 }
 
+bool GeneratorImpl::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
+  TINT_ASSERT(Writer, stmt->body.size() == 1 && stmt->body[0]->IsDefault());
+
+  // FXC fails to compile a switch with just a default case, ignoring the
+  // default case body. We work around this here by emitting the default case
+  // without the switch.
+
+  // Emit the switch condition as-is in case it has side-effects (e.g.
+  // function call). Note that's it's fine not to assign the result of the
+  // expression.
+  {
+    auto out = line();
+    if (!EmitExpression(out, stmt->condition)) {
+      return false;
+    }
+    out << ";";
+  }
+
+  // Emit "do { <default case body> } while(false);". We use a 'do' loop so
+  // that break statements work as expected, and make it 'while (false)' in
+  // case there isn't a break statement.
+  line() << "do {";
+  {
+    ScopedIndent si(this);
+    if (!EmitStatements(stmt->body[0]->body->statements)) {
+      return false;
+    }
+  }
+  line() << "} while (false);";
+  return true;
+}
+
 bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
+  // BUG(crbug.com/tint/1188): work around default-only switches
+  if (stmt->body.size() == 1 && stmt->body[0]->IsDefault()) {
+    return EmitDefaultOnlySwitch(stmt);
+  }
+
   {  // switch(expr) {
     auto out = line();
     out << "switch(";
