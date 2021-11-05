@@ -868,6 +868,7 @@ EShLanguage pipeline_stage_to_esh_language(tint::ast::PipelineStage stage) {
 /// @returns true on success
 bool GenerateGlsl(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_GLSL_WRITER
+  bool success = true;
   if (options.validate) {
     glslang::InitializeProcess();
   }
@@ -901,12 +902,12 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
           std::cerr << "Error parsing GLSL shader:\n"
                     << shader.getInfoLog() << "\n"
                     << shader.getInfoDebugLog() << "\n";
+          success = false;
         }
       }
     }
   }
-
-  return true;
+  return success;
 #else
   (void)program;
   (void)options;
