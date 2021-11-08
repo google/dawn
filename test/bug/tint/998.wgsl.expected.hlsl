@@ -17,5 +17,5 @@ void main() {
   s.data[constants[0].x] = 0u;
   return;
 }
-C:\src\tint\test\Shader@0x00000272D4538E60(15,3-24): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\tint\test\Shader@0x00000150124FBBE0(15,3-24): error X3500: array reference cannot be used as an l-value; not natively addressable
 

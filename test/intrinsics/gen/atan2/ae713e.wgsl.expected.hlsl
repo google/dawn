@@ -1,8 +1,3 @@
-SKIP: https://github.com/microsoft/DirectXShaderCompiler/issues/3824
-
-
-
-Validation Failure:
 void atan2_ae713e() {
   float4 res = atan2(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
@@ -11,10 +6,16 @@ struct tint_symbol {
   float4 value : SV_Position;
 };
 
-tint_symbol vertex_main() {
+float4 vertex_main_inner() {
   atan2_ae713e();
-  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
-  return tint_symbol_1;
+  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+tint_symbol vertex_main() {
+  const float4 inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 void fragment_main() {
@@ -27,12 +28,3 @@ void compute_main() {
   atan2_ae713e();
   return;
 }
-
-Internal Compiler error: cast<X>() argument of incompatible type!
-
-
-Internal Compiler error: cast<X>() argument of incompatible type!
-
-
-Internal Compiler error: cast<X>() argument of incompatible type!
-

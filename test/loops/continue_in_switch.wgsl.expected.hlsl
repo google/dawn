@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 [numthreads(1, 1, 1)]
 void f() {
   {
@@ -15,3 +17,5 @@ void f() {
   }
   return;
 }
+C:\src\tint\test\Shader@0x000001C513B5E750(7,11-19): error X3708: continue cannot be used in a switch
+
