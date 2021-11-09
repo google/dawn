@@ -362,7 +362,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray) {
+       EmitExpression_IndexAccessor_StorageBuffer_Load_Int_FromArray) {
   // struct Data {
   //   a : [[stride(4)]] array<i32, 5>;
   // };
@@ -406,7 +406,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray_ExprIdx) {
+       EmitExpression_IndexAccessor_StorageBuffer_Load_Int_FromArray_ExprIdx) {
   // struct Data {
   //   a : [[stride(4)]] array<i32, 5>;
   // };

@@ -238,12 +238,12 @@ bool GeneratorImpl::EmitTypeDecl(const sem::Type* ty) {
   return true;
 }
 
-bool GeneratorImpl::EmitArrayAccessor(
+bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
-    const ast::ArrayAccessorExpression* expr) {
+    const ast::IndexAccessorExpression* expr) {
   bool paren_lhs =
       !expr->array
-           ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
+           ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
                      ast::IdentifierExpression, ast::MemberAccessorExpression,
                      ast::TypeConstructorExpression>();
 
@@ -763,7 +763,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   auto texture_expr = [&]() {
     bool paren_lhs =
         !texture
-             ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
+             ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
                        ast::IdentifierExpression, ast::MemberAccessorExpression,
                        ast::TypeConstructorExpression>();
     if (paren_lhs) {
@@ -1418,8 +1418,8 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {
 
 bool GeneratorImpl::EmitExpression(std::ostream& out,
                                    const ast::Expression* expr) {
-  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
-    return EmitArrayAccessor(out, a);
+  if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
+    return EmitIndexAccessor(out, a);
   }
   if (auto* b = expr->As<ast::BinaryExpression>()) {
     return EmitBinary(out, b);
@@ -1905,7 +1905,7 @@ bool GeneratorImpl::EmitMemberAccessor(
   auto write_lhs = [&] {
     bool paren_lhs =
         !expr->structure
-             ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
+             ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
                        ast::IdentifierExpression, ast::MemberAccessorExpression,
                        ast::TypeConstructorExpression>();
     if (paren_lhs) {

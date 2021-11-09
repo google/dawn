@@ -24,7 +24,7 @@ using ::testing::ElementsAre;
 
 using TraverseExpressionsTest = TestHelper;
 
-TEST_F(TraverseExpressionsTest, DescendArrayAccessorExpression) {
+TEST_F(TraverseExpressionsTest, DescendIndexAccessor) {
   std::vector<const ast::Expression*> e = {Expr(1), Expr(1), Expr(1), Expr(1)};
   std::vector<const ast::Expression*> i = {IndexAccessor(e[0], e[1]),
                                            IndexAccessor(e[2], e[3])};

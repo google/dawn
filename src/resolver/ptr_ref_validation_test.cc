@@ -80,7 +80,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_MemberAccessor) {
             "12:34 error: cannot take the address of a vector component");
 }
 
-TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_ArrayAccessor) {
+TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_IndexAccessor) {
   // var v : vec4<i32>;
   // &v[2]
   auto* v = Var("v", ty.vec4<i32>());

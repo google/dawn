@@ -2270,7 +2270,7 @@ Maybe<const ast::Expression*> ParserImpl::postfix_expression(
               return Failure::kErrored;
             }
 
-            return create<ast::ArrayAccessorExpression>(source, prefix,
+            return create<ast::IndexAccessorExpression>(source, prefix,
                                                         param.value);
           });
 

@@ -166,7 +166,6 @@ TEST_F(ResolverEntryPointValidationTest,
 12:34 note: while analysing entry point 'main')");
 }
 
-
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
   // struct Output {
   //   [[builtin(frag_depth)]] a : f32;
@@ -354,20 +353,20 @@ constexpr Params ParamsFor(bool is_valid) {
 using TypeValidationTest = resolver::ResolverTestWithParam<Params>;
 
 static constexpr Params cases[] = {
-    ParamsFor<f32>(true),            //
-    ParamsFor<i32>(true),            //
-    ParamsFor<u32>(true),            //
-    ParamsFor<bool>(false),          //
-    ParamsFor<vec2<f32>>(true),      //
-    ParamsFor<vec3<f32>>(true),      //
-    ParamsFor<vec4<f32>>(true),      //
-    ParamsFor<mat2x2<f32>>(false),   //
-    ParamsFor<mat3x3<f32>>(false),   //
-    ParamsFor<mat4x4<f32>>(false),   //
-    ParamsFor<alias<f32>>(true),     //
-    ParamsFor<alias<i32>>(true),     //
-    ParamsFor<alias<u32>>(true),     //
-    ParamsFor<alias<bool>>(false),   //
+    ParamsFor<f32>(true),           //
+    ParamsFor<i32>(true),           //
+    ParamsFor<u32>(true),           //
+    ParamsFor<bool>(false),         //
+    ParamsFor<vec2<f32>>(true),     //
+    ParamsFor<vec3<f32>>(true),     //
+    ParamsFor<vec4<f32>>(true),     //
+    ParamsFor<mat2x2<f32>>(false),  //
+    ParamsFor<mat3x3<f32>>(false),  //
+    ParamsFor<mat4x4<f32>>(false),  //
+    ParamsFor<alias<f32>>(true),    //
+    ParamsFor<alias<i32>>(true),    //
+    ParamsFor<alias<u32>>(true),    //
+    ParamsFor<alias<bool>>(false),  //
 };
 
 TEST_P(TypeValidationTest, BareInputs) {

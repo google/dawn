@@ -22,9 +22,9 @@ namespace tint {
 namespace resolver {
 namespace {
 
-using ResolverArrayAccessorTest = ResolverTest;
+using ResolverIndexAccessorTest = ResolverTest;
 
-TEST_F(ResolverArrayAccessorTest, Matrix_Dynamic_F32) {
+TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_F32) {
   Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
   auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 1.0f));
   WrapInFunction(acc);
@@ -34,7 +34,7 @@ TEST_F(ResolverArrayAccessorTest, Matrix_Dynamic_F32) {
             "12:34 error: index must be of type 'i32' or 'u32', found: 'f32'");
 }
 
-TEST_F(ResolverArrayAccessorTest, Matrix_Dynamic_Ref) {
+TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_Ref) {
   Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
   auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
   auto* acc = IndexAccessor("my_var", idx);
@@ -43,7 +43,7 @@ TEST_F(ResolverArrayAccessorTest, Matrix_Dynamic_Ref) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverArrayAccessorTest, Matrix_BothDimensions_Dynamic_Ref) {
+TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions_Dynamic_Ref) {
   Global("my_var", ty.mat4x4<f32>(), ast::StorageClass::kPrivate);
   auto* idx = Var("idx", ty.u32(), Expr(3u));
   auto* idy = Var("idy", ty.u32(), Expr(2u));
@@ -53,7 +53,7 @@ TEST_F(ResolverArrayAccessorTest, Matrix_BothDimensions_Dynamic_Ref) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverArrayAccessorTest, Matrix_Dynamic) {
+TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
   GlobalConst("my_const", ty.mat2x3<f32>(), Construct(ty.mat2x3<f32>()));
   auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
   auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
@@ -64,7 +64,7 @@ TEST_F(ResolverArrayAccessorTest, Matrix_Dynamic) {
             "12:34 error: index must be signed or unsigned integer literal");
 }
 
-TEST_F(ResolverArrayAccessorTest, Matrix_XDimension_Dynamic) {
+TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
   GlobalConst("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
   auto* idx = Var("idx", ty.u32(), Expr(3u));
   auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, idx));
@@ -75,7 +75,7 @@ TEST_F(ResolverArrayAccessorTest, Matrix_XDimension_Dynamic) {
             "12:34 error: index must be signed or unsigned integer literal");
 }
 
-TEST_F(ResolverArrayAccessorTest, Matrix_BothDimension_Dynamic) {
+TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
   GlobalConst("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
   auto* idx = Var("idy", ty.u32(), Expr(2u));
   auto* acc =
@@ -87,7 +87,7 @@ TEST_F(ResolverArrayAccessorTest, Matrix_BothDimension_Dynamic) {
             "12:34 error: index must be signed or unsigned integer literal");
 }
 
-TEST_F(ResolverArrayAccessorTest, Matrix) {
+TEST_F(ResolverIndexAccessorTest, Matrix) {
   Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
 
   auto* acc = IndexAccessor("my_var", 2);
@@ -103,7 +103,7 @@ TEST_F(ResolverArrayAccessorTest, Matrix) {
   EXPECT_EQ(ref->StoreType()->As<sem::Vector>()->Width(), 3u);
 }
 
-TEST_F(ResolverArrayAccessorTest, Matrix_BothDimensions) {
+TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions) {
   Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
 
   auto* acc = IndexAccessor(IndexAccessor("my_var", 2), 1);
@@ -118,7 +118,7 @@ TEST_F(ResolverArrayAccessorTest, Matrix_BothDimensions) {
   EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
 }
 
-TEST_F(ResolverArrayAccessorTest, Vector_F32) {
+TEST_F(ResolverIndexAccessorTest, Vector_F32) {
   Global("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
   auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 2.0f));
   WrapInFunction(acc);
@@ -128,7 +128,7 @@ TEST_F(ResolverArrayAccessorTest, Vector_F32) {
             "12:34 error: index must be of type 'i32' or 'u32', found: 'f32'");
 }
 
-TEST_F(ResolverArrayAccessorTest, Vector_Dynamic_Ref) {
+TEST_F(ResolverIndexAccessorTest, Vector_Dynamic_Ref) {
   Global("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
   auto* idx = Var("idx", ty.i32(), Expr(2));
   auto* acc = IndexAccessor("my_var", idx);
@@ -137,7 +137,7 @@ TEST_F(ResolverArrayAccessorTest, Vector_Dynamic_Ref) {
   EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverArrayAccessorTest, Vector_Dynamic) {
+TEST_F(ResolverIndexAccessorTest, Vector_Dynamic) {
   GlobalConst("my_var", ty.vec3<f32>(), Construct(ty.vec3<f32>()));
   auto* idx = Var("idx", ty.i32(), Expr(2));
   auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, idx));
@@ -146,7 +146,7 @@ TEST_F(ResolverArrayAccessorTest, Vector_Dynamic) {
   EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverArrayAccessorTest, Vector) {
+TEST_F(ResolverIndexAccessorTest, Vector) {
   Global("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* acc = IndexAccessor("my_var", 2);
@@ -161,7 +161,7 @@ TEST_F(ResolverArrayAccessorTest, Vector) {
   EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
 }
 
-TEST_F(ResolverArrayAccessorTest, Array) {
+TEST_F(ResolverIndexAccessorTest, Array) {
   auto* idx = Expr(2);
   Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
 
@@ -177,7 +177,7 @@ TEST_F(ResolverArrayAccessorTest, Array) {
   EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
 }
 
-TEST_F(ResolverArrayAccessorTest, Alias_Array) {
+TEST_F(ResolverIndexAccessorTest, Alias_Array) {
   auto* aary = Alias("myarrty", ty.array<f32, 3>());
 
   Global("my_var", ty.Of(aary), ast::StorageClass::kPrivate);
@@ -194,7 +194,7 @@ TEST_F(ResolverArrayAccessorTest, Alias_Array) {
   EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
 }
 
-TEST_F(ResolverArrayAccessorTest, Array_Constant) {
+TEST_F(ResolverIndexAccessorTest, Array_Constant) {
   GlobalConst("my_var", ty.array<f32, 3>(), array<f32, 3>());
 
   auto* acc = IndexAccessor("my_var", 2);
@@ -206,7 +206,7 @@ TEST_F(ResolverArrayAccessorTest, Array_Constant) {
   EXPECT_TRUE(TypeOf(acc)->Is<sem::F32>()) << TypeOf(acc)->type_name();
 }
 
-TEST_F(ResolverArrayAccessorTest, Array_Dynamic_I32) {
+TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {
   // let a : array<f32, 3> = 0;
   // var idx : i32 = 0;
   // var f : f32 = a[idx];
@@ -226,7 +226,7 @@ TEST_F(ResolverArrayAccessorTest, Array_Dynamic_I32) {
             "12:34 error: index must be signed or unsigned integer literal");
 }
 
-TEST_F(ResolverArrayAccessorTest, Array_Literal_F32) {
+TEST_F(ResolverIndexAccessorTest, Array_Literal_F32) {
   // let a : array<f32, 3>;
   // var f : f32 = a[2.0f];
   auto* a = Const("a", ty.array<f32, 3>(), array<f32, 3>());
@@ -243,7 +243,7 @@ TEST_F(ResolverArrayAccessorTest, Array_Literal_F32) {
             "12:34 error: index must be of type 'i32' or 'u32', found: 'f32'");
 }
 
-TEST_F(ResolverArrayAccessorTest, Array_Literal_I32) {
+TEST_F(ResolverIndexAccessorTest, Array_Literal_I32) {
   // let a : array<f32, 3>;
   // var f : f32 = a[2];
   auto* a = Const("a", ty.array<f32, 3>(), array<f32, 3>());
@@ -257,7 +257,7 @@ TEST_F(ResolverArrayAccessorTest, Array_Literal_I32) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverArrayAccessorTest, EXpr_Deref_FuncGoodParent) {
+TEST_F(ResolverIndexAccessorTest, EXpr_Deref_FuncGoodParent) {
   // fn func(p: ptr<function, vec4<f32>>) -> f32 {
   //     let idx: u32 = u32();
   //     let x: f32 = (*p)[idx];
@@ -274,7 +274,7 @@ TEST_F(ResolverArrayAccessorTest, EXpr_Deref_FuncGoodParent) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverArrayAccessorTest, EXpr_Deref_FuncBadParent) {
+TEST_F(ResolverIndexAccessorTest, EXpr_Deref_FuncBadParent) {
   // fn func(p: ptr<function, vec4<f32>>) -> f32 {
   //     let idx: u32 = u32();
   //     let x: f32 = *p[idx];
@@ -294,7 +294,7 @@ TEST_F(ResolverArrayAccessorTest, EXpr_Deref_FuncBadParent) {
       "12:34 error: cannot index type 'ptr<function, vec4<f32>, read_write>'");
 }
 
-TEST_F(ResolverArrayAccessorTest, Exr_Deref_BadParent) {
+TEST_F(ResolverIndexAccessorTest, Exr_Deref_BadParent) {
   // var param: vec4<f32>
   // let x: f32 = *(&param)[0];
   auto* param = Var("param", ty.vec4<f32>());

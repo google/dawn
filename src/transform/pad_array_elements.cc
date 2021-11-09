@@ -115,7 +115,7 @@ void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   });
 
   // Fix up array accessors so `a[1]` becomes `a[1].el`
-  ctx.ReplaceAll([&](const ast::ArrayAccessorExpression* accessor)
+  ctx.ReplaceAll([&](const ast::IndexAccessorExpression* accessor)
                      -> const ast::Expression* {
     if (auto* array = tint::As<sem::Array>(
             sem.Get(accessor->array)->Type()->UnwrapRef())) {

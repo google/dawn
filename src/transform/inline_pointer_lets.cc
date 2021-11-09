@@ -43,7 +43,7 @@ template <typename F>
 void CollectSavedArrayIndices(const Program* program,
                               const ast::Expression* expr,
                               F&& cb) {
-  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
+  if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
     CollectSavedArrayIndices(program, a->array, cb);
 
     if (!a->index->Is<ast::Literal>()) {

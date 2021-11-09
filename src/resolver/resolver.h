@@ -37,7 +37,7 @@ namespace tint {
 
 // Forward declarations
 namespace ast {
-class ArrayAccessorExpression;
+class IndexAccessorExpression;
 class BinaryExpression;
 class BitcastExpression;
 class CallExpression;
@@ -167,7 +167,7 @@ class Resolver {
 
   // Expression resolving methods
   // Returns the semantic node pointer on success, nullptr on failure.
-  sem::Expression* ArrayAccessor(const ast::ArrayAccessorExpression*);
+  sem::Expression* IndexAccessor(const ast::IndexAccessorExpression*);
   sem::Expression* Binary(const ast::BinaryExpression*);
   sem::Expression* Bitcast(const ast::BitcastExpression*);
   sem::Expression* Call(const ast::CallExpression*);

@@ -19,70 +19,69 @@ namespace tint {
 namespace ast {
 namespace {
 
-using ArrayAccessorExpressionTest = TestHelper;
+using IndexAccessorExpressionTest = TestHelper;
 
-TEST_F(ArrayAccessorExpressionTest, Create) {
+TEST_F(IndexAccessorExpressionTest, Create) {
   auto* ary = Expr("ary");
   auto* idx = Expr("idx");
 
-  auto* exp = create<ArrayAccessorExpression>(ary, idx);
+  auto* exp = IndexAccessor(ary, idx);
   ASSERT_EQ(exp->array, ary);
   ASSERT_EQ(exp->index, idx);
 }
 
-TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
+TEST_F(IndexAccessorExpressionTest, CreateWithSource) {
   auto* ary = Expr("ary");
   auto* idx = Expr("idx");
 
-  auto* exp = create<ArrayAccessorExpression>(Source{Source::Location{20, 2}},
-                                              ary, idx);
+  auto* exp = IndexAccessor(Source{{20, 2}}, ary, idx);
   auto src = exp->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
-TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {
+TEST_F(IndexAccessorExpressionTest, IsIndexAccessor) {
   auto* ary = Expr("ary");
   auto* idx = Expr("idx");
 
-  auto* exp = create<ArrayAccessorExpression>(ary, idx);
-  EXPECT_TRUE(exp->Is<ArrayAccessorExpression>());
+  auto* exp = IndexAccessor(ary, idx);
+  EXPECT_TRUE(exp->Is<IndexAccessorExpression>());
 }
 
-TEST_F(ArrayAccessorExpressionTest, Assert_Null_Array) {
+TEST_F(IndexAccessorExpressionTest, Assert_Null_Array) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
-        b.create<ArrayAccessorExpression>(nullptr, b.Expr("idx"));
+        b.IndexAccessor(nullptr, b.Expr("idx"));
       },
       "internal compiler error");
 }
 
-TEST_F(ArrayAccessorExpressionTest, Assert_Null_Index) {
+TEST_F(IndexAccessorExpressionTest, Assert_Null_Index) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
-        b.create<ArrayAccessorExpression>(b.Expr("arr"), nullptr);
+        b.IndexAccessor(b.Expr("arr"), nullptr);
       },
       "internal compiler error");
 }
 
-TEST_F(ArrayAccessorExpressionTest, Assert_DifferentProgramID_Array) {
+TEST_F(IndexAccessorExpressionTest, Assert_DifferentProgramID_Array) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
-        b1.create<ArrayAccessorExpression>(b2.Expr("arr"), b1.Expr("idx"));
+        b1.IndexAccessor(b2.Expr("arr"), b1.Expr("idx"));
       },
       "internal compiler error");
 }
 
-TEST_F(ArrayAccessorExpressionTest, Assert_DifferentProgramID_Index) {
+TEST_F(IndexAccessorExpressionTest, Assert_DifferentProgramID_Index) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
-        b1.create<ArrayAccessorExpression>(b1.Expr("arr"), b2.Expr("idx"));
+        b1.IndexAccessor(b1.Expr("arr"), b2.Expr("idx"));
       },
       "internal compiler error");
 }

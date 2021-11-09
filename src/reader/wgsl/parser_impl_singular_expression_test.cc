@@ -27,8 +27,8 @@ TEST_F(ParserImplTest, SingularExpression_Array_ConstantIndex) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->Is<ast::ArrayAccessorExpression>());
-  auto* ary = e->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(e->Is<ast::IndexAccessorExpression>());
+  auto* ary = e->As<ast::IndexAccessorExpression>();
 
   ASSERT_TRUE(ary->array->Is<ast::IdentifierExpression>());
   auto* ident = ary->array->As<ast::IdentifierExpression>();
@@ -46,8 +46,8 @@ TEST_F(ParserImplTest, SingularExpression_Array_ExpressionIndex) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->Is<ast::ArrayAccessorExpression>());
-  auto* ary = e->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(e->Is<ast::IndexAccessorExpression>());
+  auto* ary = e->As<ast::IndexAccessorExpression>();
 
   ASSERT_TRUE(ary->array->Is<ast::IdentifierExpression>());
   auto* ident = ary->array->As<ast::IdentifierExpression>();
@@ -202,7 +202,7 @@ TEST_F(ParserImplTest, SingularExpression_NonMatch_returnLHS) {
   ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 }
 
-TEST_F(ParserImplTest, SingularExpression_Array_NestedArrayAccessor) {
+TEST_F(ParserImplTest, SingularExpression_Array_NestedIndexAccessor) {
   auto p = parser("a[b[c]]");
   auto e = p->singular_expression();
   EXPECT_TRUE(e.matched);
@@ -210,7 +210,7 @@ TEST_F(ParserImplTest, SingularExpression_Array_NestedArrayAccessor) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  const auto* outer_accessor = e->As<ast::ArrayAccessorExpression>();
+  const auto* outer_accessor = e->As<ast::IndexAccessorExpression>();
   ASSERT_TRUE(outer_accessor);
 
   const auto* outer_array =
@@ -219,7 +219,7 @@ TEST_F(ParserImplTest, SingularExpression_Array_NestedArrayAccessor) {
   EXPECT_EQ(outer_array->symbol, p->builder().Symbols().Get("a"));
 
   const auto* inner_accessor =
-      outer_accessor->index->As<ast::ArrayAccessorExpression>();
+      outer_accessor->index->As<ast::IndexAccessorExpression>();
   ASSERT_TRUE(inner_accessor);
 
   const auto* inner_array =

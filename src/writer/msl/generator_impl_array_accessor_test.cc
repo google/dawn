@@ -21,7 +21,7 @@ namespace {
 
 using MslGeneratorImplTest = TestHelper;
 
-TEST_F(MslGeneratorImplTest, ArrayAccessor) {
+TEST_F(MslGeneratorImplTest, IndexAccessor) {
   auto* ary = Var("ary", ty.array<i32, 10>());
   auto* expr = IndexAccessor("ary", 5);
   WrapInFunction(ary, expr);
@@ -33,7 +33,7 @@ TEST_F(MslGeneratorImplTest, ArrayAccessor) {
   EXPECT_EQ(out.str(), "ary[5]");
 }
 
-TEST_F(MslGeneratorImplTest, ArrayAccessor_OfDref) {
+TEST_F(MslGeneratorImplTest, IndexAccessor_OfDref) {
   Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
 
   auto* p = Const("p", nullptr, AddressOf("ary"));

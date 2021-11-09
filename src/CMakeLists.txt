@@ -42,8 +42,8 @@ set(TINT_LIB_SRCS
   ast/access.h
   ast/alias.cc
   ast/alias.h
-  ast/array_accessor_expression.cc
-  ast/array_accessor_expression.h
+  ast/index_accessor_expression.cc
+  ast/index_accessor_expression.h
   ast/array.cc
   ast/array.h
   ast/assignment_statement.cc
@@ -581,7 +581,6 @@ endif()
 if(${TINT_BUILD_TESTS})
   set(TINT_TEST_SRCS
     ast/alias_test.cc
-    ast/array_accessor_expression_test.cc
     ast/array_test.cc
     ast/assignment_statement_test.cc
     ast/atomic_test.cc
@@ -611,6 +610,7 @@ if(${TINT_BUILD_TESTS})
     ast/i32_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
+    ast/index_accessor_expression_test.cc
     ast/int_literal_expression_test.cc
     ast/interpolate_decoration_test.cc
     ast/intrinsic_texture_helper_test.cc

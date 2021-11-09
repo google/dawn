@@ -3622,7 +3622,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
           // The private variable is an array whose element type is already of
           // the same type as the value being stored into it.  Form the
           // reference into the first element.
-          lhs.expr = create<ast::ArrayAccessorExpression>(
+          lhs.expr = create<ast::IndexAccessorExpression>(
               Source{}, lhs.expr, parser_impl_.MakeNullValue(ty_.I32()));
           if (auto* ref = lhs.type->As<Reference>()) {
             lhs.type = ref->type;
@@ -3672,7 +3672,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
               Source{}, builder_.Symbols().Register(name));
           // SampleMask is an array in Vulkan SPIR-V. Always access the first
           // element.
-          id_expr = create<ast::ArrayAccessorExpression>(
+          id_expr = create<ast::IndexAccessorExpression>(
               Source{}, id_expr, parser_impl_.MakeNullValue(ty_.I32()));
 
           auto* loaded_type = parser_impl_.ConvertType(inst.type_id());
@@ -3972,7 +3972,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   }
 
   if (opcode == SpvOpVectorExtractDynamic) {
-    return {ast_type, create<ast::ArrayAccessorExpression>(
+    return {ast_type, create<ast::IndexAccessorExpression>(
                           Source{}, MakeOperand(inst, 0).expr,
                           MakeOperand(inst, 1).expr)};
   }
@@ -4362,7 +4362,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
               Source{}, current_expr.expr, Swizzle(uint32_t(index_const_val)));
         } else {
           // Non-constant index. Use array syntax
-          next_expr = create<ast::ArrayAccessorExpression>(
+          next_expr = create<ast::IndexAccessorExpression>(
               Source{}, current_expr.expr, MakeOperand(inst, index).expr);
         }
         // All vector components are the same type.
@@ -4372,18 +4372,18 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         break;
       case SpvOpTypeMatrix:
         // Use array syntax.
-        next_expr = create<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::IndexAccessorExpression>(
             Source{}, current_expr.expr, MakeOperand(inst, index).expr);
         // All matrix components are the same type.
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeArray:
-        next_expr = create<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::IndexAccessorExpression>(
             Source{}, current_expr.expr, MakeOperand(inst, index).expr);
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeRuntimeArray:
-        next_expr = create<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::IndexAccessorExpression>(
             Source{}, current_expr.expr, MakeOperand(inst, index).expr);
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
         break;
@@ -4543,7 +4543,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
                  << " is too big. Max handled index is " << kMaxVectorLen - 1;
         }
         // Use array syntax.
-        next_expr = create<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::IndexAccessorExpression>(
             Source{}, current_expr.expr, make_index(index_val));
         // All matrix components are the same type.
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
@@ -4553,7 +4553,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
         // The array size could be a spec constant, and so it's not always
         // statically checkable.  Instead, rely on a runtime index clamp
         // or runtime check to keep this safe.
-        next_expr = create<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::IndexAccessorExpression>(
             Source{}, current_expr.expr, make_index(index_val));
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
         break;
@@ -5946,7 +5946,7 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
     AddStatement(builder_.Decl({}, temp_var));
   }
 
-  auto* lhs = create<ast::ArrayAccessorExpression>(
+  auto* lhs = create<ast::IndexAccessorExpression>(
       Source{}, builder_.Expr(var_name), index.expr);
   if (!lhs) {
     return false;

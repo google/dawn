@@ -565,7 +565,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
 }
 
 uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
-  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
+  if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
     return GenerateAccessorExpression(a);
   }
   if (auto* b = expr->As<ast::BinaryExpression>()) {
@@ -900,7 +900,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
   return true;
 }
 
-bool Builder::GenerateArrayAccessor(const ast::ArrayAccessorExpression* expr,
+bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr,
                                     AccessorInfo* info) {
   auto idx_id = GenerateExpression(expr->index);
   if (idx_id == 0) {
@@ -1089,7 +1089,7 @@ bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
 }
 
 uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
-  if (!expr->IsAnyOf<ast::ArrayAccessorExpression,
+  if (!expr->IsAnyOf<ast::IndexAccessorExpression,
                      ast::MemberAccessorExpression>()) {
     TINT_ICE(Writer, builder_.Diagnostics()) << "expression is not an accessor";
     return 0;
@@ -1101,7 +1101,7 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
   std::vector<const ast::Expression*> accessors;
   const ast::Expression* source = expr;
   while (true) {
-    if (auto* array = source->As<ast::ArrayAccessorExpression>()) {
+    if (auto* array = source->As<ast::IndexAccessorExpression>()) {
       accessors.insert(accessors.begin(), source);
       source = array->array;
     } else if (auto* member = source->As<ast::MemberAccessorExpression>()) {
@@ -1120,8 +1120,8 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
   info.source_type = TypeOf(source);
 
   for (auto* accessor : accessors) {
-    if (auto* array = accessor->As<ast::ArrayAccessorExpression>()) {
-      if (!GenerateArrayAccessor(array, &info)) {
+    if (auto* array = accessor->As<ast::IndexAccessorExpression>()) {
+      if (!GenerateIndexAccessor(array, &info)) {
         return 0;
       }
     } else if (auto* member = accessor->As<ast::MemberAccessorExpression>()) {

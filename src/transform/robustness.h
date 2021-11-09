@@ -22,7 +22,7 @@
 // Forward declarations
 namespace tint {
 namespace ast {
-class ArrayAccessorExpression;
+class IndexAccessorExpression;
 class CallExpression;
 }  // namespace ast
 }  // namespace tint

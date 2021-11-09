@@ -116,8 +116,8 @@ bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
 
 bool GeneratorImpl::EmitExpression(std::ostream& out,
                                    const ast::Expression* expr) {
-  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
-    return EmitArrayAccessor(out, a);
+  if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
+    return EmitIndexAccessor(out, a);
   }
   if (auto* b = expr->As<ast::BinaryExpression>()) {
     return EmitBinary(out, b);
@@ -152,12 +152,12 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   return false;
 }
 
-bool GeneratorImpl::EmitArrayAccessor(
+bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
-    const ast::ArrayAccessorExpression* expr) {
+    const ast::IndexAccessorExpression* expr) {
   bool paren_lhs =
       !expr->array
-           ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
+           ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
                      ast::IdentifierExpression, ast::MemberAccessorExpression,
                      ast::TypeConstructorExpression>();
   if (paren_lhs) {
@@ -184,7 +184,7 @@ bool GeneratorImpl::EmitMemberAccessor(
     const ast::MemberAccessorExpression* expr) {
   bool paren_lhs =
       !expr->structure
-           ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
+           ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
                      ast::IdentifierExpression, ast::MemberAccessorExpression,
                      ast::TypeConstructorExpression>();
   if (paren_lhs) {

@@ -2354,8 +2354,8 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
 
   for (auto* expr : utils::Reverse(sorted)) {
     sem::Expression* sem_expr = nullptr;
-    if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
-      sem_expr = ArrayAccessor(array);
+    if (auto* array = expr->As<ast::IndexAccessorExpression>()) {
+      sem_expr = IndexAccessor(array);
     } else if (auto* bin_op = expr->As<ast::BinaryExpression>()) {
       sem_expr = Binary(bin_op);
     } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
@@ -2394,8 +2394,8 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
   return nullptr;
 }
 
-sem::Expression* Resolver::ArrayAccessor(
-    const ast::ArrayAccessorExpression* expr) {
+sem::Expression* Resolver::IndexAccessor(
+    const ast::IndexAccessorExpression* expr) {
   auto* idx = expr->index;
   auto* parent_raw_ty = TypeOf(expr->array);
   auto* parent_ty = parent_raw_ty->UnwrapRef();
@@ -3455,7 +3455,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
           return nullptr;
         }
 
-        auto* array = unary->expr->As<ast::ArrayAccessorExpression>();
+        auto* array = unary->expr->As<ast::IndexAccessorExpression>();
         auto* member = unary->expr->As<ast::MemberAccessorExpression>();
         if ((array && TypeOf(array->array)->UnwrapRef()->Is<sem::Vector>()) ||
             (member &&

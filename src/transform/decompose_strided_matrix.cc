@@ -144,8 +144,8 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   // preserve these without calling conversion functions.
   // Example:
   //   ssbo.mat[2] -> ssbo.mat[2]
-  ctx.ReplaceAll([&](const ast::ArrayAccessorExpression* expr)
-                     -> const ast::ArrayAccessorExpression* {
+  ctx.ReplaceAll([&](const ast::IndexAccessorExpression* expr)
+                     -> const ast::IndexAccessorExpression* {
     if (auto* access =
             ctx.src->Sem().Get<sem::StructMemberAccess>(expr->array)) {
       auto it = decomposed.find(access->Member()->Declaration());

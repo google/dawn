@@ -28,8 +28,8 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->Is<ast::ArrayAccessorExpression>());
-  auto* ary = e->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(e->Is<ast::IndexAccessorExpression>());
+  auto* ary = e->As<ast::IndexAccessorExpression>();
   ASSERT_TRUE(ary->array->Is<ast::IdentifierExpression>());
   auto* ident = ary->array->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));

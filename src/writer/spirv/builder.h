@@ -311,7 +311,7 @@ class Builder {
   /// @param expr the accessor to generate
   /// @param info the current accessor information
   /// @returns true if the accessor was generated successfully
-  bool GenerateArrayAccessor(const ast::ArrayAccessorExpression* expr,
+  bool GenerateIndexAccessor(const ast::IndexAccessorExpression* expr,
                              AccessorInfo* info);
   /// Generates a member accessor
   /// @param expr the accessor to generate

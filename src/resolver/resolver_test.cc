@@ -667,7 +667,7 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
   EXPECT_EQ(VarOf(my_var_a)->Declaration(), var);
 }
 
-TEST_F(ResolverTest, ArrayAccessor_Dynamic_Ref_F32) {
+TEST_F(ResolverTest, IndexAccessor_Dynamic_Ref_F32) {
   // var a : array<bool, 10> = 0;
   // var idx : f32 = f32();
   // var f : f32 = a[idx];

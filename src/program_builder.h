@@ -21,7 +21,6 @@
 
 #include "src/ast/alias.h"
 #include "src/ast/array.h"
-#include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/atomic.h"
 #include "src/ast/binary_expression.h"
@@ -42,6 +41,7 @@
 #include "src/ast/for_loop_statement.h"
 #include "src/ast/i32.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/index_accessor_expression.h"
 #include "src/ast/interpolate_decoration.h"
 #include "src/ast/invariant_decoration.h"
 #include "src/ast/loop_statement.h"
@@ -1740,21 +1740,21 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param arr the array argument for the array accessor expression
   /// @param idx the index argument for the array accessor expression
-  /// @returns a `ast::ArrayAccessorExpression` that indexes `arr` with `idx`
+  /// @returns a `ast::IndexAccessorExpression` that indexes `arr` with `idx`
   template <typename ARR, typename IDX>
-  const ast::ArrayAccessorExpression* IndexAccessor(const Source& source,
+  const ast::IndexAccessorExpression* IndexAccessor(const Source& source,
                                                     ARR&& arr,
                                                     IDX&& idx) {
-    return create<ast::ArrayAccessorExpression>(
+    return create<ast::IndexAccessorExpression>(
         source, Expr(std::forward<ARR>(arr)), Expr(std::forward<IDX>(idx)));
   }
 
   /// @param arr the array argument for the array accessor expression
   /// @param idx the index argument for the array accessor expression
-  /// @returns a `ast::ArrayAccessorExpression` that indexes `arr` with `idx`
+  /// @returns a `ast::IndexAccessorExpression` that indexes `arr` with `idx`
   template <typename ARR, typename IDX>
-  const ast::ArrayAccessorExpression* IndexAccessor(ARR&& arr, IDX&& idx) {
-    return create<ast::ArrayAccessorExpression>(Expr(std::forward<ARR>(arr)),
+  const ast::IndexAccessorExpression* IndexAccessor(ARR&& arr, IDX&& idx) {
+    return create<ast::IndexAccessorExpression>(Expr(std::forward<ARR>(arr)),
                                                 Expr(std::forward<IDX>(idx)));
   }
 

@@ -19,7 +19,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
@@ -28,6 +27,7 @@
 #include "src/ast/discard_statement.h"
 #include "src/ast/expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/index_accessor_expression.h"
 #include "src/ast/interpolate_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -99,8 +99,8 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output of the expression stream
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
-  bool EmitArrayAccessor(std::ostream& out,
-                         const ast::ArrayAccessorExpression* expr);
+  bool EmitIndexAccessor(std::ostream& out,
+                         const ast::IndexAccessorExpression* expr);
   /// Handles an assignment statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

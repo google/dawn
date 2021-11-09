@@ -41,7 +41,7 @@ struct Robustness::State {
 
   /// Applies the transformation state to `ctx`.
   void Transform() {
-    ctx.ReplaceAll([&](const ast::ArrayAccessorExpression* expr) {
+    ctx.ReplaceAll([&](const ast::IndexAccessorExpression* expr) {
       return Transform(expr);
     });
     ctx.ReplaceAll(
@@ -52,8 +52,8 @@ struct Robustness::State {
   /// @param expr the array, vector or matrix index expression
   /// @return the clamped replacement expression, or nullptr if `expr` should be
   /// cloned without changes.
-  const ast::ArrayAccessorExpression* Transform(
-      const ast::ArrayAccessorExpression* expr) {
+  const ast::IndexAccessorExpression* Transform(
+      const ast::IndexAccessorExpression* expr) {
     auto* ret_type = ctx.src->Sem().Get(expr->array)->Type();
 
     auto* ref = ret_type->As<sem::Reference>();

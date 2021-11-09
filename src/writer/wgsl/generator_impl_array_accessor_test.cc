@@ -21,7 +21,7 @@ namespace {
 
 using WgslGeneratorImplTest = TestHelper;
 
-TEST_F(WgslGeneratorImplTest, ArrayAccessor) {
+TEST_F(WgslGeneratorImplTest, IndexAccessor) {
   Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
   auto* expr = IndexAccessor("ary", 5);
   WrapInFunction(expr);
@@ -33,7 +33,7 @@ TEST_F(WgslGeneratorImplTest, ArrayAccessor) {
   EXPECT_EQ(out.str(), "ary[5]");
 }
 
-TEST_F(WgslGeneratorImplTest, ArrayAccessor_OfDref) {
+TEST_F(WgslGeneratorImplTest, IndexAccessor_OfDref) {
   Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
 
   auto* p = Const("p", nullptr, AddressOf("ary"));

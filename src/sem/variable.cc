@@ -64,7 +64,6 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration,
       binding_point_(binding_point),
       is_pipeline_constant_(false) {}
 
-
 GlobalVariable::~GlobalVariable() = default;
 
 Parameter::Parameter(const ast::Variable* declaration,

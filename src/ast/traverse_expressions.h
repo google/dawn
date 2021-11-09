@@ -17,10 +17,10 @@
 
 #include <vector>
 
-#include "src/ast/array_accessor_expression.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/index_accessor_expression.h"
 #include "src/ast/literal_expression.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/phony_expression.h"
@@ -102,28 +102,28 @@ bool TraverseExpressions(const ast::Expression* root,
       }
     }
 
-    if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
-      push_pair(array->array, array->index);
-    } else if (auto* bin_op = expr->As<ast::BinaryExpression>()) {
+    if (auto* idx = expr->As<IndexAccessorExpression>()) {
+      push_pair(idx->array, idx->index);
+    } else if (auto* bin_op = expr->As<BinaryExpression>()) {
       push_pair(bin_op->lhs, bin_op->rhs);
-    } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
+    } else if (auto* bitcast = expr->As<BitcastExpression>()) {
       to_visit.push_back(bitcast->expr);
-    } else if (auto* call = expr->As<ast::CallExpression>()) {
+    } else if (auto* call = expr->As<CallExpression>()) {
       // TODO(crbug.com/tint/1257): Resolver breaks if we actually include the
       // function name in the traversal.
       // to_visit.push_back(call->func);
       push_list(call->args);
-    } else if (auto* type_ctor = expr->As<ast::TypeConstructorExpression>()) {
+    } else if (auto* type_ctor = expr->As<TypeConstructorExpression>()) {
       push_list(type_ctor->values);
-    } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
+    } else if (auto* member = expr->As<MemberAccessorExpression>()) {
       // TODO(crbug.com/tint/1257): Resolver breaks if we actually include the
       // member name in the traversal.
       // push_pair(member->structure, member->member);
       to_visit.push_back(member->structure);
-    } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
+    } else if (auto* unary = expr->As<UnaryOpExpression>()) {
       to_visit.push_back(unary->expr);
-    } else if (expr->IsAnyOf<ast::Literal, ast::IdentifierExpression,
-                             ast::PhonyExpression>()) {
+    } else if (expr->IsAnyOf<Literal, IdentifierExpression,
+                             PhonyExpression>()) {
       // Leaf expression
     } else {
       TINT_ICE(AST, diags) << "unhandled expression type: "

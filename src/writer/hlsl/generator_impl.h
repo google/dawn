@@ -79,8 +79,8 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output of the expression stream
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
-  bool EmitArrayAccessor(std::ostream& out,
-                         const ast::ArrayAccessorExpression* expr);
+  bool EmitIndexAccessor(std::ostream& out,
+                         const ast::IndexAccessorExpression* expr);
   /// Handles an assignment statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

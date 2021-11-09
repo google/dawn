@@ -291,7 +291,7 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(
     return false;
   }
 
-  auto* ast_access_expr = stmt->lhs->As<ast::ArrayAccessorExpression>();
+  auto* ast_access_expr = stmt->lhs->As<ast::IndexAccessorExpression>();
 
   auto out = line();
   out << name << "(";
@@ -311,9 +311,9 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(
   return true;
 }
 
-bool GeneratorImpl::EmitArrayAccessor(
+bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
-    const ast::ArrayAccessorExpression* expr) {
+    const ast::IndexAccessorExpression* expr) {
   if (!EmitExpression(out, expr->array)) {
     return false;
   }
@@ -354,7 +354,7 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
-  if (auto* idx = stmt->lhs->As<ast::ArrayAccessorExpression>()) {
+  if (auto* idx = stmt->lhs->As<ast::IndexAccessorExpression>()) {
     if (auto* vec = TypeOf(idx->array)->UnwrapRef()->As<sem::Vector>()) {
       auto* rhs_sem = builder_.Sem().Get(idx->index);
       if (!rhs_sem->ConstantValue().IsValid()) {
@@ -2191,8 +2191,8 @@ bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
 
 bool GeneratorImpl::EmitExpression(std::ostream& out,
                                    const ast::Expression* expr) {
-  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
-    return EmitArrayAccessor(out, a);
+  if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
+    return EmitIndexAccessor(out, a);
   }
   if (auto* b = expr->As<ast::BinaryExpression>()) {
     return EmitBinary(out, b);

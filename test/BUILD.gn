@@ -146,7 +146,6 @@ tint_unittests_source_set("tint_unittests_core_sem_src") {
 tint_unittests_source_set("tint_unittests_core_src") {
   sources = [
     "../src/ast/alias_test.cc",
-    "../src/ast/array_accessor_expression_test.cc",
     "../src/ast/array_test.cc",
     "../src/ast/assignment_statement_test.cc",
     "../src/ast/atomic_test.cc",
@@ -174,6 +173,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/function_test.cc",
     "../src/ast/group_decoration_test.cc",
     "../src/ast/i32_test.cc",
+    "../src/ast/index_accessor_expression_test.cc",
     "../src/ast/identifier_expression_test.cc",
     "../src/ast/if_statement_test.cc",
     "../src/ast/int_literal_expression_test.cc",

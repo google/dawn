@@ -851,7 +851,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       continue;
     }
 
-    if (auto* accessor = node->As<ast::ArrayAccessorExpression>()) {
+    if (auto* accessor = node->As<ast::IndexAccessorExpression>()) {
       if (auto access = state.TakeAccess(accessor->array)) {
         // X[Y]
         if (auto* arr = access.type->As<sem::Array>()) {

@@ -487,7 +487,7 @@ fn f() {
                                       .Functions()[0]
                                       ->body->statements[2]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs->As<ast::ArrayAccessorExpression>()
+                                      ->lhs->As<ast::IndexAccessorExpression>()
                                       ->array->As<ast::UnaryOpExpression>()
                                       ->expr->As<ast::UnaryOpExpression>()
                                       ->expr);
@@ -537,7 +537,7 @@ fn f(b: ptr<function, vec2<u32>>) {
                                       .Functions()[0]
                                       ->body->statements[2]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs->As<ast::ArrayAccessorExpression>()
+                                      ->lhs->As<ast::IndexAccessorExpression>()
                                       ->array->As<ast::UnaryOpExpression>()
                                       ->expr);
   ASSERT_NE(use_id, 0);
@@ -584,7 +584,7 @@ fn f() {
                                       .Functions()[0]
                                       ->body->statements[1]
                                       ->As<ast::AssignmentStatement>()
-                                      ->lhs->As<ast::ArrayAccessorExpression>()
+                                      ->lhs->As<ast::IndexAccessorExpression>()
                                       ->array->As<ast::UnaryOpExpression>()
                                       ->expr->As<ast::UnaryOpExpression>()
                                       ->expr);
@@ -613,15 +613,15 @@ fn f() {
 
   NodeIdMap node_id_map(program);
 
-  auto use_id = node_id_map.GetId(
-      program.AST()
-          .Functions()[0]
-          ->body->statements[1]
-          ->As<ast::VariableDeclStatement>()
-          ->variable->constructor->As<ast::ArrayAccessorExpression>()
-          ->array->As<ast::UnaryOpExpression>()
-          ->expr->As<ast::UnaryOpExpression>()
-          ->expr);
+  auto use_id =
+      node_id_map.GetId(program.AST()
+                            .Functions()[0]
+                            ->body->statements[1]
+                            ->As<ast::VariableDeclStatement>()
+                            ->variable->constructor->As<ast::IndexAccessorExpression>()
+                            ->array->As<ast::UnaryOpExpression>()
+                            ->expr->As<ast::UnaryOpExpression>()
+                            ->expr);
   ASSERT_NE(use_id, 0);
 
   auto replacement_id = node_id_map.GetId(program.AST().GlobalVariables()[0]);
@@ -649,14 +649,14 @@ fn f() {
 
   NodeIdMap node_id_map(program);
 
-  auto use_id = node_id_map.GetId(
-      program.AST()
-          .Functions()[0]
-          ->body->statements[3]
-          ->As<ast::VariableDeclStatement>()
-          ->variable->constructor->As<ast::ArrayAccessorExpression>()
-          ->array->As<ast::UnaryOpExpression>()
-          ->expr);
+  auto use_id =
+      node_id_map.GetId(program.AST()
+                            .Functions()[0]
+                            ->body->statements[3]
+                            ->As<ast::VariableDeclStatement>()
+                            ->variable->constructor->As<ast::IndexAccessorExpression>()
+                            ->array->As<ast::UnaryOpExpression>()
+                            ->expr);
   ASSERT_NE(use_id, 0);
 
   auto replacement_id = node_id_map.GetId(program.AST()

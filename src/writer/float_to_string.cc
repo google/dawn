@@ -16,10 +16,10 @@
 
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <iomanip>
 #include <limits>
 #include <sstream>
-#include <functional>
 
 #include "src/debug.h"
 
