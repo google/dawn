@@ -286,8 +286,6 @@ libtint_source_set("libtint_core_all_src") {
     "ast/sampled_texture.h",
     "ast/sampler.cc",
     "ast/sampler.h",
-    "ast/scalar_constructor_expression.cc",
-    "ast/scalar_constructor_expression.h",
     "ast/sint_literal.cc",
     "ast/sint_literal.h",
     "ast/stage_decoration.cc",

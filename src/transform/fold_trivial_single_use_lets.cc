@@ -37,8 +37,7 @@ const ast::VariableDeclStatement* AsTrivialLetDecl(const ast::Statement* stmt) {
     return nullptr;
   }
   auto* ctor = var->constructor;
-  if (!IsAnyOf<ast::IdentifierExpression, ast::ScalarConstructorExpression>(
-          ctor)) {
+  if (!IsAnyOf<ast::IdentifierExpression, ast::Literal>(ctor)) {
     return nullptr;
   }
   return var_decl;

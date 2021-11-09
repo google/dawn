@@ -339,9 +339,8 @@ class Builder {
   /// @param var the variable generated for, nullptr if no variable associated.
   /// @param expr the expression to generate
   /// @returns the ID of the expression or 0 on failure.
-  uint32_t GenerateConstructorExpression(
-      const ast::Variable* var,
-      const ast::ConstructorExpression* expr);
+  uint32_t GenerateConstructorExpression(const ast::Variable* var,
+                                         const ast::Expression* expr);
   /// Generates a type constructor expression
   /// @param var the variable generated for, nullptr if no variable associated.
   /// @param init the expression to generate

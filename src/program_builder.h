@@ -55,7 +55,6 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
 #include "src/ast/sampler.h"
-#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/storage_texture.h"
@@ -1038,57 +1037,53 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param value the boolean value
   /// @return a Scalar constructor for the given value
-  const ast::ScalarConstructorExpression* Expr(const Source& source,
-                                               bool value) {
-    return create<ast::ScalarConstructorExpression>(source, Literal(value));
+  const ast::Literal* Expr(const Source& source, bool value) {
+    return create<ast::BoolLiteral>(source, value);
   }
 
   /// @param value the boolean value
   /// @return a Scalar constructor for the given value
-  const ast::ScalarConstructorExpression* Expr(bool value) {
-    return create<ast::ScalarConstructorExpression>(Literal(value));
+  const ast::BoolLiteral* Expr(bool value) {
+    return create<ast::BoolLiteral>(value);
   }
 
   /// @param source the source information
   /// @param value the float value
   /// @return a Scalar constructor for the given value
-  const ast::ScalarConstructorExpression* Expr(const Source& source,
-                                               f32 value) {
-    return create<ast::ScalarConstructorExpression>(source, Literal(value));
+  const ast::FloatLiteral* Expr(const Source& source, f32 value) {
+    return create<ast::FloatLiteral>(source, value);
   }
 
   /// @param value the float value
   /// @return a Scalar constructor for the given value
-  const ast::ScalarConstructorExpression* Expr(f32 value) {
-    return create<ast::ScalarConstructorExpression>(Literal(value));
+  const ast::FloatLiteral* Expr(f32 value) {
+    return create<ast::FloatLiteral>(value);
   }
 
   /// @param source the source information
   /// @param value the integer value
   /// @return a Scalar constructor for the given value
-  const ast::ScalarConstructorExpression* Expr(const Source& source,
-                                               i32 value) {
-    return create<ast::ScalarConstructorExpression>(source, Literal(value));
+  const ast::Literal* Expr(const Source& source, i32 value) {
+    return create<ast::SintLiteral>(source, value);
   }
 
   /// @param value the integer value
   /// @return a Scalar constructor for the given value
-  const ast::ScalarConstructorExpression* Expr(i32 value) {
-    return create<ast::ScalarConstructorExpression>(Literal(value));
+  const ast::SintLiteral* Expr(i32 value) {
+    return create<ast::SintLiteral>(value);
   }
 
   /// @param source the source information
   /// @param value the unsigned int value
   /// @return a Scalar constructor for the given value
-  const ast::ScalarConstructorExpression* Expr(const Source& source,
-                                               u32 value) {
-    return create<ast::ScalarConstructorExpression>(source, Literal(value));
+  const ast::UintLiteral* Expr(const Source& source, u32 value) {
+    return create<ast::UintLiteral>(source, value);
   }
 
   /// @param value the unsigned int value
   /// @return a Scalar constructor for the given value
-  const ast::ScalarConstructorExpression* Expr(u32 value) {
-    return create<ast::ScalarConstructorExpression>(Literal(value));
+  const ast::UintLiteral* Expr(u32 value) {
+    return create<ast::UintLiteral>(value);
   }
 
   /// Converts `arg` to an `ast::Expression` using `Expr()`, then appends it to
@@ -2502,12 +2497,6 @@ class ProgramBuilder {
   /// the type declaration has no resolved type.
   const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
-  /// Wraps the ast::Literal in a statement. This is used by tests that
-  /// construct a partial AST and require the Resolver to reach these
-  /// nodes.
-  /// @param lit the ast::Literal to be wrapped by an ast::Statement
-  /// @return the ast::Statement that wraps the ast::Statement
-  const ast::Statement* WrapInStatement(const ast::Literal* lit);
   /// Wraps the ast::Expression in a statement. This is used by tests that
   /// construct a partial AST and require the Resolver to reach these
   /// nodes.

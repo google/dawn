@@ -59,7 +59,7 @@ TEST_P(WgslGenerator_FloatLiteralTest, Emit) {
   GeneratorImpl& gen = Build();
 
   std::stringstream out;
-  ASSERT_TRUE(gen.EmitScalarConstructor(out, v)) << gen.error();
+  ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.error();
   EXPECT_EQ(out.str(), GetParam().expected);
 }
 

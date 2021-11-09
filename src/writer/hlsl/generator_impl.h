@@ -227,12 +227,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted
   bool EmitDiscard(const ast::DiscardStatement* stmt);
-  /// Handles generating a scalar constructor
-  /// @param out the output of the expression stream
-  /// @param expr the scalar constructor expression
-  /// @returns true if the scalar constructor is emitted
-  bool EmitScalarConstructor(std::ostream& out,
-                             const ast::ScalarConstructorExpression* expr);
   /// Handles emitting a type constructor
   /// @param out the output of the expression stream
   /// @param expr the type constructor expression

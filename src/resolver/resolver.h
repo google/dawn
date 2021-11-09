@@ -177,6 +177,7 @@ class Resolver {
   sem::Call* FunctionCall(const ast::CallExpression*);
   sem::Expression* Identifier(const ast::IdentifierExpression*);
   sem::Call* IntrinsicCall(const ast::CallExpression*, sem::IntrinsicType);
+  sem::Expression* Literal(const ast::Literal*);
   sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
   sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
 
@@ -375,9 +376,8 @@ class Resolver {
 
   sem::Constant EvaluateConstantValue(const ast::Expression* expr,
                                       const sem::Type* type);
-  sem::Constant EvaluateConstantValue(
-      const ast::ScalarConstructorExpression* scalar_ctor,
-      const sem::Type* type);
+  sem::Constant EvaluateConstantValue(const ast::Literal* literal,
+                                      const sem::Type* type);
   sem::Constant EvaluateConstantValue(
       const ast::TypeConstructorExpression* type_ctor,
       const sem::Type* type);

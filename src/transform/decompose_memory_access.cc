@@ -23,7 +23,6 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/disable_validation_decoration.h"
-#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_name.h"
 #include "src/ast/unary_op.h"
 #include "src/block_allocator.h"
@@ -331,13 +330,11 @@ struct DecomposeMemoryAccess::State {
   /// @param expr the expression to convert to an Offset
   /// @returns an Offset for the given ast::Expression
   const Offset* ToOffset(const ast::Expression* expr) {
-    if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
-      if (auto* u32 = scalar->literal->As<ast::UintLiteral>()) {
-        return offsets_.Create<OffsetLiteral>(u32->value);
-      } else if (auto* i32 = scalar->literal->As<ast::SintLiteral>()) {
-        if (i32->value > 0) {
-          return offsets_.Create<OffsetLiteral>(i32->value);
-        }
+    if (auto* u32 = expr->As<ast::UintLiteral>()) {
+      return offsets_.Create<OffsetLiteral>(u32->value);
+    } else if (auto* i32 = expr->As<ast::SintLiteral>()) {
+      if (i32->value > 0) {
+        return offsets_.Create<OffsetLiteral>(i32->value);
       }
     }
     return offsets_.Create<OffsetExpr>(expr);

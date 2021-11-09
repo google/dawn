@@ -583,6 +583,9 @@ uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return GenerateIdentifierExpression(i);
   }
+  if (auto* l = expr->As<ast::Literal>()) {
+    return GenerateLiteralIfNeeded(nullptr, l);
+  }
   if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
     return GenerateAccessorExpression(m);
   }
@@ -757,13 +760,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
 
   uint32_t init_id = 0;
   if (var->constructor) {
-    if (!var->constructor->Is<ast::ConstructorExpression>()) {
-      error_ = "scalar constructor expected";
-      return false;
-    }
-
-    init_id = GenerateConstructorExpression(
-        var, var->constructor->As<ast::ConstructorExpression>());
+    init_id = GenerateConstructorExpression(var, var->constructor);
     if (init_id == 0) {
       return false;
     }
@@ -931,14 +928,7 @@ bool Builder::GenerateArrayAccessor(const ast::ArrayAccessorExpression* expr,
   auto extract_id = extract.to_i();
 
   // If the index is a literal, we use OpCompositeExtract.
-  if (auto* scalar = expr->index->As<ast::ScalarConstructorExpression>()) {
-    auto* literal = scalar->literal->As<ast::IntLiteral>();
-    if (!literal) {
-      TINT_ICE(Writer, builder_.Diagnostics())
-          << "bad literal in array accessor";
-      return false;
-    }
-
+  if (auto* literal = expr->index->As<ast::IntLiteral>()) {
     if (!push_function_inst(spv::Op::OpCompositeExtract,
                             {Operand::Int(result_type_id), extract,
                              Operand::Int(info->source_id),
@@ -1264,11 +1254,10 @@ uint32_t Builder::GetGLSLstd450Import() {
   return id;
 }
 
-uint32_t Builder::GenerateConstructorExpression(
-    const ast::Variable* var,
-    const ast::ConstructorExpression* expr) {
-  if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
-    return GenerateLiteralIfNeeded(var, scalar->literal);
+uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
+                                                const ast::Expression* expr) {
+  if (auto* literal = expr->As<ast::Literal>()) {
+    return GenerateLiteralIfNeeded(var, literal);
   }
   if (auto* type = expr->As<ast::TypeConstructorExpression>()) {
     return GenerateTypeConstructorExpression(var, type);
@@ -1280,20 +1269,19 @@ uint32_t Builder::GenerateConstructorExpression(
 
 bool Builder::is_constructor_const(const ast::Expression* expr,
                                    bool is_global_init) {
-  auto* constructor = expr->As<ast::ConstructorExpression>();
-  if (constructor == nullptr) {
-    return false;
-  }
-  if (constructor->Is<ast::ScalarConstructorExpression>()) {
+  if (expr->Is<ast::Literal>()) {
     return true;
   }
 
-  auto* tc = constructor->As<ast::TypeConstructorExpression>();
+  auto* tc = expr->As<ast::TypeConstructorExpression>();
+  if (!tc) {
+    return false;
+  }
   auto* result_type = TypeOf(tc)->UnwrapRef();
   for (size_t i = 0; i < tc->values.size(); ++i) {
     auto* e = tc->values[i];
 
-    if (!e->Is<ast::ConstructorExpression>()) {
+    if (!e->IsAnyOf<ast::TypeConstructorExpression, ast::Literal>()) {
       if (is_global_init) {
         error_ = "constructor must be a constant expression";
         return false;
@@ -1307,13 +1295,13 @@ bool Builder::is_constructor_const(const ast::Expression* expr,
       return false;
     }
 
-    auto* sc = e->As<ast::ScalarConstructorExpression>();
-    if (result_type->Is<sem::Vector>() && sc == nullptr) {
+    auto* lit = e->As<ast::Literal>();
+    if (result_type->Is<sem::Vector>() && lit == nullptr) {
       return false;
     }
 
     // This should all be handled by |is_constructor_const| call above
-    if (sc == nullptr) {
+    if (lit == nullptr) {
       continue;
     }
 
@@ -1327,7 +1315,7 @@ bool Builder::is_constructor_const(const ast::Expression* expr,
     } else if (auto* str = subtype->As<sem::Struct>()) {
       subtype = str->Members()[i]->Type();
     }
-    if (subtype != TypeOf(sc)->UnwrapRef()) {
+    if (subtype != TypeOf(lit)->UnwrapRef()) {
       return false;
     }
   }
@@ -1409,8 +1397,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   for (auto* e : values) {
     uint32_t id = 0;
     if (constructor_is_const) {
-      id = GenerateConstructorExpression(nullptr,
-                                         e->As<ast::ConstructorExpression>());
+      id = GenerateConstructorExpression(nullptr, e);
     } else {
       id = GenerateExpression(e);
       id = GenerateLoadIfNeeded(TypeOf(e), id);

@@ -30,11 +30,8 @@ std::string SizeExprToString(const Expression* size,
   if (auto* ident = size->As<IdentifierExpression>()) {
     return symbols.NameFor(ident->symbol);
   }
-  if (auto* scalar = size->As<ScalarConstructorExpression>()) {
-    auto* literal = scalar->literal->As<IntLiteral>();
-    if (literal) {
-      return std::to_string(literal->ValueAsU32());
-    }
+  if (auto* literal = size->As<IntLiteral>()) {
+    return std::to_string(literal->ValueAsU32());
   }
   // This will never be exposed to the user as the Resolver will reject this
   // expression for array size.

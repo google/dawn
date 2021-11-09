@@ -2548,9 +2548,7 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
       return source_expr;
     }
     case SkipReason::kPointSizeBuiltinValue: {
-      return {ty_.F32(),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::FloatLiteral>(Source{}, 1.0f))};
+      return {ty_.F32(), create<ast::FloatLiteral>(Source{}, 1.0f)};
     }
     case SkipReason::kPointSizeBuiltinPointer:
       Fail() << "unhandled use of a pointer to the PointSize builtin, with ID: "
@@ -4477,8 +4475,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
   auto current_type_id = composite_type_id;
 
   auto make_index = [this](uint32_t literal) {
-    return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::UintLiteral>(Source{}, literal));
+    return create<ast::UintLiteral>(Source{}, literal);
   };
 
   // Build up a nested expression for the decomposition by walking down the type
@@ -4594,13 +4591,11 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
 }
 
 const ast::Expression* FunctionEmitter::MakeTrue(const Source& source) const {
-  return create<ast::ScalarConstructorExpression>(
-      source, create<ast::BoolLiteral>(source, true));
+  return create<ast::BoolLiteral>(source, true);
 }
 
 const ast::Expression* FunctionEmitter::MakeFalse(const Source& source) const {
-  return create<ast::ScalarConstructorExpression>(
-      source, create<ast::BoolLiteral>(source, false));
+  return create<ast::BoolLiteral>(source, false);
 }
 
 TypedExpression FunctionEmitter::MakeVectorShuffle(

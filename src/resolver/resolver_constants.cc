@@ -29,7 +29,7 @@ using f32 = ProgramBuilder::f32;
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr,
                                               const sem::Type* type) {
-  if (auto* e = expr->As<ast::ScalarConstructorExpression>()) {
+  if (auto* e = expr->As<ast::Literal>()) {
     return EvaluateConstantValue(e, type);
   }
   if (auto* e = expr->As<ast::TypeConstructorExpression>()) {
@@ -38,10 +38,8 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr,
   return {};
 }
 
-sem::Constant Resolver::EvaluateConstantValue(
-    const ast::ScalarConstructorExpression* scalar_ctor,
-    const sem::Type* type) {
-  auto* literal = scalar_ctor->literal;
+sem::Constant Resolver::EvaluateConstantValue(const ast::Literal* literal,
+                                              const sem::Type* type) {
   if (auto* lit = literal->As<ast::SintLiteral>()) {
     return {type, {lit->ValueAsI32()}};
   }

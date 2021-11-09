@@ -17,13 +17,13 @@
 
 #include <string>
 
-#include "src/ast/node.h"
+#include "src/ast/expression.h"
 
 namespace tint {
 namespace ast {
 
-/// Base class for a literal value
-class Literal : public Castable<Literal, Node> {
+/// Base class for a literal value expressions
+class Literal : public Castable<Literal, Expression> {
  public:
   ~Literal() override;
 

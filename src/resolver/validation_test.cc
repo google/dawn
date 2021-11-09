@@ -129,9 +129,7 @@ TEST_F(ResolverValidationTest, Stmt_Error_Unknown) {
 TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
   // if (1.23f) {}
 
-  WrapInFunction(If(create<ast::ScalarConstructorExpression>(Source{{12, 34}},
-                                                             Literal(1.23f)),
-                    Block()));
+  WrapInFunction(If(Literal(Source{{12, 34}}, 1.23f), Block()));
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -142,10 +140,8 @@ TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
 TEST_F(ResolverValidationTest, Stmt_Else_NonBool) {
   // else (1.23f) {}
 
-  WrapInFunction(If(Expr(true), Block(),
-                    Else(create<ast::ScalarConstructorExpression>(
-                             Source{{12, 34}}, Literal(1.23f)),
-                         Block())));
+  WrapInFunction(
+      If(Expr(true), Block(), Else(Literal(Source{{12, 34}}, 1.23f), Block())));
 
   EXPECT_FALSE(r()->Resolve());
 

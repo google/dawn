@@ -34,11 +34,8 @@ TEST_F(ParserImplTest, Decoration_Workgroup) {
 
   auto values = func_deco->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_NE(values[0], nullptr);
-  auto* x_scalar = values[0]->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(x_scalar, nullptr);
-  ASSERT_TRUE(x_scalar->literal->Is<ast::IntLiteral>());
-  EXPECT_EQ(x_scalar->literal->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
 
   EXPECT_EQ(values[1], nullptr);
   EXPECT_EQ(values[2], nullptr);
@@ -57,17 +54,11 @@ TEST_F(ParserImplTest, Decoration_Workgroup_2Param) {
 
   auto values = func_deco->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_NE(values[0], nullptr);
-  auto* x_scalar = values[0]->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(x_scalar, nullptr);
-  ASSERT_TRUE(x_scalar->literal->Is<ast::IntLiteral>());
-  EXPECT_EQ(x_scalar->literal->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
 
-  ASSERT_NE(values[1], nullptr);
-  auto* y_scalar = values[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(y_scalar, nullptr);
-  ASSERT_TRUE(y_scalar->literal->Is<ast::IntLiteral>());
-  EXPECT_EQ(y_scalar->literal->As<ast::IntLiteral>()->ValueAsU32(), 5u);
+  ASSERT_TRUE(values[1]->Is<ast::IntLiteral>());
+  EXPECT_EQ(values[1]->As<ast::IntLiteral>()->ValueAsU32(), 5u);
 
   EXPECT_EQ(values[2], nullptr);
 }
@@ -85,23 +76,14 @@ TEST_F(ParserImplTest, Decoration_Workgroup_3Param) {
 
   auto values = func_deco->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_NE(values[0], nullptr);
-  auto* x_scalar = values[0]->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(x_scalar, nullptr);
-  ASSERT_TRUE(x_scalar->literal->Is<ast::IntLiteral>());
-  EXPECT_EQ(x_scalar->literal->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
 
-  ASSERT_NE(values[1], nullptr);
-  auto* y_scalar = values[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(y_scalar, nullptr);
-  ASSERT_TRUE(y_scalar->literal->Is<ast::IntLiteral>());
-  EXPECT_EQ(y_scalar->literal->As<ast::IntLiteral>()->ValueAsU32(), 5u);
+  ASSERT_TRUE(values[1]->Is<ast::IntLiteral>());
+  EXPECT_EQ(values[1]->As<ast::IntLiteral>()->ValueAsU32(), 5u);
 
-  ASSERT_NE(values[2], nullptr);
-  auto* z_scalar = values[2]->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(z_scalar, nullptr);
-  ASSERT_TRUE(z_scalar->literal->Is<ast::IntLiteral>());
-  EXPECT_EQ(z_scalar->literal->As<ast::IntLiteral>()->ValueAsU32(), 6u);
+  ASSERT_TRUE(values[2]->Is<ast::IntLiteral>());
+  EXPECT_EQ(values[2]->As<ast::IntLiteral>()->ValueAsU32(), 6u);
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_WithIdent) {
@@ -117,11 +99,8 @@ TEST_F(ParserImplTest, Decoration_Workgroup_WithIdent) {
 
   auto values = func_deco->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_NE(values[0], nullptr);
-  auto* x_scalar = values[0]->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(x_scalar, nullptr);
-  ASSERT_TRUE(x_scalar->literal->Is<ast::IntLiteral>());
-  EXPECT_EQ(x_scalar->literal->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
 
   ASSERT_NE(values[1], nullptr);
   auto* y_ident = values[1]->As<ast::IdentifierExpression>();

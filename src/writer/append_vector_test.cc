@@ -249,9 +249,7 @@ TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
   ASSERT_NE(vec_0004, nullptr);
   ASSERT_EQ(vec_0004->values.size(), 4u);
   for (size_t i = 0; i < 3; i++) {
-    auto* ctor = vec_0004->values[i]->As<ast::ScalarConstructorExpression>();
-    ASSERT_NE(ctor, nullptr);
-    auto* literal = As<ast::SintLiteral>(ctor->literal);
+    auto* literal = As<ast::SintLiteral>(vec_0004->values[i]);
     ASSERT_NE(literal, nullptr);
     EXPECT_EQ(literal->value, 0);
   }

@@ -2015,7 +2015,7 @@ bool Resolver::WorkgroupSizeFor(const ast::Function* func,
         ws[i].value = 0;
         continue;
       }
-    } else if (!expr->Is<ast::ScalarConstructorExpression>()) {
+    } else if (!expr->Is<ast::Literal>()) {
       AddError(
           "workgroup_size argument must be either a literal or a "
           "module-scope constant",
@@ -2366,6 +2366,8 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
       sem_expr = Constructor(ctor);
     } else if (auto* ident = expr->As<ast::IdentifierExpression>()) {
       sem_expr = Identifier(ident);
+    } else if (auto* literal = expr->As<ast::Literal>()) {
+      sem_expr = Literal(literal);
     } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
       sem_expr = MemberAccessor(member);
     } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
@@ -2421,8 +2423,7 @@ sem::Expression* Resolver::ArrayAccessor(
     if (!parent_raw_ty->Is<sem::Reference>()) {
       // TODO(bclayton): expand this to allow any const_expr expression
       // https://github.com/gpuweb/gpuweb/issues/1272
-      auto* scalar = idx->As<ast::ScalarConstructorExpression>();
-      if (!scalar || !scalar->literal->As<ast::IntLiteral>()) {
+      if (!idx->As<ast::IntLiteral>()) {
         AddError("index must be signed or unsigned integer literal",
                  idx->source);
         return nullptr;
@@ -2615,8 +2616,7 @@ bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
       bool is_const_expr = true;
       ast::TraverseExpressions(
           arg->Declaration(), diagnostics_, [&](const ast::Expression* e) {
-            if (e->IsAnyOf<ast::ScalarConstructorExpression,
-                           ast::TypeConstructorExpression>()) {
+            if (e->IsAnyOf<ast::Literal, ast::TypeConstructorExpression>()) {
               return ast::TraverseAction::Descend;
             }
             is_const_expr = false;
@@ -2763,19 +2763,19 @@ sem::Expression* Resolver::Constructor(const ast::ConstructorExpression* expr) {
     return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
   }
 
-  if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
-    Mark(scalar_ctor->literal);
-    auto* ty = TypeOf(scalar_ctor->literal);
-    if (!ty) {
-      return nullptr;
-    }
-
-    auto val = EvaluateConstantValue(expr, ty);
-    return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
-  }
-
   TINT_ICE(Resolver, diagnostics_) << "unexpected constructor expression type";
   return nullptr;
+}
+
+sem::Expression* Resolver::Literal(const ast::Literal* literal) {
+  auto* ty = TypeOf(literal);
+  if (!ty) {
+    return nullptr;
+  }
+
+  auto val = EvaluateConstantValue(literal, ty);
+  return builder_->create<sem::Expression>(literal, ty, current_statement_,
+                                           val);
 }
 
 bool Resolver::ValidateStructureConstructor(
@@ -3783,7 +3783,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
       }
 
       count_expr = var->Declaration()->constructor;
-    } else if (!count_expr->Is<ast::ScalarConstructorExpression>()) {
+    } else if (!count_expr->Is<ast::Literal>()) {
       AddError(
           "array size expression must be either a literal or a module-scope "
           "constant",

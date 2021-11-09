@@ -21,9 +21,9 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/literal.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/phony_expression.h"
-#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/utils/reverse.h"
@@ -122,8 +122,7 @@ bool TraverseExpressions(const ast::Expression* root,
       to_visit.push_back(member->structure);
     } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
       to_visit.push_back(unary->expr);
-    } else if (expr->IsAnyOf<ast::ScalarConstructorExpression,
-                             ast::IdentifierExpression,
+    } else if (expr->IsAnyOf<ast::Literal, ast::IdentifierExpression,
                              ast::PhonyExpression>()) {
       // Leaf expression
     } else {

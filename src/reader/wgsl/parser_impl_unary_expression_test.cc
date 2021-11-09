@@ -34,11 +34,8 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   auto* ident = ary->array->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(ary->index->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ary->index->Is<ast::ScalarConstructorExpression>());
-  auto* init = ary->index->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
-  ASSERT_EQ(init->literal->As<ast::SintLiteral>()->value, 2);
+  ASSERT_TRUE(ary->index->Is<ast::SintLiteral>());
+  ASSERT_EQ(ary->index->As<ast::SintLiteral>()->value, 2);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
@@ -53,12 +50,8 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
   auto* u = e->As<ast::UnaryOpExpression>();
   ASSERT_EQ(u->op, ast::UnaryOp::kNegation);
 
-  ASSERT_TRUE(u->expr->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(u->expr->Is<ast::ScalarConstructorExpression>());
-
-  auto* init = u->expr->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 1);
+  ASSERT_TRUE(u->expr->Is<ast::SintLiteral>());
+  EXPECT_EQ(u->expr->As<ast::SintLiteral>()->value, 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_AddressOf) {
@@ -139,12 +132,8 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
   auto* u = e->As<ast::UnaryOpExpression>();
   ASSERT_EQ(u->op, ast::UnaryOp::kNot);
 
-  ASSERT_TRUE(u->expr->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(u->expr->Is<ast::ScalarConstructorExpression>());
-
-  auto* init = u->expr->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 1);
+  ASSERT_TRUE(u->expr->Is<ast::SintLiteral>());
+  EXPECT_EQ(u->expr->As<ast::SintLiteral>()->value, 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {
@@ -169,12 +158,8 @@ TEST_F(ParserImplTest, UnaryExpression_Tilde) {
   auto* u = e->As<ast::UnaryOpExpression>();
   ASSERT_EQ(u->op, ast::UnaryOp::kComplement);
 
-  ASSERT_TRUE(u->expr->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(u->expr->Is<ast::ScalarConstructorExpression>());
-
-  auto* init = u->expr->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal->Is<ast::SintLiteral>());
-  EXPECT_EQ(init->literal->As<ast::SintLiteral>()->value, 1);
+  ASSERT_TRUE(u->expr->Is<ast::SintLiteral>());
+  EXPECT_EQ(u->expr->As<ast::SintLiteral>()->value, 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_PrefixPlusPlus) {

@@ -35,11 +35,8 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Plus) {
   auto* ident = rel->lhs->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(rel->rhs->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(rel->rhs->Is<ast::ScalarConstructorExpression>());
-  auto* init = rel->rhs->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal->Is<ast::BoolLiteral>());
-  ASSERT_TRUE(init->literal->As<ast::BoolLiteral>()->value);
+  ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(rel->rhs->As<ast::BoolLiteral>()->value);
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
@@ -58,11 +55,8 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
   auto* ident = rel->lhs->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(rel->rhs->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(rel->rhs->Is<ast::ScalarConstructorExpression>());
-  auto* init = rel->rhs->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal->Is<ast::BoolLiteral>());
-  ASSERT_TRUE(init->literal->As<ast::BoolLiteral>()->value);
+  ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(rel->rhs->As<ast::BoolLiteral>()->value);
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_InvalidLHS) {

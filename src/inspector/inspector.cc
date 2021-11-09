@@ -24,7 +24,6 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/module.h"
 #include "src/ast/override_decoration.h"
-#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/sem/array.h"
@@ -264,23 +263,7 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
       continue;
     }
 
-    auto* expression = var->constructor;
-    auto* constructor = expression->As<ast::ConstructorExpression>();
-    if (constructor == nullptr) {
-      // This is invalid WGSL, but handling gracefully.
-      result[constant_id] = Scalar();
-      continue;
-    }
-
-    auto* scalar_constructor =
-        constructor->As<ast::ScalarConstructorExpression>();
-    if (scalar_constructor == nullptr) {
-      // This is invalid WGSL, but handling gracefully.
-      result[constant_id] = Scalar();
-      continue;
-    }
-
-    auto* literal = scalar_constructor->literal;
+    auto* literal = var->constructor->As<ast::Literal>();
     if (!literal) {
       // This is invalid WGSL, but handling gracefully.
       result[constant_id] = Scalar();

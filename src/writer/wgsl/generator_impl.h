@@ -30,7 +30,6 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
@@ -96,12 +95,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
   bool EmitCase(const ast::CaseStatement* stmt);
-  /// Handles generating a scalar constructor
+  /// Handles generating a literal expression
   /// @param out the output of the expression stream
-  /// @param expr the scalar constructor expression
-  /// @returns true if the scalar constructor is emitted
-  bool EmitScalarConstructor(std::ostream& out,
-                             const ast::ScalarConstructorExpression* expr);
+  /// @param expr the literal expression expression
+  /// @returns true if the literal expression is emitted
+  bool EmitLiteral(std::ostream& out, const ast::Literal* expr);
   /// Handles a continue statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
@@ -138,11 +136,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted
   bool EmitDiscard(const ast::DiscardStatement* stmt);
-  /// Handles a literal
-  /// @param out the output of the expression stream
-  /// @param lit the literal to emit
-  /// @returns true if the literal was successfully emitted
-  bool EmitLiteral(std::ostream& out, const ast::Literal* lit);
   /// Handles a loop statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emtited

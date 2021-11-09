@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
 
   ASSERT_EQ(e.value.size(), 3u);
   ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
-  ASSERT_TRUE(e.value[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e.value[1]->Is<ast::Literal>());
   ASSERT_TRUE(e.value[2]->Is<ast::BinaryExpression>());
 }
 
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_TrailingComma) {
 
   ASSERT_EQ(e.value.size(), 2u);
   ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
-  ASSERT_TRUE(e.value[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e.value[1]->Is<ast::Literal>());
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingLeftParen) {

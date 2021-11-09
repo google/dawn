@@ -131,6 +131,9 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return EmitIdentifier(out, i);
   }
+  if (auto* l = expr->As<ast::Literal>()) {
+    return EmitLiteral(out, l);
+  }
   if (auto* c = expr->As<ast::ConstructorExpression>()) {
     return EmitConstructor(out, c);
   }
@@ -242,9 +245,6 @@ bool GeneratorImpl::EmitCall(std::ostream& out,
 
 bool GeneratorImpl::EmitConstructor(std::ostream& out,
                                     const ast::ConstructorExpression* expr) {
-  if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
-    return EmitScalarConstructor(out, scalar);
-  }
   return EmitTypeConstructor(out, expr->As<ast::TypeConstructorExpression>());
 }
 
@@ -271,12 +271,6 @@ bool GeneratorImpl::EmitTypeConstructor(
 
   out << ")";
   return true;
-}
-
-bool GeneratorImpl::EmitScalarConstructor(
-    std::ostream& out,
-    const ast::ScalarConstructorExpression* expr) {
-  return EmitLiteral(out, expr->literal);
 }
 
 bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {

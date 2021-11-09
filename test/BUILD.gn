@@ -194,7 +194,6 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/return_statement_test.cc",
     "../src/ast/sampled_texture_test.cc",
     "../src/ast/sampler_test.cc",
-    "../src/ast/scalar_constructor_expression_test.cc",
     "../src/ast/sint_literal_test.cc",
     "../src/ast/stage_decoration_test.cc",
     "../src/ast/storage_texture_test.cc",

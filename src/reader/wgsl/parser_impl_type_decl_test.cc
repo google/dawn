@@ -455,9 +455,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
   EXPECT_EQ(a->decorations.size(), 0u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 
-  auto* count_expr = a->count->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(count_expr, nullptr);
-  auto* size = count_expr->literal->As<ast::SintLiteral>();
+  auto* size = a->count->As<ast::SintLiteral>();
   ASSERT_NE(size, nullptr);
   EXPECT_EQ(size->ValueAsI32(), 5);
 }
@@ -477,9 +475,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
   EXPECT_EQ(a->decorations.size(), 0u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 15u}}));
 
-  auto* count_expr = a->count->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(count_expr, nullptr);
-  auto* size = count_expr->literal->As<ast::UintLiteral>();
+  auto* size = a->count->As<ast::UintLiteral>();
   ASSERT_NE(size, nullptr);
   EXPECT_EQ(size->ValueAsU32(), 5u);
 }
@@ -517,9 +513,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  auto* count_expr = a->count->As<ast::ScalarConstructorExpression>();
-  ASSERT_NE(count_expr, nullptr);
-  auto* size = count_expr->literal->As<ast::SintLiteral>();
+  auto* size = a->count->As<ast::SintLiteral>();
   ASSERT_NE(size, nullptr);
   EXPECT_EQ(size->ValueAsI32(), 5);
 

@@ -1293,9 +1293,6 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
 
 bool GeneratorImpl::EmitConstructor(std::ostream& out,
                                     const ast::ConstructorExpression* expr) {
-  if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
-    return EmitScalarConstructor(out, scalar);
-  }
   return EmitTypeConstructor(out, expr->As<ast::TypeConstructorExpression>());
 }
 
@@ -1387,12 +1384,6 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
   return true;
 }
 
-bool GeneratorImpl::EmitScalarConstructor(
-    std::ostream& out,
-    const ast::ScalarConstructorExpression* expr) {
-  return EmitLiteral(out, expr->literal);
-}
-
 bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {
   if (auto* l = lit->As<ast::BoolLiteral>()) {
     out << (l->value ? "true" : "false");
@@ -1444,6 +1435,9 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   }
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return EmitIdentifier(out, i);
+  }
+  if (auto* l = expr->As<ast::Literal>()) {
+    return EmitLiteral(out, l);
   }
   if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
     return EmitMemberAccessor(out, m);

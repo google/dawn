@@ -521,11 +521,12 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(
   if (decl.errored)
     return Failure::kErrored;
 
-  ast::ConstructorExpression* initializer = nullptr;
+  const ast::Expression* initializer = nullptr;
   if (match(Token::Type::kEqual)) {
     auto init = expect_const_expr();
-    if (init.errored)
+    if (init.errored) {
       return Failure::kErrored;
+    }
     initializer = std::move(init.value);
   }
 
@@ -2175,15 +2176,18 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
   auto source = t.source();
 
   auto lit = const_literal();
-  if (lit.errored)
+  if (lit.errored) {
     return Failure::kErrored;
-  if (lit.matched)
-    return create<ast::ScalarConstructorExpression>(source, lit.value);
+  }
+  if (lit.matched) {
+    return lit.value;
+  }
 
   if (t.Is(Token::Type::kParenLeft)) {
     auto paren = expect_paren_rhs_stmt();
-    if (paren.errored)
+    if (paren.errored) {
       return Failure::kErrored;
+    }
 
     return paren.value;
   }
@@ -2869,23 +2873,25 @@ Maybe<const ast::Literal*> ParserImpl::const_literal() {
 // const_expr
 //   : type_decl PAREN_LEFT ((const_expr COMMA)? const_expr COMMA?)? PAREN_RIGHT
 //   | const_literal
-Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
+Expect<const ast::Expression*> ParserImpl::expect_const_expr() {
   auto t = peek();
   auto source = t.source();
   if (t.IsLiteral()) {
     auto lit = const_literal();
-    if (lit.errored)
+    if (lit.errored) {
       return Failure::kErrored;
-    if (!lit.matched)
+    }
+    if (!lit.matched) {
       return add_error(peek(), "unable to parse constant literal");
-
-    return create<ast::ScalarConstructorExpression>(source, lit.value);
+    }
+    return lit.value;
   } else if (!t.IsIdentifier() || get_type(t.to_str())) {
     if (peek_is(Token::Type::kParenLeft, 1) ||
         peek_is(Token::Type::kLessThan, 1)) {
       auto type = expect_type("const_expr");
-      if (type.errored)
+      if (type.errored) {
         return Failure::kErrored;
+      }
 
       auto params = expect_paren_block(
           "type constructor", [&]() -> Expect<ast::ExpressionList> {

@@ -1353,34 +1353,30 @@ bool ParserImpl::EmitScalarSpecConstants() {
   for (auto& inst : module_->types_values()) {
     // These will be populated for a valid scalar spec constant.
     const Type* ast_type = nullptr;
-    ast::ScalarConstructorExpression* ast_expr = nullptr;
+    ast::Literal* ast_expr = nullptr;
 
     switch (inst.opcode()) {
       case SpvOpSpecConstantTrue:
       case SpvOpSpecConstantFalse: {
         ast_type = ConvertType(inst.type_id());
-        ast_expr = create<ast::ScalarConstructorExpression>(
-            Source{}, create<ast::BoolLiteral>(
-                          Source{}, inst.opcode() == SpvOpSpecConstantTrue));
+        ast_expr = create<ast::BoolLiteral>(
+            Source{}, inst.opcode() == SpvOpSpecConstantTrue);
         break;
       }
       case SpvOpSpecConstant: {
         ast_type = ConvertType(inst.type_id());
         const uint32_t literal_value = inst.GetSingleWordInOperand(0);
         if (ast_type->Is<I32>()) {
-          ast_expr = create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(
-                            Source{}, static_cast<int32_t>(literal_value)));
+          ast_expr = create<ast::SintLiteral>(
+              Source{}, static_cast<int32_t>(literal_value));
         } else if (ast_type->Is<U32>()) {
-          ast_expr = create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::UintLiteral>(
-                            Source{}, static_cast<uint32_t>(literal_value)));
+          ast_expr = create<ast::UintLiteral>(
+              Source{}, static_cast<uint32_t>(literal_value));
         } else if (ast_type->Is<F32>()) {
           float float_value;
           // Copy the bits so we can read them as a float.
           std::memcpy(&float_value, &literal_value, sizeof(float_value));
-          ast_expr = create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, float_value));
+          ast_expr = create<ast::FloatLiteral>(Source{}, float_value);
         } else {
           return Fail() << " invalid result type for OpSpecConstant "
                         << inst.PrettyPrint();
@@ -1981,26 +1977,20 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
   // Currently "null<type>" is missing from the WGSL parser.
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
   if (ast_type->Is<U32>()) {
-    return {ty_.U32(), create<ast::ScalarConstructorExpression>(
-                           Source{}, create<ast::UintLiteral>(
-                                         source, spirv_const->GetU32()))};
+    return {ty_.U32(), create<ast::UintLiteral>(source, spirv_const->GetU32())};
   }
   if (ast_type->Is<I32>()) {
-    return {ty_.I32(), create<ast::ScalarConstructorExpression>(
-                           Source{}, create<ast::SintLiteral>(
-                                         source, spirv_const->GetS32()))};
+    return {ty_.I32(), create<ast::SintLiteral>(source, spirv_const->GetS32())};
   }
   if (ast_type->Is<F32>()) {
-    return {ty_.F32(), create<ast::ScalarConstructorExpression>(
-                           Source{}, create<ast::FloatLiteral>(
-                                         source, spirv_const->GetFloat()))};
+    return {ty_.F32(),
+            create<ast::FloatLiteral>(source, spirv_const->GetFloat())};
   }
   if (ast_type->Is<Bool>()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
-    return {ty_.Bool(), create<ast::ScalarConstructorExpression>(
-                            Source{}, create<ast::BoolLiteral>(source, value))};
+    return {ty_.Bool(), create<ast::BoolLiteral>(source, value)};
   }
   Fail() << "expected scalar constant";
   return {};
@@ -2021,20 +2011,16 @@ const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
   type = type->UnwrapAlias();
 
   if (type->Is<Bool>()) {
-    return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::BoolLiteral>(Source{}, false));
+    return create<ast::BoolLiteral>(Source{}, false);
   }
   if (type->Is<U32>()) {
-    return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::UintLiteral>(Source{}, 0u));
+    return create<ast::UintLiteral>(Source{}, 0u);
   }
   if (type->Is<I32>()) {
-    return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::SintLiteral>(Source{}, 0));
+    return create<ast::SintLiteral>(Source{}, 0);
   }
   if (type->Is<F32>()) {
-    return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::FloatLiteral>(Source{}, 0.0f));
+    return create<ast::FloatLiteral>(Source{}, 0.0f);
   }
   if (type->Is<Alias>()) {
     // TODO(amaiorano): No type constructor for TypeName (yet?)

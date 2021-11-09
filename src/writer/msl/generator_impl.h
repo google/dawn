@@ -26,12 +26,12 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
+#include "src/ast/expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/interpolate_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
@@ -241,12 +241,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitReturn(const ast::ReturnStatement* stmt);
-  /// Handles generating a scalar constructor
-  /// @param out the output of the expression stream
-  /// @param expr the scalar constructor expression
-  /// @returns true if the scalar constructor is emitted
-  bool EmitScalarConstructor(std::ostream& out,
-                             const ast::ScalarConstructorExpression* expr);
   /// Handles emitting a pipeline stage name
   /// @param out the output of the expression stream
   /// @param stage the stage to emit

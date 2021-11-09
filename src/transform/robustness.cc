@@ -189,7 +189,9 @@ struct Robustness::State {
 
     // Convert idx to an expression, so we can emit the new accessor.
     if (!idx.expr) {
-      idx.expr = idx.is_signed ? b.Expr(idx.i32) : b.Expr(idx.u32);
+      idx.expr = idx.is_signed
+                     ? static_cast<const ast::Expression*>(b.Expr(idx.i32))
+                     : static_cast<const ast::Expression*>(b.Expr(idx.u32));
     }
 
     // Clone arguments outside of create() call to have deterministic ordering
