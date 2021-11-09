@@ -21,7 +21,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/call_expression.h"
-#include "src/ast/literal.h"
+#include "src/ast/literal_expression.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/phony_expression.h"
 #include "src/ast/type_constructor_expression.h"

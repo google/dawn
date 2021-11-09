@@ -12,29 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/uint_literal.h"
+#include "src/ast/literal_expression.h"
 
-#include "src/program_builder.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ast::UintLiteral);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::Literal);
 
 namespace tint {
 namespace ast {
 
-UintLiteral::UintLiteral(ProgramID pid, const Source& src, uint32_t val)
-    : Base(pid, src), value(val) {}
+Literal::Literal(ProgramID pid, const Source& src) : Base(pid, src) {}
 
-UintLiteral::~UintLiteral() = default;
-
-uint32_t UintLiteral::ValueAsU32() const {
-  return value;
-}
-
-const UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<UintLiteral>(src, value);
-}
+Literal::~Literal() = default;
 
 }  // namespace ast
 }  // namespace tint

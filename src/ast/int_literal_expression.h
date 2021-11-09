@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_INT_LITERAL_H_
-#define SRC_AST_INT_LITERAL_H_
+#ifndef SRC_AST_INT_LITERAL_EXPRESSION_H_
+#define SRC_AST_INT_LITERAL_EXPRESSION_H_
 
-#include "src/ast/literal.h"
+#include "src/ast/literal_expression.h"
 
 namespace tint {
 namespace ast {
@@ -41,4 +41,4 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_INT_LITERAL_H_
+#endif  // SRC_AST_INT_LITERAL_EXPRESSION_H_

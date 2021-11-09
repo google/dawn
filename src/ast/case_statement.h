@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "src/ast/block_statement.h"
-#include "src/ast/int_literal.h"
+#include "src/ast/int_literal_expression.h"
 
 namespace tint {
 namespace ast {

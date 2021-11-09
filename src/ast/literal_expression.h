@@ -12,40 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_SINT_LITERAL_H_
-#define SRC_AST_SINT_LITERAL_H_
+#ifndef SRC_AST_LITERAL_EXPRESSION_H_
+#define SRC_AST_LITERAL_EXPRESSION_H_
 
 #include <string>
 
-#include "src/ast/int_literal.h"
+#include "src/ast/expression.h"
 
 namespace tint {
 namespace ast {
 
-/// A signed int literal
-class SintLiteral : public Castable<SintLiteral, IntLiteral> {
+/// Base class for a literal value expressions
+class Literal : public Castable<Literal, Expression> {
  public:
+  ~Literal() override;
+
+ protected:
   /// Constructor
   /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param value the signed int literals value
-  SintLiteral(ProgramID pid, const Source& src, int32_t value);
-  ~SintLiteral() override;
-
-  /// @returns the literal value as a u32
-  uint32_t ValueAsU32() const override;
-
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const SintLiteral* Clone(CloneContext* ctx) const override;
-
-  /// The int literal value
-  const int32_t value;
+  /// @param src the input source
+  Literal(ProgramID pid, const Source& src);
 };
 
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_SINT_LITERAL_H_
+#endif  // SRC_AST_LITERAL_EXPRESSION_H_

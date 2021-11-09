@@ -12,29 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_LITERAL_H_
-#define SRC_AST_LITERAL_H_
+#ifndef SRC_AST_BOOL_LITERAL_EXPRESSION_H_
+#define SRC_AST_BOOL_LITERAL_EXPRESSION_H_
 
 #include <string>
 
-#include "src/ast/expression.h"
+#include "src/ast/literal_expression.h"
 
 namespace tint {
 namespace ast {
 
-/// Base class for a literal value expressions
-class Literal : public Castable<Literal, Expression> {
+/// A boolean literal
+class BoolLiteral : public Castable<BoolLiteral, Literal> {
  public:
-  ~Literal() override;
-
- protected:
   /// Constructor
   /// @param pid the identifier of the program that owns this node
-  /// @param src the input source
-  Literal(ProgramID pid, const Source& src);
+  /// @param src the source of this node
+  /// @param value the bool literals value
+  BoolLiteral(ProgramID pid, const Source& src, bool value);
+  ~BoolLiteral() override;
+
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  const BoolLiteral* Clone(CloneContext* ctx) const override;
+
+  /// The boolean literal value
+  const bool value;
 };
 
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_LITERAL_H_
+#endif  // SRC_AST_BOOL_LITERAL_EXPRESSION_H_

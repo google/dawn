@@ -17,15 +17,15 @@
 #include <limits>
 #include <utility>
 
-#include "src/ast/bool_literal.h"
+#include "src/ast/bool_literal_expression.h"
 #include "src/ast/call_expression.h"
-#include "src/ast/float_literal.h"
+#include "src/ast/float_literal_expression.h"
 #include "src/ast/interpolate_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/module.h"
 #include "src/ast/override_decoration.h"
-#include "src/ast/sint_literal.h"
-#include "src/ast/uint_literal.h"
+#include "src/ast/sint_literal_expression.h"
+#include "src/ast/uint_literal_expression.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_multisampled_texture_type.h"

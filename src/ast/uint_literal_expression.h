@@ -12,37 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_BOOL_LITERAL_H_
-#define SRC_AST_BOOL_LITERAL_H_
+#ifndef SRC_AST_UINT_LITERAL_EXPRESSION_H_
+#define SRC_AST_UINT_LITERAL_EXPRESSION_H_
 
 #include <string>
 
-#include "src/ast/literal.h"
+#include "src/ast/int_literal_expression.h"
 
 namespace tint {
 namespace ast {
 
-/// A boolean literal
-class BoolLiteral : public Castable<BoolLiteral, Literal> {
+/// A uint literal
+class UintLiteral : public Castable<UintLiteral, IntLiteral> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
-  /// @param value the bool literals value
-  BoolLiteral(ProgramID pid, const Source& src, bool value);
-  ~BoolLiteral() override;
+  /// @param value the uint literals value
+  UintLiteral(ProgramID pid, const Source& src, uint32_t value);
+  ~UintLiteral() override;
+
+  /// @returns the literal value as a u32
+  uint32_t ValueAsU32() const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  const BoolLiteral* Clone(CloneContext* ctx) const override;
+  const UintLiteral* Clone(CloneContext* ctx) const override;
 
-  /// The boolean literal value
-  const bool value;
+  /// The int literal value
+  const uint32_t value;
 };
 
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_BOOL_LITERAL_H_
+#endif  // SRC_AST_UINT_LITERAL_EXPRESSION_H_

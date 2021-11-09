@@ -12,40 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_UINT_LITERAL_H_
-#define SRC_AST_UINT_LITERAL_H_
+#ifndef SRC_AST_FLOAT_LITERAL_EXPRESSION_H_
+#define SRC_AST_FLOAT_LITERAL_EXPRESSION_H_
 
 #include <string>
 
-#include "src/ast/int_literal.h"
+#include "src/ast/literal_expression.h"
 
 namespace tint {
 namespace ast {
 
-/// A uint literal
-class UintLiteral : public Castable<UintLiteral, IntLiteral> {
+/// A float literal
+class FloatLiteral : public Castable<FloatLiteral, Literal> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
-  /// @param value the uint literals value
-  UintLiteral(ProgramID pid, const Source& src, uint32_t value);
-  ~UintLiteral() override;
-
-  /// @returns the literal value as a u32
-  uint32_t ValueAsU32() const override;
+  /// @param value the float literals value
+  FloatLiteral(ProgramID pid, const Source& src, float value);
+  ~FloatLiteral() override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  const UintLiteral* Clone(CloneContext* ctx) const override;
+  const FloatLiteral* Clone(CloneContext* ctx) const override;
 
-  /// The int literal value
-  const uint32_t value;
+  /// The float literal value
+  const float value;
 };
 
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_UINT_LITERAL_H_
+#endif  // SRC_AST_FLOAT_LITERAL_EXPRESSION_H_

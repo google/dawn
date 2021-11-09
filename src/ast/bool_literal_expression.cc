@@ -12,26 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/float_literal.h"
-
-#include <limits>
+#include "src/ast/bool_literal_expression.h"
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::FloatLiteral);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteral);
 
 namespace tint {
 namespace ast {
 
-FloatLiteral::FloatLiteral(ProgramID pid, const Source& src, float val)
+BoolLiteral::BoolLiteral(ProgramID pid, const Source& src, bool val)
     : Base(pid, src), value(val) {}
 
-FloatLiteral::~FloatLiteral() = default;
+BoolLiteral::~BoolLiteral() = default;
 
-const FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
+const BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
-  return ctx->dst->create<FloatLiteral>(src, value);
+  return ctx->dst->create<BoolLiteral>(src, value);
 }
 
 }  // namespace ast

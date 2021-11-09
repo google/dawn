@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/int_literal.h"
+#include "src/ast/int_literal_expression.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IntLiteral);
 

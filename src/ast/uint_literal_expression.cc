@@ -12,24 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/bool_literal.h"
+#include "src/ast/uint_literal_expression.h"
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteral);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::UintLiteral);
 
 namespace tint {
 namespace ast {
 
-BoolLiteral::BoolLiteral(ProgramID pid, const Source& src, bool val)
+UintLiteral::UintLiteral(ProgramID pid, const Source& src, uint32_t val)
     : Base(pid, src), value(val) {}
 
-BoolLiteral::~BoolLiteral() = default;
+UintLiteral::~UintLiteral() = default;
 
-const BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
+uint32_t UintLiteral::ValueAsU32() const {
+  return value;
+}
+
+const UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
-  return ctx->dst->create<BoolLiteral>(src, value);
+  return ctx->dst->create<UintLiteral>(src, value);
 }
 
 }  // namespace ast

@@ -58,8 +58,8 @@ set(TINT_LIB_SRCS
   ast/bitcast_expression.h
   ast/block_statement.cc
   ast/block_statement.h
-  ast/bool_literal.cc
-  ast/bool_literal.h
+  ast/bool_literal_expression.cc
+  ast/bool_literal_expression.h
   ast/bool.cc
   ast/bool.h
   ast/break_statement.cc
@@ -98,8 +98,8 @@ set(TINT_LIB_SRCS
   ast/f32.h
   ast/fallthrough_statement.cc
   ast/fallthrough_statement.h
-  ast/float_literal.cc
-  ast/float_literal.h
+  ast/float_literal_expression.cc
+  ast/float_literal_expression.h
   ast/for_loop_statement.cc
   ast/for_loop_statement.h
   ast/function.cc
@@ -112,16 +112,16 @@ set(TINT_LIB_SRCS
   ast/identifier_expression.h
   ast/if_statement.cc
   ast/if_statement.h
-  ast/int_literal.cc
-  ast/int_literal.h
+  ast/int_literal_expression.cc
+  ast/int_literal_expression.h
   ast/internal_decoration.cc
   ast/internal_decoration.h
   ast/interpolate_decoration.cc
   ast/interpolate_decoration.h
   ast/invariant_decoration.cc
   ast/invariant_decoration.h
-  ast/literal.cc
-  ast/literal.h
+  ast/literal_expression.cc
+  ast/literal_expression.h
   ast/location_decoration.cc
   ast/location_decoration.h
   ast/loop_statement.cc
@@ -150,8 +150,8 @@ set(TINT_LIB_SRCS
   ast/sampled_texture.h
   ast/sampler.cc
   ast/sampler.h
-  ast/sint_literal.cc
-  ast/sint_literal.h
+  ast/sint_literal_expression.cc
+  ast/sint_literal_expression.h
   ast/stage_decoration.cc
   ast/stage_decoration.h
   ast/statement.cc
@@ -191,8 +191,8 @@ set(TINT_LIB_SRCS
   ast/type_name.h
   ast/u32.cc
   ast/u32.h
-  ast/uint_literal.cc
-  ast/uint_literal.h
+  ast/uint_literal_expression.cc
+  ast/uint_literal_expression.h
   ast/unary_op_expression.cc
   ast/unary_op_expression.h
   ast/unary_op.cc
@@ -589,7 +589,7 @@ if(${TINT_BUILD_TESTS})
     ast/binding_decoration_test.cc
     ast/bitcast_expression_test.cc
     ast/block_statement_test.cc
-    ast/bool_literal_test.cc
+    ast/bool_literal_expression_test.cc
     ast/bool_test.cc
     ast/break_statement_test.cc
     ast/builtin_decoration_test.cc
@@ -604,14 +604,14 @@ if(${TINT_BUILD_TESTS})
     ast/external_texture_test.cc
     ast/f32_test.cc
     ast/fallthrough_statement_test.cc
-    ast/float_literal_test.cc
+    ast/float_literal_expression_test.cc
     ast/for_loop_statement_test.cc
     ast/function_test.cc
     ast/group_decoration_test.cc
     ast/i32_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
-    ast/int_literal_test.cc
+    ast/int_literal_expression_test.cc
     ast/interpolate_decoration_test.cc
     ast/intrinsic_texture_helper_test.cc
     ast/intrinsic_texture_helper_test.h
@@ -629,7 +629,7 @@ if(${TINT_BUILD_TESTS})
     ast/return_statement_test.cc
     ast/sampled_texture_test.cc
     ast/sampler_test.cc
-    ast/sint_literal_test.cc
+    ast/sint_literal_expression_test.cc
     ast/stage_decoration_test.cc
     ast/storage_texture_test.cc
     ast/stride_decoration_test.cc
@@ -644,7 +644,7 @@ if(${TINT_BUILD_TESTS})
     ast/traverse_expressions_test.cc
     ast/type_constructor_expression_test.cc
     ast/u32_test.cc
-    ast/uint_literal_test.cc
+    ast/uint_literal_expression_test.cc
     ast/unary_op_expression_test.cc
     ast/variable_decl_statement_test.cc
     ast/variable_test.cc
