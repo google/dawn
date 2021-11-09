@@ -120,18 +120,12 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating an identifier expression
   /// @param out the output of the expression stream
   /// @param expr the identifier expression
-  /// @returns true if the identifeir was emitted
+  /// @returns true if the identifier was emitted
   bool EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr);
   /// Handles an if statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(const ast::IfStatement* stmt);
-  /// Handles generating constructor expressions
-  /// @param out the output of the expression stream
-  /// @param expr the constructor expression
-  /// @returns true if the expression was emitted
-  bool EmitConstructor(std::ostream& out,
-                       const ast::ConstructorExpression* expr);
   /// Handles generating a discard statement
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted

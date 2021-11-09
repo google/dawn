@@ -217,12 +217,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param case_idx the index of the switch case in the switch statement
   /// @returns true if the statement was emitted successfully
   bool EmitCase(const ast::SwitchStatement* s, size_t case_idx);
-  /// Handles generating constructor expressions
-  /// @param out the output of the expression stream
-  /// @param expr the constructor expression
-  /// @returns true if the expression was emitted
-  bool EmitConstructor(std::ostream& out,
-                       const ast::ConstructorExpression* expr);
   /// Handles generating a discard statement
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted

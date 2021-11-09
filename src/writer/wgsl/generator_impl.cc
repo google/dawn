@@ -134,8 +134,8 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   if (auto* l = expr->As<ast::Literal>()) {
     return EmitLiteral(out, l);
   }
-  if (auto* c = expr->As<ast::ConstructorExpression>()) {
-    return EmitConstructor(out, c);
+  if (auto* c = expr->As<ast::TypeConstructorExpression>()) {
+    return EmitTypeConstructor(out, c);
   }
   if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
     return EmitMemberAccessor(out, m);
@@ -241,11 +241,6 @@ bool GeneratorImpl::EmitCall(std::ostream& out,
   out << ")";
 
   return true;
-}
-
-bool GeneratorImpl::EmitConstructor(std::ostream& out,
-                                    const ast::ConstructorExpression* expr) {
-  return EmitTypeConstructor(out, expr->As<ast::TypeConstructorExpression>());
 }
 
 bool GeneratorImpl::EmitTypeConstructor(

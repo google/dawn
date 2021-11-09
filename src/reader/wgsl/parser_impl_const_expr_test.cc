@@ -24,7 +24,6 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* t = e->As<ast::TypeConstructorExpression>();
@@ -46,7 +45,6 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_Empty) {
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* t = e->As<ast::TypeConstructorExpression>();
@@ -61,7 +59,6 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_TrailingComma) {
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* t = e->As<ast::TypeConstructorExpression>();
@@ -137,7 +134,6 @@ TEST_F(ParserImplTest, ConstExpr_RegisteredType) {
 
   auto e = p->expect_const_expr();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 }
 

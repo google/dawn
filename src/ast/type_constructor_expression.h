@@ -17,7 +17,7 @@
 
 #include <utility>
 
-#include "src/ast/constructor_expression.h"
+#include "src/ast/expression.h"
 
 namespace tint {
 namespace ast {
@@ -27,7 +27,7 @@ class Type;
 
 /// A type specific constructor
 class TypeConstructorExpression
-    : public Castable<TypeConstructorExpression, ConstructorExpression> {
+    : public Castable<TypeConstructorExpression, Expression> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

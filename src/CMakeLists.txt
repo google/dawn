@@ -74,8 +74,6 @@ set(TINT_LIB_SRCS
   ast/call_statement.h
   ast/case_statement.cc
   ast/case_statement.h
-  ast/constructor_expression.cc
-  ast/constructor_expression.h
   ast/continue_statement.cc
   ast/continue_statement.h
   ast/decoration.cc

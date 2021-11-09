@@ -1291,11 +1291,6 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitConstructor(std::ostream& out,
-                                    const ast::ConstructorExpression* expr) {
-  return EmitTypeConstructor(out, expr->As<ast::TypeConstructorExpression>());
-}
-
 bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
   if (!emit_continuing_()) {
     return false;
@@ -1430,8 +1425,8 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   if (auto* c = expr->As<ast::CallExpression>()) {
     return EmitCall(out, c);
   }
-  if (auto* c = expr->As<ast::ConstructorExpression>()) {
-    return EmitConstructor(out, c);
+  if (auto* c = expr->As<ast::TypeConstructorExpression>()) {
+    return EmitTypeConstructor(out, c);
   }
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return EmitIdentifier(out, i);

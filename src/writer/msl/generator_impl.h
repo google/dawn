@@ -182,12 +182,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully
   bool EmitCase(const ast::CaseStatement* stmt);
-  /// Handles generating constructor expressions
-  /// @param out the output of the expression stream
-  /// @param expr the constructor expression
-  /// @returns true if the expression was emitted
-  bool EmitConstructor(std::ostream& out,
-                       const ast::ConstructorExpression* expr);
   /// Handles a continue statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

@@ -577,7 +577,7 @@ uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
   if (auto* c = expr->As<ast::CallExpression>()) {
     return GenerateCallExpression(c);
   }
-  if (auto* c = expr->As<ast::ConstructorExpression>()) {
+  if (auto* c = expr->As<ast::TypeConstructorExpression>()) {
     return GenerateConstructorExpression(nullptr, c);
   }
   if (auto* i = expr->As<ast::IdentifierExpression>()) {

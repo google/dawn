@@ -2362,8 +2362,8 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
       sem_expr = Bitcast(bitcast);
     } else if (auto* call = expr->As<ast::CallExpression>()) {
       sem_expr = Call(call);
-    } else if (auto* ctor = expr->As<ast::ConstructorExpression>()) {
-      sem_expr = Constructor(ctor);
+    } else if (auto* ctor = expr->As<ast::TypeConstructorExpression>()) {
+      sem_expr = TypeConstructor(ctor);
     } else if (auto* ident = expr->As<ast::IdentifierExpression>()) {
       sem_expr = Identifier(ident);
     } else if (auto* literal = expr->As<ast::Literal>()) {
@@ -2730,41 +2730,37 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) {
   return true;
 }
 
-sem::Expression* Resolver::Constructor(const ast::ConstructorExpression* expr) {
-  if (auto* type_ctor = expr->As<ast::TypeConstructorExpression>()) {
-    auto* ty = Type(type_ctor->type);
-    if (!ty) {
-      return nullptr;
-    }
-
-    // Now that the argument types have been determined, make sure that they
-    // obey the constructor type rules laid out in
-    // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
-    bool ok = true;
-    if (auto* vec_type = ty->As<sem::Vector>()) {
-      ok = ValidateVectorConstructor(type_ctor, vec_type);
-    } else if (auto* mat_type = ty->As<sem::Matrix>()) {
-      ok = ValidateMatrixConstructor(type_ctor, mat_type);
-    } else if (ty->is_scalar()) {
-      ok = ValidateScalarConstructor(type_ctor, ty);
-    } else if (auto* arr_type = ty->As<sem::Array>()) {
-      ok = ValidateArrayConstructor(type_ctor, arr_type);
-    } else if (auto* struct_type = ty->As<sem::Struct>()) {
-      ok = ValidateStructureConstructor(type_ctor, struct_type);
-    } else {
-      AddError("type is not constructible", type_ctor->source);
-      return nullptr;
-    }
-    if (!ok) {
-      return nullptr;
-    }
-
-    auto val = EvaluateConstantValue(expr, ty);
-    return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+sem::Expression* Resolver::TypeConstructor(
+    const ast::TypeConstructorExpression* expr) {
+  auto* ty = Type(expr->type);
+  if (!ty) {
+    return nullptr;
   }
 
-  TINT_ICE(Resolver, diagnostics_) << "unexpected constructor expression type";
-  return nullptr;
+  // Now that the argument types have been determined, make sure that they
+  // obey the constructor type rules laid out in
+  // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
+  bool ok = true;
+  if (auto* vec_type = ty->As<sem::Vector>()) {
+    ok = ValidateVectorConstructor(expr, vec_type);
+  } else if (auto* mat_type = ty->As<sem::Matrix>()) {
+    ok = ValidateMatrixConstructor(expr, mat_type);
+  } else if (ty->is_scalar()) {
+    ok = ValidateScalarConstructor(expr, ty);
+  } else if (auto* arr_type = ty->As<sem::Array>()) {
+    ok = ValidateArrayConstructor(expr, arr_type);
+  } else if (auto* struct_type = ty->As<sem::Struct>()) {
+    ok = ValidateStructureConstructor(expr, struct_type);
+  } else {
+    AddError("type is not constructible", expr->source);
+    return nullptr;
+  }
+  if (!ok) {
+    return nullptr;
+  }
+
+  auto val = EvaluateConstantValue(expr, ty);
+  return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
 }
 
 sem::Expression* Resolver::Literal(const ast::Literal* literal) {

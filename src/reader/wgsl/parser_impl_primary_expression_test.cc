@@ -39,7 +39,6 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
   auto* ty = e->As<ast::TypeConstructorExpression>();
 
@@ -65,7 +64,6 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
   auto* ty = e->As<ast::TypeConstructorExpression>();
 
@@ -227,7 +225,6 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* c = e->As<ast::TypeConstructorExpression>();

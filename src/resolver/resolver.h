@@ -171,7 +171,6 @@ class Resolver {
   sem::Expression* Binary(const ast::BinaryExpression*);
   sem::Expression* Bitcast(const ast::BitcastExpression*);
   sem::Expression* Call(const ast::CallExpression*);
-  sem::Expression* Constructor(const ast::ConstructorExpression*);
   sem::Expression* Expression(const ast::Expression*);
   sem::Function* Function(const ast::Function*);
   sem::Call* FunctionCall(const ast::CallExpression*);
@@ -179,6 +178,7 @@ class Resolver {
   sem::Call* IntrinsicCall(const ast::CallExpression*, sem::IntrinsicType);
   sem::Expression* Literal(const ast::Literal*);
   sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
+  sem::Expression* TypeConstructor(const ast::TypeConstructorExpression*);
   sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
 
   // Statement resolving methods
