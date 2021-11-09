@@ -4813,7 +4813,7 @@ struct main_out {
 };
 
 [[stage(vertex)]]
-fn main([[location(1)]] x_1_param : u32, [[location(2)]] x_2_param : vec2<u32>, [[location(3)]] x_3_param : i32, [[location(4)]] x_4_param : vec2<i32>, [[location(5), interpolate(flat)]] x_5_param : f32, [[location(6), interpolate(flat)]] x_6_param : vec2<f32>) -> main_out {
+fn main([[location(1), interpolate(flat)]] x_1_param : u32, [[location(2), interpolate(flat)]] x_2_param : vec2<u32>, [[location(3), interpolate(flat)]] x_3_param : i32, [[location(4), interpolate(flat)]] x_4_param : vec2<i32>, [[location(5), interpolate(flat)]] x_5_param : f32, [[location(6), interpolate(flat)]] x_6_param : vec2<f32>) -> main_out {
   x_1 = x_1_param;
   x_2 = x_2_param;
   x_3 = x_3_param;
@@ -4893,13 +4893,13 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(1)]]
+  [[location(1), interpolate(flat)]]
   x_1_1 : u32;
-  [[location(2)]]
+  [[location(2), interpolate(flat)]]
   x_2_1 : vec2<u32>;
-  [[location(3)]]
+  [[location(3), interpolate(flat)]]
   x_3_1 : i32;
-  [[location(4)]]
+  [[location(4), interpolate(flat)]]
   x_4_1 : vec2<i32>;
   [[location(5), interpolate(flat)]]
   x_5_1 : f32;

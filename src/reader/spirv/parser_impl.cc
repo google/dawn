@@ -1777,9 +1777,9 @@ const ast::Decoration* ParserImpl::SetLocation(
 bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
                                             const DecorationList& decorations,
                                             ast::DecorationList* ast_decos) {
-  bool has_interpolate_no_perspective = false;
-  bool has_interpolate_sampling_centroid = false;
-  bool has_interpolate_sampling_sample = false;
+  // Vulkan defaults to perspective-correct interpolation.
+  ast::InterpolationType type = ast::InterpolationType::kPerspective;
+  ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone;
 
   for (const auto& deco : decorations) {
     TINT_ASSERT(Reader, deco.size() > 0);
@@ -1793,22 +1793,14 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
                     create<ast::LocationDecoration>(Source{}, deco[1]));
         break;
       case SpvDecorationFlat:
-        // In WGSL, integral types are always flat, and so the decoration
-        // is never specified.
-        if (!store_type->IsIntegerScalarOrVector()) {
-          ast_decos->emplace_back(create<ast::InterpolateDecoration>(
-              Source{}, ast::InterpolationType::kFlat,
-              ast::InterpolationSampling::kNone));
-          // Only one interpolate attribute is allowed.
-          return true;
-        }
+        type = ast::InterpolationType::kFlat;
         break;
       case SpvDecorationNoPerspective:
         if (store_type->IsIntegerScalarOrVector()) {
           // This doesn't capture the array or struct case.
           return Fail() << "NoPerspective is invalid on integral IO";
         }
-        has_interpolate_no_perspective = true;
+        type = ast::InterpolationType::kLinear;
         break;
       case SpvDecorationCentroid:
         if (store_type->IsIntegerScalarOrVector()) {
@@ -1816,7 +1808,7 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
           return Fail()
                  << "Centroid interpolation sampling is invalid on integral IO";
         }
-        has_interpolate_sampling_centroid = true;
+        sampling = ast::InterpolationSampling::kCentroid;
         break;
       case SpvDecorationSample:
         if (store_type->IsIntegerScalarOrVector()) {
@@ -1824,33 +1816,19 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
           return Fail()
                  << "Sample interpolation sampling is invalid on integral IO";
         }
-        has_interpolate_sampling_sample = true;
+        sampling = ast::InterpolationSampling::kSample;
         break;
       default:
         break;
     }
   }
 
-  // Apply non-integral interpolation.
-  if (has_interpolate_no_perspective || has_interpolate_sampling_centroid ||
-      has_interpolate_sampling_sample) {
-    const ast::InterpolationType type =
-        has_interpolate_no_perspective ? ast::InterpolationType::kLinear
-                                       : ast::InterpolationType::kPerspective;
-    const ast::InterpolationSampling sampling =
-        has_interpolate_sampling_centroid
-            ? ast::InterpolationSampling::kCentroid
-            : (has_interpolate_sampling_sample
-                   ? ast::InterpolationSampling::kSample
-                   : ast::InterpolationSampling::
-                         kNone /* Center is the default */);
-    if (type == ast::InterpolationType::kPerspective &&
-        sampling == ast::InterpolationSampling::kNone) {
-      // This is the default. Don't add a decoration.
-    } else {
-      ast_decos->emplace_back(
-          create<ast::InterpolateDecoration>(type, sampling));
-    }
+  // Apply interpolation.
+  if (type == ast::InterpolationType::kPerspective &&
+      sampling == ast::InterpolationSampling::kNone) {
+    // This is the default. Don't add a decoration.
+  } else {
+    ast_decos->emplace_back(create<ast::InterpolateDecoration>(type, sampling));
   }
 
   return success();
