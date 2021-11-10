@@ -95,10 +95,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param ty the declared type to generate
   /// @returns true if the declared type was emitted
   bool EmitTypeDecl(const sem::Type* ty);
-  /// Handles an array accessor expression
+  /// Handles an index accessor expression
   /// @param out the output of the expression stream
   /// @param expr the expression to emit
-  /// @returns true if the array accessor was emitted
+  /// @returns true if the index accessor was emitted
   bool EmitIndexAccessor(std::ostream& out,
                          const ast::IndexAccessorExpression* expr);
   /// Handles an assignment statement

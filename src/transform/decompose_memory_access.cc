@@ -852,7 +852,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     }
 
     if (auto* accessor = node->As<ast::IndexAccessorExpression>()) {
-      if (auto access = state.TakeAccess(accessor->array)) {
+      if (auto access = state.TakeAccess(accessor->object)) {
         // X[Y]
         if (auto* arr = access.type->As<sem::Array>()) {
           auto* offset = state.Mul(arr->Stride(), accessor->index);

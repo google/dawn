@@ -54,7 +54,7 @@ struct Robustness::State {
   /// cloned without changes.
   const ast::IndexAccessorExpression* Transform(
       const ast::IndexAccessorExpression* expr) {
-    auto* ret_type = ctx.src->Sem().Get(expr->array)->Type();
+    auto* ret_type = ctx.src->Sem().Get(expr->object)->Type();
 
     auto* ref = ret_type->As<sem::Reference>();
     if (ref && omitted_classes.count(ref->StorageClass()) != 0) {
@@ -83,7 +83,7 @@ struct Robustness::State {
     } else if (auto* arr = ret_unwrapped->As<sem::Array>()) {
       size.u32 = arr->Count();
     } else if (auto* mat = ret_unwrapped->As<sem::Matrix>()) {
-      // The row accessor would have been an embedded array accessor and already
+      // The row accessor would have been an embedded index accessor and already
       // handled, so we just need to do columns here.
       size.u32 = mat->columns();
     } else {
@@ -97,7 +97,7 @@ struct Robustness::State {
         return nullptr;
       }
       // Runtime sized array
-      auto* arr = ctx.Clone(expr->array);
+      auto* arr = ctx.Clone(expr->object);
       size.expr = b.Call("arrayLength", b.AddressOf(arr));
     }
 
@@ -196,8 +196,8 @@ struct Robustness::State {
 
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx.Clone(expr->source);
-    auto* arr = ctx.Clone(expr->array);
-    return b.IndexAccessor(src, arr, idx.expr);
+    auto* obj = ctx.Clone(expr->object);
+    return b.IndexAccessor(src, obj, idx.expr);
   }
 
   /// @param type intrinsic type

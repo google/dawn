@@ -147,10 +147,10 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll([&](const ast::IndexAccessorExpression* expr)
                      -> const ast::IndexAccessorExpression* {
     if (auto* access =
-            ctx.src->Sem().Get<sem::StructMemberAccess>(expr->array)) {
+            ctx.src->Sem().Get<sem::StructMemberAccess>(expr->object)) {
       auto it = decomposed.find(access->Member()->Declaration());
       if (it != decomposed.end()) {
-        auto* obj = ctx.CloneWithoutTransform(expr->array);
+        auto* obj = ctx.CloneWithoutTransform(expr->object);
         auto* idx = ctx.Clone(expr->index);
         return ctx.dst->IndexAccessor(obj, idx);
       }

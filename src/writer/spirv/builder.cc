@@ -958,7 +958,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr,
   }
 
   TINT_ICE(Writer, builder_.Diagnostics())
-      << "unsupported array accessor expression";
+      << "unsupported index accessor expression";
   return false;
 }
 
@@ -1095,7 +1095,7 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
     return 0;
   }
 
-  // Gather a list of all the member and array accessors that are in this chain.
+  // Gather a list of all the member and index accessors that are in this chain.
   // The list is built in reverse order as that's the order we need to access
   // the chain.
   std::vector<const ast::Expression*> accessors;
@@ -1103,7 +1103,7 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
   while (true) {
     if (auto* array = source->As<ast::IndexAccessorExpression>()) {
       accessors.insert(accessors.begin(), source);
-      source = array->array;
+      source = array->object;
     } else if (auto* member = source->As<ast::MemberAccessorExpression>()) {
       accessors.insert(accessors.begin(), source);
       source = member->structure;

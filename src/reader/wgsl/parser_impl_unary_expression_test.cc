@@ -29,13 +29,13 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   ASSERT_NE(e.value, nullptr);
 
   ASSERT_TRUE(e->Is<ast::IndexAccessorExpression>());
-  auto* ary = e->As<ast::IndexAccessorExpression>();
-  ASSERT_TRUE(ary->array->Is<ast::IdentifierExpression>());
-  auto* ident = ary->array->As<ast::IdentifierExpression>();
+  auto* idx = e->As<ast::IndexAccessorExpression>();
+  ASSERT_TRUE(idx->object->Is<ast::IdentifierExpression>());
+  auto* ident = idx->object->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(ary->index->Is<ast::SintLiteral>());
-  ASSERT_EQ(ary->index->As<ast::SintLiteral>()->value, 2);
+  ASSERT_TRUE(idx->index->Is<ast::SintLiteral>());
+  ASSERT_EQ(idx->index->As<ast::SintLiteral>()->value, 2);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {

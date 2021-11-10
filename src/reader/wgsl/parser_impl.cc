@@ -2266,7 +2266,7 @@ Maybe<const ast::Expression*> ParserImpl::postfix_expression(
               return add_error(peek(), "unable to parse expression inside []");
             }
 
-            if (!expect("array accessor", Token::Type::kBracketRight)) {
+            if (!expect("index accessor", Token::Type::kBracketRight)) {
               return Failure::kErrored;
             }
 

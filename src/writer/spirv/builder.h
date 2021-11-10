@@ -299,7 +299,7 @@ class Builder {
   /// @param var the variable to generate
   /// @returns true if the variable is emited.
   bool GenerateGlobalVariable(const ast::Variable* var);
-  /// Generates an array accessor expression.
+  /// Generates an index accessor expression.
   ///
   /// For more information on accessors see the "Pointer evaluation" section of
   /// the WGSL specification.
@@ -307,7 +307,7 @@ class Builder {
   /// @param expr the expresssion to generate
   /// @returns the id of the expression or 0 on failure
   uint32_t GenerateAccessorExpression(const ast::Expression* expr);
-  /// Generates an array accessor
+  /// Generates an index accessor
   /// @param expr the accessor to generate
   /// @param info the current accessor information
   /// @returns true if the accessor was generated successfully

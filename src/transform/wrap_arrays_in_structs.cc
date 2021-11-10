@@ -56,15 +56,15 @@ void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     return nullptr;
   });
 
-  // Fix up array accessors so `a[1]` becomes `a.arr[1]`
+  // Fix up index accessors so `a[1]` becomes `a.arr[1]`
   ctx.ReplaceAll([&](const ast::IndexAccessorExpression* accessor)
                      -> const ast::IndexAccessorExpression* {
     if (auto* array = ::tint::As<sem::Array>(
-            sem.Get(accessor->array)->Type()->UnwrapRef())) {
+            sem.Get(accessor->object)->Type()->UnwrapRef())) {
       if (wrapper(array)) {
         // Array is wrapped in a structure. Emit a member accessor to get
         // to the actual array.
-        auto* arr = ctx.Clone(accessor->array);
+        auto* arr = ctx.Clone(accessor->object);
         auto* idx = ctx.Clone(accessor->index);
         auto* unwrapped = ctx.dst->MemberAccessor(arr, "arr");
         return ctx.dst->IndexAccessor(accessor->source, unwrapped, idx);

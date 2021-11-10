@@ -114,11 +114,11 @@ void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     return nullptr;
   });
 
-  // Fix up array accessors so `a[1]` becomes `a[1].el`
+  // Fix up index accessors so `a[1]` becomes `a[1].el`
   ctx.ReplaceAll([&](const ast::IndexAccessorExpression* accessor)
                      -> const ast::Expression* {
     if (auto* array = tint::As<sem::Array>(
-            sem.Get(accessor->array)->Type()->UnwrapRef())) {
+            sem.Get(accessor->object)->Type()->UnwrapRef())) {
       if (pad(array)) {
         // Array element is wrapped in a structure. Emit a member accessor
         // to get to the actual array element.

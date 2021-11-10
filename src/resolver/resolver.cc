@@ -2398,7 +2398,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
 sem::Expression* Resolver::IndexAccessor(
     const ast::IndexAccessorExpression* expr) {
   auto* idx = expr->index;
-  auto* parent_raw_ty = TypeOf(expr->array);
+  auto* parent_raw_ty = TypeOf(expr->object);
   auto* parent_ty = parent_raw_ty->UnwrapRef();
   const sem::Type* ty = nullptr;
   if (auto* arr = parent_ty->As<sem::Array>()) {
@@ -3454,7 +3454,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
         auto* array = unary->expr->As<ast::IndexAccessorExpression>();
         auto* member = unary->expr->As<ast::MemberAccessorExpression>();
-        if ((array && TypeOf(array->array)->UnwrapRef()->Is<sem::Vector>()) ||
+        if ((array && TypeOf(array->object)->UnwrapRef()->Is<sem::Vector>()) ||
             (member &&
              TypeOf(member->structure)->UnwrapRef()->Is<sem::Vector>())) {
           AddError("cannot take the address of a vector component",

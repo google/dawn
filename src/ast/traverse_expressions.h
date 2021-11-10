@@ -103,7 +103,7 @@ bool TraverseExpressions(const ast::Expression* root,
     }
 
     if (auto* idx = expr->As<IndexAccessorExpression>()) {
-      push_pair(idx->array, idx->index);
+      push_pair(idx->object, idx->index);
     } else if (auto* bin_op = expr->As<BinaryExpression>()) {
       push_pair(bin_op->lhs, bin_op->rhs);
     } else if (auto* bitcast = expr->As<BitcastExpression>()) {

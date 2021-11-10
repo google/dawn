@@ -20,18 +20,18 @@
 namespace tint {
 namespace ast {
 
-/// An array accessor expression
+/// An index accessor expression
 class IndexAccessorExpression
     : public Castable<IndexAccessorExpression, Expression> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node
-  /// @param source the array accessor source
-  /// @param arr the array
+  /// @param source the index accessor source
+  /// @param obj the object
   /// @param idx the index expression
   IndexAccessorExpression(ProgramID program_id,
                           const Source& source,
-                          const Expression* arr,
+                          const Expression* obj,
                           const Expression* idx);
   /// Move constructor
   IndexAccessorExpression(IndexAccessorExpression&&);
@@ -43,8 +43,8 @@ class IndexAccessorExpression
   /// @return the newly cloned node
   const IndexAccessorExpression* Clone(CloneContext* ctx) const override;
 
-  /// the array
-  const Expression* const array;
+  /// the array, vector or matrix
+  const Expression* const object;
 
   /// the index expression
   const Expression* const index;

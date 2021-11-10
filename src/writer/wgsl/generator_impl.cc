@@ -156,14 +156,14 @@ bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
     const ast::IndexAccessorExpression* expr) {
   bool paren_lhs =
-      !expr->array
+      !expr->object
            ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
                      ast::IdentifierExpression, ast::MemberAccessorExpression,
                      ast::TypeConstructorExpression>();
   if (paren_lhs) {
     out << "(";
   }
-  if (!EmitExpression(out, expr->array)) {
+  if (!EmitExpression(out, expr->object)) {
     return false;
   }
   if (paren_lhs) {

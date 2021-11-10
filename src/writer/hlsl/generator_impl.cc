@@ -295,7 +295,7 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(
 
   auto out = line();
   out << name << "(";
-  if (!EmitExpression(out, ast_access_expr->array)) {
+  if (!EmitExpression(out, ast_access_expr->object)) {
     return false;
   }
   out << ", ";
@@ -314,7 +314,7 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(
 bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
     const ast::IndexAccessorExpression* expr) {
-  if (!EmitExpression(out, expr->array)) {
+  if (!EmitExpression(out, expr->object)) {
     return false;
   }
   out << "[";
@@ -355,7 +355,7 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
 
 bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
   if (auto* idx = stmt->lhs->As<ast::IndexAccessorExpression>()) {
-    if (auto* vec = TypeOf(idx->array)->UnwrapRef()->As<sem::Vector>()) {
+    if (auto* vec = TypeOf(idx->object)->UnwrapRef()->As<sem::Vector>()) {
       auto* rhs_sem = builder_.Sem().Get(idx->index);
       if (!rhs_sem->ConstantValue().IsValid()) {
         return EmitDynamicVectorAssignment(stmt, vec);

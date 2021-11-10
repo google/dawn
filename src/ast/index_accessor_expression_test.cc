@@ -22,29 +22,29 @@ namespace {
 using IndexAccessorExpressionTest = TestHelper;
 
 TEST_F(IndexAccessorExpressionTest, Create) {
-  auto* ary = Expr("ary");
+  auto* obj = Expr("obj");
   auto* idx = Expr("idx");
 
-  auto* exp = IndexAccessor(ary, idx);
-  ASSERT_EQ(exp->array, ary);
+  auto* exp = IndexAccessor(obj, idx);
+  ASSERT_EQ(exp->object, obj);
   ASSERT_EQ(exp->index, idx);
 }
 
 TEST_F(IndexAccessorExpressionTest, CreateWithSource) {
-  auto* ary = Expr("ary");
+  auto* obj = Expr("obj");
   auto* idx = Expr("idx");
 
-  auto* exp = IndexAccessor(Source{{20, 2}}, ary, idx);
+  auto* exp = IndexAccessor(Source{{20, 2}}, obj, idx);
   auto src = exp->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(IndexAccessorExpressionTest, IsIndexAccessor) {
-  auto* ary = Expr("ary");
+  auto* obj = Expr("obj");
   auto* idx = Expr("idx");
 
-  auto* exp = IndexAccessor(ary, idx);
+  auto* exp = IndexAccessor(obj, idx);
   EXPECT_TRUE(exp->Is<IndexAccessorExpression>());
 }
 

@@ -23,11 +23,11 @@ namespace ast {
 
 IndexAccessorExpression::IndexAccessorExpression(ProgramID pid,
                                                  const Source& src,
-                                                 const Expression* arr,
+                                                 const Expression* obj,
                                                  const Expression* idx)
-    : Base(pid, src), array(arr), index(idx) {
-  TINT_ASSERT(AST, array);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, array, program_id);
+    : Base(pid, src), object(obj), index(idx) {
+  TINT_ASSERT(AST, object);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, object, program_id);
   TINT_ASSERT(AST, idx);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, idx, program_id);
 }
@@ -41,9 +41,9 @@ const IndexAccessorExpression* IndexAccessorExpression::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
-  auto* arr = ctx->Clone(array);
+  auto* obj = ctx->Clone(object);
   auto* idx = ctx->Clone(index);
-  return ctx->dst->create<IndexAccessorExpression>(src, arr, idx);
+  return ctx->dst->create<IndexAccessorExpression>(src, obj, idx);
 }
 
 }  // namespace ast

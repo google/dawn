@@ -1748,29 +1748,29 @@ class ProgramBuilder {
   }
 
   /// @param source the source information
-  /// @param arr the array argument for the array accessor expression
-  /// @param idx the index argument for the array accessor expression
+  /// @param obj the object for the index accessor expression
+  /// @param idx the index argument for the index accessor expression
   /// @returns a `ast::IndexAccessorExpression` that indexes `arr` with `idx`
-  template <typename ARR, typename IDX>
+  template <typename OBJ, typename IDX>
   const ast::IndexAccessorExpression* IndexAccessor(const Source& source,
-                                                    ARR&& arr,
+                                                    OBJ&& obj,
                                                     IDX&& idx) {
     return create<ast::IndexAccessorExpression>(
-        source, Expr(std::forward<ARR>(arr)), Expr(std::forward<IDX>(idx)));
+        source, Expr(std::forward<OBJ>(obj)), Expr(std::forward<IDX>(idx)));
   }
 
-  /// @param arr the array argument for the array accessor expression
-  /// @param idx the index argument for the array accessor expression
+  /// @param obj the object for the index accessor expression
+  /// @param idx the index argument for the index accessor expression
   /// @returns a `ast::IndexAccessorExpression` that indexes `arr` with `idx`
-  template <typename ARR, typename IDX>
-  const ast::IndexAccessorExpression* IndexAccessor(ARR&& arr, IDX&& idx) {
-    return create<ast::IndexAccessorExpression>(Expr(std::forward<ARR>(arr)),
+  template <typename OBJ, typename IDX>
+  const ast::IndexAccessorExpression* IndexAccessor(OBJ&& obj, IDX&& idx) {
+    return create<ast::IndexAccessorExpression>(Expr(std::forward<OBJ>(obj)),
                                                 Expr(std::forward<IDX>(idx)));
   }
 
   /// @param source the source information
   /// @param obj the object for the member accessor expression
-  /// @param idx the index argument for the array accessor expression
+  /// @param idx the index argument for the member accessor expression
   /// @returns a `ast::MemberAccessorExpression` that indexes `obj` with `idx`
   template <typename OBJ, typename IDX>
   const ast::MemberAccessorExpression* MemberAccessor(const Source& source,
@@ -1781,7 +1781,7 @@ class ProgramBuilder {
   }
 
   /// @param obj the object for the member accessor expression
-  /// @param idx the index argument for the array accessor expression
+  /// @param idx the index argument for the member accessor expression
   /// @returns a `ast::MemberAccessorExpression` that indexes `obj` with `idx`
   template <typename OBJ, typename IDX>
   const ast::MemberAccessorExpression* MemberAccessor(OBJ&& obj, IDX&& idx) {

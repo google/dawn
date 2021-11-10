@@ -44,7 +44,7 @@ void CollectSavedArrayIndices(const Program* program,
                               const ast::Expression* expr,
                               F&& cb) {
   if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
-    CollectSavedArrayIndices(program, a->array, cb);
+    CollectSavedArrayIndices(program, a->object, cb);
 
     if (!a->index->Is<ast::Literal>()) {
       cb(a->index);
@@ -160,7 +160,7 @@ void InlinePointerLets::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                 ctx.dst->Const(saved_name, nullptr, ctx.Clone(idx_expr)));
             // Place this variable after the pointer typed let. Order here is
             // important as order-of-operations needs to be preserved.
-            // CollectSavedArrayIndices() visits the LHS of an array accessor
+            // CollectSavedArrayIndices() visits the LHS of an index accessor
             // before the index expression.
             // Note that repeated calls to InsertAfter() with the same `after`
             // argument will result in nodes to inserted in the order the calls

@@ -167,7 +167,7 @@ bool GeneratorImpl::Generate() {
 bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
     const ast::IndexAccessorExpression* expr) {
-  if (!EmitExpression(out, expr->array)) {
+  if (!EmitExpression(out, expr->object)) {
     return false;
   }
   out << "[";

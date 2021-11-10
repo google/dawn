@@ -58,16 +58,16 @@ TEST_F(ParserImplErrorTest, AliasDeclInvalidDeco) {
          "  ^^^^^\n");
 }
 
-TEST_F(ParserImplErrorTest, ArrayIndexExprInvalidExpr) {
+TEST_F(ParserImplErrorTest, IndexExprInvalidExpr) {
   EXPECT("fn f() { x = y[^]; }",
          "test.wgsl:1:16 error: unable to parse expression inside []\n"
          "fn f() { x = y[^]; }\n"
          "               ^\n");
 }
 
-TEST_F(ParserImplErrorTest, ArrayIndexExprMissingRBracket) {
+TEST_F(ParserImplErrorTest, IndexExprMissingRBracket) {
   EXPECT("fn f() { x = y[1; }",
-         "test.wgsl:1:17 error: expected ']' for array accessor\n"
+         "test.wgsl:1:17 error: expected ']' for index accessor\n"
          "fn f() { x = y[1; }\n"
          "                ^\n");
 }

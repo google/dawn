@@ -64,14 +64,14 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("d"));
 
   ASSERT_TRUE(mem->structure->Is<ast::IndexAccessorExpression>());
-  auto* ary = mem->structure->As<ast::IndexAccessorExpression>();
+  auto* idx = mem->structure->As<ast::IndexAccessorExpression>();
 
-  ASSERT_NE(ary->index, nullptr);
-  ASSERT_TRUE(ary->index->Is<ast::SintLiteral>());
-  EXPECT_EQ(ary->index->As<ast::SintLiteral>()->value, 2);
+  ASSERT_NE(idx->index, nullptr);
+  ASSERT_TRUE(idx->index->Is<ast::SintLiteral>());
+  EXPECT_EQ(idx->index->As<ast::SintLiteral>()->value, 2);
 
-  ASSERT_TRUE(ary->array->Is<ast::MemberAccessorExpression>());
-  mem = ary->array->As<ast::MemberAccessorExpression>();
+  ASSERT_TRUE(idx->object->Is<ast::MemberAccessorExpression>());
+  mem = idx->object->As<ast::MemberAccessorExpression>();
   ASSERT_TRUE(mem->member->Is<ast::IdentifierExpression>());
   ident = mem->member->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("c"));
