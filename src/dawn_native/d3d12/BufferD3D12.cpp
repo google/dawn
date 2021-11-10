@@ -379,14 +379,8 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Buffer::DestroyApiObjectImpl() {
-        if (mMappedData != nullptr) {
-            // If the buffer is currently mapped, unmap without flushing the writes to the GPU
-            // since the buffer cannot be used anymore. UnmapImpl checks mWrittenRange to know
-            // which parts to flush, so we set it to an empty range to prevent flushes.
-            mWrittenMappedRange = {0, 0};
-            UnmapImpl();
-        }
-
+        // TODO(crbug.com/dawn/1189) Reintroduce optimization to skip flushing the writes to the GPU
+        // memory when we unmap in destruction case since the buffer will be destroyed anyways.
         ToBackend(GetDevice())->DeallocateMemory(mResourceAllocation);
     }
 

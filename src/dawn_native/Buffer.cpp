@@ -261,30 +261,32 @@ namespace dawn_native {
 
     MaybeError BufferBase::MapAtCreationInternal() {
         ASSERT(!IsError());
-        mState = BufferState::MappedAtCreation;
         mMapOffset = 0;
         mMapSize = mSize;
 
-        // 0-sized buffers are not supposed to be written to, Return back any non-null pointer.
-        // Handle 0-sized buffers first so we don't try to map them in the backend.
-        if (mSize == 0) {
-            return {};
+        // 0-sized buffers are not supposed to be written to. Return back any non-null pointer.
+        // Skip handling 0-sized buffers so we don't try to map them in the backend.
+        if (mSize != 0) {
+            // Mappable buffers don't use a staging buffer and are just as if mapped through
+            // MapAsync.
+            if (IsCPUWritableAtCreation()) {
+                DAWN_TRY(MapAtCreationImpl());
+            } else {
+                // If any of these fail, the buffer will be deleted and replaced with an error
+                // buffer. The staging buffer is used to return mappable data to inititalize the
+                // buffer contents. Allocate one as large as the real buffer size so that every byte
+                // is initialized.
+                // TODO(crbug.com/dawn/828): Suballocate and reuse memory from a larger staging
+                // buffer so we don't create many small buffers.
+                DAWN_TRY_ASSIGN(mStagingBuffer,
+                                GetDevice()->CreateStagingBuffer(GetAllocatedSize()));
+            }
         }
 
-        // Mappable buffers don't use a staging buffer and are just as if mapped through MapAsync.
-        if (IsCPUWritableAtCreation()) {
-            DAWN_TRY(MapAtCreationImpl());
-        } else {
-            // If any of these fail, the buffer will be deleted and replaced with an
-            // error buffer.
-            // The staging buffer is used to return mappable data to inititalize the buffer
-            // contents. Allocate one as large as the real buffer size so that every byte is
-            // initialized.
-            // TODO(crbug.com/dawn/828): Suballocate and reuse memory from a larger staging buffer
-            // so we don't create many small buffers.
-            DAWN_TRY_ASSIGN(mStagingBuffer, GetDevice()->CreateStagingBuffer(GetAllocatedSize()));
-        }
-
+        // Only set the state to mapped at creation if we did no fail any point in this helper.
+        // Otherwise, if we override the default unmapped state before succeeding to create a
+        // staging buffer, we will have issues when we try to destroy the buffer.
+        mState = BufferState::MappedAtCreation;
         return {};
     }
 
