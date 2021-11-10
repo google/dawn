@@ -198,7 +198,11 @@ func run() error {
 		fmt.Printf(" validation ")
 		if *tool.path != "" || (fxc && tool.lang == "hlsl") {
 			color.Set(color.FgGreen)
-			fmt.Printf("ENABLED")
+			tool_path := *tool.path
+			if fxc && tool.lang == "hlsl" {
+				tool_path = "Tint will use FXC dll in PATH"
+			}
+			fmt.Printf("ENABLED (" + tool_path + ")")
 		} else {
 			color.Set(color.FgRed)
 			fmt.Printf("DISABLED")
@@ -615,7 +619,7 @@ func saveExpectedFile(path string, format outputFormat, content string) error {
 	// Don't generate expected results for certain directories that contain
 	// large corpora of tests for which the generated code is uninteresting.
 	for _, exclude := range []string{"/test/unittest/", "/test/vk-gl-cts/"} {
-		if strings.Contains(path, exclude) {
+		if strings.Contains(path, filepath.FromSlash(exclude)) {
 			return nil
 		}
 	}
