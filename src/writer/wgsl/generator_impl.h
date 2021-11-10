@@ -99,7 +99,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output of the expression stream
   /// @param expr the literal expression expression
   /// @returns true if the literal expression is emitted
-  bool EmitLiteral(std::ostream& out, const ast::Literal* expr);
+  bool EmitLiteral(std::ostream& out, const ast::LiteralExpression* expr);
   /// Handles a continue statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

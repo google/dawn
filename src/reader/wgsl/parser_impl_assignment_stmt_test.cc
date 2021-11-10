@@ -36,8 +36,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
   ASSERT_NE(e->rhs, nullptr);
-  ASSERT_TRUE(e->rhs->Is<ast::SintLiteral>());
-  EXPECT_EQ(e->rhs->As<ast::SintLiteral>()->value, 123);
+  ASSERT_TRUE(e->rhs->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(e->rhs->As<ast::SintLiteralExpression>()->value, 123);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
@@ -53,8 +53,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   ASSERT_NE(e->rhs, nullptr);
 
   ASSERT_NE(e->rhs, nullptr);
-  ASSERT_TRUE(e->rhs->Is<ast::SintLiteral>());
-  EXPECT_EQ(e->rhs->As<ast::SintLiteral>()->value, 123);
+  ASSERT_TRUE(e->rhs->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(e->rhs->As<ast::SintLiteralExpression>()->value, 123);
 
   ASSERT_TRUE(e->lhs->Is<ast::MemberAccessorExpression>());
   auto* mem = e->lhs->As<ast::MemberAccessorExpression>();
@@ -67,8 +67,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   auto* idx = mem->structure->As<ast::IndexAccessorExpression>();
 
   ASSERT_NE(idx->index, nullptr);
-  ASSERT_TRUE(idx->index->Is<ast::SintLiteral>());
-  EXPECT_EQ(idx->index->As<ast::SintLiteral>()->value, 2);
+  ASSERT_TRUE(idx->index->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(idx->index->As<ast::SintLiteralExpression>()->value, 2);
 
   ASSERT_TRUE(idx->object->Is<ast::MemberAccessorExpression>());
   mem = idx->object->As<ast::MemberAccessorExpression>();
@@ -101,8 +101,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToPhony) {
   ASSERT_NE(e->rhs, nullptr);
 
   ASSERT_NE(e->rhs, nullptr);
-  ASSERT_TRUE(e->rhs->Is<ast::SintLiteral>());
-  EXPECT_EQ(e->rhs->As<ast::SintLiteral>()->value, 123);
+  ASSERT_TRUE(e->rhs->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(e->rhs->As<ast::SintLiteralExpression>()->value, 123);
 
   ASSERT_TRUE(e->lhs->Is<ast::PhonyExpression>());
 }

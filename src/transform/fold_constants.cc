@@ -81,8 +81,10 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     }
 
     if (ty->is_scalar()) {
-      return value.WithScalarAt(
-          0, [&](auto&& s) -> const ast::Literal* { return ctx.dst->Expr(s); });
+      return value.WithScalarAt(0,
+                                [&](auto&& s) -> const ast::LiteralExpression* {
+                                  return ctx.dst->Expr(s);
+                                });
     }
 
     return nullptr;

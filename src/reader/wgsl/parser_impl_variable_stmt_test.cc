@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
   ASSERT_EQ(e->source.range.end.column, 6u);
 
   ASSERT_NE(e->variable->constructor, nullptr);
-  EXPECT_TRUE(e->variable->constructor->Is<ast::Literal>());
+  EXPECT_TRUE(e->variable->constructor->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {

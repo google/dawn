@@ -1037,53 +1037,53 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param value the boolean value
   /// @return a Scalar constructor for the given value
-  const ast::Literal* Expr(const Source& source, bool value) {
-    return create<ast::BoolLiteral>(source, value);
+  const ast::LiteralExpression* Expr(const Source& source, bool value) {
+    return create<ast::BoolLiteralExpression>(source, value);
   }
 
   /// @param value the boolean value
   /// @return a Scalar constructor for the given value
-  const ast::BoolLiteral* Expr(bool value) {
-    return create<ast::BoolLiteral>(value);
+  const ast::BoolLiteralExpression* Expr(bool value) {
+    return create<ast::BoolLiteralExpression>(value);
   }
 
   /// @param source the source information
   /// @param value the float value
   /// @return a Scalar constructor for the given value
-  const ast::FloatLiteral* Expr(const Source& source, f32 value) {
-    return create<ast::FloatLiteral>(source, value);
+  const ast::FloatLiteralExpression* Expr(const Source& source, f32 value) {
+    return create<ast::FloatLiteralExpression>(source, value);
   }
 
   /// @param value the float value
   /// @return a Scalar constructor for the given value
-  const ast::FloatLiteral* Expr(f32 value) {
-    return create<ast::FloatLiteral>(value);
+  const ast::FloatLiteralExpression* Expr(f32 value) {
+    return create<ast::FloatLiteralExpression>(value);
   }
 
   /// @param source the source information
   /// @param value the integer value
   /// @return a Scalar constructor for the given value
-  const ast::Literal* Expr(const Source& source, i32 value) {
-    return create<ast::SintLiteral>(source, value);
+  const ast::LiteralExpression* Expr(const Source& source, i32 value) {
+    return create<ast::SintLiteralExpression>(source, value);
   }
 
   /// @param value the integer value
   /// @return a Scalar constructor for the given value
-  const ast::SintLiteral* Expr(i32 value) {
-    return create<ast::SintLiteral>(value);
+  const ast::SintLiteralExpression* Expr(i32 value) {
+    return create<ast::SintLiteralExpression>(value);
   }
 
   /// @param source the source information
   /// @param value the unsigned int value
   /// @return a Scalar constructor for the given value
-  const ast::UintLiteral* Expr(const Source& source, u32 value) {
-    return create<ast::UintLiteral>(source, value);
+  const ast::UintLiteralExpression* Expr(const Source& source, u32 value) {
+    return create<ast::UintLiteralExpression>(source, value);
   }
 
   /// @param value the unsigned int value
   /// @return a Scalar constructor for the given value
-  const ast::UintLiteral* Expr(u32 value) {
-    return create<ast::UintLiteral>(value);
+  const ast::UintLiteralExpression* Expr(u32 value) {
+    return create<ast::UintLiteralExpression>(value);
   }
 
   /// Converts `arg` to an `ast::Expression` using `Expr()`, then appends it to
@@ -1127,53 +1127,53 @@ class ProgramBuilder {
   /// @param source the source location for the literal
   /// @param val the boolan value
   /// @return a boolean literal with the given value
-  const ast::BoolLiteral* Literal(const Source& source, bool val) {
-    return create<ast::BoolLiteral>(source, val);
+  const ast::BoolLiteralExpression* Literal(const Source& source, bool val) {
+    return create<ast::BoolLiteralExpression>(source, val);
   }
 
   /// @param val the boolan value
   /// @return a boolean literal with the given value
-  const ast::BoolLiteral* Literal(bool val) {
-    return create<ast::BoolLiteral>(val);
+  const ast::BoolLiteralExpression* Literal(bool val) {
+    return create<ast::BoolLiteralExpression>(val);
   }
 
   /// @param source the source location for the literal
   /// @param val the float value
   /// @return a float literal with the given value
-  const ast::FloatLiteral* Literal(const Source& source, f32 val) {
-    return create<ast::FloatLiteral>(source, val);
+  const ast::FloatLiteralExpression* Literal(const Source& source, f32 val) {
+    return create<ast::FloatLiteralExpression>(source, val);
   }
 
   /// @param val the float value
   /// @return a float literal with the given value
-  const ast::FloatLiteral* Literal(f32 val) {
-    return create<ast::FloatLiteral>(val);
+  const ast::FloatLiteralExpression* Literal(f32 val) {
+    return create<ast::FloatLiteralExpression>(val);
   }
 
   /// @param source the source location for the literal
   /// @param val the unsigned int value
   /// @return a ast::UintLiteral with the given value
-  const ast::UintLiteral* Literal(const Source& source, u32 val) {
-    return create<ast::UintLiteral>(source, val);
+  const ast::UintLiteralExpression* Literal(const Source& source, u32 val) {
+    return create<ast::UintLiteralExpression>(source, val);
   }
 
   /// @param val the unsigned int value
   /// @return a ast::UintLiteral with the given value
-  const ast::UintLiteral* Literal(u32 val) {
-    return create<ast::UintLiteral>(val);
+  const ast::UintLiteralExpression* Literal(u32 val) {
+    return create<ast::UintLiteralExpression>(val);
   }
 
   /// @param source the source location for the literal
   /// @param val the integer value
   /// @return the ast::SintLiteral with the given value
-  const ast::SintLiteral* Literal(const Source& source, i32 val) {
-    return create<ast::SintLiteral>(source, val);
+  const ast::SintLiteralExpression* Literal(const Source& source, i32 val) {
+    return create<ast::SintLiteralExpression>(source, val);
   }
 
   /// @param val the integer value
   /// @return the ast::SintLiteral with the given value
-  const ast::SintLiteral* Literal(i32 val) {
-    return create<ast::SintLiteral>(val);
+  const ast::SintLiteralExpression* Literal(i32 val) {
+    return create<ast::SintLiteralExpression>(val);
   }
 
   /// @param args the arguments for the type constructor
@@ -2237,7 +2237,7 @@ class ProgramBuilder {
   /// @param selector a single case selector
   /// @param body the case body
   /// @returns the case statement pointer
-  const ast::CaseStatement* Case(const ast::IntLiteral* selector,
+  const ast::CaseStatement* Case(const ast::IntLiteralExpression* selector,
                                  const ast::BlockStatement* body = nullptr) {
     return Case(ast::CaseSelectorList{selector}, body);
   }

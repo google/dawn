@@ -2548,7 +2548,7 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
       return source_expr;
     }
     case SkipReason::kPointSizeBuiltinValue: {
-      return {ty_.F32(), create<ast::FloatLiteral>(Source{}, 1.0f)};
+      return {ty_.F32(), create<ast::FloatLiteralExpression>(Source{}, 1.0f)};
     }
     case SkipReason::kPointSizeBuiltinPointer:
       Fail() << "unhandled use of a pointer to the PointSize builtin, with ID: "
@@ -3063,9 +3063,11 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
         // The Tint AST handles 32-bit values.
         const uint32_t value32 = uint32_t(value & 0xFFFFFFFF);
         if (selector.type->IsUnsignedScalarOrVector()) {
-          selectors.emplace_back(create<ast::UintLiteral>(Source{}, value32));
+          selectors.emplace_back(
+              create<ast::UintLiteralExpression>(Source{}, value32));
         } else {
-          selectors.emplace_back(create<ast::SintLiteral>(Source{}, value32));
+          selectors.emplace_back(
+              create<ast::SintLiteralExpression>(Source{}, value32));
         }
       }
     }
@@ -4475,7 +4477,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
   auto current_type_id = composite_type_id;
 
   auto make_index = [this](uint32_t literal) {
-    return create<ast::UintLiteral>(Source{}, literal);
+    return create<ast::UintLiteralExpression>(Source{}, literal);
   };
 
   // Build up a nested expression for the decomposition by walking down the type
@@ -4591,11 +4593,11 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
 }
 
 const ast::Expression* FunctionEmitter::MakeTrue(const Source& source) const {
-  return create<ast::BoolLiteral>(source, true);
+  return create<ast::BoolLiteralExpression>(source, true);
 }
 
 const ast::Expression* FunctionEmitter::MakeFalse(const Source& source) const {
-  return create<ast::BoolLiteral>(source, false);
+  return create<ast::BoolLiteralExpression>(source, false);
 }
 
 TypedExpression FunctionEmitter::MakeVectorShuffle(

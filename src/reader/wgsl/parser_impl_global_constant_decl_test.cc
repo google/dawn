@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   EXPECT_EQ(e->source.range.end.column, 6u);
 
   ASSERT_NE(e->constructor, nullptr);
-  EXPECT_TRUE(e->constructor->Is<ast::Literal>());
+  EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
 
   EXPECT_FALSE(
       ast::HasDecoration<ast::OverrideDecoration>(e.value->decorations));
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_Inferred) {
   EXPECT_EQ(e->source.range.end.column, 6u);
 
   ASSERT_NE(e->constructor, nullptr);
-  EXPECT_TRUE(e->constructor->Is<ast::Literal>());
+  EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
 
   EXPECT_FALSE(
       ast::HasDecoration<ast::OverrideDecoration>(e.value->decorations));
@@ -137,7 +137,7 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_WithId) {
   EXPECT_EQ(e->source.range.end.column, 22u);
 
   ASSERT_NE(e->constructor, nullptr);
-  EXPECT_TRUE(e->constructor->Is<ast::Literal>());
+  EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
 
   auto* override_deco =
       ast::GetDecoration<ast::OverrideDecoration>(e.value->decorations);
@@ -169,7 +169,7 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_WithoutId) {
   EXPECT_EQ(e->source.range.end.column, 19u);
 
   ASSERT_NE(e->constructor, nullptr);
-  EXPECT_TRUE(e->constructor->Is<ast::Literal>());
+  EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
 
   auto* override_deco =
       ast::GetDecoration<ast::OverrideDecoration>(e.value->decorations);

@@ -114,7 +114,7 @@ TEST_F(ResolverTest, Stmt_Case) {
   auto* assign = Assign(lhs, rhs);
   auto* block = Block(assign);
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(3));
+  lit.push_back(create<ast::SintLiteralExpression>(3));
   auto* cse = create<ast::CaseStatement>(lit, block);
   auto* cond_var = Var("c", ty.i32());
   auto* sw = Switch(cond_var, cse, DefaultCase());

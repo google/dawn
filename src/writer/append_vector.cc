@@ -85,7 +85,7 @@ const ast::TypeConstructorExpression* AppendVector(
     const auto num_supplied = vc->values.size();
     if (num_supplied == 0) {
       // Zero-value vector constructor. Populate with zeros
-      auto buildZero = [&]() -> const ast::Literal* {
+      auto buildZero = [&]() -> const ast::LiteralExpression* {
         if (packed_el_sem_ty->Is<sem::I32>()) {
           return b->Expr(0);
         } else if (packed_el_sem_ty->Is<sem::U32>()) {

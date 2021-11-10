@@ -34,8 +34,8 @@ TEST_F(ParserImplTest, Decoration_Workgroup) {
 
   auto values = func_deco->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
   EXPECT_EQ(values[1], nullptr);
   EXPECT_EQ(values[2], nullptr);
@@ -54,11 +54,11 @@ TEST_F(ParserImplTest, Decoration_Workgroup_2Param) {
 
   auto values = func_deco->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
-  ASSERT_TRUE(values[1]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[1]->As<ast::IntLiteral>()->ValueAsU32(), 5u);
+  ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 5u);
 
   EXPECT_EQ(values[2], nullptr);
 }
@@ -76,14 +76,14 @@ TEST_F(ParserImplTest, Decoration_Workgroup_3Param) {
 
   auto values = func_deco->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
-  ASSERT_TRUE(values[1]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[1]->As<ast::IntLiteral>()->ValueAsU32(), 5u);
+  ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 5u);
 
-  ASSERT_TRUE(values[2]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[2]->As<ast::IntLiteral>()->ValueAsU32(), 6u);
+  ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 6u);
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_WithIdent) {
@@ -99,8 +99,8 @@ TEST_F(ParserImplTest, Decoration_Workgroup_WithIdent) {
 
   auto values = func_deco->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
   ASSERT_NE(values[1], nullptr);
   auto* y_ident = values[1]->As<ast::IdentifierExpression>();

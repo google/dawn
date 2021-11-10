@@ -33,11 +33,11 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   ASSERT_EQ(t->values.size(), 2u);
   auto& v = t->values;
 
-  ASSERT_TRUE(v[0]->Is<ast::FloatLiteral>());
-  EXPECT_FLOAT_EQ(v[0]->As<ast::FloatLiteral>()->value, 1.);
+  ASSERT_TRUE(v[0]->Is<ast::FloatLiteralExpression>());
+  EXPECT_FLOAT_EQ(v[0]->As<ast::FloatLiteralExpression>()->value, 1.);
 
-  ASSERT_TRUE(v[1]->Is<ast::FloatLiteral>());
-  EXPECT_FLOAT_EQ(v[1]->As<ast::FloatLiteral>()->value, 2.);
+  ASSERT_TRUE(v[1]->Is<ast::FloatLiteralExpression>());
+  EXPECT_FLOAT_EQ(v[1]->As<ast::FloatLiteralExpression>()->value, 2.);
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_Empty) {
@@ -66,8 +66,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_TrailingComma) {
   EXPECT_EQ(t->type->As<ast::Vector>()->width, 2u);
 
   ASSERT_EQ(t->values.size(), 2u);
-  ASSERT_TRUE(t->values[0]->Is<ast::Literal>());
-  ASSERT_TRUE(t->values[1]->Is<ast::Literal>());
+  ASSERT_TRUE(t->values[0]->Is<ast::LiteralExpression>());
+  ASSERT_TRUE(t->values[1]->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
@@ -112,8 +112,8 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->Is<ast::BoolLiteral>());
-  EXPECT_TRUE(e.value->As<ast::BoolLiteral>()->value);
+  ASSERT_TRUE(e.value->Is<ast::BoolLiteralExpression>());
+  EXPECT_TRUE(e.value->As<ast::BoolLiteralExpression>()->value);
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {

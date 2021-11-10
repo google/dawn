@@ -18,11 +18,11 @@ namespace tint {
 namespace ast {
 namespace {
 
-using SintLiteralTest = TestHelper;
+using SintLiteralExpressionTest = TestHelper;
 
-TEST_F(SintLiteralTest, Value) {
-  auto* i = create<SintLiteral>(47);
-  ASSERT_TRUE(i->Is<SintLiteral>());
+TEST_F(SintLiteralExpressionTest, Value) {
+  auto* i = create<SintLiteralExpression>(47);
+  ASSERT_TRUE(i->Is<SintLiteralExpression>());
   EXPECT_EQ(i->value, 47);
 }
 

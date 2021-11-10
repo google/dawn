@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   EXPECT_EQ(e->source.range.end.column, 15u);
 
   ASSERT_NE(e->constructor, nullptr);
-  ASSERT_TRUE(e->constructor->Is<ast::FloatLiteral>());
+  ASSERT_TRUE(e->constructor->Is<ast::FloatLiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {

@@ -44,17 +44,17 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
 
   ASSERT_EQ(ty->values.size(), 4u);
   const auto& val = ty->values;
-  ASSERT_TRUE(val[0]->Is<ast::SintLiteral>());
-  EXPECT_EQ(val[0]->As<ast::SintLiteral>()->value, 1);
+  ASSERT_TRUE(val[0]->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(val[0]->As<ast::SintLiteralExpression>()->value, 1);
 
-  ASSERT_TRUE(val[1]->Is<ast::SintLiteral>());
-  EXPECT_EQ(val[1]->As<ast::SintLiteral>()->value, 2);
+  ASSERT_TRUE(val[1]->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(val[1]->As<ast::SintLiteralExpression>()->value, 2);
 
-  ASSERT_TRUE(val[2]->Is<ast::SintLiteral>());
-  EXPECT_EQ(val[2]->As<ast::SintLiteral>()->value, 3);
+  ASSERT_TRUE(val[2]->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(val[2]->As<ast::SintLiteralExpression>()->value, 3);
 
-  ASSERT_TRUE(val[3]->Is<ast::SintLiteral>());
-  EXPECT_EQ(val[3]->As<ast::SintLiteral>()->value, 4);
+  ASSERT_TRUE(val[3]->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(val[3]->As<ast::SintLiteralExpression>()->value, 4);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
@@ -159,11 +159,11 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
   auto values = constructor->values;
   ASSERT_EQ(values.size(), 2u);
 
-  ASSERT_TRUE(values[0]->Is<ast::UintLiteral>());
-  EXPECT_EQ(values[0]->As<ast::UintLiteral>()->value, 1u);
+  ASSERT_TRUE(values[0]->Is<ast::UintLiteralExpression>());
+  EXPECT_EQ(values[0]->As<ast::UintLiteralExpression>()->value, 1u);
 
-  ASSERT_TRUE(values[1]->Is<ast::FloatLiteral>());
-  EXPECT_EQ(values[1]->As<ast::FloatLiteral>()->value, 2.f);
+  ASSERT_TRUE(values[1]->Is<ast::FloatLiteralExpression>());
+  EXPECT_EQ(values[1]->As<ast::FloatLiteralExpression>()->value, 2.f);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
@@ -173,8 +173,8 @@ TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::BoolLiteral>());
-  EXPECT_TRUE(e->As<ast::BoolLiteral>()->value);
+  ASSERT_TRUE(e->Is<ast::BoolLiteralExpression>());
+  EXPECT_TRUE(e->As<ast::BoolLiteralExpression>()->value);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {
@@ -231,7 +231,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   ASSERT_TRUE(c->type->Is<ast::F32>());
   ASSERT_EQ(c->values.size(), 1u);
 
-  ASSERT_TRUE(c->values[0]->Is<ast::IntLiteral>());
+  ASSERT_TRUE(c->values[0]->Is<ast::IntLiteralExpression>());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
@@ -246,7 +246,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
 
   auto* c = e->As<ast::BitcastExpression>();
   ASSERT_TRUE(c->type->Is<ast::F32>());
-  ASSERT_TRUE(c->expr->Is<ast::IntLiteral>());
+  ASSERT_TRUE(c->expr->Is<ast::IntLiteralExpression>());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingGreaterThan) {

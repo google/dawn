@@ -23,20 +23,21 @@ namespace tint {
 namespace ast {
 
 /// A boolean literal
-class BoolLiteral : public Castable<BoolLiteral, Literal> {
+class BoolLiteralExpression
+    : public Castable<BoolLiteralExpression, LiteralExpression> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
   /// @param value the bool literals value
-  BoolLiteral(ProgramID pid, const Source& src, bool value);
-  ~BoolLiteral() override;
+  BoolLiteralExpression(ProgramID pid, const Source& src, bool value);
+  ~BoolLiteralExpression() override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  const BoolLiteral* Clone(CloneContext* ctx) const override;
+  const BoolLiteralExpression* Clone(CloneContext* ctx) const override;
 
   /// The boolean literal value
   const bool value;

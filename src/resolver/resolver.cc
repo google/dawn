@@ -2015,7 +2015,7 @@ bool Resolver::WorkgroupSizeFor(const ast::Function* func,
         ws[i].value = 0;
         continue;
       }
-    } else if (!expr->Is<ast::Literal>()) {
+    } else if (!expr->Is<ast::LiteralExpression>()) {
       AddError(
           "workgroup_size argument must be either a literal or a "
           "module-scope constant",
@@ -2367,7 +2367,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
       sem_expr = TypeConstructor(ctor);
     } else if (auto* ident = expr->As<ast::IdentifierExpression>()) {
       sem_expr = Identifier(ident);
-    } else if (auto* literal = expr->As<ast::Literal>()) {
+    } else if (auto* literal = expr->As<ast::LiteralExpression>()) {
       sem_expr = Literal(literal);
     } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
       sem_expr = MemberAccessor(member);
@@ -2424,7 +2424,7 @@ sem::Expression* Resolver::IndexAccessor(
     if (!parent_raw_ty->Is<sem::Reference>()) {
       // TODO(bclayton): expand this to allow any const_expr expression
       // https://github.com/gpuweb/gpuweb/issues/1272
-      if (!idx->As<ast::IntLiteral>()) {
+      if (!idx->As<ast::IntLiteralExpression>()) {
         AddError("index must be signed or unsigned integer literal",
                  idx->source);
         return nullptr;
@@ -2617,7 +2617,8 @@ bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
       bool is_const_expr = true;
       ast::TraverseExpressions(
           arg->Declaration(), diagnostics_, [&](const ast::Expression* e) {
-            if (e->IsAnyOf<ast::Literal, ast::TypeConstructorExpression>()) {
+            if (e->IsAnyOf<ast::LiteralExpression,
+                           ast::TypeConstructorExpression>()) {
               return ast::TraverseAction::Descend;
             }
             is_const_expr = false;
@@ -2764,7 +2765,7 @@ sem::Expression* Resolver::TypeConstructor(
   return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
 }
 
-sem::Expression* Resolver::Literal(const ast::Literal* literal) {
+sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
   auto* ty = TypeOf(literal);
   if (!ty) {
     return nullptr;
@@ -3574,17 +3575,17 @@ std::string Resolver::RawTypeNameOf(const sem::Type* ty) {
   return ty->FriendlyName(builder_->Symbols());
 }
 
-sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
-  if (lit->Is<ast::SintLiteral>()) {
+sem::Type* Resolver::TypeOf(const ast::LiteralExpression* lit) {
+  if (lit->Is<ast::SintLiteralExpression>()) {
     return builder_->create<sem::I32>();
   }
-  if (lit->Is<ast::UintLiteral>()) {
+  if (lit->Is<ast::UintLiteralExpression>()) {
     return builder_->create<sem::U32>();
   }
-  if (lit->Is<ast::FloatLiteral>()) {
+  if (lit->Is<ast::FloatLiteralExpression>()) {
     return builder_->create<sem::F32>();
   }
-  if (lit->Is<ast::BoolLiteral>()) {
+  if (lit->Is<ast::BoolLiteralExpression>()) {
     return builder_->create<sem::Bool>();
   }
   TINT_UNREACHABLE(Resolver, diagnostics_)
@@ -3780,7 +3781,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
       }
 
       count_expr = var->Declaration()->constructor;
-    } else if (!count_expr->Is<ast::Literal>()) {
+    } else if (!count_expr->Is<ast::LiteralExpression>()) {
       AddError(
           "array size expression must be either a literal or a module-scope "
           "constant",
@@ -4259,7 +4260,7 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
       auto v = selector->ValueAsU32();
       auto it = selectors.find(v);
       if (it != selectors.end()) {
-        auto val = selector->Is<ast::IntLiteral>()
+        auto val = selector->Is<ast::IntLiteralExpression>()
                        ? std::to_string(selector->ValueAsI32())
                        : std::to_string(selector->ValueAsU32());
         AddError("duplicate switch case '" + val + "'", selector->source);

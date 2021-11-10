@@ -36,10 +36,10 @@ TEST_F(ParserImplTest, DecorationList_Parses) {
   ASSERT_TRUE(deco_0->Is<ast::WorkgroupDecoration>());
   const ast::Expression* x = deco_0->As<ast::WorkgroupDecoration>()->x;
   ASSERT_NE(x, nullptr);
-  auto* x_literal = x->As<ast::Literal>();
+  auto* x_literal = x->As<ast::LiteralExpression>();
   ASSERT_NE(x_literal, nullptr);
-  ASSERT_TRUE(x_literal->Is<ast::IntLiteral>());
-  EXPECT_EQ(x_literal->As<ast::IntLiteral>()->ValueAsU32(), 2u);
+  ASSERT_TRUE(x_literal->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(x_literal->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
 
   ASSERT_TRUE(deco_1->Is<ast::StageDecoration>());
   EXPECT_EQ(deco_1->As<ast::StageDecoration>()->stage,

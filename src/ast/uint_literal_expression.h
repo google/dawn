@@ -23,14 +23,15 @@ namespace tint {
 namespace ast {
 
 /// A uint literal
-class UintLiteral : public Castable<UintLiteral, IntLiteral> {
+class UintLiteralExpression
+    : public Castable<UintLiteralExpression, IntLiteralExpression> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
   /// @param value the uint literals value
-  UintLiteral(ProgramID pid, const Source& src, uint32_t value);
-  ~UintLiteral() override;
+  UintLiteralExpression(ProgramID pid, const Source& src, uint32_t value);
+  ~UintLiteralExpression() override;
 
   /// @returns the literal value as a u32
   uint32_t ValueAsU32() const override;
@@ -39,7 +40,7 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  const UintLiteral* Clone(CloneContext* ctx) const override;
+  const UintLiteralExpression* Clone(CloneContext* ctx) const override;
 
   /// The int literal value
   const uint32_t value;

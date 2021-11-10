@@ -251,10 +251,10 @@ class CloneContext {
   /// Example:
   ///
   /// ```
-  ///   // Replace all ast::UintLiterals with the number 42
+  ///   // Replace all ast::UintLiteralExpressions with the number 42
   ///   CloneCtx ctx(&out, in);
-  ///   ctx.ReplaceAll([&] (ast::UintLiteral* l) {
-  ///       return ctx->dst->create<ast::UintLiteral>(
+  ///   ctx.ReplaceAll([&] (ast::UintLiteralExpression* l) {
+  ///       return ctx->dst->create<ast::UintLiteralExpression>(
   ///           ctx->Clone(l->source),
   ///           ctx->Clone(l->type),
   ///           42);

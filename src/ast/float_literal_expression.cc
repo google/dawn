@@ -18,20 +18,23 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::FloatLiteral);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::FloatLiteralExpression);
 
 namespace tint {
 namespace ast {
 
-FloatLiteral::FloatLiteral(ProgramID pid, const Source& src, float val)
+FloatLiteralExpression::FloatLiteralExpression(ProgramID pid,
+                                               const Source& src,
+                                               float val)
     : Base(pid, src), value(val) {}
 
-FloatLiteral::~FloatLiteral() = default;
+FloatLiteralExpression::~FloatLiteralExpression() = default;
 
-const FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
+const FloatLiteralExpression* FloatLiteralExpression::Clone(
+    CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
-  return ctx->dst->create<FloatLiteral>(src, value);
+  return ctx->dst->create<FloatLiteralExpression>(src, value);
 }
 
 }  // namespace ast

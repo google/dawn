@@ -16,24 +16,27 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::UintLiteral);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::UintLiteralExpression);
 
 namespace tint {
 namespace ast {
 
-UintLiteral::UintLiteral(ProgramID pid, const Source& src, uint32_t val)
+UintLiteralExpression::UintLiteralExpression(ProgramID pid,
+                                             const Source& src,
+                                             uint32_t val)
     : Base(pid, src), value(val) {}
 
-UintLiteral::~UintLiteral() = default;
+UintLiteralExpression::~UintLiteralExpression() = default;
 
-uint32_t UintLiteral::ValueAsU32() const {
+uint32_t UintLiteralExpression::ValueAsU32() const {
   return value;
 }
 
-const UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
+const UintLiteralExpression* UintLiteralExpression::Clone(
+    CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
-  return ctx->dst->create<UintLiteral>(src, value);
+  return ctx->dst->create<UintLiteralExpression>(src, value);
 }
 
 }  // namespace ast

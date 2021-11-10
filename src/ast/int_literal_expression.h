@@ -21,9 +21,10 @@ namespace tint {
 namespace ast {
 
 /// An integer literal. This could be either signed or unsigned.
-class IntLiteral : public Castable<IntLiteral, Literal> {
+class IntLiteralExpression
+    : public Castable<IntLiteralExpression, LiteralExpression> {
  public:
-  ~IntLiteral() override;
+  ~IntLiteralExpression() override;
 
   /// @returns the literal value as a u32
   virtual uint32_t ValueAsU32() const = 0;
@@ -35,7 +36,7 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
   /// Constructor
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
-  IntLiteral(ProgramID pid, const Source& src);
+  IntLiteralExpression(ProgramID pid, const Source& src);
 };  // namespace ast
 
 }  // namespace ast

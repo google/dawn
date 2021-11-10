@@ -23,20 +23,21 @@ namespace tint {
 namespace ast {
 
 /// A float literal
-class FloatLiteral : public Castable<FloatLiteral, Literal> {
+class FloatLiteralExpression
+    : public Castable<FloatLiteralExpression, LiteralExpression> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
   /// @param value the float literals value
-  FloatLiteral(ProgramID pid, const Source& src, float value);
-  ~FloatLiteral() override;
+  FloatLiteralExpression(ProgramID pid, const Source& src, float value);
+  ~FloatLiteralExpression() override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  const FloatLiteral* Clone(CloneContext* ctx) const override;
+  const FloatLiteralExpression* Clone(CloneContext* ctx) const override;
 
   /// The float literal value
   const float value;

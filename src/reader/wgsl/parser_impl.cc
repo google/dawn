@@ -1947,12 +1947,12 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
       return Failure::kErrored;
     } else if (!cond.matched) {
       break;
-    } else if (!cond->Is<ast::IntLiteral>()) {
+    } else if (!cond->Is<ast::IntLiteralExpression>()) {
       return add_error(cond.value->source,
                        "invalid case selector must be an integer value");
     }
 
-    selectors.push_back(cond.value->As<ast::IntLiteral>());
+    selectors.push_back(cond.value->As<ast::IntLiteralExpression>());
 
     if (!match(Token::Type::kComma)) {
       break;
@@ -2841,22 +2841,22 @@ Maybe<const ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 //   | FLOAT_LITERAL
 //   | TRUE
 //   | FALSE
-Maybe<const ast::Literal*> ParserImpl::const_literal() {
+Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
   auto t = peek();
   if (t.IsError()) {
     return add_error(t.source(), t.to_str());
   }
   if (match(Token::Type::kTrue)) {
-    return create<ast::BoolLiteral>(t.source(), true);
+    return create<ast::BoolLiteralExpression>(t.source(), true);
   }
   if (match(Token::Type::kFalse)) {
-    return create<ast::BoolLiteral>(t.source(), false);
+    return create<ast::BoolLiteralExpression>(t.source(), false);
   }
   if (match(Token::Type::kSintLiteral)) {
-    return create<ast::SintLiteral>(t.source(), t.to_i32());
+    return create<ast::SintLiteralExpression>(t.source(), t.to_i32());
   }
   if (match(Token::Type::kUintLiteral)) {
-    return create<ast::UintLiteral>(t.source(), t.to_u32());
+    return create<ast::UintLiteralExpression>(t.source(), t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
     auto p = peek();
@@ -2865,7 +2865,7 @@ Maybe<const ast::Literal*> ParserImpl::const_literal() {
       return add_error(p.source(),
                        "float literals must not be suffixed with 'f'");
     }
-    return create<ast::FloatLiteral>(t.source(), t.to_f32());
+    return create<ast::FloatLiteralExpression>(t.source(), t.to_f32());
   }
   return Failure::kNoMatch;
 }

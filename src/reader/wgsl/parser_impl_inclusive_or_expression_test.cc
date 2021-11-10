@@ -35,8 +35,8 @@ TEST_F(ParserImplTest, InclusiveOrExpression_Parses) {
   auto* ident = rel->lhs->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteral>());
-  ASSERT_TRUE(rel->rhs->As<ast::BoolLiteral>()->value);
+  ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
+  ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
 }
 
 TEST_F(ParserImplTest, InclusiveOrExpression_InvalidLHS) {

@@ -131,7 +131,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return EmitIdentifier(out, i);
   }
-  if (auto* l = expr->As<ast::Literal>()) {
+  if (auto* l = expr->As<ast::LiteralExpression>()) {
     return EmitLiteral(out, l);
   }
   if (auto* c = expr->As<ast::TypeConstructorExpression>()) {
@@ -268,14 +268,15 @@ bool GeneratorImpl::EmitTypeConstructor(
   return true;
 }
 
-bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {
-  if (auto* bl = lit->As<ast::BoolLiteral>()) {
+bool GeneratorImpl::EmitLiteral(std::ostream& out,
+                                const ast::LiteralExpression* lit) {
+  if (auto* bl = lit->As<ast::BoolLiteralExpression>()) {
     out << (bl->value ? "true" : "false");
-  } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
+  } else if (auto* fl = lit->As<ast::FloatLiteralExpression>()) {
     out << FloatToBitPreservingString(fl->value);
-  } else if (auto* sl = lit->As<ast::SintLiteral>()) {
+  } else if (auto* sl = lit->As<ast::SintLiteralExpression>()) {
     out << sl->value;
-  } else if (auto* ul = lit->As<ast::UintLiteral>()) {
+  } else if (auto* ul = lit->As<ast::UintLiteralExpression>()) {
     out << ul->value << "u";
   } else {
     diagnostics_.add_error(diag::System::Writer, "unknown literal type");

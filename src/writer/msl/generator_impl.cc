@@ -1379,10 +1379,11 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
   return true;
 }
 
-bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {
-  if (auto* l = lit->As<ast::BoolLiteral>()) {
+bool GeneratorImpl::EmitLiteral(std::ostream& out,
+                                const ast::LiteralExpression* lit) {
+  if (auto* l = lit->As<ast::BoolLiteralExpression>()) {
     out << (l->value ? "true" : "false");
-  } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
+  } else if (auto* fl = lit->As<ast::FloatLiteralExpression>()) {
     if (std::isinf(fl->value)) {
       out << (fl->value >= 0 ? "INFINITY" : "-INFINITY");
     } else if (std::isnan(fl->value)) {
@@ -1390,7 +1391,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {
     } else {
       out << FloatToString(fl->value) << "f";
     }
-  } else if (auto* sl = lit->As<ast::SintLiteral>()) {
+  } else if (auto* sl = lit->As<ast::SintLiteralExpression>()) {
     // MSL (and C++) parse `-2147483648` as a `long` because it parses unary
     // minus and `2147483648` as separate tokens, and the latter doesn't
     // fit into an (32-bit) `int`. WGSL, OTOH, parses this as an `i32`. To avoid
@@ -1402,7 +1403,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::Literal* lit) {
     } else {
       out << sl->value;
     }
-  } else if (auto* ul = lit->As<ast::UintLiteral>()) {
+  } else if (auto* ul = lit->As<ast::UintLiteralExpression>()) {
     out << ul->value << "u";
   } else {
     diagnostics_.add_error(diag::System::Writer, "unknown literal type");
@@ -1431,7 +1432,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return EmitIdentifier(out, i);
   }
-  if (auto* l = expr->As<ast::Literal>()) {
+  if (auto* l = expr->As<ast::LiteralExpression>()) {
     return EmitLiteral(out, l);
   }
   if (auto* m = expr->As<ast::MemberAccessorExpression>()) {

@@ -71,14 +71,14 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
 
   auto values = decorations[0]->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 2u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
 
-  ASSERT_TRUE(values[1]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[1]->As<ast::IntLiteral>()->ValueAsU32(), 3u);
+  ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 3u);
 
-  ASSERT_TRUE(values[2]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[2]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
   auto* body = f->body;
   ASSERT_EQ(body->statements.size(), 1u);
@@ -110,14 +110,14 @@ fn main() { return; })");
   ASSERT_TRUE(decorations[0]->Is<ast::WorkgroupDecoration>());
   auto values = decorations[0]->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 2u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
 
-  ASSERT_TRUE(values[1]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[1]->As<ast::IntLiteral>()->ValueAsU32(), 3u);
+  ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 3u);
 
-  ASSERT_TRUE(values[2]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[2]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
   ASSERT_TRUE(decorations[1]->Is<ast::StageDecoration>());
   EXPECT_EQ(decorations[1]->As<ast::StageDecoration>()->stage,
@@ -154,14 +154,14 @@ fn main() { return; })");
   ASSERT_TRUE(decos[0]->Is<ast::WorkgroupDecoration>());
   auto values = decos[0]->As<ast::WorkgroupDecoration>()->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteral>()->ValueAsU32(), 2u);
+  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
 
-  ASSERT_TRUE(values[1]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[1]->As<ast::IntLiteral>()->ValueAsU32(), 3u);
+  ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 3u);
 
-  ASSERT_TRUE(values[2]->Is<ast::IntLiteral>());
-  EXPECT_EQ(values[2]->As<ast::IntLiteral>()->ValueAsU32(), 4u);
+  ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
+  EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
   ASSERT_TRUE(decos[1]->Is<ast::StageDecoration>());
   EXPECT_EQ(decos[1]->As<ast::StageDecoration>()->stage,

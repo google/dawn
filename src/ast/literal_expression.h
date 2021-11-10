@@ -23,15 +23,15 @@ namespace tint {
 namespace ast {
 
 /// Base class for a literal value expressions
-class Literal : public Castable<Literal, Expression> {
+class LiteralExpression : public Castable<LiteralExpression, Expression> {
  public:
-  ~Literal() override;
+  ~LiteralExpression() override;
 
  protected:
   /// Constructor
   /// @param pid the identifier of the program that owns this node
   /// @param src the input source
-  Literal(ProgramID pid, const Source& src);
+  LiteralExpression(ProgramID pid, const Source& src);
 };
 
 }  // namespace ast

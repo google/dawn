@@ -18,11 +18,11 @@ namespace tint {
 namespace ast {
 namespace {
 
-using FloatLiteralTest = TestHelper;
+using FloatLiteralExpressionTest = TestHelper;
 
-TEST_F(FloatLiteralTest, Value) {
-  auto* f = create<FloatLiteral>(47.2f);
-  ASSERT_TRUE(f->Is<FloatLiteral>());
+TEST_F(FloatLiteralExpressionTest, Value) {
+  auto* f = create<FloatLiteralExpression>(47.2f);
+  ASSERT_TRUE(f->Is<FloatLiteralExpression>());
   EXPECT_EQ(f->value, 47.2f);
 }
 

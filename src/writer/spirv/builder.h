@@ -353,7 +353,7 @@ class Builder {
   /// @param lit the literal to generate
   /// @returns the ID on success or 0 on failure
   uint32_t GenerateLiteralIfNeeded(const ast::Variable* var,
-                                   const ast::Literal* lit);
+                                   const ast::LiteralExpression* lit);
   /// Generates a binary expression
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise

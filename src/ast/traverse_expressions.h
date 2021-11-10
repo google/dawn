@@ -122,7 +122,7 @@ bool TraverseExpressions(const ast::Expression* root,
       to_visit.push_back(member->structure);
     } else if (auto* unary = expr->As<UnaryOpExpression>()) {
       to_visit.push_back(unary->expr);
-    } else if (expr->IsAnyOf<Literal, IdentifierExpression,
+    } else if (expr->IsAnyOf<LiteralExpression, IdentifierExpression,
                              PhonyExpression>()) {
       // Leaf expression
     } else {

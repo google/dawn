@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// A list of case literals
-using CaseSelectorList = std::vector<const IntLiteral*>;
+using CaseSelectorList = std::vector<const IntLiteralExpression*>;
 
 /// A case statement
 class CaseStatement : public Castable<CaseStatement, Statement> {

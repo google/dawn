@@ -16,20 +16,23 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteral);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteralExpression);
 
 namespace tint {
 namespace ast {
 
-BoolLiteral::BoolLiteral(ProgramID pid, const Source& src, bool val)
+BoolLiteralExpression::BoolLiteralExpression(ProgramID pid,
+                                             const Source& src,
+                                             bool val)
     : Base(pid, src), value(val) {}
 
-BoolLiteral::~BoolLiteral() = default;
+BoolLiteralExpression::~BoolLiteralExpression() = default;
 
-const BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
+const BoolLiteralExpression* BoolLiteralExpression::Clone(
+    CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
-  return ctx->dst->create<BoolLiteral>(src, value);
+  return ctx->dst->create<BoolLiteralExpression>(src, value);
 }
 
 }  // namespace ast

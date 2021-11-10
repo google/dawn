@@ -30,7 +30,7 @@ std::string SizeExprToString(const Expression* size,
   if (auto* ident = size->As<IdentifierExpression>()) {
     return symbols.NameFor(ident->symbol);
   }
-  if (auto* literal = size->As<IntLiteral>()) {
+  if (auto* literal = size->As<IntLiteralExpression>()) {
     return std::to_string(literal->ValueAsU32());
   }
   // This will never be exposed to the user as the Resolver will reject this

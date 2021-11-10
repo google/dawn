@@ -176,7 +176,7 @@ class Resolver {
   sem::Call* FunctionCall(const ast::CallExpression*);
   sem::Expression* Identifier(const ast::IdentifierExpression*);
   sem::Call* IntrinsicCall(const ast::CallExpression*, sem::IntrinsicType);
-  sem::Expression* Literal(const ast::Literal*);
+  sem::Expression* Literal(const ast::LiteralExpression*);
   sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
   sem::Expression* TypeConstructor(const ast::TypeConstructorExpression*);
   sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
@@ -329,7 +329,7 @@ class Resolver {
 
   /// @returns the semantic type of the AST literal `lit`
   /// @param lit the literal
-  sem::Type* TypeOf(const ast::Literal* lit);
+  sem::Type* TypeOf(const ast::LiteralExpression* lit);
 
   /// Assigns `stmt` to #current_statement_, #current_compound_statement_, and
   /// possibly #current_block_, pushes the variable scope, then calls
@@ -376,7 +376,7 @@ class Resolver {
 
   sem::Constant EvaluateConstantValue(const ast::Expression* expr,
                                       const sem::Type* type);
-  sem::Constant EvaluateConstantValue(const ast::Literal* literal,
+  sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,
                                       const sem::Type* type);
   sem::Constant EvaluateConstantValue(
       const ast::TypeConstructorExpression* type_ctor,

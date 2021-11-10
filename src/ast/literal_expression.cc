@@ -14,14 +14,15 @@
 
 #include "src/ast/literal_expression.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::Literal);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::LiteralExpression);
 
 namespace tint {
 namespace ast {
 
-Literal::Literal(ProgramID pid, const Source& src) : Base(pid, src) {}
+LiteralExpression::LiteralExpression(ProgramID pid, const Source& src)
+    : Base(pid, src) {}
 
-Literal::~Literal() = default;
+LiteralExpression::~LiteralExpression() = default;
 
 }  // namespace ast
 }  // namespace tint

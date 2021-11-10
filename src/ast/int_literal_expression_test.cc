@@ -18,16 +18,16 @@ namespace tint {
 namespace ast {
 namespace {
 
-using IntLiteralTest = TestHelper;
+using IntLiteralExpressionTest = TestHelper;
 
-TEST_F(IntLiteralTest, Sint_IsInt) {
-  auto* i = create<SintLiteral>(47);
-  ASSERT_TRUE(i->Is<IntLiteral>());
+TEST_F(IntLiteralExpressionTest, Sint_IsInt) {
+  auto* i = create<SintLiteralExpression>(47);
+  ASSERT_TRUE(i->Is<IntLiteralExpression>());
 }
 
-TEST_F(IntLiteralTest, Uint_IsInt) {
-  auto* i = create<UintLiteral>(42);
-  EXPECT_TRUE(i->Is<IntLiteral>());
+TEST_F(IntLiteralExpressionTest, Uint_IsInt) {
+  auto* i = create<UintLiteralExpression>(42);
+  EXPECT_TRUE(i->Is<IntLiteralExpression>());
 }
 
 }  // namespace

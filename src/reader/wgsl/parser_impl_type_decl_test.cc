@@ -455,7 +455,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
   EXPECT_EQ(a->decorations.size(), 0u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 
-  auto* size = a->count->As<ast::SintLiteral>();
+  auto* size = a->count->As<ast::SintLiteralExpression>();
   ASSERT_NE(size, nullptr);
   EXPECT_EQ(size->ValueAsI32(), 5);
 }
@@ -475,7 +475,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
   EXPECT_EQ(a->decorations.size(), 0u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 15u}}));
 
-  auto* size = a->count->As<ast::UintLiteral>();
+  auto* size = a->count->As<ast::UintLiteralExpression>();
   ASSERT_NE(size, nullptr);
   EXPECT_EQ(size->ValueAsU32(), 5u);
 }
@@ -513,7 +513,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  auto* size = a->count->As<ast::SintLiteral>();
+  auto* size = a->count->As<ast::SintLiteralExpression>();
   ASSERT_NE(size, nullptr);
   EXPECT_EQ(size->ValueAsI32(), 5);
 

@@ -46,7 +46,7 @@ void CollectSavedArrayIndices(const Program* program,
   if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
     CollectSavedArrayIndices(program, a->object, cb);
 
-    if (!a->index->Is<ast::Literal>()) {
+    if (!a->index->Is<ast::LiteralExpression>()) {
       cb(a->index);
     }
     return;

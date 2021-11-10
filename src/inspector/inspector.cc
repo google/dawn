@@ -263,29 +263,29 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
       continue;
     }
 
-    auto* literal = var->constructor->As<ast::Literal>();
+    auto* literal = var->constructor->As<ast::LiteralExpression>();
     if (!literal) {
       // This is invalid WGSL, but handling gracefully.
       result[constant_id] = Scalar();
       continue;
     }
 
-    if (auto* l = literal->As<ast::BoolLiteral>()) {
+    if (auto* l = literal->As<ast::BoolLiteralExpression>()) {
       result[constant_id] = Scalar(l->value);
       continue;
     }
 
-    if (auto* l = literal->As<ast::UintLiteral>()) {
+    if (auto* l = literal->As<ast::UintLiteralExpression>()) {
       result[constant_id] = Scalar(l->value);
       continue;
     }
 
-    if (auto* l = literal->As<ast::SintLiteral>()) {
+    if (auto* l = literal->As<ast::SintLiteralExpression>()) {
       result[constant_id] = Scalar(l->value);
       continue;
     }
 
-    if (auto* l = literal->As<ast::FloatLiteral>()) {
+    if (auto* l = literal->As<ast::FloatLiteralExpression>()) {
       result[constant_id] = Scalar(l->value);
       continue;
     }

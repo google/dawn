@@ -29,7 +29,7 @@ using f32 = ProgramBuilder::f32;
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr,
                                               const sem::Type* type) {
-  if (auto* e = expr->As<ast::Literal>()) {
+  if (auto* e = expr->As<ast::LiteralExpression>()) {
     return EvaluateConstantValue(e, type);
   }
   if (auto* e = expr->As<ast::TypeConstructorExpression>()) {
@@ -38,18 +38,19 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr,
   return {};
 }
 
-sem::Constant Resolver::EvaluateConstantValue(const ast::Literal* literal,
-                                              const sem::Type* type) {
-  if (auto* lit = literal->As<ast::SintLiteral>()) {
+sem::Constant Resolver::EvaluateConstantValue(
+    const ast::LiteralExpression* literal,
+    const sem::Type* type) {
+  if (auto* lit = literal->As<ast::SintLiteralExpression>()) {
     return {type, {lit->ValueAsI32()}};
   }
-  if (auto* lit = literal->As<ast::UintLiteral>()) {
+  if (auto* lit = literal->As<ast::UintLiteralExpression>()) {
     return {type, {lit->ValueAsU32()}};
   }
-  if (auto* lit = literal->As<ast::FloatLiteral>()) {
+  if (auto* lit = literal->As<ast::FloatLiteralExpression>()) {
     return {type, {lit->value}};
   }
-  if (auto* lit = literal->As<ast::BoolLiteral>()) {
+  if (auto* lit = literal->As<ast::BoolLiteralExpression>()) {
     return {type, {lit->value}};
   }
   TINT_UNREACHABLE(Resolver, builder_->Diagnostics());

@@ -583,7 +583,7 @@ uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return GenerateIdentifierExpression(i);
   }
-  if (auto* l = expr->As<ast::Literal>()) {
+  if (auto* l = expr->As<ast::LiteralExpression>()) {
     return GenerateLiteralIfNeeded(nullptr, l);
   }
   if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
@@ -777,16 +777,16 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
 
       // SPIR-V requires specialization constants to have initializers.
       if (type->Is<sem::F32>()) {
-        ast::FloatLiteral l(ProgramID(), Source{}, 0.0f);
+        ast::FloatLiteralExpression l(ProgramID(), Source{}, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type->Is<sem::U32>()) {
-        ast::UintLiteral l(ProgramID(), Source{}, 0);
+        ast::UintLiteralExpression l(ProgramID(), Source{}, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type->Is<sem::I32>()) {
-        ast::SintLiteral l(ProgramID(), Source{}, 0);
+        ast::SintLiteralExpression l(ProgramID(), Source{}, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type->Is<sem::Bool>()) {
-        ast::BoolLiteral l(ProgramID(), Source{}, false);
+        ast::BoolLiteralExpression l(ProgramID(), Source{}, false);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else {
         error_ = "invalid type for pipeline constant ID, must be scalar";
@@ -928,7 +928,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr,
   auto extract_id = extract.to_i();
 
   // If the index is a literal, we use OpCompositeExtract.
-  if (auto* literal = expr->index->As<ast::IntLiteral>()) {
+  if (auto* literal = expr->index->As<ast::IntLiteralExpression>()) {
     if (!push_function_inst(spv::Op::OpCompositeExtract,
                             {Operand::Int(result_type_id), extract,
                              Operand::Int(info->source_id),
@@ -1256,7 +1256,7 @@ uint32_t Builder::GetGLSLstd450Import() {
 
 uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
                                                 const ast::Expression* expr) {
-  if (auto* literal = expr->As<ast::Literal>()) {
+  if (auto* literal = expr->As<ast::LiteralExpression>()) {
     return GenerateLiteralIfNeeded(var, literal);
   }
   if (auto* type = expr->As<ast::TypeConstructorExpression>()) {
@@ -1269,7 +1269,7 @@ uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
 
 bool Builder::is_constructor_const(const ast::Expression* expr,
                                    bool is_global_init) {
-  if (expr->Is<ast::Literal>()) {
+  if (expr->Is<ast::LiteralExpression>()) {
     return true;
   }
 
@@ -1281,7 +1281,7 @@ bool Builder::is_constructor_const(const ast::Expression* expr,
   for (size_t i = 0; i < tc->values.size(); ++i) {
     auto* e = tc->values[i];
 
-    if (!e->IsAnyOf<ast::TypeConstructorExpression, ast::Literal>()) {
+    if (!e->IsAnyOf<ast::TypeConstructorExpression, ast::LiteralExpression>()) {
       if (is_global_init) {
         error_ = "constructor must be a constant expression";
         return false;
@@ -1295,7 +1295,7 @@ bool Builder::is_constructor_const(const ast::Expression* expr,
       return false;
     }
 
-    auto* lit = e->As<ast::Literal>();
+    auto* lit = e->As<ast::LiteralExpression>();
     if (result_type->Is<sem::Vector>() && lit == nullptr) {
       return false;
     }
@@ -1610,18 +1610,18 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(
     uint32_t one_id;
     uint32_t zero_id;
     if (to_elem_type->Is<sem::F32>()) {
-      ast::FloatLiteral one(ProgramID(), Source{}, 1.0f);
-      ast::FloatLiteral zero(ProgramID(), Source{}, 0.0f);
+      ast::FloatLiteralExpression one(ProgramID(), Source{}, 1.0f);
+      ast::FloatLiteralExpression zero(ProgramID(), Source{}, 0.0f);
       one_id = GenerateLiteralIfNeeded(nullptr, &one);
       zero_id = GenerateLiteralIfNeeded(nullptr, &zero);
     } else if (to_elem_type->Is<sem::U32>()) {
-      ast::UintLiteral one(ProgramID(), Source{}, 1);
-      ast::UintLiteral zero(ProgramID(), Source{}, 0);
+      ast::UintLiteralExpression one(ProgramID(), Source{}, 1);
+      ast::UintLiteralExpression zero(ProgramID(), Source{}, 0);
       one_id = GenerateLiteralIfNeeded(nullptr, &one);
       zero_id = GenerateLiteralIfNeeded(nullptr, &zero);
     } else if (to_elem_type->Is<sem::I32>()) {
-      ast::SintLiteral one(ProgramID(), Source{}, 1);
-      ast::SintLiteral zero(ProgramID(), Source{}, 0);
+      ast::SintLiteralExpression one(ProgramID(), Source{}, 1);
+      ast::SintLiteralExpression zero(ProgramID(), Source{}, 0);
       one_id = GenerateLiteralIfNeeded(nullptr, &one);
       zero_id = GenerateLiteralIfNeeded(nullptr, &zero);
     } else {
@@ -1665,7 +1665,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(
 }
 
 uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
-                                          const ast::Literal* lit) {
+                                          const ast::LiteralExpression* lit) {
   ScalarConstant constant;
 
   auto* global = builder_.Sem().Get<sem::GlobalVariable>(var);
@@ -1674,16 +1674,16 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
     constant.constant_id = global->ConstantId();
   }
 
-  if (auto* l = lit->As<ast::BoolLiteral>()) {
+  if (auto* l = lit->As<ast::BoolLiteralExpression>()) {
     constant.kind = ScalarConstant::Kind::kBool;
     constant.value.b = l->value;
-  } else if (auto* sl = lit->As<ast::SintLiteral>()) {
+  } else if (auto* sl = lit->As<ast::SintLiteralExpression>()) {
     constant.kind = ScalarConstant::Kind::kI32;
     constant.value.i32 = sl->value;
-  } else if (auto* ul = lit->As<ast::UintLiteral>()) {
+  } else if (auto* ul = lit->As<ast::UintLiteralExpression>()) {
     constant.kind = ScalarConstant::Kind::kU32;
     constant.value.u32 = ul->value;
-  } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
+  } else if (auto* fl = lit->As<ast::FloatLiteralExpression>()) {
     constant.kind = ScalarConstant::Kind::kF32;
     constant.value.f32 = fl->value;
   } else {
@@ -2920,7 +2920,7 @@ bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(gen(level));
       } else {
-        ast::SintLiteral i32_0(ProgramID(), Source{}, 0);
+        ast::SintLiteralExpression i32_0(ProgramID(), Source{}, 0);
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(
             Operand::Int(GenerateLiteralIfNeeded(nullptr, &i32_0)));
@@ -2952,7 +2952,7 @@ bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
           texture_type->Is<sem::StorageTexture>()) {
         op = spv::Op::OpImageQuerySize;
       } else {
-        ast::SintLiteral i32_0(ProgramID(), Source{}, 0);
+        ast::SintLiteralExpression i32_0(ProgramID(), Source{}, 0);
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(
             Operand::Int(GenerateLiteralIfNeeded(nullptr, &i32_0)));
@@ -3074,7 +3074,7 @@ bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
       }
       spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
 
-      ast::FloatLiteral float_0(ProgramID(), Source{}, 0.0);
+      ast::FloatLiteralExpression float_0(ProgramID(), Source{}, 0.0);
       image_operands.emplace_back(ImageOperand{
           SpvImageOperandsLodMask,
           Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0))});
@@ -3625,7 +3625,7 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
 
     case_ids.push_back(block_id);
     for (auto* selector : item->selectors) {
-      auto* int_literal = selector->As<ast::IntLiteral>();
+      auto* int_literal = selector->As<ast::IntLiteralExpression>();
       if (!int_literal) {
         error_ = "expected integer literal for switch case label";
         return false;
