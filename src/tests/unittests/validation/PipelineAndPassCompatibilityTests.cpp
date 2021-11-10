@@ -163,10 +163,10 @@ namespace {
                     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
                     pass.ExecuteBundles(1, &bundle);
                     pass.EndPass();
-                    if (depthStencilReadOnlyInPass != depthStencilReadOnlyInBundle) {
-                        ASSERT_DEVICE_ERROR(encoder.Finish());
-                    } else {
+                    if (!depthStencilReadOnlyInPass || depthStencilReadOnlyInBundle) {
                         encoder.Finish();
+                    } else {
+                        ASSERT_DEVICE_ERROR(encoder.Finish());
                     }
                 }
             }

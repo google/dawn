@@ -248,13 +248,13 @@ namespace dawn_native {
 
                         bool depthReadOnlyInBundle = renderBundles[i]->IsDepthReadOnly();
                         DAWN_INVALID_IF(
-                            depthReadOnlyInPass != depthReadOnlyInBundle,
+                            depthReadOnlyInPass && !depthReadOnlyInBundle,
                             "DepthReadOnly (%u) of renderBundle[%i] (%s) is not compatible "
                             "with DepthReadOnly (%u) of %s.",
                             depthReadOnlyInBundle, i, renderBundles[i], depthReadOnlyInPass, this);
 
                         bool stencilReadOnlyInBundle = renderBundles[i]->IsStencilReadOnly();
-                        DAWN_INVALID_IF(stencilReadOnlyInPass != stencilReadOnlyInBundle,
+                        DAWN_INVALID_IF(stencilReadOnlyInPass && !stencilReadOnlyInBundle,
                                         "StencilReadOnly (%u) of renderBundle[%i] (%s) is not "
                                         "compatible with StencilReadOnly (%u) of %s.",
                                         stencilReadOnlyInBundle, i, renderBundles[i],
