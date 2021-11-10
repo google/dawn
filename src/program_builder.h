@@ -1737,6 +1737,16 @@ class ProgramBuilder {
                                          Expr(std::forward<RHS>(rhs)));
   }
 
+  /// @param lhs the left hand argument to the equal expression
+  /// @param rhs the right hand argument to the equal expression
+  /// @returns a `ast::BinaryExpression` comparing `lhs` equal to `rhs`
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* Equal(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
   /// @param source the source information
   /// @param arr the array argument for the array accessor expression
   /// @param idx the index argument for the array accessor expression

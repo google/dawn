@@ -46,12 +46,16 @@ struct tint_symbol_5 {
 };
 
 float4 fs_main_inner(float2 texcoord) {
-  float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
-  if (!(all((clampedTexcoord == texcoord)))) {
-    discard;
+  if (true) {
+    float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+    if (!(all((clampedTexcoord == texcoord)))) {
+      discard;
+    }
+    float4 srcColor = myTexture.Sample(mySampler, texcoord);
+    return srcColor;
   }
-  float4 srcColor = myTexture.Sample(mySampler, texcoord);
-  return srcColor;
+  float4 unused;
+  return unused;
 }
 
 tint_symbol_5 fs_main(tint_symbol_4 tint_symbol_3) {

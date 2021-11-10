@@ -2339,11 +2339,52 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     out << ") {";
   }
 
+  if (sem->HasDiscard() && !sem->ReturnType()->Is<sem::Void>()) {
+    // BUG(crbug.com/tint/1081): work around non-void functions with discard
+    // failing compilation sometimes
+    if (!EmitFunctionBodyWithDiscard(func)) {
+      return false;
+    }
+  } else {
+    if (!EmitStatementsWithIndent(func->body->statements)) {
+      return false;
+    }
+  }
+
+  line() << "}";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitFunctionBodyWithDiscard(const ast::Function* func) {
+  // FXC sometimes fails to compile functions that discard with 'Not all control
+  // paths return a value'. We work around this by wrapping the function body
+  // within an "if (true) { <body> } return <default return type obj>;" so that
+  // there is always an (unused) return statement.
+
+  auto* sem = builder_.Sem().Get(func);
+  TINT_ASSERT(Writer, sem->HasDiscard() && !sem->ReturnType()->Is<sem::Void>());
+
+  ScopedIndent si(this);
+  line() << "if (true) {";
+
   if (!EmitStatementsWithIndent(func->body->statements)) {
     return false;
   }
 
   line() << "}";
+
+  // Return an unused result that matches the type of the return value
+  auto name = builder_.Symbols().NameFor(builder_.Symbols().New("unused"));
+  {
+    auto out = line();
+    if (!EmitTypeAndName(out, sem->ReturnType(), ast::StorageClass::kNone,
+                         ast::Access::kReadWrite, name)) {
+      return false;
+    }
+    out << ";";
+  }
+  line() << "return " << name << ";";
 
   return true;
 }

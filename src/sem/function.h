@@ -229,6 +229,13 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns true if `sym` is an ancestor entry point of this function
   bool HasAncestorEntryPoint(Symbol sym) const;
 
+  /// Sets that this function has a discard statement
+  void SetHasDiscard() { has_discard_ = true; }
+
+  /// Returns true if this function has a discard statement
+  /// @returns true if this function has a discard statement
+  bool HasDiscard() const { return has_discard_; }
+
  private:
   VariableBindings TransitivelyReferencedSamplerVariablesImpl(
       ast::SamplerKind kind) const;
@@ -245,6 +252,7 @@ class Function : public Castable<Function, CallTarget> {
   std::vector<const Call*> direct_calls_;
   std::vector<const Call*> callsites_;
   std::vector<const Function*> ancestor_entry_points_;
+  bool has_discard_ = false;
 };
 
 }  // namespace sem

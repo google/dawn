@@ -809,6 +809,51 @@ my_func_ret my_func() {
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithDiscardAndVoidReturn) {
+  Func("my_func", {Param("a", ty.i32())}, ty.void_(),
+       {
+           If(Equal("a", 0),  //
+              Block(create<ast::DiscardStatement>())),
+           Return(),
+       });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(void my_func(int a) {
+  if ((a == 0)) {
+    discard;
+  }
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_Function_WithDiscardAndNonVoidReturn) {
+  Func("my_func", {Param("a", ty.i32())}, ty.i32(),
+       {
+           If(Equal("a", 0),  //
+              Block(create<ast::DiscardStatement>())),
+           Return(42),
+       });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(int my_func(int a) {
+  if (true) {
+    if ((a == 0)) {
+      discard;
+    }
+    return 42;
+  }
+  int unused;
+  return unused;
+}
+)");
+}
+
 // https://crbug.com/tint/297
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Multiple_EntryPoint_With_Same_ModuleVar) {

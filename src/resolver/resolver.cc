@@ -2166,6 +2166,7 @@ bool Resolver::Statement(const ast::Statement* stmt) {
       }
       return false;
     }
+    current_function_->SetHasDiscard();
     return true;
   }
   if (stmt->Is<ast::FallthroughStatement>()) {

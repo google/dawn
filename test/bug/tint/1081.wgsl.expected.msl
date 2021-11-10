@@ -1,0 +1,39 @@
+bug/tint/1081.wgsl:9:25 warning: integral user-defined fragment inputs must have a flat interpolation attribute
+fn main([[location(1)]] x: vec3<i32>) -> [[location(2)]] i32 {
+                        ^
+
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_2 {
+  int3 x [[user(locn1)]];
+};
+struct tint_symbol_3 {
+  int value [[color(2)]];
+};
+
+int f(int x) {
+  if ((x == 10)) {
+    discard_fragment();
+  }
+  return x;
+}
+
+int tint_symbol_inner(int3 x) {
+  int y = x[0];
+  while (true) {
+    int const r = f(y);
+    if ((r == 0)) {
+      break;
+    }
+  }
+  return y;
+}
+
+fragment tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  int const inner_result = tint_symbol_inner(tint_symbol_1.x);
+  tint_symbol_3 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+

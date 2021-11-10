@@ -240,7 +240,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param func the function to generate
   /// @returns true if the function was emitted
   bool EmitFunction(const ast::Function* func);
-
+  /// Handles emitting the function body if it discards to work around a FXC
+  /// compilation bug.
+  /// @param func the function with the body to emit
+  /// @returns true if the function was emitted
+  bool EmitFunctionBodyWithDiscard(const ast::Function* func);
   /// Handles emitting a global variable
   /// @param global the global variable
   /// @returns true on success
