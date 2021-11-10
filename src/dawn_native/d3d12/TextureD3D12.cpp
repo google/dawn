@@ -647,10 +647,9 @@ namespace dawn_native { namespace d3d12 {
     }
 
     Texture::~Texture() {
-        DestroyInternal();
     }
 
-    void Texture::DestroyImpl() {
+    void Texture::DestroyApiObjectImpl() {
         Device* device = ToBackend(GetDevice());
 
         // In PIX's D3D12-only mode, there is no way to determine frame boundaries

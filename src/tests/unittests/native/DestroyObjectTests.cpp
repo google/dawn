@@ -20,12 +20,14 @@
 #include "mocks/BufferMock.h"
 #include "mocks/ComputePipelineMock.h"
 #include "mocks/DeviceMock.h"
+#include "mocks/ExternalTextureMock.h"
 #include "mocks/PipelineLayoutMock.h"
 #include "mocks/QuerySetMock.h"
 #include "mocks/RenderPipelineMock.h"
 #include "mocks/SamplerMock.h"
 #include "mocks/ShaderModuleMock.h"
 #include "mocks/SwapChainMock.h"
+#include "mocks/TextureMock.h"
 #include "tests/DawnNativeTest.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 
@@ -42,6 +44,16 @@ namespace dawn_native { namespace {
         DestroyObjectTests() : Test() {
             // Skipping validation on descriptors as coverage for validation is already present.
             mDevice.SetToggle(Toggle::SkipValidation, true);
+        }
+
+        Ref<TextureMock> GetTexture() {
+            if (mTexture != nullptr) {
+                return mTexture;
+            }
+            mTexture =
+                AcquireRef(new TextureMock(&mDevice, TextureBase::TextureState::OwnedInternal));
+            EXPECT_CALL(*mTexture.Get(), DestroyApiObjectImpl).Times(1);
+            return mTexture;
         }
 
         Ref<PipelineLayoutMock> GetPipelineLayout() {
@@ -85,6 +97,7 @@ namespace dawn_native { namespace {
 
         // The following lazy-initialized objects are used to facilitate creation of dependent
         // objects under test.
+        Ref<TextureMock> mTexture;
         Ref<PipelineLayoutMock> mPipelineLayout;
         Ref<ShaderModuleMock> mVsModule;
         Ref<ShaderModuleMock> mCsModule;
@@ -235,6 +248,24 @@ namespace dawn_native { namespace {
             EXPECT_TRUE(computePipeline->IsAlive());
             EXPECT_TRUE(computePipeline->IsCachedReference());
         }
+    }
+
+    TEST_F(DestroyObjectTests, ExternalTextureExplicit) {
+        ExternalTextureMock externalTextureMock(&mDevice);
+        EXPECT_CALL(externalTextureMock, DestroyApiObjectImpl).Times(1);
+
+        EXPECT_TRUE(externalTextureMock.IsAlive());
+        externalTextureMock.DestroyApiObject();
+        EXPECT_FALSE(externalTextureMock.IsAlive());
+    }
+
+    // We can use an actual ExternalTexture object to test the implicit case.
+    TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
+        ExternalTextureDescriptor desc = {};
+        Ref<ExternalTextureBase> externalTexture;
+        DAWN_ASSERT_AND_ASSIGN(externalTexture, mDevice.CreateExternalTexture(&desc));
+
+        EXPECT_TRUE(externalTexture->IsAlive());
     }
 
     TEST_F(DestroyObjectTests, PipelineLayoutExplicit) {
@@ -409,6 +440,84 @@ namespace dawn_native { namespace {
         }
     }
 
+    TEST_F(DestroyObjectTests, TextureExplicit) {
+        {
+            TextureMock textureMock(&mDevice, TextureBase::TextureState::OwnedInternal);
+            EXPECT_CALL(textureMock, DestroyApiObjectImpl).Times(1);
+
+            EXPECT_TRUE(textureMock.IsAlive());
+            textureMock.DestroyApiObject();
+            EXPECT_FALSE(textureMock.IsAlive());
+        }
+        {
+            TextureMock textureMock(&mDevice, TextureBase::TextureState::OwnedExternal);
+            EXPECT_CALL(textureMock, DestroyApiObjectImpl).Times(1);
+
+            EXPECT_TRUE(textureMock.IsAlive());
+            textureMock.DestroyApiObject();
+            EXPECT_FALSE(textureMock.IsAlive());
+        }
+    }
+
+    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+    // will also complain if there is a memory leak.
+    TEST_F(DestroyObjectTests, TextureImplicit) {
+        {
+            TextureMock* textureMock =
+                new TextureMock(&mDevice, TextureBase::TextureState::OwnedInternal);
+            EXPECT_CALL(*textureMock, DestroyApiObjectImpl).Times(1);
+            {
+                TextureDescriptor desc = {};
+                Ref<TextureBase> texture;
+                EXPECT_CALL(mDevice, CreateTextureImpl)
+                    .WillOnce(Return(ByMove(AcquireRef(textureMock))));
+                DAWN_ASSERT_AND_ASSIGN(texture, mDevice.CreateTexture(&desc));
+
+                EXPECT_TRUE(texture->IsAlive());
+            }
+        }
+        {
+            TextureMock* textureMock =
+                new TextureMock(&mDevice, TextureBase::TextureState::OwnedExternal);
+            EXPECT_CALL(*textureMock, DestroyApiObjectImpl).Times(1);
+            {
+                TextureDescriptor desc = {};
+                Ref<TextureBase> texture;
+                EXPECT_CALL(mDevice, CreateTextureImpl)
+                    .WillOnce(Return(ByMove(AcquireRef(textureMock))));
+                DAWN_ASSERT_AND_ASSIGN(texture, mDevice.CreateTexture(&desc));
+
+                EXPECT_TRUE(texture->IsAlive());
+            }
+        }
+    }
+
+    TEST_F(DestroyObjectTests, TextureViewExplicit) {
+        TextureViewMock textureViewMock(GetTexture().Get());
+        EXPECT_CALL(textureViewMock, DestroyApiObjectImpl).Times(1);
+
+        EXPECT_TRUE(textureViewMock.IsAlive());
+        textureViewMock.DestroyApiObject();
+        EXPECT_FALSE(textureViewMock.IsAlive());
+    }
+
+    // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
+    // will also complain if there is a memory leak.
+    TEST_F(DestroyObjectTests, TextureViewImplicit) {
+        TextureViewMock* textureViewMock = new TextureViewMock(GetTexture().Get());
+        EXPECT_CALL(*textureViewMock, DestroyApiObjectImpl).Times(1);
+        {
+            TextureViewDescriptor desc = {};
+            Ref<TextureViewBase> textureView;
+            EXPECT_CALL(mDevice, CreateTextureViewImpl)
+                .WillOnce(Return(ByMove(AcquireRef(textureViewMock))));
+            DAWN_ASSERT_AND_ASSIGN(textureView,
+                                   mDevice.CreateTextureView(GetTexture().Get(), &desc));
+
+            EXPECT_TRUE(textureView->IsAlive());
+        }
+    }
+
     // Destroying the objects on the mDevice should result in all created objects being destroyed in
     // order.
     TEST_F(DestroyObjectTests, DestroyObjects) {
@@ -422,6 +531,9 @@ namespace dawn_native { namespace {
         SamplerMock* samplerMock = new SamplerMock(&mDevice);
         ShaderModuleMock* shaderModuleMock = new ShaderModuleMock(&mDevice);
         SwapChainMock* swapChainMock = new SwapChainMock(&mDevice);
+        TextureMock* textureMock =
+            new TextureMock(&mDevice, TextureBase::TextureState::OwnedInternal);
+        TextureViewMock* textureViewMock = new TextureViewMock(GetTexture().Get());
         {
             InSequence seq;
             EXPECT_CALL(*renderPipelineMock, DestroyApiObjectImpl).Times(1);
@@ -431,6 +543,8 @@ namespace dawn_native { namespace {
             EXPECT_CALL(*bindGroupMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*bindGroupLayoutMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*shaderModuleMock, DestroyApiObjectImpl).Times(1);
+            EXPECT_CALL(*textureViewMock, DestroyApiObjectImpl).Times(1);
+            EXPECT_CALL(*textureMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*querySetMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*samplerMock, DestroyApiObjectImpl).Times(1);
             EXPECT_CALL(*bufferMock, DestroyApiObjectImpl).Times(1);
@@ -482,6 +596,13 @@ namespace dawn_native { namespace {
             DAWN_ASSERT_AND_ASSIGN(computePipeline, mDevice.CreateComputePipeline(&desc));
             EXPECT_TRUE(computePipeline->IsAlive());
             EXPECT_TRUE(computePipeline->IsCachedReference());
+        }
+
+        Ref<ExternalTextureBase> externalTexture;
+        {
+            ExternalTextureDescriptor desc = {};
+            DAWN_ASSERT_AND_ASSIGN(externalTexture, mDevice.CreateExternalTexture(&desc));
+            EXPECT_TRUE(externalTexture->IsAlive());
         }
 
         Ref<PipelineLayoutBase> pipelineLayout;
@@ -560,17 +681,39 @@ namespace dawn_native { namespace {
             EXPECT_TRUE(swapChain->IsAlive());
         }
 
+        Ref<TextureBase> texture;
+        {
+            TextureDescriptor desc = {};
+            EXPECT_CALL(mDevice, CreateTextureImpl)
+                .WillOnce(Return(ByMove(AcquireRef(textureMock))));
+            DAWN_ASSERT_AND_ASSIGN(texture, mDevice.CreateTexture(&desc));
+            EXPECT_TRUE(texture->IsAlive());
+        }
+
+        Ref<TextureViewBase> textureView;
+        {
+            TextureViewDescriptor desc = {};
+            EXPECT_CALL(mDevice, CreateTextureViewImpl)
+                .WillOnce(Return(ByMove(AcquireRef(textureViewMock))));
+            DAWN_ASSERT_AND_ASSIGN(textureView,
+                                   mDevice.CreateTextureView(GetTexture().Get(), &desc));
+            EXPECT_TRUE(textureView->IsAlive());
+        }
+
         mDevice.DestroyObjects();
         EXPECT_FALSE(bindGroup->IsAlive());
         EXPECT_FALSE(bindGroupLayout->IsAlive());
         EXPECT_FALSE(buffer->IsAlive());
         EXPECT_FALSE(computePipeline->IsAlive());
+        EXPECT_FALSE(externalTexture->IsAlive());
         EXPECT_FALSE(pipelineLayout->IsAlive());
         EXPECT_FALSE(querySet->IsAlive());
         EXPECT_FALSE(renderPipeline->IsAlive());
         EXPECT_FALSE(sampler->IsAlive());
         EXPECT_FALSE(shaderModule->IsAlive());
         EXPECT_FALSE(swapChain->IsAlive());
+        EXPECT_FALSE(texture->IsAlive());
+        EXPECT_FALSE(textureView->IsAlive());
     }
 
 }}  // namespace dawn_native::

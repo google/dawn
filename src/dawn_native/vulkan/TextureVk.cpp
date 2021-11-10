@@ -792,12 +792,11 @@ namespace dawn_native { namespace vulkan {
         mSignalSemaphore = VK_NULL_HANDLE;
 
         // Destroy the texture so it can't be used again
-        DestroyInternal();
+        DestroyApiObject();
         return {};
     }
 
     Texture::~Texture() {
-        DestroyInternal();
     }
 
     void Texture::SetLabelHelper(const char* prefix) {
@@ -809,7 +808,7 @@ namespace dawn_native { namespace vulkan {
         SetLabelHelper("Dawn_InternalTexture");
     }
 
-    void Texture::DestroyImpl() {
+    void Texture::DestroyApiObjectImpl() {
         if (GetTextureState() == TextureState::OwnedInternal) {
             Device* device = ToBackend(GetDevice());
 
@@ -1300,6 +1299,9 @@ namespace dawn_native { namespace vulkan {
     }
 
     TextureView::~TextureView() {
+    }
+
+    void TextureView::DestroyApiObjectImpl() {
         Device* device = ToBackend(GetTexture()->GetDevice());
 
         if (mHandle != VK_NULL_HANDLE) {

@@ -105,7 +105,7 @@ namespace dawn_native { namespace d3d12 {
 
         // Dawn API
         void SetLabelImpl() override;
-        void DestroyImpl() override;
+        void DestroyApiObjectImpl() override;
 
         MaybeError ClearTexture(CommandRecordingContext* commandContext,
                                 const SubresourceRange& range,

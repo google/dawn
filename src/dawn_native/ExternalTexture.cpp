@@ -91,6 +91,12 @@ namespace dawn_native {
                                              const ExternalTextureDescriptor* descriptor)
         : ApiObjectBase(device, kLabelNotImplemented), mState(ExternalTextureState::Alive) {
         textureViews[0] = descriptor->plane0;
+        TrackInDevice();
+    }
+
+    ExternalTextureBase::ExternalTextureBase(DeviceBase* device)
+        : ApiObjectBase(device, kLabelNotImplemented), mState(ExternalTextureState::Alive) {
+        TrackInDevice();
     }
 
     ExternalTextureBase::ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -113,8 +119,12 @@ namespace dawn_native {
         if (GetDevice()->ConsumedError(GetDevice()->ValidateObject(this))) {
             return;
         }
+        DestroyApiObject();
+    }
+
+    bool ExternalTextureBase::DestroyApiObject() {
         mState = ExternalTextureState::Destroyed;
-        ASSERT(!IsError());
+        return ApiObjectBase::DestroyApiObject();
     }
 
     // static
