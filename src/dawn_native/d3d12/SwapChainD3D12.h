@@ -48,7 +48,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ~SwapChain() override;
 
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
 
         using NewSwapChainBase::NewSwapChainBase;
         MaybeError Initialize(NewSwapChainBase* previousSwapChain);

@@ -34,7 +34,7 @@ namespace dawn_native {
 
         static ComputePipelineBase* MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         // Functors necessary for the unordered_set<ComputePipelineBase*>-based cache.

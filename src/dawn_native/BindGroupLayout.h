@@ -53,7 +53,7 @@ namespace dawn_native {
 
         static BindGroupLayoutBase* MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         // A map from the BindingNumber to its packed BindingIndex.

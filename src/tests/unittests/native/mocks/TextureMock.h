@@ -29,7 +29,7 @@ namespace dawn_native {
         }
         ~TextureMock() override = default;
 
-        MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
+        MOCK_METHOD(void, DestroyImpl, (), (override));
     };
 
     class TextureViewMock : public TextureViewBase {
@@ -38,7 +38,7 @@ namespace dawn_native {
         }
         ~TextureViewMock() override = default;
 
-        MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
+        MOCK_METHOD(void, DestroyImpl, (), (override));
     };
 
 }  // namespace dawn_native

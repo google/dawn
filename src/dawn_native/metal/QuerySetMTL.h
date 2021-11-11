@@ -40,7 +40,7 @@ namespace dawn_native { namespace metal {
         MaybeError Initialize();
 
         // Dawn API
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
 
         NSPRef<id<MTLBuffer>> mVisibilityBuffer;
         // Note that mCounterSampleBuffer cannot be an NSRef because the API_AVAILABLE macros don't

@@ -171,7 +171,7 @@ namespace dawn_native { namespace metal {
         // Nothing to do, Metal StorageModeShared buffers are always mapped.
     }
 
-    void Buffer::DestroyApiObjectImpl() {
+    void Buffer::DestroyImpl() {
         mMtlBuffer = nullptr;
     }
 

@@ -71,7 +71,7 @@ namespace dawn_native {
     }
 
     void ApiObjectBase::DeleteThis() {
-        DestroyApiObject();
+        Destroy();
         RefCounted::DeleteThis();
     }
 
@@ -85,15 +85,15 @@ namespace dawn_native {
         return RemoveFromList();
     }
 
-    bool ApiObjectBase::DestroyApiObject() {
+    bool ApiObjectBase::Destroy() {
         bool marked = MarkDestroyed();
         if (marked) {
-            DestroyApiObjectImpl();
+            DestroyImpl();
         }
         return marked;
     }
 
-    void ApiObjectBase::DestroyApiObjectImpl() {
+    void ApiObjectBase::DestroyImpl() {
     }
 
 }  // namespace dawn_native

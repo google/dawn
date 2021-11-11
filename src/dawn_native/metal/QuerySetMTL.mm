@@ -123,7 +123,7 @@ namespace dawn_native { namespace metal {
 
     QuerySet::~QuerySet() = default;
 
-    void QuerySet::DestroyApiObjectImpl() {
+    void QuerySet::DestroyImpl() {
         mVisibilityBuffer = nullptr;
 
         // mCounterSampleBuffer isn't an NSRef because API_AVAILABLE doesn't work will with

@@ -66,7 +66,7 @@ namespace dawn_native { namespace metal {
         void InitializeAsWrapping(const TextureDescriptor* descriptor,
                                   NSPRef<id<MTLTexture>> wrapped);
 
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
 
         MaybeError ClearTexture(CommandRecordingContext* commandContext,
                                 const SubresourceRange& range,

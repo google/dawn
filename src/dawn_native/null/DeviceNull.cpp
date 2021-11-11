@@ -329,7 +329,7 @@ namespace dawn_native { namespace null {
     void Buffer::UnmapImpl() {
     }
 
-    void Buffer::DestroyApiObjectImpl() {
+    void Buffer::DestroyImpl() {
         ToBackend(GetDevice())->DecrementMemoryUsage(GetSize());
     }
 
@@ -345,7 +345,7 @@ namespace dawn_native { namespace null {
         : QuerySetBase(device, descriptor) {
     }
 
-    void QuerySet::DestroyApiObjectImpl() {
+    void QuerySet::DestroyImpl() {
     }
 
     // Queue

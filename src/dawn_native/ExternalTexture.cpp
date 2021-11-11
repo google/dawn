@@ -119,12 +119,12 @@ namespace dawn_native {
         if (GetDevice()->ConsumedError(GetDevice()->ValidateObject(this))) {
             return;
         }
-        DestroyApiObject();
+        Destroy();
     }
 
-    bool ExternalTextureBase::DestroyApiObject() {
+    bool ExternalTextureBase::Destroy() {
         mState = ExternalTextureState::Destroyed;
-        return ApiObjectBase::DestroyApiObject();
+        return ApiObjectBase::Destroy();
     }
 
     // static

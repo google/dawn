@@ -91,7 +91,7 @@ namespace dawn_native { namespace vulkan {
 
     ComputePipeline::~ComputePipeline() = default;
 
-    void ComputePipeline::DestroyApiObjectImpl() {
+    void ComputePipeline::DestroyImpl() {
         if (mHandle != VK_NULL_HANDLE) {
             ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;

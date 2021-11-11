@@ -30,7 +30,7 @@ namespace dawn_native {
 
         MOCK_METHOD(MaybeError, Initialize, (), (override));
         MOCK_METHOD(size_t, ComputeContentHash, (), (override));
-        MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
+        MOCK_METHOD(void, DestroyImpl, (), (override));
     };
 
 }  // namespace dawn_native

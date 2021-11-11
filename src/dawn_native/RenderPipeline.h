@@ -63,7 +63,7 @@ namespace dawn_native {
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&

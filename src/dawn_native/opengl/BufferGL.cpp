@@ -174,7 +174,7 @@ namespace dawn_native { namespace opengl {
         mMappedData = nullptr;
     }
 
-    void Buffer::DestroyApiObjectImpl() {
+    void Buffer::DestroyImpl() {
         ToBackend(GetDevice())->gl.DeleteBuffers(1, &mBuffer);
         mBuffer = 0;
     }

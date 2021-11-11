@@ -60,8 +60,8 @@ namespace dawn_native {
 
     ComputePipelineBase::~ComputePipelineBase() = default;
 
-    bool ComputePipelineBase::DestroyApiObject() {
-        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
+    bool ComputePipelineBase::Destroy() {
+        bool wasDestroyed = ApiObjectBase::Destroy();
         if (wasDestroyed && IsCachedReference()) {
             // Do not uncache the actual cached object if we are a blueprint or already destroyed.
             GetDevice()->UncacheComputePipeline(this);

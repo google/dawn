@@ -41,7 +41,7 @@ namespace dawn_native { namespace opengl {
       private:
         ~Texture() override;
 
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
         MaybeError ClearTexture(const SubresourceRange& range, TextureBase::ClearValue clearValue);
 
         GLuint mHandle;
@@ -57,7 +57,7 @@ namespace dawn_native { namespace opengl {
 
       private:
         ~TextureView() override;
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
 
         GLuint mHandle;
         GLenum mTarget;

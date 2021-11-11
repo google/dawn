@@ -48,7 +48,7 @@ namespace dawn_native { namespace metal {
         ~Buffer() override;
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
         void* GetMappedPointerImpl() override;
         bool IsCPUWritableAtCreation() const override;
         MaybeError MapAtCreationImpl() override;

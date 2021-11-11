@@ -96,7 +96,7 @@ namespace dawn_native { namespace vulkan {
 
     QuerySet::~QuerySet() = default;
 
-    void QuerySet::DestroyApiObjectImpl() {
+    void QuerySet::DestroyImpl() {
         if (mHandle != VK_NULL_HANDLE) {
             ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;

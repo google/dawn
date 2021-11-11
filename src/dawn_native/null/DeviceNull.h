@@ -228,7 +228,7 @@ namespace dawn_native { namespace null {
       private:
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
         bool IsCPUWritableAtCreation() const override;
         MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
@@ -246,7 +246,7 @@ namespace dawn_native { namespace null {
         QuerySet(Device* device, const QuerySetDescriptor* descriptor);
 
       private:
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
     };
 
     class Queue final : public QueueBase {

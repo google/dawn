@@ -78,7 +78,7 @@ namespace dawn_native { namespace opengl {
 
     Sampler::~Sampler() = default;
 
-    void Sampler::DestroyApiObjectImpl() {
+    void Sampler::DestroyImpl() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
         gl.DeleteSamplers(1, &mFilteringHandle);
         gl.DeleteSamplers(1, &mNonFilteringHandle);

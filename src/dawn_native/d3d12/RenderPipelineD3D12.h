@@ -46,7 +46,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ~RenderPipeline() override;
 
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
 
         using RenderPipelineBase::RenderPipelineBase;
         D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(

@@ -225,7 +225,7 @@ namespace dawn_native { namespace vulkan {
 
     SwapChain::~SwapChain() = default;
 
-    void SwapChain::DestroyApiObjectImpl() {
+    void SwapChain::DestroyImpl() {
         DetachFromSurface();
     }
 

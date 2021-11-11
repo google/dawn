@@ -483,12 +483,12 @@ namespace dawn_native {
         : ApiObjectBase(device, tag), mFormat(kUnusedFormat) {
     }
 
-    bool TextureBase::DestroyApiObject() {
+    bool TextureBase::Destroy() {
         // We need to run the destroy operations prior to setting the state to destroyed so that
         // the state is both consistent, and implementations of the destroy that may check the
         // state do not skip operations unintentionally. (Example in Vulkan backend, the destroy
         // implementation will not be ran if we are already in the Destroyed state.)
-        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
+        bool wasDestroyed = ApiObjectBase::Destroy();
         mState = TextureState::Destroyed;
         return wasDestroyed;
     }
@@ -686,7 +686,7 @@ namespace dawn_native {
             return;
         }
         ASSERT(!IsError());
-        DestroyApiObject();
+        Destroy();
     }
 
     MaybeError TextureBase::ValidateDestroy() const {

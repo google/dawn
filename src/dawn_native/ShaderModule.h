@@ -248,7 +248,7 @@ namespace dawn_native {
 
         static Ref<ShaderModuleBase> MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         // Return true iff the program has an entrypoint called `entryPoint`.

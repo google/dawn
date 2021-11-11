@@ -51,7 +51,7 @@ namespace dawn_native {
 
         static TextureBase* MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         wgpu::TextureDimension GetDimension() const;

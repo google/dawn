@@ -269,7 +269,8 @@ namespace dawn_native {
         // TODO(dawn/628) Add types into the array as they are implemented.
 
         // clang-format off
-        static constexpr std::array<ObjectType, 13> kObjectTypeDependencyOrder = {
+        static constexpr std::array<ObjectType, 14> kObjectTypeDependencyOrder = {
+            ObjectType::CommandBuffer,
             ObjectType::RenderPipeline,
             ObjectType::ComputePipeline,
             ObjectType::PipelineLayout,
@@ -296,7 +297,7 @@ namespace dawn_native {
             objList.objects.MoveInto(&objects);
         }
         for (LinkNode<ApiObjectBase>* node : objects) {
-            node->value()->DestroyApiObject();
+            node->value()->Destroy();
         }
     }
 

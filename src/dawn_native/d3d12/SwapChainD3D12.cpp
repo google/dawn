@@ -143,7 +143,7 @@ namespace dawn_native { namespace d3d12 {
 
     SwapChain::~SwapChain() = default;
 
-    void SwapChain::DestroyApiObjectImpl() {
+    void SwapChain::DestroyImpl() {
         DetachFromSurface();
     }
 

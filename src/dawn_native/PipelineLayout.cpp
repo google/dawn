@@ -85,8 +85,8 @@ namespace dawn_native {
 
     PipelineLayoutBase::~PipelineLayoutBase() = default;
 
-    bool PipelineLayoutBase::DestroyApiObject() {
-        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
+    bool PipelineLayoutBase::Destroy() {
+        bool wasDestroyed = ApiObjectBase::Destroy();
         if (wasDestroyed && IsCachedReference()) {
             // Do not uncache the actual cached object if we are a blueprint
             GetDevice()->UncachePipelineLayout(this);

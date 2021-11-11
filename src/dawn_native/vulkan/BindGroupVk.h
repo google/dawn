@@ -40,7 +40,7 @@ namespace dawn_native { namespace vulkan {
       private:
         ~BindGroup() override;
 
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
 
         // The descriptor set in this allocation outlives the BindGroup because it is owned by
         // the BindGroupLayout which is referenced by the BindGroup.

@@ -41,7 +41,7 @@ namespace dawn_native { namespace vulkan {
 
       private:
         ~RenderPipeline() override;
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
         using RenderPipelineBase::RenderPipelineBase;
 
         struct PipelineVertexInputStateCreateInfoTemporaryAllocations {

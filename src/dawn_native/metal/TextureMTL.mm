@@ -495,7 +495,7 @@ namespace dawn_native { namespace metal {
     Texture::~Texture() {
     }
 
-    void Texture::DestroyApiObjectImpl() {
+    void Texture::DestroyImpl() {
         mMtlTexture = nullptr;
     }
 

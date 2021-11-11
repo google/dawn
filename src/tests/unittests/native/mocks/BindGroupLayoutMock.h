@@ -28,7 +28,7 @@ namespace dawn_native {
         }
         ~BindGroupLayoutMock() override = default;
 
-        MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
+        MOCK_METHOD(void, DestroyImpl, (), (override));
     };
 
 }  // namespace dawn_native

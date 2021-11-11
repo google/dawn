@@ -65,17 +65,17 @@ namespace dawn_native {
         // class's implementation in the override. This needs to be public because it can be called
         // from the device owning the object. Returns true iff destruction occurs. Upon any re-calls
         // of the function it will return false to indicate no further operations should be taken.
-        virtual bool DestroyApiObject();
+        virtual bool Destroy();
 
         // Dawn API
         void APISetLabel(const char* label);
 
       protected:
         // Overriding of the RefCounted's DeleteThis function ensures that instances of objects
-        // always call their derived class implementation of DestroyApiObject prior to the derived
+        // always call their derived class implementation of Destroy prior to the derived
         // class being destroyed. This guarantees that when ApiObjects' reference counts drop to 0,
         // then the underlying backend's Destroy calls are executed. We cannot naively put the call
-        // to DestroyApiObject in the destructor of this class because it calls DestroyApiObjectImpl
+        // to Destroy in the destructor of this class because it calls DestroyImpl
         // which is a virtual function often implemented in the Derived class which would already
         // have been destroyed by the time ApiObject's destructor is called by C++'s destruction
         // order. Note that some classes like BindGroup may override the DeleteThis function again,
@@ -89,7 +89,7 @@ namespace dawn_native {
         // pre-destruction steps that need to occur only once, i.e. Buffer needs to be unmapped
         // before being destroyed.
         bool MarkDestroyed();
-        virtual void DestroyApiObjectImpl();
+        virtual void DestroyImpl();
 
       private:
         virtual void SetLabelImpl();

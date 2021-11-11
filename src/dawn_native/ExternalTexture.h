@@ -42,7 +42,7 @@ namespace dawn_native {
 
         static ExternalTextureBase* MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         void APIDestroy();

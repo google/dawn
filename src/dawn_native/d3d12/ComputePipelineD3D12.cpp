@@ -64,7 +64,7 @@ namespace dawn_native { namespace d3d12 {
 
     ComputePipeline::~ComputePipeline() = default;
 
-    void ComputePipeline::DestroyApiObjectImpl() {
+    void ComputePipeline::DestroyImpl() {
         ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
     }
 

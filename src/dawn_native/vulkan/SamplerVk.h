@@ -33,7 +33,7 @@ namespace dawn_native { namespace vulkan {
 
       private:
         ~Sampler() override;
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
         using SamplerBase::SamplerBase;
         MaybeError Initialize(const SamplerDescriptor* descriptor);
 

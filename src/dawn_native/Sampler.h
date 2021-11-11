@@ -38,7 +38,7 @@ namespace dawn_native {
 
         static SamplerBase* MakeError(DeviceBase* device);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         bool IsComparison() const;

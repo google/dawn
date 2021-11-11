@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TESTS_UNITTESTS_NATIVE_MOCKS_PIPELINELAYOUT_MOCK_H_
-#define TESTS_UNITTESTS_NATIVE_MOCKS_PIPELINELAYOUT_MOCK_H_
+#ifndef TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFER_MOCK_H_
+#define TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFER_MOCK_H_
 
+#include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Device.h"
-#include "dawn_native/PipelineLayout.h"
 
 #include <gmock/gmock.h>
 
 namespace dawn_native {
 
-    class PipelineLayoutMock : public PipelineLayoutBase {
+    class CommandBufferMock : public CommandBufferBase {
       public:
-        PipelineLayoutMock(DeviceBase* device) : PipelineLayoutBase(device) {
+        CommandBufferMock(DeviceBase* device) : CommandBufferBase(device) {
         }
-        ~PipelineLayoutMock() override = default;
+        ~CommandBufferMock() override = default;
 
         MOCK_METHOD(void, DestroyImpl, (), (override));
     };
 
 }  // namespace dawn_native
 
-#endif  // TESTS_UNITTESTS_NATIVE_MOCKS_PIPELINELAYOUT_MOCK_H_
+#endif  // TESTS_UNITTESTS_NATIVE_MOCKS_COMMANDBUFFER_MOCK_H_

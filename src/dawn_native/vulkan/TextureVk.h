@@ -107,7 +107,7 @@ namespace dawn_native { namespace vulkan {
                                           external_memory::Service* externalMemoryService);
         void InitializeForSwapChain(VkImage nativeImage);
 
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
         MaybeError ClearTexture(CommandRecordingContext* recordingContext,
                                 const SubresourceRange& range,
                                 TextureBase::ClearValue);
@@ -176,7 +176,7 @@ namespace dawn_native { namespace vulkan {
 
       private:
         ~TextureView() override;
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
         using TextureViewBase::TextureViewBase;
         MaybeError Initialize(const TextureViewDescriptor* descriptor);
 

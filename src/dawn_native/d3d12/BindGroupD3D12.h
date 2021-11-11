@@ -48,7 +48,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ~BindGroup() override;
 
-        void DestroyApiObjectImpl() override;
+        void DestroyImpl() override;
 
         Ref<SamplerHeapCacheEntry> mSamplerAllocationEntry;
 

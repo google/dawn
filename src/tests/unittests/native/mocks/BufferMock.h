@@ -28,7 +28,7 @@ namespace dawn_native {
         }
         ~BufferMock() override = default;
 
-        MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
+        MOCK_METHOD(void, DestroyImpl, (), (override));
 
         MOCK_METHOD(MaybeError, MapAtCreationImpl, (), (override));
         MOCK_METHOD(MaybeError,

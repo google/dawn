@@ -378,7 +378,7 @@ namespace dawn_native { namespace d3d12 {
         return mMappedData;
     }
 
-    void Buffer::DestroyApiObjectImpl() {
+    void Buffer::DestroyImpl() {
         // TODO(crbug.com/dawn/1189) Reintroduce optimization to skip flushing the writes to the GPU
         // memory when we unmap in destruction case since the buffer will be destroyed anyways.
         ToBackend(GetDevice())->DeallocateMemory(mResourceAllocation);

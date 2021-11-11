@@ -59,7 +59,7 @@ namespace dawn_native { namespace vulkan {
 
     PipelineLayout::~PipelineLayout() = default;
 
-    void PipelineLayout::DestroyApiObjectImpl() {
+    void PipelineLayout::DestroyImpl() {
         if (mHandle != VK_NULL_HANDLE) {
             ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;

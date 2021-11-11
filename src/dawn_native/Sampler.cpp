@@ -100,8 +100,8 @@ namespace dawn_native {
 
     SamplerBase::~SamplerBase() = default;
 
-    bool SamplerBase::DestroyApiObject() {
-        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
+    bool SamplerBase::Destroy() {
+        bool wasDestroyed = ApiObjectBase::Destroy();
         if (wasDestroyed && IsCachedReference()) {
             // Do not uncache the actual cached object if we are a blueprint or already destroyed.
             GetDevice()->UncacheSampler(this);

@@ -31,7 +31,7 @@ namespace dawn_native {
         }
         ~ShaderModuleMock() override = default;
 
-        MOCK_METHOD(void, DestroyApiObjectImpl, (), (override));
+        MOCK_METHOD(void, DestroyImpl, (), (override));
 
         // Creates a shader module mock based on the wgsl source.
         static ResultOrError<Ref<ShaderModuleMock>> Create(DeviceBase* device, const char* source);

@@ -61,7 +61,7 @@ namespace dawn_native {
             DeviceBase* device,
             std::vector<StageAndDescriptor> stages);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         const BindGroupLayoutBase* GetBindGroupLayout(BindGroupIndex group) const;

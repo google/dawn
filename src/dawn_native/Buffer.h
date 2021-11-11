@@ -52,7 +52,7 @@ namespace dawn_native {
 
         static BufferBase* MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
 
-        bool DestroyApiObject() override;
+        bool Destroy() override;
         ObjectType GetType() const override;
 
         uint64_t GetSize() const;
