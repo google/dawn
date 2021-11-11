@@ -129,22 +129,27 @@ class GlobalVariable : public Castable<GlobalVariable, Variable> {
   /// @returns the resource binding point for the variable
   sem::BindingPoint BindingPoint() const { return binding_point_; }
 
-  /// @returns the pipeline constant ID associated with the variable
-  uint16_t ConstantId() const { return constant_id_; }
-
   /// @param id the constant identifier to assign to this variable
   void SetConstantId(uint16_t id) {
     constant_id_ = id;
-    is_pipeline_constant_ = true;
+    is_overridable_ = true;
   }
 
-  /// @returns true if this variable is an overridable pipeline constant
-  bool IsPipelineConstant() const { return is_pipeline_constant_; }
+  /// @returns the pipeline constant ID associated with the variable
+  uint16_t ConstantId() const { return constant_id_; }
+
+  /// @param is_overridable true if this is a pipeline overridable constant
+  void SetIsOverridable(bool is_overridable = true) {
+    is_overridable_ = is_overridable;
+  }
+
+  /// @returns true if this is pipeline overridable constant
+  bool IsOverridable() const { return is_overridable_; }
 
  private:
   const sem::BindingPoint binding_point_;
 
-  bool is_pipeline_constant_ = false;
+  bool is_overridable_ = false;
   uint16_t constant_id_ = 0;
 };
 

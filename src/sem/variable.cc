@@ -61,8 +61,7 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration,
                                Constant constant_value,
                                sem::BindingPoint binding_point)
     : Base(declaration, type, storage_class, access, std::move(constant_value)),
-      binding_point_(binding_point),
-      is_pipeline_constant_(false) {}
+      binding_point_(binding_point) {}
 
 GlobalVariable::~GlobalVariable() = default;
 

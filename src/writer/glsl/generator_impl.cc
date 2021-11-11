@@ -1835,7 +1835,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         if (wgsize[i].overridable_const) {
           auto* global = builder_.Sem().Get<sem::GlobalVariable>(
               wgsize[i].overridable_const);
-          if (!global->IsPipelineConstant()) {
+          if (!global->IsOverridable()) {
             TINT_ICE(Writer, builder_.Diagnostics())
                 << "expected a pipeline-overridable constant";
           }
@@ -2657,7 +2657,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   auto* type = sem->Type();
 
   auto* global = sem->As<sem::GlobalVariable>();
-  if (global && global->IsPipelineConstant()) {
+  if (global && global->IsOverridable()) {
     auto const_id = global->ConstantId();
 
     line() << "#ifndef " << kSpecConstantPrefix << const_id;

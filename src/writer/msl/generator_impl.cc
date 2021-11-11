@@ -2651,7 +2651,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   }
 
   auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
-  if (global && global->IsPipelineConstant()) {
+  if (global && global->IsOverridable()) {
     out << " [[function_constant(" << global->ConstantId() << ")]]";
   } else if (var->constructor != nullptr) {
     out << " = ";

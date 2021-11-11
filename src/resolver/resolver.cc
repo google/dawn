@@ -547,13 +547,17 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
         binding_point = {bp.group->value, bp.binding->value};
       }
 
+      auto* override =
+          ast::GetDecoration<ast::OverrideDecoration>(var->decorations);
+      bool has_const_val = rhs && var->is_const && !override;
+
       auto* global = builder_->create<sem::GlobalVariable>(
           var, var_ty, storage_class, access,
-          (rhs && var->is_const) ? rhs->ConstantValue() : sem::Constant{},
+          has_const_val ? rhs->ConstantValue() : sem::Constant{},
           binding_point);
 
-      if (auto* override =
-              ast::GetDecoration<ast::OverrideDecoration>(var->decorations)) {
+      if (override) {
+        global->SetIsOverridable();
         if (override->has_value) {
           global->SetConstantId(static_cast<uint16_t>(override->value));
         }
@@ -1995,27 +1999,30 @@ bool Resolver::WorkgroupSizeFor(const ast::Function* func,
       return false;
     }
 
-    if (auto* ident = expr->As<ast::IdentifierExpression>()) {
-      // We have an identifier of a module-scope constant.
-      auto* var = variable_stack_.Get(ident->symbol);
-      if (!var || !var->Declaration()->is_const) {
+    sem::Constant value;
+
+    if (auto* user = Sem(expr)->As<sem::VariableUser>()) {
+      // We have an variable of a module-scope constant.
+      auto* decl = user->Variable()->Declaration();
+      if (!decl->is_const) {
         AddError(kErrBadType, expr->source);
         return false;
       }
-
-      auto* decl = var->Declaration();
       // Capture the constant if an [[override]] attribute is present.
       if (ast::HasDecoration<ast::OverrideDecoration>(decl->decorations)) {
         ws[i].overridable_const = decl;
       }
 
-      expr = decl->constructor;
-      if (!expr) {
+      if (decl->constructor) {
+        value = Sem(decl->constructor)->ConstantValue();
+      } else {
         // No constructor means this value must be overriden by the user.
         ws[i].value = 0;
         continue;
       }
-    } else if (!expr->Is<ast::LiteralExpression>()) {
+    } else if (expr->Is<ast::LiteralExpression>()) {
+      value = Sem(expr)->ConstantValue();
+    } else {
       AddError(
           "workgroup_size argument must be either a literal or a "
           "module-scope constant",
@@ -2023,20 +2030,19 @@ bool Resolver::WorkgroupSizeFor(const ast::Function* func,
       return false;
     }
 
-    auto val = expr_sem->ConstantValue();
-    if (!val) {
+    if (!value) {
       TINT_ICE(Resolver, diagnostics_)
           << "could not resolve constant workgroup_size constant value";
       continue;
     }
     // Validate and set the default value for this dimension.
-    if (is_i32 ? val.Elements()[0].i32 < 1 : val.Elements()[0].u32 < 1) {
+    if (is_i32 ? value.Elements()[0].i32 < 1 : value.Elements()[0].u32 < 1) {
       AddError("workgroup_size argument must be at least 1", values[i]->source);
       return false;
     }
 
-    ws[i].value = is_i32 ? static_cast<uint32_t>(val.Elements()[0].i32)
-                         : val.Elements()[0].u32;
+    ws[i].value = is_i32 ? static_cast<uint32_t>(value.Elements()[0].i32)
+                         : value.Elements()[0].u32;
   }
   return true;
 }

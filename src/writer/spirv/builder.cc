@@ -524,7 +524,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
           // Make the constant specializable.
           auto* sem_const = builder_.Sem().Get<sem::GlobalVariable>(
               wgsize[i].overridable_const);
-          if (!sem_const->IsPipelineConstant()) {
+          if (!sem_const->IsOverridable()) {
             TINT_ICE(Writer, builder_.Diagnostics())
                 << "expected a pipeline-overridable constant";
           }
@@ -1333,7 +1333,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   // Generate the zero initializer if there are no values provided.
   if (values.empty()) {
-    if (global_var && global_var->IsPipelineConstant()) {
+    if (global_var && global_var->IsOverridable()) {
       auto constant_id = global_var->ConstantId();
       if (result_type->Is<sem::I32>()) {
         return GenerateConstantIfNeeded(
@@ -1669,7 +1669,7 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
   ScalarConstant constant;
 
   auto* global = builder_.Sem().Get<sem::GlobalVariable>(var);
-  if (global && global->IsPipelineConstant()) {
+  if (global && global->IsOverridable()) {
     constant.is_spec_op = true;
     constant.constant_id = global->ConstantId();
   }

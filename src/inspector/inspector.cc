@@ -193,7 +193,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       auto name = program_->Symbols().NameFor(decl->symbol);
 
       auto* global = var->As<sem::GlobalVariable>();
-      if (global && global->IsPipelineConstant()) {
+      if (global && global->IsOverridable()) {
         OverridableConstant overridable_constant;
         overridable_constant.name = name;
         overridable_constant.numeric_id = global->ConstantId();
@@ -245,7 +245,7 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
   for (auto* var : program_->AST().GlobalVariables()) {
     auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
-    if (!global || !global->IsPipelineConstant()) {
+    if (!global || !global->IsOverridable()) {
       continue;
     }
 
@@ -300,7 +300,7 @@ std::map<std::string, uint32_t> Inspector::GetConstantNameToIdMap() {
   std::map<std::string, uint32_t> result;
   for (auto* var : program_->AST().GlobalVariables()) {
     auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
-    if (global && global->IsPipelineConstant()) {
+    if (global && global->IsOverridable()) {
       auto name = program_->Symbols().NameFor(var->symbol);
       result[name] = global->ConstantId();
     }

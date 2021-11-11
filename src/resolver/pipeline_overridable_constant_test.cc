@@ -30,24 +30,26 @@ class ResolverPipelineOverridableConstantTest : public ResolverTest {
     auto* sem = Sem().Get<sem::GlobalVariable>(var);
     ASSERT_NE(sem, nullptr);
     EXPECT_EQ(sem->Declaration(), var);
-    EXPECT_TRUE(sem->IsPipelineConstant());
+    EXPECT_TRUE(sem->IsOverridable());
     EXPECT_EQ(sem->ConstantId(), id);
+    EXPECT_FALSE(sem->ConstantValue());
   }
 };
 
 TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
-  auto* a = GlobalConst("a", ty.f32(), Construct(ty.f32()));
+  auto* a = GlobalConst("a", ty.f32(), Expr(1.f));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   auto* sem_a = Sem().Get<sem::GlobalVariable>(a);
   ASSERT_NE(sem_a, nullptr);
   EXPECT_EQ(sem_a->Declaration(), a);
-  EXPECT_FALSE(sem_a->IsPipelineConstant());
+  EXPECT_FALSE(sem_a->IsOverridable());
+  EXPECT_TRUE(sem_a->ConstantValue());
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
-  auto* a = GlobalConst("a", ty.f32(), Construct(ty.f32()), {Override(7u)});
+  auto* a = GlobalConst("a", ty.f32(), Expr(1.f), {Override(7u)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -55,7 +57,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
-  auto* a = GlobalConst("a", ty.f32(), Construct(ty.f32()), {Override()});
+  auto* a = GlobalConst("a", ty.f32(), Expr(1.f), {Override()});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -64,12 +66,12 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
   std::vector<ast::Variable*> variables;
-  auto* a = GlobalConst("a", ty.f32(), Construct(ty.f32()), {Override()});
-  auto* b = GlobalConst("b", ty.f32(), Construct(ty.f32()), {Override()});
-  auto* c = GlobalConst("c", ty.f32(), Construct(ty.f32()), {Override(2u)});
-  auto* d = GlobalConst("d", ty.f32(), Construct(ty.f32()), {Override(4u)});
-  auto* e = GlobalConst("e", ty.f32(), Construct(ty.f32()), {Override()});
-  auto* f = GlobalConst("f", ty.f32(), Construct(ty.f32()), {Override(1u)});
+  auto* a = GlobalConst("a", ty.f32(), Expr(1.f), {Override()});
+  auto* b = GlobalConst("b", ty.f32(), Expr(1.f), {Override()});
+  auto* c = GlobalConst("c", ty.f32(), Expr(1.f), {Override(2u)});
+  auto* d = GlobalConst("d", ty.f32(), Expr(1.f), {Override(4u)});
+  auto* e = GlobalConst("e", ty.f32(), Expr(1.f), {Override()});
+  auto* f = GlobalConst("f", ty.f32(), Expr(1.f), {Override(1u)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -83,10 +85,8 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, DuplicateIds) {
-  GlobalConst("a", ty.f32(), Construct(ty.f32()),
-              {Override(Source{{12, 34}}, 7u)});
-  GlobalConst("b", ty.f32(), Construct(ty.f32()),
-              {Override(Source{{56, 78}}, 7u)});
+  GlobalConst("a", ty.f32(), Expr(1.f), {Override(Source{{12, 34}}, 7u)});
+  GlobalConst("b", ty.f32(), Expr(1.f), {Override(Source{{56, 78}}, 7u)});
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -95,8 +95,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, DuplicateIds) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, IdTooLarge) {
-  GlobalConst("a", ty.f32(), Construct(ty.f32()),
-              {Override(Source{{12, 34}}, 65536u)});
+  GlobalConst("a", ty.f32(), Expr(1.f), {Override(Source{{12, 34}}, 65536u)});
 
   EXPECT_FALSE(r()->Resolve());
 
