@@ -48,6 +48,8 @@ namespace dawn_native { namespace d3d12 {
       private:
         ~BindGroup() override;
 
+        void DestroyApiObjectImpl() override;
+
         Ref<SamplerHeapCacheEntry> mSamplerAllocationEntry;
 
         GPUDescriptorHeapAllocation mGPUViewAllocation;

@@ -47,6 +47,8 @@ namespace dawn_native { namespace metal {
         ~SwapChain() override;
 
       private:
+        void DestroyApiObjectImpl() override;
+
         using NewSwapChainBase::NewSwapChainBase;
         MaybeError Initialize(NewSwapChainBase* previousSwapChain);
 

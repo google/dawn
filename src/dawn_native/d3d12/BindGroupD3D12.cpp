@@ -205,7 +205,9 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-    BindGroup::~BindGroup() {
+    BindGroup::~BindGroup() = default;
+
+    void BindGroup::DestroyApiObjectImpl() {
         ToBackend(GetLayout())->DeallocateBindGroup(this, &mCPUViewAllocation);
         ASSERT(!mCPUViewAllocation.IsValid());
     }

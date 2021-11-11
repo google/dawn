@@ -22,7 +22,9 @@ namespace dawn_native { namespace metal {
         : BindGroupBase(this, device, descriptor) {
     }
 
-    BindGroup::~BindGroup() {
+    BindGroup::~BindGroup() = default;
+
+    void BindGroup::DestroyApiObjectImpl() {
         ToBackend(GetLayout())->DeallocateBindGroup(this);
     }
 

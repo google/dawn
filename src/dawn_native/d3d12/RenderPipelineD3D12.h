@@ -45,6 +45,9 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         ~RenderPipeline() override;
+
+        void DestroyApiObjectImpl() override;
+
         using RenderPipelineBase::RenderPipelineBase;
         D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(
             std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors);

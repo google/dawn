@@ -53,6 +53,7 @@ namespace dawn_native { namespace vulkan {
       private:
         using NewSwapChainBase::NewSwapChainBase;
         MaybeError Initialize(NewSwapChainBase* previousSwapChain);
+        void DestroyApiObjectImpl() override;
 
         struct Config {
             // Information that's passed to vulkan swapchain creation.

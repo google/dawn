@@ -417,7 +417,9 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    RenderPipeline::~RenderPipeline() {
+    RenderPipeline::~RenderPipeline() = default;
+
+    void RenderPipeline::DestroyApiObjectImpl() {
         ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
     }
 

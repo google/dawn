@@ -34,6 +34,8 @@ namespace dawn_native { namespace vulkan {
 
       private:
         ~PipelineLayout() override;
+        void DestroyApiObjectImpl() override;
+
         using PipelineLayoutBase::PipelineLayoutBase;
         MaybeError Initialize();
 

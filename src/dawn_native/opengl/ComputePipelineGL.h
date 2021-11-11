@@ -38,6 +38,7 @@ namespace dawn_native { namespace opengl {
       private:
         using ComputePipelineBase::ComputePipelineBase;
         ~ComputePipeline() override;
+        void DestroyApiObjectImpl() override;
     };
 
 }}  // namespace dawn_native::opengl

@@ -32,6 +32,7 @@ namespace dawn_native { namespace opengl {
 
       private:
         ~Sampler() override;
+        void DestroyApiObjectImpl() override;
 
         void SetupGLSampler(GLuint sampler, const SamplerDescriptor* descriptor, bool forceNearest);
 

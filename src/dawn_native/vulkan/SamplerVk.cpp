@@ -105,7 +105,9 @@ namespace dawn_native { namespace vulkan {
             "CreateSampler");
     }
 
-    Sampler::~Sampler() {
+    Sampler::~Sampler() = default;
+
+    void Sampler::DestroyApiObjectImpl() {
         if (mHandle != VK_NULL_HANDLE) {
             ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;

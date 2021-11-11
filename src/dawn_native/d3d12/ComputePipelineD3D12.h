@@ -44,6 +44,9 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         ~ComputePipeline() override;
+
+        void DestroyApiObjectImpl() override;
+
         using ComputePipelineBase::ComputePipelineBase;
         ComPtr<ID3D12PipelineState> mPipelineState;
     };
