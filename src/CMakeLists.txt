@@ -675,10 +675,10 @@ if(${TINT_BUILD_TESTS})
     resolver/intrinsic_validation_test.cc
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
+    resolver/pipeline_overridable_constant_test.cc
     resolver/ptr_ref_test.cc
     resolver/ptr_ref_validation_test.cc
     resolver/resolver_constants_test.cc
-    resolver/pipeline_overridable_constant_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h
     resolver/resolver_test.cc
@@ -693,11 +693,6 @@ if(${TINT_BUILD_TESTS})
     resolver/var_let_test.cc
     resolver/var_let_validation_test.cc
     scope_stack_test.cc
-    sem/intrinsic_test.cc
-    symbol_table_test.cc
-    symbol_test.cc
-    transform/transform_test.cc
-    test_main.cc
     sem/atomic_type_test.cc
     sem/bool_type_test.cc
     sem/depth_multisampled_texture_type_test.cc
@@ -705,6 +700,7 @@ if(${TINT_BUILD_TESTS})
     sem/external_texture_type_test.cc
     sem/f32_type_test.cc
     sem/i32_type_test.cc
+    sem/intrinsic_test.cc
     sem/matrix_type_test.cc
     sem/multisampled_texture_type_test.cc
     sem/pointer_type_test.cc
@@ -718,6 +714,11 @@ if(${TINT_BUILD_TESTS})
     sem/type_manager_test.cc
     sem/u32_type_test.cc
     sem/vector_type_test.cc
+    symbol_table_test.cc
+    symbol_test.cc
+    test_main.cc
+    traits_test.cc
+    transform/transform_test.cc
     utils/defer_test.cc
     utils/enum_set_test.cc
     utils/get_or_create_test.cc

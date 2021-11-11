@@ -28,10 +28,15 @@ void F3(int, S, float) {}
 TEST(ParamType, Function) {
   F1({});        // Avoid unused method warning
   F3(0, {}, 0);  // Avoid unused method warning
-  static_assert(std::is_same<ParamTypeT<decltype(&F1), 0>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&F3), 0>, int>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&F3), 1>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&F3), 2>, float>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&F1), 0>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&F3), 0>, int>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&F3), 1>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&F3), 2>, float>::value,
+                "");
+  static_assert(std::is_same<ReturnType<decltype(&F1)>, void>::value, "");
+  static_assert(std::is_same<ReturnType<decltype(&F3)>, void>::value, "");
+  static_assert(SignatureOfT<decltype(&F1)>::parameter_count == 1, "");
+  static_assert(SignatureOfT<decltype(&F3)>::parameter_count == 3, "");
 }
 
 TEST(ParamType, Method) {
@@ -42,11 +47,16 @@ TEST(ParamType, Method) {
   };
   C().F1({});        // Avoid unused method warning
   C().F3(0, {}, 0);  // Avoid unused method warning
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F1), 0>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 0>, int>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 1>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 2>, float>::value,
+  static_assert(std::is_same<ParameterType<decltype(&C::F1), 0>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 0>, int>::value,
                 "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 1>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 2>, float>::value,
+                "");
+  static_assert(std::is_same<ReturnType<decltype(&C::F1)>, void>::value, "");
+  static_assert(std::is_same<ReturnType<decltype(&C::F3)>, void>::value, "");
+  static_assert(SignatureOfT<decltype(&C::F1)>::parameter_count == 1, "");
+  static_assert(SignatureOfT<decltype(&C::F3)>::parameter_count == 3, "");
 }
 
 TEST(ParamType, ConstMethod) {
@@ -57,11 +67,16 @@ TEST(ParamType, ConstMethod) {
   };
   C().F1({});        // Avoid unused method warning
   C().F3(0, {}, 0);  // Avoid unused method warning
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F1), 0>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 0>, int>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 1>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 2>, float>::value,
+  static_assert(std::is_same<ParameterType<decltype(&C::F1), 0>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 0>, int>::value,
                 "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 1>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 2>, float>::value,
+                "");
+  static_assert(std::is_same<ReturnType<decltype(&C::F1)>, void>::value, "");
+  static_assert(std::is_same<ReturnType<decltype(&C::F3)>, void>::value, "");
+  static_assert(SignatureOfT<decltype(&C::F1)>::parameter_count == 1, "");
+  static_assert(SignatureOfT<decltype(&C::F3)>::parameter_count == 3, "");
 }
 
 TEST(ParamType, StaticMethod) {
@@ -72,29 +87,42 @@ TEST(ParamType, StaticMethod) {
   };
   C::F1({});        // Avoid unused method warning
   C::F3(0, {}, 0);  // Avoid unused method warning
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F1), 0>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 0>, int>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 1>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 2>, float>::value,
+  static_assert(std::is_same<ParameterType<decltype(&C::F1), 0>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 0>, int>::value,
                 "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 1>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(&C::F3), 2>, float>::value,
+                "");
+  static_assert(std::is_same<ReturnType<decltype(&C::F1)>, void>::value, "");
+  static_assert(std::is_same<ReturnType<decltype(&C::F3)>, void>::value, "");
+  static_assert(SignatureOfT<decltype(&C::F1)>::parameter_count == 1, "");
+  static_assert(SignatureOfT<decltype(&C::F3)>::parameter_count == 3, "");
 }
 
 TEST(ParamType, FunctionLike) {
   using F1 = std::function<void(S)>;
   using F3 = std::function<void(int, S, float)>;
-  static_assert(std::is_same<ParamTypeT<F1, 0>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<F3, 0>, int>::value, "");
-  static_assert(std::is_same<ParamTypeT<F3, 1>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<F3, 2>, float>::value, "");
+  static_assert(std::is_same<ParameterType<F1, 0>, S>::value, "");
+  static_assert(std::is_same<ParameterType<F3, 0>, int>::value, "");
+  static_assert(std::is_same<ParameterType<F3, 1>, S>::value, "");
+  static_assert(std::is_same<ParameterType<F3, 2>, float>::value, "");
+  static_assert(std::is_same<ReturnType<F1>, void>::value, "");
+  static_assert(std::is_same<ReturnType<F3>, void>::value, "");
+  static_assert(SignatureOfT<F1>::parameter_count == 1, "");
+  static_assert(SignatureOfT<F3>::parameter_count == 3, "");
 }
 
 TEST(ParamType, Lambda) {
   auto l1 = [](S) {};
   auto l3 = [](int, S, float) {};
-  static_assert(std::is_same<ParamTypeT<decltype(l1), 0>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(l3), 0>, int>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(l3), 1>, S>::value, "");
-  static_assert(std::is_same<ParamTypeT<decltype(l3), 2>, float>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(l1), 0>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(l3), 0>, int>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(l3), 1>, S>::value, "");
+  static_assert(std::is_same<ParameterType<decltype(l3), 2>, float>::value, "");
+  static_assert(std::is_same<ReturnType<decltype(l1)>, void>::value, "");
+  static_assert(std::is_same<ReturnType<decltype(l3)>, void>::value, "");
+  static_assert(SignatureOfT<decltype(l1)>::parameter_count == 1, "");
+  static_assert(SignatureOfT<decltype(l3)>::parameter_count == 3, "");
 }
 
 }  // namespace traits

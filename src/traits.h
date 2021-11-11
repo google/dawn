@@ -28,44 +28,63 @@ using Decay = typename std::decay<T>::type;
 template <int N, typename... Types>
 using NthTypeOf = typename std::tuple_element<N, std::tuple<Types...>>::type;
 
-/// ParamType is a traits helper that infers the type of the `N`th parameter
-/// of the function, method, static method, lambda, or function-like object `F`.
-template <typename F, int N>
-struct ParamType {
-  /// The type of the `N`th parameter of the function-like object `F`
-  using type = typename ParamType<decltype(&F::operator()), N>::type;
+/// Signature describes the signature of a function.
+template <typename RETURN, typename... PARAMETERS>
+struct Signature {
+  /// The return type of the function signature
+  using ret = RETURN;
+  /// The parameters of the function signature held in a std::tuple
+  using parameters = std::tuple<PARAMETERS...>;
+  /// The type of the Nth parameter of function signature
+  template <std::size_t N>
+  using parameter = NthTypeOf<N, PARAMETERS...>;
+  /// The total number of parameters
+  static constexpr std::size_t parameter_count = sizeof...(PARAMETERS);
 };
 
-/// ParamType specialization for a regular function or static method.
-template <typename R, int N, typename... Args>
-struct ParamType<R (*)(Args...), N> {
-  /// Arg is the raw type of the `N`th parameter of the function
-  using Arg = NthTypeOf<N, Args...>;
-  /// The type of the `N`th parameter of the function
-  using type = Decay<Arg>;
+/// SignatureOf is a traits helper that infers the signature of the function,
+/// method, static method, lambda, or function-like object `F`.
+template <typename F>
+struct SignatureOf {
+  /// The signature of the function-like object `F`
+  using type = typename SignatureOf<decltype(&F::operator())>::type;
 };
 
-/// ParamType specialization for a non-static method.
-template <typename R, typename C, int N, typename... Args>
-struct ParamType<R (C::*)(Args...), N> {
-  /// Arg is the raw type of the `N`th parameter of the function
-  using Arg = NthTypeOf<N, Args...>;
-  /// The type of the `N`th parameter of the function
-  using type = Decay<Arg>;
+/// SignatureOf specialization for a regular function or static method.
+template <typename R, typename... ARGS>
+struct SignatureOf<R (*)(ARGS...)> {
+  /// The signature of the function-like object `F`
+  using type = Signature<typename std::decay<R>::type,
+                         typename std::decay<ARGS>::type...>;
 };
 
-/// ParamType specialization for a non-static, const method.
-template <typename R, typename C, int N, typename... Args>
-struct ParamType<R (C::*)(Args...) const, N> {
-  /// Arg is the raw type of the `N`th parameter of the function
-  using Arg = NthTypeOf<N, Args...>;
-  /// The type of the `N`th parameter of the function
-  using type = Decay<Arg>;
+/// SignatureOf specialization for a non-static method.
+template <typename R, typename C, typename... ARGS>
+struct SignatureOf<R (C::*)(ARGS...)> {
+  /// The signature of the function-like object `F`
+  using type = Signature<typename std::decay<R>::type,
+                         typename std::decay<ARGS>::type...>;
 };
 
-/// ParamTypeT is an alias to `typename ParamType<F, N>::type`.
-template <typename F, int N>
-using ParamTypeT = typename ParamType<F, N>::type;
+/// SignatureOf specialization for a non-static, const method.
+template <typename R, typename C, typename... ARGS>
+struct SignatureOf<R (C::*)(ARGS...) const> {
+  /// The signature of the function-like object `F`
+  using type = Signature<typename std::decay<R>::type,
+                         typename std::decay<ARGS>::type...>;
+};
+
+/// SignatureOfT is an alias to `typename SignatureOf<F>::type`.
+template <typename F>
+using SignatureOfT = typename SignatureOf<F>::type;
+
+/// ParameterType is an alias to `typename SignatureOf<F>::type::parameter<N>`.
+template <typename F, std::size_t N>
+using ParameterType = typename SignatureOfT<F>::template parameter<N>;
+
+/// ReturnType is an alias to `typename SignatureOf<F>::type::ret`.
+template <typename F>
+using ReturnType = typename SignatureOfT<F>::ret;
 
 /// `IsTypeOrDerived<T, BASE>::value` is true iff `T` is of type `BASE`, or
 /// derives from `BASE`.

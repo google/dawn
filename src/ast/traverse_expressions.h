@@ -62,7 +62,7 @@ template <TraverseOrder ORDER = TraverseOrder::LeftToRight, typename CALLBACK>
 bool TraverseExpressions(const ast::Expression* root,
                          diag::List& diags,
                          CALLBACK&& callback) {
-  using EXPR_TYPE = std::remove_pointer_t<traits::ParamTypeT<CALLBACK, 0>>;
+  using EXPR_TYPE = std::remove_pointer_t<traits::ParameterType<CALLBACK, 0>>;
   std::vector<const ast::Expression*> to_visit{root};
 
   auto push_pair = [&](const ast::Expression* left,

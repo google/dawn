@@ -62,7 +62,7 @@ class CloneContext {
   /// F is a pointer of (or derives from) type T.
   template <typename F, typename T>
   using ParamTypeIsPtrOf = traits::IsTypeOrDerived<
-      typename std::remove_pointer<traits::ParamTypeT<F, 0>>::type,
+      typename std::remove_pointer<traits::ParameterType<F, 0>>::type,
       T>;
 
  public:
@@ -274,7 +274,7 @@ class CloneContext {
   template <typename F>
   traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>::value, CloneContext>&
   ReplaceAll(F&& replacer) {
-    using TPtr = traits::ParamTypeT<F, 0>;
+    using TPtr = traits::ParameterType<F, 0>;
     using T = typename std::remove_pointer<TPtr>::type;
     for (auto& transform : transforms_) {
       if (transform.typeinfo->Is(TypeInfo::Of<T>()) ||
