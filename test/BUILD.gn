@@ -139,11 +139,7 @@ template("tint_unittests_source_set") {
   }
 }
 
-tint_unittests_source_set("tint_unittests_core_sem_src") {
-  sources = [ "../src/sem/intrinsic_test.cc" ]
-}
-
-tint_unittests_source_set("tint_unittests_core_src") {
+tint_unittests_source_set("tint_unittests_ast_src") {
   sources = [
     "../src/ast/alias_test.cc",
     "../src/ast/array_test.cc",
@@ -215,21 +211,29 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/variable_test.cc",
     "../src/ast/vector_test.cc",
     "../src/ast/workgroup_decoration_test.cc",
-    "../src/block_allocator_test.cc",
-    "../src/castable_test.cc",
-    "../src/clone_context_test.cc",
-    "../src/debug_test.cc",
-    "../src/demangler_test.cc",
+  ]
+}
+
+
+tint_unittests_source_set("tint_unittests_diagnostic_src") {
+  sources = [
     "../src/diagnostic/formatter_test.cc",
     "../src/diagnostic/printer_test.cc",
+  ]
+}
+
+tint_unittests_source_set("tint_unittests_inspector_src") {
+  sources = [
     "../src/inspector/inspector_test.cc",
     "../src/inspector/test_inspector_builder.cc",
     "../src/inspector/test_inspector_builder.h",
     "../src/inspector/test_inspector_runner.cc",
     "../src/inspector/test_inspector_runner.h",
-    "../src/intrinsic_table_test.cc",
-    "../src/program_builder_test.cc",
-    "../src/program_test.cc",
+  ]
+}
+
+tint_unittests_source_set("tint_unittests_resolver_src") {
+  sources = [
     "../src/resolver/array_accessor_test.cc",
     "../src/resolver/assignment_validation_test.cc",
     "../src/resolver/atomics_test.cc",
@@ -264,7 +268,14 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/resolver/validation_test.cc",
     "../src/resolver/var_let_test.cc",
     "../src/resolver/var_let_validation_test.cc",
-    "../src/scope_stack_test.cc",
+  ]
+  deps = [
+    ":tint_unittests_ast_src",
+  ]
+}
+
+tint_unittests_source_set("tint_unittests_sem_src") {
+  sources = [
     "../src/sem/atomic_type_test.cc",
     "../src/sem/bool_type_test.cc",
     "../src/sem/depth_multisampled_texture_type_test.cc",
@@ -272,6 +283,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/sem/external_texture_type_test.cc",
     "../src/sem/f32_type_test.cc",
     "../src/sem/i32_type_test.cc",
+    "../src/sem/intrinsic_test.cc",
     "../src/sem/matrix_type_test.cc",
     "../src/sem/multisampled_texture_type_test.cc",
     "../src/sem/pointer_type_test.cc",
@@ -285,9 +297,11 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/sem/type_manager_test.cc",
     "../src/sem/u32_type_test.cc",
     "../src/sem/vector_type_test.cc",
-    "../src/symbol_table_test.cc",
-    "../src/symbol_test.cc",
-    "../src/traits_test.cc",
+  ]
+}
+
+tint_unittests_source_set("tint_unittests_transform_src") {
+  sources = [
     "../src/transform/add_empty_entry_point_test.cc",
     "../src/transform/array_length_from_uniform_test.cc",
     "../src/transform/binding_remapper_test.cc",
@@ -317,6 +331,11 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/transform/vertex_pulling_test.cc",
     "../src/transform/wrap_arrays_in_structs_test.cc",
     "../src/transform/zero_init_workgroup_memory_test.cc",
+  ]
+}
+
+tint_unittests_source_set("tint_unittests_utils_src") {
+  sources = [
     "../src/utils/defer_test.cc",
     "../src/utils/enum_set_test.cc",
     "../src/utils/get_or_create_test.cc",
@@ -328,15 +347,14 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/utils/scoped_assignment_test.cc",
     "../src/utils/string_test.cc",
     "../src/utils/unique_vector_test.cc",
+  ]
+}
+
+tint_unittests_source_set("tint_unittests_writer_src") {
+  sources = [
     "../src/writer/append_vector_test.cc",
     "../src/writer/float_to_string_test.cc",
     "../src/writer/text_generator_test.cc",
-  ]
-
-  deps = [
-    ":tint_unittests_core_sem_src",
-    "${tint_root_dir}/src:libtint_wgsl_reader_src",
-    "${tint_root_dir}/src:libtint_wgsl_writer_src",
   ]
 }
 
@@ -378,7 +396,6 @@ tint_unittests_source_set("tint_unittests_spv_reader_src") {
   ]
 
   deps = [
-    ":tint_unittests_core_src",
     "${tint_root_dir}/src:libtint_spv_reader_src",
   ]
 }
@@ -420,7 +437,7 @@ tint_unittests_source_set("tint_unittests_spv_writer_src") {
   ]
 
   deps = [
-    ":tint_unittests_core_src",
+    ":tint_unittests_ast_src",
     "${tint_root_dir}/src:libtint_spv_writer_src",
     "${tint_spirv_tools_dir}/:spvtools",
   ]
@@ -506,7 +523,6 @@ tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
   ]
 
   deps = [
-    ":tint_unittests_core_src",
     "${tint_root_dir}/src:libtint_wgsl_reader_src",
   ]
 }
@@ -545,7 +561,7 @@ tint_unittests_source_set("tint_unittests_wgsl_writer_src") {
   ]
 
   deps = [
-    ":tint_unittests_core_src",
+    ":tint_unittests_ast_src",
     "${tint_root_dir}/src:libtint_wgsl_writer_src",
   ]
 }
@@ -583,7 +599,7 @@ tint_unittests_source_set("tint_unittests_msl_writer_src") {
   ]
 
   deps = [
-    ":tint_unittests_core_src",
+    ":tint_unittests_ast_src",
     "${tint_root_dir}/src:libtint_msl_writer_src",
   ]
 }
@@ -623,7 +639,7 @@ tint_unittests_source_set("tint_unittests_hlsl_writer_src") {
   ]
 
   deps = [
-    ":tint_unittests_core_src",
+    ":tint_unittests_ast_src",
     "${tint_root_dir}/src:libtint_hlsl_writer_src",
   ]
 }
@@ -664,7 +680,8 @@ tint_unittests_source_set("tint_unittests_glsl_writer_src") {
   ]
 
   deps = [
-    ":tint_unittests_core_src",
+    ":tint_unittests_ast_src",
+    ":tint_unittests_transform_src",
     "${tint_root_dir}/src:libtint_glsl_writer_src",
   ]
 }
@@ -672,7 +689,33 @@ tint_unittests_source_set("tint_unittests_glsl_writer_src") {
 source_set("tint_unittests_src") {
   testonly = true
 
-  deps = [ ":tint_unittests_core_src" ]
+  sources = [
+    "../src/block_allocator_test.cc",
+    "../src/castable_test.cc",
+    "../src/clone_context_test.cc",
+    "../src/debug_test.cc",
+    "../src/demangler_test.cc",
+    "../src/intrinsic_table_test.cc",
+    "../src/program_builder_test.cc",
+    "../src/program_test.cc",
+    "../src/scope_stack_test.cc",
+    "../src/symbol_table_test.cc",
+    "../src/symbol_test.cc",
+    "../src/traits_test.cc",
+  ]
+
+  deps = [
+    ":tint_unittests_ast_src",
+    ":tint_unittests_diagnostic_src",
+    ":tint_unittests_inspector_src",
+    ":tint_unittests_resolver_src",
+    ":tint_unittests_sem_src",
+    ":tint_unittests_transform_src",
+    ":tint_unittests_utils_src",
+    ":tint_unittests_writer_src",
+    "${tint_root_dir}/src:libtint_wgsl_reader_src",
+    "${tint_root_dir}/src:libtint_wgsl_writer_src",
+  ]
 
   if (tint_build_spv_reader) {
     deps += [ ":tint_unittests_spv_reader_src" ]
