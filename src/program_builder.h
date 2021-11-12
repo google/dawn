@@ -1037,7 +1037,7 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param value the boolean value
   /// @return a Scalar constructor for the given value
-  const ast::LiteralExpression* Expr(const Source& source, bool value) {
+  const ast::BoolLiteralExpression* Expr(const Source& source, bool value) {
     return create<ast::BoolLiteralExpression>(source, value);
   }
 
@@ -1063,7 +1063,7 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param value the integer value
   /// @return a Scalar constructor for the given value
-  const ast::LiteralExpression* Expr(const Source& source, i32 value) {
+  const ast::SintLiteralExpression* Expr(const Source& source, i32 value) {
     return create<ast::SintLiteralExpression>(source, value);
   }
 
@@ -1123,58 +1123,6 @@ class ProgramBuilder {
   /// @param list the list of expressions
   /// @return `list`
   ast::ExpressionList ExprList(ast::ExpressionList list) { return list; }
-
-  /// @param source the source location for the literal
-  /// @param val the boolan value
-  /// @return a boolean literal with the given value
-  const ast::BoolLiteralExpression* Literal(const Source& source, bool val) {
-    return create<ast::BoolLiteralExpression>(source, val);
-  }
-
-  /// @param val the boolan value
-  /// @return a boolean literal with the given value
-  const ast::BoolLiteralExpression* Literal(bool val) {
-    return create<ast::BoolLiteralExpression>(val);
-  }
-
-  /// @param source the source location for the literal
-  /// @param val the float value
-  /// @return a float literal with the given value
-  const ast::FloatLiteralExpression* Literal(const Source& source, f32 val) {
-    return create<ast::FloatLiteralExpression>(source, val);
-  }
-
-  /// @param val the float value
-  /// @return a float literal with the given value
-  const ast::FloatLiteralExpression* Literal(f32 val) {
-    return create<ast::FloatLiteralExpression>(val);
-  }
-
-  /// @param source the source location for the literal
-  /// @param val the unsigned int value
-  /// @return a ast::UintLiteral with the given value
-  const ast::UintLiteralExpression* Literal(const Source& source, u32 val) {
-    return create<ast::UintLiteralExpression>(source, val);
-  }
-
-  /// @param val the unsigned int value
-  /// @return a ast::UintLiteral with the given value
-  const ast::UintLiteralExpression* Literal(u32 val) {
-    return create<ast::UintLiteralExpression>(val);
-  }
-
-  /// @param source the source location for the literal
-  /// @param val the integer value
-  /// @return the ast::SintLiteral with the given value
-  const ast::SintLiteralExpression* Literal(const Source& source, i32 val) {
-    return create<ast::SintLiteralExpression>(source, val);
-  }
-
-  /// @param val the integer value
-  /// @return the ast::SintLiteral with the given value
-  const ast::SintLiteralExpression* Literal(i32 val) {
-    return create<ast::SintLiteralExpression>(val);
-  }
 
   /// @param args the arguments for the type constructor
   /// @return an `ast::TypeConstructorExpression` of type `ty`, with the values

@@ -28,7 +28,7 @@ TEST_F(MslGeneratorImplTest, Emit_Switch) {
   auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
 
   ast::CaseSelectorList case_val;
-  case_val.push_back(Literal(5));
+  case_val.push_back(Expr(5));
 
   auto* case_body = Block(create<ast::BreakStatement>());
 

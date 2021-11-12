@@ -66,7 +66,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
         ProgramBuilder b;
         CaseStatementList cases;
         cases.push_back(
-            b.create<CaseStatement>(CaseSelectorList{b.Literal(1)}, b.Block()));
+            b.create<CaseStatement>(CaseSelectorList{b.Expr(1)}, b.Block()));
         b.create<SwitchStatement>(nullptr, cases);
       },
       "internal compiler error");
@@ -89,7 +89,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
         b1.create<SwitchStatement>(b2.Expr(true), CaseStatementList{
                                                       b1.create<CaseStatement>(
                                                           CaseSelectorList{
-                                                              b1.Literal(1),
+                                                              b1.Expr(1),
                                                           },
                                                           b1.Block()),
                                                   });
@@ -105,7 +105,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
         b1.create<SwitchStatement>(b1.Expr(true), CaseStatementList{
                                                       b2.create<CaseStatement>(
                                                           CaseSelectorList{
-                                                              b2.Literal(1),
+                                                              b2.Expr(1),
                                                           },
                                                           b2.Block()),
                                                   });

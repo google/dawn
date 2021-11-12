@@ -52,7 +52,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithoutDefault_Fail) {
 
   auto* block = Block(Decl(var),                     //
                       Switch(Source{{12, 34}}, "a",  //
-                             Case(Literal(1))));
+                             Case(Expr(1))));
 
   WrapInFunction(block);
 
@@ -70,10 +70,10 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
   // }
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
-  auto* block = Block(Decl(var),                //
-                      Switch("a",               //
-                             DefaultCase(),     //
-                             Case(Literal(1)),  //
+  auto* block = Block(Decl(var),             //
+                      Switch("a",            //
+                             DefaultCase(),  //
+                             Case(Expr(1)),  //
                              DefaultCase(Source{{12, 34}})));
 
   WrapInFunction(block);
@@ -155,9 +155,9 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
   auto* decl = Decl(Source{{12, 34}},
                     Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2)));
 
-  WrapInFunction(                                                //
-      Loop(Block(Switch(1,                                       //
-                        Case(Literal(1), Block(Break(), decl)),  //
+  WrapInFunction(                                             //
+      Loop(Block(Switch(1,                                    //
+                        Case(Expr(1), Block(Break(), decl)),  //
                         DefaultCase()))));
 
   EXPECT_FALSE(r()->Resolve());
@@ -176,7 +176,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break_InBlocks) {
 
   WrapInFunction(Loop(
       Block(Switch(1,  //
-                   Case(Literal(1), Block(Block(Block(Block(Break()))), decl)),
+                   Case(Expr(1), Block(Block(Block(Block(Break()))), decl)),
                    DefaultCase()))));
 
   EXPECT_FALSE(r()->Resolve());
@@ -192,10 +192,9 @@ TEST_F(ResolverControlBlockValidationTest,
   // }
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
-  auto* block =
-      Block(Decl(var), Switch("a",                                    //
-                              Case(Source{{12, 34}}, {Literal(1u)}),  //
-                              DefaultCase()));
+  auto* block = Block(Decl(var), Switch("a",                                 //
+                                        Case(Source{{12, 34}}, {Expr(1u)}),  //
+                                        DefaultCase()));
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
@@ -213,9 +212,9 @@ TEST_F(ResolverControlBlockValidationTest,
   // }
   auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(2u));
 
-  auto* block = Block(Decl(var),                                     //
-                      Switch("a",                                    //
-                             Case(Source{{12, 34}}, {Literal(-1)}),  //
+  auto* block = Block(Decl(var),                                  //
+                      Switch("a",                                 //
+                             Case(Source{{12, 34}}, {Expr(-1)}),  //
                              DefaultCase()));
   WrapInFunction(block);
 
@@ -237,11 +236,11 @@ TEST_F(ResolverControlBlockValidationTest,
 
   auto* block = Block(Decl(var),   //
                       Switch("a",  //
-                             Case(Literal(0u)),
+                             Case(Expr(0u)),
                              Case({
-                                 Literal(Source{{12, 34}}, 2u),
-                                 Literal(3u),
-                                 Literal(Source{{56, 78}}, 2u),
+                                 Expr(Source{{12, 34}}, 2u),
+                                 Expr(3u),
+                                 Expr(Source{{56, 78}}, 2u),
                              }),
                              DefaultCase()));
   WrapInFunction(block);
@@ -264,12 +263,12 @@ TEST_F(ResolverControlBlockValidationTest,
 
   auto* block = Block(Decl(var),   //
                       Switch("a",  //
-                             Case(Literal(Source{{12, 34}}, -10)),
+                             Case(Expr(Source{{12, 34}}, -10)),
                              Case({
-                                 Literal(0),
-                                 Literal(1),
-                                 Literal(2),
-                                 Literal(Source{{56, 78}}, -10),
+                                 Expr(0),
+                                 Expr(1),
+                                 Expr(2),
+                                 Expr(Source{{56, 78}}, -10),
                              }),
                              DefaultCase()));
   WrapInFunction(block);
@@ -310,7 +309,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {
   auto* block = Block(Decl(var),                             //
                       Switch("a",                            //
                              DefaultCase(Source{{12, 34}}),  //
-                             Case(Literal(5))));
+                             Case(Expr(5))));
   WrapInFunction(block);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

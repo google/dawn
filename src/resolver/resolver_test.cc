@@ -248,7 +248,7 @@ TEST_F(ResolverTest, Stmt_Switch) {
   auto* lhs = Expr("v");
   auto* rhs = Expr(2.3f);
   auto* case_block = Block(Assign(lhs, rhs));
-  auto* stmt = Switch(Expr(2), Case(Literal(3), case_block), DefaultCase());
+  auto* stmt = Switch(Expr(2), Case(Expr(3), case_block), DefaultCase());
   WrapInFunction(v, stmt);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

@@ -318,9 +318,8 @@ TEST_F(ResolverCompoundStatementTest, Switch) {
   auto* stmt_a = Ignore(1);
   auto* stmt_b = Ignore(1);
   auto* stmt_c = Ignore(1);
-  auto* swi =
-      Switch(expr, Case(Literal(1), Block(stmt_a)),
-             Case(Literal(2), Block(stmt_b)), DefaultCase(Block(stmt_c)));
+  auto* swi = Switch(expr, Case(Expr(1), Block(stmt_a)),
+                     Case(Expr(2), Block(stmt_b)), DefaultCase(Block(stmt_c)));
   WrapInFunction(swi);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();

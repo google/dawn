@@ -61,8 +61,8 @@ TEST_F(BuilderTest, Switch_WithCase) {
   auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* expr = Switch("a", /**/
-                      Case(Literal(1), Block(Assign("v", 1))),
-                      Case(Literal(2), Block(Assign("v", 2))), DefaultCase());
+                      Case(Expr(1), Block(Assign("v", 1))),
+                      Case(Expr(2), Block(Assign("v", 2))), DefaultCase());
   WrapInFunction(expr);
 
   auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
@@ -119,8 +119,8 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
   auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* a = Global("a", ty.u32(), ast::StorageClass::kPrivate);
 
-  auto* expr = Switch("a", Case(Literal(1u), Block(Assign("v", 1))),
-                      Case(Literal(2u), Block(Assign("v", 2))), DefaultCase());
+  auto* expr = Switch("a", Case(Expr(1u), Block(Assign("v", 1))),
+                      Case(Expr(2u), Block(Assign("v", 2))), DefaultCase());
 
   WrapInFunction(expr);
 
@@ -244,11 +244,11 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   auto* default_body = Block(Assign("v", Expr(3)));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(Literal(1));
+  selector_1.push_back(Expr(1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(Literal(2));
-  selector_2.push_back(Literal(3));
+  selector_2.push_back(Expr(2));
+  selector_2.push_back(Expr(3));
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
@@ -326,10 +326,10 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   auto* default_body = Block(Assign("v", Expr(3)));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(Literal(1));
+  selector_1.push_back(Expr(1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(Literal(2));
+  selector_2.push_back(Expr(2));
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
@@ -398,13 +398,12 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
-  auto* expr =
-      Switch("a", /**/
-             Case(Literal(1),
-                  Block(/**/
-                        If(Expr(true), Block(create<ast::BreakStatement>())),
-                        Assign("v", 1))),
-             DefaultCase());
+  auto* expr = Switch(
+      "a",                /**/
+      Case(Expr(1), Block(/**/
+                          If(Expr(true), Block(create<ast::BreakStatement>())),
+                          Assign("v", 1))),
+      DefaultCase());
 
   WrapInFunction(expr);
 

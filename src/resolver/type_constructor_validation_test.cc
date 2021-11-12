@@ -424,7 +424,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Array_type_match) {
   // array<u32, 3>(0u, 10u. 20u);
-  auto* tc = array<u32, 3>(Literal(0u), Literal(10u), Literal(20u));
+  auto* tc = array<u32, 3>(Expr(0u), Expr(10u), Expr(20u));
   WrapInFunction(tc);
 
   EXPECT_TRUE(r()->Resolve());
@@ -433,8 +433,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Array_type_Mismatch_U32F32) {
   // array<u32, 3>(0u, 1.0f, 20u);
-  auto* tc =
-      array<u32, 3>(Literal(0u), Literal(Source{{12, 34}}, 1.0f), Literal(20u));
+  auto* tc = array<u32, 3>(Expr(0u), Expr(Source{{12, 34}}, 1.0f), Expr(20u));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -446,7 +445,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Array_ScalarArgumentTypeMismatch_F32I32) {
   // array<f32, 1>(1);
-  auto* tc = array<f32, 1>(Literal(Source{{12, 34}}, 1));
+  auto* tc = array<f32, 1>(Expr(Source{{12, 34}}, 1));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -458,8 +457,8 @@ TEST_F(ResolverTypeConstructorValidationTest,
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Array_ScalarArgumentTypeMismatch_U32I32) {
   // array<u32, 6>(1, 0u, 0u, 0u, 0u, 0u);
-  auto* tc = array<u32, 1>(Literal(Source{{12, 34}}, 1), Literal(0u),
-                           Literal(0u), Literal(0u), Literal(0u));
+  auto* tc = array<u32, 1>(Expr(Source{{12, 34}}, 1), Expr(0u), Expr(0u),
+                           Expr(0u), Expr(0u));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -471,9 +470,9 @@ TEST_F(ResolverTypeConstructorValidationTest,
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Array_ScalarArgumentTypeMismatch_Vec2) {
   // array<i32, 3>(1, vec2<i32>());
-  auto* tc = array<i32, 3>(Literal(1),
-                           create<ast::TypeConstructorExpression>(
-                               Source{{12, 34}}, ty.vec2<i32>(), ExprList()));
+  auto* tc =
+      array<i32, 3>(Expr(1), create<ast::TypeConstructorExpression>(
+                                 Source{{12, 34}}, ty.vec2<i32>(), ExprList()));
   WrapInFunction(tc);
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -545,7 +544,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Array_TooFewElements) {
   // array<i32, 4>(1, 2, 3);
   SetSource(Source::Location({12, 34}));
-  auto* tc = array<i32, 4>(Literal(1), Literal(2), Literal(3));
+  auto* tc = array<i32, 4>(Expr(1), Expr(2), Expr(3));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -558,8 +557,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Array_TooManyElements) {
   // array<i32, 4>(1, 2, 3, 4, 5);
   SetSource(Source::Location({12, 34}));
-  auto* tc =
-      array<i32, 4>(Literal(1), Literal(2), Literal(3), Literal(4), Literal(5));
+  auto* tc = array<i32, 4>(Expr(1), Expr(2), Expr(3), Expr(4), Expr(5));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -571,7 +569,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_Runtime) {
   // array<i32>(1);
-  auto* tc = array(ty.i32(), nullptr, Literal(Source{{12, 34}}, 1));
+  auto* tc = array(ty.i32(), nullptr, Expr(Source{{12, 34}}, 1));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -594,7 +592,7 @@ namespace VectorConstructor {
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2F32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec2<f32>(Literal(Source{{12, 34}}, 1), 1.0f);
+  auto* tc = vec2<f32>(Expr(Source{{12, 34}}, 1), 1.0f);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -605,7 +603,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2U32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec2<u32>(1u, Literal(Source{{12, 34}}, 1));
+  auto* tc = vec2<u32>(1u, Expr(Source{{12, 34}}, 1));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -616,7 +614,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2I32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec2<i32>(Literal(Source{{12, 34}}, 1u), 1);
+  auto* tc = vec2<i32>(Expr(Source{{12, 34}}, 1u), 1);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -627,7 +625,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2Bool_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec2<bool>(true, Literal(Source{{12, 34}}, 1));
+  auto* tc = vec2<bool>(true, Expr(Source{{12, 34}}, 1));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -662,9 +660,9 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2_Error_TooManyArgumentsScalar) {
-  auto* tc = vec2<f32>(Literal(Source{{12, 34}}, 1.0f),
-                       Literal(Source{{12, 40}}, 1.0f),
-                       Literal(Source{{12, 46}}, 1.0f));
+  auto* tc =
+      vec2<f32>(Expr(Source{{12, 34}}, 1.0f), Expr(Source{{12, 40}}, 1.0f),
+                Expr(Source{{12, 46}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -691,7 +689,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2_Error_TooManyArgumentsVectorAndScalar) {
   auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
                            Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
-                       Literal(Source{{12, 40}}, 1.0f));
+                       Expr(Source{{12, 40}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -805,7 +803,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3F32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec3<f32>(1.0f, 1.0f, Literal(Source{{12, 34}}, 1));
+  auto* tc = vec3<f32>(1.0f, 1.0f, Expr(Source{{12, 34}}, 1));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -816,7 +814,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3U32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec3<u32>(1u, Literal(Source{{12, 34}}, 1), 1u);
+  auto* tc = vec3<u32>(1u, Expr(Source{{12, 34}}, 1), 1u);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -827,7 +825,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3I32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec3<i32>(1, Literal(Source{{12, 34}}, 1u), 1);
+  auto* tc = vec3<i32>(1, Expr(Source{{12, 34}}, 1u), 1);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -838,7 +836,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3Bool_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec3<bool>(true, Literal(Source{{12, 34}}, 1), false);
+  auto* tc = vec3<bool>(true, Expr(Source{{12, 34}}, 1), false);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -861,8 +859,8 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3_Error_TooFewArgumentsScalar) {
-  auto* tc = vec3<f32>(Literal(Source{{12, 34}}, 1.0f),
-                       Literal(Source{{12, 40}}, 1.0f));
+  auto* tc =
+      vec3<f32>(Expr(Source{{12, 34}}, 1.0f), Expr(Source{{12, 40}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -873,9 +871,9 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3_Error_TooManyArgumentsScalar) {
-  auto* tc = vec3<f32>(
-      Literal(Source{{12, 34}}, 1.0f), Literal(Source{{12, 40}}, 1.0f),
-      Literal(Source{{12, 46}}, 1.0f), Literal(Source{{12, 52}}, 1.0f));
+  auto* tc =
+      vec3<f32>(Expr(Source{{12, 34}}, 1.0f), Expr(Source{{12, 40}}, 1.0f),
+                Expr(Source{{12, 46}}, 1.0f), Expr(Source{{12, 52}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -912,10 +910,10 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3_Error_TooManyArgumentsVec2AndScalar) {
-  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
-                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
-                       Literal(Source{{12, 40}}, 1.0f),
-                       Literal(Source{{12, 46}}, 1.0f));
+  auto* tc =
+      vec3<f32>(create<ast::TypeConstructorExpression>(
+                    Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                Expr(Source{{12, 40}}, 1.0f), Expr(Source{{12, 46}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -928,7 +926,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3_Error_TooManyArgumentsVec3) {
   auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
                            Source{{12, 34}}, ty.vec3<f32>(), ExprList()),
-                       Literal(Source{{12, 40}}, 1.0f));
+                       Expr(Source{{12, 40}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1068,7 +1066,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4F32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec4<f32>(1.0f, 1.0f, Literal(Source{{12, 34}}, 1), 1.0f);
+  auto* tc = vec4<f32>(1.0f, 1.0f, Expr(Source{{12, 34}}, 1), 1.0f);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1079,7 +1077,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4U32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec4<u32>(1u, 1u, Literal(Source{{12, 34}}, 1), 1u);
+  auto* tc = vec4<u32>(1u, 1u, Expr(Source{{12, 34}}, 1), 1u);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1090,7 +1088,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4I32_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec4<i32>(1, 1, Literal(Source{{12, 34}}, 1u), 1);
+  auto* tc = vec4<i32>(1, 1, Expr(Source{{12, 34}}, 1u), 1);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1101,7 +1099,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4Bool_Error_ScalarArgumentTypeMismatch) {
-  auto* tc = vec4<bool>(true, false, Literal(Source{{12, 34}}, 1), true);
+  auto* tc = vec4<bool>(true, false, Expr(Source{{12, 34}}, 1), true);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1112,9 +1110,9 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooFewArgumentsScalar) {
-  auto* tc = vec4<f32>(Literal(Source{{12, 34}}, 1.0f),
-                       Literal(Source{{12, 40}}, 1.0f),
-                       Literal(Source{{12, 46}}, 1.0f));
+  auto* tc =
+      vec4<f32>(Expr(Source{{12, 34}}, 1.0f), Expr(Source{{12, 40}}, 1.0f),
+                Expr(Source{{12, 46}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1125,10 +1123,10 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsScalar) {
-  auto* tc = vec4<f32>(
-      Literal(Source{{12, 34}}, 1.0f), Literal(Source{{12, 40}}, 1.0f),
-      Literal(Source{{12, 46}}, 1.0f), Literal(Source{{12, 52}}, 1.0f),
-      Literal(Source{{12, 58}}, 1.0f));
+  auto* tc =
+      vec4<f32>(Expr(Source{{12, 34}}, 1.0f), Expr(Source{{12, 40}}, 1.0f),
+                Expr(Source{{12, 46}}, 1.0f), Expr(Source{{12, 52}}, 1.0f),
+                Expr(Source{{12, 58}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1141,7 +1139,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooFewArgumentsVec2AndScalar) {
   auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
                            Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
-                       Literal(Source{{12, 40}}, 1.0f));
+                       Expr(Source{{12, 40}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1152,11 +1150,11 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec2AndScalars) {
-  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
-                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
-                       Literal(Source{{12, 40}}, 1.0f),
-                       Literal(Source{{12, 46}}, 1.0f),
-                       Literal(Source{{12, 52}}, 1.0f));
+  auto* tc =
+      vec4<f32>(create<ast::TypeConstructorExpression>(
+                    Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                Expr(Source{{12, 40}}, 1.0f), Expr(Source{{12, 46}}, 1.0f),
+                Expr(Source{{12, 52}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1171,7 +1169,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
                            Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
                        create<ast::TypeConstructorExpression>(
                            Source{{12, 40}}, ty.vec2<f32>(), ExprList()),
-                       Literal(Source{{12, 46}}, 1.0f));
+                       Expr(Source{{12, 46}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1210,10 +1208,10 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec3AndScalars) {
-  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
-                           Source{{12, 34}}, ty.vec3<f32>(), ExprList()),
-                       Literal(Source{{12, 40}}, 1.0f),
-                       Literal(Source{{12, 46}}, 1.0f));
+  auto* tc =
+      vec4<f32>(create<ast::TypeConstructorExpression>(
+                    Source{{12, 34}}, ty.vec3<f32>(), ExprList()),
+                Expr(Source{{12, 40}}, 1.0f), Expr(Source{{12, 46}}, 1.0f));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1505,8 +1503,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   // vec2<Float32>(1.0f, 1u)
   auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
   auto* tc = create<ast::TypeConstructorExpression>(
-      Source{{12, 34}}, vec_type,
-      ExprList(1.0f, Literal(Source{{12, 40}}, 1u)));
+      Source{{12, 34}}, vec_type, ExprList(1.0f, Expr(Source{{12, 40}}, 1u)));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1696,7 +1693,7 @@ TEST_P(MatrixConstructorTest,
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
-    args.push_back(Literal(Source{{12, i}}, 1u));
+    args.push_back(Expr(Source{{12, i}}, 1u));
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);

@@ -129,7 +129,7 @@ TEST_F(ResolverValidationTest, Stmt_Error_Unknown) {
 TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
   // if (1.23f) {}
 
-  WrapInFunction(If(Literal(Source{{12, 34}}, 1.23f), Block()));
+  WrapInFunction(If(Expr(Source{{12, 34}}, 1.23f), Block()));
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -141,7 +141,7 @@ TEST_F(ResolverValidationTest, Stmt_Else_NonBool) {
   // else (1.23f) {}
 
   WrapInFunction(
-      If(Expr(true), Block(), Else(Literal(Source{{12, 34}}, 1.23f), Block())));
+      If(Expr(true), Block(), Else(Expr(Source{{12, 34}}, 1.23f), Block())));
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -931,7 +931,7 @@ TEST_F(ResolverValidationTest, Stmt_BreakInLoop) {
 TEST_F(ResolverValidationTest, Stmt_BreakInSwitch) {
   WrapInFunction(Loop(Block(Switch(
       Expr(1),
-      Case(Literal(1), Block(create<ast::BreakStatement>(Source{{12, 34}}))),
+      Case(Expr(1), Block(create<ast::BreakStatement>(Source{{12, 34}}))),
       DefaultCase()))));
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }

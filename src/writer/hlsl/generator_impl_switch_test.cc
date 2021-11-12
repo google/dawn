@@ -23,9 +23,9 @@ using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
   Global("cond", ty.i32(), ast::StorageClass::kPrivate);
-  auto* s = Switch(                      //
-      Expr("cond"),                      //
-      Case(Literal(5), Block(Break())),  //
+  auto* s = Switch(                   //
+      Expr("cond"),                   //
+      Case(Expr(5), Block(Break())),  //
       DefaultCase());
   WrapInFunction(s);
 

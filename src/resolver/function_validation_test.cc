@@ -582,7 +582,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
 
   Func("main", {}, ty.void_(), {},
        {Stage(ast::PipelineStage::kCompute),
-        WorkgroupSize(Literal(Source{{12, 34}}, 64.f))});
+        WorkgroupSize(Expr(Source{{12, 34}}, 64.f))});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -596,7 +596,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
 
   Func("main", {}, ty.void_(), {},
        {Stage(ast::PipelineStage::kCompute),
-        WorkgroupSize(Literal(Source{{12, 34}}, -2))});
+        WorkgroupSize(Expr(Source{{12, 34}}, -2))});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -609,7 +609,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Zero) {
 
   Func("main", {}, ty.void_(), {},
        {Stage(ast::PipelineStage::kCompute),
-        WorkgroupSize(Literal(Source{{12, 34}}, 0))});
+        WorkgroupSize(Expr(Source{{12, 34}}, 0))});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),

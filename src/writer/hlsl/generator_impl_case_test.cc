@@ -23,7 +23,7 @@ namespace {
 using HlslGeneratorImplTest_Case = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
-  auto* s = Switch(1, Case(Literal(5), Block(create<ast::BreakStatement>())),
+  auto* s = Switch(1, Case(Expr(5), Block(create<ast::BreakStatement>())),
                    DefaultCase());
   WrapInFunction(s);
 
@@ -39,7 +39,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
-  auto* s = Switch(1, Case(Literal(5), Block()), DefaultCase());
+  auto* s = Switch(1, Case(Expr(5), Block()), DefaultCase());
   WrapInFunction(s);
 
   GeneratorImpl& gen = Build();
@@ -55,9 +55,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
   auto* s =
-      Switch(1,                                                             //
-             Case(Literal(4), Block(create<ast::FallthroughStatement>())),  //
-             Case(Literal(5), Block(create<ast::ReturnStatement>())),       //
+      Switch(1,                                                          //
+             Case(Expr(4), Block(create<ast::FallthroughStatement>())),  //
+             Case(Expr(5), Block(create<ast::ReturnStatement>())),       //
              DefaultCase());
   WrapInFunction(s);
 
@@ -77,9 +77,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
-  auto* s = Switch(
-      1, Case({Literal(5), Literal(6)}, Block(create<ast::BreakStatement>())),
-      DefaultCase());
+  auto* s =
+      Switch(1, Case({Expr(5), Expr(6)}, Block(create<ast::BreakStatement>())),
+             DefaultCase());
   WrapInFunction(s);
 
   GeneratorImpl& gen = Build();
