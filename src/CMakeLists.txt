@@ -729,6 +729,7 @@ if(${TINT_BUILD_TESTS})
     utils/reverse_test.cc
     utils/scoped_assignment_test.cc
     utils/string_test.cc
+    utils/transform_test.cc
     utils/unique_vector_test.cc
     writer/append_vector_test.cc
     writer/float_to_string_test.cc

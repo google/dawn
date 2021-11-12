@@ -346,6 +346,7 @@ tint_unittests_source_set("tint_unittests_utils_src") {
     "../src/utils/reverse_test.cc",
     "../src/utils/scoped_assignment_test.cc",
     "../src/utils/string_test.cc",
+    "../src/utils/transform_test.cc",
     "../src/utils/unique_vector_test.cc",
   ]
 }
