@@ -2500,7 +2500,7 @@ sem::Call* Resolver::IntrinsicCall(const ast::CallExpression* expr,
   }
 
   auto* call = builder_->create<sem::Call>(expr, intrinsic, std::move(args),
-                                           current_statement_);
+                                           current_statement_, sem::Constant{});
 
   current_function_->AddDirectlyCalledIntrinsic(intrinsic);
 
@@ -2544,7 +2544,7 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr) {
   }
 
   auto* call = builder_->create<sem::Call>(expr, target, std::move(args),
-                                           current_statement_);
+                                           current_statement_, sem::Constant{});
 
   if (current_function_) {
     target->AddCallSite(call);

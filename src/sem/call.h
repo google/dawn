@@ -32,10 +32,12 @@ class Call : public Castable<Call, Expression> {
   /// @param target the call target
   /// @param arguments the call arguments
   /// @param statement the statement that owns this expression
+  /// @param constant the constant value of this expression
   Call(const ast::CallExpression* declaration,
        const CallTarget* target,
        std::vector<const sem::Expression*> arguments,
-       Statement* statement);
+       const Statement* statement,
+       Constant constant);
 
   /// Destructor
   ~Call() override;

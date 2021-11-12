@@ -56,7 +56,8 @@ struct CallTargetSignature {
   int IndexOf(ParameterUsage usage) const;
 };
 
-/// CallTarget is the base for callable functions
+/// CallTarget is the base for callable functions, intrinsics, type constructors
+/// and type casts.
 class CallTarget : public Castable<CallTarget, Node> {
  public:
   /// Constructor

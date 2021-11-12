@@ -12,26 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/sem/call.h"
+#include "src/sem/type_cast.h"
 
-#include <utility>
-#include <vector>
-
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Call);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeCast);
 
 namespace tint {
 namespace sem {
 
-Call::Call(const ast::CallExpression* declaration,
-           const CallTarget* target,
-           std::vector<const sem::Expression*> arguments,
-           const Statement* statement,
-           Constant constant)
-    : Base(declaration, target->ReturnType(), statement, std::move(constant)),
-      target_(target),
-      arguments_(std::move(arguments)) {}
+TypeCast::TypeCast(const sem::Type* type, const sem::Parameter* parameter)
+    : Base(type, ParameterList{parameter}) {}
 
-Call::~Call() = default;
+TypeCast::~TypeCast() = default;
 
 }  // namespace sem
 }  // namespace tint

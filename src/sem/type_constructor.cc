@@ -12,26 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/sem/call.h"
+#include "src/sem/type_constructor.h"
 
-#include <utility>
-#include <vector>
-
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Call);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeConstructor);
 
 namespace tint {
 namespace sem {
 
-Call::Call(const ast::CallExpression* declaration,
-           const CallTarget* target,
-           std::vector<const sem::Expression*> arguments,
-           const Statement* statement,
-           Constant constant)
-    : Base(declaration, target->ReturnType(), statement, std::move(constant)),
-      target_(target),
-      arguments_(std::move(arguments)) {}
+TypeConstructor::TypeConstructor(const sem::Type* type,
+                                 const ParameterList& parameters)
+    : Base(type, parameters) {}
 
-Call::~Call() = default;
+TypeConstructor::~TypeConstructor() = default;
 
 }  // namespace sem
 }  // namespace tint

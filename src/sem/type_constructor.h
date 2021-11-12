@@ -12,26 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/sem/call.h"
+#ifndef SRC_SEM_TYPE_CONSTRUCTOR_H_
+#define SRC_SEM_TYPE_CONSTRUCTOR_H_
 
-#include <utility>
-#include <vector>
-
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Call);
+#include "src/sem/call_target.h"
 
 namespace tint {
 namespace sem {
 
-Call::Call(const ast::CallExpression* declaration,
-           const CallTarget* target,
-           std::vector<const sem::Expression*> arguments,
-           const Statement* statement,
-           Constant constant)
-    : Base(declaration, target->ReturnType(), statement, std::move(constant)),
-      target_(target),
-      arguments_(std::move(arguments)) {}
+/// TypeConstructor is the CallTarget for a type constructor.
+class TypeConstructor : public Castable<TypeConstructor, CallTarget> {
+ public:
+  /// Constructor
+  /// @param type the type that's being constructed
+  /// @param parameters the type constructor parameters
+  TypeConstructor(const sem::Type* type, const ParameterList& parameters);
 
-Call::~Call() = default;
+  /// Destructor
+  ~TypeConstructor() override;
+};
 
 }  // namespace sem
 }  // namespace tint
+
+#endif  // SRC_SEM_TYPE_CONSTRUCTOR_H_

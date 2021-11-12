@@ -379,6 +379,10 @@ set(TINT_LIB_SRCS
   sem/switch_statement.h
   sem/texture_type.cc
   sem/texture_type.h
+  sem/type_cast.cc
+  sem/type_cast.h
+  sem/type_constructor.cc
+  sem/type_constructor.h
   sem/type.cc
   sem/type.h
   sem/type_manager.cc

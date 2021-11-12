@@ -41,6 +41,9 @@ class Expression : public Castable<Expression, Node> {
   /// Destructor
   ~Expression() override;
 
+  /// @returns the AST node
+  const ast::Expression* Declaration() const { return declaration_; }
+
   /// @return the resolved type of the expression
   const sem::Type* Type() const { return type_; }
 
@@ -49,9 +52,6 @@ class Expression : public Castable<Expression, Node> {
 
   /// @return the constant value of this expression
   const Constant& ConstantValue() const { return constant_; }
-
-  /// @returns the AST node
-  const ast::Expression* Declaration() const { return declaration_; }
 
  protected:
   /// The AST expression node for this semantic expression

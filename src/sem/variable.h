@@ -188,7 +188,7 @@ class Parameter : public Castable<Parameter, Variable> {
  private:
   const uint32_t index_;
   const ParameterUsage usage_;
-  CallTarget const* owner_;
+  CallTarget const* owner_ = nullptr;
 };
 
 /// ParameterList is a list of Parameter
