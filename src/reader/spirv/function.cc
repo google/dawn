@@ -1350,8 +1350,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
 
       // Add the return-value statement.
       stmts.push_back(create<ast::ReturnStatement>(
-          source, create<ast::TypeConstructorExpression>(
-                      source, return_type, std::move(return_exprs))));
+          source,
+          builder_.Construct(source, return_type, std::move(return_exprs))));
     }
   }
 
@@ -3960,9 +3960,8 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
       operands.emplace_back(MakeOperand(inst, iarg).expr);
     }
-    return {ast_type,
-            create<ast::TypeConstructorExpression>(
-                Source{}, ast_type->Build(builder_), std::move(operands))};
+    return {ast_type, builder_.Construct(Source{}, ast_type->Build(builder_),
+                                         std::move(operands))};
   }
 
   if (opcode == SpvOpCompositeExtract) {
@@ -4646,8 +4645,8 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
       return {};
     }
   }
-  return {result_type, create<ast::TypeConstructorExpression>(
-                           source, result_type->Build(builder_), values)};
+  return {result_type,
+          builder_.Construct(source, result_type->Build(builder_), values)};
 }
 
 bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
@@ -5018,10 +5017,10 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
 
   ast::ExpressionList params;
   params.push_back(arg_expr.expr);
-  TypedExpression result{expr_type,
-                         create<ast::TypeConstructorExpression>(
-                             GetSourceForInst(inst), expr_type->Build(builder_),
-                             std::move(params))};
+  TypedExpression result{
+      expr_type,
+      builder_.Construct(GetSourceForInst(inst), expr_type->Build(builder_),
+                         std::move(params))};
 
   if (requested_type == expr_type) {
     return result;
@@ -5468,7 +5467,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     // first component.
     if (texture_type->IsAnyOf<DepthTexture, DepthMultisampledTexture>()) {
       if (is_non_dref_sample || (opcode == SpvOpImageFetch)) {
-        value = create<ast::TypeConstructorExpression>(
+        value = builder_.Construct(
             Source{},
             result_type->Build(builder_),  // a vec4
             ast::ExpressionList{
@@ -5555,8 +5554,8 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       }
       auto* result_type = parser_impl_.ConvertType(inst.type_id());
       TypedExpression expr = {
-          result_type, create<ast::TypeConstructorExpression>(
-                           Source{}, result_type->Build(builder_), exprs)};
+          result_type,
+          builder_.Construct(Source{}, result_type->Build(builder_), exprs)};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
     case SpvOpImageQueryLod:
@@ -5577,9 +5576,8 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       // The SPIR-V result type must be integer scalar. The WGSL bulitin
       // returns i32. If they aren't the same then convert the result.
       if (!result_type->Is<I32>()) {
-        ast_expr = create<ast::TypeConstructorExpression>(
-            Source{}, result_type->Build(builder_),
-            ast::ExpressionList{ast_expr});
+        ast_expr = builder_.Construct(Source{}, result_type->Build(builder_),
+                                      ast::ExpressionList{ast_expr});
       }
       TypedExpression expr{result_type, ast_expr};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
@@ -5784,8 +5782,8 @@ const ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     for (auto i = src_count; i < dest_count; i++) {
       exprs.push_back(parser_impl_.MakeNullExpression(component_type).expr);
     }
-    texel.expr = create<ast::TypeConstructorExpression>(
-        Source{}, texel.type->Build(builder_), std::move(exprs));
+    texel.expr = builder_.Construct(Source{}, texel.type->Build(builder_),
+                                    std::move(exprs));
   }
 
   return texel.expr;
@@ -5795,9 +5793,8 @@ TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
   if (!value || value.type->Is<I32>()) {
     return value;
   }
-  return {ty_.I32(),
-          create<ast::TypeConstructorExpression>(
-              Source{}, builder_.ty.i32(), ast::ExpressionList{value.expr})};
+  return {ty_.I32(), builder_.Construct(Source{}, builder_.ty.i32(),
+                                        ast::ExpressionList{value.expr})};
 }
 
 TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
@@ -5890,11 +5887,11 @@ TypedExpression FunctionEmitter::MakeOuterProduct(
           Source{}, ast::BinaryOp::kMultiply, row_factor, column_factor);
       result_row.push_back(elem);
     }
-    result_columns.push_back(create<ast::TypeConstructorExpression>(
-        Source{}, col_ty->Build(builder_), result_row));
+    result_columns.push_back(
+        builder_.Construct(Source{}, col_ty->Build(builder_), result_row));
   }
-  return {result_ty, create<ast::TypeConstructorExpression>(
-                         Source{}, result_ty->Build(builder_), result_columns)};
+  return {result_ty, builder_.Construct(Source{}, result_ty->Build(builder_),
+                                        result_columns)};
 }
 
 bool FunctionEmitter::MakeVectorInsertDynamic(

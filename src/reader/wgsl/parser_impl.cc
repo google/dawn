@@ -2232,8 +2232,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
     if (params.errored)
       return Failure::kErrored;
 
-    return create<ast::TypeConstructorExpression>(source, type.value,
-                                                  std::move(params.value));
+    return builder_.Construct(source, type.value, std::move(params.value));
   }
 
   return Failure::kNoMatch;
@@ -2917,8 +2916,7 @@ Expect<const ast::Expression*> ParserImpl::expect_const_expr() {
       if (params.errored)
         return Failure::kErrored;
 
-      return create<ast::TypeConstructorExpression>(source, type.value,
-                                                    params.value);
+      return builder_.Construct(source, type.value, params.value);
     }
   }
   return add_error(peek(), "unable to parse const_expr");

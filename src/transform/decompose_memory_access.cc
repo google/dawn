@@ -522,11 +522,11 @@ struct DecomposeMemoryAccess::State {
                 values.emplace_back(b.Call(load, "buffer", offset));
               }
             }
-            b.Func(name, params, CreateASTTypeFor(ctx, el_ty),
-                   {
-                       b.Return(b.create<ast::TypeConstructorExpression>(
-                           CreateASTTypeFor(ctx, el_ty), values)),
-                   });
+            b.Func(
+                name, params, CreateASTTypeFor(ctx, el_ty),
+                {
+                    b.Return(b.Construct(CreateASTTypeFor(ctx, el_ty), values)),
+                });
           }
           return name;
         });

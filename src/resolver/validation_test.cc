@@ -1035,9 +1035,9 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeDecoration) {
 
 TEST_F(ResolverTest, Expr_Constructor_Cast_Pointer) {
   auto* vf = Var("vf", ty.f32());
-  auto* c = create<ast::TypeConstructorExpression>(
-      Source{{12, 34}}, ty.pointer<i32>(ast::StorageClass::kFunction),
-      ExprList(vf));
+  auto* c =
+      Construct(Source{{12, 34}}, ty.pointer<i32>(ast::StorageClass::kFunction),
+                ExprList(vf));
   auto* ip = Const("ip", ty.pointer<i32>(ast::StorageClass::kFunction), c);
   WrapInFunction(Decl(vf), Decl(ip));
 

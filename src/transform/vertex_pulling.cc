@@ -715,7 +715,7 @@ struct State {
           LoadPrimitive(array_base, primitive_offset, buffer, base_format));
     }
 
-    return ctx.dst->create<ast::TypeConstructorExpression>(
+    return ctx.dst->Construct(
         ctx.dst->create<ast::Vector>(base_type, count), std::move(expr_list));
   }
 
