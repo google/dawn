@@ -686,9 +686,7 @@ tint_unittests_source_set("tint_unittests_glsl_writer_src") {
   ]
 }
 
-source_set("tint_unittests_src") {
-  testonly = true
-
+tint_unittests_source_set("tint_unittests_core_src") {
   sources = [
     "../src/block_allocator_test.cc",
     "../src/castable_test.cc",
@@ -706,6 +704,15 @@ source_set("tint_unittests_src") {
 
   deps = [
     ":tint_unittests_ast_src",
+  ]
+}
+
+source_set("tint_unittests_src") {
+  testonly = true
+
+  deps = [
+    ":tint_unittests_ast_src",
+    ":tint_unittests_core_src",
     ":tint_unittests_diagnostic_src",
     ":tint_unittests_inspector_src",
     ":tint_unittests_resolver_src",
