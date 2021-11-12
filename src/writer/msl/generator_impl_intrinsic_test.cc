@@ -288,7 +288,7 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   Global("param2", ty.vec2<f32>(), ast::StorageClass::kPrivate);
 
   auto* call = Call("dot", "param1", "param2");
-  WrapInFunction(call);
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = Build();
 
@@ -322,7 +322,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
 TEST_F(MslGeneratorImplTest, Pack2x16Float) {
   auto* call = Call("pack2x16float", "p1");
   Global("p1", ty.vec2<f32>(), ast::StorageClass::kPrivate);
-  WrapInFunction(call);
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = Build();
 
@@ -334,7 +334,7 @@ TEST_F(MslGeneratorImplTest, Pack2x16Float) {
 TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
   auto* call = Call("unpack2x16float", "p1");
   Global("p1", ty.u32(), ast::StorageClass::kPrivate);
-  WrapInFunction(call);
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = Build();
 
@@ -345,7 +345,7 @@ TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
 
 TEST_F(MslGeneratorImplTest, DotI32) {
   Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
-  WrapInFunction(Call("dot", "v", "v"));
+  WrapInFunction(CallStmt(Call("dot", "v", "v")));
 
   GeneratorImpl& gen = SanitizeAndBuild();
 

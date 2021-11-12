@@ -913,8 +913,8 @@ TEST_F(ResolverTest, Function_CallSites) {
   auto* call_2 = Call("foo");
   auto* bar = Func("bar", ast::VariableList{}, ty.void_(),
                    {
-                       WrapInStatement(call_1),
-                       WrapInStatement(call_2),
+                       CallStmt(call_1),
+                       CallStmt(call_2),
                    });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
