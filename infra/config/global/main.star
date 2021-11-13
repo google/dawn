@@ -48,6 +48,12 @@ luci.project(
             groups = "luci-logdog-chromium-writers",
         ),
     ],
+    bindings = [
+        luci.binding(
+            roles = "role/configs.validator",
+            users = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+        ),
+    ],
 )
 
 luci.logdog(gs_bucket = "chromium-luci-logdog")
