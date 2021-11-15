@@ -469,6 +469,12 @@ Expect<bool> ParserImpl::expect_global_decl() {
     next();
   }
 
+  // The token might itself be an error.
+  if (t.IsError()) {
+    next();  // Consume it.
+    return add_error(t.source(), t.to_str());
+  }
+
   // Exhausted all attempts to make sense of where we're at.
   // Spew a generic error.
 

@@ -48,6 +48,43 @@ fn main() ->  {  // missing return type
   EXPECT_EQ(p->error(), "2:15: unable to determine function return type");
 }
 
+TEST_F(ParserImplTest, HandlesUnexpectedToken) {
+  auto p = parser(R"(
+fn main() {
+}
+foobar
+)");
+
+  ASSERT_FALSE(p->Parse());
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "4:1: unexpected token");
+}
+
+TEST_F(ParserImplTest, HandlesBadToken_InMiddle) {
+  auto p = parser(R"(
+fn main() {
+  let f = 0x1p500000000000; // Exponent too big for hex float
+  return;
+})");
+
+  ASSERT_FALSE(p->Parse());
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "3:11: exponent is too large for hex float");
+}
+
+TEST_F(ParserImplTest, HandlesBadToken_AtModuleScope) {
+  auto p = parser(R"(
+fn main() {
+  return;
+}
+0x1p5000000000000
+)");
+
+  ASSERT_FALSE(p->Parse());
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "5:1: exponent is too large for hex float");
+}
+
 TEST_F(ParserImplTest, Comments) {
   auto p = parser(R"(
 /**
