@@ -92,15 +92,6 @@
     {%- endif -%}
 {% endmacro %}
 
-namespace {
-
-    struct WGPUChainedStructTransfer {
-        WGPUSType sType;
-        bool hasNext;
-    };
-
-}  // anonymous namespace
-
 //* The main [de]serialization macro
 //* Methods are very similar to structures that have one member corresponding to each arguments.
 //* This macro takes advantage of the similarity to output [de]serialization code for a record
@@ -209,8 +200,10 @@ namespace {
 
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.
-    DAWN_DECLARE_UNUSED WireResult {{Return}}{{name}}Serialize(const {{Return}}{{name}}{{Cmd}}& record, {{Return}}{{name}}Transfer* transfer,
-                           SerializeBuffer* buffer
+    DAWN_DECLARE_UNUSED WireResult {{Return}}{{name}}Serialize(
+        const {{Return}}{{name}}{{Cmd}}& record,
+        {{Return}}{{name}}Transfer* transfer,
+        SerializeBuffer* buffer
         {%- if record.may_have_dawn_object -%}
             , const ObjectIdProvider& provider
         {%- endif -%}
@@ -291,8 +284,11 @@ namespace {
     //* Deserializes `transfer` into `record` getting more serialized data from `buffer` and `size`
     //* if needed, using `allocator` to store pointed-to values and `resolver` to translate object
     //* Ids to actual objects.
-    DAWN_DECLARE_UNUSED WireResult {{Return}}{{name}}Deserialize({{Return}}{{name}}{{Cmd}}* record, const volatile {{Return}}{{name}}Transfer* transfer,
-                                          DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator
+    DAWN_DECLARE_UNUSED WireResult {{Return}}{{name}}Deserialize(
+        {{Return}}{{name}}{{Cmd}}* record,
+        const volatile {{Return}}{{name}}Transfer* transfer,
+        DeserializeBuffer* deserializeBuffer,
+        DeserializeAllocator* allocator
         {%- if record.may_have_dawn_object -%}
             , const ObjectIdResolver& resolver
         {%- endif -%}
@@ -453,81 +449,7 @@ namespace {
     }
 {% endmacro %}
 
-namespace dawn_wire {
-
-    ObjectHandle::ObjectHandle() = default;
-    ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
-        : id(id), generation(generation) {
-    }
-
-    ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs)
-        : id(rhs.id), generation(rhs.generation) {
-    }
-    ObjectHandle& ObjectHandle::operator=(const volatile ObjectHandle& rhs) {
-        id = rhs.id;
-        generation = rhs.generation;
-        return *this;
-    }
-
-    ObjectHandle& ObjectHandle::AssignFrom(const ObjectHandle& rhs) {
-        id = rhs.id;
-        generation = rhs.generation;
-        return *this;
-    }
-    ObjectHandle& ObjectHandle::AssignFrom(const volatile ObjectHandle& rhs) {
-        id = rhs.id;
-        generation = rhs.generation;
-        return *this;
-    }
-
-    namespace {
-        // Allocates enough space from allocator to countain T[count] and return it in out.
-        // Return FatalError if the allocator couldn't allocate the memory.
-        // Always writes to |out| on success.
-        template <typename T, typename N>
-        WireResult GetSpace(DeserializeAllocator* allocator, N count, T** out) {
-            constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
-            if (count > kMaxCountWithoutOverflows) {
-                return WireResult::FatalError;
-            }
-
-            size_t totalSize = sizeof(T) * count;
-            *out = static_cast<T*>(allocator->GetSpace(totalSize));
-            if (*out == nullptr) {
-                return WireResult::FatalError;
-            }
-
-            return WireResult::Success;
-        }
-
-        size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct);
-        DAWN_NO_DISCARD WireResult SerializeChainedStruct(const WGPUChainedStruct* chainedStruct,
-                                                          SerializeBuffer* buffer,
-                                                          const ObjectIdProvider& provider);
-        WireResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
-                                            DeserializeBuffer* deserializeBuffer,
-                                            DeserializeAllocator* allocator,
-                                            const ObjectIdResolver& resolver);
-
-        size_t GetChainedStructExtraRequiredSize(WGPUChainedStructOut* chainedStruct);
-        DAWN_NO_DISCARD WireResult SerializeChainedStruct(WGPUChainedStructOut* chainedStruct,
-                                                          SerializeBuffer* buffer,
-                                                          const ObjectIdProvider& provider);
-        WireResult DeserializeChainedStruct(WGPUChainedStructOut** outChainNext,
-                                            DeserializeBuffer* deserializeBuffer,
-                                            DeserializeAllocator* allocator,
-                                            const ObjectIdResolver& resolver);
-
-        //* Output structure [de]serialization first because it is used by commands.
-        {% for type in by_category["structure"] %}
-            {% set name = as_cType(type.name) %}
-            {% if type.name.CamelCase() not in client_side_structures %}
-                {{write_record_serialization_helpers(type, name, type.members,
-                  is_cmd=False)}}
-            {% endif %}
-        {% endfor %}
-
-{% macro make_chained_struct_serialization_helpers(out) %}
+{% macro make_chained_struct_serialization_helpers(out=None) %}
         {% set ChainedStructPtr = "WGPUChainedStructOut*" if out else "const WGPUChainedStruct*" %}
         {% set ChainedStruct = "WGPUChainedStructOut" if out else "WGPUChainedStruct" %}
         size_t GetChainedStructExtraRequiredSize({{ChainedStructPtr}} chainedStruct) {
@@ -679,22 +601,131 @@ namespace dawn_wire {
         }
 {% endmacro %}
 
-{{ make_chained_struct_serialization_helpers(False) }}
-{{ make_chained_struct_serialization_helpers(True) }}
+namespace dawn_wire {
+
+    ObjectHandle::ObjectHandle() = default;
+    ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
+        : id(id), generation(generation) {
+    }
+
+    ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs)
+        : id(rhs.id), generation(rhs.generation) {
+    }
+    ObjectHandle& ObjectHandle::operator=(const volatile ObjectHandle& rhs) {
+        id = rhs.id;
+        generation = rhs.generation;
+        return *this;
+    }
+
+    ObjectHandle& ObjectHandle::AssignFrom(const ObjectHandle& rhs) {
+        id = rhs.id;
+        generation = rhs.generation;
+        return *this;
+    }
+    ObjectHandle& ObjectHandle::AssignFrom(const volatile ObjectHandle& rhs) {
+        id = rhs.id;
+        generation = rhs.generation;
+        return *this;
+    }
+
+    namespace {
+        // Allocates enough space from allocator to countain T[count] and return it in out.
+        // Return FatalError if the allocator couldn't allocate the memory.
+        // Always writes to |out| on success.
+        template <typename T, typename N>
+        WireResult GetSpace(DeserializeAllocator* allocator, N count, T** out) {
+            constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
+            if (count > kMaxCountWithoutOverflows) {
+                return WireResult::FatalError;
+            }
+
+            size_t totalSize = sizeof(T) * count;
+            *out = static_cast<T*>(allocator->GetSpace(totalSize));
+            if (*out == nullptr) {
+                return WireResult::FatalError;
+            }
+
+            return WireResult::Success;
+        }
+
+        struct WGPUChainedStructTransfer {
+            WGPUSType sType;
+            bool hasNext;
+        };
+
+        size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct);
+        DAWN_NO_DISCARD WireResult SerializeChainedStruct(const WGPUChainedStruct* chainedStruct,
+                                                          SerializeBuffer* buffer,
+                                                          const ObjectIdProvider& provider);
+        WireResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
+                                            DeserializeBuffer* deserializeBuffer,
+                                            DeserializeAllocator* allocator,
+                                            const ObjectIdResolver& resolver);
+
+        size_t GetChainedStructExtraRequiredSize(WGPUChainedStructOut* chainedStruct);
+        DAWN_NO_DISCARD WireResult SerializeChainedStruct(WGPUChainedStructOut* chainedStruct,
+                                                          SerializeBuffer* buffer,
+                                                          const ObjectIdProvider& provider);
+        WireResult DeserializeChainedStruct(WGPUChainedStructOut** outChainNext,
+                                            DeserializeBuffer* deserializeBuffer,
+                                            DeserializeAllocator* allocator,
+                                            const ObjectIdResolver& resolver);
+
+        //* Output structure [de]serialization first because it is used by commands.
+        {% for type in by_category["structure"] %}
+            {% set name = as_cType(type.name) %}
+            {% if type.name.CamelCase() not in client_side_structures %}
+                {{write_record_serialization_helpers(type, name, type.members, is_cmd=False)}}
+            {% endif %}
+        {% endfor %}
+
+
+        {{ make_chained_struct_serialization_helpers(out=False) }}
+        {{ make_chained_struct_serialization_helpers(out=True) }}
 
         //* Output [de]serialization helpers for commands
         {% for command in cmd_records["command"] %}
             {% set name = command.name.CamelCase() %}
-            {{write_record_serialization_helpers(command, name, command.members,
-              is_cmd=True)}}
+            {{write_record_serialization_helpers(command, name, command.members, is_cmd=True)}}
         {% endfor %}
 
         //* Output [de]serialization helpers for return commands
         {% for command in cmd_records["return command"] %}
             {% set name = command.name.CamelCase() %}
             {{write_record_serialization_helpers(command, name, command.members,
-              is_cmd=True, is_return_command=True)}}
+                                                 is_cmd=True, is_return_command=True)}}
         {% endfor %}
+
+        // Implementation of ObjectIdResolver that always errors.
+        // Used when the generator adds a provider argument because of a chained
+        // struct, but in practice, a chained struct in that location is invalid.
+        class ErrorObjectIdResolver final : public ObjectIdResolver {
+            public:
+                {% for type in by_category["object"] %}
+                    WireResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const override {
+                        return WireResult::FatalError;
+                    }
+                    WireResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const override {
+                        return WireResult::FatalError;
+                    }
+                {% endfor %}
+        };
+
+        // Implementation of ObjectIdProvider that always errors.
+        // Used when the generator adds a provider argument because of a chained
+        // struct, but in practice, a chained struct in that location is invalid.
+        class ErrorObjectIdProvider final : public ObjectIdProvider {
+            public:
+                {% for type in by_category["object"] %}
+                    WireResult GetId({{as_cType(type.name)}} object, ObjectId* out) const override {
+                        return WireResult::FatalError;
+                    }
+                    WireResult GetOptionalId({{as_cType(type.name)}} object, ObjectId* out) const override {
+                        return WireResult::FatalError;
+                    }
+                {% endfor %}
+        };
+
     }  // anonymous namespace
 
     {% for command in cmd_records["command"] %}
@@ -705,102 +736,72 @@ namespace dawn_wire {
         {{ write_command_serialization_methods(command, True) }}
     {% endfor %}
 
-    // Implementation of ObjectIdResolver that always errors.
-    // Used when the generator adds a provider argument because of a chained
-    // struct, but in practice, a chained struct in that location is invalid.
-    class ErrorObjectIdResolver final : public ObjectIdResolver {
-        public:
-            {% for type in by_category["object"] %}
-                WireResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const override {
-                    return WireResult::FatalError;
-                }
-                WireResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const override {
-                    return WireResult::FatalError;
-                }
-            {% endfor %}
-    };
+    // Implementations of serialization/deserialization of WPGUDeviceProperties.
+    size_t SerializedWGPUDevicePropertiesSize(const WGPUDeviceProperties* deviceProperties) {
+        return sizeof(WGPUDeviceProperties) +
+               WGPUDevicePropertiesGetExtraRequiredSize(*deviceProperties);
+    }
 
-    // Implementation of ObjectIdProvider that always errors.
-    // Used when the generator adds a provider argument because of a chained
-    // struct, but in practice, a chained struct in that location is invalid.
-    class ErrorObjectIdProvider final : public ObjectIdProvider {
-        public:
-            {% for type in by_category["object"] %}
-                WireResult GetId({{as_cType(type.name)}} object, ObjectId* out) const override {
-                    return WireResult::FatalError;
-                }
-                WireResult GetOptionalId({{as_cType(type.name)}} object, ObjectId* out) const override {
-                    return WireResult::FatalError;
-                }
-            {% endfor %}
-    };
+    void SerializeWGPUDeviceProperties(const WGPUDeviceProperties* deviceProperties,
+                                       char* buffer) {
+        SerializeBuffer serializeBuffer(buffer, SerializedWGPUDevicePropertiesSize(deviceProperties));
 
-        // Implementations of serialization/deserialization of WPGUDeviceProperties.
-        size_t SerializedWGPUDevicePropertiesSize(const WGPUDeviceProperties* deviceProperties) {
-            return sizeof(WGPUDeviceProperties) +
-                   WGPUDevicePropertiesGetExtraRequiredSize(*deviceProperties);
+        WGPUDevicePropertiesTransfer* transfer;
+
+        WireResult result = serializeBuffer.Next(&transfer);
+        ASSERT(result == WireResult::Success);
+
+        ErrorObjectIdProvider provider;
+        result = WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer, provider);
+        ASSERT(result == WireResult::Success);
+    }
+
+    bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,
+                                         const volatile char* buffer,
+                                         size_t size) {
+        const volatile WGPUDevicePropertiesTransfer* transfer;
+        DeserializeBuffer deserializeBuffer(buffer, size);
+        if (deserializeBuffer.Read(&transfer) != WireResult::Success) {
+            return false;
         }
 
-        void SerializeWGPUDeviceProperties(const WGPUDeviceProperties* deviceProperties,
-                                           char* buffer) {
-            SerializeBuffer serializeBuffer(buffer, SerializedWGPUDevicePropertiesSize(deviceProperties));
+        ErrorObjectIdResolver resolver;
+        return WGPUDevicePropertiesDeserialize(deviceProperties, transfer, &deserializeBuffer,
+                                               nullptr, resolver) == WireResult::Success;
+    }
 
-            WGPUDevicePropertiesTransfer* transfer;
+    size_t SerializedWGPUSupportedLimitsSize(const WGPUSupportedLimits* supportedLimits) {
+        return sizeof(WGPUSupportedLimits) +
+               WGPUSupportedLimitsGetExtraRequiredSize(*supportedLimits);
+    }
 
-            WireResult result = serializeBuffer.Next(&transfer);
-            ASSERT(result == WireResult::Success);
+    void SerializeWGPUSupportedLimits(
+        const WGPUSupportedLimits* supportedLimits,
+        char* buffer) {
+        SerializeBuffer serializeBuffer(buffer, SerializedWGPUSupportedLimitsSize(supportedLimits));
 
-            ErrorObjectIdProvider provider;
-            result = WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer, provider);
-            ASSERT(result == WireResult::Success);
+        WGPUSupportedLimitsTransfer* transfer;
+
+        WireResult result = serializeBuffer.Next(&transfer);
+        ASSERT(result == WireResult::Success);
+
+        ErrorObjectIdProvider provider;
+        result = WGPUSupportedLimitsSerialize(*supportedLimits, transfer, &serializeBuffer, provider);
+        ASSERT(result == WireResult::Success);
+    }
+
+    bool DeserializeWGPUSupportedLimits(WGPUSupportedLimits* supportedLimits,
+                                        const volatile char* buffer,
+                                        size_t size) {
+        const volatile WGPUSupportedLimitsTransfer* transfer;
+        DeserializeBuffer deserializeBuffer(buffer, size);
+        if (deserializeBuffer.Read(&transfer) != WireResult::Success) {
+            return false;
         }
 
-        bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,
-                                             const volatile char* buffer,
-                                             size_t size) {
-            const volatile WGPUDevicePropertiesTransfer* transfer;
-            DeserializeBuffer deserializeBuffer(buffer, size);
-            if (deserializeBuffer.Read(&transfer) != WireResult::Success) {
-                return false;
-            }
-
-            ErrorObjectIdResolver resolver;
-            return WGPUDevicePropertiesDeserialize(deviceProperties, transfer, &deserializeBuffer,
-                                                   nullptr, resolver) == WireResult::Success;
-        }
-
-        size_t SerializedWGPUSupportedLimitsSize(const WGPUSupportedLimits* supportedLimits) {
-            return sizeof(WGPUSupportedLimits) +
-                   WGPUSupportedLimitsGetExtraRequiredSize(*supportedLimits);
-        }
-
-        void SerializeWGPUSupportedLimits(
-            const WGPUSupportedLimits* supportedLimits,
-            char* buffer) {
-            SerializeBuffer serializeBuffer(buffer, SerializedWGPUSupportedLimitsSize(supportedLimits));
-
-            WGPUSupportedLimitsTransfer* transfer;
-
-            WireResult result = serializeBuffer.Next(&transfer);
-            ASSERT(result == WireResult::Success);
-
-            ErrorObjectIdProvider provider;
-            result = WGPUSupportedLimitsSerialize(*supportedLimits, transfer, &serializeBuffer, provider);
-            ASSERT(result == WireResult::Success);
-        }
-
-        bool DeserializeWGPUSupportedLimits(WGPUSupportedLimits* supportedLimits,
-                                            const volatile char* buffer,
-                                            size_t size) {
-            const volatile WGPUSupportedLimitsTransfer* transfer;
-            DeserializeBuffer deserializeBuffer(buffer, size);
-            if (deserializeBuffer.Read(&transfer) != WireResult::Success) {
-                return false;
-            }
-
-            ErrorObjectIdResolver resolver;
-            return WGPUSupportedLimitsDeserialize(supportedLimits, transfer, &deserializeBuffer,
-                                                  nullptr, resolver) == WireResult::Success;
-        }
+        ErrorObjectIdResolver resolver;
+        return WGPUSupportedLimitsDeserialize(supportedLimits, transfer, &deserializeBuffer,
+                                              nullptr, resolver) == WireResult::Success;
+    }
 
 }  // namespace dawn_wire
