@@ -59,7 +59,7 @@ TEST_P(GlslBuiltinConversionTest, Emit) {
   auto params = GetParam();
   GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(gen.builtin_to_string(params.builtin),
+  EXPECT_EQ(gen.builtin_to_string(params.builtin, ast::PipelineStage::kVertex),
             std::string(params.attribute_name));
 }
 INSTANTIATE_TEST_SUITE_P(

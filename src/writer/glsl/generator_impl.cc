@@ -1758,10 +1758,20 @@ sem::Type* GeneratorImpl::builtin_type(ast::Builtin builtin) {
   }
 }
 
-const char* GeneratorImpl::builtin_to_string(ast::Builtin builtin) const {
+const char* GeneratorImpl::builtin_to_string(ast::Builtin builtin,
+                                             ast::PipelineStage stage) {
   switch (builtin) {
     case ast::Builtin::kPosition:
-      return "gl_Position";
+      switch (stage) {
+        case ast::PipelineStage::kVertex:
+          return "gl_Position";
+        case ast::PipelineStage::kFragment:
+          return "gl_FragCoord";
+        default:
+          TINT_ICE(Writer, builder_.Diagnostics())
+              << "position builtin unexpected in this pipeline stage";
+          return "";
+      }
     case ast::Builtin::kVertexIndex:
       return "gl_VertexID";
     case ast::Builtin::kInstanceIndex:
@@ -1959,10 +1969,10 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
             return false;
           }
           out << "(";
-          out << builtin_to_string(builtin->builtin);
+          out << builtin_to_string(builtin->builtin, func->PipelineStage());
           out << ")";
         } else {
-          out << builtin_to_string(builtin->builtin);
+          out << builtin_to_string(builtin->builtin, func->PipelineStage());
         }
       } else {
         out << name;
@@ -1992,7 +2002,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
       out << "  ";
       if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
               member->Declaration()->decorations)) {
-        out << builtin_to_string(builtin->builtin);
+        out << builtin_to_string(builtin->builtin, func->PipelineStage());
       } else {
         out << name;
       }

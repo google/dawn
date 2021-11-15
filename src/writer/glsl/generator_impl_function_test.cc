@@ -208,7 +208,7 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
 }
 void main() {
   tint_symbol_1 inputs;
-  inputs.coord = gl_Position;
+  inputs.coord = gl_FragCoord;
   tint_symbol_2 outputs;
   outputs = frag_main(inputs);
   gl_FragDepth = outputs.value;
@@ -320,7 +320,7 @@ void main() {
   tint_symbol_2 inputs;
   inputs.col1 = col1;
   inputs.col2 = col2;
-  inputs.pos = gl_Position;
+  inputs.pos = gl_FragCoord;
   frag_main(inputs);
 }
 
