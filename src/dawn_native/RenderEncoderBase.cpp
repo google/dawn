@@ -285,17 +285,6 @@ namespace dawn_native {
 
                     uint64_t remainingSize = bufferSize - offset;
 
-                    // Temporarily treat 0 as undefined for size, and give a warning
-                    // TODO(dawn:1058): Remove this if block
-                    if (size == 0) {
-                        size = wgpu::kWholeSize;
-                        GetDevice()->EmitDeprecationWarning(
-                            "Using size=0 to indicate default binding size for setIndexBuffer "
-                            "is deprecated. In the future it will result in a zero-size binding. "
-                            "Use `undefined` (wgpu::kWholeSize) or just omit the parameter "
-                            "instead.");
-                    }
-
                     if (size == wgpu::kWholeSize) {
                         size = remainingSize;
                     } else {
@@ -352,17 +341,6 @@ namespace dawn_native {
                                     offset, bufferSize, buffer);
 
                     uint64_t remainingSize = bufferSize - offset;
-
-                    // Temporarily treat 0 as undefined for size, and give a warning
-                    // TODO(dawn:1058): Remove this if block
-                    if (size == 0) {
-                        size = wgpu::kWholeSize;
-                        GetDevice()->EmitDeprecationWarning(
-                            "Using size=0 to indicate default binding size for setVertexBuffer "
-                            "is deprecated. In the future it will result in a zero-size binding. "
-                            "Use `undefined` (wgpu::kWholeSize) or just omit the parameter "
-                            "instead.");
-                    }
 
                     if (size == wgpu::kWholeSize) {
                         size = remainingSize;

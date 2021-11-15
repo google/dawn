@@ -351,10 +351,7 @@ namespace {
         {
             // Explicit zero size
             VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, 0}};
-            // size=0 used as default size is deprecated but still avaliable.
-            // TODO(dawn:1058): Change the expectation when size=0 special case is removed.
-            EXPECT_DEPRECATION_WARNING(
-                TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, true));
+            TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, false);
         }
     }
 
