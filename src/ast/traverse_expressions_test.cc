@@ -124,31 +124,6 @@ TEST_F(TraverseExpressionsTest, DescendCallExpression) {
   }
 }
 
-TEST_F(TraverseExpressionsTest, DescendTypeConstructorExpression) {
-  std::vector<const ast::Expression*> e = {Expr(1), Expr(1), Expr(1), Expr(1)};
-  std::vector<const ast::Expression*> c = {vec2<i32>(e[0], e[1]),
-                                           vec2<i32>(e[2], e[3])};
-  auto* root = vec2<i32>(c[0], c[1]);
-  {
-    std::vector<const ast::Expression*> l2r;
-    TraverseExpressions<TraverseOrder::LeftToRight>(
-        root, Diagnostics(), [&](const ast::Expression* expr) {
-          l2r.push_back(expr);
-          return ast::TraverseAction::Descend;
-        });
-    EXPECT_THAT(l2r, ElementsAre(root, c[0], e[0], e[1], c[1], e[2], e[3]));
-  }
-  {
-    std::vector<const ast::Expression*> r2l;
-    TraverseExpressions<TraverseOrder::RightToLeft>(
-        root, Diagnostics(), [&](const ast::Expression* expr) {
-          r2l.push_back(expr);
-          return ast::TraverseAction::Descend;
-        });
-    EXPECT_THAT(r2l, ElementsAre(root, c[1], e[3], e[2], c[0], e[1], e[0]));
-  }
-}
-
 // TODO(crbug.com/tint/1257): Test ignores member accessor 'member' field.
 // Replace with the test below when fixed.
 TEST_F(TraverseExpressionsTest, DescendMemberIndexExpression) {

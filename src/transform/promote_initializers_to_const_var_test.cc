@@ -30,7 +30,7 @@ fn main() {
   var f1 : f32 = 2.0;
   var f2 : f32 = 3.0;
   var f3 : f32 = 4.0;
-  var i : f32 = array<f32, 4>(f0, f1, f2, f3)[2];
+  var i : f32 = array<f32, 4u>(f0, f1, f2, f3)[2];
 }
 )";
 
@@ -41,7 +41,7 @@ fn main() {
   var f1 : f32 = 2.0;
   var f2 : f32 = 3.0;
   var f3 : f32 = 4.0;
-  let tint_symbol : array<f32, 4> = array<f32, 4>(f0, f1, f2, f3);
+  let tint_symbol : array<f32, 4u> = array<f32, 4u>(f0, f1, f2, f3);
   var i : f32 = tint_symbol[2];
 }
 )";
@@ -88,16 +88,16 @@ TEST_F(PromoteInitializersToConstVarTest, ArrayInArrayArray) {
   auto* src = R"(
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  var i : f32 = array<array<f32, 2>, 2>(array<f32, 2>(1.0, 2.0), array<f32, 2>(3.0, 4.0))[0][1];
+  var i : f32 = array<array<f32, 2u>, 2u>(array<f32, 2u>(1.0, 2.0), array<f32, 2u>(3.0, 4.0))[0][1];
 }
 )";
 
   auto* expect = R"(
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  let tint_symbol : array<f32, 2> = array<f32, 2>(1.0, 2.0);
-  let tint_symbol_1 : array<f32, 2> = array<f32, 2>(3.0, 4.0);
-  let tint_symbol_2 : array<array<f32, 2>, 2> = array<array<f32, 2>, 2>(tint_symbol, tint_symbol_1);
+  let tint_symbol : array<f32, 2u> = array<f32, 2u>(1.0, 2.0);
+  let tint_symbol_1 : array<f32, 2u> = array<f32, 2u>(3.0, 4.0);
+  let tint_symbol_2 : array<array<f32, 2u>, 2u> = array<array<f32, 2u>, 2u>(tint_symbol, tint_symbol_1);
   var i : f32 = tint_symbol_2[0][1];
 }
 )";
@@ -165,12 +165,12 @@ struct S1 {
 };
 
 struct S2 {
-  a : array<S1, 3>;
+  a : array<S1, 3u>;
 };
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  var x : i32 = S2(array<S1, 3>(S1(1), S1(2), S1(3))).a[1].a;
+  var x : i32 = S2(array<S1, 3u>(S1(1), S1(2), S1(3))).a[1].a;
 }
 )";
 
@@ -180,7 +180,7 @@ struct S1 {
 };
 
 struct S2 {
-  a : array<S1, 3>;
+  a : array<S1, 3u>;
 };
 
 [[stage(compute), workgroup_size(1)]]
@@ -188,7 +188,7 @@ fn main() {
   let tint_symbol : S1 = S1(1);
   let tint_symbol_1 : S1 = S1(2);
   let tint_symbol_2 : S1 = S1(3);
-  let tint_symbol_3 : array<S1, 3> = array<S1, 3>(tint_symbol, tint_symbol_1, tint_symbol_2);
+  let tint_symbol_3 : array<S1, 3u> = array<S1, 3u>(tint_symbol, tint_symbol_1, tint_symbol_2);
   let tint_symbol_4 : S2 = S2(tint_symbol_3);
   var x : i32 = tint_symbol_4.a[1].a;
 }
@@ -209,11 +209,11 @@ struct S {
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  var local_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
+  var local_arr : array<f32, 4u> = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
   var local_str : S = S(1, 2.0, 3);
 }
 
-let module_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
+let module_arr : array<f32, 4u> = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
 
 let module_str : S = S(1, 2.0, 3);
 )";

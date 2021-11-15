@@ -19,7 +19,10 @@
 #include <vector>
 
 #include "src/program_builder.h"
+#include "src/sem/call.h"
 #include "src/sem/expression.h"
+#include "src/sem/type_constructor.h"
+#include "src/sem/type_conversion.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FoldConstants);
 
@@ -32,26 +35,25 @@ FoldConstants::~FoldConstants() = default;
 
 void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll([&](const ast::Expression* expr) -> const ast::Expression* {
-    auto* sem = ctx.src->Sem().Get(expr);
-    if (!sem) {
+    auto* call = ctx.src->Sem().Get<sem::Call>(expr);
+    if (!call) {
       return nullptr;
     }
 
-    auto value = sem->ConstantValue();
+    auto value = call->ConstantValue();
     if (!value.IsValid()) {
       return nullptr;
     }
 
-    auto* ty = sem->Type();
+    auto* ty = call->Type();
 
-    auto* ctor = expr->As<ast::TypeConstructorExpression>();
-    if (!ctor) {
+    if (!call->Target()->IsAnyOf<sem::TypeConversion, sem::TypeConstructor>()) {
       return nullptr;
     }
 
     // If original ctor expression had no init values, don't replace the
     // expression
-    if (ctor->values.size() == 0) {
+    if (call->Arguments().empty()) {
       return nullptr;
     }
 
@@ -68,7 +70,7 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       // create it with 3. So what we do is construct with vec_size args,
       // except if the original vector was single-value initialized, in
       // which case, we only construct with one arg again.
-      uint32_t ctor_size = (ctor->values.size() == 1) ? 1 : vec_size;
+      uint32_t ctor_size = (call->Arguments().size() == 1) ? 1 : vec_size;
 
       ast::ExpressionList ctors;
       for (uint32_t i = 0; i < ctor_size; ++i) {

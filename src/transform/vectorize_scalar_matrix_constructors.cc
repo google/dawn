@@ -17,7 +17,9 @@
 #include <utility>
 
 #include "src/program_builder.h"
+#include "src/sem/call.h"
 #include "src/sem/expression.h"
+#include "src/sem/type_constructor.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VectorizeScalarMatrixConstructors);
 
@@ -33,38 +35,44 @@ VectorizeScalarMatrixConstructors::~VectorizeScalarMatrixConstructors() =
 void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx,
                                             const DataMap&,
                                             DataMap&) {
-  ctx.ReplaceAll([&](const ast::TypeConstructorExpression* constructor)
-                     -> const ast::TypeConstructorExpression* {
-    // Check if this is a matrix constructor with scalar arguments.
-    auto* mat_type = ctx.src->Sem().Get(constructor->type)->As<sem::Matrix>();
-    if (!mat_type) {
-      return nullptr;
-    }
-    if (constructor->values.size() == 0) {
-      return nullptr;
-    }
-    if (!ctx.src->Sem().Get(constructor->values[0])->Type()->is_scalar()) {
-      return nullptr;
-    }
+  ctx.ReplaceAll(
+      [&](const ast::CallExpression* expr) -> const ast::CallExpression* {
+        auto* call = ctx.src->Sem().Get(expr);
+        auto* ty_ctor = call->Target()->As<sem::TypeConstructor>();
+        if (!ty_ctor) {
+          return nullptr;
+        }
+        // Check if this is a matrix constructor with scalar arguments.
+        auto* mat_type = call->Type()->As<sem::Matrix>();
+        if (!mat_type) {
+          return nullptr;
+        }
 
-    // Build a list of vector expressions for each column.
-    ast::ExpressionList columns;
-    for (uint32_t c = 0; c < mat_type->columns(); c++) {
-      // Build a list of scalar expressions for each value in the column.
-      ast::ExpressionList row_values;
-      for (uint32_t r = 0; r < mat_type->rows(); r++) {
-        row_values.push_back(
-            ctx.Clone(constructor->values[c * mat_type->rows() + r]));
-      }
+        auto& args = call->Arguments();
+        if (args.size() == 0) {
+          return nullptr;
+        }
+        if (!args[0]->Type()->is_scalar()) {
+          return nullptr;
+        }
 
-      // Construct the column vector.
-      auto* col = ctx.dst->vec(CreateASTTypeFor(ctx, mat_type->type()),
-                               mat_type->rows(), row_values);
-      columns.push_back(col);
-    }
+        // Build a list of vector expressions for each column.
+        ast::ExpressionList columns;
+        for (uint32_t c = 0; c < mat_type->columns(); c++) {
+          // Build a list of scalar expressions for each value in the column.
+          ast::ExpressionList row_values;
+          for (uint32_t r = 0; r < mat_type->rows(); r++) {
+            row_values.push_back(
+                ctx.Clone(args[c * mat_type->rows() + r]->Declaration()));
+          }
 
-    return ctx.dst->Construct(CreateASTTypeFor(ctx, mat_type), columns);
-  });
+          // Construct the column vector.
+          auto* col = ctx.dst->vec(CreateASTTypeFor(ctx, mat_type->type()),
+                                   mat_type->rows(), row_values);
+          columns.push_back(col);
+        }
+        return ctx.dst->Construct(CreateASTTypeFor(ctx, mat_type), columns);
+      });
 
   ctx.Clone();
 }

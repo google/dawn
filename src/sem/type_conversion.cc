@@ -12,33 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEM_TYPE_CAST_H_
-#define SRC_SEM_TYPE_CAST_H_
+#include "src/sem/type_conversion.h"
 
-#include "src/sem/call_target.h"
+TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeConversion);
 
 namespace tint {
 namespace sem {
 
-/// TypeCast is the CallTarget for a type cast.
-class TypeCast : public Castable<TypeCast, CallTarget> {
- public:
-  /// Constructor
-  /// @param type the target type of the cast
-  /// @param parameter the type cast parameter
-  TypeCast(const sem::Type* type, const sem::Parameter* parameter);
+TypeConversion::TypeConversion(const sem::Type* type,
+                               const sem::Parameter* parameter)
+    : Base(type, ParameterList{parameter}) {}
 
-  /// Destructor
-  ~TypeCast() override;
-
-  /// @returns the cast source type
-  const sem::Type* Source() const { return Parameters()[0]->Type(); }
-
-  /// @returns the cast target type
-  const sem::Type* Target() const { return ReturnType(); }
-};
+TypeConversion::~TypeConversion() = default;
 
 }  // namespace sem
 }  // namespace tint
-
-#endif  // SRC_SEM_TYPE_CAST_H_

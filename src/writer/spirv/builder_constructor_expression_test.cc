@@ -165,20 +165,6 @@ TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_NonConst_Value_Fails) {
-  auto* rel = create<ast::BinaryExpression>(ast::BinaryOp::kAdd, Expr(3.0f),
-                                            Expr(3.0f));
-
-  auto* t = vec2<f32>(1.0f, rel);
-  auto* g = Global("g", ty.vec2<f32>(), t, ast::StorageClass::kPrivate);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_EQ(b.GenerateConstructorExpression(g, t), 0u);
-  EXPECT_TRUE(b.has_error());
-  EXPECT_EQ(b.error(), R"(constructor must be a constant expression)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
   auto* cast = Construct<bool>(true);
   WrapInFunction(cast);
@@ -666,6 +652,36 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec4) {
 %5 = OpConstantComposite %2 %4 %4 %4 %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_F32_With_F32) {
+  auto* ctor = Construct<f32>(2.0f);
+  GlobalConst("g", ty.f32(), ctor);
+
+  spirv::Builder& b = SanitizeAndBuild();
+  ASSERT_TRUE(b.Build());
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpConstant %1 2
+%4 = OpTypeVoid
+%3 = OpTypeFunction %4
+)");
+  Validate(b);
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_U32_With_F32) {
+  auto* ctor = Construct<u32>(1.5f);
+  GlobalConst("g", ty.u32(), ctor);
+
+  spirv::Builder& b = SanitizeAndBuild();
+  ASSERT_TRUE(b.Build());
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
+%2 = OpConstant %1 1
+%4 = OpTypeVoid
+%3 = OpTypeFunction %4
+)");
+  Validate(b);
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_F32) {
@@ -1689,25 +1705,8 @@ TEST_F(SpvBuilderConstructorTest,
 
   spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.is_constructor_const(t, true));
+  EXPECT_TRUE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
-}
-
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVector_WithIdent) {
-  // vec3<f32>(a, b, c)  -> false -- ERROR
-
-  Global("a", ty.f32(), ast::StorageClass::kPrivate);
-  Global("b", ty.f32(), ast::StorageClass::kPrivate);
-  Global("c", ty.f32(), ast::StorageClass::kPrivate);
-
-  auto* t = vec3<f32>("a", "b", "c");
-  WrapInFunction(t);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_FALSE(b.is_constructor_const(t, true));
-  EXPECT_TRUE(b.has_error());
-  EXPECT_EQ(b.error(), "constructor must be a constant expression");
 }
 
 TEST_F(SpvBuilderConstructorTest,
@@ -1720,7 +1719,7 @@ TEST_F(SpvBuilderConstructorTest,
 
   spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.is_constructor_const(t, true));
+  EXPECT_TRUE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
@@ -1733,12 +1732,12 @@ TEST_F(SpvBuilderConstructorTest,
 
   spirv::Builder& b = Build();
 
-  EXPECT_FALSE(b.is_constructor_const(t, true));
+  EXPECT_TRUE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
 TEST_F(SpvBuilderConstructorTest,
-       IsConstructorConst_GlobalWithTypeCastConstructor) {
+       IsConstructorConst_GlobalWithTypeConversionConstructor) {
   // vec2<f32>(f32(1), f32(2)) -> false
 
   auto* t = vec2<f32>(Construct<f32>(1), Construct<f32>(2));
@@ -1746,7 +1745,7 @@ TEST_F(SpvBuilderConstructorTest,
 
   spirv::Builder& b = Build();
 
-  EXPECT_FALSE(b.is_constructor_const(t, true));
+  EXPECT_FALSE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
@@ -1759,7 +1758,7 @@ TEST_F(SpvBuilderConstructorTest,
 
   spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.is_constructor_const(t, false));
+  EXPECT_TRUE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
@@ -1775,7 +1774,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Vector_WithIdent) {
 
   spirv::Builder& b = Build();
 
-  EXPECT_FALSE(b.is_constructor_const(t, false));
+  EXPECT_FALSE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
@@ -1792,12 +1791,12 @@ TEST_F(SpvBuilderConstructorTest,
 
   spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.is_constructor_const(t, false));
+  EXPECT_TRUE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
 TEST_F(SpvBuilderConstructorTest,
-       IsConstructorConst_VectorWithTypeCastConstConstructors) {
+       IsConstructorConst_VectorWithTypeConversionConstConstructors) {
   // vec2<f32>(f32(1), f32(2))  -> false
 
   auto* t = vec2<f32>(Construct<f32>(1), Construct<f32>(2));
@@ -1805,7 +1804,7 @@ TEST_F(SpvBuilderConstructorTest,
 
   spirv::Builder& b = Build();
 
-  EXPECT_FALSE(b.is_constructor_const(t, false));
+  EXPECT_FALSE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
@@ -1815,7 +1814,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 
   spirv::Builder& b = Build();
 
-  EXPECT_FALSE(b.is_constructor_const(t, false));
+  EXPECT_FALSE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
@@ -1830,7 +1829,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
 
   spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.is_constructor_const(t, false));
+  EXPECT_TRUE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 
@@ -1849,7 +1848,7 @@ TEST_F(SpvBuilderConstructorTest,
 
   spirv::Builder& b = Build();
 
-  EXPECT_FALSE(b.is_constructor_const(t, false));
+  EXPECT_FALSE(b.IsConstructorConst(t));
   EXPECT_FALSE(b.has_error());
 }
 

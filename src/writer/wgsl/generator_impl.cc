@@ -134,9 +134,6 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   if (auto* l = expr->As<ast::LiteralExpression>()) {
     return EmitLiteral(out, l);
   }
-  if (auto* c = expr->As<ast::TypeConstructorExpression>()) {
-    return EmitTypeConstructor(out, c);
-  }
   if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
     return EmitMemberAccessor(out, m);
   }
@@ -156,10 +153,9 @@ bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
     const ast::IndexAccessorExpression* expr) {
   bool paren_lhs =
-      !expr->object
-           ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
-                     ast::IdentifierExpression, ast::MemberAccessorExpression,
-                     ast::TypeConstructorExpression>();
+      !expr->object->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
+                             ast::IdentifierExpression,
+                             ast::MemberAccessorExpression>();
   if (paren_lhs) {
     out << "(";
   }
@@ -183,10 +179,9 @@ bool GeneratorImpl::EmitMemberAccessor(
     std::ostream& out,
     const ast::MemberAccessorExpression* expr) {
   bool paren_lhs =
-      !expr->structure
-           ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
-                     ast::IdentifierExpression, ast::MemberAccessorExpression,
-                     ast::TypeConstructorExpression>();
+      !expr->structure->IsAnyOf<ast::IndexAccessorExpression,
+                                ast::CallExpression, ast::IdentifierExpression,
+                                ast::MemberAccessorExpression>();
   if (paren_lhs) {
     out << "(";
   }
@@ -220,7 +215,17 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
 
 bool GeneratorImpl::EmitCall(std::ostream& out,
                              const ast::CallExpression* expr) {
-  if (!EmitExpression(out, expr->func)) {
+  if (expr->target.name) {
+    if (!EmitExpression(out, expr->target.name)) {
+      return false;
+    }
+  } else if (expr->target.type) {
+    if (!EmitType(out, expr->target.type)) {
+      return false;
+    }
+  } else {
+    TINT_ICE(Writer, diagnostics_)
+        << "CallExpression target had neither a name or type";
     return false;
   }
   out << "(";
@@ -240,31 +245,6 @@ bool GeneratorImpl::EmitCall(std::ostream& out,
 
   out << ")";
 
-  return true;
-}
-
-bool GeneratorImpl::EmitTypeConstructor(
-    std::ostream& out,
-    const ast::TypeConstructorExpression* expr) {
-  if (!EmitType(out, expr->type)) {
-    return false;
-  }
-
-  out << "(";
-
-  bool first = true;
-  for (auto* e : expr->values) {
-    if (!first) {
-      out << ", ";
-    }
-    first = false;
-
-    if (!EmitExpression(out, e)) {
-      return false;
-    }
-  }
-
-  out << ")";
   return true;
 }
 

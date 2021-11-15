@@ -177,8 +177,6 @@ set(TINT_LIB_SRCS
   ast/texture.cc
   ast/texture.h
   ast/traverse_expressions.h
-  ast/type_constructor_expression.cc
-  ast/type_constructor_expression.h
   ast/type_name.cc
   ast/type_name.h
   ast/ast_type.cc  # TODO(bclayton) - rename to type.cc
@@ -379,10 +377,10 @@ set(TINT_LIB_SRCS
   sem/switch_statement.h
   sem/texture_type.cc
   sem/texture_type.h
-  sem/type_cast.cc
-  sem/type_cast.h
   sem/type_constructor.cc
   sem/type_constructor.h
+  sem/type_conversion.cc
+  sem/type_conversion.h
   sem/type.cc
   sem/type.h
   sem/type_manager.cc
@@ -644,7 +642,6 @@ if(${TINT_BUILD_TESTS})
     ast/test_helper.h
     ast/texture_test.cc
     ast/traverse_expressions_test.cc
-    ast/type_constructor_expression_test.cc
     ast/u32_test.cc
     ast/uint_literal_expression_test.cc
     ast/unary_op_expression_test.cc

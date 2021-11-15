@@ -31,7 +31,6 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/program.h"
 #include "src/sem/storage_texture_type.h"
@@ -183,12 +182,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param access the access to generate
   /// @returns true if the access is emitted
   bool EmitAccess(std::ostream& out, const ast::Access access);
-  /// Handles emitting a type constructor
-  /// @param out the output of the expression stream
-  /// @param expr the type constructor expression
-  /// @returns true if the constructor is emitted
-  bool EmitTypeConstructor(std::ostream& out,
-                           const ast::TypeConstructorExpression* expr);
   /// Handles a unary op expression
   /// @param out the output of the expression stream
   /// @param expr the expression to emit

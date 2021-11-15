@@ -90,7 +90,10 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
   EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
   ASSERT_NE(e->variable->constructor, nullptr);
-  EXPECT_TRUE(e->variable->constructor->Is<ast::TypeConstructorExpression>());
+  auto* call = e->variable->constructor->As<ast::CallExpression>();
+  ASSERT_NE(call, nullptr);
+  EXPECT_EQ(call->target.name, nullptr);
+  EXPECT_NE(call->target.type, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
@@ -105,7 +108,10 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
   EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
   ASSERT_NE(e->variable->constructor, nullptr);
-  EXPECT_TRUE(e->variable->constructor->Is<ast::TypeConstructorExpression>());
+  auto* call = e->variable->constructor->As<ast::CallExpression>();
+  ASSERT_NE(call, nullptr);
+  EXPECT_EQ(call->target.name, nullptr);
+  EXPECT_NE(call->target.type, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
@@ -120,7 +126,10 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
   EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
   ASSERT_NE(e->variable->constructor, nullptr);
-  EXPECT_TRUE(e->variable->constructor->Is<ast::TypeConstructorExpression>());
+  auto* call = e->variable->constructor->As<ast::CallExpression>();
+  ASSERT_NE(call, nullptr);
+  EXPECT_EQ(call->target.name, nullptr);
+  EXPECT_NE(call->target.type, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
@@ -135,7 +144,10 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
   EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
   ASSERT_NE(e->variable->constructor, nullptr);
-  EXPECT_TRUE(e->variable->constructor->Is<ast::TypeConstructorExpression>());
+  auto* call = e->variable->constructor->As<ast::CallExpression>();
+  ASSERT_NE(call, nullptr);
+  EXPECT_EQ(call->target.name, nullptr);
+  EXPECT_NE(call->target.type, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let) {

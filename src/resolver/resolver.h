@@ -59,6 +59,7 @@ class Array;
 class Atomic;
 class Intrinsic;
 class Statement;
+class TypeConstructor;
 }  // namespace sem
 
 namespace resolver {
@@ -170,15 +171,26 @@ class Resolver {
   sem::Expression* IndexAccessor(const ast::IndexAccessorExpression*);
   sem::Expression* Binary(const ast::BinaryExpression*);
   sem::Expression* Bitcast(const ast::BitcastExpression*);
-  sem::Expression* Call(const ast::CallExpression*);
+  sem::Call* Call(const ast::CallExpression*);
   sem::Expression* Expression(const ast::Expression*);
   sem::Function* Function(const ast::Function*);
-  sem::Call* FunctionCall(const ast::CallExpression*);
+  sem::Call* FunctionCall(const ast::CallExpression*,
+                          const std::vector<const sem::Expression*> args);
   sem::Expression* Identifier(const ast::IdentifierExpression*);
-  sem::Call* IntrinsicCall(const ast::CallExpression*, sem::IntrinsicType);
+  sem::Call* IntrinsicCall(const ast::CallExpression*,
+                           sem::IntrinsicType,
+                           const std::vector<const sem::Expression*> args,
+                           const std::vector<const sem::Type*> arg_tys);
   sem::Expression* Literal(const ast::LiteralExpression*);
   sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
-  sem::Expression* TypeConstructor(const ast::TypeConstructorExpression*);
+  sem::Call* TypeConversion(const ast::CallExpression* expr,
+                            const sem::Type* ty,
+                            const sem::Expression* arg,
+                            const sem::Type* arg_ty);
+  sem::Call* TypeConstructor(const ast::CallExpression* expr,
+                             const sem::Type* ty,
+                             const std::vector<const sem::Expression*> args,
+                             const std::vector<const sem::Type*> arg_tys);
   sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
 
   // Statement resolving methods
@@ -211,13 +223,13 @@ class Resolver {
   bool ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                  const sem::Type* storage_type,
                                  const bool is_input);
-  bool ValidateCall(const sem::Call* call);
   bool ValidateEntryPoint(const sem::Function* func);
   bool ValidateFunction(const sem::Function* func);
   bool ValidateFunctionCall(const sem::Call* call);
   bool ValidateGlobalVariable(const sem::Variable* var);
   bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
                                      const sem::Type* storage_type);
+  bool ValidateIntrinsicCall(const sem::Call* call);
   bool ValidateLocationDecoration(const ast::LocationDecoration* location,
                                   const sem::Type* type,
                                   std::unordered_set<uint32_t>& locations,
@@ -234,23 +246,23 @@ class Resolver {
   bool ValidateStatements(const ast::StatementList& stmts);
   bool ValidateStorageTexture(const ast::StorageTexture* t);
   bool ValidateStructure(const sem::Struct* str);
-  bool ValidateStructureConstructor(const ast::TypeConstructorExpression* ctor,
-                                    const sem::Struct* struct_type);
+  bool ValidateStructureConstructorOrCast(const ast::CallExpression* ctor,
+                                          const sem::Struct* struct_type);
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const sem::Variable* var);
-  bool ValidateVariableConstructor(const ast::Variable* var,
-                                   ast::StorageClass storage_class,
-                                   const sem::Type* storage_type,
-                                   const sem::Type* rhs_type);
+  bool ValidateVariableConstructorOrCast(const ast::Variable* var,
+                                         ast::StorageClass storage_class,
+                                         const sem::Type* storage_type,
+                                         const sem::Type* rhs_type);
   bool ValidateVector(const sem::Vector* ty, const Source& source);
-  bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Vector* vec_type);
-  bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Matrix* matrix_type);
-  bool ValidateScalarConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Type* type);
-  bool ValidateArrayConstructor(const ast::TypeConstructorExpression* ctor,
-                                const sem::Array* arr_type);
+  bool ValidateVectorConstructorOrCast(const ast::CallExpression* ctor,
+                                       const sem::Vector* vec_type);
+  bool ValidateMatrixConstructorOrCast(const ast::CallExpression* ctor,
+                                       const sem::Matrix* matrix_type);
+  bool ValidateScalarConstructorOrCast(const ast::CallExpression* ctor,
+                                       const sem::Type* type);
+  bool ValidateArrayConstructorOrCast(const ast::CallExpression* ctor,
+                                      const sem::Array* arr_type);
   bool ValidateTypeDecl(const ast::TypeDecl* named_type) const;
   bool ValidateTextureIntrinsicFunction(const sem::Call* call);
   bool ValidateNoDuplicateDecorations(const ast::DecorationList& decorations);
@@ -378,14 +390,45 @@ class Resolver {
                                       const sem::Type* type);
   sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,
                                       const sem::Type* type);
-  sem::Constant EvaluateConstantValue(
-      const ast::TypeConstructorExpression* type_ctor,
-      const sem::Type* type);
+  sem::Constant EvaluateConstantValue(const ast::CallExpression* call,
+                                      const sem::Type* type);
 
   /// Sem is a helper for obtaining the semantic node for the given AST node.
   template <typename SEM = sem::Info::InferFromAST,
             typename AST_OR_TYPE = CastableBase>
   const sem::Info::GetResultType<SEM, AST_OR_TYPE>* Sem(const AST_OR_TYPE* ast);
+
+  struct TypeConversionSig {
+    const sem::Type* target;
+    const sem::Type* source;
+
+    bool operator==(const TypeConversionSig&) const;
+
+    /// Hasher provides a hash function for the TypeConversionSig
+    struct Hasher {
+      /// @param sig the TypeConversionSig to create a hash for
+      /// @return the hash value
+      std::size_t operator()(const TypeConversionSig& sig) const;
+    };
+  };
+
+  struct TypeConstructorSig {
+    const sem::Type* type;
+    const std::vector<const sem::Type*> parameters;
+
+    TypeConstructorSig(const sem::Type* ty,
+                       const std::vector<const sem::Type*> params);
+    TypeConstructorSig(const TypeConstructorSig&);
+    ~TypeConstructorSig();
+    bool operator==(const TypeConstructorSig&) const;
+
+    /// Hasher provides a hash function for the TypeConstructorSig
+    struct Hasher {
+      /// @param sig the TypeConstructorSig to create a hash for
+      /// @return the hash value
+      std::size_t operator()(const TypeConstructorSig& sig) const;
+    };
+  };
 
   ProgramBuilder* const builder_;
   diag::List& diagnostics_;
@@ -398,6 +441,14 @@ class Resolver {
 
   std::unordered_set<const ast::Node*> marked_;
   std::unordered_map<uint32_t, const sem::Variable*> constant_ids_;
+  std::unordered_map<TypeConversionSig,
+                     sem::CallTarget*,
+                     TypeConversionSig::Hasher>
+      type_conversions_;
+  std::unordered_map<TypeConstructorSig,
+                     sem::CallTarget*,
+                     TypeConstructorSig::Hasher>
+      type_ctors_;
 
   sem::Function* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;

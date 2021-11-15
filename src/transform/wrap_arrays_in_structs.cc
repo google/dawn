@@ -18,8 +18,11 @@
 
 #include "src/program_builder.h"
 #include "src/sem/array.h"
+#include "src/sem/call.h"
 #include "src/sem/expression.h"
+#include "src/sem/type_constructor.h"
 #include "src/utils/get_or_create.h"
+#include "src/utils/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::WrapArraysInStructs);
 
@@ -74,21 +77,28 @@ void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   });
 
   // Fix up array constructors so `A(1,2)` becomes `tint_array_wrapper(A(1,2))`
-  ctx.ReplaceAll([&](const ast::TypeConstructorExpression* ctor)
-                     -> const ast::Expression* {
-    if (auto* array =
-            ::tint::As<sem::Array>(sem.Get(ctor)->Type()->UnwrapRef())) {
-      if (auto w = wrapper(array)) {
-        // Wrap the array type constructor with another constructor for
-        // the wrapper
-        auto* wrapped_array_ty = ctx.Clone(ctor->type);
-        auto* array_ty = w.array_type(ctx);
-        auto* arr_ctor = ctx.dst->Construct(array_ty, ctx.Clone(ctor->values));
-        return ctx.dst->Construct(wrapped_array_ty, arr_ctor);
-      }
-    }
-    return nullptr;
-  });
+  ctx.ReplaceAll(
+      [&](const ast::CallExpression* expr) -> const ast::Expression* {
+        if (auto* call = sem.Get(expr)) {
+          if (auto* ctor = call->Target()->As<sem::TypeConstructor>()) {
+            if (auto* array = ctor->ReturnType()->As<sem::Array>()) {
+              if (auto w = wrapper(array)) {
+                // Wrap the array type constructor with another constructor for
+                // the wrapper
+                auto* wrapped_array_ty = ctx.dst->ty.type_name(w.wrapper_name);
+                auto* array_ty = w.array_type(ctx);
+                auto args = utils::Transform(
+                    call->Arguments(), [&](const tint::sem::Expression* s) {
+                      return ctx.Clone(s->Declaration());
+                    });
+                auto* arr_ctor = ctx.dst->Construct(array_ty, args);
+                return ctx.dst->Construct(wrapped_array_ty, arr_ctor);
+              }
+            }
+          }
+        }
+        return nullptr;
+      });
 
   ctx.Clone();
 }

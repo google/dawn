@@ -33,7 +33,6 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/program.h"
 #include "src/scope_stack.h"
@@ -46,6 +45,8 @@ namespace tint {
 namespace sem {
 class Call;
 class Intrinsic;
+class TypeConstructor;
+class TypeConversion;
 }  // namespace sem
 
 namespace writer {
@@ -130,12 +131,36 @@ class GeneratorImpl : public TextGenerator {
   bool EmitCall(std::ostream& out, const ast::CallExpression* expr);
   /// Handles generating an intrinsic call expression
   /// @param out the output of the expression stream
-  /// @param expr the call expression
+  /// @param call the call expression
   /// @param intrinsic the intrinsic being called
   /// @returns true if the call expression is emitted
   bool EmitIntrinsicCall(std::ostream& out,
-                         const ast::CallExpression* expr,
+                         const sem::Call* call,
                          const sem::Intrinsic* intrinsic);
+  /// Handles generating a type conversion expression
+  /// @param out the output of the expression stream
+  /// @param call the call expression
+  /// @param conv the type conversion
+  /// @returns true if the expression is emitted
+  bool EmitTypeConversion(std::ostream& out,
+                          const sem::Call* call,
+                          const sem::TypeConversion* conv);
+  /// Handles generating a type constructor
+  /// @param out the output of the expression stream
+  /// @param call the call expression
+  /// @param ctor the type constructor
+  /// @returns true if the constructor is emitted
+  bool EmitTypeConstructor(std::ostream& out,
+                           const sem::Call* call,
+                           const sem::TypeConstructor* ctor);
+  /// Handles generating a function call
+  /// @param out the output of the expression stream
+  /// @param call the call expression
+  /// @param func the target function
+  /// @returns true if the call is emitted
+  bool EmitFunctionCall(std::ostream& out,
+                        const sem::Call* call,
+                        const sem::Function* func);
   /// Handles generating a call to an atomic function (`atomicAdd`,
   /// `atomicMax`, etc)
   /// @param out the output of the expression stream
@@ -293,12 +318,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
   bool EmitStructType(TextBuffer* buffer, const sem::Struct* str);
-  /// Handles emitting a type constructor
-  /// @param out the output of the expression stream
-  /// @param expr the type constructor expression
-  /// @returns true if the constructor is emitted
-  bool EmitTypeConstructor(std::ostream& out,
-                           const ast::TypeConstructorExpression* expr);
   /// Handles a unary op expression
   /// @param out the output of the expression stream
   /// @param expr the expression to emit

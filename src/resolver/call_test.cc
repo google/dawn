@@ -90,11 +90,15 @@ TEST_F(ResolverCallTest, Valid) {
     args.push_back(p.create_value(*this, 0));
   }
 
-  Func("foo", std::move(params), ty.f32(), {Return(1.23f)});
-  auto* call = Call("foo", std::move(args));
-  WrapInFunction(call);
+  auto* func = Func("foo", std::move(params), ty.f32(), {Return(1.23f)});
+  auto* call_expr = Call("foo", std::move(args));
+  WrapInFunction(call_expr);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* call = Sem().Get(call_expr);
+  EXPECT_NE(call, nullptr);
+  EXPECT_EQ(call->Target(), Sem().Get(func));
 }
 
 }  // namespace

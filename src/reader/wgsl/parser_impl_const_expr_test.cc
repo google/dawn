@@ -24,20 +24,19 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
 
-  auto* t = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(t->type->Is<ast::Vector>());
-  EXPECT_EQ(t->type->As<ast::Vector>()->width, 2u);
+  auto* t = e->As<ast::CallExpression>();
+  ASSERT_TRUE(t->target.type->Is<ast::Vector>());
+  EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
 
-  ASSERT_EQ(t->values.size(), 2u);
-  auto& v = t->values;
+  ASSERT_EQ(t->args.size(), 2u);
 
-  ASSERT_TRUE(v[0]->Is<ast::FloatLiteralExpression>());
-  EXPECT_FLOAT_EQ(v[0]->As<ast::FloatLiteralExpression>()->value, 1.);
+  ASSERT_TRUE(t->args[0]->Is<ast::FloatLiteralExpression>());
+  EXPECT_FLOAT_EQ(t->args[0]->As<ast::FloatLiteralExpression>()->value, 1.);
 
-  ASSERT_TRUE(v[1]->Is<ast::FloatLiteralExpression>());
-  EXPECT_FLOAT_EQ(v[1]->As<ast::FloatLiteralExpression>()->value, 2.);
+  ASSERT_TRUE(t->args[1]->Is<ast::FloatLiteralExpression>());
+  EXPECT_FLOAT_EQ(t->args[1]->As<ast::FloatLiteralExpression>()->value, 2.);
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_Empty) {
@@ -45,13 +44,13 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_Empty) {
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
 
-  auto* t = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(t->type->Is<ast::Vector>());
-  EXPECT_EQ(t->type->As<ast::Vector>()->width, 2u);
+  auto* t = e->As<ast::CallExpression>();
+  ASSERT_TRUE(t->target.type->Is<ast::Vector>());
+  EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
 
-  ASSERT_EQ(t->values.size(), 0u);
+  ASSERT_EQ(t->args.size(), 0u);
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_TrailingComma) {
@@ -59,15 +58,15 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_TrailingComma) {
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
 
-  auto* t = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(t->type->Is<ast::Vector>());
-  EXPECT_EQ(t->type->As<ast::Vector>()->width, 2u);
+  auto* t = e->As<ast::CallExpression>();
+  ASSERT_TRUE(t->target.type->Is<ast::Vector>());
+  EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
 
-  ASSERT_EQ(t->values.size(), 2u);
-  ASSERT_TRUE(t->values[0]->Is<ast::LiteralExpression>());
-  ASSERT_TRUE(t->values[1]->Is<ast::LiteralExpression>());
+  ASSERT_EQ(t->args.size(), 2u);
+  ASSERT_TRUE(t->args[0]->Is<ast::LiteralExpression>());
+  ASSERT_TRUE(t->args[1]->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
@@ -134,7 +133,7 @@ TEST_F(ParserImplTest, ConstExpr_RegisteredType) {
 
   auto e = p->expect_const_expr();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
 }
 
 TEST_F(ParserImplTest, ConstExpr_NotRegisteredType) {

@@ -70,12 +70,15 @@
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/switch_statement.h"
+#include "src/sem/type_constructor.h"
+#include "src/sem/type_conversion.h"
 #include "src/sem/variable.h"
 #include "src/utils/defer.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/math.h"
 #include "src/utils/reverse.h"
 #include "src/utils/scoped_assignment.h"
+#include "src/utils/transform.h"
 
 namespace tint {
 namespace resolver {
@@ -510,8 +513,8 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
         builder_->create<sem::Reference>(storage_ty, storage_class, access);
   }
 
-  if (rhs && !ValidateVariableConstructor(var, storage_class, storage_ty,
-                                          rhs->Type())) {
+  if (rhs && !ValidateVariableConstructorOrCast(var, storage_class, storage_ty,
+                                                rhs->Type())) {
     return nullptr;
   }
 
@@ -641,10 +644,11 @@ void Resolver::AllocateOverridableConstantIds() {
   }
 }
 
-bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
-                                           ast::StorageClass storage_class,
-                                           const sem::Type* storage_ty,
-                                           const sem::Type* rhs_ty) {
+bool Resolver::ValidateVariableConstructorOrCast(
+    const ast::Variable* var,
+    ast::StorageClass storage_class,
+    const sem::Type* storage_ty,
+    const sem::Type* rhs_ty) {
   auto* value_type = rhs_ty->UnwrapRef();  // Implicit load of RHS
 
   // Value type has to match storage type
@@ -2369,8 +2373,6 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
       sem_expr = Bitcast(bitcast);
     } else if (auto* call = expr->As<ast::CallExpression>()) {
       sem_expr = Call(call);
-    } else if (auto* ctor = expr->As<ast::TypeConstructorExpression>()) {
-      sem_expr = TypeConstructor(ctor);
     } else if (auto* ident = expr->As<ast::IdentifierExpression>()) {
       sem_expr = Identifier(ident);
     } else if (auto* literal = expr->As<ast::LiteralExpression>()) {
@@ -2462,33 +2464,72 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
   return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
 }
 
-sem::Expression* Resolver::Call(const ast::CallExpression* expr) {
-  auto* ident = expr->func;
-  Mark(ident);
-  auto name = builder_->Symbols().NameFor(ident->symbol);
-
-  auto intrinsic_type = sem::ParseIntrinsicType(name);
-  auto* call = (intrinsic_type != IntrinsicType::kNone)
-                   ? IntrinsicCall(expr, intrinsic_type)
-                   : FunctionCall(expr);
-
-  current_function_->AddDirectCall(call);
-  return call;
-}
-
-sem::Call* Resolver::IntrinsicCall(const ast::CallExpression* expr,
-                                   sem::IntrinsicType intrinsic_type) {
+sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   std::vector<const sem::Expression*> args(expr->args.size());
-  std::vector<const sem::Type*> arg_tys(expr->args.size());
+  std::vector<const sem::Type*> arg_tys(args.size());
   for (size_t i = 0; i < expr->args.size(); i++) {
     auto* arg = Sem(expr->args[i]);
     if (!arg) {
       return nullptr;
     }
     args[i] = arg;
-    arg_tys[i] = arg->Type();
+    arg_tys[i] = args[i]->Type();
   }
 
+  auto type_ctor_or_conv = [&](const sem::Type* ty) -> sem::Call* {
+    // The call has resolved to a type constructor or cast.
+    if (args.size() == 1) {
+      auto* target = ty;
+      auto* source = args[0]->Type()->UnwrapRef();
+      if ((source != target) &&  //
+          ((source->is_scalar() && target->is_scalar()) ||
+           (source->Is<sem::Vector>() && target->Is<sem::Vector>()) ||
+           (source->Is<sem::Matrix>() && target->Is<sem::Matrix>()))) {
+        // Note: Matrix types currently cannot be converted (the element type
+        // must only be f32). We implement this for the day we support other
+        // matrix element types.
+        return TypeConversion(expr, ty, args[0], arg_tys[0]);
+      }
+    }
+    return TypeConstructor(expr, ty, std::move(args), std::move(arg_tys));
+  };
+
+  // Resolve the target of the CallExpression to determine whether this is a
+  // function call, cast or type constructor expression.
+  if (expr->target.type) {
+    auto* ty = Type(expr->target.type);
+    if (!ty) {
+      return nullptr;
+    }
+    return type_ctor_or_conv(ty);
+  }
+
+  auto* ident = expr->target.name;
+  Mark(ident);
+
+  auto it = named_type_info_.find(ident->symbol);
+  if (it != named_type_info_.end()) {
+    // We have a type.
+    return type_ctor_or_conv(it->second.sem);
+  }
+
+  // Not a type, treat as a intrinsic / function call.
+  auto name = builder_->Symbols().NameFor(ident->symbol);
+  auto intrinsic_type = sem::ParseIntrinsicType(name);
+  auto* call = (intrinsic_type != IntrinsicType::kNone)
+                   ? IntrinsicCall(expr, intrinsic_type, std::move(args),
+                                   std::move(arg_tys))
+                   : FunctionCall(expr, std::move(args));
+
+  current_function_->AddDirectCall(call);
+  return call;
+}
+
+sem::Call* Resolver::IntrinsicCall(
+    const ast::CallExpression* expr,
+    sem::IntrinsicType intrinsic_type,
+    const std::vector<const sem::Expression*> args,
+    const std::vector<const sem::Type*> arg_tys) {
   auto* intrinsic = intrinsic_table_->Lookup(intrinsic_type, std::move(arg_tys),
                                              expr->source);
   if (!intrinsic) {
@@ -2509,21 +2550,45 @@ sem::Call* Resolver::IntrinsicCall(const ast::CallExpression* expr,
     return nullptr;
   }
 
-  if (!ValidateCall(call)) {
+  if (!ValidateIntrinsicCall(call)) {
     return nullptr;
   }
 
   return call;
 }
 
-sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr) {
-  auto* ident = expr->func;
-  auto name = builder_->Symbols().NameFor(ident->symbol);
+bool Resolver::ValidateIntrinsicCall(const sem::Call* call) {
+  if (call->Type()->Is<sem::Void>()) {
+    bool is_call_statement = false;
+    if (auto* call_stmt = As<ast::CallStatement>(call->Stmt()->Declaration())) {
+      if (call_stmt->expr == call->Declaration()) {
+        is_call_statement = true;
+      }
+    }
+    if (!is_call_statement) {
+      // https://gpuweb.github.io/gpuweb/wgsl/#function-call-expr
+      // If the called function does not return a value, a function call
+      // statement should be used instead.
+      auto* ident = call->Declaration()->target.name;
+      auto name = builder_->Symbols().NameFor(ident->symbol);
+      AddError("intrinsic '" + name + "' does not return a value",
+               call->Declaration()->source);
+      return false;
+    }
+  }
 
-  auto target_it = symbol_to_function_.find(ident->symbol);
+  return true;
+}
+
+sem::Call* Resolver::FunctionCall(
+    const ast::CallExpression* expr,
+    const std::vector<const sem::Expression*> args) {
+  auto sym = expr->target.name->symbol;
+  auto name = builder_->Symbols().NameFor(sym);
+
+  auto target_it = symbol_to_function_.find(sym);
   if (target_it == symbol_to_function_.end()) {
-    if (current_function_ &&
-        current_function_->Declaration()->symbol == ident->symbol) {
+    if (current_function_ && current_function_->Declaration()->symbol == sym) {
       AddError("recursion is not permitted. '" + name +
                    "' attempted to call itself.",
                expr->source);
@@ -2533,16 +2598,6 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr) {
     return nullptr;
   }
   auto* target = target_it->second;
-
-  std::vector<const sem::Expression*> args(expr->args.size());
-  for (size_t i = 0; i < expr->args.size(); i++) {
-    auto* arg = Sem(expr->args[i]);
-    if (!arg) {
-      return nullptr;
-    }
-    args[i] = arg;
-  }
-
   auto* call = builder_->create<sem::Call>(expr, target, std::move(args),
                                            current_statement_, sem::Constant{});
 
@@ -2567,36 +2622,7 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr) {
     return nullptr;
   }
 
-  if (!ValidateCall(call)) {
-    return nullptr;
-  }
-
   return call;
-}
-
-bool Resolver::ValidateCall(const sem::Call* call) {
-  if (call->Type()->Is<sem::Void>()) {
-    bool is_call_statement = false;
-    if (auto* call_stmt = As<ast::CallStatement>(call->Stmt()->Declaration())) {
-      if (call_stmt->expr == call->Declaration()) {
-        is_call_statement = true;
-      }
-    }
-    if (!is_call_statement) {
-      // https://gpuweb.github.io/gpuweb/wgsl/#function-call-expr
-      // If the called function does not return a value, a function call
-      // statement should be used instead.
-      auto* ident = call->Declaration()->func;
-      auto name = builder_->Symbols().NameFor(ident->symbol);
-      bool is_function = call->Target()->Is<sem::Function>();
-      AddError((is_function ? "function" : "intrinsic") + std::string(" '") +
-                   name + "' does not return a value",
-               call->Declaration()->source);
-      return false;
-    }
-  }
-
-  return true;
 }
 
 bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
@@ -2623,8 +2649,7 @@ bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
       bool is_const_expr = true;
       ast::TraverseExpressions(
           arg->Declaration(), diagnostics_, [&](const ast::Expression* e) {
-            if (e->IsAnyOf<ast::LiteralExpression,
-                           ast::TypeConstructorExpression>()) {
+            if (e->IsAnyOf<ast::LiteralExpression, ast::CallExpression>()) {
               return ast::TraverseAction::Descend;
             }
             is_const_expr = false;
@@ -2654,9 +2679,9 @@ bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
 
 bool Resolver::ValidateFunctionCall(const sem::Call* call) {
   auto* decl = call->Declaration();
-  auto* ident = decl->func;
   auto* target = call->Target()->As<sem::Function>();
-  auto name = builder_->Symbols().NameFor(ident->symbol);
+  auto sym = decl->target.name->symbol;
+  auto name = builder_->Symbols().NameFor(sym);
 
   if (target->Declaration()->IsEntryPoint()) {
     // https://www.w3.org/TR/WGSL/#function-restriction
@@ -2735,40 +2760,150 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) {
       }
     }
   }
+
+  if (call->Type()->Is<sem::Void>()) {
+    bool is_call_statement = false;
+    if (auto* call_stmt = As<ast::CallStatement>(call->Stmt()->Declaration())) {
+      if (call_stmt->expr == call->Declaration()) {
+        is_call_statement = true;
+      }
+    }
+    if (!is_call_statement) {
+      // https://gpuweb.github.io/gpuweb/wgsl/#function-call-expr
+      // If the called function does not return a value, a function call
+      // statement should be used instead.
+      AddError("function '" + name + "' does not return a value", decl->source);
+      return false;
+    }
+  }
   return true;
 }
 
-sem::Expression* Resolver::TypeConstructor(
-    const ast::TypeConstructorExpression* expr) {
-  auto* ty = Type(expr->type);
-  if (!ty) {
+sem::Call* Resolver::TypeConversion(const ast::CallExpression* expr,
+                                    const sem::Type* target,
+                                    const sem::Expression* arg,
+                                    const sem::Type* source) {
+  // It is not valid to have a type-cast call expression inside a call
+  // statement.
+  if (current_statement_) {
+    if (auto* stmt =
+            current_statement_->Declaration()->As<ast::CallStatement>()) {
+      if (stmt->expr == expr) {
+        AddError("type cast evaluated but not used", expr->source);
+        return nullptr;
+      }
+    }
+  }
+
+  auto* call_target = utils::GetOrCreate(
+      type_conversions_, TypeConversionSig{target, source},
+      [&]() -> sem::TypeConversion* {
+        // Now that the argument types have been determined, make sure that they
+        // obey the conversion rules laid out in
+        // https://gpuweb.github.io/gpuweb/wgsl/#conversion-expr.
+        bool ok = true;
+        if (auto* vec_type = target->As<sem::Vector>()) {
+          ok = ValidateVectorConstructorOrCast(expr, vec_type);
+        } else if (auto* mat_type = target->As<sem::Matrix>()) {
+          // Note: Matrix types currently cannot be converted (the element type
+          // must only be f32). We implement this for the day we support other
+          // matrix element types.
+          ok = ValidateMatrixConstructorOrCast(expr, mat_type);
+        } else if (target->is_scalar()) {
+          ok = ValidateScalarConstructorOrCast(expr, target);
+        } else if (auto* arr_type = target->As<sem::Array>()) {
+          ok = ValidateArrayConstructorOrCast(expr, arr_type);
+        } else if (auto* struct_type = target->As<sem::Struct>()) {
+          ok = ValidateStructureConstructorOrCast(expr, struct_type);
+        } else {
+          AddError("type is not constructible", expr->source);
+          return nullptr;
+        }
+        if (!ok) {
+          return nullptr;
+        }
+
+        auto* param = builder_->create<sem::Parameter>(
+            nullptr,                   // declaration
+            0,                         // index
+            source->UnwrapRef(),       // type
+            ast::StorageClass::kNone,  // storage_class
+            ast::Access::kUndefined);  // access
+        return builder_->create<sem::TypeConversion>(target, param);
+      });
+
+  if (!call_target) {
     return nullptr;
   }
 
-  // Now that the argument types have been determined, make sure that they
-  // obey the constructor type rules laid out in
-  // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
-  bool ok = true;
-  if (auto* vec_type = ty->As<sem::Vector>()) {
-    ok = ValidateVectorConstructor(expr, vec_type);
-  } else if (auto* mat_type = ty->As<sem::Matrix>()) {
-    ok = ValidateMatrixConstructor(expr, mat_type);
-  } else if (ty->is_scalar()) {
-    ok = ValidateScalarConstructor(expr, ty);
-  } else if (auto* arr_type = ty->As<sem::Array>()) {
-    ok = ValidateArrayConstructor(expr, arr_type);
-  } else if (auto* struct_type = ty->As<sem::Struct>()) {
-    ok = ValidateStructureConstructor(expr, struct_type);
-  } else {
-    AddError("type is not constructible", expr->source);
-    return nullptr;
+  auto val = EvaluateConstantValue(expr, target);
+  return builder_->create<sem::Call>(expr, call_target,
+                                     std::vector<const sem::Expression*>{arg},
+                                     current_statement_, val);
+}
+
+sem::Call* Resolver::TypeConstructor(
+    const ast::CallExpression* expr,
+    const sem::Type* ty,
+    const std::vector<const sem::Expression*> args,
+    const std::vector<const sem::Type*> arg_tys) {
+  // It is not valid to have a type-constructor call expression as a call
+  // statement.
+  if (current_statement_) {
+    if (auto* stmt =
+            current_statement_->Declaration()->As<ast::CallStatement>()) {
+      if (stmt->expr == expr) {
+        AddError("type constructor evaluated but not used", expr->source);
+        return nullptr;
+      }
+    }
   }
-  if (!ok) {
+
+  auto* call_target = utils::GetOrCreate(
+      type_ctors_, TypeConstructorSig{ty, arg_tys},
+      [&]() -> sem::TypeConstructor* {
+        // Now that the argument types have been determined, make sure that they
+        // obey the constructor type rules laid out in
+        // https://gpuweb.github.io/gpuweb/wgsl/#type-constructor-expr.
+        bool ok = true;
+        if (auto* vec_type = ty->As<sem::Vector>()) {
+          ok = ValidateVectorConstructorOrCast(expr, vec_type);
+        } else if (auto* mat_type = ty->As<sem::Matrix>()) {
+          ok = ValidateMatrixConstructorOrCast(expr, mat_type);
+        } else if (ty->is_scalar()) {
+          ok = ValidateScalarConstructorOrCast(expr, ty);
+        } else if (auto* arr_type = ty->As<sem::Array>()) {
+          ok = ValidateArrayConstructorOrCast(expr, arr_type);
+        } else if (auto* struct_type = ty->As<sem::Struct>()) {
+          ok = ValidateStructureConstructorOrCast(expr, struct_type);
+        } else {
+          AddError("type is not constructible", expr->source);
+          return nullptr;
+        }
+        if (!ok) {
+          return nullptr;
+        }
+
+        return builder_->create<sem::TypeConstructor>(
+            ty, utils::Transform(
+                    arg_tys,
+                    [&](const sem::Type* t, size_t i) -> const sem::Parameter* {
+                      return builder_->create<sem::Parameter>(
+                          nullptr,                   // declaration
+                          i,                         // index
+                          t->UnwrapRef(),            // type
+                          ast::StorageClass::kNone,  // storage_class
+                          ast::Access::kUndefined);  // access
+                    }));
+      });
+
+  if (!call_target) {
     return nullptr;
   }
 
   auto val = EvaluateConstantValue(expr, ty);
-  return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+  return builder_->create<sem::Call>(expr, call_target, std::move(args),
+                                     current_statement_, val);
 }
 
 sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
@@ -2782,26 +2917,26 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
                                            val);
 }
 
-bool Resolver::ValidateStructureConstructor(
-    const ast::TypeConstructorExpression* ctor,
+bool Resolver::ValidateStructureConstructorOrCast(
+    const ast::CallExpression* ctor,
     const sem::Struct* struct_type) {
   if (!struct_type->IsConstructible()) {
     AddError("struct constructor has non-constructible type", ctor->source);
     return false;
   }
 
-  if (ctor->values.size() > 0) {
-    if (ctor->values.size() != struct_type->Members().size()) {
+  if (ctor->args.size() > 0) {
+    if (ctor->args.size() != struct_type->Members().size()) {
       std::string fm =
-          ctor->values.size() < struct_type->Members().size() ? "few" : "many";
+          ctor->args.size() < struct_type->Members().size() ? "few" : "many";
       AddError("struct constructor has too " + fm + " inputs: expected " +
                    std::to_string(struct_type->Members().size()) + ", found " +
-                   std::to_string(ctor->values.size()),
+                   std::to_string(ctor->args.size()),
                ctor->source);
       return false;
     }
     for (auto* member : struct_type->Members()) {
-      auto* value = ctor->values[member->Index()];
+      auto* value = ctor->args[member->Index()];
       auto* value_ty = TypeOf(value);
       if (member->Type() != value_ty->UnwrapRef()) {
         AddError(
@@ -2817,10 +2952,9 @@ bool Resolver::ValidateStructureConstructor(
   return true;
 }
 
-bool Resolver::ValidateArrayConstructor(
-    const ast::TypeConstructorExpression* ctor,
-    const sem::Array* array_type) {
-  auto& values = ctor->values;
+bool Resolver::ValidateArrayConstructorOrCast(const ast::CallExpression* ctor,
+                                              const sem::Array* array_type) {
+  auto& values = ctor->args;
   auto* elem_ty = array_type->ElemType();
   for (auto* value : values) {
     auto* value_ty = TypeOf(value)->UnwrapRef();
@@ -2839,7 +2973,7 @@ bool Resolver::ValidateArrayConstructor(
     return false;
   } else if (!elem_ty->IsConstructible()) {
     AddError("array constructor has non-constructible element type",
-             ctor->type->As<ast::Array>()->type->source);
+             ctor->source);
     return false;
   } else if (!values.empty() && (values.size() != array_type->Count())) {
     std::string fm = values.size() < array_type->Count() ? "few" : "many";
@@ -2858,10 +2992,9 @@ bool Resolver::ValidateArrayConstructor(
   return true;
 }
 
-bool Resolver::ValidateVectorConstructor(
-    const ast::TypeConstructorExpression* ctor,
-    const sem::Vector* vec_type) {
-  auto& values = ctor->values;
+bool Resolver::ValidateVectorConstructorOrCast(const ast::CallExpression* ctor,
+                                               const sem::Vector* vec_type) {
+  auto& values = ctor->args;
   auto* elem_ty = vec_type->type();
   size_t value_cardinality_sum = 0;
   for (auto* value : values) {
@@ -2937,10 +3070,9 @@ bool Resolver::ValidateMatrix(const sem::Matrix* ty, const Source& source) {
   return true;
 }
 
-bool Resolver::ValidateMatrixConstructor(
-    const ast::TypeConstructorExpression* ctor,
-    const sem::Matrix* matrix_ty) {
-  auto& values = ctor->values;
+bool Resolver::ValidateMatrixConstructorOrCast(const ast::CallExpression* ctor,
+                                               const sem::Matrix* matrix_ty) {
+  auto& values = ctor->args;
   // Zero Value expression
   if (values.empty()) {
     return true;
@@ -3000,21 +3132,20 @@ bool Resolver::ValidateMatrixConstructor(
   return true;
 }
 
-bool Resolver::ValidateScalarConstructor(
-    const ast::TypeConstructorExpression* ctor,
-    const sem::Type* ty) {
-  if (ctor->values.size() == 0) {
+bool Resolver::ValidateScalarConstructorOrCast(const ast::CallExpression* ctor,
+                                               const sem::Type* ty) {
+  if (ctor->args.size() == 0) {
     return true;
   }
-  if (ctor->values.size() > 1) {
+  if (ctor->args.size() > 1) {
     AddError("expected zero or one value in constructor, got " +
-                 std::to_string(ctor->values.size()),
+                 std::to_string(ctor->args.size()),
              ctor->source);
     return false;
   }
 
   // Validate constructor
-  auto* value = ctor->values[0];
+  auto* value = ctor->args[0];
   auto* value_ty = TypeOf(value)->UnwrapRef();
 
   using Bool = sem::Bool;
@@ -4545,6 +4676,38 @@ const sem::Info::GetResultType<SEM, AST_OR_TYPE>* Resolver::Sem(
         << "Pointer: " << ast;
   }
   return sem;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Resolver::TypeConversionSig
+////////////////////////////////////////////////////////////////////////////////
+bool Resolver::TypeConversionSig::operator==(
+    const TypeConversionSig& rhs) const {
+  return target == rhs.target && source == rhs.source;
+}
+std::size_t Resolver::TypeConversionSig::Hasher::operator()(
+    const TypeConversionSig& sig) const {
+  return utils::Hash(sig.target, sig.source);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Resolver::TypeConstructorSig
+////////////////////////////////////////////////////////////////////////////////
+Resolver::TypeConstructorSig::TypeConstructorSig(
+    const sem::Type* ty,
+    const std::vector<const sem::Type*> params)
+    : type(ty), parameters(params) {}
+Resolver::TypeConstructorSig::TypeConstructorSig(const TypeConstructorSig&) =
+    default;
+Resolver::TypeConstructorSig::~TypeConstructorSig() = default;
+
+bool Resolver::TypeConstructorSig::operator==(
+    const TypeConstructorSig& rhs) const {
+  return type == rhs.type && parameters == rhs.parameters;
+}
+std::size_t Resolver::TypeConstructorSig::Hasher::operator()(
+    const TypeConstructorSig& sig) const {
+  return utils::Hash(sig.type, sig.parameters);
 }
 
 }  // namespace resolver

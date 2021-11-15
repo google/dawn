@@ -15,6 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "src/sem/constant.h"
+#include "src/sem/type_constructor.h"
 #include "src/utils/get_or_create.h"
 
 namespace tint {
@@ -32,7 +33,7 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr,
   if (auto* e = expr->As<ast::LiteralExpression>()) {
     return EvaluateConstantValue(e, type);
   }
-  if (auto* e = expr->As<ast::TypeConstructorExpression>()) {
+  if (auto* e = expr->As<ast::CallExpression>()) {
     return EvaluateConstantValue(e, type);
   }
   return {};
@@ -57,10 +58,8 @@ sem::Constant Resolver::EvaluateConstantValue(
   return {};
 }
 
-sem::Constant Resolver::EvaluateConstantValue(
-    const ast::TypeConstructorExpression* type_ctor,
-    const sem::Type* type) {
-  auto& ctor_values = type_ctor->values;
+sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
+                                              const sem::Type* type) {
   auto* vec = type->As<sem::Vector>();
 
   // For now, only fold scalars and vectors
@@ -72,7 +71,7 @@ sem::Constant Resolver::EvaluateConstantValue(
   int result_size = vec ? static_cast<int>(vec->Width()) : 1;
 
   // For zero value init, return 0s
-  if (ctor_values.empty()) {
+  if (call->args.empty()) {
     if (elem_type->Is<sem::I32>()) {
       return sem::Constant(type, sem::Constant::Scalars(result_size, 0));
     }
@@ -90,12 +89,12 @@ sem::Constant Resolver::EvaluateConstantValue(
   // Build value for type_ctor from each child value by casting to
   // type_ctor's type.
   sem::Constant::Scalars elems;
-  for (auto* cv : ctor_values) {
-    auto* expr = builder_->Sem().Get(cv);
-    if (!expr || !expr->ConstantValue()) {
+  for (auto* expr : call->args) {
+    auto* arg = builder_->Sem().Get(expr);
+    if (!arg || !arg->ConstantValue()) {
       return {};
     }
-    auto cast = ConstantCast(expr->ConstantValue(), elem_type);
+    auto cast = ConstantCast(arg->ConstantValue(), elem_type);
     elems.insert(elems.end(), cast.Elements().begin(), cast.Elements().end());
   }
 

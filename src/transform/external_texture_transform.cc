@@ -78,7 +78,7 @@ void ExternalTextureTransform::Run(CloneContext& ctx,
               // Replace the call with another that has the same parameters in
               // addition to a level parameter (always zero for external
               // textures).
-              auto* exp = ctx.Clone(call_expr->func);
+              auto* exp = ctx.Clone(call_expr->target.name);
               auto* externalTextureParam = ctx.Clone(call_expr->args[0]);
 
               ast::ExpressionList params;

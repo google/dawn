@@ -20,8 +20,8 @@
 namespace tint {
 
 namespace ast {
+class CallExpression;
 class Expression;
-class TypeConstructorExpression;
 }  // namespace ast
 
 namespace writer {
@@ -36,10 +36,9 @@ namespace writer {
 /// @param scalar the scalar to append to the vector. Must be a scalar.
 /// @returns a vector expression containing the elements of `vector` followed by
 /// the single element of `scalar` cast to the `vector` element type.
-const ast::TypeConstructorExpression* AppendVector(
-    ProgramBuilder* builder,
-    const ast::Expression* vector,
-    const ast::Expression* scalar);
+const sem::Call* AppendVector(ProgramBuilder* builder,
+                              const ast::Expression* vector,
+                              const ast::Expression* scalar);
 
 }  // namespace writer
 }  // namespace tint

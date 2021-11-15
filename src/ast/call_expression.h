@@ -21,20 +21,36 @@ namespace tint {
 namespace ast {
 
 // Forward declarations.
+class Type;
 class IdentifierExpression;
 
-/// A call expression
+/// A call expression - represents either a:
+/// * sem::Function
+/// * sem::Intrinsic
+/// * sem::TypeConstructor
+/// * sem::TypeConversion
 class CallExpression : public Castable<CallExpression, Expression> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the call expression source
-  /// @param func the function
+  /// @param name the function or type name
   /// @param args the arguments
   CallExpression(ProgramID program_id,
                  const Source& source,
-                 const IdentifierExpression* func,
+                 const IdentifierExpression* name,
                  ExpressionList args);
+
+  /// Constructor
+  /// @param program_id the identifier of the program that owns this node
+  /// @param source the call expression source
+  /// @param type the type
+  /// @param args the arguments
+  CallExpression(ProgramID program_id,
+                 const Source& source,
+                 const Type* type,
+                 ExpressionList args);
+
   /// Move constructor
   CallExpression(CallExpression&&);
   ~CallExpression() override;
@@ -45,8 +61,19 @@ class CallExpression : public Castable<CallExpression, Expression> {
   /// @return the newly cloned node
   const CallExpression* Clone(CloneContext* ctx) const override;
 
+  /// Target is either an identifier, or a Type.
+  /// One of these must be nullptr and the other a non-nullptr.
+  struct Target {
+    /// name is a function or intrinsic to call, or type name to construct or
+    /// cast-to
+    const IdentifierExpression* name = nullptr;
+    /// type to construct or cast-to
+    const Type* type = nullptr;
+  };
+
   /// The target function
-  const IdentifierExpression* const func;
+  const Target target;
+
   /// The arguments
   const ExpressionList args;
 };

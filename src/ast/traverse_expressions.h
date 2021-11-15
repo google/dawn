@@ -24,7 +24,6 @@
 #include "src/ast/literal_expression.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/phony_expression.h"
-#include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/utils/reverse.h"
 
@@ -113,8 +112,6 @@ bool TraverseExpressions(const ast::Expression* root,
       // function name in the traversal.
       // to_visit.push_back(call->func);
       push_list(call->args);
-    } else if (auto* type_ctor = expr->As<TypeConstructorExpression>()) {
-      push_list(type_ctor->values);
     } else if (auto* member = expr->As<MemberAccessorExpression>()) {
       // TODO(crbug.com/tint/1257): Resolver breaks if we actually include the
       // member name in the traversal.

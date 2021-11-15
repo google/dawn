@@ -19,7 +19,9 @@
 
 #include "src/program_builder.h"
 #include "src/sem/array.h"
+#include "src/sem/call.h"
 #include "src/sem/expression.h"
+#include "src/sem/type_constructor.h"
 #include "src/utils/get_or_create.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::PadArrayElements);
@@ -131,26 +133,29 @@ void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
 
   // Fix up array constructors so `A(1,2)` becomes
   // `A(padded(1), padded(2))`
-  ctx.ReplaceAll([&](const ast::TypeConstructorExpression* ctor)
-                     -> const ast::Expression* {
-    if (auto* array =
-            tint::As<sem::Array>(sem.Get(ctor)->Type()->UnwrapRef())) {
-      if (auto p = pad(array)) {
-        auto* arr_ty = p();
-        auto el_typename = arr_ty->type->As<ast::TypeName>()->name;
+  ctx.ReplaceAll(
+      [&](const ast::CallExpression* expr) -> const ast::Expression* {
+        auto* call = sem.Get(expr);
+        if (auto* ctor = call->Target()->As<sem::TypeConstructor>()) {
+          if (auto* array = ctor->ReturnType()->As<sem::Array>()) {
+            if (auto p = pad(array)) {
+              auto* arr_ty = p();
+              auto el_typename = arr_ty->type->As<ast::TypeName>()->name;
 
-        ast::ExpressionList args;
-        args.reserve(ctor->values.size());
-        for (auto* arg : ctor->values) {
-          args.emplace_back(ctx.dst->Construct(
-              ctx.dst->create<ast::TypeName>(el_typename), ctx.Clone(arg)));
+              ast::ExpressionList args;
+              args.reserve(call->Arguments().size());
+              for (auto* arg : call->Arguments()) {
+                auto* val = ctx.Clone(arg->Declaration());
+                args.emplace_back(ctx.dst->Construct(
+                    ctx.dst->create<ast::TypeName>(el_typename), val));
+              }
+
+              return ctx.dst->Construct(arr_ty, args);
+            }
+          }
         }
-
-        return ctx.dst->Construct(arr_ty, args);
-      }
-    }
-    return nullptr;
-  });
+        return nullptr;
+      });
 
   ctx.Clone();
 }

@@ -22,6 +22,7 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/internal_decoration.h"
 #include "src/ast/override_decoration.h"
+#include "src/ast/traverse_expressions.h"
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
@@ -33,7 +34,10 @@
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/reference_type.h"
 #include "src/sem/sampled_texture_type.h"
+#include "src/sem/statement.h"
 #include "src/sem/struct.h"
+#include "src/sem/type_constructor.h"
+#include "src/sem/type_conversion.h"
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
 #include "src/transform/add_empty_entry_point.h"
@@ -576,9 +580,6 @@ uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
   }
   if (auto* c = expr->As<ast::CallExpression>()) {
     return GenerateCallExpression(c);
-  }
-  if (auto* c = expr->As<ast::TypeConstructorExpression>()) {
-    return GenerateConstructorExpression(nullptr, c);
   }
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return GenerateIdentifierExpression(i);
@@ -1259,80 +1260,44 @@ uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
   if (auto* literal = expr->As<ast::LiteralExpression>()) {
     return GenerateLiteralIfNeeded(var, literal);
   }
-  if (auto* type = expr->As<ast::TypeConstructorExpression>()) {
-    return GenerateTypeConstructorExpression(var, type);
+  if (auto* call = builder_.Sem().Get<sem::Call>(expr)) {
+    if (call->Target()->IsAnyOf<sem::TypeConstructor, sem::TypeConversion>()) {
+      return GenerateTypeConstructorOrConversion(call, var);
+    }
   }
-
   error_ = "unknown constructor expression";
   return 0;
 }
 
-bool Builder::is_constructor_const(const ast::Expression* expr,
-                                   bool is_global_init) {
-  if (expr->Is<ast::LiteralExpression>()) {
-    return true;
-  }
+bool Builder::IsConstructorConst(const ast::Expression* expr) {
+  bool is_const = true;
+  ast::TraverseExpressions(expr, builder_.Diagnostics(),
+                           [&](const ast::Expression* e) {
+                             if (e->Is<ast::LiteralExpression>()) {
+                               return ast::TraverseAction::Descend;
+                             }
+                             if (auto* ce = e->As<ast::CallExpression>()) {
+                               auto* call = builder_.Sem().Get(ce);
+                               if (call->Target()->Is<sem::TypeConstructor>()) {
+                                 return ast::TraverseAction::Descend;
+                               }
+                             }
 
-  auto* tc = expr->As<ast::TypeConstructorExpression>();
-  if (!tc) {
-    return false;
-  }
-  auto* result_type = TypeOf(tc)->UnwrapRef();
-  for (size_t i = 0; i < tc->values.size(); ++i) {
-    auto* e = tc->values[i];
-
-    if (!e->IsAnyOf<ast::TypeConstructorExpression, ast::LiteralExpression>()) {
-      if (is_global_init) {
-        error_ = "constructor must be a constant expression";
-        return false;
-      }
-      return false;
-    }
-    if (!is_constructor_const(e, is_global_init)) {
-      return false;
-    }
-    if (has_error()) {
-      return false;
-    }
-
-    auto* lit = e->As<ast::LiteralExpression>();
-    if (result_type->Is<sem::Vector>() && lit == nullptr) {
-      return false;
-    }
-
-    // This should all be handled by |is_constructor_const| call above
-    if (lit == nullptr) {
-      continue;
-    }
-
-    const sem::Type* subtype = result_type->UnwrapRef();
-    if (auto* vec = subtype->As<sem::Vector>()) {
-      subtype = vec->type();
-    } else if (auto* mat = subtype->As<sem::Matrix>()) {
-      subtype = mat->type();
-    } else if (auto* arr = subtype->As<sem::Array>()) {
-      subtype = arr->ElemType();
-    } else if (auto* str = subtype->As<sem::Struct>()) {
-      subtype = str->Members()[i]->Type();
-    }
-    if (subtype != TypeOf(lit)->UnwrapRef()) {
-      return false;
-    }
-  }
-  return true;
+                             is_const = false;
+                             return ast::TraverseAction::Stop;
+                           });
+  return is_const;
 }
 
-uint32_t Builder::GenerateTypeConstructorExpression(
-    const ast::Variable* var,
-    const ast::TypeConstructorExpression* init) {
+uint32_t Builder::GenerateTypeConstructorOrConversion(
+    const sem::Call* call,
+    const ast::Variable* var) {
+  auto& args = call->Arguments();
   auto* global_var = builder_.Sem().Get<sem::GlobalVariable>(var);
-
-  auto& values = init->values;
-
-  auto* result_type = TypeOf(init);
+  auto* result_type = call->Type();
 
   // Generate the zero initializer if there are no values provided.
-  if (values.empty()) {
+  if (args.empty()) {
     if (global_var && global_var->IsOverridable()) {
       auto constant_id = global_var->ConstantId();
       if (result_type->Is<sem::I32>()) {
@@ -1356,10 +1321,10 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   std::ostringstream out;
-  out << "__const_" << init->type->FriendlyName(builder_.Symbols()) << "_";
+  out << "__const_" << result_type->FriendlyName(builder_.Symbols()) << "_";
 
   result_type = result_type->UnwrapRef();
-  bool constructor_is_const = is_constructor_const(init, global_var);
+  bool constructor_is_const = IsConstructorConst(call->Declaration());
   if (has_error()) {
     return 0;
   }
@@ -1368,7 +1333,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   if (auto* res_vec = result_type->As<sem::Vector>()) {
     if (res_vec->type()->is_scalar()) {
-      auto* value_type = TypeOf(values[0])->UnwrapRef();
+      auto* value_type = args[0]->Type()->UnwrapRef();
       if (auto* val_vec = value_type->As<sem::Vector>()) {
         if (val_vec->type()->is_scalar()) {
           can_cast_or_copy = res_vec->Width() == val_vec->Width();
@@ -1378,7 +1343,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   if (can_cast_or_copy) {
-    return GenerateCastOrCopyOrPassthrough(result_type, values[0], global_var);
+    return GenerateCastOrCopyOrPassthrough(result_type, args[0]->Declaration(),
+                                           global_var);
   }
 
   auto type_id = GenerateTypeIfNeeded(result_type);
@@ -1394,19 +1360,18 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   OperandList ops;
-  for (auto* e : values) {
+  for (auto* e : args) {
     uint32_t id = 0;
-    if (constructor_is_const) {
-      id = GenerateConstructorExpression(nullptr, e);
-    } else {
-      id = GenerateExpression(e);
-      id = GenerateLoadIfNeeded(TypeOf(e), id);
+    id = GenerateExpression(e->Declaration());
+    if (id == 0) {
+      return 0;
     }
+    id = GenerateLoadIfNeeded(e->Type(), id);
     if (id == 0) {
       return 0;
     }
 
-    auto* value_type = TypeOf(e)->UnwrapRef();
+    auto* value_type = e->Type()->UnwrapRef();
     // If the result and value types are the same we can just use the object.
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
@@ -1421,7 +1386,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // Both scalars, but not the same type so we need to generate a conversion
     // of the value.
     if (value_type->is_scalar() && result_type->is_scalar()) {
-      id = GenerateCastOrCopyOrPassthrough(result_type, values[0], global_var);
+      id = GenerateCastOrCopyOrPassthrough(result_type, args[0]->Declaration(),
+                                           global_var);
       out << "_" << id;
       ops.push_back(Operand::Int(id));
       continue;
@@ -1483,9 +1449,9 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   // For a single-value vector initializer, splat the initializer value.
-  auto* const init_result_type = TypeOf(init)->UnwrapRef();
-  if (values.size() == 1 && init_result_type->is_scalar_vector() &&
-      TypeOf(values[0])->UnwrapRef()->is_scalar()) {
+  auto* const init_result_type = call->Type()->UnwrapRef();
+  if (args.size() == 1 && init_result_type->is_scalar_vector() &&
+      args[0]->Type()->UnwrapRef()->is_scalar()) {
     size_t vec_size = init_result_type->As<sem::Vector>()->Width();
     for (size_t i = 0; i < (vec_size - 1); ++i) {
       ops.push_back(ops[0]);
@@ -2232,14 +2198,29 @@ bool Builder::GenerateBlockStatementWithoutScoping(
 }
 
 uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
-  auto* ident = expr->func;
   auto* call = builder_.Sem().Get(expr);
   auto* target = call->Target();
-  if (auto* intrinsic = target->As<sem::Intrinsic>()) {
-    return GenerateIntrinsic(expr, intrinsic);
-  }
 
-  auto type_id = GenerateTypeIfNeeded(target->ReturnType());
+  if (auto* func = target->As<sem::Function>()) {
+    return GenerateFunctionCall(call, func);
+  }
+  if (auto* intrinsic = target->As<sem::Intrinsic>()) {
+    return GenerateIntrinsicCall(call, intrinsic);
+  }
+  if (target->IsAnyOf<sem::TypeConversion, sem::TypeConstructor>()) {
+    return GenerateTypeConstructorOrConversion(call, nullptr);
+  }
+  TINT_ICE(Writer, builder_.Diagnostics())
+      << "unhandled call target: " << target->TypeInfo().name;
+  return false;
+}
+
+uint32_t Builder::GenerateFunctionCall(const sem::Call* call,
+                                       const sem::Function*) {
+  auto* expr = call->Declaration();
+  auto* ident = expr->target.name;
+
+  auto type_id = GenerateTypeIfNeeded(call->Type());
   if (type_id == 0) {
     return 0;
   }
@@ -2278,8 +2259,8 @@ uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
   return result_id;
 }
 
-uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
-                                    const sem::Intrinsic* intrinsic) {
+uint32_t Builder::GenerateIntrinsicCall(const sem::Call* call,
+                                        const sem::Intrinsic* intrinsic) {
   auto result = result_op();
   auto result_id = result.to_i();
 
@@ -2323,15 +2304,15 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
   // and loads it if necessary. Returns 0 on error.
   auto get_arg_as_value_id = [&](size_t i,
                                  bool generate_load = true) -> uint32_t {
-    auto* arg = call->args[i];
+    auto* arg = call->Arguments()[i];
     auto* param = intrinsic->Parameters()[i];
-    auto val_id = GenerateExpression(arg);
+    auto val_id = GenerateExpression(arg->Declaration());
     if (val_id == 0) {
       return 0;
     }
 
     if (generate_load && !param->Type()->Is<sem::Pointer>()) {
-      val_id = GenerateLoadIfNeeded(TypeOf(arg), val_id);
+      val_id = GenerateLoadIfNeeded(arg->Type(), val_id);
     }
     return val_id;
   };
@@ -2364,13 +2345,8 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
       op = spv::Op::OpAll;
       break;
     case IntrinsicType::kArrayLength: {
-      if (call->args.empty()) {
-        error_ = "missing param for runtime array length";
-        return 0;
-      }
-      auto* arg = call->args[0];
-
-      auto* address_of = arg->As<ast::UnaryOpExpression>();
+      auto* address_of =
+          call->Arguments()[0]->Declaration()->As<ast::UnaryOpExpression>();
       if (!address_of || address_of->op != ast::UnaryOp::kAddressOf) {
         error_ = "arrayLength() expected pointer to member access, got " +
                  std::string(address_of->TypeInfo().name);
@@ -2695,7 +2671,7 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
     return 0;
   }
 
-  for (size_t i = 0; i < call->args.size(); i++) {
+  for (size_t i = 0; i < call->Arguments().size(); i++) {
     if (auto val_id = get_arg_as_value_id(i)) {
       params.emplace_back(Operand::Int(val_id));
     } else {
@@ -2710,22 +2686,22 @@ uint32_t Builder::GenerateIntrinsic(const ast::CallExpression* call,
   return result_id;
 }
 
-bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
+bool Builder::GenerateTextureIntrinsic(const sem::Call* call,
                                        const sem::Intrinsic* intrinsic,
                                        Operand result_type,
                                        Operand result_id) {
   using Usage = sem::ParameterUsage;
 
   auto& signature = intrinsic->Signature();
-  auto arguments = call->args;
+  auto& arguments = call->Arguments();
 
   // Generates the given expression, returning the operand ID
-  auto gen = [&](const ast::Expression* expr) {
-    auto val_id = GenerateExpression(expr);
+  auto gen = [&](const sem::Expression* expr) {
+    auto val_id = GenerateExpression(expr->Declaration());
     if (val_id == 0) {
       return Operand::Int(0);
     }
-    val_id = GenerateLoadIfNeeded(TypeOf(expr), val_id);
+    val_id = GenerateLoadIfNeeded(expr->Type(), val_id);
 
     return Operand::Int(val_id);
   };
@@ -2751,7 +2727,7 @@ bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
     TINT_ICE(Writer, builder_.Diagnostics()) << "missing texture argument";
   }
 
-  auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
+  auto* texture_type = texture->Type()->UnwrapRef()->As<sem::Texture>();
 
   auto op = spv::Op::OpNop;
 
@@ -2819,7 +2795,7 @@ bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
         } else {
           // Assign post_emission to swizzle the result of the call to
           // OpImageQuerySize[Lod].
-          auto* element_type = ElementTypeOf(TypeOf(call));
+          auto* element_type = ElementTypeOf(call->Type());
           auto spirv_result = result_op();
           auto* spirv_result_type =
               builder_.create<sem::Vector>(element_type, spirv_result_width);
@@ -2856,8 +2832,9 @@ bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
   auto append_coords_to_spirv_params = [&]() -> bool {
     if (auto* array_index = arg(Usage::kArrayIndex)) {
       // Array index needs to be appended to the coordinates.
-      auto* packed = AppendVector(&builder_, arg(Usage::kCoords), array_index);
-      auto param = GenerateTypeConstructorExpression(nullptr, packed);
+      auto* packed = AppendVector(&builder_, arg(Usage::kCoords)->Declaration(),
+                                  array_index->Declaration());
+      auto param = GenerateExpression(packed->Declaration());
       if (param == 0) {
         return false;
       }
@@ -3026,7 +3003,7 @@ bool Builder::GenerateTextureIntrinsic(const ast::CallExpression* call,
         return false;
       }
       auto level = Operand::Int(0);
-      if (TypeOf(arg(Usage::kLevel))->Is<sem::I32>()) {
+      if (arg(Usage::kLevel)->Type()->UnwrapRef()->Is<sem::I32>()) {
         // Depth textures have i32 parameters for the level, but SPIR-V expects
         // F32. Cast.
         auto f32_type_id = GenerateTypeIfNeeded(builder_.create<sem::F32>());
@@ -3156,7 +3133,7 @@ bool Builder::GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic) {
                                 });
 }
 
-bool Builder::GenerateAtomicIntrinsic(const ast::CallExpression* call,
+bool Builder::GenerateAtomicIntrinsic(const sem::Call* call,
                                       const sem::Intrinsic* intrinsic,
                                       Operand result_type,
                                       Operand result_id) {
@@ -3193,18 +3170,18 @@ bool Builder::GenerateAtomicIntrinsic(const ast::CallExpression* call,
     return false;
   }
 
-  uint32_t pointer_id = GenerateExpression(call->args[0]);
+  uint32_t pointer_id = GenerateExpression(call->Arguments()[0]->Declaration());
   if (pointer_id == 0) {
     return false;
   }
 
   uint32_t value_id = 0;
-  if (call->args.size() > 1) {
-    value_id = GenerateExpression(call->args.back());
+  if (call->Arguments().size() > 1) {
+    value_id = GenerateExpression(call->Arguments().back()->Declaration());
     if (value_id == 0) {
       return false;
     }
-    value_id = GenerateLoadIfNeeded(TypeOf(call->args.back()), value_id);
+    value_id = GenerateLoadIfNeeded(call->Arguments().back()->Type(), value_id);
     if (value_id == 0) {
       return false;
     }
@@ -3308,12 +3285,12 @@ bool Builder::GenerateAtomicIntrinsic(const ast::CallExpression* call,
                                                                value,
                                                            });
     case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
-      auto comparator = GenerateExpression(call->args[1]);
+      auto comparator = GenerateExpression(call->Arguments()[1]->Declaration());
       if (comparator == 0) {
         return false;
       }
 
-      auto* value_sem_type = TypeOf(call->args[2]);
+      auto* value_sem_type = TypeOf(call->Arguments()[2]->Declaration());
 
       auto value_type = GenerateTypeIfNeeded(value_sem_type);
       if (value_type == 0) {

@@ -1285,7 +1285,7 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
         continue;
       }
       if (sem->Target()->Is<sem::Intrinsic>()) {
-        preserve.emplace(call->func);
+        preserve.emplace(call->target.name);
       }
     }
   }

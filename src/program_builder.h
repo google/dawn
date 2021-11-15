@@ -64,7 +64,6 @@
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/struct_member_size_decoration.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type_constructor_expression.h"
 #include "src/ast/type_name.h"
 #include "src/ast/u32.h"
 #include "src/ast/uint_literal_expression.h"
@@ -1125,35 +1124,33 @@ class ProgramBuilder {
   ast::ExpressionList ExprList(ast::ExpressionList list) { return list; }
 
   /// @param args the arguments for the type constructor
-  /// @return an `ast::TypeConstructorExpression` of type `ty`, with the values
+  /// @return an `ast::CallExpression` of type `ty`, with the values
   /// of `args` converted to `ast::Expression`s using `Expr()`
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* Construct(ARGS&&... args) {
+  const ast::CallExpression* Construct(ARGS&&... args) {
     return Construct(ty.Of<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param type the type to construct
   /// @param args the arguments for the constructor
-  /// @return an `ast::TypeConstructorExpression` of `type` constructed with the
+  /// @return an `ast::CallExpression` of `type` constructed with the
   /// values `args`.
   template <typename... ARGS>
-  const ast::TypeConstructorExpression* Construct(const ast::Type* type,
-                                                  ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        type, ExprList(std::forward<ARGS>(args)...));
+  const ast::CallExpression* Construct(const ast::Type* type, ARGS&&... args) {
+    return Construct(source_, type, std::forward<ARGS>(args)...);
   }
 
   /// @param source the source information
   /// @param type the type to construct
   /// @param args the arguments for the constructor
-  /// @return an `ast::TypeConstructorExpression` of `type` constructed with the
+  /// @return an `ast::CallExpression` of `type` constructed with the
   /// values `args`.
   template <typename... ARGS>
-  const ast::TypeConstructorExpression* Construct(const Source& source,
-                                                  const ast::Type* type,
-                                                  ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        source, type, ExprList(std::forward<ARGS>(args)...));
+  const ast::CallExpression* Construct(const Source& source,
+                                       const ast::Type* type,
+                                       ARGS&&... args) {
+    return create<ast::CallExpression>(source, type,
+                                       ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param expr the expression for the bitcast
@@ -1189,128 +1186,128 @@ class ProgramBuilder {
   /// @param args the arguments for the vector constructor
   /// @param type the vector type
   /// @param size the vector size
-  /// @return an `ast::TypeConstructorExpression` of a `size`-element vector of
+  /// @return an `ast::CallExpression` of a `size`-element vector of
   /// type `type`, constructed with the values `args`.
   template <typename... ARGS>
-  const ast::TypeConstructorExpression* vec(const ast::Type* type,
-                                            uint32_t size,
-                                            ARGS&&... args) {
+  const ast::CallExpression* vec(const ast::Type* type,
+                                 uint32_t size,
+                                 ARGS&&... args) {
     return Construct(ty.vec(type, size), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the vector constructor
-  /// @return an `ast::TypeConstructorExpression` of a 2-element vector of type
+  /// @return an `ast::CallExpression` of a 2-element vector of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* vec2(ARGS&&... args) {
+  const ast::CallExpression* vec2(ARGS&&... args) {
     return Construct(ty.vec2<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the vector constructor
-  /// @return an `ast::TypeConstructorExpression` of a 3-element vector of type
+  /// @return an `ast::CallExpression` of a 3-element vector of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* vec3(ARGS&&... args) {
+  const ast::CallExpression* vec3(ARGS&&... args) {
     return Construct(ty.vec3<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the vector constructor
-  /// @return an `ast::TypeConstructorExpression` of a 4-element vector of type
+  /// @return an `ast::CallExpression` of a 4-element vector of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* vec4(ARGS&&... args) {
+  const ast::CallExpression* vec4(ARGS&&... args) {
     return Construct(ty.vec4<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 2x2 matrix of type
+  /// @return an `ast::CallExpression` of a 2x2 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat2x2(ARGS&&... args) {
+  const ast::CallExpression* mat2x2(ARGS&&... args) {
     return Construct(ty.mat2x2<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 2x3 matrix of type
+  /// @return an `ast::CallExpression` of a 2x3 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat2x3(ARGS&&... args) {
+  const ast::CallExpression* mat2x3(ARGS&&... args) {
     return Construct(ty.mat2x3<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 2x4 matrix of type
+  /// @return an `ast::CallExpression` of a 2x4 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat2x4(ARGS&&... args) {
+  const ast::CallExpression* mat2x4(ARGS&&... args) {
     return Construct(ty.mat2x4<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 3x2 matrix of type
+  /// @return an `ast::CallExpression` of a 3x2 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat3x2(ARGS&&... args) {
+  const ast::CallExpression* mat3x2(ARGS&&... args) {
     return Construct(ty.mat3x2<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 3x3 matrix of type
+  /// @return an `ast::CallExpression` of a 3x3 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat3x3(ARGS&&... args) {
+  const ast::CallExpression* mat3x3(ARGS&&... args) {
     return Construct(ty.mat3x3<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 3x4 matrix of type
+  /// @return an `ast::CallExpression` of a 3x4 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat3x4(ARGS&&... args) {
+  const ast::CallExpression* mat3x4(ARGS&&... args) {
     return Construct(ty.mat3x4<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 4x2 matrix of type
+  /// @return an `ast::CallExpression` of a 4x2 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat4x2(ARGS&&... args) {
+  const ast::CallExpression* mat4x2(ARGS&&... args) {
     return Construct(ty.mat4x2<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 4x3 matrix of type
+  /// @return an `ast::CallExpression` of a 4x3 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat4x3(ARGS&&... args) {
+  const ast::CallExpression* mat4x3(ARGS&&... args) {
     return Construct(ty.mat4x3<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
-  /// @return an `ast::TypeConstructorExpression` of a 4x4 matrix of type
+  /// @return an `ast::CallExpression` of a 4x4 matrix of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
-  const ast::TypeConstructorExpression* mat4x4(ARGS&&... args) {
+  const ast::CallExpression* mat4x4(ARGS&&... args) {
     return Construct(ty.mat4x4<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the array constructor
-  /// @return an `ast::TypeConstructorExpression` of an array with element type
+  /// @return an `ast::CallExpression` of an array with element type
   /// `T` and size `N`, constructed with the values `args`.
   template <typename T, int N, typename... ARGS>
-  const ast::TypeConstructorExpression* array(ARGS&&... args) {
+  const ast::CallExpression* array(ARGS&&... args) {
     return Construct(ty.array<T, N>(), std::forward<ARGS>(args)...);
   }
 
   /// @param subtype the array element type
   /// @param n the array size. nullptr represents a runtime-array.
   /// @param args the arguments for the array constructor
-  /// @return an `ast::TypeConstructorExpression` of an array with element type
+  /// @return an `ast::CallExpression` of an array with element type
   /// `subtype`, constructed with the values `args`.
   template <typename EXPR, typename... ARGS>
-  const ast::TypeConstructorExpression* array(const ast::Type* subtype,
-                                              EXPR&& n,
-                                              ARGS&&... args) {
+  const ast::CallExpression* array(const ast::Type* subtype,
+                                   EXPR&& n,
+                                   ARGS&&... args) {
     return Construct(ty.array(subtype, std::forward<EXPR>(n)),
                      std::forward<ARGS>(args)...);
   }

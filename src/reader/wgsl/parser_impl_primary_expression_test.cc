@@ -39,11 +39,13 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
-  auto* ty = e->As<ast::TypeConstructorExpression>();
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
+  auto* call = e->As<ast::CallExpression>();
 
-  ASSERT_EQ(ty->values.size(), 4u);
-  const auto& val = ty->values;
+  EXPECT_NE(call->target.type, nullptr);
+
+  ASSERT_EQ(call->args.size(), 4u);
+  const auto& val = call->args;
   ASSERT_TRUE(val[0]->Is<ast::SintLiteralExpression>());
   EXPECT_EQ(val[0]->As<ast::SintLiteralExpression>()->value, 1);
 
@@ -64,10 +66,11 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
-  auto* ty = e->As<ast::TypeConstructorExpression>();
 
-  ASSERT_EQ(ty->values.size(), 0u);
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
+  auto* call = e->As<ast::CallExpression>();
+
+  ASSERT_EQ(call->args.size(), 0u);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
@@ -124,15 +127,15 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
-  auto* constructor = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(constructor->type->Is<ast::TypeName>());
-  EXPECT_EQ(constructor->type->As<ast::TypeName>()->name,
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
+  auto* call = e->As<ast::CallExpression>();
+
+  ASSERT_TRUE(call->target.type->Is<ast::TypeName>());
+  EXPECT_EQ(call->target.type->As<ast::TypeName>()->name,
             p->builder().Symbols().Get("S"));
 
-  auto values = constructor->values;
-  ASSERT_EQ(values.size(), 0u);
+  ASSERT_EQ(call->args.size(), 0u);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
@@ -149,21 +152,21 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
-  auto* constructor = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(constructor->type->Is<ast::TypeName>());
-  EXPECT_EQ(constructor->type->As<ast::TypeName>()->name,
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
+  auto* call = e->As<ast::CallExpression>();
+
+  ASSERT_TRUE(call->target.type->Is<ast::TypeName>());
+  EXPECT_EQ(call->target.type->As<ast::TypeName>()->name,
             p->builder().Symbols().Get("S"));
 
-  auto values = constructor->values;
-  ASSERT_EQ(values.size(), 2u);
+  ASSERT_EQ(call->args.size(), 2u);
 
-  ASSERT_TRUE(values[0]->Is<ast::UintLiteralExpression>());
-  EXPECT_EQ(values[0]->As<ast::UintLiteralExpression>()->value, 1u);
+  ASSERT_TRUE(call->args[0]->Is<ast::UintLiteralExpression>());
+  EXPECT_EQ(call->args[0]->As<ast::UintLiteralExpression>()->value, 1u);
 
-  ASSERT_TRUE(values[1]->Is<ast::FloatLiteralExpression>());
-  EXPECT_EQ(values[1]->As<ast::FloatLiteralExpression>()->value, 2.f);
+  ASSERT_TRUE(call->args[1]->Is<ast::FloatLiteralExpression>());
+  EXPECT_EQ(call->args[1]->As<ast::FloatLiteralExpression>()->value, 2.f);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
@@ -225,13 +228,14 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
-  auto* c = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(c->type->Is<ast::F32>());
-  ASSERT_EQ(c->values.size(), 1u);
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
+  auto* call = e->As<ast::CallExpression>();
 
-  ASSERT_TRUE(c->values[0]->Is<ast::IntLiteralExpression>());
+  ASSERT_TRUE(call->target.type->Is<ast::F32>());
+  ASSERT_EQ(call->args.size(), 1u);
+
+  ASSERT_TRUE(call->args[0]->Is<ast::IntLiteralExpression>());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {

@@ -18,8 +18,10 @@
 
 #include "src/program_builder.h"
 #include "src/sem/block_statement.h"
+#include "src/sem/call.h"
 #include "src/sem/expression.h"
 #include "src/sem/statement.h"
+#include "src/sem/type_constructor.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::PromoteInitializersToConstVar);
 
@@ -50,14 +52,12 @@ void PromoteInitializersToConstVar::Run(CloneContext& ctx,
   // pointer can be passed to the parent's constructor.
 
   for (auto* src_node : ctx.src->ASTNodes().Objects()) {
-    if (auto* src_init = src_node->As<ast::TypeConstructorExpression>()) {
-      auto* src_sem_expr = ctx.src->Sem().Get(src_init);
-      if (!src_sem_expr) {
-        TINT_ICE(Transform, ctx.dst->Diagnostics())
-            << "ast::TypeConstructorExpression has no semantic expression node";
+    if (auto* src_init = src_node->As<ast::CallExpression>()) {
+      auto* call = ctx.src->Sem().Get(src_init);
+      if (!call->Target()->Is<sem::TypeConstructor>()) {
         continue;
       }
-      auto* src_sem_stmt = src_sem_expr->Stmt();
+      auto* src_sem_stmt = call->Stmt();
       if (!src_sem_stmt) {
         // Expression is outside of a statement. This usually means the
         // expression is part of a global (module-scope) constant declaration.
@@ -76,12 +76,12 @@ void PromoteInitializersToConstVar::Run(CloneContext& ctx,
         }
       }
 
-      auto* src_ty = src_sem_expr->Type();
+      auto* src_ty = call->Type();
       if (src_ty->IsAnyOf<sem::Array, sem::Struct>()) {
         // Create a new symbol for the constant
         auto dst_symbol = ctx.dst->Sym();
         // Clone the type
-        auto* dst_ty = ctx.Clone(src_init->type);
+        auto* dst_ty = CreateASTTypeFor(ctx, call->Type());
         // Clone the initializer
         auto* dst_init = ctx.Clone(src_init);
         // Construct the constant that holds the hoisted initializer

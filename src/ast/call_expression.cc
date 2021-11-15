@@ -21,13 +21,39 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
 namespace tint {
 namespace ast {
 
+namespace {
+CallExpression::Target ToTarget(const IdentifierExpression* name) {
+  CallExpression::Target target;
+  target.name = name;
+  return target;
+}
+CallExpression::Target ToTarget(const Type* type) {
+  CallExpression::Target target;
+  target.type = type;
+  return target;
+}
+}  // namespace
+
 CallExpression::CallExpression(ProgramID pid,
                                const Source& src,
-                               const IdentifierExpression* fn,
+                               const IdentifierExpression* name,
                                ExpressionList a)
-    : Base(pid, src), func(fn), args(a) {
-  TINT_ASSERT(AST, func);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
+    : Base(pid, src), target(ToTarget(name)), args(a) {
+  TINT_ASSERT(AST, name);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
+  for (auto* arg : args) {
+    TINT_ASSERT(AST, arg);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
+  }
+}
+
+CallExpression::CallExpression(ProgramID pid,
+                               const Source& src,
+                               const Type* type,
+                               ExpressionList a)
+    : Base(pid, src), target(ToTarget(type)), args(a) {
+  TINT_ASSERT(AST, type);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
   for (auto* arg : args) {
     TINT_ASSERT(AST, arg);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
@@ -41,9 +67,11 @@ CallExpression::~CallExpression() = default;
 const CallExpression* CallExpression::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);
-  auto* fn = ctx->Clone(func);
   auto p = ctx->Clone(args);
-  return ctx->dst->create<CallExpression>(src, fn, p);
+  return target.name
+             ? ctx->dst->create<CallExpression>(src, ctx->Clone(target.name), p)
+             : ctx->dst->create<CallExpression>(src, ctx->Clone(target.type),
+                                                p);
 }
 
 }  // namespace ast

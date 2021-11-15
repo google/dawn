@@ -51,6 +51,8 @@
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
+#include "src/sem/type_constructor.h"
+#include "src/sem/type_conversion.h"
 #include "src/sem/u32_type.h"
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
@@ -242,10 +244,9 @@ bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
     const ast::IndexAccessorExpression* expr) {
   bool paren_lhs =
-      !expr->object
-           ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
-                     ast::IdentifierExpression, ast::MemberAccessorExpression,
-                     ast::TypeConstructorExpression>();
+      !expr->object->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
+                             ast::IdentifierExpression,
+                             ast::MemberAccessorExpression>();
 
   if (paren_lhs) {
     out << "(";
@@ -496,43 +497,53 @@ bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
 
 bool GeneratorImpl::EmitCall(std::ostream& out,
                              const ast::CallExpression* expr) {
-  auto* ident = expr->func;
   auto* call = program_->Sem().Get(expr);
-  if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
-    return EmitIntrinsicCall(out, expr, intrinsic);
+  auto* target = call->Target();
+
+  if (auto* func = target->As<sem::Function>()) {
+    return EmitFunctionCall(out, call, func);
+  }
+  if (auto* intrinsic = target->As<sem::Intrinsic>()) {
+    return EmitIntrinsicCall(out, call, intrinsic);
+  }
+  if (auto* conv = target->As<sem::TypeConversion>()) {
+    return EmitTypeConversion(out, call, conv);
+  }
+  if (auto* ctor = target->As<sem::TypeConstructor>()) {
+    return EmitTypeConstructor(out, call, ctor);
   }
 
-  auto* func = program_->AST().Functions().Find(ident->symbol);
-  if (func == nullptr) {
-    diagnostics_.add_error(diag::System::Writer,
-                           "Unable to find function: " +
-                               program_->Symbols().NameFor(ident->symbol));
-    return false;
-  }
+  TINT_ICE(Writer, diagnostics_)
+      << "unhandled call target: " << target->TypeInfo().name;
+  return false;
+}
 
+bool GeneratorImpl::EmitFunctionCall(std::ostream& out,
+                                     const sem::Call* call,
+                                     const sem::Function*) {
+  auto* ident = call->Declaration()->target.name;
   out << program_->Symbols().NameFor(ident->symbol) << "(";
 
   bool first = true;
-  const auto& args = expr->args;
-  for (auto* arg : args) {
+  for (auto* arg : call->Arguments()) {
     if (!first) {
       out << ", ";
     }
     first = false;
 
-    if (!EmitExpression(out, arg)) {
+    if (!EmitExpression(out, arg->Declaration())) {
       return false;
     }
   }
 
   out << ")";
-
   return true;
 }
 
 bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
-                                      const ast::CallExpression* expr,
+                                      const sem::Call* call,
                                       const sem::Intrinsic* intrinsic) {
+  auto* expr = call->Declaration();
   if (intrinsic->IsAtomic()) {
     return EmitAtomicCall(out, expr, intrinsic);
   }
@@ -631,6 +642,64 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
   }
 
   out << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitTypeConversion(std::ostream& out,
+                                       const sem::Call* call,
+                                       const sem::TypeConversion* conv) {
+  if (!EmitType(out, conv->Target(), "")) {
+    return false;
+  }
+  out << "(";
+
+  if (!EmitExpression(out, call->Arguments()[0]->Declaration())) {
+    return false;
+  }
+
+  out << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
+                                        const sem::Call* call,
+                                        const sem::TypeConstructor* ctor) {
+  auto* type = ctor->ReturnType();
+
+  if (type->IsAnyOf<sem::Array, sem::Struct>()) {
+    out << "{";
+  } else {
+    if (!EmitType(out, type, "")) {
+      return false;
+    }
+    out << "(";
+  }
+
+  int i = 0;
+  for (auto* arg : call->Arguments()) {
+    if (i > 0) {
+      out << ", ";
+    }
+
+    if (auto* struct_ty = type->As<sem::Struct>()) {
+      // Emit field designators for structures to account for padding members.
+      auto* member = struct_ty->Members()[i]->Declaration();
+      auto name = program_->Symbols().NameFor(member->symbol);
+      out << "." << name << "=";
+    }
+
+    if (!EmitExpression(out, arg->Declaration())) {
+      return false;
+    }
+
+    i++;
+  }
+
+  if (type->IsAnyOf<sem::Array, sem::Struct>()) {
+    out << "}";
+  } else {
+    out << ")";
+  }
   return true;
 }
 
@@ -762,10 +831,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   // accessor used for the function calls.
   auto texture_expr = [&]() {
     bool paren_lhs =
-        !texture
-             ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
-                       ast::IdentifierExpression, ast::MemberAccessorExpression,
-                       ast::TypeConstructorExpression>();
+        !texture->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
+                          ast::IdentifierExpression,
+                          ast::MemberAccessorExpression>();
     if (paren_lhs) {
       out << "(";
     }
@@ -1300,48 +1368,6 @@ bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
   return true;
 }
 
-bool GeneratorImpl::EmitTypeConstructor(
-    std::ostream& out,
-    const ast::TypeConstructorExpression* expr) {
-  auto* type = TypeOf(expr)->UnwrapRef();
-
-  if (type->IsAnyOf<sem::Array, sem::Struct>()) {
-    out << "{";
-  } else {
-    if (!EmitType(out, type, "")) {
-      return false;
-    }
-    out << "(";
-  }
-
-  int i = 0;
-  for (auto* e : expr->values) {
-    if (i > 0) {
-      out << ", ";
-    }
-
-    if (auto* struct_ty = type->As<sem::Struct>()) {
-      // Emit field designators for structures to account for padding members.
-      auto* member = struct_ty->Members()[i]->Declaration();
-      auto name = program_->Symbols().NameFor(member->symbol);
-      out << "." << name << "=";
-    }
-
-    if (!EmitExpression(out, e)) {
-      return false;
-    }
-
-    i++;
-  }
-
-  if (type->IsAnyOf<sem::Array, sem::Struct>()) {
-    out << "}";
-  } else {
-    out << ")";
-  }
-  return true;
-}
-
 bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
   if (type->Is<sem::Bool>()) {
     out << "false";
@@ -1425,9 +1451,6 @@ bool GeneratorImpl::EmitExpression(std::ostream& out,
   }
   if (auto* c = expr->As<ast::CallExpression>()) {
     return EmitCall(out, c);
-  }
-  if (auto* c = expr->As<ast::TypeConstructorExpression>()) {
-    return EmitTypeConstructor(out, c);
   }
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
     return EmitIdentifier(out, i);
@@ -1899,11 +1922,9 @@ bool GeneratorImpl::EmitMemberAccessor(
     std::ostream& out,
     const ast::MemberAccessorExpression* expr) {
   auto write_lhs = [&] {
-    bool paren_lhs =
-        !expr->structure
-             ->IsAnyOf<ast::IndexAccessorExpression, ast::CallExpression,
-                       ast::IdentifierExpression, ast::MemberAccessorExpression,
-                       ast::TypeConstructorExpression>();
+    bool paren_lhs = !expr->structure->IsAnyOf<
+        ast::IndexAccessorExpression, ast::CallExpression,
+        ast::IdentifierExpression, ast::MemberAccessorExpression>();
     if (paren_lhs) {
       out << "(";
     }

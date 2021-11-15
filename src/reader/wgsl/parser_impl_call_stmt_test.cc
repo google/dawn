@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, Statement_Call) {
   ASSERT_TRUE(e->Is<ast::CallStatement>());
   auto* c = e->As<ast::CallStatement>()->expr;
 
-  EXPECT_EQ(c->func->symbol, p->builder().Symbols().Get("a"));
+  EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
   EXPECT_EQ(c->args.size(), 0u);
 }
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, Statement_Call_WithParams) {
   ASSERT_TRUE(e->Is<ast::CallStatement>());
   auto* c = e->As<ast::CallStatement>()->expr;
 
-  EXPECT_EQ(c->func->symbol, p->builder().Symbols().Get("a"));
+  EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
   EXPECT_EQ(c->args.size(), 3u);
   EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());
@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, Statement_Call_WithParams_TrailingComma) {
   ASSERT_TRUE(e->Is<ast::CallStatement>());
   auto* c = e->As<ast::CallStatement>()->expr;
 
-  EXPECT_EQ(c->func->symbol, p->builder().Symbols().Get("a"));
+  EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
   EXPECT_EQ(c->args.size(), 2u);
   EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());
