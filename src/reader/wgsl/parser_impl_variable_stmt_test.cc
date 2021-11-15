@@ -58,16 +58,6 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
   EXPECT_TRUE(e->variable->constructor->Is<ast::LiteralExpression>());
 }
 
-TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {
-  auto p = parser("var a : invalid;");
-  auto e = p->variable_stmt();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: unknown type 'invalid'");
-}
-
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
   auto p = parser("var a : i32 = if(a) {}");
   auto e = p->variable_stmt();
@@ -163,16 +153,6 @@ TEST_F(ParserImplTest, VariableStmt_Let) {
   ASSERT_EQ(e->source.range.begin.column, 5u);
   ASSERT_EQ(e->source.range.end.line, 1u);
   ASSERT_EQ(e->source.range.end.column, 6u);
-}
-
-TEST_F(ParserImplTest, VariableStmt_Let_InvalidVarIdent) {
-  auto p = parser("let a : invalid = 1");
-  auto e = p->variable_stmt();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {

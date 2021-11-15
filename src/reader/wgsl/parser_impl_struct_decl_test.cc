@@ -139,22 +139,6 @@ TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
   EXPECT_EQ(p->error(), "1:10: expected '{' for struct declaration");
 }
 
-TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
-  auto p = parser("struct S { a : B; }");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  ASSERT_EQ(decos.value.size(), 0u);
-
-  auto s = p->struct_decl(decos.value);
-  EXPECT_TRUE(s.errored);
-  EXPECT_FALSE(s.matched);
-  EXPECT_EQ(s.value, nullptr);
-
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: unknown type 'B'");
-}
-
 TEST_F(ParserImplTest, StructDecl_InvalidDecorationDecl) {
   auto p = parser("[[block struct S { a : i32; }");
   auto decos = p->decoration_list();

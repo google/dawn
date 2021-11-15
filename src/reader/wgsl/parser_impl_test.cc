@@ -105,21 +105,6 @@ parameters
   ASSERT_EQ(1u, p->program().AST().Functions().size());
 }
 
-TEST_F(ParserImplTest, GetRegisteredType) {
-  auto p = parser("");
-  auto* alias = create<ast::Alias>(Sym("my_alias"), ty.i32());
-  p->register_type("my_alias", alias);
-
-  auto* got = p->get_type("my_alias");
-  EXPECT_EQ(got, alias);
-}
-
-TEST_F(ParserImplTest, GetUnregisteredType) {
-  auto p = parser("");
-  auto* alias = p->get_type("my_alias");
-  ASSERT_EQ(alias, nullptr);
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

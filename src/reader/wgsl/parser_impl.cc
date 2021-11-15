@@ -322,18 +322,6 @@ Token ParserImpl::last_token() const {
   return last_token_;
 }
 
-void ParserImpl::register_type(const std::string& name,
-                               const ast::TypeDecl* type_decl) {
-  registered_types_[name] = type_decl;
-}
-
-const ast::TypeDecl* ParserImpl::get_type(const std::string& name) {
-  if (registered_types_.find(name) == registered_types_.end()) {
-    return nullptr;
-  }
-  return registered_types_[name];
-}
-
 bool ParserImpl::Parse() {
   translation_unit();
   return !has_error();
@@ -419,7 +407,6 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("struct declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      register_type(builder_.Symbols().NameFor(str.value->name), str.value);
       builder_.AST().AddTypeDecl(str.value);
       return true;
     }
@@ -1006,10 +993,8 @@ Maybe<const ast::Alias*> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
-  auto* alias = builder_.ty.alias(make_source_range_from(t.source()),
-                                  name.value, type.value);
-  register_type(name.value, alias);
-  return alias;
+  return builder_.ty.alias(make_source_range_from(t.source()), name.value,
+                           type.value);
 }
 
 // type_decl
@@ -1059,11 +1044,6 @@ Maybe<const ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
   Source source;
   if (match(Token::Type::kIdentifier, &source)) {
-    // TODO(crbug.com/tint/697): Remove
-    auto* ty = get_type(t.to_str());
-    if (ty == nullptr)
-      return add_error(t, "unknown type '" + t.to_str() + "'");
-
     return builder_.create<ast::TypeName>(
         source, builder_.Symbols().Register(t.to_str()));
   }
@@ -2212,7 +2192,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
     return create<ast::BitcastExpression>(source, type.value, params.value);
   }
 
-  if (t.IsIdentifier() && !get_type(t.to_str())) {
+  if (t.IsIdentifier()) {
     next();
 
     auto* ident = create<ast::IdentifierExpression>(
@@ -2890,40 +2870,40 @@ Expect<const ast::Expression*> ParserImpl::expect_const_expr() {
       return add_error(peek(), "unable to parse constant literal");
     }
     return lit.value;
-  } else if (!t.IsIdentifier() || get_type(t.to_str())) {
-    if (peek_is(Token::Type::kParenLeft, 1) ||
-        peek_is(Token::Type::kLessThan, 1)) {
-      auto type = expect_type("const_expr");
-      if (type.errored) {
-        return Failure::kErrored;
-      }
+  }
 
-      auto params = expect_paren_block(
-          "type constructor", [&]() -> Expect<ast::ExpressionList> {
-            ast::ExpressionList list;
-            while (continue_parsing()) {
-              if (peek_is(Token::Type::kParenRight)) {
-                break;
-              }
-
-              auto arg = expect_const_expr();
-              if (arg.errored) {
-                return Failure::kErrored;
-              }
-              list.emplace_back(arg.value);
-
-              if (!match(Token::Type::kComma)) {
-                break;
-              }
-            }
-            return list;
-          });
-
-      if (params.errored)
-        return Failure::kErrored;
-
-      return builder_.Construct(source, type.value, params.value);
+  if (peek_is(Token::Type::kParenLeft, 1) ||
+      peek_is(Token::Type::kLessThan, 1)) {
+    auto type = expect_type("const_expr");
+    if (type.errored) {
+      return Failure::kErrored;
     }
+
+    auto params = expect_paren_block(
+        "type constructor", [&]() -> Expect<ast::ExpressionList> {
+          ast::ExpressionList list;
+          while (continue_parsing()) {
+            if (peek_is(Token::Type::kParenRight)) {
+              break;
+            }
+
+            auto arg = expect_const_expr();
+            if (arg.errored) {
+              return Failure::kErrored;
+            }
+            list.emplace_back(arg.value);
+
+            if (!match(Token::Type::kComma)) {
+              break;
+            }
+          }
+          return list;
+        });
+
+    if (params.errored)
+      return Failure::kErrored;
+
+    return builder_.Construct(source, type.value, params.value);
   }
   return add_error(peek(), "unable to parse const_expr");
 }

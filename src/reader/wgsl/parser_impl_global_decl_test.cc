@@ -44,13 +44,6 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred_Invalid) {
   EXPECT_EQ(p->error(), "1:16: expected ':' for variable declaration");
 }
 
-TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Invalid) {
-  auto p = parser("var<private> a : vec2<invalid>;");
-  p->expect_global_decl();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:23: unknown type 'invalid'");
-}
-
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
   auto p = parser("var<private> a : vec2<i32>");
   p->expect_global_decl();
@@ -118,13 +111,6 @@ type B = A;)");
   auto* tn = alias->type->As<ast::TypeName>();
   EXPECT_NE(tn, nullptr);
   EXPECT_EQ(tn->name, str->name);
-}
-
-TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Invalid) {
-  auto p = parser("type A = invalid;");
-  p->expect_global_decl();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {

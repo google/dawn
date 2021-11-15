@@ -37,9 +37,6 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto p = parser("type a = B");
 
-  auto* str = p->builder().Structure(p->builder().Symbols().Register("B"), {});
-  p->register_type("B", str);
-
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(t.errored);
@@ -80,16 +77,6 @@ TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
   EXPECT_EQ(p->error(), "1:8: expected '=' for type alias");
-}
-
-TEST_F(ParserImplTest, TypeDecl_InvalidType) {
-  auto p = parser("type a = B");
-  auto t = p->type_alias();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(t.value, nullptr);
-  EXPECT_EQ(p->error(), "1:10: unknown type 'B'");
 }
 
 }  // namespace

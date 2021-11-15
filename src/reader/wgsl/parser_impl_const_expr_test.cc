@@ -124,25 +124,17 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
   EXPECT_EQ(p->error(), "1:1: unable to parse const_expr");
 }
 
-TEST_F(ParserImplTest, ConstExpr_RegisteredType) {
+TEST_F(ParserImplTest, ConstExpr_TypeConstructor) {
   auto p = parser("S(0)");
-
-  auto* mem = Member("m", ty.i32(), ast::DecorationList{});
-  auto* s = Structure(Sym("S"), {mem});
-  p->register_type("S", s);
 
   auto e = p->expect_const_expr();
   ASSERT_FALSE(e.errored);
   ASSERT_TRUE(e->Is<ast::CallExpression>());
-}
-
-TEST_F(ParserImplTest, ConstExpr_NotRegisteredType) {
-  auto p = parser("S(0)");
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:1: unable to parse const_expr");
+  ASSERT_NE(e->As<ast::CallExpression>()->target.type, nullptr);
+  ASSERT_TRUE(e->As<ast::CallExpression>()->target.type->Is<ast::TypeName>());
+  EXPECT_EQ(
+      e->As<ast::CallExpression>()->target.type->As<ast::TypeName>()->name,
+      p->builder().Symbols().Get("S"));
 }
 
 TEST_F(ParserImplTest, ConstExpr_Recursion) {

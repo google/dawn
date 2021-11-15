@@ -494,22 +494,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstNotConstExpr) {
       "        ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstNotConstExprWithParn) {
-  EXPECT(
-      "let a = 1;\n"
-      "let b = a();",
-      "test.wgsl:2:9 error: unable to parse const_expr\n"
-      "let b = a();\n"
-      "        ^\n");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclConstConstExprRegisteredType) {
-  EXPECT("let a = S0(0);",
-         "test.wgsl:1:9 error: unable to parse const_expr\n"
-         "let a = S0(0);\n"
-         "        ^^\n");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
   uint32_t kMaxDepth = 128;
 
@@ -782,13 +766,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingSemicolon) {
          "test.wgsl:1:16 error: expected ';' for type alias\n"
          "type meow = f32\n"
          "               ^\n");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclTypeInvalid) {
-  EXPECT("var x : fish;",
-         "test.wgsl:1:9 error: unknown type 'fish'\n"
-         "var x : fish;\n"
-         "        ^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeDecoInvalid) {

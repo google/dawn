@@ -141,15 +141,6 @@ TEST_F(ParserImplTest, FunctionHeader_MissingParenRight) {
   EXPECT_EQ(p->error(), "1:10: expected ')' for function declaration");
 }
 
-TEST_F(ParserImplTest, FunctionHeader_InvalidReturnType) {
-  auto p = parser("fn main() -> invalid");
-  auto f = p->function_header();
-  EXPECT_FALSE(f.matched);
-  EXPECT_TRUE(f.errored);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:14: unknown type 'invalid'");
-}
-
 TEST_F(ParserImplTest, FunctionHeader_MissingReturnType) {
   auto p = parser("fn main() ->");
   auto f = p->function_header();

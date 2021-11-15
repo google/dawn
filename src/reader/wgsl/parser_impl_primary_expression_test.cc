@@ -131,9 +131,8 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
   ASSERT_TRUE(e->Is<ast::CallExpression>());
   auto* call = e->As<ast::CallExpression>();
 
-  ASSERT_TRUE(call->target.type->Is<ast::TypeName>());
-  EXPECT_EQ(call->target.type->As<ast::TypeName>()->name,
-            p->builder().Symbols().Get("S"));
+  ASSERT_NE(call->target.name, nullptr);
+  EXPECT_EQ(call->target.name->symbol, p->builder().Symbols().Get("S"));
 
   ASSERT_EQ(call->args.size(), 0u);
 }
@@ -156,9 +155,8 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
   ASSERT_TRUE(e->Is<ast::CallExpression>());
   auto* call = e->As<ast::CallExpression>();
 
-  ASSERT_TRUE(call->target.type->Is<ast::TypeName>());
-  EXPECT_EQ(call->target.type->As<ast::TypeName>()->name,
-            p->builder().Symbols().Get("S"));
+  ASSERT_NE(call->target.name, nullptr);
+  EXPECT_EQ(call->target.name->symbol, p->builder().Symbols().Get("S"));
 
   ASSERT_EQ(call->args.size(), 2u);
 
@@ -271,16 +269,6 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingType) {
   EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: invalid type for bitcast expression");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Bitcast_InvalidType) {
-  auto p = parser("bitcast<invalid>(1)");
-  auto e = p->primary_expression();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingLeftParen) {

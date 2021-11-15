@@ -36,10 +36,6 @@ TEST_F(ParserImplTest, TypeDecl_Invalid) {
 TEST_F(ParserImplTest, TypeDecl_Identifier) {
   auto p = parser("A");
 
-  auto& builder = p->builder();
-  auto* alias_type = builder.ty.alias("A", builder.ty.i32());
-  p->register_type("A", alias_type);
-
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -48,17 +44,6 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   ASSERT_NE(type_name, nullptr);
   EXPECT_EQ(p->builder().Symbols().Get("A"), type_name->name);
   EXPECT_EQ(type_name->source.range, (Source::Range{{1u, 1u}, {1u, 2u}}));
-}
-
-TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
-  auto p = parser("B");
-
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:1: unknown type 'B'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Bool) {
@@ -171,24 +156,6 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          testing::Values(VecData{"vec2", 2, {}},
                                          VecData{"vec3", 3, {}},
                                          VecData{"vec4", 4, {}}));
-
-class VecBadType : public ParserImplTestWithParam<VecData> {};
-
-TEST_P(VecBadType, Handles_Unknown_Type) {
-  auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:6: unknown type 'unknown'");
-}
-INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         VecBadType,
-                         testing::Values(VecData{"vec2<unknown", 2, {}},
-                                         VecData{"vec3<unknown", 3, {}},
-                                         VecData{"vec4<unknown", 4, {}}));
 
 class VecMissingType : public ParserImplTestWithParam<VecData> {};
 
@@ -356,16 +323,6 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Ptr_BadType) {
-  auto p = parser("ptr<function, unknown>");
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:15: unknown type 'unknown'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadAccess) {
@@ -702,16 +659,6 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 
-TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
-  auto p = parser("array<unknown, 3>");
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:7: unknown type 'unknown'");
-}
-
 TEST_F(ParserImplTest, TypeDecl_Array_BadSize) {
   auto p = parser("array<f32, !>");
   auto t = p->type_decl();
@@ -850,31 +797,6 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x2 f32>", 4, 2, {}},
                                          MatrixData{"mat4x3 f32>", 4, 3, {}},
                                          MatrixData{"mat4x4 f32>", 4, 4, {}}));
-
-class MatrixBadType : public ParserImplTestWithParam<MatrixData> {};
-
-TEST_P(MatrixBadType, Handles_Unknown_Type) {
-  auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:8: unknown type 'unknown'");
-}
-INSTANTIATE_TEST_SUITE_P(
-    ParserImplTest,
-    MatrixBadType,
-    testing::Values(MatrixData{"mat2x2<unknown>", 2, 2, {}},
-                    MatrixData{"mat2x3<unknown>", 2, 3, {}},
-                    MatrixData{"mat2x4<unknown>", 2, 4, {}},
-                    MatrixData{"mat3x2<unknown>", 3, 2, {}},
-                    MatrixData{"mat3x3<unknown>", 3, 3, {}},
-                    MatrixData{"mat3x4<unknown>", 3, 4, {}},
-                    MatrixData{"mat4x2<unknown>", 4, 2, {}},
-                    MatrixData{"mat4x3<unknown>", 4, 3, {}},
-                    MatrixData{"mat4x4<unknown>", 4, 4, {}}));
 
 class MatrixMissingType : public ParserImplTestWithParam<MatrixData> {};
 

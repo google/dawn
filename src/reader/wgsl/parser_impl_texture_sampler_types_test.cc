@@ -110,16 +110,6 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 16u}}));
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
-  auto p = parser("texture_1d<abc>");
-  auto t = p->texture_sampler_types();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(t.value, nullptr);
-  EXPECT_FALSE(t.matched);
-  EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:12: unknown type 'abc'");
-}
-
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
   auto p = parser("texture_1d<>");
   auto t = p->texture_sampler_types();
@@ -162,16 +152,6 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
   ASSERT_TRUE(t->As<ast::MultisampledTexture>()->type->Is<ast::I32>());
   EXPECT_EQ(t->As<ast::Texture>()->dim, ast::TextureDimension::k2d);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 29u}}));
-}
-
-TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_Invalid) {
-  auto p = parser("texture_multisampled_2d<abc>");
-  auto t = p->texture_sampler_types();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(t.value, nullptr);
-  EXPECT_FALSE(t.matched);
-  EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:25: unknown type 'abc'");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_MissingType) {
