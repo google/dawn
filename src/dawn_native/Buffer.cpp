@@ -329,17 +329,6 @@ namespace dawn_native {
         // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
         // possible to default the function argument (because there is the callback later in the
         // argument list)
-        if (size == 0) {
-            // Using 0 to indicating default size is deprecated.
-            // Temporarily treat 0 as undefined for size, and give a warning
-            // TODO(dawn:1058): Remove this if block
-            size = wgpu::kWholeMapSize;
-            GetDevice()->EmitDeprecationWarning(
-                "Using size=0 to indicate default mapping size for mapAsync "
-                "is deprecated. In the future it will result in a zero-size mapping. "
-                "Use `undefined` (wgpu::kWholeMapSize) or just omit the parameter instead.");
-        }
-
         if ((size == wgpu::kWholeMapSize) && (offset <= mSize)) {
             size = mSize - offset;
         }
