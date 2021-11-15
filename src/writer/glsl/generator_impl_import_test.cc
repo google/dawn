@@ -212,7 +212,7 @@ TEST_P(GlslImportData_TripleParam_ScalarTest, Float) {
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
                          GlslImportData_TripleParam_ScalarTest,
                          testing::Values(GlslImportData{"fma", "mad"},
-                                         GlslImportData{"mix", "lerp"},
+                                         GlslImportData{"mix", "mix"},
                                          GlslImportData{"clamp", "clamp"},
                                          GlslImportData{"smoothStep",
                                                         "smoothstep"}));

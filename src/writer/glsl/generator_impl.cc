@@ -1339,7 +1339,7 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kIsNan:
       return "isnan";
     case sem::IntrinsicType::kMix:
-      return "lerp";
+      return "mix";
     case sem::IntrinsicType::kReverseBits:
       return "reversebits";
     case sem::IntrinsicType::kSmoothStep:
