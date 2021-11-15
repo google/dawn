@@ -62,32 +62,6 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   return IsAnyOf<ast::BreakStatement, ast::FallthroughStatement>(stmts->Last());
 }
 
-const char* image_format_to_rwtexture_type(ast::ImageFormat image_format) {
-  switch (image_format) {
-    case ast::ImageFormat::kRgba8Unorm:
-    case ast::ImageFormat::kRgba8Snorm:
-    case ast::ImageFormat::kRgba16Float:
-    case ast::ImageFormat::kR32Float:
-    case ast::ImageFormat::kRg32Float:
-    case ast::ImageFormat::kRgba32Float:
-      return "float4";
-    case ast::ImageFormat::kRgba8Uint:
-    case ast::ImageFormat::kRgba16Uint:
-    case ast::ImageFormat::kR32Uint:
-    case ast::ImageFormat::kRg32Uint:
-    case ast::ImageFormat::kRgba32Uint:
-      return "uint4";
-    case ast::ImageFormat::kRgba8Sint:
-    case ast::ImageFormat::kRgba16Sint:
-    case ast::ImageFormat::kR32Sint:
-    case ast::ImageFormat::kRg32Sint:
-    case ast::ImageFormat::kRgba32Sint:
-      return "int4";
-    default:
-      return nullptr;
-  }
-}
-
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
@@ -1086,7 +1060,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
           return false;
         }
       }
-      out << ");";
+      out << ")";
       return true;
     }
     // TODO(senorblanco): determine if this works for array textures
@@ -1111,9 +1085,6 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       break;
   }
 
-  if (!EmitExpression(out, texture))
-    return false;
-
   // If pack_level_in_coords is true, then the mip level will be appended as the
   // last value of the coordinates argument. If the WGSL intrinsic overload does
   // not have a level parameter and pack_level_in_coords is true, then a zero
@@ -1124,34 +1095,32 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureSample:
-      out << ".Sample(";
-      break;
     case sem::IntrinsicType::kTextureSampleBias:
-      out << ".SampleBias(";
+      out << "texture(";
       break;
     case sem::IntrinsicType::kTextureSampleLevel:
-      out << ".SampleLevel(";
+      out << "textureLod(";
       break;
     case sem::IntrinsicType::kTextureSampleGrad:
-      out << ".SampleGrad(";
+      out << "textureGrad(";
       break;
     case sem::IntrinsicType::kTextureSampleCompare:
-      out << ".SampleCmp(";
+      out << "texture(";
       glsl_ret_width = 1;
       break;
     case sem::IntrinsicType::kTextureSampleCompareLevel:
-      out << ".SampleCmpLevelZero(";
+      out << "texture(";
       glsl_ret_width = 1;
       break;
     case sem::IntrinsicType::kTextureLoad:
-      out << ".Load(";
+      out << "texelFetch(";
       // Multisampled textures do not support mip-levels.
       if (!texture_type->Is<sem::MultisampledTexture>()) {
         pack_level_in_coords = true;
       }
       break;
     case sem::IntrinsicType::kTextureStore:
-      out << "[";
+      out << "imageStore(";
       break;
     default:
       diagnostics_.add_error(
@@ -1161,11 +1130,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       return false;
   }
 
-  if (auto* sampler = arg(Usage::kSampler)) {
-    if (!EmitExpression(out, sampler))
-      return false;
-    out << ", ";
-  }
+  if (!EmitExpression(out, texture))
+    return false;
+
+  out << ", ";
 
   auto* param_coords = arg(Usage::kCoords);
   if (!param_coords) {
@@ -1215,8 +1183,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     }
   }
 
-  for (auto usage : {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx,
-                     Usage::kDdy, Usage::kSampleIndex, Usage::kOffset}) {
+  for (auto usage :
+       {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx, Usage::kDdy,
+        Usage::kSampleIndex, Usage::kOffset, Usage::kValue}) {
     if (usage == Usage::kLevel && pack_level_in_coords) {
       continue;  // mip level already packed in coordinates.
     }
@@ -1228,34 +1197,27 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     }
   }
 
-  if (intrinsic->Type() == sem::IntrinsicType::kTextureStore) {
-    out << "] = ";
-    if (!EmitExpression(out, arg(Usage::kValue))) {
-      return false;
-    }
-  } else {
-    out << ")";
+  out << ")";
 
-    // If the intrinsic return type does not match the number of elements of the
-    // GLSL intrinsic, we need to swizzle the expression to generate the correct
-    // number of components.
-    uint32_t wgsl_ret_width = 1;
-    if (auto* vec = intrinsic->ReturnType()->As<sem::Vector>()) {
-      wgsl_ret_width = vec->Width();
+  // If the intrinsic return type does not match the number of elements of the
+  // GLSL intrinsic, we need to swizzle the expression to generate the correct
+  // number of components.
+  uint32_t wgsl_ret_width = 1;
+  if (auto* vec = intrinsic->ReturnType()->As<sem::Vector>()) {
+    wgsl_ret_width = vec->Width();
+  }
+  if (wgsl_ret_width < glsl_ret_width) {
+    out << ".";
+    for (uint32_t i = 0; i < wgsl_ret_width; i++) {
+      out << "xyz"[i];
     }
-    if (wgsl_ret_width < glsl_ret_width) {
-      out << ".";
-      for (uint32_t i = 0; i < wgsl_ret_width; i++) {
-        out << "xyz"[i];
-      }
-    }
-    if (wgsl_ret_width > glsl_ret_width) {
-      TINT_ICE(Writer, diagnostics_)
-          << "WGSL return width (" << wgsl_ret_width
-          << ") is wider than GLSL return width (" << glsl_ret_width << ") for "
-          << intrinsic->Type();
-      return false;
-    }
+  }
+  if (wgsl_ret_width > glsl_ret_width) {
+    TINT_ICE(Writer, diagnostics_)
+        << "WGSL return width (" << wgsl_ret_width
+        << ") is wider than GLSL return width (" << glsl_ret_width << ") for "
+        << intrinsic->Type();
+    return false;
   }
 
   return true;
@@ -1671,6 +1633,10 @@ bool GeneratorImpl::EmitHandleVariable(const sem::Variable* var) {
 
   auto name = builder_.Symbols().NameFor(decl->symbol);
   auto* type = var->Type()->UnwrapRef();
+  if (type->As<sem::Sampler>()) {
+    // GLSL ignores Sampler variables.
+    return true;
+  }
   if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
     return false;
   }
@@ -2426,12 +2392,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         << "Attempting to emit pointer type. These should have been removed "
            "with the InlinePointerLets transform";
     return false;
-  } else if (auto* sampler = type->As<sem::Sampler>()) {
-    out << "Sampler";
-    if (sampler->IsComparison()) {
-      out << "Comparison";
-    }
-    out << "State";
+  } else if (type->Is<sem::Sampler>()) {
+    return false;
   } else if (auto* str = type->As<sem::Struct>()) {
     out << StructName(str);
   } else if (auto* tex = type->As<sem::Texture>()) {
@@ -2440,10 +2402,29 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     auto* depth_ms = tex->As<sem::DepthMultisampledTexture>();
     auto* sampled = tex->As<sem::SampledTexture>();
 
-    if (storage && storage->access() != ast::Access::kRead) {
-      out << "RW";
+    out << "uniform highp ";
+
+    if (sampled || ms) {
+      auto* subtype =
+          sampled ? sampled->type() : storage ? storage->type() : ms->type();
+      if (subtype->Is<sem::F32>()) {
+      } else if (subtype->Is<sem::I32>()) {
+        out << "i";
+      } else if (subtype->Is<sem::U32>()) {
+        out << "u";
+      } else {
+        TINT_ICE(Writer, diagnostics_) << "Unsupported texture type";
+        return false;
+      }
     }
-    out << "Texture";
+    if (storage) {
+      if (storage->access() != ast::Access::kRead) {
+        out << "writeonly ";
+      }
+      out << "image";
+    } else {
+      out << "sampler";
+    }
 
     switch (tex->dim()) {
       case ast::TextureDimension::k1d:
@@ -2468,34 +2449,6 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         TINT_UNREACHABLE(Writer, diagnostics_)
             << "unexpected TextureDimension " << tex->dim();
         return false;
-    }
-
-    if (storage) {
-      auto* component = image_format_to_rwtexture_type(storage->image_format());
-      if (component == nullptr) {
-        TINT_ICE(Writer, diagnostics_)
-            << "Unsupported StorageTexture ImageFormat: "
-            << static_cast<int>(storage->image_format());
-        return false;
-      }
-      out << "<" << component << ">";
-    } else if (depth_ms) {
-      out << "<float4>";
-    } else if (sampled || ms) {
-      auto* subtype = sampled ? sampled->type() : ms->type();
-      out << "<";
-      if (subtype->Is<sem::F32>()) {
-        out << "float4";
-      } else if (subtype->Is<sem::I32>()) {
-        out << "int4";
-      } else if (subtype->Is<sem::U32>()) {
-        out << "uint4";
-      } else {
-        TINT_ICE(Writer, diagnostics_)
-            << "Unsupported multisampled texture type";
-        return false;
-      }
-      out << ">";
     }
   } else if (type->Is<sem::U32>()) {
     out << "uint";

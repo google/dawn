@@ -59,6 +59,15 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   }
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<InlinePointerLets>();
+
+  // Running SingleEntryPoint before RemovePhonies prevents variables
+  // referenced only by phonies from being optimized out. Strictly
+  // speaking, that optimization isn't incorrect, but it prevents some
+  // tests (e.g., types/texture/*) from producing useful results.
+  if (cfg) {
+    manager.Add<SingleEntryPoint>();
+    data.Add<SingleEntryPoint::Config>(cfg->entry_point);
+  }
   manager.Add<RemovePhonies>();
   // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
   manager.Add<Simplify>();
@@ -72,10 +81,6 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   // variables directly.
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  if (cfg) {
-    manager.Add<SingleEntryPoint>();
-    data.Add<SingleEntryPoint::Config>(cfg->entry_point);
-  }
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;
