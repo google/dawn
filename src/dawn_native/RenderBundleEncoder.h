@@ -43,6 +43,8 @@ namespace dawn_native {
         RenderBundleEncoder(DeviceBase* device, const RenderBundleEncoderDescriptor* descriptor);
         RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag);
 
+        void DestroyImpl() override;
+
         ResultOrError<RenderBundleBase*> FinishImpl(const RenderBundleDescriptor* descriptor);
         MaybeError ValidateFinish(const RenderPassResourceUsage& usages) const;
 

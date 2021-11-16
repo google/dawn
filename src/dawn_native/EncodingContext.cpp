@@ -29,9 +29,23 @@ namespace dawn_native {
     }
 
     EncodingContext::~EncodingContext() {
+        Destroy();
+    }
+
+    void EncodingContext::Destroy() {
+        if (mDestroyed) {
+            return;
+        }
         if (!mWereCommandsAcquired) {
             FreeCommands(GetIterator());
         }
+        // If we weren't already finished, then we want to handle an error here so that any calls
+        // to Finish after Destroy will return a meaningful error.
+        if (!IsFinished()) {
+            HandleError(DAWN_FORMAT_VALIDATION_ERROR("Destroyed encoder cannot be finished."));
+        }
+        mDestroyed = true;
+        mCurrentEncoder = nullptr;
     }
 
     CommandIterator EncodingContext::AcquireCommands() {

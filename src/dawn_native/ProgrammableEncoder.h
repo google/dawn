@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_PROGRAMMABLEPASSENCODER_H_
-#define DAWNNATIVE_PROGRAMMABLEPASSENCODER_H_
+#ifndef DAWNNATIVE_PROGRAMMABLEENCODER_H_
+#define DAWNNATIVE_PROGRAMMABLEENCODER_H_
 
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Error.h"
@@ -27,10 +27,10 @@ namespace dawn_native {
 
     class DeviceBase;
 
-    // Base class for shared functionality between ComputePassEncoder and RenderPassEncoder.
-    class ProgrammablePassEncoder : public ApiObjectBase {
+    // Base class for shared functionality between programmable encoders.
+    class ProgrammableEncoder : public ApiObjectBase {
       public:
-        ProgrammablePassEncoder(DeviceBase* device, EncodingContext* encodingContext);
+        ProgrammableEncoder(DeviceBase* device, EncodingContext* encodingContext);
 
         void APIInsertDebugMarker(const char* groupLabel);
         void APIPopDebugGroup();
@@ -39,8 +39,6 @@ namespace dawn_native {
       protected:
         bool IsValidationEnabled() const;
         MaybeError ValidateProgrammableEncoderEnd() const;
-
-        virtual void DeleteThis() override;
 
         // Compute and render passes do different things on SetBindGroup. These are helper functions
         // for the logic they have in common.
@@ -55,9 +53,9 @@ namespace dawn_native {
                                 const uint32_t* dynamicOffsets) const;
 
         // Construct an "error" programmable pass encoder.
-        ProgrammablePassEncoder(DeviceBase* device,
-                                EncodingContext* encodingContext,
-                                ErrorTag errorTag);
+        ProgrammableEncoder(DeviceBase* device,
+                            EncodingContext* encodingContext,
+                            ErrorTag errorTag);
 
         EncodingContext* mEncodingContext = nullptr;
 
@@ -69,4 +67,4 @@ namespace dawn_native {
 
 }  // namespace dawn_native
 
-#endif  // DAWNNATIVE_PROGRAMMABLEPASSENCODER_H_
+#endif  // DAWNNATIVE_PROGRAMMABLEENCODER_H_

@@ -468,10 +468,15 @@ namespace dawn_native {
 
     CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor*)
         : ApiObjectBase(device, kLabelNotImplemented), mEncodingContext(device, this) {
+        TrackInDevice();
     }
 
     ObjectType CommandEncoder::GetType() const {
         return ObjectType::CommandEncoder;
+    }
+
+    void CommandEncoder::DestroyImpl() {
+        mEncodingContext.Destroy();
     }
 
     CommandBufferResourceUsage CommandEncoder::AcquireResourceUsages() {

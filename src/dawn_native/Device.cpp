@@ -266,10 +266,19 @@ namespace dawn_native {
         // a ref to A, then B depends on A. We therefore try to destroy B before destroying A. Note
         // that this only considers the immediate frontend dependencies, while backend objects could
         // add complications and extra dependencies.
-        // TODO(dawn/628) Add types into the array as they are implemented.
+        //
+        // Note that AttachmentState is not an ApiObject so it cannot be eagerly destroyed. However,
+        // since AttachmentStates are cached by the device, objects that hold references to
+        // AttachmentStates should make sure to un-ref them in their Destroy operation so that we
+        // can destroy the frontend cache.
 
         // clang-format off
-        static constexpr std::array<ObjectType, 14> kObjectTypeDependencyOrder = {
+        static constexpr std::array<ObjectType, 19> kObjectTypeDependencyOrder = {
+            ObjectType::ComputePassEncoder,
+            ObjectType::RenderPassEncoder,
+            ObjectType::RenderBundleEncoder,
+            ObjectType::RenderBundle,
+            ObjectType::CommandEncoder,
             ObjectType::CommandBuffer,
             ObjectType::RenderPipeline,
             ObjectType::ComputePipeline,

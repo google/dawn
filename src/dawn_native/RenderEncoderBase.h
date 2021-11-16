@@ -20,11 +20,11 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/IndirectDrawMetadata.h"
 #include "dawn_native/PassResourceUsageTracker.h"
-#include "dawn_native/ProgrammablePassEncoder.h"
+#include "dawn_native/ProgrammableEncoder.h"
 
 namespace dawn_native {
 
-    class RenderEncoderBase : public ProgrammablePassEncoder {
+    class RenderEncoderBase : public ProgrammableEncoder {
       public:
         RenderEncoderBase(DeviceBase* device,
                           EncodingContext* encodingContext,
@@ -66,6 +66,8 @@ namespace dawn_native {
       protected:
         // Construct an "error" render encoder base.
         RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
+
+        void DestroyImpl() override;
 
         CommandBufferStateTracker mCommandBufferState;
         RenderPassResourceUsageTracker mUsageTracker;

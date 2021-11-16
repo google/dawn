@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/ProgrammablePassEncoder.h"
+#include "dawn_native/ProgrammableEncoder.h"
 
 #include "common/BitSetIterator.h"
 #include "common/ityp_array.h"
@@ -28,40 +28,32 @@
 
 namespace dawn_native {
 
-    ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
-                                                     EncodingContext* encodingContext)
+    ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device, EncodingContext* encodingContext)
         : ApiObjectBase(device, kLabelNotImplemented),
           mEncodingContext(encodingContext),
           mValidationEnabled(device->IsValidationEnabled()) {
     }
 
-    ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
-                                                     EncodingContext* encodingContext,
-                                                     ErrorTag errorTag)
+    ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
+                                             EncodingContext* encodingContext,
+                                             ErrorTag errorTag)
         : ApiObjectBase(device, errorTag),
           mEncodingContext(encodingContext),
           mValidationEnabled(device->IsValidationEnabled()) {
     }
 
-    void ProgrammablePassEncoder::DeleteThis() {
-        // This must be called prior to the destructor because it may generate an error message
-        // which calls the virtual RenderPassEncoder->GetType() as part of it's formatting.
-        mEncodingContext->EnsurePassExited(this);
-        ApiObjectBase::DeleteThis();
-    }
-
-    bool ProgrammablePassEncoder::IsValidationEnabled() const {
+    bool ProgrammableEncoder::IsValidationEnabled() const {
         return mValidationEnabled;
     }
 
-    MaybeError ProgrammablePassEncoder::ValidateProgrammableEncoderEnd() const {
+    MaybeError ProgrammableEncoder::ValidateProgrammableEncoderEnd() const {
         DAWN_INVALID_IF(mDebugGroupStackSize != 0,
                         "PushDebugGroup called %u time(s) without a corresponding PopDebugGroup.",
                         mDebugGroupStackSize);
         return {};
     }
 
-    void ProgrammablePassEncoder::APIInsertDebugMarker(const char* groupLabel) {
+    void ProgrammableEncoder::APIInsertDebugMarker(const char* groupLabel) {
         mEncodingContext->TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
@@ -77,7 +69,7 @@ namespace dawn_native {
             "encoding %s.InsertDebugMarker(\"%s\").", this, groupLabel);
     }
 
-    void ProgrammablePassEncoder::APIPopDebugGroup() {
+    void ProgrammableEncoder::APIPopDebugGroup() {
         mEncodingContext->TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
@@ -95,7 +87,7 @@ namespace dawn_native {
             "encoding %s.PopDebugGroup().", this);
     }
 
-    void ProgrammablePassEncoder::APIPushDebugGroup(const char* groupLabel) {
+    void ProgrammableEncoder::APIPushDebugGroup(const char* groupLabel) {
         mEncodingContext->TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
@@ -114,11 +106,10 @@ namespace dawn_native {
             "encoding %s.PushDebugGroup(\"%s\").", this, groupLabel);
     }
 
-    MaybeError ProgrammablePassEncoder::ValidateSetBindGroup(
-        BindGroupIndex index,
-        BindGroupBase* group,
-        uint32_t dynamicOffsetCountIn,
-        const uint32_t* dynamicOffsetsIn) const {
+    MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
+                                                         BindGroupBase* group,
+                                                         uint32_t dynamicOffsetCountIn,
+                                                         const uint32_t* dynamicOffsetsIn) const {
         DAWN_TRY(GetDevice()->ValidateObject(group));
 
         DAWN_INVALID_IF(index >= kMaxBindGroupsTyped,
@@ -192,11 +183,11 @@ namespace dawn_native {
         return {};
     }
 
-    void ProgrammablePassEncoder::RecordSetBindGroup(CommandAllocator* allocator,
-                                                     BindGroupIndex index,
-                                                     BindGroupBase* group,
-                                                     uint32_t dynamicOffsetCount,
-                                                     const uint32_t* dynamicOffsets) const {
+    void ProgrammableEncoder::RecordSetBindGroup(CommandAllocator* allocator,
+                                                 BindGroupIndex index,
+                                                 BindGroupBase* group,
+                                                 uint32_t dynamicOffsetCount,
+                                                 const uint32_t* dynamicOffsets) const {
         SetBindGroupCmd* cmd = allocator->Allocate<SetBindGroupCmd>(Command::SetBindGroup);
         cmd->index = index;
         cmd->group = group;

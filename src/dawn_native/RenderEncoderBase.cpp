@@ -34,7 +34,7 @@ namespace dawn_native {
                                          Ref<AttachmentState> attachmentState,
                                          bool depthReadOnly,
                                          bool stencilReadOnly)
-        : ProgrammablePassEncoder(device, encodingContext),
+        : ProgrammableEncoder(device, encodingContext),
           mIndirectDrawMetadata(device->GetLimits()),
           mAttachmentState(std::move(attachmentState)),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
@@ -46,10 +46,16 @@ namespace dawn_native {
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                          EncodingContext* encodingContext,
                                          ErrorTag errorTag)
-        : ProgrammablePassEncoder(device, encodingContext, errorTag),
+        : ProgrammableEncoder(device, encodingContext, errorTag),
           mIndirectDrawMetadata(device->GetLimits()),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
+    }
+
+    void RenderEncoderBase::DestroyImpl() {
+        // Remove reference to the attachment state so that we don't have lingering references to
+        // it preventing it from being uncached in the device.
+        mAttachmentState = nullptr;
     }
 
     const AttachmentState* RenderEncoderBase::GetAttachmentState() const {

@@ -30,7 +30,7 @@ namespace dawn_native {
       public:
         CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
 
-        ObjectType GetType() const;
+        ObjectType GetType() const override;
 
         CommandIterator AcquireCommands();
         CommandBufferResourceUsage AcquireResourceUsages();
@@ -79,6 +79,7 @@ namespace dawn_native {
         CommandBufferBase* APIFinish(const CommandBufferDescriptor* descriptor = nullptr);
 
       private:
+        void DestroyImpl() override;
         ResultOrError<Ref<CommandBufferBase>> FinishInternal(
             const CommandBufferDescriptor* descriptor);
 

@@ -67,6 +67,8 @@ namespace dawn_native {
                           ErrorTag errorTag);
 
       private:
+        void DestroyImpl() override;
+
         void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
 
         // For render and compute passes, the encoding context is borrowed from the command encoder.

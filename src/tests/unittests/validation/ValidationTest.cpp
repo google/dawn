@@ -129,12 +129,19 @@ void ValidationTest::TearDown() {
     }
 }
 
-void ValidationTest::StartExpectDeviceError() {
+void ValidationTest::StartExpectDeviceError(testing::Matcher<std::string> errorMatcher) {
     mExpectError = true;
     mError = false;
+    mErrorMatcher = errorMatcher;
 }
+
+void ValidationTest::StartExpectDeviceError() {
+    StartExpectDeviceError(testing::_);
+}
+
 bool ValidationTest::EndExpectDeviceError() {
     mExpectError = false;
+    mErrorMatcher = testing::_;
     return mError;
 }
 std::string ValidationTest::GetLastDeviceErrorMessage() const {
@@ -210,6 +217,9 @@ void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
     ASSERT_FALSE(self->mError) << "Got two errors in expect block";
+    if (self->mExpectError) {
+        ASSERT_THAT(message, self->mErrorMatcher);
+    }
     self->mError = true;
 }
 

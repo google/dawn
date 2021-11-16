@@ -36,7 +36,6 @@ namespace dawn_native {
 
         static CommandBufferBase* MakeError(DeviceBase* device);
 
-        void DestroyImpl() override;
         ObjectType GetType() const override;
 
         MaybeError ValidateCanUseInSubmitNow() const;
@@ -53,6 +52,8 @@ namespace dawn_native {
 
       private:
         CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
+        void DestroyImpl() override;
 
         CommandBufferResourceUsage mResourceUsages;
     };

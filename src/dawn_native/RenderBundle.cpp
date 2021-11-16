@@ -36,10 +36,15 @@ namespace dawn_native {
           mDepthReadOnly(depthReadOnly),
           mStencilReadOnly(stencilReadOnly),
           mResourceUsage(std::move(resourceUsage)) {
+        TrackInDevice();
     }
 
-    RenderBundleBase::~RenderBundleBase() {
+    void RenderBundleBase::DestroyImpl() {
         FreeCommands(&mCommands);
+
+        // Remove reference to the attachment state so that we don't have lingering references to
+        // it preventing it from being uncached in the device.
+        mAttachmentState = nullptr;
     }
 
     // static

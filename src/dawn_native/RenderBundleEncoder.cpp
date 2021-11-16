@@ -93,11 +93,17 @@ namespace dawn_native {
                             descriptor->depthReadOnly,
                             descriptor->stencilReadOnly),
           mBundleEncodingContext(device, this) {
+        TrackInDevice();
     }
 
     RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag)
         : RenderEncoderBase(device, &mBundleEncodingContext, errorTag),
           mBundleEncodingContext(device, this) {
+    }
+
+    void RenderBundleEncoder::DestroyImpl() {
+        RenderEncoderBase::DestroyImpl();
+        mBundleEncodingContext.Destroy();
     }
 
     // static

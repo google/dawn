@@ -33,7 +33,7 @@ namespace dawn_native {
     struct RenderBundleDescriptor;
     class RenderBundleEncoder;
 
-    class RenderBundleBase : public ApiObjectBase {
+    class RenderBundleBase final : public ApiObjectBase {
       public:
         RenderBundleBase(RenderBundleEncoder* encoder,
                          const RenderBundleDescriptor* descriptor,
@@ -55,11 +55,10 @@ namespace dawn_native {
         const RenderPassResourceUsage& GetResourceUsage() const;
         const IndirectDrawMetadata& GetIndirectDrawMetadata();
 
-      protected:
-        ~RenderBundleBase() override;
-
       private:
         RenderBundleBase(DeviceBase* device, ErrorTag errorTag);
+
+        void DestroyImpl() override;
 
         CommandIterator mCommands;
         IndirectDrawMetadata mIndirectDrawMetadata;

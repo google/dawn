@@ -689,6 +689,10 @@ namespace dawn_native {
             // Do not uncache the actual cached object if we are a blueprint or already destroyed.
             GetDevice()->UncacheRenderPipeline(this);
         }
+
+        // Remove reference to the attachment state so that we don't have lingering references to
+        // it preventing it from being uncached in the device.
+        mAttachmentState = nullptr;
         return wasDestroyed;
     }
 

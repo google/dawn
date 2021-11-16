@@ -105,21 +105,28 @@ namespace dawn_native {
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext)
-        : ProgrammablePassEncoder(device, encodingContext), mCommandEncoder(commandEncoder) {
+        : ProgrammableEncoder(device, encodingContext), mCommandEncoder(commandEncoder) {
+        TrackInDevice();
     }
 
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext,
                                            ErrorTag errorTag)
-        : ProgrammablePassEncoder(device, encodingContext, errorTag),
-          mCommandEncoder(commandEncoder) {
+        : ProgrammableEncoder(device, encodingContext, errorTag), mCommandEncoder(commandEncoder) {
     }
 
     ComputePassEncoder* ComputePassEncoder::MakeError(DeviceBase* device,
                                                       CommandEncoder* commandEncoder,
                                                       EncodingContext* encodingContext) {
         return new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError);
+    }
+
+    void ComputePassEncoder::DestroyImpl() {
+        ApiObjectBase::DestroyImpl();
+        // Ensure that the pass has exited. This is done for passes only since validation requires
+        // they exit before destruction while bundles do not.
+        mEncodingContext->EnsurePassExited(this);
     }
 
     ObjectType ComputePassEncoder::GetType() const {
