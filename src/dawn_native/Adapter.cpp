@@ -25,9 +25,19 @@ namespace dawn_native {
     }
 
     MaybeError AdapterBase::Initialize() {
-        DAWN_TRY(InitializeImpl());
-        DAWN_TRY(InitializeSupportedFeaturesImpl());
-        DAWN_TRY(InitializeSupportedLimitsImpl(&mLimits));
+        DAWN_TRY_CONTEXT(InitializeImpl(), "initializing adapter (backend=%s)", mBackend);
+        DAWN_TRY_CONTEXT(
+            InitializeSupportedFeaturesImpl(),
+            "gathering supported features for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
+            "backend=%s type=%s)",
+            mPCIInfo.name, mDriverDescription, mPCIInfo.vendorId, mPCIInfo.deviceId, mBackend,
+            mAdapterType);
+        DAWN_TRY_CONTEXT(
+            InitializeSupportedLimitsImpl(&mLimits),
+            "gathering supported limits for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
+            "backend=%s type=%s)",
+            mPCIInfo.name, mDriverDescription, mPCIInfo.vendorId, mPCIInfo.deviceId, mBackend,
+            mAdapterType);
 
         // Enforce internal Dawn constants.
         mLimits.v1.maxVertexBufferArrayStride =

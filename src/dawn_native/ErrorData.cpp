@@ -79,7 +79,11 @@ namespace dawn_native {
             for (auto context : mContexts) {
                 ss << " - While " << context << "\n";
             }
-        } else {
+        }
+
+        // For non-validation errors, or erros that lack a context include the
+        // stack trace for debugging purposes.
+        if (mContexts.empty() || mType != InternalErrorType::Validation) {
             for (const auto& callsite : mBacktrace) {
                 ss << "    at " << callsite.function << " (" << callsite.file << ":"
                    << callsite.line << ")\n";
