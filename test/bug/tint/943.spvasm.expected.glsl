@@ -33,12 +33,12 @@ bool coordsInBounds_vi2_vi2_(inout ivec2 coord, inout ivec2 shape) {
   bool x_87 = false;
   bool x_88_phi = false;
   ivec2 x_76 = coord;
-  bool x_81 = all((x_76 >= ivec2(0, 0)));
+  bool x_81 = all(greaterThanEqual(x_76, ivec2(0, 0)));
   x_88_phi = x_81;
   if (x_81) {
     ivec2 x_84 = coord;
     ivec2 x_85 = shape;
-    x_87 = all((x_84 < x_85));
+    x_87 = all(lessThan(x_84, x_85));
     x_88_phi = x_87;
   }
   return x_88_phi;

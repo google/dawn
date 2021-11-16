@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -87,7 +85,7 @@ struct tint_symbol_6 {
 
 vec4 fs_main_inner(vec2 texcoord) {
   vec2 clampedTexcoord = clamp(texcoord, vec2(0.0f, 0.0f), vec2(1.0f, 1.0f));
-  if (!(all((clampedTexcoord == texcoord)))) {
+  if (!(all(equal(clampedTexcoord, texcoord)))) {
     discard;
   }
   vec4 srcColor = texture(myTexture, texcoord);
@@ -109,12 +107,5 @@ void main() {
   outputs = fs_main(inputs);
   value = outputs.value;
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:28: 'all' : no matching overloaded function found 
-ERROR: 0:28: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

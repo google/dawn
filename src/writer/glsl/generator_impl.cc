@@ -52,6 +52,19 @@
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
 
+namespace {
+
+bool IsRelational(tint::ast::BinaryOp op) {
+  return op == tint::ast::BinaryOp::kEqual ||
+         op == tint::ast::BinaryOp::kNotEqual ||
+         op == tint::ast::BinaryOp::kLessThan ||
+         op == tint::ast::BinaryOp::kGreaterThan ||
+         op == tint::ast::BinaryOp::kLessThanEqual ||
+         op == tint::ast::BinaryOp::kGreaterThanEqual;
+}
+
+}  // namespace
+
 namespace tint {
 namespace writer {
 namespace glsl {
@@ -212,8 +225,47 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
   return true;
 }
 
+bool GeneratorImpl::EmitVectorRelational(std::ostream& out,
+                                         const ast::BinaryExpression* expr) {
+  switch (expr->op) {
+    case ast::BinaryOp::kEqual:
+      out << "equal";
+      break;
+    case ast::BinaryOp::kNotEqual:
+      out << "notEqual";
+      break;
+    case ast::BinaryOp::kLessThan:
+      out << "lessThan";
+      break;
+    case ast::BinaryOp::kGreaterThan:
+      out << "greaterThan";
+      break;
+    case ast::BinaryOp::kLessThanEqual:
+      out << "lessThanEqual";
+      break;
+    case ast::BinaryOp::kGreaterThanEqual:
+      out << "greaterThanEqual";
+      break;
+    default:
+      break;
+  }
+  out << "(";
+  if (!EmitExpression(out, expr->lhs)) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, expr->rhs)) {
+    return false;
+  }
+  out << ")";
+  return true;
+}
+
 bool GeneratorImpl::EmitBinary(std::ostream& out,
                                const ast::BinaryExpression* expr) {
+  if (IsRelational(expr->op) && !TypeOf(expr->lhs)->UnwrapRef()->is_scalar()) {
+    return EmitVectorRelational(out, expr);
+  }
   if (expr->op == ast::BinaryOp::kLogicalAnd ||
       expr->op == ast::BinaryOp::kLogicalOr) {
     auto name = UniqueIdentifier(kTempNamePrefix);

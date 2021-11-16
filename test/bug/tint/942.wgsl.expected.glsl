@@ -64,7 +64,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
           }
           bool tint_tmp = (tint_tmp_1);
           if (tint_tmp) {
-            tint_tmp = all((writeIndex < dims));
+            tint_tmp = all(lessThan(writeIndex, dims));
           }
           if ((tint_tmp)) {
             vec3 acc = vec3(0.0f, 0.0f, 0.0f);

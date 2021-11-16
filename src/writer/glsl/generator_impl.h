@@ -78,8 +78,14 @@ class GeneratorImpl : public TextGenerator {
   bool EmitBinary(std::ostream& out, const ast::BinaryExpression* expr);
   /// Handles generating a bitcast expression
   /// @param out the output of the expression stream
-  /// @param expr the as expression
-  /// @returns true if the bitcast was emitted
+  /// @param expr the expression
+  /// @returns true if the binary expression was emitted
+  bool EmitVectorRelational(std::ostream& out,
+                            const ast::BinaryExpression* expr);
+  /// Handles generating a vector relational expression
+  /// @param out the output of the expression stream
+  /// @param expr the expression
+  /// @returns true if the vector relational expression was emitted
   bool EmitBitcast(std::ostream& out, const ast::BitcastExpression* expr);
   /// Emits a list of statements
   /// @param stmts the statement list

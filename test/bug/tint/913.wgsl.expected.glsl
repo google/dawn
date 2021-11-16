@@ -46,7 +46,7 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   if ((tint_tmp)) {
     bool tint_tmp_3 = success;
     if (tint_tmp_3) {
-      tint_tmp_3 = all((texelFetch(dst, ivec3(ivec2(dstTexCoord), 0)) == nonCoveredColor));
+      tint_tmp_3 = all(equal(texelFetch(dst, ivec3(ivec2(dstTexCoord), 0)), nonCoveredColor));
     }
     success = (tint_tmp_3);
   } else {
