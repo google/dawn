@@ -436,9 +436,11 @@ std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDis
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGLES
 
-    if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").empty()) {
-        SetEnvironmentVar("ANGLE_DEFAULT_PLATFORM", "swiftshader");
+    ScopedEnvironmentVar angleDefaultPlatform;
+    if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {
+        angleDefaultPlatform.Set("ANGLE_DEFAULT_PLATFORM", "swiftshader");
     }
+
     if (!glfwInit()) {
         return instance;
     }

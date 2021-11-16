@@ -92,8 +92,9 @@ static utils::TerribleCommandBuffer* c2sBuf = nullptr;
 static utils::TerribleCommandBuffer* s2cBuf = nullptr;
 
 wgpu::Device CreateCppDawnDevice() {
-    if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").empty()) {
-        SetEnvironmentVar("ANGLE_DEFAULT_PLATFORM", "swiftshader");
+    ScopedEnvironmentVar angleDefaultPlatform;
+    if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {
+        angleDefaultPlatform.Set("ANGLE_DEFAULT_PLATFORM", "swiftshader");
     }
 
     glfwSetErrorCallback(PrintGLFWError);

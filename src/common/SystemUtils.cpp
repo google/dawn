@@ -15,6 +15,7 @@
 #include "common/SystemUtils.h"
 
 #include "common/Assert.h"
+#include "common/Log.h"
 
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    include <Windows.h>
@@ -35,21 +36,29 @@ const char* GetPathSeparator() {
     return "\\";
 }
 
-std::string GetEnvironmentVar(const char* variableName) {
+std::pair<std::string, bool> GetEnvironmentVar(const char* variableName) {
     // First pass a size of 0 to get the size of variable value.
-    char* tempBuf = nullptr;
-    DWORD result = GetEnvironmentVariableA(variableName, tempBuf, 0);
-    if (result == 0) {
-        return "";
+    DWORD sizeWithNullTerminator = GetEnvironmentVariableA(variableName, nullptr, 0);
+    if (sizeWithNullTerminator == 0) {
+        DWORD err = GetLastError();
+        if (err != ERROR_ENVVAR_NOT_FOUND) {
+            dawn::WarningLog() << "GetEnvironmentVariableA failed with code " << err;
+        }
+        return std::make_pair(std::string(), false);
     }
 
     // Then get variable value with its actual size.
-    std::vector<char> buffer(result + 1);
-    if (GetEnvironmentVariableA(variableName, buffer.data(), static_cast<DWORD>(buffer.size())) ==
-        0) {
-        return "";
+    std::vector<char> buffer(sizeWithNullTerminator);
+    DWORD sizeStored =
+        GetEnvironmentVariableA(variableName, buffer.data(), static_cast<DWORD>(buffer.size()));
+    if (sizeStored + 1 != sizeWithNullTerminator) {
+        DWORD err = GetLastError();
+        if (err) {
+            dawn::WarningLog() << "GetEnvironmentVariableA failed with code " << err;
+        }
+        return std::make_pair(std::string(), false);
     }
-    return std::string(buffer.data());
+    return std::make_pair(std::string(buffer.data(), sizeStored), true);
 }
 
 bool SetEnvironmentVar(const char* variableName, const char* value) {
@@ -60,12 +69,16 @@ const char* GetPathSeparator() {
     return "/";
 }
 
-std::string GetEnvironmentVar(const char* variableName) {
+std::pair<std::string, bool> GetEnvironmentVar(const char* variableName) {
     char* value = getenv(variableName);
-    return value == nullptr ? "" : std::string(value);
+    return value == nullptr ? std::make_pair(std::string(), false)
+                            : std::make_pair(std::string(value), true);
 }
 
 bool SetEnvironmentVar(const char* variableName, const char* value) {
+    if (value == nullptr) {
+        return unsetenv(variableName) == 0;
+    }
     return setenv(variableName, value, 1) == 0;
 }
 #else
@@ -133,7 +146,8 @@ ScopedEnvironmentVar::ScopedEnvironmentVar(const char* variableName, const char*
 
 ScopedEnvironmentVar::~ScopedEnvironmentVar() {
     if (mIsSet) {
-        bool success = SetEnvironmentVar(mName.c_str(), mOriginalValue.c_str());
+        bool success = SetEnvironmentVar(
+            mName.c_str(), mOriginalValue.second ? mOriginalValue.first.c_str() : nullptr);
         // If we set the environment variable in the constructor, we should never fail restoring it.
         ASSERT(success);
     }
