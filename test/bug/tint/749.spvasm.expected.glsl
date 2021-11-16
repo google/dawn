@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -62,18 +60,18 @@ void swap_i1_i1_(inout int i, inout int j) {
   int x_34_save = x_33;
   int x_35 = obj.numbers[x_34_save];
   QuicksortObject x_943 = obj;
-  int tint_symbol_5[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_6 = QuicksortObject(tint_symbol_5);
-  obj = tint_symbol_6;
+  int tint_symbol_6[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_7 = QuicksortObject(tint_symbol_6);
+  obj = tint_symbol_7;
   obj = x_943;
   vec2 x_527 = vec2(x_526.x, x_526.x);
   int x_36_save = x_32;
   vec3 x_528 = vec3(x_524.x, x_524.z, x_524.x);
   obj.numbers[x_36_save] = x_35;
   QuicksortObject x_944 = obj;
-  int tint_symbol_7[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_8 = QuicksortObject(tint_symbol_7);
-  obj = tint_symbol_8;
+  int tint_symbol_8[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_9 = QuicksortObject(tint_symbol_8);
+  obj = tint_symbol_9;
   obj = x_944;
   vec3 x_529 = vec3(x_526.y, x_526.z, x_526.x);
   int x_945 = i;
@@ -96,9 +94,9 @@ void swap_i1_i1_(inout int i, inout int j) {
   obj.numbers[x_36_save] = 0;
   obj.numbers[x_36_save] = x_949;
   QuicksortObject x_950 = obj;
-  int tint_symbol_9[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_10 = QuicksortObject(tint_symbol_9);
-  obj = tint_symbol_10;
+  int tint_symbol_10[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_11 = QuicksortObject(tint_symbol_10);
+  obj = tint_symbol_11;
   obj = x_950;
   vec3 x_532 = vec3(x_528.x, x_528.y, x_528.x);
   int x_951 = obj.numbers[x_34_save];
@@ -154,9 +152,9 @@ int performPartition_i1_i1_(inout int l, inout int h) {
   vec3 x_536 = vec3(x_534.x, x_534.z, x_535.x);
   j_1 = 10;
   QuicksortObject x_960 = obj;
-  int tint_symbol_11[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_12 = QuicksortObject(tint_symbol_11);
-  obj = tint_symbol_12;
+  int tint_symbol_12[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_13 = QuicksortObject(tint_symbol_12);
+  obj = tint_symbol_13;
   obj = x_960;
   while (true) {
     int x_961 = pivot;
@@ -171,9 +169,9 @@ int performPartition_i1_i1_(inout int l, inout int h) {
     pivot = x_963;
     x_537 = vec2(vec3(1.0f, 2.0f, 3.0f).y, vec3(1.0f, 2.0f, 3.0f).z);
     QuicksortObject x_964 = obj;
-    int tint_symbol_13[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_14 = QuicksortObject(tint_symbol_13);
-    obj = tint_symbol_14;
+    int tint_symbol_14[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_15 = QuicksortObject(tint_symbol_14);
+    obj = tint_symbol_15;
     obj = x_964;
     int x_56 = h;
     int x_965 = h;
@@ -207,9 +205,9 @@ int performPartition_i1_i1_(inout int l, inout int h) {
     param_1 = x_971;
     int x_62 = obj.numbers[x_61_save];
     QuicksortObject x_972 = obj;
-    int tint_symbol_15[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_16 = QuicksortObject(tint_symbol_15);
-    obj = tint_symbol_16;
+    int tint_symbol_16[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_17 = QuicksortObject(tint_symbol_16);
+    obj = tint_symbol_17;
     obj = x_972;
     int x_63 = pivot;
     vec2 x_540 = vec2(vec3(1.0f, 2.0f, 3.0f).y, x_534.z);
@@ -267,9 +265,9 @@ int performPartition_i1_i1_(inout int l, inout int h) {
       param_1 = x_985;
     }
     QuicksortObject x_986 = obj;
-    int tint_symbol_17[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_18 = QuicksortObject(tint_symbol_17);
-    obj = tint_symbol_18;
+    int tint_symbol_18[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_19 = QuicksortObject(tint_symbol_18);
+    obj = tint_symbol_19;
     obj = x_986;
     {
       int x_987 = h;
@@ -302,9 +300,9 @@ int performPartition_i1_i1_(inout int l, inout int h) {
   obj.numbers[x_42_save] = x_993;
   vec2 x_549 = vec2(x_534.x, x_534.y);
   QuicksortObject x_994 = obj;
-  int tint_symbol_19[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_20 = QuicksortObject(tint_symbol_19);
-  obj = tint_symbol_20;
+  int tint_symbol_20[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_21 = QuicksortObject(tint_symbol_20);
+  obj = tint_symbol_21;
   obj = x_994;
   int x_995 = h;
   h = 0;
@@ -372,8 +370,8 @@ void quicksort_() {
   param_5 = x_1007;
   h_1 = 9;
   int x_1008[10] = stack;
-  int tint_symbol_21[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  stack = tint_symbol_21;
+  int tint_symbol_22[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  stack = tint_symbol_22;
   stack = x_1008;
   vec2 x_556 = vec2(vec3(1.0f, 2.0f, 3.0f).y, vec3(1.0f, 2.0f, 3.0f).y);
   int x_1009 = param_5;
@@ -406,15 +404,15 @@ void quicksort_() {
   param_4 = x_1015;
   int x_95 = l_1;
   QuicksortObject x_1016 = obj;
-  int tint_symbol_22[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_23 = QuicksortObject(tint_symbol_22);
-  obj = tint_symbol_23;
+  int tint_symbol_23[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_24 = QuicksortObject(tint_symbol_23);
+  obj = tint_symbol_24;
   obj = x_1016;
   vec3 x_560 = vec3(x_559.y, x_559.x, x_557.x);
   int x_96_save = x_94;
   int x_1017[10] = stack;
-  int tint_symbol_24[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  stack = tint_symbol_24;
+  int tint_symbol_25[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  stack = tint_symbol_25;
   stack = x_1017;
   vec3 x_561 = vec3(x_556.y, x_556.y, x_556.y);
   int x_1018 = l_1;
@@ -464,13 +462,13 @@ void quicksort_() {
     h_1 = 0;
     h_1 = x_1028;
     int x_1029[10] = stack;
-    int tint_symbol_25[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    stack = tint_symbol_25;
+    int tint_symbol_26[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    stack = tint_symbol_26;
     stack = x_1029;
     int x_106 = top;
     int x_1030[10] = stack;
-    int tint_symbol_26[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    stack = tint_symbol_26;
+    int tint_symbol_27[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    stack = tint_symbol_27;
     stack = x_1030;
     vec2 x_567 = vec2(x_558.x, x_564.z);
     int x_1031 = param_4;
@@ -481,9 +479,9 @@ void quicksort_() {
       break;
     }
     QuicksortObject x_1032 = obj;
-    int tint_symbol_27[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_28 = QuicksortObject(tint_symbol_27);
-    obj = tint_symbol_28;
+    int tint_symbol_28[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_29 = QuicksortObject(tint_symbol_28);
+    obj = tint_symbol_29;
     obj = x_1032;
     vec3 x_568 = vec3(x_559.y, x_559.x, x_563.y);
     int x_1033 = param_4;
@@ -508,8 +506,8 @@ void quicksort_() {
     stack[x_96_save] = x_1037;
     int x_111 = stack[x_110_save];
     int x_1038[10] = stack;
-    int tint_symbol_29[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    stack = tint_symbol_29;
+    int tint_symbol_30[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    stack = tint_symbol_30;
     stack = x_1038;
     vec3 x_571 = vec3(x_559.y, x_559.x, x_564.y);
     int x_1039 = l_1;
@@ -517,8 +515,8 @@ void quicksort_() {
     l_1 = x_1039;
     h_1 = x_111;
     int x_1040[10] = stack;
-    int tint_symbol_30[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    stack = tint_symbol_30;
+    int tint_symbol_31[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    stack = tint_symbol_31;
     stack = x_1040;
     vec2 x_572 = vec2(x_562.y, x_561.y);
     int x_1041 = p;
@@ -609,8 +607,8 @@ void quicksort_() {
       stack[x_100_save] = 0;
       stack[x_100_save] = x_1061;
       int x_1062[10] = stack;
-      int tint_symbol_31[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      stack = tint_symbol_31;
+      int tint_symbol_32[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      stack = tint_symbol_32;
       stack = x_1062;
       vec2 x_584 = vec2(x_569.z, x_569.y);
       vec3 x_585 = vec3(x_580.y, x_577.x, x_577.x);
@@ -649,8 +647,8 @@ void quicksort_() {
       h_1 = x_1070;
       top = x_133;
       int x_1071[10] = stack;
-      int tint_symbol_32[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      stack = tint_symbol_32;
+      int tint_symbol_33[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      stack = tint_symbol_33;
       stack = x_1071;
       int x_134 = p;
       vec2 x_590 = vec2(x_576.x, x_573.y);
@@ -675,9 +673,9 @@ void quicksort_() {
     stack[x_96_save] = x_1076;
     vec2 x_592 = vec2(vec3(1.0f, 2.0f, 3.0f).x, vec3(1.0f, 2.0f, 3.0f).y);
     QuicksortObject x_1077 = obj;
-    int tint_symbol_33[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_34 = QuicksortObject(tint_symbol_33);
-    obj = tint_symbol_34;
+    int tint_symbol_34[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_35 = QuicksortObject(tint_symbol_34);
+    obj = tint_symbol_35;
     obj = x_1077;
     int x_137 = p;
     int x_1078 = stack[x_114_save];
@@ -742,8 +740,8 @@ void quicksort_() {
       vec2 x_601 = vec2(x_563.x, x_563.y);
       stack[x_147_save] = int((1u + uint(x_145)));
       int x_1093[10] = stack;
-      int tint_symbol_35[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      stack = tint_symbol_35;
+      int tint_symbol_36[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      stack = tint_symbol_36;
       stack = x_1093;
       int x_148 = top;
       int x_1094 = stack[x_114_save];
@@ -751,8 +749,8 @@ void quicksort_() {
       stack[x_114_save] = x_1094;
       vec2 x_602 = vec2(x_565.y, x_599.y);
       int x_1095[10] = stack;
-      int tint_symbol_36[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      stack = tint_symbol_36;
+      int tint_symbol_37[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      stack = tint_symbol_37;
       stack = x_1095;
       int x_149 = (x_148 + int(1u));
       int x_1096 = stack[x_147_save];
@@ -787,9 +785,9 @@ void quicksort_() {
       l_1 = x_1103;
       vec2 x_604 = vec2(x_563.z, x_564.x);
       QuicksortObject x_1104 = obj;
-      int tint_symbol_37[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      QuicksortObject tint_symbol_38 = QuicksortObject(tint_symbol_37);
-      obj = tint_symbol_38;
+      int tint_symbol_38[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      QuicksortObject tint_symbol_39 = QuicksortObject(tint_symbol_38);
+      obj = tint_symbol_39;
       obj = x_1104;
     }
   }
@@ -808,15 +806,15 @@ void main_1() {
   uv = x_717;
   i_2 = 0;
   QuicksortObject x_721 = obj;
-  int tint_symbol_39[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_40 = QuicksortObject(tint_symbol_39);
-  obj = tint_symbol_40;
+  int tint_symbol_40[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_41 = QuicksortObject(tint_symbol_40);
+  obj = tint_symbol_41;
   obj = x_721;
   if (true) {
     QuicksortObject x_722 = obj;
-    int tint_symbol_41[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_42 = QuicksortObject(tint_symbol_41);
-    obj = tint_symbol_42;
+    int tint_symbol_42[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_43 = QuicksortObject(tint_symbol_42);
+    obj = tint_symbol_43;
     obj = x_722;
     vec2 x_431 = vec2(vec3(1.0f, 2.0f, 3.0f).x, vec3(1.0f, 2.0f, 3.0f).x);
     int x_158 = i_2;
@@ -828,15 +826,15 @@ void main_1() {
     color = x_725;
     vec2 x_432 = vec2(x_431.y, x_431.y);
     QuicksortObject x_726 = obj;
-    int tint_symbol_43[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_44 = QuicksortObject(tint_symbol_43);
-    obj = tint_symbol_44;
+    int tint_symbol_44[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_45 = QuicksortObject(tint_symbol_44);
+    obj = tint_symbol_45;
     obj = x_726;
   }
   QuicksortObject x_756 = obj;
-  int tint_symbol_45[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_46 = QuicksortObject(tint_symbol_45);
-  obj = tint_symbol_46;
+  int tint_symbol_46[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_47 = QuicksortObject(tint_symbol_46);
+  obj = tint_symbol_47;
   obj = x_756;
   vec2 x_446 = vec2(vec2(0.0f, 0.0f).x, vec2(0.0f, 0.0f).x);
   int x_757 = i_2;
@@ -844,9 +842,9 @@ void main_1() {
   i_2 = x_757;
   quicksort_();
   QuicksortObject x_758 = obj;
-  int tint_symbol_47[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_48 = QuicksortObject(tint_symbol_47);
-  obj = tint_symbol_48;
+  int tint_symbol_48[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_49 = QuicksortObject(tint_symbol_48);
+  obj = tint_symbol_49;
   obj = x_758;
   vec4 x_184 = tint_symbol;
   vec2 x_759 = uv;
@@ -859,18 +857,18 @@ void main_1() {
   vec2 x_185 = vec2(x_184.x, x_184.y);
   vec3 x_448 = vec3(x_185.y, x_446.y, x_446.y);
   QuicksortObject x_761 = obj;
-  int tint_symbol_49[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_50 = QuicksortObject(tint_symbol_49);
-  obj = tint_symbol_50;
+  int tint_symbol_50[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_51 = QuicksortObject(tint_symbol_50);
+  obj = tint_symbol_51;
   obj = x_761;
   vec2 x_762 = uv;
   uv = vec2(0.0f, 0.0f);
   uv = x_762;
   vec2 x_191 = x_188.resolution;
   QuicksortObject x_763 = obj;
-  int tint_symbol_51[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_52 = QuicksortObject(tint_symbol_51);
-  obj = tint_symbol_52;
+  int tint_symbol_52[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_53 = QuicksortObject(tint_symbol_52);
+  obj = tint_symbol_53;
   obj = x_763;
   vec3 x_449 = vec3(x_184.y, vec3(1.0f, 2.0f, 3.0f).z, x_184.w);
   vec3 x_764 = color;
@@ -878,9 +876,9 @@ void main_1() {
   color = x_764;
   vec2 x_192 = (x_185 / x_191);
   QuicksortObject x_765 = obj;
-  int tint_symbol_53[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_54 = QuicksortObject(tint_symbol_53);
-  obj = tint_symbol_54;
+  int tint_symbol_54[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_55 = QuicksortObject(tint_symbol_54);
+  obj = tint_symbol_55;
   obj = x_765;
   vec2 x_450 = vec2(x_447.x, x_185.y);
   vec3 x_766 = color;
@@ -896,18 +894,18 @@ void main_1() {
   color = x_768;
   vec3 x_451 = vec3(x_185.x, x_185.y, x_446.y);
   QuicksortObject x_769 = obj;
-  int tint_symbol_55[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_56 = QuicksortObject(tint_symbol_55);
-  obj = tint_symbol_56;
+  int tint_symbol_56[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_57 = QuicksortObject(tint_symbol_56);
+  obj = tint_symbol_57;
   obj = x_769;
   int x_770 = obj.numbers[0u];
   obj.numbers[0u] = 0;
   obj.numbers[0u] = x_770;
   int x_201 = obj.numbers[0u];
   QuicksortObject x_771 = obj;
-  int tint_symbol_57[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_58 = QuicksortObject(tint_symbol_57);
-  obj = tint_symbol_58;
+  int tint_symbol_58[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_59 = QuicksortObject(tint_symbol_58);
+  obj = tint_symbol_59;
   obj = x_771;
   int x_772 = obj.numbers[0u];
   obj.numbers[0u] = 0;
@@ -921,9 +919,9 @@ void main_1() {
   i_2 = 0;
   i_2 = x_774;
   QuicksortObject x_775 = obj;
-  int tint_symbol_59[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_60 = QuicksortObject(tint_symbol_59);
-  obj = tint_symbol_60;
+  int tint_symbol_60[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_61 = QuicksortObject(tint_symbol_60);
+  obj = tint_symbol_61;
   obj = x_775;
   vec3 x_453 = vec3(x_451.x, x_450.x, x_450.y);
   color.x = (x_206 + float(x_201));
@@ -940,9 +938,9 @@ void main_1() {
   uv.x = 0.0f;
   uv.x = x_778;
   QuicksortObject x_779 = obj;
-  int tint_symbol_61[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_62 = QuicksortObject(tint_symbol_61);
-  obj = tint_symbol_62;
+  int tint_symbol_62[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_63 = QuicksortObject(tint_symbol_62);
+  obj = tint_symbol_63;
   obj = x_779;
   if ((x_210 > 0.25f)) {
     int x_780 = i_2;
@@ -957,18 +955,18 @@ void main_1() {
     uv.x = x_782;
     int x_216 = obj.numbers[1];
     QuicksortObject x_783 = obj;
-    int tint_symbol_63[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_64 = QuicksortObject(tint_symbol_63);
-    obj = tint_symbol_64;
+    int tint_symbol_64[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_65 = QuicksortObject(tint_symbol_64);
+    obj = tint_symbol_65;
     obj = x_783;
     vec2 x_457 = vec2(x_454.x, x_454.x);
     vec2 x_784 = uv;
     uv = vec2(0.0f, 0.0f);
     uv = x_784;
     QuicksortObject x_785 = obj;
-    int tint_symbol_65[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_66 = QuicksortObject(tint_symbol_65);
-    obj = tint_symbol_66;
+    int tint_symbol_66[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_67 = QuicksortObject(tint_symbol_66);
+    obj = tint_symbol_67;
     obj = x_785;
     vec2 x_458 = vec2(vec3(1.0f, 2.0f, 3.0f).z, vec2(0.0f, 0.0f).y);
     int x_786 = i_2;
@@ -1086,9 +1084,9 @@ void main_1() {
     color.x = 0.0f;
     color.x = x_816;
     QuicksortObject x_817 = obj;
-    int tint_symbol_67[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_68 = QuicksortObject(tint_symbol_67);
-    obj = tint_symbol_68;
+    int tint_symbol_68[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_69 = QuicksortObject(tint_symbol_68);
+    obj = tint_symbol_69;
     obj = x_817;
     vec3 x_468 = vec3(x_467.x, x_467.x, x_467.x);
     float x_818 = uv[0];
@@ -1197,9 +1195,9 @@ void main_1() {
     uv[0] = x_844;
     vec3 x_482 = vec3(x_455.x, x_475.y, x_455.y);
     QuicksortObject x_845 = obj;
-    int tint_symbol_69[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_70 = QuicksortObject(tint_symbol_69);
-    obj = tint_symbol_70;
+    int tint_symbol_70[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_71 = QuicksortObject(tint_symbol_70);
+    obj = tint_symbol_71;
     obj = x_845;
     float x_846 = uv.y;
     uv.y = 0.0f;
@@ -1270,9 +1268,9 @@ void main_1() {
     obj.numbers[6u] = x_863;
     vec2 x_490 = vec2(x_480.z, x_480.z);
     QuicksortObject x_864 = obj;
-    int tint_symbol_71[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_72 = QuicksortObject(tint_symbol_71);
-    obj = tint_symbol_72;
+    int tint_symbol_72[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_73 = QuicksortObject(tint_symbol_72);
+    obj = tint_symbol_73;
     obj = x_864;
     color.y = (float(x_280) + x_283);
     float x_865 = color.x;
@@ -1289,9 +1287,9 @@ void main_1() {
   color.x = x_867;
   float x_287 = uv.y;
   QuicksortObject x_868 = obj;
-  int tint_symbol_73[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_74 = QuicksortObject(tint_symbol_73);
-  obj = tint_symbol_74;
+  int tint_symbol_74[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_75 = QuicksortObject(tint_symbol_74);
+  obj = tint_symbol_75;
   obj = x_868;
   vec2 x_493 = vec2(x_475.x, x_475.y);
   float x_869 = uv[0];
@@ -1451,9 +1449,9 @@ void main_1() {
     uv.x = 0.0f;
     uv.x = x_910;
     QuicksortObject x_911 = obj;
-    int tint_symbol_75[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    QuicksortObject tint_symbol_76 = QuicksortObject(tint_symbol_75);
-    obj = tint_symbol_76;
+    int tint_symbol_76[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    QuicksortObject tint_symbol_77 = QuicksortObject(tint_symbol_76);
+    obj = tint_symbol_77;
     obj = x_911;
     vec3 x_513 = vec3(x_505.z, x_505.x, x_448.x);
     int x_912 = obj.numbers[8];
@@ -1505,14 +1503,14 @@ void main_1() {
   uv.x = 0.0f;
   uv.x = x_923;
   QuicksortObject x_924 = obj;
-  int tint_symbol_77[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_78 = QuicksortObject(tint_symbol_77);
-  obj = tint_symbol_78;
+  int tint_symbol_78[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_79 = QuicksortObject(tint_symbol_78);
+  obj = tint_symbol_79;
   obj = x_924;
   QuicksortObject x_925 = obj;
-  int tint_symbol_79[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_80 = QuicksortObject(tint_symbol_79);
-  obj = tint_symbol_80;
+  int tint_symbol_80[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_81 = QuicksortObject(tint_symbol_80);
+  obj = tint_symbol_81;
   obj = x_925;
   float x_926 = color.y;
   color.y = 0.0f;
@@ -1531,9 +1529,9 @@ void main_1() {
   uv.x = x_929;
   x_GLF_color = x_330;
   QuicksortObject x_930 = obj;
-  int tint_symbol_81[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  QuicksortObject tint_symbol_82 = QuicksortObject(tint_symbol_81);
-  obj = tint_symbol_82;
+  int tint_symbol_82[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  QuicksortObject tint_symbol_83 = QuicksortObject(tint_symbol_82);
+  obj = tint_symbol_83;
   obj = x_930;
   vec3 x_522 = vec3(x_330.w, x_330.y, x_493.x);
   float x_931 = color.x;
@@ -1545,40 +1543,33 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
-struct tint_symbol_3 {
-  vec4 gl_FragCoord_param;
-};
 struct tint_symbol_4 {
+  vec4 tint_symbol_2;
+};
+struct tint_symbol_5 {
   vec4 x_GLF_color_1;
 };
 
-main_out tint_symbol_1_inner(vec4 gl_FragCoord_param) {
-  tint_symbol = gl_FragCoord_param;
+main_out tint_symbol_1_inner(vec4 tint_symbol_2) {
+  tint_symbol = tint_symbol_2;
   main_1();
-  main_out tint_symbol_83 = main_out(x_GLF_color);
-  return tint_symbol_83;
+  main_out tint_symbol_84 = main_out(x_GLF_color);
+  return tint_symbol_84;
 }
 
-tint_symbol_4 tint_symbol_1(tint_symbol_3 tint_symbol_2) {
-  main_out inner_result = tint_symbol_1_inner(tint_symbol_2.gl_FragCoord_param);
-  tint_symbol_4 wrapper_result = tint_symbol_4(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
+  main_out inner_result = tint_symbol_1_inner(tint_symbol_3.tint_symbol_2);
+  tint_symbol_5 wrapper_result = tint_symbol_5(vec4(0.0f, 0.0f, 0.0f, 0.0f));
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
 out vec4 x_GLF_color_1;
 void main() {
-  tint_symbol_3 inputs;
-  inputs.gl_FragCoord_param = gl_FragCoord;
-  tint_symbol_4 outputs;
+  tint_symbol_4 inputs;
+  inputs.tint_symbol_2 = gl_FragCoord;
+  tint_symbol_5 outputs;
   outputs = tint_symbol_1(inputs);
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:1553: 'gl_FragCoord_param' : identifiers starting with "gl_" are reserved 
-ERROR: 0:1553: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

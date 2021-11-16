@@ -330,31 +330,31 @@ void main_1() {
 struct main_out {
   vec4 glFragColor_1;
 };
-struct tint_symbol_3 {
+struct tint_symbol_4 {
   vec4 v_output1_param;
   vec2 vMainuv_param;
   vec4 v_output2_param;
   vec2 v_uv_param;
-  bool gl_FrontFacing_param;
+  bool tint_symbol_2;
 };
-struct tint_symbol_4 {
+struct tint_symbol_5 {
   vec4 glFragColor_1;
 };
 
-main_out tint_symbol_1_inner(vec2 vMainuv_param, vec4 v_output1_param, bool gl_FrontFacing_param, vec2 v_uv_param, vec4 v_output2_param) {
+main_out tint_symbol_1_inner(vec2 vMainuv_param, vec4 v_output1_param, bool tint_symbol_2, vec2 v_uv_param, vec4 v_output2_param) {
   vMainuv = vMainuv_param;
   v_output1 = v_output1_param;
-  tint_symbol = gl_FrontFacing_param;
+  tint_symbol = tint_symbol_2;
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();
-  main_out tint_symbol_5 = main_out(glFragColor);
-  return tint_symbol_5;
+  main_out tint_symbol_6 = main_out(glFragColor);
+  return tint_symbol_6;
 }
 
-tint_symbol_4 tint_symbol_1(tint_symbol_3 tint_symbol_2) {
-  main_out inner_result = tint_symbol_1_inner(tint_symbol_2.vMainuv_param, tint_symbol_2.v_output1_param, tint_symbol_2.gl_FrontFacing_param, tint_symbol_2.v_uv_param, tint_symbol_2.v_output2_param);
-  tint_symbol_4 wrapper_result = tint_symbol_4(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
+  main_out inner_result = tint_symbol_1_inner(tint_symbol_3.vMainuv_param, tint_symbol_3.v_output1_param, tint_symbol_3.tint_symbol_2, tint_symbol_3.v_uv_param, tint_symbol_3.v_output2_param);
+  tint_symbol_5 wrapper_result = tint_symbol_5(vec4(0.0f, 0.0f, 0.0f, 0.0f));
   wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
   return wrapper_result;
 }
@@ -364,13 +364,13 @@ in vec4 v_output2_param;
 in vec2 v_uv_param;
 out vec4 glFragColor_1;
 void main() {
-  tint_symbol_3 inputs;
+  tint_symbol_4 inputs;
   inputs.v_output1_param = v_output1_param;
   inputs.vMainuv_param = vMainuv_param;
   inputs.v_output2_param = v_output2_param;
   inputs.v_uv_param = v_uv_param;
-  inputs.gl_FrontFacing_param = gl_FrontFacing;
-  tint_symbol_4 outputs;
+  inputs.tint_symbol_2 = gl_FrontFacing;
+  tint_symbol_5 outputs;
   outputs = tint_symbol_1(inputs);
   glFragColor_1 = outputs.glFragColor_1;
 }

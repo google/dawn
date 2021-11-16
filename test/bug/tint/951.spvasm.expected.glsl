@@ -63,23 +63,23 @@ void main_1() {
   return;
 }
 
-struct tint_symbol_3 {
-  uvec3 gl_GlobalInvocationID_param;
+struct tint_symbol_4 {
+  uvec3 tint_symbol_2;
 };
 
-void tint_symbol_1_inner(uvec3 gl_GlobalInvocationID_param) {
-  tint_symbol = gl_GlobalInvocationID_param;
+void tint_symbol_1_inner(uvec3 tint_symbol_2) {
+  tint_symbol = tint_symbol_2;
   main_1();
 }
 
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
-void tint_symbol_1(tint_symbol_3 tint_symbol_2) {
-  tint_symbol_1_inner(tint_symbol_2.gl_GlobalInvocationID_param);
+void tint_symbol_1(tint_symbol_4 tint_symbol_3) {
+  tint_symbol_1_inner(tint_symbol_3.tint_symbol_2);
   return;
 }
 void main() {
-  tint_symbol_3 inputs;
-  inputs.gl_GlobalInvocationID_param = gl_GlobalInvocationID;
+  tint_symbol_4 inputs;
+  inputs.tint_symbol_2 = gl_GlobalInvocationID;
   tint_symbol_1(inputs);
 }
 

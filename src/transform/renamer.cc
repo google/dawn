@@ -1309,7 +1309,8 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
                 kReservedKeywordsGLSL,
                 kReservedKeywordsGLSL +
                     sizeof(kReservedKeywordsGLSL) / sizeof(const char*),
-                name_in)) {
+                name_in) &&
+            name_in.compare(0, 3, "gl_")) {
           // No match, just reuse the original name.
           return ctx.dst->Symbols().New(name_in);
         }
