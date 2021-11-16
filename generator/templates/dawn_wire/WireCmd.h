@@ -98,17 +98,9 @@ namespace dawn_wire {
 
         //* Serialize the structure and everything it points to into serializeBuffer which must be
         //* big enough to contain all the data (as queried from GetRequiredSize).
-        {% if command.may_have_dawn_object %}
-            WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer, const ObjectIdProvider& objectIdProvider) const;
-        {% else %}
-            WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const;
-            // Override which drops the provider if it's not needed.
-            WireResult Serialize(size_t commandSize,
-                                 SerializeBuffer* serializeBuffer,
-                                 const ObjectIdProvider&) const {
-                return Serialize(commandSize, serializeBuffer);
-            }
-        {% endif %}
+        WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer, const ObjectIdProvider& objectIdProvider) const;
+        // Override which produces a FatalError if any object is used.
+        WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const;
 
         //* Deserializes the structure from a buffer, consuming a maximum of *size bytes. When this
         //* function returns, buffer and size will be updated by the number of bytes consumed to
@@ -117,11 +109,9 @@ namespace dawn_wire {
         //* Deserialize returns:
         //*  - Success if everything went well (yay!)
         //*  - FatalError is something bad happened (buffer too small for example)
-        WireResult Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator
-            {%- if command.may_have_dawn_object -%}
-                , const ObjectIdResolver& resolver
-            {%- endif -%}
-        );
+        WireResult Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator, const ObjectIdResolver& resolver);
+        // Override which produces a FatalError if any object is used.
+        WireResult Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator);
 
         {% if command.derived_method %}
             //* Command handlers want to know the object ID in addition to the backing object.

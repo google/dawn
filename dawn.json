@@ -594,8 +594,7 @@
     },
     "compilation info": {
         "category": "structure",
-        "extensible": false,
-        "_TODO": "should be extensible, but need to make that work in wire: https://github.com/webgpu-native/webgpu-headers/issues/82",
+        "extensible": "in",
         "members": [
             {"name": "message count", "type": "uint32_t"},
             {"name": "messages", "type": "compilation message", "annotation": "const*", "length": "message count"}
@@ -603,7 +602,6 @@
     },
     "compilation info callback": {
         "category": "callback",
-        "tags": ["dawn"],
         "args": [
             {"name": "status", "type": "compilation info request status"},
             {"name": "compilation info", "type": "compilation info", "annotation": "const*"},
@@ -612,7 +610,6 @@
     },
     "compilation info request status": {
         "category": "enum",
-        "tags": ["dawn"],
         "values": [
             {"value": 0, "name": "success"},
             {"value": 1, "name": "error"},
@@ -622,8 +619,7 @@
     },
     "compilation message": {
         "category": "structure",
-        "extensible": false,
-        "_TODO": "should be extensible, but need to make that work in wire: https://github.com/webgpu-native/webgpu-headers/issues/82",
+        "extensible": "in",
         "members": [
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "type", "type": "compilation message type"},
@@ -1942,7 +1938,6 @@
         "methods": [
             {
                 "name": "get compilation info",
-                "tags": ["dawn"],
                 "args": [
                     {"name": "callback", "type": "compilation info callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}

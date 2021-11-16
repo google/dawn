@@ -37,6 +37,7 @@ namespace dawn_native {
     }  // anonymous namespace
 
     OwnedCompilationMessages::OwnedCompilationMessages() {
+        mCompilationInfo.nextInChain = 0;
         mCompilationInfo.messageCount = 0;
         mCompilationInfo.messages = nullptr;
     }
@@ -51,8 +52,8 @@ namespace dawn_native {
         ASSERT(mCompilationInfo.messages == nullptr);
 
         mMessageStrings.push_back(message);
-        mMessages.push_back({nullptr, static_cast<WGPUCompilationMessageType>(type), lineNum,
-                             linePos, offset, length});
+        mMessages.push_back({nullptr, nullptr, static_cast<WGPUCompilationMessageType>(type),
+                             lineNum, linePos, offset, length});
     }
 
     void OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnostic) {
@@ -100,8 +101,8 @@ namespace dawn_native {
             mMessageStrings.push_back(diagnostic.message);
         }
 
-        mMessages.push_back({nullptr, tintSeverityToMessageType(diagnostic.severity), lineNum,
-                             linePos, offset, length});
+        mMessages.push_back({nullptr, nullptr, tintSeverityToMessageType(diagnostic.severity),
+                             lineNum, linePos, offset, length});
     }
 
     void OwnedCompilationMessages::AddMessages(const tint::diag::List& diagnostics) {

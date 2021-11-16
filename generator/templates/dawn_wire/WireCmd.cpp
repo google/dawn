@@ -416,37 +416,63 @@
         return size;
     }
 
-    WireResult {{Cmd}}::Serialize(size_t commandSize, SerializeBuffer* buffer
-        {%- if command.may_have_dawn_object -%}
-            , const ObjectIdProvider& provider
-        {%- endif -%}
-    ) const {
-        {{Name}}Transfer* transfer;
-        WIRE_TRY(buffer->Next(&transfer));
-        transfer->commandSize = commandSize;
+    {% if command.may_have_dawn_object %}
+        WireResult {{Cmd}}::Serialize(
+            size_t commandSize,
+            SerializeBuffer* buffer,
+            const ObjectIdProvider& provider
+        ) const {
+            {{Name}}Transfer* transfer;
+            WIRE_TRY(buffer->Next(&transfer));
+            transfer->commandSize = commandSize;
+            return ({{Name}}Serialize(*this, transfer, buffer, provider));
+        }
+        WireResult {{Cmd}}::Serialize(size_t commandSize, SerializeBuffer* buffer) const {
+            ErrorObjectIdProvider provider;
+            return Serialize(commandSize, buffer, provider);
+        }
 
-        WIRE_TRY({{Name}}Serialize(*this, transfer, buffer
-            {%- if command.may_have_dawn_object -%}
-                , provider
-            {%- endif -%}
-        ));
-        return WireResult::Success;
-    }
+        WireResult {{Cmd}}::Deserialize(
+            DeserializeBuffer* deserializeBuffer,
+            DeserializeAllocator* allocator,
+            const ObjectIdResolver& resolver
+        ) {
+            const volatile {{Name}}Transfer* transfer;
+            WIRE_TRY(deserializeBuffer->Read(&transfer));
+            return {{Name}}Deserialize(this, transfer, deserializeBuffer, allocator, resolver);
+        }
+        WireResult {{Cmd}}::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator) {
+            ErrorObjectIdResolver resolver;
+            return Deserialize(deserializeBuffer, allocator, resolver);
+        }
+    {% else %}
+        WireResult {{Cmd}}::Serialize(size_t commandSize, SerializeBuffer* buffer) const {
+            {{Name}}Transfer* transfer;
+            WIRE_TRY(buffer->Next(&transfer));
+            transfer->commandSize = commandSize;
+            return ({{Name}}Serialize(*this, transfer, buffer));
+        }
+        WireResult {{Cmd}}::Serialize(
+            size_t commandSize,
+            SerializeBuffer* buffer,
+            const ObjectIdProvider&
+        ) const {
+            return Serialize(commandSize, buffer);
+        }
 
-    WireResult {{Cmd}}::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator
-        {%- if command.may_have_dawn_object -%}
-            , const ObjectIdResolver& resolver
-        {%- endif -%}
-    ) {
-        const volatile {{Name}}Transfer* transfer;
-        WIRE_TRY(deserializeBuffer->Read(&transfer));
-
-        return {{Name}}Deserialize(this, transfer, deserializeBuffer, allocator
-            {%- if command.may_have_dawn_object -%}
-                , resolver
-            {%- endif -%}
-        );
-    }
+        WireResult {{Cmd}}::Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator) {
+            const volatile {{Name}}Transfer* transfer;
+            WIRE_TRY(deserializeBuffer->Read(&transfer));
+            return {{Name}}Deserialize(this, transfer, deserializeBuffer, allocator);
+        }
+        WireResult {{Cmd}}::Deserialize(
+            DeserializeBuffer* deserializeBuffer,
+            DeserializeAllocator* allocator,
+            const ObjectIdResolver&
+        ) {
+            return Deserialize(deserializeBuffer, allocator);
+        }
+    {% endif %}
 {% endmacro %}
 
 {% macro make_chained_struct_serialization_helpers(out=None) %}
