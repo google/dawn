@@ -74,7 +74,22 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
       // TODO(jrprice): Strip unused types.
       ctx.dst->AST().AddTypeDecl(ctx.Clone(ty));
     } else if (auto* var = decl->As<ast::Variable>()) {
-      if (var->is_const || referenced_vars.count(var)) {
+      if (referenced_vars.count(var)) {
+        if (var->is_const) {
+          if (auto* deco = ast::GetDecoration<ast::OverrideDecoration>(
+                  var->decorations)) {
+            // It is an overridable constant
+            if (!deco->has_value) {
+              // If the decoration doesn't have numeric ID specified explicitly
+              // Make their ids explicitly assigned in the decoration so that
+              // they won't be affected by other stripped away constants
+              auto* global = sem.Get(var)->As<sem::GlobalVariable>();
+              const auto* new_deco =
+                  ctx.dst->Override(deco->source, global->ConstantId());
+              ctx.Replace(deco, new_deco);
+            }
+          }
+        }
         ctx.dst->AST().AddGlobalVariable(ctx.Clone(var));
       }
     } else if (auto* func = decl->As<ast::Function>()) {

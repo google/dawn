@@ -219,13 +219,7 @@ fn comp_main2() {
 )";
 
   auto* expect = R"(
-let a : f32 = 1.0;
-
-let b : f32 = 1.0;
-
 let c : f32 = 1.0;
-
-let d : f32 = 1.0;
 
 [[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
@@ -240,6 +234,120 @@ fn comp_main1() {
   auto got = Run<SingleEntryPoint>(src, data);
 
   EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SingleEntryPointTest, OverridableConstants) {
+  auto* src = R"(
+[[override(1001)]] let c1 : u32 = 1u;
+[[override]] let c2 : u32 = 1u;
+[[override(0)]] let c3 : u32 = 1u;
+[[override(9999)]] let c4 : u32 = 1u;
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main1() {
+    let local_d = c1;
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main2() {
+    let local_d = c2;
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main3() {
+    let local_d = c3;
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main4() {
+    let local_d = c4;
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main5() {
+    let local_d = 1u;
+}
+)";
+
+  {
+    SingleEntryPoint::Config cfg("comp_main1");
+    auto* expect = R"(
+[[override(1001)]] let c1 : u32 = 1u;
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main1() {
+  let local_d = c1;
+}
+)";
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+    EXPECT_EQ(expect, str(got));
+  }
+
+  {
+    SingleEntryPoint::Config cfg("comp_main2");
+    // The decorator is replaced with the one with explicit id
+    // And should not be affected by other constants stripped away
+    auto* expect = R"(
+[[override(1)]] let c2 : u32 = 1u;
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main2() {
+  let local_d = c2;
+}
+)";
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+    EXPECT_EQ(expect, str(got));
+  }
+
+  {
+    SingleEntryPoint::Config cfg("comp_main3");
+    auto* expect = R"(
+[[override(0)]] let c3 : u32 = 1u;
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main3() {
+  let local_d = c3;
+}
+)";
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+    EXPECT_EQ(expect, str(got));
+  }
+
+  {
+    SingleEntryPoint::Config cfg("comp_main4");
+    auto* expect = R"(
+[[override(9999)]] let c4 : u32 = 1u;
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main4() {
+  let local_d = c4;
+}
+)";
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+    EXPECT_EQ(expect, str(got));
+  }
+
+  {
+    SingleEntryPoint::Config cfg("comp_main5");
+    auto* expect = R"(
+[[stage(compute), workgroup_size(1)]]
+fn comp_main5() {
+  let local_d = 1u;
+}
+)";
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+    EXPECT_EQ(expect, str(got));
+  }
 }
 
 TEST_F(SingleEntryPointTest, CalledFunctions) {
