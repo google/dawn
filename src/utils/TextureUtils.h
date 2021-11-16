@@ -181,9 +181,15 @@ namespace utils {
 
     // TODO(dawn:666, 570, 690): Add more depth/stencil formats if Stencil8, Depth16Unorm,
     // Depth24UnormStencil8, Depth32FloatStencil8 are implemented.
-    static constexpr std::array<wgpu::TextureFormat, 3> kDepthStencilFormats = {
+    static constexpr std::array<wgpu::TextureFormat, 3> kDepthFormats = {
         wgpu::TextureFormat::Depth32Float,
         wgpu::TextureFormat::Depth24Plus,
+        wgpu::TextureFormat::Depth24PlusStencil8,
+    };
+    static constexpr std::array<wgpu::TextureFormat, 1> kStencilFormats = {
+        wgpu::TextureFormat::Depth24PlusStencil8,
+    };
+    static constexpr std::array<wgpu::TextureFormat, 1> kDepthAndStencilFormats = {
         wgpu::TextureFormat::Depth24PlusStencil8,
     };
 

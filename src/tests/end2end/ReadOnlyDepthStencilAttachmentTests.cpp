@@ -28,7 +28,13 @@ namespace {
 class ReadOnlyDepthStencilAttachmentTests
     : public DawnTestWithParams<ReadOnlyDepthStencilAttachmentTestsParams> {
   protected:
-    wgpu::RenderPipeline CreateRenderPipeline(wgpu::TextureFormat format) {
+    struct DepthStencilValues {
+        float depthInitValue;
+        uint32_t stencilInitValue;
+        uint32_t stencilRefValue;
+    };
+    wgpu::RenderPipeline CreateRenderPipeline(wgpu::TextureAspect aspect,
+                                              wgpu::TextureFormat format) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         // Draw a rectangle via two triangles. The depth value of the top of the rectangle is 0.4.
@@ -50,18 +56,34 @@ class ReadOnlyDepthStencilAttachmentTests
                 return vec4<f32>(pos[VertexIndex], 1.0);
             })");
 
-        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-        [[group(0), binding(0)]] var samp : sampler;
-        [[group(0), binding(1)]] var tex : texture_depth_2d;
+        if (aspect == wgpu::TextureAspect::DepthOnly) {
+            pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+                [[group(0), binding(0)]] var samp : sampler;
+                [[group(0), binding(1)]] var tex : texture_depth_2d;
 
-        [[stage(fragment)]]
-        fn main([[builtin(position)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
-            return vec4<f32>(textureSample(tex, samp, FragCoord.xy), 0.0, 0.0, 0.0);
-        })");
+                [[stage(fragment)]]
+                fn main([[builtin(position)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+                    return vec4<f32>(textureSample(tex, samp, FragCoord.xy), 0.0, 0.0, 0.0);
+                })");
 
-        // Enable depth test. But depth write is not enabled.
-        wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil(format);
-        depthStencil->depthCompare = wgpu::CompareFunction::LessEqual;
+            // Enable depth test. But depth write is not enabled.
+            wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil(format);
+            depthStencil->depthCompare = wgpu::CompareFunction::LessEqual;
+        } else {
+            ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
+            pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+                [[group(0), binding(0)]] var tex : texture_2d<u32>;
+
+                [[stage(fragment)]]
+                fn main([[builtin(position)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+		    var texel = textureLoad(tex, vec2<i32>(FragCoord.xy), 0);
+                    return vec4<f32>(f32(texel[0]) / 255.0, 0.0, 0.0, 0.0);
+                })");
+
+            // Enable stencil test. But stencil write is not enabled.
+            wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil(format);
+            depthStencil->stencilFront.compare = wgpu::CompareFunction::LessEqual;
+        }
 
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
@@ -74,48 +96,62 @@ class ReadOnlyDepthStencilAttachmentTests
         return device.CreateTexture(&descriptor);
     }
 
-    void TestDepth(wgpu::TextureFormat format, wgpu::Texture colorTexture) {
+    void DoTest(wgpu::TextureAspect aspect,
+                wgpu::TextureFormat format,
+                wgpu::Texture colorTexture,
+                DepthStencilValues* values) {
         wgpu::Texture depthStencilTexture = CreateTexture(
             format, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding);
 
-        // Note that we can only select one single aspect for texture view used in pipeline.
-        wgpu::TextureViewDescriptor viewDesc = {};
-        viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
-        wgpu::TextureView depthStencilViewInPipeline = depthStencilTexture.CreateView(&viewDesc);
-
-        wgpu::Sampler sampler = device.CreateSampler();
-
-        wgpu::RenderPipeline pipeline = CreateRenderPipeline(format);
-        wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                 {{0, sampler}, {1, depthStencilViewInPipeline}});
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 
-        // Create a render pass to initialize the depth attachment.
         // Note that we must encompass all aspects for texture view used in attachment.
         wgpu::TextureView depthStencilViewInAttachment = depthStencilTexture.CreateView();
         utils::ComboRenderPassDescriptor passDescriptorInit({}, depthStencilViewInAttachment);
-        passDescriptorInit.cDepthStencilAttachmentInfo.clearDepth = 0.2;
+        if (aspect == wgpu::TextureAspect::DepthOnly) {
+            passDescriptorInit.cDepthStencilAttachmentInfo.clearDepth = values->depthInitValue;
+        } else {
+            ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
+            passDescriptorInit.cDepthStencilAttachmentInfo.clearStencil = values->stencilInitValue;
+        }
         wgpu::RenderPassEncoder passInit = commandEncoder.BeginRenderPass(&passDescriptorInit);
         passInit.EndPass();
 
-        // Create a render pass with readonly depth attachment. The readonly depth attachment
-        // has already been initialized. The pipeline in this render pass will sample from the
-        // depth attachment. The pipeline will read from the depth attachment to do depth test too.
+        // Note that we can only select one single aspect for texture view used in bind group.
+        wgpu::TextureViewDescriptor viewDesc = {};
+        viewDesc.aspect = aspect;
+        wgpu::TextureView depthStencilViewInBindGroup = depthStencilTexture.CreateView(&viewDesc);
+
+        // Create a render pass to initialize the depth/stencil attachment.
         utils::ComboRenderPassDescriptor passDescriptor({colorTexture.CreateView()},
                                                         depthStencilViewInAttachment);
+        // Set both aspects to readonly. We have to do this if the format has both aspects, or
+        // it doesn't impact anything if the format has only one aspect.
         passDescriptor.cDepthStencilAttachmentInfo.depthReadOnly = true;
         passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
         passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-        // Set stencilReadOnly if the format has both depth and stencil aspects.
-        if (format == wgpu::TextureFormat::Depth24PlusStencil8) {
-            passDescriptor.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-            passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-            passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-        }
+        passDescriptor.cDepthStencilAttachmentInfo.stencilReadOnly = true;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+
+        // Create a render pass with readonly depth/stencil attachment. The attachment has already
+        // been initialized. The pipeline in this render pass will sample from the attachment.
+        // The pipeline will read from the attachment to do depth/stencil test too.
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
+        wgpu::RenderPipeline pipeline = CreateRenderPipeline(aspect, format);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, bindGroup);
+        if (aspect == wgpu::TextureAspect::DepthOnly) {
+            wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, device.CreateSampler()}, {1, depthStencilViewInBindGroup}});
+            pass.SetBindGroup(0, bindGroup);
+        } else {
+            ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
+            wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                             {{0, depthStencilViewInBindGroup}});
+            pass.SetBindGroup(0, bindGroup);
+            pass.SetStencilReference(values->stencilRefValue);
+        }
         pass.Draw(6);
         pass.EndPass();
 
@@ -124,13 +160,18 @@ class ReadOnlyDepthStencilAttachmentTests
     }
 };
 
-TEST_P(ReadOnlyDepthStencilAttachmentTests, Depth) {
+class ReadOnlyDepthAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
+
+TEST_P(ReadOnlyDepthAttachmentTests, Test) {
     wgpu::Texture colorTexture =
         CreateTexture(wgpu::TextureFormat::RGBA8Unorm,
                       wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
 
-    wgpu::TextureFormat depthStencilFormat = GetParam().mTextureFormat;
-    TestDepth(depthStencilFormat, colorTexture);
+    wgpu::TextureFormat depthFormat = GetParam().mTextureFormat;
+
+    DepthStencilValues values;
+    values.depthInitValue = 0.2;
+    DoTest(wgpu::TextureAspect::DepthOnly, depthFormat, colorTexture, &values);
 
     // The top part is not rendered by the pipeline. Its color is the default clear color for
     // color attachment.
@@ -144,7 +185,37 @@ TEST_P(ReadOnlyDepthStencilAttachmentTests, Depth) {
                       {kSize, kSize / 2});
 }
 
-DAWN_INSTANTIATE_TEST_P(ReadOnlyDepthStencilAttachmentTests,
+class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
+
+TEST_P(ReadOnlyStencilAttachmentTests, Test) {
+    wgpu::Texture colorTexture =
+        CreateTexture(wgpu::TextureFormat::RGBA8Unorm,
+                      wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
+
+    wgpu::TextureFormat stencilFormat = GetParam().mTextureFormat;
+
+    DepthStencilValues values;
+    values.stencilInitValue = 3;
+    values.stencilRefValue = 2;
+    // stencilRefValue < stencilValue (stencilInitValue), so stencil test passes. The pipeline
+    // samples from stencil buffer and writes into color buffer.
+    DoTest(wgpu::TextureAspect::StencilOnly, stencilFormat, colorTexture, &values);
+    const std::vector<RGBA8> kSampledColors(kSize * kSize, {3, 0, 0, 0});
+    EXPECT_TEXTURE_EQ(kSampledColors.data(), colorTexture, {0, 0}, {kSize, kSize});
+
+    values.stencilInitValue = 1;
+    // stencilRefValue > stencilValue (stencilInitValue), so stencil test fails. The pipeline
+    // doesn't change color buffer. Sampled data from stencil buffer is discarded.
+    DoTest(wgpu::TextureAspect::StencilOnly, stencilFormat, colorTexture, &values);
+    const std::vector<RGBA8> kInitColors(kSize * kSize, {0, 0, 0, 0});
+    EXPECT_TEXTURE_EQ(kInitColors.data(), colorTexture, {0, 0}, {kSize, kSize});
+}
+
+DAWN_INSTANTIATE_TEST_P(ReadOnlyDepthAttachmentTests,
                         {D3D12Backend()},
-                        std::vector<wgpu::TextureFormat>(utils::kDepthStencilFormats.begin(),
-                                                         utils::kDepthStencilFormats.end()));
+                        std::vector<wgpu::TextureFormat>(utils::kDepthFormats.begin(),
+                                                         utils::kDepthFormats.end()));
+DAWN_INSTANTIATE_TEST_P(ReadOnlyStencilAttachmentTests,
+                        {D3D12Backend()},
+                        std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
+                                                         utils::kStencilFormats.end()));
