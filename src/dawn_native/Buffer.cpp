@@ -152,9 +152,11 @@ namespace dawn_native {
             mUsage |= kInternalStorageBuffer;
         }
 
-        // We also add internal storage usage for Indirect buffers if validation is enabled, since
-        // validation involves binding them as storage buffers for use in a compute pass.
-        if ((mUsage & wgpu::BufferUsage::Indirect) && device->IsValidationEnabled()) {
+        // We also add internal storage usage for Indirect buffers for some transformations before
+        // DispatchIndirect calls on the backend (e.g. validations, support of [[num_workgroups]] on
+        // D3D12), since these transformations involve binding them as storage buffers for use in a
+        // compute pass.
+        if (mUsage & wgpu::BufferUsage::Indirect) {
             mUsage |= kInternalStorageBuffer;
         }
 

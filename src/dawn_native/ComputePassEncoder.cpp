@@ -42,11 +42,14 @@ namespace dawn_native {
 
             // TODO(https://crbug.com/dawn/1108): Propagate validation feedback from this
             // shader in various failure modes.
+            // Type 'bool' cannot be used in storage class 'uniform' as it is non-host-shareable.
             Ref<ShaderModuleBase> shaderModule;
             DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, R"(
                 [[block]] struct UniformParams {
                     maxComputeWorkgroupsPerDimension: u32;
                     clientOffsetInU32: u32;
+                    enableValidation: u32;
+                    duplicateNumWorkgroups: u32;
                 };
 
                 [[block]] struct IndirectParams {
@@ -54,7 +57,7 @@ namespace dawn_native {
                 };
 
                 [[block]] struct ValidatedParams {
-                    data: array<u32, 3>;
+                    data: array<u32>;
                 };
 
                 [[group(0), binding(0)]] var<uniform> uniformParams: UniformParams;
@@ -65,10 +68,15 @@ namespace dawn_native {
                 fn main() {
                     for (var i = 0u; i < 3u; i = i + 1u) {
                         var numWorkgroups = clientParams.data[uniformParams.clientOffsetInU32 + i];
-                        if (numWorkgroups > uniformParams.maxComputeWorkgroupsPerDimension) {
+                        if (uniformParams.enableValidation > 0u &&
+                            numWorkgroups > uniformParams.maxComputeWorkgroupsPerDimension) {
                             numWorkgroups = 0u;
                         }
                         validatedParams.data[i] = numWorkgroups;
+
+                        if (uniformParams.duplicateNumWorkgroups > 0u) {
+                             validatedParams.data[i + 3u] = numWorkgroups;
+                        }
                     }
                 }
             )"));
@@ -191,9 +199,21 @@ namespace dawn_native {
     }
 
     ResultOrError<std::pair<Ref<BufferBase>, uint64_t>>
-    ComputePassEncoder::ValidateIndirectDispatch(BufferBase* indirectBuffer,
-                                                 uint64_t indirectOffset) {
+    ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuffer,
+                                                        uint64_t indirectOffset) {
         DeviceBase* device = GetDevice();
+
+        const bool shouldDuplicateNumWorkgroups =
+            device->ShouldDuplicateNumWorkgroupsForDispatchIndirect(
+                mCommandBufferState.GetComputePipeline());
+        if (!IsValidationEnabled() && !shouldDuplicateNumWorkgroups) {
+            return std::make_pair(indirectBuffer, indirectOffset);
+        }
+
+        // Save the previous command buffer state so it can be restored after the
+        // validation inserts additional commands.
+        CommandBufferStateTracker previousState = mCommandBufferState;
+
         auto* const store = device->GetInternalPipelineStore();
 
         Ref<ComputePipelineBase> validationPipeline;
@@ -215,9 +235,14 @@ namespace dawn_native {
         const uint64_t clientIndirectBindingSize =
             kDispatchIndirectSize + clientOffsetFromAlignedBoundary;
 
+        // Neither 'enableValidation' nor 'duplicateNumWorkgroups' can be declared as 'bool' as
+        // currently in WGSL type 'bool' cannot be used in storage class 'uniform' as 'it is
+        // non-host-shareable'.
         struct UniformParams {
             uint32_t maxComputeWorkgroupsPerDimension;
             uint32_t clientOffsetInU32;
+            uint32_t enableValidation;
+            uint32_t duplicateNumWorkgroups;
         };
 
         // Create a uniform buffer to hold parameters for the shader.
@@ -227,6 +252,8 @@ namespace dawn_native {
             params.maxComputeWorkgroupsPerDimension =
                 device->GetLimits().v1.maxComputeWorkgroupsPerDimension;
             params.clientOffsetInU32 = clientOffsetFromAlignedBoundary / sizeof(uint32_t);
+            params.enableValidation = static_cast<uint32_t>(IsValidationEnabled());
+            params.duplicateNumWorkgroups = static_cast<uint32_t>(shouldDuplicateNumWorkgroups);
 
             DAWN_TRY_ASSIGN(uniformBuffer, utils::CreateBufferFromData(
                                                device, wgpu::BufferUsage::Uniform, {params}));
@@ -234,24 +261,29 @@ namespace dawn_native {
 
         // Reserve space in the scratch buffer to hold the validated indirect params.
         ScratchBuffer& scratchBuffer = store->scratchIndirectStorage;
-        DAWN_TRY(scratchBuffer.EnsureCapacity(kDispatchIndirectSize));
+        const uint64_t scratchBufferSize =
+            shouldDuplicateNumWorkgroups ? 2 * kDispatchIndirectSize : kDispatchIndirectSize;
+        DAWN_TRY(scratchBuffer.EnsureCapacity(scratchBufferSize));
         Ref<BufferBase> validatedIndirectBuffer = scratchBuffer.GetBuffer();
 
         Ref<BindGroupBase> validationBindGroup;
-        DAWN_TRY_ASSIGN(
-            validationBindGroup,
-            utils::MakeBindGroup(
-                device, layout,
-                {
-                    {0, uniformBuffer},
-                    {1, indirectBuffer, clientIndirectBindingOffset, clientIndirectBindingSize},
-                    {2, validatedIndirectBuffer, 0, kDispatchIndirectSize},
-                }));
+        ASSERT(indirectBuffer->GetUsage() & kInternalStorageBuffer);
+        DAWN_TRY_ASSIGN(validationBindGroup,
+                        utils::MakeBindGroup(device, layout,
+                                             {
+                                                 {0, uniformBuffer},
+                                                 {1, indirectBuffer, clientIndirectBindingOffset,
+                                                  clientIndirectBindingSize},
+                                                 {2, validatedIndirectBuffer, 0, scratchBufferSize},
+                                             }));
 
         // Issue commands to validate the indirect buffer.
         APISetPipeline(validationPipeline.Get());
         APISetBindGroup(0, validationBindGroup.Get());
         APIDispatch(1);
+
+        // Restore the state.
+        RestoreCommandBufferState(std::move(previousState));
 
         // Return the new indirect buffer and indirect buffer offset.
         return std::make_pair(std::move(validatedIndirectBuffer), uint64_t(0));
@@ -287,27 +319,28 @@ namespace dawn_native {
                 // the backend.
 
                 Ref<BufferBase> indirectBufferRef = indirectBuffer;
-                if (IsValidationEnabled()) {
-                    // Save the previous command buffer state so it can be restored after the
-                    // validation inserts additional commands.
-                    CommandBufferStateTracker previousState = mCommandBufferState;
 
-                    // Validate each indirect dispatch with a single dispatch to copy the indirect
-                    // buffer params into a scratch buffer if they're valid, and otherwise zero them
-                    // out. We could consider moving the validation earlier in the pass after the
-                    // last point the indirect buffer was used with writable usage, as well as batch
-                    // validation for multiple dispatches into one, but inserting commands at
-                    // arbitrary points in the past is not possible right now.
-                    DAWN_TRY_ASSIGN(
-                        std::tie(indirectBufferRef, indirectOffset),
-                        ValidateIndirectDispatch(indirectBufferRef.Get(), indirectOffset));
+                // Get applied indirect buffer with necessary changes on the original indirect
+                // buffer. For example,
+                // - Validate each indirect dispatch with a single dispatch to copy the indirect
+                //   buffer params into a scratch buffer if they're valid, and otherwise zero them
+                //   out.
+                // - Duplicate all the indirect dispatch parameters to support [[num_workgroups]] on
+                //   D3D12.
+                // - Directly return the original indirect dispatch buffer if we don't need any
+                //   transformations on it.
+                // We could consider moving the validation earlier in the pass after the last
+                // last point the indirect buffer was used with writable usage, as well as batch
+                // validation for multiple dispatches into one, but inserting commands at
+                // arbitrary points in the past is not possible right now.
+                DAWN_TRY_ASSIGN(std::tie(indirectBufferRef, indirectOffset),
+                                TransformIndirectDispatchBuffer(indirectBufferRef, indirectOffset));
 
-                    // Restore the state.
-                    RestoreCommandBufferState(std::move(previousState));
-
+                // If we have created a new scratch dispatch indirect buffer in
+                // TransformIndirectDispatchBuffer(), we need to track it in mUsageTracker.
+                if (indirectBufferRef.Get() != indirectBuffer) {
                     // |indirectBufferRef| was replaced with a scratch buffer. Add it to the
                     // synchronization scope.
-                    ASSERT(indirectBufferRef.Get() != indirectBuffer);
                     scope.BufferUsedAs(indirectBufferRef.Get(), wgpu::BufferUsage::Indirect);
                     mUsageTracker.AddReferencedBuffer(indirectBufferRef.Get());
                 }

@@ -42,6 +42,8 @@ namespace dawn_native { namespace d3d12 {
 
         bool UsesNumWorkgroups() const;
 
+        ComPtr<ID3D12CommandSignature> GetDispatchIndirectCommandSignature();
+
       private:
         ~ComputePipeline() override;
 

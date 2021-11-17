@@ -55,6 +55,8 @@ namespace dawn_native { namespace d3d12 {
 
         ID3D12RootSignature* GetRootSignature() const;
 
+        ID3D12CommandSignature* GetDispatchIndirectCommandSignatureWithNumWorkgroups();
+
       private:
         ~PipelineLayout() override = default;
         using PipelineLayoutBase::PipelineLayoutBase;
@@ -66,8 +68,9 @@ namespace dawn_native { namespace d3d12 {
                     kMaxBindGroups>
             mDynamicRootParameterIndices;
         uint32_t mFirstIndexOffsetParameterIndex;
-        uint32_t mNumWorkgroupsParamterIndex;
+        uint32_t mNumWorkgroupsParameterIndex;
         ComPtr<ID3D12RootSignature> mRootSignature;
+        ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
     };
 
 }}  // namespace dawn_native::d3d12

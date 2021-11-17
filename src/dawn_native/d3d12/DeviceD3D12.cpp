@@ -675,4 +675,9 @@ namespace dawn_native { namespace d3d12 {
         return mTimestampPeriod;
     }
 
+    bool Device::ShouldDuplicateNumWorkgroupsForDispatchIndirect(
+        ComputePipelineBase* computePipeline) const {
+        return ToBackend(computePipeline)->UsesNumWorkgroups();
+    }
+
 }}  // namespace dawn_native::d3d12

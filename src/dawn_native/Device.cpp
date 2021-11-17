@@ -1670,4 +1670,9 @@ namespace dawn_native {
     void DeviceBase::SetLabelImpl() {
     }
 
+    bool DeviceBase::ShouldDuplicateNumWorkgroupsForDispatchIndirect(
+        ComputePipelineBase* computePipeline) const {
+        return false;
+    }
+
 }  // namespace dawn_native

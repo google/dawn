@@ -27,7 +27,7 @@ class ComputeDispatchTests : public DawnTest {
 
         // Write workgroup number into the output buffer if we saw the biggest dispatch
         // To make sure the dispatch was not called, write maximum u32 value for 0 dispatches
-        wgpu::ShaderModule moduleForDispatch = utils::CreateShaderModule(device, R"(
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
             [[block]] struct OutputBuf {
                 workGroups : vec3<u32>;
             };
@@ -47,9 +47,13 @@ class ComputeDispatchTests : public DawnTest {
                 }
             })");
 
-        // TODO(dawn:839): use moduleForDispatch for indirect dispatch tests when D3D12 supports
-        // [[num_workgroups]] for indirect dispatch.
-        wgpu::ShaderModule moduleForDispatchIndirect = utils::CreateShaderModule(device, R"(
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = module;
+        csDesc.compute.entryPoint = "main";
+        pipeline = device.CreateComputePipeline(&csDesc);
+
+        // Test the use of the compute pipelines without using [[num_workgroups]]
+        wgpu::ShaderModule moduleWithoutNumWorkgroups = utils::CreateShaderModule(device, R"(
             [[block]] struct InputBuf {
                 expectedDispatch : vec3<u32>;
             };
@@ -73,14 +77,8 @@ class ComputeDispatchTests : public DawnTest {
                     output.workGroups = dispatch;
                 }
             })");
-
-        wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.compute.module = moduleForDispatch;
-        csDesc.compute.entryPoint = "main";
-        pipelineForDispatch = device.CreateComputePipeline(&csDesc);
-
-        csDesc.compute.module = moduleForDispatchIndirect;
-        pipelineForDispatchIndirect = device.CreateComputePipeline(&csDesc);
+        csDesc.compute.module = moduleWithoutNumWorkgroups;
+        pipelineWithoutNumWorkgroups = device.CreateComputePipeline(&csDesc);
     }
 
     void DirectTest(uint32_t x, uint32_t y, uint32_t z) {
@@ -91,17 +89,16 @@ class ComputeDispatchTests : public DawnTest {
             kSentinelData);
 
         // Set up bind group and issue dispatch
-        wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, pipelineForDispatch.GetBindGroupLayout(0),
-                                 {
-                                     {0, dst, 0, 3 * sizeof(uint32_t)},
-                                 });
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {
+                                                             {0, dst, 0, 3 * sizeof(uint32_t)},
+                                                         });
 
         wgpu::CommandBuffer commands;
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-            pass.SetPipeline(pipelineForDispatch);
+            pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Dispatch(x, y, z);
             pass.EndPass();
@@ -118,7 +115,9 @@ class ComputeDispatchTests : public DawnTest {
         EXPECT_BUFFER_U32_RANGE_EQ(&expected[0], dst, 0, 3);
     }
 
-    void IndirectTest(std::vector<uint32_t> indirectBufferData, uint64_t indirectOffset) {
+    void IndirectTest(std::vector<uint32_t> indirectBufferData,
+                      uint64_t indirectOffset,
+                      bool useNumWorkgroups = true) {
         // Set up dst storage buffer to contain dispatch x, y, z
         wgpu::Buffer dst = utils::CreateBufferFromData<uint32_t>(
             device,
@@ -131,23 +130,34 @@ class ComputeDispatchTests : public DawnTest {
 
         uint32_t indirectStart = indirectOffset / sizeof(uint32_t);
 
-        wgpu::Buffer expectedBuffer =
-            utils::CreateBufferFromData(device, &indirectBufferData[indirectStart],
-                                        3 * sizeof(uint32_t), wgpu::BufferUsage::Uniform);
-
         // Set up bind group and issue dispatch
-        wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, pipelineForDispatchIndirect.GetBindGroupLayout(0),
-                                 {
-                                     {0, expectedBuffer, 0, 3 * sizeof(uint32_t)},
-                                     {1, dst, 0, 3 * sizeof(uint32_t)},
-                                 });
+        wgpu::BindGroup bindGroup;
+        wgpu::ComputePipeline computePipelineForTest;
+
+        if (useNumWorkgroups) {
+            computePipelineForTest = pipeline;
+            bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                             {
+                                                 {0, dst, 0, 3 * sizeof(uint32_t)},
+                                             });
+        } else {
+            computePipelineForTest = pipelineWithoutNumWorkgroups;
+            wgpu::Buffer expectedBuffer =
+                utils::CreateBufferFromData(device, &indirectBufferData[indirectStart],
+                                            3 * sizeof(uint32_t), wgpu::BufferUsage::Uniform);
+            bindGroup =
+                utils::MakeBindGroup(device, pipelineWithoutNumWorkgroups.GetBindGroupLayout(0),
+                                     {
+                                         {0, expectedBuffer, 0, 3 * sizeof(uint32_t)},
+                                         {1, dst, 0, 3 * sizeof(uint32_t)},
+                                     });
+        }
 
         wgpu::CommandBuffer commands;
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-            pass.SetPipeline(pipelineForDispatchIndirect);
+            pass.SetPipeline(computePipelineForTest);
             pass.SetBindGroup(0, bindGroup);
             pass.DispatchIndirect(indirectBuffer, indirectOffset);
             pass.EndPass();
@@ -178,8 +188,8 @@ class ComputeDispatchTests : public DawnTest {
     }
 
   private:
-    wgpu::ComputePipeline pipelineForDispatch;
-    wgpu::ComputePipeline pipelineForDispatchIndirect;
+    wgpu::ComputePipeline pipeline;
+    wgpu::ComputePipeline pipelineWithoutNumWorkgroups;
 };
 
 // Test basic direct
@@ -207,6 +217,11 @@ TEST_P(ComputeDispatchTests, IndirectBasic) {
     IndirectTest({2, 3, 4}, 0);
 }
 
+// Test basic indirect without using [[num_workgroups]]
+TEST_P(ComputeDispatchTests, IndirectBasicWithoutNumWorkgroups) {
+    IndirectTest({2, 3, 4}, 0, false);
+}
+
 // Test no-op indirect
 TEST_P(ComputeDispatchTests, IndirectNoop) {
     // All dimensions are 0s
@@ -227,6 +242,11 @@ TEST_P(ComputeDispatchTests, IndirectOffset) {
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t));
 }
 
+// Test indirect with buffer offset without using [[num_workgroups]]
+TEST_P(ComputeDispatchTests, IndirectOffsetWithoutNumWorkgroups) {
+    IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t), false);
+}
+
 // Test indirect dispatches at max limit.
 TEST_P(ComputeDispatchTests, MaxWorkgroups) {
     // TODO(crbug.com/dawn/1165): Fails with WARP
@@ -243,6 +263,9 @@ TEST_P(ComputeDispatchTests, MaxWorkgroups) {
 // Test indirect dispatches exceeding the max limit are noop-ed.
 TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsNoop) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    // TODO(crbug.com/dawn/839): Investigate why this test fails with WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
 
@@ -265,6 +288,9 @@ TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsNoop) {
 // Test indirect dispatches exceeding the max limit with an offset are noop-ed.
 TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsWithOffsetNoop) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    // TODO(crbug.com/dawn/839): Investigate why this test fails with WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
 

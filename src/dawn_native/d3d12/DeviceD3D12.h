@@ -139,6 +139,9 @@ namespace dawn_native { namespace d3d12 {
 
         float GetTimestampPeriodInNS() const override;
 
+        bool ShouldDuplicateNumWorkgroupsForDispatchIndirect(
+            ComputePipelineBase* computePipeline) const override;
+
       private:
         using DeviceBase::DeviceBase;
 

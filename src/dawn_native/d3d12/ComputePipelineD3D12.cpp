@@ -90,4 +90,11 @@ namespace dawn_native { namespace d3d12 {
         return GetStage(SingleShaderStage::Compute).metadata->usesNumWorkgroups;
     }
 
+    ComPtr<ID3D12CommandSignature> ComputePipeline::GetDispatchIndirectCommandSignature() {
+        if (UsesNumWorkgroups()) {
+            return ToBackend(GetLayout())->GetDispatchIndirectCommandSignatureWithNumWorkgroups();
+        }
+        return ToBackend(GetDevice())->GetDispatchIndirectSignature();
+    }
+
 }}  // namespace dawn_native::d3d12

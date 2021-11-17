@@ -336,10 +336,15 @@ namespace dawn_native {
 
         MaybeError Tick();
 
+        // TODO(crbug.com/dawn/839): Organize the below backend-specific parameters into the struct
+        // BackendMetadata that we can query from the device.
         virtual uint32_t GetOptimalBytesPerRowAlignment() const = 0;
         virtual uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const = 0;
 
         virtual float GetTimestampPeriodInNS() const = 0;
+
+        virtual bool ShouldDuplicateNumWorkgroupsForDispatchIndirect(
+            ComputePipelineBase* computePipeline) const;
 
         const CombinedLimits& GetLimits() const;
 
