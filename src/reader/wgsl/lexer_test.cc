@@ -110,6 +110,24 @@ text // nested line comments are ignored /* more text
   EXPECT_TRUE(t.IsEof());
 }
 
+TEST_F(LexerTest, Skips_Comments_Block_Unterminated) {
+  // I had to break up the /* because otherwise the clang readability check
+  // errored out saying it could not find the end of a multi-line comment.
+  Source::FileContent content(R"(
+  /)"
+                              R"(*
+abcd)");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  ASSERT_TRUE(t.Is(Token::Type::kError));
+  EXPECT_EQ(t.to_str(), "unterminated block comment");
+  EXPECT_EQ(t.source().range.begin.line, 2u);
+  EXPECT_EQ(t.source().range.begin.column, 3u);
+  EXPECT_EQ(t.source().range.end.line, 2u);
+  EXPECT_EQ(t.source().range.end.column, 4u);
+}
+
 struct FloatData {
   const char* input;
   float result;

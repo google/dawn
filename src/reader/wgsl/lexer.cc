@@ -61,14 +61,12 @@ Lexer::Lexer(const std::string& file_path, const Source::FileContent* content)
 Lexer::~Lexer() = default;
 
 Token Lexer::next() {
-  skip_whitespace();
-  skip_comments();
-
-  if (is_eof()) {
-    return {Token::Type::kEOF, begin_source()};
+  auto t = skip_whitespace_and_comments();
+  if (!t.IsUninitialized()) {
+    return t;
   }
 
-  auto t = try_hex_float();
+  t = try_hex_float();
   if (!t.IsUninitialized()) {
     return t;
   }
@@ -140,7 +138,7 @@ bool Lexer::matches(size_t pos, const std::string& substr) {
   return content_->data.substr(pos, substr.size()) == substr;
 }
 
-void Lexer::skip_whitespace() {
+Token Lexer::skip_whitespace_and_comments() {
   for (;;) {
     auto pos = pos_;
     while (!is_eof() && is_whitespace(content_->data[pos_])) {
@@ -155,27 +153,41 @@ void Lexer::skip_whitespace() {
       location_.column++;
     }
 
-    skip_comments();
+    auto t = skip_comment();
+    if (!t.IsUninitialized()) {
+      return t;
+    }
 
     // If the cursor didn't advance we didn't remove any whitespace
     // so we're done.
     if (pos == pos_)
       break;
   }
+  if (is_eof()) {
+    return {Token::Type::kEOF, begin_source()};
+  }
+
+  return {};
 }
 
-void Lexer::skip_comments() {
+Token Lexer::skip_comment() {
   if (matches(pos_, "//")) {
-    // Line comment: ignore everything until the end of line.
+    // Line comment: ignore everything until the end of line
+    // or end of input.
     while (!is_eof() && !matches(pos_, "\n")) {
       pos_++;
       location_.column++;
     }
-    return;
+    return {};
   }
 
   if (matches(pos_, "/*")) {
     // Block comment: ignore everything until the closing '*/' token.
+
+    // Record source location of the initial '/*'
+    auto source = begin_source();
+    source.range.end.column += 1;
+
     pos_ += 2;
     location_.column += 2;
 
@@ -202,7 +214,11 @@ void Lexer::skip_comments() {
         location_.column++;
       }
     }
+    if (depth > 0) {
+      return {Token::Type::kError, source, "unterminated block comment"};
+    }
   }
+  return {};
 }
 
 Token Lexer::try_float() {

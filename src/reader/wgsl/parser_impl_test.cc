@@ -85,7 +85,7 @@ fn main() {
   EXPECT_EQ(p->error(), "5:1: exponent is too large for hex float");
 }
 
-TEST_F(ParserImplTest, Comments) {
+TEST_F(ParserImplTest, Comments_TerminatedBlockComment) {
   auto p = parser(R"(
 /**
  * Here is my shader.
@@ -99,10 +99,22 @@ no
 parameters
 */) -> [[location(0)]] vec4<f32> {
   return/*block_comments_delimit_tokens*/vec4<f32>(.4, .2, .3, 1);
-}/* unterminated block comments are OK at EOF...)");
+}/* block comments are OK at EOF...*/)");
 
   ASSERT_TRUE(p->Parse()) << p->error();
   ASSERT_EQ(1u, p->program().AST().Functions().size());
+}
+
+TEST_F(ParserImplTest, Comments_UnterminatedBlockComment) {
+  auto p = parser(R"(
+[[stage(fragment)]]
+fn main() -> [[location(0)]] vec4<f32> {
+  return vec4<f32>(.4, .2, .3, 1);
+} /* unterminated block comments are invalid ...)");
+
+  ASSERT_FALSE(p->Parse());
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "5:3: unterminated block comment") << p->error();
 }
 
 }  // namespace

@@ -32,13 +32,19 @@ class Lexer {
   Lexer(const std::string& file_path, const Source::FileContent* content);
   ~Lexer();
 
-  /// Returns the next token in the input stream
+  /// Returns the next token in the input stream.
   /// @return Token
   Token next();
 
  private:
-  void skip_whitespace();
-  void skip_comments();
+  /// Advances past whitespace and comments, if present
+  /// at the current position.
+  /// @returns uninitialized token on success, or error
+  Token skip_whitespace_and_comments();
+  /// Advances past a comment at the current position,
+  /// if one exists.
+  /// @returns uninitialized token on success, or error
+  Token skip_comment();
 
   Token build_token_from_int_if_possible(Source source,
                                          size_t start,
@@ -55,6 +61,7 @@ class Lexer {
   Source begin_source() const;
   void end_source(Source&) const;
 
+  /// @returns true if the end of the input has been reached.
   bool is_eof() const;
   /// @param ch a character
   /// @returns true if 'ch' is an alphabetic character
