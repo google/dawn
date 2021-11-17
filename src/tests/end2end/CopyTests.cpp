@@ -50,7 +50,7 @@ class CopyTests {
             const uint32_t byteOffsetPerSlice = layout.bytesPerImage * layer;
             for (uint32_t y = 0; y < layout.mipSize.height; ++y) {
                 for (uint32_t x = 0; x < layout.mipSize.width * bytesPerTexelBlock; ++x) {
-                    uint32_t i = x + y * layout.texelBlocksPerRow;
+                    uint32_t i = x + y * layout.bytesPerRow;
                     textureData[byteOffsetPerSlice + i] =
                         static_cast<uint8_t>((x + 1 + (layer + 1) * y) % 256);
                 }
