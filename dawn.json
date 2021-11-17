@@ -113,6 +113,7 @@
         "tags": ["upstream"],
         "_TODO": "Add requiredFeatures and requiredLimits support",
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "required features count", "type": "uint32_t"},
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required features count"},
             {"name": "required limits", "type": "required limits", "annotation": "const*"}
@@ -520,6 +521,16 @@
                 ]
             },
             {
+                "name": "fill buffer",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "destination", "type": "buffer"},
+                    {"name": "destination offset", "type": "uint64_t"},
+                    {"name": "size", "type": "uint64_t"},
+                    {"name": "value", "type": "uint8_t", "default": 0}
+                ]
+            },
+            {
                 "name": "inject validation error",
                 "tags": ["dawn"],
                 "args": [
@@ -642,7 +653,9 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "timestamp write count", "type": "uint32_t", "default": 0, "tags": ["upstream"]},
+            {"name": "timestamp writes", "type": "compute pass timestamp write", "annotation": "const*", "length": "timestamp write count", "tags": ["upstream"]}
         ]
     },
     "compute pass encoder": {
@@ -681,6 +694,7 @@
             },
             {
                 "name": "write timestamp",
+                "tags": ["emscripten", "dawn"],
                 "args": [
                     {"name": "query set", "type": "query set"},
                     {"name": "query index", "type": "uint32_t"}
@@ -716,6 +730,23 @@
                 "name": "end pipeline statistics query",
                 "tags": ["upstream"]
             }
+        ]
+    },
+    "compute pass timestamp location": {
+        "category": "enum",
+        "tags": ["upstream"],
+        "values": [
+            {"value": 0, "name": "beginning"},
+            {"value": 1, "name": "end"}
+        ]
+    },
+    "compute pass timestamp write": {
+        "category": "structure",
+        "tags": ["upstream"],
+        "members": [
+            {"name": "query set", "type": "query set"},
+            {"name": "query index", "type": "uint32_t"},
+            {"name": "location", "type": "compute pass timestamp location"}
         ]
     },
     "compute pipeline": {
@@ -1326,8 +1357,9 @@
         "category": "enum",
         "tags": ["upstream"],
         "values": [
-            {"value": 0, "name": "low power"},
-            {"value": 1, "name": "high performance"}
+            {"value": 0, "name": "undefined"},
+            {"value": 1, "name": "low power"},
+            {"value": 2, "name": "high performance"}
         ]
     },
     "present mode": {
@@ -1609,7 +1641,9 @@
             {"name": "color attachment count", "type": "uint32_t"},
             {"name": "color attachments", "type": "render pass color attachment", "annotation": "const*", "length": "color attachment count"},
             {"name": "depth stencil attachment", "type": "render pass depth stencil attachment", "annotation": "const*", "optional": true},
-            {"name": "occlusion query set", "type": "query set", "optional": true}
+            {"name": "occlusion query set", "type": "query set", "optional": true},
+            {"name": "timestamp write count", "type": "uint32_t", "default": 0, "tags": ["upstream"]},
+            {"name": "timestamp writes", "type": "render pass timestamp write", "annotation": "const*", "length": "timestamp write count", "tags": ["upstream"]}
         ]
     },
     "render pass encoder": {
@@ -1755,6 +1789,7 @@
             },
             {
                 "name": "write timestamp",
+                "tags": ["emscripten", "dawn"],
                 "args": [
                     {"name": "query set", "type": "query set"},
                     {"name": "query index", "type": "uint32_t"}
@@ -1767,6 +1802,23 @@
                 "name": "end pipeline statistics query",
                 "tags": ["upstream"]
             }
+        ]
+    },
+    "render pass timestamp location": {
+        "category": "enum",
+        "tags": ["upstream"],
+        "values": [
+            {"value": 0, "name": "beginning"},
+            {"value": 1, "name": "end"}
+        ]
+    },
+    "render pass timestamp write": {
+        "category": "structure",
+        "tags": ["upstream"],
+        "members": [
+            {"name": "query set", "type": "query set"},
+            {"name": "query index", "type": "uint32_t"},
+            {"name": "location", "type": "render pass timestamp location"}
         ]
     },
     "render pipeline": {
