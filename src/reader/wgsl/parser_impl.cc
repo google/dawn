@@ -2844,12 +2844,6 @@ Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
     return create<ast::UintLiteralExpression>(t.source(), t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
-    auto p = peek();
-    if (p.IsIdentifier() && p.to_str() == "f") {
-      next();  // Consume 'f'
-      return add_error(p.source(),
-                       "float literals must not be suffixed with 'f'");
-    }
     return create<ast::FloatLiteralExpression>(t.source(), t.to_f32());
   }
   return Failure::kNoMatch;

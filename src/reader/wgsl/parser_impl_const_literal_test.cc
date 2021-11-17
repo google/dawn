@@ -312,6 +312,16 @@ FloatLiteralTestCase hexfloat_literal_test_cases[] = {
     {"-0x1.", -1.0f},
     {"-0x.8", -0.5f},
     {"-0x1.8", -1.5f},
+
+    // Examples with a binary exponent and a 'f' suffix.
+    {"0x1.p0f", 1.0f},
+    {"0x.8p2f", 2.0f},
+    {"0x1.8p-1f", 0.75f},
+    {"0x2p-2f", 0.5f},  // No binary point
+    {"-0x1.p0f", -1.0f},
+    {"-0x.8p2f", -2.0f},
+    {"-0x1.8p-1f", -0.75f},
+    {"-0x2p-2f", -0.5f},  // No binary point
 };
 INSTANTIATE_TEST_SUITE_P(ParserImplFloatLiteralTest_HexFloat,
                          ParserImplFloatLiteralTest,

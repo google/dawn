@@ -256,11 +256,18 @@ Token Lexer::try_float() {
     }
   }
 
-  if (!has_point && !has_exponent) {
+  bool has_f_suffix = false;
+  if (end < len_ && matches(end, "f")) {
+    end++;
+    has_f_suffix = true;
+  }
+
+  if (!has_point && !has_exponent && !has_f_suffix) {
     // If it only has digits then it's an integer.
     return {};
   }
 
+  // Save the error string, for use by diagnostics.
   const auto str = content_->data.substr(start, end - start);
 
   pos_ = end;
@@ -488,6 +495,14 @@ Token Lexer::try_hex_float() {
       }
       end++;
     }
+
+    // Parse optional 'f' suffix.  For a hex float, it can only exist
+    // when the exponent is present. Otherwise it will look like
+    // one of the mantissa digits.
+    if (end < len_ && matches(end, "f")) {
+      end++;
+    }
+
     if (!has_exponent_digits) {
       return {Token::Type::kError, source,
               "expected an exponent value for hex float"};
