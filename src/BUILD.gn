@@ -453,6 +453,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/manager.h",
     "transform/module_scope_var_to_entry_point_param.cc",
     "transform/module_scope_var_to_entry_point_param.h",
+    "transform/multiplanar_external_texture.cc",
+    "transform/multiplanar_external_texture.h",
     "transform/num_workgroups_from_uniform.cc",
     "transform/num_workgroups_from_uniform.h",
     "transform/pad_array_elements.cc",

@@ -316,6 +316,7 @@ tint_unittests_source_set("tint_unittests_transform_src") {
     "../src/transform/inline_pointer_lets_test.cc",
     "../src/transform/loop_to_for_loop_test.cc",
     "../src/transform/module_scope_var_to_entry_point_param_test.cc",
+    "../src/transform/multiplanar_external_texture_test.cc",
     "../src/transform/num_workgroups_from_uniform_test.cc",
     "../src/transform/pad_array_elements_test.cc",
     "../src/transform/promote_initializers_to_const_var_test.cc",
