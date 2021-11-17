@@ -46,6 +46,8 @@ void tint_symbol_inner(uint idx, const constant S* const tint_symbol_1) {
   int2 const g = (*(tint_symbol_1)).arr.arr[idx].g;
   int2 const h = (*(tint_symbol_1)).arr.arr[idx].h;
   float2x3 const i = (*(tint_symbol_1)).arr.arr[idx].i;
+  float3x2 const j = (*(tint_symbol_1)).arr.arr[idx].j;
+  tint_array_wrapper const k = (*(tint_symbol_1)).arr.arr[idx].k;
 }
 
 kernel void tint_symbol(const constant S* tint_symbol_2 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {

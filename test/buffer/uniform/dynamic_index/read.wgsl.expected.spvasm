@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 65
+; Bound: 73
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -87,7 +87,11 @@
 %_ptr_Uniform_v2int = OpTypePointer Uniform %v2int
      %uint_7 = OpConstant %uint 7
 %_ptr_Uniform_mat2v3float = OpTypePointer Uniform %mat2v3float
-         %60 = OpTypeFunction %void
+     %uint_9 = OpConstant %uint 9
+%_ptr_Uniform_mat3v2float = OpTypePointer Uniform %mat3v2float
+    %uint_10 = OpConstant %uint 10
+%_ptr_Uniform__arr_v4int_uint_4 = OpTypePointer Uniform %_arr_v4int_uint_4
+         %68 = OpTypeFunction %void
  %main_inner = OpFunction %void None %22
         %idx = OpFunctionParameter %uint
          %26 = OpLabel
@@ -109,11 +113,15 @@
          %56 = OpLoad %v2int %55
          %58 = OpAccessChain %_ptr_Uniform_mat2v3float %s %uint_0 %idx %uint_8
          %59 = OpLoad %mat2v3float %58
+         %62 = OpAccessChain %_ptr_Uniform_mat3v2float %s %uint_0 %idx %uint_9
+         %63 = OpLoad %mat3v2float %62
+         %66 = OpAccessChain %_ptr_Uniform__arr_v4int_uint_4 %s %uint_0 %idx %uint_10
+         %67 = OpLoad %_arr_v4int_uint_4 %66
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %60
-         %62 = OpLabel
-         %64 = OpLoad %uint %idx_1
-         %63 = OpFunctionCall %void %main_inner %64
+       %main = OpFunction %void None %68
+         %70 = OpLabel
+         %72 = OpLoad %uint %idx_1
+         %71 = OpFunctionCall %void %main_inner %72
                OpReturn
                OpFunctionEnd

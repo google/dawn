@@ -32,4 +32,6 @@ fn main([[builtin(local_invocation_index)]] idx : u32) {
   let g = s.arr[idx].g;
   let h = s.arr[idx].h;
   let i = s.arr[idx].i;
+  let j = s.arr[idx].j;
+  let k = s.arr[idx].k;
 }
