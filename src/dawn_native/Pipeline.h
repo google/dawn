@@ -37,7 +37,9 @@ namespace dawn_native {
                                          const PipelineLayoutBase* layout,
                                          SingleShaderStage stage);
 
-    using PipelineConstantEntry = std::pair<std::string, double>;
+    // Use map to make sure constant keys are sorted for creating shader cache keys
+    using PipelineConstantEntries = std::map<std::string, double>;
+
     struct ProgrammableStage {
         Ref<ShaderModuleBase> module;
         std::string entryPoint;
@@ -45,7 +47,7 @@ namespace dawn_native {
         // The metadata lives as long as module, that's ref-ed in the same structure.
         const EntryPointMetadata* metadata = nullptr;
 
-        std::vector<PipelineConstantEntry> constants;
+        PipelineConstantEntries constants;
     };
 
     class PipelineBase : public ApiObjectBase, public CachedObject {

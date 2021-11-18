@@ -17,6 +17,8 @@
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
 #include "common/Log.h"
+#include "common/WindowsUtils.h"
+#include "dawn_native/Pipeline.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/D3D12Error.h"
@@ -31,6 +33,94 @@
 #include <map>
 #include <sstream>
 #include <unordered_map>
+
+namespace dawn_native {
+    template <typename StringType, typename T = int32_t>
+    struct NumberToString {
+        static StringType ToStringAsValue(T v);
+        static StringType ToStringAsId(T v);
+    };
+
+    template <typename T>
+    struct NumberToString<std::string, T> {
+        static constexpr char kSpecConstantPrefix[] = "WGSL_SPEC_CONSTANT_";
+        static std::string ToStringAsValue(T v) {
+            return std::to_string(v);
+        }
+        static std::string ToStringAsId(T v) {
+            return std::to_string(v);
+        }
+    };
+
+    template <typename T>
+    struct NumberToString<std::wstring, T> {
+        static constexpr WCHAR kSpecConstantPrefix[] = L"WGSL_SPEC_CONSTANT_";
+        static std::wstring ToStringAsValue(T v) {
+            return std::to_wstring(v);
+        }
+        static std::wstring ToStringAsId(T v) {
+            return std::to_wstring(v);
+        }
+    };
+
+    template <>
+    struct NumberToString<std::string, float> {
+        static std::string ToStringAsValue(float v) {
+            std::ostringstream out;
+            // 32 bit float has 7 decimal digits of precision so setting n to 8 should be enough
+            out.precision(8);
+            out << std::fixed << v;
+            return out.str();
+        }
+    };
+
+    template <>
+    struct NumberToString<std::wstring, float> {
+        static std::wstring ToStringAsValue(float v) {
+            std::basic_ostringstream<WCHAR> out;
+            // 32 bit float has 7 decimal digits of precision so setting n to 8 should be enough
+            out.precision(8);
+            out << std::fixed << v;
+            return out.str();
+        }
+    };
+
+    template <>
+    struct NumberToString<std::string, uint32_t> {
+        static std::string ToStringAsValue(uint32_t v) {
+            return std::to_string(v) + "u";
+        }
+    };
+
+    template <>
+    struct NumberToString<std::wstring, uint32_t> {
+        static std::wstring ToStringAsValue(uint32_t v) {
+            return std::to_wstring(v) + L"u";
+        }
+    };
+
+    template <typename StringType>
+    StringType GetHLSLValueString(EntryPointMetadata::OverridableConstant::Type dawnType,
+                                  const OverridableConstantScalar* entry,
+                                  double value = 0) {
+        switch (dawnType) {
+            case EntryPointMetadata::OverridableConstant::Type::Boolean:
+                return NumberToString<StringType, int32_t>::ToStringAsValue(
+                    entry ? entry->b : static_cast<int32_t>(value));
+            case EntryPointMetadata::OverridableConstant::Type::Float32:
+                return NumberToString<StringType, float>::ToStringAsValue(
+                    entry ? entry->f32 : static_cast<float>(value));
+            case EntryPointMetadata::OverridableConstant::Type::Int32:
+                return NumberToString<StringType, int32_t>::ToStringAsValue(
+                    entry ? entry->i32 : static_cast<int32_t>(value));
+            case EntryPointMetadata::OverridableConstant::Type::Uint32:
+                return NumberToString<StringType, uint32_t>::ToStringAsValue(
+                    entry ? entry->u32 : static_cast<uint32_t>(value));
+            default:
+                UNREACHABLE();
+        }
+    }
+}  // namespace dawn_native
 
 namespace dawn_native { namespace d3d12 {
 
@@ -109,6 +199,8 @@ namespace dawn_native { namespace d3d12 {
             bool usesNumWorkgroups;
             uint32_t numWorkgroupsRegisterSpace;
             uint32_t numWorkgroupsShaderRegister;
+            const PipelineConstantEntries* pipelineConstantEntries;
+            const EntryPointMetadata::OverridableConstantsMap* shaderEntryPointConstants;
 
             // FXC/DXC common inputs
             bool disableWorkgroupInit;
@@ -128,7 +220,8 @@ namespace dawn_native { namespace d3d12 {
                 uint32_t compileFlags,
                 const Device* device,
                 const tint::Program* program,
-                const EntryPointMetadata& entryPoint) {
+                const EntryPointMetadata& entryPoint,
+                const ProgrammableStage& programmableStage) {
                 Compiler compiler;
                 uint64_t dxcVersion = 0;
                 if (device->IsToggleEnabled(Toggle::UseDXC)) {
@@ -200,6 +293,10 @@ namespace dawn_native { namespace d3d12 {
                 request.dxcVersion = compiler == Compiler::DXC ? dxcVersion : 0;
                 request.deviceInfo = &device->GetDeviceInfo();
                 request.hasShaderFloat16Feature = device->IsFeatureEnabled(Feature::ShaderFloat16);
+                request.pipelineConstantEntries = &programmableStage.constants;
+                request.shaderEntryPointConstants =
+                    &programmableStage.module->GetEntryPoint(programmableStage.entryPoint)
+                         .overridableConstants;
                 return std::move(request);
             }
 
@@ -251,6 +348,21 @@ namespace dawn_native { namespace d3d12 {
                 stream << " fxcVersion=" << fxcVersion;
                 stream << " dxcVersion=" << dxcVersion;
                 stream << " hasShaderFloat16Feature=" << hasShaderFloat16Feature;
+
+                stream << " overridableConstants={";
+                for (const auto& pipelineConstant : *pipelineConstantEntries) {
+                    const std::string& name = pipelineConstant.first;
+                    double value = pipelineConstant.second;
+
+                    // This is already validated so `name` must exist
+                    const auto& moduleConstant = shaderEntryPointConstants->at(name);
+
+                    stream << " <" << name << ","
+                           << GetHLSLValueString<std::string>(moduleConstant.type, nullptr, value)
+                           << ">";
+                }
+                stream << " }";
+
                 stream << ")";
                 stream << "\n";
 
@@ -310,6 +422,53 @@ namespace dawn_native { namespace d3d12 {
             return arguments;
         }
 
+        template <typename StringType>
+        const std::vector<std::pair<StringType, StringType>> GetOverridableConstantsDefines(
+            const PipelineConstantEntries* pipelineConstantEntries,
+            const EntryPointMetadata::OverridableConstantsMap* shaderEntryPointConstants) {
+            std::vector<std::pair<StringType, StringType>> defineStrings;
+
+            std::unordered_set<std::string> overriddenConstants;
+
+            // Set pipeline overridden values
+            for (const auto& pipelineConstant : *pipelineConstantEntries) {
+                const std::string& name = pipelineConstant.first;
+                double value = pipelineConstant.second;
+
+                overriddenConstants.insert(name);
+
+                // This is already validated so `name` must exist
+                const auto& moduleConstant = shaderEntryPointConstants->at(name);
+
+                defineStrings.emplace_back(
+                    NumberToString<StringType>::kSpecConstantPrefix +
+                        NumberToString<StringType>::ToStringAsId(
+                            static_cast<int32_t>(moduleConstant.id)),
+                    GetHLSLValueString<StringType>(moduleConstant.type, nullptr, value));
+            }
+
+            // Set shader initialized default values
+            for (const auto& iter : *shaderEntryPointConstants) {
+                const std::string& name = iter.first;
+                if (overriddenConstants.count(name) != 0) {
+                    // This constant already has overridden value
+                    continue;
+                }
+
+                const auto& moduleConstant = shaderEntryPointConstants->at(name);
+
+                // Uninitialized default values are okay since they are only defined to pass
+                // compilation but not used
+                defineStrings.emplace_back(NumberToString<StringType>::kSpecConstantPrefix +
+                                               NumberToString<StringType>::ToStringAsId(
+                                                   static_cast<int32_t>(moduleConstant.id)),
+                                           GetHLSLValueString<StringType>(
+                                               moduleConstant.type, &moduleConstant.defaultValue));
+            }
+
+            return defineStrings;
+        }
+
         ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(IDxcLibrary* dxcLibrary,
                                                          IDxcCompiler* dxcCompiler,
                                                          const ShaderCompilationRequest& request,
@@ -326,12 +485,21 @@ namespace dawn_native { namespace d3d12 {
             std::vector<const wchar_t*> arguments =
                 GetDXCArguments(request.compileFlags, request.hasShaderFloat16Feature);
 
+            // Build defines for overridable constants
+            const auto& defineStrings = GetOverridableConstantsDefines<std::wstring>(
+                request.pipelineConstantEntries, request.shaderEntryPointConstants);
+            std::vector<DxcDefine> dxcDefines;
+            dxcDefines.reserve(defineStrings.size());
+            for (const auto& d : defineStrings) {
+                dxcDefines.push_back({d.first.c_str(), d.second.c_str()});
+            }
+
             ComPtr<IDxcOperationResult> result;
             DAWN_TRY(CheckHRESULT(
                 dxcCompiler->Compile(sourceBlob.Get(), nullptr, entryPointW.c_str(),
                                      request.deviceInfo->shaderProfiles[request.stage].c_str(),
-                                     arguments.data(), arguments.size(), nullptr, 0, nullptr,
-                                     &result),
+                                     arguments.data(), arguments.size(), dxcDefines.data(),
+                                     dxcDefines.size(), nullptr, &result),
                 "DXC compile"));
 
             HRESULT hr;
@@ -369,8 +537,24 @@ namespace dawn_native { namespace d3d12 {
             ComPtr<ID3DBlob> compiledShader;
             ComPtr<ID3DBlob> errors;
 
+            // Build defines for overridable constants
+            const auto& defineStrings = GetOverridableConstantsDefines<std::string>(
+                request.pipelineConstantEntries, request.shaderEntryPointConstants);
+
+            const D3D_SHADER_MACRO* pDefines = nullptr;
+            std::vector<D3D_SHADER_MACRO> fxcDefines;
+            if (defineStrings.size() > 0) {
+                fxcDefines.reserve(defineStrings.size() + 1);
+                for (const auto& d : defineStrings) {
+                    fxcDefines.push_back({d.first.c_str(), d.second.c_str()});
+                }
+                // d3dCompile D3D_SHADER_MACRO* pDefines is a nullptr terminated array
+                fxcDefines.push_back({nullptr, nullptr});
+                pDefines = fxcDefines.data();
+            }
+
             DAWN_INVALID_IF(FAILED(functions->d3dCompile(
-                                hlslSource.c_str(), hlslSource.length(), nullptr, nullptr, nullptr,
+                                hlslSource.c_str(), hlslSource.length(), nullptr, pDefines, nullptr,
                                 request.entryPointName, targetProfile, request.compileFlags, 0,
                                 &compiledShader, &errors)),
                             "D3D compile failed with: %s",
@@ -391,6 +575,9 @@ namespace dawn_native { namespace d3d12 {
                 transformManager.Add<tint::transform::Robustness>();
             }
             transformManager.Add<tint::transform::BindingRemapper>();
+
+            transformManager.Add<tint::transform::SingleEntryPoint>();
+            transformInputs.Add<tint::transform::SingleEntryPoint::Config>(request.entryPointName);
 
             transformManager.Add<tint::transform::Renamer>();
 
@@ -508,7 +695,7 @@ namespace dawn_native { namespace d3d12 {
         return InitializeBase(parseResult);
     }
 
-    ResultOrError<CompiledShader> ShaderModule::Compile(const char* entryPointName,
+    ResultOrError<CompiledShader> ShaderModule::Compile(const ProgrammableStage& programmableStage,
                                                         SingleShaderStage stage,
                                                         PipelineLayout* layout,
                                                         uint32_t compileFlags) {
@@ -555,9 +742,10 @@ namespace dawn_native { namespace d3d12 {
         }
 
         ShaderCompilationRequest request;
-        DAWN_TRY_ASSIGN(request, ShaderCompilationRequest::Create(entryPointName, stage, layout,
-                                                                  compileFlags, device, program,
-                                                                  GetEntryPoint(entryPointName)));
+        DAWN_TRY_ASSIGN(
+            request, ShaderCompilationRequest::Create(
+                         programmableStage.entryPoint.c_str(), stage, layout, compileFlags, device,
+                         program, GetEntryPoint(programmableStage.entryPoint), programmableStage));
 
         PersistentCacheKey shaderCacheKey;
         DAWN_TRY_ASSIGN(shaderCacheKey, request.CreateCacheKey());

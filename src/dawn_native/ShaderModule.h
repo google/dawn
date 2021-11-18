@@ -222,9 +222,11 @@ namespace dawn_native {
             OverridableConstantScalar defaultValue;
         };
 
+        using OverridableConstantsMap = std::unordered_map<std::string, OverridableConstant>;
+
         // Map identifier to overridable constant
         // Identifier is unique: either the variable name or the numeric ID if specified
-        std::unordered_map<std::string, OverridableConstant> overridableConstants;
+        OverridableConstantsMap overridableConstants;
 
         // Overridable constants that are not initialized in shaders
         // They need value initialization from pipeline stage or it is a validation error
@@ -254,7 +256,7 @@ namespace dawn_native {
         // Return true iff the program has an entrypoint called `entryPoint`.
         bool HasEntryPoint(const std::string& entryPoint) const;
 
-        // Returns the metadata for the given `entryPoint`. HasEntryPoint with the same argument
+        // Return the metadata for the given `entryPoint`. HasEntryPoint with the same argument
         // must be true.
         const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint) const;
 

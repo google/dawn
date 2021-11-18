@@ -391,8 +391,8 @@ fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
 
 // Test overridable constants without numeric identifiers
 TEST_P(ShaderTests, OverridableConstants) {
-    // TODO(dawn:1137): D3D12 backend is unimplemented
-    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan() && !IsMetal());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     uint32_t const kCount = 11;
     std::vector<uint32_t> expected(kCount);
@@ -469,8 +469,8 @@ TEST_P(ShaderTests, OverridableConstants) {
 
 // Test overridable constants with numeric identifiers
 TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
-    // TODO(dawn:1137): D3D12 backend is unimplemented
-    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan() && !IsMetal());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     uint32_t const kCount = 4;
     std::vector<uint32_t> expected{1u, 2u, 3u, 0u};
@@ -523,17 +523,71 @@ TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), buffer, 0, kCount);
 }
 
+// Test overridable constants precision
+// D3D12 HLSL shader uses defines so we want float number to have enough precision
+TEST_P(ShaderTests, OverridableConstantsPrecision) {
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+
+    uint32_t const kCount = 2;
+    float const kValue1 = 3.14159;
+    float const kValue2 = 3.141592653589793238;
+    std::vector<float> expected{kValue1, kValue2};
+    wgpu::Buffer buffer = CreateBuffer(kCount);
+
+    std::string shader = R"(
+[[override(1001)]] let c1: f32;
+[[override(1002)]] let c2: f32;
+
+[[block]] struct Buf {
+    data : array<f32, 2>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+
+[[stage(compute), workgroup_size(1)]] fn main() {
+    buf.data[0] = c1;
+    buf.data[1] = c2;
+})";
+
+    std::vector<wgpu::ConstantEntry> constants;
+    constants.push_back({nullptr, "1001", kValue1});
+    constants.push_back({nullptr, "1002", kValue2});
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main", &constants);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Dispatch(1);
+        pass.EndPass();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expected.data(), buffer, 0, kCount);
+}
+
 // Test overridable constants for different entry points
 TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
-    // TODO(dawn:1137): D3D12 backend is unimplemented
-    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan() && !IsMetal());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     uint32_t const kCount = 1;
     std::vector<uint32_t> expected1{1u};
     std::vector<uint32_t> expected2{2u};
+    std::vector<uint32_t> expected3{3u};
 
     wgpu::Buffer buffer1 = CreateBuffer(kCount);
     wgpu::Buffer buffer2 = CreateBuffer(kCount);
+    wgpu::Buffer buffer3 = CreateBuffer(kCount);
 
     std::string shader = R"(
 [[override(1001)]] let c1: u32;
@@ -551,6 +605,10 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
 
 [[stage(compute), workgroup_size(1)]] fn main2() {
     buf.data[0] = c2;
+}
+
+[[stage(compute), workgroup_size(1)]] fn main3() {
+    buf.data[0] = 3u;
 }
 )";
 
@@ -575,10 +633,17 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
     csDesc2.compute.constantCount = constants2.size();
     wgpu::ComputePipeline pipeline2 = device.CreateComputePipeline(&csDesc2);
 
+    wgpu::ComputePipelineDescriptor csDesc3;
+    csDesc3.compute.module = shaderModule;
+    csDesc3.compute.entryPoint = "main3";
+    wgpu::ComputePipeline pipeline3 = device.CreateComputePipeline(&csDesc3);
+
     wgpu::BindGroup bindGroup1 =
         utils::MakeBindGroup(device, pipeline1.GetBindGroupLayout(0), {{0, buffer1}});
     wgpu::BindGroup bindGroup2 =
         utils::MakeBindGroup(device, pipeline2.GetBindGroupLayout(0), {{0, buffer2}});
+    wgpu::BindGroup bindGroup3 =
+        utils::MakeBindGroup(device, pipeline3.GetBindGroupLayout(0), {{0, buffer3}});
 
     wgpu::CommandBuffer commands;
     {
@@ -592,6 +657,10 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
         pass.SetBindGroup(0, bindGroup2);
         pass.Dispatch(1);
 
+        pass.SetPipeline(pipeline3);
+        pass.SetBindGroup(0, bindGroup3);
+        pass.Dispatch(1);
+
         pass.EndPass();
 
         commands = encoder.Finish();
@@ -601,14 +670,15 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
 
     EXPECT_BUFFER_U32_RANGE_EQ(expected1.data(), buffer1, 0, kCount);
     EXPECT_BUFFER_U32_RANGE_EQ(expected2.data(), buffer2, 0, kCount);
+    EXPECT_BUFFER_U32_RANGE_EQ(expected3.data(), buffer3, 0, kCount);
 }
 
 // Test overridable constants with render pipeline
 // Draw a triangle covering the render target, with vertex position and color values from
 // overridable constants
 TEST_P(ShaderTests, OverridableConstantsRenderPipeline) {
-    // TODO(dawn:1137): D3D12 backend is unimplemented
-    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan() && !IsMetal());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 [[override(1111)]] let xright: f32;

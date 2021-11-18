@@ -20,6 +20,10 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
+namespace dawn_native {
+    struct ProgrammableStage;
+}  // namespace dawn_native
+
 namespace dawn_native { namespace d3d12 {
 
     class Device;
@@ -49,7 +53,7 @@ namespace dawn_native { namespace d3d12 {
                                                        const ShaderModuleDescriptor* descriptor,
                                                        ShaderModuleParseResult* parseResult);
 
-        ResultOrError<CompiledShader> Compile(const char* entryPointName,
+        ResultOrError<CompiledShader> Compile(const ProgrammableStage& programmableStage,
                                               SingleShaderStage stage,
                                               PipelineLayout* layout,
                                               uint32_t compileFlags);

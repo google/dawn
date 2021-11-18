@@ -105,12 +105,12 @@ TEST_F(ComputePipelineOverridableConstantsValidationTest, ConstantsIdentifierLoo
         TestCreatePipeline(constants);
     }
     {
-        // Valid: set the same constant twice
+        // Error: set the same constant twice
         std::vector<wgpu::ConstantEntry> constants{
             {nullptr, "c0", 0},
             {nullptr, "c0", 1},
         };
-        TestCreatePipeline(constants);
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
     }
     {
         // Valid: find by constant numeric id
@@ -158,12 +158,12 @@ TEST_F(ComputePipelineOverridableConstantsValidationTest, UninitializedConstants
         TestCreatePipeline(constants);
     }
     {
-        // Valid: all constants initialized (with duplicate initializations)
+        // Error: duplicate initializations
         std::vector<wgpu::ConstantEntry> constants{
             {nullptr, "c0", false}, {nullptr, "c2", 1}, {nullptr, "c5", 1},
             {nullptr, "c8", 1},     {nullptr, "c2", 2},
         };
-        TestCreatePipeline(constants);
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
     }
 }
 

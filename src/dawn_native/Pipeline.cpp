@@ -55,17 +55,22 @@ namespace dawn_native {
         // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
         size_t numUninitializedConstants = metadata.uninitializedOverridableConstants.size();
         // Keep an initialized constants sets to handle duplicate initialization cases
-        // Only storing that of uninialized constants is needed
         std::unordered_set<std::string> stageInitializedConstantIdentifiers;
         for (uint32_t i = 0; i < constantCount; i++) {
             DAWN_INVALID_IF(metadata.overridableConstants.count(constants[i].key) == 0,
-                            "Pipeline overridable constant \"%s\" not found in shader module %s.",
+                            "Pipeline overridable constant \"%s\" not found in %s.",
                             constants[i].key, module);
 
-            if (metadata.uninitializedOverridableConstants.count(constants[i].key) > 0 &&
-                stageInitializedConstantIdentifiers.count(constants[i].key) == 0) {
-                numUninitializedConstants--;
+            if (stageInitializedConstantIdentifiers.count(constants[i].key) == 0) {
+                if (metadata.uninitializedOverridableConstants.count(constants[i].key) > 0) {
+                    numUninitializedConstants--;
+                }
                 stageInitializedConstantIdentifiers.insert(constants[i].key);
+            } else {
+                // There are duplicate initializations
+                return DAWN_FORMAT_VALIDATION_ERROR(
+                    "Pipeline overridable constants \"%s\" is set more than once in %s",
+                    constants[i].key, module);
             }
         }
 
@@ -116,11 +121,10 @@ namespace dawn_native {
             // Record them internally.
             bool isFirstStage = mStageMask == wgpu::ShaderStage::None;
             mStageMask |= StageBit(shaderStage);
-            mStages[shaderStage] = {module, entryPointName, &metadata,
-                                    std::vector<PipelineConstantEntry>()};
+            mStages[shaderStage] = {module, entryPointName, &metadata, {}};
             auto& constants = mStages[shaderStage].constants;
             for (uint32_t i = 0; i < stage.constantCount; i++) {
-                constants.emplace_back(stage.constants[i].key, stage.constants[i].value);
+                constants.emplace(stage.constants[i].key, stage.constants[i].value);
             }
 
             // Compute the max() of all minBufferSizes across all stages.
