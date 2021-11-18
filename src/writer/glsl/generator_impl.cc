@@ -2081,9 +2081,10 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out,
     out << (l->value ? "true" : "false");
   } else if (auto* fl = lit->As<ast::FloatLiteralExpression>()) {
     if (std::isinf(fl->value)) {
-      out << (fl->value >= 0 ? "asfloat(0x7f800000u)" : "asfloat(0xff800000u)");
+      out << (fl->value >= 0 ? "uintBitsToFloat(0x7f800000u)"
+                             : "uintBitsToFloat(0xff800000u)");
     } else if (std::isnan(fl->value)) {
-      out << "asfloat(0x7fc00000u)";
+      out << "uintBitsToFloat(0x7fc00000u)";
     } else {
       out << FloatToString(fl->value) << "f";
     }

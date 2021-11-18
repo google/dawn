@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 vec4 out_var_SV_TARGET = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void main_1() {
-  out_var_SV_TARGET = vec4(asfloat(0x7f800000u), asfloat(0x7f800000u), asfloat(0x7f800000u), asfloat(0x7f800000u));
+  out_var_SV_TARGET = vec4(uintBitsToFloat(0x7f800000u), uintBitsToFloat(0x7f800000u), uintBitsToFloat(0x7f800000u), uintBitsToFloat(0x7f800000u));
   return;
 }
 
@@ -35,12 +33,5 @@ void main() {
   outputs = tint_symbol();
   out_var_SV_TARGET_1 = outputs.out_var_SV_TARGET_1;
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:7: 'asfloat' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

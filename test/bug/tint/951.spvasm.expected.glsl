@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -28,7 +26,7 @@ float getAAtOutCoords_() {
 float unaryOperation_f1_(inout float a) {
   float x_47 = a;
   if ((x_47 < 0.0f)) {
-    return asfloat(0x7f800000u);
+    return uintBitsToFloat(0x7f800000u);
   }
   float x_55 = a;
   return log(x_55);
@@ -82,12 +80,5 @@ void main() {
   inputs.tint_symbol_2 = gl_GlobalInvocationID;
   tint_symbol_1(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:29: 'asfloat' : no matching overloaded function found 
-ERROR: 0:29: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 
