@@ -276,7 +276,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
-                    TestParams{DecorationKind::kInterpolate, true},
+                    // kInterpolate tested separately (requires [[location]])
                     TestParams{DecorationKind::kInvariant, true},
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
@@ -470,7 +470,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
-                    TestParams{DecorationKind::kInterpolate, true},
+                    // kInterpolate tested separately (requires [[location]])
                     TestParams{DecorationKind::kInvariant, true},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
@@ -618,7 +618,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
-                    TestParams{DecorationKind::kInterpolate, true},
+                    // kInterpolate tested separately (requires [[location]])
                     // kInvariant tested separately (requires position builtin)
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
@@ -1390,6 +1390,47 @@ TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
   EXPECT_EQ(r()->error(),
             "12:34 warning: integral user-defined vertex outputs must have a "
             "flat interpolation attribute");
+}
+
+TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
+  Func("main",
+       ast::VariableList{
+           Param("a", ty.vec4<f32>(),
+                 {Builtin(ast::Builtin::kPosition),
+                  Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
+                              ast::InterpolationSampling::kNone)})},
+       ty.void_(), {},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: interpolate attribute must only be used with "
+            "[[location]]");
+}
+
+TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
+  Func("main", {}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
+       ast::DecorationList{Stage(ast::PipelineStage::kVertex)},
+       {Builtin(ast::Builtin::kPosition),
+        Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
+                    ast::InterpolationSampling::kNone)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: interpolate attribute must only be used with "
+            "[[location]]");
+}
+
+TEST_F(InterpolateTest, MissingLocationAttribute_Struct) {
+  Structure(
+      "S", {Member("a", ty.f32(),
+                   {Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
+                                ast::InterpolationSampling::kNone)})});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: interpolate attribute must only be used with "
+            "[[location]]");
 }
 
 }  // namespace

@@ -1158,6 +1158,15 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
         }
       }
 
+      if (interpolate_attribute) {
+        if (!pipeline_io_attribute ||
+            !pipeline_io_attribute->Is<ast::LocationDecoration>()) {
+          AddError("interpolate attribute must only be used with [[location]]",
+                   interpolate_attribute->source);
+          return false;
+        }
+      }
+
       if (invariant_attribute) {
         bool has_position = false;
         if (pipeline_io_attribute) {
@@ -1927,8 +1936,10 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
       }
     }
 
+    auto has_location = false;
     auto has_position = false;
     const ast::InvariantDecoration* invariant_attribute = nullptr;
+    const ast::InterpolateDecoration* interpolate_attribute = nullptr;
     for (auto* deco : member->Declaration()->decorations) {
       if (!deco->IsAnyOf<ast::BuiltinDecoration,             //
                          ast::InternalDecoration,            //
@@ -1951,6 +1962,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
       if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
         invariant_attribute = invariant;
       } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+        has_location = true;
         if (!ValidateLocationDecoration(location, member->Type(), locations,
                                         member->Declaration()->source)) {
           return false;
@@ -1964,6 +1976,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
           has_position = true;
         }
       } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+        interpolate_attribute = interpolate;
         if (!ValidateInterpolateDecoration(interpolate, member->Type())) {
           return false;
         }
@@ -1973,6 +1986,12 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
     if (invariant_attribute && !has_position) {
       AddError("invariant attribute must only be applied to a position builtin",
                invariant_attribute->source);
+      return false;
+    }
+
+    if (interpolate_attribute && !has_location) {
+      AddError("interpolate attribute must only be used with [[location]]",
+               interpolate_attribute->source);
       return false;
     }
 
