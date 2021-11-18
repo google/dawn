@@ -10,7 +10,7 @@ vars = {
   'buildtools_revision': 'e3db55b4639f2a331af6f3708ca1fbd22322aac3',
   'clang_revision': 'eb5ab41f3801e2085208204fd71a490573d72dfd',
   'glslang_revision': '4b7b86d568b40f4b076259dc2fc4cdd006340f34',
-  'googletest_revision': '5c8ca58edfb304b2dd5e6061f83387470826dd87',
+  'googletest_revision': '1a3e2a265f35e604378156cd675b11ef0a184627',
   'gpuweb_cts_revision': 'b0291fd966b55a5efc496772555b94842bde1085',
   'protobuf_revision': 'fde7cf7358ec7cd69e8db9be4f1fa6a5c431386a',
   'spirv_headers_revision': 'ae217c17809fadb232ec94b29304b4afcd417bb4',
