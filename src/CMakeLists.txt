@@ -240,6 +240,7 @@ set(TINT_LIB_SRCS
   reader/reader.h
   resolver/resolver.cc
   resolver/resolver_constants.cc
+  resolver/resolver_validation.cc
   resolver/resolver.h
   scope_stack.h
   sem/array.cc

@@ -374,6 +374,7 @@ libtint_source_set("libtint_core_all_src") {
     "resolver/resolver.cc",
     "resolver/resolver.h",
     "resolver/resolver_constants.cc",
+    "resolver/resolver_validation.cc",
     "scope_stack.h",
     "sem/array.h",
     "sem/atomic_type.h",

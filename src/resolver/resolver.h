@@ -271,6 +271,18 @@ class Resolver {
                                   ast::StorageClass sc);
   bool ValidateStorageClassLayout(const sem::Variable* var);
 
+  /// @returns true if the decoration list contains a
+  /// ast::DisableValidationDecoration with the validation mode equal to
+  /// `validation`
+  bool IsValidationDisabled(const ast::DecorationList& decorations,
+                            ast::DisabledValidation validation) const;
+
+  /// @returns true if the decoration list does not contains a
+  /// ast::DisableValidationDecoration with the validation mode equal to
+  /// `validation`
+  bool IsValidationEnabled(const ast::DecorationList& decorations,
+                           ast::DisabledValidation validation) const;
+
   /// Resolves the WorkgroupSize for the given function
   bool WorkgroupSizeFor(const ast::Function*, sem::WorkgroupSize& ws);
 
@@ -287,7 +299,8 @@ class Resolver {
   /// Builds and returns the semantic information for the array `arr`.
   /// This method does not mark the ast::Array node, nor attach the generated
   /// semantic information to the AST node.
-  /// @returns the semantic Array information, or nullptr if an error is raised.
+  /// @returns the semantic Array information, or nullptr if an error is
+  /// raised.
   /// @param arr the Array to get semantic information for
   sem::Array* Array(const ast::Array* arr);
 
@@ -298,8 +311,8 @@ class Resolver {
   /// raised. raised, nullptr is returned.
   sem::Struct* Structure(const ast::Struct* str);
 
-  /// @returns the semantic info for the variable `var`. If an error is raised,
-  /// nullptr is returned.
+  /// @returns the semantic info for the variable `var`. If an error is
+  /// raised, nullptr is returned.
   /// @note this method does not resolve the decorations as these are
   /// context-dependent (global, local, parameter)
   /// @param var the variable to create or return the `VariableInfo` for
@@ -315,7 +328,8 @@ class Resolver {
   /// @param sc the storage class to apply to the type and transitent types
   /// @param ty the type to apply the storage class on
   /// @param usage the Source of the root variable declaration that uses the
-  /// given type and storage class. Used for generating sensible error messages.
+  /// given type and storage class. Used for generating sensible error
+  /// messages.
   /// @returns true on success, false on error
   bool ApplyStorageClassUsageToType(ast::StorageClass sc,
                                     sem::Type* ty,
@@ -332,7 +346,8 @@ class Resolver {
   /// @param expr the expression
   sem::Type* TypeOf(const ast::Expression* expr);
 
-  /// @returns the type name of the given semantic type, unwrapping references.
+  /// @returns the type name of the given semantic type, unwrapping
+  /// references.
   std::string TypeNameOf(const sem::Type* ty);
 
   /// @returns the type name of the given semantic type, without unwrapping
@@ -360,7 +375,8 @@ class Resolver {
   std::string VectorPretty(uint32_t size, const sem::Type* element_type);
 
   /// Mark records that the given AST node has been visited, and asserts that
-  /// the given node has not already been seen. Diamonds in the AST are illegal.
+  /// the given node has not already been seen. Diamonds in the AST are
+  /// illegal.
   /// @param node the AST node.
   void Mark(const ast::Node* node);
 
@@ -372,11 +388,6 @@ class Resolver {
 
   /// Adds the given note message to the diagnostics
   void AddNote(const std::string& msg, const Source& source) const;
-
-  template <typename CALLBACK>
-  void TraverseCallChain(const sem::Function* from,
-                         const sem::Function* to,
-                         CALLBACK&& callback) const;
 
   //////////////////////////////////////////////////////////////////////////////
   /// Constant value evaluation methods
@@ -396,7 +407,16 @@ class Resolver {
   /// Sem is a helper for obtaining the semantic node for the given AST node.
   template <typename SEM = sem::Info::InferFromAST,
             typename AST_OR_TYPE = CastableBase>
-  const sem::Info::GetResultType<SEM, AST_OR_TYPE>* Sem(const AST_OR_TYPE* ast);
+  auto* Sem(const AST_OR_TYPE* ast) {
+    auto* sem = builder_->Sem().Get<SEM>(ast);
+    if (!sem) {
+      TINT_ICE(Resolver, diagnostics_)
+          << "AST node '" << ast->TypeInfo().name << "' had no semantic info\n"
+          << "At: " << ast->source << "\n"
+          << "Pointer: " << ast;
+    }
+    return sem;
+  }
 
   struct TypeConversionSig {
     const sem::Type* target;
