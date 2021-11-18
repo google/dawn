@@ -34,7 +34,7 @@ typedef tint_padded_array_element tint_symbol_1_ret[4];
 tint_symbol_1_ret tint_symbol_1(uint4 buffer[4], uint offset) {
   tint_padded_array_element arr_1[4] = (tint_padded_array_element[4])0;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    [loop] for(uint i = 0u; (i < 4u); i = (i + 1u)) {
       const uint scalar_offset = ((offset + (i * 16u))) / 4;
       arr_1[i].el = asint(buffer[scalar_offset / 4][scalar_offset % 4]);
     }
@@ -46,7 +46,7 @@ typedef tint_padded_array_element tint_symbol_3_ret[4];
 tint_symbol_3_ret tint_symbol_3(RWByteAddressBuffer buffer, uint offset) {
   tint_padded_array_element arr_2[4] = (tint_padded_array_element[4])0;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr_2[i_1].el = asint(buffer.Load((offset + (i_1 * 16u))));
     }
   }

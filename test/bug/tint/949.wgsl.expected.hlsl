@@ -244,7 +244,7 @@ void main_1() {
   currSampledHeight = 1.0f;
   i = 0;
   {
-    for(; (i < 15); i = (i + 1)) {
+    [loop] for(; (i < 15); i = (i + 1)) {
       const float4 x_397 = TextureSamplerTexture.Sample(TextureSamplerSampler, (v_uv + vCurrOffset));
       currSampledHeight = x_397.w;
       if ((currSampledHeight > currRayHeight)) {

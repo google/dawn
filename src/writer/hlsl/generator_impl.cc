@@ -115,6 +115,13 @@ std::ostream& operator<<(std::ostream& s, const RegisterAndSpace& rs) {
   return s;
 }
 
+const char* LoopAttribute() {
+  // Force loops not to be unrolled to work around FXC compilation issues when
+  // it attempts and fails to unroll loops when it contains gradient operations.
+  // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-while
+  return "[loop] ";
+}
+
 }  // namespace
 
 SanitizedResult Sanitize(const Program* in,
@@ -2804,7 +2811,7 @@ bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
   };
 
   TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-  line() << "while (true) {";
+  line() << LoopAttribute() << "while (true) {";
   {
     ScopedIndent si(this);
     if (!EmitStatements(stmt->body->statements)) {
@@ -2874,7 +2881,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     };
 
     TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-    line() << "while (true) {";
+    line() << LoopAttribute() << "while (true) {";
     increment_indent();
     TINT_DEFER({
       decrement_indent();
@@ -2897,7 +2904,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     // For-loop can be generated.
     {
       auto out = line();
-      out << "for";
+      out << LoopAttribute() << "for";
       {
         ScopedParen sp(out);
 

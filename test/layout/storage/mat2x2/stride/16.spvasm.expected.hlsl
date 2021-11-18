@@ -18,7 +18,7 @@ typedef tint_padded_array_element tint_symbol_ret[2];
 tint_symbol_ret tint_symbol(RWByteAddressBuffer buffer, uint offset) {
   tint_padded_array_element arr_1[2] = (tint_padded_array_element[2])0;
   {
-    for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    [loop] for(uint i = 0u; (i < 2u); i = (i + 1u)) {
       arr_1[i].el = asfloat(buffer.Load2((offset + (i * 16u))));
     }
   }
@@ -28,7 +28,7 @@ tint_symbol_ret tint_symbol(RWByteAddressBuffer buffer, uint offset) {
 void tint_symbol_2(RWByteAddressBuffer buffer, uint offset, tint_padded_array_element value[2]) {
   tint_padded_array_element array[2] = value;
   {
-    for(uint i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
+    [loop] for(uint i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
       buffer.Store2((offset + (i_1 * 16u)), asuint(array[i_1].el));
     }
   }

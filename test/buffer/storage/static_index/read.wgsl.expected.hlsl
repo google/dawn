@@ -24,7 +24,7 @@ typedef tint_padded_array_element tint_symbol_10_ret[4];
 tint_symbol_10_ret tint_symbol_10(ByteAddressBuffer buffer, uint offset) {
   tint_padded_array_element arr[4] = (tint_padded_array_element[4])0;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr[i_1].el = tint_symbol_9(buffer, (offset + (i_1 * 16u)));
     }
   }

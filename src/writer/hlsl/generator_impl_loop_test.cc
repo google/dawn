@@ -34,7 +34,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  while (true) {
+  EXPECT_EQ(gen.result(), R"(  [loop] while (true) {
     discard;
   }
 )");
@@ -54,7 +54,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  while (true) {
+  EXPECT_EQ(gen.result(), R"(  [loop] while (true) {
     discard;
     {
       a_statement();
@@ -88,8 +88,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  while (true) {
-    while (true) {
+  EXPECT_EQ(gen.result(), R"(  [loop] while (true) {
+    [loop] while (true) {
       discard;
       {
         a_statement();
@@ -142,7 +142,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  while (true) {
+  EXPECT_EQ(gen.result(), R"(  [loop] while (true) {
     float lhs = 2.400000095f;
     float other = 0.0f;
     {
@@ -169,7 +169,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoop) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
-    for(; ; ) {
+    [loop] for(; ; ) {
       a_statement();
     }
   }
@@ -193,7 +193,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInit) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
-    for(int i = 0; ; ) {
+    [loop] for(int i = 0; ; ) {
       a_statement();
     }
   }
@@ -223,7 +223,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInit) {
       tint_tmp = false;
     }
     bool b = (tint_tmp);
-    for(; ; ) {
+    [loop] for(; ; ) {
       a_statement();
     }
   }
@@ -246,7 +246,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCond) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
-    for(; true; ) {
+    [loop] for(; true; ) {
       a_statement();
     }
   }
@@ -272,7 +272,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCond) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
-    while (true) {
+    [loop] while (true) {
       bool tint_tmp = true;
       if (tint_tmp) {
         tint_tmp = false;
@@ -302,7 +302,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCont) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
-    for(; ; i = (i + 1)) {
+    [loop] for(; ; i = (i + 1)) {
       a_statement();
     }
   }
@@ -329,7 +329,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCont) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
-    while (true) {
+    [loop] while (true) {
       a_statement();
       bool tint_tmp = true;
       if (tint_tmp) {
@@ -358,7 +358,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInitCondCont) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
-    for(int i = 0; true; i = (i + 1)) {
+    [loop] for(int i = 0; true; i = (i + 1)) {
       a_statement();
     }
   }
@@ -394,7 +394,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInitCondCont) {
       tint_tmp = false;
     }
     bool i = (tint_tmp);
-    while (true) {
+    [loop] while (true) {
       bool tint_tmp_1 = true;
       if (tint_tmp_1) {
         tint_tmp_1 = false;
