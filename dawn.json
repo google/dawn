@@ -1191,14 +1191,16 @@
         "tags": ["upstream"],
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "depth clamping"},
+            {"value": 1, "name": "depth clip control", "tags": ["upstream"]},
             {"value": 2, "name": "depth24 unorm stencil8"},
             {"value": 3, "name": "depth32 float stencil8"},
             {"value": 4, "name": "timestamp query"},
             {"value": 5, "name": "pipeline statistics query"},
             {"value": 6, "name": "texture compression BC"},
             {"value": 7, "name": "texture compression ETC2"},
-            {"value": 8, "name": "texture compression ASTC"}
+            {"value": 8, "name": "texture compression ASTC"},
+            {"value": 9, "name": "indirect first instance"},
+            {"value": 1000, "name": "depth clamping", "tags": ["emscripten", "dawn"]}
         ]
     },
     "filter mode": {
@@ -1889,8 +1891,18 @@
     "primitive depth clamping state": {
         "category": "structure",
         "chained": "in",
+        "tags": ["dawn", "emscripten"],
         "members": [
             {"name": "clamp depth", "type": "bool", "default": "false"}
+        ]
+    },
+
+    "primitive depth clip control": {
+        "category": "structure",
+        "chained": "in",
+        "tags": ["upstream"],
+        "members": [
+            {"name": "unclipped depth", "type": "bool", "default": "false"}
         ]
     },
 
@@ -2023,7 +2035,8 @@
         "category": "structure",
         "chained": "in",
         "members": [
-            {"name": "source", "type": "char", "annotation": "const*", "length": "strlen"}
+            {"name": "source", "type": "char", "annotation": "const*", "length": "strlen", "tags": ["dawn", "emscripten"]},
+            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen", "tags": ["upstream"]}
         ]
     },
     "shader stage": {
@@ -2168,12 +2181,13 @@
             {"value": 4, "name": "surface descriptor from canvas HTML selector"},
             {"value": 5, "name": "shader module SPIRV descriptor"},
             {"value": 6, "name": "shader module WGSL descriptor"},
-            {"value": 7, "name": "primitive depth clamping state"},
+            {"value": 7, "name": "primitive depth clip control", "tags": ["upstream"]},
             {"value": 8, "name": "surface descriptor from windows core window", "tags": ["dawn"]},
             {"value": 9, "name": "external texture binding entry", "tags": ["dawn"]},
             {"value": 10, "name": "external texture binding layout", "tags": ["dawn"]},
             {"value": 11, "name": "surface descriptor from windows swap chain panel", "tags": ["dawn"]},
-            {"value": 1000, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]}
+            {"value": 1000, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]},
+            {"value": 1001, "name": "primitive depth clamping state", "tags": ["dawn", "emscripten"]}
         ]
     },
     "texture": {
