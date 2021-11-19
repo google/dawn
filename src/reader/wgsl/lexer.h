@@ -39,7 +39,7 @@ class Lexer {
  private:
   /// Advances past whitespace and comments, if present
   /// at the current position.
-  /// @returns uninitialized token on success, or error
+  /// @returns error token, EOF, or uninitialized
   Token skip_whitespace_and_comments();
   /// Advances past a comment at the current position,
   /// if one exists.
@@ -51,6 +51,15 @@ class Lexer {
                                          size_t end,
                                          int32_t base);
   Token check_keyword(const Source&, const std::string&);
+
+  /// The try_* methods have the following in common:
+  /// - They assume there is at least one character to be consumed,
+  ///   i.e. the input has not yet reached end of file.
+  /// - They return an initialized token when they match and consume
+  ///   a token of the specified kind.
+  /// - Some can return an error token.
+  /// - Otherwise they return an uninitialized token when they did not
+  ///   match a token of the specfied kind.
   Token try_float();
   Token try_hex_float();
   Token try_hex_integer();
