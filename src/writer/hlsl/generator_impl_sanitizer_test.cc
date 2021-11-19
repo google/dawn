@@ -144,6 +144,58 @@ void a_func() {
   EXPECT_EQ(expect, got);
 }
 
+TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+  Global("c", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(2),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(Var(
+               "len", ty.u32(), ast::StorageClass::kNone,
+               Add(Call("arrayLength", AddressOf(MemberAccessor("b", "a"))),
+                   Call("arrayLength", AddressOf(MemberAccessor("c", "a")))))),
+       },
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  Options options;
+  options.array_length_from_uniform.ubo_binding = {3, 4};
+  options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+      sem::BindingPoint{2, 2}, 7u);
+  GeneratorImpl& gen = SanitizeAndBuild(options);
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+
+  auto got = gen.result();
+  auto* expect = R"(cbuffer cbuffer_tint_symbol_1 : register(b4, space3) {
+  uint4 tint_symbol_1[2];
+};
+
+ByteAddressBuffer b : register(t1, space2);
+ByteAddressBuffer c : register(t2, space2);
+
+void a_func() {
+  uint tint_symbol_4 = 0u;
+  b.GetDimensions(tint_symbol_4);
+  const uint tint_symbol_5 = ((tint_symbol_4 - 0u) / 4u);
+  uint len = (tint_symbol_5 + ((tint_symbol_1[1].w - 0u) / 4u));
+  return;
+}
+)";
+  EXPECT_EQ(expect, got);
+}
+
 TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
   auto* array_init = array<i32, 4>(1, 2, 3, 4);
   auto* array_index = IndexAccessor(array_init, 3);

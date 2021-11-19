@@ -591,6 +591,7 @@ tint_unittests_source_set("tint_unittests_msl_writer_src") {
     "../src/writer/msl/generator_impl_member_accessor_test.cc",
     "../src/writer/msl/generator_impl_module_constant_test.cc",
     "../src/writer/msl/generator_impl_return_test.cc",
+    "../src/writer/msl/generator_impl_sanitizer_test.cc",
     "../src/writer/msl/generator_impl_switch_test.cc",
     "../src/writer/msl/generator_impl_test.cc",
     "../src/writer/msl/generator_impl_type_test.cc",

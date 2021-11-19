@@ -36,6 +36,7 @@
 #include "src/sem/binding_point.h"
 #include "src/transform/decompose_memory_access.h"
 #include "src/utils/hash.h"
+#include "src/writer/array_length_from_uniform_options.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -53,8 +54,18 @@ namespace hlsl {
 
 /// The result of sanitizing a program for generation.
 struct SanitizedResult {
+  /// Constructor
+  SanitizedResult();
+  /// Destructor
+  ~SanitizedResult();
+  /// Move constructor
+  SanitizedResult(SanitizedResult&&);
+
   /// The sanitized program.
   Program program;
+  /// Indices into the array_length_from_uniform binding that are statically
+  /// used.
+  std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
 };
 
 /// Sanitize a program in preparation for generating HLSL.
@@ -62,9 +73,11 @@ struct SanitizedResult {
 /// that will be passed via root constants
 /// @param disable_workgroup_init `true` to disable workgroup memory zero
 /// @returns the sanitized program and any supplementary information
-SanitizedResult Sanitize(const Program* program,
-                         sem::BindingPoint root_constant_binding_point = {},
-                         bool disable_workgroup_init = false);
+SanitizedResult Sanitize(
+    const Program* program,
+    sem::BindingPoint root_constant_binding_point = {},
+    bool disable_workgroup_init = false,
+    const ArrayLengthFromUniformOptions& array_length_from_uniform = {});
 
 /// Implementation class for HLSL generator
 class GeneratorImpl : public TextGenerator {

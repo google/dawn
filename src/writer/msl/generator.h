@@ -18,8 +18,10 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
+#include "src/writer/array_length_from_uniform_options.h"
 #include "src/writer/text.h"
 
 namespace tint {
@@ -34,6 +36,16 @@ class GeneratorImpl;
 
 /// Configuration options used for generating MSL.
 struct Options {
+  /// Constructor
+  Options();
+  /// Destructor
+  ~Options();
+  /// Copy constructor
+  Options(const Options&);
+  /// Copy assignment
+  /// @returns this Options
+  Options& operator=(const Options&);
+
   /// The index to use when generating a UBO to receive storage buffer sizes.
   /// Defaults to 30, which is the last valid buffer slot.
   uint32_t buffer_size_ubo_index = 30;
@@ -48,6 +60,10 @@ struct Options {
 
   /// Set to `true` to disable workgroup memory zero initialization
   bool disable_workgroup_init = false;
+
+  /// Options used to specify a mapping of binding points to indices into a UBO
+  /// from which to load buffer sizes.
+  ArrayLengthFromUniformOptions array_length_from_uniform = {};
 };
 
 /// The result produced when generating MSL.
@@ -80,6 +96,10 @@ struct Result {
   /// Each entry in the vector is the size of the workgroup allocation that
   /// should be created for that index.
   std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations;
+
+  /// Indices into the array_length_from_uniform binding that are statically
+  /// used.
+  std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
 };
 
 /// Generate MSL for a program, according to a set of configuration options. The

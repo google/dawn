@@ -45,6 +45,7 @@
 #include "src/sem/type_conversion.h"
 #include "src/sem/variable.h"
 #include "src/transform/add_empty_entry_point.h"
+#include "src/transform/array_length_from_uniform.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/decompose_memory_access.h"
@@ -124,11 +125,23 @@ const char* LoopAttribute() {
 
 }  // namespace
 
-SanitizedResult Sanitize(const Program* in,
-                         sem::BindingPoint root_constant_binding_point,
-                         bool disable_workgroup_init) {
+SanitizedResult::SanitizedResult() = default;
+SanitizedResult::~SanitizedResult() = default;
+SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
+
+SanitizedResult Sanitize(
+    const Program* in,
+    sem::BindingPoint root_constant_binding_point,
+    bool disable_workgroup_init,
+    const ArrayLengthFromUniformOptions& array_length_from_uniform) {
   transform::Manager manager;
   transform::DataMap data;
+
+  // Build the config for the internal ArrayLengthFromUniform transform.
+  transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
+      array_length_from_uniform.ubo_binding);
+  array_length_from_uniform_cfg.bindpoint_to_size_index =
+      array_length_from_uniform.bindpoint_to_size_index;
 
   // Attempt to convert `loop`s into for-loops. This is to try and massage the
   // output into something that will not cause FXC to choke or misbehave.
@@ -149,6 +162,11 @@ SanitizedResult Sanitize(const Program* in,
   // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
   manager.Add<transform::Simplify>();
   manager.Add<transform::RemovePhonies>();
+  // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as
+  // it assumes that the form of the array length argument is &var.array.
+  manager.Add<transform::ArrayLengthFromUniform>();
+  data.Add<transform::ArrayLengthFromUniform::Config>(
+      std::move(array_length_from_uniform_cfg));
   // DecomposeMemoryAccess must come after:
   // * InlinePointerLets, as we cannot take the address of calls to
   //   DecomposeMemoryAccess::Intrinsic.
@@ -171,8 +189,13 @@ SanitizedResult Sanitize(const Program* in,
   data.Add<transform::NumWorkgroupsFromUniform::Config>(
       root_constant_binding_point);
 
+  auto out = manager.Run(in, data);
+
   SanitizedResult result;
-  result.program = std::move(manager.Run(in, data).program);
+  result.program = std::move(out.program);
+  result.used_array_length_from_uniform_indices =
+      std::move(out.data.Get<transform::ArrayLengthFromUniform::Result>()
+                    ->used_size_indices);
   return result;
 }
 

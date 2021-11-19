@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "src/transform/manager.h"
 #include "src/transform/renamer.h"
+#include "src/writer/hlsl/generator.h"
 #include "src/writer/hlsl/generator_impl.h"
 
 namespace tint {
@@ -58,10 +59,11 @@ class TestHelperBase : public BODY, public ProgramBuilder {
 
   /// Builds the program, runs the program through the HLSL sanitizer
   /// and returns a GeneratorImpl from the sanitized program.
+  /// @param options The HLSL generator options.
   /// @note The generator is only built once. Multiple calls to Build() will
   /// return the same GeneratorImpl without rebuilding.
   /// @return the built generator
-  GeneratorImpl& SanitizeAndBuild() {
+  GeneratorImpl& SanitizeAndBuild(const Options& options = {}) {
     if (gen_) {
       return *gen_;
     }
@@ -76,7 +78,9 @@ class TestHelperBase : public BODY, public ProgramBuilder {
           << formatter.format(program->Diagnostics());
     }();
 
-    auto sanitized_result = Sanitize(program.get());
+    auto sanitized_result = Sanitize(
+        program.get(), options.root_constant_binding_point,
+        options.disable_workgroup_init, options.array_length_from_uniform);
     [&]() {
       ASSERT_TRUE(sanitized_result.program.IsValid())
           << formatter.format(sanitized_result.program.Diagnostics());

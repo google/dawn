@@ -17,11 +17,13 @@
 
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "src/ast/pipeline_stage.h"
 #include "src/sem/binding_point.h"
+#include "src/writer/array_length_from_uniform_options.h"
 #include "src/writer/text.h"
 
 namespace tint {
@@ -37,10 +39,23 @@ class GeneratorImpl;
 
 /// Configuration options used for generating HLSL.
 struct Options {
+  /// Constructor
+  Options();
+  /// Destructor
+  ~Options();
+  /// Copy constructor
+  Options(const Options&);
+  /// Copy assignment
+  /// @returns this Options
+  Options& operator=(const Options&);
+
   /// The binding point to use for information passed via root constants.
   sem::BindingPoint root_constant_binding_point;
   /// Set to `true` to disable workgroup memory zero initialization
   bool disable_workgroup_init = false;
+  /// Options used to specify a mapping of binding points to indices into a UBO
+  /// from which to load buffer sizes.
+  ArrayLengthFromUniformOptions array_length_from_uniform = {};
 };
 
 /// The result produced when generating HLSL.
@@ -65,6 +80,10 @@ struct Result {
 
   /// The list of entry points in the generated HLSL.
   std::vector<std::pair<std::string, ast::PipelineStage>> entry_points;
+
+  /// Indices into the array_length_from_uniform binding that are statically
+  /// used.
+  std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
 };
 
 /// Generate HLSL for a program, according to a set of configuration options.

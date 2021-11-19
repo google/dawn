@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
+#include "src/writer/msl/generator.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -57,10 +58,11 @@ class TestHelperBase : public BASE, public ProgramBuilder {
 
   /// Builds the program, runs the program through the transform::Msl sanitizer
   /// and returns a GeneratorImpl from the sanitized program.
+  /// @param options The MSL generator options.
   /// @note The generator is only built once. Multiple calls to Build() will
   /// return the same GeneratorImpl without rebuilding.
   /// @return the built generator
-  GeneratorImpl& SanitizeAndBuild() {
+  GeneratorImpl& SanitizeAndBuild(const Options& options = {}) {
     if (gen_) {
       return *gen_;
     }
@@ -74,7 +76,10 @@ class TestHelperBase : public BASE, public ProgramBuilder {
           << diag::Formatter().format(program->Diagnostics());
     }();
 
-    auto result = Sanitize(program.get(), 30);
+    auto result = Sanitize(
+        program.get(), options.buffer_size_ubo_index, options.fixed_sample_mask,
+        options.emit_vertex_point_size, options.disable_workgroup_init,
+        options.array_length_from_uniform);
     [&]() {
       ASSERT_TRUE(result.program.IsValid())
           << diag::Formatter().format(result.program.Diagnostics());

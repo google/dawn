@@ -403,6 +403,8 @@ set(TINT_LIB_SRCS
   utils/unique_vector.h
   writer/append_vector.cc
   writer/append_vector.h
+  writer/array_length_from_uniform_options.cc
+  writer/array_length_from_uniform_options.h
   writer/float_to_string.cc
   writer/float_to_string.h
   writer/text_generator.cc
@@ -998,6 +1000,7 @@ if(${TINT_BUILD_TESTS})
       writer/msl/generator_impl_member_accessor_test.cc
       writer/msl/generator_impl_module_constant_test.cc
       writer/msl/generator_impl_return_test.cc
+      writer/msl/generator_impl_sanitizer_test.cc
       writer/msl/generator_impl_switch_test.cc
       writer/msl/generator_impl_test.cc
       writer/msl/generator_impl_type_test.cc

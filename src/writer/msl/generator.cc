@@ -14,11 +14,18 @@
 
 #include "src/writer/msl/generator.h"
 
+#include <utility>
+
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
+
+Options::Options() = default;
+Options::~Options() = default;
+Options::Options(const Options&) = default;
+Options& Options::operator=(const Options&) = default;
 
 Result::Result() = default;
 Result::~Result() = default;
@@ -30,7 +37,8 @@ Result Generate(const Program* program, const Options& options) {
   // Sanitize the program.
   auto sanitized_result = Sanitize(
       program, options.buffer_size_ubo_index, options.fixed_sample_mask,
-      options.emit_vertex_point_size, options.disable_workgroup_init);
+      options.emit_vertex_point_size, options.disable_workgroup_init,
+      options.array_length_from_uniform);
   if (!sanitized_result.program.IsValid()) {
     result.success = false;
     result.error = sanitized_result.program.Diagnostics().str();
@@ -38,6 +46,8 @@ Result Generate(const Program* program, const Options& options) {
   }
   result.needs_storage_buffer_sizes =
       sanitized_result.needs_storage_buffer_sizes;
+  result.used_array_length_from_uniform_indices =
+      std::move(sanitized_result.used_array_length_from_uniform_indices);
 
   // Generate the MSL code.
   auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program);

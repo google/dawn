@@ -35,59 +35,17 @@ namespace transform {
 ArrayLengthFromUniform::ArrayLengthFromUniform() = default;
 ArrayLengthFromUniform::~ArrayLengthFromUniform() = default;
 
-void ArrayLengthFromUniform::Run(CloneContext& ctx,
-                                 const DataMap& inputs,
-                                 DataMap& outputs) {
-  if (!Requires<InlinePointerLets, Simplify>(ctx)) {
-    return;
-  }
-
-  auto* cfg = inputs.Get<Config>();
-  if (cfg == nullptr) {
-    ctx.dst->Diagnostics().add_error(
-        diag::System::Transform,
-        "missing transform data for " + std::string(TypeInfo().name));
-    return;
-  }
-
+/// Iterate over all arrayLength() intrinsics that operate on
+/// storage buffer variables.
+/// @param ctx the CloneContext.
+/// @param functor of type void(const ast::CallExpression*, const
+/// sem::VariableUser, const sem::GlobalVariable*). It takes in an
+/// ast::CallExpression of the arrayLength call expression node, a
+/// sem::VariableUser of the used storage buffer variable, and the
+/// sem::GlobalVariable for the storage buffer.
+template <typename F>
+static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
   auto& sem = ctx.src->Sem();
-
-  const char* kBufferSizeMemberName = "buffer_size";
-
-  // Determine the size of the buffer size array.
-  uint32_t max_buffer_size_index = 0;
-  for (auto& idx : cfg->bindpoint_to_size_index) {
-    if (idx.second > max_buffer_size_index) {
-      max_buffer_size_index = idx.second;
-    }
-  }
-
-  // Get (or create, on first call) the uniform buffer that will receive the
-  // size of each storage buffer in the module.
-  const ast::Variable* buffer_size_ubo = nullptr;
-  auto get_ubo = [&]() {
-    if (!buffer_size_ubo) {
-      // Emit an array<vec4<u32>, N>, where N is 1/4 number of elements.
-      // We do this because UBOs require an element stride that is 16-byte
-      // aligned.
-      auto* buffer_size_struct = ctx.dst->Structure(
-          ctx.dst->Sym(),
-          {ctx.dst->Member(
-              kBufferSizeMemberName,
-              ctx.dst->ty.array(ctx.dst->ty.vec4(ctx.dst->ty.u32()),
-                                (max_buffer_size_index / 4) + 1))},
-
-          ast::DecorationList{ctx.dst->create<ast::StructBlockDecoration>()});
-      buffer_size_ubo = ctx.dst->Global(
-          ctx.dst->Sym(), ctx.dst->ty.Of(buffer_size_struct),
-          ast::StorageClass::kUniform,
-          ast::DecorationList{
-              ctx.dst->create<ast::GroupDecoration>(cfg->ubo_binding.group),
-              ctx.dst->create<ast::BindingDecoration>(
-                  cfg->ubo_binding.binding)});
-    }
-    return buffer_size_ubo;
-  };
 
   // Find all calls to the arrayLength() intrinsic.
   for (auto* node : ctx.src->ASTNodes().Objects()) {
@@ -137,23 +95,91 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
           << "storage buffer is not a global variable";
       break;
     }
+    functor(call_expr, storage_buffer_sem, var);
+  }
+}
+
+void ArrayLengthFromUniform::Run(CloneContext& ctx,
+                                 const DataMap& inputs,
+                                 DataMap& outputs) {
+  if (!Requires<InlinePointerLets, Simplify>(ctx)) {
+    return;
+  }
+
+  auto* cfg = inputs.Get<Config>();
+  if (cfg == nullptr) {
+    ctx.dst->Diagnostics().add_error(
+        diag::System::Transform,
+        "missing transform data for " + std::string(TypeInfo().name));
+    return;
+  }
+
+  const char* kBufferSizeMemberName = "buffer_size";
+
+  // Determine the size of the buffer size array.
+  uint32_t max_buffer_size_index = 0;
+
+  IterateArrayLengthOnStorageVar(
+      ctx, [&](const ast::CallExpression*, const sem::VariableUser*,
+               const sem::GlobalVariable* var) {
+        auto binding = var->BindingPoint();
+        auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
+        if (idx_itr == cfg->bindpoint_to_size_index.end()) {
+          return;
+        }
+        if (idx_itr->second > max_buffer_size_index) {
+          max_buffer_size_index = idx_itr->second;
+        }
+      });
+
+  // Get (or create, on first call) the uniform buffer that will receive the
+  // size of each storage buffer in the module.
+  const ast::Variable* buffer_size_ubo = nullptr;
+  auto get_ubo = [&]() {
+    if (!buffer_size_ubo) {
+      // Emit an array<vec4<u32>, N>, where N is 1/4 number of elements.
+      // We do this because UBOs require an element stride that is 16-byte
+      // aligned.
+      auto* buffer_size_struct = ctx.dst->Structure(
+          ctx.dst->Sym(),
+          {ctx.dst->Member(
+              kBufferSizeMemberName,
+              ctx.dst->ty.array(ctx.dst->ty.vec4(ctx.dst->ty.u32()),
+                                (max_buffer_size_index / 4) + 1))},
+
+          ast::DecorationList{ctx.dst->create<ast::StructBlockDecoration>()});
+      buffer_size_ubo = ctx.dst->Global(
+          ctx.dst->Sym(), ctx.dst->ty.Of(buffer_size_struct),
+          ast::StorageClass::kUniform,
+          ast::DecorationList{
+              ctx.dst->create<ast::GroupDecoration>(cfg->ubo_binding.group),
+              ctx.dst->create<ast::BindingDecoration>(
+                  cfg->ubo_binding.binding)});
+    }
+    return buffer_size_ubo;
+  };
+
+  std::unordered_set<uint32_t> used_size_indices;
+
+  IterateArrayLengthOnStorageVar(ctx, [&](const ast::CallExpression* call_expr,
+                                          const sem::VariableUser*
+                                              storage_buffer_sem,
+                                          const sem::GlobalVariable* var) {
     auto binding = var->BindingPoint();
     auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
     if (idx_itr == cfg->bindpoint_to_size_index.end()) {
-      ctx.dst->Diagnostics().add_error(
-          diag::System::Transform,
-          "missing size index mapping for binding point (" +
-              std::to_string(binding.group) + "," +
-              std::to_string(binding.binding) + ")");
-      continue;
+      return;
     }
 
+    uint32_t size_index = idx_itr->second;
+    used_size_indices.insert(size_index);
+
     // Load the total storage buffer size from the UBO.
-    uint32_t array_index = idx_itr->second / 4;
+    uint32_t array_index = size_index / 4;
     auto* vec_expr = ctx.dst->IndexAccessor(
         ctx.dst->MemberAccessor(get_ubo()->symbol, kBufferSizeMemberName),
         array_index);
-    uint32_t vec_index = idx_itr->second % 4;
+    uint32_t vec_index = size_index % 4;
     auto* total_storage_buffer_size =
         ctx.dst->IndexAccessor(vec_expr, vec_index);
 
@@ -170,20 +196,23 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
         ctx.dst->Sub(total_storage_buffer_size, array_offset), array_stride);
 
     ctx.Replace(call_expr, array_length);
-  }
+  });
 
   ctx.Clone();
 
-  outputs.Add<Result>(buffer_size_ubo ? true : false);
+  outputs.Add<Result>(used_size_indices);
 }
 
 ArrayLengthFromUniform::Config::Config(sem::BindingPoint ubo_bp)
     : ubo_binding(ubo_bp) {}
 ArrayLengthFromUniform::Config::Config(const Config&) = default;
+ArrayLengthFromUniform::Config& ArrayLengthFromUniform::Config::operator=(
+    const Config&) = default;
 ArrayLengthFromUniform::Config::~Config() = default;
 
-ArrayLengthFromUniform::Result::Result(bool needs_sizes)
-    : needs_buffer_sizes(needs_sizes) {}
+ArrayLengthFromUniform::Result::Result(
+    std::unordered_set<uint32_t> used_size_indices_in)
+    : used_size_indices(std::move(used_size_indices_in)) {}
 ArrayLengthFromUniform::Result::Result(const Result&) = default;
 ArrayLengthFromUniform::Result::~Result() = default;
 

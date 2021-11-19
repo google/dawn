@@ -17,6 +17,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "src/ast/assignment_statement.h"
@@ -37,6 +38,7 @@
 #include "src/program.h"
 #include "src/scope_stack.h"
 #include "src/sem/struct.h"
+#include "src/writer/array_length_from_uniform_options.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -54,10 +56,20 @@ namespace msl {
 
 /// The result of sanitizing a program for generation.
 struct SanitizedResult {
+  /// Constructor
+  SanitizedResult();
+  /// Destructor
+  ~SanitizedResult();
+  /// Move constructor
+  SanitizedResult(SanitizedResult&&);
+
   /// The sanitized program.
   Program program;
   /// True if the shader needs a UBO of buffer sizes.
   bool needs_storage_buffer_sizes = false;
+  /// Indices into the array_length_from_uniform binding that are statically
+  /// used.
+  std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
 };
 
 /// Sanitize a program in preparation for generating MSL.
@@ -66,11 +78,13 @@ struct SanitizedResult {
 /// @param emit_vertex_point_size `true` to emit a vertex point size builtin
 /// @param disable_workgroup_init `true` to disable workgroup memory zero
 /// @returns the sanitized program and any supplementary information
-SanitizedResult Sanitize(const Program* program,
-                         uint32_t buffer_size_ubo_index,
-                         uint32_t fixed_sample_mask = 0xFFFFFFFF,
-                         bool emit_vertex_point_size = false,
-                         bool disable_workgroup_init = false);
+SanitizedResult Sanitize(
+    const Program* program,
+    uint32_t buffer_size_ubo_index,
+    uint32_t fixed_sample_mask = 0xFFFFFFFF,
+    bool emit_vertex_point_size = false,
+    bool disable_workgroup_init = false,
+    const ArrayLengthFromUniformOptions& array_length_from_uniform = {});
 
 /// Implementation class for MSL generator
 class GeneratorImpl : public TextGenerator {

@@ -16,6 +16,7 @@
 #define SRC_TRANSFORM_ARRAY_LENGTH_FROM_UNIFORM_H_
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "src/sem/binding_point.h"
 #include "src/transform/transform.h"
@@ -66,6 +67,10 @@ class ArrayLengthFromUniform
     /// Copy constructor
     Config(const Config&);
 
+    /// Copy assignment
+    /// @return this Config
+    Config& operator=(const Config&);
+
     /// Destructor
     ~Config() override;
 
@@ -79,8 +84,8 @@ class ArrayLengthFromUniform
   /// Information produced about what the transform did.
   struct Result : public Castable<Result, transform::Data> {
     /// Constructor
-    /// @param needs_sizes True if the transform generated the buffer sizes UBO.
-    explicit Result(bool needs_sizes);
+    /// @param used_size_indices Indices into the UBO that are statically used.
+    explicit Result(std::unordered_set<uint32_t> used_size_indices);
 
     /// Copy constructor
     Result(const Result&);
@@ -88,8 +93,8 @@ class ArrayLengthFromUniform
     /// Destructor
     ~Result() override;
 
-    /// True if the transform generated the buffer sizes UBO.
-    const bool needs_buffer_sizes;
+    /// Indices into the UBO that are statically used.
+    const std::unordered_set<uint32_t> used_size_indices;
   };
 
  protected:

@@ -112,30 +112,46 @@ class ScopedBitCast {
 };
 }  // namespace
 
-SanitizedResult Sanitize(const Program* in,
-                         uint32_t buffer_size_ubo_index,
-                         uint32_t fixed_sample_mask,
-                         bool emit_vertex_point_size,
-                         bool disable_workgroup_init) {
+SanitizedResult::SanitizedResult() = default;
+SanitizedResult::~SanitizedResult() = default;
+SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
+
+SanitizedResult Sanitize(
+    const Program* in,
+    uint32_t buffer_size_ubo_index,
+    uint32_t fixed_sample_mask,
+    bool emit_vertex_point_size,
+    bool disable_workgroup_init,
+    const ArrayLengthFromUniformOptions& array_length_from_uniform) {
   transform::Manager manager;
   transform::DataMap internal_inputs;
 
-  // Build the configs for the internal transforms.
-  auto array_length_from_uniform_cfg =
-      transform::ArrayLengthFromUniform::Config(
-          sem::BindingPoint{0, buffer_size_ubo_index});
+  // Build the config for the internal ArrayLengthFromUniform transform.
+  transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
+      array_length_from_uniform.ubo_binding);
+  if (!array_length_from_uniform.bindpoint_to_size_index.empty()) {
+    // If |array_length_from_uniform| bindings are provided, use that config.
+    array_length_from_uniform_cfg.bindpoint_to_size_index =
+        array_length_from_uniform.bindpoint_to_size_index;
+  } else {
+    // If the binding map is empty, use the deprecated |buffer_size_ubo_index|
+    // and automatically choose indices using the binding numbers.
+    array_length_from_uniform_cfg = transform::ArrayLengthFromUniform::Config(
+        sem::BindingPoint{0, buffer_size_ubo_index});
+    // Use the SSBO binding numbers as the indices for the buffer size lookups.
+    for (auto* var : in->AST().GlobalVariables()) {
+      auto* global = in->Sem().Get<sem::GlobalVariable>(var);
+      if (global && global->StorageClass() == ast::StorageClass::kStorage) {
+        array_length_from_uniform_cfg.bindpoint_to_size_index.emplace(
+            global->BindingPoint(), global->BindingPoint().binding);
+      }
+    }
+  }
+
+  // Build the configs for the internal CanonicalizeEntryPointIO transform.
   auto entry_point_io_cfg = transform::CanonicalizeEntryPointIO::Config(
       transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, fixed_sample_mask,
       emit_vertex_point_size);
-
-  // Use the SSBO binding numbers as the indices for the buffer size lookups.
-  for (auto* var : in->AST().GlobalVariables()) {
-    auto* global = in->Sem().Get<sem::GlobalVariable>(var);
-    if (global && global->StorageClass() == ast::StorageClass::kStorage) {
-      array_length_from_uniform_cfg.bindpoint_to_size_index.emplace(
-          global->BindingPoint(), global->BindingPoint().binding);
-    }
-  }
 
   if (!disable_workgroup_init) {
     // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
@@ -160,13 +176,18 @@ SanitizedResult Sanitize(const Program* in,
   internal_inputs.Add<transform::CanonicalizeEntryPointIO::Config>(
       std::move(entry_point_io_cfg));
   auto out = manager.Run(in, internal_inputs);
-  if (!out.program.IsValid()) {
-    return {std::move(out.program)};
-  }
 
-  return {std::move(out.program),
-          out.data.Get<transform::ArrayLengthFromUniform::Result>()
-              ->needs_buffer_sizes};
+  SanitizedResult result;
+  result.program = std::move(out.program);
+  if (!result.program.IsValid()) {
+    return result;
+  }
+  result.used_array_length_from_uniform_indices =
+      std::move(out.data.Get<transform::ArrayLengthFromUniform::Result>()
+                    ->used_size_indices);
+  result.needs_storage_buffer_sizes =
+      !result.used_array_length_from_uniform_indices.empty();
+  return result;
 }
 
 GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
@@ -1314,6 +1335,13 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kUnpack2x16unorm:
       out += "unpack_unorm2x16_to_float";
       break;
+    case sem::IntrinsicType::kArrayLength:
+      diagnostics_.add_error(
+          diag::System::Writer,
+          "Unable to translate builtin: " + std::string(intrinsic->str()) +
+              "\nDid you forget to pass array_length_from_uniform generator "
+              "options?");
+      return "";
     default:
       diagnostics_.add_error(
           diag::System::Writer,
