@@ -152,7 +152,9 @@ namespace dawn_native { namespace vulkan {
           mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
     }
 
-    BindGroupLayout::~BindGroupLayout() {
+    BindGroupLayout::~BindGroupLayout() = default;
+
+    void BindGroupLayout::DestroyImpl() {
         Device* device = ToBackend(GetDevice());
 
         // DescriptorSetLayout aren't used by execution on the GPU and can be deleted at any time,
