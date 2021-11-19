@@ -1033,7 +1033,7 @@ std::string TextureExternal::String(MatchState&) const {
   return "texture_external";
 }
 
-/// TypeMatcher for 'type _modf_result'
+/// TypeMatcher for 'type __modf_result'
 /// @see src/intrinsics.def:100:6
 class ModfResult : public TypeMatcher {
  public:
@@ -1050,18 +1050,18 @@ class ModfResult : public TypeMatcher {
 };
 
 const sem::Type* ModfResult::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_modf_result(ty)) {
+  if (!match__modf_result(ty)) {
     return nullptr;
   }
-  return build_modf_result(state);
+  return build__modf_result(state);
 }
 
 std::string ModfResult::String(MatchState&) const {
-  return "_modf_result";
+  return "__modf_result";
 }
 
-/// TypeMatcher for 'type _modf_result_vec'
-/// @see src/intrinsics.def:101:41
+/// TypeMatcher for 'type __modf_result_vec'
+/// @see src/intrinsics.def:101:42
 class ModfResultVec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1078,24 +1078,24 @@ class ModfResultVec : public TypeMatcher {
 
 const sem::Type* ModfResultVec::Match(MatchState& state, const sem::Type* ty) const {
   Number N = Number::invalid;
-  if (!match_modf_result_vec(ty, N)) {
+  if (!match__modf_result_vec(ty, N)) {
     return nullptr;
   }
   N = state.Num(N);
   if (!N.IsValid()) {
     return nullptr;
   }
-  return build_modf_result_vec(state, N);
+  return build__modf_result_vec(state, N);
 }
 
 std::string ModfResultVec::String(MatchState& state) const {
   const std::string N = state.NumName();
   std::stringstream ss;
-  ss << "_modf_result_vec" << N;
+  ss << "__modf_result_vec" << N;
   return ss.str();
 }
 
-/// TypeMatcher for 'type _frexp_result'
+/// TypeMatcher for 'type __frexp_result'
 /// @see src/intrinsics.def:102:6
 class FrexpResult : public TypeMatcher {
  public:
@@ -1112,18 +1112,18 @@ class FrexpResult : public TypeMatcher {
 };
 
 const sem::Type* FrexpResult::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_frexp_result(ty)) {
+  if (!match__frexp_result(ty)) {
     return nullptr;
   }
-  return build_frexp_result(state);
+  return build__frexp_result(state);
 }
 
 std::string FrexpResult::String(MatchState&) const {
-  return "_frexp_result";
+  return "__frexp_result";
 }
 
-/// TypeMatcher for 'type _frexp_result_vec'
-/// @see src/intrinsics.def:103:42
+/// TypeMatcher for 'type __frexp_result_vec'
+/// @see src/intrinsics.def:103:43
 class FrexpResultVec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1140,20 +1140,20 @@ class FrexpResultVec : public TypeMatcher {
 
 const sem::Type* FrexpResultVec::Match(MatchState& state, const sem::Type* ty) const {
   Number N = Number::invalid;
-  if (!match_frexp_result_vec(ty, N)) {
+  if (!match__frexp_result_vec(ty, N)) {
     return nullptr;
   }
   N = state.Num(N);
   if (!N.IsValid()) {
     return nullptr;
   }
-  return build_frexp_result_vec(state, N);
+  return build__frexp_result_vec(state, N);
 }
 
 std::string FrexpResultVec::String(MatchState& state) const {
   const std::string N = state.NumName();
   std::stringstream ss;
-  ss << "_frexp_result_vec" << N;
+  ss << "__frexp_result_vec" << N;
   return ss.str();
 }
 
@@ -8171,8 +8171,8 @@ constexpr IntrinsicInfo kIntrinsics[] = {
   },
   {
     /* [29] */
-    /* fn frexp(f32) -> _frexp_result */
-    /* fn frexp<N : num>(vec<N, f32>) -> _frexp_result_vec<N> */
+    /* fn frexp(f32) -> __frexp_result */
+    /* fn frexp<N : num>(vec<N, f32>) -> __frexp_result_vec<N> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[159],
   },
@@ -8290,8 +8290,8 @@ constexpr IntrinsicInfo kIntrinsics[] = {
   },
   {
     /* [46] */
-    /* fn modf(f32) -> _modf_result */
-    /* fn modf<N : num>(vec<N, f32>) -> _modf_result_vec<N> */
+    /* fn modf(f32) -> __modf_result */
+    /* fn modf<N : num>(vec<N, f32>) -> __modf_result_vec<N> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[193],
   },

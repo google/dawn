@@ -86,12 +86,12 @@ Token Lexer::next() {
     return t;
   }
 
-  t = try_punctuation();
+  t = try_ident();
   if (!t.IsUninitialized()) {
     return t;
   }
 
-  t = try_ident();
+  t = try_punctuation();
   if (!t.IsUninitialized()) {
     return t;
   }
@@ -724,8 +724,8 @@ Token Lexer::try_integer() {
 }
 
 Token Lexer::try_ident() {
-  // Must begin with an a-zA-Z
-  if (!is_alpha(content_->data[pos_])) {
+  // Must begin with an a-zA-Z_
+  if (!(is_alpha(content_->data[pos_]) || content_->data[pos_] == '_')) {
     return {};
   }
 
@@ -735,6 +735,16 @@ Token Lexer::try_ident() {
   while (!is_eof() && is_alphanum_underscore(content_->data[pos_])) {
     pos_++;
     location_.column++;
+  }
+
+  if (content_->data[s] == '_') {
+    // Check for an underscore on its own (special token), or a
+    // double-underscore (not allowed).
+    if ((pos_ == s + 1) || (content_->data[s + 1] == '_')) {
+      location_.column -= (pos_ - s);
+      pos_ = s;
+      return {};
+    }
   }
 
   auto str = content_->data.substr(s, pos_ - s);

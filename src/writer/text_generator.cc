@@ -33,9 +33,9 @@ std::string TextGenerator::UniqueIdentifier(const std::string& prefix) {
 
 std::string TextGenerator::StructName(const sem::Struct* s) {
   auto name = builder_.Symbols().NameFor(s->Name());
-  if (name.size() > 0 && name[0] == '_') {
+  if (name.size() > 1 && name[0] == '_' && name[1] == '_') {
     name = utils::GetOrCreate(builtin_struct_names_, s,
-                              [&] { return UniqueIdentifier(name.substr(1)); });
+                              [&] { return UniqueIdentifier(name.substr(2)); });
   }
   return name;
 }

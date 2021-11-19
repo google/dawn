@@ -113,9 +113,9 @@ class TextGenerator {
 
   /// @param s the semantic structure
   /// @returns the name of the structure, taking special care of builtin
-  /// structures that start with a leading underscore. If the structure is a
+  /// structures that start with double underscores. If the structure is a
   /// builtin, then the returned name will be a unique name without the leading
-  /// underscore.
+  /// underscores.
   std::string StructName(const sem::Struct* s);
 
   /// @param str the string

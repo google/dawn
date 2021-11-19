@@ -276,6 +276,7 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          "test",
                                          "test01",
                                          "test_",
+                                         "_test",
                                          "test_01",
                                          "ALLCAPS",
                                          "MiXeD_CaSe",
@@ -283,8 +284,16 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
                                          "alldigits_0123456789"));
 
-TEST_F(LexerTest, IdentifierTest_DoesNotStartWithUnderscore) {
-  Source::FileContent content("_test");
+TEST_F(LexerTest, IdentifierTest_SingleUnderscoreDoesNotMatch) {
+  Source::FileContent content("_");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  EXPECT_FALSE(t.IsIdentifier());
+}
+
+TEST_F(LexerTest, IdentifierTest_DoesNotStartWithDoubleUnderscore) {
+  Source::FileContent content("__test");
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();

@@ -10,15 +10,15 @@
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpName %unused_entry_point "unused_entry_point"
                OpName %tint_symbol "tint_symbol"
-               OpName %_modf_result "_modf_result"
-               OpMemberName %_modf_result 0 "fract"
-               OpMemberName %_modf_result 1 "whole"
-               OpMemberDecorate %_modf_result 0 Offset 0
-               OpMemberDecorate %_modf_result 1 Offset 4
+               OpName %__modf_result "__modf_result"
+               OpMemberName %__modf_result 0 "fract"
+               OpMemberName %__modf_result 1 "whole"
+               OpMemberDecorate %__modf_result 0 Offset 0
+               OpMemberDecorate %__modf_result 1 Offset 4
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
-%_modf_result = OpTypeStruct %float %float
+%__modf_result = OpTypeStruct %float %float
     %float_1 = OpConstant %float 1
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
@@ -26,7 +26,7 @@
                OpFunctionEnd
 %tint_symbol = OpFunction %void None %1
           %6 = OpLabel
-          %7 = OpExtInst %_modf_result %10 ModfStruct %float_1
+          %7 = OpExtInst %__modf_result %10 ModfStruct %float_1
          %12 = OpCompositeExtract %float %7 1
                OpReturn
                OpFunctionEnd

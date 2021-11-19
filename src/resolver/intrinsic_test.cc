@@ -835,8 +835,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
       R"(error: no matching call to frexp(i32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  frexp(f32) -> _frexp_result
-  frexp(vecN<f32>) -> _frexp_result_vecN
+  frexp(f32) -> __frexp_result
+  frexp(vecN<f32>) -> __frexp_result_vecN
 )");
 }
 
@@ -852,8 +852,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
       R"(error: no matching call to frexp(f32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  frexp(f32) -> _frexp_result
-  frexp(vecN<f32>) -> _frexp_result_vecN
+  frexp(f32) -> __frexp_result
+  frexp(vecN<f32>) -> __frexp_result_vecN
 )");
 }
 
@@ -866,8 +866,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
   EXPECT_EQ(r()->error(), R"(error: no matching call to frexp(f32, i32)
 
 2 candidate functions:
-  frexp(f32) -> _frexp_result
-  frexp(vecN<f32>) -> _frexp_result_vecN
+  frexp(f32) -> __frexp_result
+  frexp(vecN<f32>) -> __frexp_result_vecN
 )");
 }
 
@@ -883,8 +883,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
       R"(error: no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>, read_write>)
 
 2 candidate functions:
-  frexp(vecN<f32>) -> _frexp_result_vecN
-  frexp(f32) -> _frexp_result
+  frexp(vecN<f32>) -> __frexp_result_vecN
+  frexp(f32) -> __frexp_result
 )");
 }
 
@@ -962,8 +962,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_FirstParamInt) {
       R"(error: no matching call to modf(i32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  modf(f32) -> _modf_result
-  modf(vecN<f32>) -> _modf_result_vecN
+  modf(f32) -> __modf_result
+  modf(vecN<f32>) -> __modf_result_vecN
 )");
 }
 
@@ -979,8 +979,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamIntPtr) {
       R"(error: no matching call to modf(f32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  modf(f32) -> _modf_result
-  modf(vecN<f32>) -> _modf_result_vecN
+  modf(f32) -> __modf_result
+  modf(vecN<f32>) -> __modf_result_vecN
 )");
 }
 
@@ -993,8 +993,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamNotAPointer) {
   EXPECT_EQ(r()->error(), R"(error: no matching call to modf(f32, f32)
 
 2 candidate functions:
-  modf(f32) -> _modf_result
-  modf(vecN<f32>) -> _modf_result_vecN
+  modf(f32) -> __modf_result
+  modf(vecN<f32>) -> __modf_result_vecN
 )");
 }
 
@@ -1010,8 +1010,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
       R"(error: no matching call to modf(vec2<f32>, ptr<workgroup, vec4<f32>, read_write>)
 
 2 candidate functions:
-  modf(vecN<f32>) -> _modf_result_vecN
-  modf(f32) -> _modf_result
+  modf(vecN<f32>) -> __modf_result_vecN
+  modf(f32) -> __modf_result
 )");
 }
 
