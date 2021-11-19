@@ -142,7 +142,18 @@
         ]
     },
     "bind group": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            }
+        ]
     },
     "bind group entry": {
         "category": "structure",
@@ -167,7 +178,18 @@
         ]
     },
     "bind group layout": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            }
+        ]
     },
 
     "buffer binding type": {
@@ -1171,6 +1193,15 @@
         "tags": ["dawn"],
         "methods": [
             {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
                 "name": "destroy",
                 "returns": "void"
             }
@@ -1334,7 +1365,18 @@
         ]
     },
     "pipeline layout": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            }
+        ]
     },
     "pipeline layout descriptor": {
         "category": "structure",
@@ -1396,6 +1438,15 @@
     "query set": {
         "category": "object",
         "methods": [
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
             {
                 "name": "destroy"
             }
@@ -1978,7 +2029,18 @@
     },
 
     "sampler": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            }
+        ]
     },
     "sampler descriptor": {
         "category": "structure",
@@ -2400,7 +2462,18 @@
         ]
     },
     "texture view": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            }
+        ]
     },
     "texture view dimension": {
         "category": "enum",

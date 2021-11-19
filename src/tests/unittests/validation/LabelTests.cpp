@@ -19,6 +19,72 @@
 
 class LabelTest : public ValidationTest {};
 
+TEST_F(LabelTest, BindGroup) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
+
+    wgpu::BindGroupDescriptor descriptor;
+    descriptor.layout = layout;
+    descriptor.entryCount = 0;
+    descriptor.entries = nullptr;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::BindGroup bindGroup = device.CreateBindGroup(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(bindGroup.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::BindGroup bindGroup = device.CreateBindGroup(&descriptor);
+        bindGroup.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(bindGroup.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::BindGroup bindGroup = device.CreateBindGroup(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(bindGroup.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, BindGroupLayout) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+
+    wgpu::BindGroupLayoutDescriptor descriptor = {};
+    descriptor.entryCount = 0;
+    descriptor.entries = nullptr;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(bindGroupLayout.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(&descriptor);
+        bindGroupLayout.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(bindGroupLayout.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(bindGroupLayout.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
 TEST_F(LabelTest, Buffer) {
     DAWN_SKIP_TEST_IF(UsesWire());
     std::string label = "test";
@@ -46,6 +112,142 @@ TEST_F(LabelTest, Buffer) {
         descriptor.label = label.c_str();
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
         std::string readbackLabel = dawn_native::GetObjectLabelForTesting(buffer.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, ExternalTexture) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.size.width = 1;
+    textureDescriptor.size.height = 1;
+    textureDescriptor.size.depthOrArrayLayers = 1;
+    textureDescriptor.mipLevelCount = 1;
+    textureDescriptor.sampleCount = 1;
+    textureDescriptor.dimension = wgpu::TextureDimension::e2D;
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.usage =
+        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+    wgpu::ExternalTextureDescriptor descriptor;
+    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    descriptor.plane0 = texture.CreateView();
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(externalTexture.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&descriptor);
+        externalTexture.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(externalTexture.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(externalTexture.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, PipelineLayout) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
+
+    wgpu::PipelineLayoutDescriptor descriptor;
+    descriptor.bindGroupLayoutCount = 1;
+    descriptor.bindGroupLayouts = &layout;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipelineLayout.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&descriptor);
+        pipelineLayout.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipelineLayout.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipelineLayout.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, QuerySet) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::QuerySetDescriptor descriptor;
+    descriptor.type = wgpu::QueryType::Occlusion;
+    descriptor.count = 1;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::QuerySet querySet = device.CreateQuerySet(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(querySet.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::QuerySet querySet = device.CreateQuerySet(&descriptor);
+        querySet.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(querySet.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::QuerySet querySet = device.CreateQuerySet(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(querySet.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, Sampler) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::SamplerDescriptor descriptor;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::Sampler sampler = device.CreateSampler(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(sampler.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::Sampler sampler = device.CreateSampler(&descriptor);
+        sampler.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(sampler.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::Sampler sampler = device.CreateSampler(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(sampler.Get());
         ASSERT_EQ(label, readbackLabel);
     }
 }
@@ -83,6 +285,46 @@ TEST_F(LabelTest, Texture) {
         descriptor.label = label.c_str();
         wgpu::Texture texture = device.CreateTexture(&descriptor);
         std::string readbackLabel = dawn_native::GetObjectLabelForTesting(texture.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, TextureView) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size.width = 1;
+    descriptor.size.height = 1;
+    descriptor.size.depthOrArrayLayers = 1;
+    descriptor.mipLevelCount = 1;
+    descriptor.sampleCount = 1;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.format = wgpu::TextureFormat::RGBA8Uint;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
+
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::TextureView textureView = texture.CreateView();
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(textureView.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::TextureView textureView = texture.CreateView();
+        textureView.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(textureView.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        wgpu::TextureViewDescriptor viewDescriptor;
+        viewDescriptor.label = label.c_str();
+        wgpu::TextureView textureView = texture.CreateView(&viewDescriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(textureView.Get());
         ASSERT_EQ(label, readbackLabel);
     }
 }

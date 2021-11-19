@@ -18,6 +18,7 @@
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
@@ -52,9 +53,13 @@ namespace dawn_native { namespace vulkan {
         createInfo.pPushConstantRanges = nullptr;
 
         Device* device = ToBackend(GetDevice());
-        return CheckVkSuccess(
+        DAWN_TRY(CheckVkSuccess(
             device->fn.CreatePipelineLayout(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
-            "CreatePipelineLayout");
+            "CreatePipelineLayout"));
+
+        SetLabelImpl();
+
+        return {};
     }
 
     PipelineLayout::~PipelineLayout() = default;
@@ -68,6 +73,11 @@ namespace dawn_native { namespace vulkan {
 
     VkPipelineLayout PipelineLayout::GetHandle() const {
         return mHandle;
+    }
+
+    void PipelineLayout::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_PIPELINE_LAYOUT,
+                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_PipelineLayout", GetLabel());
     }
 
 }}  // namespace dawn_native::vulkan

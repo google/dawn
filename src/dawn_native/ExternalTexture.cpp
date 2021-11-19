@@ -89,7 +89,7 @@ namespace dawn_native {
 
     ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
                                              const ExternalTextureDescriptor* descriptor)
-        : ApiObjectBase(device, kLabelNotImplemented), mState(ExternalTextureState::Alive) {
+        : ApiObjectBase(device, descriptor->label), mState(ExternalTextureState::Alive) {
         textureViews[0] = descriptor->plane0;
         TrackInDevice();
     }

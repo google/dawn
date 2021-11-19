@@ -42,6 +42,9 @@ namespace dawn_native { namespace vulkan {
 
         void DestroyImpl() override;
 
+        // Dawn API
+        void SetLabelImpl() override;
+
         // The descriptor set in this allocation outlives the BindGroup because it is owned by
         // the BindGroupLayout which is referenced by the BindGroup.
         DescriptorSetAllocation mDescriptorSetAllocation;

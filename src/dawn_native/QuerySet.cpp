@@ -101,7 +101,7 @@ namespace dawn_native {
     }
 
     QuerySetBase::QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descriptor)
-        : ApiObjectBase(device, kLabelNotImplemented),
+        : ApiObjectBase(device, descriptor->label),
           mQueryType(descriptor->type),
           mQueryCount(descriptor->count),
           mState(QuerySetState::Available) {

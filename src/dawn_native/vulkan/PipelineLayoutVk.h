@@ -39,6 +39,9 @@ namespace dawn_native { namespace vulkan {
         using PipelineLayoutBase::PipelineLayoutBase;
         MaybeError Initialize();
 
+        // Dawn API
+        void SetLabelImpl() override;
+
         VkPipelineLayout mHandle = VK_NULL_HANDLE;
     };
 

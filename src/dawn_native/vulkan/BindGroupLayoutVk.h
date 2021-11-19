@@ -66,6 +66,9 @@ namespace dawn_native { namespace vulkan {
         ~BindGroupLayout() override;
         MaybeError Initialize();
 
+        // Dawn API
+        void SetLabelImpl() override;
+
         VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
 
         SlabAllocator<BindGroup> mBindGroupAllocator;

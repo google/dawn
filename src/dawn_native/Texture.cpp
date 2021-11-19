@@ -697,7 +697,7 @@ namespace dawn_native {
     // TextureViewBase
 
     TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor)
-        : ApiObjectBase(texture->GetDevice(), kLabelNotImplemented),
+        : ApiObjectBase(texture->GetDevice(), descriptor->label),
           mTexture(texture),
           mFormat(GetDevice()->GetValidInternalFormat(descriptor->format)),
           mDimension(descriptor->dimension),

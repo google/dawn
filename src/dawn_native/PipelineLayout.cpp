@@ -59,7 +59,7 @@ namespace dawn_native {
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                            const PipelineLayoutDescriptor* descriptor,
                                            ApiObjectBase::UntrackedByDeviceTag tag)
-        : ApiObjectBase(device, kLabelNotImplemented) {
+        : ApiObjectBase(device, descriptor->label) {
         ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
         for (BindGroupIndex group(0); group < BindGroupIndex(descriptor->bindGroupLayoutCount);
              ++group) {

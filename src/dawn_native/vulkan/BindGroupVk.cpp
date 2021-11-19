@@ -23,6 +23,7 @@
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/SamplerVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
@@ -156,6 +157,8 @@ namespace dawn_native { namespace vulkan {
         // TODO(crbug.com/dawn/855): Batch these updates
         device->fn.UpdateDescriptorSets(device->GetVkDevice(), numWrites, writes.data(), 0,
                                         nullptr);
+
+        SetLabelImpl();
     }
 
     BindGroup::~BindGroup() = default;
@@ -166,6 +169,12 @@ namespace dawn_native { namespace vulkan {
 
     VkDescriptorSet BindGroup::GetHandle() const {
         return mDescriptorSetAllocation.set;
+    }
+
+    void BindGroup::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_DESCRIPTOR_SET,
+                     reinterpret_cast<uint64_t&>(mDescriptorSetAllocation.set), "Dawn_BindGroup",
+                     GetLabel());
     }
 
 }}  // namespace dawn_native::vulkan

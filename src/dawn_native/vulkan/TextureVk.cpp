@@ -1293,9 +1293,13 @@ namespace dawn_native { namespace vulkan {
         createInfo.subresourceRange.layerCount = subresources.layerCount;
         createInfo.subresourceRange.aspectMask = VulkanAspectMask(subresources.aspects);
 
-        return CheckVkSuccess(
+        DAWN_TRY(CheckVkSuccess(
             device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
-            "CreateImageView");
+            "CreateImageView"));
+
+        SetLabelImpl();
+
+        return {};
     }
 
     TextureView::~TextureView() {
@@ -1312,6 +1316,11 @@ namespace dawn_native { namespace vulkan {
 
     VkImageView TextureView::GetHandle() const {
         return mHandle;
+    }
+
+    void TextureView::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_IMAGE_VIEW,
+                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_InternalTextureView", GetLabel());
     }
 
 }}  // namespace dawn_native::vulkan

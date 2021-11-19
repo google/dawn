@@ -72,7 +72,7 @@ namespace dawn_native {
     SamplerBase::SamplerBase(DeviceBase* device,
                              const SamplerDescriptor* descriptor,
                              ApiObjectBase::UntrackedByDeviceTag tag)
-        : ApiObjectBase(device, kLabelNotImplemented),
+        : ApiObjectBase(device, descriptor->label),
           mAddressModeU(descriptor->addressModeU),
           mAddressModeV(descriptor->addressModeV),
           mAddressModeW(descriptor->addressModeW),

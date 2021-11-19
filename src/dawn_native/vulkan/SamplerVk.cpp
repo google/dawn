@@ -100,9 +100,13 @@ namespace dawn_native { namespace vulkan {
             createInfo.maxAnisotropy = 1;
         }
 
-        return CheckVkSuccess(
+        DAWN_TRY(CheckVkSuccess(
             device->fn.CreateSampler(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
-            "CreateSampler");
+            "CreateSampler"));
+
+        SetLabelImpl();
+
+        return {};
     }
 
     Sampler::~Sampler() = default;
@@ -116,6 +120,11 @@ namespace dawn_native { namespace vulkan {
 
     VkSampler Sampler::GetHandle() const {
         return mHandle;
+    }
+
+    void Sampler::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_SAMPLER,
+                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_Sampler", GetLabel());
     }
 
 }}  // namespace dawn_native::vulkan

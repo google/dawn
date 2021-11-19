@@ -37,6 +37,9 @@ namespace dawn_native { namespace vulkan {
         using SamplerBase::SamplerBase;
         MaybeError Initialize(const SamplerDescriptor* descriptor);
 
+        // Dawn API
+        void SetLabelImpl() override;
+
         VkSampler mHandle = VK_NULL_HANDLE;
     };
 
