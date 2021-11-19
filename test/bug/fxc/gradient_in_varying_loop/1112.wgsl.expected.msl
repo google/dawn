@@ -1,0 +1,36 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_2 {
+  float2 vUV [[user(locn0)]];
+};
+struct tint_symbol_3 {
+  float4 value [[color(0)]];
+};
+
+float4 tint_symbol_inner(float2 vUV, texture2d<float, access::sample> tint_symbol_4, sampler tint_symbol_5, texture2d<float, access::sample> tint_symbol_6) {
+  float3 const random = float4(tint_symbol_4.sample(tint_symbol_5, vUV)).rgb;
+  int i = 0;
+  while (true) {
+    if ((i < 1)) {
+    } else {
+      break;
+    }
+    float3 const offset = float3(random[0]);
+    if (((((offset[0] < 0.0f) || (offset[1] < 0.0f)) || (offset[0] > 1.0f)) || (offset[1] > 1.0f))) {
+      i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+      continue;
+    }
+    float const sampleDepth = tint_symbol_6.sample(tint_symbol_5, float3(offset).xy)[0];
+    i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+  }
+  return float4(1.0f);
+}
+
+fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]], texture2d<float, access::sample> tint_symbol_9 [[texture(1)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  float4 const inner_result = tint_symbol_inner(tint_symbol_1.vUV, tint_symbol_7, tint_symbol_8, tint_symbol_9);
+  tint_symbol_3 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
