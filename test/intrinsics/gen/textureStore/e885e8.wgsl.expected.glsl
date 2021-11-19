@@ -6,7 +6,7 @@ precision mediump float;
 uniform highp writeonly image1D arg_0;
 
 void textureStore_e885e8() {
-  imageStore(arg_0, 1, vec4(0.0f, 0.0f, 0.0f, 0.0f)).x;
+  imageStore(arg_0, 1, vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -45,7 +45,7 @@ precision mediump float;
 uniform highp writeonly image1D arg_0;
 
 void textureStore_e885e8() {
-  imageStore(arg_0, 1, vec4(0.0f, 0.0f, 0.0f, 0.0f)).x;
+  imageStore(arg_0, 1, vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -74,7 +74,7 @@ precision mediump float;
 uniform highp writeonly image1D arg_0;
 
 void textureStore_e885e8() {
-  imageStore(arg_0, 1, vec4(0.0f, 0.0f, 0.0f, 0.0f)).x;
+  imageStore(arg_0, 1, vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {

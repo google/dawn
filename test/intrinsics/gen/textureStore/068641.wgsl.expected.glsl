@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image3D arg_0;
+uniform highp writeonly uimage3D arg_0;
 
 void textureStore_068641() {
-  imageStore(arg_0, ivec3(0, 0, 0), uvec4(0u, 0u, 0u, 0u)).x;
+  imageStore(arg_0, ivec3(0, 0, 0), uvec4(0u, 0u, 0u, 0u));
 }
 
 struct tint_symbol {
@@ -32,20 +30,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'imageStore' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image3D arg_0;
+uniform highp writeonly uimage3D arg_0;
 
 void textureStore_068641() {
-  imageStore(arg_0, ivec3(0, 0, 0), uvec4(0u, 0u, 0u, 0u)).x;
+  imageStore(arg_0, ivec3(0, 0, 0), uvec4(0u, 0u, 0u, 0u));
 }
 
 struct tint_symbol {
@@ -61,20 +52,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'imageStore' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image3D arg_0;
+uniform highp writeonly uimage3D arg_0;
 
 void textureStore_068641() {
-  imageStore(arg_0, ivec3(0, 0, 0), uvec4(0u, 0u, 0u, 0u)).x;
+  imageStore(arg_0, ivec3(0, 0, 0), uvec4(0u, 0u, 0u, 0u));
 }
 
 struct tint_symbol {
@@ -89,12 +73,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:7: 'imageStore' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 uniform highp isampler2DArray arg_0;
 
 void textureLoad_79e697() {
-  ivec4 res = texelFetch(arg_0, ivec4(0, 0, 1, 0));
+  ivec4 res = texelFetch(arg_0, ivec3(0, 0, 1), 0);
 }
 
 struct tint_symbol {
@@ -32,21 +30,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp isampler2DArray arg_0;
 
 void textureLoad_79e697() {
-  ivec4 res = texelFetch(arg_0, ivec4(0, 0, 1, 0));
+  ivec4 res = texelFetch(arg_0, ivec3(0, 0, 1), 0);
 }
 
 struct tint_symbol {
@@ -62,21 +52,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp isampler2DArray arg_0;
 
 void textureLoad_79e697() {
-  ivec4 res = texelFetch(arg_0, ivec4(0, 0, 1, 0));
+  ivec4 res = texelFetch(arg_0, ivec3(0, 0, 1), 0);
 }
 
 struct tint_symbol {
@@ -91,13 +73,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
 
 

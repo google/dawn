@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2D arg_0;
 
 void textureDimensions_2fe1cc() {
-  ivec2 res = textureSize(arg_00);
+  ivec2 res = textureSize(arg_0, 0);
 }
 
 struct tint_symbol {
@@ -32,22 +30,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'arg_00' : undeclared identifier 
-ERROR: 0:7: 'textureSize' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 4 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2D arg_0;
 
 void textureDimensions_2fe1cc() {
-  ivec2 res = textureSize(arg_00);
+  ivec2 res = textureSize(arg_0, 0);
 }
 
 struct tint_symbol {
@@ -63,22 +52,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'arg_00' : undeclared identifier 
-ERROR: 0:7: 'textureSize' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump 2-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 4 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2D arg_0;
 
 void textureDimensions_2fe1cc() {
-  ivec2 res = textureSize(arg_00);
+  ivec2 res = textureSize(arg_0, 0);
 }
 
 struct tint_symbol {
@@ -93,14 +73,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:7: 'arg_00' : undeclared identifier 
-ERROR: 0:7: 'textureSize' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 4 compilation errors.  No code generated.
-
 
 

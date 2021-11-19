@@ -6,7 +6,7 @@ precision mediump float;
 uniform highp usampler1D arg_0;
 
 void textureLoad_1b8588() {
-  uvec4 res = texelFetch(arg_0, ivec2(1, 0));
+  uvec4 res = texelFetch(arg_0, 1, 0);
 }
 
 struct tint_symbol {
@@ -45,7 +45,7 @@ precision mediump float;
 uniform highp usampler1D arg_0;
 
 void textureLoad_1b8588() {
-  uvec4 res = texelFetch(arg_0, ivec2(1, 0));
+  uvec4 res = texelFetch(arg_0, 1, 0);
 }
 
 struct tint_symbol {
@@ -74,7 +74,7 @@ precision mediump float;
 uniform highp usampler1D arg_0;
 
 void textureLoad_1b8588() {
-  uvec4 res = texelFetch(arg_0, ivec2(1, 0));
+  uvec4 res = texelFetch(arg_0, 1, 0);
 }
 
 struct tint_symbol {

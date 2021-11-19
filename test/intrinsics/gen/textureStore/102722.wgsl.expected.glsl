@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D arg_0;
+uniform highp writeonly uimage1D arg_0;
 
 void textureStore_102722() {
-  imageStore(arg_0, 1, uvec4(0u, 0u, 0u, 0u)).x;
+  imageStore(arg_0, 1, uvec4(0u, 0u, 0u, 0u));
 }
 
 struct tint_symbol {
@@ -33,7 +33,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:4: 'image1D' : Reserved word. 
+ERROR: 0:4: 'uimage1D' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -42,10 +42,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D arg_0;
+uniform highp writeonly uimage1D arg_0;
 
 void textureStore_102722() {
-  imageStore(arg_0, 1, uvec4(0u, 0u, 0u, 0u)).x;
+  imageStore(arg_0, 1, uvec4(0u, 0u, 0u, 0u));
 }
 
 struct tint_symbol {
@@ -62,7 +62,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:4: 'image1D' : Reserved word. 
+ERROR: 0:4: 'uimage1D' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -71,10 +71,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D arg_0;
+uniform highp writeonly uimage1D arg_0;
 
 void textureStore_102722() {
-  imageStore(arg_0, 1, uvec4(0u, 0u, 0u, 0u)).x;
+  imageStore(arg_0, 1, uvec4(0u, 0u, 0u, 0u));
 }
 
 struct tint_symbol {
@@ -92,7 +92,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:4: 'image1D' : Reserved word. 
+ERROR: 0:4: 'uimage1D' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

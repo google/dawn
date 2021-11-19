@@ -1135,18 +1135,35 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureDimensions: {
-      out << "textureSize(";
+      if (texture_type->Is<sem::StorageTexture>()) {
+        out << "imageSize(";
+      } else {
+        out << "textureSize(";
+      }
       if (!EmitExpression(out, texture)) {
         return false;
       }
 
-      auto* level_arg = arg(Usage::kLevel);
-      if (level_arg) {
-        if (!EmitExpression(out, level_arg)) {
-          return false;
+      // The LOD parameter is mandatory on textureSize() for non-multisampled
+      // textures.
+      if (!texture_type->Is<sem::StorageTexture>() &&
+          !texture_type->Is<sem::MultisampledTexture>() &&
+          !texture_type->Is<sem::DepthMultisampledTexture>()) {
+        out << ", ";
+        if (auto* level_arg = arg(Usage::kLevel)) {
+          if (!EmitExpression(out, level_arg)) {
+            return false;
+          }
+        } else {
+          out << "0";
         }
       }
       out << ")";
+      // textureSize() on sampler2dArray returns the array size in the
+      // final component, so strip it out.
+      if (texture_type->dim() == ast::TextureDimension::k2dArray) {
+        out << ".xy";
+      }
       return true;
     }
     // TODO(senorblanco): determine if this works for array textures
@@ -1171,12 +1188,6 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       break;
   }
 
-  // If pack_level_in_coords is true, then the mip level will be appended as the
-  // last value of the coordinates argument. If the WGSL intrinsic overload does
-  // not have a level parameter and pack_level_in_coords is true, then a zero
-  // mip level will be inserted.
-  bool pack_level_in_coords = false;
-
   uint32_t glsl_ret_width = 4u;
 
   switch (intrinsic->Type()) {
@@ -1200,10 +1211,6 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       break;
     case sem::IntrinsicType::kTextureLoad:
       out << "texelFetch(";
-      // Multisampled textures do not support mip-levels.
-      if (!texture_type->Is<sem::MultisampledTexture>()) {
-        pack_level_in_coords = true;
-      }
       break;
     case sem::IntrinsicType::kTextureStore:
       out << "imageStore(";
@@ -1227,40 +1234,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     return false;
   }
 
-  auto emit_vector_appended_with_i32_zero = [&](const ast::Expression* vector) {
-    auto* i32 = builder_.create<sem::I32>();
-    auto* zero = builder_.Expr(0);
-    auto* stmt = builder_.Sem().Get(vector)->Stmt();
-    builder_.Sem().Add(zero, builder_.create<sem::Expression>(zero, i32, stmt,
-                                                              sem::Constant{}));
-    auto* packed = AppendVector(&builder_, vector, zero);
-    return EmitExpression(out, packed->Declaration());
-  };
-
-  auto emit_vector_appended_with_level = [&](const ast::Expression* vector) {
-    if (auto* level = arg(Usage::kLevel)) {
-      auto* packed = AppendVector(&builder_, vector, level);
-      return EmitExpression(out, packed->Declaration());
-    }
-    return emit_vector_appended_with_i32_zero(vector);
-  };
-
   if (auto* array_index = arg(Usage::kArrayIndex)) {
     // Array index needs to be appended to the coordinates.
     auto* packed = AppendVector(&builder_, param_coords, array_index);
-    if (pack_level_in_coords) {
-      // Then mip level needs to be appended to the coordinates.
-      if (!emit_vector_appended_with_level(packed->Declaration())) {
-        return false;
-      }
-    } else {
-      if (!EmitExpression(out, packed->Declaration())) {
-        return false;
-      }
-    }
-  } else if (pack_level_in_coords) {
-    // Mip level needs to be appended to the coordinates.
-    if (!emit_vector_appended_with_level(param_coords)) {
+    if (!EmitExpression(out, packed->Declaration())) {
       return false;
     }
   } else {
@@ -1272,9 +1249,6 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   for (auto usage :
        {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx, Usage::kDdy,
         Usage::kSampleIndex, Usage::kOffset, Usage::kValue}) {
-    if (usage == Usage::kLevel && pack_level_in_coords) {
-      continue;  // mip level already packed in coordinates.
-    }
     if (auto* e = arg(usage)) {
       out << ", ";
       if (!EmitExpression(out, e)) {
@@ -1285,6 +1259,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
   out << ")";
 
+  if (intrinsic->ReturnType()->Is<sem::Void>()) {
+    return true;
+  }
   // If the intrinsic return type does not match the number of elements of the
   // GLSL intrinsic, we need to swizzle the expression to generate the correct
   // number of components.
@@ -2436,27 +2413,23 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
     out << "uniform highp ";
 
-    if (sampled || ms) {
-      auto* subtype =
-          sampled ? sampled->type() : storage ? storage->type() : ms->type();
-      if (subtype->Is<sem::F32>()) {
-      } else if (subtype->Is<sem::I32>()) {
-        out << "i";
-      } else if (subtype->Is<sem::U32>()) {
-        out << "u";
-      } else {
-        TINT_ICE(Writer, diagnostics_) << "Unsupported texture type";
-        return false;
-      }
+    if (storage && storage->access() != ast::Access::kRead) {
+      out << "writeonly ";
     }
-    if (storage) {
-      if (storage->access() != ast::Access::kRead) {
-        out << "writeonly ";
-      }
-      out << "image";
+    auto* subtype = sampled
+                        ? sampled->type()
+                        : storage ? storage->type() : ms ? ms->type() : nullptr;
+    if (!subtype || subtype->Is<sem::F32>()) {
+    } else if (subtype->Is<sem::I32>()) {
+      out << "i";
+    } else if (subtype->Is<sem::U32>()) {
+      out << "u";
     } else {
-      out << "sampler";
+      TINT_ICE(Writer, diagnostics_) << "Unsupported texture type";
+      return false;
     }
+
+    out << (storage ? "image" : "sampler");
 
     switch (tex->dim()) {
       case ast::TextureDimension::k1d:

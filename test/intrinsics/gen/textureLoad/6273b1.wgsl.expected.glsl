@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2DMS arg_0;
 
 void textureLoad_6273b1() {
-  float res = texelFetch(arg_0, ivec3(0, 0, 0), 1).x;
+  float res = texelFetch(arg_0, ivec2(0, 0), 1).x;
 }
 
 struct tint_symbol {
@@ -32,20 +30,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2DMS arg_0;
 
 void textureLoad_6273b1() {
-  float res = texelFetch(arg_0, ivec3(0, 0, 0), 1).x;
+  float res = texelFetch(arg_0, ivec2(0, 0), 1).x;
 }
 
 struct tint_symbol {
@@ -61,20 +52,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2DMS arg_0;
 
 void textureLoad_6273b1() {
-  float res = texelFetch(arg_0, ivec3(0, 0, 0), 1).x;
+  float res = texelFetch(arg_0, ivec2(0, 0), 1).x;
 }
 
 struct tint_symbol {
@@ -89,12 +73,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

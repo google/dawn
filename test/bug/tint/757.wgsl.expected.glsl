@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -17,7 +15,7 @@ struct tint_symbol_2 {
 void tint_symbol_inner(uvec3 GlobalInvocationID) {
   uint flatIndex = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
-  vec4 texel = texelFetch(myTexture, ivec4(ivec3(ivec2(GlobalInvocationID.xy), 0), 0));
+  vec4 texel = texelFetch(myTexture, ivec3(ivec2(GlobalInvocationID.xy), 0), 0);
   {
     for(uint i = 0u; (i < 1u); i = (i + 1u)) {
       result.values[(flatIndex + i)] = texel.r;
@@ -35,13 +33,5 @@ void main() {
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   tint_symbol(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:18: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:18: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
-ERROR: 0:18: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
 
 

@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 uniform highp usampler2D arg_0;
 
 void textureLoad_6154d4() {
-  uvec4 res = texelFetch(arg_0, ivec3(0, 0, 0));
+  uvec4 res = texelFetch(arg_0, ivec2(0, 0), 0);
 }
 
 struct tint_symbol {
@@ -32,21 +30,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of uint'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp usampler2D arg_0;
 
 void textureLoad_6154d4() {
-  uvec4 res = texelFetch(arg_0, ivec3(0, 0, 0));
+  uvec4 res = texelFetch(arg_0, ivec2(0, 0), 0);
 }
 
 struct tint_symbol {
@@ -62,21 +52,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of uint'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp usampler2D arg_0;
 
 void textureLoad_6154d4() {
-  uvec4 res = texelFetch(arg_0, ivec3(0, 0, 0));
+  uvec4 res = texelFetch(arg_0, ivec2(0, 0), 0);
 }
 
 struct tint_symbol {
@@ -91,13 +73,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:7: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of uint'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
 
 

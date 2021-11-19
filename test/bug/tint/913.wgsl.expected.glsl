@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -26,8 +24,8 @@ struct tint_symbol_3 {
 };
 
 void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
-  ivec2 srcSize = textureSize(src);
-  ivec2 dstSize = textureSize(dst);
+  ivec2 srcSize = textureSize(src, 0);
+  ivec2 dstSize = textureSize(dst, 0);
   uvec2 dstTexCoord = uvec2(GlobalInvocationID.xy);
   vec4 nonCoveredColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
@@ -46,7 +44,7 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   if ((tint_tmp)) {
     bool tint_tmp_3 = success;
     if (tint_tmp_3) {
-      tint_tmp_3 = all(equal(texelFetch(dst, ivec3(ivec2(dstTexCoord), 0)), nonCoveredColor));
+      tint_tmp_3 = all(equal(texelFetch(dst, ivec2(dstTexCoord), 0), nonCoveredColor));
     }
     success = (tint_tmp_3);
   } else {
@@ -54,8 +52,8 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
     if ((uniforms.dstTextureFlipY == 1u)) {
       srcTexCoord.y = ((uint(srcSize.y) - srcTexCoord.y) - 1u);
     }
-    vec4 srcColor = texelFetch(src, ivec3(ivec2(srcTexCoord), 0));
-    vec4 dstColor = texelFetch(dst, ivec3(ivec2(dstTexCoord), 0));
+    vec4 srcColor = texelFetch(src, ivec2(srcTexCoord), 0);
+    vec4 dstColor = texelFetch(dst, ivec2(dstTexCoord), 0);
     if ((uniforms.channelCount == 2u)) {
       bool tint_tmp_5 = success;
       if (tint_tmp_5) {
@@ -104,13 +102,5 @@ void main() {
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   tint_symbol_1(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:27: 'textureSize' : no matching overloaded function found 
-ERROR: 0:27: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:27: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
 
 

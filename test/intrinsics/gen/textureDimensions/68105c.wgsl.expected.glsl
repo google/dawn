@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2D arg_0;
+uniform highp writeonly uimage2D arg_0;
 
 void textureDimensions_68105c() {
-  ivec2 res = textureSize(arg_0);
+  ivec2 res = imageSize(arg_0);
 }
 
 struct tint_symbol {
@@ -32,21 +30,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'textureSize' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2D arg_0;
+uniform highp writeonly uimage2D arg_0;
 
 void textureDimensions_68105c() {
-  ivec2 res = textureSize(arg_0);
+  ivec2 res = imageSize(arg_0);
 }
 
 struct tint_symbol {
@@ -62,21 +52,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'textureSize' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump 2-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2D arg_0;
+uniform highp writeonly uimage2D arg_0;
 
 void textureDimensions_68105c() {
-  ivec2 res = textureSize(arg_0);
+  ivec2 res = imageSize(arg_0);
 }
 
 struct tint_symbol {
@@ -91,13 +73,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:7: 'textureSize' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
 
 

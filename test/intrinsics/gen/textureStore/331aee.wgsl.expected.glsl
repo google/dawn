@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 uniform highp writeonly image3D arg_0;
 
 void textureStore_331aee() {
-  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f)).x;
+  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -32,20 +30,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'x' : does not apply to this type:  global highp void
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp writeonly image3D arg_0;
 
 void textureStore_331aee() {
-  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f)).x;
+  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -61,20 +52,13 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:7: 'x' : does not apply to this type:  global highp void
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp writeonly image3D arg_0;
 
 void textureStore_331aee() {
-  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f)).x;
+  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -89,12 +73,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:7: 'x' : does not apply to this type:  global highp void
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

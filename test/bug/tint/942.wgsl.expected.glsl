@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -33,7 +31,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
   }
   memoryBarrierShared();
   uint filterOffset = ((params.filterDim - 1u) / 2u);
-  ivec2 dims = textureSize(inputTex0);
+  ivec2 dims = textureSize(inputTex, 0);
   ivec2 baseIndex = (ivec2(((WorkGroupID.xy * uvec2(params.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)))) - ivec2(int(filterOffset), 0));
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
@@ -74,7 +72,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
                 acc = (acc + ((1.0f / float(params.filterDim)) * tile[r][i]));
               }
             }
-            imageStore(outputTex, writeIndex, vec4(acc, 1.0f)).x;
+            imageStore(outputTex, writeIndex, vec4(acc, 1.0f));
           }
         }
       }
@@ -94,14 +92,5 @@ void main() {
   inputs.WorkGroupID = gl_WorkGroupID;
   tint_symbol(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:34: 'inputTex0' : undeclared identifier 
-ERROR: 0:34: 'textureSize' : no matching overloaded function found 
-ERROR: 0:34: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:34: '' : compilation terminated 
-ERROR: 4 compilation errors.  No code generated.
-
 
 

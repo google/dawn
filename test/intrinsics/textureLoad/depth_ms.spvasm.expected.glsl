@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -8,7 +6,7 @@ vec4 tint_symbol_1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void textureLoad_6273b1() {
   float res = 0.0f;
-  vec4 x_17 = vec4(texelFetch(arg_0, ivec3(0, 0, 0), 1).x, 0.0f, 0.0f, 0.0f);
+  vec4 x_17 = vec4(texelFetch(arg_0, ivec2(0, 0), 1).x, 0.0f, 0.0f, 0.0f);
   res = x_17.x;
   return;
 }
@@ -51,13 +49,6 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:9: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -65,7 +56,7 @@ uniform highp sampler2DMS arg_0;
 
 void textureLoad_6273b1() {
   float res = 0.0f;
-  vec4 x_17 = vec4(texelFetch(arg_0, ivec3(0, 0, 0), 1).x, 0.0f, 0.0f, 0.0f);
+  vec4 x_17 = vec4(texelFetch(arg_0, ivec2(0, 0), 1).x, 0.0f, 0.0f, 0.0f);
   res = x_17.x;
   return;
 }
@@ -91,13 +82,6 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:8: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -105,7 +89,7 @@ uniform highp sampler2DMS arg_0;
 
 void textureLoad_6273b1() {
   float res = 0.0f;
-  vec4 x_17 = vec4(texelFetch(arg_0, ivec3(0, 0, 0), 1).x, 0.0f, 0.0f, 0.0f);
+  vec4 x_17 = vec4(texelFetch(arg_0, ivec2(0, 0), 1).x, 0.0f, 0.0f, 0.0f);
   res = x_17.x;
   return;
 }
@@ -130,12 +114,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:8: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

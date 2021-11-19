@@ -6,7 +6,7 @@ precision mediump float;
 uniform highp writeonly image1D arg_0;
 
 void textureDimensions_42d4e6() {
-  int res = textureSize(arg_0);
+  int res = imageSize(arg_0);
 }
 
 struct tint_symbol {
@@ -45,7 +45,7 @@ precision mediump float;
 uniform highp writeonly image1D arg_0;
 
 void textureDimensions_42d4e6() {
-  int res = textureSize(arg_0);
+  int res = imageSize(arg_0);
 }
 
 struct tint_symbol {
@@ -74,7 +74,7 @@ precision mediump float;
 uniform highp writeonly image1D arg_0;
 
 void textureDimensions_42d4e6() {
-  int res = textureSize(arg_0);
+  int res = imageSize(arg_0);
 }
 
 struct tint_symbol {

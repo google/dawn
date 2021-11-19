@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -25,14 +23,14 @@ struct tint_symbol_3 {
 };
 
 void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
-  ivec2 size = textureSize(src);
+  ivec2 size = textureSize(src, 0);
   ivec2 dstTexCoord = ivec2(GlobalInvocationID.xy);
   ivec2 srcTexCoord = dstTexCoord;
   if ((uniforms.dstTextureFlipY == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1);
   }
-  vec4 srcColor = texelFetch(src, ivec3(srcTexCoord, 0));
-  vec4 dstColor = texelFetch(dst, ivec3(dstTexCoord, 0));
+  vec4 srcColor = texelFetch(src, srcTexCoord, 0);
+  vec4 dstColor = texelFetch(dst, dstTexCoord, 0);
   bool success = true;
   uvec4 srcColorBits = uvec4(0u, 0u, 0u, 0u);
   uvec4 dstColorBits = uvec4(dstColor);
@@ -64,13 +62,5 @@ void main() {
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   tint_symbol_1(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:26: 'textureSize' : no matching overloaded function found 
-ERROR: 0:26: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:26: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
 
 

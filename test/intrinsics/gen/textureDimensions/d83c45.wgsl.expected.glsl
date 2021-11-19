@@ -6,7 +6,7 @@ precision mediump float;
 uniform highp usamplerCubeArray arg_0;
 
 void textureDimensions_d83c45() {
-  ivec2 res = textureSize(arg_00);
+  ivec2 res = textureSize(arg_0, 0);
 }
 
 struct tint_symbol {
@@ -45,7 +45,7 @@ precision mediump float;
 uniform highp usamplerCubeArray arg_0;
 
 void textureDimensions_d83c45() {
-  ivec2 res = textureSize(arg_00);
+  ivec2 res = textureSize(arg_0, 0);
 }
 
 struct tint_symbol {
@@ -74,7 +74,7 @@ precision mediump float;
 uniform highp usamplerCubeArray arg_0;
 
 void textureDimensions_d83c45() {
-  ivec2 res = textureSize(arg_00);
+  ivec2 res = textureSize(arg_0, 0);
 }
 
 struct tint_symbol {

@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0;
+uniform highp writeonly uimage2DArray arg_0;
 
 void textureNumLayers_9700fb() {
   int res = textureQueryLevels(arg_0);;
@@ -43,7 +43,7 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0;
+uniform highp writeonly uimage2DArray arg_0;
 
 void textureNumLayers_9700fb() {
   int res = textureQueryLevels(arg_0);;
@@ -73,7 +73,7 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0;
+uniform highp writeonly uimage2DArray arg_0;
 
 void textureNumLayers_9700fb() {
   int res = textureQueryLevels(arg_0);;

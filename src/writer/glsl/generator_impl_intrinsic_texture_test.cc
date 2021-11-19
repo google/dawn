@@ -37,17 +37,13 @@ ExpectedResult expected_texture_overload(
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
     case ValidTextureOverload::kDimensions1d:
-    case ValidTextureOverload::kDimensionsStorageWO1d:
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensionsDepth2d:
-    case ValidTextureOverload::kDimensionsStorageWO2d:
     case ValidTextureOverload::kDimensionsDepthMultisampled2d:
     case ValidTextureOverload::kDimensionsMultisampled2d:
     case ValidTextureOverload::kDimensions2dArray:
     case ValidTextureOverload::kDimensionsDepth2dArray:
-    case ValidTextureOverload::kDimensionsStorageWO2dArray:
     case ValidTextureOverload::kDimensions3d:
-    case ValidTextureOverload::kDimensionsStorageWO3d:
     case ValidTextureOverload::kDimensionsCube:
     case ValidTextureOverload::kDimensionsDepthCube:
     case ValidTextureOverload::kDimensionsCubeArray:
@@ -62,6 +58,11 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kDimensionsCubeArrayLevel:
     case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
       return {"textureSize"};
+    case ValidTextureOverload::kDimensionsStorageWO1d:
+    case ValidTextureOverload::kDimensionsStorageWO2d:
+    case ValidTextureOverload::kDimensionsStorageWO2dArray:
+    case ValidTextureOverload::kDimensionsStorageWO3d:
+      return {"imageSize"};
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
@@ -197,35 +198,35 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kLoad1dLevelF32:
     case ValidTextureOverload::kLoad1dLevelU32:
     case ValidTextureOverload::kLoad1dLevelI32:
-      return R"(texelFetch(tint_symbol, ivec2(1, 3));)";
+      return R"(texelFetch(tint_symbol, 1, 3);)";
     case ValidTextureOverload::kLoad2dLevelF32:
     case ValidTextureOverload::kLoad2dLevelU32:
     case ValidTextureOverload::kLoad2dLevelI32:
-      return R"(texelFetch(tint_symbol, ivec3(1, 2, 3));)";
+      return R"(texelFetch(tint_symbol, ivec2(1, 2), 3);)";
     case ValidTextureOverload::kLoad2dArrayLevelF32:
     case ValidTextureOverload::kLoad2dArrayLevelU32:
     case ValidTextureOverload::kLoad2dArrayLevelI32:
     case ValidTextureOverload::kLoad3dLevelF32:
     case ValidTextureOverload::kLoad3dLevelU32:
     case ValidTextureOverload::kLoad3dLevelI32:
-      return R"(texelFetch(tint_symbol, ivec4(1, 2, 3, 4));)";
+      return R"(texelFetch(tint_symbol, ivec3(1, 2, 3), 4);)";
     case ValidTextureOverload::kLoadDepthMultisampled2dF32:
     case ValidTextureOverload::kLoadMultisampled2dF32:
     case ValidTextureOverload::kLoadMultisampled2dU32:
     case ValidTextureOverload::kLoadMultisampled2dI32:
       return R"(texelFetch(tint_symbol, ivec2(1, 2), 3);)";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
-      return R"(texelFetch(tint_symbol, ivec3(1, 2, 3)).x;)";
+      return R"(texelFetch(tint_symbol, ivec2(1, 2), 3).x;)";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
-      return R"(texelFetch(tint_symbol, ivec4(1, 2, 3, 4)).x;)";
+      return R"(texelFetch(tint_symbol, ivec3(1, 2, 3), 4).x;)";
     case ValidTextureOverload::kStoreWO1dRgba32float:
-      return R"(imageStore(tint_symbol, 1, vec4(2.0f, 3.0f, 4.0f, 5.0f)).x;)";
+      return R"(imageStore(tint_symbol, 1, vec4(2.0f, 3.0f, 4.0f, 5.0f));)";
     case ValidTextureOverload::kStoreWO2dRgba32float:
-      return R"(imageStore(tint_symbol, ivec2(1, 2), vec4(3.0f, 4.0f, 5.0f, 6.0f)).x;)";
+      return R"(imageStore(tint_symbol, ivec2(1, 2), vec4(3.0f, 4.0f, 5.0f, 6.0f));)";
     case ValidTextureOverload::kStoreWO2dArrayRgba32float:
-      return R"(imageStore(tint_symbol, ivec3(1, 2, 3), vec4(4.0f, 5.0f, 6.0f, 7.0f)).x;)";
+      return R"(imageStore(tint_symbol, ivec3(1, 2, 3), vec4(4.0f, 5.0f, 6.0f, 7.0f));)";
     case ValidTextureOverload::kStoreWO3dRgba32float:
-      return R"(imageStore(tint_symbol, ivec3(1, 2, 3), vec4(4.0f, 5.0f, 6.0f, 7.0f)).x;)";
+      return R"(imageStore(tint_symbol, ivec3(1, 2, 3), vec4(4.0f, 5.0f, 6.0f, 7.0f));)";
   }
   return "<unmatched texture overload>";
 }  // NOLINT - Ignore the length of this function
