@@ -15,7 +15,7 @@ uniform highp writeonly image2D outputTex;
 layout (binding = 3) uniform Flip_1 {
   uint value;
 } flip;
-groupshared vec3 tile[4][256];
+shared vec3 tile[4][256];
 
 struct tint_symbol_2 {
   uvec3 LocalInvocationID;
@@ -31,7 +31,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
       tile[i_1][i_2] = vec3(0.0f, 0.0f, 0.0f);
     }
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   uint filterOffset = ((params.filterDim - 1u) / 2u);
   ivec2 dims = textureSize(inputTex0);
   ivec2 baseIndex = (ivec2(((WorkGroupID.xy * uvec2(params.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)))) - ivec2(int(filterOffset), 0));
@@ -48,7 +48,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
       }
     }
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
@@ -97,8 +97,11 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:16: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
+ERROR: 0:34: 'inputTex0' : undeclared identifier 
+ERROR: 0:34: 'textureSize' : no matching overloaded function found 
+ERROR: 0:34: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
+ERROR: 0:34: '' : compilation terminated 
+ERROR: 4 compilation errors.  No code generated.
 
 
 

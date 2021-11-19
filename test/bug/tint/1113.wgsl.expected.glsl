@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -64,14 +62,10 @@ vec3 loadPosition(uint vertexIndex) {
 void doIgnore() {
   uint g42 = uniforms.numTriangles;
   uint kj6 = dbg.value1;
-  uint atomic_result = 0u;
-  InterlockedOr(counters.values[0], 0, atomic_result);
-  uint b53 = atomic_result;
+  uint b53 = atomicOr(counters.values[0], 0u);
   uint rwg = indices.values[0];
   float rb5 = positions.values[0];
-  int atomic_result_1 = 0;
-  InterlockedOr(LUT.values[0], 0, atomic_result_1);
-  int g55 = atomic_result_1;
+  int g55 = atomicOr(LUT.values[0], 0);
 }
 
 struct tint_symbol_1 {
@@ -93,9 +87,7 @@ void main_count_inner(uvec3 GlobalInvocationID) {
   vec3 center = (((p0 + p1) + p2) / 3.0f);
   vec3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms.gridSize, voxelPos);
-  uint atomic_result_2 = 0u;
-  InterlockedAdd(counters.values[voxelIndex], 1u, atomic_result_2);
-  uint acefg = atomic_result_2;
+  uint acefg = atomicAdd(counters.values[voxelIndex], 1u);
   if ((triangleIndex == 0u)) {
     dbg.value0 = uniforms.gridSize;
     dbg.value_f32_0 = center.x;
@@ -123,13 +115,6 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:66: 'InterlockedOr' : no matching overloaded function found 
-ERROR: 0:66: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -172,14 +157,10 @@ layout (binding = 50) buffer Dbg_1 {
 void doIgnore() {
   uint g42 = uniforms.numTriangles;
   uint kj6 = dbg.value1;
-  uint atomic_result = 0u;
-  InterlockedOr(counters.values[0], 0, atomic_result);
-  uint b53 = atomic_result;
+  uint b53 = atomicOr(counters.values[0], 0u);
   uint rwg = indices.values[0];
   float rb5 = positions.values[0];
-  int atomic_result_1 = 0;
-  InterlockedOr(LUT.values[0], 0, atomic_result_1);
-  int g55 = atomic_result_1;
+  int g55 = atomicOr(LUT.values[0], 0);
 }
 
 struct tint_symbol_1 {
@@ -196,17 +177,12 @@ void main_create_lut_inner(uvec3 GlobalInvocationID) {
   if ((voxelIndex >= maxVoxels)) {
     return;
   }
-  uint atomic_result_2 = 0u;
-  InterlockedOr(counters.values[voxelIndex], 0, atomic_result_2);
-  uint numTriangles = atomic_result_2;
+  uint numTriangles = atomicOr(counters.values[voxelIndex], 0u);
   int offset = -1;
   if ((numTriangles > 0u)) {
-    uint atomic_result_3 = 0u;
-    InterlockedAdd(dbg.offsetCounter, numTriangles, atomic_result_3);
-    offset = int(atomic_result_3);
+    offset = int(atomicAdd(dbg.offsetCounter, numTriangles));
   }
-  int atomic_result_4 = 0;
-  InterlockedExchange(LUT.values[voxelIndex], offset, atomic_result_4);
+  atomicExchange(LUT.values[voxelIndex], offset);
 }
 
 struct tint_symbol_5 {
@@ -223,13 +199,6 @@ void main() {
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   main_create_lut(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:44: 'InterlockedOr' : no matching overloaded function found 
-ERROR: 0:44: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 
 #version 310 es
@@ -296,14 +265,10 @@ vec3 loadPosition(uint vertexIndex) {
 void doIgnore() {
   uint g42 = uniforms.numTriangles;
   uint kj6 = dbg.value1;
-  uint atomic_result = 0u;
-  InterlockedOr(counters.values[0], 0, atomic_result);
-  uint b53 = atomic_result;
+  uint b53 = atomicOr(counters.values[0], 0u);
   uint rwg = indices.values[0];
   float rb5 = positions.values[0];
-  int atomic_result_1 = 0;
-  InterlockedOr(LUT.values[0], 0, atomic_result_1);
-  int g55 = atomic_result_1;
+  int g55 = atomicOr(LUT.values[0], 0);
 }
 
 struct tint_symbol_1 {
@@ -331,9 +296,7 @@ void main_sort_triangles_inner(uvec3 GlobalInvocationID) {
   vec3 center = (((p0 + p1) + p2) / 3.0f);
   vec3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms.gridSize, voxelPos);
-  int atomic_result_2 = 0;
-  InterlockedAdd(LUT.values[voxelIndex], 1, atomic_result_2);
-  int triangleOffset = atomic_result_2;
+  int triangleOffset = atomicAdd(LUT.values[voxelIndex], 1);
 }
 
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
@@ -346,12 +309,5 @@ void main() {
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   main_sort_triangles(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:66: 'InterlockedOr' : no matching overloaded function found 
-ERROR: 0:66: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

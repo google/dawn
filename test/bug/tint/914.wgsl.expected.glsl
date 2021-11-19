@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -56,11 +54,9 @@ void mm_write(uint row, uint col, float value) {
 
 const uint RowPerThread = 4u;
 const uint ColPerThread = 4u;
-const uint TileAOuter = 64u;
-const uint TileBOuter = 64u;
 const uint TileInner = 64u;
-groupshared float mm_Asub[64][64];
-groupshared float mm_Bsub[64][64];
+shared float mm_Asub[64][64];
+shared float mm_Bsub[64][64];
 
 struct tint_symbol_2 {
   uvec3 local_id;
@@ -77,7 +73,7 @@ void tint_symbol_inner(uvec3 local_id, uvec3 global_id, uint local_invocation_in
       mm_Bsub[i][i_1] = 0.0f;
     }
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   uint tileRow = (local_id.y * RowPerThread);
   uint tileCol = (local_id.x * ColPerThread);
   uint globalRow = (global_id.y * RowPerThread);
@@ -119,7 +115,7 @@ void tint_symbol_inner(uvec3 local_id, uvec3 global_id, uint local_invocation_in
           }
         }
       }
-      GroupMemoryBarrierWithGroupSync();
+      memoryBarrierShared();
       {
         for(uint k = 0u; (k < TileInner); k = (k + 1u)) {
           {
@@ -140,7 +136,7 @@ void tint_symbol_inner(uvec3 local_id, uvec3 global_id, uint local_invocation_in
           }
         }
       }
-      GroupMemoryBarrierWithGroupSync();
+      memoryBarrierShared();
     }
   }
   {
@@ -167,11 +163,5 @@ void main() {
   inputs.global_id = gl_GlobalInvocationID;
   tint_symbol(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:60: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
 
 

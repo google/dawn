@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -19,8 +17,8 @@ layout (binding = 0) buffer ssbOut_1 {
 } x_54;
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
 uvec3 tint_symbol_1 = uvec3(0u, 0u, 0u);
-groupshared float mm_Asub[64][64];
-groupshared float mm_Bsub[64][1];
+shared float mm_Asub[64][64];
+shared float mm_Bsub[64][1];
 layout (binding = 1) buffer ssbA_1 {
   float A[];
 } x_165;
@@ -258,7 +256,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
           }
         }
       }
-      GroupMemoryBarrierWithGroupSync();
+      memoryBarrierShared();
       k = 0;
       {
         for(; (k < 64); k = (k + 1)) {
@@ -290,7 +288,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
           }
         }
       }
-      GroupMemoryBarrierWithGroupSync();
+      memoryBarrierShared();
     }
   }
   innerRow_4 = 0;
@@ -374,7 +372,7 @@ void tint_symbol_2_inner(uvec3 tint_symbol_3, uvec3 tint_symbol_4, uint local_in
       mm_Asub[i][i_1] = 0.0f;
     }
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   tint_symbol = tint_symbol_3;
   tint_symbol_1 = tint_symbol_4;
   main_1();
@@ -392,11 +390,5 @@ void main() {
   inputs.tint_symbol_4 = gl_GlobalInvocationID;
   tint_symbol_2(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:20: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
 
 

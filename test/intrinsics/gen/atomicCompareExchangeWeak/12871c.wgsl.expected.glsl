@@ -1,7 +1,13 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
+
+ivec2 tint_atomicCompareExchangeWeak(inout int param_0, int param_1, int param_2) {
+  ivec2 result;
+  result.x = atomicCompSwap(param_0, param_1, param_2);
+  result.y = result.x == param_2 ? 1 : 0;
+  return result;
+}
+
 
 
 layout (binding = 0) buffer SB_RW_1 {
@@ -9,11 +15,7 @@ layout (binding = 0) buffer SB_RW_1 {
 } sb_rw;
 
 void atomicCompareExchangeWeak_12871c() {
-  ivec2 atomic_result = ivec2(0, 0);
-  int atomic_compare_value = 1;
-  InterlockedCompareExchange(sb_rw.arg_0, atomic_compare_value, 1, atomic_result.x);
-  atomic_result.y = atomic_result.x == atomic_compare_value;
-  ivec2 res = atomic_result;
+  ivec2 res = tint_atomicCompareExchangeWeak(sb_rw.arg_0, 1, 1);
 }
 
 void fragment_main() {
@@ -25,15 +27,16 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:12: 'InterlockedCompareExchange' : no matching overloaded function found 
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
+
+ivec2 tint_atomicCompareExchangeWeak(inout int param_0, int param_1, int param_2) {
+  ivec2 result;
+  result.x = atomicCompSwap(param_0, param_1, param_2);
+  result.y = result.x == param_2 ? 1 : 0;
+  return result;
+}
+
 
 
 layout (binding = 0) buffer SB_RW_1 {
@@ -41,11 +44,7 @@ layout (binding = 0) buffer SB_RW_1 {
 } sb_rw;
 
 void atomicCompareExchangeWeak_12871c() {
-  ivec2 atomic_result = ivec2(0, 0);
-  int atomic_compare_value = 1;
-  InterlockedCompareExchange(sb_rw.arg_0, atomic_compare_value, 1, atomic_result.x);
-  atomic_result.y = atomic_result.x == atomic_compare_value;
-  ivec2 res = atomic_result;
+  ivec2 res = tint_atomicCompareExchangeWeak(sb_rw.arg_0, 1, 1);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -56,12 +55,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:12: 'InterlockedCompareExchange' : no matching overloaded function found 
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

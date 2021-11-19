@@ -111,9 +111,7 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
             if ((tint_tmp)) {
               continue;
             }
-            uint atomic_result = 0u;
-            InterlockedAdd(tileLightId.data[tileId].count, 1u, atomic_result);
-            uint offset = atomic_result;
+            uint offset = atomicAdd(tileLightId.data[tileId].count, 1u);
             if ((offset >= config.numTileLightSlot)) {
               continue;
             }

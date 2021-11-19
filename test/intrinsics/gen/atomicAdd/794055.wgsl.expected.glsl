@@ -1,14 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
-groupshared int arg_0;
+shared int arg_0;
 
 void atomicAdd_794055() {
-  int atomic_result = 0;
-  InterlockedAdd(arg_0, 1, atomic_result);
-  int res = atomic_result;
+  int res = atomicAdd(arg_0, 1);
 }
 
 struct tint_symbol_1 {
@@ -17,10 +13,9 @@ struct tint_symbol_1 {
 
 void compute_main_inner(uint local_invocation_index) {
   {
-    int atomic_result_1 = 0;
-    InterlockedExchange(arg_0, 0, atomic_result_1);
+    atomicExchange(arg_0, 0);
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   atomicAdd_794055();
 }
 
@@ -34,11 +29,5 @@ void main() {
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   compute_main(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:4: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
 
 

@@ -607,162 +607,102 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
 bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
                                             const ast::CallExpression* expr,
                                             const sem::Intrinsic* intrinsic) {
-  std::string result = UniqueIdentifier("atomic_result");
-
-  if (!intrinsic->ReturnType()->Is<sem::Void>()) {
-    auto pre = line();
-    if (!EmitTypeAndName(pre, intrinsic->ReturnType(), ast::StorageClass::kNone,
-                         ast::Access::kUndefined, result)) {
-      return false;
-    }
-    pre << " = ";
-    if (!EmitZeroValue(pre, intrinsic->ReturnType())) {
-      return false;
-    }
-    pre << ";";
-  }
-
   auto call = [&](const char* name) {
-    auto pre = line();
-    pre << name;
-
+    out << name;
     {
-      ScopedParen sp(pre);
+      ScopedParen sp(out);
       for (size_t i = 0; i < expr->args.size(); i++) {
         auto* arg = expr->args[i];
         if (i > 0) {
-          pre << ", ";
+          out << ", ";
         }
-        if (!EmitExpression(pre, arg)) {
+        if (!EmitExpression(out, arg)) {
           return false;
         }
       }
-
-      pre << ", " << result;
     }
-
-    pre << ";";
-
-    out << result;
     return true;
   };
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kAtomicLoad: {
-      // GLSL does not have an InterlockedLoad, so we emulate it with
-      // InterlockedOr using 0 as the OR value
-      auto pre = line();
-      pre << "InterlockedOr";
-      {
-        ScopedParen sp(pre);
-        if (!EmitExpression(pre, expr->args[0])) {
-          return false;
-        }
-        pre << ", 0, " << result;
-      }
-      pre << ";";
-
-      out << result;
-      return true;
-    }
-    case sem::IntrinsicType::kAtomicStore: {
-      // GLSL does not have an InterlockedStore, so we emulate it with
-      // InterlockedExchange and discard the returned value
-      {  // T result = 0;
-        auto pre = line();
-        auto* value_ty = intrinsic->Parameters()[1]->Type();
-        if (!EmitTypeAndName(pre, value_ty, ast::StorageClass::kNone,
-                             ast::Access::kUndefined, result)) {
-          return false;
-        }
-        pre << " = ";
-        if (!EmitZeroValue(pre, value_ty)) {
-          return false;
-        }
-        pre << ";";
-      }
-
-      out << "InterlockedExchange";
+      // GLSL does not have an atomicLoad, so we emulate it with
+      // atomicOr using 0 as the OR value
+      out << "atomicOr";
       {
         ScopedParen sp(out);
         if (!EmitExpression(out, expr->args[0])) {
           return false;
         }
-        out << ", ";
-        if (!EmitExpression(out, expr->args[1])) {
-          return false;
+        out << ", 0";
+        if (intrinsic->ReturnType()->Is<sem::U32>()) {
+          out << "u";
         }
-        out << ", " << result;
       }
       return true;
     }
     case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
-      auto* dest = expr->args[0];
-      auto* compare_value = expr->args[1];
-      auto* value = expr->args[2];
-
-      std::string compare = UniqueIdentifier("atomic_compare_value");
-
-      {  // T compare_value = <compare_value>;
-        auto pre = line();
-        if (!EmitTypeAndName(pre, TypeOf(compare_value),
-                             ast::StorageClass::kNone, ast::Access::kUndefined,
-                             compare)) {
-          return false;
-        }
-        pre << " = ";
-        if (!EmitExpression(pre, compare_value)) {
-          return false;
-        }
-        pre << ";";
-      }
-
-      {  // InterlockedCompareExchange(dst, compare, value, result.x);
-        auto pre = line();
-        pre << "InterlockedCompareExchange";
-        {
-          ScopedParen sp(pre);
-          if (!EmitExpression(pre, dest)) {
-            return false;
-          }
-          pre << ", " << compare << ", ";
-          if (!EmitExpression(pre, value)) {
-            return false;
-          }
-          pre << ", " << result << ".x";
-        }
-        pre << ";";
-      }
-
-      {  // result.y = result.x == compare;
-        line() << result << ".y = " << result << ".x == " << compare << ";";
-      }
-
-      out << result;
-      return true;
+      return CallIntrinsicHelper(
+          out, expr, intrinsic,
+          [&](TextBuffer* b, const std::vector<std::string>& params) {
+            {
+              auto pre = line(b);
+              if (!EmitTypeAndName(pre, intrinsic->ReturnType(),
+                                   ast::StorageClass::kNone,
+                                   ast::Access::kUndefined, "result")) {
+                return false;
+              }
+              pre << ";";
+            }
+            {
+              auto pre = line(b);
+              pre << "result.x = atomicCompSwap";
+              {
+                ScopedParen sp(pre);
+                pre << params[0];
+                pre << ", " << params[1];
+                pre << ", " << params[2];
+              }
+              pre << ";";
+            }
+            {
+              auto pre = line(b);
+              pre << "result.y = result.x == " << params[2] << " ? ";
+              if (TypeOf(expr->args[2])->Is<sem::U32>()) {
+                pre << "1u : 0u;";
+              } else {
+                pre << "1 : 0;";
+              }
+            }
+            line(b) << "return result;";
+            return true;
+          });
     }
 
     case sem::IntrinsicType::kAtomicAdd:
     case sem::IntrinsicType::kAtomicSub:
-      return call("InterlockedAdd");
+      return call("atomicAdd");
 
     case sem::IntrinsicType::kAtomicMax:
-      return call("InterlockedMax");
+      return call("atomicMax");
 
     case sem::IntrinsicType::kAtomicMin:
-      return call("InterlockedMin");
+      return call("atomicMin");
 
     case sem::IntrinsicType::kAtomicAnd:
-      return call("InterlockedAnd");
+      return call("atomicAnd");
 
     case sem::IntrinsicType::kAtomicOr:
-      return call("InterlockedOr");
+      return call("atomicOr");
 
     case sem::IntrinsicType::kAtomicXor:
-      return call("InterlockedXor");
+      return call("atomicXor");
 
     case sem::IntrinsicType::kAtomicExchange:
-      return call("InterlockedExchange");
+    case sem::IntrinsicType::kAtomicStore:
+      // GLSL does not have an atomicStore, so we emulate it with
+      // atomicExchange.
+      return call("atomicExchange");
 
     default:
       break;
@@ -1160,9 +1100,9 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
   // TODO(crbug.com/tint/661): Combine sequential barriers to a single
   // instruction.
   if (intrinsic->Type() == sem::IntrinsicType::kWorkgroupBarrier) {
-    out << "GroupMemoryBarrierWithGroupSync()";
+    out << "memoryBarrierShared()";
   } else if (intrinsic->Type() == sem::IntrinsicType::kStorageBarrier) {
-    out << "DeviceMemoryBarrierWithGroupSync()";
+    out << "memoryBarrierBuffer()";
   } else {
     TINT_UNREACHABLE(Writer, diagnostics_)
         << "unexpected barrier intrinsic type " << sem::str(intrinsic->Type());
@@ -1765,7 +1705,7 @@ bool GeneratorImpl::EmitWorkgroupVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
   auto out = line();
 
-  out << "groupshared ";
+  out << "shared ";
 
   auto name = builder_.Symbols().NameFor(decl->symbol);
   auto* type = var->Type()->UnwrapRef();

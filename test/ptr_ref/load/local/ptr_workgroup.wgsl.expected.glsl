@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
-groupshared int i;
+shared int i;
 
 struct tint_symbol_2 {
   uint local_invocation_index;
@@ -13,7 +11,7 @@ void tint_symbol_inner(uint local_invocation_index) {
   {
     i = 0;
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   i = 123;
   int use = (i + 1);
 }
@@ -28,11 +26,5 @@ void main() {
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   tint_symbol(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:4: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
 
 

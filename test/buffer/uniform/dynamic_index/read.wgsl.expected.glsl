@@ -33,6 +33,8 @@ void tint_symbol_inner(uint idx) {
   ivec2 g = s.arr[idx].g;
   ivec2 h = s.arr[idx].h;
   mat2x3 i = s.arr[idx].i;
+  mat3x2 j = s.arr[idx].j;
+  ivec4 k[4] = s.arr[idx].k;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

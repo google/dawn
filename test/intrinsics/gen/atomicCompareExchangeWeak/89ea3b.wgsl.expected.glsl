@@ -1,16 +1,18 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
-groupshared int arg_0;
+ivec2 tint_atomicCompareExchangeWeak(inout int param_0, int param_1, int param_2) {
+  ivec2 result;
+  result.x = atomicCompSwap(param_0, param_1, param_2);
+  result.y = result.x == param_2 ? 1 : 0;
+  return result;
+}
+
+
+shared int arg_0;
 
 void atomicCompareExchangeWeak_89ea3b() {
-  ivec2 atomic_result = ivec2(0, 0);
-  int atomic_compare_value = 1;
-  InterlockedCompareExchange(arg_0, atomic_compare_value, 1, atomic_result.x);
-  atomic_result.y = atomic_result.x == atomic_compare_value;
-  ivec2 res = atomic_result;
+  ivec2 res = tint_atomicCompareExchangeWeak(arg_0, 1, 1);
 }
 
 struct tint_symbol_1 {
@@ -19,10 +21,9 @@ struct tint_symbol_1 {
 
 void compute_main_inner(uint local_invocation_index) {
   {
-    int atomic_result_1 = 0;
-    InterlockedExchange(arg_0, 0, atomic_result_1);
+    atomicExchange(arg_0, 0);
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   atomicCompareExchangeWeak_89ea3b();
 }
 
@@ -36,11 +37,5 @@ void main() {
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   compute_main(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:4: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
 
 

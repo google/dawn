@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -14,9 +12,7 @@ struct tint_symbol_1 {
 };
 
 void computeMain_inner(uvec3 global_id) {
-  uint atomic_result = 0u;
-  InterlockedAdd(drawOut.vertexCount, cubeVerts, atomic_result);
-  uint firstVertex = atomic_result;
+  uint firstVertex = atomicAdd(drawOut.vertexCount, cubeVerts);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -29,12 +25,5 @@ void main() {
   inputs.global_id = gl_GlobalInvocationID;
   computeMain(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:16: 'InterlockedAdd' : no matching overloaded function found 
-ERROR: 0:16: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

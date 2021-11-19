@@ -36,7 +36,7 @@ TEST_F(GlslGeneratorImplTest_WorkgroupVar, Basic) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("groupshared float wg;\n"));
+  EXPECT_THAT(gen.result(), HasSubstr("shared float wg;\n"));
 }
 
 TEST_F(GlslGeneratorImplTest_WorkgroupVar, Aliased) {
@@ -52,7 +52,7 @@ TEST_F(GlslGeneratorImplTest_WorkgroupVar, Aliased) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("groupshared float wg;\n"));
+  EXPECT_THAT(gen.result(), HasSubstr("shared float wg;\n"));
 }
 
 }  // namespace

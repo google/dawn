@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -15,7 +13,7 @@ struct S {
 layout (binding = 1) buffer Result_1 {
   int tint_symbol;
 } result;
-groupshared S s;
+shared S s;
 
 struct tint_symbol_2 {
   uint local_invocation_index;
@@ -28,7 +26,7 @@ void f_inner(uint local_invocation_index) {
       s.data[i] = 0;
     }
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   result.tint_symbol = s.data[ubo.dynamic_idx];
 }
 
@@ -42,11 +40,5 @@ void main() {
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   f(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:16: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
 
 

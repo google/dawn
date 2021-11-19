@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
-groupshared int a;
+shared int a;
 
 void uses_a() {
   a = (a + 1);
@@ -17,7 +15,7 @@ void main1_inner(uint local_invocation_index) {
   {
     a = 0;
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   a = 42;
   uses_a();
 }
@@ -41,16 +39,10 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:4: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-groupshared int b;
+shared int b;
 
 void uses_b() {
   b = (b * 2);
@@ -67,7 +59,7 @@ void main2_inner(uint local_invocation_index_1) {
   {
     b = 0;
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   b = 7;
   uses_b();
 }
@@ -88,17 +80,11 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:4: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-groupshared int a;
-groupshared int b;
+shared int a;
+shared int b;
 
 void uses_a() {
   a = (a + 1);
@@ -138,7 +124,7 @@ void main3_inner(uint local_invocation_index_2) {
     a = 0;
     b = 0;
   }
-  GroupMemoryBarrierWithGroupSync();
+  memoryBarrierShared();
   outer();
   no_uses();
 }
@@ -153,12 +139,6 @@ void main() {
   inputs.local_invocation_index_2 = uint(gl_LocalInvocationIndex);
   main3(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:4: '' :  syntax error, unexpected IDENTIFIER
-ERROR: 1 compilation errors.  No code generated.
-
 
 
 #version 310 es
