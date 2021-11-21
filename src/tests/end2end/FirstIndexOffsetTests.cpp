@@ -50,10 +50,8 @@ class FirstIndexOffsetTests : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        // WGSL doesn't have the ability to tag attributes as "flat". "flat" is required on u32
-        // attributes for correct runtime behavior under Vulkan and codegen under OpenGL(ES).
-        // TODO(tint:451): Remove once resolved by spec/tint
-        DAWN_SUPPRESS_TEST_IF(IsVulkan() || IsOpenGL() || IsOpenGLES());
+        // TODO(tint:451): Remove once "flat" is supported under OpenGL(ES).
+        DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
     }
 
   private:
@@ -99,18 +97,18 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
 
     if ((checkIndex & CheckIndex::Vertex) != 0) {
         vertexInputs << "  [[builtin(vertex_index)]] vertex_index : u32;\n";
-        vertexOutputs << "  [[location(1)]] vertex_index : u32;\n";
+        vertexOutputs << "  [[location(1), interpolate(flat)]] vertex_index : u32;\n";
         vertexBody << "  output.vertex_index = input.vertex_index;\n";
 
-        fragmentInputs << "  [[location(1)]] vertex_index : u32;\n";
+        fragmentInputs << "  [[location(1), interpolate(flat)]] vertex_index : u32;\n";
         fragmentBody << "  _ = atomicMin(&idx_vals.vertex_index, input.vertex_index);\n";
     }
     if ((checkIndex & CheckIndex::Instance) != 0) {
         vertexInputs << "  [[builtin(instance_index)]] instance_index : u32;\n";
-        vertexOutputs << "  [[location(2)]] instance_index : u32;\n";
+        vertexOutputs << "  [[location(2), interpolate(flat)]] instance_index : u32;\n";
         vertexBody << "  output.instance_index = input.instance_index;\n";
 
-        fragmentInputs << "  [[location(2)]] instance_index : u32;\n";
+        fragmentInputs << "  [[location(2), interpolate(flat)]] instance_index : u32;\n";
         fragmentBody << "  _ = atomicMin(&idx_vals.instance_index, input.instance_index);\n";
     }
 
