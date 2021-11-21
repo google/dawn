@@ -115,6 +115,9 @@ namespace dawn_native { namespace utils {
         DeviceBase* device,
         const Ref<BindGroupLayoutBase>& layout,
         std::initializer_list<BindingInitializationHelper> entriesInitializer);
+
+    const char* GetLabelForTrace(const char* label);
+
 }}  // namespace dawn_native::utils
 
 #endif  // DAWNNATIVE_UTILS_WGPUHELPERS_H_

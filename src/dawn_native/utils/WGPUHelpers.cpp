@@ -185,4 +185,8 @@ namespace dawn_native { namespace utils {
         return device->CreateBindGroup(&descriptor);
     }
 
+    const char* GetLabelForTrace(const char* label) {
+        return (label == nullptr || strlen(label) == 0) ? "None" : label;
+    }
+
 }}  // namespace dawn_native::utils

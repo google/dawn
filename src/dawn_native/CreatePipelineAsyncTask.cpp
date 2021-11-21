@@ -20,6 +20,7 @@
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
+#include "utils/WGPUHelpers.h"
 
 namespace dawn_native {
 
@@ -114,10 +115,13 @@ namespace dawn_native {
     }
 
     void CreateComputePipelineAsyncTask::Run() {
-        TRACE_EVENT_FLOW_END0(mComputePipeline->GetDevice()->GetPlatform(), General,
-                              "CreateComputePipelineAsyncTask::RunAsync", this);
-        TRACE_EVENT0(mComputePipeline->GetDevice()->GetPlatform(), General,
-                     "CreateComputePipelineAsyncTask::Run");
+        const char* eventLabel = utils::GetLabelForTrace(mComputePipeline->GetLabel().c_str());
+        TRACE_EVENT_FLOW_END1(mComputePipeline->GetDevice()->GetPlatform(), General,
+                              "CreateComputePipelineAsyncTask::RunAsync", this, "label",
+                              eventLabel);
+        TRACE_EVENT1(mComputePipeline->GetDevice()->GetPlatform(), General,
+                     "CreateComputePipelineAsyncTask::Run", "label", eventLabel);
+
         MaybeError maybeError = mComputePipeline->Initialize();
         std::string errorMessage;
         if (maybeError.IsError()) {
@@ -133,6 +137,9 @@ namespace dawn_native {
         std::unique_ptr<CreateComputePipelineAsyncTask> task) {
         DeviceBase* device = task->mComputePipeline->GetDevice();
 
+        const char* eventLabel =
+            utils::GetLabelForTrace(task->mComputePipeline->GetLabel().c_str());
+
         // Using "taskPtr = std::move(task)" causes compilation error while it should be supported
         // since C++14:
         // https://docs.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp?view=msvc-160
@@ -140,8 +147,10 @@ namespace dawn_native {
             std::unique_ptr<CreateComputePipelineAsyncTask> innnerTaskPtr(taskPtr);
             innnerTaskPtr->Run();
         };
-        TRACE_EVENT_FLOW_BEGIN0(device->GetPlatform(), General,
-                                "CreateComputePipelineAsyncTask::RunAsync", task.get());
+
+        TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
+                                "CreateComputePipelineAsyncTask::RunAsync", task.get(), "label",
+                                eventLabel);
         device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
     }
 
@@ -156,10 +165,12 @@ namespace dawn_native {
     }
 
     void CreateRenderPipelineAsyncTask::Run() {
-        TRACE_EVENT_FLOW_END0(mRenderPipeline->GetDevice()->GetPlatform(), General,
-                              "CreateRenderPipelineAsyncTask::RunAsync", this);
-        TRACE_EVENT0(mRenderPipeline->GetDevice()->GetPlatform(), General,
-                     "CreateRenderPipelineAsyncTask::Run");
+        const char* eventLabel = utils::GetLabelForTrace(mRenderPipeline->GetLabel().c_str());
+        TRACE_EVENT_FLOW_END1(mRenderPipeline->GetDevice()->GetPlatform(), General,
+                              "CreateRenderPipelineAsyncTask::RunAsync", this, "label", eventLabel);
+        TRACE_EVENT1(mRenderPipeline->GetDevice()->GetPlatform(), General,
+                     "CreateRenderPipelineAsyncTask::Run", "label", eventLabel);
+
         MaybeError maybeError = mRenderPipeline->Initialize();
         std::string errorMessage;
         if (maybeError.IsError()) {
@@ -175,6 +186,8 @@ namespace dawn_native {
         std::unique_ptr<CreateRenderPipelineAsyncTask> task) {
         DeviceBase* device = task->mRenderPipeline->GetDevice();
 
+        const char* eventLabel = utils::GetLabelForTrace(task->mRenderPipeline->GetLabel().c_str());
+
         // Using "taskPtr = std::move(task)" causes compilation error while it should be supported
         // since C++14:
         // https://docs.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp?view=msvc-160
@@ -182,8 +195,10 @@ namespace dawn_native {
             std::unique_ptr<CreateRenderPipelineAsyncTask> innerTaskPtr(taskPtr);
             innerTaskPtr->Run();
         };
-        TRACE_EVENT_FLOW_BEGIN0(device->GetPlatform(), General,
-                                "CreateRenderPipelineAsyncTask::RunAsync", task.get());
+
+        TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
+                                "CreateRenderPipelineAsyncTask::RunAsync", task.get(), "label",
+                                eventLabel);
         device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
     }
 }  // namespace dawn_native

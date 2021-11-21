@@ -840,20 +840,18 @@ namespace dawn_platform { namespace TraceEvent {
 // Define setTraceValue for each allowed type. It stores the type and
 // value in the return arguments. This allows this API to avoid declaring any
 // structures so that it is portable to third_party libraries.
-#define INTERNAL_DECLARE_SET_TRACE_VALUE(actual_type, union_member, value_type_id) \
-    static inline void setTraceValue(actual_type arg, unsigned char* type,         \
-                                     unsigned long long* value) {                  \
-        TraceValueUnion typeValue;                                                 \
-        typeValue.union_member = arg;                                              \
-        *type = value_type_id;                                                     \
-        *value = typeValue.m_uint;                                                 \
+#define INTERNAL_DECLARE_SET_TRACE_VALUE(actual_type, union_member, value_type_id)            \
+    static inline void setTraceValue(actual_type arg, unsigned char* type, uint64_t* value) { \
+        TraceValueUnion typeValue;                                                            \
+        typeValue.union_member = arg;                                                         \
+        *type = value_type_id;                                                                \
+        *value = typeValue.m_uint;                                                            \
     }
 // Simpler form for int types that can be safely casted.
-#define INTERNAL_DECLARE_SET_TRACE_VALUE_INT(actual_type, value_type_id)   \
-    static inline void setTraceValue(actual_type arg, unsigned char* type, \
-                                     unsigned long long* value) {          \
-        *type = value_type_id;                                             \
-        *value = static_cast<unsigned long long>(arg);                     \
+#define INTERNAL_DECLARE_SET_TRACE_VALUE_INT(actual_type, value_type_id)                      \
+    static inline void setTraceValue(actual_type arg, unsigned char* type, uint64_t* value) { \
+        *type = value_type_id;                                                                \
+        *value = static_cast<unsigned long long>(arg);                                        \
     }
 
         INTERNAL_DECLARE_SET_TRACE_VALUE_INT(unsigned long long, TRACE_VALUE_TYPE_UINT)
@@ -877,7 +875,7 @@ namespace dawn_platform { namespace TraceEvent {
 
         static inline void setTraceValue(const std::string& arg,
                                          unsigned char* type,
-                                         unsigned long long* value) {
+                                         uint64_t* value) {
             TraceValueUnion typeValue;
             typeValue.m_string = arg.data();
             *type = TRACE_VALUE_TYPE_COPY_STRING;
