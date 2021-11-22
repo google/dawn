@@ -307,17 +307,6 @@ TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
   EXPECT_TRUE(TypeOf(init)->Is<sem::I32>());
 }
 
-TEST_F(ResolverTest, Stmt_VariableDecl_AliasRedeclared) {
-  Alias(Source{{12, 34}}, "MyInt", ty.i32());
-  Alias(Source{{56, 78}}, "MyInt", ty.i32());
-  WrapInFunction();
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "56:78 error: type with the name 'MyInt' was already declared\n"
-            "12:34 note: first declared here");
-}
-
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScope) {
   auto* init = Expr(2);
   Global("my_var", ty.i32(), ast::StorageClass::kPrivate, init);
@@ -1979,9 +1968,9 @@ TEST_F(ResolverTest, ASTNodesAreReached) {
 TEST_F(ResolverTest, ASTNodeNotReached) {
   EXPECT_FATAL_FAILURE(
       {
-        ProgramBuilder builder;
-        builder.Expr("1");
-        Resolver(&builder).Resolve();
+        ProgramBuilder b;
+        b.Expr("expr");
+        Resolver(&b).Resolve();
       },
       "internal compiler error: AST node 'tint::ast::IdentifierExpression' was "
       "not reached by the resolver");
@@ -1990,15 +1979,14 @@ TEST_F(ResolverTest, ASTNodeNotReached) {
 TEST_F(ResolverTest, ASTNodeReachedTwice) {
   EXPECT_FATAL_FAILURE(
       {
-        ProgramBuilder builder;
-        auto* expr = builder.Expr("1");
-        auto* usesExprTwice = builder.Add(expr, expr);
-        builder.Global("g", builder.ty.i32(), ast::StorageClass::kPrivate,
-                       usesExprTwice);
-        Resolver(&builder).Resolve();
+        ProgramBuilder b;
+        auto* expr = b.Expr(1);
+        b.Global("a", b.ty.i32(), ast::StorageClass::kPrivate, expr);
+        b.Global("b", b.ty.i32(), ast::StorageClass::kPrivate, expr);
+        Resolver(&b).Resolve();
       },
-      "internal compiler error: AST node 'tint::ast::IdentifierExpression' was "
-      "encountered twice in the same AST of a Program");
+      "internal compiler error: AST node 'tint::ast::SintLiteralExpression' "
+      "was encountered twice in the same AST of a Program");
 }
 
 TEST_F(ResolverTest, UnaryOp_Not) {

@@ -112,9 +112,9 @@ type declaration_order_check_1 = f32;
 
 fn declaration_order_check_2() {}
 
-type declaration_order_check_2 = f32;
+type declaration_order_check_3 = f32;
 
-let declaration_order_check_3 : i32 = 1;
+let declaration_order_check_4 : i32 = 1;
 
 )");
 

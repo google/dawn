@@ -111,8 +111,7 @@ TEST_F(ResolverValidationTest, Error_WithEmptySource) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "error: unknown statement type for type determination: "
-            "tint::resolver::FakeStmt");
+            "error: unknown statement type: tint::resolver::FakeStmt");
 }
 
 TEST_F(ResolverValidationTest, Stmt_Error_Unknown) {
@@ -122,8 +121,7 @@ TEST_F(ResolverValidationTest, Stmt_Error_Unknown) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "2:30 error: unknown statement type for type determination: "
-            "tint::resolver::FakeStmt");
+            "2:30 error: unknown statement type: tint::resolver::FakeStmt");
 }
 
 TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
@@ -203,8 +201,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
   WrapInFunction(assign);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: identifier must be declared before use: b");
+  EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: 'b'");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
@@ -219,30 +216,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
   WrapInFunction(body);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: identifier must be declared before use: b");
-}
-
-TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
-  // fn my_func() {
-  //   global_var = 3.14f;
-  // }
-  // var global_var: f32 = 2.1;
-
-  auto* lhs = Expr(Source{{12, 34}}, "global_var");
-  auto* rhs = Expr(3.14f);
-
-  Func("my_func", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           Assign(lhs, rhs),
-       },
-       ast::DecorationList{Stage(ast::PipelineStage::kVertex)});
-
-  Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: identifier must be declared before use: global_var");
+  EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: 'b'");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
@@ -255,7 +229,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
   Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
 
   Func("my_func", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
+       {
            Assign(Expr(Source{Source::Location{12, 34}}, "global_var"), 3.14f),
            Return(),
        });
@@ -284,8 +258,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
   WrapInFunction(outer_body);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: identifier must be declared before use: a");
+  EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: 'a'");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableOuterScope_Pass) {
@@ -327,16 +300,14 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
   WrapInFunction(outer_body);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: identifier must be declared before use: a");
+  EXPECT_EQ(r()->error(), "12:34 error: unknown identifier: 'a'");
 }
 
 TEST_F(ResolverValidationTest, StorageClass_FunctionVariableWorkgroupClass) {
   auto* var = Var("var", ty.i32(), ast::StorageClass::kWorkgroup);
 
   auto* stmt = Decl(var);
-  Func("func", ast::VariableList{}, ty.void_(), ast::StatementList{stmt},
-       ast::DecorationList{});
+  Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -348,8 +319,7 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableI32) {
   auto* var = Var("s", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* stmt = Decl(var);
-  Func("func", ast::VariableList{}, ty.void_(), ast::StatementList{stmt},
-       ast::DecorationList{});
+  Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());
 

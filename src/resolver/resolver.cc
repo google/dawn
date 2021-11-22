@@ -95,6 +95,12 @@ bool Resolver::Resolve() {
     return false;
   }
 
+  if (!DependencyGraph::Build(builder_->AST(), builder_->Symbols(),
+                              builder_->Diagnostics(), dependencies_,
+                              /* allow_out_of_order_decls*/ false)) {
+    return false;
+  }
+
   bool result = ResolveInternal();
 
   if (!result && !diagnostics_.contains_errors()) {
@@ -910,8 +916,7 @@ bool Resolver::Statement(const ast::Statement* stmt) {
     return VariableDeclStatement(v);
   }
 
-  AddError("unknown statement type for type determination: " +
-               std::string(stmt->TypeInfo().name),
+  AddError("unknown statement type: " + std::string(stmt->TypeInfo().name),
            stmt->source);
   return false;
 }
@@ -1075,12 +1080,20 @@ bool Resolver::ForLoopStatement(const ast::ForLoopStatement* stmt) {
 
 sem::Expression* Resolver::Expression(const ast::Expression* root) {
   std::vector<const ast::Expression*> sorted;
+  bool mark_failed = false;
   if (!ast::TraverseExpressions<ast::TraverseOrder::RightToLeft>(
           root, diagnostics_, [&](const ast::Expression* expr) {
-            Mark(expr);
+            if (!Mark(expr)) {
+              mark_failed = true;
+              return ast::TraverseAction::Stop;
+            }
             sorted.emplace_back(expr);
             return ast::TraverseAction::Descend;
           })) {
+    return nullptr;
+  }
+
+  if (mark_failed) {
     return nullptr;
   }
 
@@ -1524,7 +1537,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     return nullptr;
   }
 
-  AddError("identifier must be declared before use: " + name, expr->source);
+  AddError("unknown identifier: '" + name + "'", expr->source);
   return nullptr;
 }
 
@@ -2249,18 +2262,20 @@ std::string Resolver::VectorPretty(uint32_t size,
   return vec_type.FriendlyName(builder_->Symbols());
 }
 
-void Resolver::Mark(const ast::Node* node) {
+bool Resolver::Mark(const ast::Node* node) {
   if (node == nullptr) {
     TINT_ICE(Resolver, diagnostics_) << "Resolver::Mark() called with nullptr";
+    return false;
   }
   if (marked_.emplace(node).second) {
-    return;
+    return true;
   }
   TINT_ICE(Resolver, diagnostics_)
       << "AST node '" << node->TypeInfo().name
       << "' was encountered twice in the same AST of a Program\n"
       << "At: " << node->source << "\n"
       << "Pointer: " << node;
+  return false;
 }
 
 void Resolver::AddError(const std::string& msg, const Source& source) const {

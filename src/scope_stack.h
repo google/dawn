@@ -15,6 +15,7 @@
 #define SRC_SCOPE_STACK_H_
 
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "src/symbol.h"
@@ -45,14 +46,19 @@ class ScopeStack {
     }
   }
 
-  /// Assigns the value into the top most scope of the stack
-  /// @param symbol the symbol of the variable
+  /// Assigns the value into the top most scope of the stack.
+  /// @param symbol the symbol of the value
   /// @param val the value
-  void Set(const Symbol& symbol, T val) { stack_.back()[symbol] = val; }
+  /// @returns the old value if there was an existing symbol at the top of the
+  /// stack, otherwise the zero initializer for type T.
+  T Set(const Symbol& symbol, T val) {
+    std::swap(val, stack_.back()[symbol]);
+    return val;
+  }
 
   /// Retrieves a value from the stack
   /// @param symbol the symbol to look for
-  /// @returns the variable, or the zero initializer if the value was not found
+  /// @returns the value, or the zero initializer if the value was not found
   T Get(const Symbol& symbol) const {
     for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
       auto& map = *iter;

@@ -24,54 +24,6 @@ namespace {
 
 using ResolverCallValidationTest = ResolverTest;
 
-TEST_F(ResolverCallValidationTest, Recursive_Invalid) {
-  // fn main() {main(); }
-
-  SetSource(Source::Location{12, 34});
-  auto* call_expr = Call("main");
-  ast::VariableList params0;
-
-  Func("main", params0, ty.void_(),
-       ast::StatementList{
-           CallStmt(call_expr),
-       },
-       ast::DecorationList{
-           Stage(ast::PipelineStage::kVertex),
-       });
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "12:34 error: recursion is not permitted. 'main' attempted to call "
-            "itself.");
-}
-
-TEST_F(ResolverCallValidationTest, Undeclared_Invalid) {
-  // fn main() {func(); return; }
-  // fn func() { return; }
-
-  SetSource(Source::Location{12, 34});
-  auto* call_expr = Call("func");
-  ast::VariableList params0;
-
-  Func("main", params0, ty.f32(),
-       ast::StatementList{
-           CallStmt(call_expr),
-           Return(),
-       },
-       ast::DecorationList{});
-
-  Func("func", params0, ty.f32(),
-       ast::StatementList{
-           Return(),
-       },
-       ast::DecorationList{});
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(), "12:34 error: unable to find called function: func");
-}
-
 TEST_F(ResolverCallValidationTest, TooFewArgs) {
   Func("foo", {Param(Sym(), ty.i32()), Param(Sym(), ty.f32())}, ty.void_(),
        {Return()});
@@ -115,11 +67,10 @@ TEST_F(ResolverCallValidationTest, UnusedRetval) {
   Func("func", {}, ty.f32(), {Return(Expr(1.0f))}, {});
 
   Func("main", {}, ty.void_(),
-       ast::StatementList{
+       {
            CallStmt(Source{{12, 34}}, Call("func")),
            Return(),
-       },
-       {});
+       });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -133,7 +84,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_VariableIdentExpr) {
   auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
   Func("foo", {param}, ty.void_(), {});
   Func("main", {}, ty.void_(),
-       ast::StatementList{
+       {
            Decl(Var("z", ty.i32(), Expr(1))),
            CallStmt(Call("foo", AddressOf(Source{{12, 34}}, Expr("z")))),
        });
@@ -150,7 +101,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_ConstIdentExpr) {
   auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
   Func("foo", {param}, ty.void_(), {});
   Func("main", {}, ty.void_(),
-       ast::StatementList{
+       {
            Decl(Const("z", ty.i32(), Expr(1))),
            CallStmt(Call("foo", AddressOf(Expr(Source{{12, 34}}, "z")))),
        });
@@ -170,7 +121,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_NotIdentExprVar) {
   auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
   Func("foo", {param}, ty.void_(), {});
   Func("main", {}, ty.void_(),
-       ast::StatementList{
+       {
            Decl(Var("v", ty.Of(S))),
            CallStmt(Call(
                "foo", AddressOf(Source{{12, 34}}, MemberAccessor("v", "m")))),
@@ -193,7 +144,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_AddressOfMemberAccessor) {
   auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
   Func("foo", {param}, ty.void_(), {});
   Func("main", {}, ty.void_(),
-       ast::StatementList{
+       {
            Decl(Const("v", ty.Of(S), Construct(ty.Of(S)))),
            CallStmt(Call("foo", AddressOf(Expr(Source{{12, 34}},
                                                MemberAccessor("v", "m"))))),

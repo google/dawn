@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/utils/unique_vector.h"
+#include "src/utils/reverse.h"
 
 #include "gtest/gtest.h"
 
@@ -46,6 +47,10 @@ TEST(UniqueVectorTest, AddUnique) {
     EXPECT_EQ(n, i);
     i++;
   }
+  for (auto n : Reverse(unique_vec)) {
+    i--;
+    EXPECT_EQ(n, i);
+  }
   EXPECT_EQ(unique_vec[0], 0);
   EXPECT_EQ(unique_vec[1], 1);
   EXPECT_EQ(unique_vec[2], 2);
@@ -64,6 +69,10 @@ TEST(UniqueVectorTest, AddDuplicates) {
   for (auto n : unique_vec) {
     EXPECT_EQ(n, i);
     i++;
+  }
+  for (auto n : Reverse(unique_vec)) {
+    i--;
+    EXPECT_EQ(n, i);
   }
   EXPECT_EQ(unique_vec[0], 0);
   EXPECT_EQ(unique_vec[1], 1);
@@ -86,6 +95,32 @@ TEST(UniqueVectorTest, AsVector) {
     EXPECT_EQ(n, i);
     i++;
   }
+  for (auto n : Reverse(unique_vec)) {
+    i--;
+    EXPECT_EQ(n, i);
+  }
+}
+
+TEST(UniqueVectorTest, PopBack) {
+  UniqueVector<int> unique_vec;
+  unique_vec.add(0);
+  unique_vec.add(2);
+  unique_vec.add(1);
+
+  EXPECT_EQ(unique_vec.pop_back(), 1);
+  EXPECT_EQ(unique_vec.size(), 2u);
+  EXPECT_EQ(unique_vec[0], 0);
+  EXPECT_EQ(unique_vec[1], 2);
+
+  EXPECT_EQ(unique_vec.pop_back(), 2);
+  EXPECT_EQ(unique_vec.size(), 1u);
+  EXPECT_EQ(unique_vec[0], 0);
+
+  unique_vec.add(1);
+
+  EXPECT_EQ(unique_vec.size(), 2u);
+  EXPECT_EQ(unique_vec[0], 0);
+  EXPECT_EQ(unique_vec[1], 1);
 }
 
 }  // namespace

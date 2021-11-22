@@ -26,43 +26,6 @@ namespace {
 class ResolverFunctionValidationTest : public resolver::TestHelper,
                                        public testing::Test {};
 
-TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
-  // fn func() -> i32 { return 2; }
-  // fn func() -> i32 { return 2; }
-  Func(Source{{56, 78}}, "func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{
-           Return(2),
-       },
-       ast::DecorationList{});
-
-  Func(Source{{12, 34}}, "func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{
-           Return(2),
-       },
-       ast::DecorationList{});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            R"(12:34 error: redefinition of 'func'
-56:78 note: previous definition is here)");
-}
-
-TEST_F(ResolverFunctionValidationTest, ParameterNamesMustBeUnique_fail) {
-  // fn func(common_name : f32, x : i32, common_name : u32) { }
-  Func("func",
-       {
-           Param(Source{{56, 78}}, "common_name", ty.f32()),
-           Param("x", ty.i32()),
-           Param(Source{{12, 34}}, "common_name", ty.u32()),
-       },
-       ty.void_(), {});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            R"(12:34 error: redefinition of parameter 'common_name'
-56:78 note: previous definition is here)");
-}
-
 TEST_F(ResolverFunctionValidationTest, ParameterNamesMustBeUnique_pass) {
   // fn func_a(common_name : f32) { }
   // fn func_b(common_name : f32) { }
@@ -95,41 +58,6 @@ TEST_F(ResolverFunctionValidationTest,
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(ResolverFunctionValidationTest,
-       FunctionNameSameAsGlobalVariableName_Fail) {
-  // var foo:f32 = 3.14;
-  // fn foo() -> void {}
-
-  auto* global_var = Var(Source{{56, 78}}, "foo", ty.f32(),
-                         ast::StorageClass::kPrivate, Expr(3.14f));
-  AST().AddGlobalVariable(global_var);
-
-  Func(Source{{12, 34}}, "foo", ast::VariableList{}, ty.void_(),
-       ast::StatementList{}, ast::DecorationList{});
-
-  EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(),
-            "12:34 error: redefinition of 'foo'\n56:78 note: previous "
-            "definition is here");
-}
-
-TEST_F(ResolverFunctionValidationTest,
-       GlobalVariableNameSameAFunctionName_Fail) {
-  // fn foo() -> void {}
-  // var<private> foo:f32 = 3.14;
-
-  Func(Source{{12, 34}}, "foo", ast::VariableList{}, ty.void_(),
-       ast::StatementList{}, ast::DecorationList{});
-  auto* global_var = Var(Source{{56, 78}}, "foo", ty.f32(),
-                         ast::StorageClass::kPrivate, Expr(3.14f));
-  AST().AddGlobalVariable(global_var);
-
-  EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(),
-            "56:78 error: redefinition of 'foo'\n12:34 note: previous "
-            "definition is here");
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionUsingSameVariableName_Pass) {

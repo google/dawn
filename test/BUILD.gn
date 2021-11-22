@@ -243,6 +243,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../src/resolver/compound_statement_test.cc",
     "../src/resolver/control_block_validation_test.cc",
     "../src/resolver/decoration_validation_test.cc",
+    "../src/resolver/dependency_graph_test.cc",
     "../src/resolver/entry_point_validation_test.cc",
     "../src/resolver/function_validation_test.cc",
     "../src/resolver/host_shareable_validation_test.cc",

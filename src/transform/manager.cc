@@ -16,13 +16,13 @@
 
 /// If set to 1 then the transform::Manager will dump the WGSL of the program
 /// before and after each transform. Helpful for debugging bad output.
-#define PRINT_PROGRAM_FOR_EACH_TRANSFORM 0
+#define TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM 0
 
-#if PRINT_PROGRAM_FOR_EACH_TRANSFORM
-#define IF_PRINT_PROGRAM(x) x
-#else  // PRINT_PROGRAM_FOR_EACH_TRANSFORM
-#define IF_PRINT_PROGRAM(x)
-#endif  // PRINT_PROGRAM_FOR_EACH_TRANSFORM
+#if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
+#define TINT_IF_PRINT_PROGRAM(x) x
+#else  // TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
+#define TINT_IF_PRINT_PROGRAM(x)
+#endif  // TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Manager);
 
@@ -33,7 +33,7 @@ Manager::Manager() = default;
 Manager::~Manager() = default;
 
 Output Manager::Run(const Program* program, const DataMap& data) {
-#if PRINT_PROGRAM_FOR_EACH_TRANSFORM
+#if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
   auto print_program = [&](const char* msg, const Transform* transform) {
     auto wgsl = Program::printer(program);
     std::cout << "---------------------------------------------------------"
@@ -52,19 +52,20 @@ Output Manager::Run(const Program* program, const DataMap& data) {
   Output out;
   if (!transforms_.empty()) {
     for (const auto& transform : transforms_) {
-      IF_PRINT_PROGRAM(print_program("Input to", transform.get()));
+      TINT_IF_PRINT_PROGRAM(print_program("Input to", transform.get()));
 
       auto res = transform->Run(program, data);
       out.program = std::move(res.program);
       out.data.Add(std::move(res.data));
       program = &out.program;
       if (!program->IsValid()) {
-        IF_PRINT_PROGRAM(print_program("Invalid output of", transform.get()));
+        TINT_IF_PRINT_PROGRAM(
+            print_program("Invalid output of", transform.get()));
         return out;
       }
 
       if (transform == transforms_.back()) {
-        IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
+        TINT_IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
       }
     }
   } else {

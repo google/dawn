@@ -25,6 +25,7 @@
 
 #include "src/intrinsic_table.h"
 #include "src/program_builder.h"
+#include "src/resolver/dependency_graph.h"
 #include "src/scope_stack.h"
 #include "src/sem/binding_point.h"
 #include "src/sem/block_statement.h"
@@ -378,7 +379,8 @@ class Resolver {
   /// the given node has not already been seen. Diamonds in the AST are
   /// illegal.
   /// @param node the AST node.
-  void Mark(const ast::Node* node);
+  /// @returns true on success, false on error
+  bool Mark(const ast::Node* node);
 
   /// Adds the given error message to the diagnostics
   void AddError(const std::string& msg, const Source& source) const;
@@ -453,6 +455,7 @@ class Resolver {
   ProgramBuilder* const builder_;
   diag::List& diagnostics_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
+  DependencyGraph dependencies_;
   ScopeStack<sem::Variable*> variable_stack_;
   std::unordered_map<Symbol, sem::Function*> symbol_to_function_;
   std::vector<sem::Function*> entry_points_;

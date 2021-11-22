@@ -35,8 +35,10 @@
 #include "src/ast/depth_multisampled_texture.h"
 #include "src/ast/depth_texture.h"
 #include "src/ast/disable_validation_decoration.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/external_texture.h"
 #include "src/ast/f32.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal_expression.h"
 #include "src/ast/for_loop_statement.h"
 #include "src/ast/i32.h"
@@ -1892,6 +1894,19 @@ class ProgramBuilder {
     return create<ast::ReturnStatement>(Expr(std::forward<EXPR>(val)));
   }
 
+  /// Creates an ast::DiscardStatement
+  /// @param source the source information
+  /// @returns the discard statement pointer
+  const ast::DiscardStatement* Discard(const Source& source) {
+    return create<ast::DiscardStatement>(source);
+  }
+
+  /// Creates an ast::DiscardStatement
+  /// @returns the discard statement pointer
+  const ast::DiscardStatement* Discard() {
+    return create<ast::DiscardStatement>();
+  }
+
   /// Creates a ast::Alias registering it with the AST().TypeDecls().
   /// @param source the source information
   /// @param name the alias name
@@ -2203,6 +2218,19 @@ class ProgramBuilder {
   const ast::CaseStatement* DefaultCase(
       const ast::BlockStatement* body = nullptr) {
     return Case(ast::CaseSelectorList{}, body);
+  }
+
+  /// Creates an ast::FallthroughStatement
+  /// @param source the source information
+  /// @returns the fallthrough statement pointer
+  const ast::FallthroughStatement* Fallthrough(const Source& source) {
+    return create<ast::FallthroughStatement>(source);
+  }
+
+  /// Creates an ast::FallthroughStatement
+  /// @returns the fallthrough statement pointer
+  const ast::FallthroughStatement* Fallthrough() {
+    return create<ast::FallthroughStatement>();
   }
 
   /// Creates an ast::BuiltinDecoration

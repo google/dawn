@@ -238,6 +238,8 @@ set(TINT_LIB_SRCS
   program.h
   reader/reader.cc
   reader/reader.h
+  resolver/dependency_graph.cc
+  resolver/dependency_graph.h
   resolver/resolver.cc
   resolver/resolver_constants.cc
   resolver/resolver_validation.cc
@@ -673,6 +675,7 @@ if(${TINT_BUILD_TESTS})
     resolver/compound_statement_test.cc
     resolver/control_block_validation_test.cc
     resolver/decoration_validation_test.cc
+    resolver/dependency_graph_test.cc
     resolver/entry_point_validation_test.cc
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
