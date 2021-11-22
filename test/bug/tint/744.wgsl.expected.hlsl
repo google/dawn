@@ -15,7 +15,7 @@ void main_inner(uint3 global_id) {
   const uint dimOutter = uniforms[1].y;
   uint result = 0u;
   {
-    [loop] for(uint i = 0u; (i < dimInner); i = (i + 1u)) {
+    for(uint i = 0u; (i < dimInner); i = (i + 1u)) {
       const uint a = (i + (resultCell.x * dimInner));
       const uint b = (resultCell.y + (i * dimOutter));
       result = (result + (firstMatrix.Load((4u * a)) * secondMatrix.Load((4u * b))));

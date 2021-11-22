@@ -5,7 +5,7 @@ void unused_entry_point() {
 
 int f() {
   int i = 0;
-  [loop] while (true) {
+  while (true) {
     if ((i > 4)) {
       return i;
     }

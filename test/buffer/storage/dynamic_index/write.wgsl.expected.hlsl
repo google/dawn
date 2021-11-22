@@ -18,7 +18,7 @@ void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, float3x2 value) {
 void tint_symbol_11(RWByteAddressBuffer buffer, uint offset, int4 value[4]) {
   int4 array[4] = value;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       buffer.Store4((offset + (i_1 * 16u)), asuint(array[i_1]));
     }
   }

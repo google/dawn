@@ -21,7 +21,7 @@ static bool2 v2b = bool2(false, false);
 
 void foo() {
   {
-    [loop] for(int i = 0; (i < 2); i = (i + 1)) {
+    for(int i = 0; (i < 2); i = (i + 1)) {
       set_float2(v2f, i, 1.0f);
       set_int3(v3i, i, 1);
       set_uint4(v4u, i, 1u);
@@ -33,7 +33,7 @@ void foo() {
 [numthreads(1, 1, 1)]
 void main() {
   {
-    [loop] for(int i = 0; (i < 2); i = (i + 1)) {
+    for(int i = 0; (i < 2); i = (i + 1)) {
       foo();
     }
   }

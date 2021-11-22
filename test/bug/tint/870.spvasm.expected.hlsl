@@ -4,7 +4,7 @@ typedef int tint_symbol_ret[6];
 tint_symbol_ret tint_symbol(ByteAddressBuffer buffer, uint offset) {
   int arr[6] = (int[6])0;
   {
-    [loop] for(uint i = 0u; (i < 6u); i = (i + 1u)) {
+    for(uint i = 0u; (i < 6u); i = (i + 1u)) {
       arr[i] = asint(buffer.Load((offset + (i * 4u))));
     }
   }

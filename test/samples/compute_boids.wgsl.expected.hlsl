@@ -60,7 +60,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   float2 pos = float2(0.0f, 0.0f);
   float2 vel = float2(0.0f, 0.0f);
   {
-    [loop] for(uint i = 0u; (i < 5u); i = (i + 1u)) {
+    for(uint i = 0u; (i < 5u); i = (i + 1u)) {
       if ((i == index)) {
         continue;
       }

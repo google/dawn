@@ -1,5 +1,5 @@
 void main() {
-  [loop] while (true) {
+  while (true) {
     if (false) {
     } else {
       break;

@@ -14,7 +14,7 @@ void main_inner(uint3 GlobalInvocationID) {
   flatIndex = (flatIndex * 1u);
   float4 texel = myTexture.Load(int4(int3(int2(GlobalInvocationID.xy), 0), 0));
   {
-    [loop] for(uint i = 0u; (i < 1u); i = (i + 1u)) {
+    for(uint i = 0u; (i < 1u); i = (i + 1u)) {
       result.Store((4u * (flatIndex + i)), asuint(texel.r));
     }
   }
