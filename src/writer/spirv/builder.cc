@@ -3109,7 +3109,7 @@ bool Builder::GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic) {
         static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
   } else if (intrinsic->Type() == sem::IntrinsicType::kStorageBarrier) {
     execution = static_cast<uint32_t>(spv::Scope::Workgroup);
-    memory = static_cast<uint32_t>(spv::Scope::Device);
+    memory = static_cast<uint32_t>(spv::Scope::Workgroup);
     semantics =
         static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
         static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);

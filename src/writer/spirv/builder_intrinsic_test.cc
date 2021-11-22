@@ -2541,13 +2541,12 @@ TEST_F(IntrinsicBuilderTest, Call_StorageBarrier) {
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
 %7 = OpConstant %6 2
-%8 = OpConstant %6 1
-%9 = OpConstant %6 72
+%8 = OpConstant %6 72
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(OpControlBarrier %7 %8 %9
+  auto* expected_instructions = R"(OpControlBarrier %7 %7 %8
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
