@@ -1607,7 +1607,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            "textureSample(x_20, x_10, coords123.xy, i32(coords123.z))"},
+            "textureSample(x_20, x_10, coords123.xy, i32(round(coords123.z)))"},
 
         // OpImageSampleImplicitLod with ConstOffset
         ImageAccessCase{
@@ -1627,7 +1627,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            R"(textureSample(x_20, x_10, coords123.xy, i32(coords123.z), vec2<i32>(3, 4)))"},
+            R"(textureSample(x_20, x_10, coords123.xy, i32(round(coords123.z)), vec2<i32>(3, 4)))"},
 
         // OpImageSampleImplicitLod with Bias
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
@@ -1646,7 +1646,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            R"(textureSampleBias(x_20, x_10, coords123.xy, i32(coords123.z), 7.0))"},
+            R"(textureSampleBias(x_20, x_10, coords123.xy, i32(round(coords123.z)), 7.0))"},
 
         // OpImageSampleImplicitLod with Bias and signed ConstOffset
         ImageAccessCase{
@@ -1679,7 +1679,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            R"(textureSampleBias(x_20, x_10, coords123.xy, i32(coords123.z), 7.0, vec2<i32>(3, 4))"}));
+            R"(textureSampleBias(x_20, x_10, coords123.xy, i32(round(coords123.z)), 7.0, vec2<i32>(3, 4))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     // This test shows the use of a sampled image used with both regular
@@ -1730,7 +1730,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
 
 [[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
-            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(coords123.z), 0.200000003))"},
+            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003))"},
         // ImageSampleDrefImplicitLod with ConstOffset
         ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
@@ -1749,7 +1749,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
 
 [[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
-            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(coords123.z), 0.200000003, vec2<i32>(3, 4)))"}));
+            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDrefExplicitLod,
@@ -1775,7 +1775,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
 
 [[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
-            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(coords123.z), 0.200000003))"},
+            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003))"},
         // 2D, ConstOffset
         ImageAccessCase{
             "%float 2D 1 0 0 1 Unknown",
@@ -1796,7 +1796,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
 
 [[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
-            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(coords123.z), 0.200000003, vec2<i32>(3, 4)))"},
+            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003, vec2<i32>(3, 4)))"},
         // Cube
         ImageAccessCase{
             "%float Cube 1 0 0 1 Unknown",
@@ -1814,7 +1814,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
 
 [[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
-            R"(textureSampleCompareLevel(x_20, x_10, coords1234.xyz, i32(coords1234.w), 0.200000003))"}));
+            R"(textureSampleCompareLevel(x_20, x_10, coords1234.xyz, i32(round(coords1234.w)), 0.200000003))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod_UsingLod,
@@ -1838,7 +1838,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            R"(textureSampleLevel(x_20, x_10, coords123.xy, i32(coords123.z), 0.0))"},
+            R"(textureSampleLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.0))"},
 
         // OpImageSampleExplicitLod - using Lod and ConstOffset
         ImageAccessCase{
@@ -1872,7 +1872,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            R"(textureSampleLevel(x_20, x_10, coords123.xy, i32(coords123.z), 0.0, vec2<i32>(3, 4)))"}));
+            R"(textureSampleLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.0, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod_UsingGrad,
@@ -1897,7 +1897,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(coords123.z), vf12, vf21))"},
+            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(round(coords123.z)), vf12, vf21))"},
 
         // OpImageSampleExplicitLod - using Grad and ConstOffset
         ImageAccessCase{
@@ -1930,7 +1930,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(coords123.z), vf12, vf21, vec2<i32>(3, 4)))"},
+            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(round(coords123.z)), vf12, vf21, vec2<i32>(3, 4)))"},
 
         // OpImageSampleExplicitLod arrayed - using Grad and unsigned
         // ConstOffset
@@ -1942,7 +1942,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"([[group(0), binding(0)]] var x_10 : sampler;
 
 [[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
-            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(coords123.z), vf12, vf21, vec2<i32>(vec2<u32>(3u, 4u))))"}));
+            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(round(coords123.z)), vf12, vf21, vec2<i32>(vec2<u32>(3u, 4u))))"}));
 
 // Test crbug.com/378:
 // In WGSL, sampling from depth texture with explicit level of detail
@@ -3088,17 +3088,17 @@ INSTANTIATE_TEST_SUITE_P(Good_1DArray,
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf12",
                               "",
-                              {"vf12.x", "i32(vf12.y)"}},
+                              {"vf12.x", "i32(round(vf12.y))"}},
                              {"%float 1D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf123",  // one excess arg
                               "",
-                              {"vf123.x", "i32(vf123.y)"}},
+                              {"vf123.x", "i32(round(vf123.y))"}},
                              {"%float 1D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf1234",  // two excess args
                               "",
-                              {"vf1234.x", "i32(vf1234.y)"}}}));
+                              {"vf1234.x", "i32(round(vf1234.y))"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_2D,
                          SpvParserHandleTest_ImageCoordsTest,
@@ -3126,12 +3126,12 @@ INSTANTIATE_TEST_SUITE_P(Good_2DArray,
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf123",
                               "",
-                              {"vf123.xy", "i32(vf123.z)"}},
+                              {"vf123.xy", "i32(round(vf123.z))"}},
                              {"%float 2D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf1234",  // one excess arg
                               "",
-                              {"vf1234.xy", "i32(vf1234.z)"}}}));
+                              {"vf1234.xy", "i32(round(vf1234.z))"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_3D,
                          SpvParserHandleTest_ImageCoordsTest,
@@ -3175,7 +3175,7 @@ INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
                               "%v4float "
                               "%sampled_image %vf1234",
                               "",
-                              {"vf1234.xyz", "i32(vf1234.w)"}}}));
+                              {"vf1234.xyz", "i32(round(vf1234.w))"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     PreserveFloatCoords_NonArrayed,
@@ -3228,23 +3228,23 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf123",
          "",
-         {"vf123.xy", "i32(vf123.z)"}},
+         {"vf123.xy", "i32(round(vf123.z))"}},
 
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageSampleExplicitLod %v4float %sampled_image %vf123 "
          "Lod %f1",
          "",
-         {"vf123.xy", "i32(vf123.z)"}},
+         {"vf123.xy", "i32(round(vf123.z))"}},
         {"%float 2D 1 1 0 1 Unknown",
          "%result = OpImageSampleDrefImplicitLod %float %sampled_image "
          "%vf123 %depth",
          "",
-         {"vf123.xy", "i32(vf123.z)"}},
+         {"vf123.xy", "i32(round(vf123.z))"}},
         {"%float 2D 1 1 0 1 Unknown",
          "%result = OpImageSampleDrefExplicitLod %float %sampled_image "
          "%vf123 %depth Lod %float_0",
          "",
-         {"vf123.xy", "i32(vf123.z)"}}}));
+         {"vf123.xy", "i32(round(vf123.z))"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     PreserveIntCoords_NonArrayed,

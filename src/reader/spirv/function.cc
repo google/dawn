@@ -5697,9 +5697,16 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     result.push_back(prefix_swizzle_expr());
 
     // Now get the array index.
-    const ast::Expression* array_index = create<ast::MemberAccessorExpression>(
-        Source{}, raw_coords.expr, Swizzle(num_axes));
-    // Convert it to a signed integer type, if needed
+    const ast::Expression* array_index =
+        builder_.MemberAccessor(raw_coords.expr, Swizzle(num_axes));
+    if (component_type->IsFloatScalar()) {
+      // When converting from a float array layer to integer, Vulkan requires
+      // round-to-nearest, with preference for round-to-nearest-even.
+      // But i32(f32) in WGSL has unspecified rounding mode, so we have to
+      // explicitly specify the rounding.
+      array_index = builder_.Call("round", array_index);
+    }
+    // Convert it to a signed integer type, if needed.
     result.push_back(ToI32({component_type, array_index}).expr);
   } else {
     if (num_coords_supplied == num_coords_required && !is_proj) {
