@@ -148,7 +148,7 @@ const sem::Type* {{$class}}::Match(MatchState& state, const sem::Type* ty) const
 {{- range .TemplateParams }}
 {{-   template "DeclareLocalTemplateParam" . }}
 {{- end  }}
-  if (!match_{{TrimPrefix .Name "_"}}(ty{{range .TemplateParams}}, {{.GetName}}{{end}})) {
+  if (!match_{{TrimLeft .Name "_"}}(ty{{range .TemplateParams}}, {{.GetName}}{{end}})) {
     return nullptr;
   }
 {{- range .TemplateParams }}
@@ -157,7 +157,7 @@ const sem::Type* {{$class}}::Match(MatchState& state, const sem::Type* ty) const
     return nullptr;
   }
 {{- end  }}
-  return build_{{TrimPrefix .Name "_"}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
+  return build_{{TrimLeft .Name "_"}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
 }
 
 std::string {{$class}}::String(MatchState&{{if .TemplateParams}} state{{end}}) const {

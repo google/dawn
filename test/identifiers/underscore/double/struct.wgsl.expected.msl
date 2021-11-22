@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct a {
+  int b;
+};
+struct a__ {
+  int b__;
+};
+
+void f() {
+  a__ const c = {};
+  int const d = c.b__;
+}
+

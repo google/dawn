@@ -1050,10 +1050,10 @@ class ModfResult : public TypeMatcher {
 };
 
 const sem::Type* ModfResult::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match__modf_result(ty)) {
+  if (!match_modf_result(ty)) {
     return nullptr;
   }
-  return build__modf_result(state);
+  return build_modf_result(state);
 }
 
 std::string ModfResult::String(MatchState&) const {
@@ -1078,14 +1078,14 @@ class ModfResultVec : public TypeMatcher {
 
 const sem::Type* ModfResultVec::Match(MatchState& state, const sem::Type* ty) const {
   Number N = Number::invalid;
-  if (!match__modf_result_vec(ty, N)) {
+  if (!match_modf_result_vec(ty, N)) {
     return nullptr;
   }
   N = state.Num(N);
   if (!N.IsValid()) {
     return nullptr;
   }
-  return build__modf_result_vec(state, N);
+  return build_modf_result_vec(state, N);
 }
 
 std::string ModfResultVec::String(MatchState& state) const {
@@ -1112,10 +1112,10 @@ class FrexpResult : public TypeMatcher {
 };
 
 const sem::Type* FrexpResult::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match__frexp_result(ty)) {
+  if (!match_frexp_result(ty)) {
     return nullptr;
   }
-  return build__frexp_result(state);
+  return build_frexp_result(state);
 }
 
 std::string FrexpResult::String(MatchState&) const {
@@ -1140,14 +1140,14 @@ class FrexpResultVec : public TypeMatcher {
 
 const sem::Type* FrexpResultVec::Match(MatchState& state, const sem::Type* ty) const {
   Number N = Number::invalid;
-  if (!match__frexp_result_vec(ty, N)) {
+  if (!match_frexp_result_vec(ty, N)) {
     return nullptr;
   }
   N = state.Num(N);
   if (!N.IsValid()) {
     return nullptr;
   }
-  return build__frexp_result_vec(state, N);
+  return build_frexp_result_vec(state, N);
 }
 
 std::string FrexpResultVec::String(MatchState& state) const {

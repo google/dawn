@@ -60,6 +60,8 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 		"HasSuffix":             strings.HasSuffix,
 		"TrimPrefix":            strings.TrimPrefix,
 		"TrimSuffix":            strings.TrimSuffix,
+		"TrimLeft":              strings.TrimLeft,
+		"TrimRight":             strings.TrimRight,
 		"IsEnumEntry":           is(sem.EnumEntry{}),
 		"IsEnumMatcher":         is(sem.EnumMatcher{}),
 		"IsFQN":                 is(sem.FullyQualifiedName{}),

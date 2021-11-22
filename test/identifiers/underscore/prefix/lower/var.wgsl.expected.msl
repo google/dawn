@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f(thread int* const tint_symbol, thread int* const tint_symbol_1) {
+  int b = *(tint_symbol);
+  int _b = *(tint_symbol_1);
+}
+

@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+constant int a = 1;
+constant int a__ = 2;
+void f() {
+  int const b = a;
+  int const b__ = a__;
+}
+

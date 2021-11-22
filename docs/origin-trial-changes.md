@@ -9,6 +9,7 @@
 ### New Features
 
 * The `dot()` builtin now supports integer vector types.
+* Identifiers can now start with a single leading underscore.  [tint:1292](https://crbug.com/tint/1292)
 
 ## Changes for M97
 
@@ -45,4 +46,4 @@
 
 * Hex floats: now correctly errors when the magnitude is non-zero, and the exponent would cause overflow. [tint:1150](https://crbug.com/tint/1150), [tint:1166](https://crbug.com/tint/1166)
 * Identifiers beginning with an underscore are now correctly rejected.  [tint:1179](https://crbug.com/tint/1179)
-* `abs()` fixed for unsigned integers on SPIR-V backend   [tint:1179](https://crbug.com/tint/1194)
+* `abs()` fixed for unsigned integers on SPIR-V backend
