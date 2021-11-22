@@ -1,10 +1,8 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 vec3 Bad(uint index, vec3 rd) {
-  vec3 normal = vec3((0.0f).xxx);
+  vec3 normal = vec3(0.0f);
   normal[index] = -(sign(rd[index]));
   return normalize(normal);
 }
@@ -32,12 +30,5 @@ void main() {
   inputs.idx = uint(gl_LocalInvocationIndex);
   tint_symbol(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:5: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

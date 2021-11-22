@@ -563,12 +563,6 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
     return EmitZeroValue(out, type);
   }
 
-  // For single-value vector initializers, swizzle the scalar to the right
-  // vector dimension using .x
-  const bool is_single_value_vector_init =
-      type->is_scalar_vector() && call->Arguments().size() == 1 &&
-      call->Arguments()[0]->Type()->UnwrapRef()->is_scalar();
-
   auto it = structure_builders_.find(As<sem::Struct>(type));
   if (it != structure_builders_.end()) {
     out << it->second << "(";
@@ -577,10 +571,6 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
                   "")) {
       return false;
     }
-    out << "(";
-  }
-
-  if (is_single_value_vector_init) {
     out << "(";
   }
 
@@ -594,10 +584,6 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
     if (!EmitExpression(out, arg->Declaration())) {
       return false;
     }
-  }
-
-  if (is_single_value_vector_init) {
-    out << ")." << std::string(type->As<sem::Vector>()->Width(), 'x');
   }
 
   out << ")";

@@ -122,7 +122,7 @@ TEST_F(GlslGeneratorImplTest_Constructor,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("vec3((2.0f).xxx)"));
+  EXPECT_THAT(gen.result(), HasSubstr("vec3(2.0f)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor,
@@ -132,7 +132,7 @@ TEST_F(GlslGeneratorImplTest_Constructor,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("bvec3((true).xxx)"));
+  EXPECT_THAT(gen.result(), HasSubstr("bvec3(true)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor,
@@ -142,7 +142,7 @@ TEST_F(GlslGeneratorImplTest_Constructor,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("ivec3((2).xxx)"));
+  EXPECT_THAT(gen.result(), HasSubstr("ivec3(2)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor,
@@ -152,7 +152,7 @@ TEST_F(GlslGeneratorImplTest_Constructor,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uvec3((2u).xxx)"));
+  EXPECT_THAT(gen.result(), HasSubstr("uvec3(2u)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {

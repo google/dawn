@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -9,7 +7,7 @@ struct tint_symbol {
 
 vec4 frag_main_inner() {
   float b = 0.0f;
-  vec3 v = vec3((b).xxx);
+  vec3 v = vec3(b);
   return vec4(v, 1.0f);
 }
 
@@ -25,12 +23,5 @@ void main() {
   outputs = frag_main();
   value = outputs.value;
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:10: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

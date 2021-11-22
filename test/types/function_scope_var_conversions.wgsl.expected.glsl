@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -14,29 +12,22 @@ void tint_symbol() {
   uint u32_var1 = uint(123);
   uint u32_var2 = uint(123.0f);
   uint u32_var3 = uint(true);
-  bvec3 v3bool_var1 = bvec3(uvec3((123u).xxx));
-  bvec3 v3bool_var11 = bvec3(uvec3((1234u).xxx));
-  bvec3 v3bool_var2 = bvec3(ivec3((123).xxx));
-  bvec3 v3bool_var3 = bvec3(vec3((123.0f).xxx));
-  ivec3 v3i32_var1 = ivec3(uvec3((123u).xxx));
-  ivec3 v3i32_var2 = ivec3(vec3((123.0f).xxx));
-  ivec3 v3i32_var3 = ivec3(bvec3((true).xxx));
-  uvec3 v3u32_var1 = uvec3(ivec3((123).xxx));
-  uvec3 v3u32_var2 = uvec3(vec3((123.0f).xxx));
-  uvec3 v3u32_var3 = uvec3(bvec3((true).xxx));
-  bvec3 v3bool_var4 = bvec3(bvec2(vec2((123.0f).xx)), true);
+  bvec3 v3bool_var1 = bvec3(uvec3(123u));
+  bvec3 v3bool_var11 = bvec3(uvec3(1234u));
+  bvec3 v3bool_var2 = bvec3(ivec3(123));
+  bvec3 v3bool_var3 = bvec3(vec3(123.0f));
+  ivec3 v3i32_var1 = ivec3(uvec3(123u));
+  ivec3 v3i32_var2 = ivec3(vec3(123.0f));
+  ivec3 v3i32_var3 = ivec3(bvec3(true));
+  uvec3 v3u32_var1 = uvec3(ivec3(123));
+  uvec3 v3u32_var2 = uvec3(vec3(123.0f));
+  uvec3 v3u32_var3 = uvec3(bvec3(true));
+  bvec3 v3bool_var4 = bvec3(bvec2(vec2(123.0f)), true);
   bvec4 v4bool_var5 = bvec4(bvec2(vec2(123.0f, 0.0f)), bvec2(true, bool(float(0.0f))));
   return;
 }
 void main() {
   tint_symbol();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:15: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:15: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 
