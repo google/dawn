@@ -1108,6 +1108,7 @@
         "members": [
             {"name": "device ID", "type": "uint32_t"},
             {"name": "vendor ID", "type": "uint32_t"},
+            {"name": "adapter type", "type": "adapter type"},
             {"name": "texture compression BC", "type": "bool", "default": "false"},
             {"name": "texture compression ETC2", "type": "bool", "default": "false"},
             {"name": "texture compression ASTC", "type": "bool", "default": "false"},

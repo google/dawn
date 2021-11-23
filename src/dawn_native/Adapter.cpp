@@ -111,6 +111,7 @@ namespace dawn_native {
         WGPUDeviceProperties adapterProperties = {};
         adapterProperties.deviceID = mPCIInfo.deviceId;
         adapterProperties.vendorID = mPCIInfo.vendorId;
+        adapterProperties.adapterType = static_cast<WGPUAdapterType>(mAdapterType);
 
         mSupportedFeatures.InitializeDeviceProperties(&adapterProperties);
         // This is OK for now because there are no limit feature structs.
