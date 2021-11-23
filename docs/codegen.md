@@ -23,6 +23,13 @@ At this time it is used to generate:
 
 Internally `dawn.json` is a dictionary from the "canonical name" of things to their definition. The "canonical name" is a space-separated (mostly) lower-case version of the name that's parsed into a `Name` Python object. Then that name can be turned into various casings with `.CamelCase()` `.SNAKE_CASE()`, etc. When `dawn.json` things reference each other, it is always via these "canonical names".
 
+The `"_metadata"` key in the JSON file is used by flexible templates for generating various Web Standard API that contains following metadata:
+
+ - `"api"` a string, the name of the Web API
+ - `"namespace"` a string, the namespace of C++ wrapper
+ - `"c_prefix"` (optional) a string, the prefix of C function and data type, it will default to upper-case of `"namespace"` if it's not provided.
+ - `"copyright_year"` (optional) a string, templates will use the the year of copyright.
+
 The basic schema is that every entry is a thing with a `"category"` key what determines the sub-schema to apply to that thing. Categories and their sub-shema are defined below. Several parts of the schema use the concept of "record" which is a list of "record members" which are a combination of a type, a name and other metadata. For example the list of arguments of a function is a record. The list of structure members is a record. This combined concept is useful for the dawn_wire generator to generate code for structure and function calls in a very similar way.
 
 Most items and sub-items can include a list of `"tags"`, which, if specified, conditionally includes the item if any of its tags appears in the `enabled_tags` configuration passed to `parse_json`. This is used to include and exclude various items for Dawn, Emscripten, or upstream header variants. Tags are applied in the "parse_json" step ([rather than later](https://docs.google.com/document/d/1fBniVOxx3-hQbxHMugEPcQsaXaKBZYVO8yG9iXJp-fU/edit?usp=sharing)): this has the benefit of automatically catching when, for a particular tag configuration, an included item references an excluded item.

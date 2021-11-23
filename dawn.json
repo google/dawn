@@ -17,6 +17,12 @@
 
     "_doc": "See docs/codegen.md",
 
+    "_metadata": {
+        "api": "WebGPU",
+        "c_prefix": "WGPU",
+        "namespace": "wgpu"
+    },
+
     "request adapter options": {
         "category": "structure",
         "extensible": "in",
