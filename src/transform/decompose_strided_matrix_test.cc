@@ -20,8 +20,7 @@
 
 #include "src/ast/disable_validation_decoration.h"
 #include "src/program_builder.h"
-#include "src/transform/inline_pointer_lets.h"
-#include "src/transform/simplify.h"
+#include "src/transform/simplify_pointers.h"
 #include "src/transform/test_helper.h"
 
 namespace tint {
@@ -35,17 +34,7 @@ TEST_F(DecomposeStridedMatrixTest, Empty) {
   auto* src = R"()";
   auto* expect = src;
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(DecomposeStridedMatrixTest, MissingDependencyInlinePointerLets) {
-  auto* src = R"()";
-  auto* expect =
-      R"(error: tint::transform::DecomposeStridedMatrix depends on tint::transform::InlinePointerLets but the dependency was not run)";
-
-  auto got = Run<Simplify, DecomposeStridedMatrix>(src);
+  auto got = Run<SimplifyPointers, DecomposeStridedMatrix>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -53,9 +42,9 @@ TEST_F(DecomposeStridedMatrixTest, MissingDependencyInlinePointerLets) {
 TEST_F(DecomposeStridedMatrixTest, MissingDependencySimplify) {
   auto* src = R"()";
   auto* expect =
-      R"(error: tint::transform::DecomposeStridedMatrix depends on tint::transform::Simplify but the dependency was not run)";
+      R"(error: tint::transform::DecomposeStridedMatrix depends on tint::transform::SimplifyPointers but the dependency was not run)";
 
-  auto got = Run<InlinePointerLets, DecomposeStridedMatrix>(src);
+  auto got = Run<DecomposeStridedMatrix>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -120,8 +109,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -182,8 +171,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -245,8 +234,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -311,8 +300,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -373,8 +362,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -440,8 +429,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -502,8 +491,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -591,8 +580,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -648,8 +637,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -706,8 +695,8 @@ fn f() {
 }
 )";
 
-  auto got = Run<InlinePointerLets, Simplify, DecomposeStridedMatrix>(
-      Program(std::move(b)));
+  auto got =
+      Run<SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
 
   EXPECT_EQ(expect, str(got));
 }

@@ -22,13 +22,12 @@
 #include "src/transform/decompose_memory_access.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/fold_trivial_single_use_lets.h"
-#include "src/transform/inline_pointer_lets.h"
 #include "src/transform/loop_to_for_loop.h"
 #include "src/transform/manager.h"
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/remove_phonies.h"
-#include "src/transform/simplify.h"
+#include "src/transform/simplify_pointers.h"
 #include "src/transform/single_entry_point.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 
@@ -58,7 +57,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
     manager.Add<ZeroInitWorkgroupMemory>();
   }
   manager.Add<CanonicalizeEntryPointIO>();
-  manager.Add<InlinePointerLets>();
+  manager.Add<SimplifyPointers>();
 
   // Running SingleEntryPoint before RemovePhonies prevents variables
   // referenced only by phonies from being optimized out. Strictly
@@ -69,8 +68,6 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
     data.Add<SingleEntryPoint::Config>(cfg->entry_point);
   }
   manager.Add<RemovePhonies>();
-  // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
-  manager.Add<Simplify>();
   manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();

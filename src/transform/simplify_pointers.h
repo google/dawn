@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TRANSFORM_SIMPLIFY_H_
-#define SRC_TRANSFORM_SIMPLIFY_H_
+#ifndef SRC_TRANSFORM_SIMPLIFY_POINTERS_H_
+#define SRC_TRANSFORM_SIMPLIFY_POINTERS_H_
 
 #include <string>
 #include <unordered_map>
@@ -23,20 +23,25 @@
 namespace tint {
 namespace transform {
 
-/// Simplify is a peephole optimizer Transform that simplifies ASTs by removing
-/// unnecessary operations.
-/// Simplify currently optimizes the following:
-/// `&(*(expr))` => `expr`
-/// `*(&(expr))` => `expr`
-class Simplify : public Castable<Simplify, Transform> {
+/// SimplifyPointers is a Transform that moves all usage of function-scope
+/// `let` statements of a pointer type into their places of usage.
+///
+/// Parameters of a pointer type are not adjusted.
+///
+/// Note: SimplifyPointers does not operate on module-scope `let`s, as these
+/// cannot be pointers: https://gpuweb.github.io/gpuweb/wgsl/#module-constants
+/// `A module-scope let-declared constant must be of constructible type.`
+class SimplifyPointers : public Castable<SimplifyPointers, Transform> {
  public:
   /// Constructor
-  Simplify();
+  SimplifyPointers();
 
   /// Destructor
-  ~Simplify() override;
+  ~SimplifyPointers() override;
 
  protected:
+  struct State;
+
   /// Runs the transform using the CloneContext built for transforming a
   /// program. Run() is responsible for calling Clone() on the CloneContext.
   /// @param ctx the CloneContext primed with the input program and
@@ -49,4 +54,4 @@ class Simplify : public Castable<Simplify, Transform> {
 }  // namespace transform
 }  // namespace tint
 
-#endif  // SRC_TRANSFORM_SIMPLIFY_H_
+#endif  // SRC_TRANSFORM_SIMPLIFY_POINTERS_H_

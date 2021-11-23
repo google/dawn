@@ -21,10 +21,9 @@
 #include "src/program_builder.h"
 #include "src/sem/expression.h"
 #include "src/sem/member_accessor_expression.h"
-#include "src/transform/inline_pointer_lets.h"
-#include "src/transform/simplify.h"
-#include "src/utils/map.h"
+#include "src/transform/simplify_pointers.h"
 #include "src/utils/hash.h"
+#include "src/utils/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeStridedMatrix);
 
@@ -119,7 +118,7 @@ bool DecomposeStridedMatrix::ShouldRun(const Program* program) {
 }
 
 void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
-  if (!Requires<InlinePointerLets, Simplify>(ctx)) {
+  if (!Requires<SimplifyPointers>(ctx)) {
     return;
   }
 

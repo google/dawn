@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/transform/inline_pointer_lets.h"
+#include "src/transform/simplify_pointers.h"
 
 #include <memory>
 #include <utility>
@@ -24,18 +24,18 @@ namespace tint {
 namespace transform {
 namespace {
 
-using InlinePointerLetsTest = TransformTest;
+using SimplifyPointersTest = TransformTest;
 
-TEST_F(InlinePointerLetsTest, EmptyModule) {
+TEST_F(SimplifyPointersTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";
 
-  auto got = Run<InlinePointerLets>(src);
+  auto got = Run<SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(InlinePointerLetsTest, Basic) {
+TEST_F(SimplifyPointersTest, FoldPointer) {
   auto* src = R"(
 fn f() {
   var v : i32;
@@ -47,16 +47,68 @@ fn f() {
   auto* expect = R"(
 fn f() {
   var v : i32;
-  let x : i32 = *(&(v));
+  let x : i32 = v;
 }
 )";
 
-  auto got = Run<InlinePointerLets>(src);
+  auto got = Run<SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(InlinePointerLetsTest, ComplexChain) {
+TEST_F(SimplifyPointersTest, AddressOfDeref) {
+  auto* src = R"(
+fn f() {
+  var v : i32;
+  let p : ptr<function, i32> = &(v);
+  let x : ptr<function, i32> = &(*(p));
+  let y : ptr<function, i32> = &(*(&(*(p))));
+  let z : ptr<function, i32> = &(*(&(*(&(*(&(*(p))))))));
+  var a = *x;
+  var b = *y;
+  var c = *z;
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var v : i32;
+  var a = v;
+  var b = v;
+  var c = v;
+}
+)";
+
+  auto got = Run<SimplifyPointers>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, DerefAddressOf) {
+  auto* src = R"(
+fn f() {
+  var v : i32;
+  let x : i32 = *(&(v));
+  let y : i32 = *(&(*(&(v))));
+  let z : i32 = *(&(*(&(*(&(*(&(v))))))));
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var v : i32;
+  let x : i32 = v;
+  let y : i32 = v;
+  let z : i32 = v;
+}
+)";
+
+  auto got = Run<SimplifyPointers>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, ComplexChain) {
   auto* src = R"(
 fn f() {
   var a : array<mat4x4<f32>, 4>;
@@ -70,16 +122,16 @@ fn f() {
   auto* expect = R"(
 fn f() {
   var a : array<mat4x4<f32>, 4>;
-  let v : vec4<f32> = *(&((*(&((*(&(a)))[3])))[2]));
+  let v : vec4<f32> = a[3][2];
 }
 )";
 
-  auto got = Run<InlinePointerLets>(src);
+  auto got = Run<SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(InlinePointerLetsTest, SavedVars) {
+TEST_F(SimplifyPointersTest, SavedVars) {
   auto* src = R"(
 struct S {
   i : i32;
@@ -115,7 +167,7 @@ fn arr() {
   var j : i32 = 0;
   let p_save = (i + j);
   i = 2;
-  *(&(a[p_save].i)) = 4;
+  a[p_save].i = 4;
 }
 
 fn matrix() {
@@ -124,16 +176,16 @@ fn matrix() {
   var j : i32 = 0;
   let p_save_1 = (i + j);
   i = 2;
-  *(&(m[p_save_1])) = vec3<f32>(4.0, 5.0, 6.0);
+  m[p_save_1] = vec3<f32>(4.0, 5.0, 6.0);
 }
 )";
 
-  auto got = Run<InlinePointerLets>(src);
+  auto got = Run<SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(InlinePointerLetsTest, DontSaveLiterals) {
+TEST_F(SimplifyPointersTest, DontSaveLiterals) {
   auto* src = R"(
 fn f() {
   var arr : array<i32, 2>;
@@ -145,16 +197,16 @@ fn f() {
   auto* expect = R"(
 fn f() {
   var arr : array<i32, 2>;
-  *(&(arr[1])) = 4;
+  arr[1] = 4;
 }
 )";
 
-  auto got = Run<InlinePointerLets>(src);
+  auto got = Run<SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(InlinePointerLetsTest, SavedVarsChain) {
+TEST_F(SimplifyPointersTest, SavedVarsChain) {
   auto* src = R"(
 fn f() {
   var arr : array<array<i32, 2>, 2>;
@@ -173,16 +225,51 @@ fn f() {
   let j : i32 = 1;
   let p_save = i;
   let q_save = j;
-  *(&((*(&(arr[p_save])))[q_save])) = 12;
+  arr[p_save][q_save] = 12;
 }
 )";
 
-  auto got = Run<InlinePointerLets>(src);
+  auto got = Run<SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(InlinePointerLetsTest, MultiSavedVarsInSinglePtrLetExpr) {
+TEST_F(SimplifyPointersTest, ForLoopInit) {
+  auto* src = R"(
+fn foo() -> i32 {
+  return 1;
+}
+
+[[stage(fragment)]]
+fn main() {
+  var arr = array<f32, 4>();
+  for (let a = &arr[foo()]; ;) {
+    let x = *a;
+  }
+}
+)";
+
+  auto* expect = R"(
+fn foo() -> i32 {
+  return 1;
+}
+
+[[stage(fragment)]]
+fn main() {
+  var arr = array<f32, 4>();
+  let a_save = foo();
+  for(; ; ) {
+    let x = arr[a_save];
+  }
+}
+)";
+
+  auto got = Run<SimplifyPointers>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, MultiSavedVarsInSinglePtrLetExpr) {
   auto* src = R"(
 fn x() -> i32 {
   return 1;
@@ -238,18 +325,18 @@ fn f() {
   let p_save = x();
   let p_save_1 = y();
   let p_save_2 = z();
-  *(&(arr[p_save].a[p_save_1].a[p_save_2])) = 1;
-  *(&(arr[p_save].a[p_save_1].a[p_save_2])) = 2;
+  arr[p_save].a[p_save_1].a[p_save_2] = 1;
+  arr[p_save].a[p_save_1].a[p_save_2] = 2;
 }
 )";
 
-  auto got = Run<InlinePointerLets>(src);
+  auto got = Run<SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
 // TODO(crbug.com/tint/819): Enable when we support inter-scope shadowing.
-TEST_F(InlinePointerLetsTest, DISABLED_ModificationAfterInline) {
+TEST_F(SimplifyPointersTest, DISABLED_ModificationAfterInline) {
   auto* src = R"(
 fn x(p : ptr<function, i32>) -> i32 {
   return *p;
@@ -267,7 +354,7 @@ fn f() {
 
   auto* expect = R"(<TODO>)";
 
-  auto got = Run<InlinePointerLets>(src);
+  auto got = Run<SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }

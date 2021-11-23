@@ -51,14 +51,13 @@
 #include "src/transform/decompose_memory_access.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/fold_trivial_single_use_lets.h"
-#include "src/transform/inline_pointer_lets.h"
 #include "src/transform/loop_to_for_loop.h"
 #include "src/transform/manager.h"
 #include "src/transform/num_workgroups_from_uniform.h"
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/remove_phonies.h"
-#include "src/transform/simplify.h"
+#include "src/transform/simplify_pointers.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
 #include "src/utils/map.h"
@@ -151,9 +150,7 @@ SanitizedResult Sanitize(
   // assumes that num_workgroups builtins only appear as struct members and are
   // only accessed directly via member accessors.
   manager.Add<transform::NumWorkgroupsFromUniform>();
-  manager.Add<transform::InlinePointerLets>();
-  // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
-  manager.Add<transform::Simplify>();
+  manager.Add<transform::SimplifyPointers>();
   manager.Add<transform::RemovePhonies>();
   // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as
   // it assumes that the form of the array length argument is &var.array.

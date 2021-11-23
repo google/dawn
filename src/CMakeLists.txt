@@ -312,8 +312,6 @@ set(TINT_LIB_SRCS
   transform/for_loop_to_loop.h
   transform/glsl.cc
   transform/glsl.h
-  transform/inline_pointer_lets.cc
-  transform/inline_pointer_lets.h
   transform/loop_to_for_loop.cc
   transform/loop_to_for_loop.h
   transform/manager.cc
@@ -334,8 +332,8 @@ set(TINT_LIB_SRCS
   transform/renamer.h
   transform/robustness.cc
   transform/robustness.h
-  transform/simplify.cc
-  transform/simplify.h
+  transform/simplify_pointers.cc
+  transform/simplify_pointers.h
   transform/single_entry_point.cc
   transform/single_entry_point.h
   transform/transform.cc
@@ -959,7 +957,6 @@ if(${TINT_BUILD_TESTS})
       transform/fold_constants_test.cc
       transform/fold_trivial_single_use_lets_test.cc
       transform/for_loop_to_loop_test.cc
-      transform/inline_pointer_lets_test.cc
       transform/loop_to_for_loop_test.cc
       transform/module_scope_var_to_entry_point_param_test.cc
       transform/multiplanar_external_texture_test.cc
@@ -969,7 +966,7 @@ if(${TINT_BUILD_TESTS})
       transform/remove_phonies_test.cc
       transform/renamer_test.cc
       transform/robustness_test.cc
-      transform/simplify_test.cc
+      transform/simplify_pointers_test.cc
       transform/single_entry_point_test.cc
       transform/test_helper.h
       transform/vectorize_scalar_matrix_constructors.cc

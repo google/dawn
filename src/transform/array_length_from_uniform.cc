@@ -22,8 +22,7 @@
 #include "src/program_builder.h"
 #include "src/sem/call.h"
 #include "src/sem/variable.h"
-#include "src/transform/inline_pointer_lets.h"
-#include "src/transform/simplify.h"
+#include "src/transform/simplify_pointers.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform::Config);
@@ -62,8 +61,8 @@ static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
 
     // Get the storage buffer that contains the runtime array.
     // We assume that the argument to `arrayLength` has the form
-    // `&resource.array`, which requires that `InlinePointerLets` and
-    // `Simplify` have been run before this transform.
+    // `&resource.array`, which requires that `SimplifyPointers` have been run
+    // before this transform.
     auto* param = call_expr->args[0]->As<ast::UnaryOpExpression>();
     if (!param || param->op != ast::UnaryOp::kAddressOf) {
       TINT_ICE(Transform, ctx.dst->Diagnostics())
@@ -102,7 +101,7 @@ static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
 void ArrayLengthFromUniform::Run(CloneContext& ctx,
                                  const DataMap& inputs,
                                  DataMap& outputs) {
-  if (!Requires<InlinePointerLets, Simplify>(ctx)) {
+  if (!Requires<SimplifyPointers>(ctx)) {
     return;
   }
 
@@ -161,42 +160,43 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
 
   std::unordered_set<uint32_t> used_size_indices;
 
-  IterateArrayLengthOnStorageVar(ctx, [&](const ast::CallExpression* call_expr,
-                                          const sem::VariableUser*
-                                              storage_buffer_sem,
-                                          const sem::GlobalVariable* var) {
-    auto binding = var->BindingPoint();
-    auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
-    if (idx_itr == cfg->bindpoint_to_size_index.end()) {
-      return;
-    }
+  IterateArrayLengthOnStorageVar(
+      ctx, [&](const ast::CallExpression* call_expr,
+               const sem::VariableUser* storage_buffer_sem,
+               const sem::GlobalVariable* var) {
+        auto binding = var->BindingPoint();
+        auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
+        if (idx_itr == cfg->bindpoint_to_size_index.end()) {
+          return;
+        }
 
-    uint32_t size_index = idx_itr->second;
-    used_size_indices.insert(size_index);
+        uint32_t size_index = idx_itr->second;
+        used_size_indices.insert(size_index);
 
-    // Load the total storage buffer size from the UBO.
-    uint32_t array_index = size_index / 4;
-    auto* vec_expr = ctx.dst->IndexAccessor(
-        ctx.dst->MemberAccessor(get_ubo()->symbol, kBufferSizeMemberName),
-        array_index);
-    uint32_t vec_index = size_index % 4;
-    auto* total_storage_buffer_size =
-        ctx.dst->IndexAccessor(vec_expr, vec_index);
+        // Load the total storage buffer size from the UBO.
+        uint32_t array_index = size_index / 4;
+        auto* vec_expr = ctx.dst->IndexAccessor(
+            ctx.dst->MemberAccessor(get_ubo()->symbol, kBufferSizeMemberName),
+            array_index);
+        uint32_t vec_index = size_index % 4;
+        auto* total_storage_buffer_size =
+            ctx.dst->IndexAccessor(vec_expr, vec_index);
 
-    // Calculate actual array length
-    //                total_storage_buffer_size - array_offset
-    // array_length = ----------------------------------------
-    //                             array_stride
-    auto* storage_buffer_type =
-        storage_buffer_sem->Type()->UnwrapRef()->As<sem::Struct>();
-    auto* array_member_sem = storage_buffer_type->Members().back();
-    uint32_t array_offset = array_member_sem->Offset();
-    uint32_t array_stride = array_member_sem->Size();
-    auto* array_length = ctx.dst->Div(
-        ctx.dst->Sub(total_storage_buffer_size, array_offset), array_stride);
+        // Calculate actual array length
+        //                total_storage_buffer_size - array_offset
+        // array_length = ----------------------------------------
+        //                             array_stride
+        auto* storage_buffer_type =
+            storage_buffer_sem->Type()->UnwrapRef()->As<sem::Struct>();
+        auto* array_member_sem = storage_buffer_type->Members().back();
+        uint32_t array_offset = array_member_sem->Offset();
+        uint32_t array_stride = array_member_sem->Size();
+        auto* array_length =
+            ctx.dst->Div(ctx.dst->Sub(total_storage_buffer_size, array_offset),
+                         array_stride);
 
-    ctx.Replace(call_expr, array_length);
-  });
+        ctx.Replace(call_expr, array_length);
+      });
 
   ctx.Clone();
 

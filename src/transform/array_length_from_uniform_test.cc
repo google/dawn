@@ -16,8 +16,7 @@
 
 #include <utility>
 
-#include "src/transform/inline_pointer_lets.h"
-#include "src/transform/simplify.h"
+#include "src/transform/simplify_pointers.h"
 #include "src/transform/test_helper.h"
 
 namespace tint {
@@ -33,31 +32,19 @@ TEST_F(ArrayLengthFromUniformTest, Error_MissingTransformData) {
       "error: missing transform data for "
       "tint::transform::ArrayLengthFromUniform";
 
-  auto got = Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src);
+  auto got = Run<SimplifyPointers, ArrayLengthFromUniform>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ArrayLengthFromUniformTest, Error_MissingInlinePointerLets) {
+TEST_F(ArrayLengthFromUniformTest, Error_MissingSimplifyPointers) {
   auto* src = "";
 
   auto* expect =
       "error: tint::transform::ArrayLengthFromUniform depends on "
-      "tint::transform::InlinePointerLets but the dependency was not run";
+      "tint::transform::SimplifyPointers but the dependency was not run";
 
-  auto got = Run<Simplify, ArrayLengthFromUniform>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(ArrayLengthFromUniformTest, Error_MissingSimplify) {
-  auto* src = "";
-
-  auto* expect =
-      "error: tint::transform::ArrayLengthFromUniform depends on "
-      "tint::transform::Simplify but the dependency was not run";
-
-  auto got = Run<InlinePointerLets, ArrayLengthFromUniform>(src);
+  auto got = Run<ArrayLengthFromUniform>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -106,8 +93,7 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got =
-      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
+  auto got = Run<SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
   EXPECT_EQ(std::unordered_set<uint32_t>({0}),
@@ -160,8 +146,7 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got =
-      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
+  auto got = Run<SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
   EXPECT_EQ(std::unordered_set<uint32_t>({0}),
@@ -282,8 +267,7 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got =
-      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
+  auto got = Run<SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
   EXPECT_EQ(std::unordered_set<uint32_t>({0, 1, 2, 3, 4}),
@@ -398,8 +382,7 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got =
-      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
+  auto got = Run<SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
   EXPECT_EQ(std::unordered_set<uint32_t>({0, 2}),
@@ -428,8 +411,7 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got =
-      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
+  auto got = Run<SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(src, str(got));
   EXPECT_EQ(std::unordered_set<uint32_t>(),
@@ -500,8 +482,7 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got =
-      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
+  auto got = Run<SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
   EXPECT_EQ(std::unordered_set<uint32_t>({0}),

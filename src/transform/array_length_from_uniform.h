@@ -47,7 +47,7 @@ namespace transform {
 /// from a storage buffer's `BindingPoint` to the array index that will be used
 /// to get the size of that buffer.
 ///
-/// This transform assumes that the `InlinePointerLets` and `Simplify`
+/// This transform assumes that the `SimplifyPointers`
 /// transforms have been run before it so that arguments to the arrayLength
 /// builtin always have the form `&resource.array`.
 class ArrayLengthFromUniform

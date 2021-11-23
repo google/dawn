@@ -45,9 +45,8 @@
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/fold_constants.h"
 #include "src/transform/for_loop_to_loop.h"
-#include "src/transform/inline_pointer_lets.h"
 #include "src/transform/manager.h"
-#include "src/transform/simplify.h"
+#include "src/transform/simplify_pointers.h"
 #include "src/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
@@ -270,8 +269,7 @@ SanitizedResult Sanitize(const Program* in,
   if (!disable_workgroup_init) {
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }
-  manager.Add<transform::InlinePointerLets>();  // Required for arrayLength()
-  manager.Add<transform::Simplify>();           // Required for arrayLength()
+  manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
   manager.Add<transform::FoldConstants>();
   manager.Add<transform::ExternalTextureTransform>();
   manager.Add<transform::VectorizeScalarMatrixConstructors>();
