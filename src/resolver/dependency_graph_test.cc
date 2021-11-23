@@ -101,14 +101,28 @@ static constexpr SymbolDeclKind kFuncDeclKinds[] = {
 /// kinds of symbol uses.
 enum class SymbolUseKind {
   GlobalVarType,
+  GlobalVarArrayElemType,
+  GlobalVarArraySizeValue,
+  GlobalVarVectorElemType,
+  GlobalVarMatrixElemType,
+  GlobalVarSampledTexElemType,
+  GlobalVarMultisampledTexElemType,
   GlobalVarValue,
   GlobalLetType,
+  GlobalLetArrayElemType,
+  GlobalLetArraySizeValue,
+  GlobalLetVectorElemType,
+  GlobalLetMatrixElemType,
   GlobalLetValue,
   AliasType,
   StructMemberType,
   CallFunction,
   ParameterType,
   LocalVarType,
+  LocalVarArrayElemType,
+  LocalVarArraySizeValue,
+  LocalVarVectorElemType,
+  LocalVarMatrixElemType,
   LocalVarValue,
   LocalLetType,
   LocalLetValue,
@@ -116,13 +130,32 @@ enum class SymbolUseKind {
   NestedLocalVarValue,
   NestedLocalLetType,
   NestedLocalLetValue,
+  WorkgroupSizeValue,
 };
 
 static constexpr SymbolUseKind kTypeUseKinds[] = {
-    SymbolUseKind::GlobalVarType,      SymbolUseKind::GlobalLetType,
-    SymbolUseKind::AliasType,          SymbolUseKind::StructMemberType,
-    SymbolUseKind::ParameterType,      SymbolUseKind::LocalVarType,
-    SymbolUseKind::LocalLetType,       SymbolUseKind::NestedLocalVarType,
+    SymbolUseKind::GlobalVarType,
+    SymbolUseKind::GlobalVarArrayElemType,
+    SymbolUseKind::GlobalVarArraySizeValue,
+    SymbolUseKind::GlobalVarVectorElemType,
+    SymbolUseKind::GlobalVarMatrixElemType,
+    SymbolUseKind::GlobalVarSampledTexElemType,
+    SymbolUseKind::GlobalVarMultisampledTexElemType,
+    SymbolUseKind::GlobalLetType,
+    SymbolUseKind::GlobalLetArrayElemType,
+    SymbolUseKind::GlobalLetArraySizeValue,
+    SymbolUseKind::GlobalLetVectorElemType,
+    SymbolUseKind::GlobalLetMatrixElemType,
+    SymbolUseKind::AliasType,
+    SymbolUseKind::StructMemberType,
+    SymbolUseKind::ParameterType,
+    SymbolUseKind::LocalVarType,
+    SymbolUseKind::LocalVarArrayElemType,
+    SymbolUseKind::LocalVarArraySizeValue,
+    SymbolUseKind::LocalVarVectorElemType,
+    SymbolUseKind::LocalVarMatrixElemType,
+    SymbolUseKind::LocalLetType,
+    SymbolUseKind::NestedLocalVarType,
     SymbolUseKind::NestedLocalLetType,
 };
 
@@ -130,6 +163,7 @@ static constexpr SymbolUseKind kValueUseKinds[] = {
     SymbolUseKind::GlobalVarValue,      SymbolUseKind::GlobalLetValue,
     SymbolUseKind::LocalVarValue,       SymbolUseKind::LocalLetValue,
     SymbolUseKind::NestedLocalVarValue, SymbolUseKind::NestedLocalLetValue,
+    SymbolUseKind::WorkgroupSizeValue,
 };
 
 static constexpr SymbolUseKind kFuncUseKinds[] = {
@@ -172,10 +206,30 @@ std::ostream& operator<<(std::ostream& out, SymbolUseKind kind) {
       return out << "global var type";
     case SymbolUseKind::GlobalVarValue:
       return out << "global var value";
+    case SymbolUseKind::GlobalVarArrayElemType:
+      return out << "global var array element type";
+    case SymbolUseKind::GlobalVarArraySizeValue:
+      return out << "global var array size value";
+    case SymbolUseKind::GlobalVarVectorElemType:
+      return out << "global var vector element type";
+    case SymbolUseKind::GlobalVarMatrixElemType:
+      return out << "global var matrix element type";
+    case SymbolUseKind::GlobalVarSampledTexElemType:
+      return out << "global var sampled_texture element type";
+    case SymbolUseKind::GlobalVarMultisampledTexElemType:
+      return out << "global var multisampled_texture element type";
     case SymbolUseKind::GlobalLetType:
       return out << "global let type";
     case SymbolUseKind::GlobalLetValue:
       return out << "global let value";
+    case SymbolUseKind::GlobalLetArrayElemType:
+      return out << "global let array element type";
+    case SymbolUseKind::GlobalLetArraySizeValue:
+      return out << "global let array size value";
+    case SymbolUseKind::GlobalLetVectorElemType:
+      return out << "global let vector element type";
+    case SymbolUseKind::GlobalLetMatrixElemType:
+      return out << "global let matrix element type";
     case SymbolUseKind::AliasType:
       return out << "alias type";
     case SymbolUseKind::StructMemberType:
@@ -186,6 +240,14 @@ std::ostream& operator<<(std::ostream& out, SymbolUseKind kind) {
       return out << "parameter type";
     case SymbolUseKind::LocalVarType:
       return out << "local var type";
+    case SymbolUseKind::LocalVarArrayElemType:
+      return out << "local var array element type";
+    case SymbolUseKind::LocalVarArraySizeValue:
+      return out << "local var array size value";
+    case SymbolUseKind::LocalVarVectorElemType:
+      return out << "local var vector element type";
+    case SymbolUseKind::LocalVarMatrixElemType:
+      return out << "local var matrix element type";
     case SymbolUseKind::LocalVarValue:
       return out << "local var value";
     case SymbolUseKind::LocalLetType:
@@ -200,6 +262,8 @@ std::ostream& operator<<(std::ostream& out, SymbolUseKind kind) {
       return out << "nested local let type";
     case SymbolUseKind::NestedLocalLetValue:
       return out << "nested local let value";
+    case SymbolUseKind::WorkgroupSizeValue:
+      return out << "workgroup size value";
   }
   return out << "<unknown>";
 }
@@ -208,21 +272,36 @@ std::ostream& operator<<(std::ostream& out, SymbolUseKind kind) {
 std::string DiagString(SymbolUseKind kind) {
   switch (kind) {
     case SymbolUseKind::GlobalVarType:
+    case SymbolUseKind::GlobalVarArrayElemType:
+    case SymbolUseKind::GlobalVarVectorElemType:
+    case SymbolUseKind::GlobalVarMatrixElemType:
+    case SymbolUseKind::GlobalVarSampledTexElemType:
+    case SymbolUseKind::GlobalVarMultisampledTexElemType:
     case SymbolUseKind::GlobalLetType:
+    case SymbolUseKind::GlobalLetArrayElemType:
+    case SymbolUseKind::GlobalLetVectorElemType:
+    case SymbolUseKind::GlobalLetMatrixElemType:
     case SymbolUseKind::AliasType:
     case SymbolUseKind::StructMemberType:
     case SymbolUseKind::ParameterType:
     case SymbolUseKind::LocalVarType:
+    case SymbolUseKind::LocalVarArrayElemType:
+    case SymbolUseKind::LocalVarVectorElemType:
+    case SymbolUseKind::LocalVarMatrixElemType:
     case SymbolUseKind::LocalLetType:
     case SymbolUseKind::NestedLocalVarType:
     case SymbolUseKind::NestedLocalLetType:
       return "type";
     case SymbolUseKind::GlobalVarValue:
+    case SymbolUseKind::GlobalVarArraySizeValue:
     case SymbolUseKind::GlobalLetValue:
+    case SymbolUseKind::GlobalLetArraySizeValue:
     case SymbolUseKind::LocalVarValue:
+    case SymbolUseKind::LocalVarArraySizeValue:
     case SymbolUseKind::LocalLetValue:
     case SymbolUseKind::NestedLocalVarValue:
     case SymbolUseKind::NestedLocalLetValue:
+    case SymbolUseKind::WorkgroupSizeValue:
       return "identifier";
     case SymbolUseKind::CallFunction:
       return "function";
@@ -259,14 +338,29 @@ int ScopeDepth(SymbolUseKind kind) {
   switch (kind) {
     case SymbolUseKind::GlobalVarType:
     case SymbolUseKind::GlobalVarValue:
+    case SymbolUseKind::GlobalVarArrayElemType:
+    case SymbolUseKind::GlobalVarArraySizeValue:
+    case SymbolUseKind::GlobalVarVectorElemType:
+    case SymbolUseKind::GlobalVarMatrixElemType:
+    case SymbolUseKind::GlobalVarSampledTexElemType:
+    case SymbolUseKind::GlobalVarMultisampledTexElemType:
     case SymbolUseKind::GlobalLetType:
     case SymbolUseKind::GlobalLetValue:
+    case SymbolUseKind::GlobalLetArrayElemType:
+    case SymbolUseKind::GlobalLetArraySizeValue:
+    case SymbolUseKind::GlobalLetVectorElemType:
+    case SymbolUseKind::GlobalLetMatrixElemType:
     case SymbolUseKind::AliasType:
     case SymbolUseKind::StructMemberType:
+    case SymbolUseKind::WorkgroupSizeValue:
       return 0;
     case SymbolUseKind::CallFunction:
     case SymbolUseKind::ParameterType:
     case SymbolUseKind::LocalVarType:
+    case SymbolUseKind::LocalVarArrayElemType:
+    case SymbolUseKind::LocalVarArraySizeValue:
+    case SymbolUseKind::LocalVarVectorElemType:
+    case SymbolUseKind::LocalVarMatrixElemType:
     case SymbolUseKind::LocalVarValue:
     case SymbolUseKind::LocalLetType:
     case SymbolUseKind::LocalLetValue:
@@ -290,6 +384,8 @@ struct SymbolTestHelper {
   std::vector<const ast::Statement*> statements;
   /// Nested function local var / let declaration statements
   std::vector<const ast::Statement*> nested_statements;
+  /// Function decorations
+  ast::DecorationList func_decos;
 
   /// Constructor
   /// @param builder the program builder
@@ -374,6 +470,38 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind,
       b.Global(b.Sym(), node, ast::StorageClass::kPrivate);
       return node;
     }
+    case SymbolUseKind::GlobalVarArrayElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      b.Global(b.Sym(), b.ty.array(node, 4), ast::StorageClass::kPrivate);
+      return node;
+    }
+    case SymbolUseKind::GlobalVarArraySizeValue: {
+      auto* node = b.Expr(source, symbol);
+      b.Global(b.Sym(), b.ty.array(b.ty.i32(), node),
+               ast::StorageClass::kPrivate);
+      return node;
+    }
+    case SymbolUseKind::GlobalVarVectorElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      b.Global(b.Sym(), b.ty.vec3(node), ast::StorageClass::kPrivate);
+      return node;
+    }
+    case SymbolUseKind::GlobalVarMatrixElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      b.Global(b.Sym(), b.ty.mat3x4(node), ast::StorageClass::kPrivate);
+      return node;
+    }
+    case SymbolUseKind::GlobalVarSampledTexElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      b.Global(b.Sym(), b.ty.sampled_texture(ast::TextureDimension::k2d, node));
+      return node;
+    }
+    case SymbolUseKind::GlobalVarMultisampledTexElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      b.Global(b.Sym(),
+               b.ty.multisampled_texture(ast::TextureDimension::k2d, node));
+      return node;
+    }
     case SymbolUseKind::GlobalVarValue: {
       auto* node = b.Expr(source, symbol);
       b.Global(b.Sym(), b.ty.i32(), ast::StorageClass::kPrivate, node);
@@ -382,6 +510,26 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind,
     case SymbolUseKind::GlobalLetType: {
       auto* node = b.ty.type_name(source, symbol);
       b.GlobalConst(b.Sym(), node, b.Expr(1));
+      return node;
+    }
+    case SymbolUseKind::GlobalLetArrayElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      b.GlobalConst(b.Sym(), b.ty.array(node, 4), b.Expr(1));
+      return node;
+    }
+    case SymbolUseKind::GlobalLetArraySizeValue: {
+      auto* node = b.Expr(source, symbol);
+      b.GlobalConst(b.Sym(), b.ty.array(b.ty.i32(), node), b.Expr(1));
+      return node;
+    }
+    case SymbolUseKind::GlobalLetVectorElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      b.GlobalConst(b.Sym(), b.ty.vec3(node), b.Expr(1));
+      return node;
+    }
+    case SymbolUseKind::GlobalLetMatrixElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      b.GlobalConst(b.Sym(), b.ty.mat3x4(node), b.Expr(1));
       return node;
     }
     case SymbolUseKind::GlobalLetValue: {
@@ -412,6 +560,28 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind,
     case SymbolUseKind::LocalVarType: {
       auto* node = b.ty.type_name(source, symbol);
       statements.emplace_back(b.Decl(b.Var(b.Sym(), node)));
+      return node;
+    }
+    case SymbolUseKind::LocalVarArrayElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      statements.emplace_back(
+          b.Decl(b.Var(b.Sym(), b.ty.array(node, 4), b.Expr(1))));
+      return node;
+    }
+    case SymbolUseKind::LocalVarArraySizeValue: {
+      auto* node = b.Expr(source, symbol);
+      statements.emplace_back(
+          b.Decl(b.Var(b.Sym(), b.ty.array(b.ty.i32(), node), b.Expr(1))));
+      return node;
+    }
+    case SymbolUseKind::LocalVarVectorElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      statements.emplace_back(b.Decl(b.Var(b.Sym(), b.ty.vec3(node))));
+      return node;
+    }
+    case SymbolUseKind::LocalVarMatrixElemType: {
+      auto* node = b.ty.type_name(source, symbol);
+      statements.emplace_back(b.Decl(b.Var(b.Sym(), b.ty.mat3x4(node))));
       return node;
     }
     case SymbolUseKind::LocalVarValue: {
@@ -450,6 +620,11 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind,
           b.Decl(b.Const(b.Sym(), b.ty.i32(), node)));
       return node;
     }
+    case SymbolUseKind::WorkgroupSizeValue: {
+      auto* node = b.Expr(source, symbol);
+      func_decos.emplace_back(b.WorkgroupSize(1, node, 2));
+      return node;
+    }
   }
   return nullptr;
 }
@@ -460,10 +635,11 @@ void SymbolTestHelper::Build() {
     statements.emplace_back(b.Block(nested_statements));
     nested_statements.clear();
   }
-  if (!parameters.empty() || !statements.empty()) {
-    b.Func("func", parameters, b.ty.void_(), statements);
+  if (!parameters.empty() || !statements.empty() || !func_decos.empty()) {
+    b.Func("func", parameters, b.ty.void_(), statements, func_decos);
     parameters.clear();
     statements.clear();
+    func_decos.clear();
   }
 }
 
@@ -998,9 +1174,9 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
   Structure(Sym(), {Member(Sym(), T)});
   Global(Sym(), T, V);
   GlobalConst(Sym(), T, V);
-  Func(Sym(),            //
-       {Param("p", T)},  //
-       T,                // Return type
+  Func(Sym(),              //
+       {Param(Sym(), T)},  //
+       T,                  // Return type
        {
            Decl(Var(Sym(), T, V)),                    //
            Decl(Const(Sym(), T, V)),                  //
@@ -1027,7 +1203,27 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
            Return(V),                                 //
            Break(),                                   //
            Discard(),                                 //
-       });
+       });                                            //
+  // Exercise type traversal
+  Global(Sym(), ty.atomic(T));
+  Global(Sym(), ty.bool_());
+  Global(Sym(), ty.i32());
+  Global(Sym(), ty.u32());
+  Global(Sym(), ty.f32());
+  Global(Sym(), ty.array(T, V, 4));
+  Global(Sym(), ty.vec3(T));
+  Global(Sym(), ty.mat3x2(T));
+  Global(Sym(), ty.pointer(T, ast::StorageClass::kPrivate));
+  Global(Sym(), ty.sampled_texture(ast::TextureDimension::k2d, T));
+  Global(Sym(), ty.depth_texture(ast::TextureDimension::k2d));
+  Global(Sym(), ty.depth_multisampled_texture(ast::TextureDimension::k2d));
+  Global(Sym(), ty.external_texture());
+  Global(Sym(), ty.multisampled_texture(ast::TextureDimension::k2d, T));
+  Global(Sym(), ty.storage_texture(ast::TextureDimension::k2d,
+                                   ast::ImageFormat::kR16Float,
+                                   ast::Access::kRead));  //
+  Global(Sym(), ty.sampler(ast::SamplerKind::kSampler));
+  Func(Sym(), {}, ty.void_(), {});
 #undef V
 #undef T
 #undef F

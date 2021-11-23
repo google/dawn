@@ -104,24 +104,14 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
 9:10 note: called by entry point 'f0')");
 }
 
-TEST_F(ResolverValidationTest, Error_WithEmptySource) {
-  auto* s = create<FakeStmt>();
-  WrapInFunction(s);
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "error: unknown statement type: tint::resolver::FakeStmt");
-}
-
-TEST_F(ResolverValidationTest, Stmt_Error_Unknown) {
-  auto* s = create<FakeStmt>(Source{Source::Location{2, 30}});
-  WrapInFunction(s);
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "2:30 error: unknown statement type: tint::resolver::FakeStmt");
+TEST_F(ResolverValidationTest, UnhandledStmt) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.WrapInFunction(b.create<FakeStmt>());
+        Program(std::move(b));
+      },
+      "internal compiler error: unhandled node type: tint::resolver::FakeStmt");
 }
 
 TEST_F(ResolverValidationTest, Stmt_If_NonBool) {

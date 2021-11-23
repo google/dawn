@@ -26,6 +26,7 @@
 #include "src/scope_stack.h"
 #include "src/sem/intrinsic.h"
 #include "src/utils/defer.h"
+#include "src/utils/map.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/utils/unique_vector.h"
 
@@ -87,11 +88,10 @@ struct Global {
 /// A map of global name to Global
 using GlobalMap = std::unordered_map<Symbol, Global*>;
 
-/// Raises an ICE that a global ast::Node declaration type was not handled by
-/// this system.
-void UnhandledDecl(diag::List& diagnostics, const ast::Node* node) {
-  TINT_UNREACHABLE(Resolver, diagnostics)
-      << "unhandled global declaration: " << node->TypeInfo().name;
+/// Raises an ICE that a global ast::Node type was not handled by this system.
+void UnhandledNode(diag::List& diagnostics, const ast::Node* node) {
+  TINT_ICE(Resolver, diagnostics)
+      << "unhandled node type: " << node->TypeInfo().name;
 }
 
 /// Raises an error diagnostic with the given message and source.
@@ -143,55 +143,59 @@ class DependencyScanner {
     if (auto* str = global->node->As<ast::Struct>()) {
       Declare(str->name, str);
       for (auto* member : str->members) {
-        ResolveTypeDependency(member->type);
+        TraverseType(member->type);
       }
       return;
     }
     if (auto* alias = global->node->As<ast::Alias>()) {
       Declare(alias->name, alias);
-      ResolveTypeDependency(alias->type);
+      TraverseType(alias->type);
       return;
     }
     if (auto* func = global->node->As<ast::Function>()) {
       Declare(func->symbol, func);
+      TraverseDecorations(func->decorations);
       TraverseFunction(func);
       return;
     }
     if (auto* var = global->node->As<ast::Variable>()) {
       Declare(var->symbol, var);
-      ResolveTypeDependency(var->type);
+      TraverseType(var->type);
       if (var->constructor) {
         TraverseExpression(var->constructor);
       }
       return;
     }
-    UnhandledDecl(diagnostics_, global->node);
+    UnhandledNode(diagnostics_, global->node);
   }
 
  private:
-  /// Traverses the function determining global dependencies.
+  /// Traverses the function, performing symbol resolution and determining
+  /// global dependencies.
   void TraverseFunction(const ast::Function* func) {
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
 
     for (auto* param : func->params) {
       Declare(param->symbol, param);
-      ResolveTypeDependency(param->type);
+      TraverseType(param->type);
     }
     if (func->body) {
       TraverseStatements(func->body->statements);
     }
-    ResolveTypeDependency(func->return_type);
+    TraverseType(func->return_type);
   }
 
-  /// Traverses the statements determining global dependencies.
+  /// Traverses the statements, performing symbol resolution and determining
+  /// global dependencies.
   void TraverseStatements(const ast::StatementList& stmts) {
     for (auto* s : stmts) {
       TraverseStatement(s);
     }
   }
 
-  /// Traverses the statement determining global dependencies.
+  /// Traverses the statement, performing symbol resolution and determining
+  /// global dependencies.
   void TraverseStatement(const ast::Statement* stmt) {
     if (stmt == nullptr) {
       return;
@@ -253,7 +257,7 @@ class DependencyScanner {
     }
     if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
       Declare(v->variable->symbol, v->variable);
-      ResolveTypeDependency(v->variable->type);
+      TraverseType(v->variable->type);
       TraverseExpression(v->variable->constructor);
       return;
     }
@@ -262,9 +266,7 @@ class DependencyScanner {
       return;
     }
 
-    AddError(diagnostics_,
-             "unknown statement type: " + std::string(stmt->TypeInfo().name),
-             stmt->source);
+    UnhandledNode(diagnostics_, stmt);
   }
 
   /// Adds the symbol definition to the current scope, raising an error if two
@@ -279,7 +281,8 @@ class DependencyScanner {
     }
   }
 
-  /// Traverses the expression determining global dependencies.
+  /// Traverses the expression, performing symbol resolution and determining
+  /// global dependencies.
   void TraverseExpression(const ast::Expression* root) {
     if (!root) {
       return;
@@ -309,24 +312,101 @@ class DependencyScanner {
                 ResolveGlobalDependency(call->target.name,
                                         call->target.name->symbol, "function",
                                         "calls");
+                graph_.resolved_symbols.emplace(
+                    call,
+                    utils::Lookup(graph_.resolved_symbols, call->target.name));
               }
             }
             if (call->target.type) {
-              ResolveTypeDependency(call->target.type);
+              TraverseType(call->target.type);
+              graph_.resolved_symbols.emplace(
+                  call,
+                  utils::Lookup(graph_.resolved_symbols, call->target.type));
             }
           }
           return ast::TraverseAction::Descend;
         });
   }
 
-  /// Adds the type dependency to the currently processed global
-  void ResolveTypeDependency(const ast::Type* ty) {
+  /// Traverses the type node, performing symbol resolution and determining
+  /// global dependencies.
+  void TraverseType(const ast::Type* ty) {
     if (ty == nullptr) {
+      return;
+    }
+    if (auto* arr = ty->As<ast::Array>()) {
+      TraverseType(arr->type);
+      TraverseExpression(arr->count);
+      return;
+    }
+    if (auto* atomic = ty->As<ast::Atomic>()) {
+      TraverseType(atomic->type);
+      return;
+    }
+    if (auto* mat = ty->As<ast::Matrix>()) {
+      TraverseType(mat->type);
+      return;
+    }
+    if (auto* ptr = ty->As<ast::Pointer>()) {
+      TraverseType(ptr->type);
       return;
     }
     if (auto* tn = ty->As<ast::TypeName>()) {
       ResolveGlobalDependency(tn, tn->name, "type", "references");
+      return;
     }
+    if (auto* vec = ty->As<ast::Vector>()) {
+      TraverseType(vec->type);
+      return;
+    }
+    if (auto* tex = ty->As<ast::SampledTexture>()) {
+      TraverseType(tex->type);
+      return;
+    }
+    if (auto* tex = ty->As<ast::MultisampledTexture>()) {
+      TraverseType(tex->type);
+      return;
+    }
+    if (ty->IsAnyOf<ast::Void, ast::Bool, ast::I32, ast::U32, ast::F32,
+                    ast::DepthTexture, ast::DepthMultisampledTexture,
+                    ast::StorageTexture, ast::ExternalTexture,
+                    ast::Sampler>()) {
+      return;
+    }
+
+    UnhandledNode(diagnostics_, ty);
+  }
+
+  /// Traverses the decoration list, performing symbol resolution and
+  /// determining global dependencies.
+  void TraverseDecorations(const ast::DecorationList& decos) {
+    for (auto* deco : decos) {
+      TraverseDecoration(deco);
+    }
+  }
+
+  /// Traverses the decoration, performing symbol resolution and determining
+  /// global dependencies.
+  void TraverseDecoration(const ast::Decoration* deco) {
+    if (auto* wg = deco->As<ast::WorkgroupDecoration>()) {
+      TraverseExpression(wg->x);
+      TraverseExpression(wg->y);
+      TraverseExpression(wg->z);
+      return;
+    }
+    if (deco->IsAnyOf<ast::BindingDecoration, ast::BuiltinDecoration,
+                      ast::GroupDecoration, ast::InternalDecoration,
+                      ast::InterpolateDecoration, ast::InvariantDecoration,
+                      ast::LocationDecoration, ast::OverrideDecoration,
+                      ast::StageDecoration, ast::StrideDecoration,
+                      ast::StructBlockDecoration,
+                      ast::StructMemberAlignDecoration,
+                      ast::StructMemberOffsetDecoration,
+                      ast::StructMemberSizeDecoration>()) {
+      return;
+    }
+
+    UnhandledNode(diagnostics_, deco);
   }
 
   /// Adds the dependency to the currently processed global
@@ -426,7 +506,7 @@ struct DependencyAnalysis {
     if (auto* var = node->As<ast::Variable>()) {
       return var->symbol;
     }
-    UnhandledDecl(diagnostics_, node);
+    UnhandledNode(diagnostics_, node);
     return {};
   }
 
@@ -455,7 +535,7 @@ struct DependencyAnalysis {
     if (auto* var = node->As<ast::Variable>()) {
       return var->is_const ? "let" : "var";
     }
-    UnhandledDecl(diagnostics_, node);
+    UnhandledNode(diagnostics_, node);
     return {};
   }
 
