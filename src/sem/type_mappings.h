@@ -41,6 +41,7 @@ class Call;
 class Expression;
 class Function;
 class MemberAccessorExpression;
+class Node;
 class Statement;
 class Struct;
 class StructMember;
