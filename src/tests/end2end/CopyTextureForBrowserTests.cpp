@@ -63,33 +63,6 @@ class CopyTextureForBrowserTests : public Parent {
         wgpu::TextureFormat format = kTextureFormat;
     };
 
-    // This fixed source texture data is for color conversion tests.
-    // The source data can fill a texture in default width and height.
-    static std::vector<RGBA8> GetFixedSourceTextureData() {
-        std::vector<RGBA8> sourceTextureData{
-            // Take RGBA8Unorm as example:
-            // R channel has different values
-            RGBA8(0, 255, 255, 255),    // r = 0.0
-            RGBA8(102, 255, 255, 255),  // r = 0.4
-            RGBA8(153, 255, 255, 255),  // r = 0.6
-
-            // G channel has different values
-            RGBA8(255, 0, 255, 255),    // g = 0.0
-            RGBA8(255, 102, 255, 255),  // g = 0.4
-            RGBA8(255, 153, 255, 255),  // g = 0.6
-
-            // B channel has different values
-            RGBA8(255, 255, 0, 255),    // b = 0.0
-            RGBA8(255, 255, 102, 255),  // b = 0.4
-            RGBA8(255, 255, 153, 255),  // b = 0.6
-
-            // A channel set to 0
-            RGBA8(255, 255, 255, 0)  // a = 0
-        };
-
-        return sourceTextureData;
-    }
-
     enum class TextureCopyRole {
         SOURCE,
         DEST,
@@ -312,99 +285,57 @@ class CopyTextureForBrowserTests : public Parent {
         }
     }
 
-    void DoTest(const TextureSpec& srcSpec,
-                const TextureSpec& dstSpec,
-                const wgpu::Extent3D& copySize = {kDefaultTextureWidth, kDefaultTextureHeight},
-                const wgpu::CopyTextureForBrowserOptions options = {},
-                bool useFixedTestValue = false) {
+    wgpu::Texture CreateTexture(const TextureSpec& spec, wgpu::TextureUsage usage) {
         // Create and initialize src texture.
-        wgpu::TextureDescriptor srcDescriptor;
-        srcDescriptor.size = srcSpec.textureSize;
-        srcDescriptor.format = srcSpec.format;
-        srcDescriptor.mipLevelCount = srcSpec.level + 1;
-        srcDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                              wgpu::TextureUsage::TextureBinding;
-        wgpu::Texture srcTexture = this->device.CreateTexture(&srcDescriptor);
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = spec.textureSize;
+        descriptor.format = spec.format;
+        descriptor.mipLevelCount = spec.level + 1;
+        descriptor.usage = usage;
+        wgpu::Texture texture = this->device.CreateTexture(&descriptor);
+        return texture;
+    }
 
-        const utils::TextureDataCopyLayout srcCopyLayout =
-            utils::GetTextureDataCopyLayoutForTextureAtLevel(
-                kTextureFormat,
-                {srcSpec.textureSize.width, srcSpec.textureSize.height,
-                 copySize.depthOrArrayLayers},
-                srcSpec.level);
+    wgpu::Texture CreateAndInitTexture(const TextureSpec& spec,
+                                       wgpu::TextureUsage usage,
+                                       utils::TextureDataCopyLayout copyLayout,
+                                       void const* init,
+                                       uint32_t initBytes) {
+        wgpu::Texture texture = CreateTexture(spec, usage);
 
-        std::vector<RGBA8> srcTextureArrayCopyData;
-        if (useFixedTestValue) {  // Use fixed value for color conversion tests.
-            srcTextureArrayCopyData = GetFixedSourceTextureData();
-        } else {  // For other tests, the input format is always kTextureFormat.
+        wgpu::ImageCopyTexture imageTextureInit =
+            utils::CreateImageCopyTexture(texture, spec.level, {0, 0});
 
-            srcTextureArrayCopyData =
-                GetTextureData(srcCopyLayout, TextureCopyRole::SOURCE, options.alphaOp);
-        }
+        wgpu::TextureDataLayout textureDataLayout;
+        textureDataLayout.offset = 0;
+        textureDataLayout.bytesPerRow = copyLayout.bytesPerRow;
+        textureDataLayout.rowsPerImage = copyLayout.rowsPerImage;
 
-        wgpu::ImageCopyTexture srcImageTextureInit =
-            utils::CreateImageCopyTexture(srcTexture, srcSpec.level, {0, 0});
+        this->device.GetQueue().WriteTexture(&imageTextureInit, init, initBytes, &textureDataLayout,
+                                             &copyLayout.mipSize);
+        return texture;
+    }
 
-        wgpu::TextureDataLayout srcTextureDataLayout;
-        srcTextureDataLayout.offset = 0;
-        srcTextureDataLayout.bytesPerRow = srcCopyLayout.bytesPerRow;
-        srcTextureDataLayout.rowsPerImage = srcCopyLayout.rowsPerImage;
-
-        this->device.GetQueue().WriteTexture(&srcImageTextureInit, srcTextureArrayCopyData.data(),
-                                             srcTextureArrayCopyData.size() * sizeof(RGBA8),
-                                             &srcTextureDataLayout, &srcCopyLayout.mipSize);
-
-        bool testSubRectCopy = srcSpec.copyOrigin.x > 0 || srcSpec.copyOrigin.y > 0 ||
-                               dstSpec.copyOrigin.x > 0 || dstSpec.copyOrigin.y > 0 ||
-                               srcSpec.textureSize.width > copySize.width ||
-                               srcSpec.textureSize.height > copySize.height ||
-                               dstSpec.textureSize.width > copySize.width ||
-                               dstSpec.textureSize.height > copySize.height;
-
-        // Create and init dst texture.
-        wgpu::Texture dstTexture;
-        wgpu::TextureDescriptor dstDescriptor;
-        dstDescriptor.size = dstSpec.textureSize;
-        dstDescriptor.format = dstSpec.format;
-        dstDescriptor.mipLevelCount = dstSpec.level + 1;
-        dstDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
-                              wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
-        dstTexture = this->device.CreateTexture(&dstDescriptor);
-
-        if (testSubRectCopy) {
-            // For subrect copy tests, dst texture use kTextureFormat always.
-            const utils::TextureDataCopyLayout dstCopyLayout =
-                utils::GetTextureDataCopyLayoutForTextureAtLevel(
-                    kTextureFormat,
-                    {dstSpec.textureSize.width, dstSpec.textureSize.height,
-                     copySize.depthOrArrayLayers},
-                    dstSpec.level);
-
-            const std::vector<RGBA8> dstTextureArrayCopyData =
-                GetTextureData(dstCopyLayout, TextureCopyRole::DEST);
-
-            wgpu::TextureDataLayout dstTextureDataLayout;
-            dstTextureDataLayout.offset = 0;
-            dstTextureDataLayout.bytesPerRow = dstCopyLayout.bytesPerRow;
-            dstTextureDataLayout.rowsPerImage = dstCopyLayout.rowsPerImage;
-
-            wgpu::ImageCopyTexture dstImageTextureInit =
-                utils::CreateImageCopyTexture(dstTexture, dstSpec.level, {0, 0});
-
-            this->device.GetQueue().WriteTexture(&dstImageTextureInit,
-                                                 dstTextureArrayCopyData.data(),
-                                                 dstTextureArrayCopyData.size() * sizeof(RGBA8),
-                                                 &dstTextureDataLayout, &dstCopyLayout.mipSize);
-        }
-
-        // Perform the texture to texture copy
+    void RunCopyExternalImageToTexture(const TextureSpec& srcSpec,
+                                       wgpu::Texture srcTexture,
+                                       const TextureSpec& dstSpec,
+                                       wgpu::Texture dstTexture,
+                                       const wgpu::Extent3D& copySize,
+                                       const wgpu::CopyTextureForBrowserOptions options) {
         wgpu::ImageCopyTexture srcImageCopyTexture =
             utils::CreateImageCopyTexture(srcTexture, srcSpec.level, srcSpec.copyOrigin);
         wgpu::ImageCopyTexture dstImageCopyTexture =
             utils::CreateImageCopyTexture(dstTexture, dstSpec.level, dstSpec.copyOrigin);
         this->device.GetQueue().CopyTextureForBrowser(&srcImageCopyTexture, &dstImageCopyTexture,
                                                       &copySize, &options);
+    }
 
+    void CheckResultInBuiltInComputePipeline(const TextureSpec& srcSpec,
+                                             wgpu::Texture srcTexture,
+                                             const TextureSpec& dstSpec,
+                                             wgpu::Texture dstTexture,
+                                             const wgpu::Extent3D& copySize,
+                                             const wgpu::CopyTextureForBrowserOptions options) {
         // Update uniform buffer based on test config
         uint32_t uniformBufferData[] = {
             options.flipY,                                   // copy have flipY option
@@ -465,6 +396,66 @@ class CopyTextureForBrowserTests : public Parent {
                                    dstSpec.textureSize.width * dstSpec.textureSize.height);
     }
 
+    void DoTest(const TextureSpec& srcSpec,
+                const TextureSpec& dstSpec,
+                const wgpu::Extent3D& copySize = {kDefaultTextureWidth, kDefaultTextureHeight},
+                const wgpu::CopyTextureForBrowserOptions options = {}) {
+        // Create and initialize src texture.
+        const utils::TextureDataCopyLayout srcCopyLayout =
+            utils::GetTextureDataCopyLayoutForTextureAtLevel(
+                kTextureFormat,
+                {srcSpec.textureSize.width, srcSpec.textureSize.height,
+                 copySize.depthOrArrayLayers},
+                srcSpec.level);
+
+        std::vector<RGBA8> srcTextureArrayCopyData =
+            GetTextureData(srcCopyLayout, TextureCopyRole::SOURCE, options.alphaOp);
+
+        wgpu::TextureUsage srcUsage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                      wgpu::TextureUsage::TextureBinding;
+        wgpu::Texture srcTexture =
+            CreateAndInitTexture(srcSpec, srcUsage, srcCopyLayout, srcTextureArrayCopyData.data(),
+                                 srcTextureArrayCopyData.size() * sizeof(RGBA8));
+
+        bool testSubRectCopy = srcSpec.copyOrigin.x > 0 || srcSpec.copyOrigin.y > 0 ||
+                               dstSpec.copyOrigin.x > 0 || dstSpec.copyOrigin.y > 0 ||
+                               srcSpec.textureSize.width > copySize.width ||
+                               srcSpec.textureSize.height > copySize.height ||
+                               dstSpec.textureSize.width > copySize.width ||
+                               dstSpec.textureSize.height > copySize.height;
+
+        // Create and init dst texture.
+        wgpu::Texture dstTexture;
+        wgpu::TextureUsage dstUsage =
+            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+
+        if (testSubRectCopy) {
+            // For subrect copy tests, dst texture use kTextureFormat always.
+            const utils::TextureDataCopyLayout dstCopyLayout =
+                utils::GetTextureDataCopyLayoutForTextureAtLevel(
+                    kTextureFormat,
+                    {dstSpec.textureSize.width, dstSpec.textureSize.height,
+                     copySize.depthOrArrayLayers},
+                    dstSpec.level);
+
+            const std::vector<RGBA8> dstTextureArrayCopyData =
+                GetTextureData(dstCopyLayout, TextureCopyRole::DEST);
+            dstTexture = CreateAndInitTexture(dstSpec, dstUsage, dstCopyLayout,
+                                              dstTextureArrayCopyData.data(),
+                                              dstTextureArrayCopyData.size() * sizeof(RGBA8));
+        } else {
+            dstTexture = CreateTexture(dstSpec, dstUsage);
+        }
+
+        // Perform the texture to texture copy
+        RunCopyExternalImageToTexture(srcSpec, srcTexture, dstSpec, dstTexture, copySize, options);
+
+        // Check Result
+        CheckResultInBuiltInComputePipeline(srcSpec, srcTexture, dstSpec, dstTexture, copySize,
+                                            options);
+    }
+
     wgpu::Buffer uniformBuffer;
     wgpu::ComputePipeline pipeline;
 };
@@ -495,8 +486,58 @@ class CopyTextureForBrowser_Formats
         TextureSpec dstTextureSpec;
         dstTextureSpec.format = GetParam().mDstFormat;
 
-        DoTest(srcTextureSpec, dstTextureSpec, {kDefaultTextureWidth, kDefaultTextureHeight}, {},
-               true);
+        wgpu::Extent3D copySize = {kDefaultTextureWidth, kDefaultTextureHeight};
+        wgpu::CopyTextureForBrowserOptions options = {};
+
+        // Create and init source texture.
+        // This fixed source texture data is for color conversion tests.
+        // The source data can fill a texture in default width and height.
+        std::vector<RGBA8> srcTextureArrayCopyData{
+            // Take RGBA8Unorm as example:
+            // R channel has different values
+            RGBA8(0, 255, 255, 255),    // r = 0.0
+            RGBA8(102, 255, 255, 255),  // r = 0.4
+            RGBA8(153, 255, 255, 255),  // r = 0.6
+
+            // G channel has different values
+            RGBA8(255, 0, 255, 255),    // g = 0.0
+            RGBA8(255, 102, 255, 255),  // g = 0.4
+            RGBA8(255, 153, 255, 255),  // g = 0.6
+
+            // B channel has different values
+            RGBA8(255, 255, 0, 255),    // b = 0.0
+            RGBA8(255, 255, 102, 255),  // b = 0.4
+            RGBA8(255, 255, 153, 255),  // b = 0.6
+
+            // A channel set to 0
+            RGBA8(255, 255, 255, 0)  // a = 0
+        };
+
+        const utils::TextureDataCopyLayout srcCopyLayout =
+            utils::GetTextureDataCopyLayoutForTextureAtLevel(
+                kTextureFormat,
+                {srcTextureSpec.textureSize.width, srcTextureSpec.textureSize.height,
+                 copySize.depthOrArrayLayers},
+                srcTextureSpec.level);
+
+        wgpu::TextureUsage srcUsage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                      wgpu::TextureUsage::TextureBinding;
+        wgpu::Texture srcTexture = CreateAndInitTexture(
+            srcTextureSpec, srcUsage, srcCopyLayout, srcTextureArrayCopyData.data(),
+            srcTextureArrayCopyData.size() * sizeof(RGBA8));
+
+        // Create dst texture.
+        wgpu::Texture dstTexture = CreateTexture(
+            dstTextureSpec, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
+                                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
+
+        // Perform the texture to texture copy
+        RunCopyExternalImageToTexture(srcTextureSpec, srcTexture, dstTextureSpec, dstTexture,
+                                      copySize, options);
+
+        // Check Result
+        CheckResultInBuiltInComputePipeline(srcTextureSpec, srcTexture, dstTextureSpec, dstTexture,
+                                            copySize, options);
     }
 };
 
@@ -602,8 +643,7 @@ DAWN_INSTANTIATE_TEST_P(
         {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R16Float, wgpu::TextureFormat::R32Float,
          wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::RG16Float,
          wgpu::TextureFormat::RG32Float, wgpu::TextureFormat::RGBA8Unorm,
-         wgpu::TextureFormat::RGBA8UnormSrgb, wgpu::TextureFormat::BGRA8Unorm,
-         wgpu::TextureFormat::BGRA8UnormSrgb, wgpu::TextureFormat::RGB10A2Unorm,
+         wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::RGB10A2Unorm,
          wgpu::TextureFormat::RGBA16Float, wgpu::TextureFormat::RGBA32Float}));
 
 // Verify |CopyTextureForBrowser| doing subrect copy.

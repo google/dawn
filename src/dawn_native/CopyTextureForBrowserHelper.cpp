@@ -160,9 +160,7 @@ namespace dawn_native {
                 case wgpu::TextureFormat::RG16Float:
                 case wgpu::TextureFormat::RG32Float:
                 case wgpu::TextureFormat::RGBA8Unorm:
-                case wgpu::TextureFormat::RGBA8UnormSrgb:
                 case wgpu::TextureFormat::BGRA8Unorm:
-                case wgpu::TextureFormat::BGRA8UnormSrgb:
                 case wgpu::TextureFormat::RGB10A2Unorm:
                 case wgpu::TextureFormat::RGBA16Float:
                 case wgpu::TextureFormat::RGBA32Float:
