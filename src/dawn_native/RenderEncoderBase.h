@@ -27,6 +27,7 @@ namespace dawn_native {
     class RenderEncoderBase : public ProgrammableEncoder {
       public:
         RenderEncoderBase(DeviceBase* device,
+                          const char* label,
                           EncodingContext* encodingContext,
                           Ref<AttachmentState> attachmentState,
                           bool depthReadOnly,

@@ -908,6 +908,10 @@ namespace dawn_native {
     }
     CommandEncoder* DeviceBase::APICreateCommandEncoder(
         const CommandEncoderDescriptor* descriptor) {
+        const CommandEncoderDescriptor defaultDescriptor = {};
+        if (descriptor == nullptr) {
+            descriptor = &defaultDescriptor;
+        }
         return new CommandEncoder(this, descriptor);
     }
     ComputePipelineBase* DeviceBase::APICreateComputePipeline(

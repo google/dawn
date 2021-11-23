@@ -49,6 +49,7 @@ namespace dawn_native {
     // BeginRenderPassCmd. If we had RenderPassEncoder responsible for recording the
     // command, then this wouldn't be necessary.
     RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
+                                         const RenderPassDescriptor* descriptor,
                                          CommandEncoder* commandEncoder,
                                          EncodingContext* encodingContext,
                                          RenderPassResourceUsageTracker usageTracker,
@@ -59,6 +60,7 @@ namespace dawn_native {
                                          bool depthReadOnly,
                                          bool stencilReadOnly)
         : RenderEncoderBase(device,
+                            descriptor->label,
                             encodingContext,
                             std::move(attachmentState),
                             depthReadOnly,

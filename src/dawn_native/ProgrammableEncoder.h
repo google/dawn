@@ -30,7 +30,9 @@ namespace dawn_native {
     // Base class for shared functionality between programmable encoders.
     class ProgrammableEncoder : public ApiObjectBase {
       public:
-        ProgrammableEncoder(DeviceBase* device, EncodingContext* encodingContext);
+        ProgrammableEncoder(DeviceBase* device,
+                            const char* label,
+                            EncodingContext* encodingContext);
 
         void APIInsertDebugMarker(const char* groupLabel);
         void APIPopDebugGroup();

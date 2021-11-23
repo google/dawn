@@ -30,11 +30,12 @@
 namespace dawn_native {
 
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
+                                         const char* label,
                                          EncodingContext* encodingContext,
                                          Ref<AttachmentState> attachmentState,
                                          bool depthReadOnly,
                                          bool stencilReadOnly)
-        : ProgrammableEncoder(device, encodingContext),
+        : ProgrammableEncoder(device, label, encodingContext),
           mIndirectDrawMetadata(device->GetLimits()),
           mAttachmentState(std::move(attachmentState)),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),

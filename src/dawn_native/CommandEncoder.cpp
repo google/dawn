@@ -466,8 +466,8 @@ namespace dawn_native {
 
     }  // namespace
 
-    CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor*)
-        : ApiObjectBase(device, kLabelNotImplemented), mEncodingContext(device, this) {
+    CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor)
+        : ApiObjectBase(device, descriptor->label), mEncodingContext(device, this) {
         TrackInDevice();
     }
 
@@ -522,8 +522,13 @@ namespace dawn_native {
             "encoding %s.BeginComputePass(%s).", this, descriptor);
 
         if (success) {
+            const ComputePassDescriptor defaultDescriptor = {};
+            if (descriptor == nullptr) {
+                descriptor = &defaultDescriptor;
+            }
+
             ComputePassEncoder* passEncoder =
-                new ComputePassEncoder(device, this, &mEncodingContext);
+                new ComputePassEncoder(device, descriptor, this, &mEncodingContext);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }
@@ -627,10 +632,10 @@ namespace dawn_native {
             "encoding %s.BeginRenderPass(%s).", this, descriptor);
 
         if (success) {
-            RenderPassEncoder* passEncoder =
-                new RenderPassEncoder(device, this, &mEncodingContext, std::move(usageTracker),
-                                      std::move(attachmentState), descriptor->occlusionQuerySet,
-                                      width, height, depthReadOnly, stencilReadOnly);
+            RenderPassEncoder* passEncoder = new RenderPassEncoder(
+                device, descriptor, this, &mEncodingContext, std::move(usageTracker),
+                std::move(attachmentState), descriptor->occlusionQuerySet, width, height,
+                depthReadOnly, stencilReadOnly);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }
@@ -1041,6 +1046,12 @@ namespace dawn_native {
         if (device->IsValidationEnabled()) {
             DAWN_TRY(ValidateFinish());
         }
+
+        const CommandBufferDescriptor defaultDescriptor = {};
+        if (descriptor == nullptr) {
+            descriptor = &defaultDescriptor;
+        }
+
         return device->CreateCommandBuffer(this, descriptor);
     }
 

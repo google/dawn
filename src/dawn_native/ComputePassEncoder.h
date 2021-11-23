@@ -28,6 +28,7 @@ namespace dawn_native {
     class ComputePassEncoder final : public ProgrammableEncoder {
       public:
         ComputePassEncoder(DeviceBase* device,
+                           const ComputePassDescriptor* descriptor,
                            CommandEncoder* commandEncoder,
                            EncodingContext* encodingContext);
 

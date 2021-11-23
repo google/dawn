@@ -466,7 +466,18 @@
         ]
     },
     "command buffer": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            }
+        ]
     },
     "command buffer descriptor": {
         "category": "structure",
@@ -600,6 +611,15 @@
                 "args": [
                     {"name": "query set", "type": "query set"},
                     {"name": "query index", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
             }
         ]
@@ -751,6 +771,15 @@
             {
                 "name": "end pipeline statistics query",
                 "tags": ["upstream"]
+            },
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
             }
         ]
     },
@@ -1634,6 +1663,15 @@
                 "args": [
                     {"name": "descriptor", "type": "render bundle descriptor", "annotation": "const*", "optional": true}
                 ]
+            },
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
             }
         ]
     },
@@ -1854,6 +1892,15 @@
             {
                 "name": "end pipeline statistics query",
                 "tags": ["upstream"]
+            },
+            {
+                "name": "set label",
+                "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
             }
         ]
     },

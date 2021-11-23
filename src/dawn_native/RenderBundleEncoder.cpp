@@ -88,6 +88,7 @@ namespace dawn_native {
     RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
                                              const RenderBundleEncoderDescriptor* descriptor)
         : RenderEncoderBase(device,
+                            descriptor->label,
                             &mBundleEncodingContext,
                             device->GetOrCreateAttachmentState(descriptor),
                             descriptor->depthReadOnly,

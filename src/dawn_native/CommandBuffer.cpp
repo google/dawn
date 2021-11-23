@@ -25,8 +25,9 @@
 
 namespace dawn_native {
 
-    CommandBufferBase::CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor*)
-        : ApiObjectBase(encoder->GetDevice(), kLabelNotImplemented),
+    CommandBufferBase::CommandBufferBase(CommandEncoder* encoder,
+                                         const CommandBufferDescriptor* descriptor)
+        : ApiObjectBase(encoder->GetDevice(), descriptor->label),
           mCommands(encoder->AcquireCommands()),
           mResourceUsages(encoder->AcquireResourceUsages()) {
         TrackInDevice();

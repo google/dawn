@@ -111,9 +111,11 @@ namespace dawn_native {
     }  // namespace
 
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
+                                           const ComputePassDescriptor* descriptor,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext)
-        : ProgrammableEncoder(device, encodingContext), mCommandEncoder(commandEncoder) {
+        : ProgrammableEncoder(device, descriptor->label, encodingContext),
+          mCommandEncoder(commandEncoder) {
         TrackInDevice();
     }
 

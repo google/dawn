@@ -28,8 +28,10 @@
 
 namespace dawn_native {
 
-    ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device, EncodingContext* encodingContext)
-        : ApiObjectBase(device, kLabelNotImplemented),
+    ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
+                                             const char* label,
+                                             EncodingContext* encodingContext)
+        : ApiObjectBase(device, label),
           mEncodingContext(encodingContext),
           mValidationEnabled(device->IsValidationEnabled()) {
     }

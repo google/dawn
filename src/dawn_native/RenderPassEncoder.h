@@ -26,6 +26,7 @@ namespace dawn_native {
     class RenderPassEncoder final : public RenderEncoderBase {
       public:
         RenderPassEncoder(DeviceBase* device,
+                          const RenderPassDescriptor* descriptor,
                           CommandEncoder* commandEncoder,
                           EncodingContext* encodingContext,
                           RenderPassResourceUsageTracker usageTracker,

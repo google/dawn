@@ -14,6 +14,7 @@
 
 #include <string>
 #include "tests/unittests/validation/ValidationTest.h"
+#include "utils/ComboRenderBundleEncoderDescriptor.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -113,6 +114,101 @@ TEST_F(LabelTest, Buffer) {
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
         std::string readbackLabel = dawn_native::GetObjectLabelForTesting(buffer.Get());
         ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, CommandBuffer) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::CommandBufferDescriptor descriptor;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(commandBuffer.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish(&descriptor);
+        commandBuffer.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(commandBuffer.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(commandBuffer.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, CommandEncoder) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::CommandEncoderDescriptor descriptor;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&descriptor);
+        encoder.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, ComputePassEncoder) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+
+    wgpu::ComputePassDescriptor descriptor;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::ComputePassEncoder encoder = commandEncoder.BeginComputePass(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+        encoder.EndPass();
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::ComputePassEncoder encoder = commandEncoder.BeginComputePass(&descriptor);
+        encoder.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_EQ(label, readbackLabel);
+        encoder.EndPass();
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::ComputePassEncoder encoder = commandEncoder.BeginComputePass(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_EQ(label, readbackLabel);
+        encoder.EndPass();
     }
 }
 
@@ -220,6 +316,78 @@ TEST_F(LabelTest, QuerySet) {
         wgpu::QuerySet querySet = device.CreateQuerySet(&descriptor);
         std::string readbackLabel = dawn_native::GetObjectLabelForTesting(querySet.Get());
         ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, RenderBundleEncoder) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+
+    utils::ComboRenderBundleEncoderDescriptor descriptor = {};
+    descriptor.colorFormatsCount = 1;
+    descriptor.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&descriptor);
+        encoder.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, RenderPassEncoder) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+    utils::ComboRenderPassDescriptor descriptor({texture.CreateView()});
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::RenderPassEncoder encoder = commandEncoder.BeginRenderPass(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+        encoder.EndPass();
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::RenderPassEncoder encoder = commandEncoder.BeginRenderPass(&descriptor);
+        encoder.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_EQ(label, readbackLabel);
+        encoder.EndPass();
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::RenderPassEncoder encoder = commandEncoder.BeginRenderPass(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(encoder.Get());
+        ASSERT_EQ(label, readbackLabel);
+        encoder.EndPass();
     }
 }
 
