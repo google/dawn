@@ -17,7 +17,7 @@
 #include <string>
 
 #include "src/program_builder.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::Cloneable);
 

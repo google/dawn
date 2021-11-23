@@ -23,7 +23,7 @@
 #include "src/sem/member_accessor_expression.h"
 #include "src/transform/inline_pointer_lets.h"
 #include "src/transform/simplify.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeStridedMatrix);

@@ -16,7 +16,7 @@
 
 #include "src/sem/constant.h"
 #include "src/sem/type_constructor.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 
 namespace tint {
 namespace resolver {

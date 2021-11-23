@@ -397,8 +397,8 @@ set(TINT_LIB_SRCS
   sem/void_type.cc
   sem/void_type.h
   utils/enum_set.h
-  utils/get_or_create.h
   utils/hash.h
+  utils/map.h
   utils/math.h
   utils/scoped_assignment.h
   utils/string.h
@@ -730,10 +730,10 @@ if(${TINT_BUILD_TESTS})
     transform/transform_test.cc
     utils/defer_test.cc
     utils/enum_set_test.cc
-    utils/get_or_create_test.cc
     utils/hash_test.cc
     utils/io/command_test.cc
     utils/io/tmpfile_test.cc
+    utils/map_test.cc
     utils/math_test.cc
     utils/reverse_test.cc
     utils/scoped_assignment_test.cc

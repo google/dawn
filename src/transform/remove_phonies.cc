@@ -25,7 +25,7 @@
 #include "src/sem/function.h"
 #include "src/sem/statement.h"
 #include "src/sem/variable.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/utils/scoped_assignment.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::RemovePhonies);

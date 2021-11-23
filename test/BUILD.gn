@@ -339,10 +339,10 @@ tint_unittests_source_set("tint_unittests_utils_src") {
   sources = [
     "../src/utils/defer_test.cc",
     "../src/utils/enum_set_test.cc",
-    "../src/utils/get_or_create_test.cc",
     "../src/utils/hash_test.cc",
     "../src/utils/io/command_test.cc",
     "../src/utils/io/tmpfile_test.cc",
+    "../src/utils/map_test.cc",
     "../src/utils/math_test.cc",
     "../src/utils/reverse_test.cc",
     "../src/utils/scoped_assignment_test.cc",

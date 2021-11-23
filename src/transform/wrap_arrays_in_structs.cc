@@ -21,7 +21,7 @@
 #include "src/sem/call.h"
 #include "src/sem/expression.h"
 #include "src/sem/type_constructor.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/utils/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::WrapArraysInStructs);

@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "src/program_builder.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Type);

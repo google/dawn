@@ -71,7 +71,7 @@
 #include "src/transform/wrap_arrays_in_structs.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/float_to_string.h"
 

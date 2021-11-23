@@ -51,7 +51,7 @@
 #include "src/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/writer/append_vector.h"
 
 namespace tint {

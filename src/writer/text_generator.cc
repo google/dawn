@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <limits>
 
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 
 namespace tint {
 namespace writer {

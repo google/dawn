@@ -25,7 +25,7 @@
 #include "src/sem/atomic_type.h"
 #include "src/sem/function.h"
 #include "src/sem/variable.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/utils/unique_vector.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ZeroInitWorkgroupMemory);

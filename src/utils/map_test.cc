@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 
 #include <unordered_map>
 
@@ -21,6 +21,15 @@
 namespace tint {
 namespace utils {
 namespace {
+
+TEST(Lookup, Test) {
+  std::unordered_map<int, int> map;
+  map.emplace(10, 1);
+  EXPECT_EQ(Lookup(map, 10, 0), 1);    // exists, with if_missing
+  EXPECT_EQ(Lookup(map, 10), 1);       // exists, without if_missing
+  EXPECT_EQ(Lookup(map, 20, 50), 50);  // missing, with if_missing
+  EXPECT_EQ(Lookup(map, 20), 0);       // missing, without if_missing
+}
 
 TEST(GetOrCreateTest, NewKey) {
   std::unordered_map<int, int> map;

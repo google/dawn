@@ -74,7 +74,7 @@
 #include "src/sem/type_conversion.h"
 #include "src/sem/variable.h"
 #include "src/utils/defer.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/utils/math.h"
 #include "src/utils/reverse.h"
 #include "src/utils/scoped_assignment.h"

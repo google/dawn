@@ -28,8 +28,8 @@
 #include "src/sem/pipeline_stage_set.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
-#include "src/utils/get_or_create.h"
 #include "src/utils/hash.h"
+#include "src/utils/map.h"
 #include "src/utils/math.h"
 #include "src/utils/scoped_assignment.h"
 

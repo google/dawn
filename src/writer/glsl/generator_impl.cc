@@ -47,7 +47,7 @@
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/glsl.h"
 #include "src/utils/defer.h"
-#include "src/utils/get_or_create.h"
+#include "src/utils/map.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
