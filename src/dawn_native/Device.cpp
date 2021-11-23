@@ -172,7 +172,7 @@ namespace dawn_native {
 
     // DeviceBase
 
-    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
+    DeviceBase::DeviceBase(AdapterBase* adapter, const DawnDeviceDescriptor* descriptor)
         : mInstance(adapter->GetInstance()), mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
@@ -1111,7 +1111,7 @@ namespace dawn_native {
         return result.Detach();
     }
 
-    void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
+    void DeviceBase::ApplyFeatures(const DawnDeviceDescriptor* deviceDescriptor) {
         ASSERT(deviceDescriptor);
         ASSERT(GetAdapter()->SupportsAllRequestedFeatures(deviceDescriptor->requiredFeatures));
 
@@ -1565,7 +1565,7 @@ namespace dawn_native {
         SetToggle(Toggle::DisallowUnsafeAPIs, true);
     }
 
-    void DeviceBase::ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor) {
+    void DeviceBase::ApplyToggleOverrides(const DawnDeviceDescriptor* deviceDescriptor) {
         ASSERT(deviceDescriptor);
 
         for (const char* toggleName : deviceDescriptor->forceEnabledToggles) {

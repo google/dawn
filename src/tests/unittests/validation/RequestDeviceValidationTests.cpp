@@ -58,7 +58,7 @@ class RequestDeviceValidationTest : public ValidationTest {
 
 // Test that requesting a device without specifying limits is valid.
 TEST_F(RequestDeviceValidationTest, NoRequiredLimits) {
-    dawn_native::DeviceDescriptor descriptor;
+    dawn_native::DawnDeviceDescriptor descriptor;
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
                           CheckDevice([](wgpu::Device device) {
                               // Check one of the default limits.
@@ -71,7 +71,7 @@ TEST_F(RequestDeviceValidationTest, NoRequiredLimits) {
 // Test that requesting a device with the default limits is valid.
 TEST_F(RequestDeviceValidationTest, DefaultLimits) {
     wgpu::RequiredLimits limits = {};
-    dawn_native::DeviceDescriptor descriptor;
+    dawn_native::DawnDeviceDescriptor descriptor;
     descriptor.requiredLimits = reinterpret_cast<const WGPURequiredLimits*>(&limits);
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
                           CheckDevice([](wgpu::Device device) {
@@ -85,7 +85,7 @@ TEST_F(RequestDeviceValidationTest, DefaultLimits) {
 // Test that requesting a device where a required limit is above the maximum value.
 TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
     wgpu::RequiredLimits limits = {};
-    dawn_native::DeviceDescriptor descriptor;
+    dawn_native::DawnDeviceDescriptor descriptor;
     descriptor.requiredLimits = reinterpret_cast<const WGPURequiredLimits*>(&limits);
 
     wgpu::SupportedLimits supportedLimits;
@@ -138,7 +138,7 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
 // Test that requesting a device where a required limit is below the minimum value.
 TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
     wgpu::RequiredLimits limits = {};
-    dawn_native::DeviceDescriptor descriptor;
+    dawn_native::DawnDeviceDescriptor descriptor;
     descriptor.requiredLimits = reinterpret_cast<const WGPURequiredLimits*>(&limits);
 
     wgpu::SupportedLimits supportedLimits;
@@ -199,7 +199,7 @@ TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
     wgpu::RequiredLimits limits = {};
     limits.nextInChain = &depthClamp;
 
-    dawn_native::DeviceDescriptor descriptor;
+    dawn_native::DawnDeviceDescriptor descriptor;
     descriptor.requiredLimits = reinterpret_cast<const WGPURequiredLimits*>(&limits);
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
 }

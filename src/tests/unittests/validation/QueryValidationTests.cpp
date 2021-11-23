@@ -225,7 +225,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
 class TimestampQueryValidationTest : public QuerySetValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DeviceDescriptor descriptor;
+        dawn_native::DawnDeviceDescriptor descriptor;
         descriptor.requiredFeatures.push_back("timestamp-query");
         descriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
         return adapter.CreateDevice(&descriptor);
@@ -429,7 +429,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
 class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DeviceDescriptor descriptor;
+        dawn_native::DawnDeviceDescriptor descriptor;
         descriptor.requiredFeatures.push_back("pipeline-statistics-query");
         // TODO(crbug.com/1177506): Pipeline statistic query is an unsafe API, disable disallowing
         // unsafe APIs to test it.

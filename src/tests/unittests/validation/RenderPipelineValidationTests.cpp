@@ -1124,7 +1124,7 @@ TEST_F(RenderPipelineValidationTest, BindingsFromCorrectEntryPoint) {
 class DepthClampingValidationTest : public RenderPipelineValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DeviceDescriptor descriptor;
+        dawn_native::DawnDeviceDescriptor descriptor;
         descriptor.requiredFeatures = {"depth-clamping"};
         return adapter.CreateDevice(&descriptor);
     }

@@ -43,7 +43,7 @@ namespace {
         // Create device with a valid name of a toggle
         {
             const char* kValidToggleName = "emulate_store_and_msaa_resolve";
-            dawn_native::DeviceDescriptor descriptor;
+            dawn_native::DawnDeviceDescriptor descriptor;
             descriptor.forceEnabledToggles.push_back(kValidToggleName);
 
             WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
@@ -60,7 +60,7 @@ namespace {
         // Create device with an invalid toggle name
         {
             const char* kInvalidToggleName = "!@#$%^&*";
-            dawn_native::DeviceDescriptor descriptor;
+            dawn_native::DawnDeviceDescriptor descriptor;
             descriptor.forceEnabledToggles.push_back(kInvalidToggleName);
 
             WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
@@ -77,7 +77,7 @@ namespace {
 
     TEST_F(ToggleValidationTest, TurnOffVsyncWithToggle) {
         const char* kValidToggleName = "turn_off_vsync";
-        dawn_native::DeviceDescriptor descriptor;
+        dawn_native::DawnDeviceDescriptor descriptor;
         descriptor.forceEnabledToggles.push_back(kValidToggleName);
 
         WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);

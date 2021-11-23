@@ -41,9 +41,9 @@ namespace dawn_native {
         const PCIInfo& GetPCIInfo() const;
         InstanceBase* GetInstance() const;
 
-        DeviceBase* CreateDevice(const DeviceDescriptor* descriptor = nullptr);
+        DeviceBase* CreateDevice(const DawnDeviceDescriptor* descriptor = nullptr);
 
-        void RequestDevice(const DeviceDescriptor* descriptor,
+        void RequestDevice(const DawnDeviceDescriptor* descriptor,
                            WGPURequestDeviceCallback callback,
                            void* userdata);
 
@@ -66,7 +66,8 @@ namespace dawn_native {
         FeaturesSet mSupportedFeatures;
 
       private:
-        virtual ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) = 0;
+        virtual ResultOrError<DeviceBase*> CreateDeviceImpl(
+            const DawnDeviceDescriptor* descriptor) = 0;
 
         virtual MaybeError InitializeImpl() = 0;
 
@@ -76,7 +77,8 @@ namespace dawn_native {
         // Check base WebGPU limits and populate supported limits.
         virtual MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) = 0;
 
-        MaybeError CreateDeviceInternal(DeviceBase** result, const DeviceDescriptor* descriptor);
+        MaybeError CreateDeviceInternal(DeviceBase** result,
+                                        const DawnDeviceDescriptor* descriptor);
 
         virtual MaybeError ResetInternalDeviceForTestingImpl();
         InstanceBase* mInstance = nullptr;

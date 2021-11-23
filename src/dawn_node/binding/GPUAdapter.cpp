@@ -168,7 +168,7 @@ namespace wgpu { namespace binding {
     interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevice(
         Napi::Env env,
         interop::GPUDeviceDescriptor descriptor) {
-        dawn_native::DeviceDescriptor desc{};  // TODO(crbug.com/dawn/1133): Fill in.
+        dawn_native::DawnDeviceDescriptor desc{};  // TODO(crbug.com/dawn/1133): Fill in.
         interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
 
         // See src/dawn_native/Features.cpp for enum <-> string mappings.
@@ -194,7 +194,7 @@ namespace wgpu { namespace binding {
         }
 
         // Propogate enabled/disabled dawn features
-        // Note: DeviceDescriptor::forceEnabledToggles and forceDisabledToggles are vectors of
+        // Note: DawnDeviceDescriptor::forceEnabledToggles and forceDisabledToggles are vectors of
         // 'const char*', so we make sure the parsed strings survive the CreateDevice() call by
         // storing them on the stack.
         std::vector<std::string> enabledToggles;

@@ -55,7 +55,7 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
         mAdapterBase.SetSupportedFeatures(featureNamesWithoutOne);
         dawn_native::Adapter adapterWithoutFeature(&mAdapterBase);
 
-        dawn_native::DeviceDescriptor deviceDescriptor;
+        dawn_native::DawnDeviceDescriptor deviceDescriptor;
         const char* featureName = FeatureEnumToName(notSupportedFeature);
         deviceDescriptor.requiredFeatures = std::vector<const char*>(1, featureName);
         WGPUDevice deviceWithFeature = adapterWithoutFeature.CreateDevice(&deviceDescriptor);
@@ -70,7 +70,7 @@ TEST_F(FeatureTests, GetEnabledFeatures) {
         dawn_native::Feature feature = static_cast<dawn_native::Feature>(i);
         const char* featureName = FeatureEnumToName(feature);
 
-        dawn_native::DeviceDescriptor deviceDescriptor;
+        dawn_native::DawnDeviceDescriptor deviceDescriptor;
         deviceDescriptor.requiredFeatures = {featureName};
         dawn_native::DeviceBase* deviceBase =
             reinterpret_cast<dawn_native::DeviceBase*>(adapter.CreateDevice(&deviceDescriptor));

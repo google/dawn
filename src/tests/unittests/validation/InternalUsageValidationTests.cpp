@@ -44,7 +44,7 @@ TEST_F(TextureInternalUsageValidationDisabledTest, RequiresFeature) {
 
 class TextureInternalUsageValidationTest : public ValidationTest {
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DeviceDescriptor descriptor;
+        dawn_native::DawnDeviceDescriptor descriptor;
         descriptor.requiredFeatures.push_back("dawn-internal-usages");
 
         return adapter.CreateDevice(&descriptor);

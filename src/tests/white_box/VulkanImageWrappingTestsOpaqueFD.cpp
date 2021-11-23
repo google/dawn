@@ -419,7 +419,7 @@ namespace dawn_native { namespace vulkan {
         dawn_native::vulkan::Device* secondDeviceVk;
 
         dawn_native::vulkan::Adapter* backendAdapter;
-        dawn_native::DeviceDescriptor deviceDescriptor;
+        dawn_native::DawnDeviceDescriptor deviceDescriptor;
 
         wgpu::TextureDescriptor defaultDescriptor;
         VkImage defaultImage;

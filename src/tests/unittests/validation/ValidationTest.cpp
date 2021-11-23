@@ -195,7 +195,7 @@ wgpu::SupportedLimits ValidationTest::GetSupportedLimits() {
 
 WGPUDevice ValidationTest::CreateTestDevice() {
     // Disabled disallowing unsafe APIs so we can test them.
-    dawn_native::DeviceDescriptor deviceDescriptor;
+    dawn_native::DawnDeviceDescriptor deviceDescriptor;
     deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
 
     for (const std::string& toggle : gToggleParser->GetEnabledToggles()) {

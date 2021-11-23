@@ -125,11 +125,11 @@ namespace dawn_native {
         return mImpl != nullptr;
     }
 
-    WGPUDevice Adapter::CreateDevice(const DeviceDescriptor* deviceDescriptor) {
+    WGPUDevice Adapter::CreateDevice(const DawnDeviceDescriptor* deviceDescriptor) {
         return reinterpret_cast<WGPUDevice>(mImpl->CreateDevice(deviceDescriptor));
     }
 
-    void Adapter::RequestDevice(const DeviceDescriptor* descriptor,
+    void Adapter::RequestDevice(const DawnDeviceDescriptor* descriptor,
                                 WGPURequestDeviceCallback callback,
                                 void* userdata) {
         mImpl->RequestDevice(descriptor, callback, userdata);

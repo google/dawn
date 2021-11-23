@@ -56,7 +56,7 @@ namespace dawn_native {
 
     class DeviceBase : public RefCounted {
       public:
-        DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor);
+        DeviceBase(AdapterBase* adapter, const DawnDeviceDescriptor* descriptor);
         virtual ~DeviceBase();
 
         void HandleError(InternalErrorType type, const char* message);
@@ -437,8 +437,8 @@ namespace dawn_native {
             WGPUCreateRenderPipelineAsyncCallback callback,
             void* userdata);
 
-        void ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor);
-        void ApplyFeatures(const DeviceDescriptor* deviceDescriptor);
+        void ApplyToggleOverrides(const DawnDeviceDescriptor* deviceDescriptor);
+        void ApplyFeatures(const DawnDeviceDescriptor* deviceDescriptor);
 
         void SetDefaultToggles();
 

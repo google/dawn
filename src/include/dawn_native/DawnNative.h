@@ -62,13 +62,17 @@ namespace dawn_native {
 
     // An optional parameter of Adapter::CreateDevice() to send additional information when creating
     // a Device. For example, we can use it to enable a workaround, optimization or feature.
-    struct DAWN_NATIVE_EXPORT DeviceDescriptor {
+    struct DAWN_NATIVE_EXPORT DawnDeviceDescriptor {
         std::vector<const char*> requiredFeatures;
         std::vector<const char*> forceEnabledToggles;
         std::vector<const char*> forceDisabledToggles;
 
         const WGPURequiredLimits* requiredLimits = nullptr;
     };
+
+    // TODO(crbug.com/dawn/160): Remove when embedders of Dawn are updated to use
+    // DawnDeviceDescriptor.
+    using DeviceDescriptor = DawnDeviceDescriptor;
 
     // A struct to record the information of a toggle. A toggle is a code path in Dawn device that
     // can be manually configured to run or not outside Dawn, including workarounds, special
@@ -124,9 +128,9 @@ namespace dawn_native {
         // Create a device on this adapter, note that the interface will change to include at least
         // a device descriptor and a pointer to backend specific options.
         // On an error, nullptr is returned.
-        WGPUDevice CreateDevice(const DeviceDescriptor* deviceDescriptor = nullptr);
+        WGPUDevice CreateDevice(const DawnDeviceDescriptor* deviceDescriptor = nullptr);
 
-        void RequestDevice(const DeviceDescriptor* descriptor,
+        void RequestDevice(const DawnDeviceDescriptor* descriptor,
                            WGPURequestDeviceCallback callback,
                            void* userdata);
 

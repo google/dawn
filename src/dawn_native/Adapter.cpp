@@ -135,7 +135,7 @@ namespace dawn_native {
         return true;
     }
 
-    DeviceBase* AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
+    DeviceBase* AdapterBase::CreateDevice(const DawnDeviceDescriptor* descriptor) {
         DeviceBase* result = nullptr;
 
         if (mInstance->ConsumedError(CreateDeviceInternal(&result, descriptor))) {
@@ -145,7 +145,7 @@ namespace dawn_native {
         return result;
     }
 
-    void AdapterBase::RequestDevice(const DeviceDescriptor* descriptor,
+    void AdapterBase::RequestDevice(const DawnDeviceDescriptor* descriptor,
                                     WGPURequestDeviceCallback callback,
                                     void* userdata) {
         DeviceBase* result = nullptr;
@@ -164,7 +164,7 @@ namespace dawn_native {
     }
 
     MaybeError AdapterBase::CreateDeviceInternal(DeviceBase** result,
-                                                 const DeviceDescriptor* descriptor) {
+                                                 const DawnDeviceDescriptor* descriptor) {
         if (descriptor != nullptr) {
             for (const char* featureStr : descriptor->requiredFeatures) {
                 Feature featureEnum = mInstance->FeatureNameToEnum(featureStr);

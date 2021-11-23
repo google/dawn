@@ -36,7 +36,7 @@ namespace dawn_native { namespace opengl {
 
     // static
     ResultOrError<Device*> Device::Create(AdapterBase* adapter,
-                                          const DeviceDescriptor* descriptor,
+                                          const DawnDeviceDescriptor* descriptor,
                                           const OpenGLFunctions& functions) {
         Ref<Device> device = AcquireRef(new Device(adapter, descriptor, functions));
         DAWN_TRY(device->Initialize());
@@ -44,7 +44,7 @@ namespace dawn_native { namespace opengl {
     }
 
     Device::Device(AdapterBase* adapter,
-                   const DeviceDescriptor* descriptor,
+                   const DawnDeviceDescriptor* descriptor,
                    const OpenGLFunctions& functions)
         : DeviceBase(adapter, descriptor), gl(functions) {
     }

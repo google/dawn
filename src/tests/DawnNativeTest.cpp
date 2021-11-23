@@ -70,7 +70,7 @@ void DawnNativeTest::TearDown() {
 
 WGPUDevice DawnNativeTest::CreateTestDevice() {
     // Disabled disallowing unsafe APIs so we can test them.
-    dawn_native::DeviceDescriptor deviceDescriptor;
+    dawn_native::DawnDeviceDescriptor deviceDescriptor;
     deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
 
     return adapter.CreateDevice(&deviceDescriptor);
