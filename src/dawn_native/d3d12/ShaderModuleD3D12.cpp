@@ -448,6 +448,62 @@ namespace dawn_native { namespace d3d12 {
             return std::move(compiledShader);
         }
 
+        std::string CompileFlagsToStringFXC(uint32_t compileFlags) {
+            struct Flag {
+                uint32_t value;
+                const char* name;
+            };
+            constexpr Flag flags[] = {
+            // Populated from d3dcompiler.h
+#define F(f) Flag{f, #f}
+                F(D3DCOMPILE_DEBUG),
+                F(D3DCOMPILE_SKIP_VALIDATION),
+                F(D3DCOMPILE_SKIP_OPTIMIZATION),
+                F(D3DCOMPILE_PACK_MATRIX_ROW_MAJOR),
+                F(D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR),
+                F(D3DCOMPILE_PARTIAL_PRECISION),
+                F(D3DCOMPILE_FORCE_VS_SOFTWARE_NO_OPT),
+                F(D3DCOMPILE_FORCE_PS_SOFTWARE_NO_OPT),
+                F(D3DCOMPILE_NO_PRESHADER),
+                F(D3DCOMPILE_AVOID_FLOW_CONTROL),
+                F(D3DCOMPILE_PREFER_FLOW_CONTROL),
+                F(D3DCOMPILE_ENABLE_STRICTNESS),
+                F(D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY),
+                F(D3DCOMPILE_IEEE_STRICTNESS),
+                F(D3DCOMPILE_RESERVED16),
+                F(D3DCOMPILE_RESERVED17),
+                F(D3DCOMPILE_WARNINGS_ARE_ERRORS),
+                F(D3DCOMPILE_RESOURCES_MAY_ALIAS),
+                F(D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES),
+                F(D3DCOMPILE_ALL_RESOURCES_BOUND),
+                F(D3DCOMPILE_DEBUG_NAME_FOR_SOURCE),
+                F(D3DCOMPILE_DEBUG_NAME_FOR_BINARY),
+#undef F
+            };
+
+            std::string result;
+            for (const Flag& f : flags) {
+                if ((compileFlags & f.value) != 0) {
+                    result += f.name + std::string("\n");
+                }
+            }
+
+            // Optimization level must be handled separately as two bits are used, and the values
+            // don't map neatly to 0-3.
+            if ((compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL2) != 0) {
+                result += "D3DCOMPILE_OPTIMIZATION_LEVEL2";
+            } else if ((compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL0) != 0) {
+                result += "D3DCOMPILE_OPTIMIZATION_LEVEL0";
+            } else if ((compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL3) != 0) {
+                result += "D3DCOMPILE_OPTIMIZATION_LEVEL3";
+            } else {
+                result += "D3DCOMPILE_OPTIMIZATION_LEVEL1";
+            }
+            result += std::string("\n");
+
+            return result;
+        }
+
         ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const PlatformFunctions* functions,
                                                          const ShaderCompilationRequest& request,
                                                          const std::string& hlslSource) {
@@ -585,6 +641,9 @@ namespace dawn_native { namespace d3d12 {
 
             if (dumpShaders && request.compiler == ShaderCompilationRequest::Compiler::FXC) {
                 std::ostringstream dumpedMsg;
+                dumpedMsg << "/* FXC compile flags */ " << std::endl
+                          << CompileFlagsToStringFXC(request.compileFlags) << std::endl;
+
                 dumpedMsg << "/* Dumped disassembled DXBC */" << std::endl;
 
                 ComPtr<ID3DBlob> disassembly;
