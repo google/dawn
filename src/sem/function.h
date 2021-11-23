@@ -62,11 +62,9 @@ class Function : public Castable<Function, CallTarget> {
   /// @param declaration the ast::Function
   /// @param return_type the return type of the function
   /// @param parameters the parameters to the function
-  /// @param workgroup_size the workgroup size
   Function(const ast::Function* declaration,
            Type* return_type,
-           std::vector<Parameter*> parameters,
-           sem::WorkgroupSize workgroup_size);
+           std::vector<Parameter*> parameters);
 
   /// Destructor
   ~Function() override;
@@ -76,6 +74,12 @@ class Function : public Castable<Function, CallTarget> {
 
   /// @returns the workgroup size {x, y, z} for the function.
   const sem::WorkgroupSize& WorkgroupSize() const { return workgroup_size_; }
+
+  /// Sets the workgroup size {x, y, z} for the function.
+  /// @param workgroup_size the new workgroup size of the function
+  void SetWorkgroupSize(sem::WorkgroupSize workgroup_size) {
+    workgroup_size_ = std::move(workgroup_size);
+  }
 
   /// @returns all directly referenced global variables
   const utils::UniqueVector<const GlobalVariable*>& DirectlyReferencedGlobals()
@@ -243,8 +247,8 @@ class Function : public Castable<Function, CallTarget> {
       bool multisampled) const;
 
   const ast::Function* const declaration_;
-  const sem::WorkgroupSize workgroup_size_;
 
+  sem::WorkgroupSize workgroup_size_;
   utils::UniqueVector<const GlobalVariable*> directly_referenced_globals_;
   utils::UniqueVector<const GlobalVariable*> transitively_referenced_globals_;
   utils::UniqueVector<const Function*> transitively_called_functions_;

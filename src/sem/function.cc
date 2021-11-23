@@ -30,11 +30,11 @@ namespace sem {
 
 Function::Function(const ast::Function* declaration,
                    Type* return_type,
-                   std::vector<Parameter*> parameters,
-                   sem::WorkgroupSize workgroup_size)
+                   std::vector<Parameter*> parameters)
     : Base(return_type, utils::ToConstPtrVec(parameters)),
       declaration_(declaration),
-      workgroup_size_(std::move(workgroup_size)) {
+      workgroup_size_{WorkgroupDimension{1}, WorkgroupDimension{1},
+                      WorkgroupDimension{1}} {
   for (auto* parameter : parameters) {
     parameter->SetOwner(this);
   }

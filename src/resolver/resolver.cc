@@ -634,20 +634,18 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
   }
 
-  sem::WorkgroupSize ws{};
-  if (!WorkgroupSizeFor(decl, ws)) {
+  auto* func = builder_->create<sem::Function>(decl, return_type, parameters);
+  builder_->Sem().Add(decl, func);
+
+  TINT_SCOPED_ASSIGNMENT(current_function_, func);
+
+  if (!WorkgroupSize(decl)) {
     return nullptr;
   }
-
-  auto* func =
-      builder_->create<sem::Function>(decl, return_type, parameters, ws);
-  builder_->Sem().Add(decl, func);
 
   if (decl->IsEntryPoint()) {
     entry_points_.emplace_back(func);
   }
-
-  TINT_SCOPED_ASSIGNMENT(current_function_, func);
 
   if (decl->body) {
     Mark(decl->body);
@@ -692,9 +690,9 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
   return func;
 }
 
-bool Resolver::WorkgroupSizeFor(const ast::Function* func,
-                                sem::WorkgroupSize& ws) {
+bool Resolver::WorkgroupSize(const ast::Function* func) {
   // Set work-group size defaults.
+  sem::WorkgroupSize ws;
   for (int i = 0; i < 3; i++) {
     ws[i].value = 1;
     ws[i].overridable_const = nullptr;
@@ -790,6 +788,8 @@ bool Resolver::WorkgroupSizeFor(const ast::Function* func,
     ws[i].value = is_i32 ? static_cast<uint32_t>(value.Elements()[0].i32)
                          : value.Elements()[0].u32;
   }
+
+  current_function_->SetWorkgroupSize(std::move(ws));
   return true;
 }
 

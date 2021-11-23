@@ -16,6 +16,10 @@
 * The `dot()` builtin now supports integer vector types.
 * Identifiers can now start with a single leading underscore.  [tint:1292](https://crbug.com/tint/1292)
 
+### Fixes
+
+* Fixed an issue where using a module-scoped `let` in a `workgroup_size` may result in a compilation error. [tint:1320](https://crbug.com/tint/1320)
+
 ## Changes for M97
 
 ### Breaking Changes

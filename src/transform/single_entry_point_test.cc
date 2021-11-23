@@ -236,6 +236,26 @@ fn comp_main1() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SingleEntryPointTest, WorkgroupSizeLetPreserved) {
+  auto* src = R"(
+let size : i32 = 1;
+
+[[stage(compute), workgroup_size(size)]]
+fn main() {
+}
+)";
+
+  auto* expect = src;
+
+  SingleEntryPoint::Config cfg("main");
+
+  DataMap data;
+  data.Add<SingleEntryPoint::Config>(cfg);
+  auto got = Run<SingleEntryPoint>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SingleEntryPointTest, OverridableConstants) {
   auto* src = R"(
 [[override(1001)]] let c1 : u32 = 1u;

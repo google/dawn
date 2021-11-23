@@ -427,15 +427,26 @@ TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
   // let x = 4u;
   // let x = 8u;
-  // [[stage(compute), workgroup_size(x, y, 16u]
+  // [[stage(compute), workgroup_size(x, y, 16u)]]
   // fn main() {}
-  GlobalConst("x", ty.u32(), Expr(4u));
-  GlobalConst("y", ty.u32(), Expr(8u));
-  Func("main", {}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kCompute),
-        WorkgroupSize(Expr("x"), Expr("y"), Expr(16u))});
+  auto* x = GlobalConst("x", ty.u32(), Expr(4u));
+  auto* y = GlobalConst("y", ty.u32(), Expr(8u));
+  auto* func = Func("main", {}, ty.void_(), {},
+                    {Stage(ast::PipelineStage::kCompute),
+                     WorkgroupSize(Expr("x"), Expr("y"), Expr(16u))});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* sem_func = Sem().Get(func);
+  auto* sem_x = Sem().Get<sem::GlobalVariable>(x);
+  auto* sem_y = Sem().Get<sem::GlobalVariable>(y);
+
+  ASSERT_NE(sem_func, nullptr);
+  ASSERT_NE(sem_x, nullptr);
+  ASSERT_NE(sem_y, nullptr);
+
+  EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().contains(sem_x));
+  EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().contains(sem_y));
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32) {

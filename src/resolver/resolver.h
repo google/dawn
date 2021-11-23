@@ -282,8 +282,9 @@ class Resolver {
   bool IsValidationEnabled(const ast::DecorationList& decorations,
                            ast::DisabledValidation validation) const;
 
-  /// Resolves the WorkgroupSize for the given function
-  bool WorkgroupSizeFor(const ast::Function*, sem::WorkgroupSize& ws);
+  /// Resolves the WorkgroupSize for the given function, assigning it to
+  /// current_function_
+  bool WorkgroupSize(const ast::Function*);
 
   /// @returns the sem::Type for the ast::Type `ty`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
