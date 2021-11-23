@@ -1,3 +1,7 @@
+intrinsics/gen/isNan/1280ab.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec3<bool> = isNan(vec3<f32>());
+                        ^^^^^
+
 fn isNan_1280ab() {
   var res : vec3<bool> = isNan(vec3<f32>());
 }

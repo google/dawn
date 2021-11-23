@@ -1,3 +1,7 @@
+intrinsics/gen/isFinite/426f9f.wgsl:28:19 warning: use of deprecated intrinsic
+  var res: bool = isFinite(1.0);
+                  ^^^^^^^^
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0

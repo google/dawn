@@ -1,3 +1,7 @@
+intrinsics/gen/isInf/666f2a.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec3<bool> = isInf(vec3<f32>());
+                        ^^^^^
+
 fn isInf_666f2a() {
   var res : vec3<bool> = isInf(vec3<f32>());
 }

@@ -1,3 +1,7 @@
+intrinsics/gen/isFinite/426f9f.wgsl:28:19 warning: use of deprecated intrinsic
+  var res: bool = isFinite(1.0);
+                  ^^^^^^^^
+
 void isFinite_426f9f() {
   bool res = isfinite(1.0f);
 }

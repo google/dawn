@@ -1,3 +1,7 @@
+intrinsics/gen/isNormal/c6e880.wgsl:28:19 warning: use of deprecated intrinsic
+  var res: bool = isNormal(1.0);
+                  ^^^^^^^^
+
 bool tint_isNormal(float param_0) {
   uint exponent = asuint(param_0) & 0x7f80000;
   uint clamped = clamp(exponent, 0x0080000, 0x7f00000);

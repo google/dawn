@@ -1,3 +1,7 @@
+intrinsics/gen/isNormal/c286b7.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec3<bool> = isNormal(vec3<f32>());
+                        ^^^^^^^^
+
 fn isNormal_c286b7() {
   var res : vec3<bool> = isNormal(vec3<f32>());
 }

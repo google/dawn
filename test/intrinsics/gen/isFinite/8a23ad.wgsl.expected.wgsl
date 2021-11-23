@@ -1,3 +1,7 @@
+intrinsics/gen/isFinite/8a23ad.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec3<bool> = isFinite(vec3<f32>());
+                        ^^^^^^^^
+
 fn isFinite_8a23ad() {
   var res : vec3<bool> = isFinite(vec3<f32>());
 }

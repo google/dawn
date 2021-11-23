@@ -1,3 +1,7 @@
+intrinsics/gen/isNormal/b00ab1.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec2<bool> = isNormal(vec2<f32>());
+                        ^^^^^^^^
+
 bool2 tint_isNormal(float2 param_0) {
   uint2 exponent = asuint(param_0) & 0x7f80000;
   uint2 clamped = clamp(exponent, 0x0080000, 0x7f00000);

@@ -1,3 +1,7 @@
+intrinsics/gen/isNan/e4978e.wgsl:28:19 warning: use of deprecated intrinsic
+  var res: bool = isNan(1.0);
+                  ^^^^^
+
 fn isNan_e4978e() {
   var res : bool = isNan(1.0);
 }

@@ -6838,7 +6838,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[531],
     /* return matcher indices */ &kMatcherIndices[10],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [172] */
@@ -6850,7 +6850,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[530],
     /* return matcher indices */ &kMatcherIndices[24],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [173] */
@@ -6862,7 +6862,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[529],
     /* return matcher indices */ &kMatcherIndices[10],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [174] */
@@ -6874,7 +6874,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[528],
     /* return matcher indices */ &kMatcherIndices[24],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [175] */
@@ -6886,7 +6886,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[527],
     /* return matcher indices */ &kMatcherIndices[10],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [176] */
@@ -6898,7 +6898,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[526],
     /* return matcher indices */ &kMatcherIndices[24],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [177] */
@@ -6910,7 +6910,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[525],
     /* return matcher indices */ &kMatcherIndices[10],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [178] */
@@ -6922,7 +6922,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[524],
     /* return matcher indices */ &kMatcherIndices[24],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
+    /* is_deprecated */ true,
   },
   {
     /* [179] */

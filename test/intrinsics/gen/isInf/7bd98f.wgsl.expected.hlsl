@@ -1,3 +1,7 @@
+intrinsics/gen/isInf/7bd98f.wgsl:28:19 warning: use of deprecated intrinsic
+  var res: bool = isInf(1.0);
+                  ^^^^^
+
 void isInf_7bd98f() {
   bool res = isinf(1.0f);
 }

@@ -1,3 +1,7 @@
+intrinsics/gen/isFinite/f31987.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec4<bool> = isFinite(vec4<f32>());
+                        ^^^^^^^^
+
 void isFinite_f31987() {
   bool4 res = isfinite(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }

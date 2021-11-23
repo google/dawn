@@ -1,3 +1,7 @@
+intrinsics/gen/isNormal/c286b7.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec3<bool> = isNormal(vec3<f32>());
+                        ^^^^^^^^
+
 bool3 tint_isNormal(float3 param_0) {
   uint3 exponent = asuint(param_0) & 0x7f80000;
   uint3 clamped = clamp(exponent, 0x0080000, 0x7f00000);

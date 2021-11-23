@@ -327,14 +327,14 @@ fn frexp<N: num>(vec<N, f32>) -> __frexp_result_vec<N>
 [[deprecated]] fn ignore<T>(T)
 fn inverseSqrt(f32) -> f32
 fn inverseSqrt<N: num>(vec<N, f32>) -> vec<N, f32>
-fn isFinite(f32) -> bool
-fn isFinite<N: num>(vec<N, f32>) -> vec<N, bool>
-fn isInf(f32) -> bool
-fn isInf<N: num>(vec<N, f32>) -> vec<N, bool>
-fn isNan(f32) -> bool
-fn isNan<N: num>(vec<N, f32>) -> vec<N, bool>
-fn isNormal(f32) -> bool
-fn isNormal<N: num>(vec<N, f32>) -> vec<N, bool>
+[[deprecated]] fn isFinite(f32) -> bool
+[[deprecated]] fn isFinite<N: num>(vec<N, f32>) -> vec<N, bool>
+[[deprecated]] fn isInf(f32) -> bool
+[[deprecated]] fn isInf<N: num>(vec<N, f32>) -> vec<N, bool>
+[[deprecated]] fn isNan(f32) -> bool
+[[deprecated]] fn isNan<N: num>(vec<N, f32>) -> vec<N, bool>
+[[deprecated]] fn isNormal(f32) -> bool
+[[deprecated]] fn isNormal<N: num>(vec<N, f32>) -> vec<N, bool>
 fn ldexp(f32, i32) -> f32
 fn ldexp<N: num>(vec<N, f32>, vec<N, i32>) -> vec<N, f32>
 fn length(f32) -> f32
