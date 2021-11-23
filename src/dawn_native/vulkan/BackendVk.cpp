@@ -264,7 +264,7 @@ namespace dawn_native { namespace vulkan {
         // if the instance only supports Vulkan 1.0. Otherwise we set apiVersion to Vulkan 1.2,
         // treat 1.2 as the highest API version dawn targets.
         if (mGlobalInfo.apiVersion == VK_MAKE_VERSION(1, 0, 0)) {
-            appInfo.apiVersion = mGlobalInfo.apiVersion;
+            appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 0);
         } else {
             appInfo.apiVersion = VK_MAKE_VERSION(1, 2, 0);
         }
