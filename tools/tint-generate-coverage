@@ -44,9 +44,22 @@ PROFDATA_FILE="${ROOT_DIR}/tint.profdata"
 LCOV_FILE="${ROOT_DIR}/lcov.info"
 SUMMARY_FILE="${ROOT_DIR}/coverage.summary"
 
+# Remove any existing coverage data and intermediate files
+if [ -f "$PROFRAW_FILE"  ]; then rm ${PROFRAW_FILE};  fi
+if [ -f "$PROFDATA_FILE" ]; then rm ${PROFDATA_FILE}; fi
+if [ -f "$LCOV_FILE" ];     then rm ${LCOV_FILE};     fi
+if [ -f "$SUMMARY_FILE" ];  then rm ${SUMMARY_FILE};  fi
+
 # Run the executable to generate the raw coverage data
 # https://clang.llvm.org/docs/SourceBasedCodeCoverage.html#running-the-instrumented-program
-LLVM_PROFILE_FILE="${PROFRAW_FILE}" $@
+LLVM_PROFILE_FILE="${PROFRAW_FILE}" "$@"
+
+# Check that coverage information was generated
+if [ ! -f "$PROFRAW_FILE" ]; then
+    echo "lcov.info was not generated. Is coverage generation enabled?"
+    echo "To enable, run cmake with -DTINT_EMIT_COVERAGE=1".
+    exit 1
+fi
 
 # Fail on any error after running the target executable
 set -e
@@ -62,5 +75,5 @@ llvm-cov export --instr-profile="${PROFDATA_FILE}" --format=lcov --object=${TARG
 # Generate summary report
 llvm-cov report --ignore-filename-regex="(.*_test\.cc|third_party/.*)" --instr-profile="${PROFDATA_FILE}" --object=${TARGET_EXE} > "${SUMMARY_FILE}"
 
-# Clean up
+# Clean up intermediate files
 rm ${PROFRAW_FILE} ${PROFDATA_FILE}
