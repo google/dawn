@@ -35,13 +35,13 @@ TEST_F(FoldTrivialSingleUseLetsTest, Single) {
   auto* src = R"(
 fn f() {
   let x = 1;
-  ignore(x);
+  _ = x;
 }
 )";
 
   auto* expect = R"(
 fn f() {
-  ignore(1);
+  _ = 1;
 }
 )";
 
@@ -56,13 +56,13 @@ fn f() {
   let x = 1;
   let y = 2;
   let z = 3;
-  ignore(x + y + z);
+  _ = x + y + z;
 }
 )";
 
   auto* expect = R"(
 fn f() {
-  ignore(((1 + 2) + 3));
+  _ = ((1 + 2) + 3);
 }
 )";
 
@@ -77,13 +77,13 @@ fn f() {
   let x = 1;
   let y = x;
   let z = y;
-  ignore(z);
+  _ = z;
 }
 )";
 
   auto* expect = R"(
 fn f() {
-  ignore(1);
+  _ = 1;
 }
 )";
 
@@ -101,7 +101,7 @@ fn function_with_posssible_side_effect() -> i32 {
 fn f() {
   let x = 1;
   let y = function_with_posssible_side_effect();
-  ignore((x + y));
+  _ = (x + y);
 }
 )";
 
@@ -117,7 +117,7 @@ TEST_F(FoldTrivialSingleUseLetsTest, NoFold_UseInSubBlock) {
 fn f() {
   let x = 1;
   {
-    ignore(x);
+    _ = x;
   }
 }
 )";
@@ -133,7 +133,26 @@ TEST_F(FoldTrivialSingleUseLetsTest, NoFold_MultipleUses) {
   auto* src = R"(
 fn f() {
   let x = 1;
-  ignore((x + x));
+  _ = (x + x);
+}
+)";
+
+  auto* expect = src;
+
+  auto got = Run<FoldTrivialSingleUseLets>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(FoldTrivialSingleUseLetsTest, NoFold_Shadowing) {
+  auto* src = R"(
+fn f() {
+  var y = 1;
+  let x = y;
+  {
+    let y = false;
+    _ = (x + x);
+  }
 }
 )";
 

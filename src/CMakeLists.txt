@@ -338,6 +338,8 @@ set(TINT_LIB_SRCS
   transform/single_entry_point.h
   transform/transform.cc
   transform/transform.h
+  transform/unshadow.cc
+  transform/unshadow.h
   transform/vectorize_scalar_matrix_constructors.cc
   transform/vectorize_scalar_matrix_constructors.h
   transform/vertex_pulling.cc
@@ -969,7 +971,8 @@ if(${TINT_BUILD_TESTS})
       transform/simplify_pointers_test.cc
       transform/single_entry_point_test.cc
       transform/test_helper.h
-      transform/vectorize_scalar_matrix_constructors.cc
+      transform/unshadow_test.cc
+      transform/vectorize_scalar_matrix_constructors_test.cc
       transform/vertex_pulling_test.cc
       transform/wrap_arrays_in_structs_test.cc
       transform/zero_init_workgroup_memory_test.cc

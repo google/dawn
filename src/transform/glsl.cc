@@ -29,6 +29,7 @@
 #include "src/transform/remove_phonies.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/single_entry_point.h"
+#include "src/transform/unshadow.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Glsl);
@@ -45,6 +46,8 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   DataMap data;
 
   auto* cfg = inputs.Get<Config>();
+
+  manager.Add<Unshadow>();
 
   // Attempt to convert `loop`s into for-loops. This is to try and massage the
   // output into something that will not cause FXC to choke or misbehave.

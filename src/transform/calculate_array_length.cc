@@ -25,8 +25,9 @@
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
-#include "src/utils/map.h"
+#include "src/transform/simplify_pointers.h"
 #include "src/utils/hash.h"
+#include "src/utils/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CalculateArrayLength);
 TINT_INSTANTIATE_TYPEINFO(
@@ -72,6 +73,9 @@ CalculateArrayLength::~CalculateArrayLength() = default;
 
 void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   auto& sem = ctx.src->Sem();
+  if (!Requires<SimplifyPointers>(ctx)) {
+    return;
+  }
 
   // get_buffer_size_intrinsic() emits the function decorated with
   // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to

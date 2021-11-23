@@ -55,6 +55,12 @@ struct DependencyGraph {
   /// Map of ast::IdentifierExpression or ast::TypeName to a type, function, or
   /// variable that declares the symbol.
   std::unordered_map<const ast::Node*, const ast::Node*> resolved_symbols;
+
+  /// Map of ast::Variable to a type, function, or variable that is shadowed by
+  /// the variable key. A declaration (X) shadows another (Y) if X and Y use
+  /// the same symbol, and X is declared in a sub-scope of the scope that
+  /// declares Y.
+  std::unordered_map<const ast::Variable*, const ast::Node*> shadows;
 };
 
 }  // namespace resolver

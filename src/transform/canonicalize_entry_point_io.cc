@@ -23,6 +23,7 @@
 #include "src/ast/disable_validation_decoration.h"
 #include "src/program_builder.h"
 #include "src/sem/function.h"
+#include "src/transform/unshadow.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO::Config);
@@ -550,6 +551,10 @@ struct CanonicalizeEntryPointIO::State {
 void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
                                    const DataMap& inputs,
                                    DataMap&) {
+  if (!Requires<Unshadow>(ctx)) {
+    return;
+  }
+
   auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(

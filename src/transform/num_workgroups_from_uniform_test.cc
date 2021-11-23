@@ -18,6 +18,7 @@
 
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/test_helper.h"
+#include "src/transform/unshadow.h"
 
 namespace tint {
 namespace transform {
@@ -35,7 +36,8 @@ TEST_F(NumWorkgroupsFromUniformTest, Error_MissingTransformData) {
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  auto got = Run<CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
+      src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -87,7 +89,8 @@ fn main() {
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
+      src, data);
   EXPECT_EQ(expect, str(got));
 }
 
@@ -133,7 +136,8 @@ fn main() {
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
+      src, data);
   EXPECT_EQ(expect, str(got));
 }
 
@@ -190,7 +194,8 @@ fn main(tint_symbol : tint_symbol_1) {
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
+      src, data);
   EXPECT_EQ(expect, str(got));
 }
 
@@ -291,7 +296,8 @@ fn main3() {
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
+      src, data);
   EXPECT_EQ(expect, str(got));
 }
 
@@ -333,7 +339,8 @@ fn main(tint_symbol : tint_symbol_1) {
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
+      src, data);
   EXPECT_EQ(expect, str(got));
 }
 

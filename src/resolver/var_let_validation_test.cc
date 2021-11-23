@@ -175,10 +175,7 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclaredAsLocal) {
   WrapInFunction(Var(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kNone,
                      Expr(2.0f)));
 
-  EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: redefinition of 'v'\nnote: previous definition is here");
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverVarLetValidationTest, VarRedeclaredInInnerBlock) {
@@ -194,10 +191,7 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInInnerBlock) {
 
   WrapInFunction(outer_body);
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: redefinition of 'v'\nnote: previous definition is here");
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
@@ -219,10 +213,7 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
 
   WrapInFunction(outer_body);
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: redefinition of 'v'\nnote: previous definition is here");
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {

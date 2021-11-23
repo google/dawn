@@ -74,7 +74,6 @@
 #include "src/sem/type_conversion.h"
 #include "src/sem/variable.h"
 #include "src/utils/defer.h"
-#include "src/utils/map.h"
 #include "src/utils/math.h"
 #include "src/utils/reverse.h"
 #include "src/utils/scoped_assignment.h"
@@ -141,6 +140,8 @@ bool Resolver::ResolveInternal() {
   }
 
   AllocateOverridableConstantIds();
+
+  SetShadows();
 
   if (!ValidatePipelineStages()) {
     return false;
@@ -258,14 +259,8 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     if (ty->As<ast::ExternalTexture>()) {
       return builder_->create<sem::ExternalTexture>();
     }
-    if (auto* t = ty->As<ast::TypeName>()) {
-      auto it = named_type_info_.find(t->name);
-      if (it == named_type_info_.end()) {
-        AddError("unknown type '" + builder_->Symbols().NameFor(t->name) + "'",
-                 t->source);
-        return nullptr;
-      }
-      return it->second.sem;
+    if (auto* type = ResolvedSymbol<sem::Type>(ty)) {
+      return type;
     }
     TINT_UNREACHABLE(Resolver, diagnostics_)
         << "Unhandled ast::Type: " << ty->TypeInfo().name;
@@ -423,7 +418,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
     }
     case VariableKind::kLocal: {
       auto* local = builder_->create<sem::LocalVariable>(
-          var, var_ty, storage_class, access,
+          var, var_ty, storage_class, access, current_statement_,
           (rhs && var->is_const) ? rhs->ConstantValue() : sem::Constant{});
       builder_->Sem().Add(var, local);
       return local;
@@ -496,17 +491,23 @@ void Resolver::AllocateOverridableConstantIds() {
   }
 }
 
-bool Resolver::GlobalVariable(const ast::Variable* var) {
-  if (!ValidateNoDuplicateDefinition(var->symbol, var->source,
-                                     /* check_global_scope_only */ true)) {
-    return false;
+void Resolver::SetShadows() {
+  for (auto it : dependencies_.shadows) {
+    auto* var = Sem(it.first);
+    if (auto* local = var->As<sem::LocalVariable>()) {
+      local->SetShadows(Sem(it.second));
+    }
+    if (auto* param = var->As<sem::Parameter>()) {
+      param->SetShadows(Sem(it.second));
+    }
   }
+}  // namespace resolver
 
+bool Resolver::GlobalVariable(const ast::Variable* var) {
   auto* sem = Variable(var, VariableKind::kGlobal);
   if (!sem) {
     return false;
   }
-  variable_stack_.Set(var->symbol, sem);
 
   auto storage_class = sem->StorageClass();
   if (!var->is_const && storage_class == ast::StorageClass::kNone) {
@@ -547,9 +548,6 @@ bool Resolver::GlobalVariable(const ast::Variable* var) {
 }
 
 sem::Function* Resolver::Function(const ast::Function* decl) {
-  variable_stack_.Push();
-  TINT_DEFER(variable_stack_.Pop());
-
   uint32_t parameter_index = 0;
   std::unordered_map<Symbol, Source> parameter_names;
   std::vector<sem::Parameter*> parameters;
@@ -581,7 +579,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
       return nullptr;
     }
 
-    variable_stack_.Set(param->symbol, var);
     parameters.emplace_back(var);
 
     auto* var_ty = const_cast<sem::Type*>(var->Type());
@@ -683,11 +680,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
   if (!ValidateFunction(func)) {
     return nullptr;
   }
-
-  // Register the function information _after_ processing the statements. This
-  // allows us to catch a function calling itself when determining the call
-  // information as this function doesn't exist until it's finished.
-  symbol_to_function_[decl->symbol] = func;
 
   // If this is an entry point, mark all transitively called functions as being
   // used by this entry point.
@@ -1241,22 +1233,28 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   auto* ident = expr->target.name;
   Mark(ident);
 
-  auto it = named_type_info_.find(ident->symbol);
-  if (it != named_type_info_.end()) {
-    // We have a type.
-    return type_ctor_or_conv(it->second.sem);
+  auto* resolved = ResolvedSymbol(ident);
+  if (auto* ty = As<sem::Type>(resolved)) {
+    return type_ctor_or_conv(ty);
   }
 
-  // Not a type, treat as a intrinsic / function call.
+  if (auto* fn = As<sem::Function>(resolved)) {
+    return FunctionCall(expr, fn, std::move(args));
+  }
+
   auto name = builder_->Symbols().NameFor(ident->symbol);
   auto intrinsic_type = sem::ParseIntrinsicType(name);
-  auto* call = (intrinsic_type != sem::IntrinsicType::kNone)
-                   ? IntrinsicCall(expr, intrinsic_type, std::move(args),
-                                   std::move(arg_tys))
-                   : FunctionCall(expr, std::move(args));
+  if (intrinsic_type != sem::IntrinsicType::kNone) {
+    return IntrinsicCall(expr, intrinsic_type, std::move(args),
+                         std::move(arg_tys));
+  }
 
-  current_function_->AddDirectCall(call);
-  return call;
+  TINT_ICE(Resolver, diagnostics_)
+      << expr->source << " unresolved CallExpression target:\n"
+      << "resolved: " << (resolved ? resolved->TypeInfo().name : "<null>")
+      << "\n"
+      << "name: " << builder_->Symbols().NameFor(ident->symbol);
+  return nullptr;
 }
 
 sem::Call* Resolver::IntrinsicCall(
@@ -1288,37 +1286,27 @@ sem::Call* Resolver::IntrinsicCall(
     return nullptr;
   }
 
+  current_function_->AddDirectCall(call);
+
   return call;
 }
 
 sem::Call* Resolver::FunctionCall(
     const ast::CallExpression* expr,
+    sem::Function* target,
     const std::vector<const sem::Expression*> args) {
   auto sym = expr->target.name->symbol;
   auto name = builder_->Symbols().NameFor(sym);
 
-  auto target_it = symbol_to_function_.find(sym);
-  if (target_it == symbol_to_function_.end()) {
-    if (current_function_ && current_function_->Declaration()->symbol == sym) {
-      AddError("recursion is not permitted. '" + name +
-                   "' attempted to call itself.",
-               expr->source);
-    } else {
-      AddError("unable to find called function: " + name, expr->source);
-    }
-    return nullptr;
-  }
-  auto* target = target_it->second;
   auto* call = builder_->create<sem::Call>(expr, target, std::move(args),
                                            current_statement_, sem::Constant{});
 
   if (current_function_) {
-    target->AddCallSite(call);
-
     // Note: Requires called functions to be resolved first.
     // This is currently guaranteed as functions must be declared before
     // use.
     current_function_->AddTransitivelyCalledFunction(target);
+    current_function_->AddDirectCall(call);
     for (auto* transitive_call : target->TransitivelyCalledFunctions()) {
       current_function_->AddTransitivelyCalledFunction(transitive_call);
     }
@@ -1328,6 +1316,8 @@ sem::Call* Resolver::FunctionCall(
       current_function_->AddTransitivelyReferencedGlobal(var);
     }
   }
+
+  target->AddCallSite(call);
 
   if (!ValidateFunctionCall(call)) {
     return nullptr;
@@ -1476,7 +1466,8 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
 
 sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
   auto symbol = expr->symbol;
-  if (auto* var = variable_stack_.Get(symbol)) {
+  auto* resolved = ResolvedSymbol(expr);
+  if (auto* var = As<sem::Variable>(resolved)) {
     auto* user =
         builder_->create<sem::VariableUser>(expr, current_statement_, var);
 
@@ -1526,18 +1517,26 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     return user;
   }
 
-  if (symbol_to_function_.count(symbol)) {
+  if (Is<sem::Function>(resolved)) {
     AddError("missing '(' for function call", expr->source.End());
     return nullptr;
   }
 
-  std::string name = builder_->Symbols().NameFor(symbol);
-  if (sem::ParseIntrinsicType(name) != sem::IntrinsicType::kNone) {
+  if (IsIntrinsic(symbol)) {
     AddError("missing '(' for intrinsic call", expr->source.End());
     return nullptr;
   }
 
-  AddError("unknown identifier: '" + name + "'", expr->source);
+  if (resolved->Is<sem::Type>()) {
+    AddError("missing '(' for type constructor or cast", expr->source.End());
+    return nullptr;
+  }
+
+  TINT_ICE(Resolver, diagnostics_)
+      << expr->source << " unresolved identifier:\n"
+      << "resolved: " << (resolved ? resolved->TypeInfo().name : "<null>")
+      << "\n"
+      << "name: " << builder_->Symbols().NameFor(symbol);
   return nullptr;
 }
 
@@ -1934,11 +1933,6 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   Mark(stmt->variable);
 
-  if (!ValidateNoDuplicateDefinition(stmt->variable->symbol,
-                                     stmt->variable->source)) {
-    return false;
-  }
-
   auto* var = Variable(stmt->variable, VariableKind::kLocal);
   if (!var) {
     return false;
@@ -1952,7 +1946,6 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     }
   }
 
-  variable_stack_.Set(stmt->variable->symbol, var);
   if (current_block_) {  // Not all statements are inside a block
     current_block_->AddDecl(stmt->variable);
   }
@@ -1975,12 +1968,6 @@ sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
   }
 
   if (!result) {
-    return nullptr;
-  }
-
-  named_type_info_.emplace(named_type->name, TypeDeclInfo{named_type, result});
-
-  if (!ValidateTypeDecl(named_type)) {
     return nullptr;
   }
 
@@ -2081,7 +2068,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 
     if (auto* ident = count_expr->As<ast::IdentifierExpression>()) {
       // Make sure the identifier is a non-overridable module-scope constant.
-      auto* var = variable_stack_.Get(ident->symbol);
+      auto* var = ResolvedSymbol<sem::Variable>(ident);
       if (!var || !var->Is<sem::GlobalVariable>() ||
           !var->Declaration()->is_const) {
         AddError("array size identifier must be a module-scope constant",
@@ -2244,13 +2231,11 @@ bool Resolver::Scope(sem::CompoundStatement* stmt, F&& callback) {
   current_statement_ = stmt;
   current_compound_statement_ = stmt;
   current_block_ = stmt->As<sem::BlockStatement>();
-  variable_stack_.Push();
 
   TINT_DEFER({
     current_block_ = prev_current_block;
     current_compound_statement_ = prev_current_compound_statement;
     current_statement_ = prev_current_statement;
-    variable_stack_.Pop();
   });
 
   return callback();
@@ -2328,6 +2313,11 @@ bool Resolver::IsHostShareable(const sem::Type* type) const {
     return IsHostShareable(atomic->Type());
   }
   return false;
+}
+
+bool Resolver::IsIntrinsic(Symbol symbol) const {
+  std::string name = builder_->Symbols().NameFor(symbol);
+  return sem::ParseIntrinsicType(name) != sem::IntrinsicType::kNone;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

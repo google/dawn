@@ -14,11 +14,8 @@
 
 #include "src/transform/simplify_pointers.h"
 
-#include <memory>
-#include <utility>
-#include <vector>
-
 #include "src/transform/test_helper.h"
+#include "src/transform/unshadow.h"
 
 namespace tint {
 namespace transform {
@@ -26,11 +23,23 @@ namespace {
 
 using SimplifyPointersTest = TransformTest;
 
+TEST_F(SimplifyPointersTest, Error_MissingSimplifyPointers) {
+  auto* src = "";
+
+  auto* expect =
+      "error: tint::transform::SimplifyPointers depends on "
+      "tint::transform::Unshadow but the dependency was not run";
+
+  auto got = Run<SimplifyPointers>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SimplifyPointersTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -51,7 +60,7 @@ fn f() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -79,7 +88,7 @@ fn f() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -103,7 +112,7 @@ fn f() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -126,7 +135,7 @@ fn f() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -180,7 +189,7 @@ fn matrix() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -201,7 +210,7 @@ fn f() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -229,7 +238,7 @@ fn f() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -264,7 +273,7 @@ fn main() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -330,34 +339,42 @@ fn f() {
 }
 )";
 
-  auto got = Run<SimplifyPointers>(src);
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-// TODO(crbug.com/tint/819): Enable when we support inter-scope shadowing.
-TEST_F(SimplifyPointersTest, DISABLED_ModificationAfterInline) {
+TEST_F(SimplifyPointersTest, ShadowPointer) {
   auto* src = R"(
-fn x(p : ptr<function, i32>) -> i32 {
-  return *p;
-}
+var<private> a : array<i32, 2>;
 
-fn f() {
-  var i : i32 = 1;
-  let p : ptr<function, i32> = &i;
-  if (true) {
-    var i : i32 = 2;
-    x(p);
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  let x = &a;
+  var a : i32 = (*x)[0];
+  {
+    var a : i32 = (*x)[1];
   }
 }
 )";
 
-  auto* expect = R"(<TODO>)";
+  auto* expect = R"(
+var<private> a : array<i32, 2>;
 
-  auto got = Run<SimplifyPointers>(src);
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var a_1 : i32 = a[0];
+  {
+    var a_2 : i32 = a[1];
+  }
+}
+)";
+
+  auto got = Run<Unshadow, SimplifyPointers>(src);
 
   EXPECT_EQ(expect, str(got));
 }
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

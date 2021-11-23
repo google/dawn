@@ -32,6 +32,7 @@
 #include "src/sem/constant.h"
 #include "src/sem/function.h"
 #include "src/sem/struct.h"
+#include "src/utils/map.h"
 #include "src/utils/unique_vector.h"
 
 namespace tint {
@@ -176,6 +177,7 @@ class Resolver {
   sem::Expression* Expression(const ast::Expression*);
   sem::Function* Function(const ast::Function*);
   sem::Call* FunctionCall(const ast::CallExpression*,
+                          sem::Function* target,
                           const std::vector<const sem::Expression*> args);
   sem::Expression* Identifier(const ast::IdentifierExpression*);
   sem::Call* IntrinsicCall(const ast::CallExpression*,
@@ -239,9 +241,6 @@ class Resolver {
   bool ValidateMatrix(const sem::Matrix* ty, const Source& source);
   bool ValidateFunctionParameter(const ast::Function* func,
                                  const sem::Variable* var);
-  bool ValidateNoDuplicateDefinition(Symbol sym,
-                                     const Source& source,
-                                     bool check_global_scope_only = false);
   bool ValidateParameter(const ast::Function* func, const sem::Variable* var);
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateStatements(const ast::StatementList& stmts);
@@ -264,7 +263,6 @@ class Resolver {
                                        const sem::Type* type);
   bool ValidateArrayConstructorOrCast(const ast::CallExpression* ctor,
                                       const sem::Array* arr_type);
-  bool ValidateTypeDecl(const ast::TypeDecl* named_type) const;
   bool ValidateTextureIntrinsicFunction(const sem::Call* call);
   bool ValidateNoDuplicateDecorations(const ast::DecorationList& decorations);
   // sem::Struct is assumed to have at least one member
@@ -343,6 +341,10 @@ class Resolver {
   /// Allocate constant IDs for pipeline-overridable constants.
   void AllocateOverridableConstantIds();
 
+  /// Set the shadowing information on variable declarations.
+  /// @note this method must only be called after all semantic nodes are built.
+  void SetShadows();
+
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
   sem::Type* TypeOf(const ast::Expression* expr);
@@ -410,14 +412,28 @@ class Resolver {
   template <typename SEM = sem::Info::InferFromAST,
             typename AST_OR_TYPE = CastableBase>
   auto* Sem(const AST_OR_TYPE* ast) {
-    auto* sem = builder_->Sem().Get<SEM>(ast);
+    using T = sem::Info::GetResultType<SEM, AST_OR_TYPE>;
+    auto* sem = builder_->Sem().Get(ast);
     if (!sem) {
       TINT_ICE(Resolver, diagnostics_)
           << "AST node '" << ast->TypeInfo().name << "' had no semantic info\n"
           << "At: " << ast->source << "\n"
           << "Pointer: " << ast;
     }
-    return sem;
+    return const_cast<T*>(As<T>(sem));
+  }
+
+  /// @returns true if the symbol is the name of an intrinsic (builtin)
+  /// function.
+  bool IsIntrinsic(Symbol) const;
+
+  /// @returns the resolved symbol (function, type or variable) for the given
+  /// ast::Identifier or ast::TypeName cast to the given semantic type.
+  template <typename SEM = sem::Node>
+  SEM* ResolvedSymbol(const ast::Node* node) {
+    auto* resolved = utils::Lookup(dependencies_.resolved_symbols, node);
+    return resolved ? const_cast<SEM*>(builder_->Sem().Get<SEM>(resolved))
+                    : nullptr;
   }
 
   struct TypeConversionSig {
@@ -456,12 +472,8 @@ class Resolver {
   diag::List& diagnostics_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
   DependencyGraph dependencies_;
-  ScopeStack<sem::Variable*> variable_stack_;
-  std::unordered_map<Symbol, sem::Function*> symbol_to_function_;
   std::vector<sem::Function*> entry_points_;
   std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;
-  std::unordered_map<Symbol, TypeDeclInfo> named_type_info_;
-
   std::unordered_set<const ast::Node*> marked_;
   std::unordered_map<uint32_t, const sem::Variable*> constant_ids_;
   std::unordered_map<TypeConversionSig,

@@ -47,6 +47,7 @@
 #include "src/transform/for_loop_to_loop.h"
 #include "src/transform/manager.h"
 #include "src/transform/simplify_pointers.h"
+#include "src/transform/unshadow.h"
 #include "src/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
@@ -266,6 +267,7 @@ SanitizedResult Sanitize(const Program* in,
   transform::Manager manager;
   transform::DataMap data;
 
+  manager.Add<transform::Unshadow>();
   if (!disable_workgroup_init) {
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }

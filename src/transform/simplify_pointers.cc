@@ -24,6 +24,7 @@
 #include "src/sem/function.h"
 #include "src/sem/statement.h"
 #include "src/sem/variable.h"
+#include "src/transform/unshadow.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::SimplifyPointers);
 
@@ -231,6 +232,9 @@ SimplifyPointers::SimplifyPointers() = default;
 SimplifyPointers::~SimplifyPointers() = default;
 
 void SimplifyPointers::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+  if (!Requires<Unshadow>(ctx)) {
+    return;
+  }
   State(ctx).Run();
 }
 

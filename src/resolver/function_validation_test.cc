@@ -26,25 +26,46 @@ namespace {
 class ResolverFunctionValidationTest : public resolver::TestHelper,
                                        public testing::Test {};
 
-TEST_F(ResolverFunctionValidationTest, ParameterNamesMustBeUnique_pass) {
+TEST_F(ResolverFunctionValidationTest, DuplicateParameterName) {
   // fn func_a(common_name : f32) { }
   // fn func_b(common_name : f32) { }
   Func("func_a", {Param("common_name", ty.f32())}, ty.void_(), {});
   Func("func_b", {Param("common_name", ty.f32())}, ty.void_(), {});
 
-  EXPECT_TRUE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "");
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverFunctionValidationTest,
-       ParameterNamesMustBeUniqueShadowsGlobal_pass) {
+TEST_F(ResolverFunctionValidationTest, ParameterMayShadowGlobal) {
   // var<private> common_name : f32;
   // fn func(common_name : f32) { }
   Global("common_name", ty.f32(), ast::StorageClass::kPrivate);
   Func("func", {Param("common_name", ty.f32())}, ty.void_(), {});
 
-  EXPECT_TRUE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "");
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest, LocalConflictsWithParameter) {
+  // fn func(common_name : f32) {
+  //   let common_name = 1;
+  // }
+  Func("func", {Param(Source{{12, 34}}, "common_name", ty.f32())}, ty.void_(),
+       {Decl(Const(Source{{56, 78}}, "common_name", nullptr, Expr(1)))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), R"(56:78 error: redeclaration of 'common_name'
+12:34 note: 'common_name' previously declared here)");
+}
+
+TEST_F(ResolverFunctionValidationTest, NestedLocalMayShadowParameter) {
+  // fn func(common_name : f32) {
+  //   {
+  //     let common_name = 1;
+  //   }
+  // }
+  Func("func", {Param(Source{{12, 34}}, "common_name", ty.f32())}, ty.void_(),
+       {Block(Decl(Const(Source{{56, 78}}, "common_name", nullptr, Expr(1))))});
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -57,7 +78,7 @@ TEST_F(ResolverFunctionValidationTest,
            Decl(var),
        });
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionUsingSameVariableName_Pass) {
@@ -74,7 +95,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionUsingSameVariableName_Pass) {
        },
        ast::DecorationList{});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -95,7 +116,7 @@ TEST_F(ResolverFunctionValidationTest,
        },
        ast::DecorationList{});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, UnreachableCode_return) {
@@ -189,7 +210,7 @@ TEST_F(ResolverFunctionValidationTest,
   Func(Source{{12, 34}}, "func", ast::VariableList{}, ty.void_(),
        ast::StatementList{});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -213,7 +234,7 @@ TEST_F(ResolverFunctionValidationTest,
            Return(),
        });
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -269,7 +290,7 @@ TEST_F(ResolverFunctionValidationTest,
        },
        ast::DecorationList{});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -298,7 +319,7 @@ TEST_F(ResolverFunctionValidationTest,
        },
        ast::DecorationList{});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -362,7 +383,7 @@ TEST_F(ResolverFunctionValidationTest, NoPipelineEntryPoints) {
        },
        ast::DecorationList{});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
@@ -376,7 +397,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
        ast::DecorationList{});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
@@ -390,7 +411,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
        ast::DecorationList{});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
@@ -414,7 +435,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
        {Stage(ast::PipelineStage::kCompute),
         WorkgroupSize(Expr("x"), Expr("y"), Expr(16u))});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32) {
@@ -425,7 +446,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32) {
        {Stage(ast::PipelineStage::kCompute),
         WorkgroupSize(Source{{12, 34}}, Expr(1u), Expr(2u), Expr(3u))});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchTypeU32) {
@@ -696,7 +717,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {
   auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
   Func("f", ast::VariableList{bar}, ty.void_(), {});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, ParametersAtLimit) {
@@ -706,7 +727,7 @@ TEST_F(ResolverFunctionValidationTest, ParametersAtLimit) {
   }
   Func(Source{{12, 34}}, "f", params, ty.void_(), {});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest, ParametersOverLimit) {
@@ -736,7 +757,7 @@ TEST_P(ResolverFunctionParameterValidationTest, StorageClass) {
   Func("f", ast::VariableList{arg}, ty.void_(), {});
 
   if (param.should_pass) {
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
   } else {
     std::stringstream ss;
     ss << param.storage_class;

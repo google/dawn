@@ -88,6 +88,17 @@ static constexpr SymbolDeclKind kValueDeclKinds[] = {
     SymbolDeclKind::NestedLocalLet,
 };
 
+static constexpr SymbolDeclKind kGlobalDeclKinds[] = {
+    SymbolDeclKind::GlobalVar, SymbolDeclKind::GlobalLet, SymbolDeclKind::Alias,
+    SymbolDeclKind::Struct,    SymbolDeclKind::Function,
+};
+
+static constexpr SymbolDeclKind kLocalDeclKinds[] = {
+    SymbolDeclKind::Parameter,      SymbolDeclKind::LocalVar,
+    SymbolDeclKind::LocalLet,       SymbolDeclKind::NestedLocalVar,
+    SymbolDeclKind::NestedLocalLet,
+};
+
 static constexpr SymbolDeclKind kGlobalValueDeclKinds[] = {
     SymbolDeclKind::GlobalVar,
     SymbolDeclKind::GlobalLet,
@@ -1170,6 +1181,53 @@ INSTANTIATE_TEST_SUITE_P(Functions,
                                           testing::ValuesIn(kFuncUseKinds)));
 
 }  // namespace resolved_symbols
+
+////////////////////////////////////////////////////////////////////////////////
+// Shadowing tests
+////////////////////////////////////////////////////////////////////////////////
+namespace shadowing {
+
+using ResolverDependencyShadowTest = ResolverDependencyGraphTestWithParam<
+    std::tuple<SymbolDeclKind, SymbolDeclKind>>;
+
+TEST_P(ResolverDependencyShadowTest, Test) {
+  const Symbol symbol = Sym("SYMBOL");
+  const auto outer_kind = std::get<0>(GetParam());
+  const auto inner_kind = std::get<1>(GetParam());
+
+  // Build a symbol declaration and a use of that symbol
+  SymbolTestHelper helper(this);
+  auto* outer = helper.Add(outer_kind, symbol, Source{{12, 34}});
+  helper.Add(inner_kind, symbol, Source{{56, 78}});
+  auto* inner_var = helper.nested_statements.size()
+                        ? helper.nested_statements[0]
+                              ->As<ast::VariableDeclStatement>()
+                              ->variable
+                        : helper.statements.size()
+                              ? helper.statements[0]
+                                    ->As<ast::VariableDeclStatement>()
+                                    ->variable
+                              : helper.parameters[0];
+  helper.Build();
+
+  EXPECT_EQ(Build().shadows[inner_var], outer);
+}
+
+INSTANTIATE_TEST_SUITE_P(LocalShadowGlobal,
+                         ResolverDependencyShadowTest,
+                         testing::Combine(testing::ValuesIn(kGlobalDeclKinds),
+                                          testing::ValuesIn(kLocalDeclKinds)));
+
+INSTANTIATE_TEST_SUITE_P(
+    NestedLocalShadowLocal,
+    ResolverDependencyShadowTest,
+    testing::Combine(testing::Values(SymbolDeclKind::Parameter,
+                                     SymbolDeclKind::LocalVar,
+                                     SymbolDeclKind::LocalLet),
+                     testing::Values(SymbolDeclKind::NestedLocalVar,
+                                     SymbolDeclKind::NestedLocalLet)));
+
+}  // namespace shadowing
 
 ////////////////////////////////////////////////////////////////////////////////
 // AST traversal tests

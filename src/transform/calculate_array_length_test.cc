@@ -14,13 +14,27 @@
 
 #include "src/transform/calculate_array_length.h"
 
+#include "src/transform/simplify_pointers.h"
 #include "src/transform/test_helper.h"
+#include "src/transform/unshadow.h"
 
 namespace tint {
 namespace transform {
 namespace {
 
 using CalculateArrayLengthTest = TransformTest;
+
+TEST_F(CalculateArrayLengthTest, Error_MissingCalculateArrayLength) {
+  auto* src = "";
+
+  auto* expect =
+      "error: tint::transform::CalculateArrayLength depends on "
+      "tint::transform::SimplifyPointers but the dependency was not run";
+
+  auto got = Run<CalculateArrayLength>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
 
 TEST_F(CalculateArrayLengthTest, Basic) {
   auto* src = R"(
@@ -59,7 +73,7 @@ fn main() {
 }
 )";
 
-  auto got = Run<CalculateArrayLength>(src);
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -105,7 +119,7 @@ fn main() {
 }
 )";
 
-  auto got = Run<CalculateArrayLength>(src);
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -149,7 +163,7 @@ fn main() {
 }
 )";
 
-  auto got = Run<CalculateArrayLength>(src);
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -206,7 +220,7 @@ fn main() {
 }
 )";
 
-  auto got = Run<CalculateArrayLength>(src);
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -274,7 +288,63 @@ fn main() {
 }
 )";
 
-  auto got = Run<CalculateArrayLength>(src);
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CalculateArrayLengthTest, Shadowing) {
+  auto* src = R"(
+[[block]]
+struct SB {
+  x : i32;
+  arr : array<i32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> a : SB;
+[[group(0), binding(1)]] var<storage, read> b : SB;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  let x = &a;
+  var a : u32 = arrayLength(&a.arr);
+  {
+    var b : u32 = arrayLength(&((*x).arr));
+  }
+}
+)";
+
+  auto* expect =
+      R"(
+[[block]]
+struct SB {
+  x : i32;
+  arr : array<i32>;
+};
+
+[[internal(intrinsic_buffer_size)]]
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, result : ptr<function, u32>)
+
+[[group(0), binding(0)]] var<storage, read> a : SB;
+
+[[group(0), binding(1)]] var<storage, read> b : SB;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(a, &(tint_symbol_1));
+  let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
+  var a_1 : u32 = tint_symbol_2;
+  {
+    var tint_symbol_3 : u32 = 0u;
+    tint_symbol(a, &(tint_symbol_3));
+    let tint_symbol_4 : u32 = ((tint_symbol_3 - 4u) / 4u);
+    var b_1 : u32 = tint_symbol_4;
+  }
+}
+)";
+
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
   EXPECT_EQ(expect, str(got));
 }

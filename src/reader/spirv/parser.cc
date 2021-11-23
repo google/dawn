@@ -20,6 +20,7 @@
 #include "src/transform/decompose_strided_matrix.h"
 #include "src/transform/manager.h"
 #include "src/transform/simplify_pointers.h"
+#include "src/transform/unshadow.h"
 
 namespace tint {
 namespace reader {
@@ -52,6 +53,7 @@ Program Parse(const std::vector<uint32_t>& input) {
   // attribute then we need to decompose these into an array of vectors
   if (transform::DecomposeStridedMatrix::ShouldRun(&program)) {
     transform::Manager manager;
+    manager.Add<transform::Unshadow>();
     manager.Add<transform::SimplifyPointers>();
     manager.Add<transform::DecomposeStridedMatrix>();
     return manager.Run(&program).program;

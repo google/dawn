@@ -177,6 +177,9 @@ class DependencyScanner {
     TINT_DEFER(scope_stack_.Pop());
 
     for (auto* param : func->params) {
+      if (auto* shadows = scope_stack_.Get(param->symbol)) {
+        graph_.shadows.emplace(param, shadows);
+      }
       Declare(param->symbol, param);
       TraverseType(param->type);
     }
@@ -255,6 +258,9 @@ class DependencyScanner {
       return;
     }
     if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
+      if (auto* shadows = scope_stack_.Get(v->variable->symbol)) {
+        graph_.shadows.emplace(v->variable, shadows);
+      }
       TraverseType(v->variable->type);
       TraverseExpression(v->variable->constructor);
       Declare(v->variable->symbol, v->variable);

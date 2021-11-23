@@ -7,5 +7,5 @@ void f() {
   int i = 0;
   int j = 0;
   float2x2 m = float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f));
-  const float f = m[i][j];
+  const float f_1 = m[i][j];
 }

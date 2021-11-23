@@ -66,6 +66,7 @@
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/remove_phonies.h"
 #include "src/transform/simplify_pointers.h"
+#include "src/transform/unshadow.h"
 #include "src/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/transform/wrap_arrays_in_structs.h"
 #include "src/transform/zero_init_workgroup_memory.h"
@@ -151,6 +152,8 @@ SanitizedResult Sanitize(
   auto entry_point_io_cfg = transform::CanonicalizeEntryPointIO::Config(
       transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, fixed_sample_mask,
       emit_vertex_point_size);
+
+  manager.Add<transform::Unshadow>();
 
   if (!disable_workgroup_init) {
     // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as

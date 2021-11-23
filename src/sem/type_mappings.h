@@ -25,6 +25,7 @@ class CallExpression;
 class Expression;
 class Function;
 class MemberAccessorExpression;
+class Node;
 class Statement;
 class Struct;
 class StructMember;
@@ -56,11 +57,12 @@ struct TypeMappings {
   Expression* operator()(ast::Expression*);
   Function* operator()(ast::Function*);
   MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
+  Node* operator()(ast::Node*);
   Statement* operator()(ast::Statement*);
+  Struct* operator()(ast::Struct*);
   StructMember* operator()(ast::StructMember*);
   Type* operator()(ast::Type*);
   Type* operator()(ast::TypeDecl*);
-  Struct* operator()(ast::Struct*);
   Variable* operator()(ast::Variable*);
   //! @endcond
 };

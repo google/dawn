@@ -150,23 +150,26 @@ TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
 
 TEST_F(ResolverValidationTest, Expr_DontCall_Function) {
   Func("func", {}, ty.void_(), {}, {});
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
-      Symbols().Register("func"));
-  WrapInFunction(ident);
+  WrapInFunction(Expr(Source{{{3, 3}, {3, 8}}}, "func"));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "3:8 error: missing '(' for function call");
 }
 
 TEST_F(ResolverValidationTest, Expr_DontCall_Intrinsic) {
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
-      Symbols().Register("round"));
-  WrapInFunction(ident);
+  WrapInFunction(Expr(Source{{{3, 3}, {3, 8}}}, "round"));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "3:8 error: missing '(' for intrinsic call");
+}
+
+TEST_F(ResolverValidationTest, Expr_DontCall_Type) {
+  Alias("T", ty.u32());
+  WrapInFunction(Expr(Source{{{3, 3}, {3, 8}}}, "T"));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "3:8 error: missing '(' for type constructor or cast");
 }
 
 TEST_F(ResolverValidationTest,
@@ -220,7 +223,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        {
-           Assign(Expr(Source{Source::Location{12, 34}}, "global_var"), 3.14f),
+           Assign(Expr(Source{{12, 34}}, "global_var"), 3.14f),
            Return(),
        });
 
@@ -237,7 +240,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
   auto* cond = Expr(true);
   auto* body = Block(Decl(var));
 
-  SetSource(Source{Source::Location{12, 34}});
+  SetSource(Source{{12, 34}});
   auto* lhs = Expr(Source{{12, 34}}, "a");
   auto* rhs = Expr(3.14f);
 
@@ -350,9 +353,7 @@ TEST_F(ResolverValidationTest, StorageClass_TextureExplicitStorageClass) {
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
-      Symbols().Register("xyqz"));
+  auto* ident = Expr(Source{{{3, 3}, {3, 7}}}, "xyqz");
 
   auto* mem = MemberAccessor("my_vec", ident);
   WrapInFunction(mem);
@@ -364,9 +365,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
   Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
-      Symbols().Register("rgyw"));
+  auto* ident = Expr(Source{{{3, 3}, {3, 7}}}, "rgyw");
 
   auto* mem = MemberAccessor("my_vec", ident);
   WrapInFunction(mem);
@@ -380,9 +379,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
-      Symbols().Register("zzzzz"));
+  auto* ident = Expr(Source{{{3, 3}, {3, 8}}}, "zzzzz");
   auto* mem = MemberAccessor("my_vec", ident);
   WrapInFunction(mem);
 
@@ -393,8 +390,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
   Global("my_vec", ty.vec2<f32>(), ast::StorageClass::kPrivate);
 
-  auto* ident = create<ast::IdentifierExpression>(Source{{3, 3}},
-                                                  Symbols().Register("z"));
+  auto* ident = Expr(Source{{3, 3}}, "z");
   auto* mem = MemberAccessor("my_vec", ident);
   WrapInFunction(mem);
 
@@ -406,9 +402,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_BadParent) {
   // var param: vec4<f32>
   // let ret: f32 = *(&param).x;
   auto* param = Var("param", ty.vec4<f32>());
-  auto* x = create<ast::IdentifierExpression>(
-      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
-      Symbols().Register("x"));
+  auto* x = Expr(Source{{{3, 3}, {3, 8}}}, "x");
 
   auto* addressOf_expr = AddressOf(Source{{12, 34}}, param);
   auto* accessor_expr = MemberAccessor(addressOf_expr, x);
@@ -430,9 +424,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
   auto* p =
       Param("p", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction));
   auto* star_p = Deref(p);
-  auto* z = create<ast::IdentifierExpression>(
-      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
-      Symbols().Register("z"));
+  auto* z = Expr(Source{{{3, 3}, {3, 8}}}, "z");
   auto* accessor_expr = MemberAccessor(star_p, z);
   auto* x = Var("x", ty.f32(), accessor_expr);
   Func("func", {p}, ty.f32(), {Decl(x), Return(x)});
@@ -446,9 +438,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
   // }
   auto* p =
       Param("p", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction));
-  auto* z = create<ast::IdentifierExpression>(
-      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
-      Symbols().Register("z"));
+  auto* z = Expr(Source{{{3, 3}, {3, 8}}}, "z");
   auto* accessor_expr = MemberAccessor(p, z);
   auto* star_p = Deref(accessor_expr);
   auto* x = Var("x", ty.f32(), star_p);
@@ -473,7 +463,7 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto error_loc = Source{Source::Location{12, 34}};
+  auto error_loc = Source{{12, 34}};
   auto* body =
       Block(create<ast::ContinueStatement>(),
             Decl(error_loc, Var("z", ty.i32(), ast::StorageClass::kNone)),
@@ -524,9 +514,9 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto cont_loc = Source{Source::Location{12, 34}};
-  auto decl_loc = Source{Source::Location{56, 78}};
-  auto ref_loc = Source{Source::Location{90, 12}};
+  auto cont_loc = Source{{12, 34}};
+  auto decl_loc = Source{{56, 78}};
+  auto ref_loc = Source{{90, 12}};
   auto* body =
       Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
             Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
@@ -556,9 +546,9 @@ TEST_F(
   //     }
   // }
 
-  auto cont_loc = Source{Source::Location{12, 34}};
-  auto decl_loc = Source{Source::Location{56, 78}};
-  auto ref_loc = Source{Source::Location{90, 12}};
+  auto cont_loc = Source{{12, 34}};
+  auto decl_loc = Source{{56, 78}};
+  auto ref_loc = Source{{90, 12}};
   auto* body =
       Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
             Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
@@ -590,9 +580,9 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto cont_loc = Source{Source::Location{12, 34}};
-  auto decl_loc = Source{Source::Location{56, 78}};
-  auto ref_loc = Source{Source::Location{90, 12}};
+  auto cont_loc = Source{{12, 34}};
+  auto decl_loc = Source{{56, 78}};
+  auto ref_loc = Source{{90, 12}};
   auto* body =
       Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
             Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
@@ -623,9 +613,9 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto cont_loc = Source{Source::Location{12, 34}};
-  auto decl_loc = Source{Source::Location{56, 78}};
-  auto ref_loc = Source{Source::Location{90, 12}};
+  auto cont_loc = Source{{12, 34}};
+  auto decl_loc = Source{{56, 78}};
+  auto ref_loc = Source{{90, 12}};
   auto* body =
       Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
             Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
@@ -724,7 +714,7 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
   //     }
   // }
 
-  auto error_loc = Source{Source::Location{12, 34}};
+  auto error_loc = Source{{12, 34}};
   auto* body = Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
                      create<ast::ContinueStatement>());
   auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));

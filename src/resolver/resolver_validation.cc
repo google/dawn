@@ -942,11 +942,6 @@ bool Resolver::ValidateInterpolateDecoration(
 
 bool Resolver::ValidateFunction(const sem::Function* func) {
   auto* decl = func->Declaration();
-  if (!ValidateNoDuplicateDefinition(decl->symbol, decl->source,
-                                     /* check_global_scope_only */ true)) {
-    return false;
-  }
-
   auto workgroup_deco_count = 0;
   for (auto* deco : decl->decorations) {
     if (deco->Is<ast::WorkgroupDecoration>()) {
@@ -1444,7 +1439,7 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) {
     if (param_type->Is<sem::Pointer>()) {
       auto is_valid = false;
       if (auto* ident_expr = arg_expr->As<ast::IdentifierExpression>()) {
-        auto* var = variable_stack_.Get(ident_expr->symbol);
+        auto* var = ResolvedSymbol<sem::Variable>(ident_expr);
         if (!var) {
           TINT_ICE(Resolver, diagnostics_) << "failed to resolve identifier";
           return false;
@@ -1456,7 +1451,7 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) {
         if (unary->op == ast::UnaryOp::kAddressOf) {
           if (auto* ident_unary =
                   unary->expr->As<ast::IdentifierExpression>()) {
-            auto* var = variable_stack_.Get(ident_unary->symbol);
+            auto* var = ResolvedSymbol<sem::Variable>(ident_unary);
             if (!var) {
               TINT_ICE(Resolver, diagnostics_)
                   << "failed to resolve identifier";
@@ -1752,23 +1747,6 @@ bool Resolver::ValidateScalarConstructorOrCast(const ast::CallExpression* ctor,
     return false;
   }
 
-  return true;
-}
-
-bool Resolver::ValidateTypeDecl(const ast::TypeDecl* named_type) const {
-  auto iter = named_type_info_.find(named_type->name);
-  if (iter == named_type_info_.end()) {
-    TINT_ICE(Resolver, diagnostics_)
-        << "ValidateTypeDecl called() before TypeDecl()";
-  }
-  if (iter->second.ast != named_type) {
-    AddError("type with the name '" +
-                 builder_->Symbols().NameFor(named_type->name) +
-                 "' was already declared",
-             named_type->source);
-    AddNote("first declared here", iter->second.ast->source);
-    return false;
-  }
   return true;
 }
 
@@ -2338,22 +2316,21 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
   auto const* lhs_ty = TypeOf(a->lhs);
 
-  if (auto* ident = a->lhs->As<ast::IdentifierExpression>()) {
-    if (auto* var = variable_stack_.Get(ident->symbol)) {
-      if (var->Is<sem::Parameter>()) {
-        AddError("cannot assign to function parameter", a->lhs->source);
-        AddNote("'" + builder_->Symbols().NameFor(ident->symbol) +
-                    "' is declared here:",
-                var->Declaration()->source);
-        return false;
-      }
-      if (var->Declaration()->is_const) {
-        AddError("cannot assign to const", a->lhs->source);
-        AddNote("'" + builder_->Symbols().NameFor(ident->symbol) +
-                    "' is declared here:",
-                var->Declaration()->source);
-        return false;
-      }
+  if (auto* var = ResolvedSymbol<sem::Variable>(a->lhs)) {
+    auto* decl = var->Declaration();
+    if (var->Is<sem::Parameter>()) {
+      AddError("cannot assign to function parameter", a->lhs->source);
+      AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
+                  "' is declared here:",
+              decl->source);
+      return false;
+    }
+    if (decl->is_const) {
+      AddError("cannot assign to const", a->lhs->source);
+      AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
+                  "' is declared here:",
+              decl->source);
+      return false;
     }
   }
 
@@ -2384,36 +2361,6 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
         "cannot store into a read-only type '" + RawTypeNameOf(lhs_ty) + "'",
         a->source);
     return false;
-  }
-  return true;
-}
-
-bool Resolver::ValidateNoDuplicateDefinition(Symbol sym,
-                                             const Source& source,
-                                             bool check_global_scope_only) {
-  if (check_global_scope_only) {
-    if (auto* var = variable_stack_.Get(sym)) {
-      if (var->Is<sem::GlobalVariable>()) {
-        AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
-                 source);
-        AddNote("previous definition is here", var->Declaration()->source);
-        return false;
-      }
-    }
-    auto it = symbol_to_function_.find(sym);
-    if (it != symbol_to_function_.end()) {
-      AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
-               source);
-      AddNote("previous definition is here", it->second->Declaration()->source);
-      return false;
-    }
-  } else {
-    if (auto* var = variable_stack_.Get(sym)) {
-      AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
-               source);
-      AddNote("previous definition is here", var->Declaration()->source);
-      return false;
-    }
   }
   return true;
 }

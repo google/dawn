@@ -45,12 +45,10 @@ LocalVariable::LocalVariable(const ast::Variable* declaration,
                              const sem::Type* type,
                              ast::StorageClass storage_class,
                              ast::Access access,
+                             const sem::Statement* statement,
                              Constant constant_value)
-    : Base(declaration,
-           type,
-           storage_class,
-           access,
-           std::move(constant_value)) {}
+    : Base(declaration, type, storage_class, access, std::move(constant_value)),
+      statement_(statement) {}
 
 LocalVariable::~LocalVariable() = default;
 

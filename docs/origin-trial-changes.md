@@ -12,6 +12,7 @@
 
 ### New Features
 
+* Shadowing is now fully supported. [tint:819](https://crbug.com/tint/819)
 * The `dot()` builtin now supports integer vector types.
 * Identifiers can now start with a single leading underscore.  [tint:1292](https://crbug.com/tint/1292)
 

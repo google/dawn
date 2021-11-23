@@ -15,16 +15,14 @@
 #ifndef SRC_TRANSFORM_SIMPLIFY_POINTERS_H_
 #define SRC_TRANSFORM_SIMPLIFY_POINTERS_H_
 
-#include <string>
-#include <unordered_map>
-
 #include "src/transform/transform.h"
 
 namespace tint {
 namespace transform {
 
 /// SimplifyPointers is a Transform that moves all usage of function-scope
-/// `let` statements of a pointer type into their places of usage.
+/// `let` statements of a pointer type into their places of usage, while also
+/// simplifying any chains of address-of or indirections operators.
 ///
 /// Parameters of a pointer type are not adjusted.
 ///

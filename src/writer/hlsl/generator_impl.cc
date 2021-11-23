@@ -58,6 +58,7 @@
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/remove_phonies.h"
 #include "src/transform/simplify_pointers.h"
+#include "src/transform/unshadow.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
 #include "src/utils/map.h"
@@ -134,6 +135,8 @@ SanitizedResult Sanitize(
       array_length_from_uniform.ubo_binding);
   array_length_from_uniform_cfg.bindpoint_to_size_index =
       array_length_from_uniform.bindpoint_to_size_index;
+
+  manager.Add<transform::Unshadow>();
 
   // Attempt to convert `loop`s into for-loops. This is to try and massage the
   // output into something that will not cause FXC to choke or misbehave.

@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+void f() {
+  {
+    int a_1 = int();
+    int b = a_1;
+  }
+  int a_2 = int();
+  int b = a_2;
+}
+
