@@ -783,6 +783,43 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 }  // namespace undeclared_tests
 
 ////////////////////////////////////////////////////////////////////////////////
+// Self reference by decl
+////////////////////////////////////////////////////////////////////////////////
+namespace undeclared_tests {
+
+using ResolverDependencyGraphDeclSelfUse = ResolverDependencyGraphTest;
+
+TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalVar) {
+  const Symbol symbol = Sym("SYMBOL");
+  Global(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123));
+  Build(R"(error: cyclic dependency found: 'SYMBOL' -> 'SYMBOL'
+12:34 note: var 'SYMBOL' references var 'SYMBOL' here)");
+}
+
+TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalLet) {
+  const Symbol symbol = Sym("SYMBOL");
+  GlobalConst(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123));
+  Build(R"(error: cyclic dependency found: 'SYMBOL' -> 'SYMBOL'
+12:34 note: let 'SYMBOL' references let 'SYMBOL' here)");
+}
+
+TEST_F(ResolverDependencyGraphDeclSelfUse, LocalVar) {
+  const Symbol symbol = Sym("SYMBOL");
+  WrapInFunction(
+      Decl(Var(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123))));
+  Build("12:34 error: unknown identifier: 'SYMBOL'");
+}
+
+TEST_F(ResolverDependencyGraphDeclSelfUse, LocalLet) {
+  const Symbol symbol = Sym("SYMBOL");
+  WrapInFunction(
+      Decl(Const(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123))));
+  Build("12:34 error: unknown identifier: 'SYMBOL'");
+}
+
+}  // namespace undeclared_tests
+
+////////////////////////////////////////////////////////////////////////////////
 // Recursive dependency tests
 ////////////////////////////////////////////////////////////////////////////////
 namespace recursive_tests {

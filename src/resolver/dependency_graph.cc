@@ -227,7 +227,6 @@ class DependencyScanner {
     if (auto* l = stmt->As<ast::LoopStatement>()) {
       scope_stack_.Push();
       TINT_DEFER(scope_stack_.Pop());
-
       TraverseStatements(l->body->statements);
       TraverseStatement(l->continuing);
       return;
@@ -256,9 +255,9 @@ class DependencyScanner {
       return;
     }
     if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-      Declare(v->variable->symbol, v->variable);
       TraverseType(v->variable->type);
       TraverseExpression(v->variable->constructor);
+      Declare(v->variable->symbol, v->variable);
       return;
     }
     if (stmt->IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
