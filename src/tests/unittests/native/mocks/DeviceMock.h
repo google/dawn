@@ -16,6 +16,7 @@
 #define TESTS_UNITTESTS_NATIVE_MOCKS_DEVICE_MOCK_H_
 
 #include "dawn_native/Device.h"
+#include "dawn_native/RenderPipeline.h"
 
 #include <gmock/gmock.h>
 
