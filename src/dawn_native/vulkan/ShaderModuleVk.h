@@ -40,6 +40,7 @@ namespace dawn_native { namespace vulkan {
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
+        void DestroyImpl() override;
 
         // New handles created by GetTransformedModuleHandle at pipeline creation time
         class ConcurrentTransformedShaderModuleCache {
@@ -58,7 +59,7 @@ namespace dawn_native { namespace vulkan {
                                PipelineLayoutEntryPointPairHashFunc>
                 mTransformedShaderModuleCache;
         };
-        ConcurrentTransformedShaderModuleCache mTransformedShaderModuleCache;
+        std::unique_ptr<ConcurrentTransformedShaderModuleCache> mTransformedShaderModuleCache;
     };
 
 }}  // namespace dawn_native::vulkan
