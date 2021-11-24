@@ -351,7 +351,8 @@ namespace dawn_native { namespace d3d12 {
             if (compileFlags & D3DCOMPILE_IEEE_STRICTNESS) {
                 arguments.push_back(L"/Gis");
             }
-            if (compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL2) {
+            constexpr uint32_t d3dCompileFlagsBits = D3DCOMPILE_OPTIMIZATION_LEVEL2;
+            if (compileFlags & d3dCompileFlagsBits) {
                 switch (compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL2) {
                     case D3DCOMPILE_OPTIMIZATION_LEVEL0:
                         arguments.push_back(L"/O0");
@@ -490,14 +491,20 @@ namespace dawn_native { namespace d3d12 {
 
             // Optimization level must be handled separately as two bits are used, and the values
             // don't map neatly to 0-3.
-            if ((compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL2) != 0) {
-                result += "D3DCOMPILE_OPTIMIZATION_LEVEL2";
-            } else if ((compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL0) != 0) {
-                result += "D3DCOMPILE_OPTIMIZATION_LEVEL0";
-            } else if ((compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL3) != 0) {
-                result += "D3DCOMPILE_OPTIMIZATION_LEVEL3";
-            } else {
-                result += "D3DCOMPILE_OPTIMIZATION_LEVEL1";
+            constexpr uint32_t d3dCompileFlagsBits = D3DCOMPILE_OPTIMIZATION_LEVEL2;
+            switch (compileFlags & d3dCompileFlagsBits) {
+                case D3DCOMPILE_OPTIMIZATION_LEVEL0:
+                    result += "D3DCOMPILE_OPTIMIZATION_LEVEL0";
+                    break;
+                case D3DCOMPILE_OPTIMIZATION_LEVEL1:
+                    result += "D3DCOMPILE_OPTIMIZATION_LEVEL1";
+                    break;
+                case D3DCOMPILE_OPTIMIZATION_LEVEL2:
+                    result += "D3DCOMPILE_OPTIMIZATION_LEVEL2";
+                    break;
+                case D3DCOMPILE_OPTIMIZATION_LEVEL3:
+                    result += "D3DCOMPILE_OPTIMIZATION_LEVEL3";
+                    break;
             }
             result += std::string("\n");
 
