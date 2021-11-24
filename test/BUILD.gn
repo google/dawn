@@ -169,9 +169,9 @@ tint_unittests_source_set("tint_unittests_ast_src") {
     "../src/ast/function_test.cc",
     "../src/ast/group_decoration_test.cc",
     "../src/ast/i32_test.cc",
-    "../src/ast/index_accessor_expression_test.cc",
     "../src/ast/identifier_expression_test.cc",
     "../src/ast/if_statement_test.cc",
+    "../src/ast/index_accessor_expression_test.cc",
     "../src/ast/int_literal_expression_test.cc",
     "../src/ast/interpolate_decoration_test.cc",
     "../src/ast/intrinsic_texture_helper_test.cc",
@@ -212,7 +212,6 @@ tint_unittests_source_set("tint_unittests_ast_src") {
     "../src/ast/workgroup_decoration_test.cc",
   ]
 }
-
 
 tint_unittests_source_set("tint_unittests_diagnostic_src") {
   sources = [
@@ -269,9 +268,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../src/resolver/var_let_test.cc",
     "../src/resolver/var_let_validation_test.cc",
   ]
-  deps = [
-    ":tint_unittests_ast_src",
-  ]
+  deps = [ ":tint_unittests_ast_src" ]
 }
 
 tint_unittests_source_set("tint_unittests_sem_src") {
@@ -397,9 +394,7 @@ tint_unittests_source_set("tint_unittests_spv_reader_src") {
     "../src/reader/spirv/usage_test.cc",
   ]
 
-  deps = [
-    "${tint_root_dir}/src:libtint_spv_reader_src",
-  ]
+  deps = [ "${tint_root_dir}/src:libtint_spv_reader_src" ]
 }
 
 tint_unittests_source_set("tint_unittests_spv_writer_src") {
@@ -524,9 +519,7 @@ tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
     "../src/reader/wgsl/token_test.cc",
   ]
 
-  deps = [
-    "${tint_root_dir}/src:libtint_wgsl_reader_src",
-  ]
+  deps = [ "${tint_root_dir}/src:libtint_wgsl_reader_src" ]
 }
 
 tint_unittests_source_set("tint_unittests_wgsl_writer_src") {
@@ -705,9 +698,18 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/traits_test.cc",
   ]
 
-  deps = [
-    ":tint_unittests_ast_src",
-  ]
+  deps = [ ":tint_unittests_ast_src" ]
+}
+
+if (build_with_chromium) {
+  tint_unittests_source_set("tint_unittests_fuzzer_src") {
+    sources = [ "../fuzzers/random_generator_test.cc" ]
+
+    deps = [
+      ":tint_unittests_core_src",
+      "${tint_root_dir}/fuzzers:tint_fuzzer_common_src",
+    ]
+  }
 }
 
 source_set("tint_unittests_src") {
@@ -753,6 +755,10 @@ source_set("tint_unittests_src") {
 
   if (tint_build_glsl_writer) {
     deps += [ ":tint_unittests_glsl_writer_src" ]
+  }
+
+  if (build_with_chromium) {
+    deps += [ ":tint_unittests_fuzzer_src" ]
   }
 
   configs += [ ":tint_unittests_config" ]

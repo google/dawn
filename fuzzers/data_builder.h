@@ -36,7 +36,7 @@ class DataBuilder {
   /// @param data - data fuzzer to calculate seed from
   /// @param size - size of data buffer
   explicit DataBuilder(const uint8_t* data, size_t size)
-      : generator_(data, size) {
+      : generator_(RandomGenerator::CalculateSeed(data, size)) {
     assert(data != nullptr && "|data| must be !nullptr");
   }
 

@@ -16,27 +16,16 @@
 
 #include <algorithm>
 #include <cassert>
-#include <vector>
+#include <utility>
 
+#include "fuzzers/mersenne_twister_engine.h"
+#include "fuzzers/random_generator_engine.h"
 #include "src/utils/hash.h"
 
 namespace tint {
 namespace fuzzers {
 
 namespace {
-
-/// Generate integer from uniform distribution
-/// @tparam I - integer type
-/// @param engine - random number engine to use
-/// @param lower - Lower bound of integer generated
-/// @param upper - Upper bound of integer generated
-/// @returns i, where lower <= i < upper
-template <typename I>
-I RandomUInt(std::mt19937_64* engine, I lower, I upper) {
-  assert(lower < upper && "|lower| must be stictly less than |upper|");
-
-  return std::uniform_int_distribution<I>(lower, upper - 1)(*engine);
-}
 
 /// Calculate the hash for the contents of a c-style data buffer
 /// This is intentionally not implemented as a generic override of HashCombine
@@ -56,55 +45,58 @@ size_t HashBuffer(const uint8_t* data, const size_t size) {
 
 }  // namespace
 
-RandomGenerator::RandomGenerator(uint64_t seed) : engine_(seed) {}
+RandomGenerator::RandomGenerator(std::unique_ptr<RandomGeneratorEngine> engine)
+    : engine_(std::move(engine)) {}
 
-RandomGenerator::RandomGenerator(const uint8_t* data, size_t size)
-    : engine_(RandomGenerator::CalculateSeed(data, size)) {
-  assert(data != nullptr && "|data| must be !nullptr");
-}
+RandomGenerator::RandomGenerator(uint64_t seed)
+    : RandomGenerator(std::make_unique<MersenneTwisterEngine>(seed)) {}
 
 uint32_t RandomGenerator::GetUInt32(uint32_t lower, uint32_t upper) {
-  return RandomUInt(&engine_, lower, upper);
+  assert(lower < upper && "|lower| must be strictly less than |upper|");
+  return engine_->RandomUInt32(lower, upper);
 }
 
 uint32_t RandomGenerator::GetUInt32(uint32_t bound) {
   assert(bound > 0 && "|bound| must be greater than 0");
-  return RandomUInt(&engine_, 0u, bound);
+  return engine_->RandomUInt32(0u, bound);
 }
 
 uint64_t RandomGenerator::GetUInt64(uint64_t lower, uint64_t upper) {
-  return RandomUInt(&engine_, lower, upper);
+  assert(lower < upper && "|lower| must be strictly less than |upper|");
+  return engine_->RandomUInt64(lower, upper);
 }
 
 uint64_t RandomGenerator::GetUInt64(uint64_t bound) {
   assert(bound > 0 && "|bound| must be greater than 0");
-  return RandomUInt(&engine_, static_cast<uint64_t>(0), bound);
+  return engine_->RandomUInt64(static_cast<uint64_t>(0), bound);
 }
 
 uint8_t RandomGenerator::GetByte() {
-  return std::independent_bits_engine<std::mt19937_64, 8, uint8_t>(engine_)();
+  uint8_t result;
+  engine_->RandomNBytes(&result, 1);
+  return result;
 }
 
 uint32_t RandomGenerator::Get4Bytes() {
-  return std::independent_bits_engine<std::mt19937_64, 32, uint32_t>(engine_)();
+  uint32_t result;
+  engine_->RandomNBytes(reinterpret_cast<uint8_t*>(&result), 4);
+  return result;
 }
 
 void RandomGenerator::GetNBytes(uint8_t* dest, size_t n) {
   assert(dest && "|dest| must not be nullptr");
-  std::generate(
-      dest, dest + n,
-      std::independent_bits_engine<std::mt19937_64, 8, uint8_t>(engine_));
+  engine_->RandomNBytes(dest, n);
 }
 
 bool RandomGenerator::GetBool() {
-  return RandomUInt(&engine_, 0u, 2u);
+  return engine_->RandomUInt32(0u, 2u);
 }
 
 bool RandomGenerator::GetWeightedBool(uint32_t percentage) {
   static const uint32_t kMaxPercentage = 100;
   assert(percentage <= kMaxPercentage &&
          "|percentage| needs to be within [0, 100]");
-  return RandomUInt(&engine_, 0u, kMaxPercentage) < percentage;
+  return engine_->RandomUInt32(0u, kMaxPercentage) < percentage;
 }
 
 uint64_t RandomGenerator::CalculateSeed(const uint8_t* data, size_t size) {
@@ -119,16 +111,14 @@ uint64_t RandomGenerator::CalculateSeed(const uint8_t* data, size_t size) {
   static const int64_t kHashDesiredMinBytes = 4;
   // Maximum number of bytes we want to use in the hash.
   static const int64_t kHashDesiredMaxBytes = 32;
-  int64_t size_i64 = static_cast<int64_t>(size);
-  int64_t hash_begin_i64 =
+  auto size_i64 = static_cast<int64_t>(size);
+  auto hash_begin_i64 =
       std::min(kHashDesiredLeadingSkipBytes,
                std::max<int64_t>(size_i64 - kHashDesiredMinBytes, 0));
-  int64_t hash_end_i64 =
-      std::min(hash_begin_i64 + kHashDesiredMaxBytes, size_i64);
-  size_t hash_begin = static_cast<size_t>(hash_begin_i64);
-  size_t hash_size = static_cast<size_t>(hash_end_i64) - hash_begin;
+  auto hash_end_i64 = std::min(hash_begin_i64 + kHashDesiredMaxBytes, size_i64);
+  auto hash_begin = static_cast<size_t>(hash_begin_i64);
+  auto hash_size = static_cast<size_t>(hash_end_i64) - hash_begin;
   return HashBuffer(data + hash_begin, hash_size);
 }
-
 }  // namespace fuzzers
 }  // namespace tint

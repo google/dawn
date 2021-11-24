@@ -22,7 +22,7 @@ if (build_with_chromium) {
       "${tint_root_dir}/src:tint_common_config",
     ]
 
-    deps = [ "${tint_root_dir}/fuzzers:tint_fuzzer_common" ]
+    deps = [ "${tint_root_dir}/fuzzers:tint_fuzzer_common_src" ]
 
     sources = [
       "cli.cc",

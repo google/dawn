@@ -13,7 +13,9 @@
 # limitations under the License.
 
 set(FUZZER_SOURCES
+        ../mersenne_twister_engine.cc
         ../random_generator.cc
+        ../random_generator_engine.cc
         cli.cc
         fuzzer.cc
         mutator.cc
@@ -24,7 +26,9 @@ set(FUZZER_SOURCES
         util.cc)
 
 set(FUZZER_SOURCES ${FUZZER_SOURCES}
+        ../mersenne_twister_engine.h
         ../random_generator.h
+        ../random_generator_engine.h
         cli.h
         mutator.h
         mutator_cache.h
@@ -76,7 +80,9 @@ add_tint_spirv_tools_fuzzer(tint_spirv_tools_spv_writer_fuzzer)
 add_tint_spirv_tools_fuzzer(tint_spirv_tools_wgsl_writer_fuzzer)
 
 set(DEBUGGER_SOURCES
+        ../mersenne_twister_engine.cc
         ../random_generator.cc
+        ../random_generator_engine.cc
         cli.cc
         mutator.cc
         mutator_debugger.cc
@@ -86,7 +92,9 @@ set(DEBUGGER_SOURCES
         util.cc)
 
 set(DEBUGGER_SOURCES ${DEBUGGER_SOURCES}
+        ../mersenne_twister_engine.h
         ../random_generator.h
+        ../random_generator_engine.h
         cli.h
         mutator.h
         spirv_fuzz_mutator.h

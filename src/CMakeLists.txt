@@ -1083,6 +1083,18 @@ if(${TINT_BUILD_TESTS})
     )
   endif()
 
+  if (${TINT_BUILD_FUZZERS})
+    list(APPEND TINT_TEST_SRCS
+      ../fuzzers/mersenne_twister_engine.cc
+      ../fuzzers/mersenne_twister_engine.h
+      ../fuzzers/random_generator.cc
+      ../fuzzers/random_generator.h
+      ../fuzzers/random_generator_engine.cc
+      ../fuzzers/random_generator_engine.h
+      ../fuzzers/random_generator_test.cc
+    )
+  endif()
+
   add_executable(tint_unittests ${TINT_TEST_SRCS})
 
   if(NOT MSVC)

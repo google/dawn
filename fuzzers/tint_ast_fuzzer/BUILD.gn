@@ -34,7 +34,7 @@ if (build_with_chromium) {
 
     deps = [
       ":tint_ast_fuzzer_proto",
-      "${tint_root_dir}/fuzzers:tint_fuzzer_common",
+      "${tint_root_dir}/fuzzers:tint_fuzzer_common_src",
       "//third_party/protobuf:protobuf_full",
     ]
 

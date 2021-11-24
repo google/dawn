@@ -21,8 +21,12 @@ function(add_tint_regex_fuzzer NAME)
 endfunction()
 
 set(LIBTINT_REGEX_FUZZER_SOURCES
+        ../mersenne_twister_engine.cc
+        ../mersenne_twister_engine.h
         ../random_generator.cc
         ../random_generator.h
+        ../random_generator_engine.cc
+        ../random_generator_engine.h
         wgsl_mutator.cc
         wgsl_mutator.h)
 

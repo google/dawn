@@ -54,7 +54,7 @@ if (build_with_chromium) {
   # fuzzer_test doesn't have configs members, so need to define them in an empty
   # source_set.
 
-  source_set("tint_fuzzer_common") {
+  source_set("tint_fuzzer_common_src") {
     public_configs = [
       "${tint_root_dir}/src:tint_config",
       "${tint_root_dir}/src:tint_common_config",
@@ -67,8 +67,12 @@ if (build_with_chromium) {
 
     sources = [
       "data_builder.h",
+      "mersenne_twister_engine.cc",
+      "mersenne_twister_engine.h",
       "random_generator.cc",
       "random_generator.h",
+      "random_generator_engine.cc",
+      "random_generator_engine.h",
       "tint_common_fuzzer.cc",
       "tint_common_fuzzer.h",
       "tint_reader_writer_fuzzer.h",
@@ -76,8 +80,8 @@ if (build_with_chromium) {
     ]
   }
 
-  source_set("tint_fuzzer_common_with_init") {
-    public_deps = [ ":tint_fuzzer_common" ]
+  source_set("tint_fuzzer_common_with_init_src") {
+    public_deps = [ ":tint_fuzzer_common_src" ]
 
     sources = [
       "cli.cc",
@@ -90,7 +94,7 @@ if (build_with_chromium) {
   if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
     fuzzer_test("tint_ast_clone_fuzzer") {
       sources = [ "tint_ast_clone_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -115,7 +119,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_wgsl_reader_wgsl_writer_fuzzer") {
       sources = [ "tint_wgsl_reader_wgsl_writer_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -126,7 +130,7 @@ if (build_with_chromium) {
   if (tint_build_wgsl_reader && tint_build_spv_writer) {
     fuzzer_test("tint_all_transforms_fuzzer") {
       sources = [ "tint_all_transforms_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -143,7 +147,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_binding_remapper_fuzzer") {
       sources = [ "tint_binding_remapper_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -152,7 +156,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_first_index_offset_fuzzer") {
       sources = [ "tint_first_index_offset_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -169,7 +173,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_renamer_fuzzer") {
       sources = [ "tint_renamer_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -178,7 +182,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_robustness_fuzzer") {
       sources = [ "tint_robustness_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -187,7 +191,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_single_entry_point_fuzzer") {
       sources = [ "tint_single_entry_point_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -196,7 +200,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_vertex_pulling_fuzzer") {
       sources = [ "tint_vertex_pulling_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -205,7 +209,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_wgsl_reader_spv_writer_fuzzer") {
       sources = [ "tint_wgsl_reader_spv_writer_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -232,7 +236,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_wgsl_reader_hlsl_writer_fuzzer") {
       sources = [ "tint_wgsl_reader_hlsl_writer_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -259,7 +263,7 @@ if (build_with_chromium) {
 
     fuzzer_test("tint_wgsl_reader_msl_writer_fuzzer") {
       sources = [ "tint_wgsl_reader_msl_writer_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init" ]
+      deps = [ ":tint_fuzzer_common_with_init_src" ]
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir
@@ -272,7 +276,7 @@ if (build_with_chromium) {
       tint_build_wgsl_writer) {
     executable("tint_black_box_fuzz_target") {
       sources = [ "tint_black_box_fuzz_target.cc" ]
-      deps = [ ":tint_fuzzer_common" ]
+      deps = [ ":tint_fuzzer_common_src" ]
     }
   }
 
