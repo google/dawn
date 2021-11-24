@@ -56,6 +56,9 @@ struct Options {
   /// Options used to specify a mapping of binding points to indices into a UBO
   /// from which to load buffer sizes.
   ArrayLengthFromUniformOptions array_length_from_uniform = {};
+
+  // NOTE: Update fuzzers/data_builder.h when adding or changing any struct
+  // members.
 };
 
 /// The result produced when generating HLSL.

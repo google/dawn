@@ -44,6 +44,9 @@ struct ArrayLengthFromUniformOptions {
   /// The mapping from storage buffer binding points to the index into the
   /// uniform buffer where the length of the buffer is stored.
   std::unordered_map<sem::BindingPoint, uint32_t> bindpoint_to_size_index;
+
+  // NOTE: Update fuzzers/data_builder.h when adding or changing any struct
+  // members.
 };
 
 }  // namespace writer
