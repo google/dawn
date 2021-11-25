@@ -60,6 +60,7 @@ namespace dawn_native {
         UseUserDefinedLabelsInBackend,
         DisableR8RG8Mipmaps,
         UseDummyFragmentInVertexOnlyPipeline,
+        FxcOptimizations,
 
         EnumCount,
         InvalidEnum = EnumCount,

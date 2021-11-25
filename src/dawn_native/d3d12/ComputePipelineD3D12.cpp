@@ -34,6 +34,11 @@ namespace dawn_native { namespace d3d12 {
         Device* device = ToBackend(GetDevice());
         uint32_t compileFlags = 0;
 
+        if (!device->IsToggleEnabled(Toggle::UseDXC) &&
+            !device->IsToggleEnabled(Toggle::FxcOptimizations)) {
+            compileFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL0;
+        }
+
         if (device->IsToggleEnabled(Toggle::EmitHLSLDebugSymbols)) {
             compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
         }
