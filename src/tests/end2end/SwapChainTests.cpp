@@ -195,6 +195,8 @@ TEST_P(SwapChainTests, ResizingWindowOnly) {
 
 // Test resizing both the window and the swapchain at the same time.
 TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
+    // TODO(crbug.com/dawn/1205) Currently failing on new NVIDIA GTX 1660s on Linux/Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
     for (int i = 0; i < 10; i++) {
         glfwSetWindowSize(window, 400 - 10 * i, 400 + 10 * i);
         glfwPollEvents();
