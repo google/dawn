@@ -24,12 +24,14 @@ namespace {
 TEST(UniqueVectorTest, Empty) {
   UniqueVector<int> unique_vec;
   EXPECT_EQ(unique_vec.size(), 0u);
+  EXPECT_EQ(unique_vec.empty(), true);
   EXPECT_EQ(unique_vec.begin(), unique_vec.end());
 }
 
 TEST(UniqueVectorTest, MoveConstructor) {
   UniqueVector<int> unique_vec(std::vector<int>{0, 3, 2, 1, 2});
   EXPECT_EQ(unique_vec.size(), 4u);
+  EXPECT_EQ(unique_vec.empty(), false);
   EXPECT_EQ(unique_vec[0], 0);
   EXPECT_EQ(unique_vec[1], 3);
   EXPECT_EQ(unique_vec[2], 2);
@@ -42,6 +44,7 @@ TEST(UniqueVectorTest, AddUnique) {
   unique_vec.add(1);
   unique_vec.add(2);
   EXPECT_EQ(unique_vec.size(), 3u);
+  EXPECT_EQ(unique_vec.empty(), false);
   int i = 0;
   for (auto n : unique_vec) {
     EXPECT_EQ(n, i);
@@ -65,6 +68,7 @@ TEST(UniqueVectorTest, AddDuplicates) {
   unique_vec.add(1);
   unique_vec.add(2);
   EXPECT_EQ(unique_vec.size(), 3u);
+  EXPECT_EQ(unique_vec.empty(), false);
   int i = 0;
   for (auto n : unique_vec) {
     EXPECT_EQ(n, i);
@@ -90,6 +94,7 @@ TEST(UniqueVectorTest, AsVector) {
 
   const std::vector<int>& vec = unique_vec;
   EXPECT_EQ(vec.size(), 3u);
+  EXPECT_EQ(unique_vec.empty(), false);
   int i = 0;
   for (auto n : vec) {
     EXPECT_EQ(n, i);
@@ -109,18 +114,30 @@ TEST(UniqueVectorTest, PopBack) {
 
   EXPECT_EQ(unique_vec.pop_back(), 1);
   EXPECT_EQ(unique_vec.size(), 2u);
+  EXPECT_EQ(unique_vec.empty(), false);
   EXPECT_EQ(unique_vec[0], 0);
   EXPECT_EQ(unique_vec[1], 2);
 
   EXPECT_EQ(unique_vec.pop_back(), 2);
   EXPECT_EQ(unique_vec.size(), 1u);
+  EXPECT_EQ(unique_vec.empty(), false);
   EXPECT_EQ(unique_vec[0], 0);
 
   unique_vec.add(1);
 
   EXPECT_EQ(unique_vec.size(), 2u);
+  EXPECT_EQ(unique_vec.empty(), false);
   EXPECT_EQ(unique_vec[0], 0);
   EXPECT_EQ(unique_vec[1], 1);
+
+  EXPECT_EQ(unique_vec.pop_back(), 1);
+  EXPECT_EQ(unique_vec.size(), 1u);
+  EXPECT_EQ(unique_vec.empty(), false);
+  EXPECT_EQ(unique_vec[0], 0);
+
+  EXPECT_EQ(unique_vec.pop_back(), 0);
+  EXPECT_EQ(unique_vec.size(), 0u);
+  EXPECT_EQ(unique_vec.empty(), true);
 }
 
 }  // namespace

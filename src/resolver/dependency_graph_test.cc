@@ -1339,6 +1339,19 @@ TEST_F(ResolverDependencyGraphTraversalTest, InferredType) {
   Build();
 }
 
+// Reproduces an unbalanced stack push / pop bug in
+// DependencyAnalysis::SortGlobals(), found by clusterfuzz.
+// See: crbug.com/chromium/1273451
+TEST_F(ResolverDependencyGraphTraversalTest, chromium_1273451) {
+  Structure("A", {Member("a", ty.i32())});
+  Structure("B", {Member("b", ty.i32())});
+  Func("f", {Param("a", ty.type_name("A"))}, ty.type_name("B"),
+       {
+           Return(Construct(ty.type_name("B"))),
+       });
+  Build();
+}
+
 }  // namespace ast_traversal
 
 }  // namespace

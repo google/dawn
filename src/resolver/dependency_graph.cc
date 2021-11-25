@@ -305,8 +305,8 @@ class DependencyScanner {
             auto global_it = globals_.find(ident->symbol);
             if (global_it != globals_.end() &&
                 node == global_it->second->node) {
-              ResolveGlobalDependency(ident, ident->symbol, "identifier",
-                                      "references");
+              AddGlobalDependency(ident, ident->symbol, "identifier",
+                                  "references");
             } else {
               graph_.resolved_symbols.emplace(ident, node);
             }
@@ -314,9 +314,9 @@ class DependencyScanner {
           if (auto* call = expr->As<ast::CallExpression>()) {
             if (call->target.name) {
               if (!IsIntrinsic(call->target.name->symbol)) {
-                ResolveGlobalDependency(call->target.name,
-                                        call->target.name->symbol, "function",
-                                        "calls");
+                AddGlobalDependency(call->target.name,
+                                    call->target.name->symbol, "function",
+                                    "calls");
                 graph_.resolved_symbols.emplace(
                     call,
                     utils::Lookup(graph_.resolved_symbols, call->target.name));
@@ -357,7 +357,7 @@ class DependencyScanner {
       return;
     }
     if (auto* tn = ty->As<ast::TypeName>()) {
-      ResolveGlobalDependency(tn, tn->name, "type", "references");
+      AddGlobalDependency(tn, tn->name, "type", "references");
       return;
     }
     if (auto* vec = ty->As<ast::Vector>()) {
@@ -415,10 +415,10 @@ class DependencyScanner {
   }
 
   /// Adds the dependency to the currently processed global
-  void ResolveGlobalDependency(const ast::Node* from,
-                               Symbol to,
-                               const char* use,
-                               const char* action) {
+  void AddGlobalDependency(const ast::Node* from,
+                           Symbol to,
+                           const char* use,
+                           const char* action) {
     auto global_it = globals_.find(to);
     if (global_it != globals_.end()) {
       auto* global = global_it->second;
@@ -482,9 +482,8 @@ struct DependencyAnalysis {
     // Sort the globals into dependency order
     SortGlobals();
 
-#if TINT_DUMP_DEPENDENCY_GRAPH
+    // Dump the dependency graph if TINT_DUMP_DEPENDENCY_GRAPH is non-zero
     DumpDependencyGraph();
-#endif
 
     if (!allow_out_of_order_decls) {
       // Prevent out-of-order declarations.
@@ -630,16 +629,26 @@ struct DependencyAnalysis {
               return false;
             }
             if (sorted_.contains(g->node)) {
-              return false;  // Visited this global already.
+              // Visited this global already.
+              // stack was pushed, but exit() will not be called when we return
+              // false, so pop here.
+              stack.pop_back();
+              return false;
             }
             return true;
           },
-          [&](const Global* g) {  // Exit
+          [&](const Global* g) {  // Exit. Only called if Enter returned true.
             sorted_.add(g->node);
             stack.pop_back();
           });
 
       sorted_.add(global->node);
+
+      if (!stack.empty()) {
+        // Each stack.push() must have a corresponding stack.pop_back().
+        TINT_ICE(Resolver, diagnostics_)
+            << "stack not empty after returning from TraverseDependencies()";
+      }
     }
   }
 
@@ -720,25 +729,28 @@ struct DependencyAnalysis {
     }
   }
 
-#if TINT_DUMP_DEPENDENCY_GRAPH
   void DumpDependencyGraph() {
+#if TINT_DUMP_DEPENDENCY_GRAPH == 0
+    if ((true)) {
+      return;
+    }
+#endif  // TINT_DUMP_DEPENDENCY_GRAPH
     printf("=========================\n");
     printf("------ declaration ------ \n");
     for (auto* global : declaration_order_) {
       printf("%s\n", NameOf(global->node).c_str());
     }
     printf("------ dependencies ------ \n");
-    for (auto* node : sorted) {
+    for (auto* node : sorted_) {
       auto symbol = SymbolOf(node);
-      auto* global = globals.at(symbol);
-      printf("%s depends on:\n", symbols.NameFor(symbol).c_str());
-      for (auto& dep : global->deps) {
-        printf("  %s\n", NameOf(dep.global->node).c_str());
+      auto* global = globals_.at(symbol);
+      printf("%s depends on:\n", symbols_.NameFor(symbol).c_str());
+      for (auto* dep : global->deps) {
+        printf("  %s\n", NameOf(dep->node).c_str());
       }
     }
     printf("=========================\n");
   }
-#endif  // TINT_DUMP_DEPENDENCY_GRAPH
 
   /// Program symbols
   const SymbolTable& symbols_;
