@@ -15,7 +15,7 @@ struct tint_symbol_2 {
 
 void f_inner(uint local_invocation_index) {
   {
-    for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
+    [loop] for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
       const uint i = idx;
       s.data[i] = 0;
     }

@@ -33,7 +33,7 @@ S ret_struct_arr() {
 void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, tint_padded_array_element value[4]) {
   tint_padded_array_element array[4] = value;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    [loop] for(uint i = 0u; (i < 4u); i = (i + 1u)) {
       buffer.Store((offset + (i * 16u)), asuint(array[i].el));
     }
   }
@@ -43,7 +43,7 @@ typedef tint_padded_array_element tint_symbol_3_ret[4];
 tint_symbol_3_ret tint_symbol_3(uint4 buffer[4], uint offset) {
   tint_padded_array_element arr_1[4] = (tint_padded_array_element[4])0;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       const uint scalar_offset = ((offset + (i_1 * 16u))) / 4;
       arr_1[i_1].el = asint(buffer[scalar_offset / 4][scalar_offset % 4]);
     }
@@ -55,7 +55,7 @@ typedef tint_padded_array_element tint_symbol_5_ret[4];
 tint_symbol_5_ret tint_symbol_5(RWByteAddressBuffer buffer, uint offset) {
   tint_padded_array_element arr_2[4] = (tint_padded_array_element[4])0;
   {
-    for(uint i_2 = 0u; (i_2 < 4u); i_2 = (i_2 + 1u)) {
+    [loop] for(uint i_2 = 0u; (i_2 < 4u); i_2 = (i_2 + 1u)) {
       arr_2[i_2].el = asint(buffer.Load((offset + (i_2 * 16u))));
     }
   }
@@ -65,7 +65,7 @@ tint_symbol_5_ret tint_symbol_5(RWByteAddressBuffer buffer, uint offset) {
 void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, int value[2]) {
   int array_3[2] = value;
   {
-    for(uint i_3 = 0u; (i_3 < 2u); i_3 = (i_3 + 1u)) {
+    [loop] for(uint i_3 = 0u; (i_3 < 2u); i_3 = (i_3 + 1u)) {
       buffer.Store((offset + (i_3 * 4u)), asuint(array_3[i_3]));
     }
   }
@@ -74,7 +74,7 @@ void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, int value[2]) {
 void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, int value[3][2]) {
   int array_2[3][2] = value;
   {
-    for(uint i_4 = 0u; (i_4 < 3u); i_4 = (i_4 + 1u)) {
+    [loop] for(uint i_4 = 0u; (i_4 < 3u); i_4 = (i_4 + 1u)) {
       tint_symbol_9(buffer, (offset + (i_4 * 8u)), array_2[i_4]);
     }
   }
@@ -83,7 +83,7 @@ void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, int value[3][2]) {
 void tint_symbol_7(RWByteAddressBuffer buffer, uint offset, int value[4][3][2]) {
   int array_1[4][3][2] = value;
   {
-    for(uint i_5 = 0u; (i_5 < 4u); i_5 = (i_5 + 1u)) {
+    [loop] for(uint i_5 = 0u; (i_5 < 4u); i_5 = (i_5 + 1u)) {
       tint_symbol_8(buffer, (offset + (i_5 * 24u)), array_1[i_5]);
     }
   }

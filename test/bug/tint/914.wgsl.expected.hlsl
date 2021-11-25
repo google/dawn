@@ -56,7 +56,7 @@ struct tint_symbol_1 {
 
 void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   {
-    for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
+    [loop] for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
       const uint i = (idx / 64u);
       const uint i_1 = (idx % 64u);
       mm_Asub[i][i_1] = 0.0f;
@@ -73,7 +73,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   float ACached = 0.0f;
   float BCached[4] = (float[4])0;
   {
-    for(uint index = 0u; (index < (RowPerThread * ColPerThread)); index = (index + 1u)) {
+    [loop] for(uint index = 0u; (index < (RowPerThread * ColPerThread)); index = (index + 1u)) {
       acc[index] = 0.0f;
     }
   }
@@ -82,11 +82,11 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   const uint RowPerThreadB = (TileInner / 16u);
   const uint tileRowB = (local_id.y * RowPerThreadB);
   {
-    for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
+    [loop] for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
       {
-        for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+        [loop] for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
           {
-            for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
+            [loop] for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRow + innerRow);
               const uint inputCol = (tileColA + innerCol);
               mm_Asub[inputRow][inputCol] = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol));
@@ -95,9 +95,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
         }
       }
       {
-        for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
+        [loop] for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
           {
-            for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
+            [loop] for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRowB + innerRow);
               const uint inputCol = (tileCol + innerCol);
               mm_Bsub[innerCol][inputCol] = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol));
@@ -107,17 +107,17 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
       }
       GroupMemoryBarrierWithGroupSync();
       {
-        for(uint k = 0u; (k < TileInner); k = (k + 1u)) {
+        [loop] for(uint k = 0u; (k < TileInner); k = (k + 1u)) {
           {
-            for(uint inner = 0u; (inner < ColPerThread); inner = (inner + 1u)) {
+            [loop] for(uint inner = 0u; (inner < ColPerThread); inner = (inner + 1u)) {
               BCached[inner] = mm_Bsub[k][(tileCol + inner)];
             }
           }
           {
-            for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+            [loop] for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
               ACached = mm_Asub[(tileRow + innerRow)][k];
               {
-                for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
+                [loop] for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
                   const uint index = ((innerRow * ColPerThread) + innerCol);
                   acc[index] = (acc[index] + (ACached * BCached[innerCol]));
                 }
@@ -130,9 +130,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
     }
   }
   {
-    for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+    [loop] for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
       {
-        for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
+        [loop] for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
           const uint index = ((innerRow * ColPerThread) + innerCol);
           mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
         }

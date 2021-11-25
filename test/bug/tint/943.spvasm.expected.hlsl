@@ -186,10 +186,10 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   numTiles = (((x_152 - 1) / 64) + 1);
   innerRow = 0;
   {
-    for(; (innerRow < 1); innerRow = (innerRow + 1)) {
+    [loop] for(; (innerRow < 1); innerRow = (innerRow + 1)) {
       innerCol = 0;
       {
-        for(; (innerCol < 1); innerCol = (innerCol + 1)) {
+        [loop] for(; (innerCol < 1); innerCol = (innerCol + 1)) {
           acc[innerRow][innerCol] = 0.0f;
         }
       }
@@ -201,13 +201,13 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   tileRowB = (asint(x_192) * 1);
   t = 0;
   {
-    for(; (t < numTiles); t = (t + 1)) {
+    [loop] for(; (t < numTiles); t = (t + 1)) {
       innerRow_1 = 0;
       {
-        for(; (innerRow_1 < 1); innerRow_1 = (innerRow_1 + 1)) {
+        [loop] for(; (innerRow_1 < 1); innerRow_1 = (innerRow_1 + 1)) {
           innerCol_1 = 0;
           {
-            for(; (innerCol_1 < 64); innerCol_1 = (innerCol_1 + 1)) {
+            [loop] for(; (innerCol_1 < 64); innerCol_1 = (innerCol_1 + 1)) {
               inputRow = (tileRow + innerRow_1);
               inputCol = (tileColA + innerCol_1);
               const int x_233 = inputRow;
@@ -224,10 +224,10 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
       }
       innerRow_2 = 0;
       {
-        for(; (innerRow_2 < 1); innerRow_2 = (innerRow_2 + 1)) {
+        [loop] for(; (innerRow_2 < 1); innerRow_2 = (innerRow_2 + 1)) {
           innerCol_2 = 0;
           {
-            for(; (innerCol_2 < 1); innerCol_2 = (innerCol_2 + 1)) {
+            [loop] for(; (innerCol_2 < 1); innerCol_2 = (innerCol_2 + 1)) {
               inputRow_1 = (tileRowB + innerRow_2);
               inputCol_1 = (tileCol + innerCol_2);
               const int x_278 = inputRow_1;
@@ -245,10 +245,10 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
       GroupMemoryBarrierWithGroupSync();
       k = 0;
       {
-        for(; (k < 64); k = (k + 1)) {
+        [loop] for(; (k < 64); k = (k + 1)) {
           inner = 0;
           {
-            for(; (inner < 1); inner = (inner + 1)) {
+            [loop] for(; (inner < 1); inner = (inner + 1)) {
               const int x_314 = inner;
               const float x_320 = mm_Bsub[k][(tileCol + inner)];
               BCached[x_314] = x_320;
@@ -256,12 +256,12 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
           }
           innerRow_3 = 0;
           {
-            for(; (innerRow_3 < 1); innerRow_3 = (innerRow_3 + 1)) {
+            [loop] for(; (innerRow_3 < 1); innerRow_3 = (innerRow_3 + 1)) {
               const float x_338 = mm_Asub[(tileRow + innerRow_3)][k];
               ACached = x_338;
               innerCol_3 = 0;
               {
-                for(; (innerCol_3 < 1); innerCol_3 = (innerCol_3 + 1)) {
+                [loop] for(; (innerCol_3 < 1); innerCol_3 = (innerCol_3 + 1)) {
                   const int x_347 = innerRow_3;
                   const int x_348 = innerCol_3;
                   const float x_349 = ACached;
@@ -279,9 +279,9 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   }
   innerRow_4 = 0;
   {
-    for(; (innerRow_4 < 1); innerRow_4 = (innerRow_4 + 1)) {
+    [loop] for(; (innerRow_4 < 1); innerRow_4 = (innerRow_4 + 1)) {
       innerCol_4 = 0;
-      while (true) {
+      [loop] while (true) {
         bool x_393 = false;
         bool x_394_phi = false;
         if ((innerCol_4 < 1)) {
@@ -352,7 +352,7 @@ void main_inner(uint3 gl_LocalInvocationID_param, uint3 gl_GlobalInvocationID_pa
     mm_Bsub[i_1][i_2] = 0.0f;
   }
   {
-    for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 64u)) {
+    [loop] for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 64u)) {
       const uint i = (idx / 64u);
       const uint i_1 = (idx % 64u);
       mm_Asub[i][i_1] = 0.0f;

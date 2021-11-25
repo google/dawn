@@ -153,7 +153,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
   const QuicksortObject tint_symbol_11 = {tint_symbol_10};
   obj = tint_symbol_11;
   obj = x_960;
-  while (true) {
+  [loop] while (true) {
     const int x_961 = pivot;
     pivot = 0;
     pivot = x_961;
@@ -453,7 +453,7 @@ void quicksort_() {
   p = 0;
   p = x_1027;
   stack[x_100_save] = x_99;
-  while (true) {
+  [loop] while (true) {
     const float3 x_566 = float3(x_563.x, x_563.x, x_563.x);
     const int x_1028 = h_1;
     h_1 = 0;

@@ -62,7 +62,7 @@ void main_1() {
   stageUnits = (float2(1.0f, 1.0f) / x_111);
   i = 0;
   {
-    for(; (i < 2); i = (i + 1)) {
+    [loop] for(; (i < 2); i = (i + 1)) {
       switch(i) {
         case 1: {
           const float2 x_150 = tileID;
@@ -93,7 +93,7 @@ void main_1() {
         mt = ((x_181 * x_184) % 1.0f);
         f = 0.0f;
         {
-          for(; (f < 8.0f); f = (f + 1.0f)) {
+          [loop] for(; (f < 8.0f); f = (f + 1.0f)) {
             const float x_197 = animationData.y;
             if ((x_197 > mt)) {
               const float x_203 = animationData.x;

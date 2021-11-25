@@ -22,7 +22,7 @@ struct tint_symbol_2 {
 
 int main_inner(int3 x) {
   int y = x.x;
-  while (true) {
+  [loop] while (true) {
     const int r = f(y);
     if ((r == 0)) {
       break;

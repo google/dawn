@@ -25,7 +25,7 @@ void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, Inner value) {
 void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, tint_padded_array_element value[4]) {
   tint_padded_array_element array[4] = value;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       tint_symbol_9(buffer, (offset + (i_1 * 16u)), array[i_1].el);
     }
   }
