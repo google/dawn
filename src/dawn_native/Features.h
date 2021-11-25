@@ -31,6 +31,8 @@ namespace dawn_native {
         PipelineStatisticsQuery,
         TimestampQuery,
         DepthClamping,
+        Depth24UnormStencil8,
+        Depth32FloatStencil8,
 
         // Dawn-specific
         DawnInternalUsages,

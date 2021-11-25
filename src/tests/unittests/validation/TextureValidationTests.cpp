@@ -28,6 +28,11 @@ namespace {
         wgpu::TextureFormat::RGBA8Snorm,
     };
 
+    wgpu::TextureDimension kDimensions[] = {
+        wgpu::TextureDimension::e1D,
+        wgpu::TextureDimension::e3D,
+    };
+
     class TextureValidationTest : public ValidationTest {
       protected:
         void SetUp() override {
@@ -426,21 +431,13 @@ namespace {
     TEST_F(TextureValidationTest, DepthStencilFormatsFor3D) {
         wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
 
-        wgpu::TextureDimension dimensions[] = {
-            wgpu::TextureDimension::e1D,
-            wgpu::TextureDimension::e3D,
-        };
-
-        // TODO(dawn:690): Uncomment these depth/stencil formats after we implement them in Dawn.
         wgpu::TextureFormat depthStencilFormats[] = {
             wgpu::TextureFormat::Stencil8,     wgpu::TextureFormat::Depth16Unorm,
             wgpu::TextureFormat::Depth24Plus,  wgpu::TextureFormat::Depth24PlusStencil8,
             wgpu::TextureFormat::Depth32Float,
-            // wgpu::TextureFormat::Depth24UnormStencil8,
-            // wgpu::TextureFormat::Depth32FloatStencil8,
         };
 
-        for (wgpu::TextureDimension dimension : dimensions) {
+        for (wgpu::TextureDimension dimension : kDimensions) {
             for (wgpu::TextureFormat format : depthStencilFormats) {
                 descriptor.format = format;
                 descriptor.dimension = dimension;
@@ -551,6 +548,22 @@ namespace {
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
 
+    // Test that the creation of a texture with depth24unorm-stencil8 will fail when the feature
+    // Depth24UnormStencil8 is not enabled.
+    TEST_F(TextureValidationTest, UseD24S8FormatWithoutEnablingFeature) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = wgpu::TextureFormat::Depth24UnormStencil8;
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // Test that the creation of a texture with depth32float-stencil8 will fail when the feature
+    // Depth32FloatStencil8 is not enabled.
+    TEST_F(TextureValidationTest, UseD32S8FormatWithoutEnablingFeature) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = wgpu::TextureFormat::Depth32FloatStencil8;
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
     // Test that the creation of a texture with BC format will fail when the feature
     // textureCompressionBC is not enabled.
     TEST_F(TextureValidationTest, UseBCFormatWithoutEnablingFeature) {
@@ -577,6 +590,46 @@ namespace {
         for (wgpu::TextureFormat format : utils::kASTCFormats) {
             wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
             descriptor.format = format;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+    }
+
+    class D24S8TextureFormatsValidationTests : public TextureValidationTest {
+      protected:
+        WGPUDevice CreateTestDevice() override {
+            dawn_native::DeviceDescriptor descriptor;
+            descriptor.requiredFeatures = {"depth24unorm-stencil8"};
+            return adapter.CreateDevice(&descriptor);
+        }
+    };
+
+    // Test that depth24unorm-stencil8 format is invalid for 3D texture
+    TEST_F(D24S8TextureFormatsValidationTests, DepthStencilFormatsFor3D) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+
+        for (wgpu::TextureDimension dimension : kDimensions) {
+            descriptor.format = wgpu::TextureFormat::Depth24UnormStencil8;
+            descriptor.dimension = dimension;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+    }
+
+    class D32S8TextureFormatsValidationTests : public TextureValidationTest {
+      protected:
+        WGPUDevice CreateTestDevice() override {
+            dawn_native::DeviceDescriptor descriptor;
+            descriptor.requiredFeatures = {"depth32float-stencil8"};
+            return adapter.CreateDevice(&descriptor);
+        }
+    };
+
+    // Test that depth32float-stencil8 format is invalid for 3D texture
+    TEST_F(D32S8TextureFormatsValidationTests, DepthStencilFormatsFor3D) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+
+        for (wgpu::TextureDimension dimension : kDimensions) {
+            descriptor.format = wgpu::TextureFormat::Depth32FloatStencil8;
+            descriptor.dimension = dimension;
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
     }

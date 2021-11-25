@@ -22,7 +22,8 @@
 #include "common/Assert.h"
 
 namespace utils {
-    static constexpr std::array<wgpu::TextureFormat, 91> kAllTextureFormats = {
+    // TODO(dawn:666, 570): Add Stencil8, Depth16Unorm formats if they are implemented.
+    static constexpr std::array<wgpu::TextureFormat, 93> kAllTextureFormats = {
         wgpu::TextureFormat::R8Unorm,
         wgpu::TextureFormat::R8Snorm,
         wgpu::TextureFormat::R8Uint,
@@ -62,6 +63,8 @@ namespace utils {
         wgpu::TextureFormat::Depth32Float,
         wgpu::TextureFormat::Depth24Plus,
         wgpu::TextureFormat::Depth24PlusStencil8,
+        wgpu::TextureFormat::Depth24UnormStencil8,
+        wgpu::TextureFormat::Depth32FloatStencil8,
         wgpu::TextureFormat::BC1RGBAUnorm,
         wgpu::TextureFormat::BC1RGBAUnormSrgb,
         wgpu::TextureFormat::BC2RGBAUnorm,
@@ -179,18 +182,22 @@ namespace utils {
                       kBCFormats.size() + kETC2Formats.size() + kASTCFormats.size(),
                   "Number of compressed format must equal number of BC, ETC2, and ASTC formats.");
 
-    // TODO(dawn:666, 570, 690): Add more depth/stencil formats if Stencil8, Depth16Unorm,
-    // Depth24UnormStencil8, Depth32FloatStencil8 are implemented.
-    static constexpr std::array<wgpu::TextureFormat, 3> kDepthFormats = {
-        wgpu::TextureFormat::Depth32Float,
-        wgpu::TextureFormat::Depth24Plus,
-        wgpu::TextureFormat::Depth24PlusStencil8,
+    // TODO(dawn:666, 570): Add more depth/stencil formats if Stencil8, Depth16Unorm are
+    // implemented.
+    static constexpr std::array<wgpu::TextureFormat, 5> kDepthFormats = {
+        wgpu::TextureFormat::Depth32Float,         wgpu::TextureFormat::Depth24Plus,
+        wgpu::TextureFormat::Depth24PlusStencil8,  wgpu::TextureFormat::Depth24UnormStencil8,
+        wgpu::TextureFormat::Depth32FloatStencil8,
     };
-    static constexpr std::array<wgpu::TextureFormat, 1> kStencilFormats = {
+    static constexpr std::array<wgpu::TextureFormat, 3> kStencilFormats = {
         wgpu::TextureFormat::Depth24PlusStencil8,
+        wgpu::TextureFormat::Depth24UnormStencil8,
+        wgpu::TextureFormat::Depth32FloatStencil8,
     };
-    static constexpr std::array<wgpu::TextureFormat, 1> kDepthAndStencilFormats = {
+    static constexpr std::array<wgpu::TextureFormat, 3> kDepthAndStencilFormats = {
         wgpu::TextureFormat::Depth24PlusStencil8,
+        wgpu::TextureFormat::Depth24UnormStencil8,
+        wgpu::TextureFormat::Depth32FloatStencil8,
     };
 
     bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format);

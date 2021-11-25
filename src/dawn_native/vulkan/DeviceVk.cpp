@@ -497,25 +497,10 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Device::ApplyDepth24PlusS8Toggle() {
-        VkPhysicalDevice physicalDevice = ToBackend(GetAdapter())->GetPhysicalDevice();
-
-        bool supportsD32s8 = false;
-        {
-            VkFormatProperties properties;
-            fn.GetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D32_SFLOAT_S8_UINT,
-                                                 &properties);
-            supportsD32s8 =
-                properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
-        }
-
-        bool supportsD24s8 = false;
-        {
-            VkFormatProperties properties;
-            fn.GetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D24_UNORM_S8_UINT,
-                                                 &properties);
-            supportsD24s8 =
-                properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
-        }
+        bool supportsD32s8 =
+            ToBackend(GetAdapter())->IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT);
+        bool supportsD24s8 =
+            ToBackend(GetAdapter())->IsDepthStencilFormatSupported(VK_FORMAT_D24_UNORM_S8_UINT);
 
         ASSERT(supportsD32s8 || supportsD24s8);
 

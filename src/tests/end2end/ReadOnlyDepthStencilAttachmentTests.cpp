@@ -33,6 +33,33 @@ class ReadOnlyDepthStencilAttachmentTests
         uint32_t stencilInitValue;
         uint32_t stencilRefValue;
     };
+
+    std::vector<const char*> GetRequiredFeatures() override {
+        switch (GetParam().mTextureFormat) {
+            case wgpu::TextureFormat::Depth24UnormStencil8:
+                if (SupportsFeatures({"depth24unorm-stencil8"})) {
+                    mIsFormatSupported = true;
+                    return {"depth24unorm-stencil8"};
+                }
+
+                return {};
+            case wgpu::TextureFormat::Depth32FloatStencil8:
+                if (SupportsFeatures({"depth32float-stencil8"})) {
+                    mIsFormatSupported = true;
+                    return {"depth32float-stencil8"};
+                }
+
+                return {};
+            default:
+                mIsFormatSupported = true;
+                return {};
+        }
+    }
+
+    bool IsFormatSupported() const {
+        return mIsFormatSupported;
+    }
+
     wgpu::RenderPipeline CreateRenderPipeline(wgpu::TextureAspect aspect,
                                               wgpu::TextureFormat format) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
@@ -158,9 +185,18 @@ class ReadOnlyDepthStencilAttachmentTests
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
     }
+
+  private:
+    bool mIsFormatSupported = false;
 };
 
-class ReadOnlyDepthAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
+class ReadOnlyDepthAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {
+  protected:
+    void SetUp() override {
+        ReadOnlyDepthStencilAttachmentTests::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
+    }
+};
 
 TEST_P(ReadOnlyDepthAttachmentTests, Test) {
     wgpu::Texture colorTexture =
@@ -185,7 +221,13 @@ TEST_P(ReadOnlyDepthAttachmentTests, Test) {
                       {kSize, kSize / 2});
 }
 
-class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
+class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {
+  protected:
+    void SetUp() override {
+        ReadOnlyDepthStencilAttachmentTests::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
+    }
+};
 
 TEST_P(ReadOnlyStencilAttachmentTests, Test) {
     wgpu::Texture colorTexture =

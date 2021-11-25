@@ -36,6 +36,8 @@ namespace dawn_native { namespace vulkan {
         VkPhysicalDevice GetPhysicalDevice() const;
         Backend* GetBackend() const;
 
+        bool IsDepthStencilFormatSupported(VkFormat format);
+
       private:
         MaybeError InitializeImpl() override;
         MaybeError InitializeSupportedFeaturesImpl() override;

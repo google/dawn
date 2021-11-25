@@ -40,6 +40,16 @@ namespace dawn_native { namespace vulkan {
         return mBackend;
     }
 
+    bool Adapter::IsDepthStencilFormatSupported(VkFormat format) {
+        ASSERT(format == VK_FORMAT_D16_UNORM_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT ||
+               format == VK_FORMAT_D32_SFLOAT_S8_UINT);
+
+        VkFormatProperties properties;
+        GetBackend()->GetFunctions().GetPhysicalDeviceFormatProperties(mPhysicalDevice, format,
+                                                                       &properties);
+        return properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    }
+
     MaybeError Adapter::InitializeImpl() {
         DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 

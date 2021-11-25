@@ -54,6 +54,16 @@ namespace {
         return device.CreateTexture(&descriptor);
     }
 
+    wgpu::Texture CreateDepthStencilTexture(wgpu::Device& device, wgpu::TextureFormat format) {
+        wgpu::TextureDescriptor descriptor = {};
+        descriptor.size = {kWidth, kHeight, kDepth};
+        descriptor.usage =
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+        descriptor.mipLevelCount = kDefaultMipLevels;
+        descriptor.format = format;
+        return device.CreateTexture(&descriptor);
+    }
+
     wgpu::TextureViewDescriptor CreateDefaultViewDescriptor(wgpu::TextureViewDimension dimension) {
         wgpu::TextureViewDescriptor descriptor;
         descriptor.format = kDefaultTextureFormat;
@@ -636,6 +646,94 @@ namespace {
 
             viewDescriptor.aspect = wgpu::TextureAspect::StencilOnly;
             ASSERT_DEVICE_ERROR(texture.CreateView(&viewDescriptor));
+        }
+    }
+
+    class D24S8TextureViewValidationTests : public ValidationTest {
+      protected:
+        WGPUDevice CreateTestDevice() override {
+            dawn_native::DeviceDescriptor descriptor;
+            descriptor.requiredFeatures = {"depth24unorm-stencil8"};
+            return adapter.CreateDevice(&descriptor);
+        }
+    };
+
+    // Test that the selected TextureAspects must exist in the Depth24UnormStencil8 texture format
+    TEST_F(D24S8TextureViewValidationTests, AspectMustExist) {
+        wgpu::Texture texture =
+            CreateDepthStencilTexture(device, wgpu::TextureFormat::Depth24UnormStencil8);
+
+        // Can select: All, DepthOnly, and StencilOnly from Depth24UnormStencil8
+        {
+            wgpu::TextureViewDescriptor viewDescriptor = {};
+            viewDescriptor.aspect = wgpu::TextureAspect::All;
+            texture.CreateView(&viewDescriptor);
+
+            viewDescriptor.aspect = wgpu::TextureAspect::DepthOnly;
+            texture.CreateView(&viewDescriptor);
+
+            viewDescriptor.aspect = wgpu::TextureAspect::StencilOnly;
+            texture.CreateView(&viewDescriptor);
+        }
+    }
+
+    // Test the format compatibility rules when creating a texture view.
+    TEST_F(D24S8TextureViewValidationTests, TextureViewFormatCompatibility) {
+        wgpu::Texture texture =
+            CreateDepthStencilTexture(device, wgpu::TextureFormat::Depth24UnormStencil8);
+
+        wgpu::TextureViewDescriptor base2DTextureViewDescriptor =
+            CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
+
+        // It is an error to create a texture view in color format on a depth-stencil texture.
+        {
+            wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+            descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        }
+    }
+
+    class D32S8TextureViewValidationTests : public ValidationTest {
+      protected:
+        WGPUDevice CreateTestDevice() override {
+            dawn_native::DeviceDescriptor descriptor;
+            descriptor.requiredFeatures = {"depth32float-stencil8"};
+            return adapter.CreateDevice(&descriptor);
+        }
+    };
+
+    // Test that the selected TextureAspects must exist in the Depth32FloatStencil8 texture format
+    TEST_F(D32S8TextureViewValidationTests, AspectMustExist) {
+        wgpu::Texture texture =
+            CreateDepthStencilTexture(device, wgpu::TextureFormat::Depth32FloatStencil8);
+
+        // Can select: All, DepthOnly, and StencilOnly from Depth32FloatStencil8
+        {
+            wgpu::TextureViewDescriptor viewDescriptor = {};
+            viewDescriptor.aspect = wgpu::TextureAspect::All;
+            texture.CreateView(&viewDescriptor);
+
+            viewDescriptor.aspect = wgpu::TextureAspect::DepthOnly;
+            texture.CreateView(&viewDescriptor);
+
+            viewDescriptor.aspect = wgpu::TextureAspect::StencilOnly;
+            texture.CreateView(&viewDescriptor);
+        }
+    }
+
+    // Test the format compatibility rules when creating a texture view.
+    TEST_F(D32S8TextureViewValidationTests, TextureViewFormatCompatibility) {
+        wgpu::Texture texture =
+            CreateDepthStencilTexture(device, wgpu::TextureFormat::Depth32FloatStencil8);
+
+        wgpu::TextureViewDescriptor base2DTextureViewDescriptor =
+            CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
+
+        // It is an error to create a texture view in color format on a depth-stencil texture.
+        {
+            wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+            descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
         }
     }
 
