@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  float arr[4];
+};
+
+int foo() {
+  return 1;
+}
+
+fragment void tint_symbol() {
+  tint_array_wrapper arr = {.arr={}};
+  int const a_save = foo();
+  for(; ; ) {
+    float const x = arr.arr[a_save];
+    break;
+  }
+  return;
+}
+
