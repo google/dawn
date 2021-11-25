@@ -209,7 +209,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       generated_wgsl_ = std::move(result.wgsl);
       if (!result.success) {
         FATAL_ERROR(program.Diagnostics(),
-                    "WGSL writer failed: " + result.error);
+                    "WGSL writer errored on validated input:\n" + result.error);
       }
 #endif  // TINT_BUILD_WGSL_WRITER
       break;
@@ -219,8 +219,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::spirv::Generate(&program, options_spirv_);
       generated_spirv_ = std::move(result.spirv);
       if (!result.success) {
-        FATAL_ERROR(program.Diagnostics(),
-                    "SPIR-V writer failed: " + result.error);
+        FATAL_ERROR(
+            program.Diagnostics(),
+            "SPIR-V writer errored on validated input:\n" + result.error);
       }
       if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {
         FATAL_ERROR(program.Diagnostics(),
@@ -236,7 +237,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       generated_hlsl_ = std::move(result.hlsl);
       if (!result.success) {
         FATAL_ERROR(program.Diagnostics(),
-                    "HLSL writer failed: " + result.error);
+                    "HLSL writer errored on validated input:\n" + result.error);
       }
 #endif  // TINT_BUILD_HLSL_WRITER
       break;
@@ -247,7 +248,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       generated_msl_ = std::move(result.msl);
       if (!result.success) {
         FATAL_ERROR(program.Diagnostics(),
-                    "MSL writer failed: " + result.error);
+                    "MSL writer errored on validated input:\n" + result.error);
       }
 #endif  // TINT_BUILD_MSL_WRITER
       break;

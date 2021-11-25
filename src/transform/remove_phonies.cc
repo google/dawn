@@ -77,11 +77,20 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     if (auto* stmt = node->As<ast::AssignmentStatement>()) {
       if (stmt->lhs->Is<ast::PhonyExpression>()) {
         std::vector<const ast::Expression*> side_effects;
-        if (!ast::TraverseExpressions(stmt->rhs, ctx.dst->Diagnostics(),
-                                      [&](const ast::CallExpression* call) {
-                                        side_effects.push_back(call);
-                                        return ast::TraverseAction::Skip;
-                                      })) {
+        if (!ast::TraverseExpressions(
+                stmt->rhs, ctx.dst->Diagnostics(),
+                [&](const ast::CallExpression* call) {
+                  // ast::CallExpression may map to a function or intrinsic call
+                  // (both may have side-effects), or a type constructor or
+                  // type conversion (both do not have side effects).
+                  if (sem.Get(call)
+                          ->Target()
+                          ->IsAnyOf<sem::Function, sem::Intrinsic>()) {
+                    side_effects.push_back(call);
+                    return ast::TraverseAction::Skip;
+                  }
+                  return ast::TraverseAction::Descend;
+                })) {
           return;
         }
 
