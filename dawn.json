@@ -2581,6 +2581,48 @@
             {"value": 30, "name": "sint32x4"}
         ]
     },
+    "whole size" : {
+        "category": "constant",
+        "type": "uint64_t",
+        "value":  "(0xffffffffffffffffULL)"
+    },
+    "whole map size" : {
+        "category": "constant",
+        "type": "size_t",
+        "value":  "SIZE_MAX"
+    },
+    "stride undefined" : {
+        "category": "constant",
+        "tags": ["deprecated"],
+        "_TODO": "crbug.com/dawn/520: Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.",
+        "type": "uint32_t",
+        "value":  "(0xffffffffUL)"
+    },
+    "copy stride undefined" : {
+        "category": "constant",
+        "type": "uint32_t",
+        "value":  "(0xffffffffUL)"
+    },
+    "limit u32 undefined" : {
+        "category": "constant",
+        "type": "uint32_t",
+        "value":  "(0xffffffffUL)"
+    },
+    "limit u64 undefined" : {
+        "category": "constant",
+        "type": "uint64_t",
+        "value":  "(0xffffffffffffffffULL)"
+    },
+    "array layer count undefined" : {
+        "category": "constant",
+        "type": "uint32_t",
+        "value":  "(0xffffffffUL)"
+    },
+    "mip level count undefined" : {
+        "category": "constant",
+        "type": "uint32_t",
+        "value":  "(0xffffffffUL)"
+    },
     "ObjectType": {
       "_comment": "Only used for the wire",
       "category": "native"

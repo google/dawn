@@ -19,17 +19,12 @@
 
 namespace wgpu {
 
-    static constexpr uint64_t kWholeSize = WGPU_WHOLE_SIZE;
-    static constexpr size_t kWholeMapSize = WGPU_WHOLE_MAP_SIZE;
-    {% if 'deprecated' in enabled_tags %}
-        // TODO(crbug.com/520): Remove kStrideUndefined in favor of kCopyStrideUndefined.
-        static constexpr uint32_t kStrideUndefined = WGPU_STRIDE_UNDEFINED;
-    {% endif %}
-    static constexpr uint32_t kCopyStrideUndefined = WGPU_COPY_STRIDE_UNDEFINED;
-    static constexpr uint32_t kLimitU32Undefined = WGPU_LIMIT_U32_UNDEFINED;
-    static constexpr uint64_t kLimitU64Undefined = WGPU_LIMIT_U64_UNDEFINED;
-    static constexpr uint32_t kArrayLayerCountUndefined = WGPU_ARRAY_LAYER_COUNT_UNDEFINED;
-    static constexpr uint32_t kMipLevelCountUndefined = WGPU_MIP_LEVEL_COUNT_UNDEFINED;
+    {% set c_prefix = metadata.c_prefix %}
+    {% for constant in by_category["constant"] %}
+        {% set type = as_cppType(constant.type.name) %}
+        {% set value = c_prefix + "_" +  constant.name.SNAKE_CASE() %}
+        static constexpr {{type}} k{{as_cppType(constant.name)}} = {{ value }};
+    {% endfor %}
 
     {% for type in by_category["enum"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {

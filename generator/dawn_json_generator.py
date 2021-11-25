@@ -239,6 +239,14 @@ class StructureType(Record, Type):
         return self.chained == "out" or self.extensible == "out"
 
 
+class ConstantDefinition():
+    def __init__(self, is_enabled, name, json_data):
+        self.type = None
+        self.value = json_data['value']
+        self.json_data = json_data
+        self.name = Name(name)
+
+
 class Command(Record):
     def __init__(self, name, members=None):
         Record.__init__(self, name)
@@ -310,6 +318,11 @@ def link_typedef(typedef, types):
     typedef.type = types[typedef.json_data['type']]
 
 
+def link_constant(constant, types):
+    constant.type = types[constant.json_data['type']]
+    assert constant.type.name.native
+
+
 # Sort structures so that if struct A has struct B as a member, then B is
 # listed before A.
 #
@@ -362,6 +375,7 @@ def parse_json(json, enabled_tags):
         'object': ObjectType,
         'structure': StructureType,
         'typedef': TypedefType,
+        'constant': ConstantDefinition,
     }
 
     types = {}
@@ -389,6 +403,9 @@ def parse_json(json, enabled_tags):
 
     for typedef in by_category['typedef']:
         link_typedef(typedef, types)
+
+    for constant in by_category['constant']:
+        link_constant(constant, types)
 
     for category in by_category.keys():
         by_category[category] = sorted(

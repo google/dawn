@@ -75,17 +75,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define WGPU_WHOLE_SIZE (0xffffffffffffffffULL)
-#define WGPU_WHOLE_MAP_SIZE SIZE_MAX
-{% if 'deprecated' in enabled_tags %}
-    // TODO(crbug.com/dawn/520): Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.
-    #define WGPU_STRIDE_UNDEFINED (0xffffffffUL)
-{% endif %}
-#define WGPU_COPY_STRIDE_UNDEFINED (0xffffffffUL)
-#define WGPU_LIMIT_U32_UNDEFINED (0xffffffffUL)
-#define WGPU_LIMIT_U64_UNDEFINED (0xffffffffffffffffULL)
-#define WGPU_ARRAY_LAYER_COUNT_UNDEFINED (0xffffffffUL)
-#define WGPU_MIP_LEVEL_COUNT_UNDEFINED (0xffffffffUL)
+{% for constant in by_category["constant"] %}
+    #define {{c_prefix}}_{{constant.name.SNAKE_CASE()}} {{constant.value}}
+{% endfor %}
 
 typedef uint32_t {{c_prefix}}Flags;
 
@@ -138,13 +130,6 @@ typedef struct {{c_prefix}}ChainedStructOut {
     typedef {{as_cType(typeDef.type.name)}} {{as_cType(typeDef.name)}};
 
 {% endfor %}
-{% if 'deprecated' in enabled_tags %}
-    // TODO(crbug.com/dawn/1023): Remove after the deprecation period.
-    #define WGPUInputStepMode_Vertex WGPUVertexStepMode_Vertex
-    #define WGPUInputStepMode_Instance WGPUVertexStepMode_Instance
-    #define WGPUInputStepMode_Force32 WGPUVertexStepMode_Force32
-
-{% endif %}
 #ifdef __cplusplus
 extern "C" {
 #endif

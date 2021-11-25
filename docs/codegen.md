@@ -71,6 +71,10 @@ A **record** is a list of **record members**, each of which is a dictionary with
    - `"return_type"` (default to no return type) a string that's the name of the return type.
    - `"arguments"` a **record**, so an array of **record members**
 
+**`"constant"`**
+ - `"type"`: a string, the name of the base data type
+ - `"value"`: a string, the value is defined with preprocessor macro
+
 ## Dawn "wire" generators
 
 The generator for the pieces of dawn_wire need additional data which is found in [`dawn_wire_json`](../dawn_wire.json). Examples of pieces that are generated are:
