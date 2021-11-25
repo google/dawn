@@ -6,7 +6,6 @@
 .vscode/*
 !.vscode/tasks.json
 .idea
-/build*/
 buildtools
 cmake-build-*/
 coverage.summary
@@ -25,3 +24,6 @@ third_party/spirv-headers
 third_party/spirv-tools
 tools/clang
 tools/bin
+
+/build*/
+/test.wgsl
