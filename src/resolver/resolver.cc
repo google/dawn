@@ -1960,7 +1960,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
   sem::Type* result = nullptr;
   if (auto* alias = named_type->As<ast::Alias>()) {
-    result = Type(alias->type);
+    result = Alias(alias);
   } else if (auto* str = named_type->As<ast::Struct>()) {
     result = Structure(str);
   } else {
@@ -2137,6 +2137,182 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     if (found != atomic_composite_info_.end()) {
       atomic_composite_info_.emplace(out, found->second);
     }
+  }
+
+  return out;
+}
+
+sem::Type* Resolver::Alias(const ast::Alias* alias) {
+  auto* ty = Type(alias->type);
+  if (!ty) {
+    return nullptr;
+  }
+  if (!ValidateAlias(alias)) {
+    return nullptr;
+  }
+  return ty;
+}
+
+sem::Struct* Resolver::Structure(const ast::Struct* str) {
+  if (!ValidateNoDuplicateDecorations(str->decorations)) {
+    return nullptr;
+  }
+  for (auto* deco : str->decorations) {
+    Mark(deco);
+  }
+
+  sem::StructMemberList sem_members;
+  sem_members.reserve(str->members.size());
+
+  // Calculate the effective size and alignment of each field, and the overall
+  // size of the structure.
+  // For size, use the size attribute if provided, otherwise use the default
+  // size for the type.
+  // For alignment, use the alignment attribute if provided, otherwise use the
+  // default alignment for the member type.
+  // Diagnostic errors are raised if a basic rule is violated.
+  // Validation of storage-class rules requires analysing the actual variable
+  // usage of the structure, and so is performed as part of the variable
+  // validation.
+  uint64_t struct_size = 0;
+  uint64_t struct_align = 1;
+  std::unordered_map<Symbol, const ast::StructMember*> member_map;
+
+  for (auto* member : str->members) {
+    Mark(member);
+    auto result = member_map.emplace(member->symbol, member);
+    if (!result.second) {
+      AddError("redefinition of '" +
+                   builder_->Symbols().NameFor(member->symbol) + "'",
+               member->source);
+      AddNote("previous definition is here", result.first->second->source);
+      return nullptr;
+    }
+
+    // Resolve member type
+    auto* type = Type(member->type);
+    if (!type) {
+      return nullptr;
+    }
+
+    // Validate member type
+    if (!IsPlain(type)) {
+      AddError(TypeNameOf(type) +
+                   " cannot be used as the type of a structure member",
+               member->source);
+      return nullptr;
+    }
+
+    uint64_t offset = struct_size;
+    uint64_t align = type->Align();
+    uint64_t size = type->Size();
+
+    if (!ValidateNoDuplicateDecorations(member->decorations)) {
+      return nullptr;
+    }
+
+    bool has_offset_deco = false;
+    bool has_align_deco = false;
+    bool has_size_deco = false;
+    for (auto* deco : member->decorations) {
+      Mark(deco);
+      if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
+        // Offset decorations are not part of the WGSL spec, but are emitted
+        // by the SPIR-V reader.
+        if (o->offset < struct_size) {
+          AddError("offsets must be in ascending order", o->source);
+          return nullptr;
+        }
+        offset = o->offset;
+        align = 1;
+        has_offset_deco = true;
+      } else if (auto* a = deco->As<ast::StructMemberAlignDecoration>()) {
+        if (a->align <= 0 || !utils::IsPowerOfTwo(a->align)) {
+          AddError("align value must be a positive, power-of-two integer",
+                   a->source);
+          return nullptr;
+        }
+        align = a->align;
+        has_align_deco = true;
+      } else if (auto* s = deco->As<ast::StructMemberSizeDecoration>()) {
+        if (s->size < size) {
+          AddError("size must be at least as big as the type's size (" +
+                       std::to_string(size) + ")",
+                   s->source);
+          return nullptr;
+        }
+        size = s->size;
+        has_size_deco = true;
+      }
+    }
+
+    if (has_offset_deco && (has_align_deco || has_size_deco)) {
+      AddError(
+          "offset decorations cannot be used with align or size decorations",
+          member->source);
+      return nullptr;
+    }
+
+    offset = utils::RoundUp(align, offset);
+    if (offset > std::numeric_limits<uint32_t>::max()) {
+      std::stringstream msg;
+      msg << "struct member has byte offset 0x" << std::hex << offset
+          << ", but must not exceed 0x" << std::hex
+          << std::numeric_limits<uint32_t>::max();
+      AddError(msg.str(), member->source);
+      return nullptr;
+    }
+
+    auto* sem_member = builder_->create<sem::StructMember>(
+        member, member->symbol, type, static_cast<uint32_t>(sem_members.size()),
+        static_cast<uint32_t>(offset), static_cast<uint32_t>(align),
+        static_cast<uint32_t>(size));
+    builder_->Sem().Add(member, sem_member);
+    sem_members.emplace_back(sem_member);
+
+    struct_size = offset + size;
+    struct_align = std::max(struct_align, align);
+  }
+
+  uint64_t size_no_padding = struct_size;
+  struct_size = utils::RoundUp(struct_align, struct_size);
+
+  if (struct_size > std::numeric_limits<uint32_t>::max()) {
+    std::stringstream msg;
+    msg << "struct size in bytes must not exceed 0x" << std::hex
+        << std::numeric_limits<uint32_t>::max() << ", but is 0x" << std::hex
+        << struct_size;
+    AddError(msg.str(), str->source);
+    return nullptr;
+  }
+  if (struct_align > std::numeric_limits<uint32_t>::max()) {
+    TINT_ICE(Resolver, diagnostics_)
+        << "calculated struct stride exceeds uint32";
+    return nullptr;
+  }
+
+  auto* out = builder_->create<sem::Struct>(
+      str, str->name, sem_members, static_cast<uint32_t>(struct_align),
+      static_cast<uint32_t>(struct_size),
+      static_cast<uint32_t>(size_no_padding));
+
+  for (size_t i = 0; i < sem_members.size(); i++) {
+    auto* mem_type = sem_members[i]->Type();
+    if (mem_type->Is<sem::Atomic>()) {
+      atomic_composite_info_.emplace(out,
+                                     sem_members[i]->Declaration()->source);
+      break;
+    } else {
+      auto found = atomic_composite_info_.find(mem_type);
+      if (found != atomic_composite_info_.end()) {
+        atomic_composite_info_.emplace(out, found->second);
+        break;
+      }
+    }
+  }
+
+  if (!ValidateStructure(out)) {
+    return nullptr;
   }
 
   return out;

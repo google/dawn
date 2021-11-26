@@ -824,8 +824,8 @@ TEST_F(ResolverIntrinsicDataTest, FrexpVector) {
 }
 
 TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
-  Global("exp", ty.i32(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("frexp", 1, AddressOf("exp"));
+  Global("v", ty.i32(), ast::StorageClass::kWorkgroup);
+  auto* call = Call("frexp", 1, AddressOf("v"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
@@ -841,8 +841,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
 }
 
 TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
-  Global("exp", ty.f32(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("frexp", 1.0f, AddressOf("exp"));
+  Global("v", ty.f32(), ast::StorageClass::kWorkgroup);
+  auto* call = Call("frexp", 1.0f, AddressOf("v"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
@@ -872,8 +872,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
 }
 
 TEST_F(ResolverIntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
-  Global("exp", ty.vec4<i32>(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("frexp", vec2<f32>(1.0f, 2.0f), AddressOf("exp"));
+  Global("v", ty.vec4<i32>(), ast::StorageClass::kWorkgroup);
+  auto* call = Call("frexp", vec2<f32>(1.0f, 2.0f), AddressOf("v"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());

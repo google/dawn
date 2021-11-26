@@ -75,6 +75,52 @@ TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageIndirect) {
 7:8 note: called by entry point 'main')");
 }
 
+TEST_F(ResolverIntrinsicValidationTest, IntrinsicRedeclaredAsFunction) {
+  Func(Source{{12, 34}}, "mix", {}, ty.i32(), {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a function)");
+}
+
+TEST_F(ResolverIntrinsicValidationTest, IntrinsicRedeclaredAsGlobalLet) {
+  GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a module-scope let)");
+}
+
+TEST_F(ResolverIntrinsicValidationTest, IntrinsicRedeclaredAsGlobalVar) {
+  Global(Source{{12, 34}}, "mix", ty.i32(), Expr(1),
+         ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a module-scope var)");
+}
+
+TEST_F(ResolverIntrinsicValidationTest, IntrinsicRedeclaredAsAlias) {
+  Alias(Source{{12, 34}}, "mix", ty.i32());
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: 'mix' is a builtin and cannot be redeclared as an alias)");
+}
+
+TEST_F(ResolverIntrinsicValidationTest, IntrinsicRedeclaredAsStruct) {
+  Structure(Source{{12, 34}}, "mix", {Member("m", ty.i32())});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a struct)");
+}
+
 namespace TextureSamplerOffset {
 
 using TextureOverloadCase = ast::intrinsic::test::TextureOverloadCase;

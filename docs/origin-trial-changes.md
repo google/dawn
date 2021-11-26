@@ -5,6 +5,7 @@
 ### Breaking Changes
 
 * Taking the address of a vector component is no longer allowed.
+* Module-scope declarations can no longer alias a builtin name. [tint:1318](https://crbug.com/tint/1318)
 
 ### Deprecated Features
 

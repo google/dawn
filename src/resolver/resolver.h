@@ -215,6 +215,7 @@ class Resolver {
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
+  bool ValidateAlias(const ast::Alias*);
   bool ValidateArray(const sem::Array* arr, const Source& source);
   bool ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
                                      uint32_t el_size,
@@ -304,11 +305,17 @@ class Resolver {
   /// @param arr the Array to get semantic information for
   sem::Array* Array(const ast::Array* arr);
 
+  /// Builds and returns the semantic information for the alias `alias`.
+  /// This method does not mark the ast::Alias node, nor attach the generated
+  /// semantic information to the AST node.
+  /// @returns the aliased type, or nullptr if an error is raised.
+  sem::Type* Alias(const ast::Alias* alias);
+
   /// Builds and returns the semantic information for the structure `str`.
   /// This method does not mark the ast::Struct node, nor attach the generated
   /// semantic information to the AST node.
   /// @returns the semantic Struct information, or nullptr if an error is
-  /// raised. raised, nullptr is returned.
+  /// raised.
   sem::Struct* Structure(const ast::Struct* str);
 
   /// @returns the semantic info for the variable `var`. If an error is
