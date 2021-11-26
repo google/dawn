@@ -234,7 +234,7 @@ class VariableUser : public Castable<VariableUser, Expression> {
   const sem::Variable* Variable() const { return variable_; }
 
  private:
-  sem::Variable const* const variable_;
+  const sem::Variable* const variable_;
 };
 
 }  // namespace sem

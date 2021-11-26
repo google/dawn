@@ -82,7 +82,7 @@ class Swizzle : public Castable<Swizzle, MemberAccessorExpression> {
   /// Constructor
   /// @param declaration the AST node
   /// @param type the resolved type of the expression
-  /// @param statement the statement that
+  /// @param statement the statement that owns this expression
   /// @param indices the swizzle indices
   Swizzle(const ast::MemberAccessorExpression* declaration,
           const sem::Type* type,

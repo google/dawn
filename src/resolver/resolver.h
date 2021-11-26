@@ -59,8 +59,15 @@ class Variable;
 namespace sem {
 class Array;
 class Atomic;
+class BlockStatement;
+class ElseStatement;
+class ForLoopStatement;
+class IfStatement;
 class Intrinsic;
+class LoopStatement;
 class Statement;
+class SwitchCaseBlockStatement;
+class SwitchStatement;
 class TypeConstructor;
 }  // namespace sem
 
@@ -198,20 +205,26 @@ class Resolver {
 
   // Statement resolving methods
   // Each return true on success, false on failure.
-  bool Assignment(const ast::AssignmentStatement* a);
-  bool BlockStatement(const ast::BlockStatement*);
-  bool CaseStatement(const ast::CaseStatement*);
-  bool ElseStatement(const ast::ElseStatement*);
-  bool ForLoopStatement(const ast::ForLoopStatement*);
-  bool Parameter(const ast::Variable* param);
-  bool GlobalVariable(const ast::Variable* var);
-  bool IfStatement(const ast::IfStatement*);
-  bool LoopStatement(const ast::LoopStatement*);
-  bool Return(const ast::ReturnStatement* ret);
-  bool Statement(const ast::Statement*);
+  sem::Statement* AssignmentStatement(const ast::AssignmentStatement*);
+  sem::BlockStatement* BlockStatement(const ast::BlockStatement*);
+  sem::Statement* BreakStatement(const ast::BreakStatement*);
+  sem::Statement* CallStatement(const ast::CallStatement*);
+  sem::SwitchCaseBlockStatement* CaseStatement(const ast::CaseStatement*);
+  sem::Statement* ContinueStatement(const ast::ContinueStatement*);
+  sem::Statement* DiscardStatement(const ast::DiscardStatement*);
+  sem::ElseStatement* ElseStatement(const ast::ElseStatement*);
+  sem::Statement* FallthroughStatement(const ast::FallthroughStatement*);
+  sem::ForLoopStatement* ForLoopStatement(const ast::ForLoopStatement*);
+  sem::Statement* Parameter(const ast::Variable*);
+  sem::IfStatement* IfStatement(const ast::IfStatement*);
+  sem::LoopStatement* LoopStatement(const ast::LoopStatement*);
+  sem::Statement* ReturnStatement(const ast::ReturnStatement*);
+  sem::Statement* Statement(const ast::Statement*);
+  sem::SwitchStatement* SwitchStatement(const ast::SwitchStatement* s);
+  sem::Statement* VariableDeclStatement(const ast::VariableDeclStatement*);
   bool Statements(const ast::StatementList&);
-  bool SwitchStatement(const ast::SwitchStatement* s);
-  bool VariableDeclStatement(const ast::VariableDeclStatement*);
+
+  bool GlobalVariable(const ast::Variable*);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
@@ -224,13 +237,19 @@ class Resolver {
   bool ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s);
   bool ValidateAtomicVariable(const sem::Variable* var);
   bool ValidateAssignment(const ast::AssignmentStatement* a);
+  bool ValidateBreakStatement(const sem::Statement* stmt);
+  bool ValidateContinueStatement(const sem::Statement* stmt);
+  bool ValidateDiscardStatement(const sem::Statement* stmt);
   bool ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                  const sem::Type* storage_type,
                                  const bool is_input);
+  bool ValidateElseStatement(const sem::ElseStatement* stmt);
   bool ValidateEntryPoint(const sem::Function* func);
+  bool ValidateForLoopStatement(const sem::ForLoopStatement* stmt);
   bool ValidateFunction(const sem::Function* func);
   bool ValidateFunctionCall(const sem::Call* call);
   bool ValidateGlobalVariable(const sem::Variable* var);
+  bool ValidateIfStatement(const sem::IfStatement* stmt);
   bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
                                      const sem::Type* storage_type);
   bool ValidateIntrinsicCall(const sem::Call* call);
@@ -369,14 +388,19 @@ class Resolver {
   /// @param lit the literal
   sem::Type* TypeOf(const ast::LiteralExpression* lit);
 
-  /// Assigns `stmt` to #current_statement_, #current_compound_statement_, and
-  /// possibly #current_block_, pushes the variable scope, then calls
-  /// `callback`. Before returning #current_statement_,
-  /// #current_compound_statement_, and #current_block_ are restored to their
-  /// original values, and the variable scope is popped.
-  /// @returns the value returned by callback
-  template <typename F>
-  bool Scope(sem::CompoundStatement* stmt, F&& callback);
+  /// StatementScope() does the following:
+  /// * Creates the AST -> SEM mapping.
+  /// * Assigns `sem` to #current_statement_
+  /// * Assigns `sem` to #current_compound_statement_ if `sem` derives from
+  ///   sem::CompoundStatement.
+  /// * Assigns `sem` to #current_block_ if `sem` derives from
+  ///   sem::BlockStatement.
+  /// * Then calls `callback`.
+  /// * Before returning #current_statement_, #current_compound_statement_, and
+  ///   #current_block_ are restored to their original values.
+  /// @returns `sem` if `callback` returns true, otherwise `nullptr`.
+  template <typename SEM, typename F>
+  SEM* StatementScope(const ast::Statement* ast, SEM* sem, F&& callback);
 
   /// Returns a human-readable string representation of the vector type name
   /// with the given parameters.

@@ -23,6 +23,9 @@ namespace ast {
 class IfStatement;
 class ElseStatement;
 }  // namespace ast
+namespace sem {
+class Expression;
+}  // namespace sem
 }  // namespace tint
 
 namespace tint {
@@ -41,6 +44,16 @@ class IfStatement : public Castable<IfStatement, CompoundStatement> {
 
   /// Destructor
   ~IfStatement() override;
+
+  /// @returns the if-statement condition expression
+  const Expression* Condition() const { return condition_; }
+
+  /// Sets the if-statement condition expression
+  /// @param condition the if condition expression
+  void SetCondition(const Expression* condition) { condition_ = condition; }
+
+ private:
+  const Expression* condition_ = nullptr;
 };
 
 /// Holds semantic information about an else statement
@@ -56,6 +69,16 @@ class ElseStatement : public Castable<ElseStatement, CompoundStatement> {
 
   /// Destructor
   ~ElseStatement() override;
+
+  /// @returns the else-statement condition expression
+  const Expression* Condition() const { return condition_; }
+
+  /// Sets the else-statement condition expression
+  /// @param condition the else condition expression
+  void SetCondition(const Expression* condition) { condition_ = condition; }
+
+ private:
+  const Expression* condition_ = nullptr;
 };
 
 }  // namespace sem

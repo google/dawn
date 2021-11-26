@@ -1344,6 +1344,82 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
   return true;
 }
 
+bool Resolver::ValidateBreakStatement(const sem::Statement* stmt) {
+  if (!stmt->FindFirstParent<sem::LoopBlockStatement>() &&
+      !stmt->FindFirstParent<sem::SwitchCaseBlockStatement>()) {
+    AddError("break statement must be in a loop or switch case",
+             stmt->Declaration()->source);
+    return false;
+  }
+  return true;
+}
+
+bool Resolver::ValidateContinueStatement(const sem::Statement* stmt) {
+  if (auto* block =
+          stmt->FindFirstParent<sem::LoopBlockStatement,
+                                sem::LoopContinuingBlockStatement>()) {
+    if (block->Is<sem::LoopContinuingBlockStatement>()) {
+      AddError("continuing blocks must not contain a continue statement",
+               stmt->Declaration()->source);
+      return false;
+    }
+  } else {
+    AddError("continue statement must be in a loop",
+             stmt->Declaration()->source);
+    return false;
+  }
+
+  return true;
+}
+
+bool Resolver::ValidateDiscardStatement(const sem::Statement* stmt) {
+  if (auto* continuing =
+          stmt->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
+    AddError("continuing blocks must not contain a discard statement",
+             stmt->Declaration()->source);
+    if (continuing != stmt->Parent()) {
+      AddNote("see continuing block here", continuing->Declaration()->source);
+    }
+    return false;
+  }
+  return true;
+}
+
+bool Resolver::ValidateElseStatement(const sem::ElseStatement* stmt) {
+  if (auto* cond = stmt->Condition()) {
+    auto* cond_ty = cond->Type()->UnwrapRef();
+    if (!cond_ty->Is<sem::Bool>()) {
+      AddError(
+          "else statement condition must be bool, got " + TypeNameOf(cond_ty),
+          stmt->Condition()->Declaration()->source);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Resolver::ValidateForLoopStatement(const sem::ForLoopStatement* stmt) {
+  if (auto* cond = stmt->Condition()) {
+    auto* cond_ty = cond->Type()->UnwrapRef();
+    if (!cond_ty->Is<sem::Bool>()) {
+      AddError("for-loop condition must be bool, got " + TypeNameOf(cond_ty),
+               stmt->Condition()->Declaration()->source);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Resolver::ValidateIfStatement(const sem::IfStatement* stmt) {
+  auto* cond_ty = stmt->Condition()->Type()->UnwrapRef();
+  if (!cond_ty->Is<sem::Bool>()) {
+    AddError("if statement condition must be bool, got " + TypeNameOf(cond_ty),
+             stmt->Condition()->Declaration()->source);
+    return false;
+  }
+  return true;
+}
+
 bool Resolver::ValidateIntrinsicCall(const sem::Call* call) {
   if (call->Type()->Is<sem::Void>()) {
     bool is_call_statement = false;
@@ -2103,8 +2179,8 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
 }
 
 bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
-  auto* cond_type = TypeOf(s->condition)->UnwrapRef();
-  if (!cond_type->is_integer_scalar()) {
+  auto* cond_ty = TypeOf(s->condition)->UnwrapRef();
+  if (!cond_ty->is_integer_scalar()) {
     AddError(
         "switch statement selector expression must be of a "
         "scalar integer type",
@@ -2127,7 +2203,7 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
     }
 
     for (auto* selector : case_stmt->selectors) {
-      if (cond_type != TypeOf(selector)) {
+      if (cond_ty != TypeOf(selector)) {
         AddError(
             "the case selector values must have the same "
             "type as the selector expression.",
