@@ -113,7 +113,7 @@ def os_enum(dimension, category, console_name):
 
 os = struct(
     LINUX = os_enum("Ubuntu-18.04", os_category.LINUX, "linux"),
-    MAC = os_enum("Mac-11", os_category.MAC, "mac"),
+    MAC = os_enum("Mac-10.15", os_category.MAC, "mac"),
     WINDOWS = os_enum("Windows-10", os_category.WINDOWS, "win"),
 )
 
