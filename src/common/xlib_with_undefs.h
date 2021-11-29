@@ -33,6 +33,7 @@
 #undef Success
 #undef None
 #undef Always
+#undef Bool
 
 using XErrorHandler = int (*)(Display*, XErrorEvent*);
 
