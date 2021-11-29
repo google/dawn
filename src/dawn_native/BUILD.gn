@@ -679,6 +679,7 @@ source_set("dawn_native_sources") {
     }
     if (enable_vulkan_loader) {
       data_deps += [ "${dawn_vulkan_loader_dir}:libvulkan" ]
+      defines += [ "DAWN_ENABLE_VULKAN_LOADER" ]
     }
     if (use_swiftshader) {
       data_deps += [

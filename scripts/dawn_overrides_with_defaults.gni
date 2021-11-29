@@ -63,8 +63,7 @@ if (!defined(dawn_swiftshader_dir)) {
 }
 
 if (!defined(dawn_vulkan_loader_dir)) {
-  # Default to the Vulkan loader not being available.
-  dawn_vulkan_loader_dir = ""
+  dawn_vulkan_loader_dir = "//third_party/vulkan-deps/vulkan-loader/src"
 }
 
 if (!defined(dawn_vulkan_validation_layers_dir)) {

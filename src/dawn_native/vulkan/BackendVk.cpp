@@ -111,13 +111,25 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError Backend::LoadVulkan(bool useSwiftshader) {
-        // First try to load the system Vulkan driver, if that fails,
-        // try to load with Swiftshader. Note: The system driver could potentially be Swiftshader
-        // if it was installed.
-        if (mVulkanLib.Open(kVulkanLibName)) {
+        // First try to load the system Vulkan driver, if that fails, try to load with Swiftshader.
+        // Note: The system driver could potentially be Swiftshader if it was installed.
+#if defined(DAWN_ENABLE_VULKAN_LOADER)
+        // If enabled, we use our own built Vulkan loader by specifying an absolute path to the
+        // shared library. Note that when we are currently getting the absolute path for the custom
+        // loader by getting the path to the dawn native library and traversing relative from there.
+        // This has implications for dawn tests because some of them are linking statically to
+        // dawn_native which means the "module" is actually the test as well. If the directory
+        // location of the tests change w.r.t the shared lib then this may break. Essentially we are
+        // assuming that our custom built Vulkan loader will always be in the same directory as the
+        // shared dawn native library and all test binaries that link statically.
+        const std::string resolvedVulkanLibPath = GetModuleDirectory() + kVulkanLibName;
+#else
+        const std::string resolvedVulkanLibPath = kVulkanLibName;
+#endif  // defined(DAWN_ENABLE_VULKAN_LOADER)
+        if (mVulkanLib.Open(resolvedVulkanLibPath)) {
             return {};
         }
-        dawn::WarningLog() << std::string("Couldn't open ") + kVulkanLibName;
+        dawn::WarningLog() << std::string("Couldn't open ") + resolvedVulkanLibPath;
 
         // If |useSwiftshader == true|, fallback and try to directly load the Swiftshader
         // library.

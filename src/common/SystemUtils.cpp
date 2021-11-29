@@ -21,10 +21,12 @@
 #    include <Windows.h>
 #    include <vector>
 #elif defined(DAWN_PLATFORM_LINUX)
+#    include <dlfcn.h>
 #    include <limits.h>
 #    include <unistd.h>
 #    include <cstdlib>
 #elif defined(DAWN_PLATFORM_MACOS) || defined(DAWN_PLATFORM_IOS)
+#    include <dlfcn.h>
 #    include <mach-o/dyld.h>
 #    include <vector>
 #endif
@@ -134,6 +136,45 @@ std::string GetExecutableDirectory() {
     std::string exePath = GetExecutablePath();
     size_t lastPathSepLoc = exePath.find_last_of(GetPathSeparator());
     return lastPathSepLoc != std::string::npos ? exePath.substr(0, lastPathSepLoc + 1) : "";
+}
+
+#if defined(DAWN_PLATFORM_LINUX) || defined(DAWN_PLATFORM_MACOS) || defined(DAWN_PLATFORM_IOS)
+std::string GetModulePath() {
+    static int placeholderSymbol = 0;
+    Dl_info dlInfo;
+    if (dladdr(&placeholderSymbol, &dlInfo) == 0) {
+        return "";
+    }
+
+    std::array<char, PATH_MAX> absolutePath;
+    if (realpath(dlInfo.dli_fname, absolutePath.data()) == NULL) {
+        return "";
+    }
+    return absolutePath.data();
+}
+#elif defined(DAWN_PLATFORM_WINDOWS)
+std::string GetModulePath() {
+    UNREACHABLE();
+    return "";
+}
+#elif defined(DAWN_PLATFORM_FUCHSIA)
+std::string GetModulePath() {
+    UNREACHABLE();
+    return "";
+}
+#elif defined(DAWN_PLATFORM_EMSCRIPTEN)
+std::string GetModulePath() {
+    UNREACHABLE();
+    return "";
+}
+#else
+#    error "Implement GetModulePath for your platform."
+#endif
+
+std::string GetModuleDirectory() {
+    std::string modPath = GetModulePath();
+    size_t lastPathSepLoc = modPath.find_last_of(GetPathSeparator());
+    return lastPathSepLoc != std::string::npos ? modPath.substr(0, lastPathSepLoc + 1) : "";
 }
 
 // ScopedEnvironmentVar
