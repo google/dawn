@@ -16,6 +16,8 @@
 #define DAWNNATIVE_D3D12_BINDGROUPD3D12_H_
 
 #include "common/PlacementAllocated.h"
+#include "common/ityp_span.h"
+#include "common/ityp_stack_vec.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
@@ -45,6 +47,10 @@ namespace dawn_native { namespace d3d12 {
 
         void SetSamplerAllocationEntry(Ref<SamplerHeapCacheEntry> entry);
 
+        using DynamicStorageBufferLengths =
+            ityp::stack_vec<uint32_t, uint32_t, kMaxDynamicStorageBuffersPerPipelineLayout>;
+        const DynamicStorageBufferLengths& GetDynamicStorageBufferLengths() const;
+
       private:
         ~BindGroup() override;
 
@@ -54,6 +60,8 @@ namespace dawn_native { namespace d3d12 {
 
         GPUDescriptorHeapAllocation mGPUViewAllocation;
         CPUDescriptorHeapAllocation mCPUViewAllocation;
+
+        DynamicStorageBufferLengths mDynamicStorageBufferLengths;
     };
 }}  // namespace dawn_native::d3d12
 

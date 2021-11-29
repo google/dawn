@@ -26,6 +26,17 @@ using Microsoft::WRL::ComPtr;
 
 namespace dawn_native { namespace d3d12 {
     namespace {
+
+        // Reserve register names for internal use. This registers map to bindings in the shader,
+        // but are not directly related to allocation of the root signature.
+        // In the root signature, it the index of the root parameter where these registers are
+        // used that determines the layout of the root signature.
+        static constexpr uint32_t kRenderOrComputeInternalRegisterSpace = kMaxBindGroups + 1;
+        static constexpr uint32_t kRenderOrComputeInternalBaseRegister = 0;
+
+        static constexpr uint32_t kDynamicStorageBufferLengthsRegisterSpace = kMaxBindGroups + 2;
+        static constexpr uint32_t kDynamicStorageBufferLengthsBaseRegister = 0;
+
         D3D12_SHADER_VISIBILITY ShaderVisibilityType(wgpu::ShaderStage visibility) {
             ASSERT(visibility != wgpu::ShaderStage::None);
 
@@ -54,6 +65,7 @@ namespace dawn_native { namespace d3d12 {
                     UNREACHABLE();
             }
         }
+
     }  // anonymous namespace
 
     ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
@@ -160,34 +172,70 @@ namespace dawn_native { namespace d3d12 {
         // |ranges| will have resized and the pointers in the |rootParameter|s will be invalid.
         ASSERT(rangeIndex == rangesCount);
 
-        D3D12_ROOT_PARAMETER indexOffsetConstants{};
-        indexOffsetConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-        indexOffsetConstants.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-        // Always allocate 2 constants for vertex_index and instance_index
+        D3D12_ROOT_PARAMETER renderOrComputeInternalConstants{};
+        renderOrComputeInternalConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        renderOrComputeInternalConstants.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        // Always allocate 3 constants for either:
+        //  - vertex_index and instance_index
+        //  - num_workgroups_x, num_workgroups_y and num_workgroups_z
         // NOTE: We should consider delaying root signature creation until we know how many values
         // we need
-        indexOffsetConstants.Constants.Num32BitValues = 2;
-        indexOffsetConstants.Constants.RegisterSpace = kReservedRegisterSpace;
-        indexOffsetConstants.Constants.ShaderRegister = kFirstOffsetInfoBaseRegister;
+        renderOrComputeInternalConstants.Constants.Num32BitValues = 3;
+        renderOrComputeInternalConstants.Constants.RegisterSpace =
+            kRenderOrComputeInternalRegisterSpace;
+        renderOrComputeInternalConstants.Constants.ShaderRegister =
+            kRenderOrComputeInternalBaseRegister;
         mFirstIndexOffsetParameterIndex = rootParameters.size();
+        mNumWorkgroupsParameterIndex = rootParameters.size();
         // NOTE: We should consider moving this entry to earlier in the root signature since offsets
         // would need to be updated often
-        rootParameters.emplace_back(indexOffsetConstants);
+        rootParameters.emplace_back(renderOrComputeInternalConstants);
 
-        // Always allocate 3 constants for num_workgroups_x, num_workgroups_y and num_workgroups_z
-        // for Dispatch calls
-        // NOTE: We should consider delaying root signature creation until we know how many values
-        // we need
-        D3D12_ROOT_PARAMETER numWorkgroupsConstants{};
-        numWorkgroupsConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        numWorkgroupsConstants.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-        numWorkgroupsConstants.Constants.Num32BitValues = 3;
-        numWorkgroupsConstants.Constants.RegisterSpace = GetNumWorkgroupsRegisterSpace();
-        numWorkgroupsConstants.Constants.ShaderRegister = GetNumWorkgroupsShaderRegister();
-        mNumWorkgroupsParameterIndex = rootParameters.size();
-        // NOTE: We should consider moving this entry to earlier in the root signature since
-        // dispatch sizes would need to be updated often
-        rootParameters.emplace_back(numWorkgroupsConstants);
+        // Loops over all of the dynamic storage buffer bindings in the layout and build
+        // a mapping from the binding to the next offset into the root constant array where
+        // that dynamic storage buffer's binding size will be stored. The next register offset
+        // to use is tracked with |dynamicStorageBufferLengthsShaderRegisterOffset|.
+        // This data will be used by shader translation to emit a load from the root constant
+        // array to use as the binding's size in runtime array calculations.
+        // Each bind group's length data is stored contiguously in the root constant array,
+        // so the loop also computes the first register offset for each group where the
+        // data should start.
+        uint32_t dynamicStorageBufferLengthsShaderRegisterOffset = 0;
+        for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+            const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
+
+            mDynamicStorageBufferLengthInfo[group].firstRegisterOffset =
+                dynamicStorageBufferLengthsShaderRegisterOffset;
+            mDynamicStorageBufferLengthInfo[group].bindingAndRegisterOffsets.reserve(
+                bgl->GetBindingCountInfo().dynamicStorageBufferCount);
+
+            for (BindingIndex bindingIndex(0); bindingIndex < bgl->GetDynamicBufferCount();
+                 ++bindingIndex) {
+                if (bgl->IsStorageBufferBinding(bindingIndex)) {
+                    mDynamicStorageBufferLengthInfo[group].bindingAndRegisterOffsets.push_back(
+                        {bgl->GetBindingInfo(bindingIndex).binding,
+                         dynamicStorageBufferLengthsShaderRegisterOffset++});
+                }
+            }
+
+            ASSERT(mDynamicStorageBufferLengthInfo[group].bindingAndRegisterOffsets.size() ==
+                   bgl->GetBindingCountInfo().dynamicStorageBufferCount);
+        }
+        ASSERT(dynamicStorageBufferLengthsShaderRegisterOffset <=
+               kMaxDynamicStorageBuffersPerPipelineLayout);
+
+        D3D12_ROOT_PARAMETER dynamicStorageBufferLengthConstants{};
+        dynamicStorageBufferLengthConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        dynamicStorageBufferLengthConstants.ParameterType =
+            D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        dynamicStorageBufferLengthConstants.Constants.Num32BitValues =
+            dynamicStorageBufferLengthsShaderRegisterOffset;
+        dynamicStorageBufferLengthConstants.Constants.RegisterSpace =
+            kDynamicStorageBufferLengthsRegisterSpace;
+        dynamicStorageBufferLengthConstants.Constants.ShaderRegister =
+            kDynamicStorageBufferLengthsBaseRegister;
+        mDynamicStorageBufferLengthsParameterIndex = rootParameters.size();
+        rootParameters.emplace_back(dynamicStorageBufferLengthConstants);
 
         D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor;
         rootSignatureDescriptor.NumParameters = rootParameters.size();
@@ -234,6 +282,11 @@ namespace dawn_native { namespace d3d12 {
         return mRootSignature.Get();
     }
 
+    const PipelineLayout::DynamicStorageBufferLengthInfo&
+    PipelineLayout::GetDynamicStorageBufferLengthInfo() const {
+        return mDynamicStorageBufferLengthInfo;
+    }
+
     uint32_t PipelineLayout::GetDynamicRootParameterIndex(BindGroupIndex group,
                                                           BindingIndex bindingIndex) const {
         ASSERT(group < kMaxBindGroupsTyped);
@@ -245,11 +298,11 @@ namespace dawn_native { namespace d3d12 {
     }
 
     uint32_t PipelineLayout::GetFirstIndexOffsetRegisterSpace() const {
-        return kFirstIndexOffsetRegisterSpace;
+        return kRenderOrComputeInternalRegisterSpace;
     }
 
     uint32_t PipelineLayout::GetFirstIndexOffsetShaderRegister() const {
-        return kFirstOffsetInfoBaseRegister;
+        return kRenderOrComputeInternalBaseRegister;
     }
 
     uint32_t PipelineLayout::GetFirstIndexOffsetParameterIndex() const {
@@ -257,15 +310,27 @@ namespace dawn_native { namespace d3d12 {
     }
 
     uint32_t PipelineLayout::GetNumWorkgroupsRegisterSpace() const {
-        return kNumWorkgroupsRegisterSpace;
+        return kRenderOrComputeInternalRegisterSpace;
     }
 
     uint32_t PipelineLayout::GetNumWorkgroupsShaderRegister() const {
-        return kNumWorkgroupsBaseRegister;
+        return kRenderOrComputeInternalBaseRegister;
     }
 
     uint32_t PipelineLayout::GetNumWorkgroupsParameterIndex() const {
         return mNumWorkgroupsParameterIndex;
+    }
+
+    uint32_t PipelineLayout::GetDynamicStorageBufferLengthsRegisterSpace() const {
+        return kDynamicStorageBufferLengthsRegisterSpace;
+    }
+
+    uint32_t PipelineLayout::GetDynamicStorageBufferLengthsShaderRegister() const {
+        return kDynamicStorageBufferLengthsBaseRegister;
+    }
+
+    uint32_t PipelineLayout::GetDynamicStorageBufferLengthsParameterIndex() const {
+        return mDynamicStorageBufferLengthsParameterIndex;
     }
 
     ID3D12CommandSignature* PipelineLayout::GetDispatchIndirectCommandSignatureWithNumWorkgroups() {

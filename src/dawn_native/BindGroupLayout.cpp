@@ -553,4 +553,18 @@ namespace dawn_native {
                 {unverifiedBufferSizes, mBindingCounts.unverifiedBufferCount}};
     }
 
+    bool BindGroupLayoutBase::IsStorageBufferBinding(BindingIndex bindingIndex) const {
+        ASSERT(bindingIndex < GetBufferCount());
+        switch (GetBindingInfo(bindingIndex).buffer.type) {
+            case wgpu::BufferBindingType::Uniform:
+                return false;
+            case kInternalStorageBufferBinding:
+            case wgpu::BufferBindingType::Storage:
+            case wgpu::BufferBindingType::ReadOnlyStorage:
+                return true;
+            case wgpu::BufferBindingType::Undefined:
+                UNREACHABLE();
+        }
+    }
+
 }  // namespace dawn_native

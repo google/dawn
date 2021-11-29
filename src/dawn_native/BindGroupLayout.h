@@ -113,6 +113,8 @@ namespace dawn_native {
 
         BindingDataPointers ComputeBindingDataPointers(void* dataStart) const;
 
+        bool IsStorageBufferBinding(BindingIndex bindingIndex) const;
+
       protected:
         // Constructor used only for mocking and testing.
         BindGroupLayoutBase(DeviceBase* device);

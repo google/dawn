@@ -23,13 +23,6 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    // We reserve a register space that a user cannot use.
-    static constexpr uint32_t kReservedRegisterSpace = kMaxBindGroups + 1;
-    static constexpr uint32_t kFirstOffsetInfoBaseRegister = 0;
-    static constexpr uint32_t kFirstIndexOffsetRegisterSpace = kReservedRegisterSpace;
-    static constexpr uint32_t kNumWorkgroupsRegisterSpace = kReservedRegisterSpace + 1;
-    static constexpr uint32_t kNumWorkgroupsBaseRegister = 0;
-
     class Device;
 
     class PipelineLayout final : public PipelineLayoutBase {
@@ -53,9 +46,36 @@ namespace dawn_native { namespace d3d12 {
         uint32_t GetNumWorkgroupsShaderRegister() const;
         uint32_t GetNumWorkgroupsParameterIndex() const;
 
+        uint32_t GetDynamicStorageBufferLengthsRegisterSpace() const;
+        uint32_t GetDynamicStorageBufferLengthsShaderRegister() const;
+        uint32_t GetDynamicStorageBufferLengthsParameterIndex() const;
+
         ID3D12RootSignature* GetRootSignature() const;
 
         ID3D12CommandSignature* GetDispatchIndirectCommandSignatureWithNumWorkgroups();
+
+        struct PerBindGroupDynamicStorageBufferLengthInfo {
+            // First register offset for a bind group's dynamic storage buffer lengths.
+            // This is the index into the array of root constants where this bind group's
+            // lengths start.
+            uint32_t firstRegisterOffset;
+
+            struct BindingAndRegisterOffset {
+                BindingNumber binding;
+                uint32_t registerOffset;
+            };
+            // Associative list of (BindingNumber,registerOffset) pairs, which is passed into
+            // the shader to map the BindingPoint(thisGroup, BindingNumber) to the registerOffset
+            // into the root constant array which holds the dynamic storage buffer lengths.
+            std::vector<BindingAndRegisterOffset> bindingAndRegisterOffsets;
+        };
+
+        // Flat map from bind group index to the list of (BindingNumber,Register) pairs.
+        // Each pair is used in shader translation to
+        using DynamicStorageBufferLengthInfo =
+            ityp::array<BindGroupIndex, PerBindGroupDynamicStorageBufferLengthInfo, kMaxBindGroups>;
+
+        const DynamicStorageBufferLengthInfo& GetDynamicStorageBufferLengthInfo() const;
 
       private:
         ~PipelineLayout() override = default;
@@ -67,8 +87,10 @@ namespace dawn_native { namespace d3d12 {
                     ityp::array<BindingIndex, uint32_t, kMaxDynamicBuffersPerPipelineLayout>,
                     kMaxBindGroups>
             mDynamicRootParameterIndices;
+        DynamicStorageBufferLengthInfo mDynamicStorageBufferLengthInfo;
         uint32_t mFirstIndexOffsetParameterIndex;
         uint32_t mNumWorkgroupsParameterIndex;
+        uint32_t mDynamicStorageBufferLengthsParameterIndex;
         ComPtr<ID3D12RootSignature> mRootSignature;
         ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
     };
