@@ -31,6 +31,8 @@ Statement::Statement(const ast::Statement* declaration,
                      const sem::Function* function)
     : declaration_(declaration), parent_(parent), function_(function) {}
 
+Statement::~Statement() = default;
+
 const BlockStatement* Statement::Block() const {
   return FindFirstParent<BlockStatement>();
 }

@@ -249,6 +249,8 @@ set(TINT_LIB_SRCS
   sem/array.h
   sem/atomic_type.cc
   sem/atomic_type.h
+  sem/behavior.cc
+  sem/behavior.h
   sem/binding_point.h
   sem/block_statement.cc
   sem/block_statement.h

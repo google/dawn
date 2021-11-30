@@ -15,6 +15,7 @@
 #ifndef SRC_SEM_STATEMENT_H_
 #define SRC_SEM_STATEMENT_H_
 
+#include "src/sem/behavior.h"
 #include "src/sem/node.h"
 
 // Forward declarations
@@ -70,6 +71,9 @@ class Statement : public Castable<Statement, Node> {
             const CompoundStatement* parent,
             const sem::Function* function);
 
+  /// Destructor
+  ~Statement() override;
+
   /// @return the AST node for this statement
   const ast::Statement* Declaration() const { return declaration_; }
 
@@ -96,10 +100,18 @@ class Statement : public Castable<Statement, Node> {
   /// @returns the function that owns this statement
   const sem::Function* Function() const { return function_; }
 
+  /// @return the behaviors of this statement
+  const sem::Behaviors& Behaviors() const { return behaviors_; }
+
+  /// @return the behaviors of this statement
+  sem::Behaviors& Behaviors() { return behaviors_; }
+
  private:
   const ast::Statement* const declaration_;
   const CompoundStatement* const parent_;
   const sem::Function* const function_;
+
+  sem::Behaviors behaviors_;
 };
 
 /// CompoundStatement is the base class of statements that can hold other
