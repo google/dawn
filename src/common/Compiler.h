@@ -64,6 +64,7 @@
 #    if defined(NDEBUG)
 #        define DAWN_FORCE_INLINE inline __attribute__((always_inline))
 #    endif
+#    define DAWN_NOINLINE __attribute__((noinline))
 
 // MSVC
 #elif defined(_MSC_VER)
@@ -83,6 +84,7 @@ extern void __cdecl __debugbreak(void);
 #    if defined(NDEBUG)
 #        define DAWN_FORCE_INLINE __forceinline
 #    endif
+#    define DAWN_NOINLINE __declspec(noinline)
 
 #else
 #    error "Unsupported compiler"
@@ -105,6 +107,9 @@ extern void __cdecl __debugbreak(void);
 #endif
 #if !defined(DAWN_FORCE_INLINE)
 #    define DAWN_FORCE_INLINE inline
+#endif
+#if !defined(DAWN_NOINLINE)
+#    define DAWN_NOINLINE
 #endif
 
 #if defined(__clang__)

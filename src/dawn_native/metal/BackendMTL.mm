@@ -174,7 +174,7 @@ namespace dawn_native { namespace metal {
 #    error "Unsupported Apple platform."
 #endif
 
-        bool IsCounterSamplingBoundarySupport(id<MTLDevice> device)
+        DAWN_NOINLINE bool IsCounterSamplingBoundarySupport(id<MTLDevice> device)
             API_AVAILABLE(macos(11.0), ios(14.0)) {
             bool isBlitBoundarySupported =
                 [device supportsCounterSampling:MTLCounterSamplingPointAtBlitBoundary];
@@ -187,9 +187,9 @@ namespace dawn_native { namespace metal {
                    isDrawBoundarySupported;
         }
 
-        bool IsGPUCounterSupported(id<MTLDevice> device,
-                                   MTLCommonCounterSet counterSetName,
-                                   std::vector<MTLCommonCounter> counters)
+        DAWN_NOINLINE bool IsGPUCounterSupported(id<MTLDevice> device,
+                                                 MTLCommonCounterSet counterSetName,
+                                                 std::vector<MTLCommonCounter> counterNames)
             API_AVAILABLE(macos(10.15), ios(14.0)) {
             // MTLDevice’s counterSets property declares which counter sets it supports. Check
             // whether it's available on the device before requesting a counter set.
@@ -209,13 +209,15 @@ namespace dawn_native { namespace metal {
             // A GPU might support a counter set, but only support a subset of the counters in that
             // set, check if the counter set supports all specific counters we need. Return false
             // if there is a counter unsupported.
-            std::vector<NSString*> supportedCounters;
-            for (id<MTLCounter> counter in counterSet.counters) {
-                supportedCounters.push_back(counter.name);
-            }
-            for (const auto& counterName : counters) {
-                if (std::find(supportedCounters.begin(), supportedCounters.end(), counterName) ==
-                    supportedCounters.end()) {
+            for (MTLCommonCounter counterName : counterNames) {
+                bool found = false;
+                for (id<MTLCounter> counter in counterSet.counters) {
+                    if ([counter.name caseInsensitiveCompare:counterName] == NSOrderedSame) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
                     return false;
                 }
             }
