@@ -414,11 +414,6 @@ class ClampedOOBDynamicBufferOffsetTests
 
 // Test robust buffer access behavior for out of bounds accesses to dynamic buffer bindings.
 TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
-    // TODO(crbug.com/dawn/429): Dynamic storage buffers are not bounds clamped on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && ((GetParam().mOOBRead && GetParam().mReadBufferUsage ==
-                                                                    wgpu::BufferUsage::Storage) ||
-                                        GetParam().mOOBWrite));
-
     static constexpr uint32_t kArrayLength = 10u;
 
     // Out-of-bounds access will start halfway into the array and index off the end.
