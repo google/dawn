@@ -97,8 +97,8 @@
         "members": [
             {"name": "vendor ID", "type": "uint32_t"},
             {"name": "device ID", "type": "uint32_t"},
-            {"name": "name", "type": "char", "annotation": "const*"},
-            {"name": "driver description", "type": "char", "annotation": "const*"},
+            {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "driver description", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "adapter type", "type": "adapter type"},
             {"name": "backend type", "type": "backend type"}
         ]
