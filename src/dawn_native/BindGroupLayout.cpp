@@ -418,13 +418,11 @@ namespace dawn_native {
 
     BindGroupLayoutBase::~BindGroupLayoutBase() = default;
 
-    bool BindGroupLayoutBase::Destroy() {
-        bool wasDestroyed = ApiObjectBase::Destroy();
-        if (wasDestroyed && IsCachedReference()) {
-            // Do not uncache the actual cached object if we are a blueprint or already destroyed.
+    void BindGroupLayoutBase::DestroyImpl() {
+        if (IsCachedReference()) {
+            // Do not uncache the actual cached object if we are a blueprint.
             GetDevice()->UncacheBindGroupLayout(this);
         }
-        return wasDestroyed;
     }
 
     // static

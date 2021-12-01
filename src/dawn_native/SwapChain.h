@@ -49,6 +49,7 @@ namespace dawn_native {
       protected:
         SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
         ~SwapChainBase() override;
+        void DestroyImpl() override;
     };
 
     // The base class for implementation-based SwapChains that are deprecated.

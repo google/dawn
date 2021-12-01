@@ -63,6 +63,7 @@ namespace dawn_native { namespace d3d12 {
     QuerySet::~QuerySet() = default;
 
     void QuerySet::DestroyImpl() {
+        QuerySetBase::DestroyImpl();
         ToBackend(GetDevice())->ReferenceUntilUnused(mQueryHeap);
         mQueryHeap = nullptr;
     }

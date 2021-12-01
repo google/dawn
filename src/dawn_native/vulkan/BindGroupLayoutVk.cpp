@@ -155,6 +155,8 @@ namespace dawn_native { namespace vulkan {
     BindGroupLayout::~BindGroupLayout() = default;
 
     void BindGroupLayout::DestroyImpl() {
+        BindGroupLayoutBase::DestroyImpl();
+
         Device* device = ToBackend(GetDevice());
 
         // DescriptorSetLayout aren't used by execution on the GPU and can be deleted at any time,

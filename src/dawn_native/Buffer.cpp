@@ -91,10 +91,6 @@ namespace dawn_native {
                 mFakeMappedData.reset();
             }
 
-            void DestroyImpl() override {
-                mFakeMappedData.reset();
-            }
-
             std::unique_ptr<uint8_t[]> mFakeMappedData;
         };
 
@@ -183,12 +179,7 @@ namespace dawn_native {
         ASSERT(mState == BufferState::Unmapped || mState == BufferState::Destroyed);
     }
 
-    bool BufferBase::Destroy() {
-        bool marked = MarkDestroyed();
-        if (!marked) {
-            return false;
-        }
-
+    void BufferBase::DestroyImpl() {
         if (mState == BufferState::Mapped) {
             UnmapInternal(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
         } else if (mState == BufferState::MappedAtCreation) {
@@ -198,10 +189,7 @@ namespace dawn_native {
                 UnmapInternal(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
             }
         }
-
-        DestroyImpl();
         mState = BufferState::Destroyed;
-        return true;
     }
 
     // static

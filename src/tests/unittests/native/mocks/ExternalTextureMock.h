@@ -25,6 +25,9 @@ namespace dawn_native {
     class ExternalTextureMock : public ExternalTextureBase {
       public:
         ExternalTextureMock(DeviceBase* device) : ExternalTextureBase(device) {
+            ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
+                this->ExternalTextureBase::DestroyImpl();
+            });
         }
         ~ExternalTextureMock() override = default;
 

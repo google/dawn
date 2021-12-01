@@ -331,6 +331,7 @@ namespace dawn_native { namespace null {
     }
 
     void Buffer::DestroyImpl() {
+        BufferBase::DestroyImpl();
         ToBackend(GetDevice())->DecrementMemoryUsage(GetSize());
     }
 
@@ -344,9 +345,6 @@ namespace dawn_native { namespace null {
 
     QuerySet::QuerySet(Device* device, const QuerySetDescriptor* descriptor)
         : QuerySetBase(device, descriptor) {
-    }
-
-    void QuerySet::DestroyImpl() {
     }
 
     // Queue

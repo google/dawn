@@ -100,6 +100,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     void ShaderModule::DestroyImpl() {
+        ShaderModuleBase::DestroyImpl();
         // Remove reference to internal cache to trigger cleanup.
         mTransformedShaderModuleCache = nullptr;
     }

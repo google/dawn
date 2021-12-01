@@ -26,6 +26,9 @@ namespace dawn_native {
       public:
         TextureMock(DeviceBase* device, TextureBase::TextureState state)
             : TextureBase(device, state) {
+            ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
+                this->TextureBase::DestroyImpl();
+            });
         }
         ~TextureMock() override = default;
 

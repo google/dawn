@@ -246,9 +246,6 @@ namespace dawn_native { namespace null {
     class QuerySet final : public QuerySetBase {
       public:
         QuerySet(Device* device, const QuerySetDescriptor* descriptor);
-
-      private:
-        void DestroyImpl() override;
     };
 
     class Queue final : public QueueBase {

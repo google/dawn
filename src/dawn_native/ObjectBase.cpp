@@ -80,20 +80,11 @@ namespace dawn_native {
         GetDevice()->TrackObject(this);
     }
 
-    bool ApiObjectBase::MarkDestroyed() {
+    void ApiObjectBase::Destroy() {
         const std::lock_guard<std::mutex> lock(*GetDevice()->GetObjectListMutex(GetType()));
-        return RemoveFromList();
-    }
-
-    bool ApiObjectBase::Destroy() {
-        bool marked = MarkDestroyed();
-        if (marked) {
+        if (RemoveFromList()) {
             DestroyImpl();
         }
-        return marked;
-    }
-
-    void ApiObjectBase::DestroyImpl() {
     }
 
 }  // namespace dawn_native

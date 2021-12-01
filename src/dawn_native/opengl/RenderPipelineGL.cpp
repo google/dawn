@@ -237,6 +237,7 @@ namespace dawn_native { namespace opengl {
     RenderPipeline::~RenderPipeline() = default;
 
     void RenderPipeline::DestroyImpl() {
+        RenderPipelineBase::DestroyImpl();
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
         gl.DeleteVertexArrays(1, &mVertexArrayObject);
         gl.BindVertexArray(0);

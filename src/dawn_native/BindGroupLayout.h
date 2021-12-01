@@ -53,7 +53,6 @@ namespace dawn_native {
 
         static BindGroupLayoutBase* MakeError(DeviceBase* device);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         // A map from the BindingNumber to its packed BindingIndex.
@@ -118,6 +117,7 @@ namespace dawn_native {
       protected:
         // Constructor used only for mocking and testing.
         BindGroupLayoutBase(DeviceBase* device);
+        void DestroyImpl() override;
 
         template <typename BindGroup>
         SlabAllocator<BindGroup> MakeFrontendBindGroupAllocator(size_t size) {

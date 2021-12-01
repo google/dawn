@@ -126,9 +126,8 @@ namespace dawn_native {
         ASSERT(mState == QuerySetState::Unavailable || mState == QuerySetState::Destroyed);
     }
 
-    bool QuerySetBase::Destroy() {
+    void QuerySetBase::DestroyImpl() {
         mState = QuerySetState::Destroyed;
-        return ApiObjectBase::Destroy();
     }
 
     // static

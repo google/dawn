@@ -172,6 +172,7 @@ namespace dawn_native { namespace metal {
     }
 
     void Buffer::DestroyImpl() {
+        BufferBase::DestroyImpl();
         mMtlBuffer = nullptr;
     }
 

@@ -175,6 +175,7 @@ namespace dawn_native { namespace opengl {
     }
 
     void Buffer::DestroyImpl() {
+        BufferBase::DestroyImpl();
         ToBackend(GetDevice())->gl.DeleteBuffers(1, &mBuffer);
         mBuffer = 0;
     }

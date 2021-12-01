@@ -53,6 +53,7 @@ namespace dawn_native { namespace opengl {
     BindGroup::~BindGroup() = default;
 
     void BindGroup::DestroyImpl() {
+        BindGroupBase::DestroyImpl();
         ToBackend(GetLayout())->DeallocateBindGroup(this);
     }
 

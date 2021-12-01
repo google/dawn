@@ -25,6 +25,7 @@ namespace dawn_native { namespace metal {
     BindGroup::~BindGroup() = default;
 
     void BindGroup::DestroyImpl() {
+        BindGroupBase::DestroyImpl();
         ToBackend(GetLayout())->DeallocateBindGroup(this);
     }
 

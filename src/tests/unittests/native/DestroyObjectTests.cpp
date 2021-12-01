@@ -168,8 +168,8 @@ namespace dawn_native { namespace {
             BufferMock bufferMock(&mDevice, BufferBase::BufferState::Mapped);
             {
                 InSequence seq;
-                EXPECT_CALL(bufferMock, UnmapImpl).Times(1);
                 EXPECT_CALL(bufferMock, DestroyImpl).Times(1);
+                EXPECT_CALL(bufferMock, UnmapImpl).Times(1);
             }
 
             EXPECT_TRUE(bufferMock.IsAlive());
@@ -198,8 +198,8 @@ namespace dawn_native { namespace {
             BufferMock* bufferMock = new BufferMock(&mDevice, BufferBase::BufferState::Mapped);
             {
                 InSequence seq;
-                EXPECT_CALL(*bufferMock, UnmapImpl).Times(1);
                 EXPECT_CALL(*bufferMock, DestroyImpl).Times(1);
+                EXPECT_CALL(*bufferMock, UnmapImpl).Times(1);
             }
             {
                 BufferDescriptor desc = {};

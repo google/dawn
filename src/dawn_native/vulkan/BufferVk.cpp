@@ -330,6 +330,8 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Buffer::DestroyImpl() {
+        BufferBase::DestroyImpl();
+
         ToBackend(GetDevice())->GetResourceMemoryAllocator()->Deallocate(&mMemoryAllocation);
 
         if (mHandle != VK_NULL_HANDLE) {

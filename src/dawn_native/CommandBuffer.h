@@ -47,13 +47,12 @@ namespace dawn_native {
       protected:
         // Constructor used only for mocking and testing.
         CommandBufferBase(DeviceBase* device);
+        void DestroyImpl() override;
 
         CommandIterator mCommands;
 
       private:
         CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
-
-        void DestroyImpl() override;
 
         CommandBufferResourceUsage mResourceUsages;
     };

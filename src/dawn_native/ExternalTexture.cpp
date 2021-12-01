@@ -122,9 +122,8 @@ namespace dawn_native {
         Destroy();
     }
 
-    bool ExternalTextureBase::Destroy() {
+    void ExternalTextureBase::DestroyImpl() {
         mState = ExternalTextureState::Destroyed;
-        return ApiObjectBase::Destroy();
     }
 
     // static

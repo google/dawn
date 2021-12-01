@@ -683,17 +683,15 @@ namespace dawn_native {
 
     RenderPipelineBase::~RenderPipelineBase() = default;
 
-    bool RenderPipelineBase::Destroy() {
-        bool wasDestroyed = ApiObjectBase::Destroy();
-        if (wasDestroyed && IsCachedReference()) {
-            // Do not uncache the actual cached object if we are a blueprint or already destroyed.
+    void RenderPipelineBase::DestroyImpl() {
+        if (IsCachedReference()) {
+            // Do not uncache the actual cached object if we are a blueprint.
             GetDevice()->UncacheRenderPipeline(this);
         }
 
         // Remove reference to the attachment state so that we don't have lingering references to
         // it preventing it from being uncached in the device.
         mAttachmentState = nullptr;
-        return wasDestroyed;
     }
 
     // static

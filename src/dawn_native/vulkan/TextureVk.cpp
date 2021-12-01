@@ -833,6 +833,9 @@ namespace dawn_native { namespace vulkan {
             // If a signal semaphore exists it should be requested before we delete the texture
             ASSERT(mSignalSemaphore == VK_NULL_HANDLE);
         }
+        // For Vulkan, we currently run the base destruction code after the internal changes because
+        // of the dependency on the texture state which the base code overwrites too early.
+        TextureBase::DestroyImpl();
     }
 
     VkImage Texture::GetHandle() const {

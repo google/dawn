@@ -61,7 +61,6 @@ namespace dawn_native {
             DeviceBase* device,
             std::vector<StageAndDescriptor> stages);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         const BindGroupLayoutBase* GetBindGroupLayout(BindGroupIndex group) const;
@@ -87,6 +86,7 @@ namespace dawn_native {
         // Constructor used only for mocking and testing.
         PipelineLayoutBase(DeviceBase* device);
         PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+        void DestroyImpl() override;
 
         BindGroupLayoutArray mBindGroupLayouts;
         BindGroupLayoutMask mMask;

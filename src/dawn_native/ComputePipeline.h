@@ -34,7 +34,6 @@ namespace dawn_native {
 
         static ComputePipelineBase* MakeError(DeviceBase* device);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         // Functors necessary for the unordered_set<ComputePipelineBase*>-based cache.
@@ -45,6 +44,7 @@ namespace dawn_native {
       protected:
         // Constructor used only for mocking and testing.
         ComputePipelineBase(DeviceBase* device);
+        void DestroyImpl() override;
 
       private:
         ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);

@@ -63,7 +63,6 @@ namespace dawn_native {
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
@@ -111,6 +110,7 @@ namespace dawn_native {
       protected:
         // Constructor used only for mocking and testing.
         RenderPipelineBase(DeviceBase* device);
+        void DestroyImpl() override;
 
       private:
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);

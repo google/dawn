@@ -173,6 +173,9 @@ namespace dawn_native {
         ASSERT(mTasksInFlight.Empty());
     }
 
+    void QueueBase::DestroyImpl() {
+    }
+
     // static
     QueueBase* QueueBase::MakeError(DeviceBase* device) {
         return new ErrorQueue(device);

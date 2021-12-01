@@ -69,6 +69,7 @@ namespace dawn_native {
       protected:
         QueueBase(DeviceBase* device);
         QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+        void DestroyImpl() override;
 
       private:
         MaybeError WriteTextureInternal(const ImageCopyTexture* destination,

@@ -250,7 +250,6 @@ namespace dawn_native {
 
         static Ref<ShaderModuleBase> MakeError(DeviceBase* device);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         // Return true iff the program has an entrypoint called `entryPoint`.
@@ -279,6 +278,7 @@ namespace dawn_native {
       protected:
         // Constructor used only for mocking and testing.
         ShaderModuleBase(DeviceBase* device);
+        void DestroyImpl() override;
 
         MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
 

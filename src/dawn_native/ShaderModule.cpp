@@ -1204,13 +1204,11 @@ namespace dawn_native {
 
     ShaderModuleBase::~ShaderModuleBase() = default;
 
-    bool ShaderModuleBase::Destroy() {
-        bool wasDestroyed = ApiObjectBase::Destroy();
-        if (wasDestroyed && IsCachedReference()) {
-            // Do not uncache the actual cached object if we are a blueprint or already destroyed.
+    void ShaderModuleBase::DestroyImpl() {
+        if (IsCachedReference()) {
+            // Do not uncache the actual cached object if we are a blueprint.
             GetDevice()->UncacheShaderModule(this);
         }
-        return wasDestroyed;
     }
 
     // static

@@ -31,7 +31,6 @@ namespace dawn_native {
 
         static QuerySetBase* MakeError(DeviceBase* device);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         wgpu::QueryType GetQueryType() const;
@@ -50,6 +49,7 @@ namespace dawn_native {
 
         // Constructor used only for mocking and testing.
         QuerySetBase(DeviceBase* device);
+        void DestroyImpl() override;
 
         ~QuerySetBase() override;
 

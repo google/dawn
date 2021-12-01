@@ -16,6 +16,12 @@
 
 namespace dawn_native {
 
+    ShaderModuleMock::ShaderModuleMock(DeviceBase* device) : ShaderModuleBase(device) {
+        ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
+            this->ShaderModuleBase::DestroyImpl();
+        });
+    }
+
     ResultOrError<Ref<ShaderModuleMock>> ShaderModuleMock::Create(DeviceBase* device,
                                                                   const char* source) {
         ShaderModuleMock* mock = new ShaderModuleMock(device);

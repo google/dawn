@@ -25,6 +25,9 @@ namespace dawn_native {
     class BindGroupLayoutMock final : public BindGroupLayoutBase {
       public:
         BindGroupLayoutMock(DeviceBase* device) : BindGroupLayoutBase(device) {
+            ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
+                this->BindGroupLayoutBase::DestroyImpl();
+            });
         }
         ~BindGroupLayoutMock() override = default;
 

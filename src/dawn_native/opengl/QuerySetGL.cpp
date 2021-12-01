@@ -24,7 +24,4 @@ namespace dawn_native { namespace opengl {
 
     QuerySet::~QuerySet() = default;
 
-    void QuerySet::DestroyImpl() {
-    }
-
 }}  // namespace dawn_native::opengl

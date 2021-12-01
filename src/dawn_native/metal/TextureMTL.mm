@@ -500,6 +500,7 @@ namespace dawn_native { namespace metal {
     }
 
     void Texture::DestroyImpl() {
+        TextureBase::DestroyImpl();
         mMtlTexture = nullptr;
     }
 

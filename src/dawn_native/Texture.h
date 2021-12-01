@@ -51,7 +51,6 @@ namespace dawn_native {
 
         static TextureBase* MakeError(DeviceBase* device);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         wgpu::TextureDimension GetDimension() const;
@@ -99,6 +98,7 @@ namespace dawn_native {
       protected:
         // Constructor used only for mocking and testing.
         TextureBase(DeviceBase* device, TextureState state);
+        void DestroyImpl() override;
 
       private:
         TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
@@ -140,6 +140,7 @@ namespace dawn_native {
       protected:
         // Constructor used only for mocking and testing.
         TextureViewBase(TextureBase* texture);
+        void DestroyImpl() override;
 
       private:
         TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag);

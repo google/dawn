@@ -25,6 +25,9 @@ namespace dawn_native {
     class SamplerMock : public SamplerBase {
       public:
         SamplerMock(DeviceBase* device) : SamplerBase(device) {
+            ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
+                this->SamplerBase::DestroyImpl();
+            });
         }
         ~SamplerMock() override = default;
 

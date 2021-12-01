@@ -125,6 +125,9 @@ namespace dawn_native {
     SwapChainBase::~SwapChainBase() {
     }
 
+    void SwapChainBase::DestroyImpl() {
+    }
+
     // static
     SwapChainBase* SwapChainBase::MakeError(DeviceBase* device) {
         return new ErrorSwapChain(device);

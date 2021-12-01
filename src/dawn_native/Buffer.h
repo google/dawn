@@ -52,7 +52,6 @@ namespace dawn_native {
 
         static BufferBase* MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         uint64_t GetSize() const;
@@ -89,6 +88,7 @@ namespace dawn_native {
 
         // Constructor used only for mocking and testing.
         BufferBase(DeviceBase* device, BufferState state);
+        void DestroyImpl() override;
 
         ~BufferBase() override;
 

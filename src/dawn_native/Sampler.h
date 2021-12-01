@@ -38,7 +38,6 @@ namespace dawn_native {
 
         static SamplerBase* MakeError(DeviceBase* device);
 
-        bool Destroy() override;
         ObjectType GetType() const override;
 
         bool IsComparison() const;
@@ -58,6 +57,7 @@ namespace dawn_native {
       protected:
         // Constructor used only for mocking and testing.
         SamplerBase(DeviceBase* device);
+        void DestroyImpl() override;
 
       private:
         SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag);
