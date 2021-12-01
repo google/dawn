@@ -399,16 +399,15 @@ namespace dawn_native {
         TrackInDevice();
     }
 
-    BindGroupBase::~BindGroupBase() {
+    BindGroupBase::~BindGroupBase() = default;
+
+    void BindGroupBase::DestroyImpl() {
         if (mLayout != nullptr) {
             ASSERT(!IsError());
             for (BindingIndex i{0}; i < mLayout->GetBindingCount(); ++i) {
                 mBindingData.bindings[i].~Ref<ObjectBase>();
             }
         }
-    }
-
-    void BindGroupBase::DestroyImpl() {
     }
 
     void BindGroupBase::DeleteThis() {
