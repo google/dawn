@@ -27,6 +27,7 @@
 #include "utils/ScopedAutoreleasePool.h"
 
 #include <dawn_platform/DawnPlatform.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <memory>
@@ -94,10 +95,8 @@
 
 #define EXPECT_TEXTURE_EQ(...) AddTextureExpectation(__FILE__, __LINE__, __VA_ARGS__)
 
-// Should only be used to test validation of function that can't be tested by regular validation
-// tests;
-#define ASSERT_DEVICE_ERROR(statement)                          \
-    StartExpectDeviceError();                                   \
+#define ASSERT_DEVICE_ERROR_MSG(statement, matcher)             \
+    StartExpectDeviceError(matcher);                            \
     statement;                                                  \
     FlushWire();                                                \
     if (!EndExpectDeviceError()) {                              \
@@ -105,6 +104,8 @@
     }                                                           \
     do {                                                        \
     } while (0)
+
+#define ASSERT_DEVICE_ERROR(statement) ASSERT_DEVICE_ERROR_MSG(statement, testing::_)
 
 struct RGBA8 {
     constexpr RGBA8() : RGBA8(0, 0, 0, 0) {
@@ -305,7 +306,7 @@ class DawnTestBase {
 
     bool HasToggleEnabled(const char* workaround) const;
 
-    void StartExpectDeviceError();
+    void StartExpectDeviceError(testing::Matcher<std::string> errorMatcher = testing::_);
     bool EndExpectDeviceError();
 
     void ExpectDeviceDestruction();
@@ -507,6 +508,7 @@ class DawnTestBase {
     static void OnDeviceLost(WGPUDeviceLostReason reason, const char* message, void* userdata);
     bool mExpectError = false;
     bool mError = false;
+    testing::Matcher<std::string> mErrorMatcher;
     bool mExpectDestruction = false;
 
     std::ostringstream& AddTextureExpectationImpl(const char* file,

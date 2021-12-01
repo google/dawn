@@ -1012,12 +1012,15 @@ void DawnTestBase::TearDown() {
     ExpectDeviceDestruction();
 }
 
-void DawnTestBase::StartExpectDeviceError() {
+void DawnTestBase::StartExpectDeviceError(testing::Matcher<std::string> errorMatcher) {
     mExpectError = true;
     mError = false;
+    mErrorMatcher = errorMatcher;
 }
+
 bool DawnTestBase::EndExpectDeviceError() {
     mExpectError = false;
+    mErrorMatcher = testing::_;
     return mError;
 }
 
@@ -1032,6 +1035,9 @@ void DawnTestBase::OnDeviceError(WGPUErrorType type, const char* message, void* 
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
     ASSERT_FALSE(self->mError) << "Got two errors in expect block";
+    if (self->mExpectError) {
+        ASSERT_THAT(message, self->mErrorMatcher);
+    }
     self->mError = true;
 }
 

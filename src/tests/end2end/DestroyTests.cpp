@@ -17,6 +17,8 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
+using ::testing::HasSubstr;
+
 constexpr uint32_t kRTSize = 4;
 
 class DestroyTest : public DawnTest {
@@ -174,7 +176,7 @@ TEST_P(DestroyTest, DestroyDeviceBeforeSubmit) {
     // actually do, so we need to override the default device lost callback.
     ExpectDeviceDestruction();
     device.Destroy();
-    ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+    ASSERT_DEVICE_ERROR_MSG(queue.Submit(1, &commands), HasSubstr("[Device] is lost."));
 }
 
 DAWN_INSTANTIATE_TEST(DestroyTest,
