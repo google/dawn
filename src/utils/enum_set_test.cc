@@ -44,6 +44,7 @@ TEST(EnumSetTest, ConstructEmpty) {
   EXPECT_FALSE(set.Contains(E::A));
   EXPECT_FALSE(set.Contains(E::B));
   EXPECT_FALSE(set.Contains(E::C));
+  EXPECT_TRUE(set.Empty());
 }
 
 TEST(EnumSetTest, ConstructWithSingle) {
@@ -51,6 +52,7 @@ TEST(EnumSetTest, ConstructWithSingle) {
   EXPECT_FALSE(set.Contains(E::A));
   EXPECT_TRUE(set.Contains(E::B));
   EXPECT_FALSE(set.Contains(E::C));
+  EXPECT_FALSE(set.Empty());
 }
 
 TEST(EnumSetTest, ConstructWithMultiple) {
@@ -58,9 +60,26 @@ TEST(EnumSetTest, ConstructWithMultiple) {
   EXPECT_TRUE(set.Contains(E::A));
   EXPECT_FALSE(set.Contains(E::B));
   EXPECT_TRUE(set.Contains(E::C));
+  EXPECT_FALSE(set.Empty());
 }
 
-TEST(EnumSetTest, Add) {
+TEST(EnumSetTest, AssignSet) {
+  EnumSet<E> set;
+  set = EnumSet<E>(E::A, E::C);
+  EXPECT_TRUE(set.Contains(E::A));
+  EXPECT_FALSE(set.Contains(E::B));
+  EXPECT_TRUE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, AssignEnum) {
+  EnumSet<E> set(E::A);
+  set = E::B;
+  EXPECT_FALSE(set.Contains(E::A));
+  EXPECT_TRUE(set.Contains(E::B));
+  EXPECT_FALSE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, AddEnum) {
   EnumSet<E> set;
   set.Add(E::B);
   EXPECT_FALSE(set.Contains(E::A));
@@ -68,11 +87,78 @@ TEST(EnumSetTest, Add) {
   EXPECT_FALSE(set.Contains(E::C));
 }
 
-TEST(EnumSetTest, Remove) {
+TEST(EnumSetTest, RemoveEnum) {
   EnumSet<E> set(E::A, E::B);
   set.Remove(E::B);
   EXPECT_TRUE(set.Contains(E::A));
   EXPECT_FALSE(set.Contains(E::B));
+  EXPECT_FALSE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, AddEnums) {
+  EnumSet<E> set;
+  set.Add(E::B, E::C);
+  EXPECT_FALSE(set.Contains(E::A));
+  EXPECT_TRUE(set.Contains(E::B));
+  EXPECT_TRUE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, RemoveEnums) {
+  EnumSet<E> set(E::A, E::B);
+  set.Remove(E::C, E::B);
+  EXPECT_TRUE(set.Contains(E::A));
+  EXPECT_FALSE(set.Contains(E::B));
+  EXPECT_FALSE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, AddEnumSet) {
+  EnumSet<E> set;
+  set.Add(EnumSet<E>{E::B, E::C});
+  EXPECT_FALSE(set.Contains(E::A));
+  EXPECT_TRUE(set.Contains(E::B));
+  EXPECT_TRUE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, RemoveEnumSet) {
+  EnumSet<E> set(E::A, E::B);
+  set.Remove(EnumSet<E>{E::B, E::C});
+  EXPECT_TRUE(set.Contains(E::A));
+  EXPECT_FALSE(set.Contains(E::B));
+  EXPECT_FALSE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, OperatorPlusEnum) {
+  EnumSet<E> set = EnumSet<E>{E::B} + E::C;
+  EXPECT_FALSE(set.Contains(E::A));
+  EXPECT_TRUE(set.Contains(E::B));
+  EXPECT_TRUE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, OperatorMinusEnum) {
+  EnumSet<E> set = EnumSet<E>{E::A, E::B} - E::B;
+  EXPECT_TRUE(set.Contains(E::A));
+  EXPECT_FALSE(set.Contains(E::B));
+  EXPECT_FALSE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, OperatorPlusSet) {
+  EnumSet<E> set = EnumSet<E>{E::B} + EnumSet<E>{E::B, E::C};
+  EXPECT_FALSE(set.Contains(E::A));
+  EXPECT_TRUE(set.Contains(E::B));
+  EXPECT_TRUE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, OperatorMinusSet) {
+  EnumSet<E> set = EnumSet<E>{E::A, E::B} - EnumSet<E>{E::B, E::C};
+  EXPECT_TRUE(set.Contains(E::A));
+  EXPECT_FALSE(set.Contains(E::B));
+  EXPECT_FALSE(set.Contains(E::C));
+}
+
+TEST(EnumSetTest, OperatorAnd) {
+  EnumSet<E> set = EnumSet<E>{E::A, E::B} & EnumSet<E>{E::B, E::C};
+  EXPECT_FALSE(set.Contains(E::A));
+  EXPECT_TRUE(set.Contains(E::B));
   EXPECT_FALSE(set.Contains(E::C));
 }
 

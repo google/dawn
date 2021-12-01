@@ -19,6 +19,7 @@
 #include <functional>
 #include <ostream>
 #include <type_traits>
+#include <utility>
 
 namespace tint {
 namespace utils {
@@ -40,25 +41,88 @@ struct EnumSet {
   template <typename... VALUES>
   explicit constexpr EnumSet(VALUES... values) : set(Union(values...)) {}
 
-  /// Adds e to this set
+  /// Copy assignment operator.
+  /// @param set the set to assign to this set
+  /// @return this set so calls can be chained
+  inline EnumSet& operator=(const EnumSet& set) = default;
+
+  /// Copy assignment operator.
   /// @param e the enum value
   /// @return this set so calls can be chained
-  inline EnumSet& Add(Enum e) {
-    set |= Bit(e);
-    return *this;
+  inline EnumSet& operator=(Enum e) { return *this = EnumSet{e}; }
+
+  /// Adds all the given values to this set
+  /// @param values the values to add
+  /// @return this set so calls can be chained
+  template <typename... VALUES>
+  inline EnumSet& Add(VALUES... values) {
+    return Add(EnumSet(std::forward<VALUES>(values)...));
   }
 
-  /// Removes e from this set
-  /// @param e the enum value
+  /// Removes all the given values from this set
+  /// @param values the values to remove
   /// @return this set so calls can be chained
-  inline EnumSet& Remove(Enum e) {
-    set &= ~Bit(e);
-    return *this;
+  template <typename... VALUES>
+  inline EnumSet& Remove(VALUES... values) {
+    return Remove(EnumSet(std::forward<VALUES>(values)...));
+  }
+
+  /// Adds all of s to this set
+  /// @param s the enum value
+  /// @return this set so calls can be chained
+  inline EnumSet& Add(EnumSet s) { return (*this = *this + s); }
+
+  /// Removes all of s from this set
+  /// @param s the enum value
+  /// @return this set so calls can be chained
+  inline EnumSet& Remove(EnumSet s) { return (*this = *this - s); }
+
+  /// @param e the enum value
+  /// @returns a copy of this set with e added
+  inline EnumSet operator+(Enum e) const {
+    EnumSet out;
+    out.set = set | Bit(e);
+    return out;
+  }
+
+  /// @param e the enum value
+  /// @returns a copy of this set with e removed
+  inline EnumSet operator-(Enum e) const {
+    EnumSet out;
+    out.set = set & ~Bit(e);
+    return out;
+  }
+
+  /// @param s the other set
+  /// @returns the union of this set with s (this ∪ rhs)
+  inline EnumSet operator+(EnumSet s) const {
+    EnumSet out;
+    out.set = set | s.set;
+    return out;
+  }
+
+  /// @param s the other set
+  /// @returns the set of entries found in this but not in s (this \ s)
+  inline EnumSet operator-(EnumSet s) const {
+    EnumSet out;
+    out.set = set & ~s.set;
+    return out;
+  }
+
+  /// @param s the other set
+  /// @returns the intersection of this set with s (this ∩ rhs)
+  inline EnumSet operator&(EnumSet s) const {
+    EnumSet out;
+    out.set = set & s.set;
+    return out;
   }
 
   /// @param e the enum value
   /// @return true if the set contains `e`
-  inline bool Contains(Enum e) { return (set & Bit(e)) != 0; }
+  inline bool Contains(Enum e) const { return (set & Bit(e)) != 0; }
+
+  /// @return true if the set is empty
+  inline bool Empty() const { return set == 0; }
 
   /// Equality operator
   /// @param rhs the other EnumSet to compare this to
