@@ -72,6 +72,11 @@ namespace dawn_native { namespace d3d12 {
 
         ResultOrError<CommandRecordingContext*> GetPendingCommandContext();
 
+        MaybeError ClearBufferToZero(CommandRecordingContext* commandContext,
+                                     BufferBase* destination,
+                                     uint64_t destinationOffset,
+                                     uint64_t size);
+
         const D3D12DeviceInfo& GetDeviceInfo() const;
 
         MaybeError NextSerial();
@@ -191,6 +196,8 @@ namespace dawn_native { namespace d3d12 {
 
         MaybeError ApplyUseDxcToggle();
 
+        MaybeError CreateZeroBuffer();
+
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent = nullptr;
         ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
@@ -245,6 +252,10 @@ namespace dawn_native { namespace d3d12 {
         // Sampler cache needs to be destroyed before the CPU sampler allocator to ensure the final
         // release is called.
         std::unique_ptr<SamplerHeapCache> mSamplerHeapCache;
+
+        // A buffer filled with zeros that is used to copy into other buffers when they need to be
+        // cleared.
+        Ref<Buffer> mZeroBuffer;
 
         // The number of nanoseconds required for a timestamp query to be incremented by 1
         float mTimestampPeriod = 1.0f;

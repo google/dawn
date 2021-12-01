@@ -15,6 +15,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
 #include "common/GPUInfo.h"
+#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/d3d12/AdapterD3D12.h"
 #include "dawn_native/d3d12/BackendD3D12.h"
@@ -48,6 +49,9 @@ namespace dawn_native { namespace d3d12 {
     // TODO(dawn:155): Figure out these values.
     static constexpr uint16_t kShaderVisibleDescriptorHeapSize = 1024;
     static constexpr uint8_t kAttachmentDescriptorHeapSize = 64;
+
+    // Value may change in the future to better accomodate large clears.
+    static constexpr uint64_t kZeroBufferSize = 1024 * 1024 * 4;  // 4 Mb
 
     static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 
@@ -166,6 +170,9 @@ namespace dawn_native { namespace d3d12 {
         // The environment can only use DXC when it's available. Override the decision if it is not
         // applicable.
         DAWN_TRY(ApplyUseDxcToggle());
+
+        DAWN_TRY(CreateZeroBuffer());
+
         return {};
     }
 
@@ -249,6 +256,59 @@ namespace dawn_native { namespace d3d12 {
             DAWN_TRY(mPendingCommands.Open(mD3d12Device.Get(), mCommandAllocatorManager.get()));
         }
         return &mPendingCommands;
+    }
+
+    MaybeError Device::CreateZeroBuffer() {
+        BufferDescriptor zeroBufferDescriptor;
+        zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        zeroBufferDescriptor.size = kZeroBufferSize;
+        zeroBufferDescriptor.label = "ZeroBuffer_Internal";
+        DAWN_TRY_ASSIGN(mZeroBuffer, Buffer::Create(this, &zeroBufferDescriptor));
+
+        return {};
+    }
+
+    MaybeError Device::ClearBufferToZero(CommandRecordingContext* commandContext,
+                                         BufferBase* destination,
+                                         uint64_t offset,
+                                         uint64_t size) {
+        // TODO(crbug.com/dawn/852): It would be ideal to clear the buffer in CreateZeroBuffer, but
+        // the allocation of the staging buffer causes various end2end tests that monitor heap usage
+        // to fail if it's done during device creation. Perhaps ClearUnorderedAccessView*() can be
+        // used to avoid that.
+        if (!mZeroBuffer->IsDataInitialized()) {
+            DynamicUploader* uploader = GetDynamicUploader();
+            UploadHandle uploadHandle;
+            DAWN_TRY_ASSIGN(uploadHandle,
+                            uploader->Allocate(kZeroBufferSize, GetPendingCommandSerial(),
+                                               kCopyBufferToBufferOffsetAlignment));
+
+            memset(uploadHandle.mappedBuffer, 0u, kZeroBufferSize);
+
+            CopyFromStagingToBufferImpl(commandContext, uploadHandle.stagingBuffer,
+                                        uploadHandle.startOffset, mZeroBuffer.Get(), 0,
+                                        kZeroBufferSize);
+
+            mZeroBuffer->SetIsDataInitialized();
+        }
+
+        Buffer* dstBuffer = ToBackend(destination);
+
+        // Necessary to ensure residency of the zero buffer.
+        mZeroBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopySrc);
+        dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
+
+        while (size > 0) {
+            uint64_t copySize = std::min(kZeroBufferSize, size);
+            commandContext->GetCommandList()->CopyBufferRegion(
+                dstBuffer->GetD3D12Resource(), offset, mZeroBuffer->GetD3D12Resource(), 0,
+                copySize);
+
+            offset += copySize;
+            size -= copySize;
+        }
+
+        return {};
     }
 
     MaybeError Device::TickImpl() {

@@ -469,6 +469,8 @@ namespace dawn_native { namespace d3d12 {
                                  "D3D12 map at clear buffer"));
             memset(mMappedData, clearValue, size);
             UnmapImpl();
+        } else if (clearValue == 0u) {
+            DAWN_TRY(device->ClearBufferToZero(commandContext, this, offset, size));
         } else {
             // TODO(crbug.com/dawn/852): use ClearUnorderedAccessView*() when the buffer usage
             // includes STORAGE.

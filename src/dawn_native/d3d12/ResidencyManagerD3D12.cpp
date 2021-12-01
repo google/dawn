@@ -351,7 +351,6 @@ namespace dawn_native { namespace d3d12 {
     // Places an artifical cap on Dawn's budget so we can test in a predictable manner. If used,
     // this function must be called before any resources have been created.
     void ResidencyManager::RestrictBudgetForTesting(uint64_t artificialBudgetCap) {
-        ASSERT(mVideoMemoryInfo.local.lruCache.empty());
         ASSERT(mVideoMemoryInfo.nonLocal.lruCache.empty());
         ASSERT(!mRestrictBudgetForTesting);
 
