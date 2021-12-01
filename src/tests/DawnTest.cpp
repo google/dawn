@@ -1007,6 +1007,9 @@ void DawnTestBase::TearDown() {
         EXPECT_EQ(mLastWarningCount,
                   dawn_native::GetDeprecationWarningCountForTesting(device.Get()));
     }
+
+    // The device will be destroyed soon after, so we want to set the expectation.
+    ExpectDeviceDestruction();
 }
 
 void DawnTestBase::StartExpectDeviceError() {
@@ -1016,6 +1019,10 @@ void DawnTestBase::StartExpectDeviceError() {
 bool DawnTestBase::EndExpectDeviceError() {
     mExpectError = false;
     return mError;
+}
+
+void DawnTestBase::ExpectDeviceDestruction() {
+    mExpectDestruction = true;
 }
 
 // static
@@ -1029,9 +1036,14 @@ void DawnTestBase::OnDeviceError(WGPUErrorType type, const char* message, void* 
 }
 
 void DawnTestBase::OnDeviceLost(WGPUDeviceLostReason reason, const char* message, void* userdata) {
+    DawnTestBase* self = static_cast<DawnTestBase*>(userdata);
+    if (self->mExpectDestruction) {
+        EXPECT_EQ(reason, WGPUDeviceLostReason_Destroyed);
+        return;
+    }
     // Using ADD_FAILURE + ASSERT instead of FAIL to prevent the current test from continuing with a
     // corrupt state.
-    ADD_FAILURE() << "Device Lost during test: " << message;
+    ADD_FAILURE() << "Device lost during test: " << message;
     ASSERT(false);
 }
 

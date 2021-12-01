@@ -417,6 +417,66 @@ TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateRenderPipelin
         &task);
 }
 
+// Verify there is no error when the device is destroyed before the callback of
+// CreateComputePipelineAsync() is called.
+TEST_P(CreatePipelineAsyncTest, DestroyDeviceBeforeCallbackOfCreateComputePipelineAsync) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        [[stage(compute), workgroup_size(1)]] fn main() {
+        })");
+    csDesc.compute.entryPoint = "main";
+
+    device.CreateComputePipelineAsync(
+        &csDesc,
+        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
+           const char* message, void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_DeviceDestroyed,
+                      status);
+
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
+            task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
+            task->isCompleted = true;
+            task->message = message;
+        },
+        &task);
+    ExpectDeviceDestruction();
+    device.Destroy();
+}
+
+// Verify there is no error when the device is destroyed before the callback of
+// CreateRenderPipelineAsync() is called.
+TEST_P(CreatePipelineAsyncTest, DestroyDeviceBeforeCallbackOfCreateRenderPipelineAsync) {
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
+    renderPipelineDescriptor.vertex.module = vsModule;
+    renderPipelineDescriptor.cFragment.module = fsModule;
+    renderPipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+
+    device.CreateRenderPipelineAsync(
+        &renderPipelineDescriptor,
+        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
+           const char* message, void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_DeviceDestroyed,
+                      status);
+
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
+            task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
+            task->isCompleted = true;
+            task->message = message;
+        },
+        &task);
+    ExpectDeviceDestruction();
+    device.Destroy();
+}
+
 // Verify the code path of CreateComputePipelineAsync() to directly return the compute pipeline
 // object from cache works correctly.
 TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {

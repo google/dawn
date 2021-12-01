@@ -308,6 +308,8 @@ class DawnTestBase {
     void StartExpectDeviceError();
     bool EndExpectDeviceError();
 
+    void ExpectDeviceDestruction();
+
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
 
@@ -505,6 +507,7 @@ class DawnTestBase {
     static void OnDeviceLost(WGPUDeviceLostReason reason, const char* message, void* userdata);
     bool mExpectError = false;
     bool mError = false;
+    bool mExpectDestruction = false;
 
     std::ostringstream& AddTextureExpectationImpl(const char* file,
                                                   int line,

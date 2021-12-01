@@ -1016,9 +1016,7 @@
                 ]
             },
             {
-                "name": "destroy",
-                "_TODO": "crbug.com/dawn/628: Implement in Dawn",
-                "tags": ["upstream"]
+                "name": "destroy"
             },
             {
                 "name": "get limits",
