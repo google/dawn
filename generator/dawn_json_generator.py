@@ -84,6 +84,7 @@ class Type:
         self.dict_name = name
         self.name = Name(name, native=native)
         self.category = json_data['category']
+        self.is_wire_transparent = False
 
 
 EnumValue = namedtuple('EnumValue', ['name', 'value', 'valid', 'json_data'])
@@ -113,6 +114,7 @@ class EnumType(Type):
                 raise Exception("Duplicate value {} in enum {}".format(
                     value.value, name))
             all_values.add(value.value)
+        self.is_wire_transparent = True
 
 
 BitmaskValue = namedtuple('BitmaskValue', ['name', 'value', 'json_data'])
@@ -128,6 +130,7 @@ class BitmaskType(Type):
         self.full_mask = 0
         for value in self.values:
             self.full_mask = self.full_mask | value.value
+        self.is_wire_transparent = True
 
 
 class CallbackType(Type):
@@ -145,6 +148,7 @@ class TypedefType(Type):
 class NativeType(Type):
     def __init__(self, is_enabled, name, json_data):
         Type.__init__(self, name, json_data, native=True)
+        self.is_wire_transparent = True
 
 
 # Methods and structures are both "records", so record members correspond to
