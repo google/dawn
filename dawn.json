@@ -582,13 +582,11 @@
                 ]
             },
             {
-                "name": "fill buffer",
-                "tags": ["upstream"],
+                "name": "clear buffer",
                 "args": [
-                    {"name": "destination", "type": "buffer"},
-                    {"name": "destination offset", "type": "uint64_t"},
-                    {"name": "size", "type": "uint64_t"},
-                    {"name": "value", "type": "uint8_t", "default": 0}
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "offset", "type": "uint64_t", "default": 0},
+                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
                 ]
             },
             {

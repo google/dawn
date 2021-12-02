@@ -121,6 +121,11 @@ namespace dawn_native {
                     cmd->~ExecuteBundlesCmd();
                     break;
                 }
+                case Command::ClearBuffer: {
+                    ClearBufferCmd* cmd = commands->NextCommand<ClearBufferCmd>();
+                    cmd->~ClearBufferCmd();
+                    break;
+                }
                 case Command::InsertDebugMarker: {
                     InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
                     commands->NextData<char>(cmd->length + 1);
@@ -279,6 +284,10 @@ namespace dawn_native {
                 commands->NextData<Ref<RenderBundleBase>>(cmd->count);
                 break;
             }
+
+            case Command::ClearBuffer:
+                commands->NextCommand<ClearBufferCmd>();
+                break;
 
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();

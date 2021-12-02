@@ -540,6 +540,11 @@ namespace dawn_native {
         CallMapCallback(mapID, status);
     }
 
+    bool BufferBase::NeedsInitialization() const {
+        return !mIsDataInitialized &&
+               GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse);
+    }
+
     bool BufferBase::IsDataInitialized() const {
         return mIsDataInitialized;
     }

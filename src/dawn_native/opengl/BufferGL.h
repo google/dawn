@@ -33,9 +33,9 @@ namespace dawn_native { namespace opengl {
 
         GLuint GetHandle() const;
 
-        void EnsureDataInitialized();
-        void EnsureDataInitializedAsDestination(uint64_t offset, uint64_t size);
-        void EnsureDataInitializedAsDestination(const CopyTextureToBufferCmd* copy);
+        bool EnsureDataInitialized();
+        bool EnsureDataInitializedAsDestination(uint64_t offset, uint64_t size);
+        bool EnsureDataInitializedAsDestination(const CopyTextureToBufferCmd* copy);
 
       private:
         Buffer(Device* device, const BufferDescriptor* descriptor, bool shouldLazyClear);

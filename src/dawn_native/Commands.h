@@ -36,6 +36,7 @@ namespace dawn_native {
         BeginComputePass,
         BeginOcclusionQuery,
         BeginRenderPass,
+        ClearBuffer,
         CopyBufferToBuffer,
         CopyBufferToTexture,
         CopyTextureToBuffer,
@@ -194,6 +195,12 @@ namespace dawn_native {
 
     struct ExecuteBundlesCmd {
         uint32_t count;
+    };
+
+    struct ClearBufferCmd {
+        Ref<BufferBase> buffer;
+        uint64_t offset;
+        uint64_t size;
     };
 
     struct InsertDebugMarkerCmd {

@@ -32,11 +32,11 @@ namespace dawn_native { namespace metal {
                                                  const BufferDescriptor* descriptor);
         id<MTLBuffer> GetMTLBuffer() const;
 
-        void EnsureDataInitialized(CommandRecordingContext* commandContext);
-        void EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+        bool EnsureDataInitialized(CommandRecordingContext* commandContext);
+        bool EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                 uint64_t offset,
                                                 uint64_t size);
-        void EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+        bool EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                 const CopyTextureToBufferCmd* copy);
 
         static uint64_t QueryMaxBufferLength(id<MTLDevice> mtlDevice);

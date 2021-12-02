@@ -42,11 +42,12 @@ namespace dawn_native { namespace vulkan {
                                                   VkPipelineStageFlags* srcStages,
                                                   VkPipelineStageFlags* dstStages);
 
-        void EnsureDataInitialized(CommandRecordingContext* recordingContext);
-        void EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
+        // All the Ensure methods return true if the buffer was initialized to zero.
+        bool EnsureDataInitialized(CommandRecordingContext* recordingContext);
+        bool EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
                                                 uint64_t offset,
                                                 uint64_t size);
-        void EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
+        bool EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
                                                 const CopyTextureToBufferCmd* copy);
 
         // Dawn API

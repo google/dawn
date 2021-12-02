@@ -137,22 +137,6 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        MaybeError ClearBufferToZero(Device* device,
-                                     Buffer* destination,
-                                     uint64_t destinationOffset,
-                                     uint64_t size) {
-            DynamicUploader* uploader = device->GetDynamicUploader();
-            UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(uploadHandle,
-                            uploader->Allocate(size, device->GetPendingCommandSerial(),
-                                               kCopyBufferToBufferOffsetAlignment));
-            memset(uploadHandle.mappedBuffer, 0u, size);
-
-            return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer,
-                                                   uploadHandle.startOffset, destination,
-                                                   destinationOffset, size);
-        }
-
         void RecordFirstIndexOffset(ID3D12GraphicsCommandList* commandList,
                                     RenderPipeline* pipeline,
                                     uint32_t firstVertex,
@@ -731,8 +715,11 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
                     DAWN_TRY(srcBuffer->EnsureDataInitialized(commandContext));
-                    DAWN_TRY(dstBuffer->EnsureDataInitializedAsDestination(
-                        commandContext, copy->destinationOffset, copy->size));
+                    bool cleared;
+                    DAWN_TRY_ASSIGN(cleared,
+                                    dstBuffer->EnsureDataInitializedAsDestination(
+                                        commandContext, copy->destinationOffset, copy->size));
+                    DAWN_UNUSED(cleared);
 
                     srcBuffer->TrackUsageAndTransitionNow(commandContext,
                                                           wgpu::BufferUsage::CopySrc);
@@ -933,6 +920,26 @@ namespace dawn_native { namespace d3d12 {
                     break;
                 }
 
+                case Command::ClearBuffer: {
+                    ClearBufferCmd* cmd = mCommands.NextCommand<ClearBufferCmd>();
+                    if (cmd->size == 0) {
+                        // Skip no-op fills.
+                        break;
+                    }
+                    Buffer* dstBuffer = ToBackend(cmd->buffer.Get());
+
+                    bool clearedToZero;
+                    DAWN_TRY_ASSIGN(clearedToZero, dstBuffer->EnsureDataInitializedAsDestination(
+                                                       commandContext, cmd->offset, cmd->size));
+
+                    if (!clearedToZero) {
+                        DAWN_TRY(device->ClearBufferToZero(commandContext, cmd->buffer.Get(),
+                                                           cmd->offset, cmd->size));
+                    }
+
+                    break;
+                }
+
                 case Command::ResolveQuerySet: {
                     ResolveQuerySetCmd* cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
                     QuerySet* querySet = ToBackend(cmd->querySet.Get());
@@ -941,8 +948,11 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* destination = ToBackend(cmd->destination.Get());
                     uint64_t destinationOffset = cmd->destinationOffset;
 
-                    DAWN_TRY(destination->EnsureDataInitializedAsDestination(
-                        commandContext, destinationOffset, queryCount * sizeof(uint64_t)));
+                    bool cleared;
+                    DAWN_TRY_ASSIGN(cleared, destination->EnsureDataInitializedAsDestination(
+                                                 commandContext, destinationOffset,
+                                                 queryCount * sizeof(uint64_t)));
+                    DAWN_UNUSED(cleared);
 
                     // Resolving unavailable queries is undefined behaviour on D3D12, we only can
                     // resolve the available part of sparse queries. In order to resolve the
@@ -952,8 +962,9 @@ namespace dawn_native { namespace d3d12 {
                     auto endIt = querySet->GetQueryAvailability().begin() + firstQuery + queryCount;
                     bool hasUnavailableQueries = std::find(startIt, endIt, false) != endIt;
                     if (hasUnavailableQueries) {
-                        DAWN_TRY(ClearBufferToZero(device, destination, destinationOffset,
-                                                   queryCount * sizeof(uint64_t)));
+                        DAWN_TRY(device->ClearBufferToZero(commandContext, destination,
+                                                           destinationOffset,
+                                                           queryCount * sizeof(uint64_t)));
                     }
 
                     destination->TrackUsageAndTransitionNow(commandContext,
@@ -1030,8 +1041,10 @@ namespace dawn_native { namespace d3d12 {
                     ASSERT(uploadHandle.mappedBuffer != nullptr);
                     memcpy(uploadHandle.mappedBuffer, data, size);
 
-                    DAWN_TRY(dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset,
-                                                                           size));
+                    bool cleared;
+                    DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
+                                                 commandContext, offset, size));
+                    DAWN_UNUSED(cleared);
                     dstBuffer->TrackUsageAndTransitionNow(commandContext,
                                                           wgpu::BufferUsage::CopyDst);
                     commandList->CopyBufferRegion(

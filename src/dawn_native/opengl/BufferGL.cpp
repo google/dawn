@@ -67,44 +67,45 @@ namespace dawn_native { namespace opengl {
         return mBuffer;
     }
 
-    void Buffer::EnsureDataInitialized() {
-        if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
-            return;
+    bool Buffer::EnsureDataInitialized() {
+        if (!NeedsInitialization()) {
+            return false;
         }
 
         InitializeToZero();
+        return true;
     }
 
-    void Buffer::EnsureDataInitializedAsDestination(uint64_t offset, uint64_t size) {
-        if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
-            return;
+    bool Buffer::EnsureDataInitializedAsDestination(uint64_t offset, uint64_t size) {
+        if (!NeedsInitialization()) {
+            return false;
         }
 
         if (IsFullBufferRange(offset, size)) {
             SetIsDataInitialized();
-        } else {
-            InitializeToZero();
+            return false;
         }
+
+        InitializeToZero();
+        return true;
     }
 
-    void Buffer::EnsureDataInitializedAsDestination(const CopyTextureToBufferCmd* copy) {
-        if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
-            return;
+    bool Buffer::EnsureDataInitializedAsDestination(const CopyTextureToBufferCmd* copy) {
+        if (!NeedsInitialization()) {
+            return false;
         }
 
         if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
             SetIsDataInitialized();
-        } else {
-            InitializeToZero();
+            return false;
         }
+
+        InitializeToZero();
+        return true;
     }
 
     void Buffer::InitializeToZero() {
-        ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse));
-        ASSERT(!IsDataInitialized());
+        ASSERT(NeedsInitialization());
 
         const uint64_t size = GetAllocatedSize();
         Device* device = ToBackend(GetDevice());

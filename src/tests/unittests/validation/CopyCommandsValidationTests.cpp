@@ -2345,3 +2345,105 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, CopyToMultipleArrayLayers) {
                                         {testWidth - blockWidth, testHeight - blockHeight, 16});
     }
 }
+
+class CopyCommandTest_ClearBuffer : public CopyCommandTest {};
+
+TEST_F(CopyCommandTest_ClearBuffer, Success) {
+    wgpu::Buffer destination = CreateBuffer(16, wgpu::BufferUsage::CopyDst);
+
+    // Clear different ranges, including some that touch the OOB condition
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.ClearBuffer(destination, 0, 16);
+        encoder.ClearBuffer(destination, 0, 8);
+        encoder.ClearBuffer(destination, 8, 8);
+        encoder.Finish();
+    }
+
+    // Size is allowed to be omitted
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.ClearBuffer(destination, 0);
+        encoder.ClearBuffer(destination, 8);
+        encoder.Finish();
+    }
+
+    // Size and Offset are allowed to be omitted
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.ClearBuffer(destination);
+        encoder.Finish();
+    }
+}
+
+// Test a successful ClearBuffer where the last external reference is dropped.
+TEST_F(CopyCommandTest_ClearBuffer, DroppedBuffer) {
+    wgpu::Buffer destination = CreateBuffer(16, wgpu::BufferUsage::CopyDst);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.ClearBuffer(destination, 0, 8);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+
+    destination = nullptr;
+    device.GetQueue().Submit(1, &commandBuffer);
+}
+
+// Test ClearBuffer copies with OOB
+TEST_F(CopyCommandTest_ClearBuffer, OutOfBounds) {
+    wgpu::Buffer destination = CreateBuffer(16, wgpu::BufferUsage::CopyDst);
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.ClearBuffer(destination, 8, 12);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    {
+        // Despite being zero length, should still raise an error due to being out of bounds.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.ClearBuffer(destination, 20, 0);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Test ClearBuffer with incorrect buffer usage
+TEST_F(CopyCommandTest_ClearBuffer, BadUsage) {
+    wgpu::Buffer vertex = CreateBuffer(16, wgpu::BufferUsage::Vertex);
+
+    // Destination with incorrect usage
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.ClearBuffer(vertex, 0, 16);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Test ClearBuffer with unaligned data size
+TEST_F(CopyCommandTest_ClearBuffer, UnalignedSize) {
+    wgpu::Buffer destination = CreateBuffer(16, wgpu::BufferUsage::CopyDst);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.ClearBuffer(destination, 0, 2);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Test ClearBuffer with unaligned offset
+TEST_F(CopyCommandTest_ClearBuffer, UnalignedOffset) {
+    wgpu::Buffer destination = CreateBuffer(16, wgpu::BufferUsage::CopyDst);
+
+    // Unaligned destination offset
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.ClearBuffer(destination, 2, 4);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Test ClearBuffer with buffers in error state cause errors.
+TEST_F(CopyCommandTest_ClearBuffer, BuffersInErrorState) {
+    wgpu::BufferDescriptor errorBufferDescriptor;
+    errorBufferDescriptor.size = 4;
+    errorBufferDescriptor.usage =
+        wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    ASSERT_DEVICE_ERROR(wgpu::Buffer errorBuffer = device.CreateBuffer(&errorBufferDescriptor));
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.ClearBuffer(errorBuffer, 0, 4);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
