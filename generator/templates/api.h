@@ -21,8 +21,7 @@
 //*
 // BSD 3-Clause License
 //
-{% set year = metadata.copyright_year if metadata.copyright_year else 2019 %}
-// Copyright (c) {{year}}, "{{metadata.api}} native" developers
+// Copyright (c) {{metadata.copyright_year}}, "{{metadata.api}} native" developers
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without

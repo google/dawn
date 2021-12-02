@@ -20,7 +20,8 @@
     "_metadata": {
         "api": "WebGPU",
         "c_prefix": "WGPU",
-        "namespace": "wgpu"
+        "namespace": "wgpu",
+        "copyright_year": "2019"
     },
 
     "create instance": {
