@@ -133,9 +133,10 @@ class BitmaskType(Type):
         self.is_wire_transparent = True
 
 
-class CallbackType(Type):
+class FunctionPointerType(Type):
     def __init__(self, is_enabled, name, json_data):
         Type.__init__(self, name, json_data)
+        self.return_type = None
         self.arguments = []
 
 
@@ -251,6 +252,14 @@ class ConstantDefinition():
         self.name = Name(name)
 
 
+class FunctionDeclaration():
+    def __init__(self, is_enabled, name, json_data):
+        self.return_type = None
+        self.arguments = []
+        self.json_data = json_data
+        self.name = Name(name)
+
+
 class Command(Record):
     def __init__(self, name, members=None):
         Record.__init__(self, name)
@@ -313,9 +322,8 @@ def link_structure(struct, types):
     struct.members = linked_record_members(struct.json_data['members'], types)
 
 
-def link_callback(callback, types):
-    callback.arguments = linked_record_members(callback.json_data['args'],
-                                               types)
+def link_function_pointer(function_pointer, types):
+    link_function(function_pointer, types)
 
 
 def link_typedef(typedef, types):
@@ -325,6 +333,12 @@ def link_typedef(typedef, types):
 def link_constant(constant, types):
     constant.type = types[constant.json_data['type']]
     assert constant.type.name.native
+
+
+def link_function(function, types):
+    function.return_type = types[function.json_data.get('returns', 'void')]
+    function.arguments = linked_record_members(function.json_data['args'],
+                                               types)
 
 
 # Sort structures so that if struct A has struct B as a member, then B is
@@ -375,11 +389,12 @@ def parse_json(json, enabled_tags):
         'bitmask': BitmaskType,
         'enum': EnumType,
         'native': NativeType,
-        'callback': CallbackType,
+        'function pointer': FunctionPointerType,
         'object': ObjectType,
         'structure': StructureType,
         'typedef': TypedefType,
         'constant': ConstantDefinition,
+        'function': FunctionDeclaration
     }
 
     types = {}
@@ -402,14 +417,17 @@ def parse_json(json, enabled_tags):
     for struct in by_category['structure']:
         link_structure(struct, types)
 
-    for callback in by_category['callback']:
-        link_callback(callback, types)
+    for function_pointer in by_category['function pointer']:
+        link_function_pointer(function_pointer, types)
 
     for typedef in by_category['typedef']:
         link_typedef(typedef, types)
 
     for constant in by_category['constant']:
         link_constant(constant, types)
+
+    for function in by_category['function']:
+        link_function(function, types)
 
     for category in by_category.keys():
         by_category[category] = sorted(
@@ -643,7 +661,7 @@ def get_c_methods_sorted_by_name(api_params):
 
 
 def has_callback_arguments(method):
-    return any(arg.type.category == 'callback' for arg in method.arguments)
+    return any(arg.type.category == 'function pointer' for arg in method.arguments)
 
 
 def make_base_render_params(metadata):
@@ -659,12 +677,22 @@ def make_base_render_params(metadata):
         return c_prefix + type_name.CamelCase() + '_' + value_name.CamelCase()
 
     def as_cMethod(type_name, method_name):
-        assert not type_name.native and not method_name.native
-        return c_prefix.lower() + type_name.CamelCase() + method_name.CamelCase()
+        c_method = c_prefix.lower()
+        if type_name != None:
+            assert not type_name.native
+            c_method += type_name.CamelCase()
+        assert not method_name.native
+        c_method += method_name.CamelCase()
+        return c_method
 
     def as_cProc(type_name, method_name):
-        assert not type_name.native and not method_name.native
-        return c_prefix + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+        c_proc = c_prefix + 'Proc'
+        if type_name != None:
+            assert not type_name.native
+            c_proc += type_name.CamelCase()
+        assert not method_name.native
+        c_proc += method_name.CamelCase()
+        return c_proc
 
     return {
             'Name': lambda name: Name(name),

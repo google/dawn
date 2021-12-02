@@ -57,7 +57,8 @@ A **record** is a list of **record members**, each of which is a dictionary with
 
 **`"bitmask"`** an `uint32_t`-based bitmask. It is similar to **`"enum"`** but can be output differently.
 
-**`"callback"`** defines a function pointer type that can be used by other things (usually callbacks passed to method calls)
+**`"function pointer"`** defines a function pointer type that can be used by other things.
+ - `"returns"` a string that's the name of the return type
  - `"args"` a **record**, so an array of **record members**
 
 **`"structure"`**
@@ -74,6 +75,10 @@ A **record** is a list of **record members**, each of which is a dictionary with
 **`"constant"`**
  - `"type"`: a string, the name of the base data type
  - `"value"`: a string, the value is defined with preprocessor macro
+
+**`"function"`** declares a function that not belongs to any class.
+ - `"returns"` a string that's the name of the return type
+ - `"args"` a **record**, so an array of **record members**
 
 ## Dawn "wire" generators
 

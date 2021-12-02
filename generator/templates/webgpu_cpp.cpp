@@ -112,7 +112,7 @@ namespace wgpu {
                             {{as_varName(arg.name)}}.Get()
                         {%- elif arg.type.category == "enum" or arg.type.category == "bitmask" -%}
                             static_cast<{{as_cType(arg.type.name)}}>({{as_varName(arg.name)}})
-                        {%- elif arg.type.category in ["callback", "native"] -%}
+                        {%- elif arg.type.category in ["function pointer", "native"] -%}
                             {{as_varName(arg.name)}}
                         {%- else -%}
                             UNHANDLED

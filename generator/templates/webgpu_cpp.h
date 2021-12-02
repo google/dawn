@@ -52,8 +52,7 @@ namespace wgpu {
 
     {% endfor %}
 
-    using Proc = WGPUProc;
-    {% for type in by_category["callback"] %}
+    {% for type in by_category["function pointer"] %}
         using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
     {% endfor %}
 

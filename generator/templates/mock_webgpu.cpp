@@ -61,7 +61,7 @@ void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* d
             {%- endfor -%}
         ) {
             ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>({{as_varName(type.name)}});
-            {% for callback_arg in method.arguments if callback_arg.type.category == 'callback' %}
+            {% for callback_arg in method.arguments if callback_arg.type.category == 'function pointer' %}
                 object->m{{as_MethodSuffix(type.name, method.name)}}Callback = {{as_varName(callback_arg.name)}};
             {% endfor %}
             object->userdata = userdata;
@@ -73,7 +73,7 @@ void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* d
             );
         }
 
-        {% for callback_arg in method.arguments if callback_arg.type.category == 'callback' %}
+        {% for callback_arg in method.arguments if callback_arg.type.category == 'function pointer' %}
             void ProcTableAsClass::Call{{Suffix}}Callback(
                 {{-as_cType(type.name)}} {{as_varName(type.name)}}
                 {%- for arg in callback_arg.type.arguments -%}

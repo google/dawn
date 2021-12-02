@@ -23,6 +23,27 @@
         "namespace": "wgpu"
     },
 
+    "create instance": {
+        "category": "function",
+        "returns": "instance",
+        "args": [
+            {"name": "descriptor", "type": "instance descriptor", "annotation": "const*"}
+        ]
+    },
+    "proc": {
+        "category": "function pointer",
+        "returns": "void",
+        "args": []
+    },
+    "get proc address": {
+        "category": "function",
+        "returns": "proc",
+        "args": [
+            {"name": "device", "type": "device"},
+            {"name": "proc name", "type": "char", "annotation": "const*"}
+        ]
+    },
+
     "request adapter options": {
         "category": "structure",
         "extensible": "in",
@@ -45,7 +66,7 @@
         ]
     },
     "request adapter callback": {
-        "category": "callback",
+        "category": "function pointer",
         "tags": ["upstream"],
         "args": [
             {"name": "status", "type": "request adapter status"},
@@ -85,7 +106,7 @@
                 "name": "request device",
                 "args": [
                     {"name": "descriptor", "type": "device descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "request device callback"},
+                    {"name": "function pointer", "type": "request device callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             }
@@ -358,7 +379,7 @@
                     {"name": "mode", "type": "map mode"},
                     {"name": "offset", "type": "size_t"},
                     {"name": "size", "type": "size_t"},
-                    {"name": "callback", "type": "buffer map callback"},
+                    {"name": "function pointer", "type": "buffer map callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
@@ -406,7 +427,7 @@
         ]
     },
     "buffer map callback": {
-        "category": "callback",
+        "category": "function pointer",
         "args": [
             {"name": "status", "type": "buffer map async status"},
             {"name": "userdata", "type": "void", "annotation": "*"}
@@ -660,7 +681,7 @@
         ]
     },
     "compilation info callback": {
-        "category": "callback",
+        "category": "function pointer",
         "args": [
             {"name": "status", "type": "compilation info request status"},
             {"name": "compilation info", "type": "compilation info", "annotation": "const*"},
@@ -853,7 +874,7 @@
         ]
     },
     "create compute pipeline async callback": {
-        "category": "callback",
+        "category": "function pointer",
         "args": [
             {"name": "status", "type": "create pipeline async status"},
             {"name": "pipeline", "type": "compute pipeline"},
@@ -873,7 +894,7 @@
         ]
     },
     "create render pipeline async callback": {
-        "category": "callback",
+        "category": "function pointer",
         "args": [
             {"name": "status", "type": "create pipeline async status"},
             {"name": "pipeline", "type": "render pipeline"},
@@ -937,7 +958,7 @@
                 "returns": "void",
                 "args": [
                     {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "create compute pipeline async callback"},
+                    {"name": "function pointer", "type": "create compute pipeline async callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
@@ -968,7 +989,7 @@
                 "returns": "void",
                 "args": [
                     {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "create render pipeline async callback"},
+                    {"name": "function pointer", "type": "create render pipeline async callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
@@ -1048,7 +1069,7 @@
             {
                 "name": "set uncaptured error callback",
                 "args": [
-                    {"name": "callback", "type": "error callback"},
+                    {"name": "function pointer", "type": "error callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
@@ -1056,14 +1077,14 @@
                 "name": "set logging callback",
                 "tags": ["dawn"],
                 "args": [
-                    {"name": "callback", "type": "logging callback"},
+                    {"name": "function pointer", "type": "logging callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
             {
                 "name": "set device lost callback",
                 "args": [
-                    {"name": "callback", "type": "device lost callback"},
+                    {"name": "function pointer", "type": "device lost callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
@@ -1077,14 +1098,14 @@
                 "name": "pop error scope",
                 "returns": "bool",
                 "args": [
-                    {"name": "callback", "type": "error callback"},
+                    {"name": "function pointer", "type": "error callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             }
         ]
     },
     "device lost callback": {
-        "category": "callback",
+        "category": "function pointer",
         "args": [
             {"name": "reason", "type": "device lost reason"},
             {"name": "message", "type": "char", "annotation": "const*"},
@@ -1126,7 +1147,7 @@
         "category": "native"
     },
     "error callback": {
-        "category": "callback",
+        "category": "function pointer",
         "args": [
             {"name": "type", "type": "error type"},
             {"name": "message", "type": "char", "annotation": "const*"},
@@ -1179,7 +1200,7 @@
         ]
     },
     "logging callback": {
-        "category": "callback",
+        "category": "function pointer",
         "tags": ["dawn"],
         "args": [
             {"name": "type", "type": "logging type"},
@@ -1332,7 +1353,7 @@
                 "tags": ["upstream"],
                 "args": [
                     {"name": "options", "type": "request adapter options", "annotation": "const*"},
-                    {"name": "callback", "type": "request adapter callback"},
+                    {"name": "function pointer", "type": "request adapter callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             }
@@ -1521,7 +1542,7 @@
                 "name": "on submitted work done",
                 "args": [
                     {"name": "signal value", "type": "uint64_t"},
-                    {"name": "callback", "type": "queue work done callback"},
+                    {"name": "function pointer", "type": "queue work done callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
@@ -1558,7 +1579,7 @@
         ]
     },
     "queue work done callback": {
-        "category": "callback",
+        "category": "function pointer",
         "args": [
             {"name": "status", "type": "queue work done status"},
             {"name": "userdata", "type": "void", "annotation": "*"}
@@ -1950,7 +1971,7 @@
     },
 
     "request device callback": {
-        "category": "callback",
+        "category": "function pointer",
         "args": [
             {"name": "status", "type": "request device status"},
             {"name": "device", "type": "device"},
@@ -2119,7 +2140,7 @@
             {
                 "name": "get compilation info",
                 "args": [
-                    {"name": "callback", "type": "compilation info callback"},
+                    {"name": "function pointer", "type": "compilation info callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },

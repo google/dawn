@@ -70,7 +70,7 @@ class ProcTableAsClass {
                 ) = 0;
 
                 //* Calls the stored callback.
-                {% for callback_arg in method.arguments if callback_arg.type.category == 'callback' %}
+                {% for callback_arg in method.arguments if callback_arg.type.category == 'function pointer' %}
                     void Call{{as_MethodSuffix(type.name, method.name)}}Callback(
                         {{-as_cType(type.name)}} {{as_varName(type.name)}}
                         {%- for arg in callback_arg.type.arguments -%}
@@ -85,7 +85,7 @@ class ProcTableAsClass {
             ProcTableAsClass* procs = nullptr;
             {% for type in by_category["object"] %}
                 {% for method in type.methods if has_callback_arguments(method) %}
-                    {% for callback_arg in method.arguments if callback_arg.type.category == 'callback' %}
+                    {% for callback_arg in method.arguments if callback_arg.type.category == 'function pointer' %}
                         {{as_cType(callback_arg.type.name)}} m{{as_MethodSuffix(type.name, method.name)}}Callback = nullptr;
                     {% endfor %}
                 {% endfor %}

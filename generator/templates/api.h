@@ -134,20 +134,23 @@ typedef struct {{c_prefix}}ChainedStructOut {
 extern "C" {
 #endif
 
-{% for type in by_category["callback"] %}
-    typedef void (*{{as_cType(type.name)}})(
+{% for type in by_category["function pointer"] %}
+    typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
         {%- for arg in type.arguments -%}
             {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
         {%- endfor -%}
     );
 {% endfor %}
 
-typedef void (*{{c_prefix}}Proc)(void);
-
 #if !defined({{c_prefix}}_SKIP_PROCS)
 
-typedef WGPUInstance (*WGPUProcCreateInstance)(WGPUInstanceDescriptor const * descriptor);
-typedef WGPUProc (*WGPUProcGetProcAddress)(WGPUDevice device, char const * procName);
+{% for function in by_category["function"] %}
+    typedef {{as_cType(function.return_type.name)}} (*{{as_cProc(None, function.name)}})(
+            {%- for arg in function.arguments -%}
+                {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
+            {%- endfor -%}
+        );
+{% endfor %}
 
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Procs of {{type.name.CamelCase()}}
@@ -165,8 +168,13 @@ typedef WGPUProc (*WGPUProcGetProcAddress)(WGPUDevice device, char const * procN
 
 #if !defined({{c_prefix}}_SKIP_DECLARATIONS)
 
-WGPU_EXPORT WGPUInstance wgpuCreateInstance(WGPUInstanceDescriptor const * descriptor);
-WGPU_EXPORT WGPUProc wgpuGetProcAddress(WGPUDevice device, char const * procName);
+{% for function in by_category["function"] %}
+    {{c_prefix}}_EXPORT {{as_cType(function.return_type.name)}} {{as_cMethod(None, function.name)}}(
+            {%- for arg in function.arguments -%}
+                {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
+            {%- endfor -%}
+        );
+{% endfor %}
 
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Methods of {{type.name.CamelCase()}}
