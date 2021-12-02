@@ -46,7 +46,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         VkPhysicalDeviceExternalImageFormatInfo externalFormatInfo;
         externalFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO_KHR;
         externalFormatInfo.pNext = nullptr;
-        externalFormatInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA;
+        externalFormatInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA;
 
         VkPhysicalDeviceImageFormatInfo2 formatInfo;
         formatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2_KHR;
@@ -112,11 +112,9 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
             importParams.allocationSize, requirements.size);
 
         VkImportMemoryZirconHandleInfoFUCHSIA importMemoryHandleInfo;
-        importMemoryHandleInfo.sType =
-            VK_STRUCTURE_TYPE_TEMP_MEMORY_ZIRCON_HANDLE_PROPERTIES_FUCHSIA;
+        importMemoryHandleInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_ZIRCON_HANDLE_INFO_FUCHSIA;
         importMemoryHandleInfo.pNext = nullptr;
-        importMemoryHandleInfo.handleType =
-            VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA;
+        importMemoryHandleInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA;
         importMemoryHandleInfo.handle = handle;
 
         VkMemoryAllocateInfo allocateInfo;
@@ -138,7 +136,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         externalMemoryImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
         externalMemoryImageCreateInfo.pNext = nullptr;
         externalMemoryImageCreateInfo.handleTypes =
-            VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA;
+            VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA;
 
         VkImageCreateInfo createInfo = baseCreateInfo;
         createInfo.pNext = &externalMemoryImageCreateInfo;

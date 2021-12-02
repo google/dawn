@@ -192,9 +192,4 @@ static constexpr uint64_t VK_NULL_HANDLE = 0;
 #    error "Unsupported platform"
 #endif
 
-// Include Fuchsia-specific definitions that are not upstreamed yet.
-#if defined(DAWN_PLATFORM_FUCHSIA)
-#    include <vulkan/vulkan_fuchsia_extras.h>
-#endif  // defined(DAWN_PLATFORM_FUCHSIA)
-
 #endif  // COMMON_VULKANPLATFORM_H_
