@@ -86,17 +86,6 @@ class MultiplanarExternalTexture
   /// @param inputs optional extra transform-specific input data
   /// @param outputs optional extra transform-specific output data
   void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
-
-  /// Creates the statement list for the TextureSampleExternal and
-  /// TextureLoadExternal functions.
-  /// @param b a reference to the ProgramBuilder associated with the destination
-  /// context
-  /// @param callType determines the kind of param list to emit (either
-  /// textureLoad or textureSampleLevel)
-  /// @returns a statement list that is used to create the TextureSampleExternal
-  /// and TextureLoadExternal functions.
-  ast::StatementList createTexFnExtStatementList(ProgramBuilder& b,
-                                                 sem::IntrinsicType callType);
 };
 
 }  // namespace transform

@@ -379,21 +379,278 @@ fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParam) {
   auto* src = R"(
 fn f(t : texture_external, s : sampler) {
-      textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
-  }
+  textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
+}
 
-  [[group(0), binding(0)]] var ext_tex : texture_external;
-  [[group(0), binding(1)]] var smp : sampler;
+[[group(0), binding(0)]] var ext_tex : texture_external;
+[[group(0), binding(1)]] var smp : sampler;
 
-  [[stage(fragment)]]
-  fn main() {
-      f(ext_tex, smp);
-  }
+[[stage(fragment)]]
+fn main() {
+  f(ext_tex, smp);
+}
 )";
 
-  auto* expect =
-      "error: transforming a texture_external passed as a user-defined "
-      "function parameter has not been implemented.";
+  auto* expect = R"(
+[[block]]
+struct ExternalTextureParams {
+  numPlanes : u32;
+  vr : f32;
+  ug : f32;
+  vg : f32;
+  ub : f32;
+};
+
+fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  if ((params.numPlanes == 1u)) {
+    return textureSampleLevel(plane0, smp, coord, 0.0);
+  }
+  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
+  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
+  let u = uv.x;
+  let v = uv.y;
+  let r = ((1.164000034 * y) + (params.vr * v));
+  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
+  let b = ((1.164000034 * y) + (params.ub * u));
+  return vec4<f32>(r, g, b, 1.0);
+}
+
+fn f(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams, s : sampler) {
+  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+}
+
+[[group(0), binding(2)]] var ext_tex_plane_1_1 : texture_2d<f32>;
+
+[[group(0), binding(3)]] var<uniform> ext_tex_params_1 : ExternalTextureParams;
+
+[[group(0), binding(0)]] var ext_tex : texture_2d<f32>;
+
+[[group(0), binding(1)]] var smp : sampler;
+
+[[stage(fragment)]]
+fn main() {
+  f(ext_tex, ext_tex_plane_1_1, ext_tex_params_1, smp);
+}
+)";
+  DataMap data;
+  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+      MultiplanarExternalTexture::BindingsMap{
+          {{0, 0}, {{0, 2}, {0, 3}}},
+      });
+  auto got = Run<MultiplanarExternalTexture>(src, data);
+  EXPECT_EQ(expect, str(got));
+}
+
+// Tests that the texture_external passed as a parameter not in the first
+// position produces the correct output.
+TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsSecondParam) {
+  auto* src = R"(
+fn f(s : sampler, t : texture_external) {
+  textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
+}
+
+[[group(0), binding(0)]] var ext_tex : texture_external;
+[[group(0), binding(1)]] var smp : sampler;
+
+[[stage(fragment)]]
+fn main() {
+  f(smp, ext_tex);
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct ExternalTextureParams {
+  numPlanes : u32;
+  vr : f32;
+  ug : f32;
+  vg : f32;
+  ub : f32;
+};
+
+fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  if ((params.numPlanes == 1u)) {
+    return textureSampleLevel(plane0, smp, coord, 0.0);
+  }
+  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
+  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
+  let u = uv.x;
+  let v = uv.y;
+  let r = ((1.164000034 * y) + (params.vr * v));
+  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
+  let b = ((1.164000034 * y) + (params.ub * u));
+  return vec4<f32>(r, g, b, 1.0);
+}
+
+fn f(s : sampler, t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) {
+  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+}
+
+[[group(0), binding(2)]] var ext_tex_plane_1_1 : texture_2d<f32>;
+
+[[group(0), binding(3)]] var<uniform> ext_tex_params_1 : ExternalTextureParams;
+
+[[group(0), binding(0)]] var ext_tex : texture_2d<f32>;
+
+[[group(0), binding(1)]] var smp : sampler;
+
+[[stage(fragment)]]
+fn main() {
+  f(smp, ext_tex, ext_tex_plane_1_1, ext_tex_params_1);
+}
+)";
+  DataMap data;
+  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+      MultiplanarExternalTexture::BindingsMap{
+          {{0, 0}, {{0, 2}, {0, 3}}},
+      });
+  auto got = Run<MultiplanarExternalTexture>(src, data);
+  EXPECT_EQ(expect, str(got));
+}
+
+// Tests that multiple texture_external params passed to a function produces the
+// correct output.
+TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamMultiple) {
+  auto* src = R"(
+fn f(t : texture_external, s : sampler, t2 : texture_external) {
+  textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
+  textureSampleLevel(t2, s, vec2<f32>(1.0, 2.0));
+}
+
+[[group(0), binding(0)]] var ext_tex : texture_external;
+[[group(0), binding(1)]] var smp : sampler;
+[[group(0), binding(2)]] var ext_tex2 : texture_external;
+
+[[stage(fragment)]]
+fn main() {
+  f(ext_tex, smp, ext_tex2);
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct ExternalTextureParams {
+  numPlanes : u32;
+  vr : f32;
+  ug : f32;
+  vg : f32;
+  ub : f32;
+};
+
+fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  if ((params.numPlanes == 1u)) {
+    return textureSampleLevel(plane0, smp, coord, 0.0);
+  }
+  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
+  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
+  let u = uv.x;
+  let v = uv.y;
+  let r = ((1.164000034 * y) + (params.vr * v));
+  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
+  let b = ((1.164000034 * y) + (params.ub * u));
+  return vec4<f32>(r, g, b, 1.0);
+}
+
+fn f(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams, s : sampler, t2 : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams) {
+  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+  textureSampleExternal(t2, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+}
+
+[[group(0), binding(3)]] var ext_tex_plane_1_2 : texture_2d<f32>;
+
+[[group(0), binding(4)]] var<uniform> ext_tex_params_2 : ExternalTextureParams;
+
+[[group(0), binding(0)]] var ext_tex : texture_2d<f32>;
+
+[[group(0), binding(1)]] var smp : sampler;
+
+[[group(0), binding(5)]] var ext_tex_plane_1_3 : texture_2d<f32>;
+
+[[group(0), binding(6)]] var<uniform> ext_tex_params_3 : ExternalTextureParams;
+
+[[group(0), binding(2)]] var ext_tex2 : texture_2d<f32>;
+
+[[stage(fragment)]]
+fn main() {
+  f(ext_tex, ext_tex_plane_1_2, ext_tex_params_2, smp, ext_tex2, ext_tex_plane_1_3, ext_tex_params_3);
+}
+)";
+  DataMap data;
+  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+      MultiplanarExternalTexture::BindingsMap{
+          {{0, 0}, {{0, 3}, {0, 4}}},
+          {{0, 2}, {{0, 5}, {0, 6}}},
+      });
+  auto got = Run<MultiplanarExternalTexture>(src, data);
+  EXPECT_EQ(expect, str(got));
+}
+
+// Tests that the texture_external passed to as a parameter to multiple
+// functions produces the correct output.
+TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamNested) {
+  auto* src = R"(
+fn nested(t : texture_external, s : sampler) {
+  textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
+}
+
+fn f(t : texture_external, s : sampler) {
+  nested(t, s);
+}
+
+[[group(0), binding(0)]] var ext_tex : texture_external;
+[[group(0), binding(1)]] var smp : sampler;
+
+[[stage(fragment)]]
+fn main() {
+  f(ext_tex, smp);
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct ExternalTextureParams {
+  numPlanes : u32;
+  vr : f32;
+  ug : f32;
+  vg : f32;
+  ub : f32;
+};
+
+fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  if ((params.numPlanes == 1u)) {
+    return textureSampleLevel(plane0, smp, coord, 0.0);
+  }
+  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
+  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
+  let u = uv.x;
+  let v = uv.y;
+  let r = ((1.164000034 * y) + (params.vr * v));
+  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
+  let b = ((1.164000034 * y) + (params.ub * u));
+  return vec4<f32>(r, g, b, 1.0);
+}
+
+fn nested(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams, s : sampler) {
+  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+}
+
+fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
+  nested(t, ext_tex_plane_1_1, ext_tex_params_1, s);
+}
+
+[[group(0), binding(2)]] var ext_tex_plane_1_2 : texture_2d<f32>;
+
+[[group(0), binding(3)]] var<uniform> ext_tex_params_2 : ExternalTextureParams;
+
+[[group(0), binding(0)]] var ext_tex : texture_2d<f32>;
+
+[[group(0), binding(1)]] var smp : sampler;
+
+[[stage(fragment)]]
+fn main() {
+  f(ext_tex, ext_tex_plane_1_2, ext_tex_params_2, smp);
+}
+)";
   DataMap data;
   data.Add<MultiplanarExternalTexture::NewBindingPoints>(
       MultiplanarExternalTexture::BindingsMap{
