@@ -36,6 +36,10 @@ struct EnumSet {
   /// Constructor. Initializes the EnumSet with zero.
   constexpr EnumSet() = default;
 
+  /// Copy constructor.
+  /// @param s the set to copy
+  constexpr EnumSet(const EnumSet& s) = default;
+
   /// Constructor. Initializes the EnumSet with the given values.
   /// @param values the enumerator values to construct the set with
   template <typename... VALUES>
