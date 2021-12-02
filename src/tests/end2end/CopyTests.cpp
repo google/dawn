@@ -2214,6 +2214,8 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
 // for src and/or dst texture, non-zero offset (copy origin), non-zero mip level.
 TEST_P(CopyTests_T2T, Texture3DAnd2DArraySubRegion) {
     DAWN_TEST_UNSUPPORTED_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
+    // TODO(crbug.com/dawn/1216): Remove this suppression.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() && IsNvidia());
 
     constexpr uint32_t kWidth = 8;
     constexpr uint32_t kHeight = 4;
@@ -2271,6 +2273,8 @@ TEST_P(CopyTests_T2T, Texture3DAnd2DArraySubRegion) {
 
 // Test that copying whole 2D array to a 3D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture2DArrayTo3DFull) {
+    // TODO(crbug.com/dawn/1216): Remove this suppression.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() && IsNvidia());
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -2313,6 +2317,8 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArraySubRegion) {
 // works.
 TEST_P(CopyTests_T2T, Texture2DArrayTo3DSubRegion) {
     DAWN_TEST_UNSUPPORTED_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
+    // TODO(crbug.com/dawn/1216): Remove this suppression.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() && IsNvidia());
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;

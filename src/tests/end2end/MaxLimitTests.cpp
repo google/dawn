@@ -105,6 +105,9 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
     // TODO(crbug.com/dawn/1172)
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
+    // TODO(crbug.com/dawn/1217): Remove this suppression.
+    DAWN_TEST_UNSUPPORTED_IF(IsWindows() && IsVulkan() && IsNvidia());
+
     for (wgpu::BufferUsage usage : {wgpu::BufferUsage::Storage, wgpu::BufferUsage::Uniform}) {
         uint64_t maxBufferBindingSize;
         std::string shader;
