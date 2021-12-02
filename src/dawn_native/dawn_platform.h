@@ -21,6 +21,13 @@
 #include <dawn_native/dawn_platform_autogen.h>
 
 namespace dawn_native {
+
+    // kEnumCount is a constant specifying the number of enums in a WebGPU enum type,
+    // if the enums are contiguous, making it suitable for iteration.
+    // It is defined in dawn_platform_autogen.h
+    template <typename T>
+    constexpr uint32_t kEnumCount = EnumCount<T>::value;
+
     // Extra buffer usages
     // Add an extra buffer usage and an extra binding type for binding the buffers with QueryResolve
     // usage as storage buffer in the internal pipeline.

@@ -18,6 +18,7 @@
 #include "common/Log.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Surface.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 #include "dawn_platform/DawnPlatform.h"
 
 #if defined(DAWN_USE_X11)
@@ -54,6 +55,34 @@ namespace dawn_native {
     }
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
+    namespace {
+
+        BackendsBitset GetEnabledBackends() {
+            BackendsBitset enabledBackends;
+#if defined(DAWN_ENABLE_BACKEND_NULL)
+            enabledBackends.set(wgpu::BackendType::Null);
+#endif  // defined(DAWN_ENABLE_BACKEND_NULL)
+#if defined(DAWN_ENABLE_BACKEND_D3D12)
+            enabledBackends.set(wgpu::BackendType::D3D12);
+#endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
+#if defined(DAWN_ENABLE_BACKEND_METAL)
+            enabledBackends.set(wgpu::BackendType::Metal);
+#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
+#if defined(DAWN_ENABLE_BACKEND_VULKAN)
+            enabledBackends.set(wgpu::BackendType::Vulkan);
+#endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
+#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
+            enabledBackends.set(wgpu::BackendType::OpenGL);
+#endif  // defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
+#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
+            enabledBackends.set(wgpu::BackendType::OpenGLES);
+#endif  // defined(DAWN_ENABLE_BACKEND_OPENGLES)
+
+            return enabledBackends;
+        }
+
+    }  // anonymous namespace
+
     // InstanceBase
 
     // static
@@ -71,7 +100,9 @@ namespace dawn_native {
     }
 
     void InstanceBase::DiscoverDefaultAdapters() {
-        EnsureBackendConnections();
+        for (wgpu::BackendType b : IterateBitSet(GetEnabledBackends())) {
+            EnsureBackendConnection(b);
+        }
 
         if (mDiscoveredDefaultAdapters) {
             return;
@@ -122,8 +153,8 @@ namespace dawn_native {
         return mAdapters;
     }
 
-    void InstanceBase::EnsureBackendConnections() {
-        if (mBackendsConnected) {
+    void InstanceBase::EnsureBackendConnection(wgpu::BackendType backendType) {
+        if (mBackendsConnected[backendType]) {
             return;
         }
 
@@ -135,42 +166,74 @@ namespace dawn_native {
             }
         };
 
-#if defined(DAWN_ENABLE_BACKEND_D3D12)
-        Register(d3d12::Connect(this), wgpu::BackendType::D3D12);
-#endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
-#if defined(DAWN_ENABLE_BACKEND_METAL)
-        Register(metal::Connect(this), wgpu::BackendType::Metal);
-#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
-#if defined(DAWN_ENABLE_BACKEND_VULKAN)
-        // TODO(https://github.com/KhronosGroup/Vulkan-Loader/issues/287):
-        // When we can load SwiftShader in parallel with the system driver, we should create the
-        // backend only once and expose SwiftShader as an additional adapter. For now, we create two
-        // VkInstances, one from SwiftShader, and one from the system. Note: If the Vulkan driver
-        // *is* SwiftShader, then this would load SwiftShader twice.
-        Register(vulkan::Connect(this, false), wgpu::BackendType::Vulkan);
-#    if defined(DAWN_ENABLE_SWIFTSHADER)
-        Register(vulkan::Connect(this, true), wgpu::BackendType::Vulkan);
-#    endif  // defined(DAWN_ENABLE_SWIFTSHADER)
-#endif      // defined(DAWN_ENABLE_BACKEND_VULKAN)
-#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
-        Register(opengl::Connect(this, wgpu::BackendType::OpenGL), wgpu::BackendType::OpenGL);
-#endif  // defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
-#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
-        Register(opengl::Connect(this, wgpu::BackendType::OpenGLES), wgpu::BackendType::OpenGLES);
-#endif  // defined(DAWN_ENABLE_BACKEND_OPENGLES)
+        switch (backendType) {
 #if defined(DAWN_ENABLE_BACKEND_NULL)
-        Register(null::Connect(this), wgpu::BackendType::Null);
+            case wgpu::BackendType::Null:
+                Register(null::Connect(this), wgpu::BackendType::Null);
+                break;
 #endif  // defined(DAWN_ENABLE_BACKEND_NULL)
 
-        mBackendsConnected = true;
+#if defined(DAWN_ENABLE_BACKEND_D3D12)
+            case wgpu::BackendType::D3D12:
+                Register(d3d12::Connect(this), wgpu::BackendType::D3D12);
+                break;
+#endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
+
+#if defined(DAWN_ENABLE_BACKEND_METAL)
+            case wgpu::BackendType::Metal:
+                Register(metal::Connect(this), wgpu::BackendType::Metal);
+                break;
+#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
+
+#if defined(DAWN_ENABLE_BACKEND_VULKAN)
+            case wgpu::BackendType::Vulkan:
+                // TODO(https://github.com/KhronosGroup/Vulkan-Loader/issues/287):
+                // When we can load SwiftShader in parallel with the system driver, we should
+                // create the backend only once and expose SwiftShader as an additional adapter.
+                // For now, we create two VkInstances, one from SwiftShader, and one from the
+                // system. Note: If the Vulkan driver *is* SwiftShader, then this would load
+                // SwiftShader twice.
+                Register(vulkan::Connect(this, false), wgpu::BackendType::Vulkan);
+#    if defined(DAWN_ENABLE_SWIFTSHADER)
+                Register(vulkan::Connect(this, true), wgpu::BackendType::Vulkan);
+#    endif  // defined(DAWN_ENABLE_SWIFTSHADER)
+                break;
+#endif      // defined(DAWN_ENABLE_BACKEND_VULKAN)
+
+#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
+            case wgpu::BackendType::OpenGL:
+                Register(opengl::Connect(this, wgpu::BackendType::OpenGL),
+                         wgpu::BackendType::OpenGL);
+                break;
+#endif  // defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
+
+#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
+            case wgpu::BackendType::OpenGLES:
+                Register(opengl::Connect(this, wgpu::BackendType::OpenGLES),
+                         wgpu::BackendType::OpenGLES);
+                break;
+#endif  // defined(DAWN_ENABLE_BACKEND_OPENGLES)
+
+            default:
+                UNREACHABLE();
+        }
+
+        mBackendsConnected.set(backendType);
     }
 
     MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options) {
-        EnsureBackendConnections();
+        wgpu::BackendType backendType = static_cast<wgpu::BackendType>(options->backendType);
+        DAWN_TRY(ValidateBackendType(backendType));
+
+        if (!GetEnabledBackends()[backendType]) {
+            return DAWN_FORMAT_VALIDATION_ERROR("%s not supported.", backendType);
+        }
+
+        EnsureBackendConnection(backendType);
 
         bool foundBackend = false;
         for (std::unique_ptr<BackendConnection>& backend : mBackends) {
-            if (backend->GetType() != static_cast<wgpu::BackendType>(options->backendType)) {
+            if (backend->GetType() != backendType) {
                 continue;
             }
             foundBackend = true;
@@ -185,7 +248,7 @@ namespace dawn_native {
             }
         }
 
-        DAWN_INVALID_IF(!foundBackend, "No matching backend found.");
+        DAWN_INVALID_IF(!foundBackend, "%s not available.", backendType);
         return {};
     }
 

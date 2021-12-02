@@ -16,6 +16,7 @@
 #define DAWNNATIVE_INSTANCE_H_
 
 #include "common/RefCounted.h"
+#include "common/ityp_bitset.h"
 #include "dawn_native/Adapter.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Features.h"
@@ -35,6 +36,8 @@ namespace dawn_native {
 
     class Surface;
     class XlibXcbFunctions;
+
+    using BackendsBitset = ityp::bitset<wgpu::BackendType, kEnumCount<wgpu::BackendType>>;
 
     // This is called InstanceBase for consistency across the frontend, even if the backends don't
     // specialize this class.
@@ -87,11 +90,12 @@ namespace dawn_native {
         bool Initialize(const InstanceDescriptor* descriptor);
 
         // Lazily creates connections to all backends that have been compiled.
-        void EnsureBackendConnections();
+        void EnsureBackendConnection(wgpu::BackendType backendType);
 
         MaybeError DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options);
 
-        bool mBackendsConnected = false;
+        BackendsBitset mBackendsConnected;
+
         bool mDiscoveredDefaultAdapters = false;
 
         bool mBeginCaptureOnStartup = false;
