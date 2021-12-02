@@ -119,6 +119,17 @@ namespace utils {
         }
     }
 
+    bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat) {
+        switch (textureFormat) {
+            case wgpu::TextureFormat::Depth16Unorm:
+            case wgpu::TextureFormat::Depth24Plus:
+            case wgpu::TextureFormat::Depth32Float:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
         switch (textureFormat) {
             case wgpu::TextureFormat::R8Unorm:
@@ -134,7 +145,6 @@ namespace utils {
             case wgpu::TextureFormat::RG8Snorm:
             case wgpu::TextureFormat::RG8Uint:
             case wgpu::TextureFormat::RG8Sint:
-            case wgpu::TextureFormat::Depth16Unorm:
                 return 2u;
 
             case wgpu::TextureFormat::R32Float:
@@ -153,7 +163,6 @@ namespace utils {
             case wgpu::TextureFormat::RGB10A2Unorm:
             case wgpu::TextureFormat::RG11B10Ufloat:
             case wgpu::TextureFormat::RGB9E5Ufloat:
-            case wgpu::TextureFormat::Depth32Float:
                 return 4u;
 
             case wgpu::TextureFormat::RG32Float:
@@ -168,6 +177,14 @@ namespace utils {
             case wgpu::TextureFormat::RGBA32Uint:
             case wgpu::TextureFormat::RGBA32Sint:
                 return 16u;
+
+            case wgpu::TextureFormat::Depth16Unorm:
+                return 2u;
+
+            case wgpu::TextureFormat::Depth24Plus:
+            case wgpu::TextureFormat::Depth24UnormStencil8:
+            case wgpu::TextureFormat::Depth32Float:
+                return 4u;
 
             case wgpu::TextureFormat::BC1RGBAUnorm:
             case wgpu::TextureFormat::BC1RGBAUnormSrgb:
@@ -231,9 +248,7 @@ namespace utils {
             case wgpu::TextureFormat::ASTC12x12UnormSrgb:
                 return 16u;
 
-            case wgpu::TextureFormat::Depth24Plus:
             case wgpu::TextureFormat::Depth24PlusStencil8:
-            case wgpu::TextureFormat::Depth24UnormStencil8:
             case wgpu::TextureFormat::Depth32FloatStencil8:
 
             // Block size of a multi-planar format depends on aspect.

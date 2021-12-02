@@ -89,12 +89,14 @@ namespace dawn_native {
                 switch (src.texture->GetFormat().format) {
                     case wgpu::TextureFormat::Depth24Plus:
                     case wgpu::TextureFormat::Depth24PlusStencil8:
+                    case wgpu::TextureFormat::Depth24UnormStencil8:
                         return DAWN_FORMAT_VALIDATION_ERROR(
                             "The depth aspect of %s format %s cannot be selected in a texture to "
                             "buffer copy.",
                             src.texture, src.texture->GetFormat().format);
                     case wgpu::TextureFormat::Depth32Float:
                     case wgpu::TextureFormat::Depth16Unorm:
+                    case wgpu::TextureFormat::Depth32FloatStencil8:
                         break;
 
                     default:

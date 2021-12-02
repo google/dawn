@@ -206,6 +206,8 @@ namespace utils {
     bool IsETC2TextureFormat(wgpu::TextureFormat textureFormat);
     bool IsASTCTextureFormat(wgpu::TextureFormat textureFormat);
 
+    bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat);
+
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);
     uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat);
     uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat);
