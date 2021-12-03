@@ -413,6 +413,8 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
         }
       }
 
+      global->SetConstructor(rhs);
+
       builder_->Sem().Add(var, global);
       return global;
     }
@@ -421,6 +423,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
           var, var_ty, storage_class, access, current_statement_,
           (rhs && var->is_const) ? rhs->ConstantValue() : sem::Constant{});
       builder_->Sem().Add(var, local);
+      local->SetConstructor(rhs);
       return local;
     }
     case VariableKind::kParameter: {

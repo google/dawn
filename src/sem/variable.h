@@ -72,6 +72,16 @@ class Variable : public Castable<Variable, Node> {
   /// @return the constant value of this expression
   const Constant& ConstantValue() const { return constant_value_; }
 
+  /// @returns the variable constructor expression, or nullptr if the variable
+  /// does not have one.
+  const Expression* Constructor() const { return constructor_; }
+
+  /// Sets the variable constructor expression.
+  /// @param constructor the constructor expression to assign to this variable.
+  void SetConstructor(const Expression* constructor) {
+    constructor_ = constructor;
+  }
+
   /// @returns the expressions that use the variable
   const std::vector<const VariableUser*>& Users() const { return users_; }
 
@@ -81,9 +91,10 @@ class Variable : public Castable<Variable, Node> {
  private:
   const ast::Variable* const declaration_;
   const sem::Type* const type_;
-  ast::StorageClass const storage_class_;
-  ast::Access const access_;
+  const ast::StorageClass storage_class_;
+  const ast::Access access_;
   const Constant constant_value_;
+  const Expression* constructor_ = nullptr;
   std::vector<const VariableUser*> users_;
 };
 

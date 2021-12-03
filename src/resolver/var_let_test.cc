@@ -26,7 +26,7 @@ namespace {
 struct ResolverVarLetTest : public resolver::TestHelper,
                             public testing::Test {};
 
-TEST_F(ResolverVarLetTest, TypeOfVar) {
+TEST_F(ResolverVarLetTest, VarDeclWithoutConstructor) {
   // struct S { i : i32; }
   // alias A = S;
   // fn F(){
@@ -74,9 +74,80 @@ TEST_F(ResolverVarLetTest, TypeOfVar) {
   EXPECT_TRUE(TypeOf(b)->As<sem::Reference>()->StoreType()->Is<sem::Bool>());
   EXPECT_TRUE(TypeOf(s)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
   EXPECT_TRUE(TypeOf(a)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
+
+  EXPECT_EQ(Sem().Get(i)->Constructor(), nullptr);
+  EXPECT_EQ(Sem().Get(u)->Constructor(), nullptr);
+  EXPECT_EQ(Sem().Get(f)->Constructor(), nullptr);
+  EXPECT_EQ(Sem().Get(b)->Constructor(), nullptr);
+  EXPECT_EQ(Sem().Get(s)->Constructor(), nullptr);
+  EXPECT_EQ(Sem().Get(a)->Constructor(), nullptr);
 }
 
-TEST_F(ResolverVarLetTest, TypeOfLet) {
+TEST_F(ResolverVarLetTest, VarDeclWithConstructor) {
+  // struct S { i : i32; }
+  // alias A = S;
+  // fn F(){
+  //   var i : i32 = 1;
+  //   var u : u32 = 1u;
+  //   var f : f32 = 1.f;
+  //   var b : bool = true;
+  //   var s : S = S(1);
+  //   var a : A = A(1);
+  // }
+
+  auto* S = Structure("S", {Member("i", ty.i32())});
+  auto* A = Alias("A", ty.Of(S));
+
+  auto* i_c = Expr(1);
+  auto* u_c = Expr(1u);
+  auto* f_c = Expr(1.f);
+  auto* b_c = Expr(true);
+  auto* s_c = Construct(ty.Of(S), Expr(1));
+  auto* a_c = Construct(ty.Of(A), Expr(1));
+
+  auto* i = Var("i", ty.i32(), ast::StorageClass::kNone, i_c);
+  auto* u = Var("u", ty.u32(), ast::StorageClass::kNone, u_c);
+  auto* f = Var("f", ty.f32(), ast::StorageClass::kNone, f_c);
+  auto* b = Var("b", ty.bool_(), ast::StorageClass::kNone, b_c);
+  auto* s = Var("s", ty.Of(S), ast::StorageClass::kNone, s_c);
+  auto* a = Var("a", ty.Of(A), ast::StorageClass::kNone, a_c);
+
+  Func("F", {}, ty.void_(),
+       {
+           Decl(i),
+           Decl(u),
+           Decl(f),
+           Decl(b),
+           Decl(s),
+           Decl(a),
+       });
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  // `var` declarations are always of reference type
+  ASSERT_TRUE(TypeOf(i)->Is<sem::Reference>());
+  ASSERT_TRUE(TypeOf(u)->Is<sem::Reference>());
+  ASSERT_TRUE(TypeOf(f)->Is<sem::Reference>());
+  ASSERT_TRUE(TypeOf(b)->Is<sem::Reference>());
+  ASSERT_TRUE(TypeOf(s)->Is<sem::Reference>());
+  ASSERT_TRUE(TypeOf(a)->Is<sem::Reference>());
+
+  EXPECT_TRUE(TypeOf(i)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(u)->As<sem::Reference>()->StoreType()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(f)->As<sem::Reference>()->StoreType()->Is<sem::F32>());
+  EXPECT_TRUE(TypeOf(b)->As<sem::Reference>()->StoreType()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(s)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
+  EXPECT_TRUE(TypeOf(a)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
+
+  EXPECT_EQ(Sem().Get(i)->Constructor()->Declaration(), i_c);
+  EXPECT_EQ(Sem().Get(u)->Constructor()->Declaration(), u_c);
+  EXPECT_EQ(Sem().Get(f)->Constructor()->Declaration(), f_c);
+  EXPECT_EQ(Sem().Get(b)->Constructor()->Declaration(), b_c);
+  EXPECT_EQ(Sem().Get(s)->Constructor()->Declaration(), s_c);
+  EXPECT_EQ(Sem().Get(a)->Constructor()->Declaration(), a_c);
+}
+
+TEST_F(ResolverVarLetTest, LetDecl) {
   // struct S { i : i32; }
   // fn F(){
   //   var v : i32;
@@ -86,21 +157,28 @@ TEST_F(ResolverVarLetTest, TypeOfLet) {
   //   let b : bool = true;
   //   let s : S = S(1);
   //   let a : A = A(1);
-  //   let p : pointer<function, i32> = &V;
+  //   let p : pointer<function, i32> = &v;
   // }
 
   auto* S = Structure("S", {Member("i", ty.i32())});
   auto* A = Alias("A", ty.Of(S));
-
   auto* v = Var("v", ty.i32(), ast::StorageClass::kNone);
-  auto* i = Const("i", ty.i32(), Expr(1));
-  auto* u = Const("u", ty.u32(), Expr(1u));
-  auto* f = Const("f", ty.f32(), Expr(1.f));
-  auto* b = Const("b", ty.bool_(), Expr(true));
-  auto* s = Const("s", ty.Of(S), Construct(ty.Of(S), Expr(1)));
-  auto* a = Const("a", ty.Of(A), Construct(ty.Of(A), Expr(1)));
-  auto* p =
-      Const("p", ty.pointer<i32>(ast::StorageClass::kFunction), AddressOf(v));
+
+  auto* i_c = Expr(1);
+  auto* u_c = Expr(1u);
+  auto* f_c = Expr(1.f);
+  auto* b_c = Expr(true);
+  auto* s_c = Construct(ty.Of(S), Expr(1));
+  auto* a_c = Construct(ty.Of(A), Expr(1));
+  auto* p_c = AddressOf(v);
+
+  auto* i = Const("i", ty.i32(), i_c);
+  auto* u = Const("u", ty.u32(), u_c);
+  auto* f = Const("f", ty.f32(), f_c);
+  auto* b = Const("b", ty.bool_(), b_c);
+  auto* s = Const("s", ty.Of(S), s_c);
+  auto* a = Const("a", ty.Of(A), a_c);
+  auto* p = Const("p", ty.pointer<i32>(ast::StorageClass::kFunction), p_c);
 
   Func("F", {}, ty.void_(),
        {
@@ -117,14 +195,22 @@ TEST_F(ResolverVarLetTest, TypeOfLet) {
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
   // `let` declarations are always of the storage type
-  EXPECT_TRUE(TypeOf(i)->Is<sem::I32>());
-  EXPECT_TRUE(TypeOf(u)->Is<sem::U32>());
-  EXPECT_TRUE(TypeOf(f)->Is<sem::F32>());
-  EXPECT_TRUE(TypeOf(b)->Is<sem::Bool>());
-  EXPECT_TRUE(TypeOf(s)->Is<sem::Struct>());
-  EXPECT_TRUE(TypeOf(a)->Is<sem::Struct>());
+  ASSERT_TRUE(TypeOf(i)->Is<sem::I32>());
+  ASSERT_TRUE(TypeOf(u)->Is<sem::U32>());
+  ASSERT_TRUE(TypeOf(f)->Is<sem::F32>());
+  ASSERT_TRUE(TypeOf(b)->Is<sem::Bool>());
+  ASSERT_TRUE(TypeOf(s)->Is<sem::Struct>());
+  ASSERT_TRUE(TypeOf(a)->Is<sem::Struct>());
   ASSERT_TRUE(TypeOf(p)->Is<sem::Pointer>());
-  EXPECT_TRUE(TypeOf(p)->As<sem::Pointer>()->StoreType()->Is<sem::I32>());
+  ASSERT_TRUE(TypeOf(p)->As<sem::Pointer>()->StoreType()->Is<sem::I32>());
+
+  EXPECT_EQ(Sem().Get(i)->Constructor()->Declaration(), i_c);
+  EXPECT_EQ(Sem().Get(u)->Constructor()->Declaration(), u_c);
+  EXPECT_EQ(Sem().Get(f)->Constructor()->Declaration(), f_c);
+  EXPECT_EQ(Sem().Get(b)->Constructor()->Declaration(), b_c);
+  EXPECT_EQ(Sem().Get(s)->Constructor()->Declaration(), s_c);
+  EXPECT_EQ(Sem().Get(a)->Constructor()->Declaration(), a_c);
+  EXPECT_EQ(Sem().Get(p)->Constructor()->Declaration(), p_c);
 }
 
 TEST_F(ResolverVarLetTest, DefaultVarStorageClass) {
