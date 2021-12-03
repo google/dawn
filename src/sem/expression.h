@@ -68,7 +68,7 @@ class Expression : public Castable<Expression, Node> {
   const sem::Type* const type_;
   const Statement* const statement_;
   const Constant constant_;
-  sem::Behaviors behaviors_;
+  sem::Behaviors behaviors_{sem::Behavior::kNext};
 };
 
 }  // namespace sem

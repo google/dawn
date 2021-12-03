@@ -657,10 +657,20 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
           << "Resolver::Function() called with a current compound statement";
       return nullptr;
     }
-    if (!StatementScope(decl->body,
-                        builder_->create<sem::FunctionBlockStatement>(func),
-                        [&] { return Statements(decl->body->statements); })) {
+    auto* body = StatementScope(
+        decl->body, builder_->create<sem::FunctionBlockStatement>(func),
+        [&] { return Statements(decl->body->statements); });
+    if (!body) {
       return nullptr;
+    }
+    func->Behaviors() = body->Behaviors();
+    if (func->Behaviors().Contains(sem::Behavior::kReturn)) {
+      // https://www.w3.org/TR/WGSL/#behaviors-rules
+      // We assign a behavior to each function: it is its body’s behavior
+      // (treating the body as a regular statement), with any "Return" replaced
+      // by "Next".
+      func->Behaviors().Remove(sem::Behavior::kReturn);
+      func->Behaviors().Add(sem::Behavior::kNext);
     }
   }
 
@@ -797,13 +807,22 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
 }
 
 bool Resolver::Statements(const ast::StatementList& stmts) {
+  sem::Behaviors behaviors{sem::Behavior::kNext};
+
   for (auto* stmt : stmts) {
     Mark(stmt);
     auto* sem = Statement(stmt);
     if (!sem) {
       return false;
     }
+    // s1 s2:(B1∖{Next}) ∪ B2
+    // ValidateStatements will ensure that statements can only follow a Next.
+    behaviors.Remove(sem::Behavior::kNext);
+    behaviors.Add(sem->Behaviors());
   }
+
+  current_statement_->Behaviors() = behaviors;
+
   if (!ValidateStatements(stmts)) {
     return false;
   }
@@ -887,6 +906,7 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt) {
       return false;
     }
     sem->SetBlock(body);
+    sem->Behaviors() = body->Behaviors();
     return true;
   });
 }
@@ -900,6 +920,8 @@ sem::IfStatement* Resolver::IfStatement(const ast::IfStatement* stmt) {
       return false;
     }
     sem->SetCondition(cond);
+    sem->Behaviors() = cond->Behaviors();
+    sem->Behaviors().Remove(sem::Behavior::kNext);
 
     Mark(stmt->body);
     auto* body = builder_->create<sem::BlockStatement>(
@@ -908,12 +930,23 @@ sem::IfStatement* Resolver::IfStatement(const ast::IfStatement* stmt) {
                         [&] { return Statements(stmt->body->statements); })) {
       return false;
     }
+    sem->Behaviors().Add(body->Behaviors());
 
     for (auto* else_stmt : stmt->else_statements) {
       Mark(else_stmt);
-      if (!ElseStatement(else_stmt)) {
+      auto* else_sem = ElseStatement(else_stmt);
+      if (!else_sem) {
         return false;
       }
+      sem->Behaviors().Add(else_sem->Behaviors());
+    }
+
+    if (stmt->else_statements.empty() ||
+        stmt->else_statements.back()->condition != nullptr) {
+      // https://www.w3.org/TR/WGSL/#behaviors-rules
+      // if statements without an else branch are treated as if they had an
+      // empty else branch (which adds Next to their behavior)
+      sem->Behaviors().Add(sem::Behavior::kNext);
     }
 
     return ValidateIfStatement(sem);
@@ -930,7 +963,12 @@ sem::ElseStatement* Resolver::ElseStatement(const ast::ElseStatement* stmt) {
         return false;
       }
       sem->SetCondition(cond);
+      // https://www.w3.org/TR/WGSL/#behaviors-rules
+      // if statements with else if branches are treated as if they were nested
+      // simple if/else statements
+      sem->Behaviors() = cond->Behaviors();
     }
+    sem->Behaviors().Remove(sem::Behavior::kNext);
 
     Mark(stmt->body);
     auto* body = builder_->create<sem::BlockStatement>(
@@ -939,6 +977,7 @@ sem::ElseStatement* Resolver::ElseStatement(const ast::ElseStatement* stmt) {
                         [&] { return Statements(stmt->body->statements); })) {
       return false;
     }
+    sem->Behaviors().Add(body->Behaviors());
 
     return ValidateElseStatement(sem);
   });
@@ -964,19 +1003,31 @@ sem::LoopStatement* Resolver::LoopStatement(const ast::LoopStatement* stmt) {
       if (!Statements(stmt->body->statements)) {
         return false;
       }
+      auto& behaviors = sem->Behaviors();
+      behaviors = body->Behaviors();
 
       if (stmt->continuing) {
         Mark(stmt->continuing);
         if (!stmt->continuing->Empty()) {
-          auto* continuing =
+          auto* continuing = StatementScope(
+              stmt->continuing,
               builder_->create<sem::LoopContinuingBlockStatement>(
                   stmt->continuing, current_compound_statement_,
-                  current_function_);
-          return StatementScope(stmt->continuing, continuing, [&] {
-                   return Statements(stmt->continuing->statements);
-                 }) != nullptr;
+                  current_function_),
+              [&] { return Statements(stmt->continuing->statements); });
+          if (!continuing) {
+            return false;
+          }
+          behaviors.Add(continuing->Behaviors());
         }
       }
+
+      if (behaviors.Contains(sem::Behavior::kBreak)) {  // Does the loop exit?
+        behaviors.Add(sem::Behavior::kNext);
+      } else {
+        behaviors.Remove(sem::Behavior::kNext);
+      }
+      behaviors.Remove(sem::Behavior::kBreak, sem::Behavior::kContinue);
 
       return true;
     });
@@ -988,11 +1039,14 @@ sem::ForLoopStatement* Resolver::ForLoopStatement(
   auto* sem = builder_->create<sem::ForLoopStatement>(
       stmt, current_compound_statement_, current_function_);
   return StatementScope(stmt, sem, [&] {
+    auto& behaviors = sem->Behaviors();
     if (auto* initializer = stmt->initializer) {
       Mark(initializer);
-      if (!Statement(initializer)) {
+      auto* init = Statement(initializer);
+      if (!init) {
         return false;
       }
+      behaviors.Add(init->Behaviors());
     }
 
     if (auto* cond_expr = stmt->condition) {
@@ -1001,13 +1055,16 @@ sem::ForLoopStatement* Resolver::ForLoopStatement(
         return false;
       }
       sem->SetCondition(cond);
+      behaviors.Add(cond->Behaviors());
     }
 
     if (auto* continuing = stmt->continuing) {
       Mark(continuing);
-      if (!Statement(continuing)) {
+      auto* cont = Statement(continuing);
+      if (!cont) {
         return false;
       }
+      behaviors.Add(cont->Behaviors());
     }
 
     Mark(stmt->body);
@@ -1018,6 +1075,15 @@ sem::ForLoopStatement* Resolver::ForLoopStatement(
                         [&] { return Statements(stmt->body->statements); })) {
       return false;
     }
+
+    behaviors.Add(body->Behaviors());
+    if (stmt->condition ||
+        behaviors.Contains(sem::Behavior::kBreak)) {  // Does the loop exit?
+      behaviors.Add(sem::Behavior::kNext);
+    } else {
+      behaviors.Remove(sem::Behavior::kNext);
+    }
+    behaviors.Remove(sem::Behavior::kBreak, sem::Behavior::kContinue);
 
     return ValidateForLoopStatement(sem);
   });
@@ -1072,6 +1138,19 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
     if (!sem_expr) {
       return nullptr;
     }
+
+    // https://www.w3.org/TR/WGSL/#behaviors-rules
+    // an expression behavior is always either {Next} or {Next, Discard}
+    if (sem_expr->Behaviors() != sem::Behavior::kNext &&
+        sem_expr->Behaviors() != sem::Behaviors{sem::Behavior::kNext,  // NOLINT
+                                                sem::Behavior::kDiscard} &&
+        !IsCallStatement(expr)) {
+      TINT_ICE(Resolver, diagnostics_)
+          << expr->TypeInfo().name
+          << " behaviors are: " << sem_expr->Behaviors();
+      return nullptr;
+    }
+
     builder_->Sem().Add(expr, sem_expr);
     if (expr == root) {
       return sem_expr;
@@ -1084,52 +1163,57 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
 
 sem::Expression* Resolver::IndexAccessor(
     const ast::IndexAccessorExpression* expr) {
-  auto* idx = expr->index;
-  auto* parent_raw_ty = TypeOf(expr->object);
-  auto* parent_ty = parent_raw_ty->UnwrapRef();
+  auto* idx = Sem(expr->index);
+  auto* obj = Sem(expr->object);
+  auto* obj_raw_ty = obj->Type();
+  auto* obj_ty = obj_raw_ty->UnwrapRef();
   const sem::Type* ty = nullptr;
-  if (auto* arr = parent_ty->As<sem::Array>()) {
+  if (auto* arr = obj_ty->As<sem::Array>()) {
     ty = arr->ElemType();
-  } else if (auto* vec = parent_ty->As<sem::Vector>()) {
+  } else if (auto* vec = obj_ty->As<sem::Vector>()) {
     ty = vec->type();
-  } else if (auto* mat = parent_ty->As<sem::Matrix>()) {
+  } else if (auto* mat = obj_ty->As<sem::Matrix>()) {
     ty = builder_->create<sem::Vector>(mat->type(), mat->rows());
   } else {
-    AddError("cannot index type '" + TypeNameOf(parent_ty) + "'", expr->source);
+    AddError("cannot index type '" + TypeNameOf(obj_ty) + "'", expr->source);
     return nullptr;
   }
 
-  auto* idx_ty = TypeOf(idx)->UnwrapRef();
+  auto* idx_ty = idx->Type()->UnwrapRef();
   if (!idx_ty->IsAnyOf<sem::I32, sem::U32>()) {
     AddError("index must be of type 'i32' or 'u32', found: '" +
                  TypeNameOf(idx_ty) + "'",
-             idx->source);
+             idx->Declaration()->source);
     return nullptr;
   }
 
-  if (parent_ty->IsAnyOf<sem::Array, sem::Matrix>()) {
-    if (!parent_raw_ty->Is<sem::Reference>()) {
+  if (obj_ty->IsAnyOf<sem::Array, sem::Matrix>()) {
+    if (!obj_raw_ty->Is<sem::Reference>()) {
       // TODO(bclayton): expand this to allow any const_expr expression
       // https://github.com/gpuweb/gpuweb/issues/1272
-      if (!idx->As<ast::IntLiteralExpression>()) {
+      if (!idx->Declaration()->As<ast::IntLiteralExpression>()) {
         AddError("index must be signed or unsigned integer literal",
-                 idx->source);
+                 idx->Declaration()->source);
         return nullptr;
       }
     }
   }
 
   // If we're extracting from a reference, we return a reference.
-  if (auto* ref = parent_raw_ty->As<sem::Reference>()) {
+  if (auto* ref = obj_raw_ty->As<sem::Reference>()) {
     ty = builder_->create<sem::Reference>(ty, ref->StorageClass(),
                                           ref->Access());
   }
 
   auto val = EvaluateConstantValue(expr, ty);
-  return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+  auto* sem =
+      builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+  sem->Behaviors() = idx->Behaviors() + obj->Behaviors();
+  return sem;
 }
 
 sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
+  auto* inner = Sem(expr->expr);
   auto* ty = Type(expr->type);
   if (!ty) {
     return nullptr;
@@ -1140,12 +1224,17 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
   }
 
   auto val = EvaluateConstantValue(expr, ty);
-  return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+  auto* sem =
+      builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+  sem->Behaviors() = inner->Behaviors();
+  return sem;
 }
 
 sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   std::vector<const sem::Expression*> args(expr->args.size());
   std::vector<const sem::Type*> arg_tys(args.size());
+  sem::Behaviors arg_behaviors;
+
   for (size_t i = 0; i < expr->args.size(); i++) {
     auto* arg = Sem(expr->args[i]);
     if (!arg) {
@@ -1153,7 +1242,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     }
     args[i] = arg;
     arg_tys[i] = args[i]->Type();
+    arg_behaviors.Add(arg->Behaviors());
   }
+
+  arg_behaviors.Remove(sem::Behavior::kNext);
 
   auto type_ctor_or_conv = [&](const sem::Type* ty) -> sem::Call* {
     // The call has resolved to a type constructor or cast.
@@ -1192,7 +1284,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   }
 
   if (auto* fn = As<sem::Function>(resolved)) {
-    return FunctionCall(expr, fn, std::move(args));
+    return FunctionCall(expr, fn, std::move(args), arg_behaviors);
   }
 
   auto name = builder_->Symbols().NameFor(ident->symbol);
@@ -1247,7 +1339,8 @@ sem::Call* Resolver::IntrinsicCall(
 sem::Call* Resolver::FunctionCall(
     const ast::CallExpression* expr,
     sem::Function* target,
-    const std::vector<const sem::Expression*> args) {
+    const std::vector<const sem::Expression*> args,
+    sem::Behaviors arg_behaviors) {
   auto sym = expr->target.name->symbol;
   auto name = builder_->Symbols().NameFor(sym);
 
@@ -1272,6 +1365,8 @@ sem::Call* Resolver::FunctionCall(
 
   target->AddCallSite(call);
 
+  call->Behaviors() = arg_behaviors + target->Behaviors();
+
   if (!ValidateFunctionCall(call)) {
     return nullptr;
   }
@@ -1285,14 +1380,9 @@ sem::Call* Resolver::TypeConversion(const ast::CallExpression* expr,
                                     const sem::Type* source) {
   // It is not valid to have a type-cast call expression inside a call
   // statement.
-  if (current_statement_) {
-    if (auto* stmt =
-            current_statement_->Declaration()->As<ast::CallStatement>()) {
-      if (stmt->expr == expr) {
-        AddError("type cast evaluated but not used", expr->source);
-        return nullptr;
-      }
-    }
+  if (IsCallStatement(expr)) {
+    AddError("type cast evaluated but not used", expr->source);
+    return nullptr;
   }
 
   auto* call_target = utils::GetOrCreate(
@@ -1349,14 +1439,9 @@ sem::Call* Resolver::TypeConstructor(
     const std::vector<const sem::Type*> arg_tys) {
   // It is not valid to have a type-constructor call expression as a call
   // statement.
-  if (current_statement_) {
-    if (auto* stmt =
-            current_statement_->Declaration()->As<ast::CallStatement>()) {
-      if (stmt->expr == expr) {
-        AddError("type constructor evaluated but not used", expr->source);
-        return nullptr;
-      }
-    }
+  if (IsCallStatement(expr)) {
+    AddError("type constructor evaluated but not used", expr->source);
+    return nullptr;
   }
 
   auto* call_target = utils::GetOrCreate(
@@ -1619,8 +1704,11 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
   using Matrix = sem::Matrix;
   using Vector = sem::Vector;
 
-  auto* lhs_ty = TypeOf(expr->lhs)->UnwrapRef();
-  auto* rhs_ty = TypeOf(expr->rhs)->UnwrapRef();
+  auto* lhs = Sem(expr->lhs);
+  auto* rhs = Sem(expr->rhs);
+
+  auto* lhs_ty = lhs->Type()->UnwrapRef();
+  auto* rhs_ty = rhs->Type()->UnwrapRef();
 
   auto* lhs_vec = lhs_ty->As<Vector>();
   auto* lhs_vec_elem_type = lhs_vec ? lhs_vec->type() : nullptr;
@@ -1636,7 +1724,10 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
 
   auto build = [&](const sem::Type* ty) {
     auto val = EvaluateConstantValue(expr, ty);
-    return builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+    auto* sem =
+        builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+    sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
+    return sem;
   };
 
   // Binary logical expressions
@@ -1798,7 +1889,8 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
 }
 
 sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
-  auto* expr_ty = TypeOf(unary->expr);
+  auto* expr = Sem(unary->expr);
+  auto* expr_ty = expr->Type();
   if (!expr_ty) {
     return nullptr;
   }
@@ -1880,7 +1972,10 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
   }
 
   auto val = EvaluateConstantValue(unary, ty);
-  return builder_->create<sem::Expression>(unary, ty, current_statement_, val);
+  auto* sem =
+      builder_->create<sem::Expression>(unary, ty, current_statement_, val);
+  sem->Behaviors() = expr->Behaviors();
+  return sem;
 }
 
 sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
@@ -2248,10 +2343,15 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
   auto* sem = builder_->create<sem::Statement>(
       stmt, current_compound_statement_, current_function_);
   return StatementScope(stmt, sem, [&] {
+    auto& behaviors = current_statement_->Behaviors();
+    behaviors = sem::Behavior::kReturn;
+
     if (auto* value = stmt->value) {
-      if (!Expression(value)) {
+      auto* expr = Expression(value);
+      if (!expr) {
         return false;
       }
+      behaviors.Add(expr->Behaviors() - sem::Behavior::kNext);
     }
 
     // Validate after processing the return value expression so that its type is
@@ -2265,16 +2365,27 @@ sem::SwitchStatement* Resolver::SwitchStatement(
   auto* sem = builder_->create<sem::SwitchStatement>(
       stmt, current_compound_statement_, current_function_);
   return StatementScope(stmt, sem, [&] {
-    if (!Expression(stmt->condition)) {
+    auto& behaviors = sem->Behaviors();
+
+    auto* cond = Expression(stmt->condition);
+    if (!cond) {
       return false;
     }
+    behaviors = cond->Behaviors() - sem::Behavior::kNext;
 
     for (auto* case_stmt : stmt->body) {
       Mark(case_stmt);
-      if (!CaseStatement(case_stmt)) {
+      auto* c = CaseStatement(case_stmt);
+      if (!c) {
         return false;
       }
+      behaviors.Add(c->Behaviors());
     }
+
+    if (behaviors.Contains(sem::Behavior::kBreak)) {
+      behaviors.Add(sem::Behavior::kNext);
+    }
+    behaviors.Remove(sem::Behavior::kBreak, sem::Behavior::kFallthrough);
 
     return ValidateSwitch(stmt);
   });
@@ -2304,6 +2415,10 @@ sem::Statement* Resolver::VariableDeclStatement(
       current_block_->AddDecl(stmt->variable);
     }
 
+    if (auto* ctor = var->Constructor()) {
+      sem->Behaviors() = ctor->Behaviors();
+    }
+
     return ValidateVariable(var);
   });
 }
@@ -2313,8 +2428,20 @@ sem::Statement* Resolver::AssignmentStatement(
   auto* sem = builder_->create<sem::Statement>(
       stmt, current_compound_statement_, current_function_);
   return StatementScope(stmt, sem, [&] {
-    if (!Expression(stmt->lhs) || !Expression(stmt->rhs)) {
+    auto* lhs = Expression(stmt->lhs);
+    if (!lhs) {
       return false;
+    }
+
+    auto* rhs = Expression(stmt->rhs);
+    if (!rhs) {
+      return false;
+    }
+
+    auto& behaviors = sem->Behaviors();
+    behaviors = rhs->Behaviors();
+    if (!stmt->lhs->Is<ast::PhonyExpression>()) {
+      behaviors.Add(lhs->Behaviors());
     }
 
     return ValidateAssignment(stmt);
@@ -2324,13 +2451,23 @@ sem::Statement* Resolver::AssignmentStatement(
 sem::Statement* Resolver::BreakStatement(const ast::BreakStatement* stmt) {
   auto* sem = builder_->create<sem::Statement>(
       stmt, current_compound_statement_, current_function_);
-  return StatementScope(stmt, sem, [&] { return ValidateBreakStatement(sem); });
+  return StatementScope(stmt, sem, [&] {
+    sem->Behaviors() = sem::Behavior::kBreak;
+
+    return ValidateBreakStatement(sem);
+  });
 }
 
 sem::Statement* Resolver::CallStatement(const ast::CallStatement* stmt) {
   auto* sem = builder_->create<sem::Statement>(
       stmt, current_compound_statement_, current_function_);
-  return StatementScope(stmt, sem, [&] { return Expression(stmt->expr); });
+  return StatementScope(stmt, sem, [&] {
+    if (auto* expr = Expression(stmt->expr)) {
+      sem->Behaviors() = expr->Behaviors();
+      return true;
+    }
+    return false;
+  });
 }
 
 sem::Statement* Resolver::ContinueStatement(
@@ -2338,6 +2475,8 @@ sem::Statement* Resolver::ContinueStatement(
   auto* sem = builder_->create<sem::Statement>(
       stmt, current_compound_statement_, current_function_);
   return StatementScope(stmt, sem, [&] {
+    sem->Behaviors() = sem::Behavior::kContinue;
+
     // Set if we've hit the first continue statement in our parent loop
     if (auto* block = sem->FindFirstParent<sem::LoopBlockStatement>()) {
       if (!block->FirstContinue()) {
@@ -2354,6 +2493,7 @@ sem::Statement* Resolver::DiscardStatement(const ast::DiscardStatement* stmt) {
   auto* sem = builder_->create<sem::Statement>(
       stmt, current_compound_statement_, current_function_);
   return StatementScope(stmt, sem, [&] {
+    sem->Behaviors() = sem::Behavior::kDiscard;
     current_function_->SetHasDiscard();
 
     return ValidateDiscardStatement(sem);
@@ -2365,6 +2505,8 @@ sem::Statement* Resolver::FallthroughStatement(
   auto* sem = builder_->create<sem::Statement>(
       stmt, current_compound_statement_, current_function_);
   return StatementScope(stmt, sem, [&] {
+    sem->Behaviors() = sem::Behavior::kFallthrough;
+
     return ValidateFallthroughStatement(sem);
   });
 }
@@ -2510,6 +2652,12 @@ bool Resolver::IsHostShareable(const sem::Type* type) const {
 bool Resolver::IsIntrinsic(Symbol symbol) const {
   std::string name = builder_->Symbols().NameFor(symbol);
   return sem::ParseIntrinsicType(name) != sem::IntrinsicType::kNone;
+}
+
+bool Resolver::IsCallStatement(const ast::Expression* expr) const {
+  return current_statement_ &&
+         Is<ast::CallStatement>(current_statement_->Declaration(),
+                                [&](auto* stmt) { return stmt->expr == expr; });
 }
 
 ////////////////////////////////////////////////////////////////////////////////

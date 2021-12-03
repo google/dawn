@@ -240,6 +240,12 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns true if this function has a discard statement
   bool HasDiscard() const { return has_discard_; }
 
+  /// @return the behaviors of this function
+  const sem::Behaviors& Behaviors() const { return behaviors_; }
+
+  /// @return the behaviors of this function
+  sem::Behaviors& Behaviors() { return behaviors_; }
+
  private:
   VariableBindings TransitivelyReferencedSamplerVariablesImpl(
       ast::SamplerKind kind) const;
@@ -257,6 +263,7 @@ class Function : public Castable<Function, CallTarget> {
   std::vector<const Call*> callsites_;
   std::vector<const Function*> ancestor_entry_points_;
   bool has_discard_ = false;
+  sem::Behaviors behaviors_{sem::Behavior::kNext};
 };
 
 }  // namespace sem

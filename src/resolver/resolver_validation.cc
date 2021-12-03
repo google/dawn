@@ -1042,6 +1042,18 @@ bool Resolver::ValidateFunction(const sem::Function* func) {
     }
   }
 
+  // https://www.w3.org/TR/WGSL/#behaviors-rules
+  // a function behavior is always one of {}, {Next}, {Discard}, or
+  // {Next, Discard}.
+  if (func->Behaviors() != sem::Behaviors{} &&  // NOLINT: bad warning
+      func->Behaviors() != sem::Behavior::kNext &&
+      func->Behaviors() != sem::Behavior::kDiscard &&
+      func->Behaviors() != sem::Behaviors{sem::Behavior::kNext,  //
+                                          sem::Behavior::kDiscard}) {
+    TINT_ICE(Resolver, diagnostics_)
+        << "function '" << name << "' behaviors are: " << func->Behaviors();
+  }
+
   return true;
 }
 

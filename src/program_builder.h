@@ -32,6 +32,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/continue_statement.h"
 #include "src/ast/depth_multisampled_texture.h"
 #include "src/ast/depth_texture.h"
 #include "src/ast/disable_validation_decoration.h"
@@ -1864,6 +1865,19 @@ class ProgramBuilder {
   /// @returns the break statement pointer
   const ast::BreakStatement* Break() { return create<ast::BreakStatement>(); }
 
+  /// Creates an ast::ContinueStatement
+  /// @param source the source information
+  /// @returns the continue statement pointer
+  const ast::ContinueStatement* Continue(const Source& source) {
+    return create<ast::ContinueStatement>(source);
+  }
+
+  /// Creates an ast::ContinueStatement
+  /// @returns the continue statement pointer
+  const ast::ContinueStatement* Continue() {
+    return create<ast::ContinueStatement>();
+  }
+
   /// Creates an ast::ReturnStatement with no return value
   /// @param source the source information
   /// @returns the return statement pointer
@@ -2039,6 +2053,13 @@ class ProgramBuilder {
                                  const ast::BlockStatement* body) {
     return create<ast::ElseStatement>(Expr(std::forward<CONDITION>(condition)),
                                       body);
+  }
+
+  /// Creates a ast::ElseStatement with no condition and body
+  /// @param body the else body
+  /// @returns the else statement pointer
+  const ast::ElseStatement* Else(const ast::BlockStatement* body) {
+    return create<ast::ElseStatement>(nullptr, body);
   }
 
   /// Creates a ast::IfStatement with input condition, body, and optional

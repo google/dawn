@@ -185,7 +185,8 @@ class Resolver {
   sem::Function* Function(const ast::Function*);
   sem::Call* FunctionCall(const ast::CallExpression*,
                           sem::Function* target,
-                          const std::vector<const sem::Expression*> args);
+                          const std::vector<const sem::Expression*> args,
+                          sem::Behaviors arg_behaviors);
   sem::Expression* Identifier(const ast::IdentifierExpression*);
   sem::Call* IntrinsicCall(const ast::CallExpression*,
                            sem::IntrinsicType,
@@ -459,6 +460,9 @@ class Resolver {
   /// @returns true if the symbol is the name of an intrinsic (builtin)
   /// function.
   bool IsIntrinsic(Symbol) const;
+
+  /// @returns true if `expr` is the current CallStatement's CallExpression
+  bool IsCallStatement(const ast::Expression* expr) const;
 
   /// @returns the resolved symbol (function, type or variable) for the given
   /// ast::Identifier or ast::TypeName cast to the given semantic type.

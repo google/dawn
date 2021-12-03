@@ -689,6 +689,7 @@ if(${TINT_BUILD_TESTS})
     resolver/pipeline_overridable_constant_test.cc
     resolver/ptr_ref_test.cc
     resolver/ptr_ref_validation_test.cc
+    resolver/resolver_behavior_test.cc
     resolver/resolver_constants_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h

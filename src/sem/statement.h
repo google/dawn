@@ -110,8 +110,7 @@ class Statement : public Castable<Statement, Node> {
   const ast::Statement* const declaration_;
   const CompoundStatement* const parent_;
   const sem::Function* const function_;
-
-  sem::Behaviors behaviors_;
+  sem::Behaviors behaviors_{sem::Behavior::kNext};
 };
 
 /// CompoundStatement is the base class of statements that can hold other
