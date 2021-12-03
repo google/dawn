@@ -1,11 +1,18 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+#if __METAL_VERSION__ >= 210
+#define TINT_INVARIANT [[invariant]]
+#else
+#define TINT_INVARIANT
+#endif
+
 struct Out {
   float4 pos;
 };
 struct tint_symbol_1 {
-  float4 pos [[position]] [[invariant]];
+  float4 pos [[position]] TINT_INVARIANT;
 };
 
 Out tint_symbol_inner() {

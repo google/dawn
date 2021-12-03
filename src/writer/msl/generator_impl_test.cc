@@ -95,8 +95,15 @@ TEST_F(MslGeneratorImplTest, HasInvariantAttribute_True) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
+
+#if __METAL_VERSION__ >= 210
+#define TINT_INVARIANT [[invariant]]
+#else
+#define TINT_INVARIANT
+#endif
+
 struct Out {
-  float4 pos [[position]] [[invariant]];
+  float4 pos [[position]] TINT_INVARIANT;
 };
 
 vertex Out vert_main() {

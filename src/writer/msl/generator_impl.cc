@@ -240,6 +240,18 @@ bool GeneratorImpl::Generate() {
     line();
   }
 
+  if (!invariant_define_name_.empty()) {
+    // 'invariant' attribute requires MSL 2.1 or higher.
+    // WGSL can ignore the invariant attribute on pre MSL 2.1 devices.
+    // See: https://github.com/gpuweb/gpuweb/issues/893#issuecomment-745537465
+    line(&helpers_) << "#if __METAL_VERSION__ >= 210";
+    line(&helpers_) << "#define " << invariant_define_name_ << " [[invariant]]";
+    line(&helpers_) << "#else";
+    line(&helpers_) << "#define " << invariant_define_name_;
+    line(&helpers_) << "#endif";
+    line(&helpers_);
+  }
+
   if (!helpers_.lines.empty()) {
     current_buffer_->Insert("", helpers_insertion_point++, 0);
     current_buffer_->Insert(helpers_, helpers_insertion_point++, 0);
@@ -2504,8 +2516,10 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
           }
           out << " [[" << attr << "]]";
         } else if (deco->Is<ast::InvariantDecoration>()) {
-          out << " [[invariant]]";
-          has_invariant_ = true;
+          if (invariant_define_name_.empty()) {
+            invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
+          }
+          out << " " << invariant_define_name_;
         } else if (!deco->IsAnyOf<ast::StructMemberOffsetDecoration,
                                   ast::StructMemberAlignDecoration,
                                   ast::StructMemberSizeDecoration>()) {
