@@ -71,7 +71,7 @@ TEST_F(ResolverFunctionValidationTest, NestedLocalMayShadowParameter) {
 TEST_F(ResolverFunctionValidationTest,
        VoidFunctionEndWithoutReturnStatement_Pass) {
   // fn func { var a:i32 = 2; }
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+  auto* var = Var("a", ty.i32(), Expr(2));
 
   Func(Source{{12, 34}}, "func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -87,7 +87,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionUsingSameVariableName_Pass) {
   //   return func;
   // }
 
-  auto* var = Var("func", ty.i32(), ast::StorageClass::kNone, Expr(0));
+  auto* var = Var("func", ty.i32(), Expr(0));
   Func("func", ast::VariableList{}, ty.i32(),
        ast::StatementList{
            Decl(var),
@@ -103,7 +103,7 @@ TEST_F(ResolverFunctionValidationTest,
   // fn a() -> void { var b:i32 = 0; }
   // fn b() -> i32 { return 2; }
 
-  auto* var = Var("b", ty.i32(), ast::StorageClass::kNone, Expr(0));
+  auto* var = Var("b", ty.i32(), Expr(0));
   Func("a", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            Decl(var),
@@ -126,14 +126,18 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_return) {
   //  a = 2;
   //}
 
-  Func("func", ast::VariableList{}, ty.void_(),
-       {
-           Decl(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2))),
-           Return(),
-           Assign(Source{{12, 34}}, "a", 2),
-       });
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+  auto* decl_a = Decl(Var("a", ty.i32()));
+  auto* ret = Return();
+  auto* assign_a = Assign(Source{{12, 34}}, "a", 2);
+
+  Func("func", ast::VariableList{}, ty.void_(), {decl_a, ret, assign_a});
+
+  ASSERT_TRUE(r()->Resolve());
+
+  EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
+  EXPECT_TRUE(Sem().Get(decl_a)->IsReachable());
+  EXPECT_TRUE(Sem().Get(ret)->IsReachable());
+  EXPECT_FALSE(Sem().Get(assign_a)->IsReachable());
 }
 
 TEST_F(ResolverFunctionValidationTest, UnreachableCode_return_InBlocks) {
@@ -143,14 +147,18 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_return_InBlocks) {
   //  a = 2;
   //}
 
+  auto* decl_a = Decl(Var("a", ty.i32()));
+  auto* ret = Return();
+  auto* assign_a = Assign(Source{{12, 34}}, "a", 2);
+
   Func("func", ast::VariableList{}, ty.void_(),
-       {
-           Decl(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2))),
-           Block(Block(Block(Return()))),
-           Assign(Source{{12, 34}}, "a", 2),
-       });
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+       {decl_a, Block(Block(Block(ret))), assign_a});
+
+  ASSERT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
+  EXPECT_TRUE(Sem().Get(decl_a)->IsReachable());
+  EXPECT_TRUE(Sem().Get(ret)->IsReachable());
+  EXPECT_FALSE(Sem().Get(assign_a)->IsReachable());
 }
 
 TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard) {
@@ -160,14 +168,17 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard) {
   //  a = 2;
   //}
 
-  Func("func", ast::VariableList{}, ty.void_(),
-       {
-           Decl(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2))),
-           create<ast::DiscardStatement>(),
-           Assign(Source{{12, 34}}, "a", 2),
-       });
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+  auto* decl_a = Decl(Var("a", ty.i32()));
+  auto* discard = Discard();
+  auto* assign_a = Assign(Source{{12, 34}}, "a", 2);
+
+  Func("func", ast::VariableList{}, ty.void_(), {decl_a, discard, assign_a});
+
+  ASSERT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
+  EXPECT_TRUE(Sem().Get(decl_a)->IsReachable());
+  EXPECT_TRUE(Sem().Get(discard)->IsReachable());
+  EXPECT_FALSE(Sem().Get(assign_a)->IsReachable());
 }
 
 TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard_InBlocks) {
@@ -177,20 +188,24 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard_InBlocks) {
   //  a = 2;
   //}
 
+  auto* decl_a = Decl(Var("a", ty.i32()));
+  auto* discard = Discard();
+  auto* assign_a = Assign(Source{{12, 34}}, "a", 2);
+
   Func("func", ast::VariableList{}, ty.void_(),
-       {
-           Decl(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2))),
-           Block(Block(Block(create<ast::DiscardStatement>()))),
-           Assign(Source{{12, 34}}, "a", 2),
-       });
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+       {decl_a, Block(Block(Block(discard))), assign_a});
+
+  ASSERT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
+  EXPECT_TRUE(Sem().Get(decl_a)->IsReachable());
+  EXPECT_TRUE(Sem().Get(discard)->IsReachable());
+  EXPECT_FALSE(Sem().Get(assign_a)->IsReachable());
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func() -> int { var a:i32 = 2; }
 
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+  auto* var = Var("a", ty.i32(), Expr(2));
 
   Func(Source{{12, 34}}, "func", ast::VariableList{}, ty.i32(),
        ast::StatementList{
@@ -199,8 +214,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
        ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: non-void function must end with a return statement");
+  EXPECT_EQ(r()->error(), "12:34 error: missing return at end of function");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -221,8 +235,7 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{}, ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: non-void function must end with a return statement");
+  EXPECT_EQ(r()->error(), "12:34 error: missing return at end of function");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -392,7 +405,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
   // }
 
   auto* bar = Param("bar", ty.f32());
-  auto* baz = Var("baz", ty.f32(), ast::StorageClass::kNone, Expr("bar"));
+  auto* baz = Var("baz", ty.f32(), Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
        ast::DecorationList{});

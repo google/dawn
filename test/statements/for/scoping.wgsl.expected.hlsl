@@ -6,6 +6,7 @@ void unused_entry_point() {
 void f() {
   {
     [loop] for(int must_not_collide = 0; ; ) {
+      break;
     }
   }
   int must_not_collide = 0;

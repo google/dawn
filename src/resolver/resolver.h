@@ -464,6 +464,14 @@ class Resolver {
   /// @returns true if `expr` is the current CallStatement's CallExpression
   bool IsCallStatement(const ast::Expression* expr) const;
 
+  /// Searches the current statement and up through parents of the current
+  /// statement looking for a loop or for-loop continuing statement.
+  /// @returns the closest continuing statement to the current statement that
+  /// (transitively) owns the current statement.
+  /// @param stop_at_loop if true then the function will return nullptr if a
+  /// loop or for-loop was found before the continuing.
+  const ast::Statement* ClosestContinuing(bool stop_at_loop) const;
+
   /// @returns the resolved symbol (function, type or variable) for the given
   /// ast::Identifier or ast::TypeName cast to the given semantic type.
   template <typename SEM = sem::Node>

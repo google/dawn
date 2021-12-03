@@ -6,5 +6,4 @@ fn f() -> i32 {
             return i;
         }
     }
-    return 0;
 }

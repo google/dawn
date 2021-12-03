@@ -809,6 +809,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
 bool Resolver::Statements(const ast::StatementList& stmts) {
   sem::Behaviors behaviors{sem::Behavior::kNext};
 
+  bool reachable = true;
   for (auto* stmt : stmts) {
     Mark(stmt);
     auto* sem = Statement(stmt);
@@ -816,9 +817,11 @@ bool Resolver::Statements(const ast::StatementList& stmts) {
       return false;
     }
     // s1 s2:(B1∖{Next}) ∪ B2
-    // ValidateStatements will ensure that statements can only follow a Next.
-    behaviors.Remove(sem::Behavior::kNext);
-    behaviors.Add(sem->Behaviors());
+    sem->SetIsReachable(reachable);
+    if (reachable) {
+      behaviors = (behaviors - sem::Behavior::kNext) + sem->Behaviors();
+    }
+    reachable = reachable && sem->Behaviors().Contains(sem::Behavior::kNext);
   }
 
   current_statement_->Behaviors() = behaviors;
@@ -2658,6 +2661,26 @@ bool Resolver::IsCallStatement(const ast::Expression* expr) const {
   return current_statement_ &&
          Is<ast::CallStatement>(current_statement_->Declaration(),
                                 [&](auto* stmt) { return stmt->expr == expr; });
+}
+
+const ast::Statement* Resolver::ClosestContinuing(bool stop_at_loop) const {
+  for (const auto* s = current_statement_; s != nullptr; s = s->Parent()) {
+    if (stop_at_loop && s->Is<sem::LoopStatement>()) {
+      break;
+    }
+    if (s->Is<sem::LoopContinuingBlockStatement>()) {
+      return s->Declaration();
+    }
+    if (auto* f = As<sem::ForLoopStatement>(s->Parent())) {
+      if (f->Declaration()->continuing == s->Declaration()) {
+        return s->Declaration();
+      }
+      if (stop_at_loop) {
+        break;
+      }
+    }
+  }
+  return nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

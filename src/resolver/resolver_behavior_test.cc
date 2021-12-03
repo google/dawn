@@ -327,28 +327,6 @@ TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondCallFuncMayDiscard) {
             sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
 }
 
-TEST_F(ResolverBehaviorTest, StmtForLoopBreak_ContCallFuncMayDiscard) {
-  auto* stmt =
-      For(nullptr, nullptr, CallStmt(Call("DiscardOrNext")), Block(Break()));
-  WrapInFunction(stmt);
-
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-  auto* sem = Sem().Get(stmt);
-  EXPECT_EQ(sem->Behaviors(),
-            sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
-}
-
-TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_ContCallFuncMayDiscard) {
-  auto* stmt = For(nullptr, nullptr, CallStmt(Call("DiscardOrNext")), Block());
-  WrapInFunction(stmt);
-
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-  auto* sem = Sem().Get(stmt);
-  EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
-}
-
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock) {
   auto* stmt = If(true, Block());
   WrapInFunction(stmt);

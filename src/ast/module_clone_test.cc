@@ -76,7 +76,7 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
   loop {
     l0 = (p1 + 2);
     if (((l0 % 4) == 0)) {
-      continue;
+      break;
     }
 
     continuing {

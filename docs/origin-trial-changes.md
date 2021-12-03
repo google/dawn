@@ -6,6 +6,7 @@
 
 * Taking the address of a vector component is no longer allowed.
 * Module-scope declarations can no longer alias a builtin name. [tint:1318](https://crbug.com/tint/1318)
+* It is now an error to call a function either directly or transitively, from a loop continuing block, that uses `discard`. [tint:1302](https://crbug.com/tint/1302)
 
 ### Deprecated Features
 
@@ -16,6 +17,8 @@
 * Shadowing is now fully supported. [tint:819](https://crbug.com/tint/819)
 * The `dot()` builtin now supports integer vector types.
 * Identifiers can now start with a single leading underscore.  [tint:1292](https://crbug.com/tint/1292)
+* Control flow analysis has been improved, and functions no longer need to `return` if the statement is unreachable. [tint:1302](https://crbug.com/tint/1302)
+* Unreachable statements now produce a warning instead of an error, to allow WGSL code to be updated to the new analysis behavior. These warnings may become errors in the future [gpuweb#2378](https://github.com/gpuweb/gpuweb/issues/2378)
 
 ### Fixes
 

@@ -11,5 +11,4 @@ int f() {
       return i;
     }
   }
-  return 0;
 }

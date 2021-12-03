@@ -1000,10 +1000,12 @@ bool Resolver::ValidateFunction(const sem::Function* func) {
     }
 
     if (decl->body) {
-      if (!decl->body->Last() ||
-          !decl->body->Last()->Is<ast::ReturnStatement>()) {
-        AddError("non-void function must end with a return statement",
-                 decl->source);
+      sem::Behaviors behaviors{sem::Behavior::kNext};
+      if (auto* last = decl->body->Last()) {
+        behaviors = Sem(last)->Behaviors();
+      }
+      if (behaviors.Contains(sem::Behavior::kNext)) {
+        AddError("missing return at end of function", decl->source);
         return false;
       }
     } else if (IsValidationEnabled(
@@ -1334,31 +1336,19 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
 }
 
 bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
-  bool unreachable = false;
   for (auto* stmt : stmts) {
-    if (unreachable) {
-      AddError("code is unreachable", stmt->source);
-      return false;
-    }
-
-    auto* nested_stmt = stmt;
-    while (auto* block = nested_stmt->As<ast::BlockStatement>()) {
-      if (block->Empty()) {
-        break;
-      }
-      nested_stmt = block->statements.back();
-    }
-    if (nested_stmt->IsAnyOf<ast::ReturnStatement, ast::BreakStatement,
-                             ast::ContinueStatement, ast::DiscardStatement>()) {
-      unreachable = true;
+    if (!Sem(stmt)->IsReachable()) {
+      /// TODO(https://github.com/gpuweb/gpuweb/issues/2378): This may need to
+      /// become an error.
+      AddWarning("code is unreachable", stmt->source);
+      break;
     }
   }
   return true;
 }
 
 bool Resolver::ValidateBreakStatement(const sem::Statement* stmt) {
-  if (!stmt->FindFirstParent<sem::LoopBlockStatement>() &&
-      !stmt->FindFirstParent<sem::CaseStatement>()) {
+  if (!stmt->FindFirstParent<sem::LoopBlockStatement, sem::CaseStatement>()) {
     AddError("break statement must be in a loop or switch case",
              stmt->Declaration()->source);
     return false;
@@ -1367,15 +1357,17 @@ bool Resolver::ValidateBreakStatement(const sem::Statement* stmt) {
 }
 
 bool Resolver::ValidateContinueStatement(const sem::Statement* stmt) {
-  if (auto* block =
-          stmt->FindFirstParent<sem::LoopBlockStatement,
-                                sem::LoopContinuingBlockStatement>()) {
-    if (block->Is<sem::LoopContinuingBlockStatement>()) {
-      AddError("continuing blocks must not contain a continue statement",
-               stmt->Declaration()->source);
-      return false;
+  if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ true)) {
+    AddError("continuing blocks must not contain a continue statement",
+             stmt->Declaration()->source);
+    if (continuing != stmt->Declaration() &&
+        continuing != stmt->Parent()->Declaration()) {
+      AddNote("see continuing block here", continuing->source);
     }
-  } else {
+    return false;
+  }
+
+  if (!stmt->FindFirstParent<sem::LoopBlockStatement>()) {
     AddError("continue statement must be in a loop",
              stmt->Declaration()->source);
     return false;
@@ -1385,12 +1377,12 @@ bool Resolver::ValidateContinueStatement(const sem::Statement* stmt) {
 }
 
 bool Resolver::ValidateDiscardStatement(const sem::Statement* stmt) {
-  if (auto* continuing =
-          stmt->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
+  if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false)) {
     AddError("continuing blocks must not contain a discard statement",
              stmt->Declaration()->source);
-    if (continuing != stmt->Parent()) {
-      AddNote("see continuing block here", continuing->Declaration()->source);
+    if (continuing != stmt->Declaration() &&
+        continuing != stmt->Parent()->Declaration()) {
+      AddNote("see continuing block here", continuing->source);
     }
     return false;
   }
@@ -1629,6 +1621,20 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) {
       return false;
     }
   }
+
+  if (call->Behaviors().Contains(sem::Behavior::kDiscard)) {
+    if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false)) {
+      AddError(
+          "cannot call a function that may discard inside a continuing block",
+          call->Declaration()->source);
+      if (continuing != call->Stmt()->Declaration() &&
+          continuing != call->Stmt()->Parent()->Declaration()) {
+        AddNote("see continuing block here", continuing->source);
+      }
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -2200,12 +2206,12 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
   }
 
   auto* sem = Sem(ret);
-  if (auto* continuing =
-          sem->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
+  if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false)) {
     AddError("continuing blocks must not contain a return statement",
              ret->source);
-    if (continuing != sem->Parent()) {
-      AddNote("see continuing block here", continuing->Declaration()->source);
+    if (continuing != sem->Declaration() &&
+        continuing != sem->Parent()->Declaration()) {
+      AddNote("see continuing block here", continuing->source);
     }
     return false;
   }

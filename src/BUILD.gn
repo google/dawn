@@ -465,6 +465,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/promote_initializers_to_const_var.h",
     "transform/remove_phonies.cc",
     "transform/remove_phonies.h",
+    "transform/remove_unreachable_statements.cc",
+    "transform/remove_unreachable_statements.h",
     "transform/renamer.cc",
     "transform/renamer.h",
     "transform/robustness.cc",

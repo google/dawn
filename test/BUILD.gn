@@ -319,6 +319,7 @@ tint_unittests_source_set("tint_unittests_transform_src") {
     "../src/transform/pad_array_elements_test.cc",
     "../src/transform/promote_initializers_to_const_var_test.cc",
     "../src/transform/remove_phonies_test.cc",
+    "../src/transform/remove_unreachable_statements_test.cc",
     "../src/transform/renamer_test.cc",
     "../src/transform/robustness_test.cc",
     "../src/transform/simplify_pointers_test.cc",

@@ -2105,6 +2105,18 @@ class ProgramBuilder {
   }
 
   /// Creates a ast::LoopStatement with input body and optional continuing
+  /// @param source the source information
+  /// @param body the loop body
+  /// @param continuing the optional continuing block
+  /// @returns the loop statement pointer
+  const ast::LoopStatement* Loop(
+      const Source& source,
+      const ast::BlockStatement* body,
+      const ast::BlockStatement* continuing = nullptr) {
+    return create<ast::LoopStatement>(source, body, continuing);
+  }
+
+  /// Creates a ast::LoopStatement with input body and optional continuing
   /// @param body the loop body
   /// @param continuing the optional continuing block
   /// @returns the loop statement pointer

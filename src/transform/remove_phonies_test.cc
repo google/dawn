@@ -194,8 +194,10 @@ fn z() -> i32 {
 
 fn f() {
   for (_ = &s.arr; ;_ = &s.arr) {
+    break;
   }
   for (_ = x(); ;_ = y() + z()) {
+    break;
   }
 }
 )";
@@ -225,8 +227,10 @@ fn phony_sink(p0 : i32, p1 : i32) {
 
 fn f() {
   for(; ; ) {
+    break;
   }
   for(x(); ; phony_sink(y(), z())) {
+    break;
   }
 }
 )";

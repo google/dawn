@@ -106,11 +106,20 @@ class Statement : public Castable<Statement, Node> {
   /// @return the behaviors of this statement
   sem::Behaviors& Behaviors() { return behaviors_; }
 
+  /// @returns true if this statement is reachable by control flow according to
+  /// the behavior analysis
+  bool IsReachable() const { return is_reachable_; }
+
+  /// @param is_reachable whether this statement is reachable by control flow
+  /// according to the behavior analysis
+  void SetIsReachable(bool is_reachable) { is_reachable_ = is_reachable; }
+
  private:
   const ast::Statement* const declaration_;
   const CompoundStatement* const parent_;
   const sem::Function* const function_;
   sem::Behaviors behaviors_{sem::Behavior::kNext};
+  bool is_reachable_ = true;
 };
 
 /// CompoundStatement is the base class of statements that can hold other

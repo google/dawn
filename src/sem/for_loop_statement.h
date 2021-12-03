@@ -43,6 +43,9 @@ class ForLoopStatement : public Castable<ForLoopStatement, CompoundStatement> {
   /// Destructor
   ~ForLoopStatement() override;
 
+  /// @returns the AST node
+  const ast::ForLoopStatement* Declaration() const;
+
   /// @returns the for-loop condition expression
   const Expression* Condition() const { return condition_; }
 

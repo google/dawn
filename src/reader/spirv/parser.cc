@@ -19,6 +19,7 @@
 #include "src/reader/spirv/parser_impl.h"
 #include "src/transform/decompose_strided_matrix.h"
 #include "src/transform/manager.h"
+#include "src/transform/remove_unreachable_statements.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/unshadow.h"
 
@@ -56,6 +57,7 @@ Program Parse(const std::vector<uint32_t>& input) {
     manager.Add<transform::Unshadow>();
     manager.Add<transform::SimplifyPointers>();
     manager.Add<transform::DecomposeStridedMatrix>();
+    manager.Add<transform::RemoveUnreachableStatements>();
     return manager.Run(&program).program;
   }
 

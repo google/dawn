@@ -455,8 +455,7 @@ TEST_F(ResolverValidationTest,
        Stmt_Loop_ContinueInLoopBodyBeforeDeclAndAfterDecl_UsageInContinuing) {
   // loop  {
   //     continue; // Bypasses z decl
-  //     var z : i32;
-  //     continue; // Ok
+  //     var z : i32; // unreachable
   //
   //     continuing {
   //         z = 2;
@@ -465,24 +464,25 @@ TEST_F(ResolverValidationTest,
 
   auto error_loc = Source{{12, 34}};
   auto* body =
-      Block(create<ast::ContinueStatement>(),
-            Decl(error_loc, Var("z", ty.i32(), ast::StorageClass::kNone)),
-            create<ast::ContinueStatement>());
+      Block(Continue(),
+            Decl(error_loc, Var("z", ty.i32(), ast::StorageClass::kNone)));
   auto* continuing = Block(Assign(Expr("z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(12:34 warning: code is unreachable
+error: continue statement bypasses declaration of 'z'
+note: identifier 'z' declared here
+note: identifier 'z' referenced in continuing block here)");
 }
 
-TEST_F(
-    ResolverValidationTest,
-    Stmt_Loop_ContinueInLoopBodyBeforeDeclAndAfterDecl_UsageInContinuing_InBlocks) {  // NOLINT - line length
+TEST_F(ResolverValidationTest,
+       Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing_InBlocks) {
   // loop  {
   //     var z : i32;
-  //     {{{continue;}}} // Bypasses z decl
-  //     z = 1;
+  //     {{{continue;}}}
   //     continue; // Ok
   //
   //     continuing {
@@ -490,16 +490,13 @@ TEST_F(
   //     }
   // }
 
-  auto* body =
-      Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
-            Block(Block(Block(create<ast::ContinueStatement>()))),
-            Assign(Source{{12, 34}}, "z", 2), create<ast::ContinueStatement>());
+  auto* body = Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
+                     Block(Block(Block(Continue()))));
   auto* continuing = Block(Assign(Expr("z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverValidationTest,
@@ -518,7 +515,7 @@ TEST_F(ResolverValidationTest,
   auto decl_loc = Source{{56, 78}};
   auto ref_loc = Source{{90, 12}};
   auto* body =
-      Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
+      Block(If(Expr(true), Block(Continue(cont_loc))),
             Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
   auto* continuing = Block(Assign(Expr(ref_loc, "z"), 2));
   auto* loop_stmt = Loop(body, continuing);
@@ -550,7 +547,7 @@ TEST_F(
   auto decl_loc = Source{{56, 78}};
   auto ref_loc = Source{{90, 12}};
   auto* body =
-      Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
+      Block(If(Expr(true), Block(Continue(cont_loc))),
             Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
 
   auto* continuing =
@@ -584,7 +581,7 @@ TEST_F(ResolverValidationTest,
   auto decl_loc = Source{{56, 78}};
   auto ref_loc = Source{{90, 12}};
   auto* body =
-      Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
+      Block(If(Expr(true), Block(Continue(cont_loc))),
             Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
   auto* compare = create<ast::BinaryExpression>(ast::BinaryOp::kLessThan,
                                                 Expr(ref_loc, "z"), Expr(2));
@@ -617,7 +614,7 @@ TEST_F(ResolverValidationTest,
   auto decl_loc = Source{{56, 78}};
   auto ref_loc = Source{{90, 12}};
   auto* body =
-      Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
+      Block(If(Expr(true), Block(Continue(cont_loc))),
             Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
 
   auto* continuing = Block(Loop(Block(Assign(Expr(ref_loc, "z"), 2))));
@@ -635,7 +632,8 @@ TEST_F(ResolverValidationTest,
        Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuing) {
   // loop  {
   //     loop {
-  //         continue; // OK: not part of the outer loop
+  //         if (true) { continue; } // OK: not part of the outer loop
+  //         break;
   //     }
   //     var z : i32;
   //
@@ -644,7 +642,9 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
+  auto* inner_loop = Loop(Block(    //
+      If(true, Block(Continue())),  //
+      Break()));
   auto* body =
       Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
   auto* continuing = Block(Assign("z", 2));
@@ -658,7 +658,8 @@ TEST_F(ResolverValidationTest,
        Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuingSubscope) {
   // loop  {
   //     loop {
-  //         continue; // OK: not part of the outer loop
+  //         if (true) { continue; } // OK: not part of the outer loop
+  //         break;
   //     }
   //     var z : i32;
   //
@@ -669,7 +670,8 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
+  auto* inner_loop = Loop(Block(If(true, Block(Continue())),  //
+                                Break()));
   auto* body =
       Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
   auto* continuing = Block(If(Expr(true), Block(Assign("z", 2))));
@@ -683,7 +685,8 @@ TEST_F(ResolverValidationTest,
        Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuingLoop) {
   // loop  {
   //     loop {
-  //         continue; // OK: not part of the outer loop
+  //         if (true) { continue; } // OK: not part of the outer loop
+  //         break;
   //     }
   //     var z : i32;
   //
@@ -694,7 +697,8 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
+  auto* inner_loop = Loop(Block(If(true, Block(Continue())),  //
+                                Break()));
   auto* body =
       Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
   auto* continuing = Block(Loop(Block(Assign("z", 2))));
@@ -707,7 +711,7 @@ TEST_F(ResolverValidationTest,
 TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
   // loop  {
   //     var z : i32;
-  //     continue;
+  //     if (true) { continue; }
   //
   //     continuing {
   //         z = 2;
@@ -716,7 +720,7 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
 
   auto error_loc = Source{{12, 34}};
   auto* body = Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
-                     create<ast::ContinueStatement>());
+                     If(true, Block(Continue())));
   auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
@@ -775,7 +779,7 @@ TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Direct) {
   WrapInFunction(Loop(  // loop
       Block(),          //   loop block
       Block(            //   loop continuing block
-          create<ast::DiscardStatement>(Source{{12, 34}}))));
+          Discard(Source{{12, 34}}))));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -795,12 +799,38 @@ TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Indirect) {
       Block(Source{{56, 78}},  //   outer loop continuing block
             Loop(              //     inner loop
                 Block(         //       inner loop block
-                    create<ast::DiscardStatement>(Source{{12, 34}}))))));
+                    Discard(Source{{12, 34}}))))));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
       R"(12:34 error: continuing blocks must not contain a discard statement
+56:78 note: see continuing block here)");
+}
+
+TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Indirect_ViaCall) {
+  // fn MayDiscard() { if (true) { discard; } }
+  // fn F() { MayDiscard(); }
+  // loop {
+  //   continuing {
+  //     loop { F(); }
+  //   }
+  // }
+
+  Func("MayDiscard", {}, ty.void_(), {If(true, Block(Discard()))});
+  Func("SomeFunc", {}, ty.void_(), {CallStmt(Call("MayDiscard"))});
+
+  WrapInFunction(Loop(         // outer loop
+      Block(),                 //   outer loop block
+      Block(Source{{56, 78}},  //   outer loop continuing block
+            Loop(              //     inner loop
+                Block(         //       inner loop block
+                    CallStmt(Call(Source{{12, 34}}, "SomeFunc")))))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: cannot call a function that may discard inside a continuing block
 56:78 note: see continuing block here)");
 }
 
@@ -814,7 +844,7 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Direct) {
   WrapInFunction(Loop(         // loop
       Block(),                 //   loop block
       Block(Source{{56, 78}},  //   loop continuing block
-            create<ast::ContinueStatement>(Source{{12, 34}}))));
+            Continue(Source{{12, 34}}))));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -836,7 +866,118 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Indirect) {
       Block(            //   outer loop continuing block
           Loop(         //     inner loop
               Block(    //       inner loop block
-                  create<ast::ContinueStatement>(Source{{12, 34}}))))));
+                  Continue(Source{{12, 34}}))))));
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTest, Stmt_ForLoop_ReturnInContinuing_Direct) {
+  // for(;; return) {
+  //   break;
+  // }
+
+  WrapInFunction(For(nullptr, nullptr, Return(Source{{12, 34}}),  //
+                     Block(Break())));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: continuing blocks must not contain a return statement)");
+}
+
+TEST_F(ResolverTest, Stmt_ForLoop_ReturnInContinuing_Indirect) {
+  // for(;; loop { return }) {
+  //   break;
+  // }
+
+  WrapInFunction(For(nullptr, nullptr,
+                     Loop(Source{{56, 78}},                  //
+                          Block(Return(Source{{12, 34}}))),  //
+                     Block(Break())));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: continuing blocks must not contain a return statement
+56:78 note: see continuing block here)");
+}
+
+TEST_F(ResolverTest, Stmt_ForLoop_DiscardInContinuing_Direct) {
+  // for(;; discard) {
+  //   break;
+  // }
+
+  WrapInFunction(For(nullptr, nullptr, Discard(Source{{12, 34}}),  //
+                     Block(Break())));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: continuing blocks must not contain a discard statement)");
+}
+
+TEST_F(ResolverTest, Stmt_ForLoop_DiscardInContinuing_Indirect) {
+  // for(;; loop { discard }) {
+  //   break;
+  // }
+
+  WrapInFunction(For(nullptr, nullptr,
+                     Loop(Source{{56, 78}},                   //
+                          Block(Discard(Source{{12, 34}}))),  //
+                     Block(Break())));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: continuing blocks must not contain a discard statement
+56:78 note: see continuing block here)");
+}
+
+TEST_F(ResolverTest, Stmt_ForLoop_DiscardInContinuing_Indirect_ViaCall) {
+  // fn MayDiscard() { if (true) { discard; } }
+  // fn F() { MayDiscard(); }
+  // for(;; loop { F() }) {
+  //   break;
+  // }
+
+  Func("MayDiscard", {}, ty.void_(), {If(true, Block(Discard()))});
+  Func("F", {}, ty.void_(), {CallStmt(Call("MayDiscard"))});
+
+  WrapInFunction(For(nullptr, nullptr,
+                     Loop(Source{{56, 78}},                               //
+                          Block(CallStmt(Call(Source{{12, 34}}, "F")))),  //
+                     Block(Break())));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: cannot call a function that may discard inside a continuing block
+56:78 note: see continuing block here)");
+}
+
+TEST_F(ResolverTest, Stmt_ForLoop_ContinueInContinuing_Direct) {
+  // for(;; continue) {
+  //   break;
+  // }
+
+  WrapInFunction(For(nullptr, nullptr, Continue(Source{{12, 34}}),  //
+                     Block(Break())));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: continuing blocks must not contain a continue statement");
+}
+
+TEST_F(ResolverTest, Stmt_ForLoop_ContinueInContinuing_Indirect) {
+  // for(;; loop { continue }) {
+  //   break;
+  // }
+
+  WrapInFunction(For(nullptr, nullptr,
+                     Loop(                                    //
+                         Block(Continue(Source{{12, 34}}))),  //
+                     Block(Break())));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -863,12 +1004,12 @@ TEST_F(ResolverTest, Stmt_ForLoop_CondIsNotBool) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_ContinueInLoop) {
-  WrapInFunction(Loop(Block(create<ast::ContinueStatement>(Source{{12, 34}}))));
+  WrapInFunction(Loop(Block(Continue(Source{{12, 34}}))));
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverValidationTest, Stmt_ContinueNotInLoop) {
-  WrapInFunction(create<ast::ContinueStatement>(Source{{12, 34}}));
+  WrapInFunction(Continue(Source{{12, 34}}));
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error: continue statement must be in a loop");
 }

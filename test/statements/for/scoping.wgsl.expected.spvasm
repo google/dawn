@@ -31,7 +31,7 @@
                OpLoopMerge %13 %14 None
                OpBranch %15
          %15 = OpLabel
-               OpBranch %14
+               OpBranch %13
          %14 = OpLabel
                OpBranch %12
          %13 = OpLabel
