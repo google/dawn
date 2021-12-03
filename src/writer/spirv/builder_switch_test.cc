@@ -400,6 +400,52 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(BuilderTest, Switch_AllReturn) {
+  // switch (1) {
+  //   case 1: {
+  //     return 1;
+  //   }
+  //   case 2: {
+  //     fallthrough;
+  //   }
+  //   default: {
+  //     return 3;
+  //   }
+  // }
+
+  auto* fn = Func("f", {}, ty.i32(),
+                  {
+                      Switch(1,                                    //
+                             Case(Expr(1), Block(Return(1))),      //
+                             Case(Expr(2), Block(Fallthrough())),  //
+                             DefaultCase(Block(Return(3)))),
+                  });
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "f"
+%2 = OpTypeInt 32 1
+%1 = OpTypeFunction %2
+%6 = OpConstant %2 1
+%10 = OpConstant %2 3
+%11 = OpConstantNull %2
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+OpSelectionMerge %5 None
+OpSwitch %6 %7 1 %8 2 %9
+%8 = OpLabel
+OpReturnValue %6
+%9 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpReturnValue %10
+%5 = OpLabel
+OpReturnValue %11
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer
