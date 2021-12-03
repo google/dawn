@@ -653,6 +653,15 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     }
   }
 
+  if (!LastIsTerminator(func_ast->body)) {
+    if (func->ReturnType()->Is<sem::Void>()) {
+      push_function_inst(spv::Op::OpReturn, {});
+    } else {
+      auto zero = GenerateConstantNullIfNeeded(func->ReturnType());
+      push_function_inst(spv::Op::OpReturnValue, {Operand::Int(zero)});
+    }
+  }
+
   if (func_ast->IsEntryPoint()) {
     if (!GenerateEntryPoint(func_ast, func_id)) {
       return false;

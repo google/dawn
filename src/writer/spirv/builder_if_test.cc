@@ -452,26 +452,24 @@ TEST_F(BuilderTest, If_WithReturn) {
   // if (true) {
   //   return;
   // }
-  auto* if_body = Block(Return());
 
-  auto* expr =
-      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
-  WrapInFunction(expr);
+  auto* fn = Func("f", {}, ty.void_(), {If(true, Block(Return()))});
 
   spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
-%2 = OpConstantTrue %1
+  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeBool
+%6 = OpConstantTrue %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %3 None
-OpBranchConditional %2 %4 %3
-%4 = OpLabel
+            R"(OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %7
+%8 = OpLabel
 OpReturn
-%3 = OpLabel
+%7 = OpLabel
+OpReturn
 )");
 }
 
@@ -480,24 +478,28 @@ TEST_F(BuilderTest, If_WithReturnValue) {
   //   return false;
   // }
   // return true;
-  auto* if_body = Block(Return(false));
-  auto* expr = If(Expr(true), if_body);
-  Func("test", {}, ty.bool_(), {expr, Return(true)}, {});
+
+  auto* fn = Func("f", {}, ty.bool_(),
+                  {
+                      If(true, Block(Return(false))),
+                      Return(true),
+                  });
+
   spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
-%2 = OpConstantTrue %1
-%5 = OpConstantFalse %1
+  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%1 = OpTypeFunction %2
+%5 = OpConstantTrue %2
+%8 = OpConstantFalse %2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %3 None
-OpBranchConditional %2 %4 %3
-%4 = OpLabel
+            R"(OpSelectionMerge %6 None
+OpBranchConditional %5 %7 %6
+%7 = OpLabel
+OpReturnValue %8
+%6 = OpLabel
 OpReturnValue %5
-%3 = OpLabel
 )");
 }
 
@@ -512,24 +514,28 @@ TEST_F(BuilderTest, If_WithNestedBlockReturnValue) {
   //  }
   // }
   // return true;
-  auto* if_body = Block(Block(Block(Block(Return(false)))));
-  auto* expr = If(Expr(true), if_body);
-  Func("test", {}, ty.bool_(), {expr, Return(true)}, {});
+
+  auto* fn = Func("f", {}, ty.bool_(),
+                  {
+                      If(true, Block(Block(Block(Block(Return(false)))))),
+                      Return(true),
+                  });
+
   spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
-%2 = OpConstantTrue %1
-%5 = OpConstantFalse %1
+  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%1 = OpTypeFunction %2
+%5 = OpConstantTrue %2
+%8 = OpConstantFalse %2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %3 None
-OpBranchConditional %2 %4 %3
-%4 = OpLabel
+            R"(OpSelectionMerge %6 None
+OpBranchConditional %5 %7 %6
+%7 = OpLabel
+OpReturnValue %8
+%6 = OpLabel
 OpReturnValue %5
-%3 = OpLabel
 )");
 }
 
@@ -539,29 +545,27 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // }
 
   auto* var = Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-
-  auto* expr =
-      create<ast::IfStatement>(Expr("a"), Block(), ast::ElseStatementList{});
-  WrapInFunction(expr);
+  auto* fn = Func("f", {}, ty.void_(), {If("a", Block())});
 
   spirv::Builder& b = Build();
 
-  b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%5 = OpLoad %3 %1
-OpSelectionMerge %6 None
-OpBranchConditional %5 %7 %6
-%7 = OpLabel
-OpBranch %6
-%6 = OpLabel
+            R"(%9 = OpLoad %3 %1
+OpSelectionMerge %10 None
+OpBranchConditional %9 %11 %10
+%11 = OpLabel
+OpBranch %10
+%10 = OpLabel
+OpReturn
 )");
 }
 

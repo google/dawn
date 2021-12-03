@@ -787,6 +787,7 @@ TEST_F(BuilderTest, IndexAccessor_Of_Vec) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%18 = OpCompositeExtract %6 %16 1
+OpReturn
 )");
 
   Validate(b);
@@ -832,6 +833,7 @@ TEST_F(BuilderTest, IndexAccessor_Of_Array_Of_f32) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%18 = OpCompositeExtract %6 %16 2
 %20 = OpCompositeExtract %7 %18 1
+OpReturn
 )");
 
   Validate(b);
@@ -931,6 +933,7 @@ TEST_F(BuilderTest, IndexAccessor_Array_Literal) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), "");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%15 = OpCompositeExtract %6 %12 2
+OpReturn
 )");
 
   Validate(b);
@@ -979,6 +982,7 @@ TEST_F(BuilderTest, IndexAccessor_Array_Dynamic) {
 %20 = OpLoad %18 %16
 %22 = OpAccessChain %21 %13 %20
 %23 = OpLoad %6 %22
+OpReturn
 )");
 
   Validate(b);
@@ -1031,6 +1035,7 @@ TEST_F(BuilderTest, IndexAccessor_Matrix_Dynamic) {
 %22 = OpLoad %20 %18
 %24 = OpAccessChain %23 %15 %22
 %25 = OpLoad %6 %24
+OpReturn
 )");
 
   Validate(b);
