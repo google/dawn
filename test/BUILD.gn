@@ -236,6 +236,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../src/resolver/assignment_validation_test.cc",
     "../src/resolver/atomics_test.cc",
     "../src/resolver/atomics_validation_test.cc",
+    "../src/resolver/bitcast_validation_test.cc",
     "../src/resolver/builtins_validation_test.cc",
     "../src/resolver/call_test.cc",
     "../src/resolver/call_validation_test.cc",

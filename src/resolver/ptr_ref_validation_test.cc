@@ -171,19 +171,6 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
             "'ptr<storage, i32, read_write>'");
 }
 
-TEST_F(ResolverTest, Expr_Bitcast_ptr) {
-  auto* vf = Var("vf", ty.f32());
-  auto* bitcast = create<ast::BitcastExpression>(
-      Source{{12, 34}}, ty.pointer<i32>(ast::StorageClass::kFunction),
-      Expr("vf"));
-  auto* ip =
-      Const("ip", ty.pointer<i32>(ast::StorageClass::kFunction), bitcast);
-  WrapInFunction(Decl(vf), Decl(ip));
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: cannot cast to a pointer");
-}
-
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

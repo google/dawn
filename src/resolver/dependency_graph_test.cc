@@ -1282,6 +1282,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
               Block(Assign(V, V)),                    //
               Else(V,                                 //
                    Block(Assign(V, V)))),             //
+           Ignore(Bitcast(T, V)),                     //
            For(Decl(Var(Sym(), T, V)),                //
                Equal(V, V),                           //
                Assign(V, V),                          //

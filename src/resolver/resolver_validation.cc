@@ -1347,6 +1347,36 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
   return true;
 }
 
+bool Resolver::ValidateBitcast(const ast::BitcastExpression* cast,
+                               const sem::Type* to) {
+  auto* from = TypeOf(cast->expr)->UnwrapRef();
+  if (!from->is_numeric_scalar_or_vector()) {
+    AddError("'" + TypeNameOf(from) + "' cannot be bitcast",
+             cast->expr->source);
+    return false;
+  }
+  if (!to->is_numeric_scalar_or_vector()) {
+    AddError("cannot bitcast to '" + TypeNameOf(to) + "'", cast->type->source);
+    return false;
+  }
+
+  auto width = [&](const sem::Type* ty) {
+    if (auto* vec = ty->As<sem::Vector>()) {
+      return vec->Width();
+    }
+    return 1u;
+  };
+
+  if (width(from) != width(to)) {
+    AddError("cannot bitcast from '" + TypeNameOf(from) + "' to '" +
+                 TypeNameOf(to) + "'",
+             cast->source);
+    return false;
+  }
+
+  return true;
+}
+
 bool Resolver::ValidateBreakStatement(const sem::Statement* stmt) {
   if (!stmt->FindFirstParent<sem::LoopBlockStatement, sem::CaseStatement>()) {
     AddError("break statement must be in a loop or switch case",

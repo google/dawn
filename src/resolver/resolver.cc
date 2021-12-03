@@ -1221,15 +1221,17 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
   if (!ty) {
     return nullptr;
   }
-  if (ty->Is<sem::Pointer>()) {
-    AddError("cannot cast to a pointer", expr->source);
-    return nullptr;
-  }
 
   auto val = EvaluateConstantValue(expr, ty);
   auto* sem =
       builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+
   sem->Behaviors() = inner->Behaviors();
+
+  if (!ValidateBitcast(expr, ty)) {
+    return nullptr;
+  }
+
   return sem;
 }
 

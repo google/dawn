@@ -452,36 +452,6 @@ bool a = (tint_tmp);
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
-  // as<i32>(a && (b || c))
-
-  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
-  Global("c", ty.bool_(), ast::StorageClass::kPrivate);
-
-  auto* expr = create<ast::BitcastExpression>(
-      ty.i32(), create<ast::BinaryExpression>(
-                    ast::BinaryOp::kLogicalAnd, Expr("a"),
-                    create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
-                                                  Expr("b"), Expr("c"))));
-  WrapInFunction(expr);
-
-  GeneratorImpl& gen = Build();
-
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
-if (tint_tmp) {
-  bool tint_tmp_1 = b;
-  if (!tint_tmp_1) {
-    tint_tmp_1 = c;
-  }
-  tint_tmp = (tint_tmp_1);
-}
-)");
-  EXPECT_EQ(out.str(), R"(int((tint_tmp)))");
-}
-
 TEST_F(GlslGeneratorImplTest_Binary, Call_WithLogical) {
   // foo(a && b, c || d, (a || c) && (b || d))
 

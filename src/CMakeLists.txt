@@ -673,6 +673,7 @@ if(${TINT_BUILD_TESTS})
     resolver/assignment_validation_test.cc
     resolver/atomics_test.cc
     resolver/atomics_validation_test.cc
+    resolver/bitcast_validation_test.cc
     resolver/builtins_validation_test.cc
     resolver/call_test.cc
     resolver/call_validation_test.cc

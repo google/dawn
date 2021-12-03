@@ -329,6 +329,9 @@ class DependencyScanner {
                   utils::Lookup(graph_.resolved_symbols, call->target.type));
             }
           }
+          if (auto* cast = expr->As<ast::BitcastExpression>()) {
+            TraverseType(cast->type);
+          }
           return ast::TraverseAction::Descend;
         });
   }

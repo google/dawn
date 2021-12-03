@@ -171,6 +171,9 @@ using alias2 = alias<TO, 2>;
 template <typename TO>
 using alias3 = alias<TO, 3>;
 
+template <typename TO>
+struct ptr {};
+
 using ast_type_func_ptr = const ast::Type* (*)(ProgramBuilder& b);
 using ast_expr_func_ptr = const ast::Expression* (*)(ProgramBuilder& b,
                                                      int elem_value);
@@ -387,6 +390,36 @@ struct DataType<alias<T, ID>> {
   }
 };
 
+/// Helper for building pointer types and expressions
+template <typename T>
+struct DataType<ptr<T>> {
+  /// true if the pointer type is a composite type
+  static constexpr bool is_composite = false;
+
+  /// @param b the ProgramBuilder
+  /// @return a new AST alias type
+  static inline const ast::Type* AST(ProgramBuilder& b) {
+    return b.create<ast::Pointer>(DataType<T>::AST(b),
+                                  ast::StorageClass::kPrivate,
+                                  ast::Access::kReadWrite);
+  }
+  /// @param b the ProgramBuilder
+  /// @return the semantic aliased type
+  static inline const sem::Type* Sem(ProgramBuilder& b) {
+    return b.create<sem::Pointer>(DataType<T>::Sem(b),
+                                  ast::StorageClass::kPrivate,
+                                  ast::Access::kReadWrite);
+  }
+
+  /// @param b the ProgramBuilder
+  /// @return a new AST expression of the alias type
+  static inline const ast::Expression* Expr(ProgramBuilder& b, int /*unused*/) {
+    auto sym = b.Symbols().New("global_for_ptr");
+    b.Global(sym, DataType<T>::AST(b), ast::StorageClass::kPrivate);
+    return b.AddressOf(sym);
+  }
+};
+
 /// Helper for building array types and expressions
 template <int N, typename T>
 struct DataType<array<N, T>> {
@@ -401,7 +434,14 @@ struct DataType<array<N, T>> {
   /// @param b the ProgramBuilder
   /// @return the semantic array type
   static inline const sem::Type* Sem(ProgramBuilder& b) {
-    return b.create<sem::Array>(DataType<T>::Sem(b), N);
+    auto* el = DataType<T>::Sem(b);
+    return b.create<sem::Array>(
+        /* element */ el,
+        /* count */ N,
+        /* align */ el->Align(),
+        /* size */ el->Size(),
+        /* stride */ el->Align(),
+        /* implicit_stride */ el->Align());
   }
   /// @param b the ProgramBuilder
   /// @param elem_value the value each element in the array will be initialized
