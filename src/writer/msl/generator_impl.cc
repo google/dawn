@@ -2378,12 +2378,12 @@ bool GeneratorImpl::EmitPackedType(std::ostream& out,
       TextBuffer b;
       TINT_DEFER(helpers_.Append(b));
       line(&b) << R"(template<typename T, int N, int M>
-inline auto operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
+inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
   return lhs * vec<T, N>(rhs);
 }
 
 template<typename T, int N, int M>
-inline auto operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
+inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
   return vec<T, M>(lhs) * rhs;
 }
 )";

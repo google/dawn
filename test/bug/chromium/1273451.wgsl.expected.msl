@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct A {
+  int a;
+};
+struct B {
+  int b;
+};
+
+B f(A a) {
+  B const tint_symbol = {};
+  return tint_symbol;
+}
+
