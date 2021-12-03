@@ -23,7 +23,9 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Fallthrough) {
   auto* f = create<ast::FallthroughStatement>();
-  WrapInFunction(f);
+  WrapInFunction(Switch(1,                        //
+                        Case(Expr(1), Block(f)),  //
+                        DefaultCase()));
 
   GeneratorImpl& gen = Build();
 

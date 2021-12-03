@@ -874,17 +874,20 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
   return nullptr;
 }
 
-sem::SwitchCaseBlockStatement* Resolver::CaseStatement(
-    const ast::CaseStatement* stmt) {
-  auto* sem = builder_->create<sem::SwitchCaseBlockStatement>(
-      stmt->body, current_compound_statement_, current_function_);
+sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt) {
+  auto* sem = builder_->create<sem::CaseStatement>(
+      stmt, current_compound_statement_, current_function_);
   return StatementScope(stmt, sem, [&] {
-    builder_->Sem().Add(stmt->body, sem);
-    Mark(stmt->body);
     for (auto* sel : stmt->selectors) {
       Mark(sel);
     }
-    return Statements(stmt->body->statements);
+    Mark(stmt->body);
+    auto* body = BlockStatement(stmt->body);
+    if (!body) {
+      return false;
+    }
+    sem->SetBlock(body);
+    return true;
   });
 }
 
@@ -2361,7 +2364,9 @@ sem::Statement* Resolver::FallthroughStatement(
     const ast::FallthroughStatement* stmt) {
   auto* sem = builder_->create<sem::Statement>(
       stmt, current_compound_statement_, current_function_);
-  return StatementScope(stmt, sem, [&] { return true; });
+  return StatementScope(stmt, sem, [&] {
+    return ValidateFallthroughStatement(sem);
+  });
 }
 
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,

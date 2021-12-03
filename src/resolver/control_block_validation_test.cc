@@ -294,8 +294,8 @@ TEST_F(ResolverControlBlockValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: a fallthrough statement must not appear as the last "
-            "statement in last clause of a switch");
+            "12:34 error: a fallthrough statement must not be used in the last "
+            "switch case");
 }
 
 TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {

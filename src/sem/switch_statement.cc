@@ -16,8 +16,8 @@
 
 #include "src/program_builder.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::sem::CaseStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::SwitchStatement);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::SwitchCaseBlockStatement);
 
 namespace tint {
 namespace sem {
@@ -32,15 +32,22 @@ SwitchStatement::SwitchStatement(const ast::SwitchStatement* declaration,
 
 SwitchStatement::~SwitchStatement() = default;
 
-SwitchCaseBlockStatement::SwitchCaseBlockStatement(
-    const ast::BlockStatement* declaration,
-    const CompoundStatement* parent,
-    const sem::Function* function)
+const ast::SwitchStatement* SwitchStatement::Declaration() const {
+  return static_cast<const ast::SwitchStatement*>(Base::Declaration());
+}
+
+CaseStatement::CaseStatement(const ast::CaseStatement* declaration,
+                             const CompoundStatement* parent,
+                             const sem::Function* function)
     : Base(declaration, parent, function) {
   TINT_ASSERT(Semantic, parent);
   TINT_ASSERT(Semantic, function);
 }
-SwitchCaseBlockStatement::~SwitchCaseBlockStatement() = default;
+CaseStatement::~CaseStatement() = default;
+
+const ast::CaseStatement* CaseStatement::Declaration() const {
+  return static_cast<const ast::CaseStatement*>(Base::Declaration());
+}
 
 }  // namespace sem
 }  // namespace tint

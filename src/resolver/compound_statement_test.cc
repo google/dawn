@@ -343,31 +343,34 @@ TEST_F(ResolverCompoundStatementTest, Switch) {
   {
     auto* s = Sem().Get(stmt_a);
     ASSERT_NE(s, nullptr);
-    EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::SwitchCaseBlockStatement>());
+    EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::BlockStatement>());
     EXPECT_EQ(s->Parent(), s->Block());
-    EXPECT_EQ(s->Parent()->Parent(),
-              s->FindFirstParent<sem::SwitchStatement>());
+    EXPECT_EQ(s->Parent()->Parent(), s->FindFirstParent<sem::CaseStatement>());
     EXPECT_EQ(s->Parent()->Parent()->Parent(),
+              s->FindFirstParent<sem::SwitchStatement>());
+    EXPECT_EQ(s->Parent()->Parent()->Parent()->Parent(),
               s->FindFirstParent<sem::FunctionBlockStatement>());
   }
   {
     auto* s = Sem().Get(stmt_b);
     ASSERT_NE(s, nullptr);
-    EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::SwitchCaseBlockStatement>());
+    EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::BlockStatement>());
     EXPECT_EQ(s->Parent(), s->Block());
-    EXPECT_EQ(s->Parent()->Parent(),
-              s->FindFirstParent<sem::SwitchStatement>());
+    EXPECT_EQ(s->Parent()->Parent(), s->FindFirstParent<sem::CaseStatement>());
     EXPECT_EQ(s->Parent()->Parent()->Parent(),
+              s->FindFirstParent<sem::SwitchStatement>());
+    EXPECT_EQ(s->Parent()->Parent()->Parent()->Parent(),
               s->FindFirstParent<sem::FunctionBlockStatement>());
   }
   {
     auto* s = Sem().Get(stmt_c);
     ASSERT_NE(s, nullptr);
-    EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::SwitchCaseBlockStatement>());
+    EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::BlockStatement>());
     EXPECT_EQ(s->Parent(), s->Block());
-    EXPECT_EQ(s->Parent()->Parent(),
-              s->FindFirstParent<sem::SwitchStatement>());
+    EXPECT_EQ(s->Parent()->Parent(), s->FindFirstParent<sem::CaseStatement>());
     EXPECT_EQ(s->Parent()->Parent()->Parent(),
+              s->FindFirstParent<sem::SwitchStatement>());
+    EXPECT_EQ(s->Parent()->Parent()->Parent()->Parent(),
               s->FindFirstParent<sem::FunctionBlockStatement>());
   }
 }

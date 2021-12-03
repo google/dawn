@@ -1346,7 +1346,7 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
 
 bool Resolver::ValidateBreakStatement(const sem::Statement* stmt) {
   if (!stmt->FindFirstParent<sem::LoopBlockStatement>() &&
-      !stmt->FindFirstParent<sem::SwitchCaseBlockStatement>()) {
+      !stmt->FindFirstParent<sem::CaseStatement>()) {
     AddError("break statement must be in a loop or switch case",
              stmt->Declaration()->source);
     return false;
@@ -1383,6 +1383,29 @@ bool Resolver::ValidateDiscardStatement(const sem::Statement* stmt) {
     return false;
   }
   return true;
+}
+
+bool Resolver::ValidateFallthroughStatement(const sem::Statement* stmt) {
+  if (auto* block = As<sem::BlockStatement>(stmt->Parent())) {
+    if (auto* c = As<sem::CaseStatement>(block->Parent())) {
+      if (block->Declaration()->Last() == stmt->Declaration()) {
+        if (auto* s = As<sem::SwitchStatement>(c->Parent())) {
+          if (c->Declaration() != s->Declaration()->body.back()) {
+            return true;
+          }
+          AddError(
+              "a fallthrough statement must not be used in the last switch "
+              "case",
+              stmt->Declaration()->source);
+          return false;
+        }
+      }
+    }
+  }
+  AddError(
+      "fallthrough must only be used as the last statement of a case block",
+      stmt->Declaration()->source);
+  return false;
 }
 
 bool Resolver::ValidateElseStatement(const sem::ElseStatement* stmt) {
@@ -2229,18 +2252,6 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
     // No default clause
     AddError("switch statement must have a default clause", s->source);
     return false;
-  }
-
-  if (!s->body.empty()) {
-    auto* last_clause = s->body.back()->As<ast::CaseStatement>();
-    auto* last_stmt = last_clause->body->Last();
-    if (last_stmt && last_stmt->Is<ast::FallthroughStatement>()) {
-      AddError(
-          "a fallthrough statement must not appear as "
-          "the last statement in last clause of a switch",
-          last_stmt->source);
-      return false;
-    }
   }
 
   return true;

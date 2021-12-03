@@ -20,6 +20,7 @@
 // Forward declarations
 namespace tint {
 namespace ast {
+class CaseStatement;
 class SwitchStatement;
 }  // namespace ast
 }  // namespace tint
@@ -40,22 +41,36 @@ class SwitchStatement : public Castable<SwitchStatement, CompoundStatement> {
 
   /// Destructor
   ~SwitchStatement() override;
+
+  /// @return the AST node for this statement
+  const ast::SwitchStatement* Declaration() const;
 };
 
-/// Holds semantic information about a switch case block
-class SwitchCaseBlockStatement
-    : public Castable<SwitchCaseBlockStatement, BlockStatement> {
+/// Holds semantic information about a switch case statement
+class CaseStatement : public Castable<CaseStatement, CompoundStatement> {
  public:
   /// Constructor
-  /// @param declaration the AST node for this block statement
+  /// @param declaration the AST node for this case statement
   /// @param parent the owning statement
   /// @param function the owning function
-  SwitchCaseBlockStatement(const ast::BlockStatement* declaration,
-                           const CompoundStatement* parent,
-                           const sem::Function* function);
+  CaseStatement(const ast::CaseStatement* declaration,
+                const CompoundStatement* parent,
+                const sem::Function* function);
 
   /// Destructor
-  ~SwitchCaseBlockStatement() override;
+  ~CaseStatement() override;
+
+  /// @return the AST node for this statement
+  const ast::CaseStatement* Declaration() const;
+
+  /// @param body the case body block statement
+  void SetBlock(const BlockStatement* body) { body_ = body; }
+
+  /// @returns the case body block statement
+  const BlockStatement* Body() const { return body_; }
+
+ private:
+  const BlockStatement* body_ = nullptr;
 };
 
 }  // namespace sem

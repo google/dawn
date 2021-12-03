@@ -60,13 +60,13 @@ namespace sem {
 class Array;
 class Atomic;
 class BlockStatement;
+class CaseStatement;
 class ElseStatement;
 class ForLoopStatement;
 class IfStatement;
 class Intrinsic;
 class LoopStatement;
 class Statement;
-class SwitchCaseBlockStatement;
 class SwitchStatement;
 class TypeConstructor;
 }  // namespace sem
@@ -209,7 +209,7 @@ class Resolver {
   sem::BlockStatement* BlockStatement(const ast::BlockStatement*);
   sem::Statement* BreakStatement(const ast::BreakStatement*);
   sem::Statement* CallStatement(const ast::CallStatement*);
-  sem::SwitchCaseBlockStatement* CaseStatement(const ast::CaseStatement*);
+  sem::CaseStatement* CaseStatement(const ast::CaseStatement*);
   sem::Statement* ContinueStatement(const ast::ContinueStatement*);
   sem::Statement* DiscardStatement(const ast::DiscardStatement*);
   sem::ElseStatement* ElseStatement(const ast::ElseStatement*);
@@ -238,14 +238,15 @@ class Resolver {
   bool ValidateAtomicVariable(const sem::Variable* var);
   bool ValidateAssignment(const ast::AssignmentStatement* a);
   bool ValidateBreakStatement(const sem::Statement* stmt);
-  bool ValidateContinueStatement(const sem::Statement* stmt);
-  bool ValidateDiscardStatement(const sem::Statement* stmt);
   bool ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                  const sem::Type* storage_type,
                                  const bool is_input);
+  bool ValidateContinueStatement(const sem::Statement* stmt);
+  bool ValidateDiscardStatement(const sem::Statement* stmt);
   bool ValidateElseStatement(const sem::ElseStatement* stmt);
   bool ValidateEntryPoint(const sem::Function* func);
   bool ValidateForLoopStatement(const sem::ForLoopStatement* stmt);
+  bool ValidateFallthroughStatement(const sem::Statement* stmt);
   bool ValidateFunction(const sem::Function* func);
   bool ValidateFunctionCall(const sem::Call* call);
   bool ValidateGlobalVariable(const sem::Variable* var);

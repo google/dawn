@@ -105,11 +105,15 @@ Semantic tree:
 ```
 sem::SwitchStatement {
     sem::Expression condition
-    sem::SwitchCaseBlockStatement {
-        sem::Statement statement_a
+    sem::CaseStatement {
+        sem::BlockStatement {
+            sem::Statement statement_a
+        }
     }
-    sem::SwitchCaseBlockStatement {
-        sem::Statement statement_b
+    sem::CaseStatement {
+        sem::BlockStatement {
+            sem::Statement statement_b
+        }
     }
 }
 ```
