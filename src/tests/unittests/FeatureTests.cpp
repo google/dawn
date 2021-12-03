@@ -73,7 +73,7 @@ TEST_F(FeatureTests, GetEnabledFeatures) {
         dawn_native::DawnDeviceDescriptor deviceDescriptor;
         deviceDescriptor.requiredFeatures = {featureName};
         dawn_native::DeviceBase* deviceBase =
-            reinterpret_cast<dawn_native::DeviceBase*>(adapter.CreateDevice(&deviceDescriptor));
+            dawn_native::FromAPI(adapter.CreateDevice(&deviceDescriptor));
         std::vector<const char*> enabledFeatures = deviceBase->GetEnabledFeatures();
         ASSERT_EQ(1u, enabledFeatures.size());
         ASSERT_EQ(0, std::strcmp(featureName, enabledFeatures[0]));

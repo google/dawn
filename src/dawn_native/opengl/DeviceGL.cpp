@@ -203,8 +203,7 @@ namespace dawn_native { namespace opengl {
     }
     TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
                                                        ::EGLImage image) {
-        const TextureDescriptor* textureDescriptor =
-            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+        const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
 
         if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
             return nullptr;

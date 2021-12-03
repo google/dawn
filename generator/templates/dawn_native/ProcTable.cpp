@@ -39,7 +39,7 @@ namespace dawn_native {
                     {%- endfor -%}
                 ) {
                     //* Perform conversion between C types and frontend types
-                    auto self = reinterpret_cast<{{as_frontendType(type)}}>(cSelf);
+                    auto self = FromAPI(cSelf);
 
                     {% for arg in method.arguments %}
                         {% set varName = as_varName(arg.name) %}
@@ -63,7 +63,7 @@ namespace dawn_native {
                     );
                     {% if method.return_type.name.canonical_case() != "void" %}
                         {% if method.return_type.category == "object" %}
-                            return reinterpret_cast<{{as_cType(method.return_type.name)}}>(result);
+                            return ToAPI(result);
                         {% else %}
                             return result;
                         {% endif %}
@@ -84,10 +84,8 @@ namespace dawn_native {
         static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
     }
 
-    WGPUInstance NativeCreateInstance(WGPUInstanceDescriptor const* cDescriptor) {
-        const dawn_native::InstanceDescriptor* descriptor =
-            reinterpret_cast<const dawn_native::InstanceDescriptor*>(cDescriptor);
-        return reinterpret_cast<WGPUInstance>(InstanceBase::Create(descriptor));
+    WGPUInstance NativeCreateInstance(WGPUInstanceDescriptor const* descriptor) {
+        return ToAPI(InstanceBase::Create(FromAPI(descriptor)));
     }
 
     WGPUProc NativeGetProcAddress(WGPUDevice, const char* procName) {

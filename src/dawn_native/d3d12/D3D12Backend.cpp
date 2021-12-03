@@ -29,13 +29,11 @@
 namespace dawn_native { namespace d3d12 {
 
     ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-
-        return backendDevice->GetD3D12Device();
+        return ToBackend(FromAPI(device))->GetD3D12Device();
     }
 
     DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device, HWND window) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
+        Device* backendDevice = ToBackend(FromAPI(device));
 
         DawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, window));
@@ -78,7 +76,7 @@ namespace dawn_native { namespace d3d12 {
     WGPUTexture ExternalImageDXGI::ProduceTexture(
         WGPUDevice device,
         const ExternalImageAccessDescriptorDXGIKeyedMutex* descriptor) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
+        Device* backendDevice = ToBackend(FromAPI(device));
 
         // Ensure the texture usage is allowed
         if (!IsSubset(descriptor->usage, mUsage)) {
@@ -114,14 +112,14 @@ namespace dawn_native { namespace d3d12 {
             ExternalMutexSerial(descriptor->releaseMutexKey), descriptor->isSwapChainTexture,
             descriptor->isInitialized);
 
-        return reinterpret_cast<WGPUTexture>(texture.Detach());
+        return ToAPI(texture.Detach());
     }
 
     // static
     std::unique_ptr<ExternalImageDXGI> ExternalImageDXGI::Create(
         WGPUDevice device,
         const ExternalImageDescriptorDXGISharedHandle* descriptor) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
+        Device* backendDevice = ToBackend(FromAPI(device));
 
         Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource;
         if (FAILED(backendDevice->GetD3D12Device()->OpenSharedHandle(
@@ -129,8 +127,7 @@ namespace dawn_native { namespace d3d12 {
             return nullptr;
         }
 
-        const TextureDescriptor* textureDescriptor =
-            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+        const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
 
         if (backendDevice->ConsumedError(
                 ValidateTextureDescriptor(backendDevice, textureDescriptor))) {
@@ -168,7 +165,7 @@ namespace dawn_native { namespace d3d12 {
     uint64_t SetExternalMemoryReservation(WGPUDevice device,
                                           uint64_t requestedReservationSize,
                                           MemorySegment memorySegment) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
+        Device* backendDevice = ToBackend(FromAPI(device));
 
         return backendDevice->GetResidencyManager()->SetExternalMemoryReservation(
             memorySegment, requestedReservationSize);

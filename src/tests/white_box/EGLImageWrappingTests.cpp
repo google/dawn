@@ -128,7 +128,7 @@ class EGLImageTestBase : public DawnTest {
                                   void* data,
                                   size_t size) {
         dawn_native::opengl::Device* openglDevice =
-            reinterpret_cast<dawn_native::opengl::Device*>(device.Get());
+            dawn_native::opengl::ToBackend(dawn_native::FromAPI(device.Get()));
         const dawn_native::opengl::OpenGLFunctions& gl = openglDevice->gl;
         GLuint tex;
         gl.GenTextures(1, &tex);
@@ -300,7 +300,7 @@ class EGLImageUsageTests : public EGLImageTestBase {
                      void* data,
                      size_t dataSize) {
         dawn_native::opengl::Device* openglDevice =
-            reinterpret_cast<dawn_native::opengl::Device*>(device.Get());
+            dawn_native::opengl::ToBackend(dawn_native::FromAPI(device.Get()));
         const dawn_native::opengl::OpenGLFunctions& gl = openglDevice->gl;
 
         // Get a texture view for the eglImage

@@ -719,8 +719,7 @@ namespace dawn_native { namespace vulkan {
                                            VkSemaphore* outSignalSemaphore,
                                            VkDeviceMemory* outAllocation,
                                            std::vector<VkSemaphore>* outWaitSemaphores) {
-        const TextureDescriptor* textureDescriptor =
-            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+        const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
 
         const DawnTextureInternalUsageDescriptor* internalUsageDesc = nullptr;
         FindInChain(textureDescriptor->nextInChain, &internalUsageDesc);
@@ -794,8 +793,7 @@ namespace dawn_native { namespace vulkan {
         const ExternalImageDescriptorVk* descriptor,
         ExternalMemoryHandle memoryHandle,
         const std::vector<ExternalSemaphoreHandle>& waitHandles) {
-        const TextureDescriptor* textureDescriptor =
-            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+        const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
 
         // Initial validation
         if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {

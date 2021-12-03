@@ -167,8 +167,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
             return vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
 
-    dawn_native::ShaderModuleBase* shaderModuleBase =
-        reinterpret_cast<dawn_native::ShaderModuleBase*>(shaderModule.Get());
+    dawn_native::ShaderModuleBase* shaderModuleBase = dawn_native::FromAPI(shaderModule.Get());
     dawn_native::OwnedCompilationMessages* messages = shaderModuleBase->GetCompilationMessages();
     messages->ClearMessages();
     messages->AddMessageForTesting("Info Message");

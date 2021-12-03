@@ -318,7 +318,7 @@ TEST_F(CommandBufferValidationTest, DestroyEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
         ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("Destroyed encoder cannot be finished."));
     }
 
@@ -327,13 +327,13 @@ TEST_F(CommandBufferValidationTest, DestroyEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
     }
 
     // Destroyed encoder should allow encoding, and emit error on finish.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("Destroyed encoder cannot be finished."));
@@ -342,7 +342,7 @@ TEST_F(CommandBufferValidationTest, DestroyEncoder) {
     // Destroyed encoder should allow encoding and shouldn't emit an error if never finished.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
     }
@@ -353,21 +353,21 @@ TEST_F(CommandBufferValidationTest, DestroyEncoder) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
         pass.EndPass();
         encoder.Finish();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
     }
 
     // Destroying an encoder twice should not emit any errors.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
     }
 
     // Destroying an encoder twice and then calling finish should fail.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
-        reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
+        dawn_native::FromAPI(encoder.Get())->Destroy();
         ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("Destroyed encoder cannot be finished."));
     }
 }

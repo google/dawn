@@ -44,7 +44,7 @@ namespace dawn_native { namespace vulkan {
                 DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
                 gbmDevice = CreateGbmDevice();
-                deviceVk = reinterpret_cast<dawn_native::vulkan::Device*>(device.Get());
+                deviceVk = dawn_native::vulkan::ToBackend(dawn_native::FromAPI(device.Get()));
 
                 defaultGbmBo = CreateGbmBo(1, 1, true /* linear */);
                 defaultStride = gbm_bo_get_stride_for_plane(defaultGbmBo, 0);
@@ -311,14 +311,13 @@ namespace dawn_native { namespace vulkan {
             }
 
             // Create another device based on the original
-            backendAdapter =
-                reinterpret_cast<dawn_native::vulkan::Adapter*>(deviceVk->GetAdapter());
+            backendAdapter = dawn_native::vulkan::ToBackend(deviceVk->GetAdapter());
             deviceDescriptor.forceEnabledToggles = GetParam().forceEnabledWorkarounds;
             deviceDescriptor.forceDisabledToggles = GetParam().forceDisabledWorkarounds;
 
-            secondDeviceVk = reinterpret_cast<dawn_native::vulkan::Device*>(
-                backendAdapter->CreateDevice(&deviceDescriptor));
-            secondDevice = wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(secondDeviceVk));
+            secondDeviceVk =
+                dawn_native::vullkan::ToBackend(backendAdapter->CreateDevice(&deviceDescriptor));
+            secondDevice = wgpu::Device::Acquire(dawn_native::ToAPI(secondDeviceVk));
         }
 
       protected:
@@ -691,10 +690,9 @@ namespace dawn_native { namespace vulkan {
         // device 1 = |device|
         // device 2 = |secondDevice|
         // Create device 3
-        dawn_native::vulkan::Device* thirdDeviceVk = reinterpret_cast<dawn_native::vulkan::Device*>(
-            backendAdapter->CreateDevice(&deviceDescriptor));
-        wgpu::Device thirdDevice =
-            wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(thirdDeviceVk));
+        dawn_native::vulkan::Device* thirdDeviceVk =
+            dawn_native::vulkan::ToBackend(backendAdapter->CreateDevice(&deviceDescriptor));
+        wgpu::Device thirdDevice = wgpu::Device::Acquire(dawn_native::ToAPI(thirdDeviceVk));
 
         // Make queue for device 2 and 3
         wgpu::Queue secondDeviceQueue = secondDevice.GetQueue();

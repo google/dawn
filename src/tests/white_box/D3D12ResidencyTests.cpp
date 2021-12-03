@@ -42,7 +42,7 @@ class D3D12ResidencyTestBase : public DawnTest {
 
         // Restrict Dawn's budget to create an artificial budget.
         dawn_native::d3d12::Device* d3dDevice =
-            reinterpret_cast<dawn_native::d3d12::Device*>(device.Get());
+            dawn_native::d3d12::ToBackend(dawn_native::FromAPI((device.Get())));
         d3dDevice->GetResidencyManager()->RestrictBudgetForTesting(kRestrictedBudgetSize);
 
         // Initialize a source buffer on the GPU to serve as a source to quickly copy data to other
@@ -94,18 +94,20 @@ class D3D12ResourceResidencyTests : public D3D12ResidencyTestBase {
     bool CheckAllocationMethod(wgpu::Buffer buffer,
                                dawn_native::AllocationMethod allocationMethod) const {
         dawn_native::d3d12::Buffer* d3dBuffer =
-            reinterpret_cast<dawn_native::d3d12::Buffer*>(buffer.Get());
+            dawn_native::d3d12::ToBackend(dawn_native::FromAPI((buffer.Get())));
         return d3dBuffer->CheckAllocationMethodForTesting(allocationMethod);
     }
 
     bool CheckIfBufferIsResident(wgpu::Buffer buffer) const {
         dawn_native::d3d12::Buffer* d3dBuffer =
-            reinterpret_cast<dawn_native::d3d12::Buffer*>(buffer.Get());
+            dawn_native::d3d12::ToBackend(dawn_native::FromAPI((buffer.Get())));
         return d3dBuffer->CheckIsResidentForTesting();
     }
 
     bool IsUMA() const {
-        return reinterpret_cast<dawn_native::d3d12::Device*>(device.Get())->GetDeviceInfo().isUMA;
+        return dawn_native::d3d12::ToBackend(dawn_native::FromAPI(device.Get()))
+            ->GetDeviceInfo()
+            .isUMA;
     }
 };
 
@@ -367,7 +369,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
     wgpu::Sampler sampler = device.CreateSampler();
 
     dawn_native::d3d12::Device* d3dDevice =
-        reinterpret_cast<dawn_native::d3d12::Device*>(device.Get());
+        dawn_native::d3d12::ToBackend(dawn_native::FromAPI(device.Get()));
 
     dawn_native::d3d12::ShaderVisibleDescriptorAllocator* allocator =
         d3dDevice->GetViewShaderVisibleDescriptorAllocator();

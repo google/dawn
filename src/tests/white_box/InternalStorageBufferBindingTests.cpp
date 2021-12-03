@@ -53,14 +53,13 @@ class InternalStorageBufferBindingTests : public DawnTest {
         bglDesc.entryCount = 1;
         bglDesc.entries = &bglEntry;
 
-        dawn_native::DeviceBase* nativeDevice =
-            reinterpret_cast<dawn_native::DeviceBase*>(device.Get());
+        dawn_native::DeviceBase* nativeDevice = dawn_native::FromAPI(device.Get());
 
         Ref<dawn_native::BindGroupLayoutBase> bglRef =
             nativeDevice->CreateBindGroupLayout(&bglDesc, true).AcquireSuccess();
 
         wgpu::BindGroupLayout bgl =
-            wgpu::BindGroupLayout::Acquire(reinterpret_cast<WGPUBindGroupLayout>(bglRef.Detach()));
+            wgpu::BindGroupLayout::Acquire(dawn_native::ToAPI(bglRef.Detach()));
 
         // Create pipeline layout
         wgpu::PipelineLayoutDescriptor plDesc;

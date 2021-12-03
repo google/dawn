@@ -433,8 +433,7 @@ namespace dawn_native { namespace metal {
     Ref<Texture> Device::CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
                                                         IOSurfaceRef ioSurface,
                                                         uint32_t plane) {
-        const TextureDescriptor* textureDescriptor =
-            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+        const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
 
         if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
             return nullptr;

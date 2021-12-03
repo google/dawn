@@ -32,9 +32,7 @@ namespace dawn_native {
     }
 
     std::vector<const char*> GetTogglesUsed(WGPUDevice device) {
-        const dawn_native::DeviceBase* deviceBase =
-            reinterpret_cast<const dawn_native::DeviceBase*>(device);
-        return deviceBase->GetTogglesUsed();
+        return FromAPI(device)->GetTogglesUsed();
     }
 
     // Adapter
@@ -110,7 +108,7 @@ namespace dawn_native {
     }
 
     bool Adapter::GetLimits(WGPUSupportedLimits* limits) const {
-        return mImpl->GetLimits(reinterpret_cast<SupportedLimits*>(limits));
+        return mImpl->GetLimits(FromAPI(limits));
     }
 
     void Adapter::SetUseTieredLimits(bool useTieredLimits) {
@@ -126,7 +124,7 @@ namespace dawn_native {
     }
 
     WGPUDevice Adapter::CreateDevice(const DawnDeviceDescriptor* deviceDescriptor) {
-        return reinterpret_cast<WGPUDevice>(mImpl->CreateDevice(deviceDescriptor));
+        return ToAPI(mImpl->CreateDevice(deviceDescriptor));
     }
 
     void Adapter::RequestDevice(const DawnDeviceDescriptor* descriptor,
@@ -197,31 +195,29 @@ namespace dawn_native {
     }
 
     WGPUInstance Instance::Get() const {
-        return reinterpret_cast<WGPUInstance>(mImpl);
+        return ToAPI(mImpl);
     }
 
     size_t GetLazyClearCountForTesting(WGPUDevice device) {
-        dawn_native::DeviceBase* deviceBase = reinterpret_cast<dawn_native::DeviceBase*>(device);
-        return deviceBase->GetLazyClearCountForTesting();
+        return FromAPI(device)->GetLazyClearCountForTesting();
     }
 
     size_t GetDeprecationWarningCountForTesting(WGPUDevice device) {
-        dawn_native::DeviceBase* deviceBase = reinterpret_cast<dawn_native::DeviceBase*>(device);
-        return deviceBase->GetDeprecationWarningCountForTesting();
+        return FromAPI(device)->GetDeprecationWarningCountForTesting();
     }
 
-    bool IsTextureSubresourceInitialized(WGPUTexture cTexture,
+    bool IsTextureSubresourceInitialized(WGPUTexture texture,
                                          uint32_t baseMipLevel,
                                          uint32_t levelCount,
                                          uint32_t baseArrayLayer,
                                          uint32_t layerCount,
                                          WGPUTextureAspect cAspect) {
-        dawn_native::TextureBase* texture = reinterpret_cast<dawn_native::TextureBase*>(cTexture);
+        TextureBase* textureBase = FromAPI(texture);
 
         Aspect aspect =
-            ConvertAspect(texture->GetFormat(), static_cast<wgpu::TextureAspect>(cAspect));
+            ConvertAspect(textureBase->GetFormat(), static_cast<wgpu::TextureAspect>(cAspect));
         SubresourceRange range(aspect, {baseArrayLayer, layerCount}, {baseMipLevel, levelCount});
-        return texture->IsSubresourceContentInitialized(range);
+        return textureBase->IsSubresourceContentInitialized(range);
     }
 
     std::vector<const char*> GetProcMapNamesForTestingInternal();
@@ -231,8 +227,7 @@ namespace dawn_native {
     }
 
     DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device) {
-        dawn_native::DeviceBase* deviceBase = reinterpret_cast<dawn_native::DeviceBase*>(device);
-        return deviceBase->APITick();
+        return FromAPI(device)->APITick();
     }
 
     // ExternalImageDescriptor
@@ -251,14 +246,12 @@ namespace dawn_native {
     }
 
     uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer) {
-        return reinterpret_cast<const BufferBase*>(buffer)->GetAllocatedSize();
+        return FromAPI(buffer)->GetAllocatedSize();
     }
 
     bool BindGroupLayoutBindingsEqualForTesting(WGPUBindGroupLayout a, WGPUBindGroupLayout b) {
-        BindGroupLayoutBase* aBase = reinterpret_cast<BindGroupLayoutBase*>(a);
-        BindGroupLayoutBase* bBase = reinterpret_cast<BindGroupLayoutBase*>(b);
         bool excludePipelineCompatibiltyToken = true;
-        return aBase->IsLayoutEqual(bBase, excludePipelineCompatibiltyToken);
+        return FromAPI(a)->IsLayoutEqual(FromAPI(b), excludePipelineCompatibiltyToken);
     }
 
 }  // namespace dawn_native

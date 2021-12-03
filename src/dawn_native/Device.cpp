@@ -180,8 +180,7 @@ namespace dawn_native {
         }
 
         if (descriptor != nullptr && descriptor->requiredLimits != nullptr) {
-            mLimits.v1 = ReifyDefaultLimits(
-                reinterpret_cast<const RequiredLimits*>(descriptor->requiredLimits)->limits);
+            mLimits.v1 = ReifyDefaultLimits(FromAPI(descriptor->requiredLimits)->limits);
         } else {
             GetDefaultLimits(&mLimits.v1);
         }
@@ -252,7 +251,7 @@ namespace dawn_native {
             ShaderModuleDescriptor descriptor;
             ShaderModuleWGSLDescriptor wgslDesc;
             wgslDesc.source = kEmptyFragmentShader;
-            descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
+            descriptor.nextInChain = &wgslDesc;
 
             DAWN_TRY_ASSIGN(mInternalPipelineStore->dummyFragmentShader,
                             CreateShaderModule(&descriptor));
@@ -1315,9 +1314,8 @@ namespace dawn_native {
         Ref<ComputePipelineBase> cachedComputePipeline =
             GetCachedComputePipeline(uninitializedComputePipeline.Get());
         if (cachedComputePipeline.Get() != nullptr) {
-            callback(WGPUCreatePipelineAsyncStatus_Success,
-                     reinterpret_cast<WGPUComputePipeline>(cachedComputePipeline.Detach()), "",
-                     userdata);
+            callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(cachedComputePipeline.Detach()),
+                     "", userdata);
         } else {
             // Otherwise we will create the pipeline object in InitializeComputePipelineAsyncImpl(),
             // where the pipeline object may be initialized asynchronously and the result will be
@@ -1462,9 +1460,8 @@ namespace dawn_native {
         Ref<RenderPipelineBase> cachedRenderPipeline =
             GetCachedRenderPipeline(uninitializedRenderPipeline.Get());
         if (cachedRenderPipeline != nullptr) {
-            callback(WGPUCreatePipelineAsyncStatus_Success,
-                     reinterpret_cast<WGPURenderPipeline>(cachedRenderPipeline.Detach()), "",
-                     userdata);
+            callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(cachedRenderPipeline.Detach()),
+                     "", userdata);
         } else {
             // Otherwise we will create the pipeline object in InitializeRenderPipelineAsyncImpl(),
             // where the pipeline object may be initialized asynchronously and the result will be

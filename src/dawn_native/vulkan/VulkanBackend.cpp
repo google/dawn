@@ -29,13 +29,13 @@
 namespace dawn_native { namespace vulkan {
 
     VkInstance GetInstance(WGPUDevice device) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
+        Device* backendDevice = ToBackend(FromAPI(device));
         return backendDevice->GetVkInstance();
     }
 
     DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device,
                                                               const char* pName) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
+        Device* backendDevice = ToBackend(FromAPI(device));
         return (*backendDevice->fn.GetInstanceProcAddr)(backendDevice->GetVkInstance(), pName);
     }
 
@@ -43,7 +43,7 @@ namespace dawn_native { namespace vulkan {
     // header as seen in this file uses the wrapped type.
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation
     CreateNativeSwapChainImpl(WGPUDevice device, ::VkSurfaceKHR surfaceNative) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
+        Device* backendDevice = ToBackend(FromAPI(device));
         VkSurfaceKHR surface = VkSurfaceKHR::CreateFromHandle(surfaceNative);
 
         DawnSwapChainImplementation impl;
@@ -77,17 +77,17 @@ namespace dawn_native { namespace vulkan {
     }
 #endif  // DAWN_PLATFORM_LINUX
 
-    WGPUTexture WrapVulkanImage(WGPUDevice cDevice, const ExternalImageDescriptorVk* descriptor) {
+    WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* descriptor) {
 #if defined(DAWN_PLATFORM_LINUX)
         switch (descriptor->type) {
             case ExternalImageType::OpaqueFD:
             case ExternalImageType::DmaBuf: {
+                Device* backendDevice = ToBackend(FromAPI(device));
                 const ExternalImageDescriptorFD* fdDescriptor =
                     static_cast<const ExternalImageDescriptorFD*>(descriptor);
-                Device* device = reinterpret_cast<Device*>(cDevice);
-                TextureBase* texture = device->CreateTextureWrappingVulkanImage(
-                    fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs);
-                return reinterpret_cast<WGPUTexture>(texture);
+
+                return ToAPI(backendDevice->CreateTextureWrappingVulkanImage(
+                    fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs));
             }
             default:
                 return nullptr;
@@ -97,20 +97,21 @@ namespace dawn_native { namespace vulkan {
 #endif  // DAWN_PLATFORM_LINUX
     }
 
-    bool ExportVulkanImage(WGPUTexture cTexture,
+    bool ExportVulkanImage(WGPUTexture texture,
                            VkImageLayout desiredLayout,
                            ExternalImageExportInfoVk* info) {
-        if (cTexture == nullptr) {
+        if (texture == nullptr) {
             return false;
         }
 #if defined(DAWN_PLATFORM_LINUX)
         switch (info->type) {
             case ExternalImageType::OpaqueFD:
             case ExternalImageType::DmaBuf: {
-                Texture* texture = reinterpret_cast<Texture*>(cTexture);
-                Device* device = ToBackend(texture->GetDevice());
+                Texture* backendTexture = ToBackend(FromAPI(texture));
+                Device* device = ToBackend(backendTexture->GetDevice());
                 ExternalImageExportInfoFD* fdInfo = static_cast<ExternalImageExportInfoFD*>(info);
-                return device->SignalAndExportExternalTexture(texture, desiredLayout, fdInfo,
+
+                return device->SignalAndExportExternalTexture(backendTexture, desiredLayout, fdInfo,
                                                               &fdInfo->semaphoreHandles);
             }
             default:

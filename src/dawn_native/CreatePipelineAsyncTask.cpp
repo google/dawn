@@ -44,9 +44,8 @@ namespace dawn_native {
         ASSERT(mCreateComputePipelineAsyncCallback != nullptr);
 
         if (mPipeline.Get() != nullptr) {
-            mCreateComputePipelineAsyncCallback(
-                WGPUCreatePipelineAsyncStatus_Success,
-                reinterpret_cast<WGPUComputePipeline>(mPipeline.Detach()), "", mUserData);
+            mCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_Success,
+                                                ToAPI(mPipeline.Detach()), "", mUserData);
         } else {
             mCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_Error, nullptr,
                                                 mErrorMessage.c_str(), mUserData);
@@ -81,9 +80,8 @@ namespace dawn_native {
         ASSERT(mCreateRenderPipelineAsyncCallback != nullptr);
 
         if (mPipeline.Get() != nullptr) {
-            mCreateRenderPipelineAsyncCallback(
-                WGPUCreatePipelineAsyncStatus_Success,
-                reinterpret_cast<WGPURenderPipeline>(mPipeline.Detach()), "", mUserData);
+            mCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_Success,
+                                               ToAPI(mPipeline.Detach()), "", mUserData);
         } else {
             mCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_Error, nullptr,
                                                mErrorMessage.c_str(), mUserData);
