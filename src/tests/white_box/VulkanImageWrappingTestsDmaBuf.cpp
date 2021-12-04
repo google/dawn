@@ -316,7 +316,7 @@ namespace dawn_native { namespace vulkan {
             deviceDescriptor.forceDisabledToggles = GetParam().forceDisabledWorkarounds;
 
             secondDeviceVk =
-                dawn_native::vullkan::ToBackend(backendAdapter->CreateDevice(&deviceDescriptor));
+                dawn_native::vulkan::ToBackend(backendAdapter->CreateDevice(&deviceDescriptor));
             secondDevice = wgpu::Device::Acquire(dawn_native::ToAPI(secondDeviceVk));
         }
 
