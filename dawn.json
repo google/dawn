@@ -21,6 +21,7 @@
         "api": "WebGPU",
         "c_prefix": "WGPU",
         "namespace": "wgpu",
+        "proc_table_prefix": "Dawn",
         "copyright_year": "2019"
     },
 

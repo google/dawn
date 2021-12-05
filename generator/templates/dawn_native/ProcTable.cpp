@@ -12,8 +12,10 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "dawn_native/dawn_platform.h"
-#include "dawn_native/DawnNative.h"
+{% set Prefix = metadata.proc_table_prefix %}
+{% set prefix = Prefix.lower() %}
+#include "dawn_native/{{prefix}}_platform.h"
+#include "dawn_native/{{Prefix}}Native.h"
 
 #include <algorithm>
 #include <vector>
@@ -124,9 +126,10 @@ namespace dawn_native {
         return result;
     }
 
-    static DawnProcTable gProcTable = {
-        NativeGetProcAddress,
-        NativeCreateInstance,
+    static {{Prefix}}ProcTable gProcTable = {
+        {% for function in by_category["function"] %}
+            Native{{as_cppType(function.name)}},
+        {% endfor %}
         {% for type in by_category["object"] %}
             {% for method in c_methods(type) %}
                 Native{{as_MethodSuffix(type.name, method.name)}},
@@ -134,7 +137,7 @@ namespace dawn_native {
         {% endfor %}
     };
 
-    const DawnProcTable& GetProcsAutogen() {
+    const {{Prefix}}ProcTable& GetProcsAutogen() {
         return gProcTable;
     }
 }

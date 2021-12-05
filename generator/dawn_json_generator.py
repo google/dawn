@@ -28,6 +28,7 @@ class Metadata:
         self.api = metadata['api']
         self.namespace = metadata['namespace']
         self.c_prefix = metadata.get('c_prefix', self.namespace.upper())
+        self.proc_table_prefix = metadata['proc_table_prefix']
         self.copyright_year = metadata.get('copyright_year', None)
 
 
@@ -759,12 +760,13 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         api_file_name = metadata.api.lower()
         if 'dawn_headers' in targets:
+            prefix = metadata.proc_table_prefix.lower()
             renders.append(
                 FileRender('api.h', 'src/include/dawn/' + api_file_name + '.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
             renders.append(
                 FileRender('dawn_proc_table.h',
-                           'src/include/dawn/dawn_proc_table.h',
+                           'src/include/dawn/' + prefix + '_proc_table.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
 
         if 'dawncpp_headers' in targets:

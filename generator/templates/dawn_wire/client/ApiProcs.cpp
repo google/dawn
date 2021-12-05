@@ -159,16 +159,18 @@ namespace dawn_wire { namespace client {
         return result;
     }
 
-    static DawnProcTable gProcTable = {
-        ClientGetProcAddress,
-        ClientCreateInstance,
+    {% set Prefix = metadata.proc_table_prefix %}
+    static {{Prefix}}ProcTable gProcTable = {
+        {% for function in by_category["function"] %}
+            Client{{as_cppType(function.name)}},
+        {% endfor %}
         {% for type in by_category["object"] %}
             {% for method in c_methods(type) %}
                 Client{{as_MethodSuffix(type.name, method.name)}},
             {% endfor %}
         {% endfor %}
     };
-    const DawnProcTable& GetProcs() {
+    const {{Prefix}}ProcTable& GetProcs() {
         return gProcTable;
     }
 }}  // namespace dawn_wire::client
