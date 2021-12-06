@@ -63,7 +63,7 @@ namespace dawn_native { namespace vulkan {
 
         // Initialize the "instance" procs of our local function table.
         VulkanFunctions* functions = GetMutableFunctions();
-        *functions = ToBackend(GetAdapter())->GetBackend()->GetFunctions();
+        *functions = ToBackend(GetAdapter())->GetVulkanInstance()->GetFunctions();
 
         // Two things are crucial if device initialization fails: the function pointers to destroy
         // objects, and the fence deleter that calls these functions. Do not do anything before
@@ -196,14 +196,14 @@ namespace dawn_native { namespace vulkan {
     }
 
     VkInstance Device::GetVkInstance() const {
-        return ToBackend(GetAdapter())->GetBackend()->GetVkInstance();
+        return ToBackend(GetAdapter())->GetVulkanInstance()->GetVkInstance();
     }
     const VulkanDeviceInfo& Device::GetDeviceInfo() const {
         return mDeviceInfo;
     }
 
     const VulkanGlobalInfo& Device::GetGlobalInfo() const {
-        return ToBackend(GetAdapter())->GetBackend()->GetGlobalInfo();
+        return ToBackend(GetAdapter())->GetVulkanInstance()->GetGlobalInfo();
     }
 
     VkDevice Device::GetVkDevice() const {

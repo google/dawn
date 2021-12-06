@@ -26,6 +26,7 @@ namespace dawn_native { namespace vulkan {
 
     class Adapter;
     class Backend;
+    struct VulkanFunctions;
 
     // Global information - gathered before the instance is created
     struct VulkanGlobalKnobs {
@@ -76,8 +77,10 @@ namespace dawn_native { namespace vulkan {
         std::vector<bool> supportedQueueFamilies;
     };
 
-    ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const Backend& backend);
-    ResultOrError<std::vector<VkPhysicalDevice>> GetPhysicalDevices(const Backend& backend);
+    ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFunctions);
+    ResultOrError<std::vector<VkPhysicalDevice>> GatherPhysicalDevices(
+        VkInstance instance,
+        const VulkanFunctions& vkFunctions);
     ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const Adapter& adapter);
     ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const Adapter& adapter,
                                                        VkSurfaceKHR surface);

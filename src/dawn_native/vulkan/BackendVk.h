@@ -18,27 +18,41 @@
 #include "dawn_native/BackendConnection.h"
 
 #include "common/DynamicLib.h"
+#include "common/RefCounted.h"
+#include "common/ityp_array.h"
 #include "dawn_native/vulkan/VulkanFunctions.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
 namespace dawn_native { namespace vulkan {
 
-    class Backend : public BackendConnection {
+    enum class ICD {
+        None,
+        SwiftShader,
+    };
+
+    // VulkanInstance holds the reference to the Vulkan library, the VkInstance, VkPhysicalDevices
+    // on that instance, Vulkan functions loaded from the library, and global information
+    // gathered from the instance. VkPhysicalDevices bound to the VkInstance are bound to the GPU
+    // and GPU driver, keeping them active. It is RefCounted so that (eventually) when all adapters
+    // on an instance are no longer in use, the instance is deleted. This can be particuarly useful
+    // when we create multiple instances to selectively discover ICDs (like only
+    // SwiftShader/iGPU/dGPU/eGPU), and only one physical device on one instance remains in use. We
+    // can delete the VkInstances that are not in use to avoid holding the discrete GPU active.
+    class VulkanInstance : public RefCounted {
       public:
-        Backend(InstanceBase* instance);
-        ~Backend() override;
+        static ResultOrError<Ref<VulkanInstance>> Create(const InstanceBase* instance, ICD icd);
+        ~VulkanInstance();
 
         const VulkanFunctions& GetFunctions() const;
         VkInstance GetVkInstance() const;
         const VulkanGlobalInfo& GetGlobalInfo() const;
-
-        MaybeError Initialize(bool useSwiftshader);
-
-        std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
+        const std::vector<VkPhysicalDevice>& GetPhysicalDevices() const;
 
       private:
-        MaybeError LoadVulkan(bool useSwiftshader);
-        ResultOrError<VulkanGlobalKnobs> CreateInstance();
+        VulkanInstance();
+
+        MaybeError Initialize(const InstanceBase* instance, ICD icd);
+        ResultOrError<VulkanGlobalKnobs> CreateVkInstance(const InstanceBase* instance);
 
         MaybeError RegisterDebugUtils();
 
@@ -50,6 +64,19 @@ namespace dawn_native { namespace vulkan {
         VkDebugUtilsMessengerEXT mDebugUtilsMessenger = VK_NULL_HANDLE;
 
         std::vector<VkPhysicalDevice> mPhysicalDevices;
+    };
+
+    class Backend : public BackendConnection {
+      public:
+        Backend(InstanceBase* instance);
+        ~Backend() override;
+
+        MaybeError Initialize();
+
+        std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
+
+      private:
+        ityp::array<ICD, Ref<VulkanInstance>, 2> mVulkanInstances = {};
     };
 
 }}  // namespace dawn_native::vulkan

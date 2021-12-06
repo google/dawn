@@ -51,7 +51,7 @@ namespace dawn_native {
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
     namespace vulkan {
-        BackendConnection* Connect(InstanceBase* instance, bool useSwiftshader);
+        BackendConnection* Connect(InstanceBase* instance);
     }
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
@@ -187,16 +187,7 @@ namespace dawn_native {
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
             case wgpu::BackendType::Vulkan:
-                // TODO(https://github.com/KhronosGroup/Vulkan-Loader/issues/287):
-                // When we can load SwiftShader in parallel with the system driver, we should
-                // create the backend only once and expose SwiftShader as an additional adapter.
-                // For now, we create two VkInstances, one from SwiftShader, and one from the
-                // system. Note: If the Vulkan driver *is* SwiftShader, then this would load
-                // SwiftShader twice.
-                Register(vulkan::Connect(this, false), wgpu::BackendType::Vulkan);
-#    if defined(DAWN_ENABLE_SWIFTSHADER)
-                Register(vulkan::Connect(this, true), wgpu::BackendType::Vulkan);
-#    endif  // defined(DAWN_ENABLE_SWIFTSHADER)
+                Register(vulkan::Connect(this), wgpu::BackendType::Vulkan);
                 break;
 #endif      // defined(DAWN_ENABLE_BACKEND_VULKAN)
 

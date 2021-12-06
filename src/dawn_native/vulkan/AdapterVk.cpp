@@ -22,10 +22,12 @@
 
 namespace dawn_native { namespace vulkan {
 
-    Adapter::Adapter(Backend* backend, VkPhysicalDevice physicalDevice)
-        : AdapterBase(backend->GetInstance(), wgpu::BackendType::Vulkan),
+    Adapter::Adapter(InstanceBase* instance,
+                     VulkanInstance* vulkanInstance,
+                     VkPhysicalDevice physicalDevice)
+        : AdapterBase(instance, wgpu::BackendType::Vulkan),
           mPhysicalDevice(physicalDevice),
-          mBackend(backend) {
+          mVulkanInstance(vulkanInstance) {
     }
 
     const VulkanDeviceInfo& Adapter::GetDeviceInfo() const {
@@ -36,8 +38,8 @@ namespace dawn_native { namespace vulkan {
         return mPhysicalDevice;
     }
 
-    Backend* Adapter::GetBackend() const {
-        return mBackend;
+    VulkanInstance* Adapter::GetVulkanInstance() const {
+        return mVulkanInstance.Get();
     }
 
     bool Adapter::IsDepthStencilFormatSupported(VkFormat format) {
@@ -45,8 +47,8 @@ namespace dawn_native { namespace vulkan {
                format == VK_FORMAT_D32_SFLOAT_S8_UINT);
 
         VkFormatProperties properties;
-        GetBackend()->GetFunctions().GetPhysicalDeviceFormatProperties(mPhysicalDevice, format,
-                                                                       &properties);
+        mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(mPhysicalDevice, format,
+                                                                          &properties);
         return properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
     }
 
@@ -327,7 +329,7 @@ namespace dawn_native { namespace vulkan {
         // Via dawn_native::vulkan::WrapVulkanImage
         return external_memory::Service::CheckSupport(mDeviceInfo) &&
                external_semaphore::Service::CheckSupport(mDeviceInfo, mPhysicalDevice,
-                                                         mBackend->GetFunctions());
+                                                         mVulkanInstance->GetFunctions());
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DawnDeviceDescriptor* descriptor) {

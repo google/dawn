@@ -96,6 +96,9 @@ namespace dawn_native {
 // gracefully shut down.
 #define DAWN_INTERNAL_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::Internal, MESSAGE)
 
+#define DAWN_FORMAT_INTERNAL_ERROR(...) \
+    DAWN_MAKE_ERROR(InternalErrorType::Internal, absl::StrFormat(__VA_ARGS__))
+
 #define DAWN_UNIMPLEMENTED_ERROR(MESSAGE) \
     DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string("Unimplemented: ") + MESSAGE)
 
