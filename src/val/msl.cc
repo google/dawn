@@ -38,10 +38,15 @@ Result Msl(const std::string& xcrun_path, const std::string& source) {
 #ifdef _WIN32
   // On Windows, we should actually be running metal.exe from the Metal
   // Developer Tools for Windows
-  auto res = xcrun("-x", "metal", "-c", "-o", "NUL", file.Path());
+  auto res = xcrun("-x", "metal",        //
+                   "-o", "NUL",          //
+                   "-std=osx-metal1.2",  //
+                   "-c", file.Path());
 #else
-  auto res =
-      xcrun("-sdk", "macosx", "metal", "-o", "/dev/null", "-c", file.Path());
+  auto res = xcrun("-sdk", "macosx", "metal",  //
+                   "-o", "/dev/null",          //
+                   "-std=osx-metal1.2",        //
+                   "-c", file.Path());
 #endif
   if (!res.out.empty()) {
     if (!result.output.empty()) {

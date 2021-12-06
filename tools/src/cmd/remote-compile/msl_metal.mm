@@ -38,8 +38,11 @@ CompileResult CompileMslUsingMetalAPI(const std::string& src) {
   NSString* source = [NSString stringWithCString:src.c_str()
                                         encoding:NSUTF8StringEncoding];
 
+  MTLCompileOptions* compileOptions = [MTLCompileOptions new];
+  compileOptions.languageVersion = MTLLanguageVersion1_2;
+
   id<MTLLibrary> library = [device newLibraryWithSource:source
-                                                options:nil
+                                                options:compileOptions
                                                   error:&error];
   if (!library) {
     NSString* output = [error localizedDescription];
