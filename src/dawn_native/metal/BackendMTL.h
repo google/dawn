@@ -24,6 +24,8 @@ namespace dawn_native { namespace metal {
         Backend(InstanceBase* instance);
 
         std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
+        ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> DiscoverAdapters(
+            const AdapterDiscoveryOptionsBase* optionsBase) override;
     };
 
 }}  // namespace dawn_native::metal

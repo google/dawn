@@ -335,6 +335,7 @@ source_set("dawn_end2end_tests_sources") {
     "ParamGenerator.h",
     "ToggleParser.cpp",
     "ToggleParser.h",
+    "end2end/AdapterDiscoveryTests.cpp",
     "end2end/BasicTests.cpp",
     "end2end/BindGroupTests.cpp",
     "end2end/BufferTests.cpp",

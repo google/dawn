@@ -548,6 +548,19 @@ namespace dawn_native { namespace metal {
     }
 
     std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
+        AdapterDiscoveryOptions options;
+        auto result = DiscoverAdapters(&options);
+        if (result.IsError()) {
+            GetInstance()->ConsumedError(result.AcquireError());
+            return {};
+        }
+        return result.AcquireSuccess();
+    }
+
+    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
+        const AdapterDiscoveryOptionsBase* optionsBase) {
+        ASSERT(optionsBase->backendType == WGPUBackendType_Metal);
+
         std::vector<std::unique_ptr<AdapterBase>> adapters;
         BOOL supportedVersion = NO;
 #if defined(DAWN_PLATFORM_MACOS)

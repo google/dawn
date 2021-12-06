@@ -359,10 +359,29 @@ namespace dawn_native { namespace vulkan {
     Backend::~Backend() = default;
 
     std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
+        AdapterDiscoveryOptions options;
+        auto result = DiscoverAdapters(&options);
+        if (result.IsError()) {
+            GetInstance()->ConsumedError(result.AcquireError());
+            return {};
+        }
+        return result.AcquireSuccess();
+    }
+
+    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
+        const AdapterDiscoveryOptionsBase* optionsBase) {
+        ASSERT(optionsBase->backendType == WGPUBackendType_Vulkan);
+
+        const AdapterDiscoveryOptions* options =
+            static_cast<const AdapterDiscoveryOptions*>(optionsBase);
+
         std::vector<std::unique_ptr<AdapterBase>> adapters;
 
         InstanceBase* instance = GetInstance();
         for (ICD icd : kICDs) {
+            if (options->forceSwiftShader && icd != ICD::SwiftShader) {
+                continue;
+            }
             if (mVulkanInstances[icd] == nullptr && instance->ConsumedError([&]() -> MaybeError {
                     DAWN_TRY_ASSIGN(mVulkanInstances[icd], VulkanInstance::Create(instance, icd));
                     return {};
@@ -381,7 +400,6 @@ namespace dawn_native { namespace vulkan {
                 adapters.push_back(std::move(adapter));
             }
         }
-
         return adapters;
     }
 

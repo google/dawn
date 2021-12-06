@@ -151,8 +151,31 @@ namespace dawn_native { namespace d3d12 {
     }
 
     std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
-        std::vector<std::unique_ptr<AdapterBase>> adapters;
+        AdapterDiscoveryOptions options;
+        auto result = DiscoverAdapters(&options);
+        if (result.IsError()) {
+            GetInstance()->ConsumedError(result.AcquireError());
+            return {};
+        }
+        return result.AcquireSuccess();
+    }
 
+    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
+        const AdapterDiscoveryOptionsBase* optionsBase) {
+        ASSERT(optionsBase->backendType == WGPUBackendType_D3D12);
+        const AdapterDiscoveryOptions* options =
+            static_cast<const AdapterDiscoveryOptions*>(optionsBase);
+
+        std::vector<std::unique_ptr<AdapterBase>> adapters;
+        if (options->dxgiAdapter != nullptr) {
+            // |dxgiAdapter| was provided. Discover just that adapter.
+            std::unique_ptr<AdapterBase> adapter;
+            DAWN_TRY_ASSIGN(adapter, CreateAdapterFromIDXGIAdapter(this, options->dxgiAdapter));
+            adapters.push_back(std::move(adapter));
+            return std::move(adapters);
+        }
+
+        // Enumerate and discover all available adapters.
         for (uint32_t adapterIndex = 0;; ++adapterIndex) {
             ComPtr<IDXGIAdapter1> dxgiAdapter = nullptr;
             if (mFactory->EnumAdapters1(adapterIndex, &dxgiAdapter) == DXGI_ERROR_NOT_FOUND) {
@@ -171,21 +194,6 @@ namespace dawn_native { namespace d3d12 {
         }
 
         return adapters;
-    }
-
-    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
-        const AdapterDiscoveryOptionsBase* optionsBase) {
-        ASSERT(optionsBase->backendType == WGPUBackendType_D3D12);
-        const AdapterDiscoveryOptions* options =
-            static_cast<const AdapterDiscoveryOptions*>(optionsBase);
-
-        ASSERT(options->dxgiAdapter != nullptr);
-
-        std::unique_ptr<AdapterBase> adapter;
-        DAWN_TRY_ASSIGN(adapter, CreateAdapterFromIDXGIAdapter(this, options->dxgiAdapter));
-        std::vector<std::unique_ptr<AdapterBase>> adapters;
-        adapters.push_back(std::move(adapter));
-        return std::move(adapters);
     }
 
     BackendConnection* Connect(InstanceBase* instance) {

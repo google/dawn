@@ -59,6 +59,10 @@ namespace dawn_native { namespace vulkan {
         return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
     }
 
+    AdapterDiscoveryOptions::AdapterDiscoveryOptions()
+        : AdapterDiscoveryOptionsBase(WGPUBackendType_Vulkan) {
+    }
+
 #if defined(DAWN_PLATFORM_LINUX)
     ExternalImageDescriptorOpaqueFD::ExternalImageDescriptorOpaqueFD()
         : ExternalImageDescriptorFD(ExternalImageType::OpaqueFD) {
