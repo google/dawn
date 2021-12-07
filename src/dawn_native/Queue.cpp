@@ -80,6 +80,7 @@ namespace dawn_native {
             uint32_t optimallyAlignedBytesPerRow,
             uint32_t alignedRowsPerImage,
             const TextureDataLayout& dataLayout,
+            bool hasDepthOrStencil,
             const TexelBlockInfo& blockInfo,
             const Extent3D& writeSizePixel) {
             uint64_t newDataSizeBytes;
@@ -96,6 +97,13 @@ namespace dawn_native {
             // since both of them are powers of two, we only need to align to the max value.
             uint64_t offsetAlignment =
                 std::max(optimalOffsetAlignment, uint64_t(blockInfo.byteSize));
+
+            // For depth-stencil texture, buffer offset must be a multiple of 4, which is required
+            // by WebGPU and Vulkan SPEC.
+            if (hasDepthOrStencil) {
+                constexpr uint64_t kOffsetAlignmentForDepthStencil = 4;
+                offsetAlignment = std::max(offsetAlignment, kOffsetAlignmentForDepthStencil);
+            }
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
@@ -315,8 +323,8 @@ namespace dawn_native {
                                            const void* data,
                                            const TextureDataLayout& dataLayout,
                                            const Extent3D& writeSizePixel) {
-        const TexelBlockInfo& blockInfo =
-            destination.texture->GetFormat().GetAspectInfo(destination.aspect).block;
+        const Format& format = destination.texture->GetFormat();
+        const TexelBlockInfo& blockInfo = format.GetAspectInfo(destination.aspect).block;
 
         // We are only copying the part of the data that will appear in the texture.
         // Note that validating texture copy range ensures that writeSizePixel->width and
@@ -334,7 +342,8 @@ namespace dawn_native {
         DAWN_TRY_ASSIGN(uploadHandle,
                         UploadTextureDataAligningBytesPerRowAndOffset(
                             GetDevice(), data, alignedBytesPerRow, optimallyAlignedBytesPerRow,
-                            alignedRowsPerImage, dataLayout, blockInfo, writeSizePixel));
+                            alignedRowsPerImage, dataLayout, format.HasDepthOrStencil(), blockInfo,
+                            writeSizePixel));
 
         TextureDataLayout passDataLayout = dataLayout;
         passDataLayout.offset = uploadHandle.startOffset;
@@ -345,7 +354,7 @@ namespace dawn_native {
         textureCopy.texture = destination.texture;
         textureCopy.mipLevel = destination.mipLevel;
         textureCopy.origin = destination.origin;
-        textureCopy.aspect = ConvertAspect(destination.texture->GetFormat(), destination.aspect);
+        textureCopy.aspect = ConvertAspect(format, destination.aspect);
 
         DeviceBase* device = GetDevice();
 
