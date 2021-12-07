@@ -63,7 +63,14 @@ Result HlslUsingDXC(const std::string& dxc_path,
         break;
     }
 
-    auto res = dxc(profile, "-E " + ep.first, file.Path());
+    // Match Dawn's compile flags
+    // See dawn\src\dawn_native\d3d12\RenderPipelineD3D12.cpp
+    // and dawn_native\d3d12\ShaderModuleD3D12.cpp (GetDXCArguments)
+    const char* compileFlags =
+        "/Zpr "  // D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
+        "/Gis";  // D3DCOMPILE_IEEE_STRICTNESS
+
+    auto res = dxc(profile, "-E " + ep.first, compileFlags, file.Path());
     if (!res.out.empty()) {
       if (!result.output.empty()) {
         result.output += "\n";
@@ -129,11 +136,26 @@ Result HlslUsingFXC(const std::string& source,
         break;
     }
 
+    // Match Dawn's compile flags
+    // See dawn\src\dawn_native\d3d12\RenderPipelineD3D12.cpp
+    UINT compileFlags = D3DCOMPILE_OPTIMIZATION_LEVEL0 |
+                        D3DCOMPILE_PACK_MATRIX_ROW_MAJOR |
+                        D3DCOMPILE_IEEE_STRICTNESS;
+
     ComPtr<ID3DBlob> compiledShader;
     ComPtr<ID3DBlob> errors;
-    if (FAILED(d3dCompile(source.c_str(), source.length(), nullptr, nullptr,
-                          nullptr, ep.first.c_str(), profile, 0, 0,
-                          &compiledShader, &errors))) {
+    HRESULT cr = d3dCompile(source.c_str(),    // pSrcData
+                            source.length(),   // SrcDataSize
+                            nullptr,           // pSourceName
+                            nullptr,           // pDefines
+                            nullptr,           // pInclude
+                            ep.first.c_str(),  // pEntrypoint
+                            profile,           // pTarget
+                            compileFlags,      // Flags1
+                            0,                 // Flags2
+                            &compiledShader,   // ppCode
+                            &errors);          // ppErrorMsgs
+    if (FAILED(cr)) {
       result.output = static_cast<char*>(errors->GetBufferPointer());
       result.failed = true;
       return result;
