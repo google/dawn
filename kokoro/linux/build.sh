@@ -31,7 +31,9 @@ else
 fi
 
 
+# --privileged is required for some sanitizer builds, as they seem to require PTRACE privileges
 docker run --rm -i \
+  --privileged \
   --volume "${ROOT_DIR}:${ROOT_DIR}" \
   --volume "${TMP_DIR}:/src" \
   --volume "${KOKORO_ARTIFACTS_DIR}:/mnt/artifacts" \
