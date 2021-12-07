@@ -406,7 +406,7 @@ namespace {
     using OOBRead = bool;
     using OOBWrite = bool;
 
-    DAWN_TEST_PARAM_STRUCT(ClampedOOBDynamicBufferOffsetParams, ReadBufferUsage, OOBRead, OOBWrite)
+    DAWN_TEST_PARAM_STRUCT(ClampedOOBDynamicBufferOffsetParams, ReadBufferUsage, OOBRead, OOBWrite);
 }  // anonymous namespace
 
 class ClampedOOBDynamicBufferOffsetTests

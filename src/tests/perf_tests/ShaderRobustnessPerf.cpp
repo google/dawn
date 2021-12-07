@@ -374,7 +374,7 @@ namespace {
     using DimAOuter = uint32_t;
     using DimInner = uint32_t;
     using DimBOuter = uint32_t;
-    DAWN_TEST_PARAM_STRUCT(ShaderRobustnessParams, MatMulMethod, DimAOuter, DimInner, DimBOuter)
+    DAWN_TEST_PARAM_STRUCT(ShaderRobustnessParams, MatMulMethod, DimAOuter, DimInner, DimBOuter);
 
 }  // namespace
 

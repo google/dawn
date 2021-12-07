@@ -29,7 +29,7 @@ namespace {
     static constexpr uint64_t kDefaultTextureHeight = 1;
 
     using Alpha = wgpu::AlphaOp;
-    DAWN_TEST_PARAM_STRUCT(AlphaTestParams, Alpha)
+    DAWN_TEST_PARAM_STRUCT(AlphaTestParams, Alpha);
 
     using SrcFormat = wgpu::TextureFormat;
     using DstFormat = wgpu::TextureFormat;
@@ -48,8 +48,8 @@ namespace {
         return o;
     }
 
-    DAWN_TEST_PARAM_STRUCT(FormatTestParams, SrcFormat, DstFormat)
-    DAWN_TEST_PARAM_STRUCT(SubRectTestParams, SrcOrigin, DstOrigin, CopySize, FlipY)
+    DAWN_TEST_PARAM_STRUCT(FormatTestParams, SrcFormat, DstFormat);
+    DAWN_TEST_PARAM_STRUCT(SubRectTestParams, SrcOrigin, DstOrigin, CopySize, FlipY);
 
 }  // anonymous namespace
 

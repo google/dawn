@@ -326,7 +326,7 @@ namespace {
     // The CopyTests Texture to Texture in this class will validate both CopyTextureToTexture and
     // CopyTextureToTextureInternal.
     using UsageCopySrc = bool;
-    DAWN_TEST_PARAM_STRUCT(CopyTestsParams, UsageCopySrc)
+    DAWN_TEST_PARAM_STRUCT(CopyTestsParams, UsageCopySrc);
 }  // namespace
 
 class CopyTests_T2T : public CopyTests, public DawnTestWithParams<CopyTestsParams> {

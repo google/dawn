@@ -22,7 +22,7 @@ constexpr static uint32_t kSize = 4;
 
 namespace {
     using TextureFormat = wgpu::TextureFormat;
-    DAWN_TEST_PARAM_STRUCT(ReadOnlyDepthStencilAttachmentTestsParams, TextureFormat)
+    DAWN_TEST_PARAM_STRUCT(ReadOnlyDepthStencilAttachmentTestsParams, TextureFormat);
 }  // namespace
 
 class ReadOnlyDepthStencilAttachmentTests

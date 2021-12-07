@@ -647,8 +647,8 @@ using DawnTest = DawnTestWithParams<>;
 // Instantiate the test once for each backend provided in the first param list.
 // The test will be parameterized over the following param lists.
 // Use it like this:
-//     DAWN_INSTANTIATE_TEST_P(MyTestFixture, {MetalBackend, OpenGLBackend}, {A, B, C}, {1, 2, 3})
-// MyTestFixture must extend DawnTestWithParam<Param> where Param is a struct that extends
+//     DAWN_INSTANTIATE_TEST_P(MyTestFixture, {MetalBackend(), OpenGLBackend()}, {A, B, C}, {1, 2, 3})
+// MyTestFixture must extend DawnTestWithParams<Param> where Param is a struct that extends
 // AdapterTestParam, and whose constructor looks like:
 //     Param(AdapterTestParam, ABorC, 12or3, ..., otherParams... )
 //     You must also teach GTest how to print this struct.
@@ -674,7 +674,7 @@ using DawnTest = DawnTestWithParams<>;
 // It is recommended to use alias declarations so that stringified types are more readable.
 // Example:
 //   using MyParam = unsigned int;
-//   DAWN_TEST_PARAM_STRUCT(FooParams, MyParam)
+//   DAWN_TEST_PARAM_STRUCT(FooParams, MyParam);
 #define DAWN_TEST_PARAM_STRUCT(StructName, ...)                                                    \
     struct DAWN_PP_CONCATENATE(_Dawn_, StructName) {                                               \
         DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_DECL_STRUCT_FIELD,  \
@@ -697,7 +697,8 @@ using DawnTest = DawnTestWithParams<>;
         o << static_cast<const AdapterTestParam&>(param);                                          \
         o << "; " << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);           \
         return o;                                                                                  \
-    }
+    }                                                                                              \
+    static_assert(true, "require semicolon")
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST

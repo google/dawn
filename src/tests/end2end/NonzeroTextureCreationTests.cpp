@@ -39,7 +39,7 @@ namespace {
                            DepthOrArrayLayers,
                            MipCount,
                            Mip,
-                           SampleCount)
+                           SampleCount);
 
     template <typename T>
     class ExpectNonZero : public detail::CustomTextureExpectation {

@@ -35,7 +35,7 @@ struct CopyConfig {
 
 namespace {
     using TextureFormat = wgpu::TextureFormat;
-    DAWN_TEST_PARAM_STRUCT(CompressedTextureFormatTestParams, TextureFormat)
+    DAWN_TEST_PARAM_STRUCT(CompressedTextureFormatTestParams, TextureFormat);
 }  // namespace
 
 class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureFormatTestParams> {

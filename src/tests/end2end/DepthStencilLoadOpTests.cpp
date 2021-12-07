@@ -49,7 +49,7 @@ namespace {
         return o;
     }
 
-    DAWN_TEST_PARAM_STRUCT(DepthStencilLoadOpTestParams, Format, Check)
+    DAWN_TEST_PARAM_STRUCT(DepthStencilLoadOpTestParams, Format, Check);
 
     constexpr static uint32_t kRTSize = 16;
     constexpr uint32_t kMipLevelCount = 2u;
