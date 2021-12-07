@@ -267,13 +267,6 @@ namespace dawn_native { namespace vulkan {
         PFN_vkUpdateDescriptorSets UpdateDescriptorSets = nullptr;
         PFN_vkWaitForFences WaitForFences = nullptr;
 
-        // VK_KHR_swapchain
-        PFN_vkCreateSwapchainKHR CreateSwapchainKHR = nullptr;
-        PFN_vkDestroySwapchainKHR DestroySwapchainKHR = nullptr;
-        PFN_vkGetSwapchainImagesKHR GetSwapchainImagesKHR = nullptr;
-        PFN_vkAcquireNextImageKHR AcquireNextImageKHR = nullptr;
-        PFN_vkQueuePresentKHR QueuePresentKHR = nullptr;
-
         // VK_KHR_external_memory_fd
         PFN_vkGetMemoryFdKHR GetMemoryFdKHR = nullptr;
         PFN_vkGetMemoryFdPropertiesKHR GetMemoryFdPropertiesKHR = nullptr;
@@ -281,6 +274,18 @@ namespace dawn_native { namespace vulkan {
         // VK_KHR_external_semaphore_fd
         PFN_vkImportSemaphoreFdKHR ImportSemaphoreFdKHR = nullptr;
         PFN_vkGetSemaphoreFdKHR GetSemaphoreFdKHR = nullptr;
+
+        // VK_KHR_get_memory_requirements2
+        PFN_vkGetBufferMemoryRequirements2KHR GetBufferMemoryRequirements2 = nullptr;
+        PFN_vkGetImageMemoryRequirements2KHR GetImageMemoryRequirements2 = nullptr;
+        PFN_vkGetImageSparseMemoryRequirements2KHR GetImageSparseMemoryRequirements2 = nullptr;
+
+        // VK_KHR_swapchain
+        PFN_vkCreateSwapchainKHR CreateSwapchainKHR = nullptr;
+        PFN_vkDestroySwapchainKHR DestroySwapchainKHR = nullptr;
+        PFN_vkGetSwapchainImagesKHR GetSwapchainImagesKHR = nullptr;
+        PFN_vkAcquireNextImageKHR AcquireNextImageKHR = nullptr;
+        PFN_vkQueuePresentKHR QueuePresentKHR = nullptr;
 
 #if VK_USE_PLATFORM_FUCHSIA
         // VK_FUCHSIA_external_memory
