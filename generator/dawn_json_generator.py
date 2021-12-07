@@ -758,11 +758,11 @@ class MultiGeneratorFromDawnJSON(Generator):
         metadata = params_dawn['metadata']
         RENDER_PARAMS_BASE = make_base_render_params(metadata)
 
-        api_file_name = metadata.api.lower()
+        api = metadata.api.lower()
         if 'dawn_headers' in targets:
             prefix = metadata.proc_table_prefix.lower()
             renders.append(
-                FileRender('api.h', 'src/include/dawn/' + api_file_name + '.h',
+                FileRender('api.h', 'src/include/dawn/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
             renders.append(
                 FileRender('dawn_proc_table.h',
@@ -771,12 +771,12 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawncpp_headers' in targets:
             renders.append(
-                FileRender('webgpu_cpp.h', 'src/include/dawn/webgpu_cpp.h',
+                FileRender('api_cpp.h', 'src/include/dawn/' + api + '_cpp.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
 
             renders.append(
-                FileRender('webgpu_cpp_print.h',
-                           'src/include/dawn/webgpu_cpp_print.h',
+                FileRender('api_cpp_print.h',
+                           'src/include/dawn/' + api + '_cpp_print.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
 
         if 'dawn_proc' in targets:
@@ -797,17 +797,17 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_upstream = parse_json(loaded_json,
                                          enabled_tags=['upstream', 'native'])
             renders.append(
-                FileRender('api.h', 'webgpu-headers/' + api_file_name + '.h',
+                FileRender('api.h', 'webgpu-headers/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_upstream]))
 
         if 'emscripten_bits' in targets:
             params_emscripten = parse_json(
                 loaded_json, enabled_tags=['upstream', 'emscripten'])
             renders.append(
-                FileRender('api.h', 'emscripten-bits/' + api_file_name + '.h',
+                FileRender('api.h', 'emscripten-bits/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
-                FileRender('webgpu_cpp.h', 'emscripten-bits/webgpu_cpp.h',
+                FileRender('api_cpp.h', 'emscripten-bits/' + api + '_cpp.h',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
                 FileRender('webgpu_cpp.cpp', 'emscripten-bits/webgpu_cpp.cpp',

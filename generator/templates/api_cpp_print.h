@@ -12,17 +12,19 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef WEBGPU_CPP_PRINT_H_
-#define WEBGPU_CPP_PRINT_H_
+{% set API = metadata.api.upper() %}
+{% set api = API.lower() %}
+#ifndef {{API}}_CPP_PRINT_H_
+#define {{API}}_CPP_PRINT_H_
 
-#include "dawn/webgpu_cpp.h"
+#include "dawn/{{api}}_cpp.h"
 
 #include <iomanip>
 #include <ios>
 #include <ostream>
 #include <type_traits>
 
-namespace wgpu {
+namespace {{metadata.namespace}} {
 
   {% for type in by_category["enum"] %}
       template <typename CharT, typename Traits>
@@ -85,6 +87,6 @@ namespace wgpu {
       }
   {% endfor %}
 
-}  // namespace wgpu
+}  // namespace {{metadata.namespace}}
 
-#endif // WEBGPU_CPP_PRINT_H_
+#endif // {{API}}_CPP_PRINT_H_
