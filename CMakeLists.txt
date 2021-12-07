@@ -95,6 +95,8 @@ option_if_not_defined(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
 
 option_if_not_defined(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 
+option_if_not_defined(TINT_SYMBOL_STORE_DEBUG_NAME "Enable storing of name in tint::ast::Symbol to help debugging the AST" OFF)
+
 message(STATUS "Tint build samples: ${TINT_BUILD_SAMPLES}")
 message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
 message(STATUS "Tint build docs with warn as error: ${TINT_DOCS_WARN_AS_ERROR}")

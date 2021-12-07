@@ -38,7 +38,11 @@ Symbol SymbolTable::Register(const std::string& name) {
   if (it != name_to_symbol_.end())
     return it->second;
 
+#if TINT_SYMBOL_STORE_DEBUG_NAME
+  Symbol sym(next_symbol_, program_id_, name);
+#else
   Symbol sym(next_symbol_, program_id_);
+#endif
   ++next_symbol_;
 
   name_to_symbol_[name] = sym;
