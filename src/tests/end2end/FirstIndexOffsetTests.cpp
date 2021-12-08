@@ -34,12 +34,12 @@ enum class CheckIndex : uint32_t {
     Instance = 0x0000002,
 };
 
-namespace wgpu {
+namespace dawn {
     template <>
     struct IsDawnBitmask<CheckIndex> {
         static constexpr bool enable = true;
     };
-}  // namespace wgpu
+}  // namespace dawn
 
 class FirstIndexOffsetTests : public DawnTest {
   public:

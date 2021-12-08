@@ -18,6 +18,7 @@
 #include "dawn/EnumClassBitmasks.h"
 
 #include <cmath>
+#include "dawn/webgpu_cpp.h"
 
 namespace wgpu {
     enum class TestEnum {
@@ -27,10 +28,12 @@ namespace wgpu {
     };
 }  // namespace wgpu
 
-template <>
-struct wgpu::IsDawnBitmask<wgpu::TestEnum> {
-    static constexpr bool enable = true;
-};
+namespace dawn {
+    template <>
+    struct IsDawnBitmask<wgpu::TestEnum> {
+        static constexpr bool enable = true;
+    };
+}  // namespace dawn
 
 // Tests for ScanForward
 TEST(Math, ScanForward) {

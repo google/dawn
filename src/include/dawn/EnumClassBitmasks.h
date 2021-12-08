@@ -17,7 +17,19 @@
 
 #include <type_traits>
 
-namespace wgpu {
+// The operators in dawn:: namespace need be introduced into other namespaces with
+// using-declarations for C++ Argument Dependent Lookup to work.
+#define DAWN_IMPORT_BITMASK_OPERATORS \
+    using dawn::operator|;            \
+    using dawn::operator&;            \
+    using dawn::operator^;            \
+    using dawn::operator~;            \
+    using dawn::operator&=;           \
+    using dawn::operator|=;           \
+    using dawn::operator^=;           \
+    using dawn::HasZeroOrOneBits;
+
+namespace dawn {
 
     template <typename T>
     struct IsDawnBitmask {
@@ -139,6 +151,6 @@ namespace wgpu {
         return (static_cast<Integral>(value) & (static_cast<Integral>(value) - 1)) == 0;
     }
 
-}  // namespace wgpu
+}  // namespace dawn
 
 #endif  // DAWN_ENUM_CLASS_BITMASKS_H_

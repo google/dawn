@@ -100,13 +100,13 @@ namespace dawn_native {
 
 }  // namespace dawn_native
 
-namespace wgpu {
+namespace dawn {
 
     template <>
     struct IsDawnBitmask<dawn_native::Aspect> {
         static constexpr bool enable = true;
     };
 
-}  // namespace wgpu
+}  // namespace dawn
 
 #endif  // DAWNNATIVE_SUBRESOURCE_H_

@@ -31,14 +31,14 @@ namespace dawn_native {
 
 }  // namespace dawn_native
 
-namespace wgpu {
+namespace dawn {
 
     template <>
     struct IsDawnBitmask<dawn_native::TestAspect> {
         static constexpr bool enable = true;
     };
 
-}  // namespace wgpu
+}  // namespace dawn
 
 namespace dawn_native {
 

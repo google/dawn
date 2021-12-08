@@ -19,24 +19,15 @@
 
 namespace dawn_native {
 
-    // EnumClassBitmmasks is a WebGPU helper in the wgpu:: namespace.
+    // EnumClassBitmmasks is a helper in the dawn:: namespace.
     // Re-export it in the dawn_native namespace.
+    DAWN_IMPORT_BITMASK_OPERATORS
 
     // Specify this for usage with EnumMaskIterator
     template <typename T>
     struct EnumBitmaskSize {
         static constexpr unsigned value = 0;
     };
-
-    using wgpu::operator|;
-    using wgpu::operator&;
-    using wgpu::operator^;
-    using wgpu::operator~;
-    using wgpu::operator&=;
-    using wgpu::operator|=;
-    using wgpu::operator^=;
-
-    using wgpu::HasZeroOrOneBits;
 
     template <typename T>
     constexpr bool HasOneBit(T value) {
