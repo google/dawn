@@ -179,14 +179,14 @@ namespace dawn_native { namespace vulkan {
 
         ExecutionSerial completedSerial = GetCompletedCommandSerial();
 
-        for (Ref<BindGroupLayout>& bgl :
-             mBindGroupLayoutsPendingDeallocation.IterateUpTo(completedSerial)) {
-            bgl->FinishDeallocation(completedSerial);
+        for (Ref<DescriptorSetAllocator>& allocator :
+             mDescriptorAllocatorsPendingDeallocation.IterateUpTo(completedSerial)) {
+            allocator->FinishDeallocation(completedSerial);
         }
-        mBindGroupLayoutsPendingDeallocation.ClearUpTo(completedSerial);
 
         mResourceMemoryAllocator->Tick(completedSerial);
         mDeleter->Tick(completedSerial);
+        mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
 
         if (mRecordingContext.used) {
             DAWN_TRY(SubmitPendingCommands());
@@ -230,8 +230,8 @@ namespace dawn_native { namespace vulkan {
         return mResourceMemoryAllocator.get();
     }
 
-    void Device::EnqueueDeferredDeallocation(BindGroupLayout* bindGroupLayout) {
-        mBindGroupLayoutsPendingDeallocation.Enqueue(bindGroupLayout, GetPendingCommandSerial());
+    void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
+        mDescriptorAllocatorsPendingDeallocation.Enqueue(allocator, GetPendingCommandSerial());
     }
 
     CommandRecordingContext* Device::GetPendingRecordingContext() {
@@ -969,16 +969,16 @@ namespace dawn_native { namespace vulkan {
         mUnusedFences.clear();
 
         ExecutionSerial completedSerial = GetCompletedCommandSerial();
-        for (Ref<BindGroupLayout>& bgl :
-             mBindGroupLayoutsPendingDeallocation.IterateUpTo(completedSerial)) {
-            bgl->FinishDeallocation(completedSerial);
+        for (Ref<DescriptorSetAllocator>& allocator :
+             mDescriptorAllocatorsPendingDeallocation.IterateUpTo(completedSerial)) {
+            allocator->FinishDeallocation(completedSerial);
         }
-        mBindGroupLayoutsPendingDeallocation.ClearUpTo(completedSerial);
 
         // Releasing the uploader enqueues buffers to be released.
         // Call Tick() again to clear them before releasing the deleter.
         mResourceMemoryAllocator->Tick(completedSerial);
         mDeleter->Tick(completedSerial);
+        mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
 
         // Allow recycled memory to be deleted.
         mResourceMemoryAllocator->DestroyPool();

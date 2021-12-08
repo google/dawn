@@ -24,10 +24,17 @@ namespace dawn_native { namespace vulkan {
     // TODO(enga): Figure out this value.
     static constexpr uint32_t kMaxDescriptorsPerPool = 512;
 
+    // static
+    Ref<DescriptorSetAllocator> DescriptorSetAllocator::Create(
+        BindGroupLayout* layout,
+        std::map<VkDescriptorType, uint32_t> descriptorCountPerType) {
+        return AcquireRef(new DescriptorSetAllocator(layout, descriptorCountPerType));
+    }
+
     DescriptorSetAllocator::DescriptorSetAllocator(
         BindGroupLayout* layout,
         std::map<VkDescriptorType, uint32_t> descriptorCountPerType)
-        : mLayout(layout) {
+        : ObjectBase(layout->GetDevice()), mLayout(layout) {
         ASSERT(layout != nullptr);
 
         // Compute the total number of descriptors for this layout.
@@ -66,7 +73,7 @@ namespace dawn_native { namespace vulkan {
         for (auto& pool : mDescriptorPools) {
             ASSERT(pool.freeSetIndices.size() == mMaxSets);
             if (pool.vkPool != VK_NULL_HANDLE) {
-                Device* device = ToBackend(mLayout->GetDevice());
+                Device* device = ToBackend(GetDevice());
                 device->GetFencedDeleter()->DeleteWhenUnused(pool.vkPool);
             }
         }
@@ -101,13 +108,13 @@ namespace dawn_native { namespace vulkan {
         // We can't reuse the descriptor set right away because the Vulkan spec says in the
         // documentation for vkCmdBindDescriptorSets that the set may be consumed any time between
         // host execution of the command and the end of the draw/dispatch.
-        Device* device = ToBackend(mLayout->GetDevice());
+        Device* device = ToBackend(GetDevice());
         const ExecutionSerial serial = device->GetPendingCommandSerial();
         mPendingDeallocations.Enqueue({allocationInfo->poolIndex, allocationInfo->setIndex},
                                       serial);
 
         if (mLastDeallocationSerial != serial) {
-            device->EnqueueDeferredDeallocation(mLayout);
+            device->EnqueueDeferredDeallocation(this);
             mLastDeallocationSerial = serial;
         }
 
@@ -137,7 +144,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.poolSizeCount = static_cast<PoolIndex>(mPoolSizes.size());
         createInfo.pPoolSizes = mPoolSizes.data();
 
-        Device* device = ToBackend(mLayout->GetDevice());
+        Device* device = ToBackend(GetDevice());
 
         VkDescriptorPool descriptorPool;
         DAWN_TRY(CheckVkSuccess(device->fn.CreateDescriptorPool(device->GetVkDevice(), &createInfo,

@@ -19,6 +19,7 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/IntegerTypes.h"
+#include "dawn_native/ObjectBase.h"
 #include "dawn_native/vulkan/DescriptorSetAllocation.h"
 
 #include <map>
@@ -28,20 +29,24 @@ namespace dawn_native { namespace vulkan {
 
     class BindGroupLayout;
 
-    class DescriptorSetAllocator {
+    class DescriptorSetAllocator : public ObjectBase {
         using PoolIndex = uint32_t;
         using SetIndex = uint16_t;
 
       public:
-        DescriptorSetAllocator(BindGroupLayout* layout,
-                               std::map<VkDescriptorType, uint32_t> descriptorCountPerType);
-        ~DescriptorSetAllocator();
+        static Ref<DescriptorSetAllocator> Create(
+            BindGroupLayout* layout,
+            std::map<VkDescriptorType, uint32_t> descriptorCountPerType);
 
         ResultOrError<DescriptorSetAllocation> Allocate();
         void Deallocate(DescriptorSetAllocation* allocationInfo);
         void FinishDeallocation(ExecutionSerial completedSerial);
 
       private:
+        DescriptorSetAllocator(BindGroupLayout* layout,
+                               std::map<VkDescriptorType, uint32_t> descriptorCountPerType);
+        ~DescriptorSetAllocator();
+
         MaybeError AllocateDescriptorPool();
 
         BindGroupLayout* mLayout;
