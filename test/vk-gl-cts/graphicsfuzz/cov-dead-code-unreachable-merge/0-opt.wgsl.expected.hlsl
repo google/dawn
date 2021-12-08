@@ -1,4 +1,4 @@
-SKIP: https://github.com/microsoft/DirectXShaderCompiler/issues/3894
+SKIP: FAILED
 
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 static float array0[3] = (float[3])0;
@@ -17,13 +17,13 @@ void main_1() {
   i = (int(x_55) % 3);
   c = 0;
   {
-    for(; (c < 3); c = (c + 1)) {
+    [loop] for(; (c < 3); c = (c + 1)) {
       array0[c] = 0.0f;
       array1[c] = 0.0f;
       const float x_65 = asfloat(x_11[0].x);
       switch((int(x_65) + q)) {
         case 51: {
-          while (true) {
+          [loop] while (true) {
             if (true) {
             } else {
               break;
@@ -69,11 +69,31 @@ struct tint_symbol_2 {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float4 gl_FragCoord_param = tint_symbol.gl_FragCoord_param;
+main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_3 = {x_GLF_color};
-  const tint_symbol_2 tint_symbol_5 = {tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_5;
+  const main_out tint_symbol_4 = {x_GLF_color};
+  return tint_symbol_4;
 }
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.gl_FragCoord_param);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
+}
+C:\src\tint\test\Shader@0x0000012C749BFE70(15,8-20): warning X3556: integer modulus may be much slower, try using uints if possible.
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3551: infinite loop detected - loop writes no values
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3551: infinite loop detected - loop writes no values
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3551: infinite loop detected - loop writes no values
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3551: infinite loop detected - loop writes no values
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3551: infinite loop detected - loop writes no values
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,18-29): warning X3551: infinite loop detected - loop writes no values
+C:\src\tint\test\Shader@0x0000012C749BFE70(24,25-28): error X3696: infinite loop detected - loop never exits
+

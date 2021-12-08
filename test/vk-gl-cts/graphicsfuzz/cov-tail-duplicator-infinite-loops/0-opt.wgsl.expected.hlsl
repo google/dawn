@@ -20,7 +20,7 @@ void main_1() {
   const uint scalar_offset_1 = ((16u * uint(0))) / 4;
   const float x_43 = asfloat(x_5[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   if ((x_41 > x_43)) {
-    while (true) {
+    [loop] while (true) {
       const float x_53 = asfloat(x_5[1].x);
       x_GLF_color = float4(x_53, x_53, x_53, x_53);
       {
@@ -31,15 +31,15 @@ void main_1() {
       }
     }
   } else {
-    while (true) {
-      while (true) {
+    [loop] while (true) {
+      [loop] while (true) {
         if (true) {
         } else {
           break;
         }
         const int x_13 = asint(x_10[1].x);
         i = x_13;
-        while (true) {
+        [loop] while (true) {
           const int x_14 = i;
           const uint scalar_offset_2 = ((16u * uint(0))) / 4;
           const int x_15 = asint(x_10[scalar_offset_2 / 4][scalar_offset_2 % 4]);
@@ -81,11 +81,17 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_5 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_5;
+  const main_out tint_symbol_4 = {x_GLF_color};
+  return tint_symbol_4;
 }
-C:\src\tint\test\Shader@0x0000020110131FE0(21,12-15): error X3696: infinite loop detected - loop never exits
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
+}
+C:\src\tint\test\Shader@0x000002497A3112E0(21,19-22): error X3696: infinite loop detected - loop never exits
 

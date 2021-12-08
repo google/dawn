@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 struct QuicksortObject {
   int numbers[10];
 };
@@ -1560,3 +1562,5 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+C:\src\tint\test\Shader@0x000001EB41548320(156,10-21): error X3531: can't unroll loops marked with loop attribute
+

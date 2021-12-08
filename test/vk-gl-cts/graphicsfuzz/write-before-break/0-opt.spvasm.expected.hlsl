@@ -26,7 +26,7 @@ void main_1() {
   m43 = float4x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f), float3(0.0f, 0.0f, 0.0f));
   ll_1 = 0;
   GLF_live6rows = 2;
-  while (true) {
+  [loop] while (true) {
     const int x_18 = ll_1;
     const int x_19 = asint(x_9[0].x);
     if ((x_18 >= x_19)) {
@@ -39,7 +39,7 @@ void main_1() {
     ll_2 = 0;
     ctr = 0;
     {
-      for(; (ctr < 1); ctr = (ctr + 1)) {
+      [loop] for(; (ctr < 1); ctr = (ctr + 1)) {
         const int x_24 = ll_2;
         const int x_25 = asint(x_9[0].x);
         if ((x_24 >= x_25)) {
@@ -50,7 +50,7 @@ void main_1() {
         ll_3 = 0;
         c = 0;
         {
-          for(; (1 < z); c = (c + 1)) {
+          [loop] for(; (1 < z); c = (c + 1)) {
             d = 0;
             set_float3(tempm43[(((c >= 0) & (c < 4)) ? c : 0)], (((d >= 0) & (d < 3)) ? d : 0), 1.0f);
           }
@@ -73,14 +73,17 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_3;
+  const main_out tint_symbol_2 = {x_GLF_color};
+  return tint_symbol_2;
 }
-C:\src\tint\test\Shader@0x000001DB72E101B0(53,24-62): warning X3550: array reference cannot be used as an l-value; not natively addressable, forcing loop to unroll
-C:\src\tint\test\Shader@0x000001DB72E101B0(51,11-37): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (1024 iterations)
-C:\src\tint\test\Shader@0x000001DB72E101B0(40,7-39): error X3511: forced to unroll loop, but unrolling failed.
-C:\src\tint\test\Shader@0x000001DB72E101B0(27,3-14): error X3511: forced to unroll loop, but unrolling failed.
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
+}
+C:\src\tint\test\Shader@0x0000027C57A9E460(51,18-44): error X3531: can't unroll loops marked with loop attribute
 

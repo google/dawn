@@ -13,7 +13,7 @@ void main_1() {
   GLF_dead6index = 0;
   const float x_34 = asfloat(x_6[0].y);
   if ((x_34 < 0.0f)) {
-    while (true) {
+    [loop] while (true) {
       if (true) {
       } else {
         break;
@@ -33,11 +33,17 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_3;
+  const main_out tint_symbol_2 = {x_GLF_color};
+  return tint_symbol_2;
 }
-C:\src\tint\test\Shader@0x000001FA30492000(14,12-15): error X3696: infinite loop detected - loop never exits
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
+}
+C:\src\tint\test\Shader@0x000001BA0B4E7BF0(14,19-22): error X3696: infinite loop detected - loop never exits
 

@@ -24,10 +24,10 @@ void main_1() {
   if ((x_45 == 1)) {
     set_float2(m32[3], x_45, x_40);
   }
-  const float tint_symbol_4[3] = {x_40, x_40, x_40};
-  sums = tint_symbol_4;
+  const float tint_symbol_3[3] = {x_40, x_40, x_40};
+  sums = tint_symbol_3;
   x_52_phi = x_45;
-  while (true) {
+  [loop] while (true) {
     int x_53 = 0;
     const int x_52 = x_52_phi;
     const int x_56 = asint(x_8[2].x);
@@ -59,11 +59,17 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_5 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_5;
+  const main_out tint_symbol_4 = {x_GLF_color};
+  return tint_symbol_4;
 }
-C:\src\tint\test\Shader@0x0000029DDF1A00E0(23,16-21): error X3504: array index out of bounds
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
+}
+C:\src\tint\test\Shader@0x0000018CEDCE0230(23,16-21): error X3504: array index out of bounds
 

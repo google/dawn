@@ -19,7 +19,7 @@ void main_1() {
   bool x_58_phi = false;
   x_40_phi = false;
   x_42_phi = float3(0.0f, 0.0f, 0.0f);
-  while (true) {
+  [loop] while (true) {
     float3 x_43_phi = float3(0.0f, 0.0f, 0.0f);
     x_40 = x_40_phi;
     const float3 x_42 = x_42_phi;
@@ -42,7 +42,7 @@ void main_1() {
   x_36 = false;
   x_56_phi = x_40;
   x_58_phi = false;
-  while (true) {
+  [loop] while (true) {
     bool x_62 = false;
     bool x_62_phi = false;
     bool x_64_phi = false;
@@ -55,7 +55,7 @@ void main_1() {
     x_62_phi = x_56;
     x_64_phi = false;
     x_65_phi = 0;
-    while (true) {
+    [loop] while (true) {
       x_62 = x_62_phi;
       const bool x_64 = x_64_phi;
       const int x_65 = x_65_phi;
@@ -103,10 +103,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_3;
+  const main_out tint_symbol_2 = {x_GLF_color};
+  return tint_symbol_2;
 }
 
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
+}

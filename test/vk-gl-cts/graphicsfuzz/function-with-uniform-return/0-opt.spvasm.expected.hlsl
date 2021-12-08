@@ -12,7 +12,7 @@ float fx_() {
     const float x_55 = asfloat(x_7[0].y);
     return x_55;
   }
-  while (true) {
+  [loop] while (true) {
     if (true) {
     } else {
       break;
@@ -30,7 +30,7 @@ void main_1() {
   B = 1.0f;
   const float x_34 = fx_();
   x_GLF_color = float4(x_34, 0.0f, 0.0f, 1.0f);
-  while (true) {
+  [loop] while (true) {
     if ((x2 > 2.0f)) {
     } else {
       break;
@@ -54,13 +54,18 @@ struct tint_symbol_2 {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float4 gl_FragCoord_param = tint_symbol.gl_FragCoord_param;
+main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_3 = {x_GLF_color};
-  const tint_symbol_2 tint_symbol_5 = {tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_5;
+  const main_out tint_symbol_4 = {x_GLF_color};
+  return tint_symbol_4;
 }
-C:\src\tint\test\Shader@0x0000015B7FF57370(13,10-13): error X3696: infinite loop detected - loop never exits
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.gl_FragCoord_param);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
+}
+C:\src\tint\test\Shader@0x000001DE747F22A0(13,17-20): error X3696: infinite loop detected - loop never exits
 
