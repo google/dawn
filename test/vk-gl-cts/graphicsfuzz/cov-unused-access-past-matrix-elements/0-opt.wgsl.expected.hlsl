@@ -1,7 +1,20 @@
 SKIP: FAILED
 
-void set_float3(inout float3 vec, int idx, float val) {
-  vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
+void set_scalar_float4x3(inout float4x3 mat, int col, int row, float val) {
+  switch (col) {
+    case 0:
+      mat[0] = (row.xxx == int3(0, 1, 2)) ? val.xxx : mat[0];
+      break;
+    case 1:
+      mat[1] = (row.xxx == int3(0, 1, 2)) ? val.xxx : mat[1];
+      break;
+    case 2:
+      mat[2] = (row.xxx == int3(0, 1, 2)) ? val.xxx : mat[2];
+      break;
+    case 3:
+      mat[3] = (row.xxx == int3(0, 1, 2)) ? val.xxx : mat[3];
+      break;
+  }
 }
 
 struct tint_padded_array_element {
@@ -31,7 +44,7 @@ void main_1() {
   const int x_53 = asint(x_8[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   const uint scalar_offset_2 = ((16u * uint(0))) / 4;
   const float x_55 = asfloat(x_6[scalar_offset_2 / 4][scalar_offset_2 % 4]);
-  set_float3(m43[x_51], x_53, x_55);
+  set_scalar_float4x3(m43, x_53, x_51, x_55);
   const uint scalar_offset_3 = ((16u * uint(0))) / 4;
   const float x_58 = asfloat(x_6[scalar_offset_3 / 4][scalar_offset_3 % 4]);
   const uint scalar_offset_4 = ((16u * uint(0))) / 4;
@@ -115,5 +128,5 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000020E5111BFA0(32,14-22): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\tint\test\Shader@0x0000020DD7F92800(84,24-29): error X3504: array index out of bounds
 

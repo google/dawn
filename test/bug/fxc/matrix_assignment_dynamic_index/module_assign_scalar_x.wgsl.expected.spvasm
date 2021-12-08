@@ -1,0 +1,47 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 24
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %Uniforms "Uniforms"
+               OpMemberName %Uniforms 0 "i"
+               OpMemberName %Uniforms 1 "j"
+               OpName %uniforms "uniforms"
+               OpName %m1 "m1"
+               OpName %main "main"
+               OpDecorate %Uniforms Block
+               OpMemberDecorate %Uniforms 0 Offset 0
+               OpMemberDecorate %Uniforms 1 Offset 4
+               OpDecorate %uniforms NonWritable
+               OpDecorate %uniforms DescriptorSet 1
+               OpDecorate %uniforms Binding 4
+       %uint = OpTypeInt 32 0
+   %Uniforms = OpTypeStruct %uint %uint
+%_ptr_Uniform_Uniforms = OpTypePointer Uniform %Uniforms
+   %uniforms = OpVariable %_ptr_Uniform_Uniforms Uniform
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%mat2v4float = OpTypeMatrix %v4float 2
+%_ptr_Private_mat2v4float = OpTypePointer Private %mat2v4float
+         %10 = OpConstantNull %mat2v4float
+         %m1 = OpVariable %_ptr_Private_mat2v4float Private %10
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+%_ptr_Private_float = OpTypePointer Private %float
+    %float_1 = OpConstant %float 1
+       %main = OpFunction %void None %11
+         %14 = OpLabel
+         %17 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_0
+         %18 = OpLoad %uint %17
+         %22 = OpAccessChain %_ptr_Private_float %m1 %18 %int_0
+               OpStore %22 %float_1
+               OpReturn
+               OpFunctionEnd

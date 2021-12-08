@@ -344,6 +344,181 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(
   return true;
 }
 
+bool GeneratorImpl::EmitDynamicMatrixVectorAssignment(
+    const ast::AssignmentStatement* stmt,
+    const sem::Matrix* mat) {
+  auto name = utils::GetOrCreate(
+      dynamic_matrix_vector_write_, mat, [&]() -> std::string {
+        std::string fn;
+        {
+          std::ostringstream ss;
+          if (!EmitType(ss, mat, tint::ast::StorageClass::kInvalid,
+                        ast::Access::kUndefined, "")) {
+            return "";
+          }
+          fn = UniqueIdentifier("set_vector_" + ss.str());
+        }
+        {
+          auto out = line(&helpers_);
+          out << "void " << fn << "(inout ";
+          if (!EmitTypeAndName(out, mat, ast::StorageClass::kInvalid,
+                               ast::Access::kUndefined, "mat")) {
+            return "";
+          }
+          out << ", int col, ";
+          if (!EmitTypeAndName(out, mat->ColumnType(),
+                               ast::StorageClass::kInvalid,
+                               ast::Access::kUndefined, "val")) {
+            return "";
+          }
+          out << ") {";
+        }
+        {
+          ScopedIndent si(&helpers_);
+          line(&helpers_) << "switch (col) {";
+          {
+            ScopedIndent si2(&helpers_);
+            for (uint32_t i = 0; i < mat->columns(); ++i) {
+              line(&helpers_)
+                  << "case " << i << ": mat[" << i << "] = val; break;";
+            }
+          }
+          line(&helpers_) << "}";
+        }
+        line(&helpers_) << "}";
+        line(&helpers_);
+        return fn;
+      });
+
+  if (name.empty()) {
+    return false;
+  }
+
+  auto* ast_access_expr = stmt->lhs->As<ast::IndexAccessorExpression>();
+
+  auto out = line();
+  out << name << "(";
+  if (!EmitExpression(out, ast_access_expr->object)) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, ast_access_expr->index)) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, stmt->rhs)) {
+    return false;
+  }
+  out << ");";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitDynamicMatrixScalarAssignment(
+    const ast::AssignmentStatement* stmt,
+    const sem::Matrix* mat) {
+  auto* lhs_col_access = stmt->lhs->As<ast::IndexAccessorExpression>();
+  auto* lhs_row_access =
+      lhs_col_access->object->As<ast::IndexAccessorExpression>();
+
+  auto name = utils::GetOrCreate(
+      dynamic_matrix_scalar_write_, mat, [&]() -> std::string {
+        std::string fn;
+        {
+          std::ostringstream ss;
+          if (!EmitType(ss, mat, tint::ast::StorageClass::kInvalid,
+                        ast::Access::kUndefined, "")) {
+            return "";
+          }
+          fn = UniqueIdentifier("set_scalar_" + ss.str());
+        }
+        {
+          auto out = line(&helpers_);
+          out << "void " << fn << "(inout ";
+          if (!EmitTypeAndName(out, mat, ast::StorageClass::kInvalid,
+                               ast::Access::kUndefined, "mat")) {
+            return "";
+          }
+          out << ", int col, int row, ";
+          if (!EmitTypeAndName(out, mat->type(), ast::StorageClass::kInvalid,
+                               ast::Access::kUndefined, "val")) {
+            return "";
+          }
+          out << ") {";
+        }
+        {
+          ScopedIndent si(&helpers_);
+          line(&helpers_) << "switch (col) {";
+          {
+            ScopedIndent si2(&helpers_);
+            auto* vec =
+                TypeOf(lhs_row_access->object)->UnwrapRef()->As<sem::Vector>();
+            for (uint32_t i = 0; i < mat->columns(); ++i) {
+              line(&helpers_) << "case " << i << ":";
+              {
+                auto vec_name = "mat[" + std::to_string(i) + "]";
+                ScopedIndent si3(&helpers_);
+                {
+                  auto out = line(&helpers_);
+                  switch (mat->rows()) {
+                    case 2:
+                      out << vec_name
+                          << " = (row.xx == int2(0, 1)) ? val.xx : " << vec_name
+                          << ";";
+                      break;
+                    case 3:
+                      out << vec_name
+                          << " = (row.xxx == int3(0, 1, 2)) ? val.xxx : "
+                          << vec_name << ";";
+                      break;
+                    case 4:
+                      out << vec_name
+                          << " = (row.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : "
+                          << vec_name << ";";
+                      break;
+                    default:
+                      TINT_UNREACHABLE(Writer, builder_.Diagnostics())
+                          << "invalid vector size " << vec->Width();
+                      break;
+                  }
+                }
+                line(&helpers_) << "break;";
+              }
+            }
+          }
+          line(&helpers_) << "}";
+        }
+        line(&helpers_) << "}";
+        line(&helpers_);
+        return fn;
+      });
+
+  if (name.empty()) {
+    return false;
+  }
+
+  auto out = line();
+  out << name << "(";
+  if (!EmitExpression(out, lhs_row_access->object)) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, lhs_col_access->index)) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, lhs_row_access->index)) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, stmt->rhs)) {
+    return false;
+  }
+  out << ");";
+
+  return true;
+}
+
 bool GeneratorImpl::EmitIndexAccessor(
     std::ostream& out,
     const ast::IndexAccessorExpression* expr) {
@@ -387,9 +562,34 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
-  if (auto* idx = stmt->lhs->As<ast::IndexAccessorExpression>()) {
-    if (auto* vec = TypeOf(idx->object)->UnwrapRef()->As<sem::Vector>()) {
-      auto* rhs_sem = builder_.Sem().Get(idx->index);
+  if (auto* lhs_access = stmt->lhs->As<ast::IndexAccessorExpression>()) {
+    // BUG(crbug.com/tint/1333): work around assignment of scalar to matrices
+    // with at least one dynamic index
+    if (auto* lhs_sub_access =
+            lhs_access->object->As<ast::IndexAccessorExpression>()) {
+      if (auto* mat =
+              TypeOf(lhs_sub_access->object)->UnwrapRef()->As<sem::Matrix>()) {
+        auto* rhs_col_idx_sem = builder_.Sem().Get(lhs_access->index);
+        auto* rhs_row_idx_sem = builder_.Sem().Get(lhs_sub_access->index);
+        if (!rhs_col_idx_sem->ConstantValue().IsValid() ||
+            !rhs_row_idx_sem->ConstantValue().IsValid()) {
+          return EmitDynamicMatrixScalarAssignment(stmt, mat);
+        }
+      }
+    }
+    // BUG(crbug.com/tint/1333): work around assignment of vector to matrices
+    // with dynamic indices
+    const auto* lhs_access_type = TypeOf(lhs_access->object)->UnwrapRef();
+    if (auto* mat = lhs_access_type->As<sem::Matrix>()) {
+      auto* lhs_index_sem = builder_.Sem().Get(lhs_access->index);
+      if (!lhs_index_sem->ConstantValue().IsValid()) {
+        return EmitDynamicMatrixVectorAssignment(stmt, mat);
+      }
+    }
+    // BUG(crbug.com/tint/534): work around assignment to vectors with dynamic
+    // indices
+    if (auto* vec = lhs_access_type->As<sem::Vector>()) {
+      auto* rhs_sem = builder_.Sem().Get(lhs_access->index);
       if (!rhs_sem->ConstantValue().IsValid()) {
         return EmitDynamicVectorAssignment(stmt, vec);
       }
