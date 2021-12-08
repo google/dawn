@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void textureGather_43025d(depthcube_array<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
+  float4 res = tint_symbol_1.gather(tint_symbol_2, float3(), 1);
+}
+
+float4 vertex_main_inner(depthcube_array<float, access::sample> tint_symbol_3, sampler tint_symbol_4) {
+  textureGather_43025d(tint_symbol_3, tint_symbol_4);
+  return float4();
+}
+
+vertex tint_symbol vertex_main(depthcube_array<float, access::sample> tint_symbol_5 [[texture(0)]], sampler tint_symbol_6 [[sampler(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_5, tint_symbol_6);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main(depthcube_array<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]]) {
+  textureGather_43025d(tint_symbol_7, tint_symbol_8);
+  return;
+}
+
+kernel void compute_main(depthcube_array<float, access::sample> tint_symbol_9 [[texture(0)]], sampler tint_symbol_10 [[sampler(0)]]) {
+  textureGather_43025d(tint_symbol_9, tint_symbol_10);
+  return;
+}
+

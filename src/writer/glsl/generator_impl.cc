@@ -480,7 +480,7 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
                                       const sem::Intrinsic* intrinsic) {
   auto* expr = call->Declaration();
   if (intrinsic->IsTexture()) {
-    return EmitTextureCall(out, expr, intrinsic);
+    return EmitTextureCall(out, call, intrinsic);
   }
   if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
     return EmitSelectCall(out, expr);
@@ -1098,11 +1098,12 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitTextureCall(std::ostream& out,
-                                    const ast::CallExpression* expr,
+                                    const sem::Call* call,
                                     const sem::Intrinsic* intrinsic) {
   using Usage = sem::ParameterUsage;
 
   auto& signature = intrinsic->Signature();
+  auto* expr = call->Declaration();
   auto arguments = expr->args;
 
   // Returns the argument with the given usage
@@ -1184,6 +1185,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     case sem::IntrinsicType::kTextureSampleLevel:
       out << "textureLod(";
       break;
+    case sem::IntrinsicType::kTextureGather:
+    case sem::IntrinsicType::kTextureGatherCompare:
+      out << (intrinsic->Signature().IndexOf(sem::ParameterUsage::kOffset) < 0
+                  ? "textureGather("
+                  : "textureGatherOffset(");
+      break;
     case sem::IntrinsicType::kTextureSampleGrad:
       out << "textureGrad(";
       break;
@@ -1232,9 +1239,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     }
   }
 
-  for (auto usage :
-       {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx, Usage::kDdy,
-        Usage::kSampleIndex, Usage::kOffset, Usage::kValue}) {
+  for (auto usage : {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx,
+                     Usage::kDdy, Usage::kSampleIndex, Usage::kOffset,
+                     Usage::kComponent, Usage::kValue}) {
     if (auto* e = arg(usage)) {
       out << ", ";
       if (!EmitExpression(out, e)) {

@@ -1744,6 +1744,42 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO3d:
       return R"(textureDimensions(texture))";
+    case ValidTextureOverload::kGather2dF32:
+      return R"(textureGather(component, texture, sampler, coords))";
+    case ValidTextureOverload::kGather2dOffsetF32:
+      return R"(textureGather(component, texture, sampler, coords, offset))";
+    case ValidTextureOverload::kGather2dArrayF32:
+      return R"(textureGather(component, texture, sampler, coords, array_index))";
+    case ValidTextureOverload::kGather2dArrayOffsetF32:
+      return R"(textureGather(component, texture, sampler, coords, array_index, offset))";
+    case ValidTextureOverload::kGatherCubeF32:
+      return R"(textureGather(component, texture, sampler, coords))";
+    case ValidTextureOverload::kGatherCubeArrayF32:
+      return R"(textureGather(component, texture, sampler, coords, array_index))";
+    case ValidTextureOverload::kGatherDepth2dF32:
+      return R"(textureGather(texture, sampler, coords))";
+    case ValidTextureOverload::kGatherDepth2dOffsetF32:
+      return R"(textureGather(texture, sampler, coords, offset))";
+    case ValidTextureOverload::kGatherDepth2dArrayF32:
+      return R"(textureGather(texture, sampler, coords, array_index))";
+    case ValidTextureOverload::kGatherDepth2dArrayOffsetF32:
+      return R"(textureGather(texture, sampler, coords, array_index, offset))";
+    case ValidTextureOverload::kGatherDepthCubeF32:
+      return R"(textureGather(texture, sampler, coords))";
+    case ValidTextureOverload::kGatherDepthCubeArrayF32:
+      return R"(textureGather(texture, sampler, coords, array_index))";
+    case ValidTextureOverload::kGatherCompareDepth2dF32:
+      return R"(textureGatherCompare(texture, sampler, coords, depth_ref))";
+    case ValidTextureOverload::kGatherCompareDepth2dOffsetF32:
+      return R"(textureGatherCompare(texture, sampler, coords, depth_ref, offset))";
+    case ValidTextureOverload::kGatherCompareDepth2dArrayF32:
+      return R"(textureGatherCompare(texture, sampler, coords, array_index, depth_ref))";
+    case ValidTextureOverload::kGatherCompareDepth2dArrayOffsetF32:
+      return R"(textureGatherCompare(texture, sampler, coords, array_index, depth_ref, offset))";
+    case ValidTextureOverload::kGatherCompareDepthCubeF32:
+      return R"(textureGatherCompare(texture, sampler, coords, depth_ref))";
+    case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
+      return R"(textureGatherCompare(texture, sampler, coords, array_index, depth_ref))";
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
@@ -1965,6 +2001,26 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
     EXPECT_TRUE(TypeOf(call)->Is<sem::I32>());
   } else if (std::string(param.function) == "textureStore") {
     EXPECT_TRUE(TypeOf(call)->Is<sem::Void>());
+  } else if (std::string(param.function) == "textureGather") {
+    auto* vec = As<sem::Vector>(TypeOf(call));
+    ASSERT_NE(vec, nullptr);
+    EXPECT_EQ(vec->Width(), 4u);
+    switch (param.texture_data_type) {
+      case ast::intrinsic::test::TextureDataType::kF32:
+        EXPECT_TRUE(vec->type()->Is<sem::F32>());
+        break;
+      case ast::intrinsic::test::TextureDataType::kU32:
+        EXPECT_TRUE(vec->type()->Is<sem::U32>());
+        break;
+      case ast::intrinsic::test::TextureDataType::kI32:
+        EXPECT_TRUE(vec->type()->Is<sem::I32>());
+        break;
+    }
+  } else if (std::string(param.function) == "textureGatherCompare") {
+    auto* vec = As<sem::Vector>(TypeOf(call));
+    ASSERT_NE(vec, nullptr);
+    EXPECT_EQ(vec->Width(), 4u);
+    EXPECT_TRUE(vec->type()->Is<sem::F32>());
   } else {
     switch (param.texture_kind) {
       case ast::intrinsic::test::TextureKind::kRegular:

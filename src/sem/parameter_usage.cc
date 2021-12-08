@@ -35,6 +35,8 @@ const char* str(ParameterUsage usage) {
       return "array_index";
     case ParameterUsage::kBias:
       return "bias";
+    case ParameterUsage::kComponent:
+      return "component";
     case ParameterUsage::kCoords:
       return "coords";
     case ParameterUsage::kDdx:

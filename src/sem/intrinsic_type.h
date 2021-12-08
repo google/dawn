@@ -111,6 +111,8 @@ enum class IntrinsicType {
   kUnpack4x8unorm,
   kWorkgroupBarrier,
   kTextureDimensions,
+  kTextureGather,
+  kTextureGatherCompare,
   kTextureNumLayers,
   kTextureNumLevels,
   kTextureNumSamples,

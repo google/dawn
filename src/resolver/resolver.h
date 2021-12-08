@@ -45,7 +45,6 @@ class BitcastExpression;
 class CallExpression;
 class CallStatement;
 class CaseStatement;
-class ConstructorExpression;
 class ForLoopStatement;
 class Function;
 class IdentifierExpression;

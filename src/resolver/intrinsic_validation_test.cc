@@ -121,7 +121,7 @@ TEST_F(ResolverIntrinsicValidationTest, IntrinsicRedeclaredAsStruct) {
       R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a struct)");
 }
 
-namespace TextureSamplerOffset {
+namespace texture_constexpr_args {
 
 using TextureOverloadCase = ast::intrinsic::test::TextureOverloadCase;
 using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
@@ -131,194 +131,272 @@ using u32 = ProgramBuilder::u32;
 using i32 = ProgramBuilder::i32;
 using f32 = ProgramBuilder::f32;
 
-static std::vector<TextureOverloadCase> ValidCases() {
+static std::vector<TextureOverloadCase> TextureCases(
+    std::unordered_set<ValidTextureOverload> overloads) {
   std::vector<TextureOverloadCase> cases;
   for (auto c : TextureOverloadCase::ValidCases()) {
-    if (std::string(c.function).find("textureSample") == 0) {
-      if (std::string(c.description).find("offset ") != std::string::npos) {
-        cases.push_back(c);
-      }
+    if (overloads.count(c.overload)) {
+      cases.push_back(c);
     }
   }
   return cases;
 }
 
-struct OffsetCase {
-  bool is_valid;
-  int32_t x;
-  int32_t y;
-  int32_t z;
-  int32_t illegal_value = 0;
+enum class Position {
+  kFirst,
+  kLast,
 };
 
-static std::vector<OffsetCase> OffsetCases() {
-  return {
-      {true, 0, 1, 2},          //
-      {true, 7, -8, 7},         //
-      {false, 10, 10, 20, 10},  //
-      {false, -9, 0, 0, -9},    //
-      {false, 0, 8, 0, 8},      //
+struct Parameter {
+  const char* const name;
+  const Position position;
+  int min;
+  int max;
+};
+
+class Constexpr {
+ public:
+  enum class Kind {
+    kScalar,
+    kVec2,
+    kVec3,
+    kVec3_Scalar_Vec2,
+    kVec3_Vec2_Scalar,
+    kEmptyVec2,
+    kEmptyVec3,
   };
-}
 
-using IntrinsicTextureSamplerValidationTest =
-    ResolverTestWithParam<std::tuple<TextureOverloadCase,  // texture info
-                                     OffsetCase            // offset info
-                                     >>;
-TEST_P(IntrinsicTextureSamplerValidationTest, ConstExpr) {
-  auto& p = GetParam();
-  auto param = std::get<0>(p);
-  auto offset = std::get<1>(p);
-  param.BuildTextureVariable(this);
-  param.BuildSamplerVariable(this);
+  Constexpr(int32_t invalid_idx,
+            Kind k,
+            int32_t x = 0,
+            int32_t y = 0,
+            int32_t z = 0)
+      : invalid_index(invalid_idx), kind(k), values{x, y, z} {}
 
-  auto args = param.args(this);
-  // Make Resolver visit the Node about to be removed
-  WrapInFunction(args.back());
-  args.pop_back();
-  if (NumCoordinateAxes(param.texture_dimension) == 2) {
-    args.push_back(
-        Construct(Source{{12, 34}}, ty.vec2<i32>(), offset.x, offset.y));
-  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
-    args.push_back(Construct(Source{{12, 34}}, ty.vec3<i32>(), offset.x,
-                             offset.y, offset.z));
+  const ast::Expression* operator()(Source src, ProgramBuilder& b) {
+    switch (kind) {
+      case Kind::kScalar:
+        return b.Expr(src, values[0]);
+      case Kind::kVec2:
+        return b.Construct(src, b.ty.vec2<i32>(), values[0], values[1]);
+      case Kind::kVec3:
+        return b.Construct(src, b.ty.vec3<i32>(), values[0], values[1],
+                           values[2]);
+      case Kind::kVec3_Scalar_Vec2:
+        return b.Construct(src, b.ty.vec3<i32>(), values[0],
+                           b.vec2<i32>(values[1], values[2]));
+      case Kind::kVec3_Vec2_Scalar:
+        return b.Construct(src, b.ty.vec3<i32>(),
+                           b.vec2<i32>(values[0], values[1]), values[2]);
+      case Kind::kEmptyVec2:
+        return b.Construct(src, b.ty.vec2<i32>());
+      case Kind::kEmptyVec3:
+        return b.Construct(src, b.ty.vec3<i32>());
+    }
+    return nullptr;
   }
 
-  auto* call = Call(param.function, args);
-  Func("func", {}, ty.void_(), {CallStmt(call)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+  static const constexpr int32_t kValid = -1;
+  const int32_t invalid_index;  // Expected error value, or kValid
+  const Kind kind;
+  const std::array<int32_t, 3> values;
+};
 
-  if (offset.is_valid) {
+static std::ostream& operator<<(std::ostream& out, Parameter param) {
+  return out << param.name;
+}
+
+static std::ostream& operator<<(std::ostream& out, Constexpr expr) {
+  switch (expr.kind) {
+    case Constexpr::Kind::kScalar:
+      return out << expr.values[0];
+    case Constexpr::Kind::kVec2:
+      return out << "vec2(" << expr.values[0] << ", " << expr.values[1] << ")";
+    case Constexpr::Kind::kVec3:
+      return out << "vec3(" << expr.values[0] << ", " << expr.values[1] << ", "
+                 << expr.values[2] << ")";
+    case Constexpr::Kind::kVec3_Scalar_Vec2:
+      return out << "vec3(" << expr.values[0] << ", vec2(" << expr.values[1]
+                 << ", " << expr.values[2] << "))";
+    case Constexpr::Kind::kVec3_Vec2_Scalar:
+      return out << "vec3(vec2(" << expr.values[0] << ", " << expr.values[1]
+                 << "), " << expr.values[2] << ")";
+    case Constexpr::Kind::kEmptyVec2:
+      return out << "vec2()";
+    case Constexpr::Kind::kEmptyVec3:
+      return out << "vec3()";
+  }
+  return out;
+}
+
+using IntrinsicTextureConstExprArgValidationTest = ResolverTestWithParam<
+    std::tuple<TextureOverloadCase, Parameter, Constexpr>>;
+
+TEST_P(IntrinsicTextureConstExprArgValidationTest, Immediate) {
+  auto& p = GetParam();
+  auto overload = std::get<0>(p);
+  auto param = std::get<1>(p);
+  auto expr = std::get<2>(p);
+
+  overload.BuildTextureVariable(this);
+  overload.BuildSamplerVariable(this);
+
+  auto args = overload.args(this);
+  auto*& arg_to_replace =
+      (param.position == Position::kFirst) ? args.front() : args.back();
+
+  // BuildTextureVariable() uses a Literal for scalars, and a CallExpression for
+  // a vector constructor.
+  bool is_vector = arg_to_replace->Is<ast::CallExpression>();
+
+  // Make the expression to be replaced, reachable. This keeps the resolver
+  // happy.
+  WrapInFunction(arg_to_replace);
+
+  arg_to_replace = expr(Source{{12, 34}}, *this);
+
+  // Call the intrinsic with the constexpr argument replaced
+  Func("func", {}, ty.void_(), {CallStmt(Call(overload.function, args))},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  if (expr.invalid_index == Constexpr::kValid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
     EXPECT_FALSE(r()->Resolve());
     std::stringstream err;
-    err << "12:34 error: each offset component of '" << param.function
-        << "' must be at least -8 and at most 7. found: '"
-        << std::to_string(offset.illegal_value) << "'";
+    if (is_vector) {
+      err << "12:34 error: each component of the " << param.name
+          << " argument must be at least " << param.min << " and at most "
+          << param.max << ". " << param.name << " component "
+          << expr.invalid_index << " is "
+          << std::to_string(expr.values[expr.invalid_index]);
+    } else {
+      err << "12:34 error: the " << param.name << " argument must be at least "
+          << param.min << " and at most " << param.max << ". " << param.name
+          << " is " << std::to_string(expr.values[expr.invalid_index]);
+    }
     EXPECT_EQ(r()->error(), err.str());
   }
 }
 
-TEST_P(IntrinsicTextureSamplerValidationTest, ConstExprOfConstExpr) {
+TEST_P(IntrinsicTextureConstExprArgValidationTest, GlobalConst) {
   auto& p = GetParam();
-  auto param = std::get<0>(p);
-  auto offset = std::get<1>(p);
-  param.BuildTextureVariable(this);
-  param.BuildSamplerVariable(this);
+  auto overload = std::get<0>(p);
+  auto param = std::get<1>(p);
+  auto expr = std::get<2>(p);
 
-  auto args = param.args(this);
-  // Make Resolver visit the Node about to be removed
-  WrapInFunction(args.back());
-  args.pop_back();
-  if (NumCoordinateAxes(param.texture_dimension) == 2) {
-    args.push_back(Construct(Source{{12, 34}}, ty.vec2<i32>(),
-                             Construct(ty.i32(), offset.x), offset.y));
-  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
-    args.push_back(Construct(Source{{12, 34}}, ty.vec3<i32>(), offset.x,
-                             Construct(ty.vec2<i32>(), offset.y, offset.z)));
-  }
-  auto* call = Call(param.function, args);
-  Func("func", {}, ty.void_(), {CallStmt(call)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
-  if (offset.is_valid) {
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-  } else {
-    EXPECT_FALSE(r()->Resolve());
-    std::stringstream err;
-    err << "12:34 error: each offset component of '" << param.function
-        << "' must be at least -8 and at most 7. found: '"
-        << std::to_string(offset.illegal_value) << "'";
-    EXPECT_EQ(r()->error(), err.str());
-  }
-}
+  // Build the global texture and sampler variables
+  overload.BuildTextureVariable(this);
+  overload.BuildSamplerVariable(this);
 
-TEST_P(IntrinsicTextureSamplerValidationTest, EmptyVectorConstructor) {
-  auto& p = GetParam();
-  auto param = std::get<0>(p);
-  param.BuildTextureVariable(this);
-  param.BuildSamplerVariable(this);
+  // Build the module-scope let 'G' with the offset value
+  GlobalConst("G", nullptr, expr({}, *this));
 
-  auto args = param.args(this);
-  // Make Resolver visit the Node about to be removed
-  WrapInFunction(args.back());
-  args.pop_back();
-  if (NumCoordinateAxes(param.texture_dimension) == 2) {
-    args.push_back(Construct(Source{{12, 34}}, ty.vec2<i32>()));
-  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
-    args.push_back(Construct(Source{{12, 34}}, ty.vec3<i32>()));
-  }
+  auto args = overload.args(this);
+  auto*& arg_to_replace =
+      (param.position == Position::kFirst) ? args.front() : args.back();
 
-  auto* call = Call(param.function, args);
-  Func("func", {}, ty.void_(), {CallStmt(call)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
+  // Make the expression to be replaced, reachable. This keeps the resolver
+  // happy.
+  WrapInFunction(arg_to_replace);
 
-TEST_P(IntrinsicTextureSamplerValidationTest, GlobalConst) {
-  auto& p = GetParam();
-  auto param = std::get<0>(p);
-  auto offset = std::get<1>(p);
-  param.BuildTextureVariable(this);
-  param.BuildSamplerVariable(this);
+  arg_to_replace = Expr(Source{{12, 34}}, "G");
 
-  auto args = param.args(this);
-  // Make Resolver visit the Node about to be removed
-  WrapInFunction(args.back());
-  args.pop_back();
-  GlobalConst("offset_2d", ty.vec2<i32>(), vec2<i32>(offset.x, offset.y));
-  GlobalConst("offset_3d", ty.vec3<i32>(),
-              vec3<i32>(offset.x, offset.y, offset.z));
-  if (NumCoordinateAxes(param.texture_dimension) == 2) {
-    args.push_back(Expr(Source{{12, 34}}, "offset_2d"));
-  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
-    args.push_back(Expr(Source{{12, 34}}, "offset_3d"));
-  }
+  // Call the intrinsic with the constexpr argument replaced
+  Func("func", {}, ty.void_(), {CallStmt(Call(overload.function, args))},
+       {Stage(ast::PipelineStage::kFragment)});
 
-  auto* call = Call(param.function, args);
-  Func("func", {}, ty.void_(), {CallStmt(call)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
   EXPECT_FALSE(r()->Resolve());
   std::stringstream err;
-  err << "12:34 error: '" << param.function
-      << "' offset parameter must be a const_expression";
+  err << "12:34 error: the " << param.name
+      << " argument must be a const_expression";
   EXPECT_EQ(r()->error(), err.str());
 }
 
-TEST_P(IntrinsicTextureSamplerValidationTest, ScalarConst) {
-  auto& p = GetParam();
-  auto param = std::get<0>(p);
-  auto offset = std::get<1>(p);
-  param.BuildTextureVariable(this);
-  param.BuildSamplerVariable(this);
-  auto* x = Const("x", ty.i32(), Construct(ty.i32(), offset.x));
+INSTANTIATE_TEST_SUITE_P(
+    Offset2D,
+    IntrinsicTextureConstExprArgValidationTest,
+    testing::Combine(
+        testing::ValuesIn(TextureCases({
+            ValidTextureOverload::kSample2dOffsetF32,
+            ValidTextureOverload::kSample2dArrayOffsetF32,
+            ValidTextureOverload::kSampleDepth2dOffsetF32,
+            ValidTextureOverload::kSampleDepth2dArrayOffsetF32,
+            ValidTextureOverload::kSampleBias2dOffsetF32,
+            ValidTextureOverload::kSampleBias2dArrayOffsetF32,
+            ValidTextureOverload::kSampleLevel2dOffsetF32,
+            ValidTextureOverload::kSampleLevel2dArrayOffsetF32,
+            ValidTextureOverload::kSampleLevelDepth2dOffsetF32,
+            ValidTextureOverload::kSampleLevelDepth2dArrayOffsetF32,
+            ValidTextureOverload::kSampleGrad2dOffsetF32,
+            ValidTextureOverload::kSampleGrad2dArrayOffsetF32,
+            ValidTextureOverload::kSampleCompareDepth2dOffsetF32,
+            ValidTextureOverload::kSampleCompareDepth2dArrayOffsetF32,
+            ValidTextureOverload::kSampleCompareLevelDepth2dOffsetF32,
+            ValidTextureOverload::kSampleCompareLevelDepth2dArrayOffsetF32,
+        })),
+        testing::Values(Parameter{"offset", Position::kLast, -8, 7}),
+        testing::Values(
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kEmptyVec2},
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kVec2, -1, 1},
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kVec2, 7, -8},
+            Constexpr{0, Constexpr::Kind::kVec2, 8, 0},
+            Constexpr{1, Constexpr::Kind::kVec2, 0, 8},
+            Constexpr{0, Constexpr::Kind::kVec2, -9, 0},
+            Constexpr{1, Constexpr::Kind::kVec2, 0, -9},
+            Constexpr{0, Constexpr::Kind::kVec2, 8, 8},
+            Constexpr{0, Constexpr::Kind::kVec2, -9, -9})));
 
-  auto args = param.args(this);
-  // Make Resolver visit the Node about to be removed
-  WrapInFunction(args.back());
-  args.pop_back();
-  if (NumCoordinateAxes(param.texture_dimension) == 2) {
-    args.push_back(Construct(Source{{12, 34}}, ty.vec2<i32>(), x, offset.y));
-  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
-    args.push_back(
-        Construct(Source{{12, 34}}, ty.vec3<i32>(), x, offset.y, offset.z));
-  }
+INSTANTIATE_TEST_SUITE_P(
+    Offset3D,
+    IntrinsicTextureConstExprArgValidationTest,
+    testing::Combine(
+        testing::ValuesIn(TextureCases({
+            ValidTextureOverload::kSample3dOffsetF32,
+            ValidTextureOverload::kSampleBias3dOffsetF32,
+            ValidTextureOverload::kSampleLevel3dOffsetF32,
+            ValidTextureOverload::kSampleGrad3dOffsetF32,
+        })),
+        testing::Values(Parameter{"offset", Position::kLast, -8, 7}),
+        testing::Values(
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kEmptyVec3},
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kVec3, 0, 0, 0},
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kVec3, 7, -8, 7},
+            Constexpr{0, Constexpr::Kind::kVec3, 10, 0, 0},
+            Constexpr{1, Constexpr::Kind::kVec3, 0, 10, 0},
+            Constexpr{2, Constexpr::Kind::kVec3, 0, 0, 10},
+            Constexpr{0, Constexpr::Kind::kVec3, 10, 11, 12},
+            Constexpr{0, Constexpr::Kind::kVec3_Scalar_Vec2, 10, 0, 0},
+            Constexpr{1, Constexpr::Kind::kVec3_Scalar_Vec2, 0, 10, 0},
+            Constexpr{2, Constexpr::Kind::kVec3_Scalar_Vec2, 0, 0, 10},
+            Constexpr{0, Constexpr::Kind::kVec3_Scalar_Vec2, 10, 11, 12},
+            Constexpr{0, Constexpr::Kind::kVec3_Vec2_Scalar, 10, 0, 0},
+            Constexpr{1, Constexpr::Kind::kVec3_Vec2_Scalar, 0, 10, 0},
+            Constexpr{2, Constexpr::Kind::kVec3_Vec2_Scalar, 0, 0, 10},
+            Constexpr{0, Constexpr::Kind::kVec3_Vec2_Scalar, 10, 11, 12})));
 
-  auto* call = Call(param.function, args);
-  Func("func", {}, ty.void_(), {Decl(x), CallStmt(call)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
-  EXPECT_FALSE(r()->Resolve());
-  std::stringstream err;
-  err << "12:34 error: '" << param.function
-      << "' offset parameter must be a const_expression";
-  EXPECT_EQ(r()->error(), err.str());
-}
+INSTANTIATE_TEST_SUITE_P(
+    Component,
+    IntrinsicTextureConstExprArgValidationTest,
+    testing::Combine(
+        testing::ValuesIn(
+            TextureCases({ValidTextureOverload::kGather2dF32,
+                          ValidTextureOverload::kGather2dOffsetF32,
+                          ValidTextureOverload::kGather2dArrayF32,
+                          ValidTextureOverload::kGather2dArrayOffsetF32,
+                          ValidTextureOverload::kGatherCubeF32,
+                          ValidTextureOverload::kGatherCubeArrayF32})),
+        testing::Values(Parameter{"component", Position::kFirst, 0, 3}),
+        testing::Values(
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 0},
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 1},
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 2},
+            Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 3},
+            Constexpr{0, Constexpr::Kind::kScalar, 4},
+            Constexpr{0, Constexpr::Kind::kScalar, 123},
+            Constexpr{0, Constexpr::Kind::kScalar, -1})));
 
-INSTANTIATE_TEST_SUITE_P(IntrinsicTextureSamplerValidationTest,
-                         IntrinsicTextureSamplerValidationTest,
-                         testing::Combine(testing::ValuesIn(ValidCases()),
-                                          testing::ValuesIn(OffsetCases())));
-}  // namespace TextureSamplerOffset
+}  // namespace texture_constexpr_args
 
 }  // namespace
 }  // namespace resolver

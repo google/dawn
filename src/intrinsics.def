@@ -423,6 +423,24 @@ fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_2d
 fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_2d_array<F, A>) -> vec2<i32>
 fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_3d<F, A>) -> vec3<i32>
 fn textureDimensions(texture: texture_external) -> vec2<i32>
+fn textureGather<T: fiu32>(component: i32, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_2d_array<T>, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_2d_array<T>, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_cube<T>, sampler: sampler, coords: vec3<f32>) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_cube_array<T>, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<T>
+fn textureGather(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+fn textureGather(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
+fn textureGather(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<f32>
+fn textureGather(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<f32>
+fn textureGather(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+fn textureGather(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32, offset: vec2<i32>) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> vec4<f32>
 fn textureNumLayers<T: fiu32>(texture: texture_2d_array<T>) -> i32
 fn textureNumLayers<T: fiu32>(texture: texture_cube_array<T>) -> i32
 fn textureNumLayers(texture: texture_depth_2d_array) -> i32

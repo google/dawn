@@ -55,6 +55,42 @@ std::string expected_texture_overload(
       return R"(int2(texture.get_width(1), texture.get_height(1)))";
     case ValidTextureOverload::kDimensions3dLevel:
       return R"(int3(texture.get_width(1), texture.get_height(1), texture.get_depth(1)))";
+    case ValidTextureOverload::kGather2dF32:
+      return R"(texture.gather(sampler, float2(1.0f, 2.0f), int2(0), component::x))";
+    case ValidTextureOverload::kGather2dOffsetF32:
+      return R"(texture.gather(sampler, float2(1.0f, 2.0f), int2(3, 4), component::x))";
+    case ValidTextureOverload::kGather2dArrayF32:
+      return R"(texture.gather(sampler, float2(1.0f, 2.0f), 3, int2(0), component::x))";
+    case ValidTextureOverload::kGather2dArrayOffsetF32:
+      return R"(texture.gather(sampler, float2(1.0f, 2.0f), 3, int2(4, 5), component::x))";
+    case ValidTextureOverload::kGatherCubeF32:
+      return R"(texture.gather(sampler, float3(1.0f, 2.0f, 3.0f), component::x))";
+    case ValidTextureOverload::kGatherCubeArrayF32:
+      return R"(texture.gather(sampler, float3(1.0f, 2.0f, 3.0f), 4, component::x))";
+    case ValidTextureOverload::kGatherDepth2dF32:
+      return R"(texture.gather(sampler, float2(1.0f, 2.0f)))";
+    case ValidTextureOverload::kGatherDepth2dOffsetF32:
+      return R"(texture.gather(sampler, float2(1.0f, 2.0f), int2(3, 4)))";
+    case ValidTextureOverload::kGatherDepth2dArrayF32:
+      return R"(texture.gather(sampler, float2(1.0f, 2.0f), 3))";
+    case ValidTextureOverload::kGatherDepth2dArrayOffsetF32:
+      return R"(texture.gather(sampler, float2(1.0f, 2.0f), 3, int2(4, 5)))";
+    case ValidTextureOverload::kGatherDepthCubeF32:
+      return R"(texture.gather(sampler, float3(1.0f, 2.0f, 3.0f)))";
+    case ValidTextureOverload::kGatherDepthCubeArrayF32:
+      return R"(texture.gather(sampler, float3(1.0f, 2.0f, 3.0f), 4))";
+    case ValidTextureOverload::kGatherCompareDepth2dF32:
+      return R"(texture.gather_compare(sampler, float2(1.0f, 2.0f), 3.0f))";
+    case ValidTextureOverload::kGatherCompareDepth2dOffsetF32:
+      return R"(texture.gather_compare(sampler, float2(1.0f, 2.0f), 3.0f, int2(4, 5)))";
+    case ValidTextureOverload::kGatherCompareDepth2dArrayF32:
+      return R"(texture.gather_compare(sampler, float2(1.0f, 2.0f), 3, 4.0f))";
+    case ValidTextureOverload::kGatherCompareDepth2dArrayOffsetF32:
+      return R"(texture.gather_compare(sampler, float2(1.0f, 2.0f), 3, 4.0f, int2(5, 6)))";
+    case ValidTextureOverload::kGatherCompareDepthCubeF32:
+      return R"(texture.gather_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4.0f))";
+    case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
+      return R"(texture.gather_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4, 5.0f))";
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:

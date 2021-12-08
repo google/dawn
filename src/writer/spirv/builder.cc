@@ -2987,6 +2987,29 @@ bool Builder::GenerateTextureIntrinsic(const sem::Call* call,
       spirv_params.emplace_back(gen_arg(Usage::kValue));
       break;
     }
+    case IntrinsicType::kTextureGather: {
+      op = spv::Op::OpImageGather;
+      append_result_type_and_id_to_spirv_params();
+      if (!append_image_and_coords_to_spirv_params()) {
+        return false;
+      }
+      if (signature.IndexOf(Usage::kComponent) < 0) {
+        spirv_params.emplace_back(
+            Operand::Int(GenerateConstantIfNeeded(ScalarConstant::I32(0))));
+      } else {
+        spirv_params.emplace_back(gen_arg(Usage::kComponent));
+      }
+      break;
+    }
+    case IntrinsicType::kTextureGatherCompare: {
+      op = spv::Op::OpImageDrefGather;
+      append_result_type_and_id_to_spirv_params();
+      if (!append_image_and_coords_to_spirv_params()) {
+        return false;
+      }
+      spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
+      break;
+    }
     case IntrinsicType::kTextureSample: {
       op = spv::Op::OpImageSampleImplicitLod;
       append_result_type_and_id_to_spirv_params_for_read();

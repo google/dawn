@@ -671,7 +671,7 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
                                       const sem::Intrinsic* intrinsic) {
   auto* expr = call->Declaration();
   if (intrinsic->IsTexture()) {
-    return EmitTextureCall(out, expr, intrinsic);
+    return EmitTextureCall(out, call, intrinsic);
   }
   if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
     return EmitSelectCall(out, expr);
@@ -1749,11 +1749,12 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitTextureCall(std::ostream& out,
-                                    const ast::CallExpression* expr,
+                                    const sem::Call* call,
                                     const sem::Intrinsic* intrinsic) {
   using Usage = sem::ParameterUsage;
 
   auto& signature = intrinsic->Signature();
+  auto* expr = call->Declaration();
   auto arguments = expr->args;
 
   // Returns the argument with the given usage
@@ -1986,6 +1987,30 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       if (!texture_type->Is<sem::MultisampledTexture>()) {
         pack_level_in_coords = true;
       }
+      break;
+    case sem::IntrinsicType::kTextureGather:
+      out << ".Gather";
+      if (intrinsic->Parameters()[0]->Usage() ==
+          sem::ParameterUsage::kComponent) {
+        switch (call->Arguments()[0]->ConstantValue().Elements()[0].i32) {
+          case 0:
+            out << "Red";
+            break;
+          case 1:
+            out << "Green";
+            break;
+          case 2:
+            out << "Blue";
+            break;
+          case 3:
+            out << "Alpha";
+            break;
+        }
+      }
+      out << "(";
+      break;
+    case sem::IntrinsicType::kTextureGatherCompare:
+      out << ".GatherCmp(";
       break;
     case sem::IntrinsicType::kTextureStore:
       out << "[";

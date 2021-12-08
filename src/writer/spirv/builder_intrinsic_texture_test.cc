@@ -575,6 +575,520 @@ OpCapability ImageQuery
           R"(
 OpCapability ImageQuery
 )"};
+    case ValidTextureOverload::kGather2dF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 2
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstantComposite %14 %15 %16
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 0
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageGather %9 %13 %17 %19
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGather2dOffsetF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 2
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstantComposite %14 %15 %16
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 0
+%20 = OpTypeVector %18 2
+%21 = OpConstant %18 3
+%22 = OpConstant %18 4
+%23 = OpConstantComposite %20 %21 %22
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageGather %9 %13 %17 %19 ConstOffset %23
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGather2dArrayF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 3
+%21 = OpConstant %18 0
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %14 %15 %16 %17
+%8 = OpImageGather %9 %13 %20 %21
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGather2dArrayOffsetF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 3
+%21 = OpConstant %18 0
+%22 = OpTypeVector %18 2
+%23 = OpConstant %18 4
+%24 = OpConstant %18 5
+%25 = OpConstantComposite %22 %23 %24
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %14 %15 %16 %17
+%8 = OpImageGather %9 %13 %20 %21 ConstOffset %25
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherCubeF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstant %4 3
+%18 = OpConstantComposite %14 %15 %16 %17
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 0
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageGather %9 %13 %18 %20
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherCubeArrayF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpConstant %4 1
+%15 = OpConstant %4 2
+%16 = OpConstant %4 3
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 4
+%21 = OpConstant %18 0
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %9 %14 %15 %16 %17
+%8 = OpImageGather %9 %13 %20 %21
+)",
+              R"(
+OpCapability SampledCubeArray
+)"};
+    case ValidTextureOverload::kGatherDepth2dF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 2
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstantComposite %14 %15 %16
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 0
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageGather %9 %13 %17 %19
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherDepth2dOffsetF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 2
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstantComposite %14 %15 %16
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 0
+%20 = OpTypeVector %18 2
+%21 = OpConstant %18 3
+%22 = OpConstant %18 4
+%23 = OpConstantComposite %20 %21 %22
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageGather %9 %13 %17 %19 ConstOffset %23
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherDepth2dArrayF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 3
+%21 = OpConstant %18 0
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %14 %15 %16 %17
+%8 = OpImageGather %9 %13 %20 %21
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherDepth2dArrayOffsetF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 3
+%21 = OpConstant %18 0
+%22 = OpTypeVector %18 2
+%23 = OpConstant %18 4
+%24 = OpConstant %18 5
+%25 = OpConstantComposite %22 %23 %24
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %14 %15 %16 %17
+%8 = OpImageGather %9 %13 %20 %21 ConstOffset %25
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherDepthCubeF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstant %4 3
+%18 = OpConstantComposite %14 %15 %16 %17
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 0
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageGather %9 %13 %18 %20
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherDepthCubeArrayF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpConstant %4 1
+%15 = OpConstant %4 2
+%16 = OpConstant %4 3
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 4
+%21 = OpConstant %18 0
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %9 %14 %15 %16 %17
+%8 = OpImageGather %9 %13 %20 %21
+)",
+              R"(
+OpCapability SampledCubeArray
+)"};
+    case ValidTextureOverload::kGatherCompareDepth2dF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 2
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstantComposite %14 %15 %16
+%18 = OpConstant %4 3
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageDrefGather %9 %13 %17 %18
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherCompareDepth2dOffsetF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 2
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstantComposite %14 %15 %16
+%18 = OpConstant %4 3
+%20 = OpTypeInt 32 1
+%19 = OpTypeVector %20 2
+%21 = OpConstant %20 4
+%22 = OpConstant %20 5
+%23 = OpConstantComposite %19 %21 %22
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageDrefGather %9 %13 %17 %18 ConstOffset %23
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherCompareDepth2dArrayF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 3
+%21 = OpConstant %4 4
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %14 %15 %16 %17
+%8 = OpImageDrefGather %9 %13 %20 %21
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherCompareDepth2dArrayOffsetF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 3
+%21 = OpConstant %4 4
+%22 = OpTypeVector %18 2
+%23 = OpConstant %18 5
+%24 = OpConstant %18 6
+%25 = OpConstantComposite %22 %23 %24
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %14 %15 %16 %17
+%8 = OpImageDrefGather %9 %13 %20 %21 ConstOffset %25
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherCompareDepthCubeF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpTypeVector %4 3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstant %4 3
+%18 = OpConstantComposite %14 %15 %16 %17
+%19 = OpConstant %4 4
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%8 = OpImageDrefGather %9 %13 %18 %19
+)",
+              R"(
+)"};
+    case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%12 = OpTypeSampledImage %3
+%14 = OpConstant %4 1
+%15 = OpConstant %4 2
+%16 = OpConstant %4 3
+%18 = OpTypeInt 32 1
+%19 = OpConstant %18 4
+%21 = OpConstant %4 5
+)",
+              R"(
+%10 = OpLoad %7 %5
+%11 = OpLoad %3 %1
+%13 = OpSampledImage %12 %11 %10
+%17 = OpConvertSToF %4 %19
+%20 = OpCompositeConstruct %9 %14 %15 %16 %17
+%8 = OpImageDrefGather %9 %13 %20 %21
+)",
+              R"(
+OpCapability SampledCubeArray
+)"};
     case ValidTextureOverload::kNumLayers2dArray:
       return {R"(
 %4 = OpTypeFloat 32

@@ -1,0 +1,44 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 25
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %t "t"
+               OpName %s "s"
+               OpName %main "main"
+               OpName %res "res"
+               OpDecorate %t DescriptorSet 1
+               OpDecorate %t Binding 0
+               OpDecorate %s DescriptorSet 1
+               OpDecorate %s Binding 1
+        %int = OpTypeInt 32 1
+          %3 = OpTypeImage %int 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+          %t = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %7 = OpTypeSampler
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+          %s = OpVariable %_ptr_UniformConstant_7 UniformConstant
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+      %v4int = OpTypeVector %int 4
+         %16 = OpTypeSampledImage %3
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+         %20 = OpConstantNull %v2float
+      %int_1 = OpConstant %int 1
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+         %24 = OpConstantNull %v4int
+       %main = OpFunction %void None %8
+         %11 = OpLabel
+        %res = OpVariable %_ptr_Function_v4int Function %24
+         %14 = OpLoad %7 %s
+         %15 = OpLoad %3 %t
+         %17 = OpSampledImage %16 %15 %14
+         %12 = OpImageGather %v4int %17 %20 %int_1
+               OpStore %res %12
+               OpReturn
+               OpFunctionEnd

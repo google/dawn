@@ -1505,22 +1505,30 @@ bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
   if (!intrinsic) {
     return false;
   }
+
   std::string func_name = intrinsic->str();
   auto& signature = intrinsic->Signature();
-  auto index = signature.IndexOf(sem::ParameterUsage::kOffset);
-  if (index > -1) {
+
+  auto check_arg_is_constexpr = [&](sem::ParameterUsage usage, int min,
+                                    int max) {
+    auto index = signature.IndexOf(usage);
+    if (index < 0) {
+      return true;
+    }
+    std::string name = sem::str(usage);
     auto* arg = call->Arguments()[index];
     if (auto values = arg->ConstantValue()) {
       // Assert that the constant values are of the expected type.
-      if (!values.Type()->Is<sem::Vector>() ||
+      if (!values.Type()->IsAnyOf<sem::I32, sem::Vector>() ||
           !values.ElementType()->Is<sem::I32>()) {
         TINT_ICE(Resolver, diagnostics_)
-            << "failed to resolve '" + func_name + "' offset parameter type";
+            << "failed to resolve '" + func_name + "' " << name
+            << " parameter type";
         return false;
       }
 
       // Currently const_expr is restricted to literals and type constructors.
-      // Check that that's all we have for the offset parameter.
+      // Check that that's all we have for the parameter.
       bool is_const_expr = true;
       ast::TraverseExpressions(
           arg->Declaration(), diagnostics_, [&](const ast::Expression* e) {
@@ -1531,25 +1539,37 @@ bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
             return ast::TraverseAction::Stop;
           });
       if (is_const_expr) {
-        for (auto offset : values.Elements()) {
-          auto offset_value = offset.i32;
-          if (offset_value < -8 || offset_value > 7) {
-            AddError("each offset component of '" + func_name +
-                         "' must be at least -8 and at most 7. "
-                         "found: '" +
-                         std::to_string(offset_value) + "'",
-                     arg->Declaration()->source);
+        auto vector = intrinsic->Parameters()[index]->Type()->Is<sem::Vector>();
+        for (size_t i = 0; i < values.Elements().size(); i++) {
+          auto value = values.Elements()[i].i32;
+          if (value < min || value > max) {
+            if (vector) {
+              AddError("each component of the " + name +
+                           " argument must be at least " + std::to_string(min) +
+                           " and at most " + std::to_string(max) + ". " + name +
+                           " component " + std::to_string(i) + " is " +
+                           std::to_string(value),
+                       arg->Declaration()->source);
+            } else {
+              AddError("the " + name + " argument must be at least " +
+                           std::to_string(min) + " and at most " +
+                           std::to_string(max) + ". " + name + " is " +
+                           std::to_string(value),
+                       arg->Declaration()->source);
+            }
             return false;
           }
         }
         return true;
       }
     }
-    AddError("'" + func_name + "' offset parameter must be a const_expression",
+    AddError("the " + name + " argument must be a const_expression",
              arg->Declaration()->source);
     return false;
-  }
-  return true;
+  };
+
+  return check_arg_is_constexpr(sem::ParameterUsage::kOffset, -8, 7) &&
+         check_arg_is_constexpr(sem::ParameterUsage::kComponent, 0, 3);
 }
 
 bool Resolver::ValidateFunctionCall(const sem::Call* call) {

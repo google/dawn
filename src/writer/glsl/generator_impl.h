@@ -165,11 +165,11 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param out the output of the expression stream
-  /// @param expr the call expression
+  /// @param call the call expression
   /// @param intrinsic the semantic information for the texture intrinsic
   /// @returns true if the call expression is emitted
   bool EmitTextureCall(std::ostream& out,
-                       const ast::CallExpression* expr,
+                       const sem::Call* call,
                        const sem::Intrinsic* intrinsic);
   /// Handles generating a call to the `select()` intrinsic
   /// @param out the output of the expression stream

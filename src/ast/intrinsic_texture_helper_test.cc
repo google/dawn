@@ -127,7 +127,7 @@ std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
     out << "<unused>";
   }
   out << "\n";
-  out << "access:    " << data.access << "\n";
+  out << "access:            " << data.access << "\n";
   out << "image_format:      " << data.image_format << "\n";
   out << "texture_dimension: " << data.texture_dimension << "\n";
   out << "texture_data_type: " << data.texture_data_type << "\n";
@@ -460,6 +460,349 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           TextureDataType::kF32,
           "textureDimensions",
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
+      },
+
+      {
+          ValidTextureOverload::kGather2dF32,
+          "textureGather(component : i32,\n"
+          "              t         : texture_2d<T>,\n"
+          "              s         : sampler,\n"
+          "              coords    : vec2<f32>) -> vec4<T>",
+          TextureKind::kRegular,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList(0,                        // component
+                               "texture",                // t
+                               "sampler",                // s
+                               b->vec2<f32>(1.f, 2.f));  // coords
+          },
+      },
+      {
+          ValidTextureOverload::kGather2dOffsetF32,
+          "textureGather(component : i32,\n"
+          "              t         : texture_2d<T>,\n"
+          "              s         : sampler,\n"
+          "              coords    : vec2<f32>,\n"
+          "              offset    : vec2<i32>) -> vec4<T>",
+          TextureKind::kRegular,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList(0,                       // component
+                               "texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               b->vec2<i32>(3, 4));     // offset
+          },
+      },
+      {
+          ValidTextureOverload::kGather2dArrayF32,
+          "textureGather(component   : i32,\n"
+          "              t           : texture_2d_array<T>,\n"
+          "              s           : sampler,\n"
+          "              coords      : vec2<f32>,\n"
+          "              array_index : i32) -> vec4<T>",
+          TextureKind::kRegular,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList(0,                       // component
+                               "texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               3);                      // array index
+          },
+      },
+      {
+          ValidTextureOverload::kGather2dArrayOffsetF32,
+          "textureGather(component   : i32,\n"
+          "              t           : texture_2d_array<T>,\n"
+          "              s           : sampler,\n"
+          "              coords      : vec2<f32>,\n"
+          "              array_index : i32,\n"
+          "              offset      : vec2<i32>) -> vec4<T>",
+          TextureKind::kRegular,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList(0,                       // component
+                               "texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               3,                       // array_index
+                               b->vec2<i32>(4, 5));     // offset
+          },
+      },
+      {
+          ValidTextureOverload::kGatherCubeF32,
+          "textureGather(component : i32,\n"
+          "              t         : texture_cube<T>,\n"
+          "              s         : sampler,\n"
+          "              coords    : vec3<f32>) -> vec4<T>",
+          TextureKind::kRegular,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::kCube,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList(0,                             // component
+                               "texture",                     // t
+                               "sampler",                     // s
+                               b->vec3<f32>(1.f, 2.f, 3.f));  // coords
+          },
+      },
+      {
+          ValidTextureOverload::kGatherCubeArrayF32,
+          "textureGather(component   : i32,\n"
+          "              t           : texture_cube_array<T>,\n"
+          "              s           : sampler,\n"
+          "              coords      : vec3<f32>,\n"
+          "              array_index : i32) -> vec4<T>",
+          TextureKind::kRegular,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::kCubeArray,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList(0,                            // component
+                               "texture",                    // t
+                               "sampler",                    // s
+                               b->vec3<f32>(1.f, 2.f, 3.f),  // coords
+                               4);                           // array_index
+          },
+      },
+      {
+          ValidTextureOverload::kGatherDepth2dF32,
+          "textureGather(t      : texture_depth_2d,\n"
+          "              s      : sampler,\n"
+          "              coords : vec2<f32>) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",                // t
+                               "sampler",                // s
+                               b->vec2<f32>(1.f, 2.f));  // coords
+          },
+      },
+      {
+          ValidTextureOverload::kGatherDepth2dOffsetF32,
+          "textureGather(t      : texture_depth_2d,\n"
+          "              s      : sampler,\n"
+          "              coords : vec2<f32>,\n"
+          "              offset : vec2<i32>) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               b->vec2<i32>(3, 4));     // offset
+          },
+      },
+      {
+          ValidTextureOverload::kGatherDepth2dArrayF32,
+          "textureGather(t           : texture_depth_2d_array,\n"
+          "              s           : sampler,\n"
+          "              coords      : vec2<f32>,\n"
+          "              array_index : i32) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               3);                      // array_index
+          },
+      },
+      {
+          ValidTextureOverload::kGatherDepth2dArrayOffsetF32,
+          "textureGather(t           : texture_depth_2d_array,\n"
+          "              s           : sampler,\n"
+          "              coords      : vec2<f32>,\n"
+          "              array_index : i32,\n"
+          "              offset      : vec2<i32>) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               3,                       // array_index
+                               b->vec2<i32>(4, 5));     // offset
+          },
+      },
+      {
+          ValidTextureOverload::kGatherDepthCubeF32,
+          "textureGather(t      : texture_depth_cube,\n"
+          "              s      : sampler,\n"
+          "              coords : vec3<f32>) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::kCube,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",                     // t
+                               "sampler",                     // s
+                               b->vec3<f32>(1.f, 2.f, 3.f));  // coords
+          },
+      },
+      {
+          ValidTextureOverload::kGatherDepthCubeArrayF32,
+          "textureGather(t           : texture_depth_cube_array,\n"
+          "              s           : sampler,\n"
+          "              coords      : vec3<f32>,\n"
+          "              array_index : i32) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::kCubeArray,
+          TextureDataType::kF32,
+          "textureGather",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",                    // t
+                               "sampler",                    // s
+                               b->vec3<f32>(1.f, 2.f, 3.f),  // coords
+                               4);                           // array_index
+          },
+      },
+      {
+          ValidTextureOverload::kGatherCompareDepth2dF32,
+          "textureGatherCompare(t         : texture_depth_2d,\n"
+          "                     s         : sampler_comparison,\n"
+          "                     coords    : vec2<f32>,\n"
+          "                     depth_ref : f32) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kComparisonSampler,
+          ast::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureGatherCompare",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               3.f);                    // depth_ref
+          },
+      },
+      {
+          ValidTextureOverload::kGatherCompareDepth2dOffsetF32,
+          "textureGatherCompare(t         : texture_depth_2d,\n"
+          "                     s         : sampler_comparison,\n"
+          "                     coords    : vec2<f32>,\n"
+          "                     depth_ref : f32,\n"
+          "                     offset    : vec2<i32>) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kComparisonSampler,
+          ast::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureGatherCompare",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               3.f,                     // depth_ref
+                               b->vec2<i32>(4, 5));     // offset
+          },
+      },
+      {
+          ValidTextureOverload::kGatherCompareDepth2dArrayF32,
+          "textureGatherCompare(t           : texture_depth_2d_array,\n"
+          "                     s           : sampler_comparison,\n"
+          "                     coords      : vec2<f32>,\n"
+          "                     array_index : i32,\n"
+          "                     depth_ref   : f32) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kComparisonSampler,
+          ast::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureGatherCompare",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               3,                       // array_index
+                               4.f);                    // depth_ref
+          },
+      },
+      {
+          ValidTextureOverload::kGatherCompareDepth2dArrayOffsetF32,
+          "textureGatherCompare(t           : texture_depth_2d_array,\n"
+          "                     s           : sampler_comparison,\n"
+          "                     coords      : vec2<f32>,\n"
+          "                     array_index : i32,\n"
+          "                     depth_ref   : f32,\n"
+          "                     offset      : vec2<i32>) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kComparisonSampler,
+          ast::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureGatherCompare",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",               // t
+                               "sampler",               // s
+                               b->vec2<f32>(1.f, 2.f),  // coords
+                               3,                       // array_index
+                               4.f,                     // depth_ref
+                               b->vec2<i32>(5, 6));     // offset
+          },
+      },
+      {
+          ValidTextureOverload::kGatherCompareDepthCubeF32,
+          "textureGatherCompare(t         : texture_depth_cube,\n"
+          "                     s         : sampler_comparison,\n"
+          "                     coords    : vec3<f32>,\n"
+          "                     depth_ref : f32) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kComparisonSampler,
+          ast::TextureDimension::kCube,
+          TextureDataType::kF32,
+          "textureGatherCompare",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",                    // t
+                               "sampler",                    // s
+                               b->vec3<f32>(1.f, 2.f, 3.f),  // coords
+                               4.f);                         // depth_ref
+          },
+      },
+      {
+          ValidTextureOverload::kGatherCompareDepthCubeArrayF32,
+          "textureGatherCompare(t           : texture_depth_cube_array,\n"
+          "                     s           : sampler_comparison,\n"
+          "                     coords      : vec3<f32>,\n"
+          "                     array_index : i32,\n"
+          "                     depth_ref   : f32) -> vec4<f32>",
+          TextureKind::kDepth,
+          ast::SamplerKind::kComparisonSampler,
+          ast::TextureDimension::kCubeArray,
+          TextureDataType::kF32,
+          "textureGatherCompare",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",                    // t
+                               "sampler",                    // s
+                               b->vec3<f32>(1.f, 2.f, 3.f),  // coords
+                               4,                            // array_index
+                               5.f);                         // depth_ref
+          },
       },
       {
           ValidTextureOverload::kNumLayers2dArray,

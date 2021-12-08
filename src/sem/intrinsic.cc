@@ -50,6 +50,8 @@ bool IsFloatClassificationIntrinsic(IntrinsicType i) {
 
 bool IsTextureIntrinsic(IntrinsicType i) {
   return IsImageQueryIntrinsic(i) || i == IntrinsicType::kTextureLoad ||
+         i == IntrinsicType::kTextureGather ||
+         i == IntrinsicType::kTextureGatherCompare ||
          i == IntrinsicType::kTextureSample ||
          i == IntrinsicType::kTextureSampleLevel ||
          i == IntrinsicType::kTextureSampleBias ||

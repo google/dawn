@@ -135,6 +135,42 @@ ExpectedResult expected_texture_overload(
 )",
           "tint_tmp.xy;",
       };
+    case ValidTextureOverload::kGather2dF32:
+      return R"(tint_symbol.GatherRed(tint_symbol_1, float2(1.0f, 2.0f)))";
+    case ValidTextureOverload::kGather2dOffsetF32:
+      return R"(tint_symbol.GatherRed(tint_symbol_1, float2(1.0f, 2.0f), int2(3, 4)))";
+    case ValidTextureOverload::kGather2dArrayF32:
+      return R"(tint_symbol.GatherRed(tint_symbol_1, float3(1.0f, 2.0f, float(3))))";
+    case ValidTextureOverload::kGather2dArrayOffsetF32:
+      return R"(tint_symbol.GatherRed(tint_symbol_1, float3(1.0f, 2.0f, float(3)), int2(4, 5)))";
+    case ValidTextureOverload::kGatherCubeF32:
+      return R"(tint_symbol.GatherRed(tint_symbol_1, float3(1.0f, 2.0f, 3.0f)))";
+    case ValidTextureOverload::kGatherCubeArrayF32:
+      return R"(tint_symbol.GatherRed(tint_symbol_1, float4(1.0f, 2.0f, 3.0f, float(4))))";
+    case ValidTextureOverload::kGatherDepth2dF32:
+      return R"(tint_symbol.Gather(tint_symbol_1, float2(1.0f, 2.0f)))";
+    case ValidTextureOverload::kGatherDepth2dOffsetF32:
+      return R"(tint_symbol.Gather(tint_symbol_1, float2(1.0f, 2.0f), int2(3, 4)))";
+    case ValidTextureOverload::kGatherDepth2dArrayF32:
+      return R"(tint_symbol.Gather(tint_symbol_1, float3(1.0f, 2.0f, float(3))))";
+    case ValidTextureOverload::kGatherDepth2dArrayOffsetF32:
+      return R"(tint_symbol.Gather(tint_symbol_1, float3(1.0f, 2.0f, float(3)), int2(4, 5)))";
+    case ValidTextureOverload::kGatherDepthCubeF32:
+      return R"(tint_symbol.Gather(tint_symbol_1, float3(1.0f, 2.0f, 3.0f)))";
+    case ValidTextureOverload::kGatherDepthCubeArrayF32:
+      return R"(tint_symbol.Gather(tint_symbol_1, float4(1.0f, 2.0f, 3.0f, float(4))))";
+    case ValidTextureOverload::kGatherCompareDepth2dF32:
+      return R"(tint_symbol.GatherCmp(tint_symbol_1, float2(1.0f, 2.0f), 3.0f))";
+    case ValidTextureOverload::kGatherCompareDepth2dOffsetF32:
+      return R"(tint_symbol.GatherCmp(tint_symbol_1, float2(1.0f, 2.0f), 3.0f, int2(4, 5)))";
+    case ValidTextureOverload::kGatherCompareDepth2dArrayF32:
+      return R"(tint_symbol.GatherCmp(tint_symbol_1, float3(1.0f, 2.0f, float(3)), 4.0f))";
+    case ValidTextureOverload::kGatherCompareDepth2dArrayOffsetF32:
+      return R"(tint_symbol.GatherCmp(tint_symbol_1, float3(1.0f, 2.0f, float(3)), 4.0f, int2(5, 6)))";
+    case ValidTextureOverload::kGatherCompareDepthCubeF32:
+      return R"(tint_symbol.GatherCmp(tint_symbol_1, float3(1.0f, 2.0f, 3.0f), 4.0f))";
+    case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
+      return R"(tint_symbol.GatherCmp(tint_symbol_1, float4(1.0f, 2.0f, 3.0f, float(4)), 5.0f))";
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:

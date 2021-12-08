@@ -261,6 +261,12 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   if (name == "textureDimensions") {
     return IntrinsicType::kTextureDimensions;
   }
+  if (name == "textureGather") {
+    return IntrinsicType::kTextureGather;
+  }
+  if (name == "textureGatherCompare") {
+    return IntrinsicType::kTextureGatherCompare;
+  }
   if (name == "textureNumLayers") {
     return IntrinsicType::kTextureNumLayers;
   }
@@ -488,6 +494,10 @@ const char* str(IntrinsicType i) {
       return "workgroupBarrier";
     case IntrinsicType::kTextureDimensions:
       return "textureDimensions";
+    case IntrinsicType::kTextureGather:
+      return "textureGather";
+    case IntrinsicType::kTextureGatherCompare:
+      return "textureGatherCompare";
     case IntrinsicType::kTextureNumLayers:
       return "textureNumLayers";
     case IntrinsicType::kTextureNumLevels:

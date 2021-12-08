@@ -34,6 +34,7 @@ enum class ParameterUsage {
   kNone = -1,
   kArrayIndex,
   kBias,
+  kComponent,
   kCoords,
   kDdx,
   kDdy,
