@@ -22,8 +22,6 @@ namespace dawn_native {
 
         wgpu::ErrorType ErrorFilterToErrorType(wgpu::ErrorFilter filter) {
             switch (filter) {
-                case wgpu::ErrorFilter::None:
-                    return wgpu::ErrorType::NoError;
                 case wgpu::ErrorFilter::Validation:
                     return wgpu::ErrorType::Validation;
                 case wgpu::ErrorFilter::OutOfMemory:
@@ -62,7 +60,6 @@ namespace dawn_native {
     }
 
     bool ErrorScopeStack::HandleError(wgpu::ErrorType type, const char* message) {
-        ASSERT(type != wgpu::ErrorType::NoError);
         for (auto it = mScopes.rbegin(); it != mScopes.rend(); ++it) {
             if (it->mMatchedErrorType != type) {
                 // Error filter does not match. Move on to the next scope.

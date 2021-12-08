@@ -1211,9 +1211,8 @@
     "error filter": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "none"},
-            {"value": 1, "name": "validation"},
-            {"value": 2, "name": "out of memory"}
+            {"value": 0, "name": "validation"},
+            {"value": 1, "name": "out of memory"}
         ]
     },
     "error type": {
