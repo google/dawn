@@ -248,14 +248,9 @@ namespace dawn_native {
             DAWN_TRY(ValidateFrontFace(descriptor->frontFace));
             DAWN_TRY(ValidateCullMode(descriptor->cullMode));
 
-            // Pipeline descriptors must have stripIndexFormat != undefined IFF they are using strip
-            // topologies.
-            if (IsStripPrimitiveTopology(descriptor->topology)) {
-                DAWN_INVALID_IF(
-                    descriptor->stripIndexFormat == wgpu::IndexFormat::Undefined,
-                    "StripIndexFormat is undefined when using a strip primitive topology (%s).",
-                    descriptor->topology);
-            } else {
+            // Pipeline descriptors must have stripIndexFormat == undefined if they are using
+            // non-strip topologies.
+            if (!IsStripPrimitiveTopology(descriptor->topology)) {
                 DAWN_INVALID_IF(
                     descriptor->stripIndexFormat != wgpu::IndexFormat::Undefined,
                     "StripIndexFormat (%s) is not undefined when using a non-strip primitive "

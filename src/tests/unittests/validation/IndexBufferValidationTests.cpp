@@ -155,6 +155,8 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
                                                        wgpu::PrimitiveTopology::TriangleStrip);
     wgpu::RenderPipeline pipeline16 = MakeTestPipeline(wgpu::IndexFormat::Uint16,
                                                        wgpu::PrimitiveTopology::LineStrip);
+    wgpu::RenderPipeline pipelineUndef =
+        MakeTestPipeline(wgpu::IndexFormat::Undefined, wgpu::PrimitiveTopology::LineStrip);
 
     wgpu::Buffer indexBuffer =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 1, 2});
@@ -194,6 +196,31 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
         encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         encoder.SetPipeline(pipeline32);
         encoder.DrawIndexed(3);
+        encoder.Finish();
+    }
+
+    // Expected to fail because pipeline doesn't specify an index format.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
+        encoder.SetPipeline(pipelineUndef);
+        encoder.DrawIndexed(3);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.SetPipeline(pipelineUndef);
+        encoder.DrawIndexed(3);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Expected to succeed because non-indexed draw calls don't require a pipeline index format.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetPipeline(pipelineUndef);
+        encoder.Draw(3);
         encoder.Finish();
     }
 }

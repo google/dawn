@@ -727,8 +727,8 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
-// Tests that strip primitive topologies require an index format
-TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
+// Tests that only strip primitive topologies allow an index format
+TEST_F(RenderPipelineValidationTest, StripIndexFormatAllowed) {
     constexpr uint32_t kNumStripType = 2u;
     constexpr uint32_t kNumListType = 3u;
     constexpr uint32_t kNumIndexFormat = 3u;
@@ -751,14 +751,8 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
             descriptor.primitive.topology = primitiveTopology;
             descriptor.primitive.stripIndexFormat = indexFormat;
 
-            if (indexFormat == wgpu::IndexFormat::Undefined) {
-                // Fail because the index format is undefined and the primitive
-                // topology is a strip type.
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
-            } else {
-                // Succeeds because the index format is given.
-                device.CreateRenderPipeline(&descriptor);
-            }
+            // Always succeeds, regardless of if an index format is given.
+            device.CreateRenderPipeline(&descriptor);
         }
     }
 

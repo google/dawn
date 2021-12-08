@@ -245,11 +245,20 @@ namespace dawn_native {
 
             RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
             wgpu::IndexFormat pipelineIndexFormat = lastRenderPipeline->GetStripIndexFormat();
-            DAWN_INVALID_IF(
-                IsStripPrimitiveTopology(lastRenderPipeline->GetPrimitiveTopology()) &&
+
+            if (IsStripPrimitiveTopology(lastRenderPipeline->GetPrimitiveTopology())) {
+                DAWN_INVALID_IF(
+                    pipelineIndexFormat == wgpu::IndexFormat::Undefined,
+                    "%s has a strip primitive topology (%s) but a strip index format of %s, which "
+                    "prevents it for being used for indexed draw calls.",
+                    lastRenderPipeline, lastRenderPipeline->GetPrimitiveTopology(),
+                    pipelineIndexFormat);
+
+                DAWN_INVALID_IF(
                     mIndexFormat != pipelineIndexFormat,
-                "Strip index format (%s) of %s does not match index buffer format (%s).",
-                pipelineIndexFormat, lastRenderPipeline, mIndexFormat);
+                    "Strip index format (%s) of %s does not match index buffer format (%s).",
+                    pipelineIndexFormat, lastRenderPipeline, mIndexFormat);
+            }
 
             // The chunk of code above should be similar to the one in |RecomputeLazyAspects|.
             // It returns the first invalid state found. We shouldn't be able to reach this line
