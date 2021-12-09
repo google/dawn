@@ -1,4 +1,3 @@
-[[block]]
 struct Uniforms {
   i : u32;
   j : u32;
