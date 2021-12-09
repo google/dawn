@@ -44,10 +44,6 @@ Struct::Struct(Struct&&) = default;
 
 Struct::~Struct() = default;
 
-bool Struct::IsBlockDecorated() const {
-  return HasDecoration<StructBlockDecoration>(decorations);
-}
-
 const Struct* Struct::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source);

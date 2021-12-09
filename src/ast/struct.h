@@ -44,9 +44,6 @@ class Struct : public Castable<Struct, TypeDecl> {
 
   ~Struct() override;
 
-  /// @returns true if the struct is block decorated
-  bool IsBlockDecorated() const;
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context

@@ -142,9 +142,6 @@ class Struct : public Castable<Struct, Type> {
     return pipeline_stage_uses_;
   }
 
-  /// @returns true if the struct has a block decoration
-  bool IsBlockDecorated() const { return declaration_->IsBlockDecorated(); }
-
   /// @returns the name for the type
   std::string type_name() const override;
 

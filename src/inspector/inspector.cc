@@ -318,7 +318,7 @@ uint32_t Inspector::GetStorageSize(const std::string& entry_point) {
   auto* func_sem = program_->Sem().Get(func);
   for (auto& ruv : func_sem->TransitivelyReferencedUniformVariables()) {
     const sem::Struct* s = ruv.first->Type()->UnwrapRef()->As<sem::Struct>();
-    if (s && s->IsBlockDecorated()) {
+    if (s) {
       size += s->Size();
     }
   }
@@ -379,10 +379,6 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     auto* unwrapped_type = var->Type()->UnwrapRef();
     auto* str = unwrapped_type->As<sem::Struct>();
     if (str == nullptr) {
-      continue;
-    }
-
-    if (!str->IsBlockDecorated()) {
       continue;
     }
 

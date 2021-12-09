@@ -182,7 +182,6 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   auto* str = t->As<ast::Struct>();
   EXPECT_EQ(str->name, program.Symbols().Get("A"));
   EXPECT_EQ(str->members.size(), 1u);
-  EXPECT_FALSE(str->IsBlockDecorated());
 
   const auto* ty = str->members[0]->type;
   ASSERT_TRUE(ty->Is<ast::Array>());
@@ -209,7 +208,6 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   auto* str = t->As<ast::Struct>();
   EXPECT_EQ(str->name, program.Symbols().Get("A"));
   EXPECT_EQ(str->members.size(), 1u);
-  EXPECT_TRUE(str->IsBlockDecorated());
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
