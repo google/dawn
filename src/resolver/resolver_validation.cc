@@ -43,7 +43,6 @@
 #include "src/ast/sampled_texture.h"
 #include "src/ast/sampler.h"
 #include "src/ast/storage_texture.h"
-#include "src/ast/struct_block_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/traverse_expressions.h"
 #include "src/ast/type_name.h"
@@ -541,23 +540,11 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
       // attribute, satisfying the storage class constraints.
 
       auto* str = var->Type()->UnwrapRef()->As<sem::Struct>();
-
       if (!str) {
         AddError(
             "variables declared in the <storage> storage class must be of a "
             "structure type",
             decl->source);
-        return false;
-      }
-
-      if (!str->IsBlockDecorated()) {
-        AddError(
-            "structure used as a storage buffer must be declared with the "
-            "[[block]] decoration",
-            str->Declaration()->source);
-        if (decl->source.range.begin.line) {
-          AddNote("structure used as storage buffer here", decl->source);
-        }
         return false;
       }
       break;
@@ -575,18 +562,6 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
             decl->source);
         return false;
       }
-
-      if (!str->IsBlockDecorated()) {
-        AddError(
-            "structure used as a uniform buffer must be declared with the "
-            "[[block]] decoration",
-            str->Declaration()->source);
-        if (decl->source.range.begin.line) {
-          AddNote("structure used as uniform buffer here", decl->source);
-        }
-        return false;
-      }
-
       for (auto* member : str->Members()) {
         if (auto* arr = member->Type()->As<sem::Array>()) {
           if (arr->IsRuntimeSized()) {
@@ -2050,18 +2025,10 @@ bool Resolver::ValidatePipelineStages() {
 bool Resolver::ValidateArray(const sem::Array* arr, const Source& source) {
   auto* el_ty = arr->ElemType();
 
-  if (auto* el_str = el_ty->As<sem::Struct>()) {
-    if (el_str->IsBlockDecorated()) {
-      // https://gpuweb.github.io/gpuweb/wgsl/#attributes
-      // A structure type with the block attribute must not be:
-      // * the element type of an array type
-      // * the member type in another structure
-      AddError(
-          "A structure type with a [[block]] decoration cannot be used as an "
-          "element of an array",
-          source);
-      return false;
-    }
+  if (!IsFixedFootprint(el_ty)) {
+    AddError("an array element type cannot contain a runtime-sized array",
+             source);
+    return false;
   }
   return true;
 }
@@ -2123,15 +2090,13 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
               member->Declaration()->source);
           return false;
         }
-        if (!str->IsBlockDecorated()) {
-          AddError(
-              "a struct containing a runtime-sized array "
-              "requires the [[block]] attribute: '" +
-                  builder_->Symbols().NameFor(str->Declaration()->name) + "'",
-              member->Declaration()->source);
-          return false;
-        }
       }
+    } else if (!IsFixedFootprint(member->Type())) {
+      AddError(
+          "a struct that contains a runtime array cannot be nested inside "
+          "another struct",
+          member->Declaration()->source);
+      return false;
     }
 
     auto has_location = false;
@@ -2191,18 +2156,6 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
       AddError("interpolate attribute must only be used with [[location]]",
                interpolate_attribute->source);
       return false;
-    }
-
-    if (auto* member_struct_type = member->Type()->As<sem::Struct>()) {
-      if (auto* member_struct_type_block_decoration =
-              ast::GetDecoration<ast::StructBlockDecoration>(
-                  member_struct_type->Declaration()->decorations)) {
-        AddError("structs must not contain [[block]] decorated struct members",
-                 member->Declaration()->source);
-        AddNote("see member's struct decoration here",
-                member_struct_type_block_decoration->source);
-        return false;
-      }
     }
   }
 

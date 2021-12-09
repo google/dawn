@@ -112,25 +112,6 @@ TEST_F(ResolverStorageClassValidationTest, NotStorage_AccessMode) {
       R"(56:78 error: only variables in <storage> storage class may declare an access mode)");
 }
 
-TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
-  // struct S { x : i32 };
-  // var<storage, read> g : S;
-  auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
-  Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
-         ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
-
-  ASSERT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: structure used as a storage buffer must be declared with the [[block]] decoration
-56:78 note: structure used as storage buffer here)");
-}
-
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
   // [[block]] struct S { x : i32 };
   // var<storage, read> g : S;
@@ -247,24 +228,6 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
       r()->error(),
       R"(56:78 error: Type 'bool' cannot be used in storage class 'uniform' as it is non-host-shareable
 56:78 note: while instantiating variable g)");
-}
-
-TEST_F(ResolverStorageClassValidationTest, UniformBufferNoBlockDecoration) {
-  // struct S { x : i32 };
-  // var<uniform> g : S;
-  auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
-  Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kUniform,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
-
-  ASSERT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: structure used as a uniform buffer must be declared with the [[block]] decoration
-56:78 note: structure used as uniform buffer here)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Basic) {

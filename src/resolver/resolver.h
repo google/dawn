@@ -93,6 +93,10 @@ class Resolver {
   bool IsPlain(const sem::Type* type) const;
 
   /// @param type the given type
+  /// @returns true if the given type is a fixed-footprint type
+  bool IsFixedFootprint(const sem::Type* type) const;
+
+  /// @param type the given type
   /// @returns true if the given type is storable
   bool IsStorable(const sem::Type* type) const;
 

@@ -963,41 +963,6 @@ TEST_F(ArrayStrideTest, DuplicateDecoration) {
 }  // namespace
 }  // namespace ArrayStrideTests
 
-namespace StructBlockTests {
-namespace {
-
-using StructBlockTest = ResolverTest;
-TEST_F(StructBlockTest, StructUsedAsArrayElement) {
-  auto* s = Structure("S", {Member("x", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
-  auto* a = ty.array(ty.Of(s), 4);
-  Global("G", a, ast::StorageClass::kPrivate);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "error: A structure type with a [[block]] decoration cannot be "
-            "used as an element of an array");
-}
-
-TEST_F(StructBlockTest, StructWithNestedBlockMember_Invalid) {
-  auto* inner =
-      Structure("Inner", {Member("x", ty.i32())},
-                {create<ast::StructBlockDecoration>(Source{{56, 78}})});
-
-  auto* outer =
-      Structure("Outer", {Member(Source{{12, 34}}, "y", ty.Of(inner))});
-
-  Global("G", ty.Of(outer), ast::StorageClass::kPrivate);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: structs must not contain [[block]] decorated struct members
-56:78 note: see member's struct decoration here)");
-}
-}  // namespace
-}  // namespace StructBlockTests
-
 namespace ResourceTests {
 namespace {
 

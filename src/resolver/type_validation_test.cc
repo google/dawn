@@ -499,23 +499,51 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLastNoBlock_Fail) {
+TEST_F(ResolverTypeValidationTest, RuntimeArrayInArray) {
   // struct Foo {
-  //   vf: f32;
-  //   rt: array<f32>;
+  //   rt : array<array<f32>, 4>;
   // };
 
-  Structure("Foo", {
-                       Member("vf", ty.f32()),
-                       Member(Source{{12, 34}}, "rt", ty.array<f32>()),
-                   });
-
-  WrapInFunction();
+  Structure("Foo",
+            {Member("rt", ty.array(Source{{12, 34}}, ty.array<f32>(), 4))});
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "12:34 error: a struct containing a runtime-sized array requires "
-            "the [[block]] attribute: 'Foo'");
+            "12:34 error: an array element type cannot contain a runtime-sized "
+            "array");
+}
+
+TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
+  // struct Foo {
+  //   rt : array<f32>;
+  // };
+  // var<private> a : array<Foo, 4>;
+
+  auto* foo = Structure("Foo", {Member("rt", ty.array<f32>())});
+  Global("v", ty.array(Source{{12, 34}}, ty.Of(foo), 4),
+         ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
+            "12:34 error: an array element type cannot contain a runtime-sized "
+            "array");
+}
+
+TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInStruct) {
+  // struct Foo {
+  //   rt : array<f32>;
+  // };
+  // struct Outer {
+  //   inner : Foo;
+  // };
+
+  auto* foo = Structure("Foo", {Member("rt", ty.array<f32>())});
+  Structure("Outer", {Member(Source{{12, 34}}, "inner", ty.Of(foo))});
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
+            "12:34 error: a struct that contains a runtime array cannot be "
+            "nested inside another struct");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {

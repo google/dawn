@@ -43,7 +43,6 @@
 #include "src/ast/sampled_texture.h"
 #include "src/ast/sampler.h"
 #include "src/ast/storage_texture.h"
-#include "src/ast/struct_block_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/traverse_expressions.h"
 #include "src/ast/type_name.h"
@@ -2705,6 +2704,34 @@ bool Resolver::IsPlain(const sem::Type* type) const {
   return type->is_scalar() ||
          type->IsAnyOf<sem::Atomic, sem::Vector, sem::Matrix, sem::Array,
                        sem::Struct>();
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
+bool Resolver::IsFixedFootprint(const sem::Type* type) const {
+  if (type->is_scalar()) {
+    return true;
+  }
+  if (type->Is<sem::Vector>()) {
+    return true;
+  }
+  if (type->Is<sem::Matrix>()) {
+    return true;
+  }
+  if (type->Is<sem::Atomic>()) {
+    return true;
+  }
+  if (auto* arr = type->As<sem::Array>()) {
+    return !arr->IsRuntimeSized() && IsFixedFootprint(arr->ElemType());
+  }
+  if (auto* str = type->As<sem::Struct>()) {
+    for (auto* member : str->Members()) {
+      if (!IsFixedFootprint(member->Type())) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
