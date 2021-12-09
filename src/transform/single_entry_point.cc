@@ -105,6 +105,11 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
 
   // Clone the entry point.
   ctx.dst->AST().AddFunction(ctx.Clone(entry_point));
+
+  // Retain the list of applied transforms.
+  // We need to do this manually since we are not going to use the top-level
+  // ctx.Clone() function.
+  ctx.dst->SetTransformApplied(ctx.src->TransformsApplied());
 }
 
 SingleEntryPoint::Config::Config(std::string entry_point)
