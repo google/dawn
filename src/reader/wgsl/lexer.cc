@@ -681,6 +681,10 @@ Token Lexer::try_hex_integer() {
                   "...) has too many digits"};
     }
   }
+  if (first == end) {
+    return {Token::Type::kError, source,
+            "integer or float hex literal has no significant digits"};
+  }
 
   pos_ = end;
   location_.column += (end - start);

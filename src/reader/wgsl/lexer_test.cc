@@ -400,6 +400,28 @@ INSTANTIATE_TEST_SUITE_P(
         HexSignedIntData{"-0x80000000", std::numeric_limits<int32_t>::min()},
         HexSignedIntData{"0x7FFFFFFF", std::numeric_limits<int32_t>::max()}));
 
+TEST_F(LexerTest, HexPrefixOnly_IsError) {
+  // Could be the start of a hex integer or hex float, but is neither.
+  Source::FileContent content("0x");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  ASSERT_TRUE(t.Is(Token::Type::kError));
+  EXPECT_EQ(t.to_str(),
+            "integer or float hex literal has no significant digits");
+}
+
+TEST_F(LexerTest, NegativeHexPrefixOnly_IsError) {
+  // Could be the start of a hex integer or hex float, but is neither.
+  Source::FileContent content("-0x");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  ASSERT_TRUE(t.Is(Token::Type::kError));
+  EXPECT_EQ(t.to_str(),
+            "integer or float hex literal has no significant digits");
+}
+
 TEST_F(LexerTest, IntegerTest_HexSignedTooLarge) {
   Source::FileContent content("0x80000000");
   Lexer l("test.wgsl", &content);
