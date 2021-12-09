@@ -1154,19 +1154,23 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_atomic(Token t) {
 
 Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   uint32_t count = 2;
-  if (t.Is(Token::Type::kVec3))
+  if (t.Is(Token::Type::kVec3)) {
     count = 3;
-  else if (t.Is(Token::Type::kVec4))
+  } else if (t.Is(Token::Type::kVec4)) {
     count = 4;
+  }
 
-  const char* use = "vector";
+  const ast::Type* subtype = nullptr;
+  if (peek_is(Token::Type::kLessThan)) {
+    const char* use = "vector";
+    auto ty = expect_lt_gt_block(use, [&] { return expect_type(use); });
+    if (ty.errored) {
+      return Failure::kErrored;
+    }
+    subtype = ty.value;
+  }
 
-  auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
-  if (subtype.errored)
-    return Failure::kErrored;
-
-  return builder_.ty.vec(make_source_range_from(t.source()), subtype.value,
-                         count);
+  return builder_.ty.vec(make_source_range_from(t.source()), subtype, count);
 }
 
 Expect<const ast::Type*> ParserImpl::expect_type_decl_array(
@@ -1217,14 +1221,18 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
     rows = 4;
   }
 
-  const char* use = "matrix";
+  const ast::Type* subtype = nullptr;
+  if (peek_is(Token::Type::kLessThan)) {
+    const char* use = "matrix";
+    auto ty = expect_lt_gt_block(use, [&] { return expect_type(use); });
+    if (ty.errored) {
+      return Failure::kErrored;
+    }
+    subtype = ty.value;
+  }
 
-  auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
-  if (subtype.errored)
-    return Failure::kErrored;
-
-  return builder_.ty.mat(make_source_range_from(t.source()), subtype.value,
-                         columns, rows);
+  return builder_.ty.mat(make_source_range_from(t.source()), subtype, columns,
+                         rows);
 }
 
 // storage_class

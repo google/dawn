@@ -28,7 +28,9 @@ class Matrix : public Castable<Matrix, Type> {
   /// Constructor
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
-  /// @param subtype type matrix type
+  /// @param subtype the declared type of the matrix components. May be null for
+  ///        matrix constructors, where the element type will be inferred from
+  ///        the constructor arguments
   /// @param rows the number of rows in the matrix
   /// @param columns the number of columns in the matrix
   Matrix(ProgramID pid,
@@ -50,7 +52,9 @@ class Matrix : public Castable<Matrix, Type> {
   /// @return the newly cloned type
   const Matrix* Clone(CloneContext* ctx) const override;
 
-  /// The type of the matrix
+  /// The declared type of the matrix components. May be null for matrix
+  /// constructors, where the element type will be inferred from the constructor
+  /// arguments
   const Type* const type;
 
   /// The number of rows in the matrix

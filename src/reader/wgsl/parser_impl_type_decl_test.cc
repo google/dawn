@@ -139,24 +139,6 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          VecData{"vec3<f32", 3, {}},
                                          VecData{"vec4<f32", 4, {}}));
 
-class VecMissingLessThanTest : public ParserImplTestWithParam<VecData> {};
-
-TEST_P(VecMissingLessThanTest, Handles_Missing_GreaterThan) {
-  auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:5: expected '<' for vector");
-}
-INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         VecMissingLessThanTest,
-                         testing::Values(VecData{"vec2", 2, {}},
-                                         VecData{"vec3", 3, {}},
-                                         VecData{"vec4", 4, {}}));
-
 class VecMissingType : public ParserImplTestWithParam<VecData> {};
 
 TEST_P(VecMissingType, Handles_Missing_Type) {
@@ -773,30 +755,6 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x2<f32", 4, 2, {}},
                                          MatrixData{"mat4x3<f32", 4, 3, {}},
                                          MatrixData{"mat4x4<f32", 4, 4, {}}));
-
-class MatrixMissingLessThanTest : public ParserImplTestWithParam<MatrixData> {};
-
-TEST_P(MatrixMissingLessThanTest, Handles_Missing_GreaterThan) {
-  auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:8: expected '<' for matrix");
-}
-INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         MatrixMissingLessThanTest,
-                         testing::Values(MatrixData{"mat2x2 f32>", 2, 2, {}},
-                                         MatrixData{"mat2x3 f32>", 2, 3, {}},
-                                         MatrixData{"mat2x4 f32>", 2, 4, {}},
-                                         MatrixData{"mat3x2 f32>", 3, 2, {}},
-                                         MatrixData{"mat3x3 f32>", 3, 3, {}},
-                                         MatrixData{"mat3x4 f32>", 3, 4, {}},
-                                         MatrixData{"mat4x2 f32>", 4, 2, {}},
-                                         MatrixData{"mat4x3 f32>", 4, 3, {}},
-                                         MatrixData{"mat4x4 f32>", 4, 4, {}}));
 
 class MatrixMissingType : public ParserImplTestWithParam<MatrixData> {};
 

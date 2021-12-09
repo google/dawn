@@ -307,6 +307,42 @@ TEST_F(ResolverVarLetValidationTest, InvalidStorageClassForInitializer) {
             "storage classes 'private' and 'function'");
 }
 
+TEST_F(ResolverVarLetValidationTest, VectorLetNoType) {
+  // let a : mat3x3 = mat3x3<f32>();
+  WrapInFunction(Const("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3),
+                       vec3<f32>()));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+}
+
+TEST_F(ResolverVarLetValidationTest, VectorVarNoType) {
+  // var a : mat3x3;
+  WrapInFunction(Var("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+}
+
+TEST_F(ResolverVarLetValidationTest, MatrixLetNoType) {
+  // let a : mat3x3 = mat3x3<f32>();
+  WrapInFunction(Const("a",
+                       create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3),
+                       mat3x3<f32>()));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+}
+
+TEST_F(ResolverVarLetValidationTest, MatrixVarNoType) {
+  // var a : mat3x3;
+  WrapInFunction(
+      Var("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

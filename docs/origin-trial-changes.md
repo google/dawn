@@ -14,6 +14,7 @@
 
 ### New Features
 
+* Vector and matrix element type can now be inferred from constructor argument types. [tint:1334](https://crbug.com/tint/1334)
 * New texture gather builtins: `textureGather()` and `textureGatherCompare()`. [tint:1330](https://crbug.com/tint/1330)
 * Shadowing is now fully supported. [tint:819](https://crbug.com/tint/819)
 * The `dot()` builtin now supports integer vector types.

@@ -975,13 +975,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarInvalidIdentifier) {
          "    ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingLessThan) {
-  EXPECT("var i : mat4x4;",
-         "test.wgsl:1:15 error: expected '<' for matrix\n"
-         "var i : mat4x4;\n"
-         "              ^\n");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingGreaterThan) {
   EXPECT("var i : mat4x4<u32;",
          "test.wgsl:1:19 error: expected '>' for matrix\n"
@@ -1063,13 +1056,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclMissingGThan) {
   EXPECT("var<private i : i32",
          "test.wgsl:1:13 error: expected '>' for variable declaration\n"
          "var<private i : i32\n"
-         "            ^\n");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingLessThan) {
-  EXPECT("var i : vec3;",
-         "test.wgsl:1:13 error: expected '<' for vector\n"
-         "var i : vec3;\n"
          "            ^\n");
 }
 

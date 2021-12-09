@@ -393,11 +393,14 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
   } else if (ty->Is<ast::I32>()) {
     out << "i32";
   } else if (auto* mat = ty->As<ast::Matrix>()) {
-    out << "mat" << mat->columns << "x" << mat->rows << "<";
-    if (!EmitType(out, mat->type)) {
-      return false;
+    out << "mat" << mat->columns << "x" << mat->rows;
+    if (auto* el_ty = mat->type) {
+      out << "<";
+      if (!EmitType(out, el_ty)) {
+        return false;
+      }
+      out << ">";
     }
-    out << ">";
   } else if (auto* ptr = ty->As<ast::Pointer>()) {
     out << "ptr<" << ptr->storage_class << ", ";
     if (!EmitType(out, ptr->type)) {
@@ -493,11 +496,14 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
   } else if (ty->Is<ast::U32>()) {
     out << "u32";
   } else if (auto* vec = ty->As<ast::Vector>()) {
-    out << "vec" << vec->width << "<";
-    if (!EmitType(out, vec->type)) {
-      return false;
+    out << "vec" << vec->width;
+    if (auto* el_ty = vec->type) {
+      out << "<";
+      if (!EmitType(out, el_ty)) {
+        return false;
+      }
+      out << ">";
     }
-    out << ">";
   } else if (ty->Is<ast::Void>()) {
     out << "void";
   } else if (auto* tn = ty->As<ast::TypeName>()) {

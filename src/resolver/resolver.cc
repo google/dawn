@@ -180,6 +180,10 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return builder_->create<sem::F32>();
     }
     if (auto* t = ty->As<ast::Vector>()) {
+      if (!t->type) {
+        AddError("missing vector element type", t->source.End());
+        return nullptr;
+      }
       if (auto* el = Type(t->type)) {
         if (auto* vector = builder_->create<sem::Vector>(el, t->width)) {
           if (ValidateVector(vector, t->source)) {
@@ -190,6 +194,10 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return nullptr;
     }
     if (auto* t = ty->As<ast::Matrix>()) {
+      if (!t->type) {
+        AddError("missing matrix element type", t->source.End());
+        return nullptr;
+      }
       if (auto* el = Type(t->type)) {
         if (auto* column_type = builder_->create<sem::Vector>(el, t->rows)) {
           if (auto* matrix =
@@ -1240,6 +1248,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   std::vector<const sem::Type*> arg_tys(args.size());
   sem::Behaviors arg_behaviors;
 
+  // The element type of all the arguments. Nullptr if argument types are
+  // different.
+  const sem::Type* arg_el_ty = nullptr;
+
   for (size_t i = 0; i < expr->args.size(); i++) {
     auto* arg = Sem(expr->args[i]);
     if (!arg) {
@@ -1248,6 +1260,19 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     args[i] = arg;
     arg_tys[i] = args[i]->Type();
     arg_behaviors.Add(arg->Behaviors());
+
+    // Determine the common argument element type
+    auto* el_ty = arg_tys[i]->UnwrapRef();
+    if (auto* vec = el_ty->As<sem::Vector>()) {
+      el_ty = vec->type();
+    } else if (auto* mat = el_ty->As<sem::Matrix>()) {
+      el_ty = mat->type();
+    }
+    if (i == 0) {
+      arg_el_ty = el_ty;
+    } else if (arg_el_ty != el_ty) {
+      arg_el_ty = nullptr;
+    }
   }
 
   arg_behaviors.Remove(sem::Behavior::kNext);
@@ -1273,10 +1298,71 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   // Resolve the target of the CallExpression to determine whether this is a
   // function call, cast or type constructor expression.
   if (expr->target.type) {
-    auto* ty = Type(expr->target.type);
-    if (!ty) {
-      return nullptr;
+    const sem::Type* ty = nullptr;
+
+    auto err_cannot_infer_el_ty = [&](std::string name) {
+      AddError(
+          "cannot infer " + name +
+              " element type, as constructor arguments have different types",
+          expr->source);
+      for (size_t i = 0; i < args.size(); i++) {
+        auto* arg = args[i];
+        AddNote("argument " + std::to_string(i) + " has type " +
+                    arg->Type()->FriendlyName(builder_->Symbols()),
+                arg->Declaration()->source);
+      }
+    };
+
+    if (!expr->args.empty()) {
+      // vecN() without explicit element type?
+      // Try to infer element type from args
+      if (auto* vec = expr->target.type->As<ast::Vector>()) {
+        if (!vec->type) {
+          if (!arg_el_ty) {
+            err_cannot_infer_el_ty("vector");
+            return nullptr;
+          }
+
+          Mark(vec);
+          auto* v = builder_->create<sem::Vector>(
+              arg_el_ty, static_cast<uint32_t>(vec->width));
+          if (!ValidateVector(v, vec->source)) {
+            return nullptr;
+          }
+          builder_->Sem().Add(vec, v);
+          ty = v;
+        }
+      }
+
+      // matNxM() without explicit element type?
+      // Try to infer element type from args
+      if (auto* mat = expr->target.type->As<ast::Matrix>()) {
+        if (!mat->type) {
+          if (!arg_el_ty) {
+            err_cannot_infer_el_ty("matrix");
+            return nullptr;
+          }
+
+          Mark(mat);
+          auto* column_type =
+              builder_->create<sem::Vector>(arg_el_ty, mat->rows);
+          auto* m = builder_->create<sem::Matrix>(column_type, mat->columns);
+          if (!ValidateMatrix(m, mat->source)) {
+            return nullptr;
+          }
+          builder_->Sem().Add(mat, m);
+          ty = m;
+        }
+      }
     }
+
+    if (ty == nullptr) {
+      ty = Type(expr->target.type);
+      if (!ty) {
+        return nullptr;
+      }
+    }
+
     return type_ctor_or_conv(ty);
   }
 
@@ -1393,16 +1479,16 @@ sem::Call* Resolver::TypeConversion(const ast::CallExpression* expr,
   auto* call_target = utils::GetOrCreate(
       type_conversions_, TypeConversionSig{target, source},
       [&]() -> sem::TypeConversion* {
-        // Now that the argument types have been determined, make sure that they
-        // obey the conversion rules laid out in
+        // Now that the argument types have been determined, make sure that
+        // they obey the conversion rules laid out in
         // https://gpuweb.github.io/gpuweb/wgsl/#conversion-expr.
         bool ok = true;
         if (auto* vec_type = target->As<sem::Vector>()) {
           ok = ValidateVectorConstructorOrCast(expr, vec_type);
         } else if (auto* mat_type = target->As<sem::Matrix>()) {
-          // Note: Matrix types currently cannot be converted (the element type
-          // must only be f32). We implement this for the day we support other
-          // matrix element types.
+          // Note: Matrix types currently cannot be converted (the element
+          // type must only be f32). We implement this for the day we support
+          // other matrix element types.
           ok = ValidateMatrixConstructorOrCast(expr, mat_type);
         } else if (target->is_scalar()) {
           ok = ValidateScalarConstructorOrCast(expr, target);
@@ -1452,8 +1538,8 @@ sem::Call* Resolver::TypeConstructor(
   auto* call_target = utils::GetOrCreate(
       type_ctors_, TypeConstructorSig{ty, arg_tys},
       [&]() -> sem::TypeConstructor* {
-        // Now that the argument types have been determined, make sure that they
-        // obey the constructor type rules laid out in
+        // Now that the argument types have been determined, make sure that
+        // they obey the constructor type rules laid out in
         // https://gpuweb.github.io/gpuweb/wgsl/#type-constructor-expr.
         bool ok = true;
         if (auto* vec_type = ty->As<sem::Vector>()) {
@@ -2359,8 +2445,8 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
       behaviors.Add(expr->Behaviors() - sem::Behavior::kNext);
     }
 
-    // Validate after processing the return value expression so that its type is
-    // available for validation.
+    // Validate after processing the return value expression so that its type
+    // is available for validation.
     return ValidateReturn(stmt);
   });
 }

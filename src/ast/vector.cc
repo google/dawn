@@ -37,7 +37,10 @@ Vector::~Vector() = default;
 
 std::string Vector::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
-  out << "vec" << width << "<" << type->FriendlyName(symbols) << ">";
+  out << "vec" << width;
+  if (type) {
+    out << "<" << type->FriendlyName(symbols) << ">";
+  }
   return out.str();
 }
 

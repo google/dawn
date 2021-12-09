@@ -1,1 +1,1 @@
-let v = vec4<bool>(false, true, false, true);
+let v = vec4(false, true, false, true);

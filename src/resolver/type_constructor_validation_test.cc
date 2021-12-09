@@ -1821,6 +1821,386 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverTypeConstructorValidationTest, InferVec2ElementTypeFromScalars) {
+  auto* vec2_bool =
+      Construct(create<ast::Vector>(nullptr, 2), Expr(true), Expr(false));
+  auto* vec2_i32 = Construct(create<ast::Vector>(nullptr, 2), Expr(1), Expr(2));
+  auto* vec2_u32 =
+      Construct(create<ast::Vector>(nullptr, 2), Expr(1u), Expr(2u));
+  auto* vec2_f32 =
+      Construct(create<ast::Vector>(nullptr, 2), Expr(1.0f), Expr(2.0f));
+  WrapInFunction(vec2_bool, vec2_i32, vec2_u32, vec2_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec2_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec2_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec2_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec2_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec2_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec2_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec2_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec2_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec2_bool)->As<sem::Vector>()->Width(), 2u);
+  EXPECT_EQ(TypeOf(vec2_i32)->As<sem::Vector>()->Width(), 2u);
+  EXPECT_EQ(TypeOf(vec2_u32)->As<sem::Vector>()->Width(), 2u);
+  EXPECT_EQ(TypeOf(vec2_f32)->As<sem::Vector>()->Width(), 2u);
+  EXPECT_EQ(TypeOf(vec2_bool), TypeOf(vec2_bool->target.type));
+  EXPECT_EQ(TypeOf(vec2_i32), TypeOf(vec2_i32->target.type));
+  EXPECT_EQ(TypeOf(vec2_u32), TypeOf(vec2_u32->target.type));
+  EXPECT_EQ(TypeOf(vec2_f32), TypeOf(vec2_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferVec2ElementTypeFromVec2) {
+  auto* vec2_bool =
+      Construct(create<ast::Vector>(nullptr, 2), vec2<bool>(true, false));
+  auto* vec2_i32 = Construct(create<ast::Vector>(nullptr, 2), vec2<i32>(1, 2));
+  auto* vec2_u32 =
+      Construct(create<ast::Vector>(nullptr, 2), vec2<u32>(1u, 2u));
+  auto* vec2_f32 =
+      Construct(create<ast::Vector>(nullptr, 2), vec2<f32>(1.0f, 2.0f));
+  WrapInFunction(vec2_bool, vec2_i32, vec2_u32, vec2_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec2_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec2_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec2_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec2_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec2_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec2_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec2_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec2_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec2_bool)->As<sem::Vector>()->Width(), 2u);
+  EXPECT_EQ(TypeOf(vec2_i32)->As<sem::Vector>()->Width(), 2u);
+  EXPECT_EQ(TypeOf(vec2_u32)->As<sem::Vector>()->Width(), 2u);
+  EXPECT_EQ(TypeOf(vec2_f32)->As<sem::Vector>()->Width(), 2u);
+  EXPECT_EQ(TypeOf(vec2_bool), TypeOf(vec2_bool->target.type));
+  EXPECT_EQ(TypeOf(vec2_i32), TypeOf(vec2_i32->target.type));
+  EXPECT_EQ(TypeOf(vec2_u32), TypeOf(vec2_u32->target.type));
+  EXPECT_EQ(TypeOf(vec2_f32), TypeOf(vec2_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferVec3ElementTypeFromScalars) {
+  auto* vec3_bool = Construct(create<ast::Vector>(nullptr, 3), Expr(true),
+                              Expr(false), Expr(true));
+  auto* vec3_i32 =
+      Construct(create<ast::Vector>(nullptr, 3), Expr(1), Expr(2), Expr(3));
+  auto* vec3_u32 =
+      Construct(create<ast::Vector>(nullptr, 3), Expr(1u), Expr(2u), Expr(3u));
+  auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3), Expr(1.0f),
+                             Expr(2.0f), Expr(3.0f));
+  WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec3_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec3_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec3_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec3_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec3_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec3_bool)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_i32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_u32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_f32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_bool), TypeOf(vec3_bool->target.type));
+  EXPECT_EQ(TypeOf(vec3_i32), TypeOf(vec3_i32->target.type));
+  EXPECT_EQ(TypeOf(vec3_u32), TypeOf(vec3_u32->target.type));
+  EXPECT_EQ(TypeOf(vec3_f32), TypeOf(vec3_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferVec3ElementTypeFromVec3) {
+  auto* vec3_bool =
+      Construct(create<ast::Vector>(nullptr, 3), vec3<bool>(true, false, true));
+  auto* vec3_i32 =
+      Construct(create<ast::Vector>(nullptr, 3), vec3<i32>(1, 2, 3));
+  auto* vec3_u32 =
+      Construct(create<ast::Vector>(nullptr, 3), vec3<u32>(1u, 2u, 3u));
+  auto* vec3_f32 =
+      Construct(create<ast::Vector>(nullptr, 3), vec3<f32>(1.0f, 2.0f, 3.0f));
+  WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec3_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec3_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec3_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec3_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec3_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec3_bool)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_i32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_u32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_f32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_bool), TypeOf(vec3_bool->target.type));
+  EXPECT_EQ(TypeOf(vec3_i32), TypeOf(vec3_i32->target.type));
+  EXPECT_EQ(TypeOf(vec3_u32), TypeOf(vec3_u32->target.type));
+  EXPECT_EQ(TypeOf(vec3_f32), TypeOf(vec3_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       InferVec3ElementTypeFromScalarAndVec2) {
+  auto* vec3_bool = Construct(create<ast::Vector>(nullptr, 3), Expr(true),
+                              vec2<bool>(false, true));
+  auto* vec3_i32 =
+      Construct(create<ast::Vector>(nullptr, 3), Expr(1), vec2<i32>(2, 3));
+  auto* vec3_u32 =
+      Construct(create<ast::Vector>(nullptr, 3), Expr(1u), vec2<u32>(2u, 3u));
+  auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3), Expr(1.0f),
+                             vec2<f32>(2.0f, 3.0f));
+  WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec3_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec3_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec3_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec3_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec3_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec3_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec3_bool)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_i32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_u32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_f32)->As<sem::Vector>()->Width(), 3u);
+  EXPECT_EQ(TypeOf(vec3_bool), TypeOf(vec3_bool->target.type));
+  EXPECT_EQ(TypeOf(vec3_i32), TypeOf(vec3_i32->target.type));
+  EXPECT_EQ(TypeOf(vec3_u32), TypeOf(vec3_u32->target.type));
+  EXPECT_EQ(TypeOf(vec3_f32), TypeOf(vec3_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromScalars) {
+  auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4), Expr(true),
+                              Expr(false), Expr(true), Expr(false));
+  auto* vec4_i32 = Construct(create<ast::Vector>(nullptr, 4), Expr(1), Expr(2),
+                             Expr(3), Expr(4));
+  auto* vec4_u32 = Construct(create<ast::Vector>(nullptr, 4), Expr(1u),
+                             Expr(2u), Expr(3u), Expr(4u));
+  auto* vec4_f32 = Construct(create<ast::Vector>(nullptr, 4), Expr(1.0f),
+                             Expr(2.0f), Expr(3.0f), Expr(4.0f));
+  WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec4_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec4_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec4_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec4_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec4_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec4_bool)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_i32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_u32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_f32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_bool), TypeOf(vec4_bool->target.type));
+  EXPECT_EQ(TypeOf(vec4_i32), TypeOf(vec4_i32->target.type));
+  EXPECT_EQ(TypeOf(vec4_u32), TypeOf(vec4_u32->target.type));
+  EXPECT_EQ(TypeOf(vec4_f32), TypeOf(vec4_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromVec4) {
+  auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4),
+                              vec4<bool>(true, false, true, false));
+  auto* vec4_i32 =
+      Construct(create<ast::Vector>(nullptr, 4), vec4<i32>(1, 2, 3, 4));
+  auto* vec4_u32 =
+      Construct(create<ast::Vector>(nullptr, 4), vec4<u32>(1u, 2u, 3u, 4u));
+  auto* vec4_f32 = Construct(create<ast::Vector>(nullptr, 4),
+                             vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f));
+  WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec4_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec4_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec4_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec4_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec4_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec4_bool)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_i32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_u32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_f32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_bool), TypeOf(vec4_bool->target.type));
+  EXPECT_EQ(TypeOf(vec4_i32), TypeOf(vec4_i32->target.type));
+  EXPECT_EQ(TypeOf(vec4_u32), TypeOf(vec4_u32->target.type));
+  EXPECT_EQ(TypeOf(vec4_f32), TypeOf(vec4_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       InferVec4ElementTypeFromScalarAndVec3) {
+  auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4), Expr(true),
+                              vec3<bool>(false, true, false));
+  auto* vec4_i32 =
+      Construct(create<ast::Vector>(nullptr, 4), Expr(1), vec3<i32>(2, 3, 4));
+  auto* vec4_u32 = Construct(create<ast::Vector>(nullptr, 4), Expr(1u),
+                             vec3<u32>(2u, 3u, 4u));
+  auto* vec4_f32 = Construct(create<ast::Vector>(nullptr, 4), Expr(1.0f),
+                             vec3<f32>(2.0f, 3.0f, 4.0f));
+  WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec4_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec4_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec4_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec4_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec4_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec4_bool)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_i32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_u32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_f32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_bool), TypeOf(vec4_bool->target.type));
+  EXPECT_EQ(TypeOf(vec4_i32), TypeOf(vec4_i32->target.type));
+  EXPECT_EQ(TypeOf(vec4_u32), TypeOf(vec4_u32->target.type));
+  EXPECT_EQ(TypeOf(vec4_f32), TypeOf(vec4_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       InferVec4ElementTypeFromVec2AndVec2) {
+  auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4),
+                              vec2<bool>(true, false), vec2<bool>(true, false));
+  auto* vec4_i32 = Construct(create<ast::Vector>(nullptr, 4), vec2<i32>(1, 2),
+                             vec2<i32>(3, 4));
+  auto* vec4_u32 = Construct(create<ast::Vector>(nullptr, 4), vec2<u32>(1u, 2u),
+                             vec2<u32>(3u, 4u));
+  auto* vec4_f32 = Construct(create<ast::Vector>(nullptr, 4),
+                             vec2<f32>(1.0f, 2.0f), vec2<f32>(3.0f, 4.0f));
+  WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_TRUE(TypeOf(vec4_bool)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_i32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_u32)->Is<sem::Vector>());
+  ASSERT_TRUE(TypeOf(vec4_f32)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(vec4_bool)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_TRUE(TypeOf(vec4_i32)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_TRUE(TypeOf(vec4_u32)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_TRUE(TypeOf(vec4_f32)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(vec4_bool)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_i32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_u32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_f32)->As<sem::Vector>()->Width(), 4u);
+  EXPECT_EQ(TypeOf(vec4_bool), TypeOf(vec4_bool->target.type));
+  EXPECT_EQ(TypeOf(vec4_i32), TypeOf(vec4_i32->target.type));
+  EXPECT_EQ(TypeOf(vec4_u32), TypeOf(vec4_u32->target.type));
+  EXPECT_EQ(TypeOf(vec4_f32), TypeOf(vec4_f32->target.type));
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       CannotInferVectorElementTypeWithoutArgs) {
+  WrapInFunction(Construct(create<ast::Vector>(Source{{12, 34}}, nullptr, 3)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       CannotInferVec2ElementTypeFromScalarsMismatch) {
+  WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 2),
+                           Expr(Source{{1, 2}}, 1),  //
+                           Expr(Source{{1, 3}}, 2u)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
+1:2 note: argument 0 has type i32
+1:3 note: argument 1 has type u32)");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       CannotInferVec3ElementTypeFromScalarsMismatch) {
+  WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 3),
+                           Expr(Source{{1, 2}}, 1),   //
+                           Expr(Source{{1, 3}}, 2u),  //
+                           Expr(Source{{1, 4}}, 3)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
+1:2 note: argument 0 has type i32
+1:3 note: argument 1 has type u32
+1:4 note: argument 2 has type i32)");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       CannotInferVec3ElementTypeFromScalarAndVec2Mismatch) {
+  WrapInFunction(
+      Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 3),
+                Expr(Source{{1, 2}}, 1),  //
+                Construct(Source{{1, 3}}, ty.vec2<f32>(), 2.0f, 3.0f)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
+1:2 note: argument 0 has type i32
+1:3 note: argument 1 has type vec2<f32>)");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       CannotInferVec4ElementTypeFromScalarsMismatch) {
+  WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4),
+                           Expr(Source{{1, 2}}, 1),     //
+                           Expr(Source{{1, 3}}, 2),     //
+                           Expr(Source{{1, 4}}, 3.0f),  //
+                           Expr(Source{{1, 5}}, 4)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
+1:2 note: argument 0 has type i32
+1:3 note: argument 1 has type i32
+1:4 note: argument 2 has type f32
+1:5 note: argument 3 has type i32)");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       CannotInferVec4ElementTypeFromScalarAndVec3Mismatch) {
+  WrapInFunction(
+      Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4),
+                Expr(Source{{1, 2}}, 1),  //
+                Construct(Source{{1, 3}}, ty.vec3<u32>(), 2u, 3u, 4u)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
+1:2 note: argument 0 has type i32
+1:3 note: argument 1 has type vec3<u32>)");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       CannotInferVec4ElementTypeFromVec2AndVec2Mismatch) {
+  WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4),
+                           Construct(Source{{1, 2}}, ty.vec2<i32>(), 3, 4),  //
+                           Construct(Source{{1, 3}}, ty.vec2<u32>(), 3u, 4u)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
+1:2 note: argument 0 has type vec2<i32>
+1:3 note: argument 1 has type vec2<u32>)");
+}
+
 }  // namespace VectorConstructor
 
 namespace MatrixConstructor {
@@ -1841,10 +2221,15 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewArguments) {
 
   const auto param = GetParam();
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
     auto* vec_type = ty.vec<f32>(param.rows);
     args.push_back(Construct(Source{{12, i}}, vec_type));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "vec" << param.rows << "<f32>";
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -1852,9 +2237,9 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewArguments) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooFewArguments) {
@@ -1862,9 +2247,14 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooFewArguments) {
 
   const auto param = GetParam();
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns * param.rows - 1; i++) {
     args.push_back(Construct(Source{{12, i}}, ty.f32()));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "f32";
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -1872,9 +2262,9 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooFewArguments) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyArguments) {
@@ -1882,10 +2272,15 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyArguments) {
 
   const auto param = GetParam();
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns + 1; i++) {
     auto* vec_type = ty.vec<f32>(param.rows);
     args.push_back(Construct(Source{{12, i}}, vec_type));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "vec" << param.rows << "<f32>";
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -1893,9 +2288,9 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyArguments) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooManyArguments) {
@@ -1903,9 +2298,14 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooManyArguments) {
 
   const auto param = GetParam();
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns * param.rows + 1; i++) {
     args.push_back(Construct(Source{{12, i}}, ty.f32()));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "f32";
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -1913,9 +2313,9 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooManyArguments) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest,
@@ -1924,10 +2324,15 @@ TEST_P(MatrixConstructorTest,
 
   const auto param = GetParam();
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
     auto* vec_type = ty.vec<u32>(param.rows);
     args.push_back(Construct(Source{{12, i}}, vec_type));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "vec" << param.rows << "<u32>";
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -1935,9 +2340,9 @@ TEST_P(MatrixConstructorTest,
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest,
@@ -1946,9 +2351,14 @@ TEST_P(MatrixConstructorTest,
 
   const auto param = GetParam();
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
     args.push_back(Expr(Source{{12, i}}, 1u));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "u32";
   }
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -1956,9 +2366,9 @@ TEST_P(MatrixConstructorTest,
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest,
@@ -1972,23 +2382,29 @@ TEST_P(MatrixConstructorTest,
     return;
   }
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
     auto* valid_vec_type = ty.vec<f32>(param.rows);
     args.push_back(Construct(Source{{12, i}}, valid_vec_type));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "vec" << param.rows << "<f32>";
   }
   const size_t kInvalidLoc = 2 * (param.columns - 1);
   auto* invalid_vec_type = ty.vec<f32>(param.rows - 1);
   args.push_back(Construct(Source{{12, kInvalidLoc}}, invalid_vec_type));
+  args_tys << ", vec" << (param.rows - 1) << "<f32>";
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
   auto* tc = Construct(Source{}, matrix_type, std::move(args));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest,
@@ -1997,28 +2413,34 @@ TEST_P(MatrixConstructorTest,
 
   const auto param = GetParam();
 
-  // Skip the test if parameters would have resuled in an invalid vec5 type.
+  // Skip the test if parameters would have resulted in an invalid vec5 type.
   if (param.rows == 4) {
     return;
   }
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
     auto* valid_vec_type = ty.vec<f32>(param.rows);
     args.push_back(Construct(Source{{12, i}}, valid_vec_type));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "vec" << param.rows << "<f32>";
   }
   const size_t kInvalidLoc = 2 * (param.columns - 1);
   auto* invalid_vec_type = ty.vec<f32>(param.rows + 1);
   args.push_back(Construct(Source{{12, kInvalidLoc}}, invalid_vec_type));
+  args_tys << ", vec" << (param.rows + 1) << "<f32>";
 
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
   auto* tc = Construct(Source{}, matrix_type, std::move(args));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ZeroValue_Success) {
@@ -2073,10 +2495,15 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
   const auto param = GetParam();
   auto* f32_alias = Alias("Float32", ty.f32());
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
     auto* vec_type = ty.vec(ty.u32(), param.rows);
     args.push_back(Construct(Source{{12, i}}, vec_type));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "vec" << param.rows << "<u32>";
   }
 
   auto* matrix_type = ty.mat(ty.Of(f32_alias), param.columns, param.rows);
@@ -2084,9 +2511,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
@@ -2116,8 +2543,9 @@ TEST_F(ResolverTypeConstructorValidationTest,
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            R"(12:34 error: invalid constructor for mat2x2<f32>
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: no matching constructor mat2x2<f32>(vec2<u32>, vec2<f32>)
 
 3 candidates available:
   mat2x2<f32>()
@@ -2148,19 +2576,24 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
   auto* f32_alias = Alias("UnsignedInt", ty.u32());
 
+  std::stringstream args_tys;
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
     auto* vec_type = ty.vec(ty.Of(f32_alias), param.rows);
     args.push_back(Construct(Source{{12, i}}, vec_type));
+    if (i > 1) {
+      args_tys << ", ";
+    }
+    args_tys << "vec" << param.rows << "<u32>";
   }
 
   auto* tc = Construct(Source{}, matrix_type, std::move(args));
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_THAT(r()->error(),
-              HasSubstr("12:1 error: invalid constructor for " +
-                        MatrixStr(param) + "\n\n3 candidates available:"));
+  EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " +
+                                      MatrixStr(param) + "(" + args_tys.str() +
+                                      ")\n\n3 candidates available:"));
 }
 
 TEST_P(MatrixConstructorTest,
@@ -2179,6 +2612,91 @@ TEST_P(MatrixConstructorTest,
   WrapInFunction(tc);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_P(MatrixConstructorTest, InferElementTypeFromVectors) {
+  const auto param = GetParam();
+
+  ast::ExpressionList args;
+  for (uint32_t i = 1; i <= param.columns; i++) {
+    args.push_back(Construct(ty.vec<f32>(param.rows)));
+  }
+
+  auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
+  auto* tc = Construct(Source{}, matrix_type, std::move(args));
+  WrapInFunction(tc);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_P(MatrixConstructorTest, InferElementTypeFromScalars) {
+  const auto param = GetParam();
+
+  ast::ExpressionList args;
+  for (uint32_t i = 0; i < param.rows * param.columns; i++) {
+    args.push_back(Expr(static_cast<f32>(i)));
+  }
+
+  auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
+  WrapInFunction(Construct(Source{{12, 34}}, matrix_type, std::move(args)));
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_P(MatrixConstructorTest, CannotInferElementTypeFromVectors_Mismatch) {
+  const auto param = GetParam();
+
+  std::stringstream err;
+  err << "12:34 error: cannot infer matrix element type, as constructor "
+         "arguments have different types";
+
+  ast::ExpressionList args;
+  for (uint32_t i = 0; i < param.columns; i++) {
+    err << "\n";
+    auto src = Source{{1, 10 + i}};
+    if (i == 1) {
+      // Odd one out
+      args.push_back(Construct(src, ty.vec<i32>(param.rows)));
+      err << src << " note: argument " << i << " has type vec" << param.rows
+          << "<i32>";
+    } else {
+      args.push_back(Construct(src, ty.vec<f32>(param.rows)));
+      err << src << " note: argument " << i << " has type vec" << param.rows
+          << "<f32>";
+    }
+  }
+
+  auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
+  WrapInFunction(Construct(Source{{12, 34}}, matrix_type, std::move(args)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_THAT(r()->error(), err.str());
+}
+
+TEST_P(MatrixConstructorTest, CannotInferElementTypeFromScalars_Mismatch) {
+  const auto param = GetParam();
+
+  std::stringstream err;
+  err << "12:34 error: cannot infer matrix element type, as constructor "
+         "arguments have different types";
+  ast::ExpressionList args;
+  for (uint32_t i = 0; i < param.rows * param.columns; i++) {
+    err << "\n";
+    auto src = Source{{1, 10 + i}};
+    if (i == 3) {
+      args.push_back(Expr(src, static_cast<i32>(i)));  // The odd one out
+      err << src << " note: argument " << i << " has type i32";
+    } else {
+      args.push_back(Expr(src, static_cast<f32>(i)));
+      err << src << " note: argument " << i << " has type f32";
+    }
+  }
+
+  auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
+  WrapInFunction(Construct(Source{{12, 34}}, matrix_type, std::move(args)));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_THAT(r()->error(), err.str());
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,

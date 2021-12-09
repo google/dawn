@@ -766,6 +766,28 @@ TEST_F(ResolverFunctionValidationTest, ParametersOverLimit) {
             "12:34 error: functions may declare at most 255 parameters");
 }
 
+TEST_F(ResolverFunctionValidationTest, ParameterVectorNoType) {
+  // fn f(p : vec3) {}
+
+  Func(Source{{12, 34}}, "f",
+       {Param("p", create<ast::Vector>(Source{{12, 34}}, nullptr, 3))},
+       ty.void_(), {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+}
+
+TEST_F(ResolverFunctionValidationTest, ParameterMatrixNoType) {
+  // fn f(p : vec3) {}
+
+  Func(Source{{12, 34}}, "f",
+       {Param("p", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3))},
+       ty.void_(), {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+}
+
 struct TestParams {
   ast::StorageClass storage_class;
   bool should_pass;

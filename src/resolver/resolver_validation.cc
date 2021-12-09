@@ -1853,6 +1853,12 @@ bool Resolver::ValidateMatrixConstructorOrCast(const ast::CallExpression* ctor,
     return false;
   }
 
+  std::vector<const sem::Type*> arg_tys;
+  arg_tys.reserve(values.size());
+  for (auto* value : values) {
+    arg_tys.emplace_back(TypeOf(value)->UnwrapRef());
+  }
+
   auto* elem_type = matrix_ty->type();
   auto num_elements = matrix_ty->columns() * matrix_ty->rows();
 
@@ -1864,7 +1870,14 @@ bool Resolver::ValidateMatrixConstructorOrCast(const ast::CallExpression* ctor,
     auto type_name = TypeNameOf(matrix_ty);
     auto elem_type_name = TypeNameOf(elem_type);
     std::stringstream ss;
-    ss << "invalid constructor for " + type_name << std::endl << std::endl;
+    ss << "no matching constructor " + type_name << "(";
+    for (size_t i = 0; i < values.size(); i++) {
+      if (i > 0) {
+        ss << ", ";
+      }
+      ss << arg_tys[i]->FriendlyName(builder_->Symbols());
+    }
+    ss << ")" << std::endl << std::endl;
     ss << "3 candidates available:" << std::endl;
     ss << "  " << type_name << "()" << std::endl;
     ss << "  " << type_name << "(" << elem_type_name << ",...,"
@@ -1893,8 +1906,8 @@ bool Resolver::ValidateMatrixConstructorOrCast(const ast::CallExpression* ctor,
     return false;
   }
 
-  for (auto* value : values) {
-    if (TypeOf(value)->UnwrapRef() != expected_arg_type) {
+  for (auto* arg_ty : arg_tys) {
+    if (arg_ty != expected_arg_type) {
       print_error();
       return false;
     }
