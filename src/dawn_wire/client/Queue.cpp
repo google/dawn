@@ -57,7 +57,7 @@ namespace dawn_wire { namespace client {
                             size_t size) {
         Buffer* buffer = FromAPI(cBuffer);
 
-        QueueWriteBufferInternalCmd cmd;
+        QueueWriteBufferCmd cmd;
         cmd.queueId = id;
         cmd.bufferId = buffer->id;
         cmd.bufferOffset = bufferOffset;
@@ -72,7 +72,7 @@ namespace dawn_wire { namespace client {
                              size_t dataSize,
                              const WGPUTextureDataLayout* dataLayout,
                              const WGPUExtent3D* writeSize) {
-        QueueWriteTextureInternalCmd cmd;
+        QueueWriteTextureCmd cmd;
         cmd.queueId = id;
         cmd.destination = destination;
         cmd.data = static_cast<const uint8_t*>(data);

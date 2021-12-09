@@ -66,14 +66,14 @@
             { "name": "signal value", "type": "uint64_t" },
             { "name": "request serial", "type": "uint64_t" }
         ],
-        "queue write buffer internal": [
+        "queue write buffer": [
             {"name": "queue id", "type": "ObjectId" },
             {"name": "buffer id", "type": "ObjectId" },
             {"name": "buffer offset", "type": "uint64_t"},
             {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "size"},
             {"name": "size", "type": "uint64_t"}
         ],
-        "queue write texture internal": [
+        "queue write texture": [
             {"name": "queue id", "type": "ObjectId" },
             {"name": "destination", "type": "image copy texture", "annotation": "const*"},
             {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "data size"},

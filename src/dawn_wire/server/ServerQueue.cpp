@@ -45,11 +45,11 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool Server::DoQueueWriteBufferInternal(ObjectId queueId,
-                                            ObjectId bufferId,
-                                            uint64_t bufferOffset,
-                                            const uint8_t* data,
-                                            uint64_t size) {
+    bool Server::DoQueueWriteBuffer(ObjectId queueId,
+                                    ObjectId bufferId,
+                                    uint64_t bufferOffset,
+                                    const uint8_t* data,
+                                    uint64_t size) {
         // The null object isn't valid as `self` or `buffer` so we can combine the check with the
         // check that the ID is valid.
         auto* queue = QueueObjects().Get(queueId);
@@ -73,12 +73,12 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool Server::DoQueueWriteTextureInternal(ObjectId queueId,
-                                             const WGPUImageCopyTexture* destination,
-                                             const uint8_t* data,
-                                             uint64_t dataSize,
-                                             const WGPUTextureDataLayout* dataLayout,
-                                             const WGPUExtent3D* writeSize) {
+    bool Server::DoQueueWriteTexture(ObjectId queueId,
+                                     const WGPUImageCopyTexture* destination,
+                                     const uint8_t* data,
+                                     uint64_t dataSize,
+                                     const WGPUTextureDataLayout* dataLayout,
+                                     const WGPUExtent3D* writeSize) {
         // The null object isn't valid as `self` so we can combine the check with the
         // check that the ID is valid.
         auto* queue = QueueObjects().Get(queueId);
