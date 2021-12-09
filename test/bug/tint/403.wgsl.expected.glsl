@@ -1,6 +1,12 @@
 #version 310 es
 precision mediump float;
 
+struct vertexUniformBuffer1 {
+  mat2 transform1;
+};
+struct vertexUniformBuffer2 {
+  mat2 transform2;
+};
 
 layout (binding = 0) uniform vertexUniformBuffer1_1 {
   mat2 transform1;

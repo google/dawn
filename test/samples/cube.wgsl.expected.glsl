@@ -1,6 +1,9 @@
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  mat4 modelViewProjectionMatrix;
+};
 
 layout (binding = 0) uniform Uniforms_1 {
   mat4 modelViewProjectionMatrix;
@@ -63,6 +66,9 @@ void main() {
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  mat4 modelViewProjectionMatrix;
+};
 struct VertexInput {
   vec4 cur_position;
   vec4 color;

@@ -7,6 +7,18 @@ struct Inner {
 struct tint_padded_array_element {
   Inner el;
 };
+struct S {
+  ivec3 a;
+  int b;
+  uvec3 c;
+  uint d;
+  vec3 e;
+  float f;
+  mat2x3 g;
+  mat3x2 h;
+  Inner i;
+  tint_padded_array_element j[4];
+};
 
 layout (binding = 0) buffer S_1 {
   ivec3 a;

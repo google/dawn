@@ -4,11 +4,19 @@ precision mediump float;
 struct tint_padded_array_element {
   int el;
 };
+struct UBO {
+  tint_padded_array_element data[4];
+  int dynamic_idx;
+};
 
 layout (binding = 0) uniform UBO_1 {
   tint_padded_array_element data[4];
   int dynamic_idx;
 } ubo;
+
+struct Result {
+  int tint_symbol;
+};
 
 layout (binding = 2) buffer Result_1 {
   int tint_symbol;

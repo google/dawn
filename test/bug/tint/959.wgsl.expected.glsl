@@ -1,6 +1,9 @@
 #version 310 es
 precision mediump float;
 
+struct S {
+  float a;
+};
 
 layout (binding = 0) buffer S_1 {
   float a;

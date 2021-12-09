@@ -1,6 +1,10 @@
 #version 310 es
 precision mediump float;
 
+struct Params {
+  uint filterDim;
+  uint blockDim;
+};
 
 
 layout (binding = 1) uniform Params_1 {
@@ -9,6 +13,10 @@ layout (binding = 1) uniform Params_1 {
 } params;
 uniform highp sampler2D inputTex;
 uniform highp writeonly image2D outputTex;
+
+struct Flip {
+  uint value;
+};
 
 layout (binding = 3) uniform Flip_1 {
   uint value;

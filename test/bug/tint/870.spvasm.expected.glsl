@@ -7,6 +7,9 @@ struct sspp962805860buildInformationS {
   int essence;
   int orientation[6];
 };
+struct x_B4_BuildInformation {
+  sspp962805860buildInformationS passthru;
+};
 
 layout (binding = 2) buffer x_B4_BuildInformation_1 {
   sspp962805860buildInformationS passthru;

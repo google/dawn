@@ -434,6 +434,9 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct UBO {
+  vec4 coord;
+};
 
 layout (binding = 0) uniform UBO_1 {
   vec4 coord;
@@ -484,6 +487,9 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Uniforms {
+  vec4 coord;
+};
 
 layout (binding = 0) uniform Uniforms_1 {
   vec4 coord;
@@ -535,6 +541,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  float b;
+};
 
 layout (binding = 0) buffer Data_1 {
   int a;
@@ -587,6 +597,10 @@ TEST_F(GlslGeneratorImplTest_Function,
             R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  float b;
+};
 
 layout (binding = 0) buffer Data_1 {
   int a;
@@ -635,6 +649,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  float b;
+};
 
 layout (binding = 0) buffer Data_1 {
   int a;
@@ -684,6 +702,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  float b;
+};
 
 layout (binding = 0) buffer Data_1 {
   int a;
@@ -735,6 +757,9 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct S {
+  float x;
+};
 
 layout (binding = 0) uniform S_1 {
   float x;
@@ -791,6 +816,9 @@ TEST_F(GlslGeneratorImplTest_Function,
             R"(#version 310 es
 precision mediump float;
 
+struct S {
+  float x;
+};
 
 layout (binding = 0) buffer S_1 {
   float x;
@@ -1057,6 +1085,9 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float d;
+};
 
 layout (binding = 0) buffer Data_1 {
   float d;

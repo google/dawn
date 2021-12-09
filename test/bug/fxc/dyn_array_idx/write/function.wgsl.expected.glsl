@@ -1,6 +1,9 @@
 #version 310 es
 precision mediump float;
 
+struct UBO {
+  int dynamic_idx;
+};
 
 layout (binding = 0) uniform UBO_1 {
   int dynamic_idx;
@@ -8,6 +11,9 @@ layout (binding = 0) uniform UBO_1 {
 
 struct S {
   int data[64];
+};
+struct Result {
+  int tint_symbol;
 };
 
 layout (binding = 1) buffer Result_1 {

@@ -1,3 +1,7 @@
+intrinsics/gen/isInf/666f2a.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec3<bool> = isInf(vec3<f32>());
+                        ^^^^^
+
 #version 310 es
 precision mediump float;
 

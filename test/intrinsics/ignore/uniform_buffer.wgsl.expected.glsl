@@ -9,6 +9,9 @@ intrinsics/ignore/uniform_buffer.wgsl:11:5 warning: use of deprecated intrinsic
 #version 310 es
 precision mediump float;
 
+struct S {
+  int i;
+};
 
 layout (binding = 0) uniform S_1 {
   int i;

@@ -1,6 +1,9 @@
 #version 310 es
 precision mediump float;
 
+struct DrawIndirectArgs {
+  uint vertexCount;
+};
 
 layout (binding = 5) buffer DrawIndirectArgs_1 {
   uint vertexCount;

@@ -7,6 +7,11 @@ vec3 Bad(uint index, vec3 rd) {
   return normalize(normal);
 }
 
+struct S {
+  vec3 v;
+  uint i;
+};
+
 layout (binding = 0) buffer S_1 {
   vec3 v;
   uint i;

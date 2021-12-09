@@ -296,6 +296,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  mat2x3 b;
+};
 
 layout (binding = 0) buffer Data_1 {
   int a;
@@ -342,6 +346,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float z;
+  mat4x3 a;
+};
 
 layout (binding = 0) buffer Data_1 {
   float z;
@@ -386,6 +394,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float z;
+  int a[5];
+};
 
 layout (binding = 0) buffer Data_1 {
   float z;
@@ -431,6 +443,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float z;
+  int a[5];
+};
 
 layout (binding = 0) buffer Data_1 {
   float z;
@@ -473,6 +489,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float z;
+  int a[5];
+};
 
 layout (binding = 0) buffer Data_1 {
   float z;
@@ -529,6 +549,9 @@ precision mediump float;
 struct Inner {
   vec3 a;
   vec3 b;
+};
+struct Data {
+  Inner c[4];
 };
 
 layout (binding = 0) buffer Data_1 {
@@ -589,6 +612,9 @@ struct Inner {
   vec3 a;
   vec3 b;
 };
+struct Data {
+  Inner c[4];
+};
 
 layout (binding = 0) buffer Data_1 {
   Inner c[4];
@@ -647,6 +673,9 @@ precision mediump float;
 struct Inner {
   vec3 a;
   vec3 b;
+};
+struct Data {
+  Inner c[4];
 };
 
 layout (binding = 0) buffer Data_1 {
@@ -707,6 +736,9 @@ struct Inner {
   vec3 a;
   vec3 b;
 };
+struct Data {
+  Inner c[4];
+};
 
 layout (binding = 0) buffer Data_1 {
   Inner c[4];
@@ -761,6 +793,9 @@ precision mediump float;
 struct Inner {
   vec3 a;
   vec3 b;
+};
+struct Data {
+  Inner c[4];
 };
 
 layout (binding = 0) buffer Data_1 {
@@ -820,6 +855,9 @@ precision mediump float;
 struct Inner {
   ivec3 a;
   vec3 b;
+};
+struct Data {
+  Inner c[4];
 };
 
 layout (binding = 0) buffer Data_1 {

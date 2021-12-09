@@ -1,6 +1,10 @@
 #version 310 es
 precision mediump float;
 
+struct Buf {
+  uint count;
+  uint data[50];
+};
 
 layout (binding = 0) buffer Buf_1 {
   uint count;

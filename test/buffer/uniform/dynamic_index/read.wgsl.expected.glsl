@@ -14,6 +14,9 @@ struct Inner {
   mat3x2 j;
   ivec4 k[4];
 };
+struct S {
+  Inner arr[8];
+};
 
 layout (binding = 0) uniform S_1 {
   Inner arr[8];

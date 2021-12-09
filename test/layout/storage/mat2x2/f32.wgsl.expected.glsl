@@ -1,6 +1,9 @@
 #version 310 es
 precision mediump float;
 
+struct SSBO {
+  mat2 m;
+};
 
 layout (binding = 0) buffer SSBO_1 {
   mat2 m;

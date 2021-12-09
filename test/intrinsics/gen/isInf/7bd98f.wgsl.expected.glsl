@@ -1,3 +1,7 @@
+intrinsics/gen/isInf/7bd98f.wgsl:28:19 warning: use of deprecated intrinsic
+  var res: bool = isInf(1.0);
+                  ^^^^^
+
 #version 310 es
 precision mediump float;
 

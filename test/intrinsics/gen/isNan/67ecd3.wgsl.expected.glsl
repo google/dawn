@@ -1,3 +1,7 @@
+intrinsics/gen/isNan/67ecd3.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec2<bool> = isNan(vec2<f32>());
+                        ^^^^^
+
 #version 310 es
 precision mediump float;
 

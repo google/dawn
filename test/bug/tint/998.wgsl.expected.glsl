@@ -1,11 +1,17 @@
 #version 310 es
 precision mediump float;
 
+struct Constants {
+  uint zero;
+};
 
 layout (binding = 0) uniform Constants_1 {
   uint zero;
 } constants;
 
+struct Result {
+  uint value;
+};
 struct S {
   uint data[3];
 };

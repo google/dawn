@@ -4,6 +4,9 @@ precision mediump float;
 struct QuicksortObject {
   int numbers[10];
 };
+struct buf0 {
+  vec2 resolution;
+};
 
 QuicksortObject obj = QuicksortObject(int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);

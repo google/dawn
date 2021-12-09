@@ -9,6 +9,9 @@ ivec2 tint_atomicCompareExchangeWeak(inout int param_0, int param_1, int param_2
 }
 
 
+struct SB_RW {
+  int arg_0;
+};
 
 layout (binding = 0) buffer SB_RW_1 {
   int arg_0;
@@ -38,6 +41,9 @@ ivec2 tint_atomicCompareExchangeWeak(inout int param_0, int param_1, int param_2
 }
 
 
+struct SB_RW {
+  int arg_0;
+};
 
 layout (binding = 0) buffer SB_RW_1 {
   int arg_0;

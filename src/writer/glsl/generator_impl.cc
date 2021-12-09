@@ -123,10 +123,8 @@ bool GeneratorImpl::Generate() {
         return false;
       }
     } else if (auto* str = decl->As<ast::Struct>()) {
-      if (!str->IsBlockDecorated()) {
-        if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
-          return false;
-        }
+      if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
+        return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
       if (func->IsEntryPoint()) {

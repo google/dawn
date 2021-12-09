@@ -23,6 +23,18 @@ struct Particle {
   vec2 pos;
   vec2 vel;
 };
+struct SimParams {
+  float deltaT;
+  float rule1Distance;
+  float rule2Distance;
+  float rule3Distance;
+  float rule1Scale;
+  float rule2Scale;
+  float rule3Scale;
+};
+struct Particles {
+  Particle particles[5];
+};
 struct tint_symbol_6 {
   uvec3 tint_symbol;
 };
@@ -71,6 +83,18 @@ struct Particle {
   vec2 pos;
   vec2 vel;
 };
+struct SimParams {
+  float deltaT;
+  float rule1Distance;
+  float rule2Distance;
+  float rule3Distance;
+  float rule1Scale;
+  float rule2Scale;
+  float rule3Scale;
+};
+struct Particles {
+  Particle particles[5];
+};
 struct tint_symbol_6 {
   uvec3 tint_symbol;
 };
@@ -106,6 +130,18 @@ struct tint_symbol_4 {
 struct Particle {
   vec2 pos;
   vec2 vel;
+};
+struct SimParams {
+  float deltaT;
+  float rule1Distance;
+  float rule2Distance;
+  float rule3Distance;
+  float rule1Scale;
+  float rule2Scale;
+  float rule3Scale;
+};
+struct Particles {
+  Particle particles[5];
 };
 
 layout (binding = 0) uniform SimParams_1 {
