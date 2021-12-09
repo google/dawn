@@ -41,6 +41,7 @@
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
 #include "src/transform/add_empty_entry_point.h"
+#include "src/transform/add_spirv_block_decoration.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/fold_constants.h"
@@ -279,6 +280,7 @@ SanitizedResult Sanitize(const Program* in,
                                             // ZeroInitWorkgroupMemory
   manager.Add<transform::CanonicalizeEntryPointIO>();
   manager.Add<transform::AddEmptyEntryPoint>();
+  manager.Add<transform::AddSpirvBlockDecoration>();
 
   data.Add<transform::CanonicalizeEntryPointIO::Config>(
       transform::CanonicalizeEntryPointIO::Config(
@@ -4142,7 +4144,9 @@ bool Builder::GenerateStructType(const sem::Struct* struct_type,
   ops.push_back(result);
 
   auto* decl = struct_type->Declaration();
-  if (decl && decl->IsBlockDecorated()) {
+  if (decl && ast::HasDecoration<
+                  transform::AddSpirvBlockDecoration::SpirvBlockDecoration>(
+                  decl->decorations)) {
     push_annot(spv::Op::OpDecorate,
                {Operand::Int(struct_id), Operand::Int(SpvDecorationBlock)});
   }

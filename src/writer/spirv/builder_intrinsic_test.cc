@@ -1716,7 +1716,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
            Stage(ast::PipelineStage::kFragment),
        });
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build()) << b.error();
 
@@ -1765,7 +1765,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
            Stage(ast::PipelineStage::kFragment),
        });
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build()) << b.error();
 
@@ -1938,7 +1938,7 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicLoad) {
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build()) << b.error();
 
@@ -2008,7 +2008,7 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicStore) {
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build()) << b.error();
 
@@ -2083,7 +2083,7 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_i32, Test) {
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build()) << b.error();
 
@@ -2161,7 +2161,7 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_u32, Test) {
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build()) << b.error();
 
@@ -2244,7 +2244,7 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicExchange) {
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build()) << b.error();
 
@@ -2322,7 +2322,7 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicCompareExchangeWeak) {
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build()) << b.error();
 

@@ -387,16 +387,15 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* var =
-      Global("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
-             });
+  Global("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  ASSERT_TRUE(b.Build());
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
@@ -409,11 +408,14 @@ OpDecorate %1 DescriptorSet 0
 OpMemberName %3 0 "a"
 OpMemberName %3 1 "b"
 OpName %1 "b"
+OpName %7 "unused_entry_point"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4 %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
 )");
 }
 
@@ -427,16 +429,15 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
   auto* B = Alias("B", ty.Of(A));
-  auto* var =
-      Global("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
-             });
+  Global("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  ASSERT_TRUE(b.Build());
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
@@ -447,11 +448,14 @@ OpDecorate %1 DescriptorSet 0
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
 OpMemberName %3 0 "a"
 OpName %1 "b"
+OpName %7 "unused_entry_point"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
 )");
 }
 
@@ -465,16 +469,15 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
   auto* B = Alias("B", ty.Of(A));
-  auto* var =
-      Global("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
-             });
+  Global("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  ASSERT_TRUE(b.Build());
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
@@ -485,11 +488,14 @@ OpDecorate %1 DescriptorSet 0
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
 OpMemberName %3 0 "a"
 OpName %1 "b"
+OpName %7 "unused_entry_point"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
 )");
 }
 
@@ -502,23 +508,20 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* var_b =
-      Global("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
-             ast::DecorationList{
-                 create<ast::GroupDecoration>(0),
-                 create<ast::BindingDecoration>(0),
-             });
-  auto* var_c = Global("c", ty.Of(A), ast::StorageClass::kStorage,
-                       ast::Access::kReadWrite,
-                       ast::DecorationList{
-                           create<ast::GroupDecoration>(1),
-                           create<ast::BindingDecoration>(0),
-                       });
+  Global("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::GroupDecoration>(0),
+             create<ast::BindingDecoration>(0),
+         });
+  Global("c", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::GroupDecoration>(1),
+             create<ast::BindingDecoration>(0),
+         });
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(var_c)) << b.error();
+  ASSERT_TRUE(b.Build());
 
   EXPECT_EQ(DumpInstructions(b.annots()),
             R"(OpDecorate %3 Block
@@ -533,12 +536,15 @@ OpDecorate %5 Binding 0
 OpMemberName %3 0 "a"
 OpName %1 "b"
 OpName %5 "c"
+OpName %8 "unused_entry_point"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
 %5 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
 )");
 }
 

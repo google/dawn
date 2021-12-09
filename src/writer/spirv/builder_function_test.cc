@@ -236,7 +236,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                              WorkgroupSize(1)});
   }
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader

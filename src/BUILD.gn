@@ -427,6 +427,8 @@ libtint_source_set("libtint_core_all_src") {
     "traits.h",
     "transform/add_empty_entry_point.cc",
     "transform/add_empty_entry_point.h",
+    "transform/add_spirv_block_decoration.cc",
+    "transform/add_spirv_block_decoration.h",
     "transform/array_length_from_uniform.cc",
     "transform/array_length_from_uniform.h",
     "transform/binding_remapper.cc",

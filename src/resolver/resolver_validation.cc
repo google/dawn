@@ -2160,7 +2160,8 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
   }
 
   for (auto* deco : str->Declaration()->decorations) {
-    if (!(deco->Is<ast::StructBlockDecoration>())) {
+    if (!(deco->IsAnyOf<ast::StructBlockDecoration,
+                        ast::InternalDecoration>())) {
       AddError("decoration is not valid for struct declarations", deco->source);
       return false;
     }
