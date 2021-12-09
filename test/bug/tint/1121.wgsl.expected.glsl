@@ -15,10 +15,22 @@ struct TileLightIdData {
   uint count;
   uint lightId[64];
 };
+struct Tiles {
+  TileLightIdData data[4];
+};
 
 layout (binding = 0) buffer Tiles_1 {
   TileLightIdData data[4];
 } tileLightId;
+
+struct Config {
+  uint numLights;
+  uint numTiles;
+  uint tileCountX;
+  uint tileCountY;
+  uint numTileLightSlot;
+  uint tileSize;
+};
 
 layout (binding = 0) uniform Config_1 {
   uint numLights;
@@ -28,6 +40,14 @@ layout (binding = 0) uniform Config_1 {
   uint numTileLightSlot;
   uint tileSize;
 } config;
+
+struct Uniforms {
+  vec4 tint_symbol;
+  vec4 tint_symbol_1;
+  mat4 viewMatrix;
+  mat4 projectionMatrix;
+  vec4 fullScreenSize;
+};
 
 layout (binding = 0) uniform Uniforms_1 {
   vec4 tint_symbol;

@@ -1,6 +1,11 @@
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  uvec2 aShape;
+  uvec2 bShape;
+  uvec2 outShape;
+};
 
 layout (binding = 0) buffer Matrix_1 {
   uint numbers[];

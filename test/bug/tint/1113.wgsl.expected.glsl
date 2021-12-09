@@ -1,6 +1,28 @@
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  uint numTriangles;
+  uint gridSize;
+  uint pad1;
+  uint pad2;
+  vec3 bbMin;
+  vec3 bbMax;
+};
+struct Dbg {
+  uint offsetCounter;
+  uint pad0;
+  uint pad1;
+  uint pad2;
+  uint value0;
+  uint value1;
+  uint value2;
+  uint value3;
+  float value_f32_0;
+  float value_f32_1;
+  float value_f32_2;
+  float value_f32_3;
+};
 
 layout (binding = 0) uniform Uniforms_1 {
   uint numTriangles;
@@ -118,6 +140,28 @@ void main() {
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  uint numTriangles;
+  uint gridSize;
+  uint pad1;
+  uint pad2;
+  vec3 bbMin;
+  vec3 bbMax;
+};
+struct Dbg {
+  uint offsetCounter;
+  uint pad0;
+  uint pad1;
+  uint pad2;
+  uint value0;
+  uint value1;
+  uint value2;
+  uint value3;
+  float value_f32_0;
+  float value_f32_1;
+  float value_f32_2;
+  float value_f32_3;
+};
 
 layout (binding = 0) uniform Uniforms_1 {
   uint numTriangles;
@@ -204,6 +248,28 @@ void main() {
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  uint numTriangles;
+  uint gridSize;
+  uint pad1;
+  uint pad2;
+  vec3 bbMin;
+  vec3 bbMax;
+};
+struct Dbg {
+  uint offsetCounter;
+  uint pad0;
+  uint pad1;
+  uint pad2;
+  uint value0;
+  uint value1;
+  uint value2;
+  uint value3;
+  float value_f32_0;
+  float value_f32_1;
+  float value_f32_2;
+  float value_f32_3;
+};
 
 layout (binding = 0) uniform Uniforms_1 {
   uint numTriangles;

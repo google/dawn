@@ -123,8 +123,18 @@ bool GeneratorImpl::Generate() {
         return false;
       }
     } else if (auto* str = decl->As<ast::Struct>()) {
-      if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
-        return false;
+      // Skip emission if the struct contains a runtime-sized array, since its
+      // only use will be as the store-type of a buffer and we emit those
+      // elsewhere.
+      // TODO(crbug.com/tint/1339): We could also avoid emitting any other
+      // struct that is only used as a buffer store type.
+      TINT_ASSERT(Writer, str->members.size() > 0);
+      auto* last_member = str->members[str->members.size() - 1];
+      auto* arr = last_member->type->As<ast::Array>();
+      if (!arr || !arr->IsRuntimeArray()) {
+        if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
+          return false;
+        }
       }
     } else if (auto* func = decl->As<ast::Function>()) {
       if (func->IsEntryPoint()) {

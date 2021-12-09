@@ -1,6 +1,13 @@
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  uint dstTextureFlipY;
+  uint channelCount;
+  uvec2 srcCopyOrigin;
+  uvec2 dstCopyOrigin;
+  uvec2 copySize;
+};
 
 uniform highp sampler2D src;
 uniform highp sampler2D dst;

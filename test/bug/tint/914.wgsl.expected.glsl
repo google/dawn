@@ -1,6 +1,11 @@
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  uint dimAOuter;
+  uint dimInner;
+  uint dimBOuter;
+};
 
 layout (binding = 0) buffer Matrix_1 {
   float numbers[];

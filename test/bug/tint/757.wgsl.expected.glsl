@@ -1,6 +1,9 @@
 #version 310 es
 precision mediump float;
 
+struct Constants {
+  int level;
+};
 
 uniform highp sampler2DArray myTexture;
 
