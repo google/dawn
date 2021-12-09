@@ -17,6 +17,7 @@ import("scripts/dawn_overrides_with_defaults.gni")
 group("all") {
   testonly = true
   deps = [
+    "src/dawn_native:webgpu_dawn",
     "src/fuzzers:dawn_fuzzers",
     "src/tests:dawn_tests",
   ]

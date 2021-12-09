@@ -28,51 +28,51 @@
 
 namespace dawn_native {
 
-    namespace {
+    {% for type in by_category["object"] %}
+        {% for method in c_methods(type) %}
+            {% set suffix = as_MethodSuffix(type.name, method.name) %}
 
-        {% for type in by_category["object"] %}
-            {% for method in c_methods(type) %}
-                {% set suffix = as_MethodSuffix(type.name, method.name) %}
+            {{as_cType(method.return_type.name)}} Native{{suffix}}(
+                {{-as_cType(type.name)}} cSelf
+                {%- for arg in method.arguments -%}
+                    , {{as_annotated_cType(arg)}}
+                {%- endfor -%}
+            ) {
+                //* Perform conversion between C types and frontend types
+                auto self = FromAPI(cSelf);
 
-                {{as_cType(method.return_type.name)}} Native{{suffix}}(
-                    {{-as_cType(type.name)}} cSelf
-                    {%- for arg in method.arguments -%}
-                        , {{as_annotated_cType(arg)}}
-                    {%- endfor -%}
-                ) {
-                    //* Perform conversion between C types and frontend types
-                    auto self = FromAPI(cSelf);
-
-                    {% for arg in method.arguments %}
-                        {% set varName = as_varName(arg.name) %}
-                        {% if arg.type.category in ["enum", "bitmask"] %}
-                            auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
-                        {% elif arg.annotation != "value" or arg.type.category == "object" %}
-                            auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});
-                        {% else %}
-                            auto {{varName}}_ = {{as_varName(arg.name)}};
-                        {% endif %}
-                    {%- endfor-%}
-
-                    {% if method.return_type.name.canonical_case() != "void" %}
-                        auto result =
-                    {%- endif %}
-                    self->API{{method.name.CamelCase()}}(
-                        {%- for arg in method.arguments -%}
-                            {%- if not loop.first %}, {% endif -%}
-                            {{as_varName(arg.name)}}_
-                        {%- endfor -%}
-                    );
-                    {% if method.return_type.name.canonical_case() != "void" %}
-                        {% if method.return_type.category == "object" %}
-                            return ToAPI(result);
-                        {% else %}
-                            return result;
-                        {% endif %}
+                {% for arg in method.arguments %}
+                    {% set varName = as_varName(arg.name) %}
+                    {% if arg.type.category in ["enum", "bitmask"] %}
+                        auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
+                    {% elif arg.annotation != "value" or arg.type.category == "object" %}
+                        auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});
+                    {% else %}
+                        auto {{varName}}_ = {{as_varName(arg.name)}};
                     {% endif %}
-                }
-            {% endfor %}
+                {%- endfor-%}
+
+                {% if method.return_type.name.canonical_case() != "void" %}
+                    auto result =
+                {%- endif %}
+                self->API{{method.name.CamelCase()}}(
+                    {%- for arg in method.arguments -%}
+                        {%- if not loop.first %}, {% endif -%}
+                        {{as_varName(arg.name)}}_
+                    {%- endfor -%}
+                );
+                {% if method.return_type.name.canonical_case() != "void" %}
+                    {% if method.return_type.category == "object" %}
+                        return ToAPI(result);
+                    {% else %}
+                        return result;
+                    {% endif %}
+                {% endif %}
+            }
         {% endfor %}
+    {% endfor %}
+
+    namespace {
 
         struct ProcEntry {
             WGPUProc proc;
@@ -84,7 +84,8 @@ namespace dawn_native {
             {% endfor %}
         };
         static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
-    }
+
+    }  // anonymous namespace
 
     WGPUInstance NativeCreateInstance(WGPUInstanceDescriptor const* descriptor) {
         return ToAPI(InstanceBase::Create(FromAPI(descriptor)));

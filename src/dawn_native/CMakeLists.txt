@@ -545,3 +545,17 @@ endif()
 if (DAWN_ENABLE_VULKAN)
     target_sources(dawn_native PRIVATE "vulkan/VulkanBackend.cpp")
 endif()
+
+DawnJSONGenerator(
+    TARGET "webgpu_dawn_native_proc"
+    PRINT_NAME "Dawn native WebGPU procs"
+    RESULT_VARIABLE "WEBGPU_DAWN_NATIVE_PROC_GEN"
+)
+
+add_library(webgpu_dawn ${DAWN_DUMMY_FILE})
+target_link_libraries(webgpu_dawn PRIVATE dawn_native)
+target_compile_definitions(webgpu_dawn PRIVATE "WGPU_IMPLEMENTATION")
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(webgpu_dawn PRIVATE "WGPU_SHARED_LIBRARY")
+endif()
+target_sources(webgpu_dawn PRIVATE ${WEBGPU_DAWN_NATIVE_PROC_GEN})

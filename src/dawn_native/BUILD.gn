@@ -746,3 +746,32 @@ dawn_component("dawn_native") {
     }
   }
 }
+
+dawn_json_generator("webgpu_dawn_native_proc_gen") {
+  target = "webgpu_dawn_native_proc"
+  outputs = [ "src/dawn_native/webgpu_dawn_native_proc.cpp" ]
+}
+
+dawn_component("webgpu_dawn") {
+  # For a single library - build `webgpu_dawn_shared` with GN args:
+  #   dawn_complete_static_libs = true - to package a single lib
+  #
+  #   is_debug = false
+  #    - setting this to true makes library over 50Mb
+  #
+  #   use_custom_libcxx = false
+  #    - Otherwise, libc++ symbols may conflict if the
+  #      library is used outside of Chromium.
+  #
+  #   dawn_use_swiftshader = false
+  #   angle_enable_swiftshader = false
+  #    - SwiftShader can't be built without use_custom_libcxx.
+  #      It should be built separately.
+  DEFINE_PREFIX = "WGPU"
+
+  sources = get_target_outputs(":webgpu_dawn_native_proc_gen")
+  deps = [
+    ":dawn_native_static",
+    ":webgpu_dawn_native_proc_gen",
+  ]
+}
