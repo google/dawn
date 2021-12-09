@@ -1,16 +1,13 @@
-[[block]]
 struct buf1 {
   injectionSwitch : vec2<f32>;
 };
 
-[[block]]
 struct buf2 {
   resolution : vec2<f32>;
 };
 
 type RTArr = [[stride(4)]] array<i32>;
 
-[[block]]
 struct doesNotMatter {
   x_compute_data : RTArr;
 };

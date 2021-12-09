@@ -2,7 +2,6 @@ struct tmp_struct {
   nmb : array<i32, 1>;
 };
 
-[[block]]
 struct buf0 {
   injectionSwitch : vec2<f32>;
 };

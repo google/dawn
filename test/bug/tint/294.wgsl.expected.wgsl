@@ -3,7 +3,6 @@ struct Light {
   colour : vec3<f32>;
 };
 
-[[block]]
 struct Lights {
   light : [[stride(32)]] array<Light>;
 };

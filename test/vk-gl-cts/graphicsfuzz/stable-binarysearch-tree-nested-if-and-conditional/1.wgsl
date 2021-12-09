@@ -4,7 +4,6 @@ struct BST {
   rightIndex : i32;
 };
 
-[[block]]
 struct buf0 {
   injectionSwitch : vec2<f32>;
 };

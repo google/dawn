@@ -1,12 +1,10 @@
 type RTArr = [[stride(4)]] array<i32>;
 
-[[block]]
 struct doesNotMatter {
   global_seed : i32;
   data : RTArr;
 };
 
-[[block]]
 struct buf1 {
   injectionSwitch : vec2<f32>;
 };

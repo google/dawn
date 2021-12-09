@@ -2,7 +2,6 @@ struct Inner {
   x : i32;
 };
 
-[[block]]
 struct S {
   a : vec3<i32>;
   b : i32;

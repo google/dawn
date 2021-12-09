@@ -1,11 +1,9 @@
 type ArrayType = [[stride(16)]] array<i32, 4>;
 
-[[block]]
 struct S {
   arr : ArrayType;
 };
 
-[[block]]
 struct S_nested {
   arr : array<array<array<i32, 2>, 3>, 4>;
 };

@@ -1,4 +1,3 @@
-[[block]]
 struct block0 {
   in_color : vec4<f32>;
 };

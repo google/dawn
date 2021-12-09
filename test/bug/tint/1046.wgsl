@@ -3,11 +3,11 @@ struct PointLight {
     position : vec4<f32>;
 };
 
-[[block]] struct PointLights {
+ struct PointLights {
     values : [[stride(16)]] array<PointLight>;
 };
 
-[[block]] struct Uniforms {
+ struct Uniforms {
     worldView : mat4x4<f32>;
     proj : mat4x4<f32>;
     numPointLights : u32;

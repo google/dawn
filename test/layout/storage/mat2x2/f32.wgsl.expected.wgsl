@@ -1,4 +1,3 @@
-[[block]]
 struct SSBO {
   m : mat2x2<f32>;
 };

@@ -1,8 +1,8 @@
-intrinsics/ignore/uniform_buffer.wgsl:10:5 warning: use of deprecated intrinsic
+intrinsics/ignore/uniform_buffer.wgsl:9:5 warning: use of deprecated intrinsic
     ignore(u);
     ^^^^^^
 
-intrinsics/ignore/uniform_buffer.wgsl:11:5 warning: use of deprecated intrinsic
+intrinsics/ignore/uniform_buffer.wgsl:10:5 warning: use of deprecated intrinsic
     ignore(u.i);
     ^^^^^^
 

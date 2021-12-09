@@ -1,4 +1,3 @@
-[[block]]
 struct buf0 {
   injected : i32;
 };

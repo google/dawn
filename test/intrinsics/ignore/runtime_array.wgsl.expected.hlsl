@@ -1,4 +1,4 @@
-intrinsics/ignore/runtime_array.wgsl:10:5 warning: use of deprecated intrinsic
+intrinsics/ignore/runtime_array.wgsl:9:5 warning: use of deprecated intrinsic
     ignore(s.arr);
     ^^^^^^
 

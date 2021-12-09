@@ -1,4 +1,3 @@
-[[block]]
 struct DrawIndirectArgs {
   vertexCount : atomic<u32>;
 };

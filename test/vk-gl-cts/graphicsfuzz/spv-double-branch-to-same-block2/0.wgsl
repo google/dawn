@@ -1,9 +1,7 @@
-[[block]]
 struct buf1 {
   resolution : vec2<f32>;
 };
 
-[[block]]
 struct buf0 {
   injectionSwitch : vec2<f32>;
 };

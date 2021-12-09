@@ -1,4 +1,3 @@
-[[block]]
 struct S {
   [[align(64), location(0)]]
   f : f32;

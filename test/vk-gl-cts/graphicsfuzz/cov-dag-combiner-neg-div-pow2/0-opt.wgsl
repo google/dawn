@@ -1,9 +1,7 @@
-[[block]]
 struct buf1 {
   ten : i32;
 };
 
-[[block]]
 struct buf0 {
   minusEight : i32;
 };

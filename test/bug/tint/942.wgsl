@@ -1,4 +1,4 @@
-[[block]] struct Params {
+ struct Params {
   filterDim : u32;
   blockDim : u32;
 };
@@ -8,7 +8,7 @@
 [[group(1), binding(1)]] var inputTex : texture_2d<f32>;
 [[group(1), binding(2)]] var outputTex : texture_storage_2d<rgba8unorm, write>;
 
-[[block]] struct Flip {
+ struct Flip {
   value : u32;
 };
 [[group(1), binding(3)]] var<uniform> flip : Flip;

@@ -1,21 +1,17 @@
-[[block]]
 struct result {
   res0 : i32;
   res1 : i32;
   res2 : i32;
 };
 
-[[block]]
 struct block0 {
   data0 : i32;
 };
 
-[[block]]
 struct block1 {
   data1 : i32;
 };
 
-[[block]]
 struct block2 {
   data2 : i32;
 };

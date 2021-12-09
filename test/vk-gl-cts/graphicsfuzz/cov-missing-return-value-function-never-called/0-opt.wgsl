@@ -1,11 +1,9 @@
-[[block]]
 struct buf1 {
   one : u32;
 };
 
 type Arr = [[stride(16)]] array<i32, 1>;
 
-[[block]]
 struct buf0 {
   x_GLF_uniform_int_values : Arr;
 };

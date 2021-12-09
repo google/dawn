@@ -1,4 +1,3 @@
-[[block]]
 struct S {
   a : i32;
 };

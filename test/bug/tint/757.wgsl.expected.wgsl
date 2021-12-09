@@ -1,4 +1,3 @@
-[[block]]
 struct Constants {
   level : i32;
 };
@@ -7,7 +6,6 @@ struct Constants {
 
 [[group(0), binding(1)]] var myTexture : texture_2d_array<f32>;
 
-[[block]]
 struct Result {
   values : [[stride(4)]] array<f32>;
 };

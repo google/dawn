@@ -4,7 +4,6 @@ fn Bad(index : u32, rd : vec3<f32>) -> vec3<f32> {
   return normalize(normal);
 }
 
-[[block]]
 struct S {
   v : vec3<f32>;
   i : u32;

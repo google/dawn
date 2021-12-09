@@ -1,4 +1,3 @@
-[[block]]
 struct S {
   [[align(64)]] [[location(0)]] f : f32;
   [[size(32)]] [[location(1), interpolate(flat)]] u : u32;

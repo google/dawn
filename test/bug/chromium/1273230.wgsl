@@ -11,7 +11,7 @@ _ =   (vec4<f32>( 2.));
     _ = isNormal(4.);
     _ = isNormal(2.);
 
-}[[block]]
+}
 struct Uniforms {
   numTriangles : u32;
   gridSize : u32;
@@ -21,7 +21,6 @@ struct Uniforms {
   bbMax : vec3<f32>;
 };
 
-[[block]]
 struct Dbg {
   offsetCounter : atomic<u32>;
   pad0 : u32;
@@ -37,27 +36,22 @@ struct Dbg {
   value_f32_3 : f32;
 };
 
-[[block]]
 struct F32s {
   values : [[stride(4)]] array<f32>;
 };
 
-[[block]]
 struct U32s {
   values : [[stride(4)]] array<u32>;
 };
 
-[[block]]
 struct I32s {
   values : [[stride(4)]] array<i32>;
 };
 
-[[block]]
 struct AU32s {
   values : [[stride(4)]] array<atomic<u32>>;
 };
 
-[[block]]
 struct AI32s {
   values : [[stride(4)]] array<atomic<i32>>;
 };

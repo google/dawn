@@ -1,6 +1,5 @@
 type Arr = [[stride(16)]] array<i32, 2>;
 
-[[block]]
 struct buf1 {
   x_GLF_uniform_int_values : Arr;
 };

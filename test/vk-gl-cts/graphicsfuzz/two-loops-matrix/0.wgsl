@@ -1,4 +1,3 @@
-[[block]]
 struct buf0 {
   matrix_a_uni : mat4x4<f32>;
 };

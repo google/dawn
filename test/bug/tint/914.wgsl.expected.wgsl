@@ -1,11 +1,9 @@
-[[block]]
 struct Uniforms {
   dimAOuter : u32;
   dimInner : u32;
   dimBOuter : u32;
 };
 
-[[block]]
 struct Matrix {
   numbers : array<f32>;
 };

@@ -1,9 +1,9 @@
-[[block]] struct Uniforms {
+ struct Uniforms {
     dimAOuter : u32;
     dimInner : u32;
     dimBOuter : u32;
 };
-[[block]] struct Matrix {
+ struct Matrix {
     numbers: array<f32>;
 };
 

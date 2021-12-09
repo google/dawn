@@ -1,4 +1,3 @@
-[[block]]
 struct buf0 {
   four : f32;
 };

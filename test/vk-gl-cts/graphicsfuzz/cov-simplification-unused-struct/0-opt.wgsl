@@ -2,7 +2,6 @@ struct S {
   arr : array<i32, 2>;
 };
 
-[[block]]
 struct buf0 {
   one : i32;
 };

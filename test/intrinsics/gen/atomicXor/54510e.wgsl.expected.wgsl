@@ -1,4 +1,3 @@
-[[block]]
 struct SB_RW {
   arg_0 : atomic<u32>;
 };

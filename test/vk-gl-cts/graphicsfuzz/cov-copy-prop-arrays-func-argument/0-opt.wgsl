@@ -2,7 +2,6 @@ struct Array {
   values : array<i32, 2>;
 };
 
-[[block]]
 struct buf0 {
   zero : i32;
 };

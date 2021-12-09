@@ -1,11 +1,9 @@
-[[block]]
 struct buf0 {
   injectionSwitch : vec2<f32>;
 };
 
 type RTArr = [[stride(4)]] array<u32>;
 
-[[block]]
 struct doesNotMatter {
   x_compute_data : RTArr;
 };

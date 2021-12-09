@@ -4,7 +4,6 @@ struct LightData {
   radius : f32;
 };
 
-[[block]]
 struct LightsBuffer {
   lights : array<LightData>;
 };
@@ -16,14 +15,12 @@ struct TileLightIdData {
   lightId : array<u32, 64>;
 };
 
-[[block]]
 struct Tiles {
   data : array<TileLightIdData, 4>;
 };
 
 [[group(1), binding(0)]] var<storage, read_write> tileLightId : Tiles;
 
-[[block]]
 struct Config {
   numLights : u32;
   numTiles : u32;
@@ -35,7 +32,6 @@ struct Config {
 
 [[group(2), binding(0)]] var<uniform> config : Config;
 
-[[block]]
 struct Uniforms {
   min : vec4<f32>;
   max : vec4<f32>;

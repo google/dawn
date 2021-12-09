@@ -1,15 +1,15 @@
 
-[[block]] struct Constants {
+ struct Constants {
   zero: u32;
 };
 [[group(1), binding(0)]] var<uniform> constants: Constants;
 
-[[block]] struct Result {
+ struct Result {
   value: u32;
 };
 [[group(1), binding(1)]] var<storage, write> result: Result;
 
-[[block]] struct TestData {
+ struct TestData {
   data: array<atomic<i32>,3>;
 };
 [[group(0), binding(0)]] var<storage, read_write> s: TestData;

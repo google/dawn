@@ -16,18 +16,15 @@ struct Mat4x2_ {
   my : vec4<f32>;
 };
 
-[[block]]
 struct ub_SceneParams {
   u_Projection : Mat4x4_;
 };
 
-[[block]]
 struct ub_MaterialParams {
   u_TexMtx : [[stride(32)]] array<Mat4x2_, 1>;
   u_Misc0_ : vec4<f32>;
 };
 
-[[block]]
 struct ub_PacketParams {
   u_PosMtx : [[stride(48)]] array<Mat4x3_, 32>;
 };

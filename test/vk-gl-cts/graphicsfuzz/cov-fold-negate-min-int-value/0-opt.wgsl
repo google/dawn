@@ -1,4 +1,3 @@
-[[block]]
 struct buf0 {
   minusOne : i32;
 };

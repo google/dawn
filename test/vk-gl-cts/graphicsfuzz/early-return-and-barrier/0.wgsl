@@ -1,4 +1,3 @@
-[[block]]
 struct theSSBO {
   out_data : i32;
 };

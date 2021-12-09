@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 
-[[block]]
 struct buf0 {
   resolution : vec2<f32>;
 };

@@ -1,4 +1,3 @@
-[[block]]
 struct buf0 {
   zeroOne : vec2<f32>;
 };

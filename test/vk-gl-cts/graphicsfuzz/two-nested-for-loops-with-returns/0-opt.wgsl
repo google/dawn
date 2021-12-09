@@ -1,6 +1,5 @@
 type RTArr = [[stride(4)]] array<f32>;
 
-[[block]]
 struct doesNotMatter {
   x_compute_data : RTArr;
 };

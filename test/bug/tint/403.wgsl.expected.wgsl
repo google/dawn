@@ -1,9 +1,7 @@
-[[block]]
 struct vertexUniformBuffer1 {
   transform1 : mat2x2<f32>;
 };
 
-[[block]]
 struct vertexUniformBuffer2 {
   transform2 : mat2x2<f32>;
 };

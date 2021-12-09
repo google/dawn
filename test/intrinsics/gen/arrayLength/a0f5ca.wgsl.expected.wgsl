@@ -1,4 +1,3 @@
-[[block]]
 struct SB_RO {
   arg_0 : array<f32>;
 };

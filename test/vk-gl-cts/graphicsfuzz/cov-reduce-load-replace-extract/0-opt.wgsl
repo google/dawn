@@ -3,7 +3,6 @@ struct S {
   y : i32;
 };
 
-[[block]]
 struct buf0 {
   one : i32;
 };

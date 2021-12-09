@@ -1,4 +1,3 @@
-[[block]]
 struct S {
   v : vec3<f32>;
 };

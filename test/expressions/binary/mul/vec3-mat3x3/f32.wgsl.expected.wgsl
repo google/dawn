@@ -1,4 +1,3 @@
-[[block]]
 struct S {
   matrix : mat3x3<f32>;
   vector : vec3<f32>;

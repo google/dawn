@@ -1,25 +1,21 @@
 type Arr = [[stride(16)]] array<f32, 3>;
 
-[[block]]
 struct buf1 {
   x_GLF_uniform_float_values : Arr;
 };
 
 type Arr_1 = [[stride(16)]] array<i32, 4>;
 
-[[block]]
 struct buf2 {
   x_GLF_uniform_int_values : Arr_1;
 };
 
-[[block]]
 struct buf3 {
   three : i32;
 };
 
 type Arr_2 = [[stride(16)]] array<u32, 1>;
 
-[[block]]
 struct buf0 {
   x_GLF_uniform_uint_values : Arr_2;
 };

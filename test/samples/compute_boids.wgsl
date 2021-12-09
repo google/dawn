@@ -39,7 +39,7 @@ struct Particle {
   vel : vec2<f32>;
 };
 
-[[block]] struct SimParams {
+ struct SimParams {
   deltaT : f32;
   rule1Distance : f32;
   rule2Distance : f32;
@@ -49,7 +49,7 @@ struct Particle {
   rule3Scale : f32;
 };
 
-[[block]] struct Particles {
+ struct Particles {
   particles : array<Particle, 5>;
 };
 

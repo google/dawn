@@ -1,4 +1,3 @@
-[[block]]
 struct buf0 {
   injected : vec2<f32>;
 };

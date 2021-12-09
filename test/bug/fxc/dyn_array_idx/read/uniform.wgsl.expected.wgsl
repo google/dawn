@@ -1,4 +1,3 @@
-[[block]]
 struct UBO {
   data : [[stride(16)]] array<i32, 4>;
   dynamic_idx : i32;
@@ -6,7 +5,6 @@ struct UBO {
 
 [[group(0), binding(0)]] var<uniform> ubo : UBO;
 
-[[block]]
 struct Result {
   out : i32;
 };

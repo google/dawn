@@ -1,6 +1,5 @@
 type ArrayType = [[stride(16)]] array<i32, 4>;
 
-[[block]]
 struct S {
   arr : ArrayType;
 };

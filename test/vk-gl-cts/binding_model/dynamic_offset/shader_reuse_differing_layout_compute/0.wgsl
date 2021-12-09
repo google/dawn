@@ -1,4 +1,3 @@
-[[block]]
 struct block0 {
   data : vec4<f32>;
 };

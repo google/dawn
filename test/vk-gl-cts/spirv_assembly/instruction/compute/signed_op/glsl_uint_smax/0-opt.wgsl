@@ -1,6 +1,5 @@
 type RTArr = [[stride(4)]] array<u32>;
 
-[[block]]
 struct S {
   field0 : RTArr;
 };

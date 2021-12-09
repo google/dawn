@@ -1,4 +1,3 @@
-[[block]]
 struct UBO {
   dynamic_idx : i32;
 };
@@ -9,7 +8,6 @@ struct S {
   data : array<i32, 64>;
 };
 
-[[block]]
 struct Result {
   out : i32;
 };

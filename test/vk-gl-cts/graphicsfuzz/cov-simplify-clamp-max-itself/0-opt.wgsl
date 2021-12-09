@@ -1,4 +1,3 @@
-[[block]]
 struct buf0 {
   sequence : vec4<i32>;
 };

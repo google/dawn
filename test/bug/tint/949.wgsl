@@ -4,7 +4,6 @@ struct lightingInfo {
   specular : vec3<f32>;
 };
 
-[[block]]
 struct LeftOver {
   u_World : mat4x4<f32>;
   u_ViewProjection : mat4x4<f32>;
@@ -19,7 +18,6 @@ struct LeftOver {
   tangentSpaceParameter0 : vec2<f32>;
 };
 
-[[block]]
 struct Light0 {
   vLightData : vec4<f32>;
   vLightDiffuse : vec4<f32>;

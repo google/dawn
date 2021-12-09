@@ -1,11 +1,9 @@
-[[block]]
 struct Buf1 {
   result : i32;
 };
 
 type RTArr = [[stride(4)]] array<u32>;
 
-[[block]]
 struct Buf0 {
   values : RTArr;
 };

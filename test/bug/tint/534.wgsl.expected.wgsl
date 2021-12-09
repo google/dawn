@@ -1,4 +1,3 @@
-[[block]]
 struct Uniforms {
   dstTextureFlipY : u32;
   isFloat16 : u32;
@@ -6,7 +5,6 @@ struct Uniforms {
   channelCount : u32;
 };
 
-[[block]]
 struct OutputBuf {
   result : [[stride(4)]] array<u32>;
 };

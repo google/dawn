@@ -1,4 +1,3 @@
-[[block]]
 struct S {
   m : mat2x2<f32>;
 };

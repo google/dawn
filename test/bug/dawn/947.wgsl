@@ -1,4 +1,4 @@
-[[block]] struct Uniforms {
+ struct Uniforms {
     u_scale : vec2<f32>;
     u_offset : vec2<f32>;
 };

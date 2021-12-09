@@ -1,4 +1,3 @@
-[[block]]
 struct LeftOver {
   time : f32;
   [[size(12)]]

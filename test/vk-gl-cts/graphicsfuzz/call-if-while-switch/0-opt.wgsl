@@ -1,4 +1,3 @@
-[[block]]
 struct buf0 {
   injectionSwitch : vec2<f32>;
 };

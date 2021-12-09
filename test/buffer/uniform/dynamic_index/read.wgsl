@@ -12,7 +12,6 @@ struct Inner {
     [[align(16)]] k : [[stride(16)]] array<vec4<i32>, 4>;
 };
 
-[[block]]
 struct S {
     arr : array<Inner, 8>;
 };

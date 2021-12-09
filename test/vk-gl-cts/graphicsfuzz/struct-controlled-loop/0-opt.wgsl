@@ -3,7 +3,6 @@ struct S {
   f1 : vec3<bool>;
 };
 
-[[block]]
 struct buf0 {
   injectionSwitch : vec2<f32>;
 };

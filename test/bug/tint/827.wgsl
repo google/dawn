@@ -1,4 +1,4 @@
-[[block]] struct Result {
+ struct Result {
     values : array<f32>;
 };
 

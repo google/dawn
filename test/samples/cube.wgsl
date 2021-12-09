@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Vertex shader
-[[block]] struct Uniforms {
+ struct Uniforms {
   modelViewProjectionMatrix : mat4x4<f32>;
 };
 

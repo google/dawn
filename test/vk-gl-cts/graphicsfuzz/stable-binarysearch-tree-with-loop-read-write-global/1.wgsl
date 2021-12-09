@@ -8,7 +8,6 @@ struct QuicksortObject {
   numbers : array<i32, 10>;
 };
 
-[[block]]
 struct buf0 {
   injectionSwitch : vec2<f32>;
 };

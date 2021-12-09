@@ -1,4 +1,3 @@
-[[block]]
 struct Uniforms {
   dstTextureFlipY : u32;
   channelCount : u32;
@@ -7,7 +6,6 @@ struct Uniforms {
   copySize : vec2<u32>;
 };
 
-[[block]]
 struct OutputBuf {
   result : array<u32>;
 };

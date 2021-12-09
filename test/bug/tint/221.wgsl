@@ -1,6 +1,5 @@
 type Arr = array<u32, 50>;
 
-[[block]]
 struct Buf{
   count : u32;
   data : Arr;

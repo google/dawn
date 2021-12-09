@@ -1,18 +1,15 @@
 type Arr = [[stride(16)]] array<i32, 3>;
 
-[[block]]
 struct buf0 {
   x_GLF_uniform_int_values : Arr;
 };
 
-[[block]]
 struct buf2 {
   injectionSwitch : vec2<f32>;
 };
 
 type Arr_1 = [[stride(16)]] array<f32, 1>;
 
-[[block]]
 struct buf1 {
   x_GLF_uniform_float_values : Arr_1;
 };

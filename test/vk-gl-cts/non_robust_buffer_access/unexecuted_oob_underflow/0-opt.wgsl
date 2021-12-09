@@ -1,13 +1,11 @@
 type Arr = [[stride(4)]] array<i32, 8>;
 
-[[block]]
 struct In2 {
   data_in2 : Arr;
 };
 
 type Arr_1 = [[stride(4)]] array<i32, 1024>;
 
-[[block]]
 struct Out0 {
   data_out0 : Arr_1;
 };
@@ -16,12 +14,10 @@ type Arr_2 = [[stride(4)]] array<i32, 512>;
 
 type Arr_3 = [[stride(4)]] array<i32, 512>;
 
-[[block]]
 struct In0 {
   data_in0 : Arr_3;
 };
 
-[[block]]
 struct In1 {
   data_in1 : Arr_3;
 };

@@ -1,9 +1,7 @@
-[[block]]
 struct theSSBO {
   out_data : i32;
 };
 
-[[block]]
 struct buf1 {
   injectionSwitch : vec2<f32>;
 };

@@ -38,7 +38,6 @@ See:
                                                "access"      "read_write"
                                                "args"        $args -}}
 {{-   if $sb_rw_fields -}}
-[[block]]
 struct SB_RW {
 {{- $sb_rw_fields -}}
 };
@@ -52,7 +51,6 @@ struct SB_RW {
                                                "access"      "read"
                                                "args"        $args -}}
 {{-   if $sb_ro_fields -}}
-[[block]]
 struct SB_RO {
 {{- $sb_ro_fields -}}
 };
@@ -66,7 +64,6 @@ struct SB_RO {
                                             "access"      "read"
                                             "args"        $args -}}
 {{-   if $ub_fields -}}
-[[block]]
 struct UB {
 {{- $ub_fields -}}
 };

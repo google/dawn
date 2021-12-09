@@ -3,7 +3,6 @@
 // MSL. Use some high binding numbers to also test that the remapped numbers are
 // densely packed starting at 0.
 
-[[block]]
 struct S {
   a : f32;
 };

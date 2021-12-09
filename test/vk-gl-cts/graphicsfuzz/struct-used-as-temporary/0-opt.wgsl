@@ -1,4 +1,3 @@
-[[block]]
 struct S {
   field0 : vec4<f32>;
 };

@@ -1,4 +1,3 @@
-[[block]]
 struct Buffer {
   data : u32;
 };
