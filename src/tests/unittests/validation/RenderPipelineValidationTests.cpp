@@ -117,6 +117,60 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
     }
 }
 
+// Tests that depth or stencil aspect is required if we enable depth or stencil test.
+TEST_F(RenderPipelineValidationTest, DepthStencilAspectRequirement) {
+    // Control case, stencil aspect is required if stencil test or stencil write is enabled
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
+        depthStencil->stencilFront.compare = wgpu::CompareFunction::LessEqual;
+        depthStencil->stencilBack.failOp = wgpu::StencilOperation::Replace;
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    // It is invalid if the texture format doesn't have stencil aspect while stencil test is
+    // enabled (depthStencilState.stencilFront are not default values).
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24Plus);
+        depthStencil->stencilFront.compare = wgpu::CompareFunction::LessEqual;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // It is invalid if the texture format doesn't have stencil aspect while stencil write is
+    // enabled (depthStencilState.stencilBack are not default values).
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24Plus);
+        depthStencil->stencilBack.failOp = wgpu::StencilOperation::Replace;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // Control case, depth aspect is required if depth test or depth write is enabled
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
+        depthStencil->depthCompare = wgpu::CompareFunction::LessEqual;
+        depthStencil->depthWriteEnabled = true;
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    // TODO(dawn:666): Add tests for stencil-only format (Stencil8) with depth test or depth write
+    // enabled when Stencil8 format is implemented
+}
+
 // Tests that at least one color target state is required.
 TEST_F(RenderPipelineValidationTest, ColorTargetStateRequired) {
     {
