@@ -83,6 +83,9 @@ namespace dawn_native { namespace vulkan {
                         VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 }
             }
+            if (usage & kReadOnlyRenderAttachment) {
+                flags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+            }
             if (usage & kPresentTextureUsage) {
                 // The present usage is only used internally by the swapchain and is never used in
                 // combination with other usages.
@@ -129,7 +132,7 @@ namespace dawn_native { namespace vulkan {
                 flags |=
                     VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
-            if (usage & wgpu::TextureUsage::RenderAttachment) {
+            if (usage & (wgpu::TextureUsage::RenderAttachment | kReadOnlyRenderAttachment)) {
                 if (format.HasDepthOrStencil()) {
                     flags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                              VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
@@ -442,6 +445,12 @@ namespace dawn_native { namespace vulkan {
         }
         if (usage & wgpu::TextureUsage::TextureBinding) {
             flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+            // If the sampled texture is a depth/stencil texture, its image layout will be set
+            // to DEPTH_STENCIL_READ_ONLY_OPTIMAL in order to support readonly depth/stencil
+            // attachment. That layout requires DEPTH_STENCIL_ATTACHMENT_BIT image usage.
+            if (format.HasDepthOrStencil() && format.isRenderable) {
+                flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+            }
         }
         if (usage & wgpu::TextureUsage::StorageBinding) {
             flags |= VK_IMAGE_USAGE_STORAGE_BIT;
@@ -452,6 +461,9 @@ namespace dawn_native { namespace vulkan {
             } else {
                 flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
             }
+        }
+        if (usage & kReadOnlyRenderAttachment) {
+            flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         }
 
         return flags;
@@ -466,10 +478,17 @@ namespace dawn_native { namespace vulkan {
         }
 
         if (!wgpu::HasZeroOrOneBits(usage)) {
-            // Sampled | ReadOnlyStorage is the only possible multi-bit usage, if more appear  we
-            // might need additional special-casing.
-            ASSERT(usage == wgpu::TextureUsage::TextureBinding);
-            return VK_IMAGE_LAYOUT_GENERAL;
+            // Sampled | kReadOnlyRenderAttachment is the only possible multi-bit usage, if more
+            // appear we might need additional special-casing.
+            ASSERT(usage == (wgpu::TextureUsage::TextureBinding | kReadOnlyRenderAttachment));
+
+            // WebGPU requires both aspects to be readonly if the attachment's format does have
+            // both depth and stencil aspects. Vulkan 1.0 supports readonly for both aspects too
+            // via DEPTH_STENCIL_READ_ONLY image layout. Vulkan 1.1 and above can support separate
+            // readonly for a single aspect via DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL and
+            // DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL layouts. But Vulkan 1.0 cannot support
+            // it, and WebGPU doesn't need that currently.
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
         }
 
         // Usage has a single bit so we can switch on its value directly.
@@ -477,17 +496,23 @@ namespace dawn_native { namespace vulkan {
             case wgpu::TextureUsage::CopyDst:
                 return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
-                // A texture that's sampled and storage may be used as both usages in the same pass.
-                // When that happens, the layout must be GENERAL because that's a requirement for
-                // the storage usage. We can't know at bindgroup creation time if that case will
-                // happen so we must prepare for the pessimistic case and always use the GENERAL
-                // layout.
+                // The layout returned here is the one that will be used at bindgroup creation time.
+                // The bindgrpup's layout must match the runtime layout of the image when it is
+                // used via the bindgroup, but we don't know exactly what it will be yet. So we
+                // have to prepare for the pessimistic case.
             case wgpu::TextureUsage::TextureBinding:
+                // Only VK_IMAGE_LAYOUT_GENERAL can do sampling and storage access of texture at the
+                // same time.
                 if (texture->GetInternalUsage() & wgpu::TextureUsage::StorageBinding) {
                     return VK_IMAGE_LAYOUT_GENERAL;
-                } else {
-                    return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 }
+                // The sampled image can be used as a readonly depth/stencil attachment at the same
+                // time if it is a depth/stencil renderable format, so the image layout need to be
+                // VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL.
+                if (texture->GetFormat().HasDepthOrStencil() && texture->GetFormat().isRenderable) {
+                    return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+                }
+                return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
                 // Vulkan texture copy functions require the image to be in _one_  known layout.
                 // Depending on whether parts of the texture have been transitioned to only CopySrc

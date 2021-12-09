@@ -52,6 +52,31 @@ constexpr char kVulkanLibName[] = "libvulkan.so";
 #    error "Unimplemented Vulkan backend platform"
 #endif
 
+struct SkippedMessage {
+    const char* messageId;
+    const char* messageContents;
+};
+
+// Array of Validation error/warning messages that will be ignored, should include bugID
+constexpr SkippedMessage kSkippedMessages[] = {
+    // These errors are generated when simultaneously using a read-only depth/stencil attachment as
+    // a texture binding. This is valid Vulkan.
+    //
+    // When storeOp=NONE is not present, Dawn uses storeOp=STORE, but Vulkan validation layer
+    // considers the image read-only and produces a hazard. Dawn can't rely on storeOp=NONE and
+    // so this is not expected to be worked around.
+    // See http://crbug.com/dawn/1225 for more details.
+    {"SYNC-HAZARD-WRITE_AFTER_READ",
+     "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
+     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
+     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE_KHR, "},
+
+    {"SYNC-HAZARD-WRITE_AFTER_READ",
+     "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
+     "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
+     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE_KHR, "},
+};
+
 namespace dawn_native { namespace vulkan {
 
     namespace {
@@ -63,14 +88,26 @@ namespace dawn_native { namespace vulkan {
 #endif  // defined(DAWN_ENABLE_SWIFTSHADER)
         };
 
+        // Suppress validation errors that are known. Returns false in that case.
+        bool ShouldReportDebugMessage(const char* messageId, const char* message) {
+            for (const SkippedMessage& msg : kSkippedMessages) {
+                if (strstr(messageId, msg.messageId) != nullptr &&
+                    strstr(message, msg.messageContents) != nullptr) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         VKAPI_ATTR VkBool32 VKAPI_CALL
         OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                              VkDebugUtilsMessageTypeFlagsEXT /* messageTypes */,
                              const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                              void* /* pUserData */) {
-            dawn::WarningLog() << pCallbackData->pMessage;
-            ASSERT((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) == 0);
-
+            if (ShouldReportDebugMessage(pCallbackData->pMessageIdName, pCallbackData->pMessage)) {
+                dawn::WarningLog() << pCallbackData->pMessage;
+                ASSERT((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) == 0);
+            }
             return VK_FALSE;
         }
 

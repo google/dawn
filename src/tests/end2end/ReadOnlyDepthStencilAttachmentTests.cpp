@@ -254,10 +254,10 @@ TEST_P(ReadOnlyStencilAttachmentTests, Test) {
 }
 
 DAWN_INSTANTIATE_TEST_P(ReadOnlyDepthAttachmentTests,
-                        {D3D12Backend()},
+                        {D3D12Backend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kDepthFormats.begin(),
                                                          utils::kDepthFormats.end()));
 DAWN_INSTANTIATE_TEST_P(ReadOnlyStencilAttachmentTests,
-                        {D3D12Backend()},
+                        {D3D12Backend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));

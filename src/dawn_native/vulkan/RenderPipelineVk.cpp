@@ -497,7 +497,9 @@ namespace dawn_native { namespace vulkan {
         dynamic.pDynamicStates = dynamicStates;
 
         // Get a VkRenderPass that matches the attachment formats for this pipeline, load/store ops
-        // don't matter so set them all to LoadOp::Load / StoreOp::Store
+        // don't matter so set them all to LoadOp::Load / StoreOp::Store. Whether the render pass
+        // has resolve target and whether depth/stencil attachment is read-only also don't matter,
+        // so set them both to false.
         VkRenderPass renderPass = VK_NULL_HANDLE;
         {
             RenderPassCacheQuery query;
@@ -510,7 +512,7 @@ namespace dawn_native { namespace vulkan {
             if (HasDepthStencilAttachment()) {
                 query.SetDepthStencil(GetDepthStencilFormat(), wgpu::LoadOp::Load,
                                       wgpu::StoreOp::Store, wgpu::LoadOp::Load,
-                                      wgpu::StoreOp::Store);
+                                      wgpu::StoreOp::Store, false);
             }
 
             query.SetSampleCount(GetSampleCount());

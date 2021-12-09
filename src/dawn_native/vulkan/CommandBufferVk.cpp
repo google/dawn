@@ -217,10 +217,11 @@ namespace dawn_native { namespace vulkan {
                 if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                     const auto& attachmentInfo = renderPass->depthStencilAttachment;
 
-                    query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat().format,
-                                          attachmentInfo.depthLoadOp, attachmentInfo.depthStoreOp,
-                                          attachmentInfo.stencilLoadOp,
-                                          attachmentInfo.stencilStoreOp);
+                    query.SetDepthStencil(
+                        attachmentInfo.view->GetTexture()->GetFormat().format,
+                        attachmentInfo.depthLoadOp, attachmentInfo.depthStoreOp,
+                        attachmentInfo.stencilLoadOp, attachmentInfo.stencilStoreOp,
+                        attachmentInfo.depthReadOnly || attachmentInfo.stencilReadOnly);
                 }
 
                 query.SetSampleCount(renderPass->attachmentState->GetSampleCount());
