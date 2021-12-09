@@ -128,6 +128,64 @@ abcd)");
   EXPECT_EQ(t.source().range.end.column, 4u);
 }
 
+TEST_F(LexerTest, Null_InWhitespace_IsError) {
+  Source::FileContent content(std::string{' ', 0, ' '});
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.IsError());
+  EXPECT_EQ(t.source().range.begin.line, 1u);
+  EXPECT_EQ(t.source().range.begin.column, 2u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 2u);
+  EXPECT_EQ(t.to_str(), "null character found");
+}
+
+TEST_F(LexerTest, Null_InLineComment_IsError) {
+  Source::FileContent content(std::string{'/', '/', ' ', 0, ' '});
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.IsError());
+  EXPECT_EQ(t.source().range.begin.line, 1u);
+  EXPECT_EQ(t.source().range.begin.column, 4u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 4u);
+  EXPECT_EQ(t.to_str(), "null character found");
+}
+
+TEST_F(LexerTest, Null_InBlockComment_IsError) {
+  Source::FileContent content(std::string{'/', '*', ' ', 0, '*', '/'});
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.IsError());
+  EXPECT_EQ(t.source().range.begin.line, 1u);
+  EXPECT_EQ(t.source().range.begin.column, 4u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 4u);
+  EXPECT_EQ(t.to_str(), "null character found");
+}
+
+TEST_F(LexerTest, Null_InIdentifier_IsError) {
+  // Try inserting a null in an identifier. Other valid token
+  // kinds will behave similarly, so use the identifier case
+  // as a representative.
+  Source::FileContent content(std::string{'a', 0, 'c'});
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.IsIdentifier());
+  EXPECT_EQ(t.to_str(), "a");
+  t = l.next();
+  EXPECT_TRUE(t.IsError());
+  EXPECT_EQ(t.source().range.begin.line, 1u);
+  EXPECT_EQ(t.source().range.begin.column, 2u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 2u);
+  EXPECT_EQ(t.to_str(), "null character found");
+}
+
 struct FloatData {
   const char* input;
   float result;

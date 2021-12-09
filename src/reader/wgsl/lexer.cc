@@ -96,7 +96,8 @@ Token Lexer::next() {
     return t;
   }
 
-  return {Token::Type::kError, begin_source(), "invalid character found"};
+  return {Token::Type::kError, begin_source(),
+          (is_null() ? "null character found" : "invalid character found")};
 }
 
 Source Lexer::begin_source() const {
@@ -114,6 +115,10 @@ void Lexer::end_source(Source& src) const {
 
 bool Lexer::is_eof() const {
   return pos_ >= len_;
+}
+
+bool Lexer::is_null() const {
+  return (pos_ < len_) && (content_->data[pos_] == 0);
 }
 
 bool Lexer::is_alpha(char ch) const {
@@ -175,6 +180,9 @@ Token Lexer::skip_comment() {
     // Line comment: ignore everything until the end of line
     // or end of input.
     while (!is_eof() && !matches(pos_, "\n")) {
+      if (is_null()) {
+        return {Token::Type::kError, begin_source(), "null character found"};
+      }
       pos_++;
       location_.column++;
     }
@@ -208,6 +216,8 @@ Token Lexer::skip_comment() {
         pos_++;
         location_.line++;
         location_.column = 1;
+      } else if (is_null()) {
+        return {Token::Type::kError, begin_source(), "null character found"};
       } else {
         // Anything else: skip and update source location.
         pos_++;
@@ -653,10 +663,11 @@ Token Lexer::try_hex_integer() {
     end++;
   }
 
-  if (!matches(end, "0x")) {
+  if (matches(end, "0x")) {
+    end += 2;
+  } else {
     return {};
   }
-  end += 2;
 
   auto first = end;
   while (!is_eof() && is_hex(content_->data[end])) {

@@ -41,8 +41,9 @@ class Lexer {
   /// at the current position.
   /// @returns error token, EOF, or uninitialized
   Token skip_whitespace_and_comments();
-  /// Advances past a comment at the current position,
-  /// if one exists.
+  /// Advances past a comment at the current position, if one exists.
+  /// Returns an error if there was an unterminated block comment,
+  /// or a null character was present.
   /// @returns uninitialized token on success, or error
   Token skip_comment();
 
@@ -72,6 +73,9 @@ class Lexer {
 
   /// @returns true if the end of the input has been reached.
   bool is_eof() const;
+  /// @returns true if there is another character on the input and
+  /// it is not null.
+  bool is_null() const;
   /// @param ch a character
   /// @returns true if 'ch' is an alphabetic character
   bool is_alpha(char ch) const;
