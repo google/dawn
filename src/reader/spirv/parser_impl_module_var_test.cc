@@ -1413,7 +1413,6 @@ TEST_F(SpvModuleScopeVarParserTest,
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(type Arr = [[stride(4)]] array<u32, 2u>;
 
-[[block]]
 struct S {
   field0 : u32;
   field1 : f32;
@@ -1446,8 +1445,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
-struct S {
+  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : mat3x2<f32>;
 };
 
@@ -1476,8 +1474,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
-struct S {
+  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : mat3x2<f32>;
 };
 
@@ -1506,8 +1503,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
-struct S {
+  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   [[stride(64), internal(disable_validation__ignore_stride)]]
   field0 : mat3x2<f32>;
 };
@@ -1560,8 +1556,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
-struct S {
+  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32;
   field1 : f32;
 };
@@ -1590,8 +1585,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
-struct S {
+  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32;
   field1 : f32;
 };
@@ -1623,8 +1617,7 @@ TEST_F(
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
-struct S {
+  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32;
   field1 : f32;
 };

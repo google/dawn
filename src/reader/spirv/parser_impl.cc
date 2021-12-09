@@ -24,7 +24,6 @@
 #include "src/ast/disable_validation_decoration.h"
 #include "src/ast/interpolate_decoration.h"
 #include "src/ast/override_decoration.h"
-#include "src/ast/struct_block_decoration.h"
 #include "src/ast/type_name.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/spirv/function.h"
@@ -1072,15 +1071,11 @@ const Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Struct* struct_ty) {
   // Compute the struct decoration.
   auto struct_decorations = this->GetDecorationsFor(type_id);
-  bool is_block_decorated = false;
   if (struct_decorations.size() == 1) {
     const auto decoration = struct_decorations[0][0];
-    if (decoration == SpvDecorationBlock) {
-      is_block_decorated = true;
-    } else if (decoration == SpvDecorationBufferBlock) {
-      is_block_decorated = true;
+    if (decoration == SpvDecorationBufferBlock) {
       remap_buffer_block_type_.insert(type_id);
-    } else {
+    } else if (decoration != SpvDecorationBlock) {
       Fail() << "struct with ID " << type_id
              << " has unrecognized decoration: " << int(decoration);
     }
@@ -1193,13 +1188,8 @@ const Type* ParserImpl::ConvertType(
 
   // Now make the struct.
   auto sym = builder_.Symbols().Register(name);
-  ast::DecorationList ast_struct_decorations;
-  if (is_block_decorated && struct_types_for_buffers_.count(type_id)) {
-    ast_struct_decorations.emplace_back(
-        create<ast::StructBlockDecoration>(Source{}));
-  }
   auto* ast_struct = create<ast::Struct>(Source{}, sym, std::move(ast_members),
-                                         std::move(ast_struct_decorations));
+                                         ast::DecorationList());
   if (num_non_writable_members == members.size()) {
     read_only_struct_types_.insert(ast_struct->name);
   }

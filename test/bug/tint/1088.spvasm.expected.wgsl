@@ -2,7 +2,6 @@ type Arr = [[stride(64)]] array<mat4x4<f32>, 2u>;
 
 type Arr_1 = [[stride(16)]] array<f32, 4u>;
 
-[[block]]
 struct LeftOver {
   worldViewProjection : mat4x4<f32>;
   time : f32;

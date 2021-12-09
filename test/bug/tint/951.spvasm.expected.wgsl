@@ -2,17 +2,14 @@ type RTArr = [[stride(4)]] array<f32>;
 
 type RTArr_1 = [[stride(4)]] array<f32>;
 
-[[block]]
 struct ssbOut {
   result : RTArr_1;
 };
 
-[[block]]
 struct ssbA {
   A : RTArr_1;
 };
 
-[[block]]
 struct Uniforms {
   NAN : f32;
   aShape : i32;

@@ -2,24 +2,20 @@ type RTArr = [[stride(4)]] array<f32>;
 
 type RTArr_1 = [[stride(4)]] array<f32>;
 
-[[block]]
 struct ResultMatrix {
   numbers : RTArr_1;
 };
 
 type RTArr_2 = [[stride(4)]] array<f32>;
 
-[[block]]
 struct FirstMatrix {
   numbers : RTArr_1;
 };
 
-[[block]]
 struct SecondMatrix {
   numbers : RTArr_1;
 };
 
-[[block]]
 struct Uniforms {
   NAN : f32;
   sizeA : i32;

@@ -1,4 +1,3 @@
-[[block]]
 struct Uniforms {
   NAN : f32;
   [[size(12)]]
@@ -19,19 +18,16 @@ type RTArr = [[stride(4)]] array<f32>;
 
 type RTArr_1 = [[stride(4)]] array<f32>;
 
-[[block]]
 struct ssbOut {
   result : RTArr_1;
 };
 
 type RTArr_2 = [[stride(4)]] array<f32>;
 
-[[block]]
 struct ssbA {
   A : RTArr_1;
 };
 
-[[block]]
 struct ssbB {
   B : RTArr_1;
 };

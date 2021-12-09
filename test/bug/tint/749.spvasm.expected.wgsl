@@ -2,7 +2,6 @@ struct QuicksortObject {
   numbers : array<i32, 10u>;
 };
 
-[[block]]
 struct buf0 {
   resolution : vec2<f32>;
 };

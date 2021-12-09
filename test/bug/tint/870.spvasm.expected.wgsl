@@ -7,7 +7,6 @@ struct sspp962805860buildInformationS {
   orientation : Arr;
 };
 
-[[block]]
 struct x_B4_BuildInformation {
   passthru : sspp962805860buildInformationS;
 };

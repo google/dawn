@@ -1,4 +1,3 @@
-[[block]]
 struct SSBO {
   m : [[stride(16)]] array<vec2<f32>, 2u>;
 };
