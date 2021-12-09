@@ -21,7 +21,7 @@
 namespace dawn_native {
 
 {% macro render_cpp_default_value(member) -%}
-    {%- if member.annotation in ["*", "const*", "const*const*"] and member.optional -%}
+    {%- if member.annotation in ["*", "const*"] and member.optional -%}
         {{" "}}= nullptr
     {%- elif member.type.category == "object" and member.optional -%}
         {{" "}}= nullptr

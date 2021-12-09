@@ -65,11 +65,7 @@
         WIRE_TRY(provider.Get{{Optional}}Id({{in}}, &{{out}}));
     {% elif member.type.category == "structure"%}
         {%- set Provider = ", provider" if member.type.may_have_dawn_object else "" -%}
-        {% if member.annotation == "const*const*" %}
-            WIRE_TRY({{as_cType(member.type.name)}}Serialize(*{{in}}, &{{out}}, buffer{{Provider}}));
-        {% else %}
-            WIRE_TRY({{as_cType(member.type.name)}}Serialize({{in}}, &{{out}}, buffer{{Provider}}));
-        {% endif %}
+        WIRE_TRY({{as_cType(member.type.name)}}Serialize({{in}}, &{{out}}, buffer{{Provider}}));
     {%- else -%}
         {{out}} = {{in}};
     {%- endif -%}
@@ -178,12 +174,8 @@
                     //* Structures might contain more pointers so we need to add their extra size as well.
                     {% if member.type.category == "structure" %}
                         for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-                            {% if member.annotation == "const*const*" %}
-                                result += {{as_cType(member.type.name)}}GetExtraRequiredSize(*record.{{as_varName(member.name)}}[i]);
-                            {% else %}
-                                {{assert(member.annotation == "const*")}}
-                                result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}}[i]);
-                            {% endif %}
+                            {{assert(member.annotation == "const*")}}
+                            result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}}[i]);
                         }
                     {% endif %}
                 {% elif member.type.category == "structure" %}
@@ -383,20 +375,7 @@
 
                 {{as_cType(member.type.name)}}* copiedMembers;
                 WIRE_TRY(GetSpace(allocator, memberLength, &copiedMembers));
-                {% if member.annotation == "const*const*" %}
-                    {{as_cType(member.type.name)}}** pointerArray;
-                    WIRE_TRY(GetSpace(allocator, memberLength, &pointerArray));
-
-                    //* This loop cannot overflow because it iterates up to |memberLength|. Even if
-                    //* memberLength were the maximum integer value, |i| would become equal to it just before
-                    //* exiting the loop, but not increment past or wrap around.
-                    for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-                        pointerArray[i] = &copiedMembers[i];
-                    }
-                    record->{{memberName}} = pointerArray;
-                {% else %}
-                    record->{{memberName}} = copiedMembers;
-                {% endif %}
+                record->{{memberName}} = copiedMembers;
 
                 {% if member.type.is_wire_transparent %}
                     //* memcpy is not allowed to copy from volatile objects. However, these arrays
