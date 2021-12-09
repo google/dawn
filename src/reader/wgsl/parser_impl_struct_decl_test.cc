@@ -139,6 +139,7 @@ TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
   EXPECT_EQ(p->error(), "1:10: expected '{' for struct declaration");
 }
 
+// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
 TEST_F(ParserImplTest, StructDecl_InvalidDecorationDecl) {
   auto p = parser("[[block struct S { a : i32; }");
   auto decos = p->decoration_list();
@@ -151,9 +152,13 @@ TEST_F(ParserImplTest, StructDecl_InvalidDecorationDecl) {
   EXPECT_NE(s.value, nullptr);
 
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: expected ']]' for decoration list");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:3: use of deprecated language feature: [[block]] attributes have been removed from WGSL
+1:9: expected ']]' for decoration list)");
 }
 
+// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
 TEST_F(ParserImplTest, StructDecl_MissingStruct) {
   auto p = parser("[[block]] S {}");
   auto decos = p->decoration_list();

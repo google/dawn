@@ -11,6 +11,7 @@
 ### Deprecated Features
 
 * The `isNan()`, `isInf()`, `isFinite()` and `isNormal()` builtins has been deprecated and will be removed in M101. [tint:1312](https://crbug.com/tint/1312)
+* The `[[block]]` attribute has been deprecated and will be removed in M101. [tint:1324](https://crbug.com/tint/1324)
 
 ### New Features
 

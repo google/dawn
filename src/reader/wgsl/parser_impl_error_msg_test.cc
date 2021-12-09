@@ -52,10 +52,10 @@ TEST_F(ParserImplErrorTest, AndInvalidExpr) {
 }
 
 TEST_F(ParserImplErrorTest, AliasDeclInvalidDeco) {
-  EXPECT("[[block]]type e=u32;",
+  EXPECT("[[override]]type e=u32;",
          "test.wgsl:1:3 error: unexpected decorations\n"
-         "[[block]]type e=u32;\n"
-         "  ^^^^^\n");
+         "[[override]]type e=u32;\n"
+         "  ^^^^^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, IndexExprInvalidExpr) {
@@ -605,15 +605,25 @@ TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype) {
          "                           ^\n");
 }
 
+// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
 TEST_F(ParserImplErrorTest, GlobalDeclStructDecoMissingStruct) {
   EXPECT("[[block]];",
+         "test.wgsl:1:3 warning: use of deprecated language feature: [[block]] "
+         "attributes have been removed from WGSL\n"
+         "[[block]];\n"
+         "  ^^^^^\n\n"
          "test.wgsl:1:10 error: expected declaration after decorations\n"
          "[[block]];\n"
          "         ^\n");
 }
 
+// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
 TEST_F(ParserImplErrorTest, GlobalDeclStructDecoMissingEnd) {
   EXPECT("[[block struct {};",
+         "test.wgsl:1:3 warning: use of deprecated language feature: [[block]] "
+         "attributes have been removed from WGSL\n"
+         "[[block struct {};\n"
+         "  ^^^^^\n\n"
          "test.wgsl:1:9 error: expected ']]' for decoration list\n"
          "[[block struct {};\n"
          "        ^^^^^^\n");

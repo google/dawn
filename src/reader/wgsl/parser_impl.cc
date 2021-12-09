@@ -3133,6 +3133,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
   }
 
   if (s == kBlockDecoration) {
+    deprecated(t.source(), "[[block]] attributes have been removed from WGSL");
     return create<ast::StructBlockDecoration>(t.source());
   }
 

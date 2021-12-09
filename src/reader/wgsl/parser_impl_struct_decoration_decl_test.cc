@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
@@ -21,24 +21,24 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, DecorationDecl_Parses) {
-  auto p = parser("[[block]]");
+  auto p = parser("[[override]]");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
   ASSERT_EQ(decos.value.size(), 1u);
-  auto* struct_deco = decos.value[0]->As<ast::Decoration>();
-  EXPECT_TRUE(struct_deco->Is<ast::StructBlockDecoration>());
+  auto* override_deco = decos.value[0]->As<ast::Decoration>();
+  EXPECT_TRUE(override_deco->Is<ast::OverrideDecoration>());
 }
 
 TEST_F(ParserImplTest, DecorationDecl_MissingAttrRight) {
-  auto p = parser("[[block");
+  auto p = parser("[[override");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(), "1:8: expected ']]' for decoration list");
+  EXPECT_EQ(p->error(), "1:11: expected ']]' for decoration list");
 }
 
 TEST_F(ParserImplTest, DecorationDecl_InvalidDecoration) {
