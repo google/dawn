@@ -59,7 +59,6 @@ fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol {
   first_vertex_index : u32;
 };
@@ -106,7 +105,6 @@ fn entry([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] ve
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol {
   first_instance_index : u32;
 };
@@ -158,7 +156,6 @@ fn entry(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol {
   first_vertex_index : u32;
   first_instance_index : u32;
@@ -217,7 +214,6 @@ fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol {
   first_vertex_index : u32;
 };
@@ -280,7 +276,6 @@ fn entry_c([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] 
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol {
   first_vertex_index : u32;
   first_instance_index : u32;

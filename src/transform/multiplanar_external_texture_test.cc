@@ -78,7 +78,6 @@ fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -123,7 +122,6 @@ fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
   auto* expect = R"(
 [[group(0), binding(0)]] var s : sampler;
 
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -177,7 +175,6 @@ fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -235,7 +232,6 @@ fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
   auto* expect = R"(
 [[group(0), binding(0)]] var s : sampler;
 
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -309,7 +305,6 @@ fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
   auto* expect = R"(
 [[group(0), binding(0)]] var s : sampler;
 
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -392,7 +387,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -459,7 +453,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -528,7 +521,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -607,7 +599,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;

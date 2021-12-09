@@ -51,7 +51,6 @@ TEST_F(DecomposeStridedMatrixTest, MissingDependencySimplify) {
 }
 
 TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
-  // [[block]]
   // struct S {
   //   [[offset(16), stride(32)]]
   //   [[internal(ignore_stride_decoration)]]
@@ -74,9 +73,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
                   b.create<ast::StrideDecoration>(32),
                   b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
               }),
-      },
-      {
-          b.StructBlock(),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
            b.GroupAndBinding(0, 0));
@@ -91,7 +87,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
       });
 
   auto* expect = R"(
-[[block]]
 struct S {
   [[size(16)]]
   padding : u32;
@@ -117,7 +112,6 @@ fn f() {
 }
 
 TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
-  // [[block]]
   // struct S {
   //   [[offset(16), stride(32)]]
   //   [[internal(ignore_stride_decoration)]]
@@ -140,9 +134,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
                   b.create<ast::StrideDecoration>(32),
                   b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
               }),
-      },
-      {
-          b.StructBlock(),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
            b.GroupAndBinding(0, 0));
@@ -157,7 +148,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
          });
 
   auto* expect = R"(
-[[block]]
 struct S {
   [[size(16)]]
   padding : u32;
@@ -179,7 +169,6 @@ fn f() {
 }
 
 TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
-  // [[block]]
   // struct S {
   //   [[offset(16), stride(8)]]
   //   [[internal(ignore_stride_decoration)]]
@@ -202,9 +191,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
                   b.create<ast::StrideDecoration>(8),
                   b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
               }),
-      },
-      {
-          b.StructBlock(),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
            b.GroupAndBinding(0, 0));
@@ -219,7 +205,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
       });
 
   auto* expect = R"(
-[[block]]
 struct S {
   [[size(16)]]
   padding : u32;
@@ -242,7 +227,6 @@ fn f() {
 }
 
 TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
-  // [[block]]
   // struct S {
   //   [[offset(8), stride(32)]]
   //   [[internal(ignore_stride_decoration)]]
@@ -265,9 +249,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
                   b.create<ast::StrideDecoration>(32),
                   b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
               }),
-      },
-      {
-          b.StructBlock(),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
@@ -282,7 +263,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
       });
 
   auto* expect = R"(
-[[block]]
 struct S {
   [[size(8)]]
   padding : u32;
@@ -308,7 +288,6 @@ fn f() {
 }
 
 TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
-  // [[block]]
   // struct S {
   //   [[offset(16), stride(32)]]
   //   [[internal(ignore_stride_decoration)]]
@@ -331,9 +310,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
                   b.create<ast::StrideDecoration>(32),
                   b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
               }),
-      },
-      {
-          b.StructBlock(),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
@@ -348,7 +324,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
          });
 
   auto* expect = R"(
-[[block]]
 struct S {
   [[size(16)]]
   padding : u32;
@@ -370,7 +345,6 @@ fn f() {
 }
 
 TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
-  // [[block]]
   // struct S {
   //   [[offset(8), stride(32)]]
   //   [[internal(ignore_stride_decoration)]]
@@ -393,9 +367,6 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
                   b.create<ast::StrideDecoration>(32),
                   b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
               }),
-      },
-      {
-          b.StructBlock(),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
@@ -411,7 +382,6 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
          });
 
   auto* expect = R"(
-[[block]]
 struct S {
   [[size(8)]]
   padding : u32;
@@ -437,7 +407,6 @@ fn f() {
 }
 
 TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
-  // [[block]]
   // struct S {
   //   [[offset(8), stride(32)]]
   //   [[internal(ignore_stride_decoration)]]
@@ -460,9 +429,6 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
                   b.create<ast::StrideDecoration>(32),
                   b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
               }),
-      },
-      {
-          b.StructBlock(),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
@@ -477,7 +443,6 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
          });
 
   auto* expect = R"(
-[[block]]
 struct S {
   [[size(8)]]
   padding : u32;
@@ -499,7 +464,6 @@ fn f() {
 }
 
 TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
-  // [[block]]
   // struct S {
   //   [[offset(8), stride(32)]]
   //   [[internal(ignore_stride_decoration)]]
@@ -528,9 +492,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
                   b.create<ast::StrideDecoration>(32),
                   b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
               }),
-      },
-      {
-          b.StructBlock(),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
@@ -554,7 +515,6 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
       });
 
   auto* expect = R"(
-[[block]]
 struct S {
   [[size(8)]]
   padding : u32;

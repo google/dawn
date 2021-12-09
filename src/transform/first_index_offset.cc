@@ -18,7 +18,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/ast/struct_block_decoration.h"
 #include "src/program_builder.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
@@ -133,9 +132,7 @@ void FirstIndexOffset::Run(CloneContext& ctx,
       instance_index_offset = offset;
       offset += 4;
     }
-    auto* struct_ =
-        ctx.dst->Structure(ctx.dst->Sym(), std::move(members),
-                           {ctx.dst->create<ast::StructBlockDecoration>()});
+    auto* struct_ = ctx.dst->Structure(ctx.dst->Sym(), std::move(members));
 
     // Create a global to hold the uniform buffer
     Symbol buffer_name = ctx.dst->Sym();

@@ -66,7 +66,6 @@ fn main([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>;
 };
@@ -109,7 +108,6 @@ fn main(in : Builtins) {
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>;
 };
@@ -158,7 +156,6 @@ fn main(in : Builtins) {
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>;
 };
@@ -234,7 +231,6 @@ fn main3([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
 )";
 
   auto* expect = R"(
-[[block]]
 struct tint_symbol_6 {
   num_workgroups : vec3<u32>;
 };

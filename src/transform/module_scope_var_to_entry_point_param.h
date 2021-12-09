@@ -33,7 +33,6 @@ namespace transform {
 ///
 /// Before:
 /// ```
-/// [[block]]
 /// struct S {
 ///   f : f32;
 /// };

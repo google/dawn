@@ -1320,7 +1320,6 @@ fn main2() -> tint_symbol_1 {
 
 TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutDecorations) {
   auto* src = R"(
-[[block]]
 struct FragmentInput {
   [[size(16), location(1)]] value : f32;
   [[builtin(position)]] [[align(32)]] coord : vec4<f32>;
@@ -1338,7 +1337,6 @@ fn frag_main(inputs : FragmentInput) -> FragmentOutput {
 )";
 
   auto* expect = R"(
-[[block]]
 struct FragmentInput {
   [[size(16)]]
   value : f32;

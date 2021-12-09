@@ -34,7 +34,6 @@ namespace transform {
 ///
 /// The generated uniform buffer will have the form:
 /// ```
-/// [[block]]
 /// struct buffer_size_struct {
 ///  buffer_size : array<u32, 8>;
 /// };

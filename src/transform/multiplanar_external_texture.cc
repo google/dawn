@@ -241,8 +241,7 @@ struct MultiplanarExternalTexture::State {
 
     params_struct_sym = b.Symbols().New("ExternalTextureParams");
 
-    b.Structure(params_struct_sym, member_list,
-                ast::DecorationList{b.StructBlock()});
+    b.Structure(params_struct_sym, member_list);
   }
 
   /// Constructs a StatementList containing all the statements making up the

@@ -174,7 +174,6 @@ fn f() {
 // 0xffffffff. If WGSL supports 64-bit indexing, re-enable this test.
 TEST_F(RobustnessTest, DISABLED_LargeArrays_Idx) {
   auto* src = R"(
-[[block]]
 struct S {
   a : array<f32, 0x7fffffff>;
   b : array<f32>;
@@ -213,7 +212,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : array<f32, 2147483647>;
   b : array<f32>;
@@ -617,7 +615,6 @@ TEST_F(RobustnessTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
 
 TEST_F(RobustnessTest, RuntimeArray_Clamps) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
   b : array<f32>;
@@ -630,7 +627,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
   b : array<f32>;
@@ -778,7 +774,6 @@ TEST_F(RobustnessTest, DISABLED_Shadowed_Variable) {
 // Check that existing use of min() and arrayLength() do not get renamed.
 TEST_F(RobustnessTest, DontRenameSymbols) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
   b : array<f32>;
@@ -796,7 +791,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
   b : array<f32>;
@@ -819,7 +813,6 @@ fn f() {
 }
 
 const char* kOmitSourceShader = R"(
-[[block]]
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
@@ -827,7 +820,7 @@ struct S {
 [[group(0), binding(0)]] var<storage, read> s : S;
 
 type UArr = [[stride(16)]] array<f32, 4>;
-[[block]] struct U {
+struct U {
   a : UArr;
 };
 [[group(1), binding(0)]] var<uniform> u : U;
@@ -878,7 +871,6 @@ fn f() {
 
 TEST_F(RobustnessTest, OmitNone) {
   auto* expect = R"(
-[[block]]
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
@@ -888,7 +880,6 @@ struct S {
 
 type UArr = [[stride(16)]] array<f32, 4>;
 
-[[block]]
 struct U {
   a : UArr;
 };
@@ -943,7 +934,6 @@ fn f() {
 
 TEST_F(RobustnessTest, OmitStorage) {
   auto* expect = R"(
-[[block]]
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
@@ -953,7 +943,6 @@ struct S {
 
 type UArr = [[stride(16)]] array<f32, 4>;
 
-[[block]]
 struct U {
   a : UArr;
 };
@@ -1010,7 +999,6 @@ fn f() {
 
 TEST_F(RobustnessTest, OmitUniform) {
   auto* expect = R"(
-[[block]]
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
@@ -1020,7 +1008,6 @@ struct S {
 
 type UArr = [[stride(16)]] array<f32, 4>;
 
-[[block]]
 struct U {
   a : UArr;
 };
@@ -1077,7 +1064,6 @@ fn f() {
 
 TEST_F(RobustnessTest, OmitBoth) {
   auto* expect = R"(
-[[block]]
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
@@ -1087,7 +1073,6 @@ struct S {
 
 type UArr = [[stride(16)]] array<f32, 4>;
 
-[[block]]
 struct U {
   a : UArr;
 };

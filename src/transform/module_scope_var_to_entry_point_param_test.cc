@@ -199,7 +199,6 @@ fn main() {
 
 TEST_F(ModuleScopeVarToEntryPointParamTest, Buffers_Basic) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -217,7 +216,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -236,7 +234,6 @@ fn main([[group(0), binding(0), internal(disable_validation__entry_point_paramet
 
 TEST_F(ModuleScopeVarToEntryPointParamTest, Buffers_FunctionCalls) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -268,7 +265,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -490,7 +486,6 @@ fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : 
 
 TEST_F(ModuleScopeVarToEntryPointParamTest, UnusedVariables) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -512,7 +507,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
 };

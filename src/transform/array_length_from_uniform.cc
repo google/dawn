@@ -18,7 +18,6 @@
 #include <string>
 #include <utility>
 
-#include "src/ast/struct_block_decoration.h"
 #include "src/program_builder.h"
 #include "src/sem/call.h"
 #include "src/sem/variable.h"
@@ -144,9 +143,7 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
           {ctx.dst->Member(
               kBufferSizeMemberName,
               ctx.dst->ty.array(ctx.dst->ty.vec4(ctx.dst->ty.u32()),
-                                (max_buffer_size_index / 4) + 1))},
-
-          ast::DecorationList{ctx.dst->create<ast::StructBlockDecoration>()});
+                                (max_buffer_size_index / 4) + 1))});
       buffer_size_ubo = ctx.dst->Global(
           ctx.dst->Sym(), ctx.dst->ty.Of(buffer_size_struct),
           ast::StorageClass::kUniform,

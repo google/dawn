@@ -24,7 +24,6 @@ using DecomposeMemoryAccessTest = TransformTest;
 
 TEST_F(DecomposeMemoryAccessTest, SB_BasicLoad) {
   auto* src = R"(
-[[block]]
 struct SB {
   a : i32;
   b : u32;
@@ -80,7 +79,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   a : i32;
   b : u32;
@@ -222,7 +220,6 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, UB_BasicLoad) {
   auto* src = R"(
-[[block]]
 struct UB {
   a : i32;
   b : u32;
@@ -278,7 +275,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct UB {
   a : i32;
   b : u32;
@@ -420,7 +416,6 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, SB_BasicStore) {
   auto* src = R"(
-[[block]]
 struct SB {
   a : i32;
   b : u32;
@@ -476,7 +471,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   a : i32;
   b : u32;
@@ -635,7 +629,6 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, LoadStructure) {
   auto* src = R"(
-[[block]]
 struct SB {
   a : i32;
   b : u32;
@@ -670,7 +663,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   a : i32;
   b : u32;
@@ -795,7 +787,6 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, StoreStructure) {
   auto* src = R"(
-[[block]]
 struct SB {
   a : i32;
   b : u32;
@@ -830,7 +821,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   a : i32;
   b : u32;
@@ -1005,7 +995,6 @@ struct S2 {
   c : i32;
 };
 
-[[block]]
 struct SB {
   [[size(128)]]
   a : i32;
@@ -1040,7 +1029,6 @@ struct S2 {
   c : i32;
 };
 
-[[block]]
 struct SB {
   [[size(128)]]
   a : i32;
@@ -1077,7 +1065,6 @@ struct S2 {
   c : i32;
 };
 
-[[block]]
 struct SB {
   [[size(128)]]
   a : i32;
@@ -1108,7 +1095,6 @@ struct S2 {
   c : i32;
 };
 
-[[block]]
 struct SB {
   [[size(128)]]
   a : i32;
@@ -1156,7 +1142,6 @@ type A2 = S2;
 
 type A2_Array = [[stride(256)]] array<S2>;
 
-[[block]]
 struct SB {
   [[size(128)]]
   a : i32;
@@ -1195,7 +1180,6 @@ type A2 = S2;
 
 type A2_Array = [[stride(256)]] array<S2>;
 
-[[block]]
 struct SB {
   [[size(128)]]
   a : i32;
@@ -1223,7 +1207,6 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, StorageBufferAtomics) {
   auto* src = R"(
-[[block]]
 struct SB {
   padding : vec4<f32>;
   a : atomic<i32>;
@@ -1261,7 +1244,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   padding : vec4<f32>;
   a : atomic<i32>;

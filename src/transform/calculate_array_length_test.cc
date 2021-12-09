@@ -38,7 +38,6 @@ TEST_F(CalculateArrayLengthTest, Error_MissingCalculateArrayLength) {
 
 TEST_F(CalculateArrayLengthTest, Basic) {
   auto* src = R"(
-[[block]]
 struct SB {
   x : i32;
   arr : array<i32>;
@@ -53,7 +52,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   x : i32;
   arr : array<i32>;
@@ -80,7 +78,6 @@ fn main() {
 
 TEST_F(CalculateArrayLengthTest, InSameBlock) {
   auto* src = R"(
-[[block]]
 struct SB {
   x : i32;
   arr : array<i32>;
@@ -97,7 +94,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   x : i32;
   arr : array<i32>;
@@ -126,7 +122,6 @@ fn main() {
 
 TEST_F(CalculateArrayLengthTest, WithStride) {
   auto* src = R"(
-[[block]]
 struct SB {
   x : i32;
   y : f32;
@@ -142,7 +137,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   x : i32;
   y : f32;
@@ -170,7 +164,6 @@ fn main() {
 
 TEST_F(CalculateArrayLengthTest, Nested) {
   auto* src = R"(
-[[block]]
 struct SB {
   x : i32;
   arr : array<i32>;
@@ -191,7 +184,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB {
   x : i32;
   arr : array<i32>;
@@ -227,13 +219,11 @@ fn main() {
 
 TEST_F(CalculateArrayLengthTest, MultipleStorageBuffers) {
   auto* src = R"(
-[[block]]
 struct SB1 {
   x : i32;
   arr1 : array<i32>;
 };
 
-[[block]]
 struct SB2 {
   x : i32;
   arr2 : array<vec4<f32>>;
@@ -252,7 +242,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct SB1 {
   x : i32;
   arr1 : array<i32>;
@@ -261,7 +250,6 @@ struct SB1 {
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB1, result : ptr<function, u32>)
 
-[[block]]
 struct SB2 {
   x : i32;
   arr2 : array<vec4<f32>>;
@@ -295,7 +283,6 @@ fn main() {
 
 TEST_F(CalculateArrayLengthTest, Shadowing) {
   auto* src = R"(
-[[block]]
 struct SB {
   x : i32;
   arr : array<i32>;
@@ -316,7 +303,6 @@ fn main() {
 
   auto* expect =
       R"(
-[[block]]
 struct SB {
   x : i32;
   arr : array<i32>;

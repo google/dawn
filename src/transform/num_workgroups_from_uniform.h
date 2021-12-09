@@ -30,7 +30,6 @@ namespace transform {
 ///
 /// The generated uniform buffer will have the form:
 /// ```
-/// [[block]]
 /// struct num_workgroups_struct {
 ///  num_workgroups : vec3<u32>;
 /// };

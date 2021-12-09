@@ -41,7 +41,6 @@ namespace transform {
 ///   }
 ///
 /// After:
-///   [[block]]
 ///   struct TintFirstIndexOffsetData {
 ///     tint_first_vertex_index : u32;
 ///     tint_first_instance_index : u32;

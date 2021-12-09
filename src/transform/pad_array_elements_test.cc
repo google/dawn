@@ -64,7 +64,6 @@ var<private> arr : array<tint_padded_array_element, 4u>;
 
 TEST_F(PadArrayElementsTest, RuntimeArray) {
   auto* src = R"(
-[[block]]
 struct S {
   rta : [[stride(8)]] array<i32>;
 };
@@ -75,7 +74,6 @@ struct tint_padded_array_element {
   el : i32;
 };
 
-[[block]]
 struct S {
   rta : array<tint_padded_array_element>;
 };

@@ -122,8 +122,7 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
       auto* num_workgroups_struct = ctx.dst->Structure(
           ctx.dst->Sym(),
           {ctx.dst->Member(kNumWorkgroupsMemberName,
-                           ctx.dst->ty.vec3(ctx.dst->ty.u32()))},
-          ast::DecorationList{ctx.dst->create<ast::StructBlockDecoration>()});
+                           ctx.dst->ty.vec3(ctx.dst->ty.u32()))});
       num_workgroups_ubo = ctx.dst->Global(
           ctx.dst->Sym(), ctx.dst->ty.Of(num_workgroups_struct),
           ast::StorageClass::kUniform,

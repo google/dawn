@@ -26,7 +26,6 @@ using BindingRemapperTest = TransformTest;
 
 TEST_F(BindingRemapperTest, NoRemappings) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -52,7 +51,6 @@ fn f() {
 
 TEST_F(BindingRemapperTest, RemapBindingPoints) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -67,7 +65,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -96,7 +93,6 @@ fn f() {
 
 TEST_F(BindingRemapperTest, RemapAccessControls) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -113,7 +109,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -146,7 +141,6 @@ fn f() {
 // decorations in type aliases. If not, just remove.
 TEST_F(BindingRemapperTest, DISABLED_RemapAccessControlsWithAliases) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -169,7 +163,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -206,7 +199,6 @@ fn f() {
 
 TEST_F(BindingRemapperTest, RemapAll) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -221,7 +213,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   a : f32;
 };
@@ -252,7 +243,6 @@ fn f() {
 
 TEST_F(BindingRemapperTest, BindingCollisionsSameEntryPoint) {
   auto* src = R"(
-[[block]]
 struct S {
   i : i32;
 };
@@ -272,7 +262,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   i : i32;
 };
@@ -306,7 +295,6 @@ fn f() {
 
 TEST_F(BindingRemapperTest, BindingCollisionsDifferentEntryPoints) {
   auto* src = R"(
-[[block]]
 struct S {
   i : i32;
 };
@@ -331,7 +319,6 @@ fn f2() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   i : i32;
 };
@@ -370,7 +357,6 @@ fn f2() {
 
 TEST_F(BindingRemapperTest, NoData) {
   auto* src = R"(
-[[block]]
 struct S {
   a : f32;
 };

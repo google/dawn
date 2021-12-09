@@ -19,7 +19,6 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/struct_block_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/sem/variable.h"
@@ -260,9 +259,6 @@ struct State {
         {
             ctx.dst->Member(GetStructBufferName(),
                             ctx.dst->ty.array<ProgramBuilder::u32>(4)),
-        },
-        {
-            ctx.dst->create<ast::StructBlockDecoration>(),
         });
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
       // The decorated variable with struct type

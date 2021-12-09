@@ -173,7 +173,6 @@ fn f() {
 
 TEST_F(RemovePhoniesTest, ForLoop) {
   auto* src = R"(
-[[block]]
 struct S {
   arr : array<i32>;
 };
@@ -203,7 +202,6 @@ fn f() {
 )";
 
   auto* expect = R"(
-[[block]]
 struct S {
   arr : array<i32>;
 };

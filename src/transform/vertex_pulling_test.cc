@@ -107,7 +107,6 @@ fn main() -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -137,7 +136,6 @@ fn main([[location(0)]] var_a : f32) -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -176,7 +174,6 @@ fn main([[location(0)]] var_a : f32) -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -215,7 +212,6 @@ fn main([[location(0)]] var_a : f32) -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -259,7 +255,6 @@ fn main(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -308,7 +303,6 @@ fn main([[location(0)]] var_a : f32,
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -369,7 +363,6 @@ fn main(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -452,7 +445,6 @@ fn main(inputs : Inputs, indices : Indices) -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -520,7 +512,6 @@ fn main([[location(0)]] var_a : f32,
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -566,7 +557,6 @@ fn main([[location(0)]] var_a : vec2<f32>,
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -623,7 +613,6 @@ fn main([[location(0)]] var_a : f32,
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data_1 : [[stride(4)]] array<u32>;
 };
@@ -701,7 +690,6 @@ fn main(
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -862,7 +850,6 @@ fn main(
 
   auto* expect =
       R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
@@ -1022,7 +1009,6 @@ fn main(
 )";
 
   auto* expect = R"(
-[[block]]
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
