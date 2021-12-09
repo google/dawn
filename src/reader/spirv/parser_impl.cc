@@ -750,7 +750,14 @@ bool ParserImpl::IsValidIdentifier(const std::string& str) {
     return false;
   }
   std::locale c_locale("C");
-  if (!std::isalpha(str[0], c_locale)) {
+  if (str[0] == '_') {
+    if (str.length() == 1u || str[1] == '_') {
+      // https://www.w3.org/TR/WGSL/#identifiers
+      // must not be '_' (a single underscore)
+      // must not start with two underscores
+      return false;
+    }
+  } else if (!std::isalpha(str[0], c_locale)) {
     return false;
   }
   for (const char& ch : str) {

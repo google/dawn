@@ -202,8 +202,9 @@ TEST_F(SpvParserTest, Impl_Source_InvalidId) {
 
 TEST_F(SpvParserTest, Impl_IsValidIdentifier) {
   EXPECT_FALSE(ParserImpl::IsValidIdentifier(""));  // empty
-  EXPECT_FALSE(
-      ParserImpl::IsValidIdentifier("_"));  // leading underscore, but ok later
+  EXPECT_FALSE(ParserImpl::IsValidIdentifier("_"));
+  EXPECT_FALSE(ParserImpl::IsValidIdentifier("__"));
+  EXPECT_TRUE(ParserImpl::IsValidIdentifier("_x"));
   EXPECT_FALSE(
       ParserImpl::IsValidIdentifier("9"));  // leading digit, but ok later
   EXPECT_FALSE(ParserImpl::IsValidIdentifier(" "));    // leading space
