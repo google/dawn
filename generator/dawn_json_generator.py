@@ -757,8 +757,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         RENDER_PARAMS_BASE = make_base_render_params(metadata)
 
         api = metadata.api.lower()
+        prefix = metadata.proc_table_prefix.lower()
         if 'dawn_headers' in targets:
-            prefix = metadata.proc_table_prefix.lower()
             renders.append(
                 FileRender('api.h', 'src/include/dawn/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
@@ -779,11 +779,11 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawn_proc' in targets:
             renders.append(
-                FileRender('dawn_proc.c', 'src/dawn/dawn_proc.c',
+                FileRender('dawn_proc.c', 'src/dawn/' + prefix + '_proc.c',
                            [RENDER_PARAMS_BASE, params_dawn]))
             renders.append(
                 FileRender('dawn_thread_dispatch_proc.cpp',
-                           'src/dawn/dawn_thread_dispatch_proc.cpp',
+                           'src/dawn/' + prefix + '_thread_dispatch_proc.cpp',
                            [RENDER_PARAMS_BASE, params_dawn]))
 
         if 'webgpu_dawn_native_proc' in targets:

@@ -12,13 +12,15 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "dawn/dawn_proc.h"
+{% set Prefix = metadata.proc_table_prefix %}
+{% set prefix = Prefix.lower() %}
+#include "dawn/{{prefix}}_proc.h"
 
-static DawnProcTable procs;
+static {{Prefix}}ProcTable procs;
 
-static DawnProcTable nullProcs;
+static {{Prefix}}ProcTable nullProcs;
 
-void dawnProcSetProcs(const DawnProcTable* procs_) {
+void {{prefix}}ProcSetProcs(const {{Prefix}}ProcTable* procs_) {
     if (procs_) {
         procs = *procs_;
     } else {
@@ -26,13 +28,20 @@ void dawnProcSetProcs(const DawnProcTable* procs_) {
     }
 }
 
-WGPUInstance wgpuCreateInstance(WGPUInstanceDescriptor const * descriptor) {
-    return procs.createInstance(descriptor);
-}
-
-WGPUProc wgpuGetProcAddress(WGPUDevice device, const char* procName) {
-    return procs.getProcAddress(device, procName);
-}
+{% for function in by_category["function"] %}
+    {{as_cType(function.return_type.name)}} {{as_cMethod(None, function.name)}}(
+        {%- for arg in function.arguments -%}
+            {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
+        {%- endfor -%}
+    ) {
+        {% if function.return_type.name.canonical_case() != "void" %}return {% endif %}
+        procs.{{as_varName(function.name)}}(
+            {%- for arg in function.arguments -%}
+                {% if not loop.first %}, {% endif %}{{as_varName(arg.name)}}
+            {%- endfor -%}
+        );
+    }
+{% endfor %}
 
 {% for type in by_category["object"] %}
     {% for method in c_methods(type) %}

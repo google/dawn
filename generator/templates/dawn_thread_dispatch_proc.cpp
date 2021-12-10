@@ -15,13 +15,20 @@ void {{prefix}}ProcSetPerThreadProcs(const {{Prefix}}ProcTable* procs) {
     }
 }
 
-static WGPUProc ThreadDispatchGetProcAddress(WGPUDevice device, const char* procName) {
-    return perThreadProcs.getProcAddress(device, procName);
-}
-
-static WGPUInstance ThreadDispatchCreateInstance(WGPUInstanceDescriptor const * descriptor) {
-    return perThreadProcs.createInstance(descriptor);
-}
+{% for function in by_category["function"] %}
+    static {{as_cType(function.return_type.name)}} ThreadDispatch{{as_cppType(function.name)}}(
+        {%- for arg in function.arguments -%}
+            {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
+        {%- endfor -%}
+    ) {
+        {% if function.return_type.name.canonical_case() != "void" %}return {% endif %}
+        perThreadProcs.{{as_varName(function.name)}}(
+            {%- for arg in function.arguments -%}
+                {% if not loop.first %}, {% endif %}{{as_varName(arg.name)}}
+            {%- endfor -%}
+        );
+    }
+{% endfor %}
 
 {% for type in by_category["object"] %}
     {% for method in c_methods(type) %}
