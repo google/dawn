@@ -89,17 +89,6 @@ namespace dawn_native {
                     buffer.type == kInternalStorageBufferBinding) {
                     allowedStages &= ~wgpu::ShaderStage::Vertex;
                 }
-
-                // Dynamic storage buffers aren't bounds checked properly in D3D12. Disallow them as
-                // unsafe until the bounds checks are implemented.
-                DAWN_INVALID_IF(
-                    device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) &&
-                        buffer.hasDynamicOffset &&
-                        (buffer.type == wgpu::BufferBindingType::Storage ||
-                         buffer.type == kInternalStorageBufferBinding ||
-                         buffer.type == wgpu::BufferBindingType::ReadOnlyStorage),
-                    "Dynamic storage buffers are disallowed because they aren't secure yet. "
-                    "See https://crbug.com/dawn/429");
             }
             if (entry.sampler.type != wgpu::SamplerBindingType::Undefined) {
                 bindingMemberCount++;
