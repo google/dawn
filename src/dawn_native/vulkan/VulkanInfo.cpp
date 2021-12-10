@@ -219,10 +219,12 @@ namespace dawn_native { namespace vulkan {
         // because these extensions (transitively) depend on it in `EnsureDependencies`
         VkPhysicalDeviceFeatures2 features2 = {};
         features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        features2.pNext = nullptr;
         PNextChainBuilder featuresChain(&features2);
 
         VkPhysicalDeviceProperties2 properties2 = {};
         properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        features2.pNext = nullptr;
         PNextChainBuilder propertiesChain(&properties2);
 
         if (info.extensions[DeviceExt::ShaderFloat16Int8]) {

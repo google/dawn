@@ -320,6 +320,7 @@ namespace dawn_native { namespace vulkan {
         // if HasExt(DeviceExt::GetPhysicalDeviceProperties2) is true.
         VkPhysicalDeviceFeatures2 features2 = {};
         features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        features2.pNext = nullptr;
         PNextChainBuilder featuresChain(&features2);
 
         // Required for core WebGPU features.
