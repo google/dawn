@@ -135,7 +135,9 @@ class Variable : public Castable<Variable, Node> {
   /// The variable symbol
   const Symbol symbol;
 
-  /// The variable type
+  /// The declared variable type. This is null if the type is inferred, e.g.:
+  ///   let f = 1.0;
+  ///   var i = 1;
   const ast::Type* const type;
 
   /// True if this is a constant, false otherwise
