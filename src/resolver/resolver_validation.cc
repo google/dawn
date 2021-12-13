@@ -263,7 +263,8 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
 
   // TODO(amaiorano): Output struct and member decorations so that this output
   // can be copied verbatim back into source
-  auto get_struct_layout_string = [&](const sem::Struct* st) -> std::string {
+  auto get_struct_layout_string = [this, member_name_of, type_name_of](
+                                      const sem::Struct* st) -> std::string {
     std::stringstream ss;
 
     if (st->Members().empty()) {
@@ -308,7 +309,7 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
       auto* const m = st->Members()[i];
 
       // Output field alignment padding, if any
-      auto* const prev_member = (i == 0) ? nullptr : str->Members()[i - 1];
+      auto* const prev_member = (i == 0) ? nullptr : st->Members()[i - 1];
       if (prev_member) {
         uint32_t padding =
             m->Offset() - (prev_member->Offset() + prev_member->Size());

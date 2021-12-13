@@ -263,6 +263,63 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 22:24 note: see declaration of variable)");
 }
 
+// See https://crbug.com/tint/1344
+TEST_F(ResolverStorageClassLayoutValidationTest,
+       UniformBuffer_MembersOffsetNotMultipleOf16_InnerMoreMembersThanOuter) {
+  // struct Inner {
+  //   a : i32;
+  //   b : i32;
+  //   c : i32;
+  //   [[align(1), size(5)]] scalar : i32;
+  // };
+  //
+  // [[block]]
+  // struct Outer {
+  //   inner : Inner;
+  //   scalar : i32;
+  // };
+  //
+  // [[group(0), binding(0)]]
+  // var<uniform> a : Outer;
+
+  Structure(Source{{12, 34}}, "Inner",
+            {
+                Member("a", ty.i32()),
+                Member("b", ty.i32()),
+                Member("c", ty.i32()),
+                Member("scalar", ty.i32(), {MemberAlign(1), MemberSize(5)}),
+            });
+
+  Structure(Source{{34, 56}}, "Outer",
+            {
+                Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
+                Member(Source{{78, 90}}, "scalar", ty.i32()),
+            },
+            {StructBlock()});
+
+  Global(Source{{22, 24}}, "a", ty.type_name("Outer"),
+         ast::StorageClass::kUniform, GroupAndBinding(0, 0));
+
+  ASSERT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(78:90 error: uniform storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 20 bytes between 'inner' and 'scalar'. Consider setting [[align(16)]] on this member
+34:56 note: see layout of struct:
+/*            align(4) size(24) */ struct Outer {
+/* offset( 0) align(4) size(20) */   inner : Inner;
+/* offset(20) align(4) size( 4) */   scalar : i32;
+/*                              */ };
+12:34 note: and layout of previous member struct:
+/*            align(4) size(20) */ struct Inner {
+/* offset( 0) align(4) size( 4) */   a : i32;
+/* offset( 4) align(4) size( 4) */   b : i32;
+/* offset( 8) align(4) size( 4) */   c : i32;
+/* offset(12) align(1) size( 5) */   scalar : i32;
+/* offset(17) align(1) size( 3) */   // -- implicit struct size padding --;
+/*                              */ };
+22:24 note: see declaration of variable)");
+}
+
 TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_MembersOffsetNotMultipleOf16_SuggestedFix) {
   // struct Inner {
