@@ -91,7 +91,10 @@ config("dawn_internal") {
 
   # Only internal Dawn targets can use this config, this means only targets in
   # this BUILD.gn file and related subdirs.
-  visibility = [ "../*" ]
+  visibility = [
+    "../*",
+    "../../examples/*",
+  ]
 
   cflags = []
   if (is_clang) {

@@ -12,6 +12,7 @@ vars = {
   'dawn_node': False, # Also fetches dependencies required for building NodeJS bindings.
   'dawn_cmake_version': 'version:3.13.5',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
+  'dawn_gn_version': 'git_revision:fc295f3ac7ca4fe7acc6cb5fb052d22909ef3a8f',
   'dawn_go_version': 'version:1.16',
 }
 
@@ -33,7 +34,7 @@ deps = {
   'buildtools/linux64': {
     'packages': [{
       'package': 'gn/gn/linux-amd64',
-      'version': 'git_revision:dfcbc6fed0a8352696f92d67ccad54048ad182b3',
+      'version': Var('dawn_gn_version'),
     }],
     'dep_type': 'cipd',
     'condition': 'dawn_standalone and host_os == "linux"',
@@ -41,7 +42,7 @@ deps = {
   'buildtools/mac': {
     'packages': [{
       'package': 'gn/gn/mac-${{arch}}',
-      'version': 'git_revision:dfcbc6fed0a8352696f92d67ccad54048ad182b3',
+      'version': Var('dawn_gn_version'),
     }],
     'dep_type': 'cipd',
     'condition': 'dawn_standalone and host_os == "mac"',
@@ -49,7 +50,7 @@ deps = {
   'buildtools/win': {
     'packages': [{
       'package': 'gn/gn/windows-amd64',
-      'version': 'git_revision:dfcbc6fed0a8352696f92d67ccad54048ad182b3',
+      'version': Var('dawn_gn_version'),
     }],
     'dep_type': 'cipd',
     'condition': 'dawn_standalone and host_os == "win"',
