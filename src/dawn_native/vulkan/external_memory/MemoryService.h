@@ -49,7 +49,8 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         // True if the device reports it supports creating VkImages from external memory.
         bool SupportsCreateImage(const ExternalImageDescriptor* descriptor,
                                  VkFormat format,
-                                 VkImageUsageFlags usage);
+                                 VkImageUsageFlags usage,
+                                 bool* supportsDisjoint);
 
         // Returns the parameters required for importing memory
         ResultOrError<MemoryImportParams> GetMemoryImportParams(

@@ -151,6 +151,12 @@ namespace dawn_native { namespace vulkan {
             mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
         }
 
+#if defined(DAWN_USE_SYNC_FDS)
+        // TODO(chromium:1258986): Precisely enable the feature by querying the device's format
+        // features.
+        mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
+#endif
+
         return {};
     }
 

@@ -1228,7 +1228,8 @@ namespace dawn_native { namespace d3d12 {
         if (texture->GetFormat().IsMultiPlanar()) {
             const Aspect planeAspect = ConvertViewAspect(GetFormat(), descriptor->aspect);
             planeSlice = GetAspectIndex(planeAspect);
-            mSrvDesc.Format = D3D12TextureFormat(GetFormat().GetAspectInfo(planeAspect).format);
+            mSrvDesc.Format =
+                D3D12TextureFormat(texture->GetFormat().GetAspectInfo(planeAspect).format);
         }
 
         // Currently we always use D3D12_TEX2D_ARRAY_SRV because we cannot specify base array layer

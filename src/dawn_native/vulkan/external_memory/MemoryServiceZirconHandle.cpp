@@ -81,7 +81,9 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
     bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor,
                                       VkFormat format,
-                                      VkImageUsageFlags usage) {
+                                      VkImageUsageFlags usage,
+                                      bool* supportsDisjoint) {
+        *supportsDisjoint = false;
         return mSupported;
     }
 

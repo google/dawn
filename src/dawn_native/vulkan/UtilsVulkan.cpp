@@ -71,7 +71,12 @@ namespace dawn_native { namespace vulkan {
                     break;
 
                 case Aspect::Plane0:
+                    flags |= VK_IMAGE_ASPECT_PLANE_0_BIT;
+                    break;
                 case Aspect::Plane1:
+                    flags |= VK_IMAGE_ASPECT_PLANE_1_BIT;
+                    break;
+
                 case Aspect::None:
                     UNREACHABLE();
             }
