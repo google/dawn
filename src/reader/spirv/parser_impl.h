@@ -218,16 +218,16 @@ class ParserImpl : Reader {
   /// This is null until BuildInternalModule has been called.
   spvtools::opt::IRContext* ir_context() { return ir_context_.get(); }
 
-  /// Gets the list of decorations for a SPIR-V result ID.  Returns an empty
-  /// vector if the ID is not a result ID, or if no decorations target that ID.
-  /// The internal representation must have already been built.
+  /// Gets the list of unique decorations for a SPIR-V result ID.  Returns an
+  /// empty vector if the ID is not a result ID, or if no decorations target
+  /// that ID. The internal representation must have already been built.
   /// @param id SPIR-V ID
   /// @returns the list of decorations on the given ID
   DecorationList GetDecorationsFor(uint32_t id) const;
-  /// Gets the list of decorations for the member of a struct.  Returns an empty
-  /// list if the `id` is not the ID of a struct, or if the member index is out
-  /// of range, or if the target member has no decorations.
-  /// The internal representation must have already been built.
+  /// Gets the list of unique decorations for the member of a struct.  Returns
+  /// an empty list if the `id` is not the ID of a struct, or if the member
+  /// index is out of range, or if the target member has no decorations. The
+  /// internal representation must have already been built.
   /// @param id SPIR-V ID of a struct
   /// @param member_index the member within the struct
   /// @returns the list of decorations on the member

@@ -388,16 +388,20 @@ const Type* ParserImpl::ConvertType(uint32_t type_id, PtrAs ptr_as) {
 DecorationList ParserImpl::GetDecorationsFor(uint32_t id) const {
   DecorationList result;
   const auto& decorations = deco_mgr_->GetDecorationsFor(id, true);
+  std::unordered_set<uint32_t> visited;
   for (const auto* inst : decorations) {
     if (inst->opcode() != SpvOpDecorate) {
       continue;
     }
     // Example: OpDecorate %struct_id Block
     // Example: OpDecorate %array_ty ArrayStride 16
-    std::vector<uint32_t> inst_as_words;
-    inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
-    Decoration d(inst_as_words.begin() + 2, inst_as_words.end());
-    result.push_back(d);
+    auto decoration_kind = inst->GetSingleWordInOperand(1);
+    if (visited.emplace(decoration_kind).second) {
+      std::vector<uint32_t> inst_as_words;
+      inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
+      Decoration d(inst_as_words.begin() + 2, inst_as_words.end());
+      result.push_back(d);
+    }
   }
   return result;
 }
@@ -407,16 +411,20 @@ DecorationList ParserImpl::GetDecorationsForMember(
     uint32_t member_index) const {
   DecorationList result;
   const auto& decorations = deco_mgr_->GetDecorationsFor(id, true);
+  std::unordered_set<uint32_t> visited;
   for (const auto* inst : decorations) {
+    // Example: OpMemberDecorate %struct_id 1 Offset 16
     if ((inst->opcode() != SpvOpMemberDecorate) ||
         (inst->GetSingleWordInOperand(1) != member_index)) {
       continue;
     }
-    // Example: OpMemberDecorate %struct_id 2 Offset 24
-    std::vector<uint32_t> inst_as_words;
-    inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
-    Decoration d(inst_as_words.begin() + 3, inst_as_words.end());
-    result.push_back(d);
+    auto decoration_kind = inst->GetSingleWordInOperand(2);
+    if (visited.emplace(decoration_kind).second) {
+      std::vector<uint32_t> inst_as_words;
+      inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
+      Decoration d(inst_as_words.begin() + 3, inst_as_words.end());
+      result.push_back(d);
+    }
   }
   return result;
 }
@@ -1046,7 +1054,6 @@ const Type* ParserImpl::ConvertType(
 bool ParserImpl::ParseArrayDecorations(
     const spvtools::opt::analysis::Type* spv_type,
     uint32_t* array_stride) {
-  bool has_array_stride = false;
   *array_stride = 0;  // Implicit stride case.
   const auto type_id = type_mgr_->GetId(spv_type);
   for (auto& decoration : this->GetDecorationsFor(type_id)) {
@@ -1056,11 +1063,6 @@ bool ParserImpl::ParseArrayDecorations(
         return Fail() << "invalid array type ID " << type_id
                       << ": ArrayStride can't be 0";
       }
-      if (has_array_stride) {
-        return Fail() << "invalid array type ID " << type_id
-                      << ": multiple ArrayStride decorations";
-      }
-      has_array_stride = true;
       *array_stride = stride;
     } else {
       return Fail() << "invalid array type ID " << type_id

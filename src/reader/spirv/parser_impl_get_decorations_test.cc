@@ -60,6 +60,21 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_OneDecoration) {
   p->SkipDumpingPending(kSkipReason);
 }
 
+TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_Duplicate) {
+  auto p = parser(test::Assemble(R"(
+    OpDecorate %10 Block
+    OpDecorate %10 Block
+    %float = OpTypeFloat 32
+    %10 = OpTypeStruct %float
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  auto decorations = p->GetDecorationsFor(10);
+  EXPECT_THAT(decorations,
+              UnorderedElementsAre(Decoration{SpvDecorationBlock}));
+  EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
+}
+
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_MultiDecoration) {
   auto p = parser(test::Assemble(R"(
     OpDecorate %5 RelaxedPrecision
@@ -109,6 +124,21 @@ TEST_F(SpvParserGetDecorationsTest,
 
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_RelaxedPrecision) {
   auto p = parser(test::Assemble(R"(
+    OpMemberDecorate %10 0 RelaxedPrecision
+    %float = OpTypeFloat 32
+    %10 = OpTypeStruct %float
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  auto decorations = p->GetDecorationsForMember(10, 0);
+  EXPECT_THAT(decorations,
+              UnorderedElementsAre(Decoration{SpvDecorationRelaxedPrecision}));
+  EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
+}
+
+TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_Duplicate) {
+  auto p = parser(test::Assemble(R"(
+    OpMemberDecorate %10 0 RelaxedPrecision
     OpMemberDecorate %10 0 RelaxedPrecision
     %float = OpTypeFloat 32
     %10 = OpTypeStruct %float
