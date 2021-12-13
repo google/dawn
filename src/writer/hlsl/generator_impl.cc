@@ -51,6 +51,7 @@
 #include "src/transform/decompose_memory_access.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/fold_trivial_single_use_lets.h"
+#include "src/transform/localize_struct_array_assignment.h"
 #include "src/transform/loop_to_for_loop.h"
 #include "src/transform/manager.h"
 #include "src/transform/num_workgroups_from_uniform.h"
@@ -144,6 +145,15 @@ SanitizedResult Sanitize(
       array_length_from_uniform.bindpoint_to_size_index;
 
   manager.Add<transform::Unshadow>();
+
+  // LocalizeStructArrayAssignment must come after:
+  // * SimplifyPointers, because it assumes assignment to arrays in structs are
+  // done directly, not indirectly.
+  // TODO(crbug.com/tint/1340): See if we can get rid of the duplicate
+  // SimplifyPointers transform. Can't do it right now because
+  // LocalizeStructArrayAssignment introduces pointers.
+  manager.Add<transform::SimplifyPointers>();
+  manager.Add<transform::LocalizeStructArrayAssignment>();
 
   // Attempt to convert `loop`s into for-loops. This is to try and massage the
   // output into something that will not cause FXC to choke or misbehave.

@@ -2468,6 +2468,15 @@ class ProgramBuilder {
     }
   }
 
+  /// Unmarks that the given transform `T` has been applied to this program.
+  template <typename T>
+  void UnsetTransformApplied() {
+    auto it = transforms_applied_.find(&TypeInfo::Of<T>());
+    if (it != transforms_applied_.end()) {
+      transforms_applied_.erase(it);
+    }
+  }
+
   /// @returns true if the transform of type `T` was applied.
   template <typename T>
   bool HasTransformApplied() {

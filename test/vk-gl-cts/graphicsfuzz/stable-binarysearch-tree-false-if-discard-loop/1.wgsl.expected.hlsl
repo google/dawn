@@ -1,74 +1,74 @@
 SKIP: FAILED
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:61:15 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:60:15 warning: code is unreachable
               return;
               ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:99:11 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:98:11 warning: code is unreachable
           return;
           ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:171:17 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:170:17 warning: code is unreachable
                 return;
                 ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:209:13 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:208:13 warning: code is unreachable
             return;
             ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:268:15 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:267:15 warning: code is unreachable
               return;
               ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:306:11 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:305:11 warning: code is unreachable
           return;
           ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:359:15 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:358:15 warning: code is unreachable
               return;
               ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:397:11 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:396:11 warning: code is unreachable
           return;
           ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:450:15 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:449:15 warning: code is unreachable
               return;
               ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:488:11 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:487:11 warning: code is unreachable
           return;
           ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:541:15 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:540:15 warning: code is unreachable
               return;
               ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:579:11 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:578:11 warning: code is unreachable
           return;
           ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:632:15 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:631:15 warning: code is unreachable
               return;
               ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:670:11 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:669:11 warning: code is unreachable
           return;
           ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:723:15 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:722:15 warning: code is unreachable
               return;
               ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:761:11 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:760:11 warning: code is unreachable
           return;
           ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:814:15 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:813:15 warning: code is unreachable
               return;
               ^^^^^^
 
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:852:11 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/1.wgsl:851:11 warning: code is unreachable
           return;
           ^^^^^^
 
@@ -1162,6 +1162,77 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000023795628100(123,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000023795628100(54,27-30): error X3696: infinite loop detected - loop never exits
+C:\src\temp\u1660.0:147:5: warning: expression result unused [-Wunused-value]
+    0u;
+    ^~
+C:\src\temp\u1660.0:1033:20: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+        if ((x_570 == asint(x_574))) {
+             ~~~~~~^~~~~~~~~~~~~~~
+C:\src\temp\u1660.0:1033:20: note: remove extraneous parentheses around the comparison to silence this warning
+        if ((x_570 == asint(x_574))) {
+            ~      ^              ~
+C:\src\temp\u1660.0:1033:20: note: use '=' to turn this equality comparison into an assignment
+        if ((x_570 == asint(x_574))) {
+                   ^~
+                   =
+C:\src\temp\u1660.0:1043:20: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+        if ((x_570 == asint(-1))) {
+             ~~~~~~^~~~~~~~~~~~
+C:\src\temp\u1660.0:1043:20: note: remove extraneous parentheses around the comparison to silence this warning
+        if ((x_570 == asint(-1))) {
+            ~      ^           ~
+C:\src\temp\u1660.0:1043:20: note: use '=' to turn this equality comparison into an assignment
+        if ((x_570 == asint(-1))) {
+                   ^~
+                   =
+C:\src\temp\u1660.0:983:5: warning: expression result unused [-Wunused-value]
+    0u;
+    ^~
+C:\src\temp\u1660.0:1060:14: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+  if ((x_572 == asint(20))) {
+       ~~~~~~^~~~~~~~~~~~
+C:\src\temp\u1660.0:1060:14: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((x_572 == asint(20))) {
+      ~      ^           ~
+C:\src\temp\u1660.0:1060:14: note: use '=' to turn this equality comparison into an assignment
+  if ((x_572 == asint(20))) {
+             ^~
+             =
+C:\src\temp\u1660.0:27:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1660.0:254:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1660.0:356:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1660.0:458:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1660.0:560:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1660.0:662:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1660.0:764:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1660.0:866:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+error: validation errors
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+C:\src\temp\u1660.0:1085: error: Loop must have break.
+Validation failed.
+
+
 

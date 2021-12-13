@@ -37,5 +37,9 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x000001F6BB717E80(9,19-22): error X3696: infinite loop detected - loop never exits
+error: validation errors
+C:\src\temp\ull0.0:31: error: Loop must have break.
+Validation failed.
+
+
 

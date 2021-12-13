@@ -1108,6 +1108,77 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000016CFDF12D00(123,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000016CFDF12D00(54,27-30): error X3696: infinite loop detected - loop never exits
+C:\src\temp\u1p00.0:147:5: warning: expression result unused [-Wunused-value]
+    0u;
+    ^~
+C:\src\temp\u1p00.0:1033:20: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+        if ((x_570 == asint(x_574))) {
+             ~~~~~~^~~~~~~~~~~~~~~
+C:\src\temp\u1p00.0:1033:20: note: remove extraneous parentheses around the comparison to silence this warning
+        if ((x_570 == asint(x_574))) {
+            ~      ^              ~
+C:\src\temp\u1p00.0:1033:20: note: use '=' to turn this equality comparison into an assignment
+        if ((x_570 == asint(x_574))) {
+                   ^~
+                   =
+C:\src\temp\u1p00.0:1043:20: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+        if ((x_570 == asint(-1))) {
+             ~~~~~~^~~~~~~~~~~~
+C:\src\temp\u1p00.0:1043:20: note: remove extraneous parentheses around the comparison to silence this warning
+        if ((x_570 == asint(-1))) {
+            ~      ^           ~
+C:\src\temp\u1p00.0:1043:20: note: use '=' to turn this equality comparison into an assignment
+        if ((x_570 == asint(-1))) {
+                   ^~
+                   =
+C:\src\temp\u1p00.0:983:5: warning: expression result unused [-Wunused-value]
+    0u;
+    ^~
+C:\src\temp\u1p00.0:1060:14: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+  if ((x_572 == asint(20))) {
+       ~~~~~~^~~~~~~~~~~~
+C:\src\temp\u1p00.0:1060:14: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((x_572 == asint(20))) {
+      ~      ^           ~
+C:\src\temp\u1p00.0:1060:14: note: use '=' to turn this equality comparison into an assignment
+  if ((x_572 == asint(20))) {
+             ^~
+             =
+C:\src\temp\u1p00.0:27:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1p00.0:254:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1p00.0:356:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1p00.0:458:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1p00.0:560:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1p00.0:662:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1p00.0:764:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+C:\src\temp\u1p00.0:866:3: warning: expression result unused [-Wunused-value]
+  0u;
+  ^~
+error: validation errors
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+C:\src\temp\u1p00.0:1085: error: Loop must have break.
+Validation failed.
+
+
 

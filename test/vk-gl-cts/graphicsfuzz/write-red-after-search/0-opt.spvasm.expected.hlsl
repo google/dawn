@@ -268,8 +268,19 @@ void main_1() {
       const int x_145 = GLF_live4index;
       const int x_146 = GLF_live4index;
       const float x_269 = GLF_live4obj.even_numbers[1];
-      GLF_live4obj.even_numbers[(((x_144 >= 0) & (x_145 < 10)) ? x_146 : 0)] = x_269;
-      GLF_live4obj.even_numbers[(((GLF_live4i >= 0) & (GLF_live4i < 10)) ? GLF_live4i : 0)] = 1.0f;
+      {
+        float tint_symbol_1[10] = GLF_live4obj.even_numbers;
+        tint_symbol_1[(((x_144 >= 0) & (x_145 < 10)) ? x_146 : 0)] = x_269;
+        GLF_live4obj.even_numbers = tint_symbol_1;
+      }
+      const int x_147 = GLF_live4i;
+      const int x_148 = GLF_live4i;
+      const int x_149 = GLF_live4i;
+      {
+        float tint_symbol_3[10] = GLF_live4obj.even_numbers;
+        tint_symbol_3[(((x_147 >= 0) & (x_148 < 10)) ? x_149 : 0)] = 1.0f;
+        GLF_live4obj.even_numbers = tint_symbol_3;
+      }
     }
   }
   param_24 = treeIndex_1;
@@ -337,27 +348,27 @@ void main_1() {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol_1 {
+struct tint_symbol_5 {
   float4 gl_FragCoord_param : SV_Position;
 };
-struct tint_symbol_2 {
+struct tint_symbol_6 {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
 main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_4 = {x_GLF_color};
-  return tint_symbol_4;
+  const main_out tint_symbol_8 = {x_GLF_color};
+  return tint_symbol_8;
 }
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const main_out inner_result = main_inner(tint_symbol.gl_FragCoord_param);
-  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+tint_symbol_6 main(tint_symbol_5 tint_symbol_4) {
+  const main_out inner_result = main_inner(tint_symbol_4.gl_FragCoord_param);
+  tint_symbol_6 wrapper_result = (tint_symbol_6)0;
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000028F1D72B060(35,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\tint\test\Shader@0x0000028F1D72B060(270,7-91): warning X3550: array reference cannot be used as an l-value; not natively addressable, forcing loop to unroll
-C:\src\tint\test\Shader@0x0000028F1D72B060(259,12-53): error X3531: can't unroll loops marked with loop attribute
+C:\src\tint\test\Shader@0x000001F7677BB400(35,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
+C:\src\tint\test\Shader@0x000001F7677BB400(145,3): warning X4000: use of potentially uninitialized variable (makeFrame_f1_)
+internal error: compilation aborted unexpectedly
 

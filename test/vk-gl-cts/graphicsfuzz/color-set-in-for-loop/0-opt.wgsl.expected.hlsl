@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-vk-gl-cts/graphicsfuzz/color-set-in-for-loop/0-opt.wgsl:16:5 warning: code is unreachable
+vk-gl-cts/graphicsfuzz/color-set-in-for-loop/0-opt.wgsl:15:5 warning: code is unreachable
     return;
     ^^^^^^
 
@@ -40,5 +40,9 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x00000141CAFC4AB0(9,19-22): error X3696: infinite loop detected - loop never exits
+error: validation errors
+C:\src\temp\u1hm0.0:31: error: Loop must have break.
+Validation failed.
+
+
 

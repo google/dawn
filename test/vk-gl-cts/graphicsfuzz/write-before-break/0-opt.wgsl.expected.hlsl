@@ -1,7 +1,20 @@
 SKIP: FAILED
 
-void set_float3(inout float3 vec, int idx, float val) {
-  vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
+void set_scalar_float4x3(inout float4x3 mat, int col, int row, float val) {
+  switch (col) {
+    case 0:
+      mat[0] = (row.xxx == int3(0, 1, 2)) ? val.xxx : mat[0];
+      break;
+    case 1:
+      mat[1] = (row.xxx == int3(0, 1, 2)) ? val.xxx : mat[1];
+      break;
+    case 2:
+      mat[2] = (row.xxx == int3(0, 1, 2)) ? val.xxx : mat[2];
+      break;
+    case 3:
+      mat[3] = (row.xxx == int3(0, 1, 2)) ? val.xxx : mat[3];
+      break;
+  }
 }
 
 cbuffer cbuffer_x_9 : register(b0, space0) {
@@ -52,15 +65,15 @@ void main_1() {
         {
           [loop] for(; (1 < z); c = (c + 1)) {
             d = 0;
-            bool tint_tmp = (c >= 0);
+            bool tint_tmp = (d >= 0);
             if (tint_tmp) {
-              tint_tmp = (c < 4);
+              tint_tmp = (d < 3);
             }
-            bool tint_tmp_1 = (d >= 0);
+            bool tint_tmp_1 = (c >= 0);
             if (tint_tmp_1) {
-              tint_tmp_1 = (d < 3);
+              tint_tmp_1 = (c < 4);
             }
-            set_float3(tempm43[((tint_tmp) ? c : 0)], ((tint_tmp_1) ? d : 0), 1.0f);
+            set_scalar_float4x3(tempm43, ((tint_tmp) ? d : 0), ((tint_tmp_1) ? c : 0), 1.0f);
           }
         }
         bool tint_tmp_2 = (idx >= 0);
@@ -97,5 +110,9 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000011E3650E4B0(51,18-44): error X3531: can't unroll loops marked with loop attribute
+error: validation errors
+C:\src\temp\u1tig.0:105: error: Loop must have break.
+Validation failed.
+
+
 

@@ -54,3 +54,5 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+Internal compiler error: access violation. Attempted to read from address 0x0000000000000048
+

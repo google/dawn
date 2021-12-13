@@ -82,18 +82,9 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(15,8-20): warning X3556: integer modulus may be much slower, try using uints if possible.
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3551: infinite loop detected - loop writes no values
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3551: infinite loop detected - loop writes no values
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3551: infinite loop detected - loop writes no values
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3551: infinite loop detected - loop writes no values
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3551: infinite loop detected - loop writes no values
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,18-29): warning X3551: infinite loop detected - loop writes no values
-C:\src\tint\test\Shader@0x000001BF7F9DDFF0(24,25-28): error X3696: infinite loop detected - loop never exits
+error: validation errors
+C:\src\temp\u1jmg.0:77: error: Loop must have break.
+Validation failed.
+
+
 

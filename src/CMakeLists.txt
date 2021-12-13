@@ -312,6 +312,8 @@ set(TINT_LIB_SRCS
   transform/fold_constants.h
   transform/fold_trivial_single_use_lets.cc
   transform/fold_trivial_single_use_lets.h
+  transform/localize_struct_array_assignment.cc
+  transform/localize_struct_array_assignment.h
   transform/for_loop_to_loop.cc
   transform/for_loop_to_loop.h
   transform/glsl.cc
@@ -971,6 +973,7 @@ if(${TINT_BUILD_TESTS})
       transform/fold_constants_test.cc
       transform/fold_trivial_single_use_lets_test.cc
       transform/for_loop_to_loop_test.cc
+      transform/localize_struct_array_assignment_test.cc
       transform/loop_to_for_loop_test.cc
       transform/module_scope_var_to_entry_point_param_test.cc
       transform/multiplanar_external_texture_test.cc

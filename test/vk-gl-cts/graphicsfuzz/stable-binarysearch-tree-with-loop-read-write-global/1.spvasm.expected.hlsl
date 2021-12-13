@@ -92,7 +92,11 @@ void insert_i1_i1_(inout int treeIndex, inout int data_1) {
 int identity_i1_(inout int a) {
   const int x_202 = a;
   const int x_203 = a;
-  obj.numbers[x_202] = x_203;
+  {
+    int tint_symbol_1[10] = obj.numbers;
+    tint_symbol_1[x_202] = x_203;
+    obj.numbers = tint_symbol_1;
+  }
   const int x_206 = obj.numbers[2];
   return x_206;
 }
@@ -264,22 +268,22 @@ void main_1() {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol {
+struct tint_symbol_2 {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_2 = {x_GLF_color};
-  return tint_symbol_2;
+  const main_out tint_symbol_4 = {x_GLF_color};
+  return tint_symbol_4;
 }
 
-tint_symbol main() {
+tint_symbol_2 main() {
   const main_out inner_result = main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x000002117DDC0DA0(32,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\tint\test\Shader@0x000002117DDC0DA0(203,12-42): error X3531: can't unroll loops marked with loop attribute
+C:\src\tint\test\Shader@0x0000019568397DE0(32,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
+internal error: compilation aborted unexpectedly
 

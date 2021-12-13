@@ -451,6 +451,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/fold_trivial_single_use_lets.h",
     "transform/for_loop_to_loop.cc",
     "transform/for_loop_to_loop.h",
+    "transform/localize_struct_array_assignment.cc",
+    "transform/localize_struct_array_assignment.h",
     "transform/loop_to_for_loop.cc",
     "transform/loop_to_for_loop.h",
     "transform/manager.cc",
