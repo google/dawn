@@ -15,6 +15,7 @@
 #ifndef SRC_UTILS_UNIQUE_VECTOR_H_
 #define SRC_UTILS_UNIQUE_VECTOR_H_
 
+#include <cstddef>
 #include <functional>
 #include <unordered_set>
 #include <utility>
