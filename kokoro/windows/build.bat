@@ -104,7 +104,7 @@ call :status "Configuring build system"
 @echo on
 mkdir %BUILD_DIR%
 cd /d %BUILD_DIR%
-set COMMON_CMAKE_FLAGS=-DTINT_BUILD_DOCS=O
+set COMMON_CMAKE_FLAGS=-DTINT_BUILD_DOCS=O -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
 @echo off
 
 call :status "Building tint"
@@ -113,13 +113,18 @@ rem Disable msbuild "Intermediate or Output directory cannot reside in Temporary
 set IgnoreWarnIntDirInTempDetected=true
 rem Add Python3 to path as this Kokoro image only has Python2 in it
 set PATH=C:\Python37;%PATH%
-cmake %SRC_DIR% %CMAKE_FLAGS% %COMMON_CMAKE_FLAGS% || goto :error
-cmake --build . --config %BUILD_TYPE% || goto :error
+rem To use ninja with CMake requires VC env vars
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+@echo on
+rem Note that we need to specify the C and C++ compiler only because Cygwin is in PATH and CMake finds GCC and picks that over MSVC
+cmake %SRC_DIR% -G "Ninja" -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" %COMMON_CMAKE_FLAGS% || goto :error
+cmake --build . || goto :error
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat" /clean_env
 @echo off
 
 call :status "Running tint_unittests"
 @echo on
-%BUILD_TYPE%\tint_unittests.exe || goto :error
+tint_unittests.exe || goto :error
 @echo off
 
 call :status "Testing test/test-all.sh"
@@ -127,7 +132,7 @@ call :status "Testing test/test-all.sh"
 cd /d %SRC_DIR% || goto :error
 set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%PATH%
 where metal.exe
-git bash -- ./test/test-all.sh ../tint-build/%BUILD_TYPE%/tint.exe --verbose
+git bash -- ./test/test-all.sh ../tint-build/tint.exe --verbose
 @echo off
 
 call :status "Done"

@@ -14,6 +14,5 @@
 
 @echo on
 set BUILD_TYPE=Release
-set CMAKE_FLAGS=-G "Visual Studio 16 2019" -A x64
 call %~dp0\..\build.bat
 exit /b %errorlevel%
