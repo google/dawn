@@ -118,6 +118,16 @@ namespace dawn_wire { namespace client {
         return result;
     }
 
+    ReservedInstance Client::ReserveInstance() {
+        auto* allocation = InstanceAllocator().New(this);
+
+        ReservedInstance result;
+        result.instance = ToAPI(allocation->object.get());
+        result.id = allocation->object->id;
+        result.generation = allocation->generation;
+        return result;
+    }
+
     void Client::ReclaimTextureReservation(const ReservedTexture& reservation) {
         TextureAllocator().Free(FromAPI(reservation.texture));
     }
@@ -128,6 +138,10 @@ namespace dawn_wire { namespace client {
 
     void Client::ReclaimDeviceReservation(const ReservedDevice& reservation) {
         DeviceAllocator().Free(FromAPI(reservation.device));
+    }
+
+    void Client::ReclaimInstanceReservation(const ReservedInstance& reservation) {
+        InstanceAllocator().Free(FromAPI(reservation.instance));
     }
 
     void Client::Disconnect() {

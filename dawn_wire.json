@@ -148,6 +148,10 @@
             "SurfaceDescriptorFromWindowsSwapChainPanel"
         ],
         "client_side_commands": [
+            "AdapterGetProperties",
+            "AdapterGetLimits",
+            "AdapterHasFeature",
+            "AdapterRequestDevice",
             "BufferMapAsync",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
@@ -159,6 +163,7 @@
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
             "DeviceSetLoggingCallback",
+            "InstanceRequestAdapter",
             "ShaderModuleGetCompilationInfo",
             "QueueOnSubmittedWorkDone",
             "QueueWriteBuffer",
@@ -173,8 +178,10 @@
             "DevicePushErrorScope"
         ],
         "client_special_objects": [
+            "Adapter",
             "Buffer",
             "Device",
+            "Instance",
             "Queue",
             "ShaderModule"
         ],

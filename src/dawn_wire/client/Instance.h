@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn Authors
+// Copyright 2021 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_CLIENT_APIOBJECTS_H_
-#define DAWNWIRE_CLIENT_APIOBJECTS_H_
+#ifndef DAWNWIRE_CLIENT_INSTANCE_H_
+#define DAWNWIRE_CLIENT_INSTANCE_H_
 
+#include <dawn/webgpu.h>
+
+#include "dawn_wire/WireClient.h"
 #include "dawn_wire/client/ObjectBase.h"
 
-#include "dawn_wire/client/Adapter.h"
-#include "dawn_wire/client/Buffer.h"
-#include "dawn_wire/client/Device.h"
-#include "dawn_wire/client/Instance.h"
-#include "dawn_wire/client/Queue.h"
-#include "dawn_wire/client/ShaderModule.h"
+namespace dawn_wire { namespace client {
 
-#include "dawn_wire/client/ApiObjects_autogen.h"
+    class Instance final : public ObjectBase {
+      public:
+        using ObjectBase::ObjectBase;
 
-#endif  // DAWNWIRE_CLIENT_APIOBJECTS_H_
+        void RequestAdapter(const WGPURequestAdapterOptions* options,
+                            WGPURequestAdapterCallback callback,
+                            void* userdata);
+    };
+
+}}  // namespace dawn_wire::client
+
+#endif  // DAWNWIRE_CLIENT_INSTANCE_H_

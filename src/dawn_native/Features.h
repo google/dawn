@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 
 namespace dawn_native {
@@ -50,6 +51,7 @@ namespace dawn_native {
 
         void EnableFeature(Feature feature);
         bool IsEnabled(Feature feature) const;
+        bool IsEnabled(wgpu::FeatureName feature) const;
         std::vector<const char*> GetEnabledFeatureNames() const;
         void InitializeDeviceProperties(WGPUDeviceProperties* properties) const;
     };

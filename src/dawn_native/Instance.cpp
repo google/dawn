@@ -99,6 +99,12 @@ namespace dawn_native {
         return true;
     }
 
+    void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
+                                         WGPURequestAdapterCallback callback,
+                                         void* userdata) {
+        callback(WGPURequestAdapterStatus_Error, nullptr, "Not implemented", userdata);
+    }
+
     void InstanceBase::DiscoverDefaultAdapters() {
         for (wgpu::BackendType b : IterateBitSet(GetEnabledBackends())) {
             EnsureBackendConnection(b);

@@ -153,6 +153,24 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
+    bool Server::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
+        ASSERT(instance != nullptr);
+        ObjectData<WGPUInstance>* data = InstanceObjects().Allocate(id);
+        if (data == nullptr) {
+            return false;
+        }
+
+        data->handle = instance;
+        data->generation = generation;
+        data->state = AllocationState::Allocated;
+
+        // The instance is externally owned so it shouldn't be destroyed when we receive a destroy
+        // message from the client. Add a reference to counterbalance the eventual release.
+        mProcs.instanceReference(instance);
+
+        return true;
+    }
+
     WGPUDevice Server::GetDevice(uint32_t id, uint32_t generation) {
         ObjectData<WGPUDevice>* data = DeviceObjects().Get(id);
         if (data == nullptr || data->generation != generation) {

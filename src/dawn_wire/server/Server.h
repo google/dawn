@@ -171,6 +171,8 @@ namespace dawn_wire { namespace server {
 
         bool InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation);
 
+        bool InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation);
+
         WGPUDevice GetDevice(uint32_t id, uint32_t generation);
 
         template <typename T,

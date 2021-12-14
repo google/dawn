@@ -45,6 +45,10 @@ namespace dawn_native {
       public:
         static InstanceBase* Create(const InstanceDescriptor* descriptor = nullptr);
 
+        void APIRequestAdapter(const RequestAdapterOptions* options,
+                               WGPURequestAdapterCallback callback,
+                               void* userdata);
+
         void DiscoverDefaultAdapters();
         bool DiscoverAdapters(const AdapterDiscoveryOptionsBase* options);
 

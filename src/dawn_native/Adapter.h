@@ -17,6 +17,7 @@
 
 #include "dawn_native/DawnNative.h"
 
+#include "common/RefCounted.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Features.h"
 #include "dawn_native/Limits.h"
@@ -28,12 +29,20 @@ namespace dawn_native {
 
     class DeviceBase;
 
-    class AdapterBase {
+    class AdapterBase : public RefCounted {
       public:
         AdapterBase(InstanceBase* instance, wgpu::BackendType backend);
         virtual ~AdapterBase() = default;
 
         MaybeError Initialize();
+
+        // WebGPU API
+        bool APIGetLimits(SupportedLimits* limits) const;
+        void APIGetProperties(AdapterProperties* properties) const;
+        bool APIHasFeature(wgpu::FeatureName feature) const;
+        void APIRequestDevice(const DeviceDescriptor* descriptor,
+                              WGPURequestDeviceCallback callback,
+                              void* userdata);
 
         wgpu::BackendType GetBackendType() const;
         wgpu::AdapterType GetAdapterType() const;

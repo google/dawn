@@ -47,10 +47,12 @@ namespace dawn_wire { namespace client {
         ReservedTexture ReserveTexture(WGPUDevice device);
         ReservedSwapChain ReserveSwapChain(WGPUDevice device);
         ReservedDevice ReserveDevice();
+        ReservedInstance ReserveInstance();
 
         void ReclaimTextureReservation(const ReservedTexture& reservation);
         void ReclaimSwapChainReservation(const ReservedSwapChain& reservation);
         void ReclaimDeviceReservation(const ReservedDevice& reservation);
+        void ReclaimInstanceReservation(const ReservedInstance& reservation);
 
         template <typename Cmd>
         void SerializeCommand(const Cmd& cmd) {

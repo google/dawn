@@ -69,6 +69,29 @@ namespace dawn_native {
         return {};
     }
 
+    bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
+        return GetLimits(limits);
+    }
+
+    void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
+        properties->vendorID = mPCIInfo.vendorId;
+        properties->deviceID = mPCIInfo.deviceId;
+        properties->name = mPCIInfo.name.c_str();
+        properties->driverDescription = mDriverDescription.c_str();
+        properties->adapterType = mAdapterType;
+        properties->backendType = mBackend;
+    }
+
+    bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
+        return mSupportedFeatures.IsEnabled(feature);
+    }
+
+    void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
+                                       WGPURequestDeviceCallback callback,
+                                       void* userdata) {
+        callback(WGPURequestDeviceStatus_Error, nullptr, "Not implemented", userdata);
+    }
+
     wgpu::BackendType AdapterBase::GetBackendType() const {
         return mBackend;
     }

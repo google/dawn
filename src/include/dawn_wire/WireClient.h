@@ -52,6 +52,12 @@ namespace dawn_wire {
         uint32_t generation;
     };
 
+    struct ReservedInstance {
+        WGPUInstance instance;
+        uint32_t id;
+        uint32_t generation;
+    };
+
     struct DAWN_WIRE_EXPORT WireClientDescriptor {
         CommandSerializer* serializer;
         client::MemoryTransferService* memoryTransferService = nullptr;
@@ -68,10 +74,12 @@ namespace dawn_wire {
         ReservedTexture ReserveTexture(WGPUDevice device);
         ReservedSwapChain ReserveSwapChain(WGPUDevice device);
         ReservedDevice ReserveDevice();
+        ReservedInstance ReserveInstance();
 
         void ReclaimTextureReservation(const ReservedTexture& reservation);
         void ReclaimSwapChainReservation(const ReservedSwapChain& reservation);
         void ReclaimDeviceReservation(const ReservedDevice& reservation);
+        void ReclaimInstanceReservation(const ReservedInstance& reservation);
 
         // Disconnects the client.
         // Commands allocated after this point will not be sent.

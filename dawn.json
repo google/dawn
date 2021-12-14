@@ -49,16 +49,14 @@
     "request adapter options": {
         "category": "structure",
         "extensible": "in",
-        "tags": ["upstream"],
         "members": [
-            {"name": "compatible surface", "type": "surface"},
-            {"name": "power preference", "type": "power preference", "tags": ["upstream"]},
-            {"name": "force fallback adapter", "type": "bool", "tags": ["upstream"]}
+            {"name": "compatible surface", "type": "surface", "optional": true},
+            {"name": "power preference", "type": "power preference", "default": "undefined"},
+            {"name": "force fallback adapter", "type": "bool", "default": "false"}
         ]
     },
     "request adapter status": {
         "category": "enum",
-        "tags": ["upstream"],
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
@@ -69,29 +67,25 @@
     },
     "request adapter callback": {
         "category": "function pointer",
-        "tags": ["upstream"],
         "args": [
             {"name": "status", "type": "request adapter status"},
             {"name": "adapter", "type": "adapter"},
-            {"name": "message", "type": "char", "annotation": "const*"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "userdata", "type": "void", "annotation": "*"}
         ]
     },
     "adapter": {
         "category": "object",
-        "tags": ["upstream"],
         "methods": [
             {
                 "name": "get limits",
                 "returns": "bool",
-                "tags": ["upstream"],
                 "args": [
                     {"name": "limits", "type": "supported limits", "annotation": "*"}
                 ]
             },
             {
                 "name": "get properties",
-                "tags": ["upstream"],
                 "args": [
                     {"name": "properties", "type": "adapter properties", "annotation": "*"}
                 ]
@@ -99,7 +93,6 @@
             {
                 "name": "has feature",
                 "returns": "bool",
-                "tags": ["upstream"],
                 "args": [
                     {"name": "feature", "type": "feature name"}
                 ]
@@ -139,13 +132,11 @@
     "device descriptor": {
         "category": "structure",
         "extensible": "in",
-        "tags": ["upstream"],
-        "_TODO": "Add requiredFeatures and requiredLimits support",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "required features count", "type": "uint32_t"},
-            {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required features count"},
-            {"name": "required limits", "type": "required limits", "annotation": "const*"}
+            {"name": "required features count", "type": "uint32_t", "default": 0},
+            {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required features count", "default": "nullptr"},
+            {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true}
         ]
     },
     "address mode": {
@@ -1295,7 +1286,6 @@
     },
     "feature name": {
         "category": "enum",
-        "tags": ["upstream"],
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "depth clip control", "tags": ["upstream"]},
@@ -1369,7 +1359,6 @@
             },
             {
                 "name": "request adapter",
-                "tags": ["upstream"],
                 "args": [
                     {"name": "options", "type": "request adapter options", "annotation": "const*"},
                     {"name": "callback", "type": "request adapter callback"},
@@ -1475,7 +1464,6 @@
     },
     "power preference": {
         "category": "enum",
-        "tags": ["upstream"],
         "values": [
             {"value": 0, "name": "undefined"},
             {"value": 1, "name": "low power"},
@@ -1994,7 +1982,7 @@
         "args": [
             {"name": "status", "type": "request device status"},
             {"name": "device", "type": "device"},
-            {"name": "message", "type": "char", "annotation": "const*"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "userdata", "type": "void", "annotation": "*"}
         ]
     },

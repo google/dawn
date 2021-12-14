@@ -140,7 +140,7 @@ namespace {{metadata.namespace}} {
     };
 
 {% macro render_cpp_default_value(member, is_struct=True) -%}
-    {%- if member.annotation in ["*", "const*"] and member.optional -%}
+    {%- if member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
         {{" "}}= nullptr
     {%- elif member.type.category == "object" and member.optional and is_struct -%}
         {{" "}}= nullptr

@@ -51,6 +51,10 @@ namespace dawn_wire {
         return mImpl->InjectDevice(device, id, generation);
     }
 
+    bool WireServer::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
+        return mImpl->InjectInstance(instance, id, generation);
+    }
+
     WGPUDevice WireServer::GetDevice(uint32_t id, uint32_t generation) {
         return mImpl->GetDevice(id, generation);
     }

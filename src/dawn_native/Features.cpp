@@ -85,6 +85,34 @@ namespace dawn_native {
                "https://bugs.chromium.org/p/dawn/issues/detail?id=551"},
               &WGPUDeviceProperties::multiPlanarFormats}}};
 
+        Feature FromAPIFeature(wgpu::FeatureName feature) {
+            switch (feature) {
+                case wgpu::FeatureName::Undefined:
+                    return Feature::InvalidEnum;
+
+                case wgpu::FeatureName::TimestampQuery:
+                    return Feature::TimestampQuery;
+                case wgpu::FeatureName::PipelineStatisticsQuery:
+                    return Feature::PipelineStatisticsQuery;
+                case wgpu::FeatureName::TextureCompressionBC:
+                    return Feature::TextureCompressionBC;
+                case wgpu::FeatureName::TextureCompressionETC2:
+                    return Feature::TextureCompressionETC2;
+                case wgpu::FeatureName::TextureCompressionASTC:
+                    return Feature::TextureCompressionASTC;
+                case wgpu::FeatureName::DepthClamping:
+                    return Feature::DepthClamping;
+                case wgpu::FeatureName::Depth24UnormStencil8:
+                    return Feature::Depth24UnormStencil8;
+                case wgpu::FeatureName::Depth32FloatStencil8:
+                    return Feature::Depth32FloatStencil8;
+
+                case wgpu::FeatureName::IndirectFirstInstance:
+                    return Feature::InvalidEnum;
+            }
+            return Feature::InvalidEnum;
+        }
+
     }  // anonymous namespace
 
     void FeaturesSet::EnableFeature(Feature feature) {
@@ -97,6 +125,11 @@ namespace dawn_native {
         ASSERT(feature != Feature::InvalidEnum);
         const size_t featureIndex = static_cast<size_t>(feature);
         return featuresBitSet[featureIndex];
+    }
+
+    bool FeaturesSet::IsEnabled(wgpu::FeatureName feature) const {
+        Feature f = FromAPIFeature(feature);
+        return f != Feature::InvalidEnum && IsEnabled(f);
     }
 
     std::vector<const char*> FeaturesSet::GetEnabledFeatureNames() const {
