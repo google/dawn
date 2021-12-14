@@ -1183,6 +1183,13 @@ uint32_t Builder::GenerateIdentifierExpression(
   return val;
 }
 
+uint32_t Builder::GenerateNonReferenceExpression(const ast::Expression* expr) {
+  if (const auto id = GenerateExpression(expr)) {
+    return GenerateLoadIfNeeded(TypeOf(expr), id);
+  }
+  return 0;
+}
+
 uint32_t Builder::GenerateLoadIfNeeded(const sem::Type* type, uint32_t id) {
   if (auto* ref = type->As<sem::Reference>()) {
     type = ref->StoreType();
@@ -3578,7 +3585,10 @@ bool Builder::GenerateIfStatement(const ast::IfStatement* stmt) {
     if (is_just_a_break(stmt->body) && stmt->else_statements.empty()) {
       // It's a break-if.
       TINT_ASSERT(Writer, !backedge_stack_.empty());
-      const auto cond_id = GenerateExpression(stmt->condition);
+      const auto cond_id = GenerateNonReferenceExpression(stmt->condition);
+      if (!cond_id) {
+        return false;
+      }
       backedge_stack_.back() =
           Backedge(spv::Op::OpBranchConditional,
                    {Operand::Int(cond_id), Operand::Int(ci.break_target_id),
@@ -3590,7 +3600,10 @@ bool Builder::GenerateIfStatement(const ast::IfStatement* stmt) {
           is_just_a_break(es.back()->body)) {
         // It's a break-unless.
         TINT_ASSERT(Writer, !backedge_stack_.empty());
-        const auto cond_id = GenerateExpression(stmt->condition);
+        const auto cond_id = GenerateNonReferenceExpression(stmt->condition);
+        if (!cond_id) {
+          return false;
+        }
         backedge_stack_.back() =
             Backedge(spv::Op::OpBranchConditional,
                      {Operand::Int(cond_id), Operand::Int(ci.loop_header_id),

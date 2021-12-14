@@ -287,6 +287,84 @@ OpBranchConditional %6 %1 %2
 )");
 }
 
+TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_ConditionIsVar) {
+  // loop {
+  //   continuing {
+  //     var cond = true;
+  //     if (cond) { break; }
+  //   }
+  // }
+
+  auto* cond_var = Decl(Var("cond", nullptr, Expr(true)));
+  auto* if_stmt = If(Expr("cond"), Block(Break()), ast::ElseStatementList{});
+  auto* continuing = Block(cond_var, if_stmt);
+  auto* loop = Loop(Block(), continuing);
+  WrapInFunction(loop);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+%6 = OpConstantTrue %5
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpBranch %3
+%3 = OpLabel
+OpStore %7 %6
+%10 = OpLoad %5 %7
+OpBranchConditional %10 %2 %1
+%2 = OpLabel
+)");
+}
+
+TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless_ConditionIsVar) {
+  // loop {
+  //   continuing {
+  //     var cond = true;
+  //     if (cond) {} else { break; }
+  //   }
+  // }
+  auto* cond_var = Decl(Var("cond", nullptr, Expr(true)));
+  auto* if_stmt = If(Expr("cond"), Block(),
+                     ast::ElseStatementList{Else(nullptr, Block(Break()))});
+  auto* continuing = Block(cond_var, if_stmt);
+  auto* loop = Loop(Block(), continuing);
+  WrapInFunction(loop);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+%6 = OpConstantTrue %5
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpBranch %3
+%3 = OpLabel
+OpStore %7 %6
+%10 = OpLoad %5 %7
+OpBranchConditional %10 %1 %2
+%2 = OpLabel
+)");
+}
+
 TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_Nested) {
   // Make sure the right backedge and break target are used.
   // loop {
