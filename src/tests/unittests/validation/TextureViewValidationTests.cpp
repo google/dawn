@@ -652,7 +652,7 @@ namespace {
     class D24S8TextureViewValidationTests : public ValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
-            dawn_native::DeviceDescriptor descriptor;
+            dawn_native::DawnDeviceDescriptor descriptor;
             descriptor.requiredFeatures = {"depth24unorm-stencil8"};
             return adapter.CreateDevice(&descriptor);
         }
@@ -696,7 +696,7 @@ namespace {
     class D32S8TextureViewValidationTests : public ValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
-            dawn_native::DeviceDescriptor descriptor;
+            dawn_native::DawnDeviceDescriptor descriptor;
             descriptor.requiredFeatures = {"depth32float-stencil8"};
             return adapter.CreateDevice(&descriptor);
         }

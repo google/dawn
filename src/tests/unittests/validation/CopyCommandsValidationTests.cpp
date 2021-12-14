@@ -419,7 +419,7 @@ TEST_F(CopyCommandTest_B2B, CopyWithinSameBuffer) {
 class CopyCommandTest_B2T : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DeviceDescriptor descriptor;
+        dawn_native::DawnDeviceDescriptor descriptor;
         descriptor.requiredFeatures = {"depth24unorm-stencil8", "depth32float-stencil8"};
         return adapter.CreateDevice(&descriptor);
     }
@@ -1000,7 +1000,7 @@ TEST_F(CopyCommandTest_B2T, RequiredBytesInCopyOverflow) {
 class CopyCommandTest_T2B : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DeviceDescriptor descriptor;
+        dawn_native::DawnDeviceDescriptor descriptor;
         descriptor.requiredFeatures = {"depth24unorm-stencil8", "depth32float-stencil8"};
         return adapter.CreateDevice(&descriptor);
     }
@@ -1633,7 +1633,7 @@ TEST_F(CopyCommandTest_T2B, RequiredBytesInCopyOverflow) {
 class CopyCommandTest_T2T : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DeviceDescriptor descriptor;
+        dawn_native::DawnDeviceDescriptor descriptor;
         descriptor.requiredFeatures = {"depth24unorm-stencil8", "depth32float-stencil8"};
         return adapter.CreateDevice(&descriptor);
     }

@@ -70,10 +70,6 @@ namespace dawn_native {
         const WGPURequiredLimits* requiredLimits = nullptr;
     };
 
-    // TODO(crbug.com/dawn/160): Remove when embedders of Dawn are updated to use
-    // DawnDeviceDescriptor.
-    using DeviceDescriptor = DawnDeviceDescriptor;
-
     // A struct to record the information of a toggle. A toggle is a code path in Dawn device that
     // can be manually configured to run or not outside Dawn, including workarounds, special
     // features and optimizations.
