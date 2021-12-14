@@ -11,18 +11,19 @@
 //* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
+{% set api = metadata.api.lower() %}
 {% if 'dawn' in enabled_tags %}
-    #include "dawn/webgpu_cpp.h"
+    #include "dawn/{{api}}_cpp.h"
 {% else %}
-    #include "webgpu/webgpu_cpp.h"
+    #include "{{api}}/{{api}}_cpp.h"
 {% endif %}
 
 #ifdef __GNUC__
-// error: 'offsetof' within non-standard-layout type 'wgpu::XXX' is conditionally-supported
+// error: 'offsetof' within non-standard-layout type '{{metadata.namespace}}::XXX' is conditionally-supported
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
 
-namespace wgpu {
+namespace {{metadata.namespace}} {
     {% for type in by_category["enum"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
@@ -53,13 +54,14 @@ namespace wgpu {
 
     // ChainedStruct
 
-    static_assert(sizeof(ChainedStruct) == sizeof(WGPUChainedStruct),
+    {% set c_prefix = metadata.c_prefix %}
+    static_assert(sizeof(ChainedStruct) == sizeof({{c_prefix}}ChainedStruct),
             "sizeof mismatch for ChainedStruct");
-    static_assert(alignof(ChainedStruct) == alignof(WGPUChainedStruct),
+    static_assert(alignof(ChainedStruct) == alignof({{c_prefix}}ChainedStruct),
             "alignof mismatch for ChainedStruct");
-    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof(WGPUChainedStruct, next),
+    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof({{c_prefix}}ChainedStruct, next),
             "offsetof mismatch for ChainedStruct::nextInChain");
-    static_assert(offsetof(ChainedStruct, sType) == offsetof(WGPUChainedStruct, sType),
+    static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStruct, sType),
             "offsetof mismatch for ChainedStruct::sType");
     {% for type in by_category["structure"] %}
         {% set CppType = as_cppType(type.name) %}
@@ -80,6 +82,22 @@ namespace wgpu {
                     "offsetof mismatch for {{CppType}}::{{memberName}}");
         {% endfor %}
     {% endfor -%}
+
+    {%- macro render_c_actual_arg(arg) -%}
+        {%- if arg.annotation == "value" -%}
+            {%- if arg.type.category == "object" -%}
+                {{as_varName(arg.name)}}.Get()
+            {%- elif arg.type.category == "enum" or arg.type.category == "bitmask" -%}
+                static_cast<{{as_cType(arg.type.name)}}>({{as_varName(arg.name)}})
+            {%- elif arg.type.category in ["function pointer", "native"] -%}
+                {{as_varName(arg.name)}}
+            {%- else -%}
+                UNHANDLED
+            {%- endif -%}
+        {%- else -%}
+            reinterpret_cast<{{decorate("", as_cType(arg.type.name), arg)}}>({{as_varName(arg.name)}})
+        {%- endif -%}
+    {%- endmacro -%}
 
     {% for type in by_category["object"] %}
         {% set CppType = as_cppType(type.name) %}
@@ -106,20 +124,7 @@ namespace wgpu {
 
         {%- macro render_cpp_to_c_method_call(type, method) -%}
             {{as_cMethod(type.name, method.name)}}(Get()
-                {%- for arg in method.arguments -%},{{" "}}
-                    {%- if arg.annotation == "value" -%}
-                        {%- if arg.type.category == "object" -%}
-                            {{as_varName(arg.name)}}.Get()
-                        {%- elif arg.type.category == "enum" or arg.type.category == "bitmask" -%}
-                            static_cast<{{as_cType(arg.type.name)}}>({{as_varName(arg.name)}})
-                        {%- elif arg.type.category in ["function pointer", "native"] -%}
-                            {{as_varName(arg.name)}}
-                        {%- else -%}
-                            UNHANDLED
-                        {%- endif -%}
-                    {%- else -%}
-                        reinterpret_cast<{{decorate("", as_cType(arg.type.name), arg)}}>({{as_varName(arg.name)}})
-                    {%- endif -%}
+                {%- for arg in method.arguments -%},{{" "}}{{render_c_actual_arg(arg)}}
                 {%- endfor -%}
             )
         {%- endmacro -%}
@@ -134,28 +139,37 @@ namespace wgpu {
                 {% endif %}
             }
         {% endfor %}
-        void {{CppType}}::WGPUReference({{CType}} handle) {
+        void {{CppType}}::{{c_prefix}}Reference({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("reference"))}}(handle);
             }
         }
-        void {{CppType}}::WGPURelease({{CType}} handle) {
+        void {{CppType}}::{{c_prefix}}Release({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("release"))}}(handle);
             }
         }
     {% endfor %}
 
-    // Instance
+    // Function
 
-    Instance CreateInstance(const InstanceDescriptor* descriptor) {
-        const WGPUInstanceDescriptor* cDescriptor =
-            reinterpret_cast<const WGPUInstanceDescriptor*>(descriptor);
-        return Instance::Acquire(wgpuCreateInstance(cDescriptor));
-    }
+    {% for function in by_category["function"] %}
+        {%- macro render_function_call(function) -%}
+            {{as_cMethod(None, function.name)}}(
+                {%- for arg in function.arguments -%}
+                    {% if not loop.first %}, {% endif %}{{render_c_actual_arg(arg)}}
+                {%- endfor -%}
+            )
+        {%- endmacro -%}
 
-    Proc GetProcAddress(Device const& device, const char* procName) {
-        return reinterpret_cast<Proc>(wgpuGetProcAddress(device.Get(), procName));
-    }
+        {{as_cppType(function.return_type.name) | indent(4, true) }} {{as_cppType(function.name) }}(
+            {%- for arg in function.arguments -%}
+                {% if not loop.first %}, {% endif %}{{as_annotated_cppType(arg)}}
+            {%- endfor -%}
+        ) {
+            auto result = {{render_function_call(function)}};
+            return {{convert_cType_to_cppType(function.return_type, 'value', 'result')}};
+        }
+    {% endfor %}
 
 }

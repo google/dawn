@@ -580,6 +580,8 @@ def convert_cType_to_cppType(typ, annotation, arg, indent=0):
             converted_members = ',\n'.join(converted_members)
 
             return as_cppType(typ.name) + ' {\n' + converted_members + '\n}'
+        elif typ.category == 'function pointer':
+            return 'reinterpret_cast<{}>({})'.format(as_cppType(typ.name), arg)
         else:
             return 'static_cast<{}>({})'.format(as_cppType(typ.name), arg)
     else:
@@ -794,7 +796,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawncpp' in targets:
             renders.append(
-                FileRender('webgpu_cpp.cpp', 'src/dawn/webgpu_cpp.cpp',
+                FileRender('api_cpp.cpp', 'src/dawn/' + api + '_cpp.cpp',
                            [RENDER_PARAMS_BASE, params_dawn]))
 
         if 'webgpu_headers' in targets:
@@ -814,7 +816,7 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender('api_cpp.h', 'emscripten-bits/' + api + '_cpp.h',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
-                FileRender('webgpu_cpp.cpp', 'emscripten-bits/webgpu_cpp.cpp',
+                FileRender('api_cpp.cpp', 'emscripten-bits/' + api + '_cpp.cpp',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
                 FileRender('webgpu_struct_info.json',
