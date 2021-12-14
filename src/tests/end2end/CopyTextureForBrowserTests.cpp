@@ -28,6 +28,11 @@ namespace {
     static constexpr uint64_t kDefaultTextureWidth = 10;
     static constexpr uint64_t kDefaultTextureHeight = 1;
 
+    enum class ColorSpace : uint32_t {
+        SRGB = 0x00,
+        DisplayP3 = 0x01,
+    };
+
     using Alpha = wgpu::AlphaOp;
     DAWN_TEST_PARAM_STRUCT(AlphaTestParams, Alpha);
 
@@ -37,6 +42,10 @@ namespace {
     using DstOrigin = wgpu::Origin3D;
     using CopySize = wgpu::Extent3D;
     using FlipY = bool;
+    using SrcColorSpace = ColorSpace;
+    using DstColorSpace = ColorSpace;
+    using SrcAlphaMode = wgpu::AlphaMode;
+    using DstAlphaMode = wgpu::AlphaMode;
 
     std::ostream& operator<<(std::ostream& o, wgpu::Origin3D origin) {
         o << origin.x << ", " << origin.y << ", " << origin.z;
@@ -48,9 +57,98 @@ namespace {
         return o;
     }
 
+    std::ostream& operator<<(std::ostream& o, ColorSpace space) {
+        o << static_cast<uint32_t>(space);
+        return o;
+    }
+
     DAWN_TEST_PARAM_STRUCT(FormatTestParams, SrcFormat, DstFormat);
     DAWN_TEST_PARAM_STRUCT(SubRectTestParams, SrcOrigin, DstOrigin, CopySize, FlipY);
+    DAWN_TEST_PARAM_STRUCT(ColorSpaceTestParams,
+                           DstFormat,
+                           SrcColorSpace,
+                           DstColorSpace,
+                           SrcAlphaMode,
+                           DstAlphaMode);
 
+    // Color Space table
+    struct ColorSpaceInfo {
+        ColorSpace index;
+        std::array<float, 9> toXYZD50;    // 3x3 row major transform matrix
+        std::array<float, 9> fromXYZD50;  // inverse transform matrix of toXYZD50, precomputed
+        std::array<float, 7> gammaDecodingParams;  // Follow { A, B, G, E, epsilon, C, F } order
+        std::array<float, 7> gammaEncodingParams;  // inverse op of decoding, precomputed
+        bool isNonLinear;
+        bool isExtended;  // For extended color space.
+    };
+    static constexpr size_t kSupportedColorSpaceCount = 2;
+    static constexpr std::array<ColorSpaceInfo, kSupportedColorSpaceCount> ColorSpaceTable = {{
+        // sRGB,
+        // Got primary attributes from https://drafts.csswg.org/css-color/#predefined-sRGB
+        // Use matrices from
+        // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html#WSMatrices
+        // Get gamma-linear conversion params from https://en.wikipedia.org/wiki/SRGB with some
+        // mathematics.
+        {
+            //
+            ColorSpace::SRGB,
+            {{
+                //
+                0.4360747, 0.3850649, 0.1430804,  //
+                0.2225045, 0.7168786, 0.0606169,  //
+                0.0139322, 0.0971045, 0.7141733   //
+            }},
+
+            {{
+                //
+                3.1338561, -1.6168667, -0.4906146,  //
+                -0.9787684, 1.9161415, 0.0334540,   //
+                0.0719453, -0.2289914, 1.4052427    //
+            }},
+
+            // {G, A, B, C, D, E, F, }
+            {{2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0}},
+
+            {{1.0 / 2.4, 1.13711 /*pow(1.055, 2.4)*/, 0.0, 12.92f, 3.1308e-03, -0.055, 0.0}},
+
+            true,
+            true  //
+        },
+
+        // Display P3, got primary attributes from
+        // https://www.w3.org/TR/css-color-4/#valdef-color-display-p3
+        // Use equations found in
+        // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html,
+        // Use Bradford method to do D65 to D50 transform.
+        // Get matrices with help of http://www.russellcottrell.com/photo/matrixCalculator.htm
+        // Gamma-linear conversion params is the same as Srgb.
+        {
+            //
+            ColorSpace::DisplayP3,
+            {{
+                //
+                0.5151114, 0.2919612, 0.1571274,  //
+                0.2411865, 0.6922440, 0.0665695,  //
+                -0.0010491, 0.0418832, 0.7842659  //
+            }},
+
+            {{
+                //
+                2.4039872, -0.9898498, -0.3976181,  //
+                -0.8422138, 1.7988188, 0.0160511,   //
+                0.0481937, -0.0973889, 1.2736887    //
+            }},
+
+            // {G, A, B, C, D, E, F, }
+            {{2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0}},
+
+            {{1.0 / 2.4, 1.13711 /*pow(1.055, 2.4)*/, 0.0, 12.92f, 3.1308e-03, -0.055, 0.0}},
+
+            true,
+            false  //
+        }
+        //
+    }};
 }  // anonymous namespace
 
 template <typename Parent>
@@ -578,21 +676,323 @@ class CopyTextureForBrowser_AlphaOps
     }
 };
 
+class CopyTextureForBrowser_ColorSpace
+    : public CopyTextureForBrowserTests<DawnTestWithParams<ColorSpaceTestParams>> {
+  protected:
+    const ColorSpaceInfo& GetColorSpaceInfo(ColorSpace colorSpace) {
+        uint32_t index = static_cast<uint32_t>(colorSpace);
+        ASSERT(index < ColorSpaceTable.size());
+        ASSERT(ColorSpaceTable[index].index == colorSpace);
+        return ColorSpaceTable[index];
+    }
+
+    std::array<float, 9> GetConversionMatrix(ColorSpace src, ColorSpace dst) {
+        const ColorSpaceInfo& srcColorSpace = GetColorSpaceInfo(src);
+        const ColorSpaceInfo& dstColorSpace = GetColorSpaceInfo(dst);
+
+        const std::array<float, 9> toXYZD50 = srcColorSpace.toXYZD50;
+        const std::array<float, 9> fromXYZD50 = dstColorSpace.fromXYZD50;
+
+        // Fuse the transform matrix. The color space transformation equation is:
+        // Pixels = fromXYZD50 * toXYZD50 * Pixels.
+        // Calculate fromXYZD50 * toXYZD50 to simplify
+        // Add a padding in each row for Mat3x3 in wgsl uniform(mat3x3, Align(16), Size(48)).
+        std::array<float, 9> fuseMatrix = {};
+
+        // Mat3x3 * Mat3x3
+        for (uint32_t row = 0; row < 3; ++row) {
+            for (uint32_t col = 0; col < 3; ++col) {
+                // Transpose the matrix from row major to column major for wgsl.
+                fuseMatrix[col * 3 + row] = fromXYZD50[row * 3 + 0] * toXYZD50[col] +
+                                            fromXYZD50[row * 3 + 1] * toXYZD50[3 + col] +
+                                            fromXYZD50[row * 3 + 2] * toXYZD50[3 * 2 + col];
+            }
+        }
+
+        return fuseMatrix;
+    }
+
+    // TODO(crbug.com/dawn/1140): Generate source data automatically.
+    std::vector<RGBA8> GetSourceData(wgpu::AlphaMode srcTextureAlphaMode) {
+        if (srcTextureAlphaMode == wgpu::AlphaMode::Premultiplied) {
+            return std::vector<RGBA8>{
+                RGBA8(0, 102, 102, 102),  // a = 0.4
+                RGBA8(102, 0, 0, 102),    // a = 0.4
+                RGBA8(153, 0, 0, 153),    // a = 0.6
+                RGBA8(255, 0, 0, 255),    // a = 1.0
+
+                RGBA8(153, 0, 153, 153),  // a = 0.6
+                RGBA8(0, 102, 0, 102),    // a = 0.4
+                RGBA8(0, 153, 0, 153),    // a = 0.6
+                RGBA8(0, 255, 0, 255),    // a = 1.0
+
+                RGBA8(255, 255, 0, 255),  // a = 1.0
+                RGBA8(0, 0, 102, 102),    // a = 0.4
+                RGBA8(0, 0, 153, 153),    // a = 0.6
+                RGBA8(0, 0, 255, 255),    // a = 1.0
+            };
+        }
+
+        return std::vector<RGBA8>{
+            // Take RGBA8Unorm as example:
+            // R channel has different values
+            RGBA8(0, 255, 255, 255),  // r = 0.0
+            RGBA8(102, 0, 0, 255),    // r = 0.4
+            RGBA8(153, 0, 0, 255),    // r = 0.6
+            RGBA8(255, 0, 0, 255),    // r = 1.0
+
+            // G channel has different values
+            RGBA8(255, 0, 255, 255),  // g = 0.0
+            RGBA8(0, 102, 0, 255),    // g = 0.4
+            RGBA8(0, 153, 0, 255),    // g = 0.6
+            RGBA8(0, 255, 0, 255),    // g = 1.0
+
+            // B channel has different values
+            RGBA8(255, 255, 0, 255),  // b = 0.0
+            RGBA8(0, 0, 102, 255),    // b = 0.4
+            RGBA8(0, 0, 153, 255),    // b = 0.6
+            RGBA8(0, 0, 255, 255),    // b = 1.0
+        };
+    }
+
+    // TODO(crbug.com/dawn/1140): Current expected values are from ColorSync utils
+    // tool on Mac. Should implement CPU or compute shader algorithm to do color
+    // conversion and use the result as expected data.
+    std::vector<float> GetExpectedData(ColorSpace srcColorSpace,
+                                       ColorSpace dstColorSpace,
+                                       wgpu::AlphaMode srcTextureAlphaMode,
+                                       wgpu::AlphaMode dstTextureAlphaMode) {
+        if (srcTextureAlphaMode == wgpu::AlphaMode::Premultiplied) {
+            return GetExpectedDataForPremultipliedSource(srcColorSpace, dstColorSpace,
+                                                         dstTextureAlphaMode);
+        }
+
+        return GetExpectedDataForSeperateSource(srcColorSpace, dstColorSpace);
+    }
+
+    std::vector<float> GeneratePremultipliedResult(std::vector<float> result) {
+        // Four channels per pixel
+        for (uint32_t i = 0; i < result.size(); i += 4) {
+            result[i] *= result[i + 3];
+            result[i + 1] *= result[i + 3];
+            result[i + 2] *= result[i + 3];
+        }
+
+        return result;
+    }
+
+    std::vector<float> GetExpectedDataForPremultipliedSource(ColorSpace srcColorSpace,
+                                                             ColorSpace dstColorSpace,
+                                                             wgpu::AlphaMode dstTextureAlphaMode) {
+        if (srcColorSpace == dstColorSpace) {
+            std::vector<float> expected = {
+                0.0, 1.0, 1.0, 0.4,  //
+                1.0, 0.0, 0.0, 0.4,  //
+                1.0, 0.0, 0.0, 0.6,  //
+                1.0, 0.0, 0.0, 1.0,  //
+
+                1.0, 0.0, 1.0, 0.6,  //
+                0.0, 1.0, 0.0, 0.4,  //
+                0.0, 1.0, 0.0, 0.6,  //
+                0.0, 1.0, 0.0, 1.0,  //
+
+                1.0, 1.0, 0.0, 1.0,  //
+                0.0, 0.0, 1.0, 0.4,  //
+                0.0, 0.0, 1.0, 0.6,  //
+                0.0, 0.0, 1.0, 1.0,  //
+            };
+
+            return dstTextureAlphaMode == wgpu::AlphaMode::Premultiplied
+                       ? GeneratePremultipliedResult(expected)
+                       : expected;
+        }
+
+        switch (srcColorSpace) {
+            case ColorSpace::DisplayP3: {
+                switch (dstColorSpace) {
+                    case ColorSpace::SRGB: {
+                        std::vector<float> expected = {
+                            -0.5118, 1.0183,  1.0085,  0.4,  //
+                            1.093,   -0.2267, -0.1501, 0.4,  //
+                            1.093,   -0.2267, -0.1501, 0.6,  //
+                            1.093,   -0.2267, -0.1501, 1.0,  //
+
+                            1.093,   -0.2266, 1.0337,  0.6,  //
+                            -0.5118, 1.0183,  -0.3107, 0.4,  //
+                            -0.5118, 1.0183,  -0.3107, 0.6,  //
+                            -0.5118, 1.0183,  -0.3107, 1.0,  //
+
+                            0.9999,  1.0001,  -0.3462, 1.0,  //
+                            0.0002,  0.0004,  1.0419,  0.4,  //
+                            0.0002,  0.0004,  1.0419,  0.6,  //
+                            0.0002,  0.0004,  1.0419,  1.0,  //
+                        };
+
+                        return dstTextureAlphaMode == wgpu::AlphaMode::Premultiplied
+                                   ? GeneratePremultipliedResult(expected)
+                                   : expected;
+                    }
+                    default:
+                        UNREACHABLE();
+                }
+            }
+            default:
+                break;
+        }
+        UNREACHABLE();
+    }
+
+    std::vector<float> GetExpectedDataForSeperateSource(ColorSpace srcColorSpace,
+                                                        ColorSpace dstColorSpace) {
+        if (srcColorSpace == dstColorSpace) {
+            return std::vector<float>{
+                0.0, 1.0, 1.0, 1.0,  //
+                0.4, 0.0, 0.0, 1.0,  //
+                0.6, 0.0, 0.0, 1.0,  //
+                1.0, 0.0, 0.0, 1.0,  //
+
+                1.0, 0.0, 1.0, 1.0,  //
+                0.0, 0.4, 0.0, 1.0,  //
+                0.0, 0.6, 0.0, 1.0,  //
+                0.0, 1.0, 0.0, 1.0,  //
+
+                1.0, 1.0, 0.0, 1.0,  //
+                0.0, 0.0, 0.4, 1.0,  //
+                0.0, 0.0, 0.6, 1.0,  //
+                0.0, 0.0, 1.0, 1.0,  //
+            };
+        }
+
+        switch (srcColorSpace) {
+            case ColorSpace::DisplayP3: {
+                switch (dstColorSpace) {
+                    case ColorSpace::SRGB: {
+                        return std::vector<float>{
+                            -0.5118, 1.0183,  1.0085,  1.0,  //
+                            0.4401,  -0.0665, -0.0337, 1.0,  //
+                            0.6578,  -0.1199, -0.0723, 1.0,  //
+                            1.093,   -0.2267, -0.1501, 1.0,  //
+
+                            1.093,   -0.2266, 1.0337,  1.0,  //
+                            -0.1894, 0.4079,  -0.1027, 1.0,  //
+                            -0.2969, 0.6114,  -0.1720, 1.0,  //
+                            -0.5118, 1.0183,  -0.3107, 1.0,  //
+
+                            0.9999,  1.0001,  -0.3462, 1.0,  //
+                            0.0000,  0.0001,  0.4181,  1.0,  //
+                            0.0001,  0.0001,  0.6260,  1.0,  //
+                            0.0002,  0.0004,  1.0419,  1.0,  //
+                        };
+                    }
+                    default:
+                        UNREACHABLE();
+                }
+            }
+            default:
+                break;
+        }
+        UNREACHABLE();
+    }
+
+    void DoColorSpaceConversionTest() {
+        constexpr uint32_t kWidth = 12;
+        constexpr uint32_t kHeight = 1;
+
+        TextureSpec srcTextureSpec;
+        srcTextureSpec.textureSize = {kWidth, kHeight};
+
+        TextureSpec dstTextureSpec;
+        dstTextureSpec.textureSize = {kWidth, kHeight};
+        dstTextureSpec.format = GetParam().mDstFormat;
+
+        ColorSpace srcColorSpace = GetParam().mSrcColorSpace;
+        ColorSpace dstColorSpace = GetParam().mDstColorSpace;
+
+        ColorSpaceInfo srcColorSpaceInfo = GetColorSpaceInfo(srcColorSpace);
+        ColorSpaceInfo dstColorSpaceInfo = GetColorSpaceInfo(dstColorSpace);
+
+        std::array<float, 9> matrix = GetConversionMatrix(srcColorSpace, dstColorSpace);
+
+        wgpu::CopyTextureForBrowserOptions options = {};
+        options.needsColorSpaceConversion = srcColorSpace != dstColorSpace;
+        options.srcAlphaMode = GetParam().mSrcAlphaMode;
+        options.transferFunctionParametersCount = 7;
+        options.srcTransferFunctionParameters = srcColorSpaceInfo.gammaDecodingParams.data();
+        options.conversionMatrixElementsCount = 9;
+        options.conversionMatrix = matrix.data();
+        options.dstTransferFunctionParameters = dstColorSpaceInfo.gammaEncodingParams.data();
+        options.dstAlphaMode = GetParam().mDstAlphaMode;
+
+        std::vector<RGBA8> sourceTextureData = GetSourceData(options.srcAlphaMode);
+        const wgpu::Extent3D& copySize = {kWidth, kHeight};
+
+        const utils::TextureDataCopyLayout srcCopyLayout =
+            utils::GetTextureDataCopyLayoutForTextureAtLevel(
+                kTextureFormat,
+                {srcTextureSpec.textureSize.width, srcTextureSpec.textureSize.height},
+                srcTextureSpec.level);
+
+        wgpu::TextureUsage srcUsage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                      wgpu::TextureUsage::TextureBinding;
+        wgpu::Texture srcTexture = this->CreateAndInitTexture(
+            srcTextureSpec, srcUsage, srcCopyLayout, sourceTextureData.data(),
+            sourceTextureData.size() * sizeof(RGBA8));
+
+        // Create dst texture.
+        wgpu::Texture dstTexture = this->CreateTexture(
+            dstTextureSpec, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
+                                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
+
+        // Perform the texture to texture copy
+        this->RunCopyExternalImageToTexture(srcTextureSpec, srcTexture, dstTextureSpec, dstTexture,
+                                            copySize, options);
+
+        std::vector<float> expectedData = GetExpectedData(
+            srcColorSpace, dstColorSpace, options.srcAlphaMode, options.dstAlphaMode);
+
+        // The value provided by Apple's ColorSync Utility.
+        float tolerance = 0.001;
+        if (dstTextureSpec.format == wgpu::TextureFormat::RGBA16Float) {
+            EXPECT_TEXTURE_FLOAT16_EQ(expectedData.data(), dstTexture, {0, 0}, {kWidth, kHeight},
+                                      dstTextureSpec.format, tolerance);
+        } else {
+            EXPECT_TEXTURE_EQ(expectedData.data(), dstTexture, {0, 0}, {kWidth, kHeight},
+                              dstTextureSpec.format, tolerance);
+        }
+    }
+};
+
 // Verify CopyTextureForBrowserTests works with internal pipeline.
 // The case do copy without any transform.
 TEST_P(CopyTextureForBrowser_Basic, PassthroughCopy) {
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
     DoBasicCopyTest({10, 1});
 }
 
 TEST_P(CopyTextureForBrowser_Basic, VerifyCopyOnXDirection) {
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
     DoBasicCopyTest({1000, 1});
 }
 
 TEST_P(CopyTextureForBrowser_Basic, VerifyCopyOnYDirection) {
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
     DoBasicCopyTest({1, 1000});
 }
 
 TEST_P(CopyTextureForBrowser_Basic, VerifyCopyFromLargeTexture) {
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
     // TODO(crbug.com/dawn/1070): Flaky VK_DEVICE_LOST
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
@@ -600,6 +1000,10 @@ TEST_P(CopyTextureForBrowser_Basic, VerifyCopyFromLargeTexture) {
 }
 
 TEST_P(CopyTextureForBrowser_Basic, VerifyFlipY) {
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
     wgpu::CopyTextureForBrowserOptions options = {};
     options.flipY = true;
 
@@ -607,6 +1011,10 @@ TEST_P(CopyTextureForBrowser_Basic, VerifyFlipY) {
 }
 
 TEST_P(CopyTextureForBrowser_Basic, VerifyFlipYInSlimTexture) {
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
     wgpu::CopyTextureForBrowserOptions options = {};
     options.flipY = true;
 
@@ -626,6 +1034,7 @@ TEST_P(CopyTextureForBrowser_Formats, ColorConversion) {
     // Skip OpenGLES backend because it fails on using RGBA8Unorm as
     // source texture format.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
     // Skip OpenGL backend on linux because it fails on using *-srgb format as
     // dst texture format
@@ -651,6 +1060,10 @@ DAWN_INSTANTIATE_TEST_P(
 // green texture originally. After the subrect copy, affected part
 // in dst texture should be red and other part should remain green.
 TEST_P(CopyTextureForBrowser_SubRects, CopySubRect) {
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
@@ -673,7 +1086,9 @@ DAWN_INSTANTIATE_TEST_P(CopyTextureForBrowser_SubRects,
 TEST_P(CopyTextureForBrowser_AlphaOps, alphaOp) {
     // Skip OpenGLES backend because it fails on using RGBA8Unorm as
     // source texture format.
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
     // Tests skip due to crbug.com/dawn/1104.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
@@ -686,3 +1101,27 @@ DAWN_INSTANTIATE_TEST_P(
     {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
     std::vector<wgpu::AlphaOp>({wgpu::AlphaOp::DontChange, wgpu::AlphaOp::Premultiply,
                                 wgpu::AlphaOp::Unpremultiply}));
+
+// Verify |CopyTextureForBrowser| doing color space conversion.
+TEST_P(CopyTextureForBrowser_ColorSpace, colorSpaceConversion) {
+    // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+
+    // Tests skip due to crbug.com/dawn/1104.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+    DoColorSpaceConversionTest();
+}
+
+DAWN_INSTANTIATE_TEST_P(CopyTextureForBrowser_ColorSpace,
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                         VulkanBackend()},
+                        std::vector<wgpu::TextureFormat>({wgpu::TextureFormat::RGBA16Float,
+                                                          wgpu::TextureFormat::RGBA32Float}),
+                        std::vector<ColorSpace>({ColorSpace::SRGB, ColorSpace::DisplayP3}),
+                        std::vector<ColorSpace>({ColorSpace::SRGB}),
+                        std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied,
+                                                      wgpu::AlphaMode::Unpremultiplied}),
+                        std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied,
+                                                      wgpu::AlphaMode::Unpremultiplied}));

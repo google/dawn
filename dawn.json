@@ -857,20 +857,40 @@
     },
     "alpha op": {
         "category": "enum",
-        "tags": ["dawn"],
+        "tags": ["deprecated"],
         "values": [
             {"value": 0, "name": "dont change"},
             {"value": 1, "name": "premultiply"},
             {"value": 2, "name": "unpremultiply"}
         ]
     },
+    "alpha mode": {
+        "category": "enum",
+        "tags": ["dawn"],
+        "values": [
+            {"value": 0, "name": "premultiplied"},
+            {"value": 1, "name": "unpremultiplied"}
+        ]
+    },
     "copy texture for browser options": {
         "category": "structure",
         "extensible": "in",
         "tags": ["dawn"],
+        "_TODO": "support number as length input",
         "members": [
-            {"name": "flipY", "type": "bool", "default": "false"},
-            {"name": "alphaOp", "type": "alpha op", "default": "dont change"}
+            {"name": "flip y", "type": "bool", "default": "false"},
+            {"name": "alpha op", "type": "alpha op", "default": "dont change", "tags": ["deprecated"]},
+            {"name": "needs color space conversion", "type": "bool", "default": "false"},
+            {"name": "src alpha mode", "type": "alpha mode", "default": "unpremultiplied"},
+            {"name": "transfer function parameters count", "type": "uint32_t", "default": "0"},
+            {"name": "src transfer function parameters", "type": "float", "annotation": "const*",
+                     "length": "transfer function parameters count", "default": "nullptr"},
+            {"name": "conversion matrix elements count", "type": "uint32_t", "default": "0"},
+            {"name": "conversion matrix", "type": "float", "annotation": "const*",
+                     "length": "conversion matrix elements count", "default": "nullptr"},
+            {"name": "dst transfer function parameters", "type": "float", "annotation": "const*",
+                     "length": "transfer function parameters count", "default": "nullptr"},
+            {"name": "dst alpha mode", "type": "alpha mode", "default": "unpremultiplied"}
         ]
     },
     "create compute pipeline async callback": {

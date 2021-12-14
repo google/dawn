@@ -25,6 +25,7 @@
 #include "tests/ParamGenerator.h"
 #include "tests/ToggleParser.h"
 #include "utils/ScopedAutoreleasePool.h"
+#include "utils/TextureUtils.h"
 
 #include <dawn_platform/DawnPlatform.h>
 #include <gmock/gmock.h>
@@ -94,6 +95,9 @@
     AddTextureBetweenColorsExpectation(__FILE__, __LINE__, color0, color1, texture, x, y)
 
 #define EXPECT_TEXTURE_EQ(...) AddTextureExpectation(__FILE__, __LINE__, __VA_ARGS__)
+
+#define EXPECT_TEXTURE_FLOAT16_EQ(...) \
+    AddTextureExpectation<float, uint16_t>(__FILE__, __LINE__, __VA_ARGS__)
 
 #define ASSERT_DEVICE_ERROR_MSG(statement, matcher)             \
     StartExpectDeviceError(matcher);                            \
@@ -353,6 +357,30 @@ class DawnTestBase {
 
     // T - expected value Type
     // U - actual value Type (defaults = T)
+    template <typename T, typename U = T>
+    std::ostringstream& AddTextureExpectation(const char* file,
+                                              int line,
+                                              const T* expectedData,
+                                              const wgpu::Texture& texture,
+                                              wgpu::Origin3D origin,
+                                              wgpu::Extent3D extent,
+                                              wgpu::TextureFormat format,
+                                              T tolerance = 0,
+                                              uint32_t level = 0,
+                                              wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
+                                              uint32_t bytesPerRow = 0) {
+        uint32_t texelBlockSize = utils::GetTexelBlockSizeInBytes(format);
+        uint32_t texelComponentCount = utils::GetWGSLRenderableColorTextureComponentCount(format);
+
+        return AddTextureExpectationImpl(
+            file, line,
+            new detail::ExpectEq<T, U>(
+                expectedData,
+                texelComponentCount * extent.width * extent.height * extent.depthOrArrayLayers,
+                tolerance),
+            texture, origin, extent, level, aspect, texelBlockSize, bytesPerRow);
+    }
+
     template <typename T, typename U = T>
     std::ostringstream& AddTextureExpectation(const char* file,
                                               int line,
