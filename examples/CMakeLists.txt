@@ -35,10 +35,7 @@ add_executable(CHelloTriangle "CHelloTriangle.cpp")
 target_link_libraries(CHelloTriangle dawn_sample_utils)
 
 add_executable(ComputeBoids "ComputeBoids.cpp")
-target_link_libraries(ComputeBoids dawn_sample_utils glm)
+target_link_libraries(ComputeBoids dawn_sample_utils)
 
 add_executable(Animometer "Animometer.cpp")
 target_link_libraries(Animometer dawn_sample_utils)
-
-add_executable(CubeReflection "CubeReflection.cpp")
-target_link_libraries(CubeReflection dawn_sample_utils glm)

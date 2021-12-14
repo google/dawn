@@ -20,7 +20,6 @@ group("dawn_samples") {
     ":CHelloTriangle",
     ":ComputeBoids",
     ":CppHelloTriangle",
-    ":CubeReflection",
     ":ManualSwapChainTest",
   ]
 }
@@ -68,16 +67,10 @@ dawn_sample("CHelloTriangle") {
 
 dawn_sample("ComputeBoids") {
   sources = [ "ComputeBoids.cpp" ]
-  deps = [ "${dawn_root}/third_party/gn/glm" ]
 }
 
 dawn_sample("Animometer") {
   sources = [ "Animometer.cpp" ]
-}
-
-dawn_sample("CubeReflection") {
-  sources = [ "CubeReflection.cpp" ]
-  deps = [ "${dawn_root}/third_party/gn/glm" ]
 }
 
 dawn_sample("ManualSwapChainTest") {

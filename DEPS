@@ -110,12 +110,6 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # Dependencies for samples: GLM
-  'third_party/glm': {
-    'url': '{github_git}/g-truc/glm.git@bf71a834948186f4097caa076cd2663c69a10e1e',
-    'condition': 'dawn_standalone',
-  },
-
   'third_party/vulkan_memory_allocator': {
     'url': '{chromium_git}/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator@1ecb35c39875c77219c75ecb5c5b3316020f66b8',
     'condition': 'dawn_standalone',

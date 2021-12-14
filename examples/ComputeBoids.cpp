@@ -23,8 +23,6 @@
 #include <cstring>
 #include <random>
 
-#include <glm/glm.hpp>
-
 wgpu::Device device;
 wgpu::Queue queue;
 wgpu::SwapChain swapchain;
@@ -44,8 +42,8 @@ size_t pingpong = 0;
 static const uint32_t kNumParticles = 1000;
 
 struct Particle {
-    glm::vec2 pos;
-    glm::vec2 vel;
+    std::array<float, 2> pos;
+    std::array<float, 2> vel;
 };
 
 struct SimParams {
@@ -60,13 +58,13 @@ struct SimParams {
 };
 
 void initBuffers() {
-    glm::vec2 model[3] = {
+    std::array<std::array<float, 2>, 3> model = {{
         {-0.01, -0.02},
         {0.01, -0.02},
         {0.00, 0.02},
-    };
+    }};
     modelBuffer =
-        utils::CreateBufferFromData(device, model, sizeof(model), wgpu::BufferUsage::Vertex);
+        utils::CreateBufferFromData(device, &model, sizeof(model), wgpu::BufferUsage::Vertex);
 
     SimParams params = {0.04f, 0.1f, 0.025f, 0.025f, 0.02f, 0.05f, 0.005f, kNumParticles};
     updateParams =
@@ -77,8 +75,8 @@ void initBuffers() {
         std::mt19937 generator;
         std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
         for (auto& p : initialParticles) {
-            p.pos = glm::vec2(dist(generator), dist(generator));
-            p.vel = glm::vec2(dist(generator), dist(generator)) * 0.1f;
+            p.pos = {dist(generator), dist(generator)};
+            p.vel = {dist(generator) * 0.1f, dist(generator) * 0.1f};
         }
     }
 
@@ -134,7 +132,7 @@ void initRender() {
     descriptor.cAttributes[1].shaderLocation = 1;
     descriptor.cAttributes[1].offset = offsetof(Particle, vel);
     descriptor.cAttributes[1].format = wgpu::VertexFormat::Float32x2;
-    descriptor.cBuffers[1].arrayStride = sizeof(glm::vec2);
+    descriptor.cBuffers[1].arrayStride = 2 * sizeof(float);
     descriptor.cBuffers[1].attributeCount = 1;
     descriptor.cBuffers[1].attributes = &descriptor.cAttributes[2];
     descriptor.cAttributes[2].shaderLocation = 2;

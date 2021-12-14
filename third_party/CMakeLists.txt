@@ -50,13 +50,6 @@ if (NOT TARGET glfw)
     add_subdirectory(${DAWN_GLFW_DIR} "${CMAKE_CURRENT_BINARY_DIR}/glfw")
 endif()
 
-if (DAWN_BUILD_EXAMPLES)
-    if (NOT TARGET glm)
-        message(STATUS "Dawn: using GLM at ${DAWN_GLM_DIR}")
-        add_subdirectory(${DAWN_GLM_DIR} "${CMAKE_CURRENT_BINARY_DIR}/glm")
-    endif()
-endif()
-
 if (NOT TARGET libtint)
     message(STATUS "Dawn: using Tint at ${DAWN_TINT_DIR}")
     # TODO(crbug.com/tint/1217): Tint expects glslang for validation when
