@@ -458,9 +458,16 @@ class Builder {
   /// type, then return the SPIR-V ID for the expression. Otherwise implement
   /// the WGSL Load Rule: generate an OpLoad and return the ID of the result.
   /// Returns 0 if the expression could not be generated.
-  /// @param expr the expression to be generate
+  /// @param expr the semantic expression node to be generated
   /// @returns the the ID of the expression, or loaded expression
-  uint32_t GenerateNonReferenceExpression(const ast::Expression* expr);
+  uint32_t GenerateExpressionWithLoadIfNeeded(const sem::Expression* expr);
+  /// Generates an expression. If the WGSL expression does not have reference
+  /// type, then return the SPIR-V ID for the expression. Otherwise implement
+  /// the WGSL Load Rule: generate an OpLoad and return the ID of the result.
+  /// Returns 0 if the expression could not be generated.
+  /// @param expr the AST expression to be generated
+  /// @returns the the ID of the expression, or loaded expression
+  uint32_t GenerateExpressionWithLoadIfNeeded(const ast::Expression* expr);
   /// Generates an OpLoad on the given ID if it has reference type in WGSL,
   /// othewrise return the ID itself.
   /// @param type the type of the expression
