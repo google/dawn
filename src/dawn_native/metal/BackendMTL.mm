@@ -194,7 +194,7 @@ namespace dawn_native { namespace metal {
             // MTLDevice’s counterSets property declares which counter sets it supports. Check
             // whether it's available on the device before requesting a counter set.
             id<MTLCounterSet> counterSet = nil;
-            for (id<MTLCounterSet> set in device.counterSets) {
+            for (id<MTLCounterSet> set in [device counterSets]) {
                 if ([set.name caseInsensitiveCompare:counterSetName] == NSOrderedSame) {
                     counterSet = set;
                     break;
@@ -211,7 +211,7 @@ namespace dawn_native { namespace metal {
             // if there is a counter unsupported.
             for (MTLCommonCounter counterName : counterNames) {
                 bool found = false;
-                for (id<MTLCounter> counter in counterSet.counters) {
+                for (id<MTLCounter> counter in [counterSet counters]) {
                     if ([counter.name caseInsensitiveCompare:counterName] == NSOrderedSame) {
                         found = true;
                         break;
