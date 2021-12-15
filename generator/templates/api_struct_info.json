@@ -23,7 +23,7 @@
         "file": "{api}/{api}.h",
         "defines": [],
         "structs": {
-            "{{metatdata.c_prefix}}ChainedStruct": [
+            "{{metadata.c_prefix}}ChainedStruct": [
                 "next",
                 "sType"
             ],
