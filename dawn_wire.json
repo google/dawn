@@ -84,6 +84,18 @@
         "shader module get compilation info": [
             { "name": "shader module id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint64_t" }
+        ],
+        "instance request adapter": [
+            { "name": "instance id", "type": "ObjectId" },
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "adapter object handle", "type": "ObjectHandle", "handle_type": "adapter"},
+            { "name": "options", "type": "request adapter options", "annotation": "const*" }
+        ],
+        "adapter request device": [
+            { "name": "adapter id", "type": "ObjectId" },
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "device object handle", "type": "ObjectHandle", "handle_type": "device"},
+            { "name": "descriptor", "type": "device descriptor", "annotation": "const*" }
         ]
     },
     "return commands": {
@@ -137,6 +149,25 @@
             { "name": "request serial", "type": "uint64_t" },
             { "name": "status", "type": "compilation info request status" },
             { "name": "info", "type": "compilation info", "annotation": "const*", "optional": true }
+        ],
+        "instance request adapter callback": [
+            { "name": "instance", "type": "ObjectHandle", "handle_type": "instance" },
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "status", "type": "request adapter status" },
+            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true },
+            { "name": "properties", "type": "adapter properties", "annotation": "const*", "optional": "true" },
+            { "name": "limits", "type": "supported limits", "annotation": "const*", "optional": "true" },
+            { "name": "features count", "type": "uint32_t"},
+            { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
+        ],
+        "adapter request device callback": [
+            { "name": "adapter", "type": "ObjectHandle", "handle_type": "adapter" },
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "status", "type": "request device status" },
+            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true },
+            { "name": "limits", "type": "supported limits", "annotation": "const*", "optional": "true" },
+            { "name": "features count", "type": "uint32_t"},
+            { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
         ]
     },
     "special items": {

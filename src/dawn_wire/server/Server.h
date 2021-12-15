@@ -146,6 +146,22 @@ namespace dawn_wire { namespace server {
         ObjectId pipelineObjectID;
     };
 
+    struct RequestAdapterUserdata : CallbackUserdata {
+        using CallbackUserdata::CallbackUserdata;
+
+        ObjectHandle instance;
+        uint64_t requestSerial;
+        ObjectId adapterObjectId;
+    };
+
+    struct RequestDeviceUserdata : CallbackUserdata {
+        using CallbackUserdata::CallbackUserdata;
+
+        ObjectHandle adapter;
+        uint64_t requestSerial;
+        ObjectId deviceObjectId;
+    };
+
     class Server : public ServerBase {
       public:
         Server(const DawnProcTable& procs,
@@ -194,6 +210,7 @@ namespace dawn_wire { namespace server {
             mSerializer.SerializeCommand(cmd, extraSize, SerializeExtraSize);
         }
 
+        void SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject);
         void ClearDeviceCallbacks(WGPUDevice device);
 
         // Error callbacks
@@ -216,6 +233,14 @@ namespace dawn_wire { namespace server {
         void OnShaderModuleGetCompilationInfo(WGPUCompilationInfoRequestStatus status,
                                               const WGPUCompilationInfo* info,
                                               ShaderModuleGetCompilationInfoUserdata* userdata);
+        void OnRequestAdapterCallback(WGPURequestAdapterStatus status,
+                                      WGPUAdapter adapter,
+                                      const char* message,
+                                      RequestAdapterUserdata* userdata);
+        void OnRequestDeviceCallback(WGPURequestDeviceStatus status,
+                                     WGPUDevice device,
+                                     const char* message,
+                                     RequestDeviceUserdata* userdata);
 
 #include "dawn_wire/server/ServerPrototypes_autogen.inc"
 

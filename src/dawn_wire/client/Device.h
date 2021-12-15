@@ -20,6 +20,7 @@
 #include "common/LinkedList.h"
 #include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/client/ApiObjects_autogen.h"
+#include "dawn_wire/client/LimitsAndFeatures.h"
 #include "dawn_wire/client/ObjectBase.h"
 #include "dawn_wire/client/RequestTracker.h"
 
@@ -67,6 +68,9 @@ namespace dawn_wire { namespace client {
         bool GetLimits(WGPUSupportedLimits* limits) const;
         bool HasFeature(WGPUFeatureName feature) const;
         uint32_t EnumerateFeatures(WGPUFeatureName* features) const;
+        void SetLimits(const WGPUSupportedLimits* limits);
+        void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
+
         WGPUQueue GetQueue();
 
         void CancelCallbacksForDisconnect() override;
@@ -74,6 +78,7 @@ namespace dawn_wire { namespace client {
         std::weak_ptr<bool> GetAliveWeakPtr();
 
       private:
+        LimitsAndFeatures mLimitsAndFeatures;
         struct ErrorScopeData {
             WGPUErrorCallback callback = nullptr;
             void* userdata = nullptr;

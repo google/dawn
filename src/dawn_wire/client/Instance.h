@@ -18,7 +18,9 @@
 #include <dawn/webgpu.h>
 
 #include "dawn_wire/WireClient.h"
+#include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/client/ObjectBase.h"
+#include "dawn_wire/client/RequestTracker.h"
 
 namespace dawn_wire { namespace client {
 
@@ -26,9 +28,27 @@ namespace dawn_wire { namespace client {
       public:
         using ObjectBase::ObjectBase;
 
+        ~Instance();
+        void CancelCallbacksForDisconnect() override;
+
         void RequestAdapter(const WGPURequestAdapterOptions* options,
                             WGPURequestAdapterCallback callback,
                             void* userdata);
+        bool OnRequestAdapterCallback(uint64_t requestSerial,
+                                      WGPURequestAdapterStatus status,
+                                      const char* message,
+                                      const WGPUAdapterProperties* properties,
+                                      const WGPUSupportedLimits* limits,
+                                      uint32_t featuresCount,
+                                      const WGPUFeatureName* features);
+
+      private:
+        struct RequestAdapterData {
+            WGPURequestAdapterCallback callback = nullptr;
+            ObjectId adapterObjectId;
+            void* userdata = nullptr;
+        };
+        RequestTracker<RequestAdapterData> mRequestAdapterRequests;
     };
 
 }}  // namespace dawn_wire::client
