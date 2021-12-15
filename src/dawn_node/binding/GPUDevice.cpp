@@ -431,7 +431,7 @@ namespace wgpu { namespace binding {
     }
 
     void GPUDevice::pushErrorScope(Napi::Env env, interop::GPUErrorFilter filter) {
-        wgpu::ErrorFilter f = wgpu::ErrorFilter::None;
+        wgpu::ErrorFilter f;
         switch (filter) {
             case interop::GPUErrorFilter::kOutOfMemory:
                 f = wgpu::ErrorFilter::OutOfMemory;
