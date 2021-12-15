@@ -64,7 +64,9 @@ namespace dawn_wire { namespace client {
                                                  WGPUCreatePipelineAsyncStatus status,
                                                  const char* message);
 
-        bool GetLimits(WGPUSupportedLimits* limits);
+        bool GetLimits(WGPUSupportedLimits* limits) const;
+        bool HasFeature(WGPUFeatureName feature) const;
+        uint32_t EnumerateFeatures(WGPUFeatureName* features) const;
         WGPUQueue GetQueue();
 
         void CancelCallbacksForDisconnect() override;

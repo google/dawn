@@ -86,6 +86,10 @@ namespace dawn_native {
         return mSupportedFeatures.IsEnabled(feature);
     }
 
+    uint32_t AdapterBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
+        return mSupportedFeatures.EnumerateFeatures(features);
+    }
+
     void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
                                        WGPURequestDeviceCallback callback,
                                        void* userdata) {

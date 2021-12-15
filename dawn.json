@@ -98,6 +98,14 @@
                 ]
             },
             {
+                "tags": ["dawn"],
+                "name": "enumerate features",
+                "returns": "uint32_t",
+                "args": [
+                    {"name": "features", "type": "feature name", "annotation": "*"}
+                ]
+            },
+            {
                 "name": "request device",
                 "args": [
                     {"name": "descriptor", "type": "device descriptor", "annotation": "const*"},
@@ -1058,6 +1066,22 @@
                 ]
             },
             {
+                "tags": ["dawn"],
+                "name": "has feature",
+                "returns": "bool",
+                "args": [
+                    {"name": "feature", "type": "feature name"}
+                ]
+            },
+            {
+                "tags": ["dawn"],
+                "name": "enumerate features",
+                "returns": "uint32_t",
+                "args": [
+                    {"name": "features", "type": "feature name", "annotation": "*"}
+                ]
+            },
+            {
                 "name": "get queue",
                 "returns": "queue"
             },
@@ -1297,7 +1321,10 @@
             {"value": 7, "name": "texture compression ETC2"},
             {"value": 8, "name": "texture compression ASTC"},
             {"value": 9, "name": "indirect first instance"},
-            {"value": 1000, "name": "depth clamping", "tags": ["emscripten", "dawn"]}
+            {"value": 1000, "name": "depth clamping", "tags": ["emscripten", "dawn"]},
+            {"value": 1001, "name": "dawn shader float 16", "tags": ["dawn"]},
+            {"value": 1002, "name": "dawn internal usages", "tags": ["dawn"]},
+            {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

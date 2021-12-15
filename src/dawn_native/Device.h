@@ -257,7 +257,9 @@ namespace dawn_native {
 
         QueueBase* APIGetQueue();
 
-        bool APIGetLimits(SupportedLimits* limits);
+        bool APIGetLimits(SupportedLimits* limits) const;
+        bool APIHasFeature(wgpu::FeatureName feature) const;
+        uint32_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
         void APIInjectError(wgpu::ErrorType type, const char* message);
         bool APITick();
 

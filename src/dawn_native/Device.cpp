@@ -1197,13 +1197,21 @@ namespace dawn_native {
         }
     }
 
-    bool DeviceBase::APIGetLimits(SupportedLimits* limits) {
+    bool DeviceBase::APIGetLimits(SupportedLimits* limits) const {
         ASSERT(limits != nullptr);
         if (limits->nextInChain != nullptr) {
             return false;
         }
         limits->limits = mLimits.v1;
         return true;
+    }
+
+    bool DeviceBase::APIHasFeature(wgpu::FeatureName feature) const {
+        return mEnabledFeatures.IsEnabled(feature);
+    }
+
+    uint32_t DeviceBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
+        return mEnabledFeatures.EnumerateFeatures(features);
     }
 
     void DeviceBase::APIInjectError(wgpu::ErrorType type, const char* message) {

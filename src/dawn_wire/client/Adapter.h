@@ -29,6 +29,7 @@ namespace dawn_wire { namespace client {
         bool GetLimits(WGPUSupportedLimits* limits) const;
         void GetProperties(WGPUAdapterProperties* properties) const;
         bool HasFeature(WGPUFeatureName feature) const;
+        uint32_t EnumerateFeatures(WGPUFeatureName* features) const;
         void RequestDevice(const WGPUDeviceDescriptor* descriptor,
                            WGPURequestDeviceCallback callback,
                            void* userdata);

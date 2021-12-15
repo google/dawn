@@ -28,6 +28,10 @@ namespace dawn_wire { namespace client {
         UNREACHABLE();
     }
 
+    uint32_t Adapter::EnumerateFeatures(WGPUFeatureName* features) const {
+        UNREACHABLE();
+    }
+
     void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
                                 WGPURequestDeviceCallback callback,
                                 void* userdata) {

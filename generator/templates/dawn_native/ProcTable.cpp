@@ -43,7 +43,7 @@ namespace dawn_native {
 
                 {% for arg in method.arguments %}
                     {% set varName = as_varName(arg.name) %}
-                    {% if arg.type.category in ["enum", "bitmask"] %}
+                    {% if arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
                         auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
                     {% elif arg.annotation != "value" or arg.type.category == "object" %}
                         auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});

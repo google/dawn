@@ -106,11 +106,47 @@ namespace dawn_native {
                     return Feature::Depth24UnormStencil8;
                 case wgpu::FeatureName::Depth32FloatStencil8:
                     return Feature::Depth32FloatStencil8;
+                case wgpu::FeatureName::DawnShaderFloat16:
+                    return Feature::ShaderFloat16;
+                case wgpu::FeatureName::DawnInternalUsages:
+                    return Feature::DawnInternalUsages;
+                case wgpu::FeatureName::DawnMultiPlanarFormats:
+                    return Feature::MultiPlanarFormats;
 
                 case wgpu::FeatureName::IndirectFirstInstance:
                     return Feature::InvalidEnum;
             }
             return Feature::InvalidEnum;
+        }
+
+        wgpu::FeatureName ToAPIFeature(Feature feature) {
+            switch (feature) {
+                case Feature::TextureCompressionBC:
+                    return wgpu::FeatureName::TextureCompressionBC;
+                case Feature::TextureCompressionETC2:
+                    return wgpu::FeatureName::TextureCompressionETC2;
+                case Feature::TextureCompressionASTC:
+                    return wgpu::FeatureName::TextureCompressionASTC;
+                case Feature::PipelineStatisticsQuery:
+                    return wgpu::FeatureName::PipelineStatisticsQuery;
+                case Feature::TimestampQuery:
+                    return wgpu::FeatureName::TimestampQuery;
+                case Feature::DepthClamping:
+                    return wgpu::FeatureName::DepthClamping;
+                case Feature::Depth24UnormStencil8:
+                    return wgpu::FeatureName::Depth24UnormStencil8;
+                case Feature::Depth32FloatStencil8:
+                    return wgpu::FeatureName::Depth32FloatStencil8;
+                case Feature::ShaderFloat16:
+                    return wgpu::FeatureName::DawnShaderFloat16;
+                case Feature::DawnInternalUsages:
+                    return wgpu::FeatureName::DawnInternalUsages;
+                case Feature::MultiPlanarFormats:
+                    return wgpu::FeatureName::DawnMultiPlanarFormats;
+
+                case Feature::EnumCount:
+                    UNREACHABLE();
+            }
         }
 
     }  // anonymous namespace
@@ -130,6 +166,17 @@ namespace dawn_native {
     bool FeaturesSet::IsEnabled(wgpu::FeatureName feature) const {
         Feature f = FromAPIFeature(feature);
         return f != Feature::InvalidEnum && IsEnabled(f);
+    }
+
+    uint32_t FeaturesSet::EnumerateFeatures(wgpu::FeatureName* features) const {
+        for (uint32_t i : IterateBitSet(featuresBitSet)) {
+            wgpu::FeatureName feature = ToAPIFeature(static_cast<Feature>(i));
+            if (features != nullptr) {
+                *features = feature;
+                features += 1;
+            }
+        }
+        return featuresBitSet.count();
     }
 
     std::vector<const char*> FeaturesSet::GetEnabledFeatureNames() const {

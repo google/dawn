@@ -23,7 +23,7 @@ using namespace dawn_wire;
 namespace {
 
     class WireInjectInstanceTests : public WireTest {
-    public:
+      public:
         WireInjectInstanceTests() {
         }
         ~WireInjectInstanceTests() override = default;
@@ -36,13 +36,14 @@ namespace {
 
         WGPUInstance serverInstance = api.GetNewInstance();
         EXPECT_CALL(api, InstanceReference(serverInstance));
-        ASSERT_TRUE(
-            GetWireServer()->InjectInstance(serverInstance, reservation.id, reservation.generation));
+        ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reservation.id,
+                                                    reservation.generation));
 
         WGPUSurfaceDescriptor surfaceDesc = {};
         wgpuInstanceCreateSurface(reservation.instance, &surfaceDesc);
         WGPUSurface serverSurface = api.GetNewSurface();
-        EXPECT_CALL(api, InstanceCreateSurface(serverInstance, NotNull())).WillOnce(Return(serverSurface));
+        EXPECT_CALL(api, InstanceCreateSurface(serverInstance, NotNull()))
+            .WillOnce(Return(serverSurface));
         FlushClient();
     }
 
@@ -55,19 +56,18 @@ namespace {
         ASSERT_NE(reservation1.instance, reservation2.instance);
     }
 
-
     // Test that injecting the same id fails.
     TEST_F(WireInjectInstanceTests, InjectExistingID) {
         ReservedInstance reservation = GetWireClient()->ReserveInstance();
 
         WGPUInstance serverInstance = api.GetNewInstance();
         EXPECT_CALL(api, InstanceReference(serverInstance));
-        ASSERT_TRUE(
-            GetWireServer()->InjectInstance(serverInstance, reservation.id, reservation.generation));
+        ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reservation.id,
+                                                    reservation.generation));
 
         // ID already in use, call fails.
-        ASSERT_FALSE(
-            GetWireServer()->InjectInstance(serverInstance, reservation.id, reservation.generation));
+        ASSERT_FALSE(GetWireServer()->InjectInstance(serverInstance, reservation.id,
+                                                     reservation.generation));
     }
 
     // Test that the server only borrows the instance and does a single reference-release
@@ -77,8 +77,8 @@ namespace {
         // Injecting the instance adds a reference
         WGPUInstance serverInstance = api.GetNewInstance();
         EXPECT_CALL(api, InstanceReference(serverInstance));
-        ASSERT_TRUE(
-            GetWireServer()->InjectInstance(serverInstance, reservation.id, reservation.generation));
+        ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reservation.id,
+                                                    reservation.generation));
 
         // Releasing the instance removes a single reference.
         wgpuInstanceRelease(reservation.instance);
