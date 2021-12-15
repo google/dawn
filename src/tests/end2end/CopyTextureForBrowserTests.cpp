@@ -916,9 +916,7 @@ class CopyTextureForBrowser_ColorSpace
         wgpu::CopyTextureForBrowserOptions options = {};
         options.needsColorSpaceConversion = srcColorSpace != dstColorSpace;
         options.srcAlphaMode = GetParam().mSrcAlphaMode;
-        options.transferFunctionParametersCount = 7;
         options.srcTransferFunctionParameters = srcColorSpaceInfo.gammaDecodingParams.data();
-        options.conversionMatrixElementsCount = 9;
         options.conversionMatrix = matrix.data();
         options.dstTransferFunctionParameters = dstColorSpaceInfo.gammaEncodingParams.data();
         options.dstAlphaMode = GetParam().mDstAlphaMode;

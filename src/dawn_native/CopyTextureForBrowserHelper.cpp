@@ -354,13 +354,6 @@ namespace dawn_native {
         DAWN_TRY(ValidateAlphaMode(options->dstAlphaMode));
 
         if (options->needsColorSpaceConversion) {
-            DAWN_INVALID_IF(options->transferFunctionParametersCount != 7u,
-                            "Invalid transfer"
-                            " function parameter count (%u).",
-                            options->transferFunctionParametersCount);
-            DAWN_INVALID_IF(options->conversionMatrixElementsCount != 9u,
-                            "Invalid conversion matrix elements count (%u).",
-                            options->conversionMatrixElementsCount);
             DAWN_INVALID_IF(options->srcTransferFunctionParameters == nullptr,
                             "srcTransferFunctionParameters is nullptr when doing color conversion");
             DAWN_INVALID_IF(options->conversionMatrix == nullptr,
@@ -368,7 +361,6 @@ namespace dawn_native {
             DAWN_INVALID_IF(options->dstTransferFunctionParameters == nullptr,
                             "dstTransferFunctionParameters is nullptr when doing color conversion");
         }
-
         return {};
     }
 

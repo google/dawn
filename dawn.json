@@ -881,14 +881,12 @@
             {"name": "alpha op", "type": "alpha op", "default": "dont change", "tags": ["deprecated"]},
             {"name": "needs color space conversion", "type": "bool", "default": "false"},
             {"name": "src alpha mode", "type": "alpha mode", "default": "unpremultiplied"},
-            {"name": "transfer function parameters count", "type": "uint32_t", "default": "0"},
             {"name": "src transfer function parameters", "type": "float", "annotation": "const*",
-                     "length": "transfer function parameters count", "default": "nullptr"},
-            {"name": "conversion matrix elements count", "type": "uint32_t", "default": "0"},
+                     "length": 7, "optional": true},
             {"name": "conversion matrix", "type": "float", "annotation": "const*",
-                     "length": "conversion matrix elements count", "default": "nullptr"},
+                     "length": 9, "optional": true},
             {"name": "dst transfer function parameters", "type": "float", "annotation": "const*",
-                     "length": "transfer function parameters count", "default": "nullptr"},
+                     "length": 7, "optional": true},
             {"name": "dst alpha mode", "type": "alpha mode", "default": "unpremultiplied"}
         ]
     },

@@ -297,6 +297,10 @@ def linked_record_members(json_data, types):
                     assert False
             elif m['length'] == 'strlen':
                 member.length = 'strlen'
+            elif isinstance(m['length'], int):
+                assert m['length'] > 0
+                member.length = "constant"
+                member.constant_length = m['length']
             else:
                 member.length = members_by_name[m['length']]
 
