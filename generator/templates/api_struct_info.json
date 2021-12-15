@@ -19,10 +19,11 @@
 //* https://github.com/emscripten-core/emscripten/blob/master/src/struct_info.json
 //*
     {
-        "file": "webgpu/webgpu.h",
+        {% set api = metadata.api.lower() %}
+        "file": "{api}/{api}.h",
         "defines": [],
         "structs": {
-            "WGPUChainedStruct": [
+            "{{metatdata.c_prefix}}ChainedStruct": [
                 "next",
                 "sType"
             ],

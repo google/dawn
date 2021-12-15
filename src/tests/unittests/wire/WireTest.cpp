@@ -38,8 +38,8 @@ server::MemoryTransferService* WireTest::GetServerMemoryTransferService() {
 
 void WireTest::SetUp() {
     DawnProcTable mockProcs;
-    WGPUDevice mockDevice;
-    api.GetProcTableAndDevice(&mockProcs, &mockDevice);
+    api.GetProcTable(&mockProcs);
+    WGPUDevice mockDevice = api.GetNewDevice();
 
     // This SetCallback call cannot be ignored because it is done as soon as we start the server
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(_, _, _)).Times(Exactly(1));

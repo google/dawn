@@ -12,7 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "mock_webgpu.h"
+{% set api = metadata.api.lower() %}
+#include "mock_{{api}}.h"
 
 using namespace testing;
 
@@ -40,9 +41,8 @@ namespace {
 ProcTableAsClass::~ProcTableAsClass() {
 }
 
-void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* device) {
-    *device = GetNewDevice();
-
+{% set Prefix = metadata.proc_table_prefix %}
+void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
     {% for type in by_category["object"] %}
         {% for method in c_methods(type) %}
             table->{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(Forward{{as_MethodSuffix(type.name, method.name)}});

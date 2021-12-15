@@ -119,7 +119,7 @@ if (build_with_chromium) {
 ###############################################################################
 
 dawn_json_generator("mock_webgpu_gen") {
-  target = "mock_webgpu"
+  target = "mock_api"
   outputs = [
     "src/dawn/mock_webgpu.h",
     "src/dawn/mock_webgpu.cpp",

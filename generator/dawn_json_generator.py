@@ -726,7 +726,7 @@ class MultiGeneratorFromDawnJSON(Generator):
     def add_commandline_arguments(self, parser):
         allowed_targets = [
             'dawn_headers', 'dawncpp_headers', 'dawncpp', 'dawn_proc',
-            'mock_webgpu', 'dawn_wire', "dawn_native_utils"
+            'mock_api', 'dawn_wire', "dawn_native_utils"
         ]
 
         parser.add_argument('--dawn-json',
@@ -823,25 +823,25 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender('api_cpp.cpp', 'emscripten-bits/' + api + '_cpp.cpp',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
-                FileRender('webgpu_struct_info.json',
-                           'emscripten-bits/webgpu_struct_info.json',
+                FileRender('api_struct_info.json',
+                           'emscripten-bits/' + api + '_struct_info.json',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
-                FileRender('library_webgpu_enum_tables.js',
-                           'emscripten-bits/library_webgpu_enum_tables.js',
+                FileRender('library_api_enum_tables.js',
+                           'emscripten-bits/library_' + api + '_enum_tables.js',
                            [RENDER_PARAMS_BASE, params_emscripten]))
 
-        if 'mock_webgpu' in targets:
+        if 'mock_api' in targets:
             mock_params = [
                 RENDER_PARAMS_BASE, params_dawn, {
                     'has_callback_arguments': has_callback_arguments
                 }
             ]
             renders.append(
-                FileRender('mock_webgpu.h', 'src/dawn/mock_webgpu.h',
+                FileRender('mock_api.h', 'src/dawn/mock_' + api + '.h',
                            mock_params))
             renders.append(
-                FileRender('mock_webgpu.cpp', 'src/dawn/mock_webgpu.cpp',
+                FileRender('mock_api.cpp', 'src/dawn/mock_' + api + '.cpp',
                            mock_params))
 
         if 'dawn_native_utils' in targets:

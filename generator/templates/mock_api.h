@@ -12,11 +12,15 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef MOCK_WEBGPU_H
-#define MOCK_WEBGPU_H
+{% set API = metadata.api.upper() %}
+{% set api = API.lower() %}
+#ifndef MOCK_{{API}}_H
+#define MOCK_{{API}}_H
 
-#include <dawn/dawn_proc_table.h>
-#include <dawn/webgpu.h>
+{% set Prefix = metadata.proc_table_prefix %}
+{% set prefix = Prefix.lower() %}
+#include <dawn/{{prefix}}_proc_table.h>
+#include <dawn/{{api}}.h>
 #include <gmock/gmock.h>
 
 #include <memory>
@@ -28,7 +32,7 @@ class ProcTableAsClass {
     public:
         virtual ~ProcTableAsClass();
 
-        void GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* device);
+        void GetProcTable({{Prefix}}ProcTable* table);
 
         // Creates an object that can be returned by a mocked call as in WillOnce(Return(foo)).
         // It returns an object of the write type that isn't equal to any previously returned object.
@@ -131,4 +135,4 @@ class MockProcTable : public ProcTableAsClass {
         {% endfor %}
 };
 
-#endif  // MOCK_WEBGPU_H
+#endif  // MOCK_{{API}}_H
