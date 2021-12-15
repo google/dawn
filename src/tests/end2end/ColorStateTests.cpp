@@ -61,7 +61,7 @@ class ColorStateTest : public DawnTest {
     // attachment. basePipeline has no blending
     void SetupSingleSourcePipelines(wgpu::ColorTargetState colorTargetState) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-                [[block]] struct MyBlock {
+                struct MyBlock {
                     color : vec4<f32>;
                 };
 
@@ -791,7 +791,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
         {renderTargetViews[0], renderTargetViews[1], renderTargetViews[2], renderTargetViews[3]});
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct MyBlock {
+        struct MyBlock {
             color0 : vec4<f32>;
             color1 : vec4<f32>;
             color2 : vec4<f32>;
@@ -915,7 +915,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 // Test that the default blend color is correctly set at the beginning of every subpass
 TEST_P(ColorStateTest, DefaultBlendColor) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct MyBlock {
+        struct MyBlock {
             color : vec4<f32>;
         };
 
@@ -1041,7 +1041,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 // attachment.
 TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct MyBlock {
+        struct MyBlock {
             color : vec4<f32>;
         };
 

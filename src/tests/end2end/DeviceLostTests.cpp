@@ -112,7 +112,7 @@ TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
 // Test that GetBindGroupLayout fails when device is lost
 TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct UniformBuffer {
+        struct UniformBuffer {
             pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> ubo : UniformBuffer;

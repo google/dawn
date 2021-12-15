@@ -765,7 +765,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 // cause crash.
 TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
     wgpu::ShaderModule vsModuleWithStorageBuffer = utils::CreateShaderModule(device, R"(
-        [[block]] struct Dst {
+        struct Dst {
             data : array<u32, 100>;
         };
         [[group(0), binding(0)]] var<storage, read_write> dst : Dst;
@@ -1124,7 +1124,7 @@ TEST_F(RenderPipelineValidationTest, UnwrittenFragmentOutputsMask0) {
 // Test that fragment output validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, BindingsFromCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Uniforms {
+        struct Uniforms {
             data : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> var0 : Uniforms;

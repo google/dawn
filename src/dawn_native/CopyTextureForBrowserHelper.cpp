@@ -48,7 +48,7 @@ namespace dawn_native {
                 padding: u32;
             };
 
-            [[block]] struct Uniforms {                        // offset   align   size
+            struct Uniforms {                        // offset   align   size
                 scale: vec2<f32>;                              // 0        8       8
                 offset: vec2<f32>;                             // 8        8       8
                 steps_mask: u32;                               // 16       4       4  

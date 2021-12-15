@@ -45,7 +45,7 @@ class MultisampledRenderingTest : public DawnTest {
         bool alphaToCoverageEnabled = false,
         bool flipTriangle = false) {
         const char* kFsOneOutputWithDepth = R"(
-            [[block]] struct U {
+            struct U {
                 color : vec4<f32>;
                 depth : f32;
             };
@@ -64,7 +64,7 @@ class MultisampledRenderingTest : public DawnTest {
             })";
 
         const char* kFsOneOutputWithoutDepth = R"(
-            [[block]] struct U {
+            struct U {
                 color : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> uBuffer : U;
@@ -83,7 +83,7 @@ class MultisampledRenderingTest : public DawnTest {
         uint32_t sampleMask = 0xFFFFFFFF,
         bool alphaToCoverageEnabled = false) {
         const char* kFsTwoOutputs = R"(
-            [[block]] struct U {
+            struct U {
                 color0 : vec4<f32>;
                 color1 : vec4<f32>;
             };
@@ -777,7 +777,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
     constexpr float kMSAACoverage = 0.25f;
     constexpr uint32_t kSampleMask = kFirstSampleMaskBit | kThirdSampleMaskBit;
     const char* fs = R"(
-        [[block]] struct U {
+        struct U {
             color : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uBuffer : U;
@@ -838,7 +838,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     // only the first one is covered by the triangle.
     constexpr float kMSAACoverage = 0.25f;
     const char* fs = R"(
-        [[block]] struct U {
+        struct U {
             color0 : vec4<f32>;
             color1 : vec4<f32>;
         };

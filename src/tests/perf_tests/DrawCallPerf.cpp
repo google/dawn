@@ -39,7 +39,7 @@ namespace {
         })";
 
     constexpr char kFragmentShaderA[] = R"(
-        [[block]] struct Uniforms {
+        struct Uniforms {
             color : vec3<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniforms : Uniforms;
@@ -48,10 +48,10 @@ namespace {
         })";
 
     constexpr char kFragmentShaderB[] = R"(
-        [[block]] struct Constants {
+        struct Constants {
             color : vec3<f32>;
         };
-        [[block]] struct Uniforms {
+        struct Uniforms {
             color : vec3<f32>;
         };
         [[group(0), binding(0)]] var<uniform> constants : Constants;

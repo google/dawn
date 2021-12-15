@@ -58,7 +58,7 @@ void init() {
                         640, 480);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct Constants {
+        struct Constants {
             scale : f32;
             time : f32;
             offsetX : f32;

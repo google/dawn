@@ -115,7 +115,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         std::ostringstream fs;
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
         fs << R"(
-            [[block]] struct Buf {
+            struct Buf {
                 value : vec2<u32>;
             };
 
@@ -165,7 +165,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         std::ostringstream cs;
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
         cs << R"(
-            [[block]] struct Buf {
+            struct Buf {
                 value : vec2<u32>;
             };
 
@@ -453,7 +453,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
         switch (GetParam().mReadBufferUsage) {
             case wgpu::BufferUsage::Uniform:
                 shader << R"(
-                    [[block]] struct Src {
+                    struct Src {
                         values : array<vec4<u32>, kArrayLength>;
                     };
                     [[group(0), binding(0)]] var<uniform> src : Src;
@@ -461,7 +461,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
                 break;
             case wgpu::BufferUsage::Storage:
                 shader << R"(
-                    [[block]] struct Src {
+                    struct Src {
                         values : array<vec4<u32>>;
                     };
                     [[group(0), binding(0)]] var<storage, read> src : Src;
@@ -472,7 +472,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
         }
 
         shader << R"(
-            [[block]] struct Dst {
+            struct Dst {
                 values : array<vec4<u32>>;
             };
             [[group(0), binding(1)]] var<storage, read_write> dst : Dst;

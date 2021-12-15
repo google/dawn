@@ -45,18 +45,18 @@ namespace dawn_native {
             // Type 'bool' cannot be used in storage class 'uniform' as it is non-host-shareable.
             Ref<ShaderModuleBase> shaderModule;
             DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, R"(
-                [[block]] struct UniformParams {
+                struct UniformParams {
                     maxComputeWorkgroupsPerDimension: u32;
                     clientOffsetInU32: u32;
                     enableValidation: u32;
                     duplicateNumWorkgroups: u32;
                 };
 
-                [[block]] struct IndirectParams {
+                struct IndirectParams {
                     data: array<u32>;
                 };
 
-                [[block]] struct ValidatedParams {
+                struct ValidatedParams {
                     data: array<u32>;
                 };
 

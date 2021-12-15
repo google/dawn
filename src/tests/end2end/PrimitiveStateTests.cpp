@@ -45,7 +45,7 @@ class DepthClampingTest : public DawnTest {
         depthTextureView = depthTexture.CreateView();
 
         vsModule = utils::CreateShaderModule(device, R"(
-            [[block]] struct UBO {
+            struct UBO {
                 color : vec3<f32>;
                 depth : f32;
             };
@@ -56,7 +56,7 @@ class DepthClampingTest : public DawnTest {
             })");
 
         fsModule = utils::CreateShaderModule(device, R"(
-            [[block]] struct UBO {
+            struct UBO {
                 color : vec3<f32>;
                 depth : f32;
             };

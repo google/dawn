@@ -36,7 +36,7 @@ class GpuMemorySyncTests : public DawnTest {
     std::tuple<wgpu::ComputePipeline, wgpu::BindGroup> CreatePipelineAndBindGroupForCompute(
         const wgpu::Buffer& buffer) {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-            [[block]] struct Data {
+            struct Data {
                 a : i32;
             };
             [[group(0), binding(0)]] var<storage, read_write> data : Data;
@@ -63,7 +63,7 @@ class GpuMemorySyncTests : public DawnTest {
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[block]] struct Data {
+            struct Data {
                 i : i32;
             };
             [[group(0), binding(0)]] var<storage, read_write> data : Data;
@@ -243,7 +243,7 @@ class StorageToUniformSyncTests : public DawnTest {
 
     std::tuple<wgpu::ComputePipeline, wgpu::BindGroup> CreatePipelineAndBindGroupForCompute() {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-            [[block]] struct Data {
+            struct Data {
                 a : f32;
             };
             [[group(0), binding(0)]] var<storage, read_write> data : Data;
@@ -269,7 +269,7 @@ class StorageToUniformSyncTests : public DawnTest {
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[block]] struct Contents {
+            struct Contents {
                 color : f32;
             };
             [[group(0), binding(0)]] var<uniform> contents : Contents;
@@ -440,17 +440,17 @@ class MultipleWriteThenMultipleReadTests : public DawnTest {
 TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     // Create pipeline, bind group, and different buffers for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct VBContents {
+        struct VBContents {
             pos : array<vec4<f32>, 4>;
         };
         [[group(0), binding(0)]] var<storage, read_write> vbContents : VBContents;
 
-        [[block]] struct IBContents {
+        struct IBContents {
             indices : array<vec4<i32>, 2>;
         };
         [[group(0), binding(1)]] var<storage, read_write> ibContents : IBContents;
 
-        [[block]] struct ColorContents {
+        struct ColorContents {
             color : f32;
         };
         [[group(0), binding(2)]] var<storage, read_write> uniformContents : ColorContents;
@@ -503,7 +503,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             color : f32;
         };
 
@@ -562,7 +562,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     // Create pipeline, bind group, and a complex buffer for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct Contents {
+        struct Contents {
             [[align(256)]] pos : array<vec4<f32>, 4>;
             [[align(256)]] indices : array<vec4<i32>, 2>;
             [[align(256)]] color0 : f32;
@@ -620,7 +620,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             color : f32;
         };
         [[group(0), binding(0)]] var<uniform> uniformBuffer : Buf;

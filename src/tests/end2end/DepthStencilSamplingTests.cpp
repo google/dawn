@@ -70,10 +70,10 @@ class DepthStencilSamplingTest : public DawnTest {
                                 std::ostringstream& shaderBody) {
         shaderSource << "type StencilValues = array<u32, " << components.size() << ">;\n";
         shaderSource << R"(
-            [[block]] struct DepthResult {
+            struct DepthResult {
                 value : f32;
             };
-            [[block]] struct StencilResult {
+            struct StencilResult {
                 values : StencilValues;
             };)";
         shaderSource << "\n";
@@ -181,7 +181,7 @@ class DepthStencilSamplingTest : public DawnTest {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var samp : sampler_comparison;
             [[group(0), binding(1)]] var tex : texture_depth_2d;
-            [[block]] struct Uniforms {
+            struct Uniforms {
                 compareRef : f32;
             };
             [[group(0), binding(2)]] var<uniform> uniforms : Uniforms;
@@ -203,12 +203,12 @@ class DepthStencilSamplingTest : public DawnTest {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var samp : sampler_comparison;
             [[group(0), binding(1)]] var tex : texture_depth_2d;
-            [[block]] struct Uniforms {
+            struct Uniforms {
                 compareRef : f32;
             };
             [[group(0), binding(2)]] var<uniform> uniforms : Uniforms;
 
-            [[block]] struct SamplerResult {
+            struct SamplerResult {
                 value : f32;
             };
             [[group(0), binding(3)]] var<storage, read_write> samplerResult : SamplerResult;

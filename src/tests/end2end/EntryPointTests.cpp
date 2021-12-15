@@ -78,7 +78,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
     wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Data {
+        struct Data {
             data : u32;
         };
         [[binding(0), group(0)]] var<storage, read_write> data : Data;

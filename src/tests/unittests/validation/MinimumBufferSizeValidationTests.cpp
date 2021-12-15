@@ -73,7 +73,7 @@ namespace {
         std::ostringstream ostream;
         size_t index = 0;
         for (const BindingDescriptor& b : bindings) {
-            ostream << "[[block]] struct S" << index << " { " << b.decl << "};\n";
+            ostream << "struct S" << index << " { " << b.decl << "};\n";
             ostream << "[[group(" << b.group << "), binding(" << b.binding << ")]] ";
             switch (b.type) {
                 case wgpu::BufferBindingType::Uniform:

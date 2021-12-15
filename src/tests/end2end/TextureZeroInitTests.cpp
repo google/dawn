@@ -983,7 +983,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     wgpu::ProgrammableStageDescriptor compute;
     const char* cs = R"(
         [[group(0), binding(0)]] var tex : texture_2d<f32>;
-        [[block]] struct Result {
+        struct Result {
             value : vec4<f32>;
         };
         [[group(0), binding(1)]] var<storage, read_write> result : Result;

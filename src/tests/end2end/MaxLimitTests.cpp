@@ -33,7 +33,7 @@ TEST_P(MaxLimitTests, MaxComputeWorkgroupStorageSize) {
         GetSupportedLimits().limits.maxComputeWorkgroupStorageSize;
 
     std::string shader = R"(
-        [[block]] struct Dst {
+        struct Dst {
             value0 : u32;
             value1 : u32;
         };
@@ -129,11 +129,11 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                         std::min(maxBufferBindingSize, uint64_t(512) * 1024 * 1024);
                 }
                 shader = R"(
-                  [[block]] struct Buf {
+                  struct Buf {
                       values : array<u32>;
                   };
 
-                  [[block]] struct Result {
+                  struct Result {
                       value0 : u32;
                       value1 : u32;
                   };
@@ -156,7 +156,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                                                 uint64_t(std::numeric_limits<int32_t>::max()) + 8);
 
                 shader = R"(
-                  [[block]] struct Buf {
+                  struct Buf {
                       value0 : u32;
                       // padding such that value0 and value1 are the first and last bytes of the memory.
                       [[size()" +
@@ -164,7 +164,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                       value1 : u32;
                   };
 
-                  [[block]] struct Result {
+                  struct Result {
                       value0 : u32;
                       value1 : u32;
                   };

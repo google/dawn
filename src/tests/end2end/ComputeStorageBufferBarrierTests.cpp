@@ -32,7 +32,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             data : array<u32, 100>;
         };
 
@@ -82,7 +82,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             data : array<u32, 100>;
         };
 
@@ -148,7 +148,7 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             data : array<u32, 100>;
         };
 
@@ -216,7 +216,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             data : array<vec4<u32>, 25>;
         };
 
@@ -284,7 +284,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
         wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             data : array<vec4<u32>, 25>;
         };
 
@@ -342,7 +342,7 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
     wgpu::ComputePipelineDescriptor step2PipelineDesc;
     step2PipelineDesc.compute.entryPoint = "main";
     step2PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             data : array<u32, 3>;
         };
         [[group(0), binding(0)]] var<storage, read_write> buf : Buf;
@@ -356,12 +356,12 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
     wgpu::ComputePipelineDescriptor step3PipelineDesc;
     step3PipelineDesc.compute.entryPoint = "main";
     step3PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buf {
+        struct Buf {
             data : array<u32, 3>;
         };
         [[group(0), binding(0)]] var<storage, read> buf : Buf;
 
-        [[block]] struct Result {
+        struct Result {
             data : u32;
         };
         [[group(0), binding(1)]] var<storage, read_write> result : Result;

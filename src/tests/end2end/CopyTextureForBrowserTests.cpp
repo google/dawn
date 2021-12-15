@@ -247,7 +247,7 @@ class CopyTextureForBrowserTests : public Parent {
     // comparing a value generated on CPU to the one generated on GPU.
     wgpu::ComputePipeline MakeTestPipeline() {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(this->device, R"(
-            [[block]] struct Uniforms {
+            struct Uniforms {
                 dstTextureFlipY : u32;
                 channelCount    : u32;
                 srcCopyOrigin   : vec2<u32>;
@@ -255,7 +255,7 @@ class CopyTextureForBrowserTests : public Parent {
                 copySize        : vec2<u32>;
                 alphaOp         : u32;
             };
-            [[block]] struct OutputBuf {
+            struct OutputBuf {
                 result : array<u32>;
             };
             [[group(0), binding(0)]] var src : texture_2d<f32>;

@@ -28,7 +28,7 @@ namespace {
             ValidationTest::SetUp();
 
             vsModule = utils::CreateShaderModule(device, R"(
-                [[block]] struct S {
+                struct S {
                     transform : mat2x2<f32>;
                 };
                 [[group(0), binding(0)]] var<uniform> uniforms : S;
@@ -38,12 +38,12 @@ namespace {
                 })");
 
             fsModule = utils::CreateShaderModule(device, R"(
-                [[block]] struct Uniforms {
+                struct Uniforms {
                     color : vec4<f32>;
                 };
                 [[group(1), binding(0)]] var<uniform> uniforms : Uniforms;
 
-                [[block]] struct Storage {
+                struct Storage {
                     dummy : array<f32>;
                 };
                 [[group(1), binding(1)]] var<storage, read_write> ssbo : Storage;

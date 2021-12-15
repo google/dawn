@@ -595,8 +595,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
 
     wgpu::ShaderModule paramWriterModule = utils::CreateShaderModule(device,
                                                                      R"(
-            [[block]] struct Input { firstIndex: u32; };
-            [[block]] struct Params {
+            struct Input { firstIndex: u32; };
+            struct Params {
                 indexCount: u32;
                 instanceCount: u32;
                 firstIndex: u32;

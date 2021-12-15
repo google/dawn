@@ -67,7 +67,7 @@ class BindGroupTests : public DawnTest {
 
         std::ostringstream fs;
         for (size_t i = 0; i < bindingTypes.size(); ++i) {
-            fs << "[[block]] struct Buffer" << i << R"( {
+            fs << "struct Buffer" << i << R"( {
                 color : vec4<f32>;
             };)";
 
@@ -129,7 +129,7 @@ class BindGroupTests : public DawnTest {
 // This test passes by not asserting or crashing.
 TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Contents {
+        struct Contents {
             f : f32;
         };
         [[group(0), binding(0)]] var <uniform> contents: Contents;
@@ -164,7 +164,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
-        [[block]] struct VertexUniformBuffer {
+        struct VertexUniformBuffer {
             transform : vec4<f32>;
         };
 
@@ -182,7 +182,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct FragmentUniformBuffer {
+        struct FragmentUniformBuffer {
             color : vec4<f32>;
         };
         [[group(0), binding(1)]] var <uniform> fragmentUbo : FragmentUniformBuffer;
@@ -242,7 +242,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
-        [[block]] struct VertexUniformBuffer {
+        struct VertexUniformBuffer {
             transform : vec4<f32>;
         };
         [[group(0), binding(0)]] var <uniform> vertexUbo : VertexUniformBuffer;
@@ -345,7 +345,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
-        [[block]] struct VertexUniformBuffer {
+        struct VertexUniformBuffer {
             transform : vec4<f32>;
         };
 
@@ -366,7 +366,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct FragmentUniformBuffer {
+        struct FragmentUniformBuffer {
             color : vec4<f32>;
         };
 
@@ -435,7 +435,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 // This test passes by not asserting or crashing.
 TEST_P(BindGroupTests, MultipleEntryPointsWithMultipleNonZeroGroups) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Contents {
+        struct Contents {
             f : f32;
         };
         [[group(0), binding(0)]] var <uniform> contents0: Contents;
@@ -1035,11 +1035,11 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 
     wgpu::ComputePipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buffer {
+        struct Buffer {
             value : u32;
         };
 
-        [[block]] struct OutputBuffer {
+        struct OutputBuffer {
             value : vec3<u32>;
         };
 
@@ -1118,11 +1118,11 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buffer {
+        struct Buffer {
             value : u32;
         };
 
-        [[block]] struct OutputBuffer {
+        struct OutputBuffer {
             value : vec2<u32>;
         };
 
@@ -1244,7 +1244,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[block]] struct Ubo {
+        struct Ubo {
             color : vec4<f32>;
         };
 
@@ -1386,7 +1386,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
         })");
 
     pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Buffer0 {
+        struct Buffer0 {
             color : vec4<f32>;
         };
         [[group(0), binding(0)]] var<storage, read> buffer0 : Buffer0;
@@ -1501,7 +1501,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
             device, wgpu::BufferUsage::Uniform, {expectedValue, 0, 0, 0});
         bgEntries.push_back({nullptr, binding, buffer, 0, 4 * sizeof(uint32_t), nullptr, nullptr});
 
-        interface << "[[block]] struct UniformBuffer" << i << R"({
+        interface << "struct UniformBuffer" << i << R"({
                 value : u32;
             };
         )";
@@ -1518,7 +1518,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
             device, wgpu::BufferUsage::Storage, {expectedValue});
         bgEntries.push_back({nullptr, binding, buffer, 0, sizeof(uint32_t), nullptr, nullptr});
 
-        interface << "[[block]] struct ReadOnlyStorageBuffer" << i << R"({
+        interface << "struct ReadOnlyStorageBuffer" << i << R"({
                 value : u32;
             };
         )";
@@ -1534,7 +1534,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         device, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc, {0});
     bgEntries.push_back({nullptr, binding, result, 0, sizeof(uint32_t), nullptr, nullptr});
 
-    interface << R"([[block]] struct ReadWriteStorageBuffer{
+    interface << R"(struct ReadWriteStorageBuffer{
             value : u32;
         };
     )";

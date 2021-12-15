@@ -28,7 +28,7 @@ class ComputeDispatchTests : public DawnTest {
         // Write workgroup number into the output buffer if we saw the biggest dispatch
         // To make sure the dispatch was not called, write maximum u32 value for 0 dispatches
         wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-            [[block]] struct OutputBuf {
+            struct OutputBuf {
                 workGroups : vec3<u32>;
             };
 
@@ -54,10 +54,10 @@ class ComputeDispatchTests : public DawnTest {
 
         // Test the use of the compute pipelines without using [[num_workgroups]]
         wgpu::ShaderModule moduleWithoutNumWorkgroups = utils::CreateShaderModule(device, R"(
-            [[block]] struct InputBuf {
+            struct InputBuf {
                 expectedDispatch : vec3<u32>;
             };
-            [[block]] struct OutputBuf {
+            struct OutputBuf {
                 workGroups : vec3<u32>;
             };
 

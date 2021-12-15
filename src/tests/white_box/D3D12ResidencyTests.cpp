@@ -353,7 +353,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
             })");
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[block]] struct U {
+            struct U {
                 color : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> colorBuffer : U;

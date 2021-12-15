@@ -53,7 +53,7 @@ class OpArrayLengthTest : public DawnTest {
         // Common shader code to use these buffers in shaders, assuming they are in bindgroup index
         // 0.
         mShaderInterface = R"(
-            [[block]] struct DataBuffer {
+            struct DataBuffer {
                 data : [[stride(4)]] array<f32>;
             };
 
@@ -70,7 +70,7 @@ class OpArrayLengthTest : public DawnTest {
                 b : i32;
             };
 
-            [[block]] struct Buffer3 {
+            struct Buffer3 {
                 [[size(64)]] garbage : mat4x4<f32>;
                 data : [[stride(8)]] array<Buffer3Data>;
             };
@@ -120,7 +120,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     pipelineDesc.layout = pl;
     pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, (R"(
-        [[block]] struct ResultBuffer {
+        struct ResultBuffer {
             data : [[stride(4)]] array<u32, 3>;
         };
         [[group(1), binding(0)]] var<storage, read_write> result : ResultBuffer;

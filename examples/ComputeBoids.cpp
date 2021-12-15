@@ -151,7 +151,7 @@ void initSim() {
             pos : vec2<f32>;
             vel : vec2<f32>;
         };
-        [[block]] struct SimParams {
+        struct SimParams {
             deltaT : f32;
             rule1Distance : f32;
             rule2Distance : f32;
@@ -161,7 +161,7 @@ void initSim() {
             rule3Scale : f32;
             particleCount : u32;
         };
-        [[block]] struct Particles {
+        struct Particles {
             particles : array<Particle>;
         };
         [[binding(0), group(0)]] var<uniform> params : SimParams;

@@ -74,7 +74,7 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
         let kTileSize : u32 = 4u;
         let kInstances : u32 = 11u;
 
-        [[block]] struct Dst {
+        struct Dst {
             x : u32;
         };
 
@@ -110,7 +110,7 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
             m: mat2x2<f32>;
         };
 
-        [[block]] struct Dst {
+        struct Dst {
             d_struct : StructValues;
             d_matrix : mat2x2<f32>;
             d_array : array<u32, 4>;

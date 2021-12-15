@@ -50,7 +50,7 @@ TEST_P(ShaderTests, ComputeLog2) {
     wgpu::Buffer buffer = CreateBuffer(kSteps);
 
     std::string shader = R"(
-[[block]] struct Buf {
+struct Buf {
     data : array<u32, 19>;
 };
 
@@ -335,7 +335,7 @@ struct Inputs {
 };
 
 // [1] a binding point that conflicts with the regitster
-[[block]] struct S1 { data : array<vec4<u32>, 20>; };
+struct S1 { data : array<vec4<u32>, 20>; };
 [[group(0), binding(1)]] var<uniform> providedData1 : S1;
 
 [[stage(vertex)]] fn vsMain(input : Inputs) -> [[builtin(position)]] vec4<f32> {
@@ -412,7 +412,7 @@ TEST_P(ShaderTests, OverridableConstants) {
 [[override]] let c9: u32 = 0u;          // default override
 [[override]] let c10: u32 = 10u;        // default
 
-[[block]] struct Buf {
+struct Buf {
     data : array<u32, 11>;
 };
 
@@ -482,7 +482,7 @@ TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
 [[override(1003)]] let c3: u32 = 3u;       // default
 [[override(1004)]] let c4: u32;            // default unspecified
 
-[[block]] struct Buf {
+struct Buf {
     data : array<u32, 4>;
 };
 
@@ -539,7 +539,7 @@ TEST_P(ShaderTests, OverridableConstantsPrecision) {
 [[override(1001)]] let c1: f32;
 [[override(1002)]] let c2: f32;
 
-[[block]] struct Buf {
+struct Buf {
     data : array<f32, 2>;
 };
 
@@ -593,7 +593,7 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
 [[override(1001)]] let c1: u32;
 [[override(1002)]] let c2: u32;
 
-[[block]] struct Buf {
+struct Buf {
     data : array<u32, 1>;
 };
 

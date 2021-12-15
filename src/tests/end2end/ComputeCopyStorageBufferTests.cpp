@@ -88,7 +88,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
 // Test that a trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
     BasicTest(R"(
-        [[block]] struct Buf {
+        struct Buf {
             s : array<vec4<u32>, 4>;
         };
 
@@ -111,7 +111,7 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
             b : vec2<u32>;
         };
 
-        [[block]] struct Buf {
+        struct Buf {
             s : array<S, 4>;
         };
 
@@ -129,7 +129,7 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
 // Test that a trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
     BasicTest(R"(
-        [[block]] struct Buf {
+        struct Buf {
             s : array<vec4<u32>>;
         };
 

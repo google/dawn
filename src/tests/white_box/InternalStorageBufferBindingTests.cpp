@@ -31,7 +31,7 @@ class InternalStorageBufferBindingTests : public DawnTest {
 
     wgpu::ComputePipeline CreateComputePipelineWithInternalStorage() {
         wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-            [[block]] struct Buf {
+            struct Buf {
                 data : array<u32, 4>;
             };
 

@@ -997,7 +997,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
 
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct UBO {
+        struct UBO {
             value : vec4<u32>;
         };
         [[group(0), binding(0)]] var<uniform> ubo : UBO;
@@ -1036,7 +1036,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct SSBO {
+        struct SSBO {
             value : vec4<u32>;
         };
         [[group(0), binding(0)]] var<storage, read> ssbo : SSBO;
@@ -1075,7 +1075,7 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
 
     constexpr uint32_t kBoundBufferSize = 32u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct SSBO {
+        struct SSBO {
             value : array<vec4<u32>, 2>;
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;

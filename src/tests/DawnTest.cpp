@@ -1146,7 +1146,7 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
     shaderSource << "let width : u32 = " << width << "u;\n";
     shaderSource << "[[group(0), binding(0)]] var tex : " << wgslTextureType << ";\n";
     shaderSource << R"(
-        [[block]] struct Result {
+        struct Result {
             values : array<f32>;
         };
         [[group(0), binding(1)]] var<storage, read_write> result : Result;

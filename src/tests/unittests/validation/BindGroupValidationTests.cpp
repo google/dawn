@@ -1419,7 +1419,7 @@ class SetBindGroupValidationTest : public ValidationTest {
                 })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-                [[block]] struct S {
+                struct S {
                     value : vec2<f32>;
                 };
 
@@ -1443,7 +1443,7 @@ class SetBindGroupValidationTest : public ValidationTest {
 
     wgpu::ComputePipeline CreateComputePipeline() {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-                [[block]] struct S {
+                struct S {
                     value : vec2<f32>;
                 };
 
@@ -1871,7 +1871,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
             device.CreatePipelineLayout(&pipelineLayoutDescriptor);
 
         std::stringstream ss;
-        ss << "[[block]] struct S { value : vec2<f32>; };";
+        ss << "struct S { value : vec2<f32>; };";
 
         // Build a shader which has bindings that match the pipeline layout.
         for (uint32_t l = 0; l < layouts.size(); ++l) {
@@ -2051,7 +2051,7 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
 
     wgpu::RenderPipeline CreateRenderPipeline(std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
         return CreateFSRenderPipeline(R"(
-            [[block]] struct S {
+            struct S {
                 value : vec2<f32>;
             };
 
@@ -2086,7 +2086,7 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
     wgpu::ComputePipeline CreateComputePipeline(
         std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
         return CreateComputePipeline(R"(
-            [[block]] struct S {
+            struct S {
                 value : vec2<f32>;
             };
 

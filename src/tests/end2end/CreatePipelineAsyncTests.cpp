@@ -133,7 +133,7 @@ class CreatePipelineAsyncTest : public DawnTest {
 TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct SSBO {
+        struct SSBO {
             value : u32;
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
@@ -163,7 +163,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
 TEST_P(CreatePipelineAsyncTest, ReleaseEntryPointAfterCreatComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct SSBO {
+        struct SSBO {
             value : u32;
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
@@ -202,7 +202,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct SSBO {
+        struct SSBO {
             value : u32;
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
@@ -482,7 +482,7 @@ TEST_P(CreatePipelineAsyncTest, DestroyDeviceBeforeCallbackOfCreateRenderPipelin
 TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct SSBO {
+        struct SSBO {
             value : u32;
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
@@ -541,7 +541,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwiceAtSameTime) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.layout = pipelineLayout;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct SSBO {
+        struct SSBO {
             value : u32;
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;

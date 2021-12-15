@@ -53,7 +53,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
             })");
 
         mSimpleFSModule = utils::CreateShaderModule(device, R"(
-            [[block]] struct U {
+            struct U {
                 color : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> colorBuffer : U;
@@ -444,7 +444,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
     pipelineDescriptor.vertex.module = mSimpleVSModule;
 
     pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-        [[block]] struct U {
+        struct U {
             heapSize : f32;
         };
         [[group(0), binding(0)]] var<uniform> buffer0 : U;
@@ -777,7 +777,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            [[block]] struct U {
+            struct U {
                 transform : mat2x2<f32>;
             };
             [[group(0), binding(0)]] var<uniform> buffer0 : U;
@@ -793,7 +793,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
                 return vec4<f32>(buffer0.transform * (pos[VertexIndex]), 0.0, 1.0);
             })");
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[block]] struct U {
+            struct U {
                 color : vec4<f32>;
             };
             [[group(0), binding(1)]] var sampler0 : sampler;

@@ -503,7 +503,7 @@ TEST_F(ShaderModuleValidationTest, OverridableConstantsNumericIDConflicts) {
 [[override(1234)]] let c0: u32;
 [[override(1234)]] let c1: u32;
 
-[[block]] struct Buf {
+struct Buf {
     data : array<u32, 2>;
 };
 

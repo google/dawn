@@ -40,15 +40,15 @@ namespace dawn_native {
                 high : u32;
             };
 
-            [[block]] struct TimestampArr {
+            struct TimestampArr {
                 t : array<Timestamp>;
             };
 
-            [[block]] struct AvailabilityArr {
+            struct AvailabilityArr {
                 v : array<u32>;
             };
 
-            [[block]] struct TimestampParams {
+            struct TimestampParams {
                 first  : u32;
                 count  : u32;
                 offset : u32;

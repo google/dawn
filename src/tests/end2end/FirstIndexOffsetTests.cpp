@@ -127,7 +127,7 @@ struct VertexOutputs {
 })";
 
     std::string fragmentShader = R"(
-[[block]] struct IndexVals {
+struct IndexVals {
   vertex_index : atomic<u32>;
   instance_index : atomic<u32>;
 };

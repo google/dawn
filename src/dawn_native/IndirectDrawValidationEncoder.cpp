@@ -53,7 +53,7 @@ namespace dawn_native {
             let kBaseVertexEntry = 3u;
             let kFirstInstanceEntry = 4u;
 
-            [[block]] struct BatchInfo {
+            struct BatchInfo {
                 numIndexBufferElementsLow: u32;
                 numIndexBufferElementsHigh: u32;
                 numDraws: u32;
@@ -61,7 +61,7 @@ namespace dawn_native {
                 indirectOffsets: array<u32>;
             };
 
-            [[block]] struct IndirectParams {
+            struct IndirectParams {
                 data: array<u32>;
             };
 

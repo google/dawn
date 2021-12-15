@@ -208,7 +208,7 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
 // of HLSL shaders. WGSL shader should result into caching 1 HLSL shader (stage x entrypoints)
 TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPoints) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[block]] struct Data {
+        struct Data {
             data : u32;
         };
         [[binding(0), group(0)]] var<storage, read_write> data : Data;
