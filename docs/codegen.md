@@ -28,8 +28,10 @@ The `"_metadata"` key in the JSON file is used by flexible templates for generat
  - `"api"` a string, the name of the Web API
  - `"namespace"` a string, the namespace of C++ wrapper
  - `"c_prefix"` (optional) a string, the prefix of C function and data type, it will default to upper-case of `"namespace"` if it's not provided.
-  - `"proc_table_prefix"` a string, the prefix of proc table.
- - `"copyright_year"` (optional) a string, templates will use the the year of copyright.
+ - `"proc_table_prefix"` a string, the prefix of proc table.
+ - `"impl_dir"` a string, the directory of API implementation
+ - `"native_namespace"` a string, the namespace of native implementation
+ - `"copyright_year"` (optional) a string, templates will use the year of copyright.
 
 The basic schema is that every entry is a thing with a `"category"` key what determines the sub-schema to apply to that thing. Categories and their sub-shema are defined below. Several parts of the schema use the concept of "record" which is a list of "record members" which are a combination of a type, a name and other metadata. For example the list of arguments of a function is a record. The list of structure members is a record. This combined concept is useful for the dawn_wire generator to generate code for structure and function calls in a very similar way.
 

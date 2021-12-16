@@ -22,6 +22,7 @@
         "c_prefix": "WGPU",
         "namespace": "wgpu",
         "proc_table_prefix": "Dawn",
+        "native_namespace": "dawn native",
         "copyright_year": "2019"
     },
 

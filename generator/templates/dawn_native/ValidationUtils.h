@@ -15,17 +15,22 @@
 #ifndef BACKEND_VALIDATIONUTILS_H_
 #define BACKEND_VALIDATIONUTILS_H_
 
-#include "dawn/webgpu_cpp.h"
+{% set api = metadata.api.lower() %}
+#include "dawn/{{api}}_cpp.h"
 
-#include "dawn_native/Error.h"
+{% set native_namespace = Name(metadata.native_namespace).snake_case() %}
+{% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
+{% set native_dir = impl_dir + native_namespace %}
+#include "{{native_dir}}/Error.h"
 
-namespace dawn_native {
+namespace {{native_namespace}} {
 
     // Helper functions to check the value of enums and bitmasks
     {% for type in by_category["enum"] + by_category["bitmask"] %}
-        MaybeError Validate{{type.name.CamelCase()}}(wgpu::{{as_cppType(type.name)}} value);
+        {% set namespace = metadata.namespace %}
+        MaybeError Validate{{type.name.CamelCase()}}({{namespace}}::{{as_cppType(type.name)}} value);
     {% endfor %}
 
-} // namespace dawn_native
+} // namespace {{native_namespace}}
 
 #endif  // BACKEND_VALIDATIONUTILS_H_
