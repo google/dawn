@@ -1,9 +1,8 @@
 //* This template itself is part of the Dawn source and follows Dawn's license,
 //* which is Apache 2.0.
 //*
-//* Because the WebGPU native API for which the generator is used is related to
-//* the W3C WebGPU standard. BSD 3-Clause is the license for W3C standards, so
-//* it is desirable to use the same license.
+//* The WebGPU native API is a joint project used by Google, Mozilla, and Apple.
+//* It was agreed to use a BSD 3-Clause license so that it is GPLv2-compatible.
 //*
 //* As a result, the template comments using //* at the top of the file are
 //* removed during generation such that the resulting file starts with the
