@@ -419,25 +419,6 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_ZeroIsError) {
               Eq("invalid array type ID 10: ArrayStride can't be 0"));
 }
 
-TEST_F(SpvParserTest,
-       ConvertType_RuntimeArray_ArrayStride_SpecifiedTwiceTakeTheFirstStride) {
-  // This is an inconsistent input module. Be resilient and
-  // take only the first stride.
-  auto p = parser(test::Assemble(Preamble() + R"(
-    OpDecorate %10 ArrayStride 64
-    OpDecorate %10 ArrayStride 32
-    %uint = OpTypeInt 32 0
-    %10 = OpTypeRuntimeArray %uint
-  )" + MainBody()));
-  EXPECT_TRUE(p->BuildInternalModule());
-  auto* type = p->ConvertType(10);
-  ASSERT_NE(type, nullptr);
-  auto* arr_type = type->UnwrapAll()->As<Array>();
-  ASSERT_NE(arr_type, nullptr);
-  EXPECT_EQ(arr_type->size, 0u);
-  EXPECT_EQ(arr_type->stride, 64u);
-}
-
 TEST_F(SpvParserTest, ConvertType_Array) {
   auto p = parser(test::Assemble(Preamble() + R"(
     %uint = OpTypeInt 32 0
@@ -554,28 +535,6 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_ZeroIsError) {
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: ArrayStride can't be 0"));
-}
-
-TEST_F(SpvParserTest,
-       ConvertType_ArrayStride_SpecifiedTwiceTakeTheFirstStride) {
-  // This is an inconsistent input module. Be resilient and
-  // take only the first stride.
-  auto p = parser(test::Assemble(Preamble() + R"(
-    OpDecorate %10 ArrayStride 4
-    OpDecorate %10 ArrayStride 8
-    %uint = OpTypeInt 32 0
-    %uint_5 = OpConstant %uint 5
-    %10 = OpTypeArray %uint %uint_5
-  )" + MainBody()));
-  EXPECT_TRUE(p->BuildInternalModule());
-
-  auto* type = p->ConvertType(10);
-  ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->UnwrapAll()->Is<Array>());
-  auto* arr_type = type->UnwrapAll()->As<Array>();
-  ASSERT_NE(arr_type, nullptr);
-  EXPECT_EQ(arr_type->stride, 4u);
-  EXPECT_TRUE(p->error().empty());
 }
 
 TEST_F(SpvParserTest, ConvertType_StructEmpty) {
