@@ -270,6 +270,7 @@ std::string PerVertexPreamble() {
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1
 
+    OpDecorate %10 Block
     OpMemberDecorate %10 0 BuiltIn Position
     OpMemberDecorate %10 1 BuiltIn PointSize
     OpMemberDecorate %10 2 BuiltIn ClipDistance
@@ -4116,6 +4117,7 @@ TEST_F(SpvModuleScopeVarParserTest,
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1
 
+    OpDecorate %10 Block
     OpMemberDecorate %10 0 BuiltIn Position
     OpMemberDecorate %10 1 BuiltIn PointSize
     OpMemberDecorate %10 2 BuiltIn ClipDistance
