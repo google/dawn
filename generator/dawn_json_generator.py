@@ -870,7 +870,7 @@ class MultiGeneratorFromDawnJSON(Generator):
                            frontend_params))
             renders.append(
                 FileRender('dawn_native/dawn_platform.h',
-                           'src/dawn_native/dawn_platform_autogen.h',
+                           'src/' + native_dir + '/' + prefix + '_platform_autogen.h',
                            frontend_params))
             renders.append(
                 FileRender('dawn_native/wgpu_structs.h',
