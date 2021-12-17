@@ -13,8 +13,8 @@ vars = {
   'googletest_revision': '1a3e2a265f35e604378156cd675b11ef0a184627',
   'gpuweb_cts_revision': 'b0291fd966b55a5efc496772555b94842bde1085',
   'protobuf_revision': 'fde7cf7358ec7cd69e8db9be4f1fa6a5c431386a',
-  'spirv_headers_revision': 'ae217c17809fadb232ec94b29304b4afcd417bb4',
-  'spirv_tools_revision': 'ba4b390c367e09edaad36f0376a87aa03620fd4b',
+  'spirv_headers_revision': 'eddd4dfc930f1374a70797460240a501c7d333f7',
+  'spirv_tools_revision': 'df2aad68b98279412494a6d449bd71b6756e699b',
   'testing_revision': '2691851e49de541c3fe42fa8692ddcdee938162f',
 }
 

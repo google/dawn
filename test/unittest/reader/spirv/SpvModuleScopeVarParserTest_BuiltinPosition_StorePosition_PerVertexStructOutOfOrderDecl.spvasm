@@ -7,6 +7,7 @@
 OpCapability Shader
 OpMemoryModel Logical Simple
 OpEntryPoint Vertex %2 "main" %1
+OpDecorate %_struct_10 Block
 OpMemberDecorate %_struct_10 0 BuiltIn ClipDistance
 OpMemberDecorate %_struct_10 1 BuiltIn CullDistance
 OpMemberDecorate %_struct_10 2 BuiltIn Position
