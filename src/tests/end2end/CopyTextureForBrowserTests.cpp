@@ -33,9 +33,6 @@ namespace {
         DisplayP3 = 0x01,
     };
 
-    using Alpha = wgpu::AlphaOp;
-    DAWN_TEST_PARAM_STRUCT(AlphaTestParams, Alpha);
-
     using SrcFormat = wgpu::TextureFormat;
     using DstFormat = wgpu::TextureFormat;
     using SrcOrigin = wgpu::Origin3D;
@@ -62,6 +59,7 @@ namespace {
         return o;
     }
 
+    DAWN_TEST_PARAM_STRUCT(AlphaTestParams, SrcAlphaMode, DstAlphaMode);
     DAWN_TEST_PARAM_STRUCT(FormatTestParams, SrcFormat, DstFormat);
     DAWN_TEST_PARAM_STRUCT(SubRectTestParams, SrcOrigin, DstOrigin, CopySize, FlipY);
     DAWN_TEST_PARAM_STRUCT(ColorSpaceTestParams,
@@ -167,9 +165,11 @@ class CopyTextureForBrowserTests : public Parent {
     };
 
     // Source texture contains red pixels and dst texture contains green pixels at start.
-    static std::vector<RGBA8> GetTextureData(const utils::TextureDataCopyLayout& layout,
-                                             TextureCopyRole textureRole,
-                                             wgpu::AlphaOp alphaOp = wgpu::AlphaOp::DontChange) {
+    static std::vector<RGBA8> GetTextureData(
+        const utils::TextureDataCopyLayout& layout,
+        TextureCopyRole textureRole,
+        wgpu::AlphaMode srcAlphaMode = wgpu::AlphaMode::Premultiplied,
+        wgpu::AlphaMode dstAlphaMode = wgpu::AlphaMode::Unpremultiplied) {
         std::array<uint8_t, 4> alpha = {0, 102, 153, 255};  // 0.0, 0.4, 0.6, 1.0
         std::vector<RGBA8> textureData(layout.texelBlockCount);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
@@ -180,32 +180,30 @@ class CopyTextureForBrowserTests : public Parent {
                     // Source textures will have variable pixel data to cover cases like
                     // flipY.
                     if (textureRole == TextureCopyRole::SOURCE) {
-                        switch (alphaOp) {
-                            case wgpu::AlphaOp::DontChange:
-                                textureData[sliceOffset + rowOffset + x] = RGBA8(
-                                    static_cast<uint8_t>((x + layer * x) % 256),
-                                    static_cast<uint8_t>((y + layer * y) % 256),
-                                    static_cast<uint8_t>(x % 256), static_cast<uint8_t>(x % 256));
-                                break;
-                            case wgpu::AlphaOp::Premultiply:
+                        if (srcAlphaMode != dstAlphaMode) {
+                            if (dstAlphaMode == wgpu::AlphaMode::Premultiplied) {
                                 // For premultiply alpha test cases, we expect each channel in dst
                                 // texture will equal to the alpha channel value.
+                                ASSERT(srcAlphaMode == wgpu::AlphaMode::Unpremultiplied);
                                 textureData[sliceOffset + rowOffset + x] = RGBA8(
                                     static_cast<uint8_t>(255), static_cast<uint8_t>(255),
                                     static_cast<uint8_t>(255), static_cast<uint8_t>(alpha[x % 4]));
-                                break;
-                            case wgpu::AlphaOp::Unpremultiply:
+                            } else {
                                 // For unpremultiply alpha test cases, we expect each channel in dst
                                 // texture will equal to 1.0.
+                                ASSERT(srcAlphaMode == wgpu::AlphaMode::Premultiplied);
                                 textureData[sliceOffset + rowOffset + x] =
                                     RGBA8(static_cast<uint8_t>(alpha[x % 4]),
                                           static_cast<uint8_t>(alpha[x % 4]),
                                           static_cast<uint8_t>(alpha[x % 4]),
                                           static_cast<uint8_t>(alpha[x % 4]));
-                                break;
-                            default:
-                                UNREACHABLE();
-                                break;
+                            }
+
+                        } else {
+                            textureData[sliceOffset + rowOffset + x] =
+                                RGBA8(static_cast<uint8_t>((x + layer * x) % 256),
+                                      static_cast<uint8_t>((y + layer * y) % 256),
+                                      static_cast<uint8_t>(x % 256), static_cast<uint8_t>(x % 256));
                         }
                     } else {  // Dst textures will have be init as `green` to ensure subrect
                               // copy not cross bound.
@@ -232,8 +230,9 @@ class CopyTextureForBrowserTests : public Parent {
             0,
             0,  // uvec2, subrect copy dst origin
             0,
-            0,                                                 // uvec2, subrect copy size
-            static_cast<uint32_t>(wgpu::AlphaOp::DontChange),  // AlphaOp: DontChange
+            0,  // uvec2, subrect copy size
+            0,  // srcAlphaMode, wgpu::AlphaMode::Premultiplied
+            0   // dstAlphaMode, wgpu::AlphaMode::Premultiplied
         };
 
         wgpu::BufferDescriptor uniformBufferDesc = {};
@@ -253,7 +252,8 @@ class CopyTextureForBrowserTests : public Parent {
                 srcCopyOrigin   : vec2<u32>;
                 dstCopyOrigin   : vec2<u32>;
                 copySize        : vec2<u32>;
-                alphaOp         : u32;
+                srcAlphaMode    : u32;
+                dstAlphaMode    : u32;
             };
             struct OutputBuf {
                 result : array<u32>;
@@ -297,25 +297,19 @@ class CopyTextureForBrowserTests : public Parent {
 
                     // Expect the dst texture channels should be all equal to alpha value
                     // after premultiply.
-                    // TODO(crbug.com/1217153): if wgsl support `constexpr` and allow it
-                    // to be case selector, Replace 0u/1u/2u with a constexpr variable with
-                    // meaningful name.
-                    switch(uniforms.alphaOp) {
-                        case 0u: { // AlphaOp: DontChange
-                            break;
-                        }
-                        case 1u: { // AlphaOp: Premultiply
+                    let premultiplied = 0u;
+                    let unpremultiplied = 1u;
+                    if (uniforms.srcAlphaMode != uniforms.dstAlphaMode) {
+                        if (uniforms.dstAlphaMode == premultiplied) {
+                            // srcAlphaMode == unpremultiplied
                             srcColor = vec4<f32>(srcColor.rgb * srcColor.a, srcColor.a);
-                            break;
-                        }
-                        case 2u: { // AlphaOp: Unpremultiply
+                        } 
+
+                        if (uniforms.dstAlphaMode == unpremultiplied) {
+                            // srcAlphaMode == premultiplied
                             if (srcColor.a != 0.0) {
                                 srcColor = vec4<f32>(srcColor.rgb / srcColor.a, srcColor.a);
                             }
-                            break;
-                        }
-                        default: {
-                            break;
                         }
                     }
 
@@ -443,9 +437,9 @@ class CopyTextureForBrowserTests : public Parent {
             dstSpec.copyOrigin.x,
             dstSpec.copyOrigin.y,  // dst texture copy origin
             copySize.width,
-            copySize.height,                        // copy size
-            static_cast<uint32_t>(options.alphaOp)  // alphaOp
-        };
+            copySize.height,  // copy size
+            static_cast<uint32_t>(options.srcAlphaMode),
+            static_cast<uint32_t>(options.dstAlphaMode)};
 
         this->device.GetQueue().WriteBuffer(uniformBuffer, 0, uniformBufferData,
                                             sizeof(uniformBufferData));
@@ -506,8 +500,8 @@ class CopyTextureForBrowserTests : public Parent {
                  copySize.depthOrArrayLayers},
                 srcSpec.level);
 
-        std::vector<RGBA8> srcTextureArrayCopyData =
-            GetTextureData(srcCopyLayout, TextureCopyRole::SOURCE, options.alphaOp);
+        std::vector<RGBA8> srcTextureArrayCopyData = GetTextureData(
+            srcCopyLayout, TextureCopyRole::SOURCE, options.srcAlphaMode, options.dstAlphaMode);
 
         wgpu::TextureUsage srcUsage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                                       wgpu::TextureUsage::TextureBinding;
@@ -659,10 +653,10 @@ class CopyTextureForBrowser_SubRects
     }
 };
 
-class CopyTextureForBrowser_AlphaOps
+class CopyTextureForBrowser_AlphaMode
     : public CopyTextureForBrowserTests<DawnTestWithParams<AlphaTestParams>> {
   protected:
-    void DoAlphaOpTest() {
+    void DoAlphaModeTest() {
         constexpr uint32_t kWidth = 10;
         constexpr uint32_t kHeight = 10;
 
@@ -670,7 +664,8 @@ class CopyTextureForBrowser_AlphaOps
         textureSpec.textureSize = {kWidth, kHeight};
 
         wgpu::CopyTextureForBrowserOptions options = {};
-        options.alphaOp = GetParam().mAlpha;
+        options.srcAlphaMode = GetParam().mSrcAlphaMode;
+        options.dstAlphaMode = GetParam().mDstAlphaMode;
 
         DoTest(textureSpec, textureSpec, {kWidth, kHeight}, options);
     }
@@ -1079,9 +1074,9 @@ DAWN_INSTANTIATE_TEST_P(CopyTextureForBrowser_SubRects,
                         std::vector<wgpu::Extent3D>({{1, 1}, {2, 1}, {1, 2}, {2, 2}}),
                         std::vector<bool>({true, false}));
 
-// Verify |CopyTextureForBrowser| doing alphaOp.
-// Test alpha ops: DontChange, Premultiply, Unpremultiply.
-TEST_P(CopyTextureForBrowser_AlphaOps, alphaOp) {
+// Verify |CopyTextureForBrowser| doing alpha changes.
+// Test srcAlphaMode and dstAlphaMode: Premultiplied, Unpremultiplied.
+TEST_P(CopyTextureForBrowser_AlphaMode, alphaMode) {
     // Skip OpenGLES backend because it fails on using RGBA8Unorm as
     // source texture format.
     // TODO(crbug.com/dawn/1232): Program link error on OpenGLES backend
@@ -1091,14 +1086,16 @@ TEST_P(CopyTextureForBrowser_AlphaOps, alphaOp) {
     // Tests skip due to crbug.com/dawn/1104.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
-    DoAlphaOpTest();
+    DoAlphaModeTest();
 }
 
-DAWN_INSTANTIATE_TEST_P(
-    CopyTextureForBrowser_AlphaOps,
-    {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-    std::vector<wgpu::AlphaOp>({wgpu::AlphaOp::DontChange, wgpu::AlphaOp::Premultiply,
-                                wgpu::AlphaOp::Unpremultiply}));
+DAWN_INSTANTIATE_TEST_P(CopyTextureForBrowser_AlphaMode,
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                         VulkanBackend()},
+                        std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied,
+                                                      wgpu::AlphaMode::Unpremultiplied}),
+                        std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied,
+                                                      wgpu::AlphaMode::Unpremultiplied}));
 
 // Verify |CopyTextureForBrowser| doing color space conversion.
 TEST_P(CopyTextureForBrowser_ColorSpace, colorSpaceConversion) {

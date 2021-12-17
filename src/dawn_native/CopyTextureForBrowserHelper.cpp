@@ -348,8 +348,6 @@ namespace dawn_native {
 
         DAWN_INVALID_IF(options->nextInChain != nullptr, "nextInChain must be nullptr");
 
-        // TODO(crbug.com/dawn/1140): Remove alphaOp and wgpu::AlphaState::DontChange.
-        DAWN_TRY(ValidateAlphaOp(options->alphaOp));
         DAWN_TRY(ValidateAlphaMode(options->srcAlphaMode));
         DAWN_TRY(ValidateAlphaMode(options->dstAlphaMode));
 
@@ -470,19 +468,6 @@ namespace dawn_native {
                 options->srcAlphaMode != options->dstAlphaMode) {
                 stepsMask |= kPremultiplyStep;
             }
-        }
-
-        if (options->alphaOp != wgpu::AlphaOp::DontChange) {
-            dawn::WarningLog() << "CopyTextureForBrowserOption.alphaOp has been deprecated.";
-        }
-
-        // TODO(crbugs.com/dawn/1140): AlphaOp will be deprecated
-        if (options->alphaOp == wgpu::AlphaOp::Premultiply) {
-            stepsMask |= kPremultiplyStep;
-        }
-
-        if (options->alphaOp == wgpu::AlphaOp::Unpremultiply) {
-            stepsMask |= kUnpremultiplyStep;
         }
 
         uniformData.stepsMask = stepsMask;

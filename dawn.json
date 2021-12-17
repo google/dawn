@@ -855,15 +855,6 @@
             {"name": "compute", "type": "programmable stage descriptor"}
         ]
     },
-    "alpha op": {
-        "category": "enum",
-        "tags": ["deprecated"],
-        "values": [
-            {"value": 0, "name": "dont change"},
-            {"value": 1, "name": "premultiply"},
-            {"value": 2, "name": "unpremultiply"}
-        ]
-    },
     "alpha mode": {
         "category": "enum",
         "tags": ["dawn"],
@@ -879,7 +870,6 @@
         "_TODO": "support number as length input",
         "members": [
             {"name": "flip y", "type": "bool", "default": "false"},
-            {"name": "alpha op", "type": "alpha op", "default": "dont change", "tags": ["deprecated"]},
             {"name": "needs color space conversion", "type": "bool", "default": "false"},
             {"name": "src alpha mode", "type": "alpha mode", "default": "unpremultiplied"},
             {"name": "src transfer function parameters", "type": "float", "annotation": "const*",
