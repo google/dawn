@@ -374,6 +374,8 @@ function(tint_default_compile_options TARGET)
         -Wno-global-constructors
         -Wno-zero-as-null-pointer-constant
         -Wno-shorten-64-to-32
+        -Wno-shadow-field-in-constructor
+        -Wno-reserved-id-macro
       )
     endif()
   endif()
