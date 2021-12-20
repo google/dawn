@@ -216,6 +216,10 @@ class Builder {
     functions_.back().push_var(operands);
   }
 
+  /// @returns true if the current instruction insertion point is
+  /// inside a basic block.
+  bool InsideBasicBlock() const;
+
   /// Converts a storage class to a SPIR-V storage class.
   /// @param klass the storage class to convert
   /// @returns the SPIR-V storage class or SpvStorageClassMax on error.

@@ -603,6 +603,91 @@ OpReturn
 )");
 }
 
+TEST_F(BuilderTest, If_ElseIf_WithReturn) {
+  // crbug.com/tint/1315
+  // if (false) {
+  // } else if (true) {
+  //   return;
+  // }
+
+  auto* if_stmt = If(Expr(false), Block(),
+                     ast::ElseStatementList{Else(Expr(true), Block(Return()))});
+  auto* fn = Func("f", {}, ty.void_(), {if_stmt});
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeBool
+%6 = OpConstantFalse %5
+%10 = OpConstantTrue %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %9
+%8 = OpLabel
+OpBranch %7
+%9 = OpLabel
+OpSelectionMerge %11 None
+OpBranchConditional %10 %12 %11
+%12 = OpLabel
+OpReturn
+%11 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpReturn
+)");
+}
+
+TEST_F(BuilderTest, Loop_If_ElseIf_WithBreak) {
+  // crbug.com/tint/1315
+  // loop {
+  //   if (false) {
+  //   } else if (true) {
+  //     break;
+  //   }
+  // }
+
+  auto* if_stmt = If(Expr(false), Block(),
+                     ast::ElseStatementList{Else(Expr(true), Block(Break()))});
+  auto* fn = Func("f", {}, ty.void_(), {Loop(Block(if_stmt))});
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%9 = OpTypeBool
+%10 = OpConstantFalse %9
+%14 = OpConstantTrue %9
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %5
+%5 = OpLabel
+OpLoopMerge %6 %7 None
+OpBranch %8
+%8 = OpLabel
+OpSelectionMerge %11 None
+OpBranchConditional %10 %12 %13
+%12 = OpLabel
+OpBranch %11
+%13 = OpLabel
+OpSelectionMerge %15 None
+OpBranchConditional %14 %16 %15
+%16 = OpLabel
+OpBranch %6
+%15 = OpLabel
+OpBranch %11
+%11 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpBranch %5
+%6 = OpLabel
+OpReturn
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

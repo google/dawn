@@ -96,23 +96,6 @@ bool LastIsFallthrough(const ast::BlockStatement* stmts) {
   return !stmts->Empty() && stmts->Last()->Is<ast::FallthroughStatement>();
 }
 
-// A terminator is anything which will cause a SPIR-V terminator to be emitted.
-// This means things like breaks, fallthroughs and continues which all emit an
-// OpBranch or return for the OpReturn emission.
-bool LastIsTerminator(const ast::BlockStatement* stmts) {
-  if (IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
-              ast::DiscardStatement, ast::ReturnStatement,
-              ast::FallthroughStatement>(stmts->Last())) {
-    return true;
-  }
-
-  if (auto* block = As<ast::BlockStatement>(stmts->Last())) {
-    return LastIsTerminator(block);
-  }
-
-  return false;
-}
-
 /// Returns the matrix type that is `type` or that is wrapped by
 /// one or more levels of an arrays inside of `type`.
 /// @param type the given type, which must not be null
@@ -650,7 +633,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     }
   }
 
-  if (!LastIsTerminator(func_ast->body)) {
+  if (InsideBasicBlock()) {
     if (func->ReturnType()->Is<sem::Void>()) {
       push_function_inst(spv::Op::OpReturn, {});
     } else {
@@ -3500,7 +3483,7 @@ bool Builder::GenerateConditionalBlock(
     return false;
   }
   // We only branch if the last element of the body didn't already branch.
-  if (!LastIsTerminator(true_body)) {
+  if (InsideBasicBlock()) {
     if (!push_function_inst(spv::Op::OpBranch,
                             {Operand::Int(merge_block_id)})) {
       return false;
@@ -3525,7 +3508,7 @@ bool Builder::GenerateConditionalBlock(
         return false;
       }
     }
-    if (!LastIsTerminator(else_stmt->body)) {
+    if (InsideBasicBlock()) {
       if (!push_function_inst(spv::Op::OpBranch,
                               {Operand::Int(merge_block_id)})) {
         return false;
@@ -3673,7 +3656,7 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
                               {Operand::Int(case_ids[i + 1])})) {
         return false;
       }
-    } else if (!LastIsTerminator(item->body)) {
+    } else if (InsideBasicBlock()) {
       if (!push_function_inst(spv::Op::OpBranch,
                               {Operand::Int(merge_block_id)})) {
         return false;
@@ -3765,7 +3748,7 @@ bool Builder::GenerateLoopStatement(const ast::LoopStatement* stmt) {
     }
 
     // We only branch if the last element of the body didn't already branch.
-    if (!LastIsTerminator(stmt->body)) {
+    if (InsideBasicBlock()) {
       if (!push_function_inst(spv::Op::OpBranch,
                               {Operand::Int(continue_block_id)})) {
         return false;
@@ -4411,6 +4394,34 @@ bool Builder::push_function_inst(spv::Op op, const OperandList& operands) {
     return false;
   }
   functions_.back().push_inst(op, operands);
+  return true;
+}
+
+bool Builder::InsideBasicBlock() const {
+  if (functions_.empty()) {
+    return false;
+  }
+  const auto& instructions = functions_.back().instructions();
+  if (instructions.empty()) {
+    // The Function object does not explicitly represent its entry block
+    // label.  So return *true* because an empty list means the only
+    // thing in the function is that entry block label.
+    return true;
+  }
+  const auto& inst = instructions.back();
+  switch (inst.opcode()) {
+    case spv::Op::OpBranch:
+    case spv::Op::OpBranchConditional:
+    case spv::Op::OpSwitch:
+    case spv::Op::OpReturn:
+    case spv::Op::OpReturnValue:
+    case spv::Op::OpUnreachable:
+    case spv::Op::OpKill:
+    case spv::Op::OpTerminateInvocation:
+      return false;
+    default:
+      break;
+  }
   return true;
 }
 

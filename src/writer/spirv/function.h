@@ -32,7 +32,7 @@ class Function {
 
   /// Constructor
   /// @param declaration the function declaration
-  /// @param label_op the operand for the initial function label
+  /// @param label_op the operand for function's entry block label
   /// @param params the function parameters
   Function(const Instruction& declaration,
            const Operand& label_op,
@@ -49,7 +49,7 @@ class Function {
   /// @returns the declaration
   const Instruction& declaration() const { return declaration_; }
 
-  /// @returns the function label id
+  /// @returns the label ID for the function entry block
   uint32_t label_id() const { return label_op_.to_i(); }
 
   /// Adds an instruction to the instruction list
