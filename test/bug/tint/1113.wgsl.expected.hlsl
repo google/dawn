@@ -1,3 +1,7 @@
+uint value_or_one_if_zero_uint(uint value) {
+  return value == 0u ? 1u : value;
+}
+
 uint atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
   uint value = 0;
   buffer.InterlockedOr(offset, 0, value);
@@ -54,8 +58,8 @@ uint toIndex1D(uint gridSize, float3 voxelPos) {
 }
 
 uint3 toIndex3D(uint gridSize, uint index) {
-  uint z_1 = (index / (gridSize * gridSize));
-  uint y_1 = ((index - ((gridSize * gridSize) * z_1)) / gridSize);
+  uint z_1 = (index / value_or_one_if_zero_uint((gridSize * gridSize)));
+  uint y_1 = ((index - ((gridSize * gridSize) * z_1)) / (gridSize == 0u ? 1u : gridSize));
   uint x_1 = (index % gridSize);
   return uint3(x_1, y_1, z_1);
 }

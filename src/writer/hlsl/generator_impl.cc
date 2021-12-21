@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <iomanip>
 #include <set>
 #include <utility>
@@ -618,6 +619,127 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
   return true;
 }
 
+bool GeneratorImpl::EmitExpressionOrOneIfZero(std::ostream& out,
+                                              const ast::Expression* expr) {
+  // For constants, replace literal 0 with 1.
+  sem::Constant::Scalars elems;
+  if (const auto& val = builder_.Sem().Get(expr)->ConstantValue()) {
+    if (!val.AnyZero()) {
+      return EmitExpression(out, expr);
+    }
+
+    if (val.Type()->IsAnyOf<sem::I32, sem::U32>()) {
+      return EmitValue(out, val.Type(), 1);
+    }
+
+    if (auto* vec = val.Type()->As<sem::Vector>()) {
+      auto* elem_ty = vec->type();
+
+      if (!EmitType(out, val.Type(), ast::StorageClass::kNone,
+                    ast::Access::kUndefined, "")) {
+        return false;
+      }
+
+      out << "(";
+      for (size_t i = 0; i < val.Elements().size(); ++i) {
+        if (i != 0) {
+          out << ", ";
+        }
+        if (!val.WithScalarAt(i, [&](auto&& s) -> bool {
+              // Use std::equal_to to work around -Wfloat-equal warnings
+              auto equals_to =
+                  std::equal_to<std::remove_reference_t<decltype(s)>>{};
+
+              bool is_zero = equals_to(s, 0);
+              return EmitValue(out, elem_ty, is_zero ? 1 : static_cast<int>(s));
+            })) {
+          return false;
+        }
+      }
+      out << ")";
+      return true;
+    }
+
+    TINT_ICE(Writer, diagnostics_)
+        << "EmitExpressionOrOneIfZero expects integer scalar or vector";
+    return false;
+  }
+
+  auto* ty = TypeOf(expr)->UnwrapRef();
+
+  // For non-constants, we need to emit runtime code to check if the value is 0,
+  // and return 1 in that case.
+  std::string zero;
+  {
+    std::ostringstream ss;
+    EmitValue(ss, ty, 0);
+    zero = ss.str();
+  }
+  std::string one;
+  {
+    std::ostringstream ss;
+    EmitValue(ss, ty, 1);
+    one = ss.str();
+  }
+
+  // For identifiers, no need for a function call as it's fine to evaluate
+  // `expr` more than once.
+  if (expr->Is<ast::IdentifierExpression>()) {
+    out << "(";
+    if (!EmitExpression(out, expr)) {
+      return false;
+    }
+    out << " == " << zero << " ? " << one << " : ";
+    if (!EmitExpression(out, expr)) {
+      return false;
+    }
+    out << ")";
+    return true;
+  }
+
+  // For non-identifier expressions, call a function to make sure `expr` is only
+  // evaluated once.
+  auto name =
+      utils::GetOrCreate(value_or_one_if_zero_, ty, [&]() -> std::string {
+        // Example:
+        // int4 tint_value_or_one_if_zero_int4(int4 value) {
+        //   return value == 0 ? 0 : value;
+        // }
+        std::string ty_name;
+        {
+          std::ostringstream ss;
+          if (!EmitType(ss, ty, tint::ast::StorageClass::kInvalid,
+                        ast::Access::kUndefined, "")) {
+            return "";
+          }
+          ty_name = ss.str();
+        }
+
+        std::string fn = UniqueIdentifier("value_or_one_if_zero_" + ty_name);
+        line(&helpers_) << ty_name << " " << fn << "(" << ty_name
+                        << " value) {";
+        {
+          ScopedIndent si(&helpers_);
+          line(&helpers_) << "return value == " << zero << " ? " << one
+                          << " : value;";
+        }
+        line(&helpers_) << "}";
+        line(&helpers_);
+        return fn;
+      });
+
+  if (name.empty()) {
+    return false;
+  }
+
+  out << name << "(";
+  if (!EmitExpression(out, expr)) {
+    return false;
+  }
+  out << ")";
+  return true;
+}
+
 bool GeneratorImpl::EmitBinary(std::ostream& out,
                                const ast::BinaryExpression* expr) {
   if (expr->op == ast::BinaryOp::kLogicalAnd ||
@@ -741,18 +863,11 @@ bool GeneratorImpl::EmitBinary(std::ostream& out,
       break;
     case ast::BinaryOp::kDivide:
       out << "/";
-
-      if (auto val = builder_.Sem().Get(expr->rhs)->ConstantValue()) {
-        // Integer divide by zero is a DXC compile error, and undefined behavior
-        // in WGSL. Replace the 0 with 1.
-        if (val.Type()->Is<sem::I32>() && val.Elements()[0].i32 == 0) {
-          out << " 1";
-          return true;
-        }
-        if (val.Type()->Is<sem::U32>() && val.Elements()[0].u32 == 0u) {
-          out << " 1u";
-          return true;
-        }
+      // BUG(crbug.com/tint/1083): Integer divide by zero is a FXC compile
+      // error, and undefined behavior in WGSL.
+      if (TypeOf(expr->rhs)->UnwrapRef()->is_integer_scalar_or_vector()) {
+        out << " ";
+        return EmitExpressionOrOneIfZero(out, expr->rhs);
       }
       break;
     case ast::BinaryOp::kModulo:
@@ -3006,15 +3121,17 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
+bool GeneratorImpl::EmitValue(std::ostream& out,
+                              const sem::Type* type,
+                              int value) {
   if (type->Is<sem::Bool>()) {
-    out << "false";
+    out << (value == 0 ? "false" : "true");
   } else if (type->Is<sem::F32>()) {
-    out << "0.0f";
+    out << value << ".0f";
   } else if (type->Is<sem::I32>()) {
-    out << "0";
+    out << value;
   } else if (type->Is<sem::U32>()) {
-    out << "0u";
+    out << value << "u";
   } else if (auto* vec = type->As<sem::Vector>()) {
     if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite,
                   "")) {
@@ -3025,7 +3142,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
       if (i != 0) {
         out << ", ";
       }
-      if (!EmitZeroValue(out, vec->type())) {
+      if (!EmitValue(out, vec->type(), value)) {
         return false;
       }
     }
@@ -3039,7 +3156,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
       if (i != 0) {
         out << ", ";
       }
-      if (!EmitZeroValue(out, mat->type())) {
+      if (!EmitValue(out, mat->type(), value)) {
         return false;
       }
     }
@@ -3049,14 +3166,18 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
                   "")) {
       return false;
     }
-    out << ")0";
+    out << ")" << value;
   } else {
     diagnostics_.add_error(
         diag::System::Writer,
-        "Invalid type for zero emission: " + type->type_name());
+        "Invalid type for value emission: " + type->type_name());
     return false;
   }
   return true;
+}
+
+bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
+  return EmitValue(out, type, 0);
 }
 
 bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {

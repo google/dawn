@@ -97,6 +97,9 @@ class Constant {
   /// @returns the constant's scalar elements
   const Scalars& Elements() const { return elems_; }
 
+  /// @returns true if any scalar element is zero
+  bool AnyZero() const;
+
   /// Calls `func(s)` with s being the current scalar value at `index`.
   /// `func` is typically a lambda of the form '[](auto&& s)'.
   /// @param index the index of the scalar value

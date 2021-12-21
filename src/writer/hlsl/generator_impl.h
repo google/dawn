@@ -100,6 +100,12 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitAssign(const ast::AssignmentStatement* stmt);
+  /// Emits code such that if `expr` is zero, it emits one, else `expr`
+  /// @param out the output of the expression stream
+  /// @param expr the expression
+  /// @returns true if the expression was emitted, false otherwise
+  bool EmitExpressionOrOneIfZero(std::ostream& out,
+                                 const ast::Expression* expr);
   /// Handles generating a binary expression
   /// @param out the output of the expression stream
   /// @param expr the binary expression
@@ -401,6 +407,12 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
   bool EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression* expr);
+  /// Emits `value` for the given type
+  /// @param out the output stream
+  /// @param type the type to emit the value for
+  /// @param value the value to emit
+  /// @returns true if the value was successfully emitted.
+  bool EmitValue(std::ostream& out, const sem::Type* type, int value);
   /// Emits the zero value for the given type
   /// @param out the output stream
   /// @param type the type to emit the value for
@@ -515,6 +527,7 @@ class GeneratorImpl : public TextGenerator {
       dynamic_matrix_vector_write_;
   std::unordered_map<const sem::Matrix*, std::string>
       dynamic_matrix_scalar_write_;
+  std::unordered_map<const sem::Type*, std::string> value_or_one_if_zero_;
 };
 
 }  // namespace hlsl
