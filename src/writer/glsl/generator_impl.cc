@@ -1188,33 +1188,28 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureSample:
     case sem::IntrinsicType::kTextureSampleBias:
-      out << "texture(";
+      out << "texture";
       break;
     case sem::IntrinsicType::kTextureSampleLevel:
-      out << "textureLod(";
+      out << "textureLod";
       break;
     case sem::IntrinsicType::kTextureGather:
     case sem::IntrinsicType::kTextureGatherCompare:
-      out << (intrinsic->Signature().IndexOf(sem::ParameterUsage::kOffset) < 0
-                  ? "textureGather("
-                  : "textureGatherOffset(");
+      out << "textureGather";
       break;
     case sem::IntrinsicType::kTextureSampleGrad:
-      out << "textureGrad(";
+      out << "textureGrad";
       break;
     case sem::IntrinsicType::kTextureSampleCompare:
-      out << "texture(";
-      glsl_ret_width = 1;
-      break;
     case sem::IntrinsicType::kTextureSampleCompareLevel:
-      out << "texture(";
+      out << "texture";
       glsl_ret_width = 1;
       break;
     case sem::IntrinsicType::kTextureLoad:
-      out << "texelFetch(";
+      out << "texelFetch";
       break;
     case sem::IntrinsicType::kTextureStore:
-      out << "imageStore(";
+      out << "imageStore";
       break;
     default:
       diagnostics_.add_error(
@@ -1223,6 +1218,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
               std::string(intrinsic->str()) + "'");
       return false;
   }
+
+  if (intrinsic->Signature().IndexOf(sem::ParameterUsage::kOffset) >= 0) {
+    out << "Offset";
+  }
+
+  out << "(";
 
   if (!EmitExpression(out, texture))
     return false;
@@ -1247,8 +1248,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     }
   }
 
-  for (auto usage : {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx,
-                     Usage::kDdy, Usage::kSampleIndex, Usage::kOffset,
+  for (auto usage : {Usage::kDepthRef, Usage::kLevel, Usage::kDdx, Usage::kDdy,
+                     Usage::kSampleIndex, Usage::kOffset, Usage::kBias,
                      Usage::kComponent, Usage::kValue}) {
     if (auto* e = arg(usage)) {
       out << ", ";

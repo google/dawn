@@ -7,7 +7,7 @@ uniform highp sampler2D arg_0;
 
 
 void textureSampleCompare_25fcd1() {
-  float res = texture(arg_0, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
+  float res = textureOffset(arg_0, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
 }
 
 void fragment_main() {
@@ -20,7 +20,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:8: 'texture' : no matching overloaded function found 
+ERROR: 0:8: 'textureOffset' : no matching overloaded function found 
 ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

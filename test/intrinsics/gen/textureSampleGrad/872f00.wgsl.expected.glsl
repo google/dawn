@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -7,7 +5,7 @@ uniform highp sampler2DArray arg_0;
 
 
 void textureSampleGrad_872f00() {
-  vec4 res = textureGrad(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), ivec2(0, 0));
+  vec4 res = textureGradOffset(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), ivec2(0, 0));
 }
 
 struct tint_symbol {
@@ -33,14 +31,6 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:8: 'textureGrad' : no matching overloaded function found 
-ERROR: 0:8: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -48,7 +38,7 @@ uniform highp sampler2DArray arg_0;
 
 
 void textureSampleGrad_872f00() {
-  vec4 res = textureGrad(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), ivec2(0, 0));
+  vec4 res = textureGradOffset(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), ivec2(0, 0));
 }
 
 struct tint_symbol {
@@ -64,14 +54,6 @@ void main() {
 }
 
 
-Error parsing GLSL shader:
-ERROR: 0:8: 'textureGrad' : no matching overloaded function found 
-ERROR: 0:8: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -79,7 +61,7 @@ uniform highp sampler2DArray arg_0;
 
 
 void textureSampleGrad_872f00() {
-  vec4 res = textureGrad(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), ivec2(0, 0));
+  vec4 res = textureGradOffset(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), ivec2(0, 0));
 }
 
 struct tint_symbol {
@@ -94,13 +76,5 @@ void compute_main() {
 void main() {
   compute_main();
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:8: 'textureGrad' : no matching overloaded function found 
-ERROR: 0:8: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
 
 

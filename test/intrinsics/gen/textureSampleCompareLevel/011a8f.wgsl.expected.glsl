@@ -7,7 +7,7 @@ uniform highp sampler2DArray arg_0;
 
 
 void textureSampleCompareLevel_011a8f() {
-  float res = texture(arg_0, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
+  float res = textureOffset(arg_0, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
 }
 
 struct tint_symbol {
@@ -34,7 +34,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:8: 'texture' : no matching overloaded function found 
+ERROR: 0:8: 'textureOffset' : no matching overloaded function found 
 ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -47,7 +47,7 @@ uniform highp sampler2DArray arg_0;
 
 
 void textureSampleCompareLevel_011a8f() {
-  float res = texture(arg_0, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
+  float res = textureOffset(arg_0, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
 }
 
 struct tint_symbol {
@@ -64,7 +64,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:8: 'texture' : no matching overloaded function found 
+ERROR: 0:8: 'textureOffset' : no matching overloaded function found 
 ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -77,7 +77,7 @@ uniform highp sampler2DArray arg_0;
 
 
 void textureSampleCompareLevel_011a8f() {
-  float res = texture(arg_0, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
+  float res = textureOffset(arg_0, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
 }
 
 struct tint_symbol {
@@ -95,7 +95,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:8: 'texture' : no matching overloaded function found 
+ERROR: 0:8: 'textureOffset' : no matching overloaded function found 
 ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
