@@ -242,6 +242,21 @@ class StructureType(Record, Type):
         # two nextInChain members.
         assert not (self.extensible and self.chained)
 
+    def update_metadata(self):
+        Record.update_metadata(self)
+
+        if self.may_have_dawn_object:
+            self.is_wire_transparent = False
+            return
+
+        assert not (self.chained or self.extensible)
+
+        def get_is_wire_transparent(member):
+            return member.type.is_wire_transparent and member.annotation == 'value'
+
+        self.is_wire_transparent = all(
+            get_is_wire_transparent(m) for m in self.members)
+
     @property
     def output(self):
         return self.chained == "out" or self.extensible == "out"
