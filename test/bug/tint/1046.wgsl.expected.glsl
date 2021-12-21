@@ -6,6 +6,13 @@ precision mediump float;
 struct PointLight {
   vec4 position;
 };
+struct Uniforms {
+  mat4 worldView;
+  mat4 proj;
+  uint numPointLights;
+  uint color_source;
+  vec4 color;
+};
 
 layout (binding = 0) uniform Uniforms_1 {
   mat4 worldView;
@@ -73,7 +80,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:59: 'color' : redefinition 
+ERROR: 0:66: 'color' : redefinition 
 ERROR: 1 compilation errors.  No code generated.
 
 

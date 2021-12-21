@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+intrinsics/gen/isNormal/c6e880.wgsl:28:19 warning: use of deprecated intrinsic
+  var res: bool = isNormal(1.0);
+                  ^^^^^^^^
+
 #version 310 es
 precision mediump float;
 

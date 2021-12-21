@@ -1,6 +1,22 @@
+SKIP: FAILED
+
 #version 310 es
 precision mediump float;
 
+struct ResultMatrix {
+  float numbers[];
+};
+struct FirstMatrix {
+  float numbers[];
+};
+struct SecondMatrix {
+  float numbers[];
+};
+struct Uniforms {
+  float NAN;
+  int sizeA;
+  int sizeB;
+};
 
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
 layout (binding = 2) buffer ResultMatrix_1 {
@@ -62,5 +78,12 @@ void main() {
   inputs.tint_symbol_2 = gl_GlobalInvocationID;
   tint_symbol_1(inputs);
 }
+
+
+Error parsing GLSL shader:
+ERROR: 0:5: '' : array size required 
+ERROR: 0:6: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
 
 

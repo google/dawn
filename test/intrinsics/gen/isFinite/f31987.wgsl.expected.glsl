@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+intrinsics/gen/isFinite/f31987.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec4<bool> = isFinite(vec4<f32>());
+                        ^^^^^^^^
+
 #version 310 es
 precision mediump float;
 

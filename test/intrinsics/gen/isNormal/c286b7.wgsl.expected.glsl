@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+intrinsics/gen/isNormal/c286b7.wgsl:28:25 warning: use of deprecated intrinsic
+  var res: vec3<bool> = isNormal(vec3<f32>());
+                        ^^^^^^^^
+
 #version 310 es
 precision mediump float;
 

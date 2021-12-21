@@ -7,6 +7,26 @@ struct lightingInfo {
   vec3 diffuse;
   vec3 specular;
 };
+struct LeftOver {
+  mat4 u_World;
+  mat4 u_ViewProjection;
+  float u_bumpStrength;
+  uint padding;
+  vec3 u_cameraPosition;
+  float u_parallaxScale;
+  float textureInfoName;
+  uint padding_1;
+  vec2 tangentSpaceParameter0;
+};
+struct Light0 {
+  vec4 vLightData;
+  vec4 vLightDiffuse;
+  vec4 vLightSpecular;
+  vec3 vLightGround;
+  uint padding_2;
+  vec4 shadowsInfo;
+  vec2 depthValues;
+};
 
 float u_Float = 0.0f;
 vec3 u_Color = vec3(0.0f, 0.0f, 0.0f);
@@ -377,9 +397,9 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:53: 'ddx' : no matching overloaded function found 
-ERROR: 0:53: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
-ERROR: 0:53: '' : compilation terminated 
+ERROR: 0:73: 'ddx' : no matching overloaded function found 
+ERROR: 0:73: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
+ERROR: 0:73: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

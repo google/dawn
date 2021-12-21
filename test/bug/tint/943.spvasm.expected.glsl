@@ -1,6 +1,24 @@
+SKIP: FAILED
+
 #version 310 es
 precision mediump float;
 
+struct Uniforms {
+  float NAN;
+  ivec3 aShape;
+  ivec3 bShape;
+  ivec3 outShape;
+  ivec2 outShapeStrides;
+};
+struct ssbOut {
+  float result[];
+};
+struct ssbA {
+  float A[];
+};
+struct ssbB {
+  float B[];
+};
 
 int dimAOuter_1 = 0;
 layout (binding = 3) uniform Uniforms_1 {
@@ -390,5 +408,12 @@ void main() {
   inputs.tint_symbol_4 = gl_GlobalInvocationID;
   tint_symbol_2(inputs);
 }
+
+
+Error parsing GLSL shader:
+ERROR: 0:12: '' : array size required 
+ERROR: 0:13: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
 
 

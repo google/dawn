@@ -3,6 +3,17 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
+struct LeftOver {
+  float time;
+  uint padding;
+  mat4 worldViewProjection;
+  vec2 outputSize;
+  vec2 stageSize;
+  vec2 spriteMapSize;
+  float stageScale;
+  float spriteCount;
+  vec3 colorMul;
+};
 
 layout (binding = 9) uniform LeftOver_1 {
   float time;
@@ -218,9 +229,9 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:65: 'frac' : no matching overloaded function found 
-ERROR: 0:65: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
-ERROR: 0:65: '' : compilation terminated 
+ERROR: 0:76: 'frac' : no matching overloaded function found 
+ERROR: 0:76: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
+ERROR: 0:76: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
