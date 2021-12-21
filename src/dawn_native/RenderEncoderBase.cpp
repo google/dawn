@@ -403,7 +403,11 @@ namespace dawn_native {
 
                 return {};
             },
-            "encoding %s.SetBindGroup(%u, %s, %u, ...).", this, groupIndexIn, group,
+            // TODO(dawn:1190): For unknown reasons formatting this message fails if `group` is used
+            // as a string value in the message. This despite the exact same code working as
+            // intended in ComputePassEncoder::APISetBindGroup. Replacing with a static [BindGroup]
+            // until the reason for the failure can be determined.
+            "encoding %s.SetBindGroup(%u, [BindGroup], %u, ...).", this, groupIndexIn,
             dynamicOffsetCount);
     }
 
