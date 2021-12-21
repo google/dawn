@@ -12,13 +12,20 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef DAWNNATIVE_WGPU_STRUCTS_H_
-#define DAWNNATIVE_WGPU_STRUCTS_H_
+{% set namespace_name = Name(metadata.native_namespace) %}
+{% set DIR = namespace_name.concatcase().upper() %}
+{% set namespace = metadata.namespace %}
+#ifndef {{DIR}}_{{namespace.upper()}}_STRUCTS_H_
+#define {{DIR}}_{{namespace.upper()}}_STRUCTS_H_
 
-#include "dawn/webgpu_cpp.h"
-#include "dawn_native/Forward.h"
+{% set api = metadata.api.lower() %}
+#include "dawn/{{api}}_cpp.h"
+{% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
+{% set native_namespace = namespace_name.snake_case() %}
+{% set native_dir = impl_dir + native_namespace %}
+#include "{{native_dir}}/Forward.h"
 
-namespace dawn_native {
+namespace {{native_namespace}} {
 
 {% macro render_cpp_default_value(member) -%}
     {%- if member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
@@ -26,7 +33,7 @@ namespace dawn_native {
     {%- elif member.type.category == "object" and member.optional -%}
         {{" "}}= nullptr
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
-        {{" "}}= wgpu::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+        {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
     {%- elif member.type.category == "native" and member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- else -%}
@@ -36,14 +43,14 @@ namespace dawn_native {
 
     struct ChainedStruct {
         ChainedStruct const * nextInChain = nullptr;
-        wgpu::SType sType = wgpu::SType::Invalid;
+        {{namespace}}::SType sType = {{namespace}}::SType::Invalid;
     };
 
     {% for type in by_category["structure"] %}
         {% if type.chained %}
             struct {{as_cppType(type.name)}} : ChainedStruct {
                 {{as_cppType(type.name)}}() {
-                    sType = wgpu::SType::{{type.name.CamelCase()}};
+                    sType = {{namespace}}::SType::{{type.name.CamelCase()}};
                 }
         {% else %}
             struct {{as_cppType(type.name)}} {
@@ -72,6 +79,6 @@ namespace dawn_native {
         using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};
     {% endfor %}
 
-} // namespace dawn_native
+} // namespace {{native_namespace}}
 
-#endif  // DAWNNATIVE_WGPU_STRUCTS_H_
+#endif  // {{DIR}}_{{namespace.upper()}}_STRUCTS_H_
