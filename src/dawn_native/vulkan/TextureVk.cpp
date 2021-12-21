@@ -537,6 +537,9 @@ namespace dawn_native { namespace vulkan {
                     return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 }
 
+            case kReadOnlyRenderAttachment:
+                return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
             case kPresentTextureUsage:
                 return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
