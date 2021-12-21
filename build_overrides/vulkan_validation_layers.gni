@@ -22,4 +22,4 @@ vvl_glslang_dir = "//third_party/vulkan-deps/glslang/src"
 
 # Fake the ozone_platform_x11 when inside Dawn's repository
 import("../scripts/dawn_features.gni")
-use_x11 = dawn_use_x11
+ozone_platform_x11 = dawn_use_x11
