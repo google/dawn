@@ -38,8 +38,11 @@ namespace dawn_native { namespace null {
     }
 
     // Used for the tests that intend to use an adapter without all features enabled.
-    void Adapter::SetSupportedFeatures(const std::vector<const char*>& requiredFeatures) {
-        mSupportedFeatures = GetInstance()->FeatureNamesToFeaturesSet(requiredFeatures);
+    void Adapter::SetSupportedFeatures(const std::vector<wgpu::FeatureName>& requiredFeatures) {
+        mSupportedFeatures = {};
+        for (wgpu::FeatureName f : requiredFeatures) {
+            mSupportedFeatures.EnableFeature(f);
+        }
     }
 
     MaybeError Adapter::InitializeImpl() {
@@ -57,7 +60,7 @@ namespace dawn_native { namespace null {
         return {};
     }
 
-    ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DawnDeviceDescriptor* descriptor) {
+    ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
         return Device::Create(this, descriptor);
     }
 
@@ -95,11 +98,11 @@ namespace dawn_native { namespace null {
     // Device
 
     // static
-    ResultOrError<Device*> Device::Create(Adapter* adapter,
-                                          const DawnDeviceDescriptor* descriptor) {
+    ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
+                                              const DeviceDescriptor* descriptor) {
         Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
         DAWN_TRY(device->Initialize());
-        return device.Detach();
+        return device;
     }
 
     Device::~Device() {

@@ -41,8 +41,8 @@ namespace dawn_native { namespace d3d12 {
     // Definition of backend types
     class Device final : public DeviceBase {
       public:
-        static ResultOrError<Device*> Create(Adapter* adapter,
-                                             const DawnDeviceDescriptor* descriptor);
+        static ResultOrError<Ref<Device>> Create(Adapter* adapter,
+                                                 const DeviceDescriptor* descriptor);
         ~Device() override;
 
         MaybeError Initialize();

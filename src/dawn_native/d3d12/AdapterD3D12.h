@@ -40,8 +40,8 @@ namespace dawn_native { namespace d3d12 {
         const gpu_info::D3DDriverVersion& GetDriverVersion() const;
 
       private:
-        ResultOrError<DeviceBase*> CreateDeviceImpl(
-            const DawnDeviceDescriptor* descriptor) override;
+        ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+            const DeviceDescriptor* descriptor) override;
         MaybeError ResetInternalDeviceForTestingImpl() override;
 
         bool AreTimestampQueriesSupported() const;

@@ -312,17 +312,21 @@ namespace dawn_native { namespace vulkan {
 
             // Create another device based on the original
             backendAdapter = dawn_native::vulkan::ToBackend(deviceVk->GetAdapter());
-            deviceDescriptor.forceEnabledToggles = GetParam().forceEnabledWorkarounds;
-            deviceDescriptor.forceDisabledToggles = GetParam().forceDisabledWorkarounds;
+            deviceDescriptor.nextInChain = &togglesDesc;
+            togglesDesc.forceEnabledToggles = GetParam().forceEnabledWorkarounds.data();
+            togglesDesc.forceEnabledTogglesCount = GetParam().forceEnabledWorkarounds.size();
+            togglesDesc.forceDisabledToggles = GetParam().forceDisabledWorkarounds.data();
+            togglesDesc.forceDisabledTogglesCount = GetParam().forceDisabledWorkarounds.size();
 
             secondDeviceVk =
-                dawn_native::vulkan::ToBackend(backendAdapter->CreateDevice(&deviceDescriptor));
+                dawn_native::vulkan::ToBackend(backendAdapter->APICreateDevice(&deviceDescriptor));
             secondDevice = wgpu::Device::Acquire(dawn_native::ToAPI(secondDeviceVk));
         }
 
       protected:
         dawn_native::vulkan::Adapter* backendAdapter;
-        dawn_native::DawnDeviceDescriptor deviceDescriptor;
+        dawn_native::DeviceDescriptor deviceDescriptor;
+        dawn_native::DawnTogglesDeviceDescriptor togglesDesc;
 
         wgpu::Device secondDevice;
         dawn_native::vulkan::Device* secondDeviceVk;
@@ -691,7 +695,7 @@ namespace dawn_native { namespace vulkan {
         // device 2 = |secondDevice|
         // Create device 3
         dawn_native::vulkan::Device* thirdDeviceVk =
-            dawn_native::vulkan::ToBackend(backendAdapter->CreateDevice(&deviceDescriptor));
+            dawn_native::vulkan::ToBackend(backendAdapter->APICreateDevice(&deviceDescriptor));
         wgpu::Device thirdDevice = wgpu::Device::Acquire(dawn_native::ToAPI(thirdDeviceVk));
 
         // Make queue for device 2 and 3

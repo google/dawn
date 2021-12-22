@@ -37,9 +37,9 @@ namespace dawn_native { namespace opengl {
 
     class Device final : public DeviceBase {
       public:
-        static ResultOrError<Device*> Create(AdapterBase* adapter,
-                                             const DawnDeviceDescriptor* descriptor,
-                                             const OpenGLFunctions& functions);
+        static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
+                                                 const DeviceDescriptor* descriptor,
+                                                 const OpenGLFunctions& functions);
         ~Device() override;
 
         MaybeError Initialize();
@@ -81,7 +81,7 @@ namespace dawn_native { namespace opengl {
 
       private:
         Device(AdapterBase* adapter,
-               const DawnDeviceDescriptor* descriptor,
+               const DeviceDescriptor* descriptor,
                const OpenGLFunctions& functions);
 
         ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(

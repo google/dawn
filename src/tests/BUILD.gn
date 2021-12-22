@@ -227,6 +227,7 @@ test("dawn_unittests") {
     "unittests/TypedIntegerTests.cpp",
     "unittests/native/CommandBufferEncodingTests.cpp",
     "unittests/native/DestroyObjectTests.cpp",
+    "unittests/native/DeviceCreationTests.cpp",
     "unittests/validation/BindGroupValidationTests.cpp",
     "unittests/validation/BufferValidationTests.cpp",
     "unittests/validation/CommandBufferValidationTests.cpp",

@@ -64,9 +64,7 @@ namespace dawn_native {
 
         // Used to query the details of an feature. Return nullptr if featureName is not a valid
         // name of an feature supported in Dawn.
-        const FeatureInfo* GetFeatureInfo(const char* featureName);
-        Feature FeatureNameToEnum(const char* featureName);
-        FeaturesSet FeatureNamesToFeaturesSet(const std::vector<const char*>& requiredFeatures);
+        const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature);
 
         bool IsBackendValidationEnabled() const;
         void SetBackendValidationLevel(BackendValidationLevel level);

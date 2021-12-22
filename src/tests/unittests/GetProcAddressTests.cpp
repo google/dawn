@@ -59,7 +59,7 @@ namespace {
             switch (GetParam()) {
                 case DawnFlavor::Native: {
                     mDevice = wgpu::Device::Acquire(
-                        reinterpret_cast<WGPUDevice>(mNativeAdapter.CreateDevice(nullptr)));
+                        reinterpret_cast<WGPUDevice>(mNativeAdapter.APICreateDevice()));
                     mProcs = dawn_native::GetProcs();
                     break;
                 }

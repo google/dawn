@@ -50,6 +50,9 @@ namespace dawn_wire { namespace client {
                                      uint32_t featuresCount,
                                      const WGPUFeatureName* features);
 
+        // Unimplementable. Only availale in dawn_native.
+        WGPUDevice CreateDevice(const WGPUDeviceDescriptor*);
+
       private:
         LimitsAndFeatures mLimitsAndFeatures;
         WGPUAdapterProperties mProperties;

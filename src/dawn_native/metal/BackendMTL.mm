@@ -277,8 +277,8 @@ namespace dawn_native { namespace metal {
         }
 
       private:
-        ResultOrError<DeviceBase*> CreateDeviceImpl(
-            const DawnDeviceDescriptor* descriptor) override {
+        ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+            const DeviceDescriptor* descriptor) override {
             return Device::Create(this, mDevice, descriptor);
         }
 

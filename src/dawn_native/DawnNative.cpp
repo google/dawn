@@ -14,6 +14,7 @@
 
 #include "dawn_native/DawnNative.h"
 
+#include "common/Log.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/Device.h"
@@ -24,6 +25,41 @@
 // Contains the entry-points into dawn_native
 
 namespace dawn_native {
+
+    namespace {
+        struct ComboDeprecatedDawnDeviceDescriptor : DeviceDescriptor {
+            ComboDeprecatedDawnDeviceDescriptor(const DawnDeviceDescriptor* deviceDescriptor) {
+                dawn::WarningLog() << "DawnDeviceDescriptor is deprecated. Please use "
+                                      "WGPUDeviceDescriptor instead.";
+
+                DeviceDescriptor* desc = this;
+
+                if (deviceDescriptor != nullptr) {
+                    desc->nextInChain = &mTogglesDesc;
+                    mTogglesDesc.forceEnabledToggles = deviceDescriptor->forceEnabledToggles.data();
+                    mTogglesDesc.forceEnabledTogglesCount =
+                        deviceDescriptor->forceEnabledToggles.size();
+                    mTogglesDesc.forceDisabledToggles =
+                        deviceDescriptor->forceDisabledToggles.data();
+                    mTogglesDesc.forceDisabledTogglesCount =
+                        deviceDescriptor->forceDisabledToggles.size();
+
+                    desc->requiredLimits =
+                        reinterpret_cast<const RequiredLimits*>(deviceDescriptor->requiredLimits);
+
+                    FeaturesInfo featuresInfo;
+                    for (const char* featureStr : deviceDescriptor->requiredFeatures) {
+                        mRequiredFeatures.push_back(featuresInfo.FeatureNameToAPIEnum(featureStr));
+                    }
+                    desc->requiredFeatures = mRequiredFeatures.data();
+                    desc->requiredFeaturesCount = mRequiredFeatures.size();
+                }
+            }
+
+            DawnTogglesDeviceDescriptor mTogglesDesc = {};
+            std::vector<wgpu::FeatureName> mRequiredFeatures = {};
+        };
+    }  // namespace
 
     const DawnProcTable& GetProcsAutogen();
 
@@ -98,6 +134,10 @@ namespace dawn_native {
         return mImpl->GetPCIInfo();
     }
 
+    WGPUAdapter Adapter::Get() const {
+        return ToAPI(mImpl);
+    }
+
     std::vector<const char*> Adapter::GetSupportedFeatures() const {
         FeaturesSet supportedFeaturesSet = mImpl->GetSupportedFeatures();
         return supportedFeaturesSet.GetEnabledFeatureNames();
@@ -124,13 +164,19 @@ namespace dawn_native {
     }
 
     WGPUDevice Adapter::CreateDevice(const DawnDeviceDescriptor* deviceDescriptor) {
-        return ToAPI(mImpl->CreateDevice(deviceDescriptor));
+        ComboDeprecatedDawnDeviceDescriptor desc(deviceDescriptor);
+        return ToAPI(mImpl->APICreateDevice(&desc));
+    }
+
+    WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor) {
+        return ToAPI(mImpl->APICreateDevice(FromAPI(deviceDescriptor)));
     }
 
     void Adapter::RequestDevice(const DawnDeviceDescriptor* descriptor,
                                 WGPURequestDeviceCallback callback,
                                 void* userdata) {
-        mImpl->RequestDevice(descriptor, callback, userdata);
+        ComboDeprecatedDawnDeviceDescriptor desc(descriptor);
+        mImpl->APIRequestDevice(&desc, callback, userdata);
     }
 
     void Adapter::ResetInternalDeviceForTesting() {
@@ -174,6 +220,10 @@ namespace dawn_native {
 
     const ToggleInfo* Instance::GetToggleInfo(const char* toggleName) {
         return mImpl->GetToggleInfo(toggleName);
+    }
+
+    const FeatureInfo* Instance::GetFeatureInfo(WGPUFeatureName feature) {
+        return mImpl->GetFeatureInfo(static_cast<wgpu::FeatureName>(feature));
     }
 
     void Instance::EnableBackendValidation(bool enableBackendValidation) {

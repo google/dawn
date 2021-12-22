@@ -15,12 +15,15 @@
 #include "dawn_native/Adapter.h"
 
 #include "common/Constants.h"
+#include "dawn_native/Device.h"
 #include "dawn_native/Instance.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 namespace dawn_native {
 
     AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
         : mInstance(instance), mBackend(backend) {
+        mSupportedFeatures.EnableFeature(Feature::DawnNative);
         mSupportedFeatures.EnableFeature(Feature::DawnInternalUsages);
     }
 
@@ -90,10 +93,36 @@ namespace dawn_native {
         return mSupportedFeatures.EnumerateFeatures(features);
     }
 
+    DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
+        DeviceDescriptor defaultDesc = {};
+        if (descriptor == nullptr) {
+            descriptor = &defaultDesc;
+        }
+        auto result = CreateDeviceInternal(descriptor);
+        if (result.IsError()) {
+            mInstance->ConsumedError(result.AcquireError());
+            return nullptr;
+        }
+        return result.AcquireSuccess().Detach();
+    }
+
     void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
                                        WGPURequestDeviceCallback callback,
                                        void* userdata) {
-        callback(WGPURequestDeviceStatus_Error, nullptr, "Not implemented", userdata);
+        auto result = CreateDeviceInternal(descriptor);
+
+        if (result.IsError()) {
+            std::unique_ptr<ErrorData> errorData = result.AcquireError();
+            callback(WGPURequestDeviceStatus_Error, nullptr,
+                     errorData->GetFormattedMessage().c_str(), userdata);
+            return;
+        }
+
+        Ref<DeviceBase> device = result.AcquireSuccess();
+
+        WGPURequestDeviceStatus status =
+            device == nullptr ? WGPURequestDeviceStatus_Unknown : WGPURequestDeviceStatus_Success;
+        callback(status, ToAPI(device.Detach()), nullptr, userdata);
     }
 
     wgpu::BackendType AdapterBase::GetBackendType() const {
@@ -120,14 +149,10 @@ namespace dawn_native {
         return mSupportedFeatures;
     }
 
-    bool AdapterBase::SupportsAllRequestedFeatures(
-        const std::vector<const char*>& requestedFeatures) const {
-        for (const char* featureStr : requestedFeatures) {
-            Feature featureEnum = mInstance->FeatureNameToEnum(featureStr);
-            if (featureEnum == Feature::InvalidEnum) {
-                return false;
-            }
-            if (!mSupportedFeatures.IsEnabled(featureEnum)) {
+    bool AdapterBase::SupportsAllRequiredFeatures(
+        const ityp::span<size_t, const wgpu::FeatureName>& features) const {
+        for (wgpu::FeatureName f : features) {
+            if (!mSupportedFeatures.IsEnabled(f)) {
                 return false;
             }
         }
@@ -163,57 +188,27 @@ namespace dawn_native {
         return true;
     }
 
-    DeviceBase* AdapterBase::CreateDevice(const DawnDeviceDescriptor* descriptor) {
-        DeviceBase* result = nullptr;
+    ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
+        const DeviceDescriptor* descriptor) {
+        ASSERT(descriptor != nullptr);
 
-        if (mInstance->ConsumedError(CreateDeviceInternal(&result, descriptor))) {
-            return nullptr;
+        for (uint32_t i = 0; i < descriptor->requiredFeaturesCount; ++i) {
+            wgpu::FeatureName f = descriptor->requiredFeatures[i];
+            DAWN_TRY(ValidateFeatureName(f));
+            DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(f),
+                            "Requested feature %s is not supported.", f);
         }
 
-        return result;
-    }
-
-    void AdapterBase::RequestDevice(const DawnDeviceDescriptor* descriptor,
-                                    WGPURequestDeviceCallback callback,
-                                    void* userdata) {
-        DeviceBase* device = nullptr;
-        MaybeError err = CreateDeviceInternal(&device, descriptor);
-
-        if (err.IsError()) {
-            std::unique_ptr<ErrorData> errorData = err.AcquireError();
-            callback(WGPURequestDeviceStatus_Error, ToAPI(device),
-                     errorData->GetFormattedMessage().c_str(), userdata);
-            return;
-        }
-        WGPURequestDeviceStatus status =
-            device == nullptr ? WGPURequestDeviceStatus_Unknown : WGPURequestDeviceStatus_Success;
-        callback(status, ToAPI(device), nullptr, userdata);
-    }
-
-    MaybeError AdapterBase::CreateDeviceInternal(DeviceBase** result,
-                                                 const DawnDeviceDescriptor* descriptor) {
-        if (descriptor != nullptr) {
-            for (const char* featureStr : descriptor->requiredFeatures) {
-                Feature featureEnum = mInstance->FeatureNameToEnum(featureStr);
-                DAWN_INVALID_IF(featureEnum == Feature::InvalidEnum,
-                                "Requested feature %s is unknown.", featureStr);
-                DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(featureEnum),
-                                "Requested feature %s is disabled.", featureStr);
-            }
-        }
-
-        if (descriptor != nullptr && descriptor->requiredLimits != nullptr) {
+        if (descriptor->requiredLimits != nullptr) {
             DAWN_TRY_CONTEXT(
                 ValidateLimits(mUseTieredLimits ? ApplyLimitTiers(mLimits.v1) : mLimits.v1,
-                               FromAPI(descriptor->requiredLimits)->limits),
+                               descriptor->requiredLimits->limits),
                 "validating required limits");
 
             DAWN_INVALID_IF(descriptor->requiredLimits->nextInChain != nullptr,
                             "nextInChain is not nullptr.");
         }
-
-        DAWN_TRY_ASSIGN(*result, CreateDeviceImpl(descriptor));
-        return {};
+        return CreateDeviceImpl(descriptor);
     }
 
     void AdapterBase::SetUseTieredLimits(bool useTieredLimits) {

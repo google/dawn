@@ -106,17 +106,17 @@ namespace dawn_native { namespace metal {
     }  // namespace
 
     // static
-    ResultOrError<Device*> Device::Create(AdapterBase* adapter,
-                                          NSPRef<id<MTLDevice>> mtlDevice,
-                                          const DawnDeviceDescriptor* descriptor) {
+    ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
+                                              NSPRef<id<MTLDevice>> mtlDevice,
+                                              const DeviceDescriptor* descriptor) {
         Ref<Device> device = AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor));
         DAWN_TRY(device->Initialize());
-        return device.Detach();
+        return device;
     }
 
     Device::Device(AdapterBase* adapter,
                    NSPRef<id<MTLDevice>> mtlDevice,
-                   const DawnDeviceDescriptor* descriptor)
+                   const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor), mMtlDevice(std::move(mtlDevice)), mCompletedSerial(0) {
     }
 

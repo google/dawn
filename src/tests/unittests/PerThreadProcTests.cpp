@@ -57,10 +57,10 @@ TEST_F(PerThreadProcTests, DispatchesPerThread) {
 
     // Note: Acquire doesn't call reference or release.
     wgpu::Device deviceA =
-        wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(mNativeAdapter.CreateDevice(nullptr)));
+        wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(mNativeAdapter.APICreateDevice()));
 
     wgpu::Device deviceB =
-        wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(mNativeAdapter.CreateDevice(nullptr)));
+        wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(mNativeAdapter.APICreateDevice()));
 
     std::thread threadA([&]() {
         DawnProcTable procs = dawn_native::GetProcs();

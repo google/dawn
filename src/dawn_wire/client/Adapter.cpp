@@ -14,6 +14,7 @@
 
 #include "dawn_wire/client/Adapter.h"
 
+#include "common/Log.h"
 #include "dawn_wire/client/Client.h"
 
 namespace dawn_wire { namespace client {
@@ -122,6 +123,11 @@ namespace dawn_wire { namespace client {
 
         request.callback(status, ToAPI(device), message, request.userdata);
         return true;
+    }
+
+    WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor*) {
+        dawn::ErrorLog() << "adapter.CreateDevice not supported with dawn_wire.";
+        return nullptr;
     }
 
 }}  // namespace dawn_wire::client

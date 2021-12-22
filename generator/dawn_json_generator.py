@@ -405,8 +405,10 @@ def topo_sort_structure(structs):
     return result
 
 
-def parse_json(json, enabled_tags):
-    is_enabled = lambda json_data: item_is_enabled(enabled_tags, json_data)
+def parse_json(json, enabled_tags, disabled_tags=None):
+    is_enabled = lambda json_data: item_is_enabled(
+        enabled_tags, json_data) and not item_is_disabled(
+            disabled_tags, json_data)
     category_to_parser = {
         'bitmask': BitmaskType,
         'enum': EnumType,
@@ -426,7 +428,7 @@ def parse_json(json, enabled_tags):
         by_category[name] = []
 
     for (name, json_data) in json.items():
-        if name[0] == '_' or not item_is_enabled(enabled_tags, json_data):
+        if name[0] == '_' or not is_enabled(json_data):
             continue
         category = json_data['category']
         parsed = category_to_parser[category](is_enabled, name, json_data)
@@ -464,12 +466,14 @@ def parse_json(json, enabled_tags):
         'types': types,
         'by_category': by_category,
         'enabled_tags': enabled_tags,
+        'disabled_tags': disabled_tags,
     }
     return {
         'metadata': Metadata(json['_metadata']),
         'types': types,
         'by_category': by_category,
         'enabled_tags': enabled_tags,
+        'disabled_tags': disabled_tags,
         'c_methods': lambda typ: c_methods(api_params, typ),
         'c_methods_sorted_by_name': get_c_methods_sorted_by_name(api_params),
     }
@@ -617,6 +621,8 @@ def decorate(name, typ, arg):
         return typ + ' * ' + name
     elif arg.annotation == 'const*':
         return typ + ' const * ' + name
+    elif arg.annotation == 'const*const*':
+        return 'const ' + typ + '* const * ' + name
     else:
         assert False
 
@@ -630,6 +636,14 @@ def item_is_enabled(enabled_tags, json_data):
     tags = json_data.get('tags')
     if tags is None: return True
     return any(tag in enabled_tags for tag in tags)
+
+
+def item_is_disabled(disabled_tags, json_data):
+    if disabled_tags is None: return False
+    tags = json_data.get('tags')
+    if tags is None: return False
+
+    return any(tag in disabled_tags for tag in tags)
 
 
 def as_cppEnum(value_name):
@@ -672,6 +686,7 @@ def c_methods(params, typ):
             Method(Name('release'), params['types']['void'], [],
                    {'tags': ['dawn', 'emscripten']}),
         ] if item_is_enabled(params['enabled_tags'], x.json_data)
+        and not item_is_disabled(params['disabled_tags'], x.json_data)
     ]
 
 
@@ -925,10 +940,14 @@ class MultiGeneratorFromDawnJSON(Generator):
                            frontend_params))
 
         if 'dawn_wire' in targets:
-            additional_params = compute_wire_params(params_dawn, wire_json)
+            params_dawn_wire = parse_json(loaded_json,
+                                          enabled_tags=['dawn', 'deprecated'],
+                                          disabled_tags=['native'])
+            additional_params = compute_wire_params(params_dawn_wire,
+                                                    wire_json)
 
             wire_params = [
-                RENDER_PARAMS_BASE, params_dawn, {
+                RENDER_PARAMS_BASE, params_dawn_wire, {
                     'as_wireType': lambda type : as_wireType(metadata, type),
                     'as_annotated_wireType': \
                         lambda arg: annotated(as_wireType(metadata, arg.type), arg),

@@ -46,8 +46,8 @@ namespace dawn_native { namespace vulkan {
         MaybeError InitializeSupportedFeaturesImpl() override;
         MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
 
-        ResultOrError<DeviceBase*> CreateDeviceImpl(
-            const DawnDeviceDescriptor* descriptor) override;
+        ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+            const DeviceDescriptor* descriptor) override;
 
         VkPhysicalDevice mPhysicalDevice;
         Ref<VulkanInstance> mVulkanInstance;

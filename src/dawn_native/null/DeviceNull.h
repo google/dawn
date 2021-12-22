@@ -86,8 +86,8 @@ namespace dawn_native { namespace null {
 
     class Device final : public DeviceBase {
       public:
-        static ResultOrError<Device*> Create(Adapter* adapter,
-                                             const DawnDeviceDescriptor* descriptor);
+        static ResultOrError<Ref<Device>> Create(Adapter* adapter,
+                                                 const DeviceDescriptor* descriptor);
         ~Device() override;
 
         MaybeError Initialize();
@@ -175,15 +175,15 @@ namespace dawn_native { namespace null {
         bool SupportsExternalImages() const override;
 
         // Used for the tests that intend to use an adapter without all features enabled.
-        void SetSupportedFeatures(const std::vector<const char*>& requiredFeatures);
+        void SetSupportedFeatures(const std::vector<wgpu::FeatureName>& requiredFeatures);
 
       private:
         MaybeError InitializeImpl() override;
         MaybeError InitializeSupportedFeaturesImpl() override;
         MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
 
-        ResultOrError<DeviceBase*> CreateDeviceImpl(
-            const DawnDeviceDescriptor* descriptor) override;
+        ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+            const DeviceDescriptor* descriptor) override;
     };
 
     // Helper class so |BindGroup| can allocate memory for its binding data,

@@ -113,6 +113,14 @@
                     {"name": "callback", "type": "request device callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
+            },
+            {
+                "name": "create device",
+                "tags": ["dawn"],
+                "returns": "device",
+                "args": [
+                    {"name": "descriptor", "type": "device descriptor", "annotation": "const*", "optional": "true"}
+                ]
             }
         ]
     },
@@ -146,6 +154,17 @@
             {"name": "required features count", "type": "uint32_t", "default": 0},
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required features count", "default": "nullptr"},
             {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true}
+        ]
+    },
+    "dawn toggles device descriptor": {
+        "tags": ["dawn", "native"],
+        "category": "structure",
+        "chained": "in",
+        "members": [
+            {"name": "force enabled toggles count", "type": "uint32_t", "default": 0},
+            {"name": "force enabled toggles", "type": "char", "annotation": "const*const*", "length": "force enabled toggles count"},
+            {"name": "force disabled toggles count", "type": "uint32_t", "default": 0},
+            {"name": "force disabled toggles", "type": "char", "annotation": "const*const*", "length": "force disabled toggles count"}
         ]
     },
     "address mode": {
@@ -1164,6 +1183,7 @@
             {"name": "depth32 float stencil8", "type": "bool", "default": "false"},
             {"name": "invalid feature", "type": "bool", "default": "false"},
             {"name": "dawn internal usages", "type": "bool", "default": "false"},
+            {"name": "dawn native", "type": "bool", "default": "false"},
             {"name": "limits", "type": "supported limits"}
         ]
     },
@@ -1313,7 +1333,8 @@
             {"value": 1000, "name": "depth clamping", "tags": ["emscripten", "dawn"]},
             {"value": 1001, "name": "dawn shader float 16", "tags": ["dawn"]},
             {"value": 1002, "name": "dawn internal usages", "tags": ["dawn"]},
-            {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]}
+            {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]},
+            {"value": 1004, "name": "dawn native", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
@@ -2347,7 +2368,8 @@
             {"value": 10, "name": "external texture binding layout", "tags": ["dawn"]},
             {"value": 11, "name": "surface descriptor from windows swap chain panel", "tags": ["dawn"]},
             {"value": 1000, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]},
-            {"value": 1001, "name": "primitive depth clamping state", "tags": ["dawn", "emscripten"]}
+            {"value": 1001, "name": "primitive depth clamping state", "tags": ["dawn", "emscripten"]},
+            {"value": 1002, "name": "dawn toggles device descriptor", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

@@ -179,6 +179,7 @@
             "SurfaceDescriptorFromWindowsSwapChainPanel"
         ],
         "client_side_commands": [
+            "AdapterCreateDevice",
             "AdapterGetProperties",
             "AdapterGetLimits",
             "AdapterHasFeature",

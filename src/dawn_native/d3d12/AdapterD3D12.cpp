@@ -394,7 +394,7 @@ namespace dawn_native { namespace d3d12 {
         infoQueue->PopStorageFilter();
     }
 
-    ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DawnDeviceDescriptor* descriptor) {
+    ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
         return Device::Create(this, descriptor);
     }
 

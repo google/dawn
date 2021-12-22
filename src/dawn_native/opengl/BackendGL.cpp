@@ -254,8 +254,8 @@ namespace dawn_native { namespace opengl {
             return {};
         }
 
-        ResultOrError<DeviceBase*> CreateDeviceImpl(
-            const DawnDeviceDescriptor* descriptor) override {
+        ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+            const DeviceDescriptor* descriptor) override {
             // There is no limit on the number of devices created from this adapter because they can
             // all share the same backing OpenGL context.
             return Device::Create(this, descriptor, mFunctions);

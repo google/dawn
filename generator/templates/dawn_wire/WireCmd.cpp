@@ -179,6 +179,7 @@
             {% endif %}
             {
                 {% if member.annotation != "value" %}
+                    {{ assert(member.annotation != "const*const*") }}
                     auto memberLength = {{member_length(member, "record.")}};
                     result += memberLength * {{member_transfer_sizeof(member)}};
                     //* Structures might contain more pointers so we need to add their extra size as well.
@@ -258,6 +259,7 @@
 
         //* Allocate space and write the non-value arguments in it.
         {% for member in members if member.annotation != "value" and member.length != "strlen" and not member.skip_serialize %}
+            {{ assert(member.annotation != "const*const*") }}
             {% set memberName = as_varName(member.name) %}
 
             {% if member.type.category != "object" and member.optional %}
@@ -367,6 +369,7 @@
 
         //* Get extra buffer data, and copy pointed to values in extra allocated space.
         {% for member in members if member.annotation != "value" and member.length != "strlen" %}
+            {{ assert(member.annotation != "const*const*") }}
             {% set memberName = as_varName(member.name) %}
 
             {% if member.type.category != "object" and member.optional %}

@@ -45,14 +45,14 @@
 namespace dawn_native { namespace vulkan {
 
     // static
-    ResultOrError<Device*> Device::Create(Adapter* adapter,
-                                          const DawnDeviceDescriptor* descriptor) {
+    ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
+                                              const DeviceDescriptor* descriptor) {
         Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
         DAWN_TRY(device->Initialize());
-        return device.Detach();
+        return device;
     }
 
-    Device::Device(Adapter* adapter, const DawnDeviceDescriptor* descriptor)
+    Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor) {
         InitTogglesFromDriver();
     }

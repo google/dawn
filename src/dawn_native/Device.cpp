@@ -21,6 +21,7 @@
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CompilationMessages.h"
@@ -172,15 +173,19 @@ namespace dawn_native {
 
     // DeviceBase
 
-    DeviceBase::DeviceBase(AdapterBase* adapter, const DawnDeviceDescriptor* descriptor)
+    DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
         : mInstance(adapter->GetInstance()), mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
-        if (descriptor != nullptr) {
-            ApplyToggleOverrides(descriptor);
-            ApplyFeatures(descriptor);
-        }
+        ASSERT(descriptor != nullptr);
 
-        if (descriptor != nullptr && descriptor->requiredLimits != nullptr) {
-            mLimits.v1 = ReifyDefaultLimits(FromAPI(descriptor->requiredLimits)->limits);
+        const DawnTogglesDeviceDescriptor* togglesDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &togglesDesc);
+        if (togglesDesc != nullptr) {
+            ApplyToggleOverrides(togglesDesc);
+        }
+        ApplyFeatures(descriptor);
+
+        if (descriptor->requiredLimits != nullptr) {
+            mLimits.v1 = ReifyDefaultLimits(descriptor->requiredLimits->limits);
         } else {
             GetDefaultLimits(&mLimits.v1);
         }
@@ -1140,16 +1145,14 @@ namespace dawn_native {
         return result.Detach();
     }
 
-    void DeviceBase::ApplyFeatures(const DawnDeviceDescriptor* deviceDescriptor) {
+    void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
         ASSERT(deviceDescriptor);
-        ASSERT(GetAdapter()->SupportsAllRequestedFeatures(deviceDescriptor->requiredFeatures));
+        ASSERT(GetAdapter()->SupportsAllRequiredFeatures(
+            {deviceDescriptor->requiredFeatures, deviceDescriptor->requiredFeaturesCount}));
 
-        mEnabledFeatures = GetAdapter()->GetInstance()->FeatureNamesToFeaturesSet(
-            deviceDescriptor->requiredFeatures);
-    }
-
-    std::vector<const char*> DeviceBase::GetEnabledFeatures() const {
-        return mEnabledFeatures.GetEnabledFeatureNames();
+        for (uint32_t i = 0; i < deviceDescriptor->requiredFeaturesCount; ++i) {
+            mEnabledFeatures.EnableFeature(deviceDescriptor->requiredFeatures[i]);
+        }
     }
 
     bool DeviceBase::IsFeatureEnabled(Feature feature) const {
@@ -1600,18 +1603,20 @@ namespace dawn_native {
         SetToggle(Toggle::DisallowUnsafeAPIs, true);
     }
 
-    void DeviceBase::ApplyToggleOverrides(const DawnDeviceDescriptor* deviceDescriptor) {
-        ASSERT(deviceDescriptor);
+    void DeviceBase::ApplyToggleOverrides(const DawnTogglesDeviceDescriptor* togglesDescriptor) {
+        ASSERT(togglesDescriptor != nullptr);
 
-        for (const char* toggleName : deviceDescriptor->forceEnabledToggles) {
-            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
+        for (uint32_t i = 0; i < togglesDescriptor->forceEnabledTogglesCount; ++i) {
+            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(
+                togglesDescriptor->forceEnabledToggles[i]);
             if (toggle != Toggle::InvalidEnum) {
                 mEnabledToggles.Set(toggle, true);
                 mOverridenToggles.Set(toggle, true);
             }
         }
-        for (const char* toggleName : deviceDescriptor->forceDisabledToggles) {
-            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
+        for (uint32_t i = 0; i < togglesDescriptor->forceDisabledTogglesCount; ++i) {
+            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(
+                togglesDescriptor->forceDisabledToggles[i]);
             if (toggle != Toggle::InvalidEnum) {
                 mEnabledToggles.Set(toggle, false);
                 mOverridenToggles.Set(toggle, true);

@@ -56,7 +56,7 @@ namespace dawn_native {
 
     class DeviceBase : public RefCounted {
       public:
-        DeviceBase(AdapterBase* adapter, const DawnDeviceDescriptor* descriptor);
+        DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor);
         virtual ~DeviceBase();
 
         void HandleError(InternalErrorType type, const char* message);
@@ -312,7 +312,6 @@ namespace dawn_native {
         void TrackObject(ApiObjectBase* object);
         std::mutex* GetObjectListMutex(ObjectType type);
 
-        std::vector<const char*> GetEnabledFeatures() const;
         std::vector<const char*> GetTogglesUsed() const;
         bool IsFeatureEnabled(Feature feature) const;
         bool IsToggleEnabled(Toggle toggle) const;
@@ -442,8 +441,8 @@ namespace dawn_native {
             WGPUCreateRenderPipelineAsyncCallback callback,
             void* userdata);
 
-        void ApplyToggleOverrides(const DawnDeviceDescriptor* deviceDescriptor);
-        void ApplyFeatures(const DawnDeviceDescriptor* deviceDescriptor);
+        void ApplyToggleOverrides(const DawnTogglesDeviceDescriptor* togglesDescriptor);
+        void ApplyFeatures(const DeviceDescriptor* deviceDescriptor);
 
         void SetDefaultToggles();
 

@@ -142,17 +142,8 @@ namespace dawn_native {
         return mTogglesInfo.ToggleNameToEnum(toggleName);
     }
 
-    const FeatureInfo* InstanceBase::GetFeatureInfo(const char* featureName) {
-        return mFeaturesInfo.GetFeatureInfo(featureName);
-    }
-
-    Feature InstanceBase::FeatureNameToEnum(const char* featureName) {
-        return mFeaturesInfo.FeatureNameToEnum(featureName);
-    }
-
-    FeaturesSet InstanceBase::FeatureNamesToFeaturesSet(
-        const std::vector<const char*>& requiredFeatures) {
-        return mFeaturesInfo.FeatureNamesToFeaturesSet(requiredFeatures);
+    const FeatureInfo* InstanceBase::GetFeatureInfo(wgpu::FeatureName feature) {
+        return mFeaturesInfo.GetFeatureInfo(feature);
     }
 
     const std::vector<std::unique_ptr<AdapterBase>>& InstanceBase::GetAdapters() const {
