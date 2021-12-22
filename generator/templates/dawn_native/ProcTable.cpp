@@ -14,19 +14,22 @@
 
 {% set Prefix = metadata.proc_table_prefix %}
 {% set prefix = Prefix.lower() %}
-#include "dawn_native/{{prefix}}_platform.h"
-#include "dawn_native/{{Prefix}}Native.h"
+{% set native_namespace = Name(metadata.native_namespace).snake_case() %}
+{% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
+{% set native_dir = impl_dir + native_namespace %}
+#include "{{native_dir}}/{{prefix}}_platform.h"
+#include "{{native_dir}}/{{Prefix}}Native.h"
 
 #include <algorithm>
 #include <vector>
 
 {% for type in by_category["object"] %}
     {% if type.name.canonical_case() not in ["texture view"] %}
-        #include "dawn_native/{{type.name.CamelCase()}}.h"
+        #include "{{native_dir}}/{{type.name.CamelCase()}}.h"
     {% endif %}
 {% endfor %}
 
-namespace dawn_native {
+namespace {{native_namespace}} {
 
     {% for type in by_category["object"] %}
         {% for method in c_methods(type) %}
@@ -74,49 +77,60 @@ namespace dawn_native {
 
     namespace {
 
+        {% set c_prefix = metadata.c_prefix %}
         struct ProcEntry {
-            WGPUProc proc;
+            {{c_prefix}}Proc proc;
             const char* name;
         };
         static const ProcEntry sProcMap[] = {
             {% for (type, method) in c_methods_sorted_by_name %}
-                { reinterpret_cast<WGPUProc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
+                { reinterpret_cast<{{c_prefix}}Proc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
             {% endfor %}
         };
         static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
 
     }  // anonymous namespace
 
-    WGPUInstance NativeCreateInstance(WGPUInstanceDescriptor const* descriptor) {
-        return ToAPI(InstanceBase::Create(FromAPI(descriptor)));
-    }
+    {% for function in by_category["function"] %}
+        {{as_cType(function.return_type.name)}} Native{{as_cppType(function.name)}}(
+            {%- for arg in function.arguments -%}
+                {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
+            {%- endfor -%}
+        ) {
+            {% if function.name.canonical_case() == "get proc address" %}
+                if (procName == nullptr) {
+                    return nullptr;
+                }
 
-    WGPUProc NativeGetProcAddress(WGPUDevice, const char* procName) {
-        if (procName == nullptr) {
-            return nullptr;
+                const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
+                    [](const ProcEntry &a, const char *b) -> bool {
+                        return strcmp(a.name, b) < 0;
+                    }
+                );
+
+                if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
+                    return entry->proc;
+                }
+
+                // Special case the free-standing functions of the API.
+                // TODO(dawn:1238) Checking string one by one is slow, it needs to be optimized.
+                {% for function in by_category["function"] %}
+                    if (strcmp(procName, "{{as_cMethod(None, function.name)}}") == 0) {
+                        return reinterpret_cast<{{c_prefix}}Proc>(Native{{as_cppType(function.name)}});
+                    }
+
+                {% endfor %}
+                return nullptr;
+            {% else %}
+                return ToAPI({{as_cppType(function.return_type.name)}}Base::Create(
+                    {%- for arg in function.arguments -%}
+                        FromAPI({% if not loop.first %}, {% endif %}{{as_varName(arg.name)}})
+                    {%- endfor -%}
+                ));
+            {% endif %}
         }
 
-        const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
-            [](const ProcEntry &a, const char *b) -> bool {
-                return strcmp(a.name, b) < 0;
-            }
-        );
-
-        if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
-            return entry->proc;
-        }
-
-        // Special case the two free-standing functions of the API.
-        if (strcmp(procName, "wgpuGetProcAddress") == 0) {
-            return reinterpret_cast<WGPUProc>(NativeGetProcAddress);
-        }
-
-        if (strcmp(procName, "wgpuCreateInstance") == 0) {
-            return reinterpret_cast<WGPUProc>(NativeCreateInstance);
-        }
-
-        return nullptr;
-    }
+    {% endfor %}
 
     std::vector<const char*> GetProcMapNamesForTestingInternal() {
         std::vector<const char*> result;
