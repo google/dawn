@@ -12,14 +12,17 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef DAWNNATIVE_OBJECTTPYE_AUTOGEN_H_
-#define DAWNNATIVE_OBJECTTPYE_AUTOGEN_H_
+{% set namespace_name = Name(metadata.native_namespace) %}
+{% set DIR = namespace_name.concatcase().upper() %}
+#ifndef {{DIR}}_OBJECTTPYE_AUTOGEN_H_
+#define {{DIR}}_OBJECTTPYE_AUTOGEN_H_
 
 #include "common/ityp_array.h"
 
 #include <cstdint>
 
-namespace dawn_native {
+{% set native_namespace = namespace_name.snake_case() %}
+namespace {{native_namespace}} {
 
     enum class ObjectType : uint32_t {
         {% for type in by_category["object"] %}
@@ -32,7 +35,7 @@ namespace dawn_native {
 
     const char* ObjectTypeAsString(ObjectType type);
 
-} // namespace dawn_native
+} // namespace {{native_namespace}}
 
 
-#endif  // DAWNNATIVE_OBJECTTPYE_AUTOGEN_H_
+#endif  // {{DIR}}_OBJECTTPYE_AUTOGEN_H_

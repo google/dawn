@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/ChainUtils_autogen.h"
+{% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
+{% set native_namespace = Name(metadata.native_namespace).snake_case() %}
+{% set native_dir = impl_dir + native_namespace %}
+#include "{{native_dir}}/ChainUtils_autogen.h"
 
 #include <unordered_set>
 
-namespace dawn_native {
+namespace {{native_namespace}} {
 
+{% set namespace = metadata.namespace %}
 {% for value in types["s type"].values %}
     {% if value.valid %}
         void FindInChain(const ChainedStruct* chain, const {{as_cppEnum(value.name)}}** out) {
             for (; chain; chain = chain->nextInChain) {
-                if (chain->sType == wgpu::SType::{{as_cppEnum(value.name)}}) {
+                if (chain->sType == {{namespace}}::SType::{{as_cppEnum(value.name)}}) {
                     *out = static_cast<const {{as_cppEnum(value.name)}}*>(chain);
                     break;
                 }
@@ -32,8 +36,8 @@ namespace dawn_native {
 {% endfor %}
 
 MaybeError ValidateSTypes(const ChainedStruct* chain,
-                          std::vector<std::vector<wgpu::SType>> oneOfConstraints) {
-    std::unordered_set<wgpu::SType> allSTypes;
+                          std::vector<std::vector<{{namespace}}::SType>> oneOfConstraints) {
+    std::unordered_set<{{namespace}}::SType> allSTypes;
     for (; chain; chain = chain->nextInChain) {
         if (allSTypes.find(chain->sType) != allSTypes.end()) {
             return DAWN_VALIDATION_ERROR("Chain cannot have duplicate sTypes");
@@ -42,7 +46,7 @@ MaybeError ValidateSTypes(const ChainedStruct* chain,
     }
     for (const auto& oneOfConstraint : oneOfConstraints) {
         bool satisfied = false;
-        for (wgpu::SType oneOfSType : oneOfConstraint) {
+        for ({{namespace}}::SType oneOfSType : oneOfConstraint) {
             if (allSTypes.find(oneOfSType) != allSTypes.end()) {
                 if (satisfied) {
                     return DAWN_VALIDATION_ERROR("Unsupported sType combination");
@@ -58,4 +62,4 @@ MaybeError ValidateSTypes(const ChainedStruct* chain,
     return {};
 }
 
-}  // namespace dawn_native
+}  // namespace {{native_namespace}}

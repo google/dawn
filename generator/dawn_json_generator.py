@@ -901,11 +901,11 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/dawn_native/ProcTable.cpp', frontend_params))
             renders.append(
                 FileRender('dawn_native/ChainUtils.h',
-                           'src/dawn_native/ChainUtils_autogen.h',
+                           'src/' + native_dir + '/ChainUtils_autogen.h',
                            frontend_params))
             renders.append(
                 FileRender('dawn_native/ChainUtils.cpp',
-                           'src/dawn_native/ChainUtils_autogen.cpp',
+                           'src/' + native_dir + '/ChainUtils_autogen.cpp',
                            frontend_params))
             renders.append(
                 FileRender('dawn_native/webgpu_absl_format.h',
@@ -917,11 +917,11 @@ class MultiGeneratorFromDawnJSON(Generator):
                            frontend_params))
             renders.append(
                 FileRender('dawn_native/ObjectType.h',
-                           'src/dawn_native/ObjectType_autogen.h',
+                           'src/' + native_dir + '/ObjectType_autogen.h',
                            frontend_params))
             renders.append(
                 FileRender('dawn_native/ObjectType.cpp',
-                           'src/dawn_native/ObjectType_autogen.cpp',
+                           'src/' + native_dir + '/ObjectType_autogen.cpp',
                            frontend_params))
 
         if 'dawn_wire' in targets:

@@ -12,13 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_CHAIN_UTILS_H_
-#define DAWNNATIVE_CHAIN_UTILS_H_
+{% set namespace_name = Name(metadata.native_namespace) %}
+{% set DIR = namespace_name.concatcase().upper() %}
+#ifndef {{DIR}}_CHAIN_UTILS_H_
+#define {{DIR}}_CHAIN_UTILS_H_
 
-#include "dawn_native/dawn_platform.h"
-#include "dawn_native/Error.h"
+{% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
+{% set native_namespace = namespace_name.snake_case() %}
+{% set native_dir = impl_dir + native_namespace %}
+{% set prefix = metadata.proc_table_prefix.lower() %}
+#include "{{native_dir}}/{{prefix}}_platform.h"
+#include "{{native_dir}}/Error.h"
 
-namespace dawn_native {
+namespace {{native_namespace}} {
     {% for value in types["s type"].values %}
         {% if value.valid %}
             void FindInChain(const ChainedStruct* chain, const {{as_cppEnum(value.name)}}** out);
@@ -31,8 +37,9 @@ namespace dawn_native {
     // For example:
     //   ValidateSTypes(chain, { { ShaderModuleSPIRVDescriptor, ShaderModuleWGSLDescriptor } }))
     //   ValidateSTypes(chain, { { Extension1 }, { Extension2 } })
+    {% set namespace = metadata.namespace %}
     MaybeError ValidateSTypes(const ChainedStruct* chain,
-                              std::vector<std::vector<wgpu::SType>> oneOfConstraints);
+                              std::vector<std::vector<{{namespace}}::SType>> oneOfConstraints);
 
     template <typename T>
     MaybeError ValidateSingleSTypeInner(const ChainedStruct* chain, T sType) {
@@ -73,6 +80,6 @@ namespace dawn_native {
         return ValidateSingleSTypeInner(chain, sType, sTypes...);
     }
 
-}  // namespace dawn_native
+}  // namespace {{native_namespace}}
 
-#endif  // DAWNNATIVE_CHAIN_UTILS_H_
+#endif  // {{DIR}}_CHAIN_UTILS_H_
