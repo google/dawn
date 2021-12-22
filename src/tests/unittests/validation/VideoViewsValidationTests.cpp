@@ -21,8 +21,10 @@ namespace {
     class VideoViewsValidation : public ValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
-            dawn_native::DawnDeviceDescriptor descriptor;
-            descriptor.requiredFeatures = {"multiplanar-formats"};
+            wgpu::DeviceDescriptor descriptor;
+            wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DawnMultiPlanarFormats};
+            descriptor.requiredFeatures = requiredFeatures;
+            descriptor.requiredFeaturesCount = 1;
             return adapter.CreateDevice(&descriptor);
         }
 

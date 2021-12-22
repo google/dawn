@@ -19,13 +19,13 @@
 
 class ShaderFloat16Tests : public DawnTest {
   protected:
-    std::vector<const char*> GetRequiredFeatures() override {
-        mIsShaderFloat16Supported = SupportsFeatures({"shader-float16"});
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        mIsShaderFloat16Supported = SupportsFeatures({wgpu::FeatureName::DawnShaderFloat16});
         if (!mIsShaderFloat16Supported) {
             return {};
         }
 
-        return {"shader-float16"};
+        return {wgpu::FeatureName::DawnShaderFloat16};
     }
 
     bool IsShaderFloat16Supported() const {

@@ -28,6 +28,7 @@ namespace dawn_platform {
 
 namespace wgpu {
     struct AdapterProperties;
+    struct DeviceDescriptor;
 }
 
 namespace dawn_native {
@@ -123,9 +124,16 @@ namespace dawn_native {
 
         // Create a device on this adapter. On an error, nullptr is returned.
         WGPUDevice CreateDevice(const DawnDeviceDescriptor* deviceDescriptor);
+        WGPUDevice CreateDevice(const wgpu::DeviceDescriptor* deviceDescriptor);
         WGPUDevice CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor = nullptr);
 
         void RequestDevice(const DawnDeviceDescriptor* descriptor,
+                           WGPURequestDeviceCallback callback,
+                           void* userdata);
+        void RequestDevice(const wgpu::DeviceDescriptor* descriptor,
+                           WGPURequestDeviceCallback callback,
+                           void* userdata);
+        void RequestDevice(const WGPUDeviceDescriptor* descriptor,
                            WGPURequestDeviceCallback callback,
                            void* userdata);
 

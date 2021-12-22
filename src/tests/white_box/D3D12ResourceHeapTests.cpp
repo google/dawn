@@ -26,13 +26,13 @@ class D3D12ResourceHeapTests : public DawnTest {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     }
 
-    std::vector<const char*> GetRequiredFeatures() override {
-        mIsBCFormatSupported = SupportsFeatures({"texture-compression-bc"});
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        mIsBCFormatSupported = SupportsFeatures({wgpu::FeatureName::TextureCompressionBC});
         if (!mIsBCFormatSupported) {
             return {};
         }
 
-        return {"texture-compression-bc"};
+        return {wgpu::FeatureName::TextureCompressionBC};
     }
 
     bool IsBCFormatSupported() const {

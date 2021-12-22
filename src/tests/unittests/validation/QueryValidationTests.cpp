@@ -225,9 +225,17 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
 class TimestampQueryValidationTest : public QuerySetValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.requiredFeatures.push_back("timestamp-query");
-        descriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TimestampQuery};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+
+        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+        descriptor.nextInChain = &togglesDesc;
+        const char* forceDisabledToggles[1] = {"disallow_unsafe_apis"};
+        togglesDesc.forceDisabledToggles = forceDisabledToggles;
+        togglesDesc.forceDisabledTogglesCount = 1;
+
         return adapter.CreateDevice(&descriptor);
     }
 };
@@ -429,11 +437,19 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
 class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.requiredFeatures.push_back("pipeline-statistics-query");
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::PipelineStatisticsQuery};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+
         // TODO(crbug.com/1177506): Pipeline statistic query is an unsafe API, disable disallowing
         // unsafe APIs to test it.
-        descriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
+        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+        descriptor.nextInChain = &togglesDesc;
+        const char* forceDisabledToggles[1] = {"disallow_unsafe_apis"};
+        togglesDesc.forceDisabledToggles = forceDisabledToggles;
+        togglesDesc.forceDisabledTogglesCount = 1;
+
         return adapter.CreateDevice(&descriptor);
     }
 };

@@ -40,19 +40,22 @@ namespace {
 
 class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureFormatTestParams> {
   protected:
-    std::vector<const char*> GetRequiredFeatures() override {
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         const wgpu::TextureFormat format = GetParam().mTextureFormat;
-        if (utils::IsBCTextureFormat(format) && SupportsFeatures({"texture-compression-bc"})) {
+        if (utils::IsBCTextureFormat(format) &&
+            SupportsFeatures({wgpu::FeatureName::TextureCompressionBC})) {
             mIsFormatSupported = true;
-            return {"texture-compression-bc"};
+            return {wgpu::FeatureName::TextureCompressionBC};
         }
-        if (utils::IsETC2TextureFormat(format) && SupportsFeatures({"texture-compression-etc2"})) {
+        if (utils::IsETC2TextureFormat(format) &&
+            SupportsFeatures({wgpu::FeatureName::TextureCompressionETC2})) {
             mIsFormatSupported = true;
-            return {"texture-compression-etc2"};
+            return {wgpu::FeatureName::TextureCompressionETC2};
         }
-        if (utils::IsASTCTextureFormat(format) && SupportsFeatures({"texture-compression-astc"})) {
+        if (utils::IsASTCTextureFormat(format) &&
+            SupportsFeatures({wgpu::FeatureName::TextureCompressionASTC})) {
             mIsFormatSupported = true;
-            return {"texture-compression-astc"};
+            return {wgpu::FeatureName::TextureCompressionASTC};
         }
         return {};
     }
@@ -1149,12 +1152,12 @@ DAWN_INSTANTIATE_TEST_P(CompressedTextureFormatTest,
 // Suite of regression tests that target specific compression types.
 class CompressedTextureFormatSpecificTest : public DawnTest {
   protected:
-    std::vector<const char*> GetRequiredFeatures() override {
-        mIsBCFormatSupported = SupportsFeatures({"texture-compression-bc"});
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        mIsBCFormatSupported = SupportsFeatures({wgpu::FeatureName::TextureCompressionBC});
 
-        std::vector<const char*> features;
+        std::vector<wgpu::FeatureName> features;
         if (mIsBCFormatSupported) {
-            features.emplace_back("texture-compression-bc");
+            features.emplace_back(wgpu::FeatureName::TextureCompressionBC);
         }
         return features;
     }

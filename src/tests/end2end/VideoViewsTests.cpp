@@ -45,13 +45,13 @@ void VideoViewsTests::TearDown() {
     DawnTest::TearDown();
 }
 
-std::vector<const char*> VideoViewsTests::GetRequiredFeatures() {
-    std::vector<const char*> requiredFeatures = {};
-    mIsMultiPlanarFormatsSupported = SupportsFeatures({"multiplanar-formats"});
+std::vector<wgpu::FeatureName> VideoViewsTests::GetRequiredFeatures() {
+    std::vector<wgpu::FeatureName> requiredFeatures = {};
+    mIsMultiPlanarFormatsSupported = SupportsFeatures({wgpu::FeatureName::DawnMultiPlanarFormats});
     if (mIsMultiPlanarFormatsSupported) {
-        requiredFeatures.push_back("multiplanar-formats");
+        requiredFeatures.push_back(wgpu::FeatureName::DawnMultiPlanarFormats);
     }
-    requiredFeatures.push_back("dawn-internal-usages");
+    requiredFeatures.push_back(wgpu::FeatureName::DawnInternalUsages);
     return requiredFeatures;
 }
 

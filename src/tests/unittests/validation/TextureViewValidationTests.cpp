@@ -652,8 +652,10 @@ namespace {
     class D24S8TextureViewValidationTests : public ValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
-            dawn_native::DawnDeviceDescriptor descriptor;
-            descriptor.requiredFeatures = {"depth24unorm-stencil8"};
+            wgpu::DeviceDescriptor descriptor;
+            wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth24UnormStencil8};
+            descriptor.requiredFeatures = requiredFeatures;
+            descriptor.requiredFeaturesCount = 1;
             return adapter.CreateDevice(&descriptor);
         }
     };
@@ -696,8 +698,10 @@ namespace {
     class D32S8TextureViewValidationTests : public ValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
-            dawn_native::DawnDeviceDescriptor descriptor;
-            descriptor.requiredFeatures = {"depth32float-stencil8"};
+            wgpu::DeviceDescriptor descriptor;
+            wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
+            descriptor.requiredFeatures = requiredFeatures;
+            descriptor.requiredFeaturesCount = 1;
             return adapter.CreateDevice(&descriptor);
         }
     };

@@ -597,8 +597,10 @@ namespace {
     class D24S8TextureFormatsValidationTests : public TextureValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
-            dawn_native::DawnDeviceDescriptor descriptor;
-            descriptor.requiredFeatures = {"depth24unorm-stencil8"};
+            wgpu::DeviceDescriptor descriptor;
+            wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth24UnormStencil8};
+            descriptor.requiredFeatures = requiredFeatures;
+            descriptor.requiredFeaturesCount = 1;
             return adapter.CreateDevice(&descriptor);
         }
     };
@@ -617,8 +619,10 @@ namespace {
     class D32S8TextureFormatsValidationTests : public TextureValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
-            dawn_native::DawnDeviceDescriptor descriptor;
-            descriptor.requiredFeatures = {"depth32float-stencil8"};
+            wgpu::DeviceDescriptor descriptor;
+            wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
+            descriptor.requiredFeatures = requiredFeatures;
+            descriptor.requiredFeaturesCount = 1;
             return adapter.CreateDevice(&descriptor);
         }
     };
@@ -639,9 +643,12 @@ namespace {
     class CompressedTextureFormatsValidationTests : public TextureValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
-            dawn_native::DawnDeviceDescriptor descriptor;
-            descriptor.requiredFeatures = {"texture-compression-bc", "texture-compression-etc2",
-                                           "texture-compression-astc"};
+            wgpu::DeviceDescriptor descriptor;
+            wgpu::FeatureName requiredFeatures[3] = {wgpu::FeatureName::TextureCompressionBC,
+                                                     wgpu::FeatureName::TextureCompressionETC2,
+                                                     wgpu::FeatureName::TextureCompressionASTC};
+            descriptor.requiredFeatures = requiredFeatures;
+            descriptor.requiredFeaturesCount = 3;
             return adapter.CreateDevice(&descriptor);
         }
 

@@ -78,7 +78,7 @@ class VideoViewsTests : public DawnTest {
   protected:
     void SetUp() override;
     void TearDown() override;
-    std::vector<const char*> GetRequiredFeatures() override;
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
     bool IsMultiPlanarFormatsSupported() const;
     wgpu::ShaderModule GetTestVertexShaderModule() const;
 

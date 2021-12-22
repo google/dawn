@@ -61,8 +61,7 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
                 properties.adapterType == desiredProperties.adapterType &&
                 properties.backendType == desiredProperties.backendType) {
                 // Create the device, destroy the instance, and break out of the loop.
-                dawn_native::DawnDeviceDescriptor deviceDescriptor = {};
-                device = wgpu::Device::Acquire(adapter.CreateDevice(&deviceDescriptor));
+                device = wgpu::Device::Acquire(adapter.CreateDevice());
                 instance.reset();
                 break;
             }

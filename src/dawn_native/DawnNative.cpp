@@ -168,6 +168,10 @@ namespace dawn_native {
         return ToAPI(mImpl->APICreateDevice(&desc));
     }
 
+    WGPUDevice Adapter::CreateDevice(const wgpu::DeviceDescriptor* deviceDescriptor) {
+        return CreateDevice(reinterpret_cast<const WGPUDeviceDescriptor*>(deviceDescriptor));
+    }
+
     WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor) {
         return ToAPI(mImpl->APICreateDevice(FromAPI(deviceDescriptor)));
     }
@@ -177,6 +181,20 @@ namespace dawn_native {
                                 void* userdata) {
         ComboDeprecatedDawnDeviceDescriptor desc(descriptor);
         mImpl->APIRequestDevice(&desc, callback, userdata);
+    }
+
+    void Adapter::RequestDevice(const wgpu::DeviceDescriptor* descriptor,
+                                WGPURequestDeviceCallback callback,
+                                void* userdata) {
+        mImpl->APIRequestDevice(reinterpret_cast<const DeviceDescriptor*>(descriptor), callback,
+                                userdata);
+    }
+
+    void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
+                                WGPURequestDeviceCallback callback,
+                                void* userdata) {
+        mImpl->APIRequestDevice(reinterpret_cast<const DeviceDescriptor*>(descriptor), callback,
+                                userdata);
     }
 
     void Adapter::ResetInternalDeviceForTesting() {

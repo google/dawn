@@ -70,8 +70,13 @@ void DawnNativeTest::TearDown() {
 
 WGPUDevice DawnNativeTest::CreateTestDevice() {
     // Disabled disallowing unsafe APIs so we can test them.
-    dawn_native::DawnDeviceDescriptor deviceDescriptor;
-    deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
+    wgpu::DeviceDescriptor deviceDescriptor = {};
+    wgpu::DawnTogglesDeviceDescriptor togglesDesc = {};
+    deviceDescriptor.nextInChain = &togglesDesc;
+
+    const char* toggle = "disallow_unsafe_apis";
+    togglesDesc.forceDisabledToggles = &toggle;
+    togglesDesc.forceDisabledTogglesCount = 1;
 
     return adapter.CreateDevice(&deviceDescriptor);
 }

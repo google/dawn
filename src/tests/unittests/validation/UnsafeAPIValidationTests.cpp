@@ -22,8 +22,12 @@
 class UnsafeAPIValidationTest : public ValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.forceEnabledToggles.push_back("disallow_unsafe_apis");
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+        descriptor.nextInChain = &togglesDesc;
+        const char* toggle = "disallow_unsafe_apis";
+        togglesDesc.forceEnabledToggles = &toggle;
+        togglesDesc.forceEnabledTogglesCount = 1;
         return adapter.CreateDevice(&descriptor);
     }
 };
@@ -71,10 +75,18 @@ TEST_F(UnsafeAPIValidationTest, PipelineOverridableConstants) {
 class UnsafeQueryAPIValidationTest : public ValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.requiredFeatures.push_back("pipeline-statistics-query");
-        descriptor.requiredFeatures.push_back("timestamp-query");
-        descriptor.forceEnabledToggles.push_back("disallow_unsafe_apis");
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::PipelineStatisticsQuery,
+                                                 wgpu::FeatureName::TimestampQuery};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 2;
+
+        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+        descriptor.nextInChain = &togglesDesc;
+        const char* toggle = "disallow_unsafe_apis";
+        togglesDesc.forceEnabledToggles = &toggle;
+        togglesDesc.forceEnabledTogglesCount = 1;
+
         return adapter.CreateDevice(&descriptor);
     }
 };

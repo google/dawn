@@ -454,13 +454,13 @@ class PipelineStatisticsQueryTests : public QueryTests {
         DawnTest::SetUp();
 
         // Skip all tests if pipeline statistics feature is not supported
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({"pipeline-statistics-query"}));
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::PipelineStatisticsQuery}));
     }
 
-    std::vector<const char*> GetRequiredFeatures() override {
-        std::vector<const char*> requiredFeatures = {};
-        if (SupportsFeatures({"pipeline-statistics-query"})) {
-            requiredFeatures.push_back("pipeline-statistics-query");
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::PipelineStatisticsQuery})) {
+            requiredFeatures.push_back(wgpu::FeatureName::PipelineStatisticsQuery);
         }
 
         return requiredFeatures;
@@ -523,13 +523,13 @@ class TimestampQueryTests : public QueryTests {
         DawnTest::SetUp();
 
         // Skip all tests if timestamp feature is not supported
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({"timestamp-query"}));
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::TimestampQuery}));
     }
 
-    std::vector<const char*> GetRequiredFeatures() override {
-        std::vector<const char*> requiredFeatures = {};
-        if (SupportsFeatures({"timestamp-query"})) {
-            requiredFeatures.push_back("timestamp-query");
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::TimestampQuery})) {
+            requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
         }
         return requiredFeatures;
     }

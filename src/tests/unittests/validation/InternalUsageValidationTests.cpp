@@ -44,9 +44,10 @@ TEST_F(TextureInternalUsageValidationDisabledTest, RequiresFeature) {
 
 class TextureInternalUsageValidationTest : public ValidationTest {
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.requiredFeatures.push_back("dawn-internal-usages");
-
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DawnInternalUsages};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
         return adapter.CreateDevice(&descriptor);
     }
 };

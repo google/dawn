@@ -331,8 +331,8 @@ namespace {
 
 class CopyTests_T2T : public CopyTests, public DawnTestWithParams<CopyTestsParams> {
   protected:
-    std::vector<const char*> GetRequiredFeatures() override {
-        return {"dawn-internal-usages"};
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::DawnInternalUsages};
     }
 
     void DoTest(const TextureSpec& srcSpec,

@@ -46,10 +46,10 @@ namespace {
 
 class BufferZeroInitTest : public DawnTest {
   protected:
-    std::vector<const char*> GetRequiredFeatures() override {
-        std::vector<const char*> requiredFeatures = {};
-        if (SupportsFeatures({"timestamp-query"})) {
-            requiredFeatures.push_back("timestamp-query");
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::TimestampQuery})) {
+            requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
         }
         return requiredFeatures;
     }
@@ -1316,7 +1316,7 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
 
     // Skip if timestamp feature is not supported on device
-    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({"timestamp-query"}));
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::TimestampQuery}));
 
     // crbug.com/dawn/940: Does not work on Mac 11.0+. Backend validation changed.
     DAWN_TEST_UNSUPPORTED_IF(IsMacOS() && !IsMacOS(10));

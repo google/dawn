@@ -168,23 +168,24 @@ namespace wgpu { namespace binding {
     interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevice(
         Napi::Env env,
         interop::GPUDeviceDescriptor descriptor) {
-        dawn_native::DawnDeviceDescriptor desc{};  // TODO(crbug.com/dawn/1133): Fill in.
+        wgpu::DeviceDescriptor desc{};  // TODO(crbug.com/dawn/1133): Fill in.
         interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
 
+        std::vector<wgpu::FeatureName> requiredFeatures;
         // See src/dawn_native/Features.cpp for enum <-> string mappings.
         for (auto required : descriptor.requiredFeatures) {
             switch (required) {
                 case interop::GPUFeatureName::kDepthClamping:
-                    desc.requiredFeatures.emplace_back("depth-clamping");
+                    requiredFeatures.emplace_back(wgpu::FeatureName::DepthClamping);
                     continue;
                 case interop::GPUFeatureName::kPipelineStatisticsQuery:
-                    desc.requiredFeatures.emplace_back("pipeline-statistics-query");
+                    requiredFeatures.emplace_back(wgpu::FeatureName::PipelineStatisticsQuery);
                     continue;
                 case interop::GPUFeatureName::kTextureCompressionBc:
-                    desc.requiredFeatures.emplace_back("texture-compression-bc");
+                    requiredFeatures.emplace_back(wgpu::FeatureName::TextureCompressionBC);
                     continue;
                 case interop::GPUFeatureName::kTimestampQuery:
-                    desc.requiredFeatures.emplace_back("timestamp-query");
+                    requiredFeatures.emplace_back(wgpu::FeatureName::TimestampQuery);
                     continue;
                 case interop::GPUFeatureName::kDepth24UnormStencil8:
                 case interop::GPUFeatureName::kDepth32FloatStencil8:
@@ -194,23 +195,35 @@ namespace wgpu { namespace binding {
         }
 
         // Propogate enabled/disabled dawn features
-        // Note: DawnDeviceDescriptor::forceEnabledToggles and forceDisabledToggles are vectors of
-        // 'const char*', so we make sure the parsed strings survive the CreateDevice() call by
-        // storing them on the stack.
+        // Note: DawnDeviceTogglesDescriptor::forceEnabledToggles and forceDisabledToggles are
+        // vectors of 'const char*', so we make sure the parsed strings survive the CreateDevice()
+        // call by storing them on the stack.
         std::vector<std::string> enabledToggles;
         std::vector<std::string> disabledToggles;
+        std::vector<const char*> forceEnabledToggles;
+        std::vector<const char*> forceDisabledToggles;
         if (auto values = flags_.Get("enable-dawn-features")) {
             enabledToggles = Split(*values, ',');
             for (auto& t : enabledToggles) {
-                desc.forceEnabledToggles.emplace_back(t.c_str());
+                forceEnabledToggles.emplace_back(t.c_str());
             }
         }
         if (auto values = flags_.Get("disable-dawn-features")) {
             disabledToggles = Split(*values, ',');
             for (auto& t : disabledToggles) {
-                desc.forceDisabledToggles.emplace_back(t.c_str());
+                forceDisabledToggles.emplace_back(t.c_str());
             }
         }
+
+        desc.requiredFeaturesCount = requiredFeatures.size();
+        desc.requiredFeatures = requiredFeatures.data();
+
+        wgpu::DawnDeviceTogglesDescriptor togglesDesc = {};
+        desc.nextInChain = &togglesDesc;
+        togglesDesc.forceEnabledTogglesCount = forceEnabledToggles.size();
+        togglesDesc.forceEnabledToggles = forceEnabledToggles.data();
+        togglesDesc.forceDisabledTogglesCount = forceDisabledToggles.size();
+        togglesDesc.forceDisabledToggles = forceDisabledToggles.data();
 
         auto wgpu_device = adapter_.CreateDevice(&desc);
         if (wgpu_device) {

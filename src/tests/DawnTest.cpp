@@ -37,6 +37,7 @@
 #include <regex>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
 #    include "GLFW/glfw3.h"
@@ -856,7 +857,7 @@ dawn_native::Adapter DawnTestBase::GetAdapter() const {
     return mBackendAdapter;
 }
 
-std::vector<const char*> DawnTestBase::GetRequiredFeatures() {
+std::vector<wgpu::FeatureName> DawnTestBase::GetRequiredFeatures() {
     return {};
 }
 
@@ -875,19 +876,25 @@ wgpu::SupportedLimits DawnTestBase::GetSupportedLimits() {
     return *reinterpret_cast<wgpu::SupportedLimits*>(&supportedLimits);
 }
 
-bool DawnTestBase::SupportsFeatures(const std::vector<const char*>& features) {
+bool DawnTestBase::SupportsFeatures(const std::vector<wgpu::FeatureName>& features) {
     ASSERT(mBackendAdapter);
-    std::set<std::string> supportedFeaturesSet;
-    for (const char* supportedFeatureName : mBackendAdapter.GetSupportedFeatures()) {
-        supportedFeaturesSet.insert(supportedFeatureName);
+    std::vector<wgpu::FeatureName> supportedFeatures;
+    uint32_t count =
+        dawn_native::GetProcs().adapterEnumerateFeatures(mBackendAdapter.Get(), nullptr);
+    supportedFeatures.resize(count);
+    dawn_native::GetProcs().adapterEnumerateFeatures(
+        mBackendAdapter.Get(), reinterpret_cast<WGPUFeatureName*>(&supportedFeatures[0]));
+
+    std::unordered_set<wgpu::FeatureName> supportedSet;
+    for (wgpu::FeatureName f : supportedFeatures) {
+        supportedSet.insert(f);
     }
 
-    for (const char* featureName : features) {
-        if (supportedFeaturesSet.find(featureName) == supportedFeaturesSet.end()) {
+    for (wgpu::FeatureName f : features) {
+        if (supportedSet.count(f) == 0) {
             return false;
         }
     }
-
     return true;
 }
 
@@ -922,32 +929,44 @@ void DawnTestBase::SetUp() {
     for (const char* forceDisabledWorkaround : mParam.forceDisabledWorkarounds) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceDisabledWorkaround) != nullptr);
     }
-    dawn_native::DawnDeviceDescriptor deviceDescriptor = {};
-    deviceDescriptor.forceEnabledToggles = mParam.forceEnabledWorkarounds;
-    deviceDescriptor.forceDisabledToggles = mParam.forceDisabledWorkarounds;
-    deviceDescriptor.requiredFeatures = GetRequiredFeatures();
+
+    std::vector<const char*> forceEnabledToggles = mParam.forceEnabledWorkarounds;
+    std::vector<const char*> forceDisabledToggles = mParam.forceDisabledWorkarounds;
+
+    std::vector<wgpu::FeatureName> requiredFeatures = GetRequiredFeatures();
 
     wgpu::SupportedLimits supportedLimits;
     mBackendAdapter.GetLimits(reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits));
     wgpu::RequiredLimits requiredLimits = GetRequiredLimits(supportedLimits);
-    deviceDescriptor.requiredLimits = reinterpret_cast<WGPURequiredLimits*>(&requiredLimits);
 
     // Disabled disallowing unsafe APIs so we can test them.
-    deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
+    forceDisabledToggles.push_back("disallow_unsafe_apis");
 
     for (const std::string& toggle : gTestEnv->GetEnabledToggles()) {
         const dawn_native::ToggleInfo* info =
             gTestEnv->GetInstance()->GetToggleInfo(toggle.c_str());
         ASSERT(info != nullptr);
-        deviceDescriptor.forceEnabledToggles.push_back(info->name);
+        forceEnabledToggles.push_back(info->name);
     }
 
     for (const std::string& toggle : gTestEnv->GetDisabledToggles()) {
         const dawn_native::ToggleInfo* info =
             gTestEnv->GetInstance()->GetToggleInfo(toggle.c_str());
         ASSERT(info != nullptr);
-        deviceDescriptor.forceDisabledToggles.push_back(info->name);
+        forceDisabledToggles.push_back(info->name);
     }
+
+    wgpu::DeviceDescriptor deviceDescriptor = {};
+    deviceDescriptor.requiredLimits = &requiredLimits;
+    deviceDescriptor.requiredFeatures = requiredFeatures.data();
+    deviceDescriptor.requiredFeaturesCount = requiredFeatures.size();
+
+    wgpu::DawnTogglesDeviceDescriptor togglesDesc = {};
+    deviceDescriptor.nextInChain = &togglesDesc;
+    togglesDesc.forceEnabledToggles = forceEnabledToggles.data();
+    togglesDesc.forceEnabledTogglesCount = forceEnabledToggles.size();
+    togglesDesc.forceDisabledToggles = forceDisabledToggles.data();
+    togglesDesc.forceDisabledTogglesCount = forceDisabledToggles.size();
 
     std::tie(device, backendDevice) =
         mWireHelper->RegisterDevice(mBackendAdapter.CreateDevice(&deviceDescriptor));

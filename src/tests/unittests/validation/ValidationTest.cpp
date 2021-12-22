@@ -195,16 +195,25 @@ wgpu::SupportedLimits ValidationTest::GetSupportedLimits() {
 
 WGPUDevice ValidationTest::CreateTestDevice() {
     // Disabled disallowing unsafe APIs so we can test them.
-    dawn_native::DawnDeviceDescriptor deviceDescriptor;
-    deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
+    std::vector<const char*> forceEnabledToggles;
+    std::vector<const char*> forceDisabledToggles = {"disallow_unsafe_apis"};
 
     for (const std::string& toggle : gToggleParser->GetEnabledToggles()) {
-        deviceDescriptor.forceEnabledToggles.push_back(toggle.c_str());
+        forceEnabledToggles.push_back(toggle.c_str());
     }
 
     for (const std::string& toggle : gToggleParser->GetDisabledToggles()) {
-        deviceDescriptor.forceDisabledToggles.push_back(toggle.c_str());
+        forceDisabledToggles.push_back(toggle.c_str());
     }
+
+    wgpu::DeviceDescriptor deviceDescriptor;
+    wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+    deviceDescriptor.nextInChain = &togglesDesc;
+
+    togglesDesc.forceEnabledToggles = forceEnabledToggles.data();
+    togglesDesc.forceEnabledTogglesCount = forceEnabledToggles.size();
+    togglesDesc.forceDisabledToggles = forceDisabledToggles.data();
+    togglesDesc.forceDisabledTogglesCount = forceDisabledToggles.size();
 
     return adapter.CreateDevice(&deviceDescriptor);
 }

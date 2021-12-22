@@ -509,13 +509,13 @@ class DawnTestBase {
     void FlushWire();
     void WaitForAllOperations();
 
-    bool SupportsFeatures(const std::vector<const char*>& features);
+    bool SupportsFeatures(const std::vector<wgpu::FeatureName>& features);
 
     // Called in SetUp() to get the features required to be enabled in the tests. The tests must
     // check if the required features are supported by the adapter in this function and guarantee
     // the returned features are all supported by the adapter. The tests may provide different
     // code path to handle the situation when not all features are supported.
-    virtual std::vector<const char*> GetRequiredFeatures();
+    virtual std::vector<wgpu::FeatureName> GetRequiredFeatures();
 
     virtual wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits&);
 

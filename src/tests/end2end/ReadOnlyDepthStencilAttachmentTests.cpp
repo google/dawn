@@ -34,19 +34,19 @@ class ReadOnlyDepthStencilAttachmentTests
         uint32_t stencilRefValue;
     };
 
-    std::vector<const char*> GetRequiredFeatures() override {
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         switch (GetParam().mTextureFormat) {
             case wgpu::TextureFormat::Depth24UnormStencil8:
-                if (SupportsFeatures({"depth24unorm-stencil8"})) {
+                if (SupportsFeatures({wgpu::FeatureName::Depth24UnormStencil8})) {
                     mIsFormatSupported = true;
-                    return {"depth24unorm-stencil8"};
+                    return {wgpu::FeatureName::Depth24UnormStencil8};
                 }
 
                 return {};
             case wgpu::TextureFormat::Depth32FloatStencil8:
-                if (SupportsFeatures({"depth32float-stencil8"})) {
+                if (SupportsFeatures({wgpu::FeatureName::Depth32FloatStencil8})) {
                     mIsFormatSupported = true;
-                    return {"depth32float-stencil8"};
+                    return {wgpu::FeatureName::Depth32FloatStencil8};
                 }
 
                 return {};

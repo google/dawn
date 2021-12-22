@@ -43,8 +43,11 @@ namespace {
         // Create device with a valid name of a toggle
         {
             const char* kValidToggleName = "emulate_store_and_msaa_resolve";
-            dawn_native::DawnDeviceDescriptor descriptor;
-            descriptor.forceEnabledToggles.push_back(kValidToggleName);
+            wgpu::DeviceDescriptor descriptor;
+            wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+            descriptor.nextInChain = &togglesDesc;
+            togglesDesc.forceEnabledToggles = &kValidToggleName;
+            togglesDesc.forceEnabledTogglesCount = 1;
 
             WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
             std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(deviceWithToggle);
@@ -60,8 +63,11 @@ namespace {
         // Create device with an invalid toggle name
         {
             const char* kInvalidToggleName = "!@#$%^&*";
-            dawn_native::DawnDeviceDescriptor descriptor;
-            descriptor.forceEnabledToggles.push_back(kInvalidToggleName);
+            wgpu::DeviceDescriptor descriptor;
+            wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+            descriptor.nextInChain = &togglesDesc;
+            togglesDesc.forceEnabledToggles = &kInvalidToggleName;
+            togglesDesc.forceEnabledTogglesCount = 1;
 
             WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
             std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(deviceWithToggle);
@@ -77,8 +83,11 @@ namespace {
 
     TEST_F(ToggleValidationTest, TurnOffVsyncWithToggle) {
         const char* kValidToggleName = "turn_off_vsync";
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.forceEnabledToggles.push_back(kValidToggleName);
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+        descriptor.nextInChain = &togglesDesc;
+        togglesDesc.forceEnabledToggles = &kValidToggleName;
+        togglesDesc.forceEnabledTogglesCount = 1;
 
         WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
         std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(deviceWithToggle);

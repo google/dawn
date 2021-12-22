@@ -75,17 +75,17 @@ namespace {
       protected:
         constexpr static uint32_t kSize = 128;
 
-        std::vector<const char*> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
             if (GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
-                SupportsFeatures({"texture-compression-bc"})) {
-                return {"texture-compression-bc"};
+                SupportsFeatures({wgpu::FeatureName::TextureCompressionBC})) {
+                return {wgpu::FeatureName::TextureCompressionBC};
             }
             return {};
         }
 
         void Run() {
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
-                                     !SupportsFeatures({"texture-compression-bc"}));
+                                     !SupportsFeatures({wgpu::FeatureName::TextureCompressionBC}));
 
             // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
             // reading from Snorm textures.

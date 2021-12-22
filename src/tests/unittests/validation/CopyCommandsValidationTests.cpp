@@ -419,8 +419,11 @@ TEST_F(CopyCommandTest_B2B, CopyWithinSameBuffer) {
 class CopyCommandTest_B2T : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.requiredFeatures = {"depth24unorm-stencil8", "depth32float-stencil8"};
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::Depth24UnormStencil8,
+                                                 wgpu::FeatureName::Depth32FloatStencil8};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 2;
         return adapter.CreateDevice(&descriptor);
     }
 };
@@ -1000,8 +1003,11 @@ TEST_F(CopyCommandTest_B2T, RequiredBytesInCopyOverflow) {
 class CopyCommandTest_T2B : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.requiredFeatures = {"depth24unorm-stencil8", "depth32float-stencil8"};
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::Depth24UnormStencil8,
+                                                 wgpu::FeatureName::Depth32FloatStencil8};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 2;
         return adapter.CreateDevice(&descriptor);
     }
 };
@@ -1633,8 +1639,11 @@ TEST_F(CopyCommandTest_T2B, RequiredBytesInCopyOverflow) {
 class CopyCommandTest_T2T : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.requiredFeatures = {"depth24unorm-stencil8", "depth32float-stencil8"};
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::Depth24UnormStencil8,
+                                                 wgpu::FeatureName::Depth32FloatStencil8};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 2;
         return adapter.CreateDevice(&descriptor);
     }
 };
@@ -2076,9 +2085,12 @@ TEST_F(CopyCommandTest_T2T, CopyWithinSameTexture) {
 class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
-        dawn_native::DawnDeviceDescriptor descriptor;
-        descriptor.requiredFeatures = {"texture-compression-bc", "texture-compression-etc2",
-                                       "texture-compression-astc"};
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[3] = {wgpu::FeatureName::TextureCompressionBC,
+                                                 wgpu::FeatureName::TextureCompressionETC2,
+                                                 wgpu::FeatureName::TextureCompressionASTC};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 3;
         return adapter.CreateDevice(&descriptor);
     }
 
