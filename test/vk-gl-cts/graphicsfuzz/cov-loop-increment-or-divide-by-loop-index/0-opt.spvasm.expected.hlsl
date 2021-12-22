@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 cbuffer cbuffer_x_6 : register(b0, space0) {
   uint4 x_6[4];
 };
@@ -18,7 +16,7 @@ void main_1() {
       if ((x_35 == x_37)) {
         a = (a + 1);
       } else {
-        a = (a / i);
+        a = (a / (i == 0 ? 1 : i));
       }
     }
   }
@@ -59,6 +57,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x00000150DB0FB4A0(19,14-18): error X4010: Unsigned integer divide by zero
-C:\src\tint\test\Shader@0x00000150DB0FB4A0(19,14-18): warning X3556: integer divides may be much slower, try using uints if possible.
-

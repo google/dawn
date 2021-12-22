@@ -137,10 +137,12 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left + right)", ast::BinaryOp::kAdd},
         BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
         BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
-        // NOTE: Integer divide covered by DivideBy* tests below
+        // NOTE: Integer divide covered by DivOrModBy* tests below
         BinaryData{"(left / right)", ast::BinaryOp::kDivide,
                    BinaryData::Types::Float},
-        BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
+        // NOTE: Integer modulo covered by DivOrModBy* tests below
+        BinaryData{"(left % right)", ast::BinaryOp::kModulo,
+                   BinaryData::Types::Float}));
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
   auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
@@ -526,11 +528,36 @@ foo((tint_tmp), (tint_tmp_1), (tint_tmp_2));
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_i32) {
+namespace HlslGeneratorDivMod {
+
+struct Params {
+  enum class Type { Div, Mod };
+  Type type;
+};
+
+struct HlslGeneratorDivModTest : TestParamHelper<Params> {
+  std::string Token() {
+    return GetParam().type == Params::Type::Div ? "/" : "%";
+  }
+
+  template <typename... Args>
+  auto Op(Args... args) {
+    return GetParam().type == Params::Type::Div
+               ? Div(std::forward<Args>(args)...)
+               : Mod(std::forward<Args>(args)...);
+  }
+};
+
+INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest,
+                         HlslGeneratorDivModTest,
+                         testing::Values(Params{Params::Type::Div},
+                                         Params{Params::Type::Mod}));
+
+TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.i32())),
-           Decl(Const("r", nullptr, Div("a", 0))),
+           Decl(Const("r", nullptr, Op("a", 0))),
        });
 
   GeneratorImpl& gen = Build();
@@ -538,16 +565,17 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_i32) {
   ASSERT_TRUE(gen.Generate());
   EXPECT_EQ(gen.result(), R"(void fn() {
   int a = 0;
-  const int r = (a / 1);
+  const int r = (a )" + Token() +
+                              R"( 1);
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_u32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_u32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.u32())),
-           Decl(Const("r", nullptr, Div("a", 0u))),
+           Decl(Const("r", nullptr, Op("a", 0u))),
        });
 
   GeneratorImpl& gen = Build();
@@ -555,16 +583,17 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_u32) {
   ASSERT_TRUE(gen.Generate());
   EXPECT_EQ(gen.result(), R"(void fn() {
   uint a = 0u;
-  const uint r = (a / 1u);
+  const uint r = (a )" + Token() +
+                              R"( 1u);
 }
 )");
-}
+}  // namespace HlslGeneratorDivMod
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_vec_by_vec_i32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", nullptr, vec4<i32>(100, 100, 100, 100))),
-           Decl(Const("r", nullptr, Div("a", vec4<i32>(50, 0, 25, 0)))),
+           Decl(Const("r", nullptr, Op("a", vec4<i32>(50, 0, 25, 0)))),
        });
 
   GeneratorImpl& gen = Build();
@@ -572,16 +601,17 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_vec_by_vec_i32) {
   ASSERT_TRUE(gen.Generate());
   EXPECT_EQ(gen.result(), R"(void fn() {
   int4 a = int4(100, 100, 100, 100);
-  const int4 r = (a / int4(50, 1, 25, 1));
+  const int4 r = (a )" + Token() +
+                              R"( int4(50, 1, 25, 1));
 }
 )");
-}
+}  // namespace
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_vec_by_scalar_i32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_scalar_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", nullptr, vec4<i32>(100, 100, 100, 100))),
-           Decl(Const("r", nullptr, Div("a", 0))),
+           Decl(Const("r", nullptr, Op("a", 0))),
        });
 
   GeneratorImpl& gen = Build();
@@ -589,16 +619,17 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_vec_by_scalar_i32) {
   ASSERT_TRUE(gen.Generate());
   EXPECT_EQ(gen.result(), R"(void fn() {
   int4 a = int4(100, 100, 100, 100);
-  const int4 r = (a / 1);
+  const int4 r = (a )" + Token() +
+                              R"( 1);
 }
 )");
-}
+}  // namespace hlsl
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByIdentifier_i32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_i32) {
   Func("fn", {Param("b", ty.i32())}, ty.void_(),
        {
            Decl(Var("a", ty.i32())),
-           Decl(Const("r", nullptr, Div("a", "b"))),
+           Decl(Const("r", nullptr, Op("a", "b"))),
        });
 
   GeneratorImpl& gen = Build();
@@ -606,16 +637,17 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByIdentifier_i32) {
   ASSERT_TRUE(gen.Generate());
   EXPECT_EQ(gen.result(), R"(void fn(int b) {
   int a = 0;
-  const int r = (a / (b == 0 ? 1 : b));
+  const int r = (a )" + Token() +
+                              R"( (b == 0 ? 1 : b));
 }
 )");
-}
+}  // namespace writer
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByIdentifier_u32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_u32) {
   Func("fn", {Param("b", ty.u32())}, ty.void_(),
        {
            Decl(Var("a", ty.u32())),
-           Decl(Const("r", nullptr, Div("a", "b"))),
+           Decl(Const("r", nullptr, Op("a", "b"))),
        });
 
   GeneratorImpl& gen = Build();
@@ -623,16 +655,17 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByIdentifier_u32) {
   ASSERT_TRUE(gen.Generate());
   EXPECT_EQ(gen.result(), R"(void fn(uint b) {
   uint a = 0u;
-  const uint r = (a / (b == 0u ? 1u : b));
+  const uint r = (a )" + Token() +
+                              R"( (b == 0u ? 1u : b));
 }
 )");
-}
+}  // namespace tint
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByIdentifier_vec_by_vec_i32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_vec_i32) {
   Func("fn", {Param("b", ty.vec3<i32>())}, ty.void_(),
        {
            Decl(Var("a", ty.vec3<i32>())),
-           Decl(Const("r", nullptr, Div("a", "b"))),
+           Decl(Const("r", nullptr, Op("a", "b"))),
        });
 
   GeneratorImpl& gen = Build();
@@ -640,16 +673,17 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByIdentifier_vec_by_vec_i32) {
   ASSERT_TRUE(gen.Generate());
   EXPECT_EQ(gen.result(), R"(void fn(int3 b) {
   int3 a = int3(0, 0, 0);
-  const int3 r = (a / (b == int3(0, 0, 0) ? int3(1, 1, 1) : b));
+  const int3 r = (a )" + Token() +
+                              R"( (b == int3(0, 0, 0) ? int3(1, 1, 1) : b));
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByIdentifier_vec_by_scalar_i32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_scalar_i32) {
   Func("fn", {Param("b", ty.i32())}, ty.void_(),
        {
            Decl(Var("a", ty.vec3<i32>())),
-           Decl(Const("r", nullptr, Div("a", "b"))),
+           Decl(Const("r", nullptr, Op("a", "b"))),
        });
 
   GeneratorImpl& gen = Build();
@@ -657,12 +691,13 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByIdentifier_vec_by_scalar_i32) {
   ASSERT_TRUE(gen.Generate());
   EXPECT_EQ(gen.result(), R"(void fn(int b) {
   int3 a = int3(0, 0, 0);
-  const int3 r = (a / (b == 0 ? 1 : b));
+  const int3 r = (a )" + Token() +
+                              R"( (b == 0 ? 1 : b));
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByExpression_i32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_i32) {
   Func("zero", {}, ty.i32(),
        {
            Return(Expr(0)),
@@ -671,7 +706,7 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByExpression_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.i32())),
-           Decl(Const("r", nullptr, Div("a", Call("zero")))),
+           Decl(Const("r", nullptr, Op("a", Call("zero")))),
        });
 
   GeneratorImpl& gen = Build();
@@ -687,12 +722,13 @@ int zero() {
 
 void fn() {
   int a = 0;
-  const int r = (a / value_or_one_if_zero_int(zero()));
+  const int r = (a )" + Token() +
+                              R"( value_or_one_if_zero_int(zero()));
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByExpression_u32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_u32) {
   Func("zero", {}, ty.u32(),
        {
            Return(Expr(0u)),
@@ -701,7 +737,7 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByExpression_u32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.u32())),
-           Decl(Const("r", nullptr, Div("a", Call("zero")))),
+           Decl(Const("r", nullptr, Op("a", Call("zero")))),
        });
 
   GeneratorImpl& gen = Build();
@@ -717,12 +753,13 @@ uint zero() {
 
 void fn() {
   uint a = 0u;
-  const uint r = (a / value_or_one_if_zero_uint(zero()));
+  const uint r = (a )" + Token() +
+                              R"( value_or_one_if_zero_uint(zero()));
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByExpression_vec_by_vec_i32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_vec_i32) {
   Func("zero", {}, ty.vec3<i32>(),
        {
            Return(vec3<i32>(0, 0, 0)),
@@ -731,7 +768,7 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByExpression_vec_by_vec_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.vec3<i32>())),
-           Decl(Const("r", nullptr, Div("a", Call("zero")))),
+           Decl(Const("r", nullptr, Op("a", Call("zero")))),
        });
 
   GeneratorImpl& gen = Build();
@@ -747,12 +784,13 @@ int3 zero() {
 
 void fn() {
   int3 a = int3(0, 0, 0);
-  const int3 r = (a / value_or_one_if_zero_int3(zero()));
+  const int3 r = (a )" + Token() +
+                              R"( value_or_one_if_zero_int3(zero()));
 }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, DivideByExpression_vec_by_scalar_i32) {
+TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_scalar_i32) {
   Func("zero", {}, ty.i32(),
        {
            Return(0),
@@ -761,7 +799,7 @@ TEST_F(HlslGeneratorImplTest_Binary, DivideByExpression_vec_by_scalar_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.vec3<i32>())),
-           Decl(Const("r", nullptr, Div("a", Call("zero")))),
+           Decl(Const("r", nullptr, Op("a", Call("zero")))),
        });
 
   GeneratorImpl& gen = Build();
@@ -777,10 +815,12 @@ int zero() {
 
 void fn() {
   int3 a = int3(0, 0, 0);
-  const int3 r = (a / value_or_one_if_zero_int(zero()));
+  const int3 r = (a )" + Token() +
+                              R"( value_or_one_if_zero_int(zero()));
 }
 )");
 }
+}  // namespace HlslGeneratorDivMod
 
 }  // namespace
 }  // namespace hlsl

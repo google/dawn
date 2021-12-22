@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void f() {
+  int a = 1;
+  int b = 0;
+  int const r = (a % b);
+  return;
+}
+

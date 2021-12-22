@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 cbuffer cbuffer_x_8 : register(b2, space0) {
   uint4 x_8[2];
 };
@@ -24,7 +22,7 @@ void main_1() {
   if ((x_43 < x_45)) {
     const uint scalar_offset_1 = ((16u * uint(0))) / 4;
     const uint x_50 = x_12[scalar_offset_1 / 4][scalar_offset_1 % 4];
-    b = asint((x_50 % a));
+    b = asint((x_50 % (a == 0u ? 1u : a)));
   }
   const int x_54 = b;
   const int x_56 = asint(x_8[1].x);
@@ -68,5 +66,3 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000026AFDC08170(25,16-23): error X4010: Unsigned integer divide by zero
-

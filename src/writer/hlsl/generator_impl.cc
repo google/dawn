@@ -863,8 +863,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& out,
       break;
     case ast::BinaryOp::kDivide:
       out << "/";
-      // BUG(crbug.com/tint/1083): Integer divide by zero is a FXC compile
-      // error, and undefined behavior in WGSL.
+      // BUG(crbug.com/tint/1083): Integer divide/modulo by zero is a FXC
+      // compile error, and undefined behavior in WGSL.
       if (TypeOf(expr->rhs)->UnwrapRef()->is_integer_scalar_or_vector()) {
         out << " ";
         return EmitExpressionOrOneIfZero(out, expr->rhs);
@@ -872,6 +872,12 @@ bool GeneratorImpl::EmitBinary(std::ostream& out,
       break;
     case ast::BinaryOp::kModulo:
       out << "%";
+      // BUG(crbug.com/tint/1083): Integer divide/modulo by zero is a FXC
+      // compile error, and undefined behavior in WGSL.
+      if (TypeOf(expr->rhs)->UnwrapRef()->is_integer_scalar_or_vector()) {
+        out << " ";
+        return EmitExpressionOrOneIfZero(out, expr->rhs);
+      }
       break;
     case ast::BinaryOp::kNone:
       diagnostics_.add_error(diag::System::Writer,

@@ -60,7 +60,7 @@ uint toIndex1D(uint gridSize, float3 voxelPos) {
 uint3 toIndex3D(uint gridSize, uint index) {
   uint z_1 = (index / value_or_one_if_zero_uint((gridSize * gridSize)));
   uint y_1 = ((index - ((gridSize * gridSize) * z_1)) / (gridSize == 0u ? 1u : gridSize));
-  uint x_1 = (index % gridSize);
+  uint x_1 = (index % (gridSize == 0u ? 1u : gridSize));
   return uint3(x_1, y_1, z_1);
 }
 

@@ -1665,6 +1665,16 @@ class ProgramBuilder {
                                          Expr(std::forward<RHS>(rhs)));
   }
 
+  /// @param lhs the left hand argument to the modulo operation
+  /// @param rhs the right hand argument to the modulo operation
+  /// @returns a `ast::BinaryExpression` applying modulo of `lhs` by `rhs`
+  template <typename LHS, typename RHS>
+  const ast::Expression* Mod(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kModulo,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
   /// @param lhs the left hand argument to the bit shift right operation
   /// @param rhs the right hand argument to the bit shift right operation
   /// @returns a `ast::BinaryExpression` bit shifting right `lhs` by `rhs`
