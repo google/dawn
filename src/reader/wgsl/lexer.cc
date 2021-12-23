@@ -342,7 +342,7 @@ Token Lexer::try_hex_float() {
   auto source = begin_source();
 
   // clang-format off
-  // -?0x([0-9a-fA-F]*.?[0-9a-fA-F]+ | [0-9a-fA-F]+.[0-9a-fA-F]*)(p|P)(+|-)?[0-9]+  // NOLINT
+  // -?0[xX]([0-9a-fA-F]*.?[0-9a-fA-F]+ | [0-9a-fA-F]+.[0-9a-fA-F]*)(p|P)(+|-)?[0-9]+  // NOLINT
   // clang-format on
 
   // -?
@@ -351,8 +351,8 @@ Token Lexer::try_hex_float() {
     sign_bit = 1;
     end++;
   }
-  // 0x
-  if (matches(end, "0x")) {
+  // 0[xX]
+  if (matches(end, "0x") || matches(end, "0X")) {
     end += 2;
   } else {
     return {};
@@ -663,7 +663,7 @@ Token Lexer::try_hex_integer() {
     end++;
   }
 
-  if (matches(end, "0x")) {
+  if (matches(end, "0x") || matches(end, "0X")) {
     end += 2;
   } else {
     return {};

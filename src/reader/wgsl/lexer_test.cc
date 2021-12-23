@@ -394,11 +394,17 @@ INSTANTIATE_TEST_SUITE_P(
     IntegerTest_HexSigned,
     testing::Values(
         HexSignedIntData{"0x0", 0},
+        HexSignedIntData{"0X0", 0},
         HexSignedIntData{"0x42", 66},
+        HexSignedIntData{"0X42", 66},
         HexSignedIntData{"-0x42", -66},
+        HexSignedIntData{"-0X42", -66},
         HexSignedIntData{"0xeF1Abc9", 250719177},
+        HexSignedIntData{"0XeF1Abc9", 250719177},
         HexSignedIntData{"-0x80000000", std::numeric_limits<int32_t>::min()},
-        HexSignedIntData{"0x7FFFFFFF", std::numeric_limits<int32_t>::max()}));
+        HexSignedIntData{"-0X80000000", std::numeric_limits<int32_t>::min()},
+        HexSignedIntData{"0x7FFFFFFF", std::numeric_limits<int32_t>::max()},
+        HexSignedIntData{"0X7FFFFFFF", std::numeric_limits<int32_t>::max()}));
 
 TEST_F(LexerTest, HexPrefixOnly_IsError) {
   // Could be the start of a hex integer or hex float, but is neither.
@@ -411,9 +417,31 @@ TEST_F(LexerTest, HexPrefixOnly_IsError) {
             "integer or float hex literal has no significant digits");
 }
 
+TEST_F(LexerTest, HexPrefixUpperCaseOnly_IsError) {
+  // Could be the start of a hex integer or hex float, but is neither.
+  Source::FileContent content("0X");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  ASSERT_TRUE(t.Is(Token::Type::kError));
+  EXPECT_EQ(t.to_str(),
+            "integer or float hex literal has no significant digits");
+}
+
 TEST_F(LexerTest, NegativeHexPrefixOnly_IsError) {
   // Could be the start of a hex integer or hex float, but is neither.
   Source::FileContent content("-0x");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  ASSERT_TRUE(t.Is(Token::Type::kError));
+  EXPECT_EQ(t.to_str(),
+            "integer or float hex literal has no significant digits");
+}
+
+TEST_F(LexerTest, NegativeHexPrefixUpperCaseOnly_IsError) {
+  // Could be the start of a hex integer or hex float, but is neither.
+  Source::FileContent content("-0X");
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
