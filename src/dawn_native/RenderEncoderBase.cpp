@@ -281,7 +281,7 @@ namespace dawn_native {
                                     "Index format must be specified");
 
                     DAWN_INVALID_IF(offset % uint64_t(IndexFormatSize(format)) != 0,
-                                    "Index buffer offset (%u) is not a multiple of the size (%u)"
+                                    "Index buffer offset (%u) is not a multiple of the size (%u) "
                                     "of %s.",
                                     offset, IndexFormatSize(format), format);
 
