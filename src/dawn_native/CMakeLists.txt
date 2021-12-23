@@ -176,6 +176,8 @@ target_sources(dawn_native PRIVATE
     "VertexFormat.cpp"
     "VertexFormat.h"
     "dawn_platform.h"
+    "webgpu_absl_format.cpp"
+    "webgpu_absl_format.h"
     "utils/WGPUHelpers.cpp"
     "utils/WGPUHelpers.h"
 )

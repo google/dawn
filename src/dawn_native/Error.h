@@ -18,7 +18,7 @@
 #include "absl/strings/str_format.h"
 #include "common/Result.h"
 #include "dawn_native/ErrorData.h"
-#include "dawn_native/webgpu_absl_format_autogen.h"
+#include "dawn_native/webgpu_absl_format.h"
 
 #include <string>
 
