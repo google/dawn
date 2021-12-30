@@ -218,7 +218,7 @@ namespace wgpu { namespace binding {
         desc.requiredFeaturesCount = requiredFeatures.size();
         desc.requiredFeatures = requiredFeatures.data();
 
-        wgpu::DawnDeviceTogglesDescriptor togglesDesc = {};
+        DawnTogglesDeviceDescriptor togglesDesc = {};
         desc.nextInChain = &togglesDesc;
         togglesDesc.forceEnabledTogglesCount = forceEnabledToggles.size();
         togglesDesc.forceEnabledToggles = forceEnabledToggles.data();
