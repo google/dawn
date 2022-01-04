@@ -929,12 +929,6 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, Variable) {
   EXPECT_THAT(su.to_str(), Eq(GetParam().expected_sampler_usage));
   EXPECT_THAT(iu.to_str(), Eq(GetParam().expected_image_usage));
 
-  // TODO(dneto): remove this. crbug.com/tint/1336
-  if (inst.find("Gather") != std::string::npos) {
-    // WGSL does not support Gather instructions yet.
-    // So don't emit them as part of a "passing" corpus.
-    p->DeliberatelyInvalidSpirv();
-  }
   if (inst.find("ImageQueryLod") != std::string::npos) {
     // WGSL does not support querying image level of detail.
     // So don't emit them as part of a "passing" corpus.
@@ -987,12 +981,6 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, FunctionParam) {
   EXPECT_THAT(su.to_str(), Eq(GetParam().expected_sampler_usage));
   EXPECT_THAT(iu.to_str(), Eq(GetParam().expected_image_usage));
 
-  // TODO(dneto): remove this. crbug.com/tint/1336
-  if (inst.find("Gather") != std::string::npos) {
-    // WGSL does not support Gather instructions yet.
-    // So don't emit them as part of a "passing" corpus.
-    p->DeliberatelyInvalidSpirv();
-  }
   if (inst.find("ImageQueryLod") != std::string::npos) {
     // WGSL does not support querying image level of detail.
     // So don't emit them as part of a "passing" corpus.
@@ -1721,15 +1709,87 @@ INSTANTIATE_TEST_SUITE_P(
     ImageDrefGather,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
-        // TODO(dneto): OpImageDrefGather 2DDepth
-        // TODO(dneto): OpImageDrefGather 2DDepth ConstOffset signed
-        // TODO(dneto): OpImageDrefGather 2DDepth ConstOffset unsigned
-        // TODO(dneto): OpImageDrefGather 2DDepth Array
-        // TODO(dneto): OpImageDrefGather 2DDepth Array ConstOffset signed
-        // TODO(dneto): OpImageDrefGather 2DDepth Array ConstOffset unsigned
-        // TODO(dneto): OpImageDrefGather DepthCube
-        // TODO(dneto): OpImageDrefGather DepthCube Array
-    }));
+        // OpImageDrefGather 2DDepth
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageDrefGather "
+            "%v4float %sampled_image %coords12 %depth",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+            "textureGatherCompare(x_20, x_10, coords12, 0.200000003)"},
+        // OpImageDrefGather 2DDepth ConstOffset signed
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageDrefGather "
+            "%v4float %sampled_image %coords12 %depth ConstOffset %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+            "textureGatherCompare(x_20, x_10, coords12, 0.200000003, "
+            "vec2<i32>(3, 4))"},
+        // OpImageDrefGather 2DDepth ConstOffset unsigned
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageDrefGather "
+            "%v4float %sampled_image %coords12 %depth ConstOffset "
+            "%u_offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+            "textureGatherCompare(x_20, x_10, coords12, 0.200000003, "
+            "vec2<i32>(vec2<u32>(3u, 4u)))"},
+        // OpImageDrefGather 2DDepth Array
+        ImageAccessCase{
+            "%float 2D 1 1 0 1 Unknown",
+            "%result = OpImageDrefGather "
+            "%v4float %sampled_image %coords123 %depth",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+            "textureGatherCompare(x_20, x_10, coords123.xy, "
+            "i32(round(coords123.z)), 0.200000003)"},
+        // OpImageDrefGather 2DDepth Array ConstOffset signed
+        ImageAccessCase{
+            "%float 2D 1 1 0 1 Unknown",
+            "%result = OpImageDrefGather "
+            "%v4float %sampled_image %coords123 %depth ConstOffset %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+            "textureGatherCompare(x_20, x_10, coords123.xy, "
+            "i32(round(coords123.z)), 0.200000003, vec2<i32>(3, 4))"},
+        // OpImageDrefGather 2DDepth Array ConstOffset unsigned
+        ImageAccessCase{
+            "%float 2D 1 1 0 1 Unknown",
+            "%result = OpImageDrefGather "
+            "%v4float %sampled_image %coords123 %depth ConstOffset "
+            "%u_offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+            "textureGatherCompare(x_20, x_10, coords123.xy, "
+            "i32(round(coords123.z)), 0.200000003, "
+            "vec2<i32>(vec2<u32>(3u, 4u)))"},
+        // OpImageDrefGather DepthCube
+        ImageAccessCase{
+            "%float Cube 1 0 0 1 Unknown",
+            "%result = OpImageDrefGather "
+            "%v4float %sampled_image %coords123 %depth",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+            "textureGatherCompare(x_20, x_10, coords123, 0.200000003)"},
+        // OpImageDrefGather DepthCube Array
+        ImageAccessCase{
+            "%float Cube 1 1 0 1 Unknown",
+            "%result = OpImageDrefGather "
+            "%v4float %sampled_image %coords1234 %depth",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+            "textureGatherCompare(x_20, x_10, coords1234.xyz, "
+            "i32(round(coords1234.w)), 0.200000003)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleImplicitLod,
@@ -3774,6 +3834,49 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 0 0 1 Unknown",
          "%result = OpImageQueryLod %v2int %sampled_image %vf12",
          "WGSL does not support querying the level of detail of an image: ",
+         {}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageGather_Bias_IsError,
+    SpvParserHandleTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageGather %v4float %sampled_image %vf12 %int_1 "
+         "Bias %float_null",
+         "WGSL does not support image gather with level-of-detail bias: ",
+         {}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageDrefGather_Bias_IsError,
+    SpvParserHandleTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageDrefGather %v4float %sampled_image %vf12 %depth "
+         "Bias %float_null",
+         "WGSL does not support image gather with level-of-detail bias: ",
+         {}}}));
+
+// Note: Vulkan SPIR-V ImageGather and ImageDrefGather do not allow explicit
+// Lod. The SPIR-V validator should reject those cases already.
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageGather_Grad_IsError,
+    SpvParserHandleTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageGather %v4float %sampled_image %vf12 %int_1 "
+         "Grad %vf12 %vf12",
+         "WGSL does not support image gather with explicit gradient: ",
+         {}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageDrefGather_Grad_IsError,
+    SpvParserHandleTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageDrefGather %v4float %sampled_image %vf12 %depth "
+         "Grad %vf12 %vf12",
+         "WGSL does not support image gather with explicit gradient: ",
          {}}}));
 
 TEST_F(SpvParserHandleTest,

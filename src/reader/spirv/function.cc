@@ -5286,9 +5286,24 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
 
   const auto num_args = inst.NumInOperands();
 
+  // Consumes the depth-reference argument, pushing it onto the end of
+  // the parameter list. Issues a diagnostic and returns false on error.
+  auto consume_dref = [&]() -> bool {
+    if (arg_index < num_args) {
+      params.push_back(MakeOperand(inst, arg_index).expr);
+      arg_index++;
+    } else {
+      return Fail()
+             << "image depth-compare instruction is missing a Dref operand: "
+             << inst.PrettyPrint();
+    }
+    return true;
+  };
+
   std::string builtin_name;
   bool use_level_of_detail_suffix = true;
   bool is_dref_sample = false;
+  bool is_gather_or_dref_gather = false;
   bool is_non_dref_sample = false;
   switch (opcode) {
     case SpvOpImageSampleImplicitLod:
@@ -5304,16 +5319,12 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     case SpvOpImageSampleProjDrefExplicitLod:
       is_dref_sample = true;
       builtin_name = "textureSampleCompare";
-      if (arg_index < num_args) {
-        params.push_back(MakeOperand(inst, arg_index).expr);
-        arg_index++;
-      } else {
-        return Fail()
-               << "image depth-compare instruction is missing a Dref operand: "
-               << inst.PrettyPrint();
+      if (!consume_dref()) {
+        return false;
       }
       break;
     case SpvOpImageGather:
+      is_gather_or_dref_gather = true;
       builtin_name = "textureGather";
       if (!texture_type->Is<DepthTexture>()) {
         // The explicit component is the *first* argument in WGSL.
@@ -5323,7 +5334,12 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       arg_index++;
       break;
     case SpvOpImageDrefGather:
-      return Fail() << " image dref gather is not yet supported";
+      is_gather_or_dref_gather = true;
+      builtin_name = "textureGatherCompare";
+      if (!consume_dref()) {
+        return false;
+      }
+      break;
     case SpvOpImageFetch:
     case SpvOpImageRead:
       // Read a single texel from a sampled or storage image.
@@ -5367,6 +5383,11 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                        "level-of-detail bias: "
                     << inst.PrettyPrint();
     }
+    if (is_gather_or_dref_gather) {
+      return Fail() << "WGSL does not support image gather with "
+                       "level-of-detail bias: "
+                    << inst.PrettyPrint();
+    }
     builtin_name += "Bias";
     params.push_back(MakeOperand(inst, arg_index).expr);
     image_operands_mask ^= SpvImageOperandsBiasMask;
@@ -5376,9 +5397,11 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     if (use_level_of_detail_suffix) {
       builtin_name += "Level";
     }
-    if (is_dref_sample) {
+    if (is_dref_sample || is_gather_or_dref_gather) {
       // Metal only supports Lod = 0 for comparison sampling without
       // derivatives.
+      // Vulkan SPIR-V does not allow Lod with OpImageGather or
+      // OpImageDrefGather.
       if (!IsFloatZero(inst.GetSingleWordInOperand(arg_index))) {
         return Fail() << "WGSL comparison sampling without derivatives "
                          "requires level-of-detail 0.0"
@@ -5409,6 +5432,11 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       (image_operands_mask & SpvImageOperandsGradMask)) {
     if (is_dref_sample) {
       return Fail() << "WGSL does not support depth-reference sampling with "
+                       "explicit gradient: "
+                    << inst.PrettyPrint();
+    }
+    if (is_gather_or_dref_gather) {
+      return Fail() << "WGSL does not support image gather with "
                        "explicit gradient: "
                     << inst.PrettyPrint();
     }
@@ -5475,8 +5503,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     //   compare sample      f32   DrefImplicitLod      f32
     //   compare sample      f32   DrefExplicitLod      f32
     //   texel load          vec4  ImageFetch           f32
-    //   normal gather       vec4  ImageGather          vec4 TODO(dneto)
-    //   dref gather         vec4  ImageFetch           vec4 TODO(dneto)
+    //   normal gather       vec4  ImageGather          vec4
+    //   dref gather         vec4  ImageDrefGather      vec4
     // Construct a 4-element vector with the result from the builtin in the
     // first component.
     if (texture_type->IsAnyOf<DepthTexture, DepthMultisampledTexture>()) {
