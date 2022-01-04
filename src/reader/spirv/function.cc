@@ -494,8 +494,9 @@ bool IsSampledImageAccess(SpvOp opcode) {
 }
 
 // @param opcode a SPIR-V opcode
-// @returns true if the given instruction is an image sampling operation.
-bool IsImageSampling(SpvOp opcode) {
+// @returns true if the given instruction is an image sampling, gather,
+// or gather-compare operation.
+bool IsImageSamplingOrGatherOrDrefGather(SpvOp opcode) {
   switch (opcode) {
     case SpvOpImageSampleImplicitLod:
     case SpvOpImageSampleExplicitLod:
@@ -506,6 +507,8 @@ bool IsImageSampling(SpvOp opcode) {
     case SpvOpImageSampleProjExplicitLod:
     case SpvOpImageSampleProjDrefImplicitLod:
     case SpvOpImageSampleProjDrefExplicitLod:
+    case SpvOpImageGather:
+    case SpvOpImageDrefGather:
       return true;
     default:
       break;
@@ -5247,6 +5250,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   params.push_back(GetImageExpression(inst));
 
+  // Form the sampler operand, if needed.
   if (IsSampledImageAccess(opcode)) {
     // Form the sampler operand.
     if (auto* sampler = GetSamplerExpression(inst)) {
@@ -5256,6 +5260,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     }
   }
 
+  // Find the texture type.
   const Pointer* texture_ptr_type = parser_impl_.GetTypeForHandleVar(*image);
   if (!texture_ptr_type) {
     return Fail();
@@ -5309,8 +5314,16 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       }
       break;
     case SpvOpImageGather:
+      builtin_name = "textureGather";
+      if (!texture_type->Is<DepthTexture>()) {
+        // The explicit component is the *first* argument in WGSL.
+        params.insert(params.begin(), ToI32(MakeOperand(inst, arg_index)).expr);
+      }
+      // Skip over the component operand, even for depth textures.
+      arg_index++;
+      break;
     case SpvOpImageDrefGather:
-      return Fail() << " image gather is not yet supported";
+      return Fail() << " image dref gather is not yet supported";
     case SpvOpImageFetch:
     case SpvOpImageRead:
       // Read a single texel from a sampled or storage image.
@@ -5407,8 +5420,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsConstOffsetMask)) {
-    if (!IsImageSampling(opcode)) {
-      return Fail() << "ConstOffset is only permitted for sampling operations: "
+    if (!IsImageSamplingOrGatherOrDrefGather(opcode)) {
+      return Fail() << "ConstOffset is only permitted for sampling, gather, or "
+                       "depth-reference gather operations: "
                     << inst.PrettyPrint();
     }
     switch (texture_type->dims) {

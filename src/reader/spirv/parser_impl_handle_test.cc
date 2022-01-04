@@ -929,6 +929,7 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, Variable) {
   EXPECT_THAT(su.to_str(), Eq(GetParam().expected_sampler_usage));
   EXPECT_THAT(iu.to_str(), Eq(GetParam().expected_image_usage));
 
+  // TODO(dneto): remove this. crbug.com/tint/1336
   if (inst.find("Gather") != std::string::npos) {
     // WGSL does not support Gather instructions yet.
     // So don't emit them as part of a "passing" corpus.
@@ -986,6 +987,7 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, FunctionParam) {
   EXPECT_THAT(su.to_str(), Eq(GetParam().expected_sampler_usage));
   EXPECT_THAT(iu.to_str(), Eq(GetParam().expected_image_usage));
 
+  // TODO(dneto): remove this. crbug.com/tint/1336
   if (inst.find("Gather") != std::string::npos) {
     // WGSL does not support Gather instructions yet.
     // So don't emit them as part of a "passing" corpus.
@@ -1003,8 +1005,6 @@ INSTANTIATE_TEST_SUITE_P(
     Samples,
     SpvParserHandleTest_RegisterHandleUsage_SampledImage,
     ::testing::Values(
-
-        // Test image gather even though WGSL doesn't support it yet.
 
         // OpImageGather
         UsageImageAccessCase{"%result = OpImageGather "
@@ -1565,24 +1565,170 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage,
        DISABLED_FunctionParam) {}
 
 INSTANTIATE_TEST_SUITE_P(
-    DISABLED_ImageGather,
+    ImageGather,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
-        // TODO(dneto): OpImageGather
-        // TODO(dneto): OpImageGather with ConstOffset (signed and unsigned)
-        // TODO(dneto): OpImageGather with Offset (signed and unsigned)
-        // TODO(dneto): OpImageGather with Offsets (signed and unsigned)
-    }));
+        // OpImageGather 2D
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords12 %int_1",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+                        "textureGather(1, x_20, x_10, coords12)"},
+        // OpImageGather 2D ConstOffset signed
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageGather "
+            "%v4float %sampled_image %coords12 %int_1 ConstOffset %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            "textureGather(1, x_20, x_10, coords12, vec2<i32>(3, 4))"},
+        // OpImageGather 2D ConstOffset unsigned
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords12 %int_1 ConstOffset "
+                        "%u_offsets2d",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+                        "textureGather(1, x_20, x_10, coords12, "
+                        "vec2<i32>(vec2<u32>(3u, 4u)))"},
+        // OpImageGather 2D Array
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords123 %int_1",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+                        "textureGather(1, x_20, x_10, coords123.xy, "
+                        "i32(round(coords123.z)))"},
+        // OpImageGather 2D Array ConstOffset signed
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageGather "
+            "%v4float %sampled_image %coords123 %int_1 ConstOffset %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            "textureGather(1, x_20, x_10, coords123.xy, "
+            "i32(round(coords123.z)), vec2<i32>(3, 4))"},
+        // OpImageGather 2D Array ConstOffset unsigned
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords123 %int_1 ConstOffset "
+                        "%u_offsets2d",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+                        "textureGather(1, x_20, x_10, coords123.xy, "
+                        "i32(round(coords123.z)), "
+                        "vec2<i32>(vec2<u32>(3u, 4u)))"},
+        // OpImageGather Cube
+        ImageAccessCase{"%float Cube 0 0 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords123 %int_1",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_cube<f32>;)",
+                        "textureGather(1, x_20, x_10, coords123)"},
+        // OpImageGather Cube Array
+        ImageAccessCase{"%float Cube 0 1 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords1234 %int_1",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_cube_array<f32>;)",
+                        "textureGather(1, x_20, x_10, coords1234.xyz, "
+                        "i32(round(coords1234.w)))"},
+        // OpImageGather 2DDepth
+        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords12 %int_1",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+                        "textureGather(x_20, x_10, coords12)"},
+        // OpImageGather 2DDepth ConstOffset signed
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageGather "
+            "%v4float %sampled_image %coords12 %int_1 ConstOffset %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+            "textureGather(x_20, x_10, coords12, vec2<i32>(3, 4))"},
+        // OpImageGather 2DDepth ConstOffset unsigned
+        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords12 %int_1 ConstOffset "
+                        "%u_offsets2d",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+                        "textureGather(x_20, x_10, coords12, "
+                        "vec2<i32>(vec2<u32>(3u, 4u)))"},
+        // OpImageGather 2DDepth Array
+        ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords123 %int_1",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+                        "textureGather(x_20, x_10, coords123.xy, "
+                        "i32(round(coords123.z)))"},
+        // OpImageGather 2DDepth Array ConstOffset signed
+        ImageAccessCase{
+            "%float 2D 1 1 0 1 Unknown",
+            "%result = OpImageGather "
+            "%v4float %sampled_image %coords123 %int_1 ConstOffset %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+            "textureGather(x_20, x_10, coords123.xy, "
+            "i32(round(coords123.z)), vec2<i32>(3, 4))"},
+        // OpImageGather 2DDepth Array ConstOffset unsigned
+        ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords123 %int_1 ConstOffset "
+                        "%u_offsets2d",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+                        "textureGather(x_20, x_10, coords123.xy, "
+                        "i32(round(coords123.z)), "
+                        "vec2<i32>(vec2<u32>(3u, 4u)))"},
+        // OpImageGather DepthCube
+        ImageAccessCase{"%float Cube 1 0 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords123 %int_1",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+                        "textureGather(x_20, x_10, coords123)"},
+        // OpImageGather DepthCube Array
+        ImageAccessCase{"%float Cube 1 1 0 1 Unknown",
+                        "%result = OpImageGather "
+                        "%v4float %sampled_image %coords1234 %int_1",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+                        "textureGather(x_20, x_10, coords1234.xyz, "
+                        "i32(round(coords1234.w)))"}}));
 
 INSTANTIATE_TEST_SUITE_P(
-    DISABLED_ImageDrefGather,
+    ImageDrefGather,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
-        // TODO(dneto): OpImageDrefGather
-        // TODO(dneto): OpImageDrefGather with ConstOffset (signed and
-        // unsigned)
-        // TODO(dneto): OpImageDrefGather with Offset (signed and unsigned)
-        // TODO(dneto): OpImageDrefGather with Offsets (signed and unsigned)
+        // TODO(dneto): OpImageDrefGather 2DDepth
+        // TODO(dneto): OpImageDrefGather 2DDepth ConstOffset signed
+        // TODO(dneto): OpImageDrefGather 2DDepth ConstOffset unsigned
+        // TODO(dneto): OpImageDrefGather 2DDepth Array
+        // TODO(dneto): OpImageDrefGather 2DDepth Array ConstOffset signed
+        // TODO(dneto): OpImageDrefGather 2DDepth Array ConstOffset unsigned
+        // TODO(dneto): OpImageDrefGather DepthCube
+        // TODO(dneto): OpImageDrefGather DepthCube Array
     }));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3458,21 +3604,21 @@ INSTANTIATE_TEST_SUITE_P(
         {"%uint 2D 0 0 0 1 Unknown",
          "%result = OpImageFetch %v4uint %sampled_image %vf12 ConstOffset "
          "%the_vu12",
-         "ConstOffset is only permitted for sampling operations: ",
+         "ConstOffset is only permitted for sampling, gather, or "
+         "depth-reference gather operations: ",
          {}},
         // ImageRead
         {"%uint 2D 0 0 0 2 Rgba32ui",
          "%result = OpImageRead %v4uint %im %vu12 ConstOffset %the_vu12",
-         "ConstOffset is only permitted for sampling operations: ",
+         "ConstOffset is only permitted for sampling, gather, or "
+         "depth-reference gather operations: ",
          {}},
         // ImageWrite
         {"%uint 2D 0 0 0 2 Rgba32ui",
          "OpImageWrite %im %vu12 %vu1234 ConstOffset %the_vu12",
-         "ConstOffset is only permitted for sampling operations: ",
-         {}}
-        // TODO(dneto): Gather
-        // TODO(dneto): DrefGather
-    }));
+         "ConstOffset is only permitted for sampling, gather, or "
+         "depth-reference gather operations: ",
+         {}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ConstOffset_BadDim_Errors,
