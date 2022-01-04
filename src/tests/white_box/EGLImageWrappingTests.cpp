@@ -135,7 +135,7 @@ class EGLImageTestBase : public DawnTest {
         gl.BindTexture(GL_TEXTURE_2D, tex);
         gl.TexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
         EGLAttrib attribs[1] = {EGL_NONE};
-        EGLClientBuffer buffer = reinterpret_cast<EGLClientBuffer>(tex);
+        EGLClientBuffer buffer = reinterpret_cast<EGLClientBuffer>(static_cast<intptr_t>(tex));
         EGLDisplay dpy = egl.GetCurrentDisplay();
         EGLContext ctx = egl.GetCurrentContext();
         EGLImage eglImage = egl.CreateImage(dpy, ctx, EGL_GL_TEXTURE_2D, buffer, attribs);

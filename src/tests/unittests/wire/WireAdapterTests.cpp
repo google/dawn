@@ -193,7 +193,7 @@ namespace {
                         for (wgpu::FeatureName feature : fakeFeatures) {
                             *(features++) = static_cast<WGPUFeatureName>(feature);
                         }
-                        return fakeFeatures.size();
+                        return static_cast<uint32_t>(fakeFeatures.size());
                     })));
 
                 api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Success,
@@ -259,7 +259,7 @@ namespace {
                         for (wgpu::FeatureName feature : fakeFeatures) {
                             *(features++) = static_cast<WGPUFeatureName>(feature);
                         }
-                        return fakeFeatures.size();
+                        return static_cast<uint32_t>(fakeFeatures.size());
                     })));
 
                 // The device was actually created, but the wire didn't support its features.

@@ -146,6 +146,17 @@ config("dawn_internal") {
     # Dawn extends wgpu enums with internal enums.
     # MSVC considers these invalid switch values. crbug.com/dawn/397.
     cflags += [ "/wd4063" ]
+
+    # MSVC things that a switch over all the enum values of an enum class is
+    # not sufficient to cover all control paths. Turn off this warning so that
+    # the respective clang warning tells us where to add switch cases
+    # (otherwise we have to add default: UNREACHABLE() that silences clang too)
+    cflags += [ "/wd4715" ]
+
+    # MSVC emits warnings when using constructs deprecated in C++17. Silence
+    # them until they are fixed.
+    # TODO(dawn:824): Fix all uses of C++ features deprecated in C++17.
+    defines += [ "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS" ]
     if (dawn_is_winuwp) {
       # /ZW makes sure we don't add calls that are forbidden in UWP.
       # and /EHsc is required to be used in combination with it,
