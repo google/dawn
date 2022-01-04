@@ -61,7 +61,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
-  } elseif (else_cond) {
+  } else if (else_cond) {
     return;
   }
 )");
@@ -118,7 +118,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
-  } elseif (else_cond) {
+  } else if (else_cond) {
     return;
   } else {
     return;

@@ -4,7 +4,10 @@
 
 ### Deprecated Features
 
-* The `[[block]]` attribute has been deprecated and will be removed in M102. [tint:1324](https://crbug.com/tint/1324)
+The following features have been deprecated and will be removed in M102:
+
+* The `[[block]]` attribute has been deprecated. [tint:1324](https://crbug.com/tint/1324)
+* `elseif` has been replaced with `else if` [tint:1289](https://crbug.com/tint/1289)
 
 ### New Features
 

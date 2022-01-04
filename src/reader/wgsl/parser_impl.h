@@ -522,12 +522,9 @@ class ParserImpl {
   /// Parses a `if_stmt` grammar element
   /// @returns the parsed statement or nullptr
   Maybe<const ast::IfStatement*> if_stmt();
-  /// Parses a `elseif_stmt` grammar element
-  /// @returns the parsed elements
-  Maybe<ast::ElseStatementList> elseif_stmt();
-  /// Parses a `else_stmt` grammar element
+  /// Parses a list of `else_stmt` grammar elements
   /// @returns the parsed statement or nullptr
-  Maybe<const ast::ElseStatement*> else_stmt();
+  Expect<ast::ElseStatementList> else_stmts();
   /// Parses a `switch_stmt` grammar element
   /// @returns the parsed statement or nullptr
   Maybe<const ast::SwitchStatement*> switch_stmt();

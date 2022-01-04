@@ -221,7 +221,7 @@ TEST_F(ResolverCompoundStatementTest, If) {
   // fn F() {
   //   if (cond_a) {
   //     stat_a;
-  //   } elseif (cond_b) {
+  //   } else if (cond_b) {
   //     stat_b;
   //   } else {
   //     stat_c;

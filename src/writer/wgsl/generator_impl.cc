@@ -955,7 +955,7 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
   for (auto* e : stmt->else_statements) {
     if (e->condition) {
       auto out = line();
-      out << "} elseif (";
+      out << "} else if (";
       if (!EmitExpression(out, e->condition)) {
         return false;
       }

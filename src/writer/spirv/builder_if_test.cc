@@ -150,7 +150,7 @@ OpBranch %7
 TEST_F(BuilderTest, If_WithElseIf) {
   // if (true) {
   //   v = 2;
-  // } elseif (true) {
+  // } else if (true) {
   //   v = 3;
   // }
 
@@ -201,9 +201,9 @@ OpBranch %7
 TEST_F(BuilderTest, If_WithMultiple) {
   // if (true) {
   //   v = 2;
-  // } elseif (true) {
+  // } else if (true) {
   //   v = 3;
-  // } elseif (false) {
+  // } else if (false) {
   //   v = 4;
   // } else {
   //   v = 5;

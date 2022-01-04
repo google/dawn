@@ -35,7 +35,8 @@ TEST_F(ParserImplTest, IfStmt) {
 }
 
 TEST_F(ParserImplTest, IfStmt_WithElse) {
-  auto p = parser("if (a == 4) { a = b; c = d; } elseif(c) { d = 2; } else {}");
+  auto p =
+      parser("if (a == 4) { a = b; c = d; } else if(c) { d = 2; } else {}");
   auto e = p->if_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -98,13 +99,13 @@ TEST_F(ParserImplTest, IfStmt_MissingBody) {
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
-  auto p = parser("if (a) {} elseif (a) { fn main() -> a{}}");
+  auto p = parser("if (a) {} else if (a) { fn main() -> a{}}");
   auto e = p->if_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:24: expected '}'");
+  EXPECT_EQ(p->error(), "1:25: expected '}'");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElse) {

@@ -41,19 +41,19 @@ fn getColor(fragment : FragmentInput) -> vec4<f32>{
 
         color = fragment.color;
 
-    }elseif(uniforms.color_source == 1u){
+    } else if(uniforms.color_source == 1u){
         // NORMALS
 
         // color = vec4<f32>(0.0, 0.0, 1.0, 1.0);
         color = fragment.normal;
         color.a = 1.0;
 
-    }elseif(uniforms.color_source == 2u){
+    } else if(uniforms.color_source == 2u){
         // uniform color
 
         color = uniforms.color;
 
-    }elseif(uniforms.color_source == 3u){
+    } else if(uniforms.color_source == 3u){
         // TEXTURE
 
         color = textureSample(myTexture, mySampler, fragment.uv);

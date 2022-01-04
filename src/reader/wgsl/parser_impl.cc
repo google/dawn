@@ -1540,7 +1540,7 @@ Expect<ast::Builtin> ParserImpl::expect_builtin() {
 }
 
 // body_stmt
-//   : BRACKET_LEFT statements BRACKET_RIGHT
+//   : BRACE_LEFT statements BRACE_RIGHT
 Expect<ast::BlockStatement*> ParserImpl::expect_body_stmt() {
   return expect_brace_block("", [&]() -> Expect<ast::BlockStatement*> {
     auto stmts = expect_statements();
@@ -1791,7 +1791,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
 }
 
 // if_stmt
-//   : IF paren_rhs_stmt body_stmt elseif_stmt? else_stmt?
+//   : IF paren_rhs_stmt body_stmt ( ELSE else_stmts ) ?
 Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
   Source source;
   if (!match(Token::Type::kIf, &source))
@@ -1805,59 +1805,52 @@ Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
   if (body.errored)
     return Failure::kErrored;
 
-  auto elseif = elseif_stmt();
-  if (elseif.errored)
+  auto el = else_stmts();
+  if (el.errored) {
     return Failure::kErrored;
-
-  auto el = else_stmt();
-  if (el.errored)
-    return Failure::kErrored;
-  if (el.matched)
-    elseif.value.push_back(el.value);
-
-  return create<ast::IfStatement>(source, condition.value, body.value,
-                                  elseif.value);
-}
-
-// elseif_stmt
-//   : ELSE_IF paren_rhs_stmt body_stmt elseif_stmt?
-Maybe<ast::ElseStatementList> ParserImpl::elseif_stmt() {
-  Source source;
-  if (!match(Token::Type::kElseIf, &source))
-    return Failure::kNoMatch;
-
-  ast::ElseStatementList ret;
-  while (continue_parsing()) {
-    auto condition = expect_paren_rhs_stmt();
-    if (condition.errored)
-      return Failure::kErrored;
-
-    auto body = expect_body_stmt();
-    if (body.errored)
-      return Failure::kErrored;
-
-    ret.push_back(
-        create<ast::ElseStatement>(source, condition.value, body.value));
-
-    if (!match(Token::Type::kElseIf, &source))
-      break;
   }
 
-  return ret;
+  return create<ast::IfStatement>(source, condition.value, body.value,
+                                  std::move(el.value));
 }
 
-// else_stmt
-//   : ELSE body_stmt
-Maybe<const ast::ElseStatement*> ParserImpl::else_stmt() {
-  Source source;
-  if (!match(Token::Type::kElse, &source))
-    return Failure::kNoMatch;
+// else_stmts
+//  : body_stmt
+//  | if_stmt
+Expect<ast::ElseStatementList> ParserImpl::else_stmts() {
+  ast::ElseStatementList stmts;
+  while (continue_parsing()) {
+    Source start;
 
-  auto body = expect_body_stmt();
-  if (body.errored)
-    return Failure::kErrored;
+    bool else_if = false;
+    if (match(Token::Type::kElse, &start)) {
+      else_if = match(Token::Type::kIf);
+    } else if (match(Token::Type::kElseIf, &start)) {
+      deprecated(start, "'elseif' is now 'else if'");
+      else_if = true;
+    } else {
+      break;
+    }
 
-  return create<ast::ElseStatement>(source, nullptr, body.value);
+    const ast::Expression* cond = nullptr;
+    if (else_if) {
+      auto condition = expect_paren_rhs_stmt();
+      if (condition.errored) {
+        return Failure::kErrored;
+      }
+      cond = condition.value;
+    }
+
+    auto body = expect_body_stmt();
+    if (body.errored) {
+      return Failure::kErrored;
+    }
+
+    Source source = make_source_range_from(start);
+    stmts.emplace_back(create<ast::ElseStatement>(source, cond, body.value));
+  }
+
+  return stmts;
 }
 
 // switch_stmt
