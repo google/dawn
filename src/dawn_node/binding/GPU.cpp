@@ -112,6 +112,9 @@ namespace wgpu { namespace binding {
         std::transform(forceBackend.begin(), forceBackend.end(), forceBackend.begin(),
                        [](char c) { return std::tolower(c); });
 
+        // Default to first adapter if a backend is not specified
+        size_t adapterIndex = 0;
+
         if (!forceBackend.empty()) {
             if (forceBackend == "null") {
                 targetBackendType = wgpu::BackendType::Null;
@@ -129,17 +132,24 @@ namespace wgpu { namespace binding {
                 targetBackendType = wgpu::BackendType::OpenGL;
             } else if (forceBackend == "opengles" || forceBackend == "gles") {
                 targetBackendType = wgpu::BackendType::OpenGLES;
+            } else {
+                promise.Reject("unknown backend '" + forceBackend + "'");
+                return promise;
             }
-        }
 
-        // Default to first adapter if we don't find a match
-        size_t adapterIndex = 0;
-        for (size_t i = 0; i < adapters.size(); ++i) {
-            wgpu::AdapterProperties props;
-            adapters[i].GetProperties(&props);
-            if (props.backendType == targetBackendType) {
-                adapterIndex = i;
-                break;
+            bool found = false;
+            for (size_t i = 0; i < adapters.size(); ++i) {
+                wgpu::AdapterProperties props;
+                adapters[i].GetProperties(&props);
+                if (props.backendType == targetBackendType) {
+                    adapterIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                promise.Reject("backend '" + forceBackend + "' not found");
+                return promise;
             }
         }
 
