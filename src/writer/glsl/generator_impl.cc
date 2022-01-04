@@ -2110,7 +2110,7 @@ bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
     if (!EmitStatements(stmt->body->statements)) {
       return false;
     }
-    if (!emit_continuing()) {
+    if (!emit_continuing_()) {
       return false;
     }
   }
@@ -2190,7 +2190,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
       return false;
     }
 
-    if (!emit_continuing()) {
+    if (!emit_continuing_()) {
       return false;
     }
   } else {
