@@ -370,6 +370,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpEntryPoint Vertex %main "main" %1
 
  ;  scramble the member indices
+  OpDecorate %10 Block
   OpMemberDecorate %10 0 BuiltIn ClipDistance
   OpMemberDecorate %10 1 BuiltIn CullDistance
   OpMemberDecorate %10 2 BuiltIn Position
