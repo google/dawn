@@ -1565,7 +1565,7 @@ sem::Call* Resolver::TypeConstructor(
                     [&](const sem::Type* t, size_t i) -> const sem::Parameter* {
                       return builder_->create<sem::Parameter>(
                           nullptr,                   // declaration
-                          i,                         // index
+                          static_cast<uint32_t>(i),  // index
                           t->UnwrapRef(),            // type
                           ast::StorageClass::kNone,  // storage_class
                           ast::Access::kUndefined);  // access

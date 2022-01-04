@@ -155,14 +155,15 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         return expr->Declaration();
       }));
   auto* constructor_target = b->create<sem::TypeConstructor>(
-      packed_sem_ty,
-      utils::Transform(packed,
-                       [&](const tint::sem::Expression* arg,
-                           size_t i) -> const sem::Parameter* {
-                         return b->create<sem::Parameter>(
-                             nullptr, i, arg->Type()->UnwrapRef(),
-                             ast::StorageClass::kNone, ast::Access::kUndefined);
-                       }));
+      packed_sem_ty, utils::Transform(packed,
+                                      [&](const tint::sem::Expression* arg,
+                                          size_t i) -> const sem::Parameter* {
+                                        return b->create<sem::Parameter>(
+                                            nullptr, static_cast<uint32_t>(i),
+                                            arg->Type()->UnwrapRef(),
+                                            ast::StorageClass::kNone,
+                                            ast::Access::kUndefined);
+                                      }));
   auto* constructor_sem = b->create<sem::Call>(
       constructor_ast, constructor_target, packed, statement, sem::Constant{});
   b->Sem().Add(constructor_ast, constructor_sem);
