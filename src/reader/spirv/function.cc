@@ -5207,7 +5207,7 @@ const ast::Expression* FunctionEmitter::GetSamplerExpression(
 }
 
 bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
-  ast::ExpressionList params;
+  ast::ExpressionList args;
   const auto opcode = inst.opcode();
 
   // Form the texture operand.
@@ -5215,13 +5215,13 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   if (!image) {
     return false;
   }
-  params.push_back(GetImageExpression(inst));
+  args.push_back(GetImageExpression(inst));
 
   // Form the sampler operand, if needed.
   if (IsSampledImageAccess(opcode)) {
     // Form the sampler operand.
     if (auto* sampler = GetSamplerExpression(inst)) {
-      params.push_back(sampler);
+      args.push_back(sampler);
     } else {
       return false;
     }
@@ -5247,7 +5247,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   if (coords.empty()) {
     return false;
   }
-  params.insert(params.end(), coords.begin(), coords.end());
+  args.insert(args.end(), coords.begin(), coords.end());
   // Skip the coordinates operand.
   arg_index++;
 
@@ -5257,7 +5257,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   // the parameter list. Issues a diagnostic and returns false on error.
   auto consume_dref = [&]() -> bool {
     if (arg_index < num_args) {
-      params.push_back(MakeOperand(inst, arg_index).expr);
+      args.push_back(MakeOperand(inst, arg_index).expr);
       arg_index++;
     } else {
       return Fail()
@@ -5295,7 +5295,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       builtin_name = "textureGather";
       if (!texture_type->Is<DepthTexture>()) {
         // The explicit component is the *first* argument in WGSL.
-        params.insert(params.begin(), ToI32(MakeOperand(inst, arg_index)).expr);
+        args.insert(args.begin(), ToI32(MakeOperand(inst, arg_index)).expr);
       }
       // Skip over the component operand, even for depth textures.
       arg_index++;
@@ -5324,7 +5324,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
           return false;
         }
 
-        params.push_back(converted_texel);
+        args.push_back(converted_texel);
         arg_index++;
       } else {
         return Fail() << "image write is missing a Texel operand: "
@@ -5356,7 +5356,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                     << inst.PrettyPrint();
     }
     builtin_name += "Bias";
-    params.push_back(MakeOperand(inst, arg_index).expr);
+    args.push_back(MakeOperand(inst, arg_index).expr);
     image_operands_mask ^= SpvImageOperandsBiasMask;
     arg_index++;
   }
@@ -5383,7 +5383,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         // Convert it to a signed integer type.
         lod = ToI32(lod);
       }
-      params.push_back(lod.expr);
+      args.push_back(lod.expr);
     }
 
     image_operands_mask ^= SpvImageOperandsLodMask;
@@ -5393,7 +5393,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                   ->IsAnyOf<DepthMultisampledTexture, MultisampledTexture>()) {
     // textureLoad requires an explicit level-of-detail parameter for
     // non-multisampled texture types.
-    params.push_back(parser_impl_.MakeNullValue(ty_.I32()));
+    args.push_back(parser_impl_.MakeNullValue(ty_.I32()));
   }
   if (arg_index + 1 < num_args &&
       (image_operands_mask & SpvImageOperandsGradMask)) {
@@ -5408,8 +5408,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                     << inst.PrettyPrint();
     }
     builtin_name += "Grad";
-    params.push_back(MakeOperand(inst, arg_index).expr);
-    params.push_back(MakeOperand(inst, arg_index + 1).expr);
+    args.push_back(MakeOperand(inst, arg_index).expr);
+    args.push_back(MakeOperand(inst, arg_index + 1).expr);
     image_operands_mask ^= SpvImageOperandsGradMask;
     arg_index += 2;
   }
@@ -5431,14 +5431,14 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                       << inst.PrettyPrint();
     }
 
-    params.push_back(ToSignedIfUnsigned(MakeOperand(inst, arg_index)).expr);
+    args.push_back(ToSignedIfUnsigned(MakeOperand(inst, arg_index)).expr);
     image_operands_mask ^= SpvImageOperandsConstOffsetMask;
     arg_index++;
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsSampleMask)) {
     // TODO(dneto): only permitted with ImageFetch
-    params.push_back(ToI32(MakeOperand(inst, arg_index)).expr);
+    args.push_back(ToI32(MakeOperand(inst, arg_index)).expr);
     image_operands_mask ^= SpvImageOperandsSampleMask;
     arg_index++;
   }
@@ -5447,10 +5447,16 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                   << "): " << inst.PrettyPrint();
   }
 
+  // If any of the arguments are nullptr, then we've failed.
+  if (std::any_of(args.begin(), args.end(),
+                  [](auto* expr) { return expr == nullptr; })) {
+    return false;
+  }
+
   auto* ident = create<ast::IdentifierExpression>(
       Source{}, builder_.Symbols().Register(builtin_name));
   auto* call_expr =
-      create<ast::CallExpression>(Source{}, ident, std::move(params));
+      create<ast::CallExpression>(Source{}, ident, std::move(args));
 
   if (inst.type_id() != 0) {
     // It returns a value.
