@@ -3945,8 +3945,8 @@ TEST_F(SpvParserHandleTest,
   auto ast_body = fe.ast_body();
   const auto got = test::ToString(p->program(), ast_body);
   auto* expect = R"(var var_1 : vec4<f32>;
-let x_22 : vec4<f32> = textureSample(x_2, x_3, vec2<f32>(0.0, 0.0));
-let x_26 : vec4<f32> = textureSample(x_2, x_3, vec2<f32>(0.0, 0.0));
+let x_22 : vec4<f32> = textureSample(x_2, x_3, vec2<f32>());
+let x_26 : vec4<f32> = textureSample(x_2, x_3, vec2<f32>());
 var_1 = (x_22 + x_26);
 return;
 )";

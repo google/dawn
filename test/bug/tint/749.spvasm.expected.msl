@@ -843,7 +843,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
   QuicksortObject const tint_symbol_43 = {.numbers=tint_symbol_42};
   *(tint_symbol_84) = tint_symbol_43;
   *(tint_symbol_84) = x_756;
-  float2 const x_446 = float2(float2(0.0f, 0.0f)[0], float2(0.0f, 0.0f)[0]);
+  float2 const x_446 = float2(float2()[0], float2()[0]);
   int const x_757 = i_2;
   i_2 = 0;
   i_2 = x_757;
@@ -857,7 +857,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
   float2 const x_759 = uv;
   uv = float2(0.0f, 0.0f);
   uv = x_759;
-  float2 const x_447 = float2(float2(0.0f, 0.0f)[1], float2(0.0f, 0.0f)[1]);
+  float2 const x_447 = float2(float2()[1], float2()[1]);
   float2 const x_760 = uv;
   uv = float2(0.0f, 0.0f);
   uv = x_760;
@@ -956,7 +956,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
     int const x_781 = (*(tint_symbol_84)).numbers.arr[0u];
     (*(tint_symbol_84)).numbers.arr[0u] = 0;
     (*(tint_symbol_84)).numbers.arr[0u] = x_781;
-    float3 const x_456 = float3(float2(0.0f, 0.0f)[1], x_448[1], x_448[1]);
+    float3 const x_456 = float3(float2()[1], x_448[1], x_448[1]);
     float const x_782 = uv[0];
     uv[0] = 0.0f;
     uv[0] = x_782;
@@ -975,7 +975,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
     QuicksortObject const tint_symbol_63 = {.numbers=tint_symbol_62};
     *(tint_symbol_84) = tint_symbol_63;
     *(tint_symbol_84) = x_785;
-    float2 const x_458 = float2(float3(1.0f, 2.0f, 3.0f)[2], float2(0.0f, 0.0f)[1]);
+    float2 const x_458 = float2(float3(1.0f, 2.0f, 3.0f)[2], float2()[1]);
     int const x_786 = i_2;
     i_2 = 0;
     i_2 = x_786;
@@ -1015,7 +1015,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
   float const x_796 = uv[0];
   uv[0] = 0.0f;
   uv[0] = x_796;
-  float2 const x_461 = float2(float2(0.0f, 0.0f)[1], float2(0.0f, 0.0f)[1]);
+  float2 const x_461 = float2(float2()[1], float2()[1]);
   float const x_797 = uv[0];
   uv[0] = 0.0f;
   uv[0] = x_797;
@@ -1059,7 +1059,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
     int const x_808 = i_2;
     i_2 = 0;
     i_2 = x_808;
-    float2 const x_466 = float2(x_455[1], float2(0.0f, 0.0f)[1]);
+    float2 const x_466 = float2(x_455[1], float2()[1]);
     int const x_809 = i_2;
     i_2 = 0;
     i_2 = x_809;
@@ -1113,7 +1113,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
     int const x_822 = (*(tint_symbol_84)).numbers.arr[0u];
     (*(tint_symbol_84)).numbers.arr[0u] = 0;
     (*(tint_symbol_84)).numbers.arr[0u] = x_822;
-    float2 const x_470 = float2(float2(0.0f, 0.0f)[0], float2(0.0f, 0.0f)[1]);
+    float2 const x_470 = float2(float2()[0], float2()[1]);
     float const x_823 = color[2];
     color[2] = 0.0f;
     color[2] = x_823;
@@ -1155,7 +1155,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
   color[0] = x_832;
   float2 const x_476 = float2(x_451[2], x_460[1]);
   color[1] = (x_257 + float(x_254));
-  float3 const x_477 = float3(float2(0.0f, 0.0f)[0], x_472[0], float2(0.0f, 0.0f)[1]);
+  float3 const x_477 = float3(float2()[0], x_472[0], float2()[1]);
   float const x_833 = uv[0];
   uv[0] = 0.0f;
   uv[0] = x_833;
@@ -1170,14 +1170,14 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
   int const x_836 = i_2;
   i_2 = 0;
   i_2 = x_836;
-  float3 const x_479 = float3(float2(0.0f, 0.0f)[1], x_454[1], float2(0.0f, 0.0f)[0]);
+  float3 const x_479 = float3(float2()[1], x_454[1], float2()[0]);
   int const x_837 = (*(tint_symbol_84)).numbers.arr[0u];
   (*(tint_symbol_84)).numbers.arr[0u] = 0;
   (*(tint_symbol_84)).numbers.arr[0u] = x_837;
   float const x_838 = color[1];
   color[1] = 0.0f;
   color[1] = x_838;
-  float3 const x_480 = float3(x_446[0], x_446[0], float2(0.0f, 0.0f)[1]);
+  float3 const x_480 = float3(x_446[0], x_446[0], float2()[1]);
   float const x_839 = uv[0];
   uv[0] = 0.0f;
   uv[0] = x_839;
@@ -1384,7 +1384,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
   float const x_891 = color[1];
   color[1] = 0.0f;
   color[1] = x_891;
-  float2 const x_504 = float2(x_453[1], float2(0.0f, 0.0f)[0]);
+  float2 const x_504 = float2(x_453[1], float2()[0]);
   float const x_892 = color[0];
   color[0] = 0.0f;
   color[0] = x_892;
@@ -1487,7 +1487,7 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
     float const x_918 = uv[0];
     uv[0] = 0.0f;
     uv[0] = x_918;
-    float3 const x_517 = float3(float2(0.0f, 0.0f)[0], float2(0.0f, 0.0f)[0], float2(0.0f, 0.0f)[1]);
+    float3 const x_517 = float3(float2()[0], float2()[0], float2()[1]);
     color[0] = (float(x_317) + x_320);
     float const x_919 = color[0];
     color[0] = 0.0f;

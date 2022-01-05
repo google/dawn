@@ -105,10 +105,10 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto ast_body = fe.ast_body();
   EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_14 : vec2<bool> = vec2<bool>(false, false);
-let x_11 : vec2<u32> = vec2<u32>(0u, 0u);
-let x_12 : vec2<i32> = vec2<i32>(0, 0);
-let x_13 : vec2<f32> = vec2<f32>(0.0, 0.0);
+              HasSubstr(R"(let x_14 : vec2<bool> = vec2<bool>();
+let x_11 : vec2<u32> = vec2<u32>();
+let x_12 : vec2<i32> = vec2<i32>();
+let x_13 : vec2<f32> = vec2<f32>();
 )"));
 }
 
@@ -161,9 +161,9 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto ast_body = fe.ast_body();
   EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_11 : vec2<u32> = vec2<u32>(0u, 0u);
-let x_12 : vec2<i32> = vec2<i32>(0, 0);
-let x_13 : vec2<f32> = vec2<f32>(0.0, 0.0);
+              HasSubstr(R"(let x_11 : vec2<u32> = vec2<u32>();
+let x_12 : vec2<i32> = vec2<i32>();
+let x_13 : vec2<f32> = vec2<f32>();
 )"));
 }
 
@@ -185,9 +185,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto ast_body = fe.ast_body();
   EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_11 : mat2x2<f32> = mat2x2<f32>("
-                        "vec2<f32>(0.0, 0.0), "
-                        "vec2<f32>(0.0, 0.0));"));
+              HasSubstr("let x_11 : mat2x2<f32> = mat2x2<f32>();"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
@@ -209,7 +207,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto ast_body = fe.ast_body();
   EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_11 : array<u32, 2u> = array<u32, 2u>(0u, 0u);"));
+              HasSubstr("let x_11 : array<u32, 2u> = array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {

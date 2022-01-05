@@ -1,9 +1,9 @@
 [[group(1), binding(0)]] var arg_0 : texture_depth_multisampled_2d;
 
-var<private> tint_symbol_1 : vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+var<private> tint_symbol_1 : vec4<f32> = vec4<f32>();
 
 fn textureDimensions_f60bdb() {
-  var res : vec2<i32> = vec2<i32>(0, 0);
+  var res : vec2<i32> = vec2<i32>();
   let x_16 : vec2<i32> = vec2<i32>(textureDimensions(arg_0));
   res = x_16;
   return;
@@ -16,7 +16,7 @@ fn tint_symbol_2(tint_symbol : vec4<f32>) {
 
 fn vertex_main_1() {
   textureDimensions_f60bdb();
-  tint_symbol_2(vec4<f32>(0.0, 0.0, 0.0, 0.0));
+  tint_symbol_2(vec4<f32>());
   return;
 }
 

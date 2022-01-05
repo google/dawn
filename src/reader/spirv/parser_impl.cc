@@ -2001,37 +2001,8 @@ const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
   if (type->Is<F32>()) {
     return create<ast::FloatLiteralExpression>(Source{}, 0.0f);
   }
-  if (type->Is<Alias>()) {
-    // TODO(amaiorano): No type constructor for TypeName (yet?)
-    ast::ExpressionList ast_components;
-    return builder_.Construct(Source{}, original_type->Build(builder_),
-                              std::move(ast_components));
-  }
-  if (auto* vec_ty = type->As<Vector>()) {
-    ast::ExpressionList ast_components;
-    for (size_t i = 0; i < vec_ty->size; ++i) {
-      ast_components.emplace_back(MakeNullValue(vec_ty->type));
-    }
-    return builder_.Construct(Source{}, type->Build(builder_),
-                              std::move(ast_components));
-  }
-  if (auto* mat_ty = type->As<Matrix>()) {
-    // Matrix components are columns
-    auto* column_ty = ty_.Vector(mat_ty->type, mat_ty->rows);
-    ast::ExpressionList ast_components;
-    for (size_t i = 0; i < mat_ty->columns; ++i) {
-      ast_components.emplace_back(MakeNullValue(column_ty));
-    }
-    return builder_.Construct(Source{}, type->Build(builder_),
-                              std::move(ast_components));
-  }
-  if (auto* arr_ty = type->As<Array>()) {
-    ast::ExpressionList ast_components;
-    for (size_t i = 0; i < arr_ty->size; ++i) {
-      ast_components.emplace_back(MakeNullValue(arr_ty->type));
-    }
-    return builder_.Construct(Source{}, original_type->Build(builder_),
-                              std::move(ast_components));
+  if (type->IsAnyOf<Vector, Matrix, Array>()) {
+    return builder_.Construct(Source{}, type->Build(builder_));
   }
   if (auto* struct_ty = type->As<Struct>()) {
     ast::ExpressionList ast_components;

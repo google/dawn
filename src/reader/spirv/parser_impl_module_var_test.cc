@@ -357,8 +357,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePosition) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("gl_Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);"))
+  EXPECT_THAT(module_str, HasSubstr("gl_Position = vec4<f32>();"))
       << module_str;
 }
 
@@ -402,8 +401,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("gl_Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);"))
+  EXPECT_THAT(module_str, HasSubstr("gl_Position = vec4<f32>();"))
       << module_str;
 }
 
@@ -998,9 +996,8 @@ TEST_F(SpvModuleScopeVarParserTest, VectorBoolNullInitializer) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>(false, false);"));
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorBoolUndefInitializer) {
@@ -1012,9 +1009,8 @@ TEST_F(SpvModuleScopeVarParserTest, VectorBoolUndefInitializer) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>(false, false);"));
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>();"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1030,7 +1026,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorUintNullInitializer) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>(0u, 0u);"));
+              HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorUintUndefInitializer) {
@@ -1043,7 +1039,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorUintUndefInitializer) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>(0u, 0u);"));
+              HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>();"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1059,7 +1055,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorIntNullInitializer) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>(0, 0);"));
+              HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorIntUndefInitializer) {
@@ -1072,7 +1068,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorIntUndefInitializer) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>(0, 0);"));
+              HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>();"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1087,9 +1083,8 @@ TEST_F(SpvModuleScopeVarParserTest, VectorFloatNullInitializer) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(0.0, 0.0);"));
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorFloatUndefInitializer) {
@@ -1101,9 +1096,8 @@ TEST_F(SpvModuleScopeVarParserTest, VectorFloatUndefInitializer) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(0.0, 0.0);"));
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>();"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1141,10 +1135,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
-                        "vec2<f32>(0.0, 0.0), "
-                        "vec2<f32>(0.0, 0.0), "
-                        "vec2<f32>(0.0, 0.0));"));
+              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
@@ -1157,10 +1148,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
-                        "vec2<f32>(0.0, 0.0), "
-                        "vec2<f32>(0.0, 0.0), "
-                        "vec2<f32>(0.0, 0.0));"));
+              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>();"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1193,8 +1181,7 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayNullInitializer) {
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(
       module_str,
-      HasSubstr(
-          "var<private> x_200 : array<u32, 2u> = array<u32, 2u>(0u, 0u);"));
+      HasSubstr("var<private> x_200 : array<u32, 2u> = array<u32, 2u>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ArrayUndefInitializer) {
@@ -1208,8 +1195,7 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayUndefInitializer) {
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(
       module_str,
-      HasSubstr(
-          "var<private> x_200 : array<u32, 2u> = array<u32, 2u>(0u, 0u);"));
+      HasSubstr("var<private> x_200 : array<u32, 2u> = array<u32, 2u>();"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1245,7 +1231,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(
       module_str,
-      HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>(0u, 0u));"))
+      HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>());"))
       << module_str;
 }
 
@@ -1262,7 +1248,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(
       module_str,
-      HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>(0u, 0u));"))
+      HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>());"))
       << module_str;
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
@@ -3967,7 +3953,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->error().empty());
   const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(var<private> x_1 : array<u32, 1u> = array<u32, 1u>(0u);
+      R"(var<private> x_1 : array<u32, 1u> = array<u32, 1u>();
 
 fn main_1() {
   return;
@@ -4013,7 +3999,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->error().empty());
   const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(var<private> x_1 : array<i32, 1u> = array<i32, 1u>(0);
+      R"(var<private> x_1 : array<i32, 1u> = array<i32, 1u>();
 
 fn main_1() {
   return;

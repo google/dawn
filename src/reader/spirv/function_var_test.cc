@@ -340,7 +340,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Null) {
   auto ast_body = fe.ast_body();
   EXPECT_THAT(
       test::ToString(p->program(), ast_body),
-      HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>(0u, 0u);"));
+      HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserFunctionVarTest,
@@ -368,7 +368,7 @@ TEST_F(SpvParserFunctionVarTest,
 
   auto ast_body = fe.ast_body();
   EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : Arr = Arr(0u, 0u);"));
+              HasSubstr("var x_200 : Arr = [[stride(16)]] array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer) {
@@ -412,7 +412,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
 
   auto ast_body = fe.ast_body();
   EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : S = S(0u, 0.0, array<u32, 2u>(0u, 0u));"));
+              HasSubstr("var x_200 : S = S(0u, 0.0, array<u32, 2u>());"));
 }
 
 TEST_F(SpvParserFunctionVarTest,
@@ -1525,7 +1525,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_CompositeInsert) {
 
   const auto* expected = R"(var x_200 : vec2<i32>;
 if (true) {
-  x_200 = vec2<i32>(0, 0);
+  x_200 = vec2<i32>();
   x_200.x = 0;
 } else {
   return;
@@ -1568,7 +1568,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_VectorInsertDynamic) {
   const auto got = test::ToString(p->program(), ast_body);
   const auto* expected = R"(var x_200 : vec2<i32>;
 if (true) {
-  x_200 = vec2<i32>(0, 0);
+  x_200 = vec2<i32>();
   x_200[1] = 3;
 } else {
   return;

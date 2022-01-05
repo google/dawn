@@ -1325,8 +1325,8 @@
         %893 = OpLoad %QuicksortObject %obj
                OpStore %obj %103
                OpStore %obj %893
-        %894 = OpCompositeExtract %float %876 0
-        %895 = OpCompositeExtract %float %876 0
+        %894 = OpCompositeExtract %float %168 0
+        %895 = OpCompositeExtract %float %168 0
         %896 = OpCompositeConstruct %v2float %894 %895
         %897 = OpLoad %int %i_2
                OpStore %i_2 %int_0
@@ -1339,8 +1339,8 @@
         %901 = OpLoad %v2float %uv
                OpStore %uv %876
                OpStore %uv %901
-        %902 = OpCompositeExtract %float %876 1
-        %903 = OpCompositeExtract %float %876 1
+        %902 = OpCompositeExtract %float %168 1
+        %903 = OpCompositeExtract %float %168 1
         %904 = OpCompositeConstruct %v2float %902 %903
         %905 = OpLoad %v2float %uv
                OpStore %uv %876
@@ -1473,7 +1473,7 @@
                OpStore %988 %int_0
         %989 = OpAccessChain %_ptr_Private_int %obj %uint_0 %uint_0
                OpStore %989 %987
-        %990 = OpCompositeExtract %float %876 1
+        %990 = OpCompositeExtract %float %168 1
         %991 = OpCompositeExtract %float %912 1
         %992 = OpCompositeExtract %float %912 1
         %993 = OpCompositeConstruct %v3float %990 %991 %992
@@ -1498,7 +1498,7 @@
                OpStore %obj %103
                OpStore %obj %1005
        %1006 = OpCompositeExtract %float %38 2
-       %1007 = OpCompositeExtract %float %876 1
+       %1007 = OpCompositeExtract %float %168 1
        %1008 = OpCompositeConstruct %v2float %1006 %1007
        %1009 = OpLoad %int %i_2
                OpStore %i_2 %int_0
@@ -1572,8 +1572,8 @@
                OpStore %1054 %float_0
        %1055 = OpAccessChain %_ptr_Function_float %uv %uint_0
                OpStore %1055 %1053
-       %1056 = OpCompositeExtract %float %876 1
-       %1057 = OpCompositeExtract %float %876 1
+       %1056 = OpCompositeExtract %float %168 1
+       %1057 = OpCompositeExtract %float %168 1
        %1058 = OpCompositeConstruct %v2float %1056 %1057
        %1059 = OpAccessChain %_ptr_Function_float %uv %uint_0
        %1060 = OpLoad %float %1059
@@ -1666,7 +1666,7 @@
                OpStore %i_2 %int_0
                OpStore %i_2 %1125
        %1126 = OpCompositeExtract %float %975 1
-       %1127 = OpCompositeExtract %float %876 1
+       %1127 = OpCompositeExtract %float %168 1
        %1128 = OpCompositeConstruct %v2float %1126 %1127
        %1129 = OpLoad %int %i_2
                OpStore %i_2 %int_0
@@ -1764,8 +1764,8 @@
                OpStore %1193 %int_0
        %1194 = OpAccessChain %_ptr_Private_int %obj %uint_0 %uint_0
                OpStore %1194 %1192
-       %1195 = OpCompositeExtract %float %876 0
-       %1196 = OpCompositeExtract %float %876 1
+       %1195 = OpCompositeExtract %float %168 0
+       %1196 = OpCompositeExtract %float %168 1
        %1197 = OpCompositeConstruct %v2float %1195 %1196
        %1198 = OpAccessChain %_ptr_Function_float %color %uint_2
        %1199 = OpLoad %float %1198
@@ -1855,9 +1855,9 @@
        %1261 = OpConvertSToF %float %1219
        %1262 = OpFAdd %float %1241 %1261
                OpStore %1260 %1262
-       %1263 = OpCompositeExtract %float %876 0
+       %1263 = OpCompositeExtract %float %168 0
        %1264 = OpCompositeExtract %float %1216 0
-       %1265 = OpCompositeExtract %float %876 1
+       %1265 = OpCompositeExtract %float %168 1
        %1266 = OpCompositeConstruct %v3float %1263 %1264 %1265
        %1267 = OpAccessChain %_ptr_Function_float %uv %uint_0
        %1268 = OpLoad %float %1267
@@ -1885,9 +1885,9 @@
        %1284 = OpLoad %int %i_2
                OpStore %i_2 %int_0
                OpStore %i_2 %1284
-       %1285 = OpCompositeExtract %float %876 1
+       %1285 = OpCompositeExtract %float %168 1
        %1286 = OpCompositeExtract %float %970 1
-       %1287 = OpCompositeExtract %float %876 0
+       %1287 = OpCompositeExtract %float %168 0
        %1288 = OpCompositeConstruct %v3float %1285 %1286 %1287
        %1289 = OpAccessChain %_ptr_Private_int %obj %uint_0 %uint_0
        %1290 = OpLoad %int %1289
@@ -1903,7 +1903,7 @@
                OpStore %1296 %1294
        %1297 = OpCompositeExtract %float %896 0
        %1298 = OpCompositeExtract %float %896 0
-       %1299 = OpCompositeExtract %float %876 1
+       %1299 = OpCompositeExtract %float %168 1
        %1300 = OpCompositeConstruct %v3float %1297 %1298 %1299
        %1301 = OpAccessChain %_ptr_Function_float %uv %uint_0
        %1302 = OpLoad %float %1301
@@ -2308,7 +2308,7 @@
        %1588 = OpAccessChain %_ptr_Function_float %color %uint_1
                OpStore %1588 %1586
        %1589 = OpCompositeExtract %float %962 1
-       %1590 = OpCompositeExtract %float %876 0
+       %1590 = OpCompositeExtract %float %168 0
        %1591 = OpCompositeConstruct %v2float %1589 %1590
        %1592 = OpAccessChain %_ptr_Function_float %color %uint_0
        %1593 = OpLoad %float %1592
@@ -2517,9 +2517,9 @@
                OpStore %1743 %float_0
        %1744 = OpAccessChain %_ptr_Function_float %uv %uint_0
                OpStore %1744 %1742
-       %1745 = OpCompositeExtract %float %876 0
-       %1746 = OpCompositeExtract %float %876 0
-       %1747 = OpCompositeExtract %float %876 1
+       %1745 = OpCompositeExtract %float %168 0
+       %1746 = OpCompositeExtract %float %168 0
+       %1747 = OpCompositeExtract %float %168 1
        %1748 = OpCompositeConstruct %v3float %1745 %1746 %1747
        %1749 = OpAccessChain %_ptr_Function_float %color %uint_0
        %1750 = OpConvertSToF %float %1714

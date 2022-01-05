@@ -1,10 +1,10 @@
 [[group(1), binding(0)]] var arg_0 : texture_depth_multisampled_2d;
 
-var<private> tint_symbol_1 : vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+var<private> tint_symbol_1 : vec4<f32> = vec4<f32>();
 
 fn textureLoad_6273b1() {
   var res : f32 = 0.0;
-  let x_17 : vec4<f32> = vec4<f32>(textureLoad(arg_0, vec2<i32>(0, 0), 1), 0.0, 0.0, 0.0);
+  let x_17 : vec4<f32> = vec4<f32>(textureLoad(arg_0, vec2<i32>(), 1), 0.0, 0.0, 0.0);
   res = x_17.x;
   return;
 }
@@ -16,7 +16,7 @@ fn tint_symbol_2(tint_symbol : vec4<f32>) {
 
 fn vertex_main_1() {
   textureLoad_6273b1();
-  tint_symbol_2(vec4<f32>(0.0, 0.0, 0.0, 0.0));
+  tint_symbol_2(vec4<f32>());
   return;
 }
 

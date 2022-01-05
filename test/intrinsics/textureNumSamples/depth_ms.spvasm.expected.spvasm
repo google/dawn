@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 59
+; Bound: 57
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -44,73 +44,71 @@
          %11 = OpTypeImage %float 2D 1 0 1 1 Unknown
 %_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
       %arg_0 = OpVariable %_ptr_UniformConstant_11 UniformConstant
-    %float_0 = OpConstant %float 0
-         %13 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
 %_ptr_Private_v4float = OpTypePointer Private %v4float
-%tint_symbol_1 = OpVariable %_ptr_Private_v4float Private %13
+%tint_symbol_1 = OpVariable %_ptr_Private_v4float Private %5
        %void = OpTypeVoid
-         %16 = OpTypeFunction %void
+         %14 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %int_0 = OpConstant %int 0
 %_ptr_Function_int = OpTypePointer Function %int
-         %24 = OpConstantNull %int
-         %27 = OpTypeFunction %void %v4float
+         %22 = OpConstantNull %int
+         %25 = OpTypeFunction %void %v4float
 %vertex_main_out = OpTypeStruct %v4float
-         %35 = OpTypeFunction %vertex_main_out
+         %33 = OpTypeFunction %vertex_main_out
     %float_1 = OpConstant %float 1
-%textureNumSamples_a3c8a0 = OpFunction %void None %16
-         %19 = OpLabel
-        %res = OpVariable %_ptr_Function_int Function %24
+%textureNumSamples_a3c8a0 = OpFunction %void None %14
+         %17 = OpLabel
+        %res = OpVariable %_ptr_Function_int Function %22
                OpStore %res %int_0
-         %26 = OpLoad %11 %arg_0
-         %25 = OpImageQuerySamples %int %26
-               OpStore %res %25
+         %24 = OpLoad %11 %arg_0
+         %23 = OpImageQuerySamples %int %24
+               OpStore %res %23
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %27
+%tint_symbol_2 = OpFunction %void None %25
 %tint_symbol = OpFunctionParameter %v4float
-         %30 = OpLabel
+         %28 = OpLabel
                OpStore %tint_symbol_1 %tint_symbol
                OpReturn
                OpFunctionEnd
-%vertex_main_1 = OpFunction %void None %16
-         %32 = OpLabel
-         %33 = OpFunctionCall %void %textureNumSamples_a3c8a0
-         %34 = OpFunctionCall %void %tint_symbol_2 %13
+%vertex_main_1 = OpFunction %void None %14
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %textureNumSamples_a3c8a0
+         %32 = OpFunctionCall %void %tint_symbol_2 %5
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %vertex_main_out None %35
-         %38 = OpLabel
-         %39 = OpFunctionCall %void %vertex_main_1
-         %40 = OpLoad %v4float %tint_symbol_1
-         %41 = OpCompositeConstruct %vertex_main_out %40
-               OpReturnValue %41
+%vertex_main_inner = OpFunction %vertex_main_out None %33
+         %36 = OpLabel
+         %37 = OpFunctionCall %void %vertex_main_1
+         %38 = OpLoad %v4float %tint_symbol_1
+         %39 = OpCompositeConstruct %vertex_main_out %38
+               OpReturnValue %39
                OpFunctionEnd
-%vertex_main = OpFunction %void None %16
-         %43 = OpLabel
-         %44 = OpFunctionCall %vertex_main_out %vertex_main_inner
-         %45 = OpCompositeExtract %v4float %44 0
-               OpStore %tint_symbol_1_1_1 %45
+%vertex_main = OpFunction %void None %14
+         %41 = OpLabel
+         %42 = OpFunctionCall %vertex_main_out %vertex_main_inner
+         %43 = OpCompositeExtract %v4float %42 0
+               OpStore %tint_symbol_1_1_1 %43
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
-%fragment_main_1 = OpFunction %void None %16
-         %48 = OpLabel
-         %49 = OpFunctionCall %void %textureNumSamples_a3c8a0
+%fragment_main_1 = OpFunction %void None %14
+         %46 = OpLabel
+         %47 = OpFunctionCall %void %textureNumSamples_a3c8a0
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %16
-         %51 = OpLabel
-         %52 = OpFunctionCall %void %fragment_main_1
+%fragment_main = OpFunction %void None %14
+         %49 = OpLabel
+         %50 = OpFunctionCall %void %fragment_main_1
                OpReturn
                OpFunctionEnd
-%compute_main_1 = OpFunction %void None %16
-         %54 = OpLabel
-         %55 = OpFunctionCall %void %textureNumSamples_a3c8a0
+%compute_main_1 = OpFunction %void None %14
+         %52 = OpLabel
+         %53 = OpFunctionCall %void %textureNumSamples_a3c8a0
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %16
-         %57 = OpLabel
-         %58 = OpFunctionCall %void %compute_main_1
+%compute_main = OpFunction %void None %14
+         %55 = OpLabel
+         %56 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
