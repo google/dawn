@@ -62,6 +62,7 @@ The following features have been deprecated and will be removed in M102:
 
 * Swizzling of `vec3` types in `storage` and `uniform` buffers has been fixed for Metal 1.x. [tint:1249](https://crbug.com/tint/1249)
 * Calling a function that returns an unused value no longer produces an FXC compilation error. [tint:1259](https://crbug.com/tint/1259)
+* `abs()` fixed for unsigned integers on SPIR-V backend
 
 ## Changes for M95
 
@@ -74,4 +75,3 @@ The following features have been deprecated and will be removed in M102:
 
 * Hex floats: now correctly errors when the magnitude is non-zero, and the exponent would cause overflow. [tint:1150](https://crbug.com/tint/1150), [tint:1166](https://crbug.com/tint/1166)
 * Identifiers beginning with an underscore are now correctly rejected.  [tint:1179](https://crbug.com/tint/1179)
-* `abs()` fixed for unsigned integers on SPIR-V backend

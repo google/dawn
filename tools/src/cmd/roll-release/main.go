@@ -49,7 +49,7 @@ const (
 	dawnURL             = "https://dawn.googlesource.com/dawn"
 	tintSubdirInDawn    = "third_party/tint"
 	branchPrefix        = "chromium/"
-	branchLegacyCutoff  = 4590 // Branch numbers < than this are ignored
+	branchLegacyCutoff  = 4664 // Branch numbers < than this are ignored
 )
 
 type branches = map[string]plumbing.Hash
