@@ -178,7 +178,10 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::TextureFormat::Depth24Plus:
                     return DXGI_FORMAT_R32_TYPELESS;
 
+                case wgpu::TextureFormat::Depth24UnormStencil8:
+                    return DXGI_FORMAT_R24G8_TYPELESS;
                 case wgpu::TextureFormat::Depth24PlusStencil8:
+                case wgpu::TextureFormat::Depth32FloatStencil8:
                     return DXGI_FORMAT_R32G8X24_TYPELESS;
 
                 case wgpu::TextureFormat::BC1RGBAUnorm:
@@ -252,10 +255,6 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 // TODO(dawn:666): implement stencil8
                 case wgpu::TextureFormat::Stencil8:
-                // TODO(dawn:690): implement depth24unorm-stencil8
-                case wgpu::TextureFormat::Depth24UnormStencil8:
-                // TODO(dawn:690): implement depth32float-stencil8
-                case wgpu::TextureFormat::Depth32FloatStencil8:
                 case wgpu::TextureFormat::Undefined:
                     UNREACHABLE();
             }
@@ -342,14 +341,16 @@ namespace dawn_native { namespace d3d12 {
             case wgpu::TextureFormat::RGBA32Float:
                 return DXGI_FORMAT_R32G32B32A32_FLOAT;
 
-            case wgpu::TextureFormat::Depth32Float:
-                return DXGI_FORMAT_D32_FLOAT;
-            case wgpu::TextureFormat::Depth24Plus:
-                return DXGI_FORMAT_D32_FLOAT;
-            case wgpu::TextureFormat::Depth24PlusStencil8:
-                return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
             case wgpu::TextureFormat::Depth16Unorm:
                 return DXGI_FORMAT_D16_UNORM;
+            case wgpu::TextureFormat::Depth32Float:
+            case wgpu::TextureFormat::Depth24Plus:
+                return DXGI_FORMAT_D32_FLOAT;
+            case wgpu::TextureFormat::Depth24UnormStencil8:
+                return DXGI_FORMAT_D24_UNORM_S8_UINT;
+            case wgpu::TextureFormat::Depth24PlusStencil8:
+            case wgpu::TextureFormat::Depth32FloatStencil8:
+                return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 
             case wgpu::TextureFormat::BC1RGBAUnorm:
                 return DXGI_FORMAT_BC1_UNORM;
@@ -425,10 +426,6 @@ namespace dawn_native { namespace d3d12 {
 
             // TODO(dawn:666): implement stencil8
             case wgpu::TextureFormat::Stencil8:
-            // TODO(dawn:690): implement depth24unorm-stencil8
-            case wgpu::TextureFormat::Depth24UnormStencil8:
-            // TODO(dawn:690): implement depth32float-stencil8
-            case wgpu::TextureFormat::Depth32FloatStencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
@@ -699,7 +696,9 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(GetFormat().aspects & aspect);
 
         switch (GetFormat().format) {
+            case wgpu::TextureFormat::Depth24UnormStencil8:
             case wgpu::TextureFormat::Depth24PlusStencil8:
+            case wgpu::TextureFormat::Depth32FloatStencil8:
                 switch (aspect) {
                     case Aspect::Depth:
                         return DXGI_FORMAT_R32_FLOAT;
@@ -1186,7 +1185,39 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::TextureFormat::Depth16Unorm:
                     mSrvDesc.Format = DXGI_FORMAT_R16_UNORM;
                     break;
+                case wgpu::TextureFormat::Depth24UnormStencil8:
+                    switch (descriptor->aspect) {
+                        case wgpu::TextureAspect::DepthOnly:
+                            planeSlice = 0;
+                            mSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+                            break;
+                        case wgpu::TextureAspect::StencilOnly:
+                            planeSlice = 1;
+                            mSrvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+                            // Stencil is accessed using the .g component in the shader.
+                            // Map it to the zeroth component to match other APIs.
+                            mSrvDesc.Shader4ComponentMapping =
+                                D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
+                                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1,
+                                    D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
+                                    D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
+                                    D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
+                            break;
+                        case wgpu::TextureAspect::All:
+                            // A single aspect is not selected. The texture view must not be
+                            // sampled.
+                            mSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+                            break;
+
+                        // Depth formats cannot use plane aspects.
+                        case wgpu::TextureAspect::Plane0Only:
+                        case wgpu::TextureAspect::Plane1Only:
+                            UNREACHABLE();
+                            break;
+                    }
+                    break;
                 case wgpu::TextureFormat::Depth24PlusStencil8:
+                case wgpu::TextureFormat::Depth32FloatStencil8:
                     switch (descriptor->aspect) {
                         case wgpu::TextureAspect::DepthOnly:
                             planeSlice = 0;

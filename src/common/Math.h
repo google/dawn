@@ -89,6 +89,11 @@ uint16_t Float32ToFloat16(float fp32);
 float Float16ToFloat32(uint16_t fp16);
 bool IsFloat16NaN(uint16_t fp16);
 
+template <typename T>
+T FloatToUnorm(float value) {
+    return static_cast<T>(value * static_cast<float>(std::numeric_limits<T>::max()));
+}
+
 float SRGBToLinear(float srgb);
 
 template <typename T1,

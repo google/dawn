@@ -249,6 +249,19 @@ TEST(Math, IsFloat16NaN) {
     ASSERT_TRUE(IsFloat16NaN(0xFFFF));
 }
 
+// Tests for FloatToUnorm
+TEST(Math, FloatToUnorm) {
+    std::vector<float> kTestFloatValues = {0.0f, 0.4f, 0.5f, 1.0f};
+    std::vector<unsigned char> kExpectedCharValues = {0, 102, 127, 255};
+    std::vector<uint8_t> kExpectedUint8Values = {0, 102, 127, 255};
+    std::vector<uint16_t> kExpectedUint16Values = {0, 26214, 32767, 65535};
+    for (size_t i = 0; i < kTestFloatValues.size(); i++) {
+        ASSERT_EQ(FloatToUnorm<unsigned char>(kTestFloatValues[i]), kExpectedCharValues[i]);
+        ASSERT_EQ(FloatToUnorm<uint8_t>(kTestFloatValues[i]), kExpectedUint8Values[i]);
+        ASSERT_EQ(FloatToUnorm<uint16_t>(kTestFloatValues[i]), kExpectedUint16Values[i]);
+    }
+}
+
 // Tests for SRGBToLinear
 TEST(Math, SRGBToLinear) {
     ASSERT_EQ(SRGBToLinear(0.0f), 0.0f);

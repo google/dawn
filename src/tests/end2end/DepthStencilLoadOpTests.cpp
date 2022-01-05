@@ -62,6 +62,8 @@ namespace {
         void SetUp() override {
             DawnTestWithParams<DepthStencilLoadOpTestParams>::SetUp();
 
+            DAWN_TEST_UNSUPPORTED_IF(!mIsFormatSupported);
+
             // Readback of Depth/Stencil textures not fully supported on GL right now.
             // Also depends on glTextureView which is not supported on ES.
             DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
@@ -88,6 +90,26 @@ namespace {
                 renderPassDescriptor.cDepthStencilAttachmentInfo.clearStencil =
                     kStencilValues[mipLevel];
                 renderPassDescriptors.push_back(renderPassDescriptor);
+            }
+        }
+
+        std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+            switch (GetParam().mFormat) {
+                case wgpu::TextureFormat::Depth24UnormStencil8:
+                    if (SupportsFeatures({wgpu::FeatureName::Depth24UnormStencil8})) {
+                        mIsFormatSupported = true;
+                        return {wgpu::FeatureName::Depth24UnormStencil8};
+                    }
+                    return {};
+                case wgpu::TextureFormat::Depth32FloatStencil8:
+                    if (SupportsFeatures({wgpu::FeatureName::Depth32FloatStencil8})) {
+                        mIsFormatSupported = true;
+                        return {wgpu::FeatureName::Depth32FloatStencil8};
+                    }
+                    return {};
+                default:
+                    mIsFormatSupported = true;
+                    return {};
             }
         }
 
@@ -151,6 +173,9 @@ namespace {
         std::array<wgpu::TextureView, kMipLevelCount> textureViews;
         // Vector instead of array because there is no default constructor.
         std::vector<utils::ComboRenderPassDescriptor> renderPassDescriptors;
+
+      private:
+        bool mIsFormatSupported = false;
     };
 
 }  // anonymous namespace
@@ -240,7 +265,8 @@ namespace {
         auto params2 = MakeParamGenerator<DepthStencilLoadOpTestParams>(
             {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
              OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-            {wgpu::TextureFormat::Depth24PlusStencil8},
+            {wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureFormat::Depth24UnormStencil8,
+             wgpu::TextureFormat::Depth32FloatStencil8},
             {Check::CopyStencil, Check::StencilTest, Check::DepthTest, Check::SampleDepth});
 
         std::vector<DepthStencilLoadOpTestParams> allParams;

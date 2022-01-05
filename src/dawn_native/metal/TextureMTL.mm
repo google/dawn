@@ -222,6 +222,7 @@ namespace dawn_native { namespace metal {
             case wgpu::TextureFormat::Depth24Plus:
                 return MTLPixelFormatDepth32Float;
             case wgpu::TextureFormat::Depth24PlusStencil8:
+            case wgpu::TextureFormat::Depth32FloatStencil8:
                 return MTLPixelFormatDepth32Float_Stencil8;
             case wgpu::TextureFormat::Depth16Unorm:
                 if (@available(macOS 10.12, iOS 13.0, *)) {
@@ -232,6 +233,9 @@ namespace dawn_native { namespace metal {
                 }
 
 #if defined(DAWN_PLATFORM_MACOS)
+            case wgpu::TextureFormat::Depth24UnormStencil8:
+                return MTLPixelFormatDepth24Unorm_Stencil8;
+
             case wgpu::TextureFormat::BC1RGBAUnorm:
                 return MTLPixelFormatBC1_RGBA;
             case wgpu::TextureFormat::BC1RGBAUnormSrgb:
@@ -261,6 +265,8 @@ namespace dawn_native { namespace metal {
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return MTLPixelFormatBC7_RGBAUnorm_sRGB;
 #else
+            case wgpu::TextureFormat::Depth24UnormStencil8:
+
             case wgpu::TextureFormat::BC1RGBAUnorm:
             case wgpu::TextureFormat::BC1RGBAUnormSrgb:
             case wgpu::TextureFormat::BC2RGBAUnorm:
@@ -321,10 +327,6 @@ namespace dawn_native { namespace metal {
 
             // TODO(dawn:666): implement stencil8
             case wgpu::TextureFormat::Stencil8:
-            // TODO(dawn:690): implement depth24unorm-stencil8
-            case wgpu::TextureFormat::Depth24UnormStencil8:
-            // TODO(dawn:690): implement depth32float-stencil8
-            case wgpu::TextureFormat::Depth32FloatStencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
@@ -746,8 +748,17 @@ namespace dawn_native { namespace metal {
             MTLPixelFormat format = MetalPixelFormat(descriptor->format);
             if (descriptor->aspect == wgpu::TextureAspect::StencilOnly) {
                 if (@available(macOS 10.12, iOS 10.0, *)) {
-                    ASSERT(format == MTLPixelFormatDepth32Float_Stencil8);
-                    format = MTLPixelFormatX32_Stencil8;
+                    if (format == MTLPixelFormatDepth32Float_Stencil8) {
+                        format = MTLPixelFormatX32_Stencil8;
+                    }
+#if defined(DAWN_PLATFORM_MACOS)
+                    else if (format == MTLPixelFormatDepth24Unorm_Stencil8) {
+                        format = MTLPixelFormatX24_Stencil8;
+                    }
+#endif
+                    else {
+                        UNREACHABLE();
+                    }
                 } else {
                     // TODO(enga): Add a workaround to back combined depth/stencil textures
                     // with Sampled usage using two separate textures.

@@ -324,6 +324,17 @@ namespace dawn_native { namespace metal {
                 mSupportedFeatures.EnableFeature(Feature::DepthClamping);
             }
 
+            if (@available(macOS 10.11, iOS 9.0, *)) {
+                mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
+            }
+
+#if defined(DAWN_PLATFORM_MACOS)
+            // MTLPixelFormatDepth24Unorm_Stencil8 is only available on macOS 10.11+
+            if ([*mDevice isDepth24Stencil8PixelFormatSupported]) {
+                mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
+            }
+#endif
+
             return {};
         }
 

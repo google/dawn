@@ -151,6 +151,14 @@ namespace dawn_native { namespace vulkan {
             mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
         }
 
+        if (IsDepthStencilFormatSupported(VK_FORMAT_D24_UNORM_S8_UINT)) {
+            mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
+        }
+
+        if (IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT)) {
+            mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
+        }
+
 #if defined(DAWN_USE_SYNC_FDS)
         // TODO(chromium:1258986): Precisely enable the feature by querying the device's format
         // features.
