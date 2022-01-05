@@ -421,29 +421,31 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Floating_Floating,
                          ::testing::ValuesIn(std::vector<GlslStd450Case>{
-                             {"Acos", "acos"},
-                             {"Asin", "asin"},
-                             {"Atan", "atan"},
-                             {"Ceil", "ceil"},
-                             {"Cos", "cos"},
-                             {"Cosh", "cosh"},
-                             {"Exp", "exp"},
-                             {"Exp2", "exp2"},
-                             {"FAbs", "abs"},
-                             {"FSign", "sign"},
-                             {"Floor", "floor"},
-                             {"Fract", "fract"},
-                             {"InverseSqrt", "inverseSqrt"},
-                             {"Log", "log"},
-                             {"Log2", "log2"},
-                             {"Round", "round"},
-                             {"RoundEven", "round"},
-                             {"Sin", "sin"},
-                             {"Sinh", "sinh"},
-                             {"Sqrt", "sqrt"},
-                             {"Tan", "tan"},
-                             {"Tanh", "tanh"},
-                             {"Trunc", "trunc"},
+                             {"Acos", "acos"},                //
+                             {"Asin", "asin"},                //
+                             {"Atan", "atan"},                //
+                             {"Ceil", "ceil"},                //
+                             {"Cos", "cos"},                  //
+                             {"Cosh", "cosh"},                //
+                             {"Degrees", "degrees"},          //
+                             {"Exp", "exp"},                  //
+                             {"Exp2", "exp2"},                //
+                             {"FAbs", "abs"},                 //
+                             {"FSign", "sign"},               //
+                             {"Floor", "floor"},              //
+                             {"Fract", "fract"},              //
+                             {"InverseSqrt", "inverseSqrt"},  //
+                             {"Log", "log"},                  //
+                             {"Log2", "log2"},                //
+                             {"Radians", "radians"},          //
+                             {"Round", "round"},              //
+                             {"RoundEven", "round"},          //
+                             {"Sin", "sin"},                  //
+                             {"Sinh", "sinh"},                //
+                             {"Sqrt", "sqrt"},                //
+                             {"Tan", "tan"},                  //
+                             {"Tanh", "tanh"},                //
+                             {"Trunc", "trunc"},              //
                          }));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -1130,76 +1132,6 @@ let x_98 : vec2<f32> = (v2f1 + v2f1);
 let x_99 : vec2<f32> = (v2f2 + v2f2);
 let x_1 : vec2<f32> = reflect(x_98, x_99);
 )";
-
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
-}
-
-TEST_F(SpvParserTest, GlslStd450_Degrees_Scalar) {
-  const auto assembly = Preamble() + R"(
-     %1 = OpExtInst %float %glsl Degrees %float_50
-     OpReturn
-     OpFunctionEnd
-  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected = "let x_1 : f32 = (50.0 * 57.295780182);";
-
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
-}
-
-TEST_F(SpvParserTest, GlslStd450_Degrees_Vector) {
-  const auto assembly = Preamble() + R"(
-     %1 = OpExtInst %v3float %glsl Degrees %v3float_60_70_50
-     OpReturn
-     OpFunctionEnd
-  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected =
-      R"(let x_1 : vec3<f32> = (vec3<f32>(60.0, 70.0, 50.0) * vec3<f32>(57.295780182));)";
-
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
-}
-
-TEST_F(SpvParserTest, GlslStd450_Radians_Scalar) {
-  const auto assembly = Preamble() + R"(
-     %1 = OpExtInst %float %glsl Radians %float_50
-     OpReturn
-     OpFunctionEnd
-  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected = "let x_1 : f32 = (50.0 * 0.017453292);";
-
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
-}
-
-TEST_F(SpvParserTest, GlslStd450_Radians_Vector) {
-  const auto assembly = Preamble() + R"(
-     %1 = OpExtInst %v3float %glsl Radians %v3float_60_70_50
-     OpReturn
-     OpFunctionEnd
-  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected =
-      R"(let x_1 : vec3<f32> = (vec3<f32>(60.0, 70.0, 50.0) * vec3<f32>(0.017453292));)";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }

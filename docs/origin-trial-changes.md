@@ -12,6 +12,7 @@ The following features have been deprecated and will be removed in M102:
 ### New Features
 
 * Vector and matrix element type can now be inferred from constructor argument types. [tint:1334](https://crbug.com/tint/1334)
+* Added builtins `degrees()` and `radians()` for converting between degrees and radians. [tint:1329](https://crbug.com/tint/1329)
 
 ## Changes for M98
 

@@ -217,6 +217,22 @@ class GeneratorImpl : public TextGenerator {
   bool EmitFrexpCall(std::ostream& out,
                      const ast::CallExpression* expr,
                      const sem::Intrinsic* intrinsic);
+  /// Handles generating a call to the `degrees()` intrinsic
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitDegreesCall(std::ostream& out,
+                       const ast::CallExpression* expr,
+                       const sem::Intrinsic* intrinsic);
+  /// Handles generating a call to the `radians()` intrinsic
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitRadiansCall(std::ostream& out,
+                       const ast::CallExpression* expr,
+                       const sem::Intrinsic* intrinsic);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully

@@ -1,8 +1,12 @@
+float tint_radians(float param_0) {
+  return param_0 * 0.017453292519943295474;
+}
+
 void main_1() {
   float a = 0.0f;
   float b = 0.0f;
   a = 42.0f;
-  b = (a * 0.017453292f);
+  b = tint_radians(a);
   return;
 }
 

@@ -1016,6 +1016,12 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
   if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
     return EmitIsNormalCall(out, expr, intrinsic);
   }
+  if (intrinsic->Type() == sem::IntrinsicType::kDegrees) {
+    return EmitDegreesCall(out, expr, intrinsic);
+  }
+  if (intrinsic->Type() == sem::IntrinsicType::kRadians) {
+    return EmitRadiansCall(out, expr, intrinsic);
+  }
   if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {
     return EmitExpression(out, expr->args[0]);  // [DEPRECATED]
   }
@@ -1031,7 +1037,6 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
   if (intrinsic->IsAtomic()) {
     return EmitWorkgroupAtomicCall(out, expr, intrinsic);
   }
-
   auto name = generate_builtin_name(intrinsic);
   if (name.empty()) {
     return false;
@@ -1923,6 +1928,30 @@ bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
                 << "clamp(exponent, " << kMinNormalExponent << ", "
                 << kMaxNormalExponent << ");";
         line(b) << "return clamped == exponent;";
+        return true;
+      });
+}
+
+bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
+                                    const ast::CallExpression* expr,
+                                    const sem::Intrinsic* intrinsic) {
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        line(b) << "return " << params[0] << " * " << std::setprecision(20)
+                << sem::kRadToDeg << ";";
+        return true;
+      });
+}
+
+bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
+                                    const ast::CallExpression* expr,
+                                    const sem::Intrinsic* intrinsic) {
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        line(b) << "return " << params[0] << " * " << std::setprecision(20)
+                << sem::kDegToRad << ";";
         return true;
       });
 }

@@ -289,6 +289,8 @@ fn cosh<N: num>(vec<N, f32>) -> vec<N, f32>
 fn countOneBits<T: iu32>(T) -> T
 fn countOneBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn cross(vec3<f32>, vec3<f32>) -> vec3<f32>
+fn degrees(f32) -> f32
+fn degrees<N: num>(vec<N, f32>) -> vec<N, f32>
 fn determinant<N: num>(mat<N, N, f32>) -> f32
 fn distance(f32, f32) -> f32
 fn distance<N: num>(vec<N, f32>, vec<N, f32>) -> f32
@@ -360,6 +362,8 @@ fn pack4x8snorm(vec4<f32>) -> u32
 fn pack4x8unorm(vec4<f32>) -> u32
 fn pow(f32, f32) -> f32
 fn pow<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn radians(f32) -> f32
+fn radians<N: num>(vec<N, f32>) -> vec<N, f32>
 fn reflect<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
 fn refract<N: num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32>
 fn reverseBits<T: iu32>(T) -> T

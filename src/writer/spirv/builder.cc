@@ -133,6 +133,8 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
       return GLSLstd450Cosh;
     case IntrinsicType::kCross:
       return GLSLstd450Cross;
+    case IntrinsicType::kDegrees:
+      return GLSLstd450Degrees;
     case IntrinsicType::kDeterminant:
       return GLSLstd450Determinant;
     case IntrinsicType::kDistance:
@@ -195,6 +197,8 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
       return GLSLstd450PackHalf2x16;
     case IntrinsicType::kPow:
       return GLSLstd450Pow;
+    case IntrinsicType::kRadians:
+      return GLSLstd450Radians;
     case IntrinsicType::kReflect:
       return GLSLstd450Reflect;
     case IntrinsicType::kRefract:

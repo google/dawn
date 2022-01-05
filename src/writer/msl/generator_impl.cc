@@ -594,6 +594,10 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
       return EmitModfCall(out, expr, intrinsic);
     case sem::IntrinsicType::kFrexp:
       return EmitFrexpCall(out, expr, intrinsic);
+    case sem::IntrinsicType::kDegrees:
+      return EmitDegreesCall(out, expr, intrinsic);
+    case sem::IntrinsicType::kRadians:
+      return EmitRadiansCall(out, expr, intrinsic);
 
     case sem::IntrinsicType::kPack2x16float:
     case sem::IntrinsicType::kUnpack2x16float: {
@@ -1249,6 +1253,30 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
         line(b) << "int" << width << " exp;";
         line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
         line(b) << "return {sig, exp};";
+        return true;
+      });
+}
+
+bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
+                                    const ast::CallExpression* expr,
+                                    const sem::Intrinsic* intrinsic) {
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        line(b) << "return " << params[0] << " * " << std::setprecision(20)
+                << sem::kRadToDeg << ";";
+        return true;
+      });
+}
+
+bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
+                                    const ast::CallExpression* expr,
+                                    const sem::Intrinsic* intrinsic) {
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        line(b) << "return " << params[0] << " * " << std::setprecision(20)
+                << sem::kDegToRad << ";";
         return true;
       });
 }

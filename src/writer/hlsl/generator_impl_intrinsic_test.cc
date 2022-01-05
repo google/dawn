@@ -447,6 +447,90 @@ void test_function() {
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_Intrinsic, Degrees_Scalar) {
+  auto* val = Var("val", ty.f32());
+  auto* call = Call("degrees", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(float tint_degrees(float param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  float val = 0.0f;
+  const float tint_symbol = tint_degrees(val);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Degrees_Vector) {
+  auto* val = Var("val", ty.vec3<f32>());
+  auto* call = Call("degrees", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(float3 tint_degrees(float3 param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  float3 val = float3(0.0f, 0.0f, 0.0f);
+  const float3 tint_symbol = tint_degrees(val);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Radians_Scalar) {
+  auto* val = Var("val", ty.f32());
+  auto* call = Call("radians", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(float tint_radians(float param_0) {
+  return param_0 * 0.017453292519943295474;
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  float val = 0.0f;
+  const float tint_symbol = tint_radians(val);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Radians_Vector) {
+  auto* val = Var("val", ty.vec3<f32>());
+  auto* call = Call("radians", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(float3 tint_radians(float3 param_0) {
+  return param_0 * 0.017453292519943295474;
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  float3 val = float3(0.0f, 0.0f, 0.0f);
+  const float3 tint_symbol = tint_radians(val);
+  return;
+}
+)");
+}
+
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {
   auto* call = Call("pack4x8snorm", "p1");
   Global("p1", ty.vec4<f32>(), ast::StorageClass::kPrivate);

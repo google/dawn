@@ -3,7 +3,7 @@ fn main_1() {
   var b : f32;
   a = 42.0;
   let x_11 : f32 = a;
-  b = (x_11 * 57.295780182);
+  b = degrees(x_11);
   return;
 }
 

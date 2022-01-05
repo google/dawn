@@ -4,6 +4,7 @@
 ; Bound: 17
 ; Schema: 0
                OpCapability Shader
+         %13 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -17,15 +18,14 @@
 %_ptr_Function_float = OpTypePointer Function %float
           %8 = OpConstantNull %float
    %float_42 = OpConstant %float 42
-%float_0_0174532924 = OpConstant %float 0.0174532924
      %main_1 = OpFunction %void None %1
           %4 = OpLabel
           %a = OpVariable %_ptr_Function_float Function %8
           %b = OpVariable %_ptr_Function_float Function %8
                OpStore %a %float_42
          %11 = OpLoad %float %a
-         %13 = OpFMul %float %11 %float_0_0174532924
-               OpStore %b %13
+         %12 = OpExtInst %float %13 Radians %11
+               OpStore %b %12
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %1

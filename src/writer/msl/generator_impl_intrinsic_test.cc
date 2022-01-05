@@ -319,6 +319,106 @@ TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
   EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_threadgroup)");
 }
 
+TEST_F(MslGeneratorImplTest, Degrees_Scalar) {
+  auto* val = Var("val", ty.f32());
+  auto* call = Call("degrees", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+float tint_degrees(float param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+kernel void test_function() {
+  float val = 0.0f;
+  float const tint_symbol = tint_degrees(val);
+  return;
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Degrees_Vector) {
+  auto* val = Var("val", ty.vec3<f32>());
+  auto* call = Call("degrees", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+float3 tint_degrees(float3 param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+kernel void test_function() {
+  float3 val = 0.0f;
+  float3 const tint_symbol = tint_degrees(val);
+  return;
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Radians_Scalar) {
+  auto* val = Var("val", ty.f32());
+  auto* call = Call("radians", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+float tint_radians(float param_0) {
+  return param_0 * 0.017453292519943295474;
+}
+
+kernel void test_function() {
+  float val = 0.0f;
+  float const tint_symbol = tint_radians(val);
+  return;
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Radians_Vector) {
+  auto* val = Var("val", ty.vec3<f32>());
+  auto* call = Call("radians", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+float3 tint_radians(float3 param_0) {
+  return param_0 * 0.017453292519943295474;
+}
+
+kernel void test_function() {
+  float3 val = 0.0f;
+  float3 const tint_symbol = tint_radians(val);
+  return;
+}
+
+)");
+}
+
 TEST_F(MslGeneratorImplTest, Pack2x16Float) {
   auto* call = Call("pack2x16float", "p1");
   Global("p1", ty.vec2<f32>(), ast::StorageClass::kPrivate);

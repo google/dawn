@@ -381,7 +381,129 @@ TEST_F(GlslGeneratorImplTest_Intrinsic, IsNormal_Vector) {
   (tint_isnormal_clamped == tint_isnormal_exponent);
 )"));
 }
+#endif
 
+TEST_F(GlslGeneratorImplTest_Intrinsic, Degrees_Scalar) {
+  auto* val = Var("val", ty.f32());
+  auto* call = Call("degrees", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+precision mediump float;
+
+float tint_degrees(float param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  float val = 0.0f;
+  float tint_symbol = tint_degrees(val);
+  return;
+}
+void main() {
+  test_function();
+}
+
+
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Intrinsic, Degrees_Vector) {
+  auto* val = Var("val", ty.vec3<f32>());
+  auto* call = Call("degrees", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+precision mediump float;
+
+vec3 tint_degrees(vec3 param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  vec3 val = vec3(0.0f, 0.0f, 0.0f);
+  vec3 tint_symbol = tint_degrees(val);
+  return;
+}
+void main() {
+  test_function();
+}
+
+
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Intrinsic, Radians_Scalar) {
+  auto* val = Var("val", ty.f32());
+  auto* call = Call("radians", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+precision mediump float;
+
+float tint_radians(float param_0) {
+  return param_0 * 0.017453292519943295474;
+}
+
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  float val = 0.0f;
+  float tint_symbol = tint_radians(val);
+  return;
+}
+void main() {
+  test_function();
+}
+
+
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Intrinsic, Radians_Vector) {
+  auto* val = Var("val", ty.vec3<f32>());
+  auto* call = Call("radians", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+precision mediump float;
+
+vec3 tint_radians(vec3 param_0) {
+  return param_0 * 0.017453292519943295474;
+}
+
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  vec3 val = vec3(0.0f, 0.0f, 0.0f);
+  vec3 tint_symbol = tint_radians(val);
+  return;
+}
+void main() {
+  test_function();
+}
+
+
+)");
+}
+
+#if 0
 TEST_F(GlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {
   auto* call = Call("pack4x8snorm", "p1");
   Global("p1", ty.vec4<f32>(), ast::StorageClass::kPrivate);

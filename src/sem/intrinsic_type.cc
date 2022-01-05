@@ -72,6 +72,9 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   if (name == "cross") {
     return IntrinsicType::kCross;
   }
+  if (name == "degrees") {
+    return IntrinsicType::kDegrees;
+  }
   if (name == "determinant") {
     return IntrinsicType::kDeterminant;
   }
@@ -191,6 +194,9 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   }
   if (name == "pow") {
     return IntrinsicType::kPow;
+  }
+  if (name == "radians") {
+    return IntrinsicType::kRadians;
   }
   if (name == "reflect") {
     return IntrinsicType::kReflect;
@@ -368,6 +374,8 @@ const char* str(IntrinsicType i) {
       return "countOneBits";
     case IntrinsicType::kCross:
       return "cross";
+    case IntrinsicType::kDegrees:
+      return "degrees";
     case IntrinsicType::kDeterminant:
       return "determinant";
     case IntrinsicType::kDistance:
@@ -448,6 +456,8 @@ const char* str(IntrinsicType i) {
       return "pack4x8unorm";
     case IntrinsicType::kPow:
       return "pow";
+    case IntrinsicType::kRadians:
+      return "radians";
     case IntrinsicType::kReflect:
       return "reflect";
     case IntrinsicType::kRefract:

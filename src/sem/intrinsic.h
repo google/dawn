@@ -145,6 +145,12 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   const bool is_deprecated_;
 };
 
+/// Constant value used by the degrees() intrinsic
+static constexpr double kRadToDeg = 57.295779513082322865;
+
+/// Constant value used by the radians() intrinsic
+static constexpr double kDegToRad = 0.017453292519943295474;
+
 }  // namespace sem
 }  // namespace tint
 

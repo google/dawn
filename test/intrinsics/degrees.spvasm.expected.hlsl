@@ -1,8 +1,12 @@
+float tint_degrees(float param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
 void main_1() {
   float a = 0.0f;
   float b = 0.0f;
   a = 42.0f;
-  b = (a * 57.295780182f);
+  b = tint_degrees(a);
   return;
 }
 
