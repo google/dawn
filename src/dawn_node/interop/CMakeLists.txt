@@ -60,9 +60,3 @@ target_link_libraries(dawn_node_interop
     PRIVATE
         dawncpp
 )
-
-# dawn_node targets require C++17
-set_property(
-    TARGET dawn_node_interop
-    PROPERTY CXX_STANDARD 17
-)

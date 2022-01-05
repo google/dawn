@@ -80,9 +80,3 @@ target_link_libraries(dawn_node_binding
         dawncpp
         dawn_node_interop
 )
-
-# dawn_node targets require C++17
-set_property(
-    TARGET dawn_node_binding
-    PROPERTY CXX_STANDARD 17
-)
