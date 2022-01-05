@@ -92,7 +92,7 @@ class Namer {
   /// Returns an unregistered name based on a given base name.
   /// @param base_name the base name
   /// @returns a new name
-  std::string FindUnusedDerivedName(const std::string& base_name) const;
+  std::string FindUnusedDerivedName(const std::string& base_name);
 
   /// Returns a newly registered name based on a given base name.
   /// In the internal table `name_to_id_`, it is mapped to the invalid
@@ -152,6 +152,10 @@ class Namer {
   // If entry k in the vector is an empty string, then a suggestion
   // was recorded for a higher-numbered index, but not for index k.
   std::unordered_map<uint32_t, std::vector<std::string>> struct_member_names_;
+
+  // Saved search id suffix for a given base name. Used by
+  // FindUnusedDerivedName().
+  std::unordered_map<std::string, uint32_t> next_unusued_derived_name_id_;
 };
 
 }  // namespace spirv

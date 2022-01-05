@@ -104,20 +104,24 @@ std::string Namer::GetMemberName(uint32_t struct_id,
   return result;
 }
 
-std::string Namer::FindUnusedDerivedName(const std::string& base_name) const {
+std::string Namer::FindUnusedDerivedName(const std::string& base_name) {
   // Ensure uniqueness among names.
   std::string derived_name;
-  int i = 0;
-  do {
+  uint32_t& i = next_unusued_derived_name_id_[base_name];
+  while (i != 0xffffffff) {
     std::stringstream new_name_stream;
     new_name_stream << base_name;
     if (i > 0) {
       new_name_stream << "_" << i;
     }
-    i++;
     derived_name = new_name_stream.str();
-  } while (IsRegistered(derived_name));
-  return derived_name;
+    if (!IsRegistered(derived_name)) {
+      return derived_name;
+    }
+    i++;
+  }
+  TINT_ASSERT(Reader, false /* FindUnusedDerivedName() overflowed u32 */);
+  return "<u32 overflow>";
 }
 
 std::string Namer::MakeDerivedName(const std::string& base_name) {
