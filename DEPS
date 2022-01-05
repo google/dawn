@@ -2,6 +2,10 @@ use_relative_paths = True
 
 gclient_gn_args_file = 'build/config/gclient_args.gni'
 
+gclient_gn_args = [
+  'generate_location_tags',
+]
+
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'dawn_git': 'https://dawn.googlesource.com',
@@ -14,16 +18,19 @@ vars = {
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
   'dawn_gn_version': 'git_revision:fc295f3ac7ca4fe7acc6cb5fb052d22909ef3a8f',
   'dawn_go_version': 'version:1.16',
+
+  # GN variable required by //testing that will be output in the gclient_args.gni
+  'generate_location_tags': False,
 }
 
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@0ff4b3d4eeb6d480c716b432a9a93a58c42150d5',
+    'url': '{chromium_git}/chromium/src/build@555c8b467c21e2c4b22d00e87e3faa0431df9ac2',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@9c143ace7560797fed136da85e22ea4834e6b147',
+    'url': '{chromium_git}/chromium/src/buildtools@f78b4b9f33bd8ef9944d5ce643daff1c31880189',
     'condition': 'dawn_standalone',
   },
   'buildtools/clang_format/script': {
@@ -57,17 +64,17 @@ deps = {
   },
 
   'buildtools/third_party/libc++/trunk': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@8fa87946779682841e21e2da977eccfb6cb3bded',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@79a2e924d96e2fc1e4b937c42efd08898fa472d7',
     'condition': 'dawn_standalone',
   },
 
   'buildtools/third_party/libc++abi/trunk': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@f4328ad7c0d8242d36cb5bea530925f9fea34248',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@2715a6c0de8dac4c7674934a6b3d30ba0c685271',
     'condition': 'dawn_standalone',
   },
 
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@03ff857f12277f511e0a30aca44b80e8aaebafd7',
+    'url': '{chromium_git}/chromium/src/tools/clang@8b7330592cb85ba09505a6be7bacabd0ad6160a3',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
@@ -81,11 +88,16 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@3e2640a325dc34ec3d9cb2802b8da874aecaf52d',
+    'url': '{chromium_git}/chromium/src/testing@d485ae97b7900c1fb7edfbe2901ae5adcb120865',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {
-    'url': '{chromium_git}/external/github.com/google/googletest@2828773179fa425ee406df61890a150577178ea2',
+    'url': '{chromium_git}/external/github.com/google/googletest@6b74da4757a549563d7c37c8fae3e704662a043b',
+    'condition': 'dawn_standalone',
+  },
+  # This is a dependency of //testing
+  'third_party/catapult': {
+    'url': '{chromium_git}/catapult.git@fa35beefb3429605035f98211ddb8750dee6a13d',
     'condition': 'dawn_standalone',
   },
 
@@ -179,14 +191,14 @@ hooks = [
     'name': 'sysroot_x86',
     'pattern': '.',
     'condition': 'dawn_standalone and checkout_linux and (checkout_x86 or checkout_x64)',
-    'action': ['python', 'build/linux/sysroot_scripts/install-sysroot.py',
+    'action': ['python3', 'build/linux/sysroot_scripts/install-sysroot.py',
                '--arch=x86'],
   },
   {
     'name': 'sysroot_x64',
     'pattern': '.',
     'condition': 'dawn_standalone and checkout_linux and checkout_x64',
-    'action': ['python', 'build/linux/sysroot_scripts/install-sysroot.py',
+    'action': ['python3', 'build/linux/sysroot_scripts/install-sysroot.py',
                '--arch=x64'],
   },
   {
@@ -195,20 +207,20 @@ hooks = [
     'name': 'mac_toolchain',
     'pattern': '.',
     'condition': 'dawn_standalone and checkout_mac',
-    'action': ['python', 'build/mac_toolchain.py'],
+    'action': ['python3', 'build/mac_toolchain.py'],
   },
   {
     # Update the Windows toolchain if necessary. Must run before 'clang' below.
     'name': 'win_toolchain',
     'pattern': '.',
     'condition': 'dawn_standalone and checkout_win',
-    'action': ['python', 'build/vs_toolchain.py', 'update', '--force'],
+    'action': ['python3', 'build/vs_toolchain.py', 'update', '--force'],
   },
   {
     # Note: On Win, this should run after win_toolchain, as it may use it.
     'name': 'clang',
     'pattern': '.',
-    'action': ['python', 'tools/clang/scripts/update.py'],
+    'action': ['python3', 'tools/clang/scripts/update.py'],
     'condition': 'dawn_standalone',
   },
   {
@@ -262,7 +274,7 @@ hooks = [
     'name': 'lastchange',
     'pattern': '.',
     'condition': 'dawn_standalone',
-    'action': ['python', 'build/util/lastchange.py',
+    'action': ['python3', 'build/util/lastchange.py',
                '-o', 'build/util/LASTCHANGE'],
   },
   # TODO(https://crbug.com/1180257): Use CIPD for CMake on Windows.
@@ -283,7 +295,7 @@ hooks = [
     'name': 'cmake_win32_extract',
     'pattern': '.',
     'condition': 'dawn_node and host_os == "win"',
-    'action': [ 'python',
+    'action': [ 'python3',
                 'scripts/extract.py',
                 'tools/cmake-win32.zip',
                 'tools/cmake-win32/',
