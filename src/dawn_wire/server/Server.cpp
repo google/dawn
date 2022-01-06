@@ -191,8 +191,8 @@ namespace dawn_wire { namespace server {
     }
 
     bool TrackDeviceChild(DeviceInfo* info, ObjectType type, ObjectId id) {
-        auto it = info->childObjectTypesAndIds.insert(PackObjectTypeAndId(type, id));
-        if (!it.second) {
+        auto [_, inserted] = info->childObjectTypesAndIds.insert(PackObjectTypeAndId(type, id));
+        if (!inserted) {
             // An object of this type and id already exists.
             return false;
         }

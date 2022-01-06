@@ -50,8 +50,7 @@ namespace dawn_native { namespace vulkan {
             writeImageInfo(bindingCount);
 
         uint32_t numWrites = 0;
-        for (const auto& it : GetLayout()->GetBindingMap()) {
-            BindingIndex bindingIndex = it.second;
+        for (const auto [_, bindingIndex] : GetLayout()->GetBindingMap()) {
             const BindingInfo& bindingInfo = GetLayout()->GetBindingInfo(bindingIndex);
 
             auto& write = writes[numWrites];

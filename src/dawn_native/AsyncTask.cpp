@@ -46,8 +46,8 @@ namespace dawn_native {
             allPendingTasks.swap(mPendingTasks);
         }
 
-        for (auto& keyValue : allPendingTasks) {
-            keyValue.second->waitableEvent->Wait();
+        for (auto& [_, task] : allPendingTasks) {
+            task->waitableEvent->Wait();
         }
     }
 

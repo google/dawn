@@ -244,10 +244,7 @@ namespace dawn_native { namespace metal {
                 }
             };
 
-            for (const auto& pipelineConstant : programmableStage.constants) {
-                const std::string& name = pipelineConstant.first;
-                double value = pipelineConstant.second;
-
+            for (const auto& [name, value] : programmableStage.constants) {
                 overriddenConstants.insert(name);
 
                 // This is already validated so `name` must exist

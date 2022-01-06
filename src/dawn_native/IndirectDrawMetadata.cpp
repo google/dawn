@@ -139,22 +139,21 @@ namespace dawn_native {
     }
 
     void IndirectDrawMetadata::AddBundle(RenderBundleBase* bundle) {
-        auto result = mAddedBundles.insert(bundle);
-        if (!result.second) {
+        auto [_, inserted] = mAddedBundles.insert(bundle);
+        if (!inserted) {
             return;
         }
 
-        for (const auto& entry :
+        for (const auto& [config, validationInfo] :
              bundle->GetIndirectDrawMetadata().mIndexedIndirectBufferValidationInfo) {
-            const IndexedIndirectConfig& config = entry.first;
             auto it = mIndexedIndirectBufferValidationInfo.lower_bound(config);
             if (it != mIndexedIndirectBufferValidationInfo.end() && it->first == config) {
                 // We already have batches for the same config. Merge the new ones in.
-                for (const IndexedIndirectValidationBatch& batch : entry.second.GetBatches()) {
+                for (const IndexedIndirectValidationBatch& batch : validationInfo.GetBatches()) {
                     it->second.AddBatch(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange, batch);
                 }
             } else {
-                mIndexedIndirectBufferValidationInfo.emplace_hint(it, config, entry.second);
+                mIndexedIndirectBufferValidationInfo.emplace_hint(it, config, validationInfo);
             }
         }
     }

@@ -96,11 +96,11 @@ namespace dawn_native { namespace opengl {
                 DAWN_INVALID_IF(bindGroupIndex >= kMaxBindGroupsTyped,
                                 "Bind group index over limits in the SPIRV");
 
-                const auto& it =
+                const auto& [entry, inserted] =
                     (*bindings)[bindGroupIndex].emplace(bindingNumber, ShaderBindingInfo{});
-                DAWN_INVALID_IF(!it.second, "Shader has duplicate bindings");
+                DAWN_INVALID_IF(!inserted, "Shader has duplicate bindings");
 
-                ShaderBindingInfo* info = &it.first->second;
+                ShaderBindingInfo* info = &entry->second;
                 info->id = resource.id;
                 info->base_type_id = resource.base_type_id;
                 info->bindingType = bindingType;

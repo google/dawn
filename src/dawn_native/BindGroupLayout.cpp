@@ -382,8 +382,8 @@ namespace dawn_native {
             }
             IncrementBindingCounts(&mBindingCounts, binding);
 
-            const auto& it = mBindingMap.emplace(BindingNumber(binding.binding), i);
-            ASSERT(it.second);
+            const auto& [_, inserted] = mBindingMap.emplace(BindingNumber(binding.binding), i);
+            ASSERT(inserted);
         }
         ASSERT(CheckBufferBindingsFirst({mBindingInfo.data(), GetBindingCount()}));
         ASSERT(mBindingInfo.size() <= kMaxBindingsPerPipelineLayoutTyped);
@@ -445,11 +445,10 @@ namespace dawn_native {
 
         // std::map is sorted by key, so two BGLs constructed in different orders
         // will still record the same.
-        for (const auto& it : mBindingMap) {
-            recorder.Record(it.first, it.second);
+        for (const auto [id, index] : mBindingMap) {
+            recorder.Record(id, index);
 
-            const BindingInfo& info = mBindingInfo[it.second];
-
+            const BindingInfo& info = mBindingInfo[index];
             recorder.Record(info.buffer.hasDynamicOffset, info.visibility, info.bindingType,
                             info.buffer.type, info.buffer.minBindingSize, info.sampler.type,
                             info.texture.sampleType, info.texture.viewDimension,

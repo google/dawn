@@ -71,14 +71,14 @@ namespace wgpu { namespace utils {
     std::ostream& Write(std::ostream& out, const std::unordered_map<K, V>& value) {
         out << "{";
         bool first = true;
-        for (auto it : value) {
+        for (auto& [key, value] : value) {
             if (!first) {
                 out << ", ";
             }
             first = false;
-            Write(out, it.first);
+            Write(out, key);
             out << ": ";
-            Write(out, it.second);
+            Write(out, value);
         }
         return out << "}";
     }

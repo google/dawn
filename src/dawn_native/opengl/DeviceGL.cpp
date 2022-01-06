@@ -244,8 +244,7 @@ namespace dawn_native { namespace opengl {
     ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
         ExecutionSerial fenceSerial{0};
         while (!mFencesInFlight.empty()) {
-            GLsync sync = mFencesInFlight.front().first;
-            ExecutionSerial tentativeSerial = mFencesInFlight.front().second;
+            auto [sync, tentativeSerial] = mFencesInFlight.front();
 
             // Fence are added in order, so we can stop searching as soon
             // as we see one that's not ready.

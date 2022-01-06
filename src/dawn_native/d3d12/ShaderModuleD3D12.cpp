@@ -90,11 +90,11 @@ namespace dawn_native { namespace d3d12 {
 
             std::map<tint::transform::BindingPoint, T, CompareBindingPoint> sorted(map.begin(),
                                                                                    map.end());
-            for (auto& entry : sorted) {
+            for (auto& [bindingPoint, value] : sorted) {
                 output << " ";
-                Serialize(output, entry.first);
+                Serialize(output, bindingPoint);
                 output << "=";
-                Serialize(output, entry.second);
+                Serialize(output, value);
             }
             output << ")";
         }
@@ -144,10 +144,7 @@ namespace dawn_native { namespace d3d12 {
             std::unordered_set<std::string> overriddenConstants;
 
             // Set pipeline overridden values
-            for (const auto& pipelineConstant : *pipelineConstantEntries) {
-                const std::string& name = pipelineConstant.first;
-                double value = pipelineConstant.second;
-
+            for (const auto& [name, value] : *pipelineConstantEntries) {
                 overriddenConstants.insert(name);
 
                 // This is already validated so `name` must exist
@@ -246,9 +243,7 @@ namespace dawn_native { namespace d3d12 {
                     // the Tint AST to make the "bindings" decoration match the offset chosen by
                     // d3d12::BindGroupLayout so that Tint produces HLSL with the correct registers
                     // assigned to each interface variable.
-                    for (const auto& it : groupBindingInfo) {
-                        BindingNumber binding = it.first;
-                        auto const& bindingInfo = it.second;
+                    for (const auto& [binding, bindingInfo] : groupBindingInfo) {
                         BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
                         BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
                                                      static_cast<uint32_t>(binding)};
@@ -379,8 +374,8 @@ namespace dawn_native { namespace d3d12 {
                 stream << " hasShaderFloat16Feature=" << hasShaderFloat16Feature;
 
                 stream << " defines={";
-                for (const auto& it : defineStrings) {
-                    stream << " <" << it.first << "," << it.second << ">";
+                for (const auto& [name, value] : defineStrings) {
+                    stream << " <" << name << "," << value << ">";
                 }
                 stream << " }";
 
@@ -463,15 +458,14 @@ namespace dawn_native { namespace d3d12 {
             // Build defines for overridable constants
             std::vector<std::pair<std::wstring, std::wstring>> defineStrings;
             defineStrings.reserve(request.defineStrings.size());
-            for (const auto& it : request.defineStrings) {
-                defineStrings.emplace_back(UTF8ToWStr(it.first.c_str()),
-                                           UTF8ToWStr(it.second.c_str()));
+            for (const auto& [name, value] : request.defineStrings) {
+                defineStrings.emplace_back(UTF8ToWStr(name.c_str()), UTF8ToWStr(value.c_str()));
             }
 
             std::vector<DxcDefine> dxcDefines;
             dxcDefines.reserve(defineStrings.size());
-            for (const auto& d : defineStrings) {
-                dxcDefines.push_back({d.first.c_str(), d.second.c_str()});
+            for (const auto& [name, value] : defineStrings) {
+                dxcDefines.push_back({name.c_str(), value.c_str()});
             }
 
             ComPtr<IDxcOperationResult> result;
@@ -584,8 +578,8 @@ namespace dawn_native { namespace d3d12 {
             std::vector<D3D_SHADER_MACRO> fxcDefines;
             if (request.defineStrings.size() > 0) {
                 fxcDefines.reserve(request.defineStrings.size() + 1);
-                for (const auto& d : request.defineStrings) {
-                    fxcDefines.push_back({d.first.c_str(), d.second.c_str()});
+                for (const auto& [name, value] : request.defineStrings) {
+                    fxcDefines.push_back({name.c_str(), value.c_str()});
                 }
                 // d3dCompile D3D_SHADER_MACRO* pDefines is a nullptr terminated array
                 fxcDefines.push_back({nullptr, nullptr});

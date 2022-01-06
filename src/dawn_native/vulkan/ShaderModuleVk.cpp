@@ -36,8 +36,8 @@ namespace dawn_native { namespace vulkan {
     ShaderModule::ConcurrentTransformedShaderModuleCache::
         ~ConcurrentTransformedShaderModuleCache() {
         std::lock_guard<std::mutex> lock(mMutex);
-        for (const auto& iter : mTransformedShaderModuleCache) {
-            mDevice->GetFencedDeleter()->DeleteWhenUnused(iter.second);
+        for (const auto& [_, module] : mTransformedShaderModuleCache) {
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(module);
         }
     }
 

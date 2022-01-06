@@ -59,16 +59,16 @@ namespace dawn_wire { namespace client {
                 // Move mRequests to a local variable so that further reentrant modifications of
                 // mRequests don't invalidate the iterators.
                 auto allRequests = std::move(mRequests);
-                for (auto& it : allRequests) {
-                    closeFunc(&it.second);
+                for (auto& [_, request] : allRequests) {
+                    closeFunc(&request);
                 }
             }
         }
 
         template <typename F>
         void ForAll(F&& f) {
-            for (auto& it : mRequests) {
-                f(&it.second);
+            for (auto& [_, request] : mRequests) {
+                f(&request);
             }
         }
 

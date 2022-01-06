@@ -230,11 +230,10 @@ namespace dawn_native {
         const uint32_t minStorageBufferOffsetAlignment =
             device->GetLimits().v1.minStorageBufferOffsetAlignment;
 
-        for (auto& entry : bufferInfoMap) {
-            const IndirectDrawMetadata::IndexedIndirectConfig& config = entry.first;
+        for (auto& [config, validationInfo] : bufferInfoMap) {
             BufferBase* clientIndirectBuffer = config.first;
             for (const IndirectDrawMetadata::IndexedIndirectValidationBatch& batch :
-                 entry.second.GetBatches()) {
+                 validationInfo.GetBatches()) {
                 const uint64_t minOffsetFromAlignedBoundary =
                     batch.minOffset % minStorageBufferOffsetAlignment;
                 const uint64_t minOffsetAlignedDown =

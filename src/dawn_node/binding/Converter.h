@@ -359,8 +359,8 @@ namespace wgpu { namespace binding {
             }
             auto* els = Allocate<std::remove_const_t<OUT>>(in.size());
             size_t i = 0;
-            for (auto& it : in) {
-                if (!Convert(els[i++], it.first, it.second)) {
+            for (auto& [key, value] : in) {
+                if (!Convert(els[i++], key, value)) {
                     return false;
                 }
             }

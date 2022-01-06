@@ -53,9 +53,9 @@ namespace testing {
             // remove from this set even if a callback should only be called once so that
             // repeated calls to the callback still forward the userdata correctly.
             // Userdata will be destroyed when the mock is destroyed.
-            auto it = mUserdatas.insert(std::move(mockAndUserdata));
-            ASSERT(it.second);
-            return it.first->get();
+            auto [result, inserted] = mUserdatas.insert(std::move(mockAndUserdata));
+            ASSERT(inserted);
+            return result->get();
         }
 
       private:

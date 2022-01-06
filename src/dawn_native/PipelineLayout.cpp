@@ -235,8 +235,8 @@ namespace dawn_native {
             -> ResultOrError<Ref<BindGroupLayoutBase>> {
             std::vector<BindGroupLayoutEntry> entryVec;
             entryVec.reserve(entries.size());
-            for (auto& it : entries) {
-                entryVec.push_back(it.second);
+            for (auto& [_, entry] : entries) {
+                entryVec.push_back(entry);
             }
 
             BindGroupLayoutDescriptor desc = {};
@@ -268,10 +268,7 @@ namespace dawn_native {
             const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
 
             for (BindGroupIndex group(0); group < metadata.bindings.size(); ++group) {
-                for (const auto& bindingIt : metadata.bindings[group]) {
-                    BindingNumber bindingNumber = bindingIt.first;
-                    const ShaderBindingInfo& shaderBinding = bindingIt.second;
-
+                for (const auto& [bindingNumber, shaderBinding] : metadata.bindings[group]) {
                     // Create the BindGroupLayoutEntry
                     BindGroupLayoutEntry entry =
                         ConvertMetadataToEntry(shaderBinding, &externalTextureBindingLayout);
@@ -280,9 +277,10 @@ namespace dawn_native {
 
                     // Add it to our map of all entries, if there is an existing entry, then we
                     // need to merge, if we can.
-                    const auto& insertion = entryData[group].insert({bindingNumber, entry});
-                    if (!insertion.second) {
-                        DAWN_TRY(MergeEntries(&insertion.first->second, entry));
+                    const auto& [existingEntry, inserted] =
+                        entryData[group].insert({bindingNumber, entry});
+                    if (!inserted) {
+                        DAWN_TRY(MergeEntries(&existingEntry->second, entry));
                     }
                 }
             }

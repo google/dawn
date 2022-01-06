@@ -157,8 +157,8 @@ class ColorStateTest : public DawnTest {
 
         SetupSingleSourcePipelines(descriptor);
 
-        for (const auto& test : tests) {
-            DoSingleSourceTest(base, {test.first}, test.second);
+        for (const auto& [triangleColor, expectedColor] : tests) {
+            DoSingleSourceTest(base, {triangleColor}, expectedColor);
         }
     }
 
@@ -190,8 +190,8 @@ class ColorStateTest : public DawnTest {
 
         SetupSingleSourcePipelines(descriptor);
 
-        for (const auto& test : tests) {
-            DoSingleSourceTest(base, test.first, test.second);
+        for (const auto& [triangles, expectedColor] : tests) {
+            DoSingleSourceTest(base, triangles, expectedColor);
         }
     }
 

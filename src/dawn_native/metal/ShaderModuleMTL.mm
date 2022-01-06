@@ -68,10 +68,7 @@ namespace dawn_native { namespace metal {
         for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const BindGroupLayoutBase::BindingMap& bindingMap =
                 layout->GetBindGroupLayout(group)->GetBindingMap();
-            for (const auto& it : bindingMap) {
-                BindingNumber bindingNumber = it.first;
-                BindingIndex bindingIndex = it.second;
-
+            for (const auto [bindingNumber, bindingIndex] : bindingMap) {
                 const BindingInfo& bindingInfo =
                     layout->GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
 

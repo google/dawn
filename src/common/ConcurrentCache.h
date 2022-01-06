@@ -37,8 +37,8 @@ class ConcurrentCache : public NonMovable {
 
     std::pair<T*, bool> Insert(T* object) {
         std::lock_guard<std::mutex> lock(mMutex);
-        auto insertion = mCache.insert(object);
-        return std::make_pair(*(insertion.first), insertion.second);
+        auto [value, inserted] = mCache.insert(object);
+        return {*value, inserted};
     }
 
     size_t Erase(T* object) {

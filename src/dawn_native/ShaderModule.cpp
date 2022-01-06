@@ -596,12 +596,12 @@ namespace dawn_native {
                                                             const BindGroupLayoutBase* layout) {
             // Iterate over all bindings used by this group in the shader, and find the
             // corresponding binding in the BindGroupLayout, if it exists.
-            for (const auto& it : entryPoint.bindings[group]) {
+            for (const auto& [bindingId, bindingInfo] : entryPoint.bindings[group]) {
                 DAWN_TRY_CONTEXT(ValidateCompatibilityOfSingleBindingWithLayout(
-                                     device, layout, entryPoint.stage, it.first, it.second),
+                                     device, layout, entryPoint.stage, bindingId, bindingInfo),
                                  "validating that the entry-point's declaration for [[group(%u), "
                                  "binding(%u)]] matches %s",
-                                 static_cast<uint32_t>(group), static_cast<uint32_t>(it.first),
+                                 static_cast<uint32_t>(group), static_cast<uint32_t>(bindingId),
                                  layout);
             }
 
@@ -665,15 +665,16 @@ namespace dawn_native {
                         metadata->overridableConstants[identifier] = constant;
 
                         if (!c.is_initialized) {
-                            auto it = metadata->uninitializedOverridableConstants.emplace(
-                                std::move(identifier));
+                            auto [_, inserted] =
+                                metadata->uninitializedOverridableConstants.emplace(
+                                    std::move(identifier));
                             // The insertion should have taken place
-                            ASSERT(it.second);
+                            ASSERT(inserted);
                         } else {
-                            auto it = metadata->initializedOverridableConstants.emplace(
+                            auto [_, inserted] = metadata->initializedOverridableConstants.emplace(
                                 std::move(identifier));
                             // The insertion should have taken place
-                            ASSERT(it.second);
+                            ASSERT(inserted);
                         }
                     }
                 }
@@ -866,14 +867,14 @@ namespace dawn_native {
                     BindingNumber bindingNumber(resource.binding);
                     BindGroupIndex bindGroupIndex(resource.bind_group);
 
-                    const auto& it = metadata->bindings[bindGroupIndex].emplace(
+                    const auto& [binding, inserted] = metadata->bindings[bindGroupIndex].emplace(
                         bindingNumber, ShaderBindingInfo{});
                     DAWN_INVALID_IF(
-                        !it.second,
+                        !inserted,
                         "Entry-point has a duplicate binding for (group:%u, binding:%u).",
                         resource.binding, resource.bind_group);
 
-                    ShaderBindingInfo* info = &it.first->second;
+                    ShaderBindingInfo* info = &binding->second;
                     info->bindingType = TintResourceTypeToBindingInfoType(resource.resource_type);
 
                     switch (info->bindingType) {

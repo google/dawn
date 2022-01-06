@@ -73,9 +73,9 @@ namespace dawn_native {
                 for (uint32_t i = 0; i < descriptor->pipelineStatisticsCount; i++) {
                     DAWN_TRY(ValidatePipelineStatisticName(descriptor->pipelineStatistics[i]));
 
-                    std::pair<std::set<wgpu::PipelineStatisticName>::iterator, bool> res =
+                    auto [_, inserted] =
                         pipelineStatisticsSet.insert((descriptor->pipelineStatistics[i]));
-                    DAWN_INVALID_IF(!res.second, "Statistic %s is specified more than once.",
+                    DAWN_INVALID_IF(!inserted, "Statistic %s is specified more than once.",
                                     descriptor->pipelineStatistics[i]);
                 }
             } break;

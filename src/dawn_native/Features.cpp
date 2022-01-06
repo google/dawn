@@ -256,9 +256,9 @@ namespace dawn_native {
                 {"timestamp_query", "timestamp-query"},
                 {"multiplanar_formats", "multiplanar-formats"},
             }};
-        for (const auto& replacement : kReplacementsForDeprecatedNames) {
-            if (strcmp(featureName, replacement.first) == 0) {
-                return FeatureNameToEnum(replacement.second);
+        for (const auto& [name, replacement] : kReplacementsForDeprecatedNames) {
+            if (strcmp(featureName, name) == 0) {
+                return FeatureNameToEnum(replacement);
             }
         }
 

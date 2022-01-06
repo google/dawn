@@ -811,9 +811,7 @@ TEST_P(DepthStencilStateTest, StencilReferenceInitialized) {
             {stencilEqualKeepState, RGBA8::kGreen, 0.f, 0x0, wgpu::FrontFace::CCW, false}};
 
         // Since the stencil reference is not inherited, second draw won't pass the stencil test
-        std::pair<RGBA8, RGBA8> expectation = {RGBA8::kZero, RGBA8::kZero};
-
-        DoTest(testParams, expectation.first, expectation.second, true);
+        DoTest(testParams, RGBA8::kZero, RGBA8::kZero, true);
     }
 
     // Test that stencil reference is initialized as zero for new render pass
@@ -826,9 +824,7 @@ TEST_P(DepthStencilStateTest, StencilReferenceInitialized) {
             {stencilEqualKeepState, RGBA8::kBlue, 0.f, 0x0, wgpu::FrontFace::CCW, true}};
 
         // The third draw should pass the stencil test since the second pass set it to default zero
-        std::pair<RGBA8, RGBA8> expectation = {RGBA8::kBlue, RGBA8::kBlue};
-
-        DoTest(testParams, expectation.first, expectation.second, true);
+        DoTest(testParams, RGBA8::kBlue, RGBA8::kBlue, true);
     }
 }
 

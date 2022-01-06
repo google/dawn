@@ -748,23 +748,23 @@ namespace dawn_native {
 
     Ref<ComputePipelineBase> DeviceBase::AddOrGetCachedComputePipeline(
         Ref<ComputePipelineBase> computePipeline) {
-        auto insertion = mCaches->computePipelines.insert(computePipeline.Get());
-        if (insertion.second) {
+        auto [cachedPipeline, inserted] = mCaches->computePipelines.insert(computePipeline.Get());
+        if (inserted) {
             computePipeline->SetIsCachedReference();
             return computePipeline;
         } else {
-            return *(insertion.first);
+            return *cachedPipeline;
         }
     }
 
     Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
         Ref<RenderPipelineBase> renderPipeline) {
-        auto insertion = mCaches->renderPipelines.insert(renderPipeline.Get());
-        if (insertion.second) {
+        auto [cachedPipeline, inserted] = mCaches->renderPipelines.insert(renderPipeline.Get());
+        if (inserted) {
             renderPipeline->SetIsCachedReference();
             return renderPipeline;
         } else {
-            return *(insertion.first);
+            return *cachedPipeline;
         }
     }
 
