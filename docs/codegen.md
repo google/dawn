@@ -49,7 +49,7 @@ A **record** is a list of **record members**, each of which is a dictionary with
 **`"native"`**, doesn't have any other key. This is used to define native types that can be referenced by name in other things.
 
 **`"typedef"`** (usually only used for gradual deprecations):
- - `"name"`: the name of the things this is a typedef for.
+ - `"type"`: the name of the things this is a typedef for.
 
 **`"enum"`** an `uint32_t`-based enum value.
  - `"values"` an array of enum values. Each value is a dictionary containing:
