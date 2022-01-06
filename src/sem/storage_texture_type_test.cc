@@ -27,27 +27,27 @@ using StorageTextureTest = TestHelper;
 
 TEST_F(StorageTextureTest, Dim) {
   auto* subtype =
-      StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
+      StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Float, Types());
   auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRgba32Float,
+                                   ast::TexelFormat::kRgba32Float,
                                    ast::Access::kReadWrite, subtype);
   EXPECT_EQ(s->dim(), ast::TextureDimension::k2dArray);
 }
 
 TEST_F(StorageTextureTest, Format) {
   auto* subtype =
-      StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
+      StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Float, Types());
   auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRgba32Float,
+                                   ast::TexelFormat::kRgba32Float,
                                    ast::Access::kReadWrite, subtype);
-  EXPECT_EQ(s->image_format(), ast::ImageFormat::kRgba32Float);
+  EXPECT_EQ(s->texel_format(), ast::TexelFormat::kRgba32Float);
 }
 
 TEST_F(StorageTextureTest, TypeName) {
   auto* subtype =
-      StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
+      StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Float, Types());
   auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRgba32Float,
+                                   ast::TexelFormat::kRgba32Float,
                                    ast::Access::kReadWrite, subtype);
   EXPECT_EQ(s->type_name(),
             "__storage_texture_2d_array_rgba32float_read_write");
@@ -55,9 +55,9 @@ TEST_F(StorageTextureTest, TypeName) {
 
 TEST_F(StorageTextureTest, FriendlyName) {
   auto* subtype =
-      StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
+      StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Float, Types());
   auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRgba32Float,
+                                   ast::TexelFormat::kRgba32Float,
                                    ast::Access::kReadWrite, subtype);
   EXPECT_EQ(s->FriendlyName(Symbols()),
             "texture_storage_2d_array<rgba32float, read_write>");
@@ -65,9 +65,9 @@ TEST_F(StorageTextureTest, FriendlyName) {
 
 TEST_F(StorageTextureTest, F32) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
+      sem::StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Float, Types());
   Type* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRgba32Float,
+                                   ast::TexelFormat::kRgba32Float,
                                    ast::Access::kReadWrite, subtype);
 
   auto program = Build();
@@ -80,9 +80,9 @@ TEST_F(StorageTextureTest, F32) {
 
 TEST_F(StorageTextureTest, U32) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kRg32Uint, Types());
+      sem::StorageTexture::SubtypeFor(ast::TexelFormat::kRg32Uint, Types());
   Type* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRg32Uint,
+                                   ast::TexelFormat::kRg32Uint,
                                    ast::Access::kReadWrite, subtype);
 
   auto program = Build();
@@ -95,9 +95,9 @@ TEST_F(StorageTextureTest, U32) {
 
 TEST_F(StorageTextureTest, I32) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Sint, Types());
+      sem::StorageTexture::SubtypeFor(ast::TexelFormat::kRgba32Sint, Types());
   Type* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRgba32Sint,
+                                   ast::TexelFormat::kRgba32Sint,
                                    ast::Access::kReadWrite, subtype);
 
   auto program = Build();

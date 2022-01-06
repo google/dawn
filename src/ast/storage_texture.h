@@ -23,10 +23,8 @@
 namespace tint {
 namespace ast {
 
-class Manager;
-
-/// The image format in the storage texture
-enum class ImageFormat {
+/// The texel format in the storage texture
+enum class TexelFormat {
   kNone = -1,
   kR8Unorm,
   kR8Snorm,
@@ -66,9 +64,9 @@ enum class ImageFormat {
 };
 
 /// @param out the std::ostream to write to
-/// @param format the ImageFormat
+/// @param format the TexelFormat
 /// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, ImageFormat format);
+std::ostream& operator<<(std::ostream& out, TexelFormat format);
 
 /// A storage texture type.
 class StorageTexture : public Castable<StorageTexture, Texture> {
@@ -83,7 +81,7 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   StorageTexture(ProgramID pid,
                  const Source& src,
                  TextureDimension dim,
-                 ImageFormat format,
+                 TexelFormat format,
                  const Type* subtype,
                  Access access_control);
 
@@ -103,11 +101,11 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
 
   /// @param format the storage texture image format
   /// @param builder the ProgramBuilder used to build the returned type
-  /// @returns the storage texture subtype for the given ImageFormat
-  static Type* SubtypeFor(ImageFormat format, ProgramBuilder& builder);
+  /// @returns the storage texture subtype for the given TexelFormat
+  static Type* SubtypeFor(TexelFormat format, ProgramBuilder& builder);
 
   /// The image format
-  const ImageFormat format;
+  const TexelFormat format;
 
   /// The storage subtype
   const Type* const type;

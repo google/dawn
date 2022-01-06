@@ -194,7 +194,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
 
   ASSERT_TRUE(t->Is<ast::Texture>());
   ASSERT_TRUE(t->Is<ast::StorageTexture>());
-  EXPECT_EQ(t->As<ast::StorageTexture>()->format, ast::ImageFormat::kR8Unorm);
+  EXPECT_EQ(t->As<ast::StorageTexture>()->format, ast::TexelFormat::kR8Unorm);
   EXPECT_EQ(t->As<ast::StorageTexture>()->access, ast::Access::kRead);
   EXPECT_EQ(t->As<ast::Texture>()->dim, ast::TextureDimension::k1d);
   EXPECT_EQ(t->source.range, (Source::Range{{1u, 1u}, {1u, 34u}}));
@@ -210,7 +210,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
 
   ASSERT_TRUE(t->Is<ast::Texture>());
   ASSERT_TRUE(t->Is<ast::StorageTexture>());
-  EXPECT_EQ(t->As<ast::StorageTexture>()->format, ast::ImageFormat::kR16Float);
+  EXPECT_EQ(t->As<ast::StorageTexture>()->format, ast::TexelFormat::kR16Float);
   EXPECT_EQ(t->As<ast::StorageTexture>()->access, ast::Access::kWrite);
   EXPECT_EQ(t->As<ast::Texture>()->dim, ast::TextureDimension::k2d);
   EXPECT_EQ(t->source.range, (Source::Range{{1u, 1u}, {1u, 36u}}));

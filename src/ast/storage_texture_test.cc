@@ -23,45 +23,45 @@ namespace {
 using AstStorageTextureTest = TestHelper;
 
 TEST_F(AstStorageTextureTest, IsTexture) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, *this);
+  auto* subtype = StorageTexture::SubtypeFor(TexelFormat::kRgba32Float, *this);
   Texture* ty =
       create<StorageTexture>(TextureDimension::k2dArray,
-                             ImageFormat::kRgba32Float, subtype, Access::kRead);
+                             TexelFormat::kRgba32Float, subtype, Access::kRead);
   EXPECT_FALSE(ty->Is<DepthTexture>());
   EXPECT_FALSE(ty->Is<SampledTexture>());
   EXPECT_TRUE(ty->Is<StorageTexture>());
 }
 
 TEST_F(AstStorageTextureTest, Dim) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, *this);
+  auto* subtype = StorageTexture::SubtypeFor(TexelFormat::kRgba32Float, *this);
   auto* s =
       create<StorageTexture>(TextureDimension::k2dArray,
-                             ImageFormat::kRgba32Float, subtype, Access::kRead);
+                             TexelFormat::kRgba32Float, subtype, Access::kRead);
   EXPECT_EQ(s->dim, TextureDimension::k2dArray);
 }
 
 TEST_F(AstStorageTextureTest, Format) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, *this);
+  auto* subtype = StorageTexture::SubtypeFor(TexelFormat::kRgba32Float, *this);
   auto* s =
       create<StorageTexture>(TextureDimension::k2dArray,
-                             ImageFormat::kRgba32Float, subtype, Access::kRead);
-  EXPECT_EQ(s->format, ImageFormat::kRgba32Float);
+                             TexelFormat::kRgba32Float, subtype, Access::kRead);
+  EXPECT_EQ(s->format, TexelFormat::kRgba32Float);
 }
 
 TEST_F(AstStorageTextureTest, FriendlyName) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, *this);
+  auto* subtype = StorageTexture::SubtypeFor(TexelFormat::kRgba32Float, *this);
   auto* s =
       create<StorageTexture>(TextureDimension::k2dArray,
-                             ImageFormat::kRgba32Float, subtype, Access::kRead);
+                             TexelFormat::kRgba32Float, subtype, Access::kRead);
   EXPECT_EQ(s->FriendlyName(Symbols()),
             "texture_storage_2d_array<rgba32float, read>");
 }
 
 TEST_F(AstStorageTextureTest, F32) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, *this);
+  auto* subtype = StorageTexture::SubtypeFor(TexelFormat::kRgba32Float, *this);
   Type* s =
       create<StorageTexture>(TextureDimension::k2dArray,
-                             ImageFormat::kRgba32Float, subtype, Access::kRead);
+                             TexelFormat::kRgba32Float, subtype, Access::kRead);
 
   ASSERT_TRUE(s->Is<Texture>());
   ASSERT_TRUE(s->Is<StorageTexture>());
@@ -69,9 +69,9 @@ TEST_F(AstStorageTextureTest, F32) {
 }
 
 TEST_F(AstStorageTextureTest, U32) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRg32Uint, *this);
+  auto* subtype = StorageTexture::SubtypeFor(TexelFormat::kRg32Uint, *this);
   Type* s =
-      create<StorageTexture>(TextureDimension::k2dArray, ImageFormat::kRg32Uint,
+      create<StorageTexture>(TextureDimension::k2dArray, TexelFormat::kRg32Uint,
                              subtype, Access::kRead);
 
   ASSERT_TRUE(s->Is<Texture>());
@@ -80,10 +80,10 @@ TEST_F(AstStorageTextureTest, U32) {
 }
 
 TEST_F(AstStorageTextureTest, I32) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Sint, *this);
+  auto* subtype = StorageTexture::SubtypeFor(TexelFormat::kRgba32Sint, *this);
   Type* s =
       create<StorageTexture>(TextureDimension::k2dArray,
-                             ImageFormat::kRgba32Sint, subtype, Access::kRead);
+                             TexelFormat::kRgba32Sint, subtype, Access::kRead);
 
   ASSERT_TRUE(s->Is<Texture>());
   ASSERT_TRUE(s->Is<StorageTexture>());

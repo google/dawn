@@ -757,8 +757,8 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
 
     auto* base_type = texture_type->type();
     entry.sampled_kind = BaseTypeToSampledKind(base_type);
-    entry.image_format = TypeImageFormatToResourceBindingImageFormat(
-        texture_type->image_format());
+    entry.image_format = TypeTexelFormatToResourceBindingTexelFormat(
+        texture_type->texel_format());
 
     result.push_back(entry);
   }

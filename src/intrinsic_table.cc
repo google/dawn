@@ -290,7 +290,7 @@ class OpenNumberMatcher : public NumberMatcher {
 // TODO(bclayton): See if we can move more of this hand-rolled code to the
 // template
 ////////////////////////////////////////////////////////////////////////////////
-using TexelFormat = ast::ImageFormat;
+using TexelFormat = ast::TexelFormat;
 using Access = ast::Access;
 using StorageClass = ast::StorageClass;
 using ParameterUsage = sem::ParameterUsage;
@@ -619,7 +619,7 @@ bool match_texture_storage(const sem::Type* ty,
   }
   if (auto* v = ty->As<sem::StorageTexture>()) {
     if (v->dim() == dim) {
-      F = Number(static_cast<uint32_t>(v->image_format()));
+      F = Number(static_cast<uint32_t>(v->texel_format()));
       A = Number(static_cast<uint32_t>(v->access()));
       return true;
     }

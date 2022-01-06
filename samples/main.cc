@@ -253,80 +253,80 @@ std::string SampledKindToString(
   return "Unknown";
 }
 
-std::string ImageFormatToString(
-    tint::inspector::ResourceBinding::ImageFormat format) {
+std::string TexelFormatToString(
+    tint::inspector::ResourceBinding::TexelFormat format) {
   switch (format) {
-    case tint::inspector::ResourceBinding::ImageFormat::kR8Unorm:
+    case tint::inspector::ResourceBinding::TexelFormat::kR8Unorm:
       return "R8Unorm";
-    case tint::inspector::ResourceBinding::ImageFormat::kR8Snorm:
+    case tint::inspector::ResourceBinding::TexelFormat::kR8Snorm:
       return "R8Snorm";
-    case tint::inspector::ResourceBinding::ImageFormat::kR8Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kR8Uint:
       return "R8Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kR8Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kR8Sint:
       return "R8Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kR16Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kR16Uint:
       return "R16Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kR16Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kR16Sint:
       return "R16Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kR16Float:
+    case tint::inspector::ResourceBinding::TexelFormat::kR16Float:
       return "R16Float";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg8Unorm:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg8Unorm:
       return "Rg8Unorm";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg8Snorm:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg8Snorm:
       return "Rg8Snorm";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg8Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg8Uint:
       return "Rg8Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg8Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg8Sint:
       return "Rg8Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kR32Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kR32Uint:
       return "R32Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kR32Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kR32Sint:
       return "R32Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kR32Float:
+    case tint::inspector::ResourceBinding::TexelFormat::kR32Float:
       return "R32Float";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg16Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg16Uint:
       return "Rg16Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg16Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg16Sint:
       return "Rg16Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg16Float:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg16Float:
       return "Rg16Float";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba8Unorm:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba8Unorm:
       return "Rgba8Unorm";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba8UnormSrgb:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba8UnormSrgb:
       return "Rgba8UnormSrgb";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba8Snorm:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba8Snorm:
       return "Rgba8Snorm";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba8Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba8Uint:
       return "Rgba8Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba8Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba8Sint:
       return "Rgba8Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kBgra8Unorm:
+    case tint::inspector::ResourceBinding::TexelFormat::kBgra8Unorm:
       return "Bgra8Unorm";
-    case tint::inspector::ResourceBinding::ImageFormat::kBgra8UnormSrgb:
+    case tint::inspector::ResourceBinding::TexelFormat::kBgra8UnormSrgb:
       return "Bgra8UnormSrgb";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgb10A2Unorm:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgb10A2Unorm:
       return "Rgb10A2Unorm";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg11B10Float:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg11B10Float:
       return "Rg11B10Float";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg32Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg32Uint:
       return "Rg32Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg32Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg32Sint:
       return "Rg32Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRg32Float:
+    case tint::inspector::ResourceBinding::TexelFormat::kRg32Float:
       return "Rg32Float";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba16Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba16Uint:
       return "Rgba16Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba16Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba16Sint:
       return "Rgba16Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba16Float:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba16Float:
       return "Rgba16Float";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba32Uint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba32Uint:
       return "Rgba32Uint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba32Sint:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba32Sint:
       return "Rgba32Sint";
-    case tint::inspector::ResourceBinding::ImageFormat::kRgba32Float:
+    case tint::inspector::ResourceBinding::TexelFormat::kRgba32Float:
       return "Rgba32Float";
-    case tint::inspector::ResourceBinding::ImageFormat::kNone:
+    case tint::inspector::ResourceBinding::TexelFormat::kNone:
       return "None";
   }
   return "Unknown";
@@ -1162,7 +1162,7 @@ int main(int argc, const char** argv) {
         std::cout << "\t\t sampled_kind = "
                   << SampledKindToString(binding.sampled_kind) << std::endl;
         std::cout << "\t\t image_format = "
-                  << ImageFormatToString(binding.image_format) << std::endl;
+                  << TexelFormatToString(binding.image_format) << std::endl;
       }
     }
     std::cout << std::string(80, '-') << std::endl;

@@ -130,53 +130,53 @@ ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
   return ast::TextureDimension::kNone;
 }
 
-ast::ImageFormat EnumConverter::ToImageFormat(SpvImageFormat fmt) {
+ast::TexelFormat EnumConverter::ToTexelFormat(SpvImageFormat fmt) {
   switch (fmt) {
     case SpvImageFormatUnknown:
-      return ast::ImageFormat::kNone;
+      return ast::TexelFormat::kNone;
 
     // 8 bit channels
     case SpvImageFormatRgba8:
-      return ast::ImageFormat::kRgba8Unorm;
+      return ast::TexelFormat::kRgba8Unorm;
     case SpvImageFormatRgba8Snorm:
-      return ast::ImageFormat::kRgba8Snorm;
+      return ast::TexelFormat::kRgba8Snorm;
     case SpvImageFormatRgba8ui:
-      return ast::ImageFormat::kRgba8Uint;
+      return ast::TexelFormat::kRgba8Uint;
     case SpvImageFormatRgba8i:
-      return ast::ImageFormat::kRgba8Sint;
+      return ast::TexelFormat::kRgba8Sint;
 
     // 16 bit channels
     case SpvImageFormatRgba16ui:
-      return ast::ImageFormat::kRgba16Uint;
+      return ast::TexelFormat::kRgba16Uint;
     case SpvImageFormatRgba16i:
-      return ast::ImageFormat::kRgba16Sint;
+      return ast::TexelFormat::kRgba16Sint;
     case SpvImageFormatRgba16f:
-      return ast::ImageFormat::kRgba16Float;
+      return ast::TexelFormat::kRgba16Float;
 
     // 32 bit channels
     case SpvImageFormatR32ui:
-      return ast::ImageFormat::kR32Uint;
+      return ast::TexelFormat::kR32Uint;
     case SpvImageFormatR32i:
-      return ast::ImageFormat::kR32Sint;
+      return ast::TexelFormat::kR32Sint;
     case SpvImageFormatR32f:
-      return ast::ImageFormat::kR32Float;
+      return ast::TexelFormat::kR32Float;
     case SpvImageFormatRg32ui:
-      return ast::ImageFormat::kRg32Uint;
+      return ast::TexelFormat::kRg32Uint;
     case SpvImageFormatRg32i:
-      return ast::ImageFormat::kRg32Sint;
+      return ast::TexelFormat::kRg32Sint;
     case SpvImageFormatRg32f:
-      return ast::ImageFormat::kRg32Float;
+      return ast::TexelFormat::kRg32Float;
     case SpvImageFormatRgba32ui:
-      return ast::ImageFormat::kRgba32Uint;
+      return ast::TexelFormat::kRgba32Uint;
     case SpvImageFormatRgba32i:
-      return ast::ImageFormat::kRgba32Sint;
+      return ast::TexelFormat::kRgba32Sint;
     case SpvImageFormatRgba32f:
-      return ast::ImageFormat::kRgba32Float;
+      return ast::TexelFormat::kRgba32Float;
     default:
       break;
   }
   Fail() << "invalid image format: " << int(fmt);
-  return ast::ImageFormat::kNone;
+  return ast::TexelFormat::kNone;
 }
 
 }  // namespace spirv

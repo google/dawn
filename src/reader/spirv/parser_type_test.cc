@@ -46,9 +46,9 @@ TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
   EXPECT_EQ(ty.SampledTexture(ast::TextureDimension::k2d, ty.I32()),
             ty.SampledTexture(ast::TextureDimension::k2d, ty.I32()));
   EXPECT_EQ(ty.StorageTexture(ast::TextureDimension::k2d,
-                              ast::ImageFormat::kR16Sint, ast::Access::kRead),
+                              ast::TexelFormat::kR16Sint, ast::Access::kRead),
             ty.StorageTexture(ast::TextureDimension::k2d,
-                              ast::ImageFormat::kR16Sint, ast::Access::kRead));
+                              ast::TexelFormat::kR16Sint, ast::Access::kRead));
 }
 
 TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
@@ -83,17 +83,17 @@ TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
   EXPECT_NE(ty.SampledTexture(ast::TextureDimension::k2d, ty.I32()),
             ty.SampledTexture(ast::TextureDimension::k2d, ty.U32()));
   EXPECT_NE(ty.StorageTexture(ast::TextureDimension::k2d,
-                              ast::ImageFormat::kR16Sint, ast::Access::kRead),
+                              ast::TexelFormat::kR16Sint, ast::Access::kRead),
             ty.StorageTexture(ast::TextureDimension::k3d,
-                              ast::ImageFormat::kR16Sint, ast::Access::kRead));
+                              ast::TexelFormat::kR16Sint, ast::Access::kRead));
   EXPECT_NE(ty.StorageTexture(ast::TextureDimension::k2d,
-                              ast::ImageFormat::kR16Sint, ast::Access::kRead),
+                              ast::TexelFormat::kR16Sint, ast::Access::kRead),
             ty.StorageTexture(ast::TextureDimension::k2d,
-                              ast::ImageFormat::kR32Sint, ast::Access::kRead));
+                              ast::TexelFormat::kR32Sint, ast::Access::kRead));
   EXPECT_NE(ty.StorageTexture(ast::TextureDimension::k2d,
-                              ast::ImageFormat::kR16Sint, ast::Access::kRead),
+                              ast::TexelFormat::kR16Sint, ast::Access::kRead),
             ty.StorageTexture(ast::TextureDimension::k2d,
-                              ast::ImageFormat::kR16Sint, ast::Access::kWrite));
+                              ast::TexelFormat::kR16Sint, ast::Access::kWrite));
 }
 
 }  // namespace

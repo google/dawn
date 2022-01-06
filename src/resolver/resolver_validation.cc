@@ -95,24 +95,24 @@ bool IsValidStorageTextureDimension(ast::TextureDimension dim) {
   }
 }
 
-bool IsValidStorageTextureImageFormat(ast::ImageFormat format) {
+bool IsValidStorageTextureTexelFormat(ast::TexelFormat format) {
   switch (format) {
-    case ast::ImageFormat::kR32Uint:
-    case ast::ImageFormat::kR32Sint:
-    case ast::ImageFormat::kR32Float:
-    case ast::ImageFormat::kRg32Uint:
-    case ast::ImageFormat::kRg32Sint:
-    case ast::ImageFormat::kRg32Float:
-    case ast::ImageFormat::kRgba8Unorm:
-    case ast::ImageFormat::kRgba8Snorm:
-    case ast::ImageFormat::kRgba8Uint:
-    case ast::ImageFormat::kRgba8Sint:
-    case ast::ImageFormat::kRgba16Uint:
-    case ast::ImageFormat::kRgba16Sint:
-    case ast::ImageFormat::kRgba16Float:
-    case ast::ImageFormat::kRgba32Uint:
-    case ast::ImageFormat::kRgba32Sint:
-    case ast::ImageFormat::kRgba32Float:
+    case ast::TexelFormat::kR32Uint:
+    case ast::TexelFormat::kR32Sint:
+    case ast::TexelFormat::kR32Float:
+    case ast::TexelFormat::kRg32Uint:
+    case ast::TexelFormat::kRg32Sint:
+    case ast::TexelFormat::kRg32Float:
+    case ast::TexelFormat::kRgba8Unorm:
+    case ast::TexelFormat::kRgba8Snorm:
+    case ast::TexelFormat::kRgba8Uint:
+    case ast::TexelFormat::kRgba8Sint:
+    case ast::TexelFormat::kRgba16Uint:
+    case ast::TexelFormat::kRgba16Sint:
+    case ast::TexelFormat::kRgba16Float:
+    case ast::TexelFormat::kRgba32Uint:
+    case ast::TexelFormat::kRgba32Sint:
+    case ast::TexelFormat::kRgba32Float:
       return true;
     default:
       return false;
@@ -182,7 +182,7 @@ bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
     return false;
   }
 
-  if (!IsValidStorageTextureImageFormat(t->format)) {
+  if (!IsValidStorageTextureTexelFormat(t->format)) {
     AddError(
         "image format must be one of the texel formats specified for storage "
         "textues in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",

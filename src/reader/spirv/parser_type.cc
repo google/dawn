@@ -19,8 +19,8 @@
 #include <utility>
 
 #include "src/program_builder.h"
-#include "src/utils/map.h"
 #include "src/utils/hash.h"
+#include "src/utils/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Type);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Void);
@@ -237,7 +237,7 @@ const ast::Type* SampledTexture::Build(ProgramBuilder& b) const {
 }
 
 StorageTexture::StorageTexture(ast::TextureDimension d,
-                               ast::ImageFormat f,
+                               ast::TexelFormat f,
                                ast::Access a)
     : Base(d), format(f), access(a) {}
 StorageTexture::StorageTexture(const StorageTexture&) = default;
@@ -532,7 +532,7 @@ const spirv::SampledTexture* TypeManager::SampledTexture(
 
 const spirv::StorageTexture* TypeManager::StorageTexture(
     ast::TextureDimension dims,
-    ast::ImageFormat fmt,
+    ast::TexelFormat fmt,
     ast::Access access) {
   return utils::GetOrCreate(
       state->storage_textures_, spirv::StorageTexture(dims, fmt, access), [&] {

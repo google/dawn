@@ -469,10 +469,10 @@ class ParserImpl {
   /// Parses a 'texture_external_type' grammar element
   /// @returns the parsed Type or nullptr if none matched
   Maybe<const ast::Type*> external_texture_type();
-  /// Parses a `image_storage_type` grammar element
+  /// Parses a `texel_format` grammar element
   /// @param use a description of what was being parsed if an error was raised
-  /// @returns returns the image format or kNone if none matched.
-  Expect<ast::ImageFormat> expect_image_storage_type(const std::string& use);
+  /// @returns returns the texel format or kNone if none matched.
+  Expect<ast::TexelFormat> expect_texel_format(const std::string& use);
   /// Parses a `function_header` grammar element
   /// @returns the parsed function header
   Maybe<FunctionHeader> function_header();

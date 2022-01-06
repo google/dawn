@@ -837,7 +837,7 @@ TEST_P(StorageTextureDimensionTest, All) {
 
   auto* st =
       ty.storage_texture(Source{{12, 34}}, params.dim,
-                         ast::ImageFormat::kR32Uint, ast::Access::kWrite);
+                         ast::TexelFormat::kR32Uint, ast::Access::kWrite);
 
   Global("a", st, ast::StorageClass::kNone,
          ast::DecorationList{GroupAndBinding(0, 0)});
@@ -856,46 +856,46 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          testing::ValuesIn(Dimension_cases));
 
 struct FormatParams {
-  ast::ImageFormat format;
+  ast::TexelFormat format;
   bool is_valid;
 };
 
 static constexpr FormatParams format_cases[] = {
-    FormatParams{ast::ImageFormat::kBgra8Unorm, false},
-    FormatParams{ast::ImageFormat::kBgra8UnormSrgb, false},
-    FormatParams{ast::ImageFormat::kR16Float, false},
-    FormatParams{ast::ImageFormat::kR16Sint, false},
-    FormatParams{ast::ImageFormat::kR16Uint, false},
-    FormatParams{ast::ImageFormat::kR32Float, true},
-    FormatParams{ast::ImageFormat::kR32Sint, true},
-    FormatParams{ast::ImageFormat::kR32Uint, true},
-    FormatParams{ast::ImageFormat::kR8Sint, false},
-    FormatParams{ast::ImageFormat::kR8Snorm, false},
-    FormatParams{ast::ImageFormat::kR8Uint, false},
-    FormatParams{ast::ImageFormat::kR8Unorm, false},
-    FormatParams{ast::ImageFormat::kRg11B10Float, false},
-    FormatParams{ast::ImageFormat::kRg16Float, false},
-    FormatParams{ast::ImageFormat::kRg16Sint, false},
-    FormatParams{ast::ImageFormat::kRg16Uint, false},
-    FormatParams{ast::ImageFormat::kRg32Float, true},
-    FormatParams{ast::ImageFormat::kRg32Sint, true},
-    FormatParams{ast::ImageFormat::kRg32Uint, true},
-    FormatParams{ast::ImageFormat::kRg8Sint, false},
-    FormatParams{ast::ImageFormat::kRg8Snorm, false},
-    FormatParams{ast::ImageFormat::kRg8Uint, false},
-    FormatParams{ast::ImageFormat::kRg8Unorm, false},
-    FormatParams{ast::ImageFormat::kRgb10A2Unorm, false},
-    FormatParams{ast::ImageFormat::kRgba16Float, true},
-    FormatParams{ast::ImageFormat::kRgba16Sint, true},
-    FormatParams{ast::ImageFormat::kRgba16Uint, true},
-    FormatParams{ast::ImageFormat::kRgba32Float, true},
-    FormatParams{ast::ImageFormat::kRgba32Sint, true},
-    FormatParams{ast::ImageFormat::kRgba32Uint, true},
-    FormatParams{ast::ImageFormat::kRgba8Sint, true},
-    FormatParams{ast::ImageFormat::kRgba8Snorm, true},
-    FormatParams{ast::ImageFormat::kRgba8Uint, true},
-    FormatParams{ast::ImageFormat::kRgba8Unorm, true},
-    FormatParams{ast::ImageFormat::kRgba8UnormSrgb, false}};
+    FormatParams{ast::TexelFormat::kBgra8Unorm, false},
+    FormatParams{ast::TexelFormat::kBgra8UnormSrgb, false},
+    FormatParams{ast::TexelFormat::kR16Float, false},
+    FormatParams{ast::TexelFormat::kR16Sint, false},
+    FormatParams{ast::TexelFormat::kR16Uint, false},
+    FormatParams{ast::TexelFormat::kR32Float, true},
+    FormatParams{ast::TexelFormat::kR32Sint, true},
+    FormatParams{ast::TexelFormat::kR32Uint, true},
+    FormatParams{ast::TexelFormat::kR8Sint, false},
+    FormatParams{ast::TexelFormat::kR8Snorm, false},
+    FormatParams{ast::TexelFormat::kR8Uint, false},
+    FormatParams{ast::TexelFormat::kR8Unorm, false},
+    FormatParams{ast::TexelFormat::kRg11B10Float, false},
+    FormatParams{ast::TexelFormat::kRg16Float, false},
+    FormatParams{ast::TexelFormat::kRg16Sint, false},
+    FormatParams{ast::TexelFormat::kRg16Uint, false},
+    FormatParams{ast::TexelFormat::kRg32Float, true},
+    FormatParams{ast::TexelFormat::kRg32Sint, true},
+    FormatParams{ast::TexelFormat::kRg32Uint, true},
+    FormatParams{ast::TexelFormat::kRg8Sint, false},
+    FormatParams{ast::TexelFormat::kRg8Snorm, false},
+    FormatParams{ast::TexelFormat::kRg8Uint, false},
+    FormatParams{ast::TexelFormat::kRg8Unorm, false},
+    FormatParams{ast::TexelFormat::kRgb10A2Unorm, false},
+    FormatParams{ast::TexelFormat::kRgba16Float, true},
+    FormatParams{ast::TexelFormat::kRgba16Sint, true},
+    FormatParams{ast::TexelFormat::kRgba16Uint, true},
+    FormatParams{ast::TexelFormat::kRgba32Float, true},
+    FormatParams{ast::TexelFormat::kRgba32Sint, true},
+    FormatParams{ast::TexelFormat::kRgba32Uint, true},
+    FormatParams{ast::TexelFormat::kRgba8Sint, true},
+    FormatParams{ast::TexelFormat::kRgba8Snorm, true},
+    FormatParams{ast::TexelFormat::kRgba8Uint, true},
+    FormatParams{ast::TexelFormat::kRgba8Unorm, true},
+    FormatParams{ast::TexelFormat::kRgba8UnormSrgb, false}};
 
 using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {
@@ -951,7 +951,7 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
 
   auto* st =
       ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
-                         ast::ImageFormat::kR32Uint, ast::Access::kUndefined);
+                         ast::TexelFormat::kR32Uint, ast::Access::kUndefined);
 
   Global("a", st, ast::StorageClass::kNone,
          ast::DecorationList{GroupAndBinding(0, 0)});
@@ -967,7 +967,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
 
   auto* st =
       ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
-                         ast::ImageFormat::kR32Uint, ast::Access::kReadWrite);
+                         ast::TexelFormat::kR32Uint, ast::Access::kReadWrite);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{GroupAndBinding(0, 0)});
@@ -983,7 +983,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
   // var a : texture_storage_1d<ru32int, read>;
 
   auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
-                                ast::ImageFormat::kR32Uint, ast::Access::kRead);
+                                ast::TexelFormat::kR32Uint, ast::Access::kRead);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{GroupAndBinding(0, 0)});
@@ -999,7 +999,7 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
   // var a : texture_storage_1d<ru32int, write>;
 
   auto* st =
-      ty.storage_texture(ast::TextureDimension::k1d, ast::ImageFormat::kR32Uint,
+      ty.storage_texture(ast::TextureDimension::k1d, ast::TexelFormat::kR32Uint,
                          ast::Access::kWrite);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,

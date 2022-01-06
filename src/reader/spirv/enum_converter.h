@@ -60,11 +60,11 @@ class EnumConverter {
   /// @returns a Tint AST texture dimension
   ast::TextureDimension ToDim(SpvDim dim, bool arrayed);
 
-  /// Converts a SPIR-V Image Format to a Tint ImageFormat
+  /// Converts a SPIR-V Image Format to a TexelFormat
   /// On failure, logs an error and returns kNone
   /// @param fmt the SPIR-V format
   /// @returns a Tint AST format
-  ast::ImageFormat ToImageFormat(SpvImageFormat fmt);
+  ast::TexelFormat ToTexelFormat(SpvImageFormat fmt);
 
  private:
   /// Registers a failure and returns a stream for log diagnostics.

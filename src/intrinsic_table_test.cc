@@ -394,9 +394,9 @@ TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
   auto* vec2_i32 = create<sem::Vector>(i32, 2);
   auto* vec4_f32 = create<sem::Vector>(f32, 4);
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Float, Types());
+      sem::StorageTexture::SubtypeFor(ast::TexelFormat::kR32Float, Types());
   auto* tex = create<sem::StorageTexture>(ast::TextureDimension::k2d,
-                                          ast::ImageFormat::kR32Float,
+                                          ast::TexelFormat::kR32Float,
                                           ast::Access::kWrite, subtype);
 
   auto* result = table->Lookup(IntrinsicType::kTextureStore,

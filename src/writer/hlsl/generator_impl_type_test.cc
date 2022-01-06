@@ -532,7 +532,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
 
 struct HlslStorageTextureData {
   ast::TextureDimension dim;
-  ast::ImageFormat imgfmt;
+  ast::TexelFormat imgfmt;
   std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out,
@@ -561,43 +561,43 @@ INSTANTIATE_TEST_SUITE_P(
     HlslStorageTexturesTest,
     testing::Values(
         HlslStorageTextureData{
-            ast::TextureDimension::k1d, ast::ImageFormat::kRgba8Unorm,
+            ast::TextureDimension::k1d, ast::TexelFormat::kRgba8Unorm,
             "RWTexture1D<float4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k2d, ast::ImageFormat::kRgba16Float,
+            ast::TextureDimension::k2d, ast::TexelFormat::kRgba16Float,
             "RWTexture2D<float4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k2dArray, ast::ImageFormat::kR32Float,
+            ast::TextureDimension::k2dArray, ast::TexelFormat::kR32Float,
             "RWTexture2DArray<float4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k3d, ast::ImageFormat::kRg32Float,
+            ast::TextureDimension::k3d, ast::TexelFormat::kRg32Float,
             "RWTexture3D<float4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k1d, ast::ImageFormat::kRgba32Float,
+            ast::TextureDimension::k1d, ast::TexelFormat::kRgba32Float,
             "RWTexture1D<float4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k2d, ast::ImageFormat::kRgba16Uint,
+            ast::TextureDimension::k2d, ast::TexelFormat::kRgba16Uint,
             "RWTexture2D<uint4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k2dArray, ast::ImageFormat::kR32Uint,
+            ast::TextureDimension::k2dArray, ast::TexelFormat::kR32Uint,
             "RWTexture2DArray<uint4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k3d, ast::ImageFormat::kRg32Uint,
+            ast::TextureDimension::k3d, ast::TexelFormat::kRg32Uint,
             "RWTexture3D<uint4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k1d, ast::ImageFormat::kRgba32Uint,
+            ast::TextureDimension::k1d, ast::TexelFormat::kRgba32Uint,
             "RWTexture1D<uint4> tex : register(u1, space2);"},
         HlslStorageTextureData{ast::TextureDimension::k2d,
-                               ast::ImageFormat::kRgba16Sint,
+                               ast::TexelFormat::kRgba16Sint,
                                "RWTexture2D<int4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k2dArray, ast::ImageFormat::kR32Sint,
+            ast::TextureDimension::k2dArray, ast::TexelFormat::kR32Sint,
             "RWTexture2DArray<int4> tex : register(u1, space2);"},
         HlslStorageTextureData{ast::TextureDimension::k3d,
-                               ast::ImageFormat::kRg32Sint,
+                               ast::TexelFormat::kRg32Sint,
                                "RWTexture3D<int4> tex : register(u1, space2);"},
         HlslStorageTextureData{
-            ast::TextureDimension::k1d, ast::ImageFormat::kRgba32Sint,
+            ast::TextureDimension::k1d, ast::TexelFormat::kRgba32Sint,
             "RWTexture1D<int4> tex : register(u1, space2);"}));
 
 }  // namespace

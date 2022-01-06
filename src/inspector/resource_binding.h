@@ -47,8 +47,8 @@ struct ResourceBinding {
   /// in SPIR-V OpTypeImage.
   enum class SampledKind { kUnknown = -1, kFloat, kUInt, kSInt };
 
-  /// Enumerator of texture image formats
-  enum class ImageFormat {
+  /// Enumerator of texel image formats
+  enum class TexelFormat {
     kNone = -1,
     kR8Unorm,
     kR8Snorm,
@@ -87,6 +87,9 @@ struct ResourceBinding {
     kRgba32Float,
   };
 
+  /// Renamed field [DEPRECATED]
+  using ImageFormat = TexelFormat;
+
   /// kXXX maps to entries returned by GetXXXResourceBindings call.
   enum class ResourceType {
     kUniformBuffer,
@@ -118,7 +121,7 @@ struct ResourceBinding {
   /// Kind of data being sampled, if defined.
   SampledKind sampled_kind;
   /// Format of data, if defined.
-  ImageFormat image_format;
+  TexelFormat image_format;
 };
 
 /// Convert from internal ast::TextureDimension to public
@@ -134,12 +137,12 @@ TypeTextureDimensionToResourceBindingTextureDimension(
 /// @returns the publicly visible equivalent
 ResourceBinding::SampledKind BaseTypeToSampledKind(const sem::Type* base_type);
 
-/// Convert from internal ast::ImageFormat to public
-/// ResourceBinding::ImageFormat
+/// Convert from internal ast::TexelFormat to public
+/// ResourceBinding::TexelFormat
 /// @param image_format internal value to convert from
 /// @returns the publicly visible equivalent
-ResourceBinding::ImageFormat TypeImageFormatToResourceBindingImageFormat(
-    const ast::ImageFormat& image_format);
+ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
+    const ast::TexelFormat& image_format);
 
 }  // namespace inspector
 }  // namespace tint

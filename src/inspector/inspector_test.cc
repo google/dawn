@@ -130,11 +130,11 @@ class InspectorGetDepthMultisampledTextureResourceBindingsTest
 
 typedef std::tuple<ast::TextureDimension, ResourceBinding::TextureDimension>
     DimensionParams;
-typedef std::tuple<ast::ImageFormat,
-                   ResourceBinding::ImageFormat,
+typedef std::tuple<ast::TexelFormat,
+                   ResourceBinding::TexelFormat,
                    ResourceBinding::SampledKind>
-    ImageFormatParams;
-typedef std::tuple<DimensionParams, ImageFormatParams>
+    TexelFormatParams;
+typedef std::tuple<DimensionParams, TexelFormatParams>
     GetStorageTextureTestParams;
 class InspectorGetStorageTextureResourceBindingsTestWithParam
     : public InspectorBuilder,
@@ -1292,7 +1292,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   Func("depth_ms_func", {}, ty.void_(), {Ignore("depth_ms_texture")});
 
   auto* st_type = MakeStorageTextureTypes(ast::TextureDimension::k2d,
-                                          ast::ImageFormat::kR32Uint);
+                                          ast::TexelFormat::kR32Uint);
   AddStorageTexture("st_var", st_type, 4, 0);
   MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<i32>(), {});
 
@@ -2379,15 +2379,15 @@ TEST_F(InspectorGetStorageTextureResourceBindingsTest, Empty) {
 
 TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
   DimensionParams dim_params;
-  ImageFormatParams format_params;
+  TexelFormatParams format_params;
   std::tie(dim_params, format_params) = GetParam();
 
   ast::TextureDimension dim;
   ResourceBinding::TextureDimension expected_dim;
   std::tie(dim, expected_dim) = dim_params;
 
-  ast::ImageFormat format;
-  ResourceBinding::ImageFormat expected_format;
+  ast::TexelFormat format;
+  ResourceBinding::TexelFormat expected_format;
   ResourceBinding::SampledKind expected_kind;
   std::tie(format, expected_format, expected_kind) = format_params;
 
@@ -2445,53 +2445,53 @@ INSTANTIATE_TEST_SUITE_P(
             std::make_tuple(ast::TextureDimension::k3d,
                             ResourceBinding::TextureDimension::k3d)),
         testing::Values(
-            std::make_tuple(ast::ImageFormat::kR32Float,
-                            ResourceBinding::ImageFormat::kR32Float,
+            std::make_tuple(ast::TexelFormat::kR32Float,
+                            ResourceBinding::TexelFormat::kR32Float,
                             ResourceBinding::SampledKind::kFloat),
-            std::make_tuple(ast::ImageFormat::kR32Sint,
-                            ResourceBinding::ImageFormat::kR32Sint,
+            std::make_tuple(ast::TexelFormat::kR32Sint,
+                            ResourceBinding::TexelFormat::kR32Sint,
                             ResourceBinding::SampledKind::kSInt),
-            std::make_tuple(ast::ImageFormat::kR32Uint,
-                            ResourceBinding::ImageFormat::kR32Uint,
+            std::make_tuple(ast::TexelFormat::kR32Uint,
+                            ResourceBinding::TexelFormat::kR32Uint,
                             ResourceBinding::SampledKind::kUInt),
-            std::make_tuple(ast::ImageFormat::kRg32Float,
-                            ResourceBinding::ImageFormat::kRg32Float,
+            std::make_tuple(ast::TexelFormat::kRg32Float,
+                            ResourceBinding::TexelFormat::kRg32Float,
                             ResourceBinding::SampledKind::kFloat),
-            std::make_tuple(ast::ImageFormat::kRg32Sint,
-                            ResourceBinding::ImageFormat::kRg32Sint,
+            std::make_tuple(ast::TexelFormat::kRg32Sint,
+                            ResourceBinding::TexelFormat::kRg32Sint,
                             ResourceBinding::SampledKind::kSInt),
-            std::make_tuple(ast::ImageFormat::kRg32Uint,
-                            ResourceBinding::ImageFormat::kRg32Uint,
+            std::make_tuple(ast::TexelFormat::kRg32Uint,
+                            ResourceBinding::TexelFormat::kRg32Uint,
                             ResourceBinding::SampledKind::kUInt),
-            std::make_tuple(ast::ImageFormat::kRgba16Float,
-                            ResourceBinding::ImageFormat::kRgba16Float,
+            std::make_tuple(ast::TexelFormat::kRgba16Float,
+                            ResourceBinding::TexelFormat::kRgba16Float,
                             ResourceBinding::SampledKind::kFloat),
-            std::make_tuple(ast::ImageFormat::kRgba16Sint,
-                            ResourceBinding::ImageFormat::kRgba16Sint,
+            std::make_tuple(ast::TexelFormat::kRgba16Sint,
+                            ResourceBinding::TexelFormat::kRgba16Sint,
                             ResourceBinding::SampledKind::kSInt),
-            std::make_tuple(ast::ImageFormat::kRgba16Uint,
-                            ResourceBinding::ImageFormat::kRgba16Uint,
+            std::make_tuple(ast::TexelFormat::kRgba16Uint,
+                            ResourceBinding::TexelFormat::kRgba16Uint,
                             ResourceBinding::SampledKind::kUInt),
-            std::make_tuple(ast::ImageFormat::kRgba32Float,
-                            ResourceBinding::ImageFormat::kRgba32Float,
+            std::make_tuple(ast::TexelFormat::kRgba32Float,
+                            ResourceBinding::TexelFormat::kRgba32Float,
                             ResourceBinding::SampledKind::kFloat),
-            std::make_tuple(ast::ImageFormat::kRgba32Sint,
-                            ResourceBinding::ImageFormat::kRgba32Sint,
+            std::make_tuple(ast::TexelFormat::kRgba32Sint,
+                            ResourceBinding::TexelFormat::kRgba32Sint,
                             ResourceBinding::SampledKind::kSInt),
-            std::make_tuple(ast::ImageFormat::kRgba32Uint,
-                            ResourceBinding::ImageFormat::kRgba32Uint,
+            std::make_tuple(ast::TexelFormat::kRgba32Uint,
+                            ResourceBinding::TexelFormat::kRgba32Uint,
                             ResourceBinding::SampledKind::kUInt),
-            std::make_tuple(ast::ImageFormat::kRgba8Sint,
-                            ResourceBinding::ImageFormat::kRgba8Sint,
+            std::make_tuple(ast::TexelFormat::kRgba8Sint,
+                            ResourceBinding::TexelFormat::kRgba8Sint,
                             ResourceBinding::SampledKind::kSInt),
-            std::make_tuple(ast::ImageFormat::kRgba8Snorm,
-                            ResourceBinding::ImageFormat::kRgba8Snorm,
+            std::make_tuple(ast::TexelFormat::kRgba8Snorm,
+                            ResourceBinding::TexelFormat::kRgba8Snorm,
                             ResourceBinding::SampledKind::kFloat),
-            std::make_tuple(ast::ImageFormat::kRgba8Uint,
-                            ResourceBinding::ImageFormat::kRgba8Uint,
+            std::make_tuple(ast::TexelFormat::kRgba8Uint,
+                            ResourceBinding::TexelFormat::kRgba8Uint,
                             ResourceBinding::SampledKind::kUInt),
-            std::make_tuple(ast::ImageFormat::kRgba8Unorm,
-                            ResourceBinding::ImageFormat::kRgba8Unorm,
+            std::make_tuple(ast::TexelFormat::kRgba8Unorm,
+                            ResourceBinding::TexelFormat::kRgba8Unorm,
                             ResourceBinding::SampledKind::kFloat))));
 
 TEST_P(InspectorGetDepthTextureResourceBindingsTestWithParam,

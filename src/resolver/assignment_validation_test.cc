@@ -227,7 +227,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
 
   auto make_type = [&] {
     return ty.storage_texture(ast::TextureDimension::k1d,
-                              ast::ImageFormat::kRgba8Unorm,
+                              ast::TexelFormat::kRgba8Unorm,
                               ast::Access::kWrite);
   };
 

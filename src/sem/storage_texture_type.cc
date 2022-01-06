@@ -22,10 +22,10 @@ namespace tint {
 namespace sem {
 
 StorageTexture::StorageTexture(ast::TextureDimension dim,
-                               ast::ImageFormat format,
+                               ast::TexelFormat format,
                                ast::Access access,
                                sem::Type* subtype)
-    : Base(dim), image_format_(format), access_(access), subtype_(subtype) {}
+    : Base(dim), texel_format_(format), access_(access), subtype_(subtype) {}
 
 StorageTexture::StorageTexture(StorageTexture&&) = default;
 
@@ -33,66 +33,66 @@ StorageTexture::~StorageTexture() = default;
 
 std::string StorageTexture::type_name() const {
   std::ostringstream out;
-  out << "__storage_texture_" << dim() << "_" << image_format_ << "_"
+  out << "__storage_texture_" << dim() << "_" << texel_format_ << "_"
       << access_;
   return out.str();
 }
 
 std::string StorageTexture::FriendlyName(const SymbolTable&) const {
   std::ostringstream out;
-  out << "texture_storage_" << dim() << "<" << image_format_ << ", " << access_
+  out << "texture_storage_" << dim() << "<" << texel_format_ << ", " << access_
       << ">";
   return out.str();
 }
 
-sem::Type* StorageTexture::SubtypeFor(ast::ImageFormat format,
+sem::Type* StorageTexture::SubtypeFor(ast::TexelFormat format,
                                       sem::Manager& type_mgr) {
   switch (format) {
-    case ast::ImageFormat::kR8Uint:
-    case ast::ImageFormat::kR16Uint:
-    case ast::ImageFormat::kRg8Uint:
-    case ast::ImageFormat::kR32Uint:
-    case ast::ImageFormat::kRg16Uint:
-    case ast::ImageFormat::kRgba8Uint:
-    case ast::ImageFormat::kRg32Uint:
-    case ast::ImageFormat::kRgba16Uint:
-    case ast::ImageFormat::kRgba32Uint: {
+    case ast::TexelFormat::kR8Uint:
+    case ast::TexelFormat::kR16Uint:
+    case ast::TexelFormat::kRg8Uint:
+    case ast::TexelFormat::kR32Uint:
+    case ast::TexelFormat::kRg16Uint:
+    case ast::TexelFormat::kRgba8Uint:
+    case ast::TexelFormat::kRg32Uint:
+    case ast::TexelFormat::kRgba16Uint:
+    case ast::TexelFormat::kRgba32Uint: {
       return type_mgr.Get<sem::U32>();
     }
 
-    case ast::ImageFormat::kR8Sint:
-    case ast::ImageFormat::kR16Sint:
-    case ast::ImageFormat::kRg8Sint:
-    case ast::ImageFormat::kR32Sint:
-    case ast::ImageFormat::kRg16Sint:
-    case ast::ImageFormat::kRgba8Sint:
-    case ast::ImageFormat::kRg32Sint:
-    case ast::ImageFormat::kRgba16Sint:
-    case ast::ImageFormat::kRgba32Sint: {
+    case ast::TexelFormat::kR8Sint:
+    case ast::TexelFormat::kR16Sint:
+    case ast::TexelFormat::kRg8Sint:
+    case ast::TexelFormat::kR32Sint:
+    case ast::TexelFormat::kRg16Sint:
+    case ast::TexelFormat::kRgba8Sint:
+    case ast::TexelFormat::kRg32Sint:
+    case ast::TexelFormat::kRgba16Sint:
+    case ast::TexelFormat::kRgba32Sint: {
       return type_mgr.Get<sem::I32>();
     }
 
-    case ast::ImageFormat::kR8Unorm:
-    case ast::ImageFormat::kRg8Unorm:
-    case ast::ImageFormat::kRgba8Unorm:
-    case ast::ImageFormat::kRgba8UnormSrgb:
-    case ast::ImageFormat::kBgra8Unorm:
-    case ast::ImageFormat::kBgra8UnormSrgb:
-    case ast::ImageFormat::kRgb10A2Unorm:
-    case ast::ImageFormat::kR8Snorm:
-    case ast::ImageFormat::kRg8Snorm:
-    case ast::ImageFormat::kRgba8Snorm:
-    case ast::ImageFormat::kR16Float:
-    case ast::ImageFormat::kR32Float:
-    case ast::ImageFormat::kRg16Float:
-    case ast::ImageFormat::kRg11B10Float:
-    case ast::ImageFormat::kRg32Float:
-    case ast::ImageFormat::kRgba16Float:
-    case ast::ImageFormat::kRgba32Float: {
+    case ast::TexelFormat::kR8Unorm:
+    case ast::TexelFormat::kRg8Unorm:
+    case ast::TexelFormat::kRgba8Unorm:
+    case ast::TexelFormat::kRgba8UnormSrgb:
+    case ast::TexelFormat::kBgra8Unorm:
+    case ast::TexelFormat::kBgra8UnormSrgb:
+    case ast::TexelFormat::kRgb10A2Unorm:
+    case ast::TexelFormat::kR8Snorm:
+    case ast::TexelFormat::kRg8Snorm:
+    case ast::TexelFormat::kRgba8Snorm:
+    case ast::TexelFormat::kR16Float:
+    case ast::TexelFormat::kR32Float:
+    case ast::TexelFormat::kRg16Float:
+    case ast::TexelFormat::kRg11B10Float:
+    case ast::TexelFormat::kRg32Float:
+    case ast::TexelFormat::kRgba16Float:
+    case ast::TexelFormat::kRgba32Float: {
       return type_mgr.Get<sem::F32>();
     }
 
-    case ast::ImageFormat::kNone:
+    case ast::TexelFormat::kNone:
       break;
   }
 

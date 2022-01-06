@@ -840,7 +840,6 @@ if(${TINT_BUILD_TESTS})
       reader/wgsl/parser_impl_global_decl_test.cc
       reader/wgsl/parser_impl_global_variable_decl_test.cc
       reader/wgsl/parser_impl_if_stmt_test.cc
-      reader/wgsl/parser_impl_image_storage_type_test.cc
       reader/wgsl/parser_impl_inclusive_or_expression_test.cc
       reader/wgsl/parser_impl_logical_and_expression_test.cc
       reader/wgsl/parser_impl_logical_or_expression_test.cc
@@ -872,6 +871,7 @@ if(${TINT_BUILD_TESTS})
       reader/wgsl/parser_impl_test.cc
       reader/wgsl/parser_impl_test_helper.cc
       reader/wgsl/parser_impl_test_helper.h
+      reader/wgsl/parser_impl_texel_format_test.cc
       reader/wgsl/parser_impl_texture_sampler_types_test.cc
       reader/wgsl/parser_impl_type_alias_test.cc
       reader/wgsl/parser_impl_type_decl_test.cc

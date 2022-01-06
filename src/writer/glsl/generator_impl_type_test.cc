@@ -507,7 +507,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitMultisampledTexture) {
 
 struct GlslStorageTextureData {
   ast::TextureDimension dim;
-  ast::ImageFormat imgfmt;
+  ast::TexelFormat imgfmt;
   std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out,
@@ -539,32 +539,32 @@ INSTANTIATE_TEST_SUITE_P(
     GlslStorageTexturesTest,
     testing::Values(
         GlslStorageTextureData{ast::TextureDimension::k1d,
-                               ast::ImageFormat::kRgba8Unorm, "image1D tex;"},
+                               ast::TexelFormat::kRgba8Unorm, "image1D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k2d,
-                               ast::ImageFormat::kRgba16Float, "image2D tex;"},
+                               ast::TexelFormat::kRgba16Float, "image2D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k2dArray,
-                               ast::ImageFormat::kR32Float,
+                               ast::TexelFormat::kR32Float,
                                "image2DArray tex;"},
         GlslStorageTextureData{ast::TextureDimension::k3d,
-                               ast::ImageFormat::kRg32Float, "image3D tex;"},
+                               ast::TexelFormat::kRg32Float, "image3D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k1d,
-                               ast::ImageFormat::kRgba32Float, "image1D tex;"},
+                               ast::TexelFormat::kRgba32Float, "image1D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k2d,
-                               ast::ImageFormat::kRgba16Uint, "image2D tex;"},
+                               ast::TexelFormat::kRgba16Uint, "image2D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k2dArray,
-                               ast::ImageFormat::kR32Uint, "image2DArray tex;"},
+                               ast::TexelFormat::kR32Uint, "image2DArray tex;"},
         GlslStorageTextureData{ast::TextureDimension::k3d,
-                               ast::ImageFormat::kRg32Uint, "image3D tex;"},
+                               ast::TexelFormat::kRg32Uint, "image3D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k1d,
-                               ast::ImageFormat::kRgba32Uint, "image1D tex;"},
+                               ast::TexelFormat::kRgba32Uint, "image1D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k2d,
-                               ast::ImageFormat::kRgba16Sint, "image2D tex;"},
+                               ast::TexelFormat::kRgba16Sint, "image2D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k2dArray,
-                               ast::ImageFormat::kR32Sint, "image2DArray tex;"},
+                               ast::TexelFormat::kR32Sint, "image2DArray tex;"},
         GlslStorageTextureData{ast::TextureDimension::k3d,
-                               ast::ImageFormat::kRg32Sint, "image3D tex;"},
+                               ast::TexelFormat::kRg32Sint, "image3D tex;"},
         GlslStorageTextureData{ast::TextureDimension::k1d,
-                               ast::ImageFormat::kRgba32Sint, "image1D tex;"}));
+                               ast::TexelFormat::kRgba32Sint, "image1D tex;"}));
 
 }  // namespace
 }  // namespace glsl

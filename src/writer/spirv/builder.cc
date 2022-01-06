@@ -3916,17 +3916,17 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
         // the access type. Doing this ensures we de-dupe.
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(
-                                 st->dim(), st->image_format(),
+                                 st->dim(), st->texel_format(),
                                  ast::Access::kRead, st->type())
                              ->type_name()] = id;
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(
-                                 st->dim(), st->image_format(),
+                                 st->dim(), st->texel_format(),
                                  ast::Access::kWrite, st->type())
                              ->type_name()] = id;
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(
-                                 st->dim(), st->image_format(),
+                                 st->dim(), st->texel_format(),
                                  ast::Access::kReadWrite, st->type())
                              ->type_name()] = id;
       }
@@ -4014,7 +4014,7 @@ bool Builder::GenerateTextureType(const sem::Texture* texture,
 
   uint32_t format_literal = SpvImageFormat_::SpvImageFormatUnknown;
   if (auto* t = texture->As<sem::StorageTexture>()) {
-    format_literal = convert_image_format_to_spv(t->image_format());
+    format_literal = convert_texel_format_to_spv(t->texel_format());
   }
 
   push_type(spv::Op::OpTypeImage,
@@ -4291,99 +4291,99 @@ void Builder::AddInterpolationDecorations(uint32_t id,
   }
 }
 
-SpvImageFormat Builder::convert_image_format_to_spv(
-    const ast::ImageFormat format) {
+SpvImageFormat Builder::convert_texel_format_to_spv(
+    const ast::TexelFormat format) {
   switch (format) {
-    case ast::ImageFormat::kR8Unorm:
+    case ast::TexelFormat::kR8Unorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR8;
-    case ast::ImageFormat::kR8Snorm:
+    case ast::TexelFormat::kR8Snorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR8Snorm;
-    case ast::ImageFormat::kR8Uint:
+    case ast::TexelFormat::kR8Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR8ui;
-    case ast::ImageFormat::kR8Sint:
+    case ast::TexelFormat::kR8Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR8i;
-    case ast::ImageFormat::kR16Uint:
+    case ast::TexelFormat::kR16Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR16ui;
-    case ast::ImageFormat::kR16Sint:
+    case ast::TexelFormat::kR16Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR16i;
-    case ast::ImageFormat::kR16Float:
+    case ast::TexelFormat::kR16Float:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR16f;
-    case ast::ImageFormat::kRg8Unorm:
+    case ast::TexelFormat::kRg8Unorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg8;
-    case ast::ImageFormat::kRg8Snorm:
+    case ast::TexelFormat::kRg8Snorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg8Snorm;
-    case ast::ImageFormat::kRg8Uint:
+    case ast::TexelFormat::kRg8Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg8ui;
-    case ast::ImageFormat::kRg8Sint:
+    case ast::TexelFormat::kRg8Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg8i;
-    case ast::ImageFormat::kR32Uint:
+    case ast::TexelFormat::kR32Uint:
       return SpvImageFormatR32ui;
-    case ast::ImageFormat::kR32Sint:
+    case ast::TexelFormat::kR32Sint:
       return SpvImageFormatR32i;
-    case ast::ImageFormat::kR32Float:
+    case ast::TexelFormat::kR32Float:
       return SpvImageFormatR32f;
-    case ast::ImageFormat::kRg16Uint:
+    case ast::TexelFormat::kRg16Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg16ui;
-    case ast::ImageFormat::kRg16Sint:
+    case ast::TexelFormat::kRg16Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg16i;
-    case ast::ImageFormat::kRg16Float:
+    case ast::TexelFormat::kRg16Float:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg16f;
-    case ast::ImageFormat::kRgba8Unorm:
+    case ast::TexelFormat::kRgba8Unorm:
       return SpvImageFormatRgba8;
-    case ast::ImageFormat::kRgba8UnormSrgb:
+    case ast::TexelFormat::kRgba8UnormSrgb:
       return SpvImageFormatUnknown;
-    case ast::ImageFormat::kRgba8Snorm:
+    case ast::TexelFormat::kRgba8Snorm:
       return SpvImageFormatRgba8Snorm;
-    case ast::ImageFormat::kRgba8Uint:
+    case ast::TexelFormat::kRgba8Uint:
       return SpvImageFormatRgba8ui;
-    case ast::ImageFormat::kRgba8Sint:
+    case ast::TexelFormat::kRgba8Sint:
       return SpvImageFormatRgba8i;
-    case ast::ImageFormat::kBgra8Unorm:
+    case ast::TexelFormat::kBgra8Unorm:
       return SpvImageFormatUnknown;
-    case ast::ImageFormat::kBgra8UnormSrgb:
+    case ast::TexelFormat::kBgra8UnormSrgb:
       return SpvImageFormatUnknown;
-    case ast::ImageFormat::kRgb10A2Unorm:
+    case ast::TexelFormat::kRgb10A2Unorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRgb10A2;
-    case ast::ImageFormat::kRg11B10Float:
+    case ast::TexelFormat::kRg11B10Float:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR11fG11fB10f;
-    case ast::ImageFormat::kRg32Uint:
+    case ast::TexelFormat::kRg32Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg32ui;
-    case ast::ImageFormat::kRg32Sint:
+    case ast::TexelFormat::kRg32Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg32i;
-    case ast::ImageFormat::kRg32Float:
+    case ast::TexelFormat::kRg32Float:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg32f;
-    case ast::ImageFormat::kRgba16Uint:
+    case ast::TexelFormat::kRgba16Uint:
       return SpvImageFormatRgba16ui;
-    case ast::ImageFormat::kRgba16Sint:
+    case ast::TexelFormat::kRgba16Sint:
       return SpvImageFormatRgba16i;
-    case ast::ImageFormat::kRgba16Float:
+    case ast::TexelFormat::kRgba16Float:
       return SpvImageFormatRgba16f;
-    case ast::ImageFormat::kRgba32Uint:
+    case ast::TexelFormat::kRgba32Uint:
       return SpvImageFormatRgba32ui;
-    case ast::ImageFormat::kRgba32Sint:
+    case ast::TexelFormat::kRgba32Sint:
       return SpvImageFormatRgba32i;
-    case ast::ImageFormat::kRgba32Float:
+    case ast::TexelFormat::kRgba32Float:
       return SpvImageFormatRgba32f;
-    case ast::ImageFormat::kNone:
+    case ast::TexelFormat::kNone:
       return SpvImageFormatUnknown;
   }
   return SpvImageFormatUnknown;

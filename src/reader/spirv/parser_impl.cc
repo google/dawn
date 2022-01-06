@@ -2505,8 +2505,8 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
       }
     } else {
       const auto access = ast::Access::kWrite;
-      const auto format = enum_converter_.ToImageFormat(image_type->format());
-      if (format == ast::ImageFormat::kNone) {
+      const auto format = enum_converter_.ToTexelFormat(image_type->format());
+      if (format == ast::TexelFormat::kNone) {
         return nullptr;
       }
       ast_store_type = ty_.StorageTexture(dim, format, access);
@@ -2526,47 +2526,47 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
   return result;
 }
 
-const Type* ParserImpl::GetComponentTypeForFormat(ast::ImageFormat format) {
+const Type* ParserImpl::GetComponentTypeForFormat(ast::TexelFormat format) {
   switch (format) {
-    case ast::ImageFormat::kR8Uint:
-    case ast::ImageFormat::kR16Uint:
-    case ast::ImageFormat::kRg8Uint:
-    case ast::ImageFormat::kR32Uint:
-    case ast::ImageFormat::kRg16Uint:
-    case ast::ImageFormat::kRgba8Uint:
-    case ast::ImageFormat::kRg32Uint:
-    case ast::ImageFormat::kRgba16Uint:
-    case ast::ImageFormat::kRgba32Uint:
+    case ast::TexelFormat::kR8Uint:
+    case ast::TexelFormat::kR16Uint:
+    case ast::TexelFormat::kRg8Uint:
+    case ast::TexelFormat::kR32Uint:
+    case ast::TexelFormat::kRg16Uint:
+    case ast::TexelFormat::kRgba8Uint:
+    case ast::TexelFormat::kRg32Uint:
+    case ast::TexelFormat::kRgba16Uint:
+    case ast::TexelFormat::kRgba32Uint:
       return ty_.U32();
 
-    case ast::ImageFormat::kR8Sint:
-    case ast::ImageFormat::kR16Sint:
-    case ast::ImageFormat::kRg8Sint:
-    case ast::ImageFormat::kR32Sint:
-    case ast::ImageFormat::kRg16Sint:
-    case ast::ImageFormat::kRgba8Sint:
-    case ast::ImageFormat::kRg32Sint:
-    case ast::ImageFormat::kRgba16Sint:
-    case ast::ImageFormat::kRgba32Sint:
+    case ast::TexelFormat::kR8Sint:
+    case ast::TexelFormat::kR16Sint:
+    case ast::TexelFormat::kRg8Sint:
+    case ast::TexelFormat::kR32Sint:
+    case ast::TexelFormat::kRg16Sint:
+    case ast::TexelFormat::kRgba8Sint:
+    case ast::TexelFormat::kRg32Sint:
+    case ast::TexelFormat::kRgba16Sint:
+    case ast::TexelFormat::kRgba32Sint:
       return ty_.I32();
 
-    case ast::ImageFormat::kR8Unorm:
-    case ast::ImageFormat::kRg8Unorm:
-    case ast::ImageFormat::kRgba8Unorm:
-    case ast::ImageFormat::kRgba8UnormSrgb:
-    case ast::ImageFormat::kBgra8Unorm:
-    case ast::ImageFormat::kBgra8UnormSrgb:
-    case ast::ImageFormat::kRgb10A2Unorm:
-    case ast::ImageFormat::kR8Snorm:
-    case ast::ImageFormat::kRg8Snorm:
-    case ast::ImageFormat::kRgba8Snorm:
-    case ast::ImageFormat::kR16Float:
-    case ast::ImageFormat::kR32Float:
-    case ast::ImageFormat::kRg16Float:
-    case ast::ImageFormat::kRg11B10Float:
-    case ast::ImageFormat::kRg32Float:
-    case ast::ImageFormat::kRgba16Float:
-    case ast::ImageFormat::kRgba32Float:
+    case ast::TexelFormat::kR8Unorm:
+    case ast::TexelFormat::kRg8Unorm:
+    case ast::TexelFormat::kRgba8Unorm:
+    case ast::TexelFormat::kRgba8UnormSrgb:
+    case ast::TexelFormat::kBgra8Unorm:
+    case ast::TexelFormat::kBgra8UnormSrgb:
+    case ast::TexelFormat::kRgb10A2Unorm:
+    case ast::TexelFormat::kR8Snorm:
+    case ast::TexelFormat::kRg8Snorm:
+    case ast::TexelFormat::kRgba8Snorm:
+    case ast::TexelFormat::kR16Float:
+    case ast::TexelFormat::kR32Float:
+    case ast::TexelFormat::kRg16Float:
+    case ast::TexelFormat::kRg11B10Float:
+    case ast::TexelFormat::kRg32Float:
+    case ast::TexelFormat::kRgba16Float:
+    case ast::TexelFormat::kRgba32Float:
       return ty_.F32();
     default:
       break;
@@ -2575,49 +2575,49 @@ const Type* ParserImpl::GetComponentTypeForFormat(ast::ImageFormat format) {
   return nullptr;
 }
 
-unsigned ParserImpl::GetChannelCountForFormat(ast::ImageFormat format) {
+unsigned ParserImpl::GetChannelCountForFormat(ast::TexelFormat format) {
   switch (format) {
-    case ast::ImageFormat::kR16Float:
-    case ast::ImageFormat::kR16Sint:
-    case ast::ImageFormat::kR16Uint:
-    case ast::ImageFormat::kR32Float:
-    case ast::ImageFormat::kR32Sint:
-    case ast::ImageFormat::kR32Uint:
-    case ast::ImageFormat::kR8Sint:
-    case ast::ImageFormat::kR8Snorm:
-    case ast::ImageFormat::kR8Uint:
-    case ast::ImageFormat::kR8Unorm:
+    case ast::TexelFormat::kR16Float:
+    case ast::TexelFormat::kR16Sint:
+    case ast::TexelFormat::kR16Uint:
+    case ast::TexelFormat::kR32Float:
+    case ast::TexelFormat::kR32Sint:
+    case ast::TexelFormat::kR32Uint:
+    case ast::TexelFormat::kR8Sint:
+    case ast::TexelFormat::kR8Snorm:
+    case ast::TexelFormat::kR8Uint:
+    case ast::TexelFormat::kR8Unorm:
       // One channel
       return 1;
 
-    case ast::ImageFormat::kRg11B10Float:
-    case ast::ImageFormat::kRg16Float:
-    case ast::ImageFormat::kRg16Sint:
-    case ast::ImageFormat::kRg16Uint:
-    case ast::ImageFormat::kRg32Float:
-    case ast::ImageFormat::kRg32Sint:
-    case ast::ImageFormat::kRg32Uint:
-    case ast::ImageFormat::kRg8Sint:
-    case ast::ImageFormat::kRg8Snorm:
-    case ast::ImageFormat::kRg8Uint:
-    case ast::ImageFormat::kRg8Unorm:
+    case ast::TexelFormat::kRg11B10Float:
+    case ast::TexelFormat::kRg16Float:
+    case ast::TexelFormat::kRg16Sint:
+    case ast::TexelFormat::kRg16Uint:
+    case ast::TexelFormat::kRg32Float:
+    case ast::TexelFormat::kRg32Sint:
+    case ast::TexelFormat::kRg32Uint:
+    case ast::TexelFormat::kRg8Sint:
+    case ast::TexelFormat::kRg8Snorm:
+    case ast::TexelFormat::kRg8Uint:
+    case ast::TexelFormat::kRg8Unorm:
       // Two channels
       return 2;
 
-    case ast::ImageFormat::kBgra8Unorm:
-    case ast::ImageFormat::kBgra8UnormSrgb:
-    case ast::ImageFormat::kRgb10A2Unorm:
-    case ast::ImageFormat::kRgba16Float:
-    case ast::ImageFormat::kRgba16Sint:
-    case ast::ImageFormat::kRgba16Uint:
-    case ast::ImageFormat::kRgba32Float:
-    case ast::ImageFormat::kRgba32Sint:
-    case ast::ImageFormat::kRgba32Uint:
-    case ast::ImageFormat::kRgba8Sint:
-    case ast::ImageFormat::kRgba8Snorm:
-    case ast::ImageFormat::kRgba8Uint:
-    case ast::ImageFormat::kRgba8Unorm:
-    case ast::ImageFormat::kRgba8UnormSrgb:
+    case ast::TexelFormat::kBgra8Unorm:
+    case ast::TexelFormat::kBgra8UnormSrgb:
+    case ast::TexelFormat::kRgb10A2Unorm:
+    case ast::TexelFormat::kRgba16Float:
+    case ast::TexelFormat::kRgba16Sint:
+    case ast::TexelFormat::kRgba16Uint:
+    case ast::TexelFormat::kRgba32Float:
+    case ast::TexelFormat::kRgba32Sint:
+    case ast::TexelFormat::kRgba32Uint:
+    case ast::TexelFormat::kRgba8Sint:
+    case ast::TexelFormat::kRgba8Snorm:
+    case ast::TexelFormat::kRgba8Uint:
+    case ast::TexelFormat::kRgba8Unorm:
+    case ast::TexelFormat::kRgba8UnormSrgb:
       // Four channels
       return 4;
 
@@ -2628,7 +2628,7 @@ unsigned ParserImpl::GetChannelCountForFormat(ast::ImageFormat format) {
   return 0;
 }
 
-const Type* ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
+const Type* ParserImpl::GetTexelTypeForFormat(ast::TexelFormat format) {
   const auto* component_type = GetComponentTypeForFormat(format);
   if (!component_type) {
     return nullptr;

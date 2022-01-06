@@ -563,7 +563,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
 //  | depth_texture_type
 //  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
-//  | storage_texture_type LESS_THAN image_storage_type
+//  | storage_texture_type LESS_THAN texel_format
 //                         COMMA access GREATER_THAN
 Maybe<const ast::Type*> ParserImpl::texture_sampler_types() {
   auto type = sampler_type();
@@ -607,9 +607,9 @@ Maybe<const ast::Type*> ParserImpl::texture_sampler_types() {
   if (storage.matched) {
     const char* use = "storage texture type";
     using StorageTextureInfo =
-        std::pair<tint::ast::ImageFormat, tint::ast::Access>;
+        std::pair<tint::ast::TexelFormat, tint::ast::Access>;
     auto params = expect_lt_gt_block(use, [&]() -> Expect<StorageTextureInfo> {
-      auto format = expect_image_storage_type(use);
+      auto format = expect_texel_format(use);
       if (format.errored) {
         return Failure::kErrored;
       }
@@ -781,115 +781,115 @@ Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
 //  | RGBA32UINT
 //  | RGBA32SINT
 //  | RGBA32FLOAT
-Expect<ast::ImageFormat> ParserImpl::expect_image_storage_type(
+Expect<ast::TexelFormat> ParserImpl::expect_texel_format(
     const std::string& use) {
   auto tok = next();
   if (tok.IsIdentifier()) {
     auto s = tok.to_str();
     if (s == "bgra8unorm") {
-      return ast::ImageFormat::kBgra8Unorm;
+      return ast::TexelFormat::kBgra8Unorm;
     }
     if (s == "bgra8unorm_srgb") {
-      return ast::ImageFormat::kBgra8UnormSrgb;
+      return ast::TexelFormat::kBgra8UnormSrgb;
     }
     if (s == "r16float") {
-      return ast::ImageFormat::kR16Float;
+      return ast::TexelFormat::kR16Float;
     }
     if (s == "r16sint") {
-      return ast::ImageFormat::kR16Sint;
+      return ast::TexelFormat::kR16Sint;
     }
     if (s == "r16uint") {
-      return ast::ImageFormat::kR16Uint;
+      return ast::TexelFormat::kR16Uint;
     }
     if (s == "r32float") {
-      return ast::ImageFormat::kR32Float;
+      return ast::TexelFormat::kR32Float;
     }
     if (s == "r32sint") {
-      return ast::ImageFormat::kR32Sint;
+      return ast::TexelFormat::kR32Sint;
     }
     if (s == "r32uint") {
-      return ast::ImageFormat::kR32Uint;
+      return ast::TexelFormat::kR32Uint;
     }
     if (s == "r8sint") {
-      return ast::ImageFormat::kR8Sint;
+      return ast::TexelFormat::kR8Sint;
     }
     if (s == "r8snorm") {
-      return ast::ImageFormat::kR8Snorm;
+      return ast::TexelFormat::kR8Snorm;
     }
     if (s == "r8uint") {
-      return ast::ImageFormat::kR8Uint;
+      return ast::TexelFormat::kR8Uint;
     }
     if (s == "r8unorm") {
-      return ast::ImageFormat::kR8Unorm;
+      return ast::TexelFormat::kR8Unorm;
     }
     if (s == "rg11b10float") {
-      return ast::ImageFormat::kRg11B10Float;
+      return ast::TexelFormat::kRg11B10Float;
     }
     if (s == "rg16float") {
-      return ast::ImageFormat::kRg16Float;
+      return ast::TexelFormat::kRg16Float;
     }
     if (s == "rg16sint") {
-      return ast::ImageFormat::kRg16Sint;
+      return ast::TexelFormat::kRg16Sint;
     }
     if (s == "rg16uint") {
-      return ast::ImageFormat::kRg16Uint;
+      return ast::TexelFormat::kRg16Uint;
     }
     if (s == "rg32float") {
-      return ast::ImageFormat::kRg32Float;
+      return ast::TexelFormat::kRg32Float;
     }
     if (s == "rg32sint") {
-      return ast::ImageFormat::kRg32Sint;
+      return ast::TexelFormat::kRg32Sint;
     }
     if (s == "rg32uint") {
-      return ast::ImageFormat::kRg32Uint;
+      return ast::TexelFormat::kRg32Uint;
     }
     if (s == "rg8sint") {
-      return ast::ImageFormat::kRg8Sint;
+      return ast::TexelFormat::kRg8Sint;
     }
     if (s == "rg8snorm") {
-      return ast::ImageFormat::kRg8Snorm;
+      return ast::TexelFormat::kRg8Snorm;
     }
     if (s == "rg8uint") {
-      return ast::ImageFormat::kRg8Uint;
+      return ast::TexelFormat::kRg8Uint;
     }
     if (s == "rg8unorm") {
-      return ast::ImageFormat::kRg8Unorm;
+      return ast::TexelFormat::kRg8Unorm;
     }
     if (s == "rgb10a2unorm") {
-      return ast::ImageFormat::kRgb10A2Unorm;
+      return ast::TexelFormat::kRgb10A2Unorm;
     }
     if (s == "rgba16float") {
-      return ast::ImageFormat::kRgba16Float;
+      return ast::TexelFormat::kRgba16Float;
     }
     if (s == "rgba16sint") {
-      return ast::ImageFormat::kRgba16Sint;
+      return ast::TexelFormat::kRgba16Sint;
     }
     if (s == "rgba16uint") {
-      return ast::ImageFormat::kRgba16Uint;
+      return ast::TexelFormat::kRgba16Uint;
     }
     if (s == "rgba32float") {
-      return ast::ImageFormat::kRgba32Float;
+      return ast::TexelFormat::kRgba32Float;
     }
     if (s == "rgba32sint") {
-      return ast::ImageFormat::kRgba32Sint;
+      return ast::TexelFormat::kRgba32Sint;
     }
     if (s == "rgba32uint") {
-      return ast::ImageFormat::kRgba32Uint;
+      return ast::TexelFormat::kRgba32Uint;
     }
     if (s == "rgba8sint") {
-      return ast::ImageFormat::kRgba8Sint;
+      return ast::TexelFormat::kRgba8Sint;
     }
     if (s == "rgba8snorm") {
-      return ast::ImageFormat::kRgba8Snorm;
+      return ast::TexelFormat::kRgba8Snorm;
     }
     if (s == "rgba8uint") {
-      return ast::ImageFormat::kRgba8Uint;
+      return ast::TexelFormat::kRgba8Uint;
     }
     if (s == "rgba8unorm") {
-      return ast::ImageFormat::kRgba8Unorm;
+      return ast::TexelFormat::kRgba8Unorm;
     }
     if (s == "rgba8unorm_srgb") {
-      return ast::ImageFormat::kRgba8UnormSrgb;
+      return ast::TexelFormat::kRgba8UnormSrgb;
     }
   }
   return add_error(tok.source(), "invalid format", use);

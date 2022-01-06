@@ -552,7 +552,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   // var<uniform_constant> a : texture_storage_2d<r32uint, write>;
 
   auto* type =
-      ty.storage_texture(ast::TextureDimension::k2d, ast::ImageFormat::kR32Uint,
+      ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                          ast::Access::kWrite);
 
   auto* var_a = Global("a", type,
@@ -585,7 +585,7 @@ TEST_F(BuilderTest, DISABLED_GlobalVar_TextureStorageWithDifferentAccess) {
   // var<uniform_constant> b : texture_storage_2d<r32uint, write>;
 
   auto* type_a =
-      ty.storage_texture(ast::TextureDimension::k2d, ast::ImageFormat::kR32Uint,
+      ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                          ast::Access::kReadWrite);
   auto* var_a = Global("a", type_a, ast::StorageClass::kNone,
                        ast::DecorationList{
@@ -594,7 +594,7 @@ TEST_F(BuilderTest, DISABLED_GlobalVar_TextureStorageWithDifferentAccess) {
                        });
 
   auto* type_b =
-      ty.storage_texture(ast::TextureDimension::k2d, ast::ImageFormat::kR32Uint,
+      ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                          ast::Access::kWrite);
   auto* var_b = Global("b", type_b, ast::StorageClass::kNone,
                        ast::DecorationList{

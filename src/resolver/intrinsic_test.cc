@@ -222,7 +222,7 @@ inline std::ostream& operator<<(std::ostream& out, Texture data) {
 struct TextureTestParams {
   ast::TextureDimension dim;
   Texture type = Texture::kF32;
-  ast::ImageFormat format = ast::ImageFormat::kR16Float;
+  ast::TexelFormat format = ast::TexelFormat::kR16Float;
 };
 inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
   out << data.dim << "_" << data.type;

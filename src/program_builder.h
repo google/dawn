@@ -901,11 +901,11 @@ class ProgramBuilder {
     }
 
     /// @param dims the dimensionality of the texture
-    /// @param format the image format of the texture
+    /// @param format the texel format of the texture
     /// @param access the access control of the texture
     /// @returns the storage texture
     const ast::StorageTexture* storage_texture(ast::TextureDimension dims,
-                                               ast::ImageFormat format,
+                                               ast::TexelFormat format,
                                                ast::Access access) const {
       auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
       return builder->create<ast::StorageTexture>(dims, format, subtype,
@@ -914,12 +914,12 @@ class ProgramBuilder {
 
     /// @param source the Source of the node
     /// @param dims the dimensionality of the texture
-    /// @param format the image format of the texture
+    /// @param format the texel format of the texture
     /// @param access the access control of the texture
     /// @returns the storage texture
     const ast::StorageTexture* storage_texture(const Source& source,
                                                ast::TextureDimension dims,
-                                               ast::ImageFormat format,
+                                               ast::TexelFormat format,
                                                ast::Access access) const {
       auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
       return builder->create<ast::StorageTexture>(source, dims, format, subtype,

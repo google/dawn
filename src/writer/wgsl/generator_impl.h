@@ -176,7 +176,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output of the expression stream
   /// @param fmt the format to generate
   /// @returns true if the format is emitted
-  bool EmitImageFormat(std::ostream& out, const ast::ImageFormat fmt);
+  bool EmitImageFormat(std::ostream& out, const ast::TexelFormat fmt);
   /// Handles emitting an access control
   /// @param out the output of the expression stream
   /// @param access the access to generate

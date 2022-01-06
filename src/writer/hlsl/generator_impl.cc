@@ -76,26 +76,26 @@ namespace {
 const char kTempNamePrefix[] = "tint_tmp";
 const char kSpecConstantPrefix[] = "WGSL_SPEC_CONSTANT_";
 
-const char* image_format_to_rwtexture_type(ast::ImageFormat image_format) {
+const char* image_format_to_rwtexture_type(ast::TexelFormat image_format) {
   switch (image_format) {
-    case ast::ImageFormat::kRgba8Unorm:
-    case ast::ImageFormat::kRgba8Snorm:
-    case ast::ImageFormat::kRgba16Float:
-    case ast::ImageFormat::kR32Float:
-    case ast::ImageFormat::kRg32Float:
-    case ast::ImageFormat::kRgba32Float:
+    case ast::TexelFormat::kRgba8Unorm:
+    case ast::TexelFormat::kRgba8Snorm:
+    case ast::TexelFormat::kRgba16Float:
+    case ast::TexelFormat::kR32Float:
+    case ast::TexelFormat::kRg32Float:
+    case ast::TexelFormat::kRgba32Float:
       return "float4";
-    case ast::ImageFormat::kRgba8Uint:
-    case ast::ImageFormat::kRgba16Uint:
-    case ast::ImageFormat::kR32Uint:
-    case ast::ImageFormat::kRg32Uint:
-    case ast::ImageFormat::kRgba32Uint:
+    case ast::TexelFormat::kRgba8Uint:
+    case ast::TexelFormat::kRgba16Uint:
+    case ast::TexelFormat::kR32Uint:
+    case ast::TexelFormat::kRg32Uint:
+    case ast::TexelFormat::kRgba32Uint:
       return "uint4";
-    case ast::ImageFormat::kRgba8Sint:
-    case ast::ImageFormat::kRgba16Sint:
-    case ast::ImageFormat::kR32Sint:
-    case ast::ImageFormat::kRg32Sint:
-    case ast::ImageFormat::kRgba32Sint:
+    case ast::TexelFormat::kRgba8Sint:
+    case ast::TexelFormat::kRgba16Sint:
+    case ast::TexelFormat::kR32Sint:
+    case ast::TexelFormat::kRg32Sint:
+    case ast::TexelFormat::kRgba32Sint:
       return "int4";
     default:
       return nullptr;
@@ -3623,11 +3623,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     }
 
     if (storage) {
-      auto* component = image_format_to_rwtexture_type(storage->image_format());
+      auto* component = image_format_to_rwtexture_type(storage->texel_format());
       if (component == nullptr) {
         TINT_ICE(Writer, diagnostics_)
-            << "Unsupported StorageTexture ImageFormat: "
-            << static_cast<int>(storage->image_format());
+            << "Unsupported StorageTexture TexelFormat: "
+            << static_cast<int>(storage->texel_format());
         return false;
       }
       out << "<" << component << ">";

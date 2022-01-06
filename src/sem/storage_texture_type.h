@@ -31,11 +31,11 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
-  /// @param format the image format of the texture
+  /// @param format the texel format of the texture
   /// @param access the access control type of the texture
   /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
   StorageTexture(ast::TextureDimension dim,
-                 ast::ImageFormat format,
+                 ast::TexelFormat format,
                  ast::Access access,
                  sem::Type* subtype);
 
@@ -46,8 +46,8 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// @returns the storage subtype
   Type* type() const { return subtype_; }
 
-  /// @returns the image format
-  ast::ImageFormat image_format() const { return image_format_; }
+  /// @returns the texel format
+  ast::TexelFormat texel_format() const { return texel_format_; }
 
   /// @returns the access control
   ast::Access access() const { return access_; }
@@ -62,11 +62,11 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
 
   /// @param format the storage texture image format
   /// @param type_mgr the sem::Manager used to build the returned type
-  /// @returns the storage texture subtype for the given ImageFormat
-  static sem::Type* SubtypeFor(ast::ImageFormat format, sem::Manager& type_mgr);
+  /// @returns the storage texture subtype for the given TexelFormat
+  static sem::Type* SubtypeFor(ast::TexelFormat format, sem::Manager& type_mgr);
 
  private:
-  ast::ImageFormat const image_format_;
+  ast::TexelFormat const texel_format_;
   ast::Access const access_;
   Type* const subtype_;
 };
