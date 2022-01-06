@@ -15,6 +15,10 @@ The following features have been deprecated and will be removed in M102:
 * Added builtins `degrees()` and `radians()` for converting between degrees and radians. [tint:1329](https://crbug.com/tint/1329)
 * `let` arrays and matrices can now be dynamically indexed. [tint:1352](https://crbug.com/tint/1352)
 
+### Fixes
+
+* Fixed an issue where for-loops that contain array or structure constructors in the loop initializer statements, condition expressions or continuing statements could fail to compile. [tint:1364](https://crbug.com/tint/1364)
+
 ## Changes for M98
 
 ### Breaking Changes

@@ -21,8 +21,10 @@ namespace tint {
 namespace transform {
 
 /// A transform that hoists the array and structure initializers to a constant
-/// variable, declared just before the statement of usage. See
-/// crbug.com/tint/406 for more details.
+/// variable, declared just before the statement of usage. This transform may
+/// also decompose for-loops into loops so that let declarations can be emitted
+/// before loop condition expressions and/or continuing statements.
+/// @see crbug.com/tint/406
 class PromoteInitializersToConstVar
     : public Castable<PromoteInitializersToConstVar, Transform> {
  public:

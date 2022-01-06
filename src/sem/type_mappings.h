@@ -23,6 +23,7 @@ namespace tint {
 namespace ast {
 class CallExpression;
 class Expression;
+class ForLoopStatement;
 class Function;
 class MemberAccessorExpression;
 class Node;
@@ -39,6 +40,7 @@ namespace sem {
 class Array;
 class Call;
 class Expression;
+class ForLoopStatement;
 class Function;
 class MemberAccessorExpression;
 class Node;
@@ -56,6 +58,7 @@ struct TypeMappings {
   //! @cond Doxygen_Suppress
   Call* operator()(ast::CallExpression*);
   Expression* operator()(ast::Expression*);
+  ForLoopStatement* operator()(ast::ForLoopStatement*);
   Function* operator()(ast::Function*);
   MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
   Node* operator()(ast::Node*);

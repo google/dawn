@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/expression.h"
+#include "src/sem/for_loop_statement.h"
 
 namespace tint {
 namespace resolver {
