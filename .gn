@@ -14,4 +14,7 @@
 
 buildconfig = "//build/config/BUILDCONFIG.gn"
 
+# Use Python3 to run scripts. On Windows this will use python.exe or python.bat
+script_executable = "python3"
+
 check_targets = [ "//*" ]

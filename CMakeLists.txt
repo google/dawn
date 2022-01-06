@@ -18,7 +18,7 @@ project(tint)
 enable_testing()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_DEBUG_POSTFIX "")
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -301,7 +301,7 @@ function(tint_default_compile_options TARGET)
 
   if (${COMPILER_IS_LIKE_GNU})
     target_compile_options(${TARGET} PRIVATE
-      -std=c++14
+      -std=c++17
       -fno-exceptions
       -fno-rtti
       -pedantic-errors
