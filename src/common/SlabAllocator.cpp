@@ -228,7 +228,8 @@ void SlabAllocatorImpl::GetNewSlab() {
         return;
     }
 
-    // TODO(crbug.com/dawn/824): Use aligned_alloc with C++17.
+    // TODO(crbug.com/dawn/824): Use aligned_alloc when possible. It should be available with
+    // C++17 but on macOS it also requires macOS 10.15 to work.
     char* allocation = new char[mTotalAllocationSize];
     char* alignedPtr = AlignPtr(allocation, mAllocationAlignment);
 
