@@ -80,7 +80,7 @@ namespace dawn_wire { namespace server {
         // client does the default size computation, we should always have a valid actual size here
         // in server. All other invalid actual size can be caught by dawn native side validation.
         if (offset64 > std::numeric_limits<size_t>::max() || size64 >= WGPU_WHOLE_MAP_SIZE) {
-            OnBufferMapAsyncCallback(WGPUBufferMapAsyncStatus_Error, userdata.get());
+            OnBufferMapAsyncCallback(userdata.get(), WGPUBufferMapAsyncStatus_Error);
             return true;
         }
 
@@ -90,11 +90,9 @@ namespace dawn_wire { namespace server {
         userdata->offset = offset;
         userdata->size = size;
 
-        mProcs.bufferMapAsync(
-            buffer->handle, mode, offset, size,
-            ForwardToServer<decltype(
-                &Server::OnBufferMapAsyncCallback)>::Func<&Server::OnBufferMapAsyncCallback>(),
-            userdata.release());
+        mProcs.bufferMapAsync(buffer->handle, mode, offset, size,
+                              ForwardToServer<&Server::OnBufferMapAsyncCallback>,
+                              userdata.release());
 
         return true;
     }
@@ -227,7 +225,7 @@ namespace dawn_wire { namespace server {
             static_cast<size_t>(offset), static_cast<size_t>(size));
     }
 
-    void Server::OnBufferMapAsyncCallback(WGPUBufferMapAsyncStatus status, MapUserdata* data) {
+    void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatus status) {
         // Skip sending the callback if the buffer has already been destroyed.
         auto* bufferData = BufferObjects().Get(data->buffer.id);
         if (bufferData == nullptr || bufferData->generation != data->buffer.generation) {

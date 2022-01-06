@@ -39,18 +39,16 @@ namespace dawn_wire { namespace server {
         userdata->requestSerial = requestSerial;
         userdata->deviceObjectId = deviceHandle.id;
 
-        mProcs.adapterRequestDevice(
-            adapter->handle, descriptor,
-            ForwardToServer<decltype(
-                &Server::OnRequestDeviceCallback)>::Func<&Server::OnRequestDeviceCallback>(),
-            userdata.release());
+        mProcs.adapterRequestDevice(adapter->handle, descriptor,
+                                    ForwardToServer<&Server::OnRequestDeviceCallback>,
+                                    userdata.release());
         return true;
     }
 
-    void Server::OnRequestDeviceCallback(WGPURequestDeviceStatus status,
+    void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
+                                         WGPURequestDeviceStatus status,
                                          WGPUDevice device,
-                                         const char* message,
-                                         RequestDeviceUserdata* data) {
+                                         const char* message) {
         auto* deviceObject = DeviceObjects().Get(data->deviceObjectId, AllocationState::Reserved);
         // Should be impossible to fail. ObjectIds can't be freed by a destroy command until
         // they move from Reserved to Allocated, or if they are destroyed here.

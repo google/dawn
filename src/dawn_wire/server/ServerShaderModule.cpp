@@ -29,16 +29,14 @@ namespace dawn_wire { namespace server {
         userdata->requestSerial = requestSerial;
 
         mProcs.shaderModuleGetCompilationInfo(
-            shaderModule->handle,
-            ForwardToServer<decltype(&Server::OnShaderModuleGetCompilationInfo)>::Func<
-                &Server::OnShaderModuleGetCompilationInfo>(),
+            shaderModule->handle, ForwardToServer<&Server::OnShaderModuleGetCompilationInfo>,
             userdata.release());
         return true;
     }
 
-    void Server::OnShaderModuleGetCompilationInfo(WGPUCompilationInfoRequestStatus status,
-                                                  const WGPUCompilationInfo* info,
-                                                  ShaderModuleGetCompilationInfoUserdata* data) {
+    void Server::OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUserdata* data,
+                                                  WGPUCompilationInfoRequestStatus status,
+                                                  const WGPUCompilationInfo* info) {
         ReturnShaderModuleGetCompilationInfoCallbackCmd cmd;
         cmd.shaderModule = data->shaderModule;
         cmd.requestSerial = data->requestSerial;

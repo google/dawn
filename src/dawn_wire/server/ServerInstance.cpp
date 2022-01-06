@@ -41,18 +41,16 @@ namespace dawn_wire { namespace server {
         userdata->requestSerial = requestSerial;
         userdata->adapterObjectId = adapterHandle.id;
 
-        mProcs.instanceRequestAdapter(
-            instance->handle, options,
-            ForwardToServer<decltype(
-                &Server::OnRequestAdapterCallback)>::Func<&Server::OnRequestAdapterCallback>(),
-            userdata.release());
+        mProcs.instanceRequestAdapter(instance->handle, options,
+                                      ForwardToServer<&Server::OnRequestAdapterCallback>,
+                                      userdata.release());
         return true;
     }
 
-    void Server::OnRequestAdapterCallback(WGPURequestAdapterStatus status,
+    void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
+                                          WGPURequestAdapterStatus status,
                                           WGPUAdapter adapter,
-                                          const char* message,
-                                          RequestAdapterUserdata* data) {
+                                          const char* message) {
         auto* adapterObject =
             AdapterObjects().Get(data->adapterObjectId, AllocationState::Reserved);
         // Should be impossible to fail. ObjectIds can't be freed by a destroy command until

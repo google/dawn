@@ -91,19 +91,16 @@ namespace dawn_wire { namespace server {
 
         ErrorScopeUserdata* unownedUserdata = userdata.release();
         bool success = mProcs.devicePopErrorScope(
-            device->handle,
-            ForwardToServer<decltype(
-                &Server::OnDevicePopErrorScope)>::Func<&Server::OnDevicePopErrorScope>(),
-            unownedUserdata);
+            device->handle, ForwardToServer<&Server::OnDevicePopErrorScope>, unownedUserdata);
         if (!success) {
             delete unownedUserdata;
         }
         return success;
     }
 
-    void Server::OnDevicePopErrorScope(WGPUErrorType type,
-                                       const char* message,
-                                       ErrorScopeUserdata* userdata) {
+    void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
+                                       WGPUErrorType type,
+                                       const char* message) {
         ReturnDevicePopErrorScopeCallbackCmd cmd;
         cmd.device = userdata->device;
         cmd.requestSerial = userdata->requestSerial;
@@ -139,16 +136,14 @@ namespace dawn_wire { namespace server {
 
         mProcs.deviceCreateComputePipelineAsync(
             device->handle, descriptor,
-            ForwardToServer<decltype(&Server::OnCreateComputePipelineAsyncCallback)>::Func<
-                &Server::OnCreateComputePipelineAsyncCallback>(),
-            userdata.release());
+            ForwardToServer<&Server::OnCreateComputePipelineAsyncCallback>, userdata.release());
         return true;
     }
 
-    void Server::OnCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
+    void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* data,
+                                                      WGPUCreatePipelineAsyncStatus status,
                                                       WGPUComputePipeline pipeline,
-                                                      const char* message,
-                                                      CreatePipelineAsyncUserData* data) {
+                                                      const char* message) {
         HandleCreateRenderPipelineAsyncCallbackResult<ObjectType::ComputePipeline>(
             &ComputePipelineObjects(), status, pipeline, data);
 
@@ -186,16 +181,14 @@ namespace dawn_wire { namespace server {
 
         mProcs.deviceCreateRenderPipelineAsync(
             device->handle, descriptor,
-            ForwardToServer<decltype(&Server::OnCreateRenderPipelineAsyncCallback)>::Func<
-                &Server::OnCreateRenderPipelineAsyncCallback>(),
-            userdata.release());
+            ForwardToServer<&Server::OnCreateRenderPipelineAsyncCallback>, userdata.release());
         return true;
     }
 
-    void Server::OnCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
+    void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* data,
+                                                     WGPUCreatePipelineAsyncStatus status,
                                                      WGPURenderPipeline pipeline,
-                                                     const char* message,
-                                                     CreatePipelineAsyncUserData* data) {
+                                                     const char* message) {
         HandleCreateRenderPipelineAsyncCallbackResult<ObjectType::RenderPipeline>(
             &RenderPipelineObjects(), status, pipeline, data);
 

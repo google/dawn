@@ -17,7 +17,7 @@
 
 namespace dawn_wire { namespace server {
 
-    void Server::OnQueueWorkDone(WGPUQueueWorkDoneStatus status, QueueWorkDoneUserdata* data) {
+    void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data, WGPUQueueWorkDoneStatus status) {
         ReturnQueueWorkDoneCallbackCmd cmd;
         cmd.queue = data->queue;
         cmd.requestSerial = data->requestSerial;
@@ -38,10 +38,9 @@ namespace dawn_wire { namespace server {
         userdata->queue = ObjectHandle{queueId, queue->generation};
         userdata->requestSerial = requestSerial;
 
-        mProcs.queueOnSubmittedWorkDone(
-            queue->handle, signalValue,
-            ForwardToServer<decltype(&Server::OnQueueWorkDone)>::Func<&Server::OnQueueWorkDone>(),
-            userdata.release());
+        mProcs.queueOnSubmittedWorkDone(queue->handle, signalValue,
+                                        ForwardToServer<&Server::OnQueueWorkDone>,
+                                        userdata.release());
         return true;
     }
 
