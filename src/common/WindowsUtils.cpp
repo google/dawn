@@ -23,12 +23,11 @@ std::string WCharToUTF8(const wchar_t* input) {
     // input. It will return a size that includes the null terminator.
     int requiredSize = WideCharToMultiByte(CP_UTF8, 0, input, -1, nullptr, 0, nullptr, nullptr);
 
-    // When we can use C++17 this can be changed to use string.data() instead.
-    std::unique_ptr<char[]> result = std::make_unique<char[]>(requiredSize);
-    WideCharToMultiByte(CP_UTF8, 0, input, -1, result.get(), requiredSize, nullptr, nullptr);
+    std::string result;
+    result.resize(requiredSize - 1);
+    WideCharToMultiByte(CP_UTF8, 0, input, -1, result.data(), requiredSize, nullptr, nullptr);
 
-    // This will allocate the returned std::string and then destroy result.
-    return std::string(result.get(), result.get() + (requiredSize - 1));
+    return result;
 }
 
 std::wstring UTF8ToWStr(const char* input) {
@@ -36,10 +35,9 @@ std::wstring UTF8ToWStr(const char* input) {
     // input. It will return a size that includes the null terminator.
     int requiredSize = MultiByteToWideChar(CP_UTF8, 0, input, -1, nullptr, 0);
 
-    // When we can use C++17 this can be changed to use string.data() instead.
-    std::unique_ptr<wchar_t[]> result = std::make_unique<wchar_t[]>(requiredSize);
-    MultiByteToWideChar(CP_UTF8, 0, input, -1, result.get(), requiredSize);
+    std::wstring result;
+    result.resize(requiredSize - 1);
+    MultiByteToWideChar(CP_UTF8, 0, input, -1, result.data(), requiredSize);
 
-    // This will allocate the returned std::string and then destroy result.
-    return std::wstring(result.get(), result.get() + (requiredSize - 1));
+    return result;
 }
