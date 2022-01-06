@@ -783,112 +783,116 @@ Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
 //  | RGBA32FLOAT
 Expect<ast::ImageFormat> ParserImpl::expect_image_storage_type(
     const std::string& use) {
-  if (match(Token::Type::kFormatR8Unorm))
-    return ast::ImageFormat::kR8Unorm;
-
-  if (match(Token::Type::kFormatR8Snorm))
-    return ast::ImageFormat::kR8Snorm;
-
-  if (match(Token::Type::kFormatR8Uint))
-    return ast::ImageFormat::kR8Uint;
-
-  if (match(Token::Type::kFormatR8Sint))
-    return ast::ImageFormat::kR8Sint;
-
-  if (match(Token::Type::kFormatR16Uint))
-    return ast::ImageFormat::kR16Uint;
-
-  if (match(Token::Type::kFormatR16Sint))
-    return ast::ImageFormat::kR16Sint;
-
-  if (match(Token::Type::kFormatR16Float))
-    return ast::ImageFormat::kR16Float;
-
-  if (match(Token::Type::kFormatRg8Unorm))
-    return ast::ImageFormat::kRg8Unorm;
-
-  if (match(Token::Type::kFormatRg8Snorm))
-    return ast::ImageFormat::kRg8Snorm;
-
-  if (match(Token::Type::kFormatRg8Uint))
-    return ast::ImageFormat::kRg8Uint;
-
-  if (match(Token::Type::kFormatRg8Sint))
-    return ast::ImageFormat::kRg8Sint;
-
-  if (match(Token::Type::kFormatR32Uint))
-    return ast::ImageFormat::kR32Uint;
-
-  if (match(Token::Type::kFormatR32Sint))
-    return ast::ImageFormat::kR32Sint;
-
-  if (match(Token::Type::kFormatR32Float))
-    return ast::ImageFormat::kR32Float;
-
-  if (match(Token::Type::kFormatRg16Uint))
-    return ast::ImageFormat::kRg16Uint;
-
-  if (match(Token::Type::kFormatRg16Sint))
-    return ast::ImageFormat::kRg16Sint;
-
-  if (match(Token::Type::kFormatRg16Float))
-    return ast::ImageFormat::kRg16Float;
-
-  if (match(Token::Type::kFormatRgba8Unorm))
-    return ast::ImageFormat::kRgba8Unorm;
-
-  if (match(Token::Type::kFormatRgba8UnormSrgb))
-    return ast::ImageFormat::kRgba8UnormSrgb;
-
-  if (match(Token::Type::kFormatRgba8Snorm))
-    return ast::ImageFormat::kRgba8Snorm;
-
-  if (match(Token::Type::kFormatRgba8Uint))
-    return ast::ImageFormat::kRgba8Uint;
-
-  if (match(Token::Type::kFormatRgba8Sint))
-    return ast::ImageFormat::kRgba8Sint;
-
-  if (match(Token::Type::kFormatBgra8Unorm))
-    return ast::ImageFormat::kBgra8Unorm;
-
-  if (match(Token::Type::kFormatBgra8UnormSrgb))
-    return ast::ImageFormat::kBgra8UnormSrgb;
-
-  if (match(Token::Type::kFormatRgb10A2Unorm))
-    return ast::ImageFormat::kRgb10A2Unorm;
-
-  if (match(Token::Type::kFormatRg11B10Float))
-    return ast::ImageFormat::kRg11B10Float;
-
-  if (match(Token::Type::kFormatRg32Uint))
-    return ast::ImageFormat::kRg32Uint;
-
-  if (match(Token::Type::kFormatRg32Sint))
-    return ast::ImageFormat::kRg32Sint;
-
-  if (match(Token::Type::kFormatRg32Float))
-    return ast::ImageFormat::kRg32Float;
-
-  if (match(Token::Type::kFormatRgba16Uint))
-    return ast::ImageFormat::kRgba16Uint;
-
-  if (match(Token::Type::kFormatRgba16Sint))
-    return ast::ImageFormat::kRgba16Sint;
-
-  if (match(Token::Type::kFormatRgba16Float))
-    return ast::ImageFormat::kRgba16Float;
-
-  if (match(Token::Type::kFormatRgba32Uint))
-    return ast::ImageFormat::kRgba32Uint;
-
-  if (match(Token::Type::kFormatRgba32Sint))
-    return ast::ImageFormat::kRgba32Sint;
-
-  if (match(Token::Type::kFormatRgba32Float))
-    return ast::ImageFormat::kRgba32Float;
-
-  return add_error(peek().source(), "invalid format", use);
+  auto tok = next();
+  if (tok.IsIdentifier()) {
+    auto s = tok.to_str();
+    if (s == "bgra8unorm") {
+      return ast::ImageFormat::kBgra8Unorm;
+    }
+    if (s == "bgra8unorm_srgb") {
+      return ast::ImageFormat::kBgra8UnormSrgb;
+    }
+    if (s == "r16float") {
+      return ast::ImageFormat::kR16Float;
+    }
+    if (s == "r16sint") {
+      return ast::ImageFormat::kR16Sint;
+    }
+    if (s == "r16uint") {
+      return ast::ImageFormat::kR16Uint;
+    }
+    if (s == "r32float") {
+      return ast::ImageFormat::kR32Float;
+    }
+    if (s == "r32sint") {
+      return ast::ImageFormat::kR32Sint;
+    }
+    if (s == "r32uint") {
+      return ast::ImageFormat::kR32Uint;
+    }
+    if (s == "r8sint") {
+      return ast::ImageFormat::kR8Sint;
+    }
+    if (s == "r8snorm") {
+      return ast::ImageFormat::kR8Snorm;
+    }
+    if (s == "r8uint") {
+      return ast::ImageFormat::kR8Uint;
+    }
+    if (s == "r8unorm") {
+      return ast::ImageFormat::kR8Unorm;
+    }
+    if (s == "rg11b10float") {
+      return ast::ImageFormat::kRg11B10Float;
+    }
+    if (s == "rg16float") {
+      return ast::ImageFormat::kRg16Float;
+    }
+    if (s == "rg16sint") {
+      return ast::ImageFormat::kRg16Sint;
+    }
+    if (s == "rg16uint") {
+      return ast::ImageFormat::kRg16Uint;
+    }
+    if (s == "rg32float") {
+      return ast::ImageFormat::kRg32Float;
+    }
+    if (s == "rg32sint") {
+      return ast::ImageFormat::kRg32Sint;
+    }
+    if (s == "rg32uint") {
+      return ast::ImageFormat::kRg32Uint;
+    }
+    if (s == "rg8sint") {
+      return ast::ImageFormat::kRg8Sint;
+    }
+    if (s == "rg8snorm") {
+      return ast::ImageFormat::kRg8Snorm;
+    }
+    if (s == "rg8uint") {
+      return ast::ImageFormat::kRg8Uint;
+    }
+    if (s == "rg8unorm") {
+      return ast::ImageFormat::kRg8Unorm;
+    }
+    if (s == "rgb10a2unorm") {
+      return ast::ImageFormat::kRgb10A2Unorm;
+    }
+    if (s == "rgba16float") {
+      return ast::ImageFormat::kRgba16Float;
+    }
+    if (s == "rgba16sint") {
+      return ast::ImageFormat::kRgba16Sint;
+    }
+    if (s == "rgba16uint") {
+      return ast::ImageFormat::kRgba16Uint;
+    }
+    if (s == "rgba32float") {
+      return ast::ImageFormat::kRgba32Float;
+    }
+    if (s == "rgba32sint") {
+      return ast::ImageFormat::kRgba32Sint;
+    }
+    if (s == "rgba32uint") {
+      return ast::ImageFormat::kRgba32Uint;
+    }
+    if (s == "rgba8sint") {
+      return ast::ImageFormat::kRgba8Sint;
+    }
+    if (s == "rgba8snorm") {
+      return ast::ImageFormat::kRgba8Snorm;
+    }
+    if (s == "rgba8uint") {
+      return ast::ImageFormat::kRgba8Uint;
+    }
+    if (s == "rgba8unorm") {
+      return ast::ImageFormat::kRgba8Unorm;
+    }
+    if (s == "rgba8unorm_srgb") {
+      return ast::ImageFormat::kRgba8UnormSrgb;
+    }
+  }
+  return add_error(tok.source(), "invalid format", use);
 }
 
 // variable_ident_decl
