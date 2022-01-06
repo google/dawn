@@ -31,39 +31,6 @@ std::ostream& operator<<(std::ostream& out, TexelFormat format) {
     case TexelFormat::kNone:
       out << "none";
       break;
-    case TexelFormat::kR8Unorm:
-      out << "r8unorm";
-      break;
-    case TexelFormat::kR8Snorm:
-      out << "r8snorm";
-      break;
-    case TexelFormat::kR8Uint:
-      out << "r8uint";
-      break;
-    case TexelFormat::kR8Sint:
-      out << "r8sint";
-      break;
-    case TexelFormat::kR16Uint:
-      out << "r16uint";
-      break;
-    case TexelFormat::kR16Sint:
-      out << "r16sint";
-      break;
-    case TexelFormat::kR16Float:
-      out << "r16float";
-      break;
-    case TexelFormat::kRg8Unorm:
-      out << "rg8unorm";
-      break;
-    case TexelFormat::kRg8Snorm:
-      out << "rg8snorm";
-      break;
-    case TexelFormat::kRg8Uint:
-      out << "rg8uint";
-      break;
-    case TexelFormat::kRg8Sint:
-      out << "rg8sint";
-      break;
     case TexelFormat::kR32Uint:
       out << "r32uint";
       break;
@@ -73,20 +40,8 @@ std::ostream& operator<<(std::ostream& out, TexelFormat format) {
     case TexelFormat::kR32Float:
       out << "r32float";
       break;
-    case TexelFormat::kRg16Uint:
-      out << "rg16uint";
-      break;
-    case TexelFormat::kRg16Sint:
-      out << "rg16sint";
-      break;
-    case TexelFormat::kRg16Float:
-      out << "rg16float";
-      break;
     case TexelFormat::kRgba8Unorm:
       out << "rgba8unorm";
-      break;
-    case TexelFormat::kRgba8UnormSrgb:
-      out << "rgba8unorm_srgb";
       break;
     case TexelFormat::kRgba8Snorm:
       out << "rgba8snorm";
@@ -96,18 +51,6 @@ std::ostream& operator<<(std::ostream& out, TexelFormat format) {
       break;
     case TexelFormat::kRgba8Sint:
       out << "rgba8sint";
-      break;
-    case TexelFormat::kBgra8Unorm:
-      out << "bgra8unorm";
-      break;
-    case TexelFormat::kBgra8UnormSrgb:
-      out << "bgra8unorm_srgb";
-      break;
-    case TexelFormat::kRgb10A2Unorm:
-      out << "rgb10a2unorm";
-      break;
-    case TexelFormat::kRg11B10Float:
-      out << "rg11b10float";
       break;
     case TexelFormat::kRg32Uint:
       out << "rg32uint";
@@ -167,11 +110,7 @@ const StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
 
 Type* StorageTexture::SubtypeFor(TexelFormat format, ProgramBuilder& builder) {
   switch (format) {
-    case TexelFormat::kR8Uint:
-    case TexelFormat::kR16Uint:
-    case TexelFormat::kRg8Uint:
     case TexelFormat::kR32Uint:
-    case TexelFormat::kRg16Uint:
     case TexelFormat::kRgba8Uint:
     case TexelFormat::kRg32Uint:
     case TexelFormat::kRgba16Uint:
@@ -179,11 +118,7 @@ Type* StorageTexture::SubtypeFor(TexelFormat format, ProgramBuilder& builder) {
       return builder.create<U32>();
     }
 
-    case TexelFormat::kR8Sint:
-    case TexelFormat::kR16Sint:
-    case TexelFormat::kRg8Sint:
     case TexelFormat::kR32Sint:
-    case TexelFormat::kRg16Sint:
     case TexelFormat::kRgba8Sint:
     case TexelFormat::kRg32Sint:
     case TexelFormat::kRgba16Sint:
@@ -191,20 +126,9 @@ Type* StorageTexture::SubtypeFor(TexelFormat format, ProgramBuilder& builder) {
       return builder.create<I32>();
     }
 
-    case TexelFormat::kR8Unorm:
-    case TexelFormat::kRg8Unorm:
     case TexelFormat::kRgba8Unorm:
-    case TexelFormat::kRgba8UnormSrgb:
-    case TexelFormat::kBgra8Unorm:
-    case TexelFormat::kBgra8UnormSrgb:
-    case TexelFormat::kRgb10A2Unorm:
-    case TexelFormat::kR8Snorm:
-    case TexelFormat::kRg8Snorm:
     case TexelFormat::kRgba8Snorm:
-    case TexelFormat::kR16Float:
     case TexelFormat::kR32Float:
-    case TexelFormat::kRg16Float:
-    case TexelFormat::kRg11B10Float:
     case TexelFormat::kRg32Float:
     case TexelFormat::kRgba16Float:
     case TexelFormat::kRgba32Float: {

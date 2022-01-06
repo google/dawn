@@ -48,11 +48,7 @@ std::string StorageTexture::FriendlyName(const SymbolTable&) const {
 sem::Type* StorageTexture::SubtypeFor(ast::TexelFormat format,
                                       sem::Manager& type_mgr) {
   switch (format) {
-    case ast::TexelFormat::kR8Uint:
-    case ast::TexelFormat::kR16Uint:
-    case ast::TexelFormat::kRg8Uint:
     case ast::TexelFormat::kR32Uint:
-    case ast::TexelFormat::kRg16Uint:
     case ast::TexelFormat::kRgba8Uint:
     case ast::TexelFormat::kRg32Uint:
     case ast::TexelFormat::kRgba16Uint:
@@ -60,11 +56,7 @@ sem::Type* StorageTexture::SubtypeFor(ast::TexelFormat format,
       return type_mgr.Get<sem::U32>();
     }
 
-    case ast::TexelFormat::kR8Sint:
-    case ast::TexelFormat::kR16Sint:
-    case ast::TexelFormat::kRg8Sint:
     case ast::TexelFormat::kR32Sint:
-    case ast::TexelFormat::kRg16Sint:
     case ast::TexelFormat::kRgba8Sint:
     case ast::TexelFormat::kRg32Sint:
     case ast::TexelFormat::kRgba16Sint:
@@ -72,20 +64,9 @@ sem::Type* StorageTexture::SubtypeFor(ast::TexelFormat format,
       return type_mgr.Get<sem::I32>();
     }
 
-    case ast::TexelFormat::kR8Unorm:
-    case ast::TexelFormat::kRg8Unorm:
     case ast::TexelFormat::kRgba8Unorm:
-    case ast::TexelFormat::kRgba8UnormSrgb:
-    case ast::TexelFormat::kBgra8Unorm:
-    case ast::TexelFormat::kBgra8UnormSrgb:
-    case ast::TexelFormat::kRgb10A2Unorm:
-    case ast::TexelFormat::kR8Snorm:
-    case ast::TexelFormat::kRg8Snorm:
     case ast::TexelFormat::kRgba8Snorm:
-    case ast::TexelFormat::kR16Float:
     case ast::TexelFormat::kR32Float:
-    case ast::TexelFormat::kRg16Float:
-    case ast::TexelFormat::kRg11B10Float:
     case ast::TexelFormat::kRg32Float:
     case ast::TexelFormat::kRgba16Float:
     case ast::TexelFormat::kRgba32Float: {

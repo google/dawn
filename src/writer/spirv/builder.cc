@@ -4304,74 +4304,20 @@ void Builder::AddInterpolationDecorations(uint32_t id,
 SpvImageFormat Builder::convert_texel_format_to_spv(
     const ast::TexelFormat format) {
   switch (format) {
-    case ast::TexelFormat::kR8Unorm:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatR8;
-    case ast::TexelFormat::kR8Snorm:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatR8Snorm;
-    case ast::TexelFormat::kR8Uint:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatR8ui;
-    case ast::TexelFormat::kR8Sint:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatR8i;
-    case ast::TexelFormat::kR16Uint:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatR16ui;
-    case ast::TexelFormat::kR16Sint:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatR16i;
-    case ast::TexelFormat::kR16Float:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatR16f;
-    case ast::TexelFormat::kRg8Unorm:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatRg8;
-    case ast::TexelFormat::kRg8Snorm:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatRg8Snorm;
-    case ast::TexelFormat::kRg8Uint:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatRg8ui;
-    case ast::TexelFormat::kRg8Sint:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatRg8i;
     case ast::TexelFormat::kR32Uint:
       return SpvImageFormatR32ui;
     case ast::TexelFormat::kR32Sint:
       return SpvImageFormatR32i;
     case ast::TexelFormat::kR32Float:
       return SpvImageFormatR32f;
-    case ast::TexelFormat::kRg16Uint:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatRg16ui;
-    case ast::TexelFormat::kRg16Sint:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatRg16i;
-    case ast::TexelFormat::kRg16Float:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatRg16f;
     case ast::TexelFormat::kRgba8Unorm:
       return SpvImageFormatRgba8;
-    case ast::TexelFormat::kRgba8UnormSrgb:
-      return SpvImageFormatUnknown;
     case ast::TexelFormat::kRgba8Snorm:
       return SpvImageFormatRgba8Snorm;
     case ast::TexelFormat::kRgba8Uint:
       return SpvImageFormatRgba8ui;
     case ast::TexelFormat::kRgba8Sint:
       return SpvImageFormatRgba8i;
-    case ast::TexelFormat::kBgra8Unorm:
-      return SpvImageFormatUnknown;
-    case ast::TexelFormat::kBgra8UnormSrgb:
-      return SpvImageFormatUnknown;
-    case ast::TexelFormat::kRgb10A2Unorm:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatRgb10A2;
-    case ast::TexelFormat::kRg11B10Float:
-      push_capability(SpvCapabilityStorageImageExtendedFormats);
-      return SpvImageFormatR11fG11fB10f;
     case ast::TexelFormat::kRg32Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg32ui;

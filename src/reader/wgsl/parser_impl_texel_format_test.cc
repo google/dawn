@@ -27,94 +27,6 @@ TEST_F(ParserImplTest, ImageStorageType_Invalid) {
   EXPECT_EQ(p->error(), "1:1: invalid format for test");
 }
 
-TEST_F(ParserImplTest, ImageStorageType_R8Unorm) {
-  auto p = parser("r8unorm");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kR8Unorm);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_R8Snorm) {
-  auto p = parser("r8snorm");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kR8Snorm);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_R8Uint) {
-  auto p = parser("r8uint");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kR8Uint);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_R8Sint) {
-  auto p = parser("r8sint");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kR8Sint);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_R16Uint) {
-  auto p = parser("r16uint");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kR16Uint);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_R16Sint) {
-  auto p = parser("r16sint");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kR16Sint);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_R16Float) {
-  auto p = parser("r16float");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kR16Float);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rg8Unorm) {
-  auto p = parser("rg8unorm");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRg8Unorm);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rg8Snorm) {
-  auto p = parser("rg8snorm");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRg8Snorm);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rg8Uint) {
-  auto p = parser("rg8uint");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRg8Uint);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rg8Sint) {
-  auto p = parser("rg8sint");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRg8Sint);
-  EXPECT_FALSE(p->has_error());
-}
-
 TEST_F(ParserImplTest, ImageStorageType_R32Uint) {
   auto p = parser("r32uint");
   auto t = p->expect_texel_format("test");
@@ -139,43 +51,11 @@ TEST_F(ParserImplTest, ImageStorageType_R32Float) {
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rg16Uint) {
-  auto p = parser("rg16uint");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRg16Uint);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rg16Sint) {
-  auto p = parser("rg16sint");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRg16Sint);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rg16Float) {
-  auto p = parser("rg16float");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRg16Float);
-  EXPECT_FALSE(p->has_error());
-}
-
 TEST_F(ParserImplTest, ImageStorageType_Rgba8Unorm) {
   auto p = parser("rgba8unorm");
   auto t = p->expect_texel_format("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::TexelFormat::kRgba8Unorm);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rgba8UnormSrgb) {
-  auto p = parser("rgba8unorm_srgb");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRgba8UnormSrgb);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -200,38 +80,6 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Sint) {
   auto t = p->expect_texel_format("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::TexelFormat::kRgba8Sint);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Bgra8Unorm) {
-  auto p = parser("bgra8unorm");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kBgra8Unorm);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Bgra8UnormSrgb) {
-  auto p = parser("bgra8unorm_srgb");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kBgra8UnormSrgb);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rgb10A2Unorm) {
-  auto p = parser("rgb10a2unorm");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRgb10A2Unorm);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, ImageStorageType_Rg11B10Float) {
-  auto p = parser("rg11b10float");
-  auto t = p->expect_texel_format("test");
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TexelFormat::kRg11B10Float);
   EXPECT_FALSE(p->has_error());
 }
 

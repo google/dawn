@@ -861,30 +861,12 @@ struct FormatParams {
 };
 
 static constexpr FormatParams format_cases[] = {
-    FormatParams{ast::TexelFormat::kBgra8Unorm, false},
-    FormatParams{ast::TexelFormat::kBgra8UnormSrgb, false},
-    FormatParams{ast::TexelFormat::kR16Float, false},
-    FormatParams{ast::TexelFormat::kR16Sint, false},
-    FormatParams{ast::TexelFormat::kR16Uint, false},
     FormatParams{ast::TexelFormat::kR32Float, true},
     FormatParams{ast::TexelFormat::kR32Sint, true},
     FormatParams{ast::TexelFormat::kR32Uint, true},
-    FormatParams{ast::TexelFormat::kR8Sint, false},
-    FormatParams{ast::TexelFormat::kR8Snorm, false},
-    FormatParams{ast::TexelFormat::kR8Uint, false},
-    FormatParams{ast::TexelFormat::kR8Unorm, false},
-    FormatParams{ast::TexelFormat::kRg11B10Float, false},
-    FormatParams{ast::TexelFormat::kRg16Float, false},
-    FormatParams{ast::TexelFormat::kRg16Sint, false},
-    FormatParams{ast::TexelFormat::kRg16Uint, false},
     FormatParams{ast::TexelFormat::kRg32Float, true},
     FormatParams{ast::TexelFormat::kRg32Sint, true},
     FormatParams{ast::TexelFormat::kRg32Uint, true},
-    FormatParams{ast::TexelFormat::kRg8Sint, false},
-    FormatParams{ast::TexelFormat::kRg8Snorm, false},
-    FormatParams{ast::TexelFormat::kRg8Uint, false},
-    FormatParams{ast::TexelFormat::kRg8Unorm, false},
-    FormatParams{ast::TexelFormat::kRgb10A2Unorm, false},
     FormatParams{ast::TexelFormat::kRgba16Float, true},
     FormatParams{ast::TexelFormat::kRgba16Sint, true},
     FormatParams{ast::TexelFormat::kRgba16Uint, true},
@@ -894,8 +876,7 @@ static constexpr FormatParams format_cases[] = {
     FormatParams{ast::TexelFormat::kRgba8Sint, true},
     FormatParams{ast::TexelFormat::kRgba8Snorm, true},
     FormatParams{ast::TexelFormat::kRgba8Uint, true},
-    FormatParams{ast::TexelFormat::kRgba8Unorm, true},
-    FormatParams{ast::TexelFormat::kRgba8UnormSrgb, false}};
+    FormatParams{ast::TexelFormat::kRgba8Unorm, true}};
 
 using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {

@@ -1334,19 +1334,19 @@ INSTANTIATE_TEST_SUITE_P(
         "ptrdiff_t",
         "r16snorm",
         "r16unorm",
-        // "r8unorm",  // Also used in WGSL
+        "r8unorm",
         "reference",
         "rg11b10f",
         "rg16snorm",
         "rg16unorm",
-        // "rg8snorm",  // Also used in WGSL
-        // "rg8unorm",  // Also used in WGSL
+        "rg8snorm",
+        "rg8unorm",
         "rgb10a2",
         "rgb9e5",
         "rgba16snorm",
         "rgba16unorm",
-        // "rgba8snorm",  // Also used in WGSL
-        // "rgba8unorm",  // Also used in WGSL
+        "rgba8snorm",
+        "rgba8unorm",
         // "sampler",  // Also used in WGSL
         "short2",
         "short3",

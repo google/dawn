@@ -184,8 +184,8 @@ TEST_F(ParserImplTest,
   EXPECT_EQ(p->error(), "1:28: expected '>' for multisampled texture type");
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
-  auto p = parser("texture_storage_1d<r8unorm, read>");
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dRg32Float) {
+  auto p = parser("texture_storage_1d<rg32float, read>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -194,14 +194,14 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
 
   ASSERT_TRUE(t->Is<ast::Texture>());
   ASSERT_TRUE(t->Is<ast::StorageTexture>());
-  EXPECT_EQ(t->As<ast::StorageTexture>()->format, ast::TexelFormat::kR8Unorm);
+  EXPECT_EQ(t->As<ast::StorageTexture>()->format, ast::TexelFormat::kRg32Float);
   EXPECT_EQ(t->As<ast::StorageTexture>()->access, ast::Access::kRead);
   EXPECT_EQ(t->As<ast::Texture>()->dim, ast::TextureDimension::k1d);
-  EXPECT_EQ(t->source.range, (Source::Range{{1u, 1u}, {1u, 34u}}));
+  EXPECT_EQ(t->source.range, (Source::Range{{1u, 1u}, {1u, 36u}}));
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
-  auto p = parser("texture_storage_2d<r16float, write>");
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR32Uint) {
+  auto p = parser("texture_storage_2d<r32uint, write>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -210,10 +210,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
 
   ASSERT_TRUE(t->Is<ast::Texture>());
   ASSERT_TRUE(t->Is<ast::StorageTexture>());
-  EXPECT_EQ(t->As<ast::StorageTexture>()->format, ast::TexelFormat::kR16Float);
+  EXPECT_EQ(t->As<ast::StorageTexture>()->format, ast::TexelFormat::kR32Uint);
   EXPECT_EQ(t->As<ast::StorageTexture>()->access, ast::Access::kWrite);
   EXPECT_EQ(t->As<ast::Texture>()->dim, ast::TextureDimension::k2d);
-  EXPECT_EQ(t->source.range, (Source::Range{{1u, 1u}, {1u, 36u}}));
+  EXPECT_EQ(t->source.range, (Source::Range{{1u, 1u}, {1u, 35u}}));
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
@@ -226,7 +226,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidAccess) {
-  auto p = parser("texture_storage_1d<r16float, abc>");
+  auto p = parser("texture_storage_1d<r32float, abc>");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -253,7 +253,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingGreaterThan) {
-  auto p = parser("texture_storage_1d<r8unorm, read");
+  auto p = parser("texture_storage_1d<r32uint, read");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);

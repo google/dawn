@@ -2528,42 +2528,23 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
 
 const Type* ParserImpl::GetComponentTypeForFormat(ast::TexelFormat format) {
   switch (format) {
-    case ast::TexelFormat::kR8Uint:
-    case ast::TexelFormat::kR16Uint:
-    case ast::TexelFormat::kRg8Uint:
     case ast::TexelFormat::kR32Uint:
-    case ast::TexelFormat::kRg16Uint:
     case ast::TexelFormat::kRgba8Uint:
     case ast::TexelFormat::kRg32Uint:
     case ast::TexelFormat::kRgba16Uint:
     case ast::TexelFormat::kRgba32Uint:
       return ty_.U32();
 
-    case ast::TexelFormat::kR8Sint:
-    case ast::TexelFormat::kR16Sint:
-    case ast::TexelFormat::kRg8Sint:
     case ast::TexelFormat::kR32Sint:
-    case ast::TexelFormat::kRg16Sint:
     case ast::TexelFormat::kRgba8Sint:
     case ast::TexelFormat::kRg32Sint:
     case ast::TexelFormat::kRgba16Sint:
     case ast::TexelFormat::kRgba32Sint:
       return ty_.I32();
 
-    case ast::TexelFormat::kR8Unorm:
-    case ast::TexelFormat::kRg8Unorm:
     case ast::TexelFormat::kRgba8Unorm:
-    case ast::TexelFormat::kRgba8UnormSrgb:
-    case ast::TexelFormat::kBgra8Unorm:
-    case ast::TexelFormat::kBgra8UnormSrgb:
-    case ast::TexelFormat::kRgb10A2Unorm:
-    case ast::TexelFormat::kR8Snorm:
-    case ast::TexelFormat::kRg8Snorm:
     case ast::TexelFormat::kRgba8Snorm:
-    case ast::TexelFormat::kR16Float:
     case ast::TexelFormat::kR32Float:
-    case ast::TexelFormat::kRg16Float:
-    case ast::TexelFormat::kRg11B10Float:
     case ast::TexelFormat::kRg32Float:
     case ast::TexelFormat::kRgba16Float:
     case ast::TexelFormat::kRgba32Float:
@@ -2577,36 +2558,18 @@ const Type* ParserImpl::GetComponentTypeForFormat(ast::TexelFormat format) {
 
 unsigned ParserImpl::GetChannelCountForFormat(ast::TexelFormat format) {
   switch (format) {
-    case ast::TexelFormat::kR16Float:
-    case ast::TexelFormat::kR16Sint:
-    case ast::TexelFormat::kR16Uint:
     case ast::TexelFormat::kR32Float:
     case ast::TexelFormat::kR32Sint:
     case ast::TexelFormat::kR32Uint:
-    case ast::TexelFormat::kR8Sint:
-    case ast::TexelFormat::kR8Snorm:
-    case ast::TexelFormat::kR8Uint:
-    case ast::TexelFormat::kR8Unorm:
       // One channel
       return 1;
 
-    case ast::TexelFormat::kRg11B10Float:
-    case ast::TexelFormat::kRg16Float:
-    case ast::TexelFormat::kRg16Sint:
-    case ast::TexelFormat::kRg16Uint:
     case ast::TexelFormat::kRg32Float:
     case ast::TexelFormat::kRg32Sint:
     case ast::TexelFormat::kRg32Uint:
-    case ast::TexelFormat::kRg8Sint:
-    case ast::TexelFormat::kRg8Snorm:
-    case ast::TexelFormat::kRg8Uint:
-    case ast::TexelFormat::kRg8Unorm:
       // Two channels
       return 2;
 
-    case ast::TexelFormat::kBgra8Unorm:
-    case ast::TexelFormat::kBgra8UnormSrgb:
-    case ast::TexelFormat::kRgb10A2Unorm:
     case ast::TexelFormat::kRgba16Float:
     case ast::TexelFormat::kRgba16Sint:
     case ast::TexelFormat::kRgba16Uint:
@@ -2617,7 +2580,6 @@ unsigned ParserImpl::GetChannelCountForFormat(ast::TexelFormat format) {
     case ast::TexelFormat::kRgba8Snorm:
     case ast::TexelFormat::kRgba8Uint:
     case ast::TexelFormat::kRgba8Unorm:
-    case ast::TexelFormat::kRgba8UnormSrgb:
       // Four channels
       return 4;
 

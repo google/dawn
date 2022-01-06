@@ -50,6 +50,26 @@ struct ResourceBinding {
   /// Enumerator of texel image formats
   enum class TexelFormat {
     kNone = -1,
+
+    kRgba8Unorm,
+    kRgba8Snorm,
+    kRgba8Uint,
+    kRgba8Sint,
+    kRgba16Uint,
+    kRgba16Sint,
+    kRgba16Float,
+    kR32Uint,
+    kR32Sint,
+    kR32Float,
+    kRg32Uint,
+    kRg32Sint,
+    kRg32Float,
+    kRgba32Uint,
+    kRgba32Sint,
+    kRgba32Float,
+
+    // [DEPRECATED]
+    // The below are all deprecated, and will be removed.
     kR8Unorm,
     kR8Snorm,
     kR8Uint,
@@ -61,30 +81,14 @@ struct ResourceBinding {
     kRg8Snorm,
     kRg8Uint,
     kRg8Sint,
-    kR32Uint,
-    kR32Sint,
-    kR32Float,
     kRg16Uint,
     kRg16Sint,
     kRg16Float,
-    kRgba8Unorm,
     kRgba8UnormSrgb,
-    kRgba8Snorm,
-    kRgba8Uint,
-    kRgba8Sint,
     kBgra8Unorm,
     kBgra8UnormSrgb,
     kRgb10A2Unorm,
     kRg11B10Float,
-    kRg32Uint,
-    kRg32Sint,
-    kRg32Float,
-    kRgba16Uint,
-    kRgba16Sint,
-    kRgba16Float,
-    kRgba32Uint,
-    kRgba32Sint,
-    kRgba32Float,
   };
 
   /// Renamed field [DEPRECATED]
