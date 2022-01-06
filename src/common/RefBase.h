@@ -134,7 +134,7 @@ class RefBase {
         return mValue;
     }
 
-    T Detach() DAWN_NO_DISCARD {
+    [[nodiscard]] T Detach() {
         T value{std::move(mValue)};
         mValue = Traits::kNullValue;
         return value;
@@ -145,7 +145,7 @@ class RefBase {
         mValue = value;
     }
 
-    T* InitializeInto() DAWN_NO_DISCARD {
+    [[nodiscard]] T* InitializeInto() {
         ASSERT(mValue == Traits::kNullValue);
         return &mValue;
     }

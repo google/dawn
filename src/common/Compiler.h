@@ -19,7 +19,6 @@
 //  - DAWN_COMPILER_[CLANG|GCC|MSVC]: Compiler detection
 //  - DAWN_BREAKPOINT(): Raises an exception and breaks in the debugger
 //  - DAWN_BUILTIN_UNREACHABLE(): Hints the compiler that a code path is unreachable
-//  - DAWN_NO_DISCARD: An attribute that is C++17 [[nodiscard]] where available
 //  - DAWN_(UN)?LIKELY(EXPR): Where available, hints the compiler that the expression will be true
 //      (resp. false) to help it generate code that leads to better branch prediction.
 //  - DAWN_UNUSED(EXPR): Prevents unused variable/expression warnings on EXPR.
@@ -51,15 +50,6 @@
 #        define __has_cpp_attribute(name) 0
 #    endif
 
-// Use warn_unused_result on clang otherwise we can a c++1z extension warning in C++14 mode
-// Also avoid warn_unused_result with GCC because it is only a function attribute and not a type
-// attribute.
-#    if __has_cpp_attribute(warn_unused_result) && defined(__clang__)
-#        define DAWN_NO_DISCARD __attribute__((warn_unused_result))
-#    elif DAWN_CPP_VERSION >= 17 && __has_cpp_attribute(nodiscard)
-#        define DAWN_NO_DISCARD [[nodiscard]]
-#    endif
-
 #    define DAWN_DECLARE_UNUSED __attribute__((unused))
 #    if defined(NDEBUG)
 #        define DAWN_FORCE_INLINE inline __attribute__((always_inline))
@@ -74,11 +64,6 @@ extern void __cdecl __debugbreak(void);
 #    define DAWN_BREAKPOINT() __debugbreak()
 
 #    define DAWN_BUILTIN_UNREACHABLE() __assume(false)
-
-// Visual Studio 2017 15.3 adds support for [[nodiscard]]
-#    if _MSC_VER >= 1911 && DAWN_CPP_VERSION >= 17
-#        define DAWN_NO_DISCARD [[nodiscard]]
-#    endif
 
 #    define DAWN_DECLARE_UNUSED
 #    if defined(NDEBUG)
@@ -102,20 +87,11 @@ extern void __cdecl __debugbreak(void);
 #if !defined(DAWN_UNLIKELY)
 #    define DAWN_UNLIKELY(X) X
 #endif
-#if !defined(DAWN_NO_DISCARD)
-#    define DAWN_NO_DISCARD
-#endif
 #if !defined(DAWN_FORCE_INLINE)
 #    define DAWN_FORCE_INLINE inline
 #endif
 #if !defined(DAWN_NOINLINE)
 #    define DAWN_NOINLINE
-#endif
-
-#if defined(__clang__)
-#    define DAWN_FALLTHROUGH [[clang::fallthrough]]
-#else
-#    define DAWN_FALLTHROUGH
 #endif
 
 #endif  // COMMON_COMPILER_H_

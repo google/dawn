@@ -530,7 +530,7 @@
             return result;
         }
 
-        DAWN_NO_DISCARD WireResult SerializeChainedStruct({{ChainedStructPtr}} chainedStruct,
+        [[nodiscard]] WireResult SerializeChainedStruct({{ChainedStructPtr}} chainedStruct,
                                                           SerializeBuffer* buffer,
                                                           const ObjectIdProvider& provider) {
             ASSERT(chainedStruct != nullptr);
@@ -702,7 +702,7 @@ namespace dawn_wire {
         };
 
         size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct);
-        DAWN_NO_DISCARD WireResult SerializeChainedStruct(const WGPUChainedStruct* chainedStruct,
+        [[nodiscard]] WireResult SerializeChainedStruct(const WGPUChainedStruct* chainedStruct,
                                                           SerializeBuffer* buffer,
                                                           const ObjectIdProvider& provider);
         WireResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
@@ -711,7 +711,7 @@ namespace dawn_wire {
                                             const ObjectIdResolver& resolver);
 
         size_t GetChainedStructExtraRequiredSize(WGPUChainedStructOut* chainedStruct);
-        DAWN_NO_DISCARD WireResult SerializeChainedStruct(WGPUChainedStructOut* chainedStruct,
+        [[nodiscard]] WireResult SerializeChainedStruct(WGPUChainedStructOut* chainedStruct,
                                                           SerializeBuffer* buffer,
                                                           const ObjectIdProvider& provider);
         WireResult DeserializeChainedStruct(WGPUChainedStructOut** outChainNext,

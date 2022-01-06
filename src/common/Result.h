@@ -58,7 +58,7 @@ class Result;
 // Specialization of Result for returning errors only via pointers. It is basically a pointer
 // where nullptr is both Success and Empty.
 template <typename E>
-class DAWN_NO_DISCARD Result<void, E> {
+class [[nodiscard]] Result<void, E> {
   public:
     Result();
     Result(std::unique_ptr<E> error);
@@ -109,7 +109,7 @@ namespace detail {
 }  // namespace detail
 
 template <typename T, typename E>
-class DAWN_NO_DISCARD Result<T*, E> {
+class [[nodiscard]] Result<T*, E> {
   public:
     static_assert(alignof_if_defined_else_default<T, 4> >= 4,
                   "Result<T*, E*> reserves two bits for tagging pointers");
@@ -141,7 +141,7 @@ class DAWN_NO_DISCARD Result<T*, E> {
 };
 
 template <typename T, typename E>
-class DAWN_NO_DISCARD Result<const T*, E> {
+class [[nodiscard]] Result<const T*, E> {
   public:
     static_assert(alignof_if_defined_else_default<T, 4> >= 4,
                   "Result<T*, E*> reserves two bits for tagging pointers");
@@ -170,7 +170,7 @@ template <typename T>
 class Ref;
 
 template <typename T, typename E>
-class DAWN_NO_DISCARD Result<Ref<T>, E> {
+class [[nodiscard]] Result<Ref<T>, E> {
   public:
     static_assert(alignof_if_defined_else_default<T, 4> >= 4,
                   "Result<Ref<T>, E> reserves two bits for tagging pointers");
@@ -205,7 +205,7 @@ class DAWN_NO_DISCARD Result<Ref<T>, E> {
 // a tagged union instead if it turns out to be a hotspot. T and E must be movable and default
 // constructible.
 template <typename T, typename E>
-class DAWN_NO_DISCARD Result {
+class [[nodiscard]] Result {
   public:
     Result(T&& success);
     Result(std::unique_ptr<E> error);

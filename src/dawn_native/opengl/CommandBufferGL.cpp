@@ -756,7 +756,7 @@ namespace dawn_native { namespace opengl {
                                 break;
                             }
                             // Implementation for 2D array is the same as 3D.
-                            DAWN_FALLTHROUGH;
+                            [[fallthrough]];
                         }
 
                         case wgpu::TextureDimension::e3D: {

@@ -41,7 +41,7 @@ namespace utils {
      *     // do rendering ...
      *   }
      */
-    class DAWN_NO_DISCARD ScopedAutoreleasePool {
+    class [[nodiscard]] ScopedAutoreleasePool {
       public:
         ScopedAutoreleasePool();
         ~ScopedAutoreleasePool();

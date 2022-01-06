@@ -217,7 +217,7 @@ namespace dawn_native {
                         "Filtering sampler %s is incompatible with non-filtering sampler "
                         "binding.",
                         entry.sampler);
-                    DAWN_FALLTHROUGH;
+                    [[fallthrough]];
                 case wgpu::SamplerBindingType::Filtering:
                     DAWN_INVALID_IF(
                         entry.sampler->IsComparison(),

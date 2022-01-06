@@ -1275,7 +1275,7 @@ namespace dawn_native { namespace d3d12 {
             switch (descriptor->dimension) {
                 case wgpu::TextureViewDimension::e2DArray:
                     ASSERT(texture->GetArrayLayers() == 1);
-                    DAWN_FALLTHROUGH;
+                    [[fallthrough]];
                 case wgpu::TextureViewDimension::e2D:
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                     mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
