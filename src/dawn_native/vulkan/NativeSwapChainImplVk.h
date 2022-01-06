@@ -20,7 +20,7 @@
 #include "dawn/dawn_wsi.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class Device;
 
@@ -66,6 +66,6 @@ namespace dawn_native { namespace vulkan {
         Device* mDevice = nullptr;
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_NATIVESWAPCHAINIMPLVK_H_

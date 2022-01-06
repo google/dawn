@@ -15,7 +15,7 @@
 #include "common/Assert.h"
 #include "dawn_wire/server/Server.h"
 
-namespace dawn_wire { namespace server {
+namespace dawn_wire::server {
     //* Implementation of the command doers
     {% for command in cmd_records["command"] %}
         {% set type = command.derived_object %}
@@ -118,4 +118,4 @@ namespace dawn_wire { namespace server {
         }
     }
 
-}}  // namespace dawn_wire::server
+}  // namespace dawn_wire::server

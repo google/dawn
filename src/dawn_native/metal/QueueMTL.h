@@ -17,7 +17,7 @@
 
 #include "dawn_native/Queue.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class Device;
 
@@ -29,6 +29,6 @@ namespace dawn_native { namespace metal {
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_QUEUEMTL_H_

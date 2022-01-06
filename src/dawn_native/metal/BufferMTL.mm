@@ -21,7 +21,7 @@
 
 #include <limits>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
     // The size of uniform buffer and storage buffer need to be aligned to 16 bytes which is the
     // largest alignment of supported data types
     static constexpr uint32_t kMinUniformOrStorageBufferAlignment = 16u;
@@ -237,4 +237,4 @@ namespace dawn_native { namespace metal {
                                            value:clearValue];
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

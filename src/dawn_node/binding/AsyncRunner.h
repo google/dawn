@@ -21,7 +21,7 @@
 #include "dawn/webgpu_cpp.h"
 #include "napi.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // AsyncRunner is used to poll a wgpu::Device with calls to Tick() while there are asynchronous
     // tasks in flight.
@@ -72,6 +72,6 @@ namespace wgpu { namespace binding {
         std::shared_ptr<AsyncRunner> runner_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_ASYNC_RUNNER_H_

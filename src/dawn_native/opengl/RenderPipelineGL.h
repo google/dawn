@@ -22,7 +22,7 @@
 
 #include <vector>
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     class Device;
     class PersistentPipelineState;
@@ -57,6 +57,6 @@ namespace dawn_native { namespace opengl {
             mAttributesUsingVertexBuffer;
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_RENDERPIPELINEGL_H_

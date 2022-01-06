@@ -10,7 +10,6 @@ IndentWidth: 4
 ObjCBlockIndentWidth: 4
 AccessModifierOffset: -2
 
-# Nested namespaces are C++17, fake them by compacting namespaces for now.
 CompactNamespaces: true
 
 # This should result in only one indentation level with compacted namespaces

@@ -21,11 +21,11 @@
 #include "dawn_native/vulkan/VulkanFunctions.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
     class Device;
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
-namespace dawn_native { namespace vulkan { namespace external_semaphore {
+namespace dawn_native { namespace vulkan::external_semaphore {
 
     class Service {
       public:
@@ -55,6 +55,6 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         bool mSupported = false;
     };
 
-}}}  // namespace dawn_native::vulkan::external_semaphore
+}}  // namespace dawn_native::vulkan::external_semaphore
 
 #endif  // DAWNNATIVE_VULKAN_EXTERNALSEMAPHORE_SERVICE_H_

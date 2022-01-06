@@ -20,7 +20,7 @@
 #include "common/SwapChainUtils.h"
 #include "dawn_native/null/DeviceNull.h"
 
-namespace dawn_native { namespace null {
+namespace dawn_native::null {
 
     DawnSwapChainImplementation CreateNativeSwapChainImpl() {
         DawnSwapChainImplementation impl;
@@ -29,4 +29,4 @@ namespace dawn_native { namespace null {
         return impl;
     }
 
-}}  // namespace dawn_native::null
+}  // namespace dawn_native::null

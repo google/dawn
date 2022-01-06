@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUTextureView is an implementation of interop::GPUTextureView that wraps a
     // wgpu::TextureView.
@@ -41,6 +41,6 @@ namespace wgpu { namespace binding {
         wgpu::TextureView view_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUTEXTUREVIEW_H_

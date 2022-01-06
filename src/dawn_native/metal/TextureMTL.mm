@@ -25,7 +25,7 @@
 
 #include <CoreVideo/CVPixelBuffer.h>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     namespace {
         bool UsageNeedsTextureView(wgpu::TextureUsage usage) {
@@ -849,4 +849,4 @@ namespace dawn_native { namespace metal {
         ASSERT(mMtlTextureView != nullptr);
         return mMtlTextureView.Get();
     }
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

@@ -24,7 +24,7 @@
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     Queue::Queue(Device* device) : QueueBase(device) {
     }
@@ -45,4 +45,4 @@ namespace dawn_native { namespace metal {
         return device->SubmitPendingCommandBuffer();
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

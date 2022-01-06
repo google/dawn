@@ -20,7 +20,7 @@
 #include <array>
 #include <limits>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     static constexpr uint32_t VulkanVersion_1_1 = VK_MAKE_VERSION(1, 1, 0);
     static constexpr uint32_t VulkanVersion_1_2 = VK_MAKE_VERSION(1, 2, 0);
@@ -323,4 +323,4 @@ namespace dawn_native { namespace vulkan {
         return result;
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

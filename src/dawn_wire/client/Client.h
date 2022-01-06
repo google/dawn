@@ -26,7 +26,7 @@
 #include "dawn_wire/WireDeserializeAllocator.h"
 #include "dawn_wire/client/ClientBase_autogen.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     class Device;
     class MemoryTransferService;
@@ -90,6 +90,6 @@ namespace dawn_wire { namespace client {
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client
 
 #endif  // DAWNWIRE_CLIENT_CLIENT_H_

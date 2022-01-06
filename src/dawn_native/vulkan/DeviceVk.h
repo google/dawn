@@ -32,7 +32,7 @@
 #include <memory>
 #include <queue>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class Adapter;
     class BindGroupLayout;
@@ -208,6 +208,6 @@ namespace dawn_native { namespace vulkan {
                                        std::vector<VkSemaphore>* outWaitSemaphores);
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_DEVICEVK_H_

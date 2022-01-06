@@ -19,7 +19,7 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     // Wrapper for a handle into a CPU-only descriptor heap.
     class CPUDescriptorHeapAllocation {
@@ -42,6 +42,6 @@ namespace dawn_native { namespace d3d12 {
         uint32_t mHeapIndex = -1;
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_CPUDESCRIPTORHEAPALLOCATION_H_

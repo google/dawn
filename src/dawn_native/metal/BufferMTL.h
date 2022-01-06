@@ -21,7 +21,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class CommandRecordingContext;
     class Device;
@@ -62,6 +62,6 @@ namespace dawn_native { namespace metal {
         NSPRef<id<MTLBuffer>> mMtlBuffer;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_BUFFERMTL_H_

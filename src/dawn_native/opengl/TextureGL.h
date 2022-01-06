@@ -19,7 +19,7 @@
 
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     class Device;
     struct GLFormat;
@@ -64,6 +64,6 @@ namespace dawn_native { namespace opengl {
         bool mOwnsHandle;
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_TEXTUREGL_H_

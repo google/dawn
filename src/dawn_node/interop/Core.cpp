@@ -14,7 +14,7 @@
 
 #include "src/dawn_node/interop/Core.h"
 
-namespace wgpu { namespace interop {
+namespace wgpu::interop {
 
     Result Success;
 
@@ -157,4 +157,4 @@ namespace wgpu { namespace interop {
         return Napi::Value::From(env, value);
     }
 
-}}  // namespace wgpu::interop
+}  // namespace wgpu::interop

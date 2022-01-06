@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
     // GPUSampler is an implementation of interop::GPUSampler that wraps a wgpu::Sampler.
     class GPUSampler final : public interop::GPUSampler {
       public:
@@ -39,6 +39,6 @@ namespace wgpu { namespace binding {
         wgpu::Sampler sampler_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUSAMPLER_H_

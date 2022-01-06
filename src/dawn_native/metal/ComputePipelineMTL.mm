@@ -19,7 +19,7 @@
 #include "dawn_native/metal/ShaderModuleMTL.h"
 #include "dawn_native/metal/UtilsMetal.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     // static
     Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
@@ -83,4 +83,4 @@ namespace dawn_native { namespace metal {
         CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

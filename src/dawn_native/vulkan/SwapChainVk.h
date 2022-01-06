@@ -21,7 +21,7 @@
 
 #include <vector>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class Device;
     class Texture;
@@ -93,6 +93,6 @@ namespace dawn_native { namespace vulkan {
         Ref<Texture> mTexture;
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_SWAPCHAINVK_H_

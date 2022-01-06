@@ -22,7 +22,7 @@
 
 #include <vector>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class Adapter;
     class Backend;
@@ -84,6 +84,6 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const Adapter& adapter);
     ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const Adapter& adapter,
                                                        VkSurfaceKHR surface);
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANINFO_H_

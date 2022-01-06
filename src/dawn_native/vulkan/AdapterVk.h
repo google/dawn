@@ -21,7 +21,7 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class VulkanInstance;
 
@@ -54,6 +54,6 @@ namespace dawn_native { namespace vulkan {
         VulkanDeviceInfo mDeviceInfo = {};
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_ADAPTERVK_H_

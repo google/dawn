@@ -19,7 +19,7 @@
 
 #include <memory>
 
-namespace dawn_wire { namespace server {
+namespace dawn_wire::server {
 
     bool Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
         auto* buffer = BufferObjects().Get(cmd.selfId);
@@ -279,4 +279,4 @@ namespace dawn_wire { namespace server {
         });
     }
 
-}}  // namespace dawn_wire::server
+}  // namespace dawn_wire::server

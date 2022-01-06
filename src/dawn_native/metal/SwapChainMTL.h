@@ -22,7 +22,7 @@
 @class CAMetalLayer;
 @protocol CAMetalDrawable;
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class Device;
     class Texture;
@@ -62,6 +62,6 @@ namespace dawn_native { namespace metal {
         void DetachFromSurfaceImpl() override;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_SWAPCHAINMTL_H_

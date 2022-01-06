@@ -24,7 +24,7 @@
 
 #include <cstring>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     namespace {
 
@@ -410,4 +410,4 @@ namespace dawn_native { namespace vulkan {
         device->fn.CmdFillBuffer(recordingContext->commandBuffer, mHandle, offset, size,
                                  clearValue);
     }
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

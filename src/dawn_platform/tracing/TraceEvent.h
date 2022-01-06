@@ -754,7 +754,7 @@
 #define TRACE_VALUE_TYPE_STRING (static_cast<unsigned char>(6))
 #define TRACE_VALUE_TYPE_COPY_STRING (static_cast<unsigned char>(7))
 
-namespace dawn_platform { namespace TraceEvent {
+namespace dawn_platform::TraceEvent {
 
     // Specify these values when the corresponding argument of addTraceEvent is not
     // used.
@@ -986,6 +986,6 @@ namespace dawn_platform { namespace TraceEvent {
             Data m_data;
         };
 
-}}  // namespace dawn_platform::TraceEvent
+}  // namespace dawn_platform::TraceEvent
 
 #endif  // DAWNPLATFORM_TRACING_TRACEEVENT_H_

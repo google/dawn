@@ -26,7 +26,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     // static
     ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
@@ -177,4 +177,4 @@ namespace dawn_native { namespace vulkan {
                      GetLabel());
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

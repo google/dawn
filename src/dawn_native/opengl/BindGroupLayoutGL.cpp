@@ -16,7 +16,7 @@
 
 #include "dawn_native/opengl/BindGroupGL.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     BindGroupLayout::BindGroupLayout(DeviceBase* device,
                                      const BindGroupLayoutDescriptor* descriptor,
@@ -34,4 +34,4 @@ namespace dawn_native { namespace opengl {
         mBindGroupAllocator.Deallocate(bindGroup);
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

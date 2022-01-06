@@ -21,7 +21,7 @@
 
 #include <cstring>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     namespace {
         ResultOrError<InstanceExtSet> GatherInstanceExtensions(
@@ -331,4 +331,4 @@ namespace dawn_native { namespace vulkan {
         return std::move(info);
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

@@ -24,7 +24,7 @@
 
 #include <sstream>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     // static
     ResultOrError<Ref<ShaderModule>> ShaderModule::Create(Device* device,
@@ -257,4 +257,4 @@ namespace dawn_native { namespace metal {
 
         return {};
     }
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

@@ -25,7 +25,7 @@ namespace dawn_native {
     struct TextureCopy;
 }  // namespace dawn_native
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     struct CommandRecordingContext;
     class Device;
@@ -50,6 +50,6 @@ namespace dawn_native { namespace vulkan {
                                                 const Extent3D& copySize);
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_COMMANDBUFFERVK_H_

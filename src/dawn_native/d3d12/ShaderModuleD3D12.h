@@ -24,7 +24,7 @@ namespace dawn_native {
     struct ProgrammableStage;
 }  // namespace dawn_native
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class Device;
     class PipelineLayout;
@@ -64,6 +64,6 @@ namespace dawn_native { namespace d3d12 {
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_SHADERMODULED3D12_H_

@@ -31,7 +31,7 @@
 
 #include <vector>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     namespace {
 
@@ -613,4 +613,4 @@ namespace dawn_native { namespace metal {
         return new Backend(instance);
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

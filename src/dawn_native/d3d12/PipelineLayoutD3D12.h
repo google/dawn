@@ -21,7 +21,7 @@
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class Device;
 
@@ -95,6 +95,6 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_PIPELINELAYOUTD3D12_H_

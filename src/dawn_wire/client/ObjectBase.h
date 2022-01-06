@@ -20,7 +20,7 @@
 #include "common/LinkedList.h"
 #include "dawn_wire/ObjectType_autogen.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     class Client;
 
@@ -46,6 +46,6 @@ namespace dawn_wire { namespace client {
         const uint32_t id;
     };
 
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client
 
 #endif  // DAWNWIRE_CLIENT_OBJECTBASE_H_

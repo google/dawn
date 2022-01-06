@@ -21,7 +21,7 @@
 constexpr VkResult VK_FAKE_ERROR_FOR_TESTING = VK_RESULT_MAX_ENUM;
 constexpr VkResult VK_FAKE_DEVICE_OOM_FOR_TESTING = static_cast<VkResult>(VK_RESULT_MAX_ENUM - 1);
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     // Returns a string version of the result.
     const char* VkResultAsString(::VkResult result);
@@ -45,6 +45,6 @@ namespace dawn_native { namespace vulkan {
             resultIn, VK_FAKE_DEVICE_OOM_FOR_TESTING, VK_FAKE_ERROR_FOR_TESTING)), \
         contextIn)
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANERROR_H_

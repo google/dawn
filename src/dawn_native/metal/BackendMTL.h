@@ -17,7 +17,7 @@
 
 #include "dawn_native/BackendConnection.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class Backend : public BackendConnection {
       public:
@@ -28,6 +28,6 @@ namespace dawn_native { namespace metal {
             const AdapterDiscoveryOptionsBase* optionsBase) override;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_BACKENDMTL_H_

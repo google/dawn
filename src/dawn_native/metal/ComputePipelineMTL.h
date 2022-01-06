@@ -21,7 +21,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class Device;
 
@@ -48,6 +48,6 @@ namespace dawn_native { namespace metal {
         std::vector<uint32_t> mWorkgroupAllocations;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_COMPUTEPIPELINEMTL_H_

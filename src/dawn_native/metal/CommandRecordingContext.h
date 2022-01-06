@@ -20,7 +20,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     // This class wraps a MTLCommandBuffer and tracks which Metal encoder is open.
     // Only one encoder may be open at a time.
@@ -54,6 +54,6 @@ namespace dawn_native { namespace metal {
         bool mUsed = false;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_COMMANDRECORDINGCONTEXT_H_

@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUBindGroupLayout is an implementation of interop::GPUBindGroupLayout that wraps a
     // wgpu::BindGroupLayout.
@@ -41,6 +41,6 @@ namespace wgpu { namespace binding {
         wgpu::BindGroupLayout layout_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUBINDGROUPLAYOUT_H_

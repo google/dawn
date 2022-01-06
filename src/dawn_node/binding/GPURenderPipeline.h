@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPURenderPipeline is an implementation of interop::GPURenderPipeline that wraps a
     // wgpu::RenderPipeline.
@@ -43,6 +43,6 @@ namespace wgpu { namespace binding {
         wgpu::RenderPipeline pipeline_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPURENDERPIPELINE_H_

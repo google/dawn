@@ -23,7 +23,7 @@
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/UtilsGL.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     namespace {
 
@@ -577,4 +577,4 @@ namespace dawn_native { namespace opengl {
         return mTarget;
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

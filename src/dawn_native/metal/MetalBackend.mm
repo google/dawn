@@ -20,7 +20,7 @@
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     id<MTLDevice> GetMetalDevice(WGPUDevice device) {
         return ToBackend(FromAPI(device))->GetMTLDevice();
@@ -46,4 +46,4 @@ namespace dawn_native { namespace metal {
         ToBackend(FromAPI(device))->WaitForCommandsToBeScheduled();
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

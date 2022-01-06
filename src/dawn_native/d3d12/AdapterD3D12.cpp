@@ -24,7 +24,7 @@
 
 #include <sstream>
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     Adapter::Adapter(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
         : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12),
@@ -412,4 +412,4 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

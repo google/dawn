@@ -21,7 +21,7 @@
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     Queue::Queue(Device* device) : QueueBase(device) {
     }
@@ -77,4 +77,4 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

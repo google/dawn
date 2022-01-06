@@ -18,7 +18,7 @@
 #include "dawn_wire/ChunkedCommandSerializer.h"
 #include "dawn_wire/server/ServerBase_autogen.h"
 
-namespace dawn_wire { namespace server {
+namespace dawn_wire::server {
 
     class Server;
     class MemoryTransferService;
@@ -238,6 +238,6 @@ namespace dawn_wire { namespace server {
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 
-}}  // namespace dawn_wire::server
+}  // namespace dawn_wire::server
 
 #endif  // DAWNWIRE_SERVER_SERVER_H_

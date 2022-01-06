@@ -21,7 +21,7 @@
 #include "src/dawn_node/binding/Flags.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
     // GPU is an implementation of interop::GPU that wraps a dawn_native::Instance.
     class GPU final : public interop::GPU {
       public:
@@ -37,6 +37,6 @@ namespace wgpu { namespace binding {
         dawn_native::Instance instance_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPU_H_

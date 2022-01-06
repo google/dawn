@@ -31,7 +31,7 @@
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     namespace {
         D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& format) {
@@ -1377,4 +1377,4 @@ namespace dawn_native { namespace d3d12 {
         return uavDesc;
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

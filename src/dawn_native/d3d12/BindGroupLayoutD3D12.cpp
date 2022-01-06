@@ -20,7 +20,7 @@
 #include "dawn_native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
     namespace {
         D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(
             const BindingInfo& bindingInfo) {
@@ -188,4 +188,4 @@ namespace dawn_native { namespace d3d12 {
         return mSamplerDescriptorRanges;
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

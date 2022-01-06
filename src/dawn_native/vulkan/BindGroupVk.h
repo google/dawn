@@ -22,7 +22,7 @@
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/DescriptorSetAllocation.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class Device;
 
@@ -50,6 +50,6 @@ namespace dawn_native { namespace vulkan {
         DescriptorSetAllocation mDescriptorSetAllocation;
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_BINDGROUPVK_H_

@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUTexture is an implementation of interop::GPUTexture that wraps a wgpu::Texture.
     class GPUTexture final : public interop::GPUTexture {
@@ -44,6 +44,6 @@ namespace wgpu { namespace binding {
         wgpu::Texture texture_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUTEXTURE_H_

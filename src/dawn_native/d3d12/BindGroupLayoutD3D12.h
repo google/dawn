@@ -21,7 +21,7 @@
 #include "common/ityp_stack_vec.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class BindGroup;
     class CPUDescriptorHeapAllocation;
@@ -89,6 +89,6 @@ namespace dawn_native { namespace d3d12 {
         StagingDescriptorAllocator* mViewAllocator = nullptr;
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_BINDGROUPLAYOUTD3D12_H_

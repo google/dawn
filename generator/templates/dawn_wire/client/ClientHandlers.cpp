@@ -17,7 +17,7 @@
 
 #include <string>
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
     {% for command in cmd_records["return command"] %}
         bool Client::Handle{{command.name.CamelCase()}}(DeserializeBuffer* deserializeBuffer) {
             Return{{command.name.CamelCase()}}Cmd cmd;
@@ -94,4 +94,4 @@ namespace dawn_wire { namespace client {
 
         return commands;
     }
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client

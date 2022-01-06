@@ -19,7 +19,7 @@
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/Device.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     // static
     WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor) {
@@ -402,4 +402,4 @@ namespace dawn_wire { namespace client {
         mMappedData = nullptr;
     }
 
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client

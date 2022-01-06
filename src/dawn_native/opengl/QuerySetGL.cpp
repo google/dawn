@@ -16,7 +16,7 @@
 
 #include "dawn_native/opengl/DeviceGL.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     QuerySet::QuerySet(Device* device, const QuerySetDescriptor* descriptor)
         : QuerySetBase(device, descriptor) {
@@ -24,4 +24,4 @@ namespace dawn_native { namespace opengl {
 
     QuerySet::~QuerySet() = default;
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

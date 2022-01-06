@@ -26,7 +26,7 @@ namespace dawn_native {
     struct ProgrammableStage;
 }  // namespace dawn_native
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     struct OpenGLFunctions;
     class PipelineLayout;
@@ -64,6 +64,6 @@ namespace dawn_native { namespace opengl {
         Ref<Sampler> mDummySampler;
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_PIPELINEGL_H_

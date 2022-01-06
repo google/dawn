@@ -24,7 +24,7 @@
 #include "common/RefCounted.h"
 #include "dawn_native/Error.h"
 
-namespace dawn_native { namespace utils {
+namespace dawn_native::utils {
 
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(DeviceBase* device, const char* source);
 
@@ -118,6 +118,6 @@ namespace dawn_native { namespace utils {
 
     const char* GetLabelForTrace(const char* label);
 
-}}  // namespace dawn_native::utils
+}  // namespace dawn_native::utils
 
 #endif  // DAWNNATIVE_UTILS_WGPUHELPERS_H_

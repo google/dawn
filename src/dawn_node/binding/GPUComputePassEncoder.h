@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUComputePassEncoder is an implementation of interop::GPUComputePassEncoder that wraps a
     // wgpu::ComputePassEncoder.
@@ -71,6 +71,6 @@ namespace wgpu { namespace binding {
         wgpu::ComputePassEncoder enc_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUCOMPUTEPASSENCODER_H_

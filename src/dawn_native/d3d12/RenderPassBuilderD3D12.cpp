@@ -21,7 +21,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     namespace {
         D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE D3D12BeginningAccessType(wgpu::LoadOp loadOp) {
@@ -235,4 +235,4 @@ namespace dawn_native { namespace d3d12 {
             D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_NO_ACCESS;
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

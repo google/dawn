@@ -21,7 +21,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class Device;
 
@@ -39,6 +39,6 @@ namespace dawn_native { namespace metal {
         NSPRef<id<MTLSamplerState>> mMtlSamplerState;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_SAMPLERMTL_H_

@@ -36,7 +36,7 @@
 #include "dawn_native/ToBackend.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native { namespace null {
+namespace dawn_native::null {
 
     class Adapter;
     class BindGroup;
@@ -335,6 +335,6 @@ namespace dawn_native { namespace null {
         std::unique_ptr<uint8_t[]> mBuffer;
     };
 
-}}  // namespace dawn_native::null
+}  // namespace dawn_native::null
 
 #endif  // DAWNNATIVE_NULL_DEVICENULL_H_

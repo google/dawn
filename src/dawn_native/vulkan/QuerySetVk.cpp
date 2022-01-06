@@ -20,7 +20,7 @@
 #include "dawn_native/vulkan/VulkanError.h"
 #include "dawn_platform/DawnPlatform.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     namespace {
         VkQueryType VulkanQueryType(wgpu::QueryType type) {
@@ -114,4 +114,4 @@ namespace dawn_native { namespace vulkan {
                      reinterpret_cast<uint64_t&>(mHandle), "Dawn_QuerySet", GetLabel());
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

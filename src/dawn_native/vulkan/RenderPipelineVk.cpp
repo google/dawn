@@ -24,7 +24,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     namespace {
 
@@ -624,4 +624,4 @@ namespace dawn_native { namespace vulkan {
         CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

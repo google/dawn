@@ -19,7 +19,7 @@
 
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     class Device;
 
@@ -43,6 +43,6 @@ namespace dawn_native { namespace opengl {
         GLuint mNonFilteringHandle;
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_SAMPLERGL_H_

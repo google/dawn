@@ -77,7 +77,7 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE_KHR, "},
 };
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     namespace {
 
@@ -444,4 +444,4 @@ namespace dawn_native { namespace vulkan {
         return new Backend(instance);
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

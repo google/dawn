@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     GLuint ToOpenGLCompareFunction(wgpu::CompareFunction compareFunction) {
         switch (compareFunction) {
@@ -52,4 +52,4 @@ namespace dawn_native { namespace opengl {
                 UNREACHABLE();
         }
     }
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

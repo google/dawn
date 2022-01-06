@@ -17,7 +17,7 @@
 #include <cctype>
 #include <tuple>
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     MaybeError OpenGLVersion::Initialize(GetProcAddress getProc) {
         PFNGLGETSTRINGPROC getString = reinterpret_cast<PFNGLGETSTRINGPROC>(getProc("glGetString"));
@@ -73,4 +73,4 @@ namespace dawn_native { namespace opengl {
         return std::tie(mMajorVersion, mMinorVersion) >= std::tie(majorVersion, minorVersion);
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

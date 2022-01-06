@@ -31,7 +31,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     namespace {
         // Converts an Dawn texture dimension to a Vulkan image view type.
@@ -1364,4 +1364,4 @@ namespace dawn_native { namespace vulkan {
                      reinterpret_cast<uint64_t&>(mHandle), "Dawn_InternalTextureView", GetLabel());
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

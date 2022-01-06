@@ -32,7 +32,7 @@ typedef __IOSurface* IOSurfaceRef;
 #    import <Metal/Metal.h>
 #endif  //__OBJC__
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
         AdapterDiscoveryOptions();
@@ -56,14 +56,14 @@ namespace dawn_native { namespace metal {
     // scheduled could lead to races in who gets scheduled first and incorrect rendering.
     DAWN_NATIVE_EXPORT void WaitForCommandsToBeScheduled(WGPUDevice device);
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #ifdef __OBJC__
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     DAWN_NATIVE_EXPORT id<MTLDevice> GetMetalDevice(WGPUDevice device);
 
-}}      // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 #endif  // __OBJC__
 
 #pragma clang diagnostic pop

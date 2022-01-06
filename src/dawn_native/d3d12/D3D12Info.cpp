@@ -20,7 +20,7 @@
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
         D3D12DeviceInfo info = {};
@@ -119,4 +119,4 @@ namespace dawn_native { namespace d3d12 {
         return std::move(info);
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

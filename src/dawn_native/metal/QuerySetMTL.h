@@ -21,7 +21,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class Device;
 
@@ -49,6 +49,6 @@ namespace dawn_native { namespace metal {
                                                                       ios(14.0)) = nullptr;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_QUERYSETMTL_H_

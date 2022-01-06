@@ -20,7 +20,7 @@
 #include "src/dawn_node/binding/AsyncRunner.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
     // GPUDevice is an implementation of interop::GPUDevice that wraps a wgpu::Device.
     class GPUDevice final : public interop::GPUDevice {
       public:
@@ -108,6 +108,6 @@ namespace wgpu { namespace binding {
             lost_promises_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUDEVICE_H_

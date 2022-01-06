@@ -16,7 +16,7 @@
 
 #include "dawn_wire/client/Client.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     ShaderModule::~ShaderModule() {
         ClearAllCallbacks(WGPUCompilationInfoRequestStatus_Unknown);
@@ -61,4 +61,4 @@ namespace dawn_wire { namespace client {
         });
     }
 
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client

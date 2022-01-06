@@ -25,7 +25,7 @@
 #include <map>
 #include <vector>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class BindGroupLayout;
 
@@ -71,6 +71,6 @@ namespace dawn_native { namespace vulkan {
         ExecutionSerial mLastDeallocationSerial = ExecutionSerial(0);
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_DESCRIPTORSETALLOCATOR_H_

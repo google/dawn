@@ -20,7 +20,7 @@
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class Device;
 
@@ -32,6 +32,6 @@ namespace dawn_native { namespace d3d12 {
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_QUEUED3D12_H_

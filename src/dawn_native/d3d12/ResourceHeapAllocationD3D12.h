@@ -19,7 +19,7 @@
 #include "dawn_native/ResourceMemoryAllocation.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class Heap;
 
@@ -43,6 +43,6 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12Resource> mResource;
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_RESOURCEHEAPALLOCATIOND3D12_H_

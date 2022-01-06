@@ -18,7 +18,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     StagingDescriptorAllocator::StagingDescriptorAllocator(Device* device,
                                                            uint32_t descriptorCount,
@@ -149,4 +149,4 @@ namespace dawn_native { namespace d3d12 {
         mAllocationsToDelete.ClearUpTo(completedSerial);
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

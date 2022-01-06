@@ -18,7 +18,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     namespace {
         D3D12_QUERY_HEAP_TYPE D3D12QueryHeapType(wgpu::QueryType type) {
@@ -72,4 +72,4 @@ namespace dawn_native { namespace d3d12 {
         SetDebugName(ToBackend(GetDevice()), mQueryHeap.Get(), "Dawn_QuerySet", GetLabel());
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

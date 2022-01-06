@@ -26,7 +26,7 @@
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     namespace {
         D3D12_RESOURCE_FLAGS D3D12ResourceFlags(wgpu::BufferUsage usage) {
@@ -490,4 +490,4 @@ namespace dawn_native { namespace d3d12 {
 
         return {};
     }
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

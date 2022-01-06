@@ -44,7 +44,7 @@
 
 #include <sstream>
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     // TODO(dawn:155): Figure out these values.
     static constexpr uint16_t kShaderVisibleDescriptorHeapSize = 1024;
@@ -742,4 +742,4 @@ namespace dawn_native { namespace d3d12 {
         return ToBackend(computePipeline)->UsesNumWorkgroups();
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

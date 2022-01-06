@@ -29,7 +29,7 @@
 // of two states: switched in or out. Only a switched in heap can be bound to the pipeline. If
 // the heap is full, the caller must switch-in a new heap before re-allocating and the old one
 // is returned to the pool.
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class Device;
     class GPUDescriptorHeapAllocation;
@@ -100,6 +100,6 @@ namespace dawn_native { namespace d3d12 {
         // This is stored on the allocator to avoid extra conversions.
         uint32_t mDescriptorCount = 0;
     };
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_SHADERVISIBLEDESCRIPTORALLOCATOR_H_

@@ -22,7 +22,7 @@ namespace dawn_native {
     struct BeginRenderPassCmd;
 }  // namespace dawn_native
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class BindGroupStateTracker;
     class CommandRecordingContext;
@@ -52,6 +52,6 @@ namespace dawn_native { namespace d3d12 {
                                     const RenderPassBuilder* renderPassBuilder) const;
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_COMMANDBUFFERD3D12_H_

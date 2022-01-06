@@ -20,7 +20,7 @@
 
 #include <limits>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     namespace {
 
@@ -222,4 +222,4 @@ namespace dawn_native { namespace vulkan {
         return mConfig.format;
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

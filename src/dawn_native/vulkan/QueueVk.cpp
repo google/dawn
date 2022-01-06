@@ -25,7 +25,7 @@
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     // static
     Queue* Queue::Create(Device* device) {
@@ -56,4 +56,4 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

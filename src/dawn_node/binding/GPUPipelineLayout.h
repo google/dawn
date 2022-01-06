@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUPipelineLayout is an implementation of interop::GPUPipelineLayout that wraps a
     // wgpu::PipelineLayout.
@@ -41,6 +41,6 @@ namespace wgpu { namespace binding {
         wgpu::PipelineLayout layout_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUPIPELINELAYOUT_H_

@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
     class Flags;
 
     // GPUAdapter is an implementation of interop::GPUAdapter that wraps a dawn_native::Adapter.
@@ -42,6 +42,6 @@ namespace wgpu { namespace binding {
         const Flags& flags_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUADAPTER_H_

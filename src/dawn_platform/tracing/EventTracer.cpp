@@ -16,7 +16,7 @@
 #include "common/Assert.h"
 #include "dawn_platform/DawnPlatform.h"
 
-namespace dawn_platform { namespace tracing {
+namespace dawn_platform::tracing {
 
     const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform, TraceCategory category) {
         static unsigned char disabled = 0;
@@ -55,4 +55,4 @@ namespace dawn_platform { namespace tracing {
         return static_cast<TraceEventHandle>(0);
     }
 
-}}  // namespace dawn_platform::tracing
+}  // namespace dawn_platform::tracing

@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPURenderBundle is an implementation of interop::GPURenderBundle that wraps a
     // wgpu::RenderBundle.
@@ -41,6 +41,6 @@ namespace wgpu { namespace binding {
         wgpu::RenderBundle bundle_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPURENDERBUNDLE_H_

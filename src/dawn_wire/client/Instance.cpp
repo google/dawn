@@ -16,7 +16,7 @@
 
 #include "dawn_wire/client/Client.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     Instance::~Instance() {
         mRequestAdapterRequests.CloseAll([](RequestAdapterData* request) {
@@ -98,4 +98,4 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client

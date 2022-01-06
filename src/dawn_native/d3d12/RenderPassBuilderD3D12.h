@@ -24,7 +24,7 @@
 
 #include <array>
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class TextureView;
 
@@ -93,6 +93,6 @@ namespace dawn_native { namespace d3d12 {
                     kMaxColorAttachments>
             mSubresourceParams;
     };
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_RENDERPASSBUILDERD3D12_H_

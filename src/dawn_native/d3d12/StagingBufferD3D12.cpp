@@ -19,7 +19,7 @@
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     StagingBuffer::StagingBuffer(size_t size, Device* device)
         : StagingBufferBase(size), mDevice(device) {
@@ -74,4 +74,4 @@ namespace dawn_native { namespace d3d12 {
     ID3D12Resource* StagingBuffer::GetResource() const {
         return mUploadHeap.GetD3D12Resource();
     }
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

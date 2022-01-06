@@ -48,7 +48,7 @@ namespace {
     }
 }  // namespace
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     namespace {
 
@@ -233,4 +233,4 @@ namespace wgpu { namespace binding {
         }
         return promise;
     }
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding

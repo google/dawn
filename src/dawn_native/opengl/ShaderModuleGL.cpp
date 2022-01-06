@@ -34,7 +34,7 @@
 
 #include <sstream>
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber) {
         std::ostringstream o;
@@ -397,4 +397,4 @@ namespace dawn_native { namespace opengl {
         return glsl;
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

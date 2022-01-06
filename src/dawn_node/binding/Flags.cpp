@@ -14,7 +14,7 @@
 
 #include "src/dawn_node/binding/Flags.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
     void Flags::Set(const std::string& key, const std::string& value) {
         flags_[key] = value;
     }
@@ -26,4 +26,4 @@ namespace wgpu { namespace binding {
         }
         return {};
     }
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding

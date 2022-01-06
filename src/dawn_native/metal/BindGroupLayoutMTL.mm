@@ -16,7 +16,7 @@
 
 #include "dawn_native/metal/BindGroupMTL.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     // static
     Ref<BindGroupLayout> BindGroupLayout::Create(
@@ -42,4 +42,4 @@ namespace dawn_native { namespace metal {
         mBindGroupAllocator.Deallocate(bindGroup);
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

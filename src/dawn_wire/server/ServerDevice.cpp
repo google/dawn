@@ -14,7 +14,7 @@
 
 #include "dawn_wire/server/Server.h"
 
-namespace dawn_wire { namespace server {
+namespace dawn_wire::server {
 
     namespace {
 
@@ -201,4 +201,4 @@ namespace dawn_wire { namespace server {
         SerializeCommand(cmd);
     }
 
-}}  // namespace dawn_wire::server
+}  // namespace dawn_wire::server

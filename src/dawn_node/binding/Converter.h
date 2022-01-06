@@ -24,7 +24,7 @@
 #include "src/dawn_node/binding/Errors.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // ImplOfTraits is a traits helper that is used to associate the interop interface type to the
     // binding implementation type.
@@ -393,6 +393,6 @@ namespace wgpu { namespace binding {
         std::vector<std::function<void()>> free_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_CONVERTER_H_

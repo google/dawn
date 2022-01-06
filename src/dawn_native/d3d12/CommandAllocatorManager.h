@@ -23,7 +23,7 @@
 
 #include <bitset>
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class Device;
 
@@ -53,6 +53,6 @@ namespace dawn_native { namespace d3d12 {
         SerialQueue<ExecutionSerial, IndexedCommandAllocator> mInFlightCommandAllocators;
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_COMMANDALLOCATORMANAGER_H_

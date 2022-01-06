@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUBindGroup is an implementation of interop::GPUBindGroup that wraps a wgpu::BindGroup.
     class GPUBindGroup final : public interop::GPUBindGroup {
@@ -40,6 +40,6 @@ namespace wgpu { namespace binding {
         wgpu::BindGroup group_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUBINDGROUP_H_

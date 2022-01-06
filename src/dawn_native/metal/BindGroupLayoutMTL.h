@@ -18,7 +18,7 @@
 #include "common/SlabAllocator.h"
 #include "dawn_native/BindGroupLayout.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class BindGroup;
     class Device;
@@ -41,6 +41,6 @@ namespace dawn_native { namespace metal {
         SlabAllocator<BindGroup> mBindGroupAllocator;
     };
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_BINDGROUPLAYOUTMTL_H_

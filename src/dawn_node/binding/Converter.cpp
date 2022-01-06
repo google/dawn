@@ -22,7 +22,7 @@
 #include "src/dawn_node/binding/GPUTextureView.h"
 #include "src/dawn_node/utils/Debug.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     Converter::~Converter() {
         for (auto& free : free_) {
@@ -1150,4 +1150,4 @@ namespace wgpu { namespace binding {
                Convert(out.fragment, in.fragment);
     }
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding

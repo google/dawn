@@ -45,7 +45,7 @@
         __FILE__, __FUNCTION__, __LINE__ \
     }
 
-namespace wgpu { namespace interop {
+namespace wgpu::interop {
 
     ////////////////////////////////////////////////////////////////////////////////
     // Primitive JavaScript types
@@ -687,6 +687,6 @@ namespace wgpu { namespace interop {
         }
     }
 
-}}  // namespace wgpu::interop
+}  // namespace wgpu::interop
 
 #endif  //  DAWN_NODE_INTEROP_CORE_WEBGPU_H_

@@ -16,7 +16,7 @@
 
 #include <memory>
 
-namespace dawn_wire { namespace server {
+namespace dawn_wire::server {
 
     bool Server::DoShaderModuleGetCompilationInfo(ObjectId shaderModuleId, uint64_t requestSerial) {
         auto* shaderModule = ShaderModuleObjects().Get(shaderModuleId);
@@ -46,4 +46,4 @@ namespace dawn_wire { namespace server {
         SerializeCommand(cmd);
     }
 
-}}  // namespace dawn_wire::server
+}  // namespace dawn_wire::server

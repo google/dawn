@@ -22,7 +22,7 @@
 #include "dawn_native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class Device;
     class SamplerHeapCacheEntry;
@@ -63,6 +63,6 @@ namespace dawn_native { namespace d3d12 {
 
         DynamicStorageBufferLengths mDynamicStorageBufferLengths;
     };
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_BINDGROUPD3D12_H_

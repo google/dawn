@@ -20,7 +20,7 @@
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/client/Client.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     class MockMemoryTransferService : public MemoryTransferService {
       public:
@@ -94,6 +94,6 @@ namespace dawn_wire { namespace client {
         MOCK_METHOD(void, OnWriteHandleDestroy, (const void* WriteHandle));
     };
 
-}}  //  namespace dawn_wire::client
+}  // namespace dawn_wire::client
 
 #endif  // DAWNWIRE_CLIENT_CLIENTMEMORYTRANSFERSERVICE_MOCK_H_

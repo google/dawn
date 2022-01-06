@@ -19,7 +19,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/ErrorInjector.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     constexpr HRESULT E_FAKE_ERROR_FOR_TESTING = MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0xFF);
     constexpr HRESULT E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING =
@@ -40,6 +40,6 @@ namespace dawn_native { namespace d3d12 {
                             E_FAKE_ERROR_FOR_TESTING),                      \
         contextIn)
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_D3D12ERROR_H_

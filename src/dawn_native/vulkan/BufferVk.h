@@ -21,7 +21,7 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     struct CommandRecordingContext;
     class Device;
@@ -77,6 +77,6 @@ namespace dawn_native { namespace vulkan {
         wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_BUFFERVK_H_

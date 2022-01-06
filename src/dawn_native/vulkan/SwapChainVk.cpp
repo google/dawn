@@ -30,7 +30,7 @@
 #    include "dawn_native/XlibXcbFunctions.h"
 #endif  // defined(DAWN_USE_X11)
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     // OldSwapChain
 
@@ -661,4 +661,4 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

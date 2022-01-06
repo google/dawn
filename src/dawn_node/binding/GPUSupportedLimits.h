@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUSupportedLimits is an implementation of interop::GPUSupportedLimits.
     class GPUSupportedLimits final : public interop::GPUSupportedLimits {
@@ -59,6 +59,6 @@ namespace wgpu { namespace binding {
         wgpu::SupportedLimits limits_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUSUPPORTEDLIMITS_H_

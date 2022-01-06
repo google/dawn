@@ -20,7 +20,7 @@
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/ObjectAllocator.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     Device::Device(Client* clientIn, uint32_t initialRefcount, uint32_t initialId)
         : ObjectBase(clientIn, initialRefcount, initialId), mIsAlive(std::make_shared<bool>()) {
@@ -339,4 +339,4 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client

@@ -42,7 +42,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     // static
     ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
@@ -1015,4 +1015,4 @@ namespace dawn_native { namespace vulkan {
         return mDeviceInfo.properties.limits.timestampPeriod;
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

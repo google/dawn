@@ -19,7 +19,7 @@
 
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     class Device;
 
@@ -53,6 +53,6 @@ namespace dawn_native { namespace opengl {
         void* mMappedData = nullptr;
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_BUFFERGL_H_

@@ -24,7 +24,7 @@ namespace dawn_native {
     union OverridableConstantScalar;
 }  // namespace dawn_native
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class Device;
 
@@ -116,6 +116,6 @@ namespace dawn_native { namespace vulkan {
         std::vector<OverridableConstantScalar>* specializationDataEntries,
         std::vector<VkSpecializationMapEntry>* specializationMapEntries);
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_UTILSVULKAN_H_

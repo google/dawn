@@ -21,7 +21,7 @@
 #include "src/dawn_node/binding/AsyncRunner.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUBuffer is an implementation of interop::GPUBuffer that wraps a wgpu::Buffer.
     class GPUBuffer final : public interop::GPUBuffer {
@@ -81,6 +81,6 @@ namespace wgpu { namespace binding {
         std::vector<Mapping> mapped_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUBUFFER_H_

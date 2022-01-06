@@ -19,7 +19,7 @@
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     // TODO(enga): Figure out this value.
     static constexpr uint32_t kMaxDescriptorsPerPool = 512;
@@ -185,4 +185,4 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

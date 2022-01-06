@@ -14,7 +14,7 @@
 
 #include "src/dawn_node/binding/Errors.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     namespace {
         constexpr char kHierarchyRequestError[] = "HierarchyRequestError";
@@ -176,4 +176,4 @@ namespace wgpu { namespace binding {
         return New(env, kNotAllowedError);
     }
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding

@@ -20,7 +20,7 @@
 #include "napi.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUCommandEncoder is an implementation of interop::GPUCommandEncoder that wraps a
     // wgpu::CommandEncoder.
@@ -75,6 +75,6 @@ namespace wgpu { namespace binding {
         wgpu::CommandEncoder enc_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUCOMMANDENCODER_H_

@@ -18,7 +18,7 @@
 #include "dawn_native/opengl/BindGroupLayoutGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor) {
         const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
@@ -62,4 +62,4 @@ namespace dawn_native { namespace opengl {
         return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

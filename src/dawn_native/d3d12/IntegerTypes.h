@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     // An ID used to desambiguate between multiple uses of the same descriptor heap in the
     // BindGroup allocations.
@@ -29,6 +29,6 @@ namespace dawn_native { namespace d3d12 {
     // The monotonically increasing serial for external D3D12 mutexes imported in Dawn.
     using ExternalMutexSerial = TypedInteger<struct ExternalMutexSerialT, uint64_t>;
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_INTEGERTYPES_H_

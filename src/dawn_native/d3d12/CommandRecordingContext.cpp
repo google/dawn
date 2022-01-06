@@ -18,7 +18,7 @@
 #include "dawn_native/d3d12/HeapD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     void CommandRecordingContext::AddToSharedTextureList(Texture* texture) {
         ASSERT(IsOpen());
@@ -123,4 +123,4 @@ namespace dawn_native { namespace d3d12 {
         mTempBuffers.emplace_back(tempBuffer);
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

@@ -20,7 +20,7 @@
 
 #include "common/GPUInfo.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     Adapter::Adapter(InstanceBase* instance,
                      VulkanInstance* vulkanInstance,
@@ -350,4 +350,4 @@ namespace dawn_native { namespace vulkan {
         return Device::Create(this, descriptor);
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

@@ -16,7 +16,7 @@
 
 #include "dawn_native/metal/BindGroupLayoutMTL.h"
 #include "dawn_native/metal/DeviceMTL.h"
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
         : BindGroupBase(this, device, descriptor) {
@@ -34,4 +34,4 @@ namespace dawn_native { namespace metal {
         return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

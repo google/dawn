@@ -21,7 +21,7 @@
 #include "src/dawn_node/binding/GPUCommandBuffer.h"
 #include "src/dawn_node/utils/Debug.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     ////////////////////////////////////////////////////////////////////////////////
     // wgpu::bindings::GPUQueue
@@ -129,4 +129,4 @@ namespace wgpu { namespace binding {
         UNIMPLEMENTED();
     }
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding

@@ -28,7 +28,7 @@
 #include <fcntl.h>
 #include <gbm.h>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     namespace {
 
@@ -884,4 +884,4 @@ namespace dawn_native { namespace vulkan {
     DAWN_INSTANTIATE_TEST(VulkanImageWrappingValidationTests, VulkanBackend());
     DAWN_INSTANTIATE_TEST(VulkanImageWrappingUsageTests, VulkanBackend());
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

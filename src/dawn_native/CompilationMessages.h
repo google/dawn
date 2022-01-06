@@ -22,10 +22,10 @@
 #include <string>
 #include <vector>
 
-namespace tint { namespace diag {
+namespace tint::diag {
     class Diagnostic;
     class List;
-}}  // namespace tint::diag
+}  // namespace tint::diag
 
 namespace dawn_native {
 

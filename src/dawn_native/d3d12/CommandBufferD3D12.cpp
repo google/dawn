@@ -33,7 +33,7 @@
 #include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     namespace {
 
@@ -1649,4 +1649,4 @@ namespace dawn_native { namespace d3d12 {
         }
         return {};
     }
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

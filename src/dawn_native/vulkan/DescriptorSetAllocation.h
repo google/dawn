@@ -17,7 +17,7 @@
 
 #include "common/vulkan_platform.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     // Contains a descriptor set along with data necessary to track its allocation.
     struct DescriptorSetAllocation {
@@ -26,6 +26,6 @@ namespace dawn_native { namespace vulkan {
         uint16_t setIndex;
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_DESCRIPTORSETALLOCATION_H_

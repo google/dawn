@@ -27,7 +27,7 @@
 #include <set>
 #include <sstream>
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     namespace {
 
@@ -215,4 +215,4 @@ namespace dawn_native { namespace opengl {
         }
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

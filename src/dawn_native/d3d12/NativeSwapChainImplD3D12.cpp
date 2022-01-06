@@ -18,7 +18,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     namespace {
         DXGI_USAGE D3D12SwapChainBufferUsage(WGPUTextureUsage allowedUsages) {
@@ -117,4 +117,4 @@ namespace dawn_native { namespace d3d12 {
         return wgpu::TextureFormat::RGBA8Unorm;
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

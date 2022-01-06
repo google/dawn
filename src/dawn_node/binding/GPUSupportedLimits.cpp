@@ -14,7 +14,7 @@
 
 #include "src/dawn_node/binding/GPUSupportedLimits.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     ////////////////////////////////////////////////////////////////////////////////
     // wgpu::bindings::GPUSupportedLimits
@@ -128,4 +128,4 @@ namespace wgpu { namespace binding {
         return limits_.limits.maxComputeWorkgroupsPerDimension;
     }
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding

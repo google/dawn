@@ -19,7 +19,7 @@
 
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     class Device;
 
@@ -33,6 +33,6 @@ namespace dawn_native { namespace opengl {
         MaybeError OnBeforePresent(TextureViewBase* view) override;
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_SWAPCHAINGL_H_

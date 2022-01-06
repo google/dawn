@@ -20,7 +20,7 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     class Device;
 
@@ -45,6 +45,6 @@ namespace dawn_native { namespace vulkan {
         VkPipelineLayout mHandle = VK_NULL_HANDLE;
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_PIPELINELAYOUTVK_H_

@@ -19,7 +19,7 @@
 #include "src/dawn_node/binding/GPUTextureView.h"
 #include "src/dawn_node/utils/Debug.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     ////////////////////////////////////////////////////////////////////////////////
     // wgpu::bindings::GPUTexture
@@ -61,4 +61,4 @@ namespace wgpu { namespace binding {
         UNIMPLEMENTED();
     }
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding

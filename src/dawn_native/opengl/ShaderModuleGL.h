@@ -19,7 +19,7 @@
 
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     class Device;
     class PipelineLayout;
@@ -70,6 +70,6 @@ namespace dawn_native { namespace opengl {
         BindingInfoArrayTable mGLBindings;
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_SHADERMODULEGL_H_

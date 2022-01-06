@@ -21,7 +21,7 @@ namespace dawn_native {
     struct BeginRenderPassCmd;
 }  // namespace dawn_native
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     class Device;
     struct OpenGLFunctions;
@@ -44,6 +44,6 @@ namespace dawn_native { namespace opengl {
                        const void* data,
                        const TextureDataLayout& dataLayout,
                        const Extent3D& copySize);
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_COMMANDBUFFERGL_H_

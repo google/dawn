@@ -21,7 +21,7 @@
 #include "src/dawn_node/binding/AsyncRunner.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUShaderModule is an implementation of interop::GPUShaderModule that wraps a
     // wgpu::ShaderModule.
@@ -45,6 +45,6 @@ namespace wgpu { namespace binding {
         std::shared_ptr<AsyncRunner> async_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUSHADERMODULE_H_

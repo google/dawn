@@ -24,7 +24,7 @@
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class CommandRecordingContext;
     class Device;
@@ -159,6 +159,6 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;
     };
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_TEXTURED3D12_H_

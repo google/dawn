@@ -16,7 +16,7 @@
 
 #include "dawn_native/opengl/DeviceGL.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     NativeSwapChainImpl::NativeSwapChainImpl(Device* device,
                                              PresentCallback present,
@@ -85,4 +85,4 @@ namespace dawn_native { namespace opengl {
         return wgpu::TextureFormat::RGBA8Unorm;
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

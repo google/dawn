@@ -22,7 +22,7 @@
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     class Device;
 
@@ -45,6 +45,6 @@ namespace dawn_native { namespace opengl {
         size_t mNumSampledTextures;
     };
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_PIPELINELAYOUTGL_H_

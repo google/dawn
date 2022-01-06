@@ -22,7 +22,7 @@
 
 #include <cstring>
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     namespace {
 
@@ -303,4 +303,4 @@ namespace dawn_native { namespace opengl {
         return new Backend(instance, backendType);
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl

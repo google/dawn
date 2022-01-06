@@ -20,7 +20,7 @@
 #include <array>
 #include <sstream>
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
     namespace {
         // Extract Version from "10.0.{Version}.0" if possible, otherwise return 0.
         uint32_t GetWindowsSDKVersionFromDirectoryName(const char* directoryName) {
@@ -268,4 +268,4 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

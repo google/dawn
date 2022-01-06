@@ -21,7 +21,7 @@
 #include "src/dawn_node/binding/AsyncRunner.h"
 #include "src/dawn_node/interop/WebGPU.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // GPUQueue is an implementation of interop::GPUQueue that wraps a wgpu::Queue.
     class GPUQueue final : public interop::GPUQueue {
@@ -56,6 +56,6 @@ namespace wgpu { namespace binding {
         std::shared_ptr<AsyncRunner> async_;
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_GPUQUEUE_H_

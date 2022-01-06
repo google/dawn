@@ -17,7 +17,7 @@
 #include <cassert>
 #include <limits>
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     AsyncRunner::AsyncRunner(Napi::Env env, wgpu::Device device) : env_(env), device_(device) {
     }
@@ -57,4 +57,4 @@ namespace wgpu { namespace binding {
             });
     }
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding

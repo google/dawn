@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     template <typename T>
     class ObjectAllocator {
@@ -105,6 +105,6 @@ namespace dawn_wire { namespace client {
         std::vector<uint32_t> mFreeIds;
         std::vector<ObjectAndSerial> mObjects;
     };
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client
 
 #endif  // DAWNWIRE_CLIENT_OBJECTALLOCATOR_H_

@@ -25,7 +25,7 @@ namespace dawn_native {
 
 }  // namespace dawn_native
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     struct TextureCopySubresource {
         static constexpr unsigned int kMaxTextureCopyRegions = 4;
@@ -92,6 +92,6 @@ namespace dawn_native { namespace d3d12 {
                                                       uint64_t offset,
                                                       uint32_t bytesPerRow,
                                                       uint32_t rowsPerImage);
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_TEXTURECOPYSPLITTER_H_

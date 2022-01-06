@@ -16,7 +16,7 @@
 
 #include <string>
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     const char* VkResultAsString(::VkResult result) {
         // Convert to a int32_t to silence and MSVC warning that the fake errors don't appear in
@@ -106,4 +106,4 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan

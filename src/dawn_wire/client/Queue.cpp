@@ -17,7 +17,7 @@
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/Device.h"
 
-namespace dawn_wire { namespace client {
+namespace dawn_wire::client {
 
     Queue::~Queue() {
         ClearAllCallbacks(WGPUQueueWorkDoneStatus_Unknown);
@@ -95,4 +95,4 @@ namespace dawn_wire { namespace client {
         });
     }
 
-}}  // namespace dawn_wire::client
+}  // namespace dawn_wire::client

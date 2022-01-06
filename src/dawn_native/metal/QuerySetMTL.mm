@@ -18,7 +18,7 @@
 #include "common/Platform.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     namespace {
 
@@ -136,4 +136,4 @@ namespace dawn_native { namespace metal {
         }
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

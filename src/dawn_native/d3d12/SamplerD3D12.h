@@ -19,7 +19,7 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     class Device;
 
@@ -35,6 +35,6 @@ namespace dawn_native { namespace d3d12 {
         D3D12_SAMPLER_DESC mSamplerDesc = {};
     };
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_SAMPLERD3D12_H_

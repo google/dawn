@@ -22,7 +22,7 @@
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
         Device* device,
@@ -102,4 +102,4 @@ namespace dawn_native { namespace d3d12 {
         return ToBackend(GetDevice())->GetDispatchIndirectSignature();
     }
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12

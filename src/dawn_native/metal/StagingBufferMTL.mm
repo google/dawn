@@ -15,7 +15,7 @@
 #include "dawn_native/metal/StagingBufferMTL.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     StagingBuffer::StagingBuffer(size_t size, Device* device)
         : StagingBufferBase(size), mDevice(device) {
@@ -43,4 +43,4 @@ namespace dawn_native { namespace metal {
         return mBuffer.Get();
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

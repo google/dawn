@@ -18,7 +18,7 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     // static
     Ref<PipelineLayout> PipelineLayout::Create(Device* device,
@@ -79,4 +79,4 @@ namespace dawn_native { namespace metal {
         return mBufferBindingCount[stage];
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal

@@ -19,7 +19,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
     // Flags maintains a key-value mapping of input flags passed into the module's create()
     // function, used to configure dawn_node.
     class Flags {
@@ -30,6 +30,6 @@ namespace wgpu { namespace binding {
       private:
         std::unordered_map<std::string, std::string> flags_;
     };
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_FLAGS_H_

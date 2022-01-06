@@ -22,7 +22,7 @@
 #include "dawn_native/d3d12/d3d12_platform.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native { namespace d3d12 {
+namespace dawn_native::d3d12 {
 
     ResultOrError<std::wstring> ConvertStringToWstring(const char* str);
 
@@ -86,6 +86,6 @@ namespace dawn_native { namespace d3d12 {
                       const char* prefix,
                       std::string label = "");
 
-}}  // namespace dawn_native::d3d12
+}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_UTILSD3D12_H_

@@ -17,7 +17,7 @@
 
 #include "dawn_native/ToBackend.h"
 
-namespace dawn_native { namespace metal {
+namespace dawn_native::metal {
 
     class Adapter;
     class BindGroup;
@@ -63,6 +63,6 @@ namespace dawn_native { namespace metal {
         return ToBackendBase<MetalBackendTraits>(common);
     }
 
-}}  // namespace dawn_native::metal
+}  // namespace dawn_native::metal
 
 #endif  // DAWNNATIVE_METAL_FORWARD_H_

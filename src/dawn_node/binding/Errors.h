@@ -17,7 +17,7 @@
 
 #include "napi.h"
 
-namespace wgpu { namespace binding {
+namespace wgpu::binding {
 
     // Errors contains static helper methods for creating DOMException error
     // messages as documented at:
@@ -55,6 +55,6 @@ namespace wgpu { namespace binding {
         static Napi::Error NotAllowedError(Napi::Env);
     };
 
-}}  // namespace wgpu::binding
+}  // namespace wgpu::binding
 
 #endif  // DAWN_NODE_BINDING_ERRORS_H_

@@ -21,7 +21,7 @@
 
 class DynamicLib;
 
-namespace dawn_native { namespace vulkan {
+namespace dawn_native::vulkan {
 
     struct VulkanGlobalInfo;
     struct VulkanDeviceInfo;
@@ -321,6 +321,6 @@ namespace dawn_native { namespace vulkan {
         ::VkResult mValue;
     };
 
-}}  // namespace dawn_native::vulkan
+}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANFUNCTIONS_H_

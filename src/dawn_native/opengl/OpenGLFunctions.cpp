@@ -16,7 +16,7 @@
 
 #include <cctype>
 
-namespace dawn_native { namespace opengl {
+namespace dawn_native::opengl {
 
     MaybeError OpenGLFunctions::Initialize(GetProcAddress getProc) {
         DAWN_TRY(mVersion.Initialize(getProc));
@@ -58,4 +58,4 @@ namespace dawn_native { namespace opengl {
         return mVersion.IsES() && mVersion.IsAtLeast(majorVersion, minorVersion);
     }
 
-}}  // namespace dawn_native::opengl
+}  // namespace dawn_native::opengl
