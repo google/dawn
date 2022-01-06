@@ -1646,6 +1646,21 @@ class CopyCommandTest_T2T : public CopyCommandTest {
         descriptor.requiredFeaturesCount = 2;
         return adapter.CreateDevice(&descriptor);
     }
+
+    wgpu::TextureFormat GetCopyCompatibleFormat(wgpu::TextureFormat format) {
+        switch (format) {
+            case wgpu::TextureFormat::BGRA8Unorm:
+                return wgpu::TextureFormat::BGRA8UnormSrgb;
+            case wgpu::TextureFormat::BGRA8UnormSrgb:
+                return wgpu::TextureFormat::BGRA8Unorm;
+            case wgpu::TextureFormat::RGBA8Unorm:
+                return wgpu::TextureFormat::RGBA8UnormSrgb;
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
+                return wgpu::TextureFormat::RGBA8Unorm;
+            default:
+                UNREACHABLE();
+        }
+    }
 };
 
 TEST_F(CopyCommandTest_T2T, Success) {
@@ -1892,6 +1907,23 @@ TEST_F(CopyCommandTest_T2T, FormatsMismatch) {
                 {0, 0, 1});
 }
 
+// Test copying between textures that have srgb compatible texture formats;
+TEST_F(CopyCommandTest_T2T, SrgbFormatsCompatibility) {
+    for (wgpu::TextureFormat srcTextureFormat :
+         {wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::BGRA8UnormSrgb,
+          wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8UnormSrgb}) {
+        wgpu::TextureFormat dstTextureFormat = GetCopyCompatibleFormat(srcTextureFormat);
+        wgpu::Texture source =
+            Create2DTexture(16, 16, 5, 2, srcTextureFormat, wgpu::TextureUsage::CopySrc);
+        wgpu::Texture destination =
+            Create2DTexture(16, 16, 5, 2, dstTextureFormat, wgpu::TextureUsage::CopyDst);
+
+        // Failure when formats don't match
+        TestT2TCopy(utils::Expectation::Success, source, 0, {0, 0, 0}, destination, 0, {0, 0, 0},
+                    {0, 0, 1});
+    }
+}
+
 TEST_F(CopyCommandTest_T2T, MultisampledCopies) {
     wgpu::Texture sourceMultiSampled1x = Create2DTexture(
         16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc, 1);
@@ -2111,6 +2143,97 @@ class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
         uint32_t width = utils::GetTextureFormatBlockWidth(format) * 4;
         uint32_t height = utils::GetTextureFormatBlockHeight(format) * 4;
         return Create2DTexture(format, 1, width, height);
+    }
+
+    wgpu::TextureFormat GetCopyCompatibleFormat(wgpu::TextureFormat format) {
+        switch (format) {
+            case wgpu::TextureFormat::BC1RGBAUnorm:
+                return wgpu::TextureFormat::BC1RGBAUnormSrgb;
+            case wgpu::TextureFormat::BC1RGBAUnormSrgb:
+                return wgpu::TextureFormat::BC1RGBAUnorm;
+            case wgpu::TextureFormat::BC2RGBAUnorm:
+                return wgpu::TextureFormat::BC2RGBAUnormSrgb;
+            case wgpu::TextureFormat::BC2RGBAUnormSrgb:
+                return wgpu::TextureFormat::BC2RGBAUnorm;
+            case wgpu::TextureFormat::BC3RGBAUnorm:
+                return wgpu::TextureFormat::BC3RGBAUnormSrgb;
+            case wgpu::TextureFormat::BC3RGBAUnormSrgb:
+                return wgpu::TextureFormat::BC3RGBAUnorm;
+            case wgpu::TextureFormat::BC7RGBAUnorm:
+                return wgpu::TextureFormat::BC7RGBAUnormSrgb;
+            case wgpu::TextureFormat::BC7RGBAUnormSrgb:
+                return wgpu::TextureFormat::BC7RGBAUnorm;
+            case wgpu::TextureFormat::ETC2RGB8Unorm:
+                return wgpu::TextureFormat::ETC2RGB8UnormSrgb;
+            case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
+                return wgpu::TextureFormat::ETC2RGB8Unorm;
+            case wgpu::TextureFormat::ETC2RGB8A1Unorm:
+                return wgpu::TextureFormat::ETC2RGB8A1UnormSrgb;
+            case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
+                return wgpu::TextureFormat::ETC2RGB8A1Unorm;
+            case wgpu::TextureFormat::ETC2RGBA8Unorm:
+                return wgpu::TextureFormat::ETC2RGBA8UnormSrgb;
+            case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
+                return wgpu::TextureFormat::ETC2RGBA8Unorm;
+            case wgpu::TextureFormat::ASTC4x4Unorm:
+                return wgpu::TextureFormat::ASTC4x4UnormSrgb;
+            case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+                return wgpu::TextureFormat::ASTC4x4Unorm;
+            case wgpu::TextureFormat::ASTC5x4Unorm:
+                return wgpu::TextureFormat::ASTC5x4UnormSrgb;
+            case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+                return wgpu::TextureFormat::ASTC5x4Unorm;
+            case wgpu::TextureFormat::ASTC5x5Unorm:
+                return wgpu::TextureFormat::ASTC5x5UnormSrgb;
+            case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+                return wgpu::TextureFormat::ASTC5x5Unorm;
+            case wgpu::TextureFormat::ASTC6x5Unorm:
+                return wgpu::TextureFormat::ASTC6x5UnormSrgb;
+            case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+                return wgpu::TextureFormat::ASTC6x5Unorm;
+            case wgpu::TextureFormat::ASTC6x6Unorm:
+                return wgpu::TextureFormat::ASTC6x6UnormSrgb;
+            case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+                return wgpu::TextureFormat::ASTC6x6Unorm;
+            case wgpu::TextureFormat::ASTC8x5Unorm:
+                return wgpu::TextureFormat::ASTC8x5UnormSrgb;
+            case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+                return wgpu::TextureFormat::ASTC8x5Unorm;
+            case wgpu::TextureFormat::ASTC8x6Unorm:
+                return wgpu::TextureFormat::ASTC8x6UnormSrgb;
+            case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+                return wgpu::TextureFormat::ASTC8x6Unorm;
+            case wgpu::TextureFormat::ASTC8x8Unorm:
+                return wgpu::TextureFormat::ASTC8x8UnormSrgb;
+            case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+                return wgpu::TextureFormat::ASTC8x8Unorm;
+            case wgpu::TextureFormat::ASTC10x5Unorm:
+                return wgpu::TextureFormat::ASTC10x5UnormSrgb;
+            case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+                return wgpu::TextureFormat::ASTC10x5Unorm;
+            case wgpu::TextureFormat::ASTC10x6Unorm:
+                return wgpu::TextureFormat::ASTC10x6UnormSrgb;
+            case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+                return wgpu::TextureFormat::ASTC10x6Unorm;
+            case wgpu::TextureFormat::ASTC10x8Unorm:
+                return wgpu::TextureFormat::ASTC10x8UnormSrgb;
+            case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+                return wgpu::TextureFormat::ASTC10x8Unorm;
+            case wgpu::TextureFormat::ASTC10x10Unorm:
+                return wgpu::TextureFormat::ASTC10x10UnormSrgb;
+            case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+                return wgpu::TextureFormat::ASTC10x10Unorm;
+            case wgpu::TextureFormat::ASTC12x10Unorm:
+                return wgpu::TextureFormat::ASTC12x10UnormSrgb;
+            case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+                return wgpu::TextureFormat::ASTC12x10Unorm;
+            case wgpu::TextureFormat::ASTC12x12Unorm:
+                return wgpu::TextureFormat::ASTC12x12UnormSrgb;
+            case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+                return wgpu::TextureFormat::ASTC12x12Unorm;
+            default:
+                UNREACHABLE();
+        }
     }
 };
 
@@ -2355,6 +2478,48 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, CopyToMultipleArrayLayers) {
         // Copy touching the texture corners with a non-packed rowsPerImage
         TestBothTBCopiesExactBufferSize(256, 6, texture, format, {blockWidth, blockHeight, 4},
                                         {testWidth - blockWidth, testHeight - blockHeight, 16});
+    }
+}
+
+// Test copying between textures that have srgb compatible texture formats;
+TEST_F(CopyCommandTest_CompressedTextureFormats, SrgbFormatCompatibility) {
+    constexpr std::array<wgpu::TextureFormat, 42> srcFormats = {
+        wgpu::TextureFormat::BC1RGBAUnorm,    wgpu::TextureFormat::BC1RGBAUnormSrgb,
+        wgpu::TextureFormat::BC2RGBAUnorm,    wgpu::TextureFormat::BC2RGBAUnormSrgb,
+        wgpu::TextureFormat::BC3RGBAUnorm,    wgpu::TextureFormat::BC3RGBAUnormSrgb,
+        wgpu::TextureFormat::BC7RGBAUnorm,    wgpu::TextureFormat::BC7RGBAUnormSrgb,
+        wgpu::TextureFormat::ETC2RGB8Unorm,   wgpu::TextureFormat::ETC2RGB8UnormSrgb,
+        wgpu::TextureFormat::ETC2RGB8A1Unorm, wgpu::TextureFormat::ETC2RGB8A1UnormSrgb,
+        wgpu::TextureFormat::ETC2RGBA8Unorm,  wgpu::TextureFormat::ETC2RGBA8UnormSrgb,
+        wgpu::TextureFormat::ASTC4x4Unorm,    wgpu::TextureFormat::ASTC4x4UnormSrgb,
+        wgpu::TextureFormat::ASTC5x4Unorm,    wgpu::TextureFormat::ASTC5x4UnormSrgb,
+        wgpu::TextureFormat::ASTC5x5Unorm,    wgpu::TextureFormat::ASTC5x5UnormSrgb,
+        wgpu::TextureFormat::ASTC6x5Unorm,    wgpu::TextureFormat::ASTC6x5UnormSrgb,
+        wgpu::TextureFormat::ASTC6x6Unorm,    wgpu::TextureFormat::ASTC6x6UnormSrgb,
+        wgpu::TextureFormat::ASTC8x5Unorm,    wgpu::TextureFormat::ASTC8x5UnormSrgb,
+        wgpu::TextureFormat::ASTC8x6Unorm,    wgpu::TextureFormat::ASTC8x6UnormSrgb,
+        wgpu::TextureFormat::ASTC8x8Unorm,    wgpu::TextureFormat::ASTC8x8UnormSrgb,
+        wgpu::TextureFormat::ASTC10x5Unorm,   wgpu::TextureFormat::ASTC10x5UnormSrgb,
+        wgpu::TextureFormat::ASTC10x6Unorm,   wgpu::TextureFormat::ASTC10x6UnormSrgb,
+        wgpu::TextureFormat::ASTC10x8Unorm,   wgpu::TextureFormat::ASTC10x8UnormSrgb,
+        wgpu::TextureFormat::ASTC10x10Unorm,  wgpu::TextureFormat::ASTC10x10UnormSrgb,
+        wgpu::TextureFormat::ASTC12x10Unorm,  wgpu::TextureFormat::ASTC12x10UnormSrgb,
+        wgpu::TextureFormat::ASTC12x12Unorm,  wgpu::TextureFormat::ASTC12x12UnormSrgb};
+
+    constexpr uint32_t kBlockPerDim = 2;
+    constexpr uint32_t kMipmapLevels = 1;
+    for (wgpu::TextureFormat srcFormat : srcFormats) {
+        uint32_t blockWidth = utils::GetTextureFormatBlockWidth(srcFormat);
+        uint32_t blockHeight = utils::GetTextureFormatBlockHeight(srcFormat);
+        uint32_t testWidth = blockWidth * kBlockPerDim;
+        uint32_t testHeight = blockHeight * kBlockPerDim;
+        wgpu::Texture texture = Create2DTexture(srcFormat, kMipmapLevels, testWidth, testHeight);
+        wgpu::Texture texture2 = Create2DTexture(GetCopyCompatibleFormat(srcFormat), kMipmapLevels,
+                                                 testWidth, testHeight);
+        wgpu::Extent3D extent3D = {testWidth, testHeight, 1};
+
+        TestBothT2TCopies(utils::Expectation::Success, texture, 0, {0, 0, 0}, texture2, 0,
+                          {0, 0, 0}, extent3D);
     }
 }
 

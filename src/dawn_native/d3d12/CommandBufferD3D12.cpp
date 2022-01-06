@@ -64,7 +64,7 @@ namespace dawn_native { namespace d3d12 {
                                 const Extent3D& copySize) {
             // Checked by validation
             ASSERT(src.texture->GetSampleCount() == dst.texture->GetSampleCount());
-            ASSERT(src.texture->GetFormat().format == dst.texture->GetFormat().format);
+            ASSERT(src.texture->GetFormat().CopyCompatibleWith(dst.texture->GetFormat()));
             ASSERT(src.aspect == dst.aspect);
 
             const Extent3D& srcSize = src.texture->GetSize();
@@ -168,7 +168,8 @@ namespace dawn_native { namespace d3d12 {
                     Toggle::
                         UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel)) {
                 bool copyToLesserLevel = srcCopy.mipLevel > dstCopy.mipLevel;
-                ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
+                ASSERT(
+                    srcCopy.texture->GetFormat().CopyCompatibleWith(dstCopy.texture->GetFormat()));
 
                 // GetAspectInfo(aspect) requires HasOneBit(aspect) == true, plus the texel block
                 // sizes of depth stencil formats are always no less than 4 bytes.

@@ -85,6 +85,7 @@ namespace dawn_native {
     // A wgpu::TextureFormat along with all the information about it necessary for validation.
     struct Format {
         wgpu::TextureFormat format;
+
         bool isRenderable;
         bool isCompressed;
         // A format can be known but not supported because it is part of a disabled extension.
@@ -109,6 +110,14 @@ namespace dawn_native {
         // The index of the format in the list of all known formats: a unique number for each format
         // in [0, kKnownFormatCount)
         size_t GetIndex() const;
+
+        // baseFormat represents the memory layout of the format.
+        // If two formats has the same baseFormat, they could copy to each other.
+        wgpu::TextureFormat baseFormat;
+
+        // CopyCompatibleWith() returns true if the input format has the same baseFormat
+        // with current format.
+        bool CopyCompatibleWith(const Format& format) const;
 
       private:
         // Used to store the aspectInfo for one or more planes. For single plane "color" formats,

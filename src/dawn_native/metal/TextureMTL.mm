@@ -113,6 +113,49 @@ namespace dawn_native { namespace metal {
             return false;
         }
 
+        // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
+        // between linear space and sRGB without setting MTLTextureUsagePixelFormatView flag. For
+        // example, creating bgra8Unorm texture view on rgba8Unorm texture or creating
+        // rgba8Unorm_srgb texture view on rgab8Unorm texture.
+        bool AllowFormatReinterpretationWithoutFlag(MTLPixelFormat origin,
+                                                    MTLPixelFormat reinterpretation) {
+            switch (origin) {
+                case MTLPixelFormatRGBA8Unorm:
+                    return reinterpretation == MTLPixelFormatBGRA8Unorm ||
+                           reinterpretation == MTLPixelFormatRGBA8Unorm_sRGB;
+                case MTLPixelFormatBGRA8Unorm:
+                    return reinterpretation == MTLPixelFormatRGBA8Unorm ||
+                           reinterpretation == MTLPixelFormatBGRA8Unorm_sRGB;
+                case MTLPixelFormatRGBA8Unorm_sRGB:
+                    return reinterpretation == MTLPixelFormatBGRA8Unorm_sRGB ||
+                           reinterpretation == MTLPixelFormatRGBA8Unorm;
+                case MTLPixelFormatBGRA8Unorm_sRGB:
+                    return reinterpretation == MTLPixelFormatRGBA8Unorm_sRGB ||
+                           reinterpretation == MTLPixelFormatBGRA8Unorm;
+#if defined(DAWN_PLATFORM_MACOS)
+                case MTLPixelFormatBC1_RGBA:
+                    return reinterpretation == MTLPixelFormatBC1_RGBA_sRGB;
+                case MTLPixelFormatBC1_RGBA_sRGB:
+                    return reinterpretation == MTLPixelFormatBC1_RGBA;
+                case MTLPixelFormatBC2_RGBA:
+                    return reinterpretation == MTLPixelFormatBC2_RGBA_sRGB;
+                case MTLPixelFormatBC2_RGBA_sRGB:
+                    return reinterpretation == MTLPixelFormatBC2_RGBA;
+                case MTLPixelFormatBC3_RGBA:
+                    return reinterpretation == MTLPixelFormatBC3_RGBA_sRGB;
+                case MTLPixelFormatBC3_RGBA_sRGB:
+                    return reinterpretation == MTLPixelFormatBC3_RGBA;
+                case MTLPixelFormatBC7_RGBAUnorm:
+                    return reinterpretation == MTLPixelFormatBC7_RGBAUnorm_sRGB;
+                case MTLPixelFormatBC7_RGBAUnorm_sRGB:
+                    return reinterpretation == MTLPixelFormatBC7_RGBAUnorm;
+#endif
+
+                default:
+                    return false;
+            }
+        }
+
         ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
             switch (format) {
                 case kCVPixelFormatType_32RGBA:
@@ -382,7 +425,10 @@ namespace dawn_native { namespace metal {
         mtlDesc.width = GetWidth();
         mtlDesc.height = GetHeight();
         mtlDesc.sampleCount = GetSampleCount();
-        // TODO: add MTLTextureUsagePixelFormatView when needed when we support format
+        // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
+        // between linear space and sRGB. For example, creating bgra8Unorm texture view on
+        // rgba8Unorm texture or creating rgba8Unorm_srgb texture view on rgab8Unorm texture.
+        // TODO: add MTLTextureUsagePixelFormatView when needed when we support other format
         // reinterpretation.
         mtlDesc.usage = MetalTextureUsage(GetFormat(), GetInternalUsage(), GetSampleCount());
         mtlDesc.pixelFormat = MetalPixelFormat(GetFormat().format);
@@ -507,6 +553,17 @@ namespace dawn_native { namespace metal {
 
     id<MTLTexture> Texture::GetMTLTexture() {
         return mMtlTexture.Get();
+    }
+
+    NSPRef<id<MTLTexture>> Texture::CreateFormatView(wgpu::TextureFormat format) {
+        if (GetFormat().format == format) {
+            return mMtlTexture;
+        }
+
+        ASSERT(AllowFormatReinterpretationWithoutFlag(MetalPixelFormat(GetFormat().format),
+                                                      MetalPixelFormat(format)));
+        return AcquireNSPRef(
+            [mMtlTexture.Get() newTextureViewWithPixelFormat:MetalPixelFormat(format)]);
     }
 
     MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,

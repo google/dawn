@@ -429,11 +429,13 @@ namespace dawn_native {
     MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
                                                         const ImageCopyTexture& dst,
                                                         const Extent3D& copySize) {
-        // Metal requires texture-to-texture copies be the same format
-        DAWN_INVALID_IF(src.texture->GetFormat().format != dst.texture->GetFormat().format,
-                        "Source %s format (%s) and destination %s format (%s) do not match.",
-                        src.texture, src.texture->GetFormat().format, dst.texture,
-                        dst.texture->GetFormat().format);
+        // Metal requires texture-to-texture copies happens between texture formats that equal to
+        // each other or only have diff on srgb-ness.
+        DAWN_INVALID_IF(
+            !src.texture->GetFormat().CopyCompatibleWith(dst.texture->GetFormat()),
+            "Source %s format (%s) and destination %s format (%s) are not copy compatible.",
+            src.texture, src.texture->GetFormat().format, dst.texture,
+            dst.texture->GetFormat().format);
 
         return ValidateTextureToTextureCopyCommonRestrictions(src, dst, copySize);
     }

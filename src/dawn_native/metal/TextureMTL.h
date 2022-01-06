@@ -48,6 +48,7 @@ namespace dawn_native { namespace metal {
                                            NSPRef<id<MTLTexture>> wrapped);
 
         id<MTLTexture> GetMTLTexture();
+        NSPRef<id<MTLTexture>> CreateFormatView(wgpu::TextureFormat format);
 
         void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                                  const SubresourceRange& range);
