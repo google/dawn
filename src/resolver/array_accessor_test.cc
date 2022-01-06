@@ -59,9 +59,8 @@ TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
   auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
   WrapInFunction(Decl(idx), acc);
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: index must be signed or unsigned integer literal");
+  EXPECT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "");
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
@@ -70,9 +69,8 @@ TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
   auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, idx));
   WrapInFunction(Decl(idx), acc);
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: index must be signed or unsigned integer literal");
+  EXPECT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "");
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
@@ -82,9 +80,8 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
       IndexAccessor(IndexAccessor("my_var", Expr(Source{{12, 34}}, idx)), 1);
   WrapInFunction(Decl(idx), acc);
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: index must be signed or unsigned integer literal");
+  EXPECT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "");
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix) {
@@ -221,9 +218,8 @@ TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {
        },
        ast::DecorationList{});
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: index must be signed or unsigned integer literal");
+  EXPECT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "");
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Literal_F32) {

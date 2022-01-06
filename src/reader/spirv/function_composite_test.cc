@@ -45,6 +45,7 @@ std::string CommonTypes() {
 
   %uint_10 = OpConstant %uint 10
   %uint_20 = OpConstant %uint 20
+  %uint_1 = OpConstant %uint 1
   %uint_3 = OpConstant %uint 3
   %uint_4 = OpConstant %uint 4
   %uint_5 = OpConstant %uint 5
@@ -220,8 +221,9 @@ TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("OpCompositeExtract %1 index value 900 is out of "
-                             "bounds for vector of 2 elements"));
+  EXPECT_EQ(p->error(),
+            "OpCompositeExtract %1 index value 900 is out of bounds for vector "
+            "of 2 elements");
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Matrix) {
@@ -261,8 +263,9 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(p->error(), Eq("OpCompositeExtract %2 index value 3 is out of "
-                             "bounds for matrix of 3 elements"));
+  EXPECT_EQ(p->error(),
+            "OpCompositeExtract %2 index value 3 is out of bounds for matrix "
+            "of 3 elements");
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
@@ -411,8 +414,9 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("OpCompositeExtract %2 index value 40 is out of "
-                             "bounds for structure %26 having 3 members"));
+  EXPECT_EQ(p->error(),
+            "OpCompositeExtract %2 index value 40 is out of bounds for "
+            "structure %27 having 3 members");
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
@@ -475,8 +479,9 @@ TEST_F(SpvParserTest_CompositeInsert, Vector_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("OpCompositeInsert %1 index value 900 is out of "
-                             "bounds for vector of 2 elements"));
+  EXPECT_EQ(p->error(),
+            "OpCompositeInsert %1 index value 900 is out of bounds for vector "
+            "of 2 elements");
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Matrix) {
@@ -519,8 +524,9 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(p->error(), Eq("OpCompositeInsert %2 index value 3 is out of "
-                             "bounds for matrix of 3 elements"));
+  EXPECT_EQ(p->error(),
+            "OpCompositeInsert %2 index value 3 is out of bounds for matrix of "
+            "3 elements");
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
@@ -611,8 +617,8 @@ TEST_F(SpvParserTest_CompositeInsert, Struct) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto ast_body = fe.ast_body();
   auto body_str = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body_str, HasSubstr(R"(var x_35 : S;
-let x_1 : S = x_35;
+  EXPECT_THAT(body_str, HasSubstr(R"(var x_36 : S;
+let x_1 : S = x_36;
 var x_2_1 : S = x_1;
 x_2_1.field2 = 30;
 let x_2 : S = x_2_1;
@@ -691,8 +697,9 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("OpCompositeInsert %2 index value 40 is out of "
-                             "bounds for structure %26 having 3 members"));
+  EXPECT_EQ(p->error(),
+            "OpCompositeInsert %2 index value 40 is out of bounds for "
+            "structure %27 having 3 members");
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
@@ -715,8 +722,8 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto ast_body = fe.ast_body();
   auto body_str = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body_str, HasSubstr(R"(var x_37 : S_1;
-let x_1 : S_1 = x_37;
+  EXPECT_THAT(body_str, HasSubstr(R"(var x_38 : S_1;
+let x_1 : S_1 = x_38;
 var x_2_1 : S_1 = x_1;
 x_2_1.field1[2u][0u].y = 70.0;
 let x_2 : S_1 = x_2_1;
@@ -901,7 +908,7 @@ TEST_F(SpvParserTest_VectorExtractDynamic, UnsignedIndex) {
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %v2uint %v2uint_3_4
-     %2 = OpCopyObject %uint %uint_3
+     %2 = OpCopyObject %uint %uint_1
      %10 = OpVectorExtractDynamic %uint %1 %2
      OpReturn
      OpFunctionEnd

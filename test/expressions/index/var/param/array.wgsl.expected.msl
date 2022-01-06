@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  int arr[8];
+};
+
+int f(int i) {
+  tint_array_wrapper a = {.arr={1, 2, 3, 4, 5, 6, 7, 8}};
+  return a.arr[i];
+}
+

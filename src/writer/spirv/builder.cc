@@ -49,6 +49,7 @@
 #include "src/transform/manager.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/unshadow.h"
+#include "src/transform/var_for_dynamic_index.h"
 #include "src/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
@@ -268,6 +269,7 @@ SanitizedResult Sanitize(const Program* in,
   manager.Add<transform::CanonicalizeEntryPointIO>();
   manager.Add<transform::AddEmptyEntryPoint>();
   manager.Add<transform::AddSpirvBlockDecoration>();
+  manager.Add<transform::VarForDynamicIndex>();
 
   data.Add<transform::CanonicalizeEntryPointIO::Config>(
       transform::CanonicalizeEntryPointIO::Config(
@@ -915,12 +917,17 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr,
   auto extract = result_op();
   auto extract_id = extract.to_i();
 
-  // If the index is a literal, we use OpCompositeExtract.
-  if (auto* literal = expr->index->As<ast::IntLiteralExpression>()) {
-    if (!push_function_inst(spv::Op::OpCompositeExtract,
-                            {Operand::Int(result_type_id), extract,
-                             Operand::Int(info->source_id),
-                             Operand::Int(literal->ValueAsU32())})) {
+  // If the index is compile-time constant, we use OpCompositeExtract.
+  auto* idx = builder_.Sem().Get(expr->index);
+  if (auto idx_constval = idx->ConstantValue()) {
+    if (!push_function_inst(
+            spv::Op::OpCompositeExtract,
+            {
+                Operand::Int(result_type_id),
+                extract,
+                Operand::Int(info->source_id),
+                Operand::Int(idx_constval.ElementAs<uint32_t>(0)),
+            })) {
       return false;
     }
 
@@ -1106,6 +1113,9 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
     return 0;
   }
   info.source_type = TypeOf(source);
+
+  // Note: Dynamic index on array and matrix values (lets) should have been
+  // promoted to storage with the VarForDynamicIndex transform.
 
   for (auto* accessor : accessors) {
     if (auto* array = accessor->As<ast::IndexAccessorExpression>()) {

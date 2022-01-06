@@ -11,7 +11,7 @@
                OpName %f "f"
                OpName %i "i"
                OpName %j "j"
-               OpName %m "m"
+               OpName %var_for_index "var_for_index"
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
         %int = OpTypeInt 32 1
@@ -38,11 +38,11 @@
           %6 = OpLabel
           %i = OpVariable %_ptr_Function_int Function %10
           %j = OpVariable %_ptr_Function_int Function %10
-          %m = OpVariable %_ptr_Function_mat2v2float Function %24
-               OpStore %m %21
+%var_for_index = OpVariable %_ptr_Function_mat2v2float Function %24
+               OpStore %var_for_index %21
          %25 = OpLoad %int %i
          %26 = OpLoad %int %j
-         %28 = OpAccessChain %_ptr_Function_float %m %25 %26
+         %28 = OpAccessChain %_ptr_Function_float %var_for_index %25 %26
          %29 = OpLoad %float %28
                OpReturn
                OpFunctionEnd

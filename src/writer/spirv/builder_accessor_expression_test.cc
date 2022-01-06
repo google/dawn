@@ -940,12 +940,12 @@ OpReturn
 }
 
 TEST_F(BuilderTest, IndexAccessor_Array_Dynamic) {
-  // var a : array<f32, 3>;
+  // let a : array<f32, 3>;
   // idx : i32
   // a[idx]
 
-  auto* var = Var("a", ty.array<f32, 3>(),
-                  Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
+  auto* var = Const("a", ty.array<f32, 3>(),
+                    Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
 
   auto* idx = Var("idx", ty.i32());
   auto* expr = IndexAccessor("a", idx);
@@ -966,21 +966,21 @@ TEST_F(BuilderTest, IndexAccessor_Array_Dynamic) {
 %10 = OpConstant %6 0.5
 %11 = OpConstant %6 1
 %12 = OpConstantComposite %5 %9 %10 %11
-%14 = OpTypePointer Function %5
-%15 = OpConstantNull %5
-%18 = OpTypeInt 32 1
-%17 = OpTypePointer Function %18
-%19 = OpConstantNull %18
+%15 = OpTypeInt 32 1
+%14 = OpTypePointer Function %15
+%16 = OpConstantNull %15
+%18 = OpTypePointer Function %5
+%19 = OpConstantNull %5
 %21 = OpTypePointer Function %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%13 = OpVariable %14 Function %15
-%16 = OpVariable %17 Function %19
+            R"(%13 = OpVariable %14 Function %16
+%17 = OpVariable %18 Function %19
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %13 %12
-%20 = OpLoad %18 %16
-%22 = OpAccessChain %21 %13 %20
+            R"(OpStore %17 %12
+%20 = OpLoad %15 %13
+%22 = OpAccessChain %21 %17 %20
 %23 = OpLoad %6 %22
 OpReturn
 )");
@@ -989,14 +989,14 @@ OpReturn
 }
 
 TEST_F(BuilderTest, IndexAccessor_Matrix_Dynamic) {
-  // var a : mat2x2<f32>(vec2<f32>(1., 2.), vec2<f32>(3., 4.));
+  // let a : mat2x2<f32>(vec2<f32>(1., 2.), vec2<f32>(3., 4.));
   // idx : i32
   // a[idx]
 
   auto* var =
-      Var("a", ty.mat2x2<f32>(),
-          Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1.f, 2.f),
-                    Construct(ty.vec2<f32>(), 3.f, 4.f)));
+      Const("a", ty.mat2x2<f32>(),
+            Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1.f, 2.f),
+                      Construct(ty.vec2<f32>(), 3.f, 4.f)));
 
   auto* idx = Var("idx", ty.i32());
   auto* expr = IndexAccessor("a", idx);
@@ -1019,21 +1019,21 @@ TEST_F(BuilderTest, IndexAccessor_Matrix_Dynamic) {
 %12 = OpConstant %7 4
 %13 = OpConstantComposite %6 %11 %12
 %14 = OpConstantComposite %5 %10 %13
-%16 = OpTypePointer Function %5
-%17 = OpConstantNull %5
-%20 = OpTypeInt 32 1
-%19 = OpTypePointer Function %20
-%21 = OpConstantNull %20
+%17 = OpTypeInt 32 1
+%16 = OpTypePointer Function %17
+%18 = OpConstantNull %17
+%20 = OpTypePointer Function %5
+%21 = OpConstantNull %5
 %23 = OpTypePointer Function %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%15 = OpVariable %16 Function %17
-%18 = OpVariable %19 Function %21
+            R"(%15 = OpVariable %16 Function %18
+%19 = OpVariable %20 Function %21
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %15 %14
-%22 = OpLoad %20 %18
-%24 = OpAccessChain %23 %15 %22
+            R"(OpStore %19 %14
+%22 = OpLoad %17 %15
+%24 = OpAccessChain %23 %19 %22
 %25 = OpLoad %6 %24
 OpReturn
 )");

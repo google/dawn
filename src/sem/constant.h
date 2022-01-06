@@ -126,6 +126,13 @@ class Constant {
     return func(~0);
   }
 
+  /// @param index the index of the scalar value
+  /// @return the value of the scalar `static_cast` to type T.
+  template <typename T>
+  T ElementAs(size_t index) const {
+    return WithScalarAt(index, [](auto val) { return static_cast<T>(val); });
+  }
+
  private:
   const sem::Type* type_ = nullptr;
   const sem::Type* elem_type_ = nullptr;

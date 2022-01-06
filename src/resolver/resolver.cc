@@ -1197,18 +1197,6 @@ sem::Expression* Resolver::IndexAccessor(
     return nullptr;
   }
 
-  if (obj_ty->IsAnyOf<sem::Array, sem::Matrix>()) {
-    if (!obj_raw_ty->Is<sem::Reference>()) {
-      // TODO(bclayton): expand this to allow any const_expr expression
-      // https://github.com/gpuweb/gpuweb/issues/1272
-      if (!idx->Declaration()->As<ast::IntLiteralExpression>()) {
-        AddError("index must be signed or unsigned integer literal",
-                 idx->Declaration()->source);
-        return nullptr;
-      }
-    }
-  }
-
   // If we're extracting from a reference, we return a reference.
   if (auto* ref = obj_raw_ty->As<sem::Reference>()) {
     ty = builder_->create<sem::Reference>(ty, ref->StorageClass(),

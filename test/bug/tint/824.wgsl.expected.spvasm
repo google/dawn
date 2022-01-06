@@ -17,9 +17,9 @@
                OpName %main_inner "main_inner"
                OpName %VertexIndex "VertexIndex"
                OpName %InstanceIndex "InstanceIndex"
-               OpName %zv "zv"
+               OpName %var_for_index "var_for_index"
                OpName %output "output"
-               OpName %colors "colors"
+               OpName %var_for_index_1 "var_for_index_1"
                OpName %main "main"
                OpDecorate %VertexIndex_1 BuiltIn VertexIndex
                OpDecorate %InstanceIndex_1 BuiltIn InstanceIndex
@@ -82,18 +82,18 @@
 %VertexIndex = OpFunctionParameter %uint
 %InstanceIndex = OpFunctionParameter %uint
          %19 = OpLabel
-         %zv = OpVariable %_ptr_Function__arr_v2float_uint_4 Function %34
+%var_for_index = OpVariable %_ptr_Function__arr_v2float_uint_4 Function %34
      %output = OpVariable %_ptr_Function_Output Function %41
-     %colors = OpVariable %_ptr_Function__arr_v4float_uint_4 Function %56
-               OpStore %zv %31
-         %37 = OpAccessChain %_ptr_Function_float %zv %InstanceIndex %uint_0
+%var_for_index_1 = OpVariable %_ptr_Function__arr_v4float_uint_4 Function %56
+               OpStore %var_for_index %31
+         %37 = OpAccessChain %_ptr_Function_float %var_for_index %InstanceIndex %uint_0
          %38 = OpLoad %float %37
          %43 = OpAccessChain %_ptr_Function_v4float %output %uint_0
          %46 = OpCompositeConstruct %v4float %float_0_5 %float_0_5 %38 %float_1
                OpStore %43 %46
-               OpStore %colors %53
+               OpStore %var_for_index_1 %53
          %58 = OpAccessChain %_ptr_Function_v4float %output %uint_1
-         %59 = OpAccessChain %_ptr_Function_v4float %colors %InstanceIndex
+         %59 = OpAccessChain %_ptr_Function_v4float %var_for_index_1 %InstanceIndex
          %60 = OpLoad %v4float %59
                OpStore %58 %60
          %61 = OpLoad %Output %output
