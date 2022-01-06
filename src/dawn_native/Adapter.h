@@ -41,7 +41,7 @@ namespace dawn_native {
         bool APIGetLimits(SupportedLimits* limits) const;
         void APIGetProperties(AdapterProperties* properties) const;
         bool APIHasFeature(wgpu::FeatureName feature) const;
-        uint32_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
+        size_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
         void APIRequestDevice(const DeviceDescriptor* descriptor,
                               WGPURequestDeviceCallback callback,
                               void* userdata);

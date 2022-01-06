@@ -89,7 +89,7 @@ namespace dawn_native {
         return mSupportedFeatures.IsEnabled(feature);
     }
 
-    uint32_t AdapterBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
+    size_t AdapterBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
         return mSupportedFeatures.EnumerateFeatures(features);
     }
 

@@ -101,7 +101,7 @@
             {
                 "tags": ["dawn"],
                 "name": "enumerate features",
-                "returns": "uint32_t",
+                "returns": "size_t",
                 "args": [
                     {"name": "features", "type": "feature name", "annotation": "*"}
                 ]
@@ -1084,7 +1084,7 @@
             {
                 "tags": ["dawn"],
                 "name": "enumerate features",
-                "returns": "uint32_t",
+                "returns": "size_t",
                 "args": [
                     {"name": "features", "type": "feature name", "annotation": "*"}
                 ]

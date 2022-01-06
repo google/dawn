@@ -57,7 +57,7 @@ namespace dawn_native {
         bool IsEnabled(wgpu::FeatureName feature) const;
         // Returns |count|, the number of features. Writes out all |count| values if |features| is
         // non-null.
-        uint32_t EnumerateFeatures(wgpu::FeatureName* features) const;
+        size_t EnumerateFeatures(wgpu::FeatureName* features) const;
         std::vector<const char*> GetEnabledFeatureNames() const;
         void InitializeDeviceProperties(WGPUDeviceProperties* properties) const;
     };

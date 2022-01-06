@@ -181,7 +181,7 @@ namespace dawn_native {
         return f != Feature::InvalidEnum && IsEnabled(f);
     }
 
-    uint32_t FeaturesSet::EnumerateFeatures(wgpu::FeatureName* features) const {
+    size_t FeaturesSet::EnumerateFeatures(wgpu::FeatureName* features) const {
         for (uint32_t i : IterateBitSet(featuresBitSet)) {
             wgpu::FeatureName feature = ToAPIFeature(static_cast<Feature>(i));
             if (features != nullptr) {

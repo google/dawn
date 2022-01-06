@@ -138,7 +138,7 @@ namespace {
                         for (wgpu::FeatureName feature : fakeFeatures) {
                             *(features++) = static_cast<WGPUFeatureName>(feature);
                         }
-                        return static_cast<uint32_t>(fakeFeatures.size());
+                        return fakeFeatures.size();
                     })));
                 api.CallInstanceRequestAdapterCallback(
                     apiInstance, WGPURequestAdapterStatus_Success, apiAdapter, nullptr);
@@ -217,7 +217,7 @@ namespace {
                         for (wgpu::FeatureName feature : fakeFeatures) {
                             *(features++) = static_cast<WGPUFeatureName>(feature);
                         }
-                        return static_cast<uint32_t>(fakeFeatures.size());
+                        return fakeFeatures.size();
                     })));
                 api.CallInstanceRequestAdapterCallback(
                     apiInstance, WGPURequestAdapterStatus_Success, apiAdapter, nullptr);

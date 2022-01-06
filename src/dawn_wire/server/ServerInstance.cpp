@@ -79,7 +79,7 @@ namespace dawn_wire::server {
         adapterObject->state = AllocationState::Allocated;
         adapterObject->handle = adapter;
 
-        uint32_t featuresCount = mProcs.adapterEnumerateFeatures(adapter, nullptr);
+        size_t featuresCount = mProcs.adapterEnumerateFeatures(adapter, nullptr);
         features.resize(featuresCount);
         mProcs.adapterEnumerateFeatures(adapter, features.data());
 

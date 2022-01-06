@@ -75,7 +75,7 @@ namespace dawn_wire::client {
         return mLimitsAndFeatures.HasFeature(feature);
     }
 
-    uint32_t Device::EnumerateFeatures(WGPUFeatureName* features) const {
+    size_t Device::EnumerateFeatures(WGPUFeatureName* features) const {
         return mLimitsAndFeatures.EnumerateFeatures(features);
     }
 

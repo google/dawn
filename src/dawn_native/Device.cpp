@@ -1213,7 +1213,7 @@ namespace dawn_native {
         return mEnabledFeatures.IsEnabled(feature);
     }
 
-    uint32_t DeviceBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
+    size_t DeviceBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
         return mEnabledFeatures.EnumerateFeatures(features);
     }
 

@@ -70,7 +70,7 @@ namespace dawn_wire::server {
 
         std::vector<WGPUFeatureName> features;
 
-        uint32_t featuresCount = mProcs.deviceEnumerateFeatures(device, nullptr);
+        size_t featuresCount = mProcs.deviceEnumerateFeatures(device, nullptr);
         features.resize(featuresCount);
         mProcs.deviceEnumerateFeatures(device, features.data());
 
