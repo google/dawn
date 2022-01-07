@@ -136,21 +136,25 @@ namespace wgpu::binding {
                 promise.Reject("unknown backend '" + forceBackend + "'");
                 return promise;
             }
+        }
 
-            bool found = false;
-            for (size_t i = 0; i < adapters.size(); ++i) {
-                wgpu::AdapterProperties props;
-                adapters[i].GetProperties(&props);
-                if (props.backendType == targetBackendType) {
-                    adapterIndex = i;
-                    found = true;
-                    break;
-                }
+        bool found = false;
+        for (size_t i = 0; i < adapters.size(); ++i) {
+            wgpu::AdapterProperties props;
+            adapters[i].GetProperties(&props);
+            if (props.backendType == targetBackendType) {
+                adapterIndex = i;
+                found = true;
+                break;
             }
-            if (!found) {
+        }
+        if (!found) {
+            if (!forceBackend.empty()) {
                 promise.Reject("backend '" + forceBackend + "' not found");
-                return promise;
+            } else {
+                promise.Reject("no suitable backends found");
             }
+            return promise;
         }
 
         auto adapter = GPUAdapter::Create<GPUAdapter>(env, adapters[adapterIndex], flags_);
