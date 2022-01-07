@@ -94,6 +94,10 @@ namespace dawn_native {
         properties->name = mImpl->GetPCIInfo().name.c_str();
     }
 
+    void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
+        GetProperties(reinterpret_cast<wgpu::AdapterProperties*>(properties));
+    }
+
     BackendType Adapter::GetBackendType() const {
         switch (mImpl->GetBackendType()) {
             case wgpu::BackendType::D3D12:

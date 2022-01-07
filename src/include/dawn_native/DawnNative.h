@@ -108,6 +108,7 @@ namespace dawn_native {
         // Essentially webgpu.h's wgpuAdapterGetProperties while we don't have WGPUAdapter in
         // dawn.json
         void GetProperties(wgpu::AdapterProperties* properties) const;
+        void GetProperties(WGPUAdapterProperties* properties) const;
 
         std::vector<const char*> GetSupportedExtensions() const;
         std::vector<const char*> GetSupportedFeatures() const;
