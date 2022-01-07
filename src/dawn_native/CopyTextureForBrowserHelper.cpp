@@ -48,14 +48,15 @@ namespace dawn_native {
                 padding: u32;
             };
 
-            struct Uniforms {                        // offset   align   size
-                scale: vec2<f32>;                              // 0        8       8
-                offset: vec2<f32>;                             // 8        8       8
-                steps_mask: u32;                               // 16       4       4  
-                // implicit padding;                           // 20               12
-                conversion_matrix: mat3x3<f32>;                // 32       16      48
-                gamma_decoding_params: GammaTransferParams;    // 80       4       32
-                gamma_encoding_params: GammaTransferParams;    // 112      4       32
+            struct Uniforms {                                            // offset   align   size
+                scale: vec2<f32>;                                        // 0        8       8
+                offset: vec2<f32>;                                       // 8        8       8
+                steps_mask: u32;                                         // 16       4       4
+                // implicit padding;                                     // 20               12
+                conversion_matrix: mat3x3<f32>;                          // 32       16      48
+                gamma_decoding_params: GammaTransferParams;              // 80       4       32
+                gamma_encoding_params: GammaTransferParams;              // 112      4       32
+                gamma_decoding_for_dst_srgb_params: GammaTransferParams; // 144      4       32
             };
 
             [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
@@ -141,6 +142,7 @@ namespace dawn_native {
                 let kConvertToDstGamutStep = 0x04u;
                 let kEncodeToGammaStep = 0x08u;
                 let kPremultiplyStep = 0x10u;
+                let kDecodeForSrgbDstFormat = 0x20u;
 
                 // Unpremultiply step. Appling color space conversion op on premultiplied source texture
                 // also needs to unpremultiply first.
@@ -180,6 +182,14 @@ namespace dawn_native {
                     color = vec4<f32>(color.rgb * color.a, color.a);
                 }
 
+                // Decode for copying from non-srgb formats to srgb formats
+                if (bool(uniforms.steps_mask & kDecodeForSrgbDstFormat)) {
+                    color = vec4<f32>(gamma_conversion(color.r, uniforms.gamma_decoding_for_dst_srgb_params),
+                                      gamma_conversion(color.g, uniforms.gamma_decoding_for_dst_srgb_params),
+                                      gamma_conversion(color.b, uniforms.gamma_decoding_for_dst_srgb_params),
+                                      color.a);
+                }
+
                 return color;
             }
         )";
@@ -207,8 +217,9 @@ namespace dawn_native {
             std::array<float, 12> conversionMatrix = {};
             GammaTransferParams gammaDecodingParams = {};
             GammaTransferParams gammaEncodingParams = {};
+            GammaTransferParams gammaDecodingForDstSrgbParams = {};
         };
-        static_assert(sizeof(Uniform) == 144, "");
+        static_assert(sizeof(Uniform) == 176, "");
 
         // TODO(crbug.com/dawn/856): Expand copyTextureForBrowser to support any
         // non-depth, non-stencil, non-compressed texture format pair copy. Now this API
@@ -232,7 +243,9 @@ namespace dawn_native {
                 case wgpu::TextureFormat::RG16Float:
                 case wgpu::TextureFormat::RG32Float:
                 case wgpu::TextureFormat::RGBA8Unorm:
+                case wgpu::TextureFormat::RGBA8UnormSrgb:
                 case wgpu::TextureFormat::BGRA8Unorm:
+                case wgpu::TextureFormat::BGRA8UnormSrgb:
                 case wgpu::TextureFormat::RGB10A2Unorm:
                 case wgpu::TextureFormat::RGBA16Float:
                 case wgpu::TextureFormat::RGBA32Float:
@@ -362,6 +375,17 @@ namespace dawn_native {
         return {};
     }
 
+    // Whether the format of dst texture of CopyTextureForBrowser() is srgb or non-srgb.
+    bool IsSrgbDstFormat(wgpu::TextureFormat format) {
+        switch (format) {
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
+            case wgpu::TextureFormat::BGRA8UnormSrgb:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     MaybeError DoCopyTextureForBrowser(DeviceBase* device,
                                        const ImageCopyTexture* source,
                                        const ImageCopyTexture* destination,
@@ -375,6 +399,7 @@ namespace dawn_native {
             return {};
         }
 
+        bool isSrgbDstFormat = IsSrgbDstFormat(destination->texture->GetFormat().format);
         RenderPipelineBase* pipeline;
         DAWN_TRY_ASSIGN(pipeline, GetOrCreateCopyTextureForBrowserPipeline(
                                       device, destination->texture->GetFormat().format));
@@ -422,6 +447,7 @@ namespace dawn_native {
         constexpr uint32_t kConvertToDstGamutStep = 0x04;
         constexpr uint32_t kEncodeToGammaStep = 0x08;
         constexpr uint32_t kPremultiplyStep = 0x10;
+        constexpr uint32_t kDecodeForSrgbDstFormat = 0x20;
 
         if (options->srcAlphaMode == wgpu::AlphaMode::Premultiplied) {
             if (options->needsColorSpaceConversion ||
@@ -470,6 +496,25 @@ namespace dawn_native {
             }
         }
 
+        // Copy to *-srgb texture should keep the bytes exactly the same as copy
+        // to non-srgb texture. Add an extra decode-to-linear step so that after the
+        // sampler of *-srgb format texture applying encoding, the bytes keeps the same
+        // as non-srgb format texture.
+        // NOTE: CopyTextureForBrowser() doesn't need to accept *-srgb format texture as
+        // source input. But above operation also valid for *-srgb format texture input and
+        // non-srgb format dst texture.
+        // TODO(crbug.com/dawn/1195): Reinterpret to non-srgb texture view on *-srgb texture
+        // and use it as render attachment when possible.
+        // TODO(crbug.com/dawn/1195): Opt the condition for this extra step. It is possible to
+        // bypass this extra step in some cases.
+        if (isSrgbDstFormat) {
+            stepsMask |= kDecodeForSrgbDstFormat;
+            // Get gamma-linear conversion params from https://en.wikipedia.org/wiki/SRGB with some
+            // mathematics. Order: {G, A, B, C, D, E, F, }
+            uniformData.gammaDecodingForDstSrgbParams = {
+                2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0};
+        }
+
         uniformData.stepsMask = stepsMask;
 
         Ref<BufferBase> uniformBuffer;
@@ -511,9 +556,9 @@ namespace dawn_native {
         dstTextureViewDesc.baseArrayLayer = destination->origin.z;
         dstTextureViewDesc.arrayLayerCount = 1;
         Ref<TextureViewBase> dstView;
+
         DAWN_TRY_ASSIGN(dstView,
                         device->CreateTextureView(destination->texture, &dstTextureViewDesc));
-
         // Prepare render pass color attachment descriptor.
         RenderPassColorAttachment colorAttachmentDesc;
 
@@ -546,7 +591,6 @@ namespace dawn_native {
 
         // Submit command buffer.
         device->GetQueue()->APISubmit(1, &submitCommandBuffer);
-
         return {};
     }
 

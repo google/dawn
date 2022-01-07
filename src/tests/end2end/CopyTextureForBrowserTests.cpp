@@ -571,6 +571,17 @@ class CopyTextureForBrowser_Formats
                GetParam().mDstFormat == wgpu::TextureFormat::BGRA8UnormSrgb;
     }
 
+    wgpu::TextureFormat GetNonSrgbFormat(wgpu::TextureFormat format) {
+        switch (format) {
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
+                return wgpu::TextureFormat::RGBA8Unorm;
+            case wgpu::TextureFormat::BGRA8UnormSrgb:
+                return wgpu::TextureFormat::BGRA8Unorm;
+            default:
+                return format;
+        }
+    }
+
     void DoColorConversionTest() {
         TextureSpec srcTextureSpec;
         srcTextureSpec.format = GetParam().mSrcFormat;
@@ -627,8 +638,40 @@ class CopyTextureForBrowser_Formats
         RunCopyExternalImageToTexture(srcTextureSpec, srcTexture, dstTextureSpec, dstTexture,
                                       copySize, options);
 
+        wgpu::Texture result;
+        TextureSpec resultSpec = dstTextureSpec;
+
+        // To construct the expected value for the case that dst texture is srgb format,
+        // we need to ensure it is byte level equal to the comparable non-srgb format texture.
+        // We schedule an copy from srgb texture to non-srgb texture which keeps the bytes
+        // same and bypass the sampler to do gamma correction when comparing the expected values
+        // in compute shader.
+        if (IsDstFormatSrgbFormats()) {
+            resultSpec.format = GetNonSrgbFormat(dstTextureSpec.format);
+            wgpu::Texture intermediateTexture = CreateTexture(
+                resultSpec, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
+                                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            // Perform the texture to texture copy
+            wgpu::ImageCopyTexture dstImageCopyTexture =
+                utils::CreateImageCopyTexture(dstTexture, 0, {0, 0, 0});
+            wgpu::ImageCopyTexture intermediateImageCopyTexture =
+                utils::CreateImageCopyTexture(intermediateTexture, 0, {0, 0, 0});
+
+            encoder.CopyTextureToTexture(&dstImageCopyTexture, &intermediateImageCopyTexture,
+                                         &(dstTextureSpec.textureSize));
+            wgpu::CommandBuffer commands = encoder.Finish();
+            queue.Submit(1, &commands);
+
+            result = intermediateTexture;
+        } else {
+            result = dstTexture;
+        }
+
         // Check Result
-        CheckResultInBuiltInComputePipeline(srcTextureSpec, srcTexture, dstTextureSpec, dstTexture,
+        CheckResultInBuiltInComputePipeline(srcTextureSpec, srcTexture, resultSpec, result,
                                             copySize, options);
     }
 };
@@ -1045,7 +1088,8 @@ DAWN_INSTANTIATE_TEST_P(
         {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R16Float, wgpu::TextureFormat::R32Float,
          wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::RG16Float,
          wgpu::TextureFormat::RG32Float, wgpu::TextureFormat::RGBA8Unorm,
-         wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::RGB10A2Unorm,
+         wgpu::TextureFormat::RGBA8UnormSrgb, wgpu::TextureFormat::BGRA8Unorm,
+         wgpu::TextureFormat::BGRA8UnormSrgb, wgpu::TextureFormat::RGB10A2Unorm,
          wgpu::TextureFormat::RGBA16Float, wgpu::TextureFormat::RGBA32Float}));
 
 // Verify |CopyTextureForBrowser| doing subrect copy.
