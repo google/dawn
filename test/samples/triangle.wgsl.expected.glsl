@@ -1,6 +1,8 @@
 #version 310 es
 precision mediump float;
 
+const vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));
+
 struct tint_symbol_1 {
   uint VertexIndex;
 };
@@ -9,7 +11,6 @@ struct tint_symbol_2 {
 };
 
 vec4 vtx_main_inner(uint VertexIndex) {
-  vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));
   return vec4(pos[VertexIndex], 0.0f, 1.0f);
 }
 
