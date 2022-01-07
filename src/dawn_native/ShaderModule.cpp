@@ -156,82 +156,47 @@ namespace dawn_native {
         }
 
         wgpu::TextureFormat TintImageFormatToTextureFormat(
-            tint::inspector::ResourceBinding::ImageFormat format) {
+            tint::inspector::ResourceBinding::TexelFormat format) {
             switch (format) {
-                case tint::inspector::ResourceBinding::ImageFormat::kR8Unorm:
-                    return wgpu::TextureFormat::R8Unorm;
-                case tint::inspector::ResourceBinding::ImageFormat::kR8Snorm:
-                    return wgpu::TextureFormat::R8Snorm;
-                case tint::inspector::ResourceBinding::ImageFormat::kR8Uint:
-                    return wgpu::TextureFormat::R8Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kR8Sint:
-                    return wgpu::TextureFormat::R8Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kR16Uint:
-                    return wgpu::TextureFormat::R16Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kR16Sint:
-                    return wgpu::TextureFormat::R16Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kR16Float:
-                    return wgpu::TextureFormat::R16Float;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg8Unorm:
-                    return wgpu::TextureFormat::RG8Unorm;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg8Snorm:
-                    return wgpu::TextureFormat::RG8Snorm;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg8Uint:
-                    return wgpu::TextureFormat::RG8Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg8Sint:
-                    return wgpu::TextureFormat::RG8Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kR32Uint:
+                case tint::inspector::ResourceBinding::TexelFormat::kR32Uint:
                     return wgpu::TextureFormat::R32Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kR32Sint:
+                case tint::inspector::ResourceBinding::TexelFormat::kR32Sint:
                     return wgpu::TextureFormat::R32Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kR32Float:
+                case tint::inspector::ResourceBinding::TexelFormat::kR32Float:
                     return wgpu::TextureFormat::R32Float;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg16Uint:
-                    return wgpu::TextureFormat::RG16Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg16Sint:
-                    return wgpu::TextureFormat::RG16Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg16Float:
-                    return wgpu::TextureFormat::RG16Float;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba8Unorm:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba8Unorm:
                     return wgpu::TextureFormat::RGBA8Unorm;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba8UnormSrgb:
-                    return wgpu::TextureFormat::RGBA8UnormSrgb;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba8Snorm:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba8Snorm:
                     return wgpu::TextureFormat::RGBA8Snorm;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba8Uint:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba8Uint:
                     return wgpu::TextureFormat::RGBA8Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba8Sint:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba8Sint:
                     return wgpu::TextureFormat::RGBA8Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kBgra8Unorm:
-                    return wgpu::TextureFormat::BGRA8Unorm;
-                case tint::inspector::ResourceBinding::ImageFormat::kBgra8UnormSrgb:
-                    return wgpu::TextureFormat::BGRA8UnormSrgb;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgb10A2Unorm:
-                    return wgpu::TextureFormat::RGB10A2Unorm;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg11B10Float:
-                    return wgpu::TextureFormat::RG11B10Ufloat;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg32Uint:
+                case tint::inspector::ResourceBinding::TexelFormat::kRg32Uint:
                     return wgpu::TextureFormat::RG32Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg32Sint:
+                case tint::inspector::ResourceBinding::TexelFormat::kRg32Sint:
                     return wgpu::TextureFormat::RG32Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRg32Float:
+                case tint::inspector::ResourceBinding::TexelFormat::kRg32Float:
                     return wgpu::TextureFormat::RG32Float;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba16Uint:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba16Uint:
                     return wgpu::TextureFormat::RGBA16Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba16Sint:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba16Sint:
                     return wgpu::TextureFormat::RGBA16Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba16Float:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba16Float:
                     return wgpu::TextureFormat::RGBA16Float;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba32Uint:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba32Uint:
                     return wgpu::TextureFormat::RGBA32Uint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba32Sint:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba32Sint:
                     return wgpu::TextureFormat::RGBA32Sint;
-                case tint::inspector::ResourceBinding::ImageFormat::kRgba32Float:
+                case tint::inspector::ResourceBinding::TexelFormat::kRgba32Float:
                     return wgpu::TextureFormat::RGBA32Float;
-                case tint::inspector::ResourceBinding::ImageFormat::kNone:
+                case tint::inspector::ResourceBinding::TexelFormat::kNone:
+                    return wgpu::TextureFormat::Undefined;
+
+                default:
+                    UNREACHABLE();
                     return wgpu::TextureFormat::Undefined;
             }
-            UNREACHABLE();
         }
 
         wgpu::TextureViewDimension TintTextureDimensionToTextureViewDimension(
