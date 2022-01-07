@@ -270,7 +270,8 @@ namespace dawn_native::vulkan {
 
         for (ColorAttachmentIndex i : IterateBitSet(a.colorMask)) {
             if ((a.colorFormats[i] != b.colorFormats[i]) ||
-                (a.colorLoadOp[i] != b.colorLoadOp[i])) {
+                (a.colorLoadOp[i] != b.colorLoadOp[i]) ||
+                (a.colorStoreOp[i] != b.colorStoreOp[i])) {
                 return false;
             }
         }
@@ -282,6 +283,7 @@ namespace dawn_native::vulkan {
         if (a.hasDepthStencil) {
             if ((a.depthStencilFormat != b.depthStencilFormat) ||
                 (a.depthLoadOp != b.depthLoadOp) || (a.stencilLoadOp != b.stencilLoadOp) ||
+                (a.depthStoreOp != b.depthStoreOp) || (a.stencilStoreOp != b.stencilStoreOp) ||
                 (a.readOnlyDepthStencil != b.readOnlyDepthStencil)) {
                 return false;
             }
