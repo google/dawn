@@ -84,9 +84,10 @@ See:
 {{-   if      IsDefaultDictionaryLiteral $.Value}}{{template "Type" $.Type}}{}
 {{-   else if IsTypeName                 $.Type }}
 {{-     $ty := Lookup $.Type.Name}}
-{{-     if      IsEnum         $ty     }}{{$.Type.Name}}::{{EnumEntryName $.Value.Value}}
+{{-     if      IsTypedef      $ty     }}{{Eval "Literal" "Value" $.Value "Type" $ty.Type}}
+{{-     else if IsEnum         $ty     }}{{$.Type.Name}}::{{EnumEntryName $.Value.Value}}
 {{-     else if IsBasicLiteral $.Value }}{{$.Value.Value}}
-{{-     else                           }}/* Unhandled Type {{printf "ty: %v $.Type.Name: %T $.Value: %T" $ty $.Type.Name $.Value}} */
+{{-     else                           }}/* Unhandled Type {{printf "ty: %T $.Type.Name: %T $.Value: %T" $ty $.Type.Name $.Value}} */
 {{-     end                            }}
 {{-   else if IsSequenceType $.Type  }}{{template "Type" $.Type}}{} {{- /* TODO: Assumes the initialiser is empty */}}
 {{-   else if IsBasicLiteral $.Value }}{{$.Value.Value}}
