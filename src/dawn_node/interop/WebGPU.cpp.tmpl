@@ -206,7 +206,7 @@ Wrappers* Wrappers::instance = nullptr;
 {{-      if not (IsUndefinedType $o.Type) }}auto result = {{end -}}
           impl->{{$o.Name}}(info.Env(){{range $i, $_ := $o.Parameters}}, std::get<{{$i}}>(args){{end}});
           {{/* indent */ -}}
-{{-      if   IsUndefinedType $o.Type}}return info.Env().Null();
+{{-      if   IsUndefinedType $o.Type}}return info.Env().Undefined();
 {{-      else                        }}return ToJS(info.Env(), result);
 {{-      end                         }}
         }
