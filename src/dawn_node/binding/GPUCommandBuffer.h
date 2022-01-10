@@ -34,7 +34,6 @@ namespace wgpu::binding {
         }
 
         // interop::GPUCommandBuffer interface compliance
-        interop::Promise<double> getExecutionTime(Napi::Env) override;
         std::optional<std::string> getLabel(Napi::Env) override;
         void setLabel(Napi::Env, std::optional<std::string> value) override;
 

@@ -38,12 +38,14 @@ namespace wgpu::binding {
         Converter conv(env);
 
         wgpu::RenderPassDescriptor desc{};
+        // TODO(dawn:1250) handle timestampWrites
         if (!conv(desc.colorAttachments, desc.colorAttachmentCount, descriptor.colorAttachments) ||
             !conv(desc.depthStencilAttachment, descriptor.depthStencilAttachment) ||
             !conv(desc.label, descriptor.label) ||
             !conv(desc.occlusionQuerySet, descriptor.occlusionQuerySet)) {
             return {};
         }
+
         return interop::GPURenderPassEncoder::Create<GPURenderPassEncoder>(
             env, enc_.BeginRenderPass(&desc));
     }
@@ -52,8 +54,25 @@ namespace wgpu::binding {
         Napi::Env env,
         interop::GPUComputePassDescriptor descriptor) {
         wgpu::ComputePassDescriptor desc{};
+        // TODO(dawn:1250) handle timestampWrites
         return interop::GPUComputePassEncoder::Create<GPUComputePassEncoder>(
             env, enc_.BeginComputePass(&desc));
+    }
+
+    void GPUCommandEncoder::clearBuffer(Napi::Env env,
+                                        interop::Interface<interop::GPUBuffer> buffer,
+                                        interop::GPUSize64 offset,
+                                        std::optional<interop::GPUSize64> size) {
+        Converter conv(env);
+
+        wgpu::Buffer b{};
+        uint64_t s = wgpu::kWholeSize;
+        if (!conv(b, buffer) ||  //
+            !conv(s, size)) {
+            return;
+        }
+
+        enc_.ClearBuffer(b, offset, s);
     }
 
     void GPUCommandEncoder::copyBufferToBuffer(Napi::Env env,

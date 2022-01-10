@@ -50,13 +50,6 @@ namespace wgpu::binding {
         void setStencilReference(Napi::Env, interop::GPUStencilValue reference) override;
         void beginOcclusionQuery(Napi::Env, interop::GPUSize32 queryIndex) override;
         void endOcclusionQuery(Napi::Env) override;
-        void beginPipelineStatisticsQuery(Napi::Env,
-                                          interop::Interface<interop::GPUQuerySet> querySet,
-                                          interop::GPUSize32 queryIndex) override;
-        void endPipelineStatisticsQuery(Napi::Env) override;
-        void writeTimestamp(Napi::Env,
-                            interop::Interface<interop::GPUQuerySet> querySet,
-                            interop::GPUSize32 queryIndex) override;
         void executeBundles(
             Napi::Env,
             std::vector<interop::Interface<interop::GPURenderBundle>> bundles) override;

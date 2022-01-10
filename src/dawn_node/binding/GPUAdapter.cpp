@@ -59,22 +59,31 @@ namespace wgpu::binding {
         class Features : public interop::GPUSupportedFeatures {
           public:
             Features(WGPUDeviceProperties properties) {
-                if (properties.depthClamping) {
-                    enabled_.emplace(interop::GPUFeatureName::kDepthClamping);
+                if (properties.depth24UnormStencil8) {
+                    enabled_.emplace(interop::GPUFeatureName::kDepth24UnormStencil8);
                 }
-                if (properties.pipelineStatisticsQuery) {
-                    enabled_.emplace(interop::GPUFeatureName::kPipelineStatisticsQuery);
+                if (properties.depth32FloatStencil8) {
+                    enabled_.emplace(interop::GPUFeatureName::kDepth32FloatStencil8);
+                }
+                if (properties.timestampQuery) {
+                    enabled_.emplace(interop::GPUFeatureName::kTimestampQuery);
                 }
                 if (properties.textureCompressionBC) {
                     enabled_.emplace(interop::GPUFeatureName::kTextureCompressionBc);
+                }
+                if (properties.textureCompressionETC2) {
+                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionEtc2);
+                }
+                if (properties.textureCompressionASTC) {
+                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionAstc);
                 }
                 if (properties.timestampQuery) {
                     enabled_.emplace(interop::GPUFeatureName::kTimestampQuery);
                 }
 
-                // TODO(crbug.com/dawn/1130)
-                // interop::GPUFeatureName::kDepth24UnormStencil8:
-                // interop::GPUFeatureName::kDepth32FloatStencil8:
+                // TODO(dawn:1123) add support for these extensions when possible.
+                // wgpu::interop::GPUFeatureName::kIndirectFirstInstance
+                // wgpu::interop::GPUFeatureName::kDepthClipControl
             }
 
             bool has(interop::GPUFeatureName feature) {
@@ -175,21 +184,28 @@ namespace wgpu::binding {
         // See src/dawn_native/Features.cpp for enum <-> string mappings.
         for (auto required : descriptor.requiredFeatures) {
             switch (required) {
-                case interop::GPUFeatureName::kDepthClamping:
-                    requiredFeatures.emplace_back(wgpu::FeatureName::DepthClamping);
-                    continue;
-                case interop::GPUFeatureName::kPipelineStatisticsQuery:
-                    requiredFeatures.emplace_back(wgpu::FeatureName::PipelineStatisticsQuery);
-                    continue;
                 case interop::GPUFeatureName::kTextureCompressionBc:
                     requiredFeatures.emplace_back(wgpu::FeatureName::TextureCompressionBC);
+                    continue;
+                case interop::GPUFeatureName::kTextureCompressionEtc2:
+                    requiredFeatures.emplace_back(wgpu::FeatureName::TextureCompressionETC2);
+                    continue;
+                case interop::GPUFeatureName::kTextureCompressionAstc:
+                    requiredFeatures.emplace_back(wgpu::FeatureName::TextureCompressionASTC);
                     continue;
                 case interop::GPUFeatureName::kTimestampQuery:
                     requiredFeatures.emplace_back(wgpu::FeatureName::TimestampQuery);
                     continue;
                 case interop::GPUFeatureName::kDepth24UnormStencil8:
+                    requiredFeatures.emplace_back(wgpu::FeatureName::Depth24UnormStencil8);
+                    continue;
                 case interop::GPUFeatureName::kDepth32FloatStencil8:
-                    continue;  // TODO(crbug.com/dawn/1130)
+                    requiredFeatures.emplace_back(wgpu::FeatureName::Depth32FloatStencil8);
+                    continue;
+                case interop::GPUFeatureName::kDepthClipControl:
+                case interop::GPUFeatureName::kIndirectFirstInstance:
+                    // TODO(dawn:1123) Add support for these extensions when possible.
+                    continue;
             }
             UNIMPLEMENTED("required: ", required);
         }

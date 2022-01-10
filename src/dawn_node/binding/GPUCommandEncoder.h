@@ -35,6 +35,10 @@ namespace wgpu::binding {
         interop::Interface<interop::GPUComputePassEncoder> beginComputePass(
             Napi::Env,
             interop::GPUComputePassDescriptor descriptor) override;
+        void clearBuffer(Napi::Env,
+                         interop::Interface<interop::GPUBuffer> buffer,
+                         interop::GPUSize64 offset,
+                         std::optional<interop::GPUSize64> size) override;
         void copyBufferToBuffer(Napi::Env,
                                 interop::Interface<interop::GPUBuffer> source,
                                 interop::GPUSize64 sourceOffset,

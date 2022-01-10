@@ -71,30 +71,6 @@ namespace wgpu::binding {
         enc_.EndOcclusionQuery();
     }
 
-    void GPURenderPassEncoder::beginPipelineStatisticsQuery(
-        Napi::Env,
-        interop::Interface<interop::GPUQuerySet> querySet,
-        interop::GPUSize32 queryIndex) {
-        UNIMPLEMENTED();
-    }
-
-    void GPURenderPassEncoder::endPipelineStatisticsQuery(Napi::Env) {
-        UNIMPLEMENTED();
-    }
-
-    void GPURenderPassEncoder::writeTimestamp(Napi::Env env,
-                                              interop::Interface<interop::GPUQuerySet> querySet,
-                                              interop::GPUSize32 queryIndex) {
-        Converter conv(env);
-
-        wgpu::QuerySet q{};
-        if (!conv(q, querySet)) {
-            return;
-        }
-
-        enc_.WriteTimestamp(q, queryIndex);
-    }
-
     void GPURenderPassEncoder::executeBundles(
         Napi::Env env,
         std::vector<interop::Interface<interop::GPURenderBundle>> bundles_in) {

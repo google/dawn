@@ -25,10 +25,6 @@ namespace wgpu::binding {
     GPUCommandBuffer::GPUCommandBuffer(wgpu::CommandBuffer cmd_buf) : cmd_buf_(std::move(cmd_buf)) {
     }
 
-    interop::Promise<double> GPUCommandBuffer::getExecutionTime(Napi::Env) {
-        UNIMPLEMENTED();
-    };
-
     std::optional<std::string> GPUCommandBuffer::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }

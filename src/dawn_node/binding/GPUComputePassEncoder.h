@@ -43,13 +43,6 @@ namespace wgpu::binding {
         void dispatchIndirect(Napi::Env,
                               interop::Interface<interop::GPUBuffer> indirectBuffer,
                               interop::GPUSize64 indirectOffset) override;
-        void beginPipelineStatisticsQuery(Napi::Env,
-                                          interop::Interface<interop::GPUQuerySet> querySet,
-                                          interop::GPUSize32 queryIndex) override;
-        void endPipelineStatisticsQuery(Napi::Env) override;
-        void writeTimestamp(Napi::Env,
-                            interop::Interface<interop::GPUQuerySet> querySet,
-                            interop::GPUSize32 queryIndex) override;
         void endPass(Napi::Env) override;
         void setBindGroup(Napi::Env,
                           interop::GPUIndex32 index,

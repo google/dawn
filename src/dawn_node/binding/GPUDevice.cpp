@@ -413,9 +413,7 @@ namespace wgpu::binding {
 
         wgpu::QuerySetDescriptor desc{};
         if (!conv(desc.label, descriptor.label) || !conv(desc.type, descriptor.type) ||
-            !conv(desc.count, descriptor.count) ||
-            !conv(desc.pipelineStatistics, desc.pipelineStatisticsCount,
-                  descriptor.pipelineStatistics)) {
+            !conv(desc.count, descriptor.count)) {
             return {};
         }
 

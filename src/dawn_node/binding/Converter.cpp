@@ -283,7 +283,8 @@ namespace wgpu::binding {
                 out = wgpu::TextureFormat::Stencil8;
                 return true;
             case interop::GPUTextureFormat::kDepth16Unorm:
-                break;  // TODO(crbug.com/dawn/1130): Unsupported.
+                out = wgpu::TextureFormat::Depth16Unorm;
+                return true;
             case interop::GPUTextureFormat::kDepth24Plus:
                 out = wgpu::TextureFormat::Depth24Plus;
                 return true;
@@ -292,6 +293,12 @@ namespace wgpu::binding {
                 return true;
             case interop::GPUTextureFormat::kDepth32Float:
                 out = wgpu::TextureFormat::Depth32Float;
+                return true;
+            case interop::GPUTextureFormat::kDepth24UnormStencil8:
+                out = wgpu::TextureFormat::Depth24UnormStencil8;
+                return true;
+            case interop::GPUTextureFormat::kDepth32FloatStencil8:
+                out = wgpu::TextureFormat::Depth32FloatStencil8;
                 return true;
             case interop::GPUTextureFormat::kBc1RgbaUnorm:
                 out = wgpu::TextureFormat::BC1RGBAUnorm;
@@ -335,12 +342,121 @@ namespace wgpu::binding {
             case interop::GPUTextureFormat::kBc7RgbaUnormSrgb:
                 out = wgpu::TextureFormat::BC7RGBAUnormSrgb;
                 return true;
-            case interop::GPUTextureFormat::kDepth24UnormStencil8:
-                break;  // TODO(crbug.com/dawn/1130): Unsupported.
-            case interop::GPUTextureFormat::kDepth32FloatStencil8:
-                break;  // TODO(crbug.com/dawn/1130): Unsupported.
+            case interop::GPUTextureFormat::kEtc2Rgb8Unorm:
+                out = wgpu::TextureFormat::ETC2RGB8Unorm;
+                return true;
+            case interop::GPUTextureFormat::kEtc2Rgb8UnormSrgb:
+                out = wgpu::TextureFormat::ETC2RGB8UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kEtc2Rgb8A1Unorm:
+                out = wgpu::TextureFormat::ETC2RGB8A1Unorm;
+                return true;
+            case interop::GPUTextureFormat::kEtc2Rgb8A1UnormSrgb:
+                out = wgpu::TextureFormat::ETC2RGB8A1UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kEtc2Rgba8Unorm:
+                out = wgpu::TextureFormat::ETC2RGBA8Unorm;
+                return true;
+            case interop::GPUTextureFormat::kEtc2Rgba8UnormSrgb:
+                out = wgpu::TextureFormat::ETC2RGBA8UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kEacR11Unorm:
+                out = wgpu::TextureFormat::EACR11Unorm;
+                return true;
+            case interop::GPUTextureFormat::kEacR11Snorm:
+                out = wgpu::TextureFormat::EACR11Snorm;
+                return true;
+            case interop::GPUTextureFormat::kEacRg11Unorm:
+                out = wgpu::TextureFormat::EACRG11Unorm;
+                return true;
+            case interop::GPUTextureFormat::kEacRg11Snorm:
+                out = wgpu::TextureFormat::EACRG11Snorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc4X4Unorm:
+                out = wgpu::TextureFormat::ASTC4x4Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc4X4UnormSrgb:
+                out = wgpu::TextureFormat::ASTC4x4UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc5X4Unorm:
+                out = wgpu::TextureFormat::ASTC5x4Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc5X4UnormSrgb:
+                out = wgpu::TextureFormat::ASTC5x4UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc5X5Unorm:
+                out = wgpu::TextureFormat::ASTC5x5Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc5X5UnormSrgb:
+                out = wgpu::TextureFormat::ASTC5x5UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc6X5Unorm:
+                out = wgpu::TextureFormat::ASTC6x5Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc6X5UnormSrgb:
+                out = wgpu::TextureFormat::ASTC6x5UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc6X6Unorm:
+                out = wgpu::TextureFormat::ASTC6x6Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc6X6UnormSrgb:
+                out = wgpu::TextureFormat::ASTC6x6UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc8X5Unorm:
+                out = wgpu::TextureFormat::ASTC8x5Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc8X5UnormSrgb:
+                out = wgpu::TextureFormat::ASTC8x5UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc8X6Unorm:
+                out = wgpu::TextureFormat::ASTC8x6Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc8X6UnormSrgb:
+                out = wgpu::TextureFormat::ASTC8x6UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc8X8Unorm:
+                out = wgpu::TextureFormat::ASTC8x8Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc8X8UnormSrgb:
+                out = wgpu::TextureFormat::ASTC8x8UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc10X5Unorm:
+                out = wgpu::TextureFormat::ASTC10x5Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc10X5UnormSrgb:
+                out = wgpu::TextureFormat::ASTC10x5UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc10X6Unorm:
+                out = wgpu::TextureFormat::ASTC10x6Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc10X6UnormSrgb:
+                out = wgpu::TextureFormat::ASTC10x6UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc10X8Unorm:
+                out = wgpu::TextureFormat::ASTC10x8Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc10X8UnormSrgb:
+                out = wgpu::TextureFormat::ASTC10x8UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc10X10Unorm:
+                out = wgpu::TextureFormat::ASTC10x10Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc10X10UnormSrgb:
+                out = wgpu::TextureFormat::ASTC10x10UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc12X10Unorm:
+                out = wgpu::TextureFormat::ASTC12x10Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc12X10UnormSrgb:
+                out = wgpu::TextureFormat::ASTC12x12UnormSrgb;
+                return true;
+            case interop::GPUTextureFormat::kAstc12X12Unorm:
+                out = wgpu::TextureFormat::ASTC12x12Unorm;
+                return true;
+            case interop::GPUTextureFormat::kAstc12X12UnormSrgb:
+                out = wgpu::TextureFormat::ASTC12x12UnormSrgb;
+                return true;
         }
-        // TODO(crbug.com/dawn/1130): Add ASTC and ETC formats.
         Napi::Error::New(env, "invalid value for GPUTextureFormat").ThrowAsJavaScriptException();
         return false;
     }
@@ -1064,39 +1180,11 @@ namespace wgpu::binding {
             case interop::GPUQueryType::kOcclusion:
                 out = wgpu::QueryType::Occlusion;
                 return true;
-            case interop::GPUQueryType::kPipelineStatistics:
-                out = wgpu::QueryType::PipelineStatistics;
-                return true;
             case interop::GPUQueryType::kTimestamp:
                 out = wgpu::QueryType::Timestamp;
                 return true;
         }
         Napi::Error::New(env, "invalid value for GPUQueryType").ThrowAsJavaScriptException();
-        return false;
-    }
-
-    bool Converter::Convert(wgpu::PipelineStatisticName& out,
-                            const interop::GPUPipelineStatisticName& in) {
-        out = wgpu::PipelineStatisticName::VertexShaderInvocations;
-        switch (in) {
-            case interop::GPUPipelineStatisticName::kVertexShaderInvocations:
-                out = wgpu::PipelineStatisticName::VertexShaderInvocations;
-                return true;
-            case interop::GPUPipelineStatisticName::kClipperInvocations:
-                out = wgpu::PipelineStatisticName::ClipperInvocations;
-                return true;
-            case interop::GPUPipelineStatisticName::kClipperPrimitivesOut:
-                out = wgpu::PipelineStatisticName::ClipperPrimitivesOut;
-                return true;
-            case interop::GPUPipelineStatisticName::kFragmentShaderInvocations:
-                out = wgpu::PipelineStatisticName::FragmentShaderInvocations;
-                return true;
-            case interop::GPUPipelineStatisticName::kComputeShaderInvocations:
-                out = wgpu::PipelineStatisticName::ComputeShaderInvocations;
-                return true;
-        }
-        Napi::Error::New(env, "invalid value for GPUPipelineStatisticName")
-            .ThrowAsJavaScriptException();
         return false;
     }
 

@@ -50,30 +50,6 @@ namespace wgpu::binding {
         enc_.DispatchIndirect(*indirectBuffer.As<GPUBuffer>(), indirectOffset);
     }
 
-    void GPUComputePassEncoder::beginPipelineStatisticsQuery(
-        Napi::Env,
-        interop::Interface<interop::GPUQuerySet> querySet,
-        interop::GPUSize32 queryIndex) {
-        UNIMPLEMENTED();
-    }
-
-    void GPUComputePassEncoder::endPipelineStatisticsQuery(Napi::Env) {
-        UNIMPLEMENTED();
-    }
-
-    void GPUComputePassEncoder::writeTimestamp(Napi::Env env,
-                                               interop::Interface<interop::GPUQuerySet> querySet,
-                                               interop::GPUSize32 queryIndex) {
-        Converter conv(env);
-
-        wgpu::QuerySet q{};
-        if (!conv(q, querySet)) {
-            return;
-        }
-
-        enc_.WriteTimestamp(q, queryIndex);
-    }
-
     void GPUComputePassEncoder::endPass(Napi::Env) {
         enc_.EndPass();
     }

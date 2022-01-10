@@ -241,9 +241,6 @@ namespace wgpu::binding {
 
         [[nodiscard]] bool Convert(wgpu::QueryType& out, const interop::GPUQueryType& in);
 
-        [[nodiscard]] bool Convert(wgpu::PipelineStatisticName& out,
-                                   const interop::GPUPipelineStatisticName& in);
-
         [[nodiscard]] bool Convert(wgpu::AddressMode& out, const interop::GPUAddressMode& in);
 
         [[nodiscard]] bool Convert(wgpu::FilterMode& out, const interop::GPUFilterMode& in);
