@@ -695,7 +695,7 @@ class ParserImpl {
  private:
   /// ReturnType resolves to the return type for the function or lambda F.
   template <typename F>
-  using ReturnType = typename std::result_of<F()>::type;
+  using ReturnType = typename std::invoke_result<F>::type;
 
   /// ResultType resolves to `T` for a `RESULT` of type Expect<T>.
   template <typename RESULT>
