@@ -82,6 +82,10 @@ For example, on Windows, to use the d3dcompiler_47.dll from a Chromium checkout,
 
 Note that we pass `--verbose` above so that all test output, including the dumped shader, is written to stdout.
 
+### Testing against a `run-cts` expectations file
+
+You can write out an expectations file with the `--output <path>` command line flag, and then compare this snapshot to a later run with `--expect <path>`.
+
 ## Debugging TypeScript with VSCode
 
 Open or create the `.vscode/launch.json` file, and add:

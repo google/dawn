@@ -32,11 +32,13 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"syscall"
 	"time"
+	"unicode/utf8"
 
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
@@ -68,6 +70,23 @@ var (
 	mainCtx context.Context
 )
 
+// ANSI escape sequences
+const (
+	escape       = "\u001B["
+	positionLeft = escape + "0G"
+	ansiReset    = escape + "0m"
+
+	bold = escape + "1m"
+
+	red     = escape + "31m"
+	green   = escape + "32m"
+	yellow  = escape + "33m"
+	blue    = escape + "34m"
+	magenta = escape + "35m"
+	cyan    = escape + "36m"
+	white   = escape + "37m"
+)
+
 type dawnNodeFlags []string
 
 func (f *dawnNodeFlags) String() string {
@@ -75,7 +94,7 @@ func (f *dawnNodeFlags) String() string {
 }
 
 func (f *dawnNodeFlags) Set(value string) error {
-	// Multiple flags must be passed in indivually:
+	// Multiple flags must be passed in individually:
 	// -flag=a=b -dawn_node_flag=c=d
 	*f = append(*f, value)
 	return nil
@@ -110,7 +129,7 @@ func run() error {
 		backendDefault = "vulkan"
 	}
 
-	var dawnNode, cts, node, npx, logFilename, backend string
+	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend string
 	var verbose, isolated, build bool
 	var numRunners int
 	var flags dawnNodeFlags
@@ -118,6 +137,8 @@ func run() error {
 	flag.StringVar(&cts, "cts", "", "root directory of WebGPU CTS")
 	flag.StringVar(&node, "node", "", "path to node executable")
 	flag.StringVar(&npx, "npx", "", "path to npx executable")
+	flag.StringVar(&resultsPath, "output", "", "path to write test results file")
+	flag.StringVar(&expectationsPath, "expect", "", "path to expectations file")
 	flag.BoolVar(&verbose, "verbose", false, "print extra information while testing")
 	flag.BoolVar(&build, "build", true, "attempt to build the CTS before running")
 	flag.BoolVar(&isolated, "isolate", false, "run each test in an isolated process")
@@ -195,6 +216,7 @@ func run() error {
 		dawnNode:   dawnNode,
 		cts:        cts,
 		flags:      flags,
+		results:    testcaseStatuses{},
 		evalScript: func(main string) string {
 			return fmt.Sprintf(`require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/%v.ts');`, main)
 		},
@@ -245,6 +267,15 @@ func run() error {
 		}
 	}
 
+	// If an expectations file was specified, load it.
+	if expectationsPath != "" {
+		if ex, err := loadExpectations(expectationsPath); err == nil {
+			r.expectations = ex
+		} else {
+			return err
+		}
+	}
+
 	if numRunners > 0 {
 		// Find all the test cases that match the given queries.
 		if err := r.gatherTestCases(query, verbose); err != nil {
@@ -254,15 +285,30 @@ func run() error {
 		if isolated {
 			fmt.Println("Running in parallel isolated...")
 			fmt.Printf("Testing %d test cases...\n", len(r.testcases))
-			return r.runParallelIsolated()
+			if err := r.runParallelIsolated(); err != nil {
+				return err
+			}
+		} else {
+			fmt.Println("Running in parallel with server...")
+			fmt.Printf("Testing %d test cases...\n", len(r.testcases))
+			if err := r.runParallelWithServer(); err != nil {
+				return err
+			}
 		}
-		fmt.Println("Running in parallel with server...")
-		fmt.Printf("Testing %d test cases...\n", len(r.testcases))
-		return r.runParallelWithServer()
+	} else {
+		fmt.Println("Running serially...")
+		if err := r.runSerially(query); err != nil {
+			return err
+		}
 	}
 
-	fmt.Println("Running serially...")
-	return r.runSerially(query)
+	if resultsPath != "" {
+		if err := saveExpectations(resultsPath, r.results); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 type logger struct {
@@ -325,6 +371,8 @@ type runner struct {
 	flags                    dawnNodeFlags
 	evalScript               func(string) string
 	testcases                []string
+	expectations             testcaseStatuses
+	results                  testcaseStatuses
 	log                      logger
 }
 
@@ -655,12 +703,12 @@ func (r *runner) streamResults(wg *sync.WaitGroup, results chan result) {
 	}()
 
 	// Total number of tests, test counts binned by status
-	numTests, numByStatus := len(r.testcases), map[status]int{}
+	numTests, numByExpectedStatus := len(r.testcases), map[expectedStatus]int{}
 
 	// Helper function for printing a progress bar.
 	lastStatusUpdate, animFrame := time.Now(), 0
 	updateProgress := func() {
-		printANSIProgressBar(animFrame, numTests, numByStatus)
+		printANSIProgressBar(animFrame, numTests, numByExpectedStatus)
 		animFrame++
 		lastStatusUpdate = time.Now()
 	}
@@ -676,11 +724,22 @@ func (r *runner) streamResults(wg *sync.WaitGroup, results chan result) {
 
 	for res := range results {
 		r.log.logResults(res)
-
-		numByStatus[res.status] = numByStatus[res.status] + 1
+		r.results[res.testcase] = res.status
+		expected := r.expectations[res.testcase]
+		exStatus := expectedStatus{
+			status:   res.status,
+			expected: expected == res.status,
+		}
+		numByExpectedStatus[exStatus] = numByExpectedStatus[exStatus] + 1
 		name := res.testcase
-		if r.verbose || res.error != nil || (res.status != pass && res.status != skip) {
-			fmt.Printf("%v - %v: %v\n", name, res.status, res.message)
+		if r.verbose ||
+			res.error != nil ||
+			(exStatus.status != pass && exStatus.status != skip && !exStatus.expected) {
+			fmt.Printf("%v - %v: %v", name, res.status, res.message)
+			if expected != "" {
+				fmt.Printf(" [%v -> %v]", expected, res.status)
+			}
+			fmt.Println()
 			if res.error != nil {
 				fmt.Println(res.error)
 			}
@@ -690,27 +749,59 @@ func (r *runner) streamResults(wg *sync.WaitGroup, results chan result) {
 			updateProgress()
 		}
 	}
-	printANSIProgressBar(animFrame, numTests, numByStatus)
+	printANSIProgressBar(animFrame, numTests, numByExpectedStatus)
 
 	// All done. Print final stats.
-	fmt.Printf(`
-Completed in %v
+	fmt.Printf("\nCompleted in %v\n", timeTaken)
 
-pass:    %v (%v)
-fail:    %v (%v)
-skip:    %v (%v)
-timeout: %v (%v)
-`,
-		timeTaken,
-		numByStatus[pass], percentage(numByStatus[pass], numTests),
-		numByStatus[fail], percentage(numByStatus[fail], numTests),
-		numByStatus[skip], percentage(numByStatus[skip], numTests),
-		numByStatus[timeout], percentage(numByStatus[timeout], numTests),
-	)
+	var numExpectedByStatus map[status]int
+	if r.expectations != nil {
+		// The status of each testcase that was run
+		numExpectedByStatus = map[status]int{}
+		for t, s := range r.expectations {
+			if _, wasTested := r.results[t]; wasTested {
+				numExpectedByStatus[s] = numExpectedByStatus[s] + 1
+			}
+		}
+	}
+
+	for _, s := range statuses {
+		// number of tests, just run, that resulted in the given status
+		numByStatus := numByExpectedStatus[expectedStatus{s, true}] +
+			numByExpectedStatus[expectedStatus{s, false}]
+		// difference in number of tests that had the given status from the
+		// expected number (taken from the expectations file)
+		diffFromExpected := 0
+		if numExpectedByStatus != nil {
+			diffFromExpected = numByStatus - numExpectedByStatus[s]
+		}
+		if numByStatus == 0 && diffFromExpected == 0 {
+			continue
+		}
+
+		fmt.Print(bold, statusColor[s])
+		fmt.Print(alignRight(strings.ToUpper(string(s))+": ", 10))
+		fmt.Print(ansiReset)
+		if numByStatus > 0 {
+			fmt.Print(bold)
+		}
+		fmt.Print(alignLeft(numByStatus, 10))
+		fmt.Print(ansiReset)
+		fmt.Print(alignRight("("+percentage(numByStatus, numTests)+")", 6))
+
+		if diffFromExpected != 0 {
+			fmt.Print(bold, " [")
+			fmt.Printf("%+d", diffFromExpected)
+			fmt.Print(ansiReset, "]")
+		}
+		fmt.Println()
+	}
+
 }
 
 // runSerially() calls the CTS test runner to run the test query in a single
 // process.
+// TODO(bclayton): Support comparing against r.expectations
 func (r *runner) runSerially(query string) error {
 	start := time.Now()
 	result := r.runTestcase(query)
@@ -734,6 +825,24 @@ const (
 	skip    status = "skip"
 	timeout status = "timeout"
 )
+
+// All the status types
+var statuses = []status{pass, warn, fail, skip, timeout}
+
+var statusColor = map[status]string{
+	pass:    green,
+	warn:    yellow,
+	skip:    blue,
+	timeout: yellow,
+	fail:    red,
+}
+
+// expectedStatus is a test status, along with a boolean to indicate whether the
+// status matches the test expectations
+type expectedStatus struct {
+	status   status
+	expected bool
+}
 
 // result holds the information about a completed test
 type result struct {
@@ -828,24 +937,33 @@ func isFile(path string) bool {
 	return !s.IsDir()
 }
 
+// alignLeft returns the string of 'val' padded so that it is aligned left in
+// a column of the given width
+func alignLeft(val interface{}, width int) string {
+	s := fmt.Sprint(val)
+	padding := width - utf8.RuneCountInString(s)
+	if padding < 0 {
+		return s
+	}
+	return s + strings.Repeat(" ", padding)
+}
+
+// alignRight returns the string of 'val' padded so that it is aligned right in
+// a column of the given width
+func alignRight(val interface{}, width int) string {
+	s := fmt.Sprint(val)
+	padding := width - utf8.RuneCountInString(s)
+	if padding < 0 {
+		return s
+	}
+	return strings.Repeat(" ", padding) + s
+}
+
 // printANSIProgressBar prints a colored progress bar, providing realtime
 // information about the status of the CTS run.
 // Note: We'll want to skip this if !isatty or if we're running on windows.
-func printANSIProgressBar(animFrame int, numTests int, numByStatus map[status]int) {
-	const (
-		barWidth = 50
-
-		escape       = "\u001B["
-		positionLeft = escape + "0G"
-		red          = escape + "31m"
-		green        = escape + "32m"
-		yellow       = escape + "33m"
-		blue         = escape + "34m"
-		magenta      = escape + "35m"
-		cyan         = escape + "36m"
-		white        = escape + "37m"
-		reset        = escape + "0m"
-	)
+func printANSIProgressBar(animFrame int, numTests int, numByExpectedStatus map[expectedStatus]int) {
+	const barWidth = 50
 
 	animSymbols := []rune{'⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'}
 	blockSymbols := []rune{'▏', '▎', '▍', '▌', '▋', '▊', '▉'}
@@ -857,31 +975,41 @@ func printANSIProgressBar(animFrame int, numTests int, numByStatus map[status]in
 
 	numFinished := 0
 
-	for _, ty := range []struct {
-		status status
-		color  string
-	}{{pass, green}, {warn, yellow}, {skip, blue}, {timeout, yellow}, {fail, red}} {
-		num := numByStatus[ty.status]
-		numFinished += num
-		statusFrac := float64(num) / float64(numTests)
-		fNumBlocks := barWidth * statusFrac
-		fmt.Fprint(stdout, ty.color)
-		numBlocks := int(math.Ceil(fNumBlocks))
-		if numBlocks > 1 {
-			fmt.Print(strings.Repeat(string("▉"), numBlocks))
+	for _, status := range statuses {
+		for _, expected := range []bool{true, false} {
+			color := statusColor[status]
+			if expected {
+				color += bold
+			}
+
+			num := numByExpectedStatus[expectedStatus{status, expected}]
+			numFinished += num
+			statusFrac := float64(num) / float64(numTests)
+			fNumBlocks := barWidth * statusFrac
+			fmt.Fprint(stdout, color)
+			numBlocks := int(math.Ceil(fNumBlocks))
+			if expected {
+				if numBlocks > 1 {
+					fmt.Print(strings.Repeat(string("░"), numBlocks))
+				}
+			} else {
+				if numBlocks > 1 {
+					fmt.Print(strings.Repeat(string("▉"), numBlocks))
+				}
+				if numBlocks > 0 {
+					frac := fNumBlocks - math.Floor(fNumBlocks)
+					symbol := blockSymbols[int(math.Round(frac*float64(len(blockSymbols)-1)))]
+					fmt.Print(string(symbol))
+				}
+			}
+			numBlocksPrinted += numBlocks
 		}
-		if numBlocks > 0 {
-			frac := fNumBlocks - math.Floor(fNumBlocks)
-			symbol := blockSymbols[int(math.Round(frac*float64(len(blockSymbols)-1)))]
-			fmt.Print(string(symbol))
-		}
-		numBlocksPrinted += numBlocks
 	}
 
 	if barWidth > numBlocksPrinted {
 		fmt.Print(strings.Repeat(string(" "), barWidth-numBlocksPrinted))
 	}
-	fmt.Fprint(stdout, reset)
+	fmt.Fprint(stdout, ansiReset)
 	fmt.Print("] ", percentage(numFinished, numTests))
 
 	if colors {
@@ -891,4 +1019,57 @@ func printANSIProgressBar(animFrame int, numTests int, numByStatus map[status]in
 		// cannot move cursor, so newline
 		fmt.Println()
 	}
+}
+
+// testcaseStatus is a pair of testcase name and result status
+// Intended to be serialized for expectations files.
+type testcaseStatus struct {
+	Testcase string
+	Status   status
+}
+
+// testcaseStatuses is a map of testcase to test status
+type testcaseStatuses map[string]status
+
+// loadExpectations loads the test expectations from path
+func loadExpectations(path string) (testcaseStatuses, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open expectations file: %w", err)
+	}
+	defer f.Close()
+
+	statuses := []testcaseStatus{}
+	if err := json.NewDecoder(f).Decode(&statuses); err != nil {
+		return nil, fmt.Errorf("failed to read expectations file: %w", err)
+	}
+
+	out := make(testcaseStatuses, len(statuses))
+	for _, s := range statuses {
+		out[s.Testcase] = s.Status
+	}
+	return out, nil
+}
+
+// saveExpectations saves the test results 'ex' as an expectations file to path
+func saveExpectations(path string, ex testcaseStatuses) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("failed to create expectations file: %w", err)
+	}
+	defer f.Close()
+
+	statuses := make([]testcaseStatus, 0, len(ex))
+	for testcase, status := range ex {
+		statuses = append(statuses, testcaseStatus{testcase, status})
+	}
+	sort.Slice(statuses, func(i, j int) bool { return statuses[i].Testcase < statuses[j].Testcase })
+
+	e := json.NewEncoder(f)
+	e.SetIndent("", "  ")
+	if err := e.Encode(&statuses); err != nil {
+		return fmt.Errorf("failed to save expectations file: %w", err)
+	}
+
+	return nil
 }
