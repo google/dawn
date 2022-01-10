@@ -193,6 +193,7 @@ func simplify(in *ast.File) (*ast.File, declarations) {
 	{
 		interfaces := map[string]*ast.Interface{}
 		mixins := map[string]*ast.Mixin{}
+		includes := []*ast.Includes{}
 		for _, d := range in.Declarations {
 			switch d := d.(type) {
 			case *ast.Interface:
@@ -209,24 +210,28 @@ func simplify(in *ast.File) (*ast.File, declarations) {
 				mixins[d.Name] = d
 				s.declarations[d.Name] = d
 			case *ast.Includes:
-				// Merge mixin into interface
-				i, ok := interfaces[d.Name]
-				if !ok {
-					panic(fmt.Errorf("%v includes %v, but %v is not an interface", d.Name, d.Source, d.Name))
-				}
-				m, ok := mixins[d.Source]
-				if !ok {
-					panic(fmt.Errorf("%v includes %v, but %v is not an mixin", d.Name, d.Source, d.Source))
-				}
-				// Merge mixin into the interface
-				for _, member := range m.Members {
-					if member, ok := member.(*ast.Member); ok {
-						i.Members = append(i.Members, member)
-					}
-				}
+				includes = append(includes, d)
 			default:
 				if name := nameOf(d); name != "" {
 					s.declarations[nameOf(d)] = d
+				}
+			}
+		}
+
+		// Merge mixin into interface
+		for _, include := range includes {
+			i, ok := interfaces[include.Name]
+			if !ok {
+				panic(fmt.Errorf("%v includes %v, but %v is not an interface", include.Name, include.Source, include.Name))
+			}
+			m, ok := mixins[include.Source]
+			if !ok {
+				panic(fmt.Errorf("%v includes %v, but %v is not an mixin", include.Name, include.Source, include.Source))
+			}
+			// Merge mixin into the interface
+			for _, member := range m.Members {
+				if member, ok := member.(*ast.Member); ok {
+					i.Members = append(i.Members, member)
 				}
 			}
 		}
