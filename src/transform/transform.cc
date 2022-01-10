@@ -142,6 +142,9 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx,
   if (auto* t = ty->As<sem::DepthMultisampledTexture>()) {
     return ctx.dst->create<ast::DepthMultisampledTexture>(t->dim());
   }
+  if (ty->Is<sem::ExternalTexture>()) {
+    return ctx.dst->create<ast::ExternalTexture>();
+  }
   if (auto* t = ty->As<sem::MultisampledTexture>()) {
     return ctx.dst->create<ast::MultisampledTexture>(
         t->dim(), CreateASTTypeFor(ctx, t->type()));

@@ -132,6 +132,23 @@ class Function : public Castable<Function, CallTarget> {
     directly_called_intrinsics_.add(intrinsic);
   }
 
+  /// Adds the given texture/sampler pair to the list of unique pairs
+  /// that this function uses (directly or indirectly). These can only
+  /// be parameters to this function or global variables. Uniqueness is
+  /// ensured by texture_sampler_pairs_ being a UniqueVector.
+  /// @param texture the texture (must be non-null)
+  /// @param sampler the sampler (null indicates a texture-only reference)
+  void AddTextureSamplerPair(const sem::Variable* texture,
+                             const sem::Variable* sampler) {
+    texture_sampler_pairs_.add(VariablePair(texture, sampler));
+  }
+
+  /// @returns the list of texture/sampler pairs that this function uses
+  /// (directly or indirectly).
+  const std::vector<VariablePair>& TextureSamplerPairs() const {
+    return texture_sampler_pairs_;
+  }
+
   /// @returns the list of direct calls to functions / intrinsics made by this
   /// function
   std::vector<const Call*> DirectCallStatements() const {
@@ -259,6 +276,7 @@ class Function : public Castable<Function, CallTarget> {
   utils::UniqueVector<const GlobalVariable*> transitively_referenced_globals_;
   utils::UniqueVector<const Function*> transitively_called_functions_;
   utils::UniqueVector<const Intrinsic*> directly_called_intrinsics_;
+  utils::UniqueVector<VariablePair> texture_sampler_pairs_;
   std::vector<const Call*> direct_calls_;
   std::vector<const Call*> callsites_;
   std::vector<const Function*> ancestor_entry_points_;

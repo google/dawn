@@ -2021,6 +2021,146 @@ TEST_F(ResolverTest, UnaryOp_Negation) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error: cannot negate expression of type 'u32");
 }
+
+TEST_F(ResolverTest, TextureSampler_TextureSample) {
+  Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         GroupAndBinding(1, 1));
+  Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
+
+  auto* call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1.0f, 2.0f)));
+  const ast::Function* f = Func("test_function", {}, ty.void_(), {call},
+                                {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  const sem::Function* sf = Sem().Get(f);
+  auto pairs = sf->TextureSamplerPairs();
+  ASSERT_EQ(pairs.size(), 1u);
+  EXPECT_TRUE(pairs[0].first != nullptr);
+  EXPECT_TRUE(pairs[0].second != nullptr);
+}
+
+TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
+  Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         GroupAndBinding(1, 1));
+  Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
+
+  auto* inner_call =
+      CallStmt(Call("textureSample", "t", "s", vec2<f32>(1.0f, 2.0f)));
+  const ast::Function* inner_func =
+      Func("inner_func", {}, ty.void_(), {inner_call});
+  auto* outer_call = CallStmt(Call("inner_func"));
+  const ast::Function* outer_func =
+      Func("outer_func", {}, ty.void_(), {outer_call},
+           {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto inner_pairs = Sem().Get(inner_func)->TextureSamplerPairs();
+  ASSERT_EQ(inner_pairs.size(), 1u);
+  EXPECT_TRUE(inner_pairs[0].first != nullptr);
+  EXPECT_TRUE(inner_pairs[0].second != nullptr);
+
+  auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
+  ASSERT_EQ(outer_pairs.size(), 1u);
+  EXPECT_TRUE(outer_pairs[0].first != nullptr);
+  EXPECT_TRUE(outer_pairs[0].second != nullptr);
+}
+
+TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
+  Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         GroupAndBinding(1, 1));
+  Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
+
+  auto* inner_call_1 =
+      CallStmt(Call("textureSample", "t", "s", vec2<f32>(1.0f, 2.0f)));
+  const ast::Function* inner_func_1 =
+      Func("inner_func_1", {}, ty.void_(), {inner_call_1});
+  auto* inner_call_2 =
+      CallStmt(Call("textureSample", "t", "s", vec2<f32>(3.0f, 4.0f)));
+  const ast::Function* inner_func_2 =
+      Func("inner_func_2", {}, ty.void_(), {inner_call_2});
+  auto* outer_call_1 = CallStmt(Call("inner_func_1"));
+  auto* outer_call_2 = CallStmt(Call("inner_func_2"));
+  const ast::Function* outer_func =
+      Func("outer_func", {}, ty.void_(), {outer_call_1, outer_call_2},
+           {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto inner_pairs_1 = Sem().Get(inner_func_1)->TextureSamplerPairs();
+  ASSERT_EQ(inner_pairs_1.size(), 1u);
+  EXPECT_TRUE(inner_pairs_1[0].first != nullptr);
+  EXPECT_TRUE(inner_pairs_1[0].second != nullptr);
+
+  auto inner_pairs_2 = Sem().Get(inner_func_2)->TextureSamplerPairs();
+  ASSERT_EQ(inner_pairs_1.size(), 1u);
+  EXPECT_TRUE(inner_pairs_2[0].first != nullptr);
+  EXPECT_TRUE(inner_pairs_2[0].second != nullptr);
+
+  auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
+  ASSERT_EQ(outer_pairs.size(), 1u);
+  EXPECT_TRUE(outer_pairs[0].first != nullptr);
+  EXPECT_TRUE(outer_pairs[0].second != nullptr);
+}
+
+TEST_F(ResolverTest,
+       TextureSampler_TextureSampleFunctionDiamondDifferentVariables) {
+  Global("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         GroupAndBinding(1, 1));
+  Global("t2", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         GroupAndBinding(1, 2));
+  Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 3));
+
+  auto* inner_call_1 =
+      CallStmt(Call("textureSample", "t1", "s", vec2<f32>(1.0f, 2.0f)));
+  const ast::Function* inner_func_1 =
+      Func("inner_func_1", {}, ty.void_(), {inner_call_1});
+  auto* inner_call_2 =
+      CallStmt(Call("textureSample", "t2", "s", vec2<f32>(3.0f, 4.0f)));
+  const ast::Function* inner_func_2 =
+      Func("inner_func_2", {}, ty.void_(), {inner_call_2});
+  auto* outer_call_1 = CallStmt(Call("inner_func_1"));
+  auto* outer_call_2 = CallStmt(Call("inner_func_2"));
+  const ast::Function* outer_func =
+      Func("outer_func", {}, ty.void_(), {outer_call_1, outer_call_2},
+           {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto inner_pairs_1 = Sem().Get(inner_func_1)->TextureSamplerPairs();
+  ASSERT_EQ(inner_pairs_1.size(), 1u);
+  EXPECT_TRUE(inner_pairs_1[0].first != nullptr);
+  EXPECT_TRUE(inner_pairs_1[0].second != nullptr);
+
+  auto inner_pairs_2 = Sem().Get(inner_func_2)->TextureSamplerPairs();
+  ASSERT_EQ(inner_pairs_2.size(), 1u);
+  EXPECT_TRUE(inner_pairs_2[0].first != nullptr);
+  EXPECT_TRUE(inner_pairs_2[0].second != nullptr);
+
+  auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
+  ASSERT_EQ(outer_pairs.size(), 2u);
+  EXPECT_TRUE(outer_pairs[0].first == inner_pairs_1[0].first);
+  EXPECT_TRUE(outer_pairs[0].second == inner_pairs_1[0].second);
+  EXPECT_TRUE(outer_pairs[1].first == inner_pairs_2[0].first);
+  EXPECT_TRUE(outer_pairs[1].second == inner_pairs_2[0].second);
+}
+
+TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
+  Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         GroupAndBinding(1, 2));
+
+  auto* call = Call("textureDimensions", "t");
+  const ast::Function* f = WrapInFunction(call);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  const sem::Function* sf = Sem().Get(f);
+  auto pairs = sf->TextureSamplerPairs();
+  ASSERT_EQ(pairs.size(), 1u);
+  EXPECT_TRUE(pairs[0].first != nullptr);
+  EXPECT_TRUE(pairs[0].second == nullptr);
+}
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

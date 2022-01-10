@@ -15,6 +15,7 @@
 #ifndef SRC_SEM_VARIABLE_H_
 #define SRC_SEM_VARIABLE_H_
 
+#include <utility>
 #include <vector>
 
 #include "src/ast/access.h"
@@ -248,7 +249,25 @@ class VariableUser : public Castable<VariableUser, Expression> {
   const sem::Variable* const variable_;
 };
 
+/// A pair of sem::Variables. Can be hashed.
+typedef std::pair<const Variable*, const Variable*> VariablePair;
+
 }  // namespace sem
 }  // namespace tint
+
+namespace std {
+
+/// Custom std::hash specialization for VariablePair
+template <>
+class hash<tint::sem::VariablePair> {
+ public:
+  /// @param i the variable pair to create a hash for
+  /// @return the hash value
+  inline std::size_t operator()(const tint::sem::VariablePair& i) const {
+    return tint::utils::Hash(i.first, i.second);
+  }
+};
+
+}  // namespace std
 
 #endif  // SRC_SEM_VARIABLE_H_

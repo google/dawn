@@ -1400,9 +1400,25 @@ sem::Call* Resolver::IntrinsicCall(
 
   current_function_->AddDirectlyCalledIntrinsic(intrinsic);
 
-  if (IsTextureIntrinsic(intrinsic_type) &&
-      !ValidateTextureIntrinsicFunction(call)) {
-    return nullptr;
+  if (IsTextureIntrinsic(intrinsic_type)) {
+    if (!ValidateTextureIntrinsicFunction(call)) {
+      return nullptr;
+    }
+    // Collect a texture/sampler pair for this intrinsic.
+    const auto& signature = intrinsic->Signature();
+    int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
+    if (texture_index == -1) {
+      TINT_ICE(Resolver, diagnostics_)
+          << "texture intrinsic without texture parameter";
+    }
+
+    auto* texture = args[texture_index]->As<sem::VariableUser>()->Variable();
+    int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
+    const sem::Variable* sampler =
+        sampler_index != -1
+            ? args[sampler_index]->As<sem::VariableUser>()->Variable()
+            : nullptr;
+    current_function_->AddTextureSamplerPair(texture, sampler);
   }
 
   if (!ValidateIntrinsicCall(call)) {
@@ -1438,6 +1454,26 @@ sem::Call* Resolver::FunctionCall(
     // We inherit any referenced variables from the callee.
     for (auto* var : target->TransitivelyReferencedGlobals()) {
       current_function_->AddTransitivelyReferencedGlobal(var);
+    }
+
+    // Map all texture/sampler pairs from the target function to the
+    // current function. These can only be global or parameter
+    // variables. Resolve any parameter variables to the corresponding
+    // argument passed to the current function. Leave global variables
+    // as-is. Then add the mapped pair to the current function's list of
+    // texture/sampler pairs.
+    for (sem::VariablePair pair : target->TextureSamplerPairs()) {
+      const sem::Variable* texture = pair.first;
+      const sem::Variable* sampler = pair.second;
+      if (auto* param = texture->As<sem::Parameter>()) {
+        texture = args[param->Index()]->As<sem::VariableUser>()->Variable();
+      }
+      if (sampler) {
+        if (auto* param = sampler->As<sem::Parameter>()) {
+          sampler = args[param->Index()]->As<sem::VariableUser>()->Variable();
+        }
+      }
+      current_function_->AddTextureSamplerPair(texture, sampler);
     }
   }
 
