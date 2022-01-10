@@ -555,7 +555,7 @@ func (r *runner) runServer(caseIndices <-chan int, results chan<- result) error 
 		}
 		postResp, err := http.Post(fmt.Sprintf("http://localhost:%v/run?%v", port, r.testcases[idx]), "", &bytes.Buffer{})
 		if err != nil {
-			res.error = fmt.Errorf("server POST failure. Restarting server...")
+			res.error = fmt.Errorf("server POST failure. Restarting server... This can happen when there is a crash. Try running with --isolate.")
 			res.status = fail
 			results <- res
 			stopServer()
