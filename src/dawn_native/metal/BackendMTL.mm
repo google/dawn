@@ -243,12 +243,12 @@ namespace dawn_native::metal {
       public:
         Adapter(InstanceBase* instance, id<MTLDevice> device)
             : AdapterBase(instance, wgpu::BackendType::Metal), mDevice(device) {
-            mPCIInfo.name = std::string([[*mDevice name] UTF8String]);
+            mName = std::string([[*mDevice name] UTF8String]);
 
             PCIIDs ids;
             if (!instance->ConsumedError(GetDevicePCIInfo(device, &ids))) {
-                mPCIInfo.vendorId = ids.vendorId;
-                mPCIInfo.deviceId = ids.deviceId;
+                mVendorId = ids.vendorId;
+                mDeviceId = ids.deviceId;
             }
 
 #if defined(DAWN_PLATFORM_IOS)
@@ -311,7 +311,7 @@ namespace dawn_native::metal {
                     // fails to call without any copy commands on MTLBlitCommandEncoder. This issue
                     // has been fixed on macOS 11.0. See crbug.com/dawn/545
                     enableTimestampQuery &=
-                        !(gpu_info::IsAMD(GetPCIInfo().vendorId) && IsMacOSVersionAtLeast(11));
+                        !(gpu_info::IsAMD(mVendorId) && IsMacOSVersionAtLeast(11));
 #endif
 
                     if (enableTimestampQuery) {

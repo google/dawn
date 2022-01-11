@@ -33,14 +33,12 @@ namespace dawn_native {
             InitializeSupportedFeaturesImpl(),
             "gathering supported features for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
             "backend=%s type=%s)",
-            mPCIInfo.name, mDriverDescription, mPCIInfo.vendorId, mPCIInfo.deviceId, mBackend,
-            mAdapterType);
+            mName, mDriverDescription, mVendorId, mDeviceId, mBackend, mAdapterType);
         DAWN_TRY_CONTEXT(
             InitializeSupportedLimitsImpl(&mLimits),
             "gathering supported limits for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
             "backend=%s type=%s)",
-            mPCIInfo.name, mDriverDescription, mPCIInfo.vendorId, mPCIInfo.deviceId, mBackend,
-            mAdapterType);
+            mName, mDriverDescription, mVendorId, mDeviceId, mBackend, mAdapterType);
 
         // Enforce internal Dawn constants.
         mLimits.v1.maxVertexBufferArrayStride =
@@ -77,9 +75,9 @@ namespace dawn_native {
     }
 
     void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
-        properties->vendorID = mPCIInfo.vendorId;
-        properties->deviceID = mPCIInfo.deviceId;
-        properties->name = mPCIInfo.name.c_str();
+        properties->vendorID = mVendorId;
+        properties->deviceID = mDeviceId;
+        properties->name = mName.c_str();
         properties->driverDescription = mDriverDescription.c_str();
         properties->adapterType = mAdapterType;
         properties->backendType = mBackend;
@@ -125,20 +123,16 @@ namespace dawn_native {
         callback(status, ToAPI(device.Detach()), nullptr, userdata);
     }
 
+    uint32_t AdapterBase::GetVendorId() const {
+        return mVendorId;
+    }
+
+    uint32_t AdapterBase::GetDeviceId() const {
+        return mDeviceId;
+    }
+
     wgpu::BackendType AdapterBase::GetBackendType() const {
         return mBackend;
-    }
-
-    wgpu::AdapterType AdapterBase::GetAdapterType() const {
-        return mAdapterType;
-    }
-
-    const std::string& AdapterBase::GetDriverDescription() const {
-        return mDriverDescription;
-    }
-
-    const PCIInfo& AdapterBase::GetPCIInfo() const {
-        return mPCIInfo;
     }
 
     InstanceBase* AdapterBase::GetInstance() const {
@@ -161,8 +155,8 @@ namespace dawn_native {
 
     WGPUDeviceProperties AdapterBase::GetAdapterProperties() const {
         WGPUDeviceProperties adapterProperties = {};
-        adapterProperties.deviceID = mPCIInfo.deviceId;
-        adapterProperties.vendorID = mPCIInfo.vendorId;
+        adapterProperties.deviceID = mDeviceId;
+        adapterProperties.vendorID = mVendorId;
         adapterProperties.adapterType = static_cast<WGPUAdapterType>(mAdapterType);
 
         mSupportedFeatures.InitializeDeviceProperties(&adapterProperties);

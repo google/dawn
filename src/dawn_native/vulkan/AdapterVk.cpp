@@ -65,9 +65,9 @@ namespace dawn_native::vulkan {
                 "Vulkan driver version: " + std::to_string(mDeviceInfo.properties.driverVersion);
         }
 
-        mPCIInfo.deviceId = mDeviceInfo.properties.deviceID;
-        mPCIInfo.vendorId = mDeviceInfo.properties.vendorID;
-        mPCIInfo.name = mDeviceInfo.properties.deviceName;
+        mDeviceId = mDeviceInfo.properties.deviceID;
+        mVendorId = mDeviceInfo.properties.vendorID;
+        mName = mDeviceInfo.properties.deviceName;
 
         switch (mDeviceInfo.properties.deviceType) {
             case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:

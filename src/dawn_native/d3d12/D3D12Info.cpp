@@ -54,7 +54,7 @@ namespace dawn_native::d3d12 {
             // with RENDER_PASS_TIER_1 available, so fall back to a software emulated render
             // pass on these platforms.
             if (featureOptions5.RenderPassesTier < D3D12_RENDER_PASS_TIER_1 ||
-                !gpu_info::IsIntel(adapter.GetPCIInfo().vendorId)) {
+                !gpu_info::IsIntel(adapter.GetVendorId())) {
                 info.supportsRenderPass = true;
             }
         }

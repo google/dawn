@@ -25,7 +25,9 @@ namespace dawn_native::null {
     // Implementation of pre-Device objects: the null adapter, null backend connection and Connect()
 
     Adapter::Adapter(InstanceBase* instance) : AdapterBase(instance, wgpu::BackendType::Null) {
-        mPCIInfo.name = "Null backend";
+        mVendorId = 0;
+        mDeviceId = 0;
+        mName = "Null backend";
         mAdapterType = wgpu::AdapterType::CPU;
         MaybeError err = Initialize();
         ASSERT(err.IsSuccess());

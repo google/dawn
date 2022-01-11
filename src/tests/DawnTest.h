@@ -261,7 +261,7 @@ class DawnTestEnvironment : public testing::Environment {
 
     ToggleParser mToggleParser;
 
-    std::vector<dawn_native::DeviceType> mDevicePreferences;
+    std::vector<wgpu::AdapterType> mDevicePreferences;
     std::vector<TestAdapterProperties> mAdapterProperties;
 
     std::unique_ptr<utils::PlatformDebugLogger> mPlatformDebugLogger;

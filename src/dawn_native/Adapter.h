@@ -47,10 +47,9 @@ namespace dawn_native {
                               void* userdata);
         DeviceBase* APICreateDevice(const DeviceDescriptor* descriptor = nullptr);
 
+        uint32_t GetVendorId() const;
+        uint32_t GetDeviceId() const;
         wgpu::BackendType GetBackendType() const;
-        wgpu::AdapterType GetAdapterType() const;
-        const std::string& GetDriverDescription() const;
-        const PCIInfo& GetPCIInfo() const;
         InstanceBase* GetInstance() const;
 
         void ResetInternalDeviceForTesting();
@@ -67,7 +66,9 @@ namespace dawn_native {
         virtual bool SupportsExternalImages() const = 0;
 
       protected:
-        PCIInfo mPCIInfo = {};
+        uint32_t mVendorId = 0xFFFFFFFF;
+        uint32_t mDeviceId = 0xFFFFFFFF;
+        std::string mName;
         wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;
         std::string mDriverDescription;
         FeaturesSet mSupportedFeatures;

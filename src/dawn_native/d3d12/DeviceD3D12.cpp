@@ -584,15 +584,16 @@ namespace dawn_native::d3d12 {
         // By default use the maximum shader-visible heap size allowed.
         SetToggle(Toggle::UseD3D12SmallShaderVisibleHeapForTesting, false);
 
-        PCIInfo pciInfo = GetAdapter()->GetPCIInfo();
+        uint32_t deviceId = GetAdapter()->GetDeviceId();
+        uint32_t vendorId = GetAdapter()->GetVendorId();
 
         // Currently this workaround is only needed on Intel Gen9 and Gen9.5 GPUs.
         // See http://crbug.com/1161355 for more information.
-        if (gpu_info::IsIntel(pciInfo.vendorId) &&
-            (gpu_info::IsSkylake(pciInfo.deviceId) || gpu_info::IsKabylake(pciInfo.deviceId) ||
-             gpu_info::IsCoffeelake(pciInfo.deviceId))) {
+        if (gpu_info::IsIntel(vendorId) &&
+            (gpu_info::IsSkylake(deviceId) || gpu_info::IsKabylake(deviceId) ||
+             gpu_info::IsCoffeelake(deviceId))) {
             constexpr gpu_info::D3DDriverVersion kFirstDriverVersionWithFix = {30, 0, 100, 9864};
-            if (gpu_info::CompareD3DDriverVersion(pciInfo.vendorId,
+            if (gpu_info::CompareD3DDriverVersion(vendorId,
                                                   ToBackend(GetAdapter())->GetDriverVersion(),
                                                   kFirstDriverVersionWithFix) < 0) {
                 SetToggle(

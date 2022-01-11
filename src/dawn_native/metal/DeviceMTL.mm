@@ -137,8 +137,7 @@ namespace dawn_native::metal {
         if (IsFeatureEnabled(Feature::TimestampQuery)) {
             // Make a best guess of timestamp period based on device vendor info, and converge it to
             // an accurate value by the following calculations.
-            mTimestampPeriod =
-                gpu_info::IsIntel(GetAdapter()->GetPCIInfo().vendorId) ? 83.333f : 1.0f;
+            mTimestampPeriod = gpu_info::IsIntel(GetAdapter()->GetVendorId()) ? 83.333f : 1.0f;
 
             // Initialize kalman filter parameters
             mKalmanInfo = std::make_unique<KalmanInfo>();
@@ -199,27 +198,28 @@ namespace dawn_native::metal {
         // TODO(crbug.com/dawn/846): tighten this workaround when the driver bug is fixed.
         SetToggle(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
 
-        const PCIInfo& pciInfo = GetAdapter()->GetPCIInfo();
+        uint32_t deviceId = GetAdapter()->GetDeviceId();
+        uint32_t vendorId = GetAdapter()->GetVendorId();
 
         // TODO(crbug.com/dawn/847): Use MTLStorageModeShared instead of MTLStorageModePrivate when
         // creating MTLCounterSampleBuffer in QuerySet on Intel platforms, otherwise it fails to
         // create the buffer. Change to use MTLStorageModePrivate when the bug is fixed.
         if (@available(macOS 10.15, iOS 14.0, *)) {
-            bool useSharedMode = gpu_info::IsIntel(pciInfo.vendorId);
+            bool useSharedMode = gpu_info::IsIntel(vendorId);
             SetToggle(Toggle::MetalUseSharedModeForCounterSampleBuffer, useSharedMode);
         }
 
         // TODO(crbug.com/dawn/1071): r8unorm and rg8unorm textures with multiple mip levels don't
         // clear properly on Intel Macs.
-        if (gpu_info::IsIntel(pciInfo.vendorId)) {
+        if (gpu_info::IsIntel(vendorId)) {
             SetToggle(Toggle::DisableR8RG8Mipmaps, true);
         }
 
         // On some Intel GPU vertex only render pipeline get wrong depth result if no fragment
         // shader provided. Create a dummy fragment shader module to work around this issue.
-        if (gpu_info::IsIntel(this->GetAdapter()->GetPCIInfo().vendorId)) {
+        if (gpu_info::IsIntel(vendorId)) {
             bool useDummyFragmentShader = true;
-            if (gpu_info::IsSkylake(this->GetAdapter()->GetPCIInfo().deviceId)) {
+            if (gpu_info::IsSkylake(deviceId)) {
                 useDummyFragmentShader = false;
             }
             SetToggle(Toggle::UseDummyFragmentInVertexOnlyPipeline, useDummyFragmentShader);

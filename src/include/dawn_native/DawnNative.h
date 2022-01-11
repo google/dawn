@@ -33,31 +33,6 @@ namespace wgpu {
 
 namespace dawn_native {
 
-    // DEPRECATED: use WGPUAdapterProperties instead.
-    struct PCIInfo {
-        uint32_t deviceId = 0;
-        uint32_t vendorId = 0;
-        std::string name;
-    };
-
-    // DEPRECATED: use WGPUBackendType instead.
-    enum class BackendType {
-        D3D12,
-        Metal,
-        Null,
-        OpenGL,
-        OpenGLES,
-        Vulkan,
-    };
-
-    // DEPRECATED: use WGPUAdapterType instead.
-    enum class DeviceType {
-        DiscreteGPU,
-        IntegratedGPU,
-        CPU,
-        Unknown,
-    };
-
     class InstanceBase;
     class AdapterBase;
 
@@ -99,11 +74,6 @@ namespace dawn_native {
 
         Adapter(const Adapter& other);
         Adapter& operator=(const Adapter& other);
-
-        // DEPRECATED: use GetProperties instead.
-        BackendType GetBackendType() const;
-        DeviceType GetDeviceType() const;
-        const PCIInfo& GetPCIInfo() const;
 
         // Essentially webgpu.h's wgpuAdapterGetProperties while we don't have WGPUAdapter in
         // dawn.json

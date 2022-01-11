@@ -323,11 +323,11 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                 std::string type;
                 while (std::getline(ss, type, ',')) {
                     if (strcmp(type.c_str(), "discrete") == 0) {
-                        mDevicePreferences.push_back(dawn_native::DeviceType::DiscreteGPU);
+                        mDevicePreferences.push_back(wgpu::AdapterType::DiscreteGPU);
                     } else if (strcmp(type.c_str(), "integrated") == 0) {
-                        mDevicePreferences.push_back(dawn_native::DeviceType::IntegratedGPU);
+                        mDevicePreferences.push_back(wgpu::AdapterType::IntegratedGPU);
                     } else if (strcmp(type.c_str(), "cpu") == 0) {
-                        mDevicePreferences.push_back(dawn_native::DeviceType::CPU);
+                        mDevicePreferences.push_back(wgpu::AdapterType::CPU);
                     } else {
                         dawn::ErrorLog() << "Invalid device type preference: " << type;
                         UNREACHABLE();
@@ -474,14 +474,14 @@ GLFWwindow* DawnTestEnvironment::GetOpenGLESWindow() const {
 
 void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::Instance* instance) {
     // Get the first available preferred device type.
-    dawn_native::DeviceType preferredDeviceType = static_cast<dawn_native::DeviceType>(-1);
+    wgpu::AdapterType preferredDeviceType = static_cast<wgpu::AdapterType>(-1);
     bool hasDevicePreference = false;
-    for (dawn_native::DeviceType devicePreference : mDevicePreferences) {
+    for (wgpu::AdapterType devicePreference : mDevicePreferences) {
         for (const dawn_native::Adapter& adapter : instance->GetAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 
-            if (adapter.GetDeviceType() == devicePreference) {
+            if (properties.adapterType == devicePreference) {
                 preferredDeviceType = devicePreference;
                 hasDevicePreference = true;
                 break;
@@ -517,12 +517,12 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::In
             selected &=
                 // The device type doesn't match the first available preferred type for that
                 // backend, if present.
-                (adapter.GetDeviceType() == preferredDeviceType) ||
+                (properties.adapterType == preferredDeviceType) ||
                 // Always select Unknown OpenGL adapters if we don't want a CPU adapter.
                 // OpenGL will usually be unknown because we can't query the device type.
                 // If we ever have Swiftshader GL (unlikely), we could set the DeviceType properly.
-                (preferredDeviceType != dawn_native::DeviceType::CPU &&
-                 adapter.GetDeviceType() == dawn_native::DeviceType::Unknown &&
+                (preferredDeviceType != wgpu::AdapterType::CPU &&
+                 properties.adapterType == wgpu::AdapterType::Unknown &&
                  (properties.backendType == wgpu::BackendType::OpenGL ||
                   properties.backendType == wgpu::BackendType::OpenGLES)) ||
                 // Always select the Null backend. There are few tests on this backend, and they run

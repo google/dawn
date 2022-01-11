@@ -186,16 +186,16 @@ namespace dawn_native::opengl {
             }
             mFunctions.Enable(GL_SAMPLE_MASK);
 
-            mPCIInfo.name = reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER));
+            mName = reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER));
 
             // Workaroud to find vendor id from vendor name
             const char* vendor = reinterpret_cast<const char*>(mFunctions.GetString(GL_VENDOR));
-            mPCIInfo.vendorId = GetVendorIdFromVendors(vendor);
+            mVendorId = GetVendorIdFromVendors(vendor);
 
             mDriverDescription = std::string("OpenGL version ") +
                                  reinterpret_cast<const char*>(mFunctions.GetString(GL_VERSION));
 
-            if (mPCIInfo.name.find("SwiftShader") != std::string::npos) {
+            if (mName.find("SwiftShader") != std::string::npos) {
                 mAdapterType = wgpu::AdapterType::CPU;
             }
 

@@ -76,9 +76,9 @@ namespace dawn_native::d3d12 {
         DXGI_ADAPTER_DESC1 adapterDesc;
         mHardwareAdapter->GetDesc1(&adapterDesc);
 
-        mPCIInfo.deviceId = adapterDesc.DeviceId;
-        mPCIInfo.vendorId = adapterDesc.VendorId;
-        mPCIInfo.name = WCharToUTF8(adapterDesc.Description);
+        mDeviceId = adapterDesc.DeviceId;
+        mVendorId = adapterDesc.VendorId;
+        mName = WCharToUTF8(adapterDesc.Description);
 
         DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 
