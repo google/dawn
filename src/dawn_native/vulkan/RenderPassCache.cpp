@@ -240,13 +240,13 @@ namespace dawn_native::vulkan {
         HashCombine(&hash, Hash(query.resolveTargetMask));
 
         for (ColorAttachmentIndex i : IterateBitSet(query.colorMask)) {
-            HashCombine(&hash, query.colorFormats[i], query.colorLoadOp[i]);
+            HashCombine(&hash, query.colorFormats[i], query.colorLoadOp[i], query.colorStoreOp[i]);
         }
 
         HashCombine(&hash, query.hasDepthStencil);
         if (query.hasDepthStencil) {
-            HashCombine(&hash, query.depthStencilFormat, query.depthLoadOp, query.stencilLoadOp,
-                        query.readOnlyDepthStencil);
+            HashCombine(&hash, query.depthStencilFormat, query.depthLoadOp, query.depthStoreOp,
+                        query.stencilLoadOp, query.stencilStoreOp, query.readOnlyDepthStencil);
         }
 
         HashCombine(&hash, query.sampleCount);
