@@ -56,7 +56,12 @@ if (NOT TARGET libtint)
     # building the GLSL writer, but currently Dawn does not provide this
     # third_party dependency. Disable the GLSL writer for now.
     set(TINT_BUILD_GLSL_WRITER OFF)
+    # TODO(crbug.com/tint/455): Tint does not currently build with CMake when
+    # BUILD_SHARED_LIBS=1, so always build it as static for now.
+    set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
+    set(BUILD_SHARED_LIBS 0)
     add_subdirectory(${DAWN_TINT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/tint")
+    set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
 endif()
 
 if (NOT TARGET libabsl)
