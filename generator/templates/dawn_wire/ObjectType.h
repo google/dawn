@@ -17,7 +17,7 @@
 
 #include "common/ityp_array.h"
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     enum class ObjectType : uint32_t {
         {% for type in by_category["object"] %}
@@ -28,7 +28,7 @@ namespace dawn_wire {
     template <typename T>
     using PerObjectType = ityp::array<ObjectType, T, {{len(by_category["object"])}}>;
 
-} // namespace dawn_wire
+} // namespace dawn::wire
 
 
 #endif  // DAWNWIRE_OBJECTTPYE_AUTOGEN_H_

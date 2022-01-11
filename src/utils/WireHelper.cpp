@@ -34,10 +34,10 @@ namespace utils {
 
     namespace {
 
-        class WireServerTraceLayer : public dawn_wire::CommandHandler {
+        class WireServerTraceLayer : public dawn::wire::CommandHandler {
           public:
-            WireServerTraceLayer(const char* dir, dawn_wire::CommandHandler* handler)
-                : dawn_wire::CommandHandler(), mDir(dir), mHandler(handler) {
+            WireServerTraceLayer(const char* dir, dawn::wire::CommandHandler* handler)
+                : dawn::wire::CommandHandler(), mDir(dir), mHandler(handler) {
                 const char* sep = GetPathSeparator();
                 if (mDir.size() > 0 && mDir.back() != *sep) {
                     mDir += sep;
@@ -75,7 +75,7 @@ namespace utils {
 
           private:
             std::string mDir;
-            dawn_wire::CommandHandler* mHandler;
+            dawn::wire::CommandHandler* mHandler;
             std::ofstream mFile;
         };
 
@@ -108,11 +108,11 @@ namespace utils {
                 mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
                 mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
 
-                dawn_wire::WireServerDescriptor serverDesc = {};
+                dawn::wire::WireServerDescriptor serverDesc = {};
                 serverDesc.procs = &dawn_native::GetProcs();
                 serverDesc.serializer = mS2cBuf.get();
 
-                mWireServer.reset(new dawn_wire::WireServer(serverDesc));
+                mWireServer.reset(new dawn::wire::WireServer(serverDesc));
                 mC2sBuf->SetHandler(mWireServer.get());
 
                 if (wireTraceDir != nullptr && strlen(wireTraceDir) > 0) {
@@ -121,12 +121,12 @@ namespace utils {
                     mC2sBuf->SetHandler(mWireServerTraceLayer.get());
                 }
 
-                dawn_wire::WireClientDescriptor clientDesc = {};
+                dawn::wire::WireClientDescriptor clientDesc = {};
                 clientDesc.serializer = mC2sBuf.get();
 
-                mWireClient.reset(new dawn_wire::WireClient(clientDesc));
+                mWireClient.reset(new dawn::wire::WireClient(clientDesc));
                 mS2cBuf->SetHandler(mWireClient.get());
-                dawnProcSetProcs(&dawn_wire::client::GetProcs());
+                dawnProcSetProcs(&dawn::wire::client::GetProcs());
             }
 
             std::pair<wgpu::Device, WGPUDevice> RegisterDevice(WGPUDevice backendDevice) override {
@@ -157,8 +157,8 @@ namespace utils {
             std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
             std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
             std::unique_ptr<WireServerTraceLayer> mWireServerTraceLayer;
-            std::unique_ptr<dawn_wire::WireServer> mWireServer;
-            std::unique_ptr<dawn_wire::WireClient> mWireClient;
+            std::unique_ptr<dawn::wire::WireServer> mWireServer;
+            std::unique_ptr<dawn::wire::WireClient> mWireClient;
         };
 
     }  // anonymous namespace

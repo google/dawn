@@ -20,7 +20,7 @@
 #include "dawn_wire/client/ObjectBase.h"
 #include "dawn_wire/client/RequestTracker.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class ShaderModule final : public ObjectBase {
       public:
@@ -43,6 +43,6 @@ namespace dawn_wire::client {
         RequestTracker<CompilationInfoRequest> mCompilationInfoRequests;
     };
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_SHADER_MODULE_H_

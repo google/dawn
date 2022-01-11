@@ -21,7 +21,7 @@
 #include "dawn/webgpu.h"
 #include "dawn_wire/dawn_wire_export.h"
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     class DAWN_WIRE_EXPORT CommandSerializer {
       public:
@@ -71,6 +71,9 @@ namespace dawn_wire {
                                                          const volatile char* deserializeBuffer,
                                                          size_t deserializeBufferSize);
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
+
+// TODO(dawn:824): Remove once the deprecation period is passed.
+namespace dawn_wire = dawn::wire;
 
 #endif  // DAWNWIRE_WIRE_H_

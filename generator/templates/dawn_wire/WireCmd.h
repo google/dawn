@@ -21,7 +21,7 @@
 #include "dawn_wire/ObjectType_autogen.h"
 #include "dawn_wire/WireResult.h"
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     using ObjectId = uint32_t;
     using ObjectGeneration = uint32_t;
@@ -133,6 +133,6 @@ namespace dawn_wire {
         {{write_command_struct(command, True)}}
     {% endfor %}
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif // DAWNWIRE_WIRECMD_AUTOGEN_H_

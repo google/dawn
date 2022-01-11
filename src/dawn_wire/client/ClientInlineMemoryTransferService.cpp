@@ -19,7 +19,7 @@
 
 #include <cstring>
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class InlineMemoryTransferService : public MemoryTransferService {
         class ReadHandleImpl : public ReadHandle {
@@ -128,4 +128,4 @@ namespace dawn_wire::client {
         return std::make_unique<InlineMemoryTransferService>();
     }
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client

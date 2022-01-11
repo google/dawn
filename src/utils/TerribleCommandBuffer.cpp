@@ -21,11 +21,11 @@ namespace utils {
     TerribleCommandBuffer::TerribleCommandBuffer() {
     }
 
-    TerribleCommandBuffer::TerribleCommandBuffer(dawn_wire::CommandHandler* handler)
+    TerribleCommandBuffer::TerribleCommandBuffer(dawn::wire::CommandHandler* handler)
         : mHandler(handler) {
     }
 
-    void TerribleCommandBuffer::SetHandler(dawn_wire::CommandHandler* handler) {
+    void TerribleCommandBuffer::SetHandler(dawn::wire::CommandHandler* handler) {
         mHandler = handler;
     }
 

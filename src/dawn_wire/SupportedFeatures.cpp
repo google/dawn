@@ -14,7 +14,7 @@
 
 #include "dawn_wire/SupportedFeatures.h"
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     // Note: Upon updating this list, please also update serialization/deserialization
     // of limit structs on Adapter/Device initialization.
@@ -46,4 +46,4 @@ namespace dawn_wire {
         return false;
     }
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire

@@ -18,7 +18,7 @@
 #include "dawn_wire/server/ServerMemoryTransferService_mock.h"
 
 using namespace testing;
-using namespace dawn_wire;
+using namespace dawn::wire;
 
 namespace {
 
@@ -314,8 +314,8 @@ class WireMemoryTransferServiceTests : public WireTest {
     // mUpdatedBufferContent| after all writes are flushed.
     static uint32_t mUpdatedBufferContent;
 
-    testing::StrictMock<dawn_wire::server::MockMemoryTransferService> serverMemoryTransferService;
-    testing::StrictMock<dawn_wire::client::MockMemoryTransferService> clientMemoryTransferService;
+    testing::StrictMock<dawn::wire::server::MockMemoryTransferService> serverMemoryTransferService;
+    testing::StrictMock<dawn::wire::client::MockMemoryTransferService> clientMemoryTransferService;
 };
 
 uint32_t WireMemoryTransferServiceTests::mBufferContent = 1337;

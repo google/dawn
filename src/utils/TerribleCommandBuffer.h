@@ -19,12 +19,12 @@
 
 namespace utils {
 
-    class TerribleCommandBuffer : public dawn_wire::CommandSerializer {
+    class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
       public:
         TerribleCommandBuffer();
-        TerribleCommandBuffer(dawn_wire::CommandHandler* handler);
+        TerribleCommandBuffer(dawn::wire::CommandHandler* handler);
 
-        void SetHandler(dawn_wire::CommandHandler* handler);
+        void SetHandler(dawn::wire::CommandHandler* handler);
 
         size_t GetMaximumAllocationSize() const override;
 
@@ -32,7 +32,7 @@ namespace utils {
         bool Flush() override;
 
       private:
-        dawn_wire::CommandHandler* mHandler = nullptr;
+        dawn::wire::CommandHandler* mHandler = nullptr;
         size_t mOffset = 0;
         char mBuffer[1000000];
     };

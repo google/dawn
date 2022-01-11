@@ -24,7 +24,7 @@
 #include <cstring>
 #include <memory>
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     class ChunkedCommandSerializer {
       public:
@@ -109,6 +109,6 @@ namespace dawn_wire {
         size_t mMaxAllocationSize;
     };
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif  // DAWNWIRE_CHUNKEDCOMMANDSERIALIZER_H_

@@ -14,7 +14,7 @@
 
 #include "dawn_wire/ChunkedCommandSerializer.h"
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     ChunkedCommandSerializer::ChunkedCommandSerializer(CommandSerializer* serializer)
         : mSerializer(serializer), mMaxAllocationSize(serializer->GetMaximumAllocationSize()) {
@@ -35,4 +35,4 @@ namespace dawn_wire {
         }
     }
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire

@@ -22,7 +22,7 @@
 #include "dawn_wire/client/ObjectBase.h"
 #include "dawn_wire/client/RequestTracker.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class Instance final : public ObjectBase {
       public:
@@ -51,6 +51,6 @@ namespace dawn_wire::client {
         RequestTracker<RequestAdapterData> mRequestAdapterRequests;
     };
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_INSTANCE_H_

@@ -16,7 +16,7 @@
 
 #include "dawn_wire/SupportedFeatures.h"
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
 
     bool Server::DoAdapterRequestDevice(ObjectId adapterId,
                                         uint64_t requestSerial,
@@ -107,4 +107,4 @@ namespace dawn_wire::server {
         SerializeCommand(cmd);
     }
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server

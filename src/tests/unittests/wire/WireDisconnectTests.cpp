@@ -19,7 +19,7 @@
 #include "tests/MockCallback.h"
 
 using namespace testing;
-using namespace dawn_wire;
+using namespace dawn::wire;
 
 namespace {
 

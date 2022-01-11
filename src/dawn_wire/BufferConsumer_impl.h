@@ -20,7 +20,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     template <typename BufferT>
     template <typename T>
@@ -68,6 +68,6 @@ namespace dawn_wire {
         return WireResult::Success;
     }
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif  // DAWNWIRE_BUFFERCONSUMER_IMPL_H_

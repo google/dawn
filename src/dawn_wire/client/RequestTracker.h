@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <map>
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class Device;
     class MemoryTransferService;
@@ -77,6 +77,6 @@ namespace dawn_wire::client {
         std::map<uint64_t, Request> mRequests;
     };
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_REQUESTTRACKER_H_

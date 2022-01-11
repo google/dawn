@@ -22,7 +22,7 @@
 #include <map>
 #include <unordered_set>
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
 
     struct DeviceInfo {
         std::unordered_set<uint64_t> childObjectTypesAndIds;
@@ -223,6 +223,6 @@ namespace dawn_wire::server {
         std::map<T, ObjectId> mTable;
     };
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server
 
 #endif  // DAWNWIRE_SERVER_OBJECTSTORAGE_H_

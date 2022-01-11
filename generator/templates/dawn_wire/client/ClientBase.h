@@ -20,7 +20,7 @@
 #include "dawn_wire/client/ApiObjects.h"
 #include "dawn_wire/client/ObjectAllocator.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class ClientBase : public ChunkedCommandHandler, public ObjectIdProvider {
       public:
@@ -69,6 +69,6 @@ namespace dawn_wire::client {
         {% endfor %}
     };
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_CLIENTBASE_AUTOGEN_H_

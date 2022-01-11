@@ -28,7 +28,7 @@
 
 namespace {
 
-    class DevNull : public dawn_wire::CommandSerializer {
+    class DevNull : public dawn::wire::CommandSerializer {
       public:
         size_t GetMaximumAllocationSize() const override {
             // Some fuzzer bots have a 2GB allocation limit. Pick a value reasonably below that.
@@ -116,11 +116,11 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     }
 
     DevNull devNull;
-    dawn_wire::WireServerDescriptor serverDesc = {};
+    dawn::wire::WireServerDescriptor serverDesc = {};
     serverDesc.procs = &procs;
     serverDesc.serializer = &devNull;
 
-    std::unique_ptr<dawn_wire::WireServer> wireServer(new dawn_wire::WireServer(serverDesc));
+    std::unique_ptr<dawn::wire::WireServer> wireServer(new dawn_wire::WireServer(serverDesc));
     wireServer->InjectDevice(device.Get(), 1, 0);
 
     wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);

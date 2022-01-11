@@ -15,7 +15,7 @@
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/client/Client.h"
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     WireClient::WireClient(const WireClientDescriptor& descriptor)
         : mImpl(new client::Client(descriptor.serializer, descriptor.memoryTransferService)) {
@@ -79,4 +79,4 @@ namespace dawn_wire {
         MemoryTransferService::WriteHandle::~WriteHandle() = default;
     }  // namespace client
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire

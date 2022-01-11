@@ -18,7 +18,7 @@
 #include "dawn_wire/WireServer.h"
 
 using namespace testing;
-using namespace dawn_wire;
+using namespace dawn::wire;
 
 class WireInjectSwapChainTests : public WireTest {
   public:

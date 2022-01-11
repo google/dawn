@@ -20,7 +20,7 @@
 #include "dawn_wire/WireServer.h"
 #include "dawn_wire/server/Server.h"
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
 
     class MockMemoryTransferService : public MemoryTransferService {
       public:
@@ -103,6 +103,6 @@ namespace dawn_wire::server {
         MOCK_METHOD(void, OnWriteHandleDestroy, (const WriteHandle* writeHandle));
     };
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server
 
 #endif  // DAWNWIRE_SERVER_SERVERMEMORYTRANSFERSERVICE_MOCK_H_

@@ -25,7 +25,7 @@
 namespace {
 
     using namespace testing;
-    using namespace dawn_wire;
+    using namespace dawn::wire;
 
     class WireInstanceBasicTest : public WireTest {};
     class WireInstanceTests : public WireTest {

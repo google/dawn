@@ -19,7 +19,7 @@
 #include <array>
 
 using namespace testing;
-using namespace dawn_wire;
+using namespace dawn::wire;
 
 class WireArgumentTests : public WireTest {
   public:

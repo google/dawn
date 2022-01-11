@@ -17,7 +17,7 @@
 #include "dawn_wire/WireClient.h"
 
 using namespace testing;
-using namespace dawn_wire;
+using namespace dawn::wire;
 
 namespace {
 

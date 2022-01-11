@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     class ChunkedCommandHandler : public CommandHandler {
       public:
@@ -66,6 +66,6 @@ namespace dawn_wire {
         std::unique_ptr<char[]> mChunkedCommandData;
     };
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif  // DAWNWIRE_CHUNKEDCOMMANDHANDLER_H_

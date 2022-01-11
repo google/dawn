@@ -67,12 +67,12 @@ namespace {
                 case DawnFlavor::Wire: {
                     mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
 
-                    dawn_wire::WireClientDescriptor clientDesc = {};
+                    dawn::wire::WireClientDescriptor clientDesc = {};
                     clientDesc.serializer = mC2sBuf.get();
-                    mWireClient = std::make_unique<dawn_wire::WireClient>(clientDesc);
+                    mWireClient = std::make_unique<dawn::wire::WireClient>(clientDesc);
 
                     mDevice = wgpu::Device::Acquire(mWireClient->ReserveDevice().device);
-                    mProcs = dawn_wire::client::GetProcs();
+                    mProcs = dawn::wire::client::GetProcs();
                     break;
                 }
 
@@ -94,7 +94,7 @@ namespace {
         dawn_native::null::Adapter mNativeAdapter;
 
         std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
-        std::unique_ptr<dawn_wire::WireClient> mWireClient;
+        std::unique_ptr<dawn::wire::WireClient> mWireClient;
 
         wgpu::Device mDevice;
         DawnProcTable mProcs;
@@ -162,7 +162,7 @@ namespace {
     }
 
     TEST(GetProcAddressInternalTests, CheckDawnWireClientProcMapOrder) {
-        std::vector<const char*> names = dawn_wire::client::GetProcMapNamesForTesting();
+        std::vector<const char*> names = dawn::wire::client::GetProcMapNamesForTesting();
         for (size_t i = 1; i < names.size(); i++) {
             ASSERT_LT(std::string(names[i - 1]), std::string(names[i]));
         }

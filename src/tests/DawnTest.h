@@ -201,11 +201,11 @@ namespace detail {
     class ExpectBetweenColors;
 }  // namespace detail
 
-namespace dawn_wire {
+namespace dawn::wire {
     class CommandHandler;
     class WireClient;
     class WireServer;
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 void InitDawnEnd2EndTestEnvironment(int argc, char** argv);
 

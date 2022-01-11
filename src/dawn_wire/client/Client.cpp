@@ -17,7 +17,7 @@
 #include "common/Compiler.h"
 #include "dawn_wire/client/Device.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     namespace {
 
@@ -168,4 +168,4 @@ namespace dawn_wire::client {
         return mDisconnected;
     }
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client

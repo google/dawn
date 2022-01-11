@@ -26,7 +26,7 @@
 
 #include <memory>
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class Client;
     class Queue;
@@ -107,6 +107,6 @@ namespace dawn_wire::client {
         std::shared_ptr<bool> mIsAlive;
     };
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_DEVICE_H_

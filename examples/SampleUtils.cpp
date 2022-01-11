@@ -86,8 +86,8 @@ static utils::BackendBinding* binding = nullptr;
 
 static GLFWwindow* window = nullptr;
 
-static dawn_wire::WireServer* wireServer = nullptr;
-static dawn_wire::WireClient* wireClient = nullptr;
+static dawn::wire::WireServer* wireServer = nullptr;
+static dawn::wire::WireClient* wireClient = nullptr;
 static utils::TerribleCommandBuffer* c2sBuf = nullptr;
 static utils::TerribleCommandBuffer* s2cBuf = nullptr;
 
@@ -149,18 +149,18 @@ wgpu::Device CreateCppDawnDevice() {
             c2sBuf = new utils::TerribleCommandBuffer();
             s2cBuf = new utils::TerribleCommandBuffer();
 
-            dawn_wire::WireServerDescriptor serverDesc = {};
+            dawn::wire::WireServerDescriptor serverDesc = {};
             serverDesc.procs = &backendProcs;
             serverDesc.serializer = s2cBuf;
 
-            wireServer = new dawn_wire::WireServer(serverDesc);
+            wireServer = new dawn::wire::WireServer(serverDesc);
             c2sBuf->SetHandler(wireServer);
 
-            dawn_wire::WireClientDescriptor clientDesc = {};
+            dawn::wire::WireClientDescriptor clientDesc = {};
             clientDesc.serializer = c2sBuf;
 
-            wireClient = new dawn_wire::WireClient(clientDesc);
-            procs = dawn_wire::client::GetProcs();
+            wireClient = new dawn::wire::WireClient(clientDesc);
+            procs = dawn::wire::client::GetProcs();
             s2cBuf->SetHandler(wireClient);
 
             auto deviceReservation = wireClient->ReserveDevice();

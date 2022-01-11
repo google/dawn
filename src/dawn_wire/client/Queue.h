@@ -21,7 +21,7 @@
 #include "dawn_wire/client/ObjectBase.h"
 #include "dawn_wire/client/RequestTracker.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class Queue final : public ObjectBase {
       public:
@@ -52,6 +52,6 @@ namespace dawn_wire::client {
         RequestTracker<OnWorkDoneData> mOnWorkDoneRequests;
     };
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_QUEUE_H_

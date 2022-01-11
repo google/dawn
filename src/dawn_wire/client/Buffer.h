@@ -21,7 +21,7 @@
 #include "dawn_wire/client/ObjectBase.h"
 #include "dawn_wire/client/RequestTracker.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class Device;
 
@@ -104,6 +104,6 @@ namespace dawn_wire::client {
         std::weak_ptr<bool> mDeviceIsAlive;
     };
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_BUFFER_H_

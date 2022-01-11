@@ -18,7 +18,7 @@
 
 #include <limits>
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     bool Client::DoDeviceUncapturedErrorCallback(Device* device,
                                                  WGPUErrorType errorType,
@@ -130,4 +130,4 @@ namespace dawn_wire::client {
         return shaderModule->GetCompilationInfoCallback(requestSerial, status, info);
     }
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client

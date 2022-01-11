@@ -17,10 +17,10 @@
 
 #include <dawn/webgpu.h>
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     bool IsFeatureSupported(WGPUFeatureName feature);
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif  // DAWNWIRE_SUPPORTEDFEATURES_H_

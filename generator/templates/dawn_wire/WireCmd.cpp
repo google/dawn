@@ -649,7 +649,7 @@
         }
 {% endmacro %}
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     ObjectHandle::ObjectHandle() = default;
     ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
@@ -852,4 +852,4 @@ namespace dawn_wire {
                                               nullptr, resolver) == WireResult::Success;
     }
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire

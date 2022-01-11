@@ -18,7 +18,7 @@
 #include "dawn_wire/ObjectType_autogen.h"
 #include "dawn_wire/client/ObjectBase.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     template <typename T>
     struct ObjectTypeToTypeEnum {
@@ -48,6 +48,6 @@ namespace dawn_wire::client {
         };
 
     {% endfor %}
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_APIOBJECTS_AUTOGEN_H_

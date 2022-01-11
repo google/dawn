@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
 
     MockMemoryTransferService::MockReadHandle::MockReadHandle(MockMemoryTransferService* service)
         : ReadHandle(), mService(service) {
@@ -88,4 +88,4 @@ namespace dawn_wire::server {
         return new MockWriteHandle(this);
     }
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server

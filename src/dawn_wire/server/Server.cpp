@@ -15,7 +15,7 @@
 #include "dawn_wire/server/Server.h"
 #include "dawn_wire/WireServer.h"
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
 
     Server::Server(const DawnProcTable& procs,
                    CommandSerializer* serializer,
@@ -210,4 +210,4 @@ namespace dawn_wire::server {
         return true;
     }
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server

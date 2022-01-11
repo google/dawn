@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-namespace dawn_wire {
+namespace dawn::wire {
     WireDeserializeAllocator::WireDeserializeAllocator() {
         Reset();
     }
@@ -57,4 +57,4 @@ namespace dawn_wire {
         mCurrentBuffer = mStaticBuffer;
         mRemainingSize = sizeof(mStaticBuffer);
     }
-}  // namespace dawn_wire
+}  // namespace dawn::wire

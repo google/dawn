@@ -18,7 +18,7 @@
 
 #include <cstring>
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
 
     class InlineMemoryTransferService : public MemoryTransferService {
       public:
@@ -91,4 +91,4 @@ namespace dawn_wire::server {
         return std::make_unique<InlineMemoryTransferService>();
     }
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server

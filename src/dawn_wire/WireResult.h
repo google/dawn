@@ -17,7 +17,7 @@
 
 #include "common/Compiler.h"
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     enum class [[nodiscard]] WireResult{
         Success,
@@ -33,6 +33,6 @@ namespace dawn_wire {
         }                                                       \
     } while (0)
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif  // DAWNWIRE_WIRERESULT_H_

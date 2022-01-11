@@ -15,7 +15,7 @@
 #include "common/Assert.h"
 #include "dawn_wire/server/Server.h"
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
     {% for command in cmd_records["command"] %}
         {% set method = command.derived_method %}
         {% set is_method = method != None %}
@@ -147,4 +147,4 @@ namespace dawn_wire::server {
         return commands;
     }
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server

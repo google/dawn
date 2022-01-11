@@ -19,7 +19,7 @@
 
 #include <unordered_set>
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     class LimitsAndFeatures {
       public:
@@ -35,6 +35,6 @@ namespace dawn_wire::client {
         std::unordered_set<WGPUFeatureName> mFeatures;
     };
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client
 
 #endif  // DAWNWIRE_CLIENT_LIMITSANDFEATURES_H_

@@ -17,7 +17,7 @@
 #include "common/Log.h"
 #include "dawn_wire/client/Client.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     Adapter::~Adapter() {
         mRequestDeviceRequests.CloseAll([](RequestDeviceData* request) {
@@ -130,4 +130,4 @@ namespace dawn_wire::client {
         return nullptr;
     }
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client

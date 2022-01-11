@@ -16,7 +16,7 @@
 #include "tests/unittests/wire/WireTest.h"
 
 using namespace testing;
-using namespace dawn_wire;
+using namespace dawn::wire;
 
 class WireDestroyObjectTests : public WireTest {};
 

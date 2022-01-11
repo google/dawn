@@ -97,7 +97,7 @@ inline testing::Matcher<const char*> ValidStringMessage() {
     return MakeMatcher(new StringMessageMatcher());
 }
 
-namespace dawn_wire {
+namespace dawn::wire {
     class WireClient;
     class WireServer;
     namespace client {
@@ -106,7 +106,7 @@ namespace dawn_wire {
     namespace server {
         class MemoryTransferService;
     }  // namespace server
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 namespace utils {
     class TerribleCommandBuffer;
@@ -131,8 +131,8 @@ class WireTest : public testing::Test {
     WGPUDevice device;
     WGPUQueue queue;
 
-    dawn_wire::WireServer* GetWireServer();
-    dawn_wire::WireClient* GetWireClient();
+    dawn::wire::WireServer* GetWireServer();
+    dawn::wire::WireClient* GetWireClient();
 
     void DeleteServer();
     void DeleteClient();
@@ -140,11 +140,11 @@ class WireTest : public testing::Test {
   private:
     void SetupIgnoredCallExpectations();
 
-    virtual dawn_wire::client::MemoryTransferService* GetClientMemoryTransferService();
-    virtual dawn_wire::server::MemoryTransferService* GetServerMemoryTransferService();
+    virtual dawn::wire::client::MemoryTransferService* GetClientMemoryTransferService();
+    virtual dawn::wire::server::MemoryTransferService* GetServerMemoryTransferService();
 
-    std::unique_ptr<dawn_wire::WireServer> mWireServer;
-    std::unique_ptr<dawn_wire::WireClient> mWireClient;
+    std::unique_ptr<dawn::wire::WireServer> mWireServer;
+    std::unique_ptr<dawn::wire::WireClient> mWireClient;
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
     std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
 };

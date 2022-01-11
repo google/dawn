@@ -22,7 +22,7 @@
 #include "dawn_wire/WireDeserializeAllocator.h"
 #include "dawn_wire/server/ObjectStorage.h"
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
 
     class ServerBase : public ChunkedCommandHandler, public ObjectIdResolver {
       public:
@@ -100,6 +100,6 @@ namespace dawn_wire::server {
         {% endfor %}
     };
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server
 
 #endif  // DAWNWIRE_SERVER_SERVERBASE_H_

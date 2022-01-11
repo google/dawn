@@ -113,6 +113,7 @@ namespace dawn::platform {
 
 }  // namespace dawn::platform
 
+// TODO(dawn:824): Remove once the deprecation period is passed.
 namespace dawn_platform = dawn::platform;
 
 #endif  // DAWNPLATFORM_DAWNPLATFORM_H_

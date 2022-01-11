@@ -19,7 +19,7 @@
 
 #include <vector>
 
-namespace dawn_wire {
+namespace dawn::wire {
     // A really really simple implementation of the DeserializeAllocator. It's main feature
     // is that it has some inline storage so as to avoid allocations for the majority of
     // commands.
@@ -38,6 +38,6 @@ namespace dawn_wire {
         char mStaticBuffer[2048];
         std::vector<char*> mAllocations;
     };
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif  // DAWNWIRE_WIREDESERIALIZEALLOCATOR_H_

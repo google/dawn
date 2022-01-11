@@ -21,7 +21,7 @@
 #include <memory>
 #include <vector>
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     namespace client {
         class Client;
@@ -178,6 +178,6 @@ namespace dawn_wire {
         // Backdoor to get the order of the ProcMap for testing
         DAWN_WIRE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();
     }  // namespace client
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif  // DAWNWIRE_WIRECLIENT_H_

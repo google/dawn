@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_wire/SupportedFeatures.h"
 
-namespace dawn_wire::client {
+namespace dawn::wire::client {
 
     bool LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
         ASSERT(limits != nullptr);
@@ -60,4 +60,4 @@ namespace dawn_wire::client {
         }
     }
 
-}  // namespace dawn_wire::client
+}  // namespace dawn::wire::client

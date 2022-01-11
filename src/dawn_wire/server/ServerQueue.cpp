@@ -15,7 +15,7 @@
 #include "common/Assert.h"
 #include "dawn_wire/server/Server.h"
 
-namespace dawn_wire::server {
+namespace dawn::wire::server {
 
     void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data, WGPUQueueWorkDoneStatus status) {
         ReturnQueueWorkDoneCallbackCmd cmd;
@@ -100,4 +100,4 @@ namespace dawn_wire::server {
         return true;
     }
 
-}  // namespace dawn_wire::server
+}  // namespace dawn::wire::server

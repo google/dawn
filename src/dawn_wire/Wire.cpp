@@ -14,7 +14,7 @@
 
 #include "dawn_wire/Wire.h"
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     CommandSerializer::CommandSerializer() = default;
     CommandSerializer::~CommandSerializer() = default;
@@ -25,4 +25,4 @@ namespace dawn_wire {
     CommandHandler::CommandHandler() = default;
     CommandHandler::~CommandHandler() = default;
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire

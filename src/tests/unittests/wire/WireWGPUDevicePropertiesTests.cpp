@@ -28,14 +28,14 @@ TEST_F(WireWGPUDevicePropertiesTests, SerializeWGPUDeviceProperties) {
     sentWGPUDeviceProperties.timestampQuery = true;
 
     size_t sentWGPUDevicePropertiesSize =
-        dawn_wire::SerializedWGPUDevicePropertiesSize(&sentWGPUDeviceProperties);
+        dawn::wire::SerializedWGPUDevicePropertiesSize(&sentWGPUDeviceProperties);
     std::vector<char> buffer;
     buffer.resize(sentWGPUDevicePropertiesSize);
-    dawn_wire::SerializeWGPUDeviceProperties(&sentWGPUDeviceProperties, buffer.data());
+    dawn::wire::SerializeWGPUDeviceProperties(&sentWGPUDeviceProperties, buffer.data());
 
     WGPUDeviceProperties receivedWGPUDeviceProperties;
-    ASSERT_TRUE(dawn_wire::DeserializeWGPUDeviceProperties(&receivedWGPUDeviceProperties,
-                                                           buffer.data(), buffer.size()));
+    ASSERT_TRUE(dawn::wire::DeserializeWGPUDeviceProperties(&receivedWGPUDeviceProperties,
+                                                            buffer.data(), buffer.size()));
     ASSERT_TRUE(receivedWGPUDeviceProperties.textureCompressionBC);
     ASSERT_FALSE(receivedWGPUDeviceProperties.pipelineStatisticsQuery);
     ASSERT_TRUE(receivedWGPUDeviceProperties.timestampQuery);
@@ -46,12 +46,12 @@ TEST_F(WireWGPUDevicePropertiesTests, DeserializeBufferTooSmall) {
     WGPUDeviceProperties sentWGPUDeviceProperties = {};
 
     size_t sentWGPUDevicePropertiesSize =
-        dawn_wire::SerializedWGPUDevicePropertiesSize(&sentWGPUDeviceProperties);
+        dawn::wire::SerializedWGPUDevicePropertiesSize(&sentWGPUDeviceProperties);
     std::vector<char> buffer;
     buffer.resize(sentWGPUDevicePropertiesSize);
-    dawn_wire::SerializeWGPUDeviceProperties(&sentWGPUDeviceProperties, buffer.data());
+    dawn::wire::SerializeWGPUDeviceProperties(&sentWGPUDeviceProperties, buffer.data());
 
     WGPUDeviceProperties receivedWGPUDeviceProperties;
-    ASSERT_FALSE(dawn_wire::DeserializeWGPUDeviceProperties(&receivedWGPUDeviceProperties,
-                                                            buffer.data(), buffer.size() - 1));
+    ASSERT_FALSE(dawn::wire::DeserializeWGPUDeviceProperties(&receivedWGPUDeviceProperties,
+                                                             buffer.data(), buffer.size() - 1));
 }

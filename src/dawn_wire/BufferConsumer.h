@@ -19,7 +19,7 @@
 
 #include <cstddef>
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     // BufferConsumer is a utility class that allows reading bytes from a buffer
     // while simultaneously decrementing the amount of remaining space by exactly
@@ -80,6 +80,6 @@ namespace dawn_wire {
         }
     };
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
 
 #endif  // DAWNWIRE_BUFFERCONSUMER_H_

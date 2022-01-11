@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <cstring>
 
-namespace dawn_wire {
+namespace dawn::wire {
 
     ChunkedCommandHandler::~ChunkedCommandHandler() = default;
 
@@ -76,4 +76,4 @@ namespace dawn_wire {
         return ChunkedCommandsResult::Consumed;
     }
 
-}  // namespace dawn_wire
+}  // namespace dawn::wire
