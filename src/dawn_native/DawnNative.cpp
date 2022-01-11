@@ -262,7 +262,7 @@ namespace dawn_native {
         mImpl->EnableBeginCaptureOnStartup(beginCaptureOnStartup);
     }
 
-    void Instance::SetPlatform(dawn_platform::Platform* platform) {
+    void Instance::SetPlatform(dawn::platform::Platform* platform) {
         mImpl->SetPlatform(platform);
     }
 

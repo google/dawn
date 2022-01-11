@@ -645,7 +645,7 @@
 // for best performance when tracing is disabled.
 // const unsigned char*
 //     TRACE_EVENT_API_GET_CATEGORY_ENABLED(const char* category_name)
-#define TRACE_EVENT_API_GET_CATEGORY_ENABLED dawn_platform::tracing::GetTraceCategoryEnabledFlag
+#define TRACE_EVENT_API_GET_CATEGORY_ENABLED dawn::platform::tracing::GetTraceCategoryEnabledFlag
 
 // Add a trace event to the platform tracing system.
 // void TRACE_EVENT_API_ADD_TRACE_EVENT(
@@ -658,7 +658,7 @@
 //                    const unsigned char* arg_types,
 //                    const unsigned long long* arg_values,
 //                    unsigned char flags)
-#define TRACE_EVENT_API_ADD_TRACE_EVENT dawn_platform::tracing::AddTraceEvent
+#define TRACE_EVENT_API_ADD_TRACE_EVENT dawn::platform::tracing::AddTraceEvent
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -677,44 +677,46 @@
 
 // Implementation detail: internal macro to create static category and add
 // event if the category is enabled.
-#define INTERNAL_TRACE_EVENT_ADD(platform, phase, category, name, flags, ...)                      \
-    do {                                                                                           \
-        INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, ::dawn_platform::TraceCategory::category) \
-        if (*INTERNALTRACEEVENTUID(catstatic)) {                                                   \
-            dawn_platform::TraceEvent::addTraceEvent(                                              \
-                platform, phase, INTERNALTRACEEVENTUID(catstatic), name,                           \
-                dawn_platform::TraceEvent::noEventId, flags, __VA_ARGS__);                         \
-        }                                                                                          \
+#define INTERNAL_TRACE_EVENT_ADD(platformObj, phase, category, name, flags, ...)          \
+    do {                                                                                  \
+        INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platformObj,                               \
+                                               ::dawn::platform::TraceCategory::category) \
+        if (*INTERNALTRACEEVENTUID(catstatic)) {                                          \
+            dawn::platform::TraceEvent::addTraceEvent(                                    \
+                platformObj, phase, INTERNALTRACEEVENTUID(catstatic), name,               \
+                dawn::platform::TraceEvent::noEventId, flags, __VA_ARGS__);               \
+        }                                                                                 \
     } while (0)
 
 // Implementation detail: internal macro to create static category and add begin
 // event if the category is enabled. Also adds the end event when the scope
 // ends.
-#define INTERNAL_TRACE_EVENT_ADD_SCOPED(platform, category, name, ...)                         \
-    INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, ::dawn_platform::TraceCategory::category) \
-    dawn_platform::TraceEvent::TraceEndOnScopeClose INTERNALTRACEEVENTUID(profileScope);       \
-    do {                                                                                       \
-        if (*INTERNALTRACEEVENTUID(catstatic)) {                                               \
-            dawn_platform::TraceEvent::addTraceEvent(                                          \
-                platform, TRACE_EVENT_PHASE_BEGIN, INTERNALTRACEEVENTUID(catstatic), name,     \
-                dawn_platform::TraceEvent::noEventId, TRACE_EVENT_FLAG_NONE, __VA_ARGS__);     \
-            INTERNALTRACEEVENTUID(profileScope)                                                \
-                .initialize(platform, INTERNALTRACEEVENTUID(catstatic), name);                 \
-        }                                                                                      \
+#define INTERNAL_TRACE_EVENT_ADD_SCOPED(platformObj, category, name, ...)                          \
+    INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platformObj, ::dawn::platform::TraceCategory::category) \
+    dawn::platform::TraceEvent::TraceEndOnScopeClose INTERNALTRACEEVENTUID(profileScope);          \
+    do {                                                                                           \
+        if (*INTERNALTRACEEVENTUID(catstatic)) {                                                   \
+            dawn::platform::TraceEvent::addTraceEvent(                                             \
+                platformObj, TRACE_EVENT_PHASE_BEGIN, INTERNALTRACEEVENTUID(catstatic), name,      \
+                dawn::platform::TraceEvent::noEventId, TRACE_EVENT_FLAG_NONE, __VA_ARGS__);        \
+            INTERNALTRACEEVENTUID(profileScope)                                                    \
+                .initialize(platformObj, INTERNALTRACEEVENTUID(catstatic), name);                  \
+        }                                                                                          \
     } while (0)
 
 // Implementation detail: internal macro to create static category and add
 // event if the category is enabled.
-#define INTERNAL_TRACE_EVENT_ADD_WITH_ID(platform, phase, category, name, id, flags, ...)          \
-    do {                                                                                           \
-        INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, ::dawn_platform::TraceCategory::category) \
-        if (*INTERNALTRACEEVENTUID(catstatic)) {                                                   \
-            unsigned char traceEventFlags = flags | TRACE_EVENT_FLAG_HAS_ID;                       \
-            dawn_platform::TraceEvent::TraceID traceEventTraceID(id, &traceEventFlags);            \
-            dawn_platform::TraceEvent::addTraceEvent(                                              \
-                platform, phase, INTERNALTRACEEVENTUID(catstatic), name, traceEventTraceID.data(), \
-                traceEventFlags, __VA_ARGS__);                                                     \
-        }                                                                                          \
+#define INTERNAL_TRACE_EVENT_ADD_WITH_ID(platformObj, phase, category, name, id, flags, ...) \
+    do {                                                                                     \
+        INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platformObj,                                  \
+                                               ::dawn::platform::TraceCategory::category)    \
+        if (*INTERNALTRACEEVENTUID(catstatic)) {                                             \
+            unsigned char traceEventFlags = flags | TRACE_EVENT_FLAG_HAS_ID;                 \
+            dawn::platform::TraceEvent::TraceID traceEventTraceID(id, &traceEventFlags);     \
+            dawn::platform::TraceEvent::addTraceEvent(                                       \
+                platformObj, phase, INTERNALTRACEEVENTUID(catstatic), name,                  \
+                traceEventTraceID.data(), traceEventFlags, __VA_ARGS__);                     \
+        }                                                                                    \
     } while (0)
 
 // Notes regarding the following definitions:
@@ -754,7 +756,7 @@
 #define TRACE_VALUE_TYPE_STRING (static_cast<unsigned char>(6))
 #define TRACE_VALUE_TYPE_COPY_STRING (static_cast<unsigned char>(7))
 
-namespace dawn_platform::TraceEvent {
+namespace dawn::platform::TraceEvent {
 
     // Specify these values when the corresponding argument of addTraceEvent is not
     // used.
@@ -887,8 +889,8 @@ namespace dawn_platform::TraceEvent {
         // store pointers to the internal c_str and pass through to the tracing API, the
         // arg values must live throughout these procedures.
 
-        static inline dawn_platform::tracing::TraceEventHandle addTraceEvent(
-            dawn_platform::Platform* platform,
+        static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
+            dawn::platform::Platform* platform,
             char phase,
             const unsigned char* categoryEnabled,
             const char* name,
@@ -900,8 +902,8 @@ namespace dawn_platform::TraceEvent {
         }
 
         template <class ARG1_TYPE>
-        static inline dawn_platform::tracing::TraceEventHandle addTraceEvent(
-            dawn_platform::Platform* platform,
+        static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
+            dawn::platform::Platform* platform,
             char phase,
             const unsigned char* categoryEnabled,
             const char* name,
@@ -919,8 +921,8 @@ namespace dawn_platform::TraceEvent {
         }
 
         template <class ARG1_TYPE, class ARG2_TYPE>
-        static inline dawn_platform::tracing::TraceEventHandle addTraceEvent(
-            dawn_platform::Platform* platform,
+        static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
+            dawn::platform::Platform* platform,
             char phase,
             const unsigned char* categoryEnabled,
             const char* name,
@@ -952,7 +954,7 @@ namespace dawn_platform::TraceEvent {
                     addEventIfEnabled();
             }
 
-            void initialize(dawn_platform::Platform* platform,
+            void initialize(dawn::platform::Platform* platform,
                             const unsigned char* categoryEnabled,
                             const char* name) {
                 m_data.platform = platform;
@@ -978,7 +980,7 @@ namespace dawn_platform::TraceEvent {
             // members of this class instead, compiler warnings occur about potential
             // uninitialized accesses.
             struct Data {
-                dawn_platform::Platform* platform;
+                dawn::platform::Platform* platform;
                 const unsigned char* categoryEnabled;
                 const char* name;
             };
@@ -986,6 +988,6 @@ namespace dawn_platform::TraceEvent {
             Data m_data;
         };
 
-}  // namespace dawn_platform::TraceEvent
+}  // namespace dawn::platform::TraceEvent
 
 #endif  // DAWNPLATFORM_TRACING_TRACEEVENT_H_

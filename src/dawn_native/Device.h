@@ -33,9 +33,9 @@
 #include <mutex>
 #include <utility>
 
-namespace dawn_platform {
+namespace dawn::platform {
     class WorkerTaskPool;
-}  // namespace dawn_platform
+}  // namespace dawn::platform
 
 namespace dawn_native {
     class AdapterBase;
@@ -126,7 +126,7 @@ namespace dawn_native {
         MaybeError ValidateObject(const ApiObjectBase* object) const;
 
         AdapterBase* GetAdapter() const;
-        dawn_platform::Platform* GetPlatform() const;
+        dawn::platform::Platform* GetPlatform() const;
 
         // Returns the Format corresponding to the wgpu::TextureFormat or an error if the format
         // isn't a valid wgpu::TextureFormat or isn't supported by this device.
@@ -353,7 +353,7 @@ namespace dawn_native {
 
         AsyncTaskManager* GetAsyncTaskManager() const;
         CallbackTaskManager* GetCallbackTaskManager() const;
-        dawn_platform::WorkerTaskPool* GetWorkerTaskPool() const;
+        dawn::platform::WorkerTaskPool* GetWorkerTaskPool() const;
 
         void AddComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
                                                  std::string errorMessage,
@@ -536,7 +536,7 @@ namespace dawn_native {
         std::unique_ptr<PersistentCache> mPersistentCache;
 
         std::unique_ptr<CallbackTaskManager> mCallbackTaskManager;
-        std::unique_ptr<dawn_platform::WorkerTaskPool> mWorkerTaskPool;
+        std::unique_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
         std::string mLabel;
     };
 

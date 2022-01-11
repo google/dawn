@@ -22,9 +22,9 @@
 #include <string>
 #include <vector>
 
-namespace dawn_platform {
+namespace dawn::platform {
     class Platform;
-}  // namespace dawn_platform
+}  // namespace dawn::platform
 
 namespace wgpu {
     struct AdapterProperties;
@@ -193,7 +193,7 @@ namespace dawn_native {
         // Enable debug capture on Dawn startup
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
 
-        void SetPlatform(dawn_platform::Platform* platform);
+        void SetPlatform(dawn::platform::Platform* platform);
 
         // Returns the underlying WGPUInstance object.
         WGPUInstance Get() const;

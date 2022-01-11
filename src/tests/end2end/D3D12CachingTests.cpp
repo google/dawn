@@ -27,7 +27,7 @@
     } while (0)
 
 // FakePersistentCache implements a in-memory persistent cache.
-class FakePersistentCache : public dawn_platform::CachingInterface {
+class FakePersistentCache : public dawn::platform::CachingInterface {
   public:
     // PersistentCache API
     void StoreData(const WGPUDevice device,
@@ -72,24 +72,24 @@ class FakePersistentCache : public dawn_platform::CachingInterface {
 };
 
 // Test platform that only supports caching.
-class DawnTestPlatform : public dawn_platform::Platform {
+class DawnTestPlatform : public dawn::platform::Platform {
   public:
-    DawnTestPlatform(dawn_platform::CachingInterface* cachingInterface)
+    DawnTestPlatform(dawn::platform::CachingInterface* cachingInterface)
         : mCachingInterface(cachingInterface) {
     }
     ~DawnTestPlatform() override = default;
 
-    dawn_platform::CachingInterface* GetCachingInterface(const void* fingerprint,
-                                                         size_t fingerprintSize) override {
+    dawn::platform::CachingInterface* GetCachingInterface(const void* fingerprint,
+                                                          size_t fingerprintSize) override {
         return mCachingInterface;
     }
 
-    dawn_platform::CachingInterface* mCachingInterface = nullptr;
+    dawn::platform::CachingInterface* mCachingInterface = nullptr;
 };
 
 class D3D12CachingTests : public DawnTest {
   protected:
-    std::unique_ptr<dawn_platform::Platform> CreateTestPlatform() override {
+    std::unique_ptr<dawn::platform::Platform> CreateTestPlatform() override {
         return std::make_unique<DawnTestPlatform>(&mPersistentCache);
     }
 

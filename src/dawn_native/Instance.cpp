@@ -272,17 +272,17 @@ namespace dawn_native {
         return mBeginCaptureOnStartup;
     }
 
-    void InstanceBase::SetPlatform(dawn_platform::Platform* platform) {
+    void InstanceBase::SetPlatform(dawn::platform::Platform* platform) {
         mPlatform = platform;
     }
 
-    dawn_platform::Platform* InstanceBase::GetPlatform() {
+    dawn::platform::Platform* InstanceBase::GetPlatform() {
         if (mPlatform != nullptr) {
             return mPlatform;
         }
 
         if (mDefaultPlatform == nullptr) {
-            mDefaultPlatform = std::make_unique<dawn_platform::Platform>();
+            mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
         }
         return mDefaultPlatform.get();
     }

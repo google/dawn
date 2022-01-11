@@ -595,7 +595,7 @@ namespace dawn_native {
         return mAdapter;
     }
 
-    dawn_platform::Platform* DeviceBase::GetPlatform() const {
+    dawn::platform::Platform* DeviceBase::GetPlatform() const {
         return GetAdapter()->GetInstance()->GetPlatform();
     }
 
@@ -1649,7 +1649,7 @@ namespace dawn_native {
         return mCallbackTaskManager.get();
     }
 
-    dawn_platform::WorkerTaskPool* DeviceBase::GetWorkerTaskPool() const {
+    dawn::platform::WorkerTaskPool* DeviceBase::GetWorkerTaskPool() const {
         return mWorkerTaskPool.get();
     }
 

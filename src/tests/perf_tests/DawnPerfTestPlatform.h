@@ -27,7 +27,7 @@ namespace utils {
     class Timer;
 }
 
-class DawnPerfTestPlatform : public dawn_platform::Platform {
+class DawnPerfTestPlatform : public dawn::platform::Platform {
   public:
     // These are trace events according to Google's "Trace Event Format".
     // See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
@@ -36,7 +36,7 @@ class DawnPerfTestPlatform : public dawn_platform::Platform {
         TraceEvent() {
         }
         TraceEvent(char phaseIn,
-                   dawn_platform::TraceCategory categoryIn,
+                   dawn::platform::TraceCategory categoryIn,
                    const char* nameIn,
                    uint64_t idIn,
                    double timestampIn)
@@ -44,7 +44,7 @@ class DawnPerfTestPlatform : public dawn_platform::Platform {
         }
 
         char phase = 0;
-        dawn_platform::TraceCategory category;
+        dawn::platform::TraceCategory category;
         const char* name = nullptr;
         uint64_t id = 0;
         std::string threadId;
@@ -59,7 +59,7 @@ class DawnPerfTestPlatform : public dawn_platform::Platform {
 
   private:
     const unsigned char* GetTraceCategoryEnabledFlag(
-        dawn_platform::TraceCategory category) override;
+        dawn::platform::TraceCategory category) override;
 
     double MonotonicallyIncreasingTime() override;
 

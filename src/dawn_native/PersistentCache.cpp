@@ -51,11 +51,11 @@ namespace dawn_native {
         mCache->StoreData(ToAPI(mDevice), key.data(), key.size(), value, size);
     }
 
-    dawn_platform::CachingInterface* PersistentCache::GetPlatformCache() {
+    dawn::platform::CachingInterface* PersistentCache::GetPlatformCache() {
         // TODO(dawn:549): Create a fingerprint of concatenated version strings (ex. Tint commit
         // hash, Dawn commit hash). This will be used by the client so it may know when to discard
         // previously cached Dawn objects should this fingerprint change.
-        dawn_platform::Platform* platform = mDevice->GetPlatform();
+        dawn::platform::Platform* platform = mDevice->GetPlatform();
         if (platform != nullptr) {
             return platform->GetCachingInterface(/*fingerprint*/ nullptr, /*fingerprintSize*/ 0);
         }

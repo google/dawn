@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-namespace dawn_platform {
+namespace dawn::platform {
 
     class Platform;
     enum class TraceCategory;
@@ -46,6 +46,6 @@ namespace dawn_platform {
                       unsigned char flags);
 
     }  // namespace tracing
-}  // namespace dawn_platform
+}  // namespace dawn::platform
 
 #endif  // DAWNPLATFORM_TRACING_EVENTTRACER_H_

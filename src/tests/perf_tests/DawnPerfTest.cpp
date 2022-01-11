@@ -37,16 +37,16 @@ namespace {
         for (const DawnPerfTestPlatform::TraceEvent& traceEvent : traceEventBuffer) {
             const char* category = nullptr;
             switch (traceEvent.category) {
-                case dawn_platform::TraceCategory::General:
+                case dawn::platform::TraceCategory::General:
                     category = "general";
                     break;
-                case dawn_platform::TraceCategory::Validation:
+                case dawn::platform::TraceCategory::Validation:
                     category = "validation";
                     break;
-                case dawn_platform::TraceCategory::Recording:
+                case dawn::platform::TraceCategory::Recording:
                     category = "recording";
                     break;
-                case dawn_platform::TraceCategory::GPUWork:
+                case dawn::platform::TraceCategory::GPUWork:
                     category = "gpu";
                     break;
                 default:
@@ -231,7 +231,7 @@ void DawnPerfTestBase::RunTest() {
 }
 
 void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
-    dawn_platform::Platform* platform = gTestEnv->GetPlatform();
+    dawn::platform::Platform* platform = gTestEnv->GetPlatform();
 
     mNumStepsPerformed = 0;
     mCpuTime = 0;
@@ -313,11 +313,11 @@ void DawnPerfTestBase::OutputResults() {
         double* totalTime = nullptr;
 
         switch (traceEvent.category) {
-            case dawn_platform::TraceCategory::Validation:
+            case dawn::platform::TraceCategory::Validation:
                 tracker = &validationTracker;
                 totalTime = &totalValidationTime;
                 break;
-            case dawn_platform::TraceCategory::Recording:
+            case dawn::platform::TraceCategory::Recording:
                 tracker = &recordingTracker;
                 totalTime = &totalRecordingTime;
                 break;

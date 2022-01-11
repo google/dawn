@@ -1541,7 +1541,7 @@ void DawnTestBase::ResolveExpectations() {
     }
 }
 
-std::unique_ptr<dawn_platform::Platform> DawnTestBase::CreateTestPlatform() {
+std::unique_ptr<dawn::platform::Platform> DawnTestBase::CreateTestPlatform() {
     return nullptr;
 }
 

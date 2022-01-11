@@ -17,7 +17,7 @@
 
 #include "common/Assert.h"
 
-namespace dawn_platform {
+namespace dawn::platform {
 
     CachingInterface::CachingInterface() = default;
 
@@ -51,13 +51,13 @@ namespace dawn_platform {
         return 0;
     }
 
-    dawn_platform::CachingInterface* Platform::GetCachingInterface(const void* fingerprint,
-                                                                   size_t fingerprintSize) {
+    dawn::platform::CachingInterface* Platform::GetCachingInterface(const void* fingerprint,
+                                                                    size_t fingerprintSize) {
         return nullptr;
     }
 
-    std::unique_ptr<dawn_platform::WorkerTaskPool> Platform::CreateWorkerTaskPool() {
+    std::unique_ptr<dawn::platform::WorkerTaskPool> Platform::CreateWorkerTaskPool() {
         return std::make_unique<AsyncWorkerThreadPool>();
     }
 
-}  // namespace dawn_platform
+}  // namespace dawn::platform

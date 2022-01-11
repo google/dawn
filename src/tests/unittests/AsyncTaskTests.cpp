@@ -64,8 +64,8 @@ class AsyncTaskTest : public testing::Test {};
 
 // Emulate the basic usage of worker thread pool in Create*PipelineAsync().
 TEST_F(AsyncTaskTest, Basic) {
-    dawn_platform::Platform platform;
-    std::unique_ptr<dawn_platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
+    dawn::platform::Platform platform;
+    std::unique_ptr<dawn::platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
 
     dawn_native::AsyncTaskManager taskManager(pool.get());
     ConcurrentTaskResultQueue taskResultQueue;

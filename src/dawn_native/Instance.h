@@ -28,9 +28,9 @@
 #include <unordered_map>
 #include <vector>
 
-namespace dawn_platform {
+namespace dawn::platform {
     class Platform;
-}  // namespace dawn_platform
+}  // namespace dawn::platform
 
 namespace dawn_native {
 
@@ -73,8 +73,8 @@ namespace dawn_native {
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
         bool IsBeginCaptureOnStartupEnabled() const;
 
-        void SetPlatform(dawn_platform::Platform* platform);
-        dawn_platform::Platform* GetPlatform();
+        void SetPlatform(dawn::platform::Platform* platform);
+        dawn::platform::Platform* GetPlatform();
 
         // Get backend-independent libraries that need to be loaded dynamically.
         const XlibXcbFunctions* GetOrCreateXlibXcbFunctions();
@@ -103,8 +103,8 @@ namespace dawn_native {
         bool mBeginCaptureOnStartup = false;
         BackendValidationLevel mBackendValidationLevel = BackendValidationLevel::Disabled;
 
-        dawn_platform::Platform* mPlatform = nullptr;
-        std::unique_ptr<dawn_platform::Platform> mDefaultPlatform;
+        dawn::platform::Platform* mPlatform = nullptr;
+        std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
 
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<std::unique_ptr<AdapterBase>> mAdapters;

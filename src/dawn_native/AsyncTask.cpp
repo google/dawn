@@ -4,7 +4,7 @@
 
 namespace dawn_native {
 
-    AsyncTaskManager::AsyncTaskManager(dawn_platform::WorkerTaskPool* workerTaskPool)
+    AsyncTaskManager::AsyncTaskManager(dawn::platform::WorkerTaskPool* workerTaskPool)
         : mWorkerTaskPool(workerTaskPool) {
     }
 

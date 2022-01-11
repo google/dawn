@@ -51,7 +51,7 @@ namespace {
         bool mIsComplete;
     };
 
-    class AsyncWaitableEvent final : public dawn_platform::WaitableEvent {
+    class AsyncWaitableEvent final : public dawn::platform::WaitableEvent {
       public:
         explicit AsyncWaitableEvent()
             : mWaitableEventImpl(std::make_shared<AsyncWaitableEventImpl>()) {
@@ -75,10 +75,10 @@ namespace {
 
 }  // anonymous namespace
 
-namespace dawn_platform {
+namespace dawn::platform {
 
-    std::unique_ptr<dawn_platform::WaitableEvent> AsyncWorkerThreadPool::PostWorkerTask(
-        dawn_platform::PostWorkerTaskCallback callback,
+    std::unique_ptr<dawn::platform::WaitableEvent> AsyncWorkerThreadPool::PostWorkerTask(
+        dawn::platform::PostWorkerTaskCallback callback,
         void* userdata) {
         std::unique_ptr<AsyncWaitableEvent> waitableEvent = std::make_unique<AsyncWaitableEvent>();
 
@@ -94,4 +94,4 @@ namespace dawn_platform {
         return waitableEvent;
     }
 
-}  // namespace dawn_platform
+}  // namespace dawn::platform

@@ -23,7 +23,7 @@
 
 #include <dawn/webgpu.h>
 
-namespace dawn_platform {
+namespace dawn::platform {
 
     enum class TraceCategory {
         General,     // General trace events
@@ -111,6 +111,8 @@ namespace dawn_platform {
         Platform& operator=(const Platform&) = delete;
     };
 
-}  // namespace dawn_platform
+}  // namespace dawn::platform
+
+namespace dawn_platform = dawn::platform;
 
 #endif  // DAWNPLATFORM_DAWNPLATFORM_H_

@@ -324,7 +324,7 @@ class DawnTestBase {
     wgpu::Instance GetInstance() const;
     dawn_native::Adapter GetAdapter() const;
 
-    virtual std::unique_ptr<dawn_platform::Platform> CreateTestPlatform();
+    virtual std::unique_ptr<dawn::platform::Platform> CreateTestPlatform();
 
     struct PrintToStringParamName {
         PrintToStringParamName(const char* test);
@@ -599,7 +599,7 @@ class DawnTestBase {
 
     dawn_native::Adapter mBackendAdapter;
 
-    std::unique_ptr<dawn_platform::Platform> mTestPlatform;
+    std::unique_ptr<dawn::platform::Platform> mTestPlatform;
 };
 
 #define DAWN_SKIP_TEST_IF_BASE(condition, type, reason)   \

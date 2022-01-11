@@ -53,8 +53,8 @@ class ConcurrentCacheTest : public testing::Test {
     }
 
   protected:
-    dawn_platform::Platform mPlatform;
-    std::unique_ptr<dawn_platform::WorkerTaskPool> mPool;
+    dawn::platform::Platform mPlatform;
+    std::unique_ptr<dawn::platform::WorkerTaskPool> mPool;
     dawn_native::AsyncTaskManager mTaskManager;
     ConcurrentCache<SimpleCachedObject> mCache;
 };

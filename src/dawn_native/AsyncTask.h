@@ -22,10 +22,10 @@
 
 #include "common/RefCounted.h"
 
-namespace dawn_platform {
+namespace dawn::platform {
     class WaitableEvent;
     class WorkerTaskPool;
-}  // namespace dawn_platform
+}  // namespace dawn::platform
 
 namespace dawn_native {
 
@@ -38,7 +38,7 @@ namespace dawn_native {
 
     class AsyncTaskManager {
       public:
-        explicit AsyncTaskManager(dawn_platform::WorkerTaskPool* workerTaskPool);
+        explicit AsyncTaskManager(dawn::platform::WorkerTaskPool* workerTaskPool);
 
         void PostTask(AsyncTask asyncTask);
         void WaitAllPendingTasks();
@@ -49,7 +49,7 @@ namespace dawn_native {
           public:
             AsyncTask asyncTask;
             AsyncTaskManager* taskManager;
-            std::unique_ptr<dawn_platform::WaitableEvent> waitableEvent;
+            std::unique_ptr<dawn::platform::WaitableEvent> waitableEvent;
         };
 
         static void DoWaitableTask(void* task);
@@ -57,7 +57,7 @@ namespace dawn_native {
 
         std::mutex mPendingTasksMutex;
         std::unordered_map<WaitableTask*, Ref<WaitableTask>> mPendingTasks;
-        dawn_platform::WorkerTaskPool* mWorkerTaskPool;
+        dawn::platform::WorkerTaskPool* mWorkerTaskPool;
     };
 
 }  // namespace dawn_native
