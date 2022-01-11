@@ -34,6 +34,7 @@
 namespace dawn_native::d3d12 {
 
     namespace {
+
         D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
@@ -517,15 +518,12 @@ namespace dawn_native::d3d12 {
         const TextureDescriptor* descriptor,
         ComPtr<ID3D12Resource> d3d12Texture,
         Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-        ExternalMutexSerial acquireMutexKey,
-        ExternalMutexSerial releaseMutexKey,
         bool isSwapChainTexture,
         bool isInitialized) {
         Ref<Texture> dawnTexture =
             AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
         DAWN_TRY(dawnTexture->InitializeAsExternalTexture(
-            descriptor, std::move(d3d12Texture), std::move(d3d11on12Resource), acquireMutexKey,
-            releaseMutexKey, isSwapChainTexture));
+            descriptor, std::move(d3d12Texture), std::move(d3d11on12Resource), isSwapChainTexture));
 
         // Importing a multi-planar format must be initialized. This is required because
         // a shared multi-planar format cannot be initialized by Dawn.
@@ -553,15 +551,11 @@ namespace dawn_native::d3d12 {
         const TextureDescriptor* descriptor,
         ComPtr<ID3D12Resource> d3d12Texture,
         Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-        ExternalMutexSerial acquireMutexKey,
-        ExternalMutexSerial releaseMutexKey,
         bool isSwapChainTexture) {
         DAWN_TRY(CheckHRESULT(d3d11on12Resource->GetDXGIKeyedMutex()->AcquireSync(
-                                  uint64_t(acquireMutexKey), INFINITE),
+                                  kDXGIKeyedMutexAcquireReleaseKey, INFINITE),
                               "D3D12 acquiring shared mutex"));
 
-        mAcquireMutexKey = acquireMutexKey;
-        mReleaseMutexKey = releaseMutexKey;
         mD3D11on12Resource = std::move(d3d11on12Resource);
         mSwapChainTexture = isSwapChainTexture;
 
@@ -680,7 +674,7 @@ namespace dawn_native::d3d12 {
         mSwapChainTexture = false;
 
         if (mD3D11on12Resource != nullptr) {
-            mD3D11on12Resource->GetDXGIKeyedMutex()->ReleaseSync(uint64_t(mReleaseMutexKey));
+            mD3D11on12Resource->GetDXGIKeyedMutex()->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
         }
     }
 

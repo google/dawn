@@ -45,8 +45,6 @@ namespace dawn_native::d3d12 {
             const TextureDescriptor* descriptor,
             ComPtr<ID3D12Resource> d3d12Texture,
             Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-            ExternalMutexSerial acquireMutexKey,
-            ExternalMutexSerial releaseMutexKey,
             bool isSwapChainTexture,
             bool isInitialized);
         static ResultOrError<Ref<Texture>> Create(Device* device,
@@ -96,8 +94,6 @@ namespace dawn_native::d3d12 {
         MaybeError InitializeAsExternalTexture(const TextureDescriptor* descriptor,
                                                ComPtr<ID3D12Resource> d3d12Texture,
                                                Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-                                               ExternalMutexSerial acquireMutexKey,
-                                               ExternalMutexSerial releaseMutexKey,
                                                bool isSwapChainTexture);
         MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture);
 
@@ -136,8 +132,6 @@ namespace dawn_native::d3d12 {
         bool mSwapChainTexture = false;
         D3D12_RESOURCE_FLAGS mD3D12ResourceFlags;
 
-        ExternalMutexSerial mAcquireMutexKey = ExternalMutexSerial(0);
-        ExternalMutexSerial mReleaseMutexKey = ExternalMutexSerial(0);
         Ref<D3D11on12ResourceCacheEntry> mD3D11on12Resource;
     };
 

@@ -55,9 +55,14 @@ namespace dawn_native::d3d12 {
         HANDLE sharedHandle;
     };
 
+    // Keyed mutex acquire/release uses a fixed key of 0 to match Chromium behavior.
+    constexpr UINT64 kDXGIKeyedMutexAcquireReleaseKey = 0;
+
     struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptorDXGIKeyedMutex
         : ExternalImageAccessDescriptor {
       public:
+        // TODO(chromium:1241533): Remove deprecated keyed mutex params after removing associated
+        // code from Chromium - we use a fixed key of 0 for acquire and release everywhere now.
         uint64_t acquireMutexKey;
         uint64_t releaseMutexKey;
         bool isSwapChainTexture = false;

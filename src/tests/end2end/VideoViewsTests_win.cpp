@@ -144,10 +144,11 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         hr = d3d11Texture.As(&dxgiKeyedMutex);
         ASSERT(hr == S_OK);
 
-        hr = dxgiKeyedMutex->AcquireSync(0, INFINITE);
+        using dawn_native::d3d12::kDXGIKeyedMutexAcquireReleaseKey;
+        hr = dxgiKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE);
         ASSERT(hr == S_OK);
 
-        hr = dxgiKeyedMutex->ReleaseSync(1);
+        hr = dxgiKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
         ASSERT(hr == S_OK);
 
         // Open the DX11 texture in Dawn from the shared handle and return it as a WebGPU
@@ -164,8 +165,6 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         ::CloseHandle(sharedHandle);
 
         dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
-        externalAccessDesc.acquireMutexKey = 1;
-        externalAccessDesc.releaseMutexKey = 2;
         externalAccessDesc.isInitialized = true;
         externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(textureDesc.usage);
 

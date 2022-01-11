@@ -108,9 +108,7 @@ namespace dawn_native::d3d12 {
 
         Ref<TextureBase> texture = backendDevice->CreateExternalTexture(
             &textureDescriptor, mD3D12Resource, std::move(d3d11on12Resource),
-            ExternalMutexSerial(descriptor->acquireMutexKey),
-            ExternalMutexSerial(descriptor->releaseMutexKey), descriptor->isSwapChainTexture,
-            descriptor->isInitialized);
+            descriptor->isSwapChainTexture, descriptor->isInitialized);
 
         return ToAPI(texture.Detach());
     }

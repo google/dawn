@@ -534,16 +534,13 @@ namespace dawn_native::d3d12 {
         const TextureDescriptor* descriptor,
         ComPtr<ID3D12Resource> d3d12Texture,
         Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-        ExternalMutexSerial acquireMutexKey,
-        ExternalMutexSerial releaseMutexKey,
         bool isSwapChainTexture,
         bool isInitialized) {
         Ref<Texture> dawnTexture;
-        if (ConsumedError(
-                Texture::CreateExternalImage(this, descriptor, std::move(d3d12Texture),
-                                             std::move(d3d11on12Resource), acquireMutexKey,
-                                             releaseMutexKey, isSwapChainTexture, isInitialized),
-                &dawnTexture)) {
+        if (ConsumedError(Texture::CreateExternalImage(this, descriptor, std::move(d3d12Texture),
+                                                       std::move(d3d11on12Resource),
+                                                       isSwapChainTexture, isInitialized),
+                          &dawnTexture)) {
             return nullptr;
         }
         return {dawnTexture};
