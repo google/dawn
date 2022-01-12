@@ -64,8 +64,12 @@ namespace dawn_native::d3d12 {
                                                        Aspect aspects,
                                                        bool depthReadOnly,
                                                        bool stencilReadOnly) const;
+
         void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                                  const SubresourceRange& range);
+
+        MaybeError AcquireKeyedMutex();
+        void ReleaseKeyedMutex();
 
         void TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* commandContext,
                                                     std::vector<D3D12_RESOURCE_BARRIER>* barrier,

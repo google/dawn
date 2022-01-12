@@ -19,7 +19,10 @@
 
 #include "common/HashUtils.h"
 #include "common/Log.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
+
+#include <dawn_native/D3D12Backend.h>
 
 namespace dawn_native::d3d12 {
 
@@ -69,6 +72,10 @@ namespace dawn_native::d3d12 {
             return;
         }
 
+        if (mAcquireCount > 0) {
+            mDXGIKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
+        }
+
         ComPtr<ID3D11Resource> d3d11Resource;
         if (FAILED(mDXGIKeyedMutex.As(&d3d11Resource))) {
             return;
@@ -85,9 +92,25 @@ namespace dawn_native::d3d12 {
         Flush11On12DeviceToAvoidLeaks(std::move(mD3D11on12Device));
     }
 
-    ComPtr<IDXGIKeyedMutex> D3D11on12ResourceCacheEntry::GetDXGIKeyedMutex() const {
+    MaybeError D3D11on12ResourceCacheEntry::AcquireKeyedMutex() {
         ASSERT(mDXGIKeyedMutex != nullptr);
-        return mDXGIKeyedMutex;
+        ASSERT(mAcquireCount >= 0);
+        if (mAcquireCount == 0) {
+            DAWN_TRY(CheckHRESULT(
+                mDXGIKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE),
+                "D3D12 acquiring shared mutex"));
+        }
+        mAcquireCount++;
+        return {};
+    }
+
+    void D3D11on12ResourceCacheEntry::ReleaseKeyedMutex() {
+        ASSERT(mDXGIKeyedMutex != nullptr);
+        ASSERT(mAcquireCount > 0);
+        mAcquireCount--;
+        if (mAcquireCount == 0) {
+            mDXGIKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
+        }
     }
 
     size_t D3D11on12ResourceCacheEntry::HashFunc::operator()(

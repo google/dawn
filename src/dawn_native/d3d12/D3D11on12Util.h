@@ -16,6 +16,7 @@
 #define DAWNNATIVE_D3D11ON12UTIL_H_
 
 #include "common/RefCounted.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 #include <dawn_native/DawnNative.h>
@@ -35,7 +36,8 @@ namespace dawn_native::d3d12 {
                                     ComPtr<ID3D11On12Device> d3d11on12Device);
         ~D3D11on12ResourceCacheEntry();
 
-        ComPtr<IDXGIKeyedMutex> GetDXGIKeyedMutex() const;
+        MaybeError AcquireKeyedMutex();
+        void ReleaseKeyedMutex();
 
         // Functors necessary for the
         // unordered_set<D3D11on12ResourceCacheEntry&>-based cache.
@@ -51,6 +53,7 @@ namespace dawn_native::d3d12 {
       private:
         ComPtr<IDXGIKeyedMutex> mDXGIKeyedMutex;
         ComPtr<ID3D11On12Device> mD3D11on12Device;
+        int64_t mAcquireCount = 0;
     };
 
     // |D3D11on12ResourceCache| maintains a cache of 11 wrapped resources.

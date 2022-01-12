@@ -624,6 +624,51 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
     }
 }
 
+TEST_P(D3D12SharedHandleUsageTests, RecursiveExternalImageAccess) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    // Create the first Dawn texture then clear it to red.
+    wgpu::Texture texture1;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    std::unique_ptr<dawn_native::d3d12::ExternalImageDXGI> externalImage;
+    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture1, &d3d11Texture,
+                     &externalImage);
+    {
+        const wgpu::Color solidRed{1.0f, 0.0f, 0.0f, 1.0f};
+        ASSERT_NE(texture1.Get(), nullptr);
+        ClearImage(texture1.Get(), solidRed, device);
+
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture1.Get(), 0, 0);
+    }
+
+    // Create another Dawn texture then clear it with another color.
+    dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+    externalAccessDesc.isInitialized = true;
+    externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(baseDawnDescriptor.usage);
+
+    // Acquire the ExternalImageDXGI again without destroying the original texture.
+    wgpu::Texture texture2 =
+        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+
+    // Check again that the new texture is still red
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture2.Get(), 0, 0);
+
+    // Clear the new texture to blue
+    {
+        const wgpu::Color solidBlue{0.0f, 0.0f, 1.0f, 1.0f};
+        ASSERT_NE(texture2.Get(), nullptr);
+        ClearImage(texture2.Get(), solidBlue, device);
+
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture2.Get(), 0, 0);
+    }
+
+    // Check that the original texture is also blue
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture1.Get(), 0, 0);
+
+    texture1.Destroy();
+    texture2.Destroy();
+}
+
 // Produce a new texture with a usage not specified in the external image.
 TEST_P(D3D12SharedHandleUsageTests, ExternalImageUsage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
