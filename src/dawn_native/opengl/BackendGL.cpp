@@ -270,12 +270,12 @@ namespace dawn::native::opengl {
         : BackendConnection(instance, backendType) {
     }
 
-    std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
+    std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters() {
         // The OpenGL backend needs at least "getProcAddress" to discover an adapter.
         return {};
     }
 
-    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
+    ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* optionsBase) {
         // TODO(cwallez@chromium.org): For now only create a single OpenGL adapter because don't
         // know how to handle MakeCurrent.
@@ -288,14 +288,13 @@ namespace dawn::native::opengl {
         DAWN_INVALID_IF(options->getProc == nullptr,
                         "AdapterDiscoveryOptions::getProc must be set");
 
-        std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(
-            GetInstance(), static_cast<wgpu::BackendType>(optionsBase->backendType));
+        Ref<Adapter> adapter = AcquireRef(
+            new Adapter(GetInstance(), static_cast<wgpu::BackendType>(optionsBase->backendType)));
         DAWN_TRY(adapter->InitializeGLFunctions(options->getProc));
         DAWN_TRY(adapter->Initialize());
 
         mCreatedAdapter = true;
-        std::vector<std::unique_ptr<AdapterBase>> adapters;
-        adapters.push_back(std::unique_ptr<AdapterBase>(adapter.release()));
+        std::vector<Ref<AdapterBase>> adapters{std::move(adapter)};
         return std::move(adapters);
     }
 

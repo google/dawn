@@ -73,8 +73,8 @@ namespace dawn::native::vulkan {
 
         MaybeError Initialize();
 
-        std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
-        ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> DiscoverAdapters(
+        std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override;
+        ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
             const AdapterDiscoveryOptionsBase* optionsBase) override;
 
       private:

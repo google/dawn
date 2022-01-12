@@ -535,6 +535,7 @@ namespace dawn::native {
         }
         ErrorScope scope = mErrorScopeStack->Pop();
         if (callback != nullptr) {
+            // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
             callback(static_cast<WGPUErrorType>(scope.GetErrorType()), scope.GetErrorMessage(),
                      userdata);
         }
@@ -973,6 +974,7 @@ namespace dawn::native {
         // callback.
         if (maybeResult.IsError()) {
             std::unique_ptr<ErrorData> error = maybeResult.AcquireError();
+            // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
             callback(WGPUCreatePipelineAsyncStatus_Error, nullptr, error->GetMessage().c_str(),
                      userdata);
         }
@@ -1015,6 +1017,7 @@ namespace dawn::native {
         // callback.
         if (maybeResult.IsError()) {
             std::unique_ptr<ErrorData> error = maybeResult.AcquireError();
+            // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
             callback(WGPUCreatePipelineAsyncStatus_Error, nullptr, error->GetMessage().c_str(),
                      userdata);
         }
@@ -1325,6 +1328,7 @@ namespace dawn::native {
         Ref<ComputePipelineBase> cachedComputePipeline =
             GetCachedComputePipeline(uninitializedComputePipeline.Get());
         if (cachedComputePipeline.Get() != nullptr) {
+            // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
             callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(cachedComputePipeline.Detach()),
                      "", userdata);
         } else {
@@ -1471,6 +1475,7 @@ namespace dawn::native {
         Ref<RenderPipelineBase> cachedRenderPipeline =
             GetCachedRenderPipeline(uninitializedRenderPipeline.Get());
         if (cachedRenderPipeline != nullptr) {
+            // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
             callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(cachedRenderPipeline.Detach()),
                      "", userdata);
         } else {

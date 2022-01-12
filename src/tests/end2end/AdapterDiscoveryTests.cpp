@@ -13,10 +13,13 @@
 // limitations under the License.
 
 #include "common/GPUInfo.h"
+#include "common/Log.h"
 #include "common/Platform.h"
 #include "common/SystemUtils.h"
+#include "dawn/dawn_proc.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
+#include "tests/MockCallback.h"
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
 #    include "dawn_native/VulkanBackend.h"
@@ -42,6 +45,8 @@
 #include <gtest/gtest.h>
 
 namespace {
+
+    using namespace testing;
 
     class AdapterDiscoveryTests : public ::testing::Test {};
 
@@ -265,5 +270,146 @@ namespace {
         }
     }
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN) && defined(DAWN_ENABLE_BACKEND_METAL)
+
+    class AdapterCreationTest : public ::testing::Test {
+      protected:
+        void SetUp() override {
+            dawnProcSetProcs(&dawn_native::GetProcs());
+
+            {
+                auto nativeInstance = std::make_unique<dawn_native::Instance>();
+                nativeInstance->DiscoverDefaultAdapters();
+                for (dawn_native::Adapter& nativeAdapter : nativeInstance->GetAdapters()) {
+                    anyAdapterAvailable = true;
+
+                    wgpu::AdapterProperties properties;
+                    nativeAdapter.GetProperties(&properties);
+                    swiftShaderAvailable =
+                        swiftShaderAvailable ||
+                        gpu_info::IsSwiftshader(properties.vendorID, properties.deviceID);
+                    discreteGPUAvailable = discreteGPUAvailable ||
+                                           properties.adapterType == wgpu::AdapterType::DiscreteGPU;
+                    integratedGPUAvailable =
+                        integratedGPUAvailable ||
+                        properties.adapterType == wgpu::AdapterType::IntegratedGPU;
+                }
+            }
+
+            instance = wgpu::CreateInstance();
+        }
+
+        void TearDown() override {
+            instance = nullptr;
+            dawnProcSetProcs(nullptr);
+        }
+
+        wgpu::Instance instance;
+        bool anyAdapterAvailable = false;
+        bool swiftShaderAvailable = false;
+        bool discreteGPUAvailable = false;
+        bool integratedGPUAvailable = false;
+    };
+
+    // Test that requesting the default adapter works
+    TEST_F(AdapterCreationTest, DefaultAdapter) {
+        wgpu::RequestAdapterOptions options = {};
+
+        MockCallback<WGPURequestAdapterCallback> cb;
+
+        WGPUAdapter cAdapter = nullptr;
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+        instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
+
+        wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+        EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+    }
+
+    // Test that passing nullptr for the options gets the default adapter
+    TEST_F(AdapterCreationTest, NullGivesDefaultAdapter) {
+        wgpu::RequestAdapterOptions options = {};
+
+        MockCallback<WGPURequestAdapterCallback> cb;
+
+        WGPUAdapter cAdapter = nullptr;
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+        instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
+
+        wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+        EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this + 1))
+            .WillOnce(SaveArg<1>(&cAdapter));
+        instance.RequestAdapter(nullptr, cb.Callback(), cb.MakeUserdata(this + 1));
+
+        wgpu::Adapter adapter2 = wgpu::Adapter::Acquire(cAdapter);
+        EXPECT_EQ(adapter.Get(), adapter2.Get());
+    }
+
+    // Test that requesting the fallback adapter returns SwiftShader.
+    TEST_F(AdapterCreationTest, FallbackAdapter) {
+        wgpu::RequestAdapterOptions options = {};
+        options.forceFallbackAdapter = true;
+
+        MockCallback<WGPURequestAdapterCallback> cb;
+
+        WGPUAdapter cAdapter = nullptr;
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+        instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
+
+        wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+        EXPECT_EQ(adapter != nullptr, swiftShaderAvailable);
+        if (adapter != nullptr) {
+            wgpu::AdapterProperties properties;
+            adapter.GetProperties(&properties);
+
+            EXPECT_EQ(properties.adapterType, wgpu::AdapterType::CPU);
+            EXPECT_TRUE(gpu_info::IsSwiftshader(properties.vendorID, properties.deviceID));
+        }
+    }
+
+    // Test that requesting a high performance GPU works
+    TEST_F(AdapterCreationTest, PreferHighPerformance) {
+        wgpu::RequestAdapterOptions options = {};
+        options.powerPreference = wgpu::PowerPreference::HighPerformance;
+
+        MockCallback<WGPURequestAdapterCallback> cb;
+
+        WGPUAdapter cAdapter = nullptr;
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+        instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
+
+        wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+        EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+        if (discreteGPUAvailable) {
+            wgpu::AdapterProperties properties;
+            adapter.GetProperties(&properties);
+            EXPECT_EQ(properties.adapterType, wgpu::AdapterType::DiscreteGPU);
+        }
+    }
+
+    // Test that requesting a low power GPU works
+    TEST_F(AdapterCreationTest, PreferLowPower) {
+        wgpu::RequestAdapterOptions options = {};
+        options.powerPreference = wgpu::PowerPreference::LowPower;
+
+        MockCallback<WGPURequestAdapterCallback> cb;
+
+        WGPUAdapter cAdapter = nullptr;
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+        instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
+
+        wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+        EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+        if (integratedGPUAvailable) {
+            wgpu::AdapterProperties properties;
+            adapter.GetProperties(&properties);
+            EXPECT_EQ(properties.adapterType, wgpu::AdapterType::IntegratedGPU);
+        }
+    }
 
 }  // anonymous namespace

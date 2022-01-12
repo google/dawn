@@ -71,11 +71,11 @@ namespace dawn::native::null {
         Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::BackendType::Null) {
         }
 
-        std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override {
+        std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override {
             // There is always a single Null adapter because it is purely CPU based and doesn't
             // depend on the system.
-            std::vector<std::unique_ptr<AdapterBase>> adapters;
-            std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(GetInstance());
+            std::vector<Ref<AdapterBase>> adapters;
+            Ref<Adapter> adapter = AcquireRef(new Adapter(GetInstance()));
             adapters.push_back(std::move(adapter));
             return adapters;
         }

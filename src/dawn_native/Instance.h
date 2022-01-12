@@ -52,7 +52,7 @@ namespace dawn::native {
         void DiscoverDefaultAdapters();
         bool DiscoverAdapters(const AdapterDiscoveryOptionsBase* options);
 
-        const std::vector<std::unique_ptr<AdapterBase>>& GetAdapters() const;
+        const std::vector<Ref<AdapterBase>>& GetAdapters() const;
 
         // Used to handle error that happen up to device creation.
         bool ConsumedError(MaybeError maybeError);
@@ -96,6 +96,9 @@ namespace dawn::native {
 
         MaybeError DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options);
 
+        ResultOrError<Ref<AdapterBase>> RequestAdapterInternal(
+            const RequestAdapterOptions* options);
+
         BackendsBitset mBackendsConnected;
 
         bool mDiscoveredDefaultAdapters = false;
@@ -107,7 +110,7 @@ namespace dawn::native {
         std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
 
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
-        std::vector<std::unique_ptr<AdapterBase>> mAdapters;
+        std::vector<Ref<AdapterBase>> mAdapters;
 
         FeaturesInfo mFeaturesInfo;
         TogglesInfo mTogglesInfo;

@@ -23,8 +23,8 @@ namespace dawn::native::opengl {
       public:
         Backend(InstanceBase* instance, wgpu::BackendType backendType);
 
-        std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
-        ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> DiscoverAdapters(
+        std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override;
+        ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
             const AdapterDiscoveryOptionsBase* options) override;
 
       private:

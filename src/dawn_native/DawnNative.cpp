@@ -76,14 +76,33 @@ namespace dawn::native {
     Adapter::Adapter() = default;
 
     Adapter::Adapter(AdapterBase* impl) : mImpl(impl) {
+        if (mImpl != nullptr) {
+            mImpl->Reference();
+        }
     }
 
     Adapter::~Adapter() {
+        if (mImpl != nullptr) {
+            mImpl->Release();
+        }
         mImpl = nullptr;
     }
 
-    Adapter::Adapter(const Adapter& other) = default;
-    Adapter& Adapter::operator=(const Adapter& other) = default;
+    Adapter::Adapter(const Adapter& other) : Adapter(other.mImpl) {
+    }
+
+    Adapter& Adapter::operator=(const Adapter& other) {
+        if (this != &other) {
+            if (mImpl) {
+                mImpl->Release();
+            }
+            mImpl = other.mImpl;
+            if (mImpl) {
+                mImpl->Reference();
+            }
+        }
+        return *this;
+    }
 
     void Adapter::GetProperties(wgpu::AdapterProperties* properties) const {
         GetProperties(reinterpret_cast<WGPUAdapterProperties*>(properties));
@@ -189,8 +208,8 @@ namespace dawn::native {
     std::vector<Adapter> Instance::GetAdapters() const {
         // Adapters are owned by mImpl so it is safe to return non RAII pointers to them
         std::vector<Adapter> adapters;
-        for (const std::unique_ptr<AdapterBase>& adapter : mImpl->GetAdapters()) {
-            adapters.push_back({adapter.get()});
+        for (const Ref<AdapterBase>& adapter : mImpl->GetAdapters()) {
+            adapters.push_back({adapter.Get()});
         }
         return adapters;
     }

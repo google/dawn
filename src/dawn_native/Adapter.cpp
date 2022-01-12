@@ -107,10 +107,15 @@ namespace dawn::native {
     void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
                                        WGPURequestDeviceCallback callback,
                                        void* userdata) {
+        static constexpr DeviceDescriptor kDefaultDescriptor = {};
+        if (descriptor == nullptr) {
+            descriptor = &kDefaultDescriptor;
+        }
         auto result = CreateDeviceInternal(descriptor);
 
         if (result.IsError()) {
             std::unique_ptr<ErrorData> errorData = result.AcquireError();
+            // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
             callback(WGPURequestDeviceStatus_Error, nullptr,
                      errorData->GetFormattedMessage().c_str(), userdata);
             return;
@@ -120,6 +125,7 @@ namespace dawn::native {
 
         WGPURequestDeviceStatus status =
             device == nullptr ? WGPURequestDeviceStatus_Unknown : WGPURequestDeviceStatus_Success;
+        // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
         callback(status, ToAPI(device.Detach()), nullptr, userdata);
     }
 

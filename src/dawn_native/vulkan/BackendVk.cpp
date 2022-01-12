@@ -395,7 +395,7 @@ namespace dawn::native::vulkan {
 
     Backend::~Backend() = default;
 
-    std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
+    std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters() {
         AdapterDiscoveryOptions options;
         auto result = DiscoverAdapters(&options);
         if (result.IsError()) {
@@ -405,14 +405,14 @@ namespace dawn::native::vulkan {
         return result.AcquireSuccess();
     }
 
-    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
+    ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* optionsBase) {
         ASSERT(optionsBase->backendType == WGPUBackendType_Vulkan);
 
         const AdapterDiscoveryOptions* options =
             static_cast<const AdapterDiscoveryOptions*>(optionsBase);
 
-        std::vector<std::unique_ptr<AdapterBase>> adapters;
+        std::vector<Ref<AdapterBase>> adapters;
 
         InstanceBase* instance = GetInstance();
         for (ICD icd : kICDs) {
@@ -429,8 +429,8 @@ namespace dawn::native::vulkan {
             const std::vector<VkPhysicalDevice>& physicalDevices =
                 mVulkanInstances[icd]->GetPhysicalDevices();
             for (uint32_t i = 0; i < physicalDevices.size(); ++i) {
-                std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(
-                    instance, mVulkanInstances[icd].Get(), physicalDevices[i]);
+                Ref<Adapter> adapter = AcquireRef(
+                    new Adapter(instance, mVulkanInstances[icd].Get(), physicalDevices[i]));
                 if (instance->ConsumedError(adapter->Initialize())) {
                     continue;
                 }

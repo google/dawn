@@ -558,7 +558,7 @@ namespace dawn::native::metal {
         }
     }
 
-    std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
+    std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters() {
         AdapterDiscoveryOptions options;
         auto result = DiscoverAdapters(&options);
         if (result.IsError()) {
@@ -568,11 +568,11 @@ namespace dawn::native::metal {
         return result.AcquireSuccess();
     }
 
-    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
+    ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* optionsBase) {
         ASSERT(optionsBase->backendType == WGPUBackendType_Metal);
 
-        std::vector<std::unique_ptr<AdapterBase>> adapters;
+        std::vector<Ref<AdapterBase>> adapters;
         BOOL supportedVersion = NO;
 #if defined(DAWN_PLATFORM_MACOS)
         if (@available(macOS 10.11, *)) {
@@ -581,7 +581,7 @@ namespace dawn::native::metal {
             NSRef<NSArray<id<MTLDevice>>> devices = AcquireNSRef(MTLCopyAllDevices());
 
             for (id<MTLDevice> device in devices.Get()) {
-                std::unique_ptr<Adapter> adapter = std::make_unique<Adapter>(GetInstance(), device);
+                Ref<Adapter> adapter = AcquireRef(new Adapter(GetInstance(), device));
                 if (!GetInstance()->ConsumedError(adapter->Initialize())) {
                     adapters.push_back(std::move(adapter));
                 }
@@ -593,8 +593,8 @@ namespace dawn::native::metal {
         if (@available(iOS 8.0, *)) {
             supportedVersion = YES;
             // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
-            std::unique_ptr<Adapter> adapter =
-                std::make_unique<Adapter>(GetInstance(), MTLCreateSystemDefaultDevice());
+            Ref<Adapter> adapter =
+                AcquireRef(new Adapter(GetInstance(), MTLCreateSystemDefaultDevice()));
             if (!GetInstance()->ConsumedError(adapter->Initialize())) {
                 adapters.push_back(std::move(adapter));
             }

@@ -99,6 +99,21 @@ namespace {
         EXPECT_NE(device, nullptr);
     }
 
+    // Test successful call to RequestDevice with a null descriptor
+    TEST_F(DeviceCreationTest, RequestDeviceNullDescriptorSuccess) {
+        WGPUDevice cDevice;
+        {
+            MockCallback<WGPURequestDeviceCallback> cb;
+            EXPECT_CALL(cb, Call(WGPURequestDeviceStatus_Success, NotNull(), nullptr, this))
+                .WillOnce(SaveArg<1>(&cDevice));
+
+            adapter.RequestDevice(nullptr, cb.Callback(), cb.MakeUserdata(this));
+        }
+
+        wgpu::Device device = wgpu::Device::Acquire(cDevice);
+        EXPECT_NE(device, nullptr);
+    }
+
     // Test failing call to RequestDevice with invalid feature
     TEST_F(DeviceCreationTest, RequestDeviceFailure) {
         MockCallback<WGPURequestDeviceCallback> cb;

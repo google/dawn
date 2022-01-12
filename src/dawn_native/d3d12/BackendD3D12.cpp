@@ -66,13 +66,12 @@ namespace dawn::native::d3d12 {
             return std::move(factory);
         }
 
-        ResultOrError<std::unique_ptr<AdapterBase>> CreateAdapterFromIDXGIAdapter(
+        ResultOrError<Ref<AdapterBase>> CreateAdapterFromIDXGIAdapter(
             Backend* backend,
             ComPtr<IDXGIAdapter> dxgiAdapter) {
             ComPtr<IDXGIAdapter3> dxgiAdapter3;
             DAWN_TRY(CheckHRESULT(dxgiAdapter.As(&dxgiAdapter3), "DXGIAdapter retrieval"));
-            std::unique_ptr<Adapter> adapter =
-                std::make_unique<Adapter>(backend, std::move(dxgiAdapter3));
+            Ref<Adapter> adapter = AcquireRef(new Adapter(backend, std::move(dxgiAdapter3)));
             DAWN_TRY(adapter->Initialize());
 
             return {std::move(adapter)};
@@ -150,7 +149,7 @@ namespace dawn::native::d3d12 {
         return mFunctions.get();
     }
 
-    std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
+    std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters() {
         AdapterDiscoveryOptions options;
         auto result = DiscoverAdapters(&options);
         if (result.IsError()) {
@@ -160,16 +159,16 @@ namespace dawn::native::d3d12 {
         return result.AcquireSuccess();
     }
 
-    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> Backend::DiscoverAdapters(
+    ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* optionsBase) {
         ASSERT(optionsBase->backendType == WGPUBackendType_D3D12);
         const AdapterDiscoveryOptions* options =
             static_cast<const AdapterDiscoveryOptions*>(optionsBase);
 
-        std::vector<std::unique_ptr<AdapterBase>> adapters;
+        std::vector<Ref<AdapterBase>> adapters;
         if (options->dxgiAdapter != nullptr) {
             // |dxgiAdapter| was provided. Discover just that adapter.
-            std::unique_ptr<AdapterBase> adapter;
+            Ref<AdapterBase> adapter;
             DAWN_TRY_ASSIGN(adapter, CreateAdapterFromIDXGIAdapter(this, options->dxgiAdapter));
             adapters.push_back(std::move(adapter));
             return std::move(adapters);
@@ -183,14 +182,14 @@ namespace dawn::native::d3d12 {
             }
 
             ASSERT(dxgiAdapter != nullptr);
-            ResultOrError<std::unique_ptr<AdapterBase>> adapter =
+            ResultOrError<Ref<AdapterBase>> adapter =
                 CreateAdapterFromIDXGIAdapter(this, dxgiAdapter);
             if (adapter.IsError()) {
                 GetInstance()->ConsumedError(adapter.AcquireError());
                 continue;
             }
 
-            adapters.push_back(std::move(adapter.AcquireSuccess()));
+            adapters.push_back(adapter.AcquireSuccess());
         }
 
         return adapters;

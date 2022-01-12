@@ -28,7 +28,7 @@ namespace dawn::native {
         return mInstance;
     }
 
-    ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> BackendConnection::DiscoverAdapters(
+    ResultOrError<std::vector<Ref<AdapterBase>>> BackendConnection::DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* options) {
         return DAWN_FORMAT_VALIDATION_ERROR("DiscoverAdapters not implemented for this backend.");
     }

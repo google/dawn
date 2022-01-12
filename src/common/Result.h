@@ -179,6 +179,8 @@ class [[nodiscard]] Result<Ref<T>, E> {
 
     template <typename U>
     Result(Ref<U>&& success);
+    template <typename U>
+    Result(const Ref<U>& success);
     Result(std::unique_ptr<E> error);
 
     template <typename U>
@@ -409,6 +411,11 @@ template <typename U>
 Result<Ref<T>, E>::Result(Ref<U>&& success)
     : mPayload(detail::MakePayload(success.Detach(), detail::Success)) {
     static_assert(std::is_convertible<U*, T*>::value, "");
+}
+
+template <typename T, typename E>
+template <typename U>
+Result<Ref<T>, E>::Result(const Ref<U>& success) : Result(Ref<U>(success)) {
 }
 
 template <typename T, typename E>
