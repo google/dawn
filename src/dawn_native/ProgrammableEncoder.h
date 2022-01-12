@@ -23,7 +23,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -67,6 +67,6 @@ namespace dawn_native {
         const bool mValidationEnabled;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_PROGRAMMABLEENCODER_H_

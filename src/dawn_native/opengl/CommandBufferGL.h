@@ -17,11 +17,11 @@
 
 #include "dawn_native/CommandBuffer.h"
 
-namespace dawn_native {
+namespace dawn::native {
     struct BeginRenderPassCmd;
-}  // namespace dawn_native
+}  // namespace dawn::native
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Device;
     struct OpenGLFunctions;
@@ -44,6 +44,6 @@ namespace dawn_native::opengl {
                        const void* data,
                        const TextureDataLayout& dataLayout,
                        const Extent3D& copySize);
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_COMMANDBUFFERGL_H_

@@ -14,7 +14,7 @@
 
 #include "ShaderModuleMock.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     ShaderModuleMock::ShaderModuleMock(DeviceBase* device) : ShaderModuleBase(device) {
         ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
@@ -37,4 +37,4 @@ namespace dawn_native {
         return AcquireRef(mock);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

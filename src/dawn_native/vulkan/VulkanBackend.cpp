@@ -26,7 +26,7 @@
 #include "dawn_native/vulkan/NativeSwapChainImplVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     VkInstance GetInstance(WGPUDevice device) {
         Device* backendDevice = ToBackend(FromAPI(device));
@@ -126,4 +126,4 @@ namespace dawn_native::vulkan {
 #endif  // DAWN_PLATFORM_LINUX
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

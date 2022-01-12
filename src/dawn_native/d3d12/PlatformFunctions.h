@@ -22,7 +22,7 @@
 
 #include <d3dcompiler.h>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     // Loads the functions required from the platform dynamically so that we don't need to rely on
     // them being present in the system. For example linking against d3d12.lib would prevent
@@ -105,6 +105,6 @@ namespace dawn_native::d3d12 {
         DynamicLib mPIXEventRuntimeLib;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_PLATFORMFUNCTIONS_H_

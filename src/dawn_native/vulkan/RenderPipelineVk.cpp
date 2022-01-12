@@ -24,7 +24,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
 
@@ -360,11 +360,11 @@ namespace dawn_native::vulkan {
             shaderStage.pName = programmableStage.entryPoint.c_str();
 
             switch (stage) {
-                case dawn_native::SingleShaderStage::Vertex: {
+                case dawn::native::SingleShaderStage::Vertex: {
                     shaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
                     break;
                 }
-                case dawn_native::SingleShaderStage::Fragment: {
+                case dawn::native::SingleShaderStage::Fragment: {
                     shaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
                     break;
                 }
@@ -624,4 +624,4 @@ namespace dawn_native::vulkan {
         CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

@@ -19,7 +19,7 @@
 #include "dawn_native/PerStage.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class Adapter;
 
@@ -36,6 +36,6 @@ namespace dawn_native::d3d12 {
     };
 
     ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter);
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_D3D12INFO_H_

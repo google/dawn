@@ -20,7 +20,7 @@
 #include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
         VkAttachmentLoadOp VulkanAttachmentLoadOp(wgpu::LoadOp op) {
@@ -291,4 +291,4 @@ namespace dawn_native::vulkan {
 
         return true;
     }
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

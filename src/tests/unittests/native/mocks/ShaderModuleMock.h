@@ -23,7 +23,7 @@
 
 #include <gmock/gmock.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class ShaderModuleMock : public ShaderModuleBase {
       public:
@@ -36,6 +36,6 @@ namespace dawn_native {
         static ResultOrError<Ref<ShaderModuleMock>> Create(DeviceBase* device, const char* source);
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // TESTS_UNITTESTS_NATIVE_MOCKS_SHADERMODULE_MOCK_H_

@@ -19,7 +19,7 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/RenderEncoderBase.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class RenderBundleBase;
 
@@ -85,6 +85,6 @@ namespace dawn_native {
         bool mOcclusionQueryActive = false;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RENDERPASSENCODER_H_

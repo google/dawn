@@ -29,7 +29,7 @@
 #include <cstdlib>
 #include <limits>
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
         // NOTE: This must match the workgroup_size attribute on the compute entry point below.
@@ -382,4 +382,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

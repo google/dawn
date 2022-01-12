@@ -14,7 +14,7 @@
 
 #include "dawn_native/CallbackTaskManager.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     bool CallbackTaskManager::IsEmpty() {
         std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
@@ -34,4 +34,4 @@ namespace dawn_native {
         mCallbackTaskQueue.push_back(std::move(callbackTask));
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

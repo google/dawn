@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 // AsyncTaskTests:
-//     Simple tests for dawn_native::AsyncTask and dawn_native::AsnycTaskManager.
+//     Simple tests for dawn::native::AsyncTask and dawn::native::AsnycTaskManager.
 
 #include <gtest/gtest.h>
 
@@ -67,13 +67,13 @@ TEST_F(AsyncTaskTest, Basic) {
     dawn::platform::Platform platform;
     std::unique_ptr<dawn::platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
 
-    dawn_native::AsyncTaskManager taskManager(pool.get());
+    dawn::native::AsyncTaskManager taskManager(pool.get());
     ConcurrentTaskResultQueue taskResultQueue;
 
     constexpr size_t kTaskCount = 4u;
     std::set<uint32_t> idset;
     for (uint32_t i = 0; i < kTaskCount; ++i) {
-        dawn_native::AsyncTask asyncTask([&taskResultQueue, i] { DoTask(&taskResultQueue, i); });
+        dawn::native::AsyncTask asyncTask([&taskResultQueue, i] { DoTask(&taskResultQueue, i); });
         taskManager.PostTask(std::move(asyncTask));
         idset.insert(i);
     }

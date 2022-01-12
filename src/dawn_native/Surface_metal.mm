@@ -20,11 +20,11 @@
 
 #import <QuartzCore/CAMetalLayer.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     bool InheritsFromCAMetalLayer(void* obj) {
         id<NSObject> object = static_cast<id>(obj);
         return [object isKindOfClass:[CAMetalLayer class]];
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

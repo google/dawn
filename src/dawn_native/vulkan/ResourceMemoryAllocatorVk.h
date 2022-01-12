@@ -25,7 +25,7 @@
 #include <memory>
 #include <vector>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class Device;
 
@@ -61,6 +61,6 @@ namespace dawn_native::vulkan {
         SerialQueue<ExecutionSerial, ResourceMemoryAllocation> mSubAllocationsToDelete;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_

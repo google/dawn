@@ -22,7 +22,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     class Device;
     class PipelineLayout;
@@ -65,6 +65,6 @@ namespace dawn_native::metal {
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
     };
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_METAL_SHADERMODULEMTL_H_

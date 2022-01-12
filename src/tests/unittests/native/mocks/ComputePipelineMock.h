@@ -20,7 +20,7 @@
 
 #include <gmock/gmock.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class ComputePipelineMock : public ComputePipelineBase {
       public:
@@ -36,6 +36,6 @@ namespace dawn_native {
         MOCK_METHOD(void, DestroyImpl, (), (override));
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // TESTS_UNITTESTS_NATIVE_MOCKS_COMPUTEPIPELINE_MOCK_H_

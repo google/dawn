@@ -24,7 +24,7 @@
 
 #include <memory>
 
-namespace dawn_native {
+namespace dawn::native {
 
     struct CopyTextureToBufferCmd;
 
@@ -130,6 +130,6 @@ namespace dawn_native {
         size_t mMapSize = 0;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_BUFFER_H_

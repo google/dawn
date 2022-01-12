@@ -24,7 +24,7 @@
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     SamplerHeapCacheEntry::SamplerHeapCacheEntry(std::vector<Sampler*> samplers)
         : mSamplers(std::move(samplers)) {
@@ -163,4 +163,4 @@ namespace dawn_native::d3d12 {
                                                          const SamplerHeapCacheEntry* b) const {
         return a->mSamplers == b->mSamplers;
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

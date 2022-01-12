@@ -20,11 +20,11 @@
 #include <type_traits>
 
 // Make our own Base - Backend object pair, reusing the AdapterBase name
-namespace dawn_native {
+namespace dawn::native {
     class AdapterBase : public RefCounted {};
-}  // namespace dawn_native
+}  // namespace dawn::native
 
-using namespace dawn_native;
+using namespace dawn::native;
 
 class MyAdapter : public AdapterBase {};
 

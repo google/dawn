@@ -14,7 +14,7 @@
 
 #include "dawn_native/BackendConnection.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     BackendConnection::BackendConnection(InstanceBase* instance, wgpu::BackendType type)
         : mInstance(instance), mType(type) {
@@ -33,4 +33,4 @@ namespace dawn_native {
         return DAWN_FORMAT_VALIDATION_ERROR("DiscoverAdapters not implemented for this backend.");
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

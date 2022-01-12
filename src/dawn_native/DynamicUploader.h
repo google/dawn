@@ -22,7 +22,7 @@
 
 // DynamicUploader is the front-end implementation used to manage multiple ring buffers for upload
 // usage.
-namespace dawn_native {
+namespace dawn::native {
 
     struct UploadHandle {
         uint8_t* mappedBuffer = nullptr;
@@ -61,6 +61,6 @@ namespace dawn_native {
         SerialQueue<ExecutionSerial, std::unique_ptr<StagingBufferBase>> mReleasedStagingBuffers;
         DeviceBase* mDevice;
     };
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_DYNAMICUPLOADER_H_

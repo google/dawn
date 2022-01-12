@@ -23,7 +23,7 @@
 #include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/Texture.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     CommandBufferBase::CommandBufferBase(CommandEncoder* encoder,
                                          const CommandBufferDescriptor* descriptor)
@@ -217,24 +217,24 @@ namespace dawn_native {
         return true;
     }
 
-    std::array<float, 4> ConvertToFloatColor(dawn_native::Color color) {
+    std::array<float, 4> ConvertToFloatColor(dawn::native::Color color) {
         const std::array<float, 4> outputValue = {
             static_cast<float>(color.r), static_cast<float>(color.g), static_cast<float>(color.b),
             static_cast<float>(color.a)};
         return outputValue;
     }
-    std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn_native::Color color) {
+    std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn::native::Color color) {
         const std::array<int32_t, 4> outputValue = {
             static_cast<int32_t>(color.r), static_cast<int32_t>(color.g),
             static_cast<int32_t>(color.b), static_cast<int32_t>(color.a)};
         return outputValue;
     }
 
-    std::array<uint32_t, 4> ConvertToUnsignedIntegerColor(dawn_native::Color color) {
+    std::array<uint32_t, 4> ConvertToUnsignedIntegerColor(dawn::native::Color color) {
         const std::array<uint32_t, 4> outputValue = {
             static_cast<uint32_t>(color.r), static_cast<uint32_t>(color.g),
             static_cast<uint32_t>(color.b), static_cast<uint32_t>(color.a)};
         return outputValue;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

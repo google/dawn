@@ -18,7 +18,7 @@
 #include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/ObjectType_autogen.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                                  const ComputePipelineDescriptor* descriptor) {
@@ -93,4 +93,4 @@ namespace dawn_native {
         return PipelineBase::EqualForCache(a, b);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

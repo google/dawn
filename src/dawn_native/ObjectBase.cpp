@@ -17,7 +17,7 @@
 
 #include <mutex>
 
-namespace dawn_native {
+namespace dawn::native {
 
     static constexpr uint64_t kErrorPayload = 0;
     static constexpr uint64_t kNotErrorPayload = 1;
@@ -87,4 +87,4 @@ namespace dawn_native {
         }
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

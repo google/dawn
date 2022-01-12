@@ -24,7 +24,7 @@ namespace dawn::platform {
     class CachingInterface;
 }
 
-namespace dawn_native {
+namespace dawn::native {
 
     using PersistentCacheKey = std::vector<uint8_t>;
 
@@ -87,6 +87,6 @@ namespace dawn_native {
         std::mutex mMutex;
         dawn::platform::CachingInterface* mCache = nullptr;
     };
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_PERSISTENTCACHE_H_

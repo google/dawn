@@ -28,7 +28,7 @@
 struct ID3D12Device;
 struct ID3D12Resource;
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class D3D11on12ResourceCache;
 
@@ -106,6 +106,6 @@ namespace dawn_native::d3d12 {
         Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12BACKEND_H_

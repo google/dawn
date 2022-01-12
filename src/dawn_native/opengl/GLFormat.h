@@ -18,7 +18,7 @@
 #include "dawn_native/Format.h"
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Device;
 
@@ -37,6 +37,6 @@ namespace dawn_native::opengl {
     using GLFormatTable = std::array<GLFormat, kKnownFormatCount>;
     GLFormatTable BuildGLFormatTable();
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_GLFORMAT_H_

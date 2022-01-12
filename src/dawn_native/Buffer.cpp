@@ -28,7 +28,7 @@
 #include <cstring>
 #include <utility>
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
         struct MapRequestTask : QueueBase::TaskInFlight {
@@ -557,4 +557,4 @@ namespace dawn_native {
         return offset == 0 && size == GetSize();
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

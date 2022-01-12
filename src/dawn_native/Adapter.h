@@ -26,7 +26,7 @@
 
 #include <string>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -94,6 +94,6 @@ namespace dawn_native {
         bool mUseTieredLimits = false;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_ADAPTER_H_

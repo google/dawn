@@ -21,7 +21,7 @@
 
 #include <map>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class BindGroupBase;
     class BufferBase;
@@ -81,6 +81,6 @@ namespace dawn_native {
         QueryAvailabilityMap mQueryAvailabilities;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_PASSRESOURCEUSAGETRACKER_H_

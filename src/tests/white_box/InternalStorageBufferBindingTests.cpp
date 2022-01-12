@@ -44,22 +44,22 @@ class InternalStorageBufferBindingTests : public DawnTest {
         )");
 
         // Create binding group layout with internal storage buffer binding type
-        dawn_native::BindGroupLayoutEntry bglEntry;
+        dawn::native::BindGroupLayoutEntry bglEntry;
         bglEntry.binding = 0;
-        bglEntry.buffer.type = dawn_native::kInternalStorageBufferBinding;
+        bglEntry.buffer.type = dawn::native::kInternalStorageBufferBinding;
         bglEntry.visibility = wgpu::ShaderStage::Compute;
 
-        dawn_native::BindGroupLayoutDescriptor bglDesc;
+        dawn::native::BindGroupLayoutDescriptor bglDesc;
         bglDesc.entryCount = 1;
         bglDesc.entries = &bglEntry;
 
-        dawn_native::DeviceBase* nativeDevice = dawn_native::FromAPI(device.Get());
+        dawn::native::DeviceBase* nativeDevice = dawn::native::FromAPI(device.Get());
 
-        Ref<dawn_native::BindGroupLayoutBase> bglRef =
+        Ref<dawn::native::BindGroupLayoutBase> bglRef =
             nativeDevice->CreateBindGroupLayout(&bglDesc, true).AcquireSuccess();
 
         wgpu::BindGroupLayout bgl =
-            wgpu::BindGroupLayout::Acquire(dawn_native::ToAPI(bglRef.Detach()));
+            wgpu::BindGroupLayout::Acquire(dawn::native::ToAPI(bglRef.Detach()));
 
         // Create pipeline layout
         wgpu::PipelineLayoutDescriptor plDesc;

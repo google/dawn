@@ -22,7 +22,7 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class Device;
     class Heap;
@@ -77,6 +77,6 @@ namespace dawn_native::d3d12 {
         VideoMemoryInfo mVideoMemoryInfo = {};
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_RESIDENCYMANAGERD3D12_H_

@@ -22,7 +22,7 @@
 #include "dawn_native/metal/TextureMTL.h"
 #include "dawn_native/metal/UtilsMetal.h"
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     namespace {
         MTLVertexFormat VertexFormatType(wgpu::VertexFormat format) {
@@ -503,4 +503,4 @@ namespace dawn_native::metal {
         CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal

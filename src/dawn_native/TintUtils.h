@@ -17,7 +17,7 @@
 
 #include "common/NonCopyable.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -32,6 +32,6 @@ namespace dawn_native {
         ScopedTintICEHandler(ScopedTintICEHandler&&) = delete;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_TEXTURE_H_

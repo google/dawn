@@ -15,7 +15,7 @@
 #include "dawn_native/ResourceMemoryAllocation.h"
 #include "common/Assert.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     ResourceMemoryAllocation::ResourceMemoryAllocation()
         : mOffset(0), mResourceHeap(nullptr), mMappedPointer(nullptr) {
@@ -50,4 +50,4 @@ namespace dawn_native {
         mResourceHeap = nullptr;
         mInfo = {};
     }
-}  // namespace dawn_native
+}  // namespace dawn::native

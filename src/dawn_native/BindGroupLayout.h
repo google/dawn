@@ -31,7 +31,7 @@
 #include <bitset>
 #include <map>
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
                                                  const BindGroupLayoutDescriptor* descriptor,
@@ -142,6 +142,6 @@ namespace dawn_native {
             PipelineCompatibilityToken(0);
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_BINDGROUPLAYOUT_H_

@@ -21,7 +21,7 @@
 #include "dawn_native/DawnNative.h"
 #include "dawn_native/ErrorData.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     // This is similar to DAWN_TRY_ASSIGN but produces a fatal GTest error if EXPR is an error.
 #define DAWN_ASSERT_AND_ASSIGN(VAR, EXPR) \
@@ -29,7 +29,7 @@ namespace dawn_native {
 
     void AddFatalDawnFailure(const char* expression, const ErrorData* error);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 class DawnNativeTest : public ::testing::Test {
   public:
@@ -42,8 +42,8 @@ class DawnNativeTest : public ::testing::Test {
     virtual WGPUDevice CreateTestDevice();
 
   protected:
-    std::unique_ptr<dawn_native::Instance> instance;
-    dawn_native::Adapter adapter;
+    std::unique_ptr<dawn::native::Instance> instance;
+    dawn::native::Adapter adapter;
     wgpu::Device device;
 
   private:

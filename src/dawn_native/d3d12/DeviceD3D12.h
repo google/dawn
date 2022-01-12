@@ -22,7 +22,7 @@
 #include "dawn_native/d3d12/Forward.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class CommandAllocatorManager;
     class PlatformFunctions;
@@ -259,6 +259,6 @@ namespace dawn_native::d3d12 {
         float mTimestampPeriod = 1.0f;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_DEVICED3D12_H_

@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include <utility>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // TODO(cwallez@chromium.org): figure out a way to have more type safety for the iterator
 
@@ -225,4 +225,4 @@ namespace dawn_native {
         mEndPtr = reinterpret_cast<uint8_t*>(&mDummyEnum[1]);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

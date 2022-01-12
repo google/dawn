@@ -19,7 +19,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/ErrorInjector.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     constexpr HRESULT E_FAKE_ERROR_FOR_TESTING = MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0xFF);
     constexpr HRESULT E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING =
@@ -31,15 +31,15 @@ namespace dawn_native::d3d12 {
     // Uses CheckRESULT but returns OOM specific error when recoverable.
     MaybeError CheckOutOfMemoryHRESULTImpl(HRESULT result, const char* context);
 
-#define CheckHRESULT(resultIn, contextIn)   \
-    ::dawn_native::d3d12::CheckHRESULTImpl( \
+#define CheckHRESULT(resultIn, contextIn)    \
+    ::dawn::native::d3d12::CheckHRESULTImpl( \
         INJECT_ERROR_OR_RUN(resultIn, E_FAKE_ERROR_FOR_TESTING), contextIn)
 #define CheckOutOfMemoryHRESULT(resultIn, contextIn)                        \
-    ::dawn_native::d3d12::CheckOutOfMemoryHRESULTImpl(                      \
+    ::dawn::native::d3d12::CheckOutOfMemoryHRESULTImpl(                     \
         INJECT_ERROR_OR_RUN(resultIn, E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING, \
                             E_FAKE_ERROR_FOR_TESTING),                      \
         contextIn)
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_D3D12ERROR_H_

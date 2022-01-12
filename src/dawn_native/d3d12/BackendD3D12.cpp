@@ -20,7 +20,7 @@
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     namespace {
 
@@ -207,4 +207,4 @@ namespace dawn_native::d3d12 {
         return backend;
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

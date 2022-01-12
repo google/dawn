@@ -24,7 +24,7 @@
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     Queue::Queue(Device* device) : QueueBase(device) {
     }
@@ -51,4 +51,4 @@ namespace dawn_native::d3d12 {
         return {};
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

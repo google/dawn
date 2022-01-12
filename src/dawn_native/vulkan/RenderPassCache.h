@@ -28,7 +28,7 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class Device;
 
@@ -101,6 +101,6 @@ namespace dawn_native::vulkan {
         Cache mCache;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_RENDERPASSCACHE_H_

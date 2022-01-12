@@ -27,7 +27,7 @@
 #include <utility>
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class RenderBundleBase;
     struct CombinedLimits;
@@ -121,6 +121,6 @@ namespace dawn_native {
         uint32_t mMaxBatchOffsetRange;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_INDIRECTDRAWMETADATA_H_

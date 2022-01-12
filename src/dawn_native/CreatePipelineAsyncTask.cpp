@@ -22,7 +22,7 @@
 #include "dawn_platform/tracing/TraceEvent.h"
 #include "utils/WGPUHelpers.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     CreatePipelineAsyncCallbackTaskBase::CreatePipelineAsyncCallbackTaskBase(
         std::string errorMessage,
@@ -199,4 +199,4 @@ namespace dawn_native {
                                 eventLabel);
         device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
     }
-}  // namespace dawn_native
+}  // namespace dawn::native

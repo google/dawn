@@ -25,7 +25,7 @@
 #include "utils/SystemUtils.h"
 #include "utils/WGPUHelpers.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
 
@@ -40,11 +40,11 @@ namespace dawn_native::vulkan {
                 DawnTest::SetUp();
                 DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
-                deviceVk = dawn_native::vulkan::ToBackend(dawn_native::FromAPI(device.Get()));
+                deviceVk = dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get()));
             }
 
             // Creates a VkImage with external memory
-            ::VkResult CreateImage(dawn_native::vulkan::Device* deviceVk,
+            ::VkResult CreateImage(dawn::native::vulkan::Device* deviceVk,
                                    uint32_t width,
                                    uint32_t height,
                                    VkFormat format,
@@ -79,7 +79,7 @@ namespace dawn_native::vulkan {
             }
 
             // Allocates memory for an image
-            ::VkResult AllocateMemory(dawn_native::vulkan::Device* deviceVk,
+            ::VkResult AllocateMemory(dawn::native::vulkan::Device* deviceVk,
                                       VkImage handle,
                                       VkDeviceMemory* allocation,
                                       VkDeviceSize* allocationSize,
@@ -111,14 +111,14 @@ namespace dawn_native::vulkan {
             }
 
             // Binds memory to an image
-            ::VkResult BindMemory(dawn_native::vulkan::Device* deviceVk,
+            ::VkResult BindMemory(dawn::native::vulkan::Device* deviceVk,
                                   VkImage handle,
                                   VkDeviceMemory* memory) {
                 return deviceVk->fn.BindImageMemory(deviceVk->GetVkDevice(), handle, *memory, 0);
             }
 
             // Extracts a file descriptor representing memory on a device
-            int GetMemoryFd(dawn_native::vulkan::Device* deviceVk, VkDeviceMemory memory) {
+            int GetMemoryFd(dawn::native::vulkan::Device* deviceVk, VkDeviceMemory memory) {
                 VkMemoryGetFdInfoKHR getFdInfo;
                 getFdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
                 getFdInfo.pNext = nullptr;
@@ -133,7 +133,7 @@ namespace dawn_native::vulkan {
             }
 
             // Prepares and exports memory for an image on a given device
-            void CreateBindExportImage(dawn_native::vulkan::Device* deviceVk,
+            void CreateBindExportImage(dawn::native::vulkan::Device* deviceVk,
                                        uint32_t width,
                                        uint32_t height,
                                        VkFormat format,
@@ -164,7 +164,7 @@ namespace dawn_native::vulkan {
                                           std::vector<int> waitFDs,
                                           bool isInitialized = true,
                                           bool expectValid = true) {
-                dawn_native::vulkan::ExternalImageDescriptorOpaqueFD descriptor;
+                dawn::native::vulkan::ExternalImageDescriptorOpaqueFD descriptor;
                 return WrapVulkanImage(dawnDevice, textureDescriptor, memoryFd, allocationSize,
                                        memoryTypeIndex, waitFDs, descriptor.releasedOldLayout,
                                        descriptor.releasedNewLayout, isInitialized, expectValid);
@@ -180,7 +180,7 @@ namespace dawn_native::vulkan {
                                           VkImageLayout releasedNewLayout,
                                           bool isInitialized = true,
                                           bool expectValid = true) {
-                dawn_native::vulkan::ExternalImageDescriptorOpaqueFD descriptor;
+                dawn::native::vulkan::ExternalImageDescriptorOpaqueFD descriptor;
                 descriptor.cTextureDescriptor =
                     reinterpret_cast<const WGPUTextureDescriptor*>(textureDescriptor);
                 descriptor.isInitialized = isInitialized;
@@ -192,7 +192,7 @@ namespace dawn_native::vulkan {
                 descriptor.releasedNewLayout = releasedNewLayout;
 
                 WGPUTexture texture =
-                    dawn_native::vulkan::WrapVulkanImage(dawnDevice.Get(), &descriptor);
+                    dawn::native::vulkan::WrapVulkanImage(dawnDevice.Get(), &descriptor);
 
                 if (expectValid) {
                     EXPECT_NE(texture, nullptr) << "Failed to wrap image, are external memory / "
@@ -208,9 +208,9 @@ namespace dawn_native::vulkan {
             // We have to export the signal before destroying the wrapped texture else it's an
             // assertion failure
             void IgnoreSignalSemaphore(wgpu::Texture wrappedTexture) {
-                dawn_native::vulkan::ExternalImageExportInfoOpaqueFD info;
-                dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                                       VK_IMAGE_LAYOUT_GENERAL, &info);
+                dawn::native::vulkan::ExternalImageExportInfoOpaqueFD info;
+                dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                        VK_IMAGE_LAYOUT_GENERAL, &info);
                 for (int handle : info.semaphoreHandles) {
                     ASSERT_NE(handle, -1);
                     close(handle);
@@ -218,7 +218,7 @@ namespace dawn_native::vulkan {
             }
 
           protected:
-            dawn_native::vulkan::Device* deviceVk;
+            dawn::native::vulkan::Device* deviceVk;
         };
 
     }  // anonymous namespace
@@ -344,8 +344,8 @@ namespace dawn_native::vulkan {
         ASSERT_NE(texture.Get(), nullptr);
         IgnoreSignalSemaphore(texture);
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        ASSERT_DEVICE_ERROR(bool success = dawn_native::vulkan::ExportVulkanImage(
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        ASSERT_DEVICE_ERROR(bool success = dawn::native::vulkan::ExportVulkanImage(
                                 texture.Get(), VK_IMAGE_LAYOUT_GENERAL, &exportInfo));
         ASSERT_FALSE(success);
     }
@@ -355,8 +355,8 @@ namespace dawn_native::vulkan {
         wgpu::Texture texture = device.CreateTexture(&defaultDescriptor);
         ASSERT_NE(texture.Get(), nullptr);
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        ASSERT_DEVICE_ERROR(bool success = dawn_native::vulkan::ExportVulkanImage(
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        ASSERT_DEVICE_ERROR(bool success = dawn::native::vulkan::ExportVulkanImage(
                                 texture.Get(), VK_IMAGE_LAYOUT_GENERAL, &exportInfo));
         ASSERT_FALSE(success);
     }
@@ -367,8 +367,8 @@ namespace dawn_native::vulkan {
         ASSERT_NE(texture.Get(), nullptr);
         texture.Destroy();
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        ASSERT_DEVICE_ERROR(bool success = dawn_native::vulkan::ExportVulkanImage(
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        ASSERT_DEVICE_ERROR(bool success = dawn::native::vulkan::ExportVulkanImage(
                                 texture.Get(), VK_IMAGE_LAYOUT_GENERAL, &exportInfo));
         ASSERT_FALSE(success);
     }
@@ -382,7 +382,7 @@ namespace dawn_native::vulkan {
             DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
             // Create another device based on the original
-            backendAdapter = dawn_native::vulkan::ToBackend(deviceVk->GetAdapter());
+            backendAdapter = dawn::native::vulkan::ToBackend(deviceVk->GetAdapter());
             deviceDescriptor.nextInChain = &togglesDesc;
             togglesDesc.forceEnabledToggles = GetParam().forceEnabledWorkarounds.data();
             togglesDesc.forceEnabledTogglesCount = GetParam().forceEnabledWorkarounds.size();
@@ -390,8 +390,8 @@ namespace dawn_native::vulkan {
             togglesDesc.forceDisabledTogglesCount = GetParam().forceDisabledWorkarounds.size();
 
             secondDeviceVk =
-                dawn_native::vulkan::ToBackend(backendAdapter->APICreateDevice(&deviceDescriptor));
-            secondDevice = wgpu::Device::Acquire(dawn_native::ToAPI(secondDeviceVk));
+                dawn::native::vulkan::ToBackend(backendAdapter->APICreateDevice(&deviceDescriptor));
+            secondDevice = wgpu::Device::Acquire(dawn::native::ToAPI(secondDeviceVk));
 
             CreateBindExportImage(deviceVk, 1, 1, VK_FORMAT_R8G8B8A8_UNORM, &defaultImage,
                                   &defaultAllocation, &defaultAllocationSize,
@@ -418,11 +418,11 @@ namespace dawn_native::vulkan {
 
       protected:
         wgpu::Device secondDevice;
-        dawn_native::vulkan::Device* secondDeviceVk;
+        dawn::native::vulkan::Device* secondDeviceVk;
 
-        dawn_native::vulkan::Adapter* backendAdapter;
-        dawn_native::DeviceDescriptor deviceDescriptor;
-        dawn_native::DawnTogglesDeviceDescriptor togglesDesc;
+        dawn::native::vulkan::Adapter* backendAdapter;
+        dawn::native::DeviceDescriptor deviceDescriptor;
+        dawn::native::DawnTogglesDeviceDescriptor togglesDesc;
 
         wgpu::TextureDescriptor defaultDescriptor;
         VkImage defaultImage;
@@ -488,9 +488,9 @@ namespace dawn_native::vulkan {
         // Clear |wrappedTexture| on |secondDevice|
         ClearImage(secondDevice, wrappedTexture, {1 / 255.0f, 2 / 255.0f, 3 / 255.0f, 4 / 255.0f});
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
 
         // Import the image to |device|, making sure we wait on signalFd
         int memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
@@ -517,9 +517,9 @@ namespace dawn_native::vulkan {
         // Clear |wrappedTexture| on |secondDevice|
         ClearImage(secondDevice, wrappedTexture, {1 / 255.0f, 2 / 255.0f, 3 / 255.0f, 4 / 255.0f});
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
 
         // Import the image to |device|, making sure we wait on the semaphore
         int memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
@@ -547,9 +547,9 @@ namespace dawn_native::vulkan {
         // Clear |wrappedTexture| on |secondDevice|
         ClearImage(secondDevice, wrappedTexture, {1 / 255.0f, 2 / 255.0f, 3 / 255.0f, 4 / 255.0f});
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
 
         // Import the image to |device|, making sure we wait on the semaphore
         int memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
@@ -587,9 +587,9 @@ namespace dawn_native::vulkan {
         // Clear |wrappedTexture| on |device|
         ClearImage(device, wrappedTexture, {5 / 255.0f, 6 / 255.0f, 7 / 255.0f, 8 / 255.0f});
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &exportInfo);
 
         // Import the image to |secondDevice|, making sure we wait on the semaphore
         int memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
@@ -608,10 +608,10 @@ namespace dawn_native::vulkan {
                                    secondDeviceWrappedTexture);
 
         // Re-import back into |device|, waiting on |secondDevice|'s signal
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD secondExportInfo;
-        dawn_native::vulkan::ExportVulkanImage(secondDeviceWrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                               &secondExportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD secondExportInfo;
+        dawn::native::vulkan::ExportVulkanImage(secondDeviceWrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                &secondExportInfo);
         memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
 
         wgpu::Texture nextWrappedTexture =
@@ -638,9 +638,9 @@ namespace dawn_native::vulkan {
         // Clear |wrappedTexture| on |secondDevice|
         ClearImage(secondDevice, wrappedTexture, {1 / 255.0f, 2 / 255.0f, 3 / 255.0f, 4 / 255.0f});
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
 
         // Import the image to |device|, making sure we wait on the semaphore
         int memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
@@ -691,9 +691,9 @@ namespace dawn_native::vulkan {
         // Clear |wrappedTexture| on |device|
         ClearImage(device, wrappedTexture, {5 / 255.0f, 6 / 255.0f, 7 / 255.0f, 8 / 255.0f});
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
 
         // Import the image to |secondDevice|, making sure we wait on |signalFd|
         int memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
@@ -722,10 +722,10 @@ namespace dawn_native::vulkan {
         secondDeviceQueue.Submit(1, &commands);
 
         // Re-import back into |device|, waiting on |secondDevice|'s signal
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD secondExportInfo;
-        dawn_native::vulkan::ExportVulkanImage(secondDeviceWrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                               &secondExportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD secondExportInfo;
+        dawn::native::vulkan::ExportVulkanImage(secondDeviceWrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                &secondExportInfo);
         memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
 
         wgpu::Texture nextWrappedTexture =
@@ -753,9 +753,9 @@ namespace dawn_native::vulkan {
         // Clear |wrappedTexture| on |secondDevice|
         ClearImage(secondDevice, wrappedTexture, {1 / 255.0f, 2 / 255.0f, 3 / 255.0f, 4 / 255.0f});
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
 
         // Import the image to |device|, making sure we wait on the semaphore
         int memoryFd = GetMemoryFd(deviceVk, defaultAllocation);
@@ -800,9 +800,9 @@ namespace dawn_native::vulkan {
         // device 1 = |device|
         // device 2 = |secondDevice|
         // Create device 3
-        dawn_native::vulkan::Device* thirdDeviceVk =
-            dawn_native::vulkan::ToBackend(backendAdapter->APICreateDevice(&deviceDescriptor));
-        wgpu::Device thirdDevice = wgpu::Device::Acquire(dawn_native::ToAPI(thirdDeviceVk));
+        dawn::native::vulkan::Device* thirdDeviceVk =
+            dawn::native::vulkan::ToBackend(backendAdapter->APICreateDevice(&deviceDescriptor));
+        wgpu::Device thirdDevice = wgpu::Device::Acquire(dawn::native::ToAPI(thirdDeviceVk));
 
         // Make queue for device 2 and 3
         wgpu::Queue secondDeviceQueue = secondDevice.GetQueue();
@@ -850,8 +850,8 @@ namespace dawn_native::vulkan {
         SimpleCopyTextureToTexture(thirdDevice, thirdDeviceQueue, wrappedTexADevice3,
                                    wrappedTexBDevice3);
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfoTexBDevice3;
-        dawn_native::vulkan::ExportVulkanImage(
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfoTexBDevice3;
+        dawn::native::vulkan::ExportVulkanImage(
             wrappedTexBDevice3.Get(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfoTexBDevice3);
 
         IgnoreSignalSemaphore(wrappedTexADevice3);
@@ -871,8 +871,8 @@ namespace dawn_native::vulkan {
         SimpleCopyTextureToTexture(secondDevice, secondDeviceQueue, wrappedTexBDevice2,
                                    wrappedTexCDevice2);
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfoTexCDevice2;
-        dawn_native::vulkan::ExportVulkanImage(
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfoTexCDevice2;
+        dawn::native::vulkan::ExportVulkanImage(
             wrappedTexCDevice2.Get(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfoTexCDevice2);
 
         IgnoreSignalSemaphore(wrappedTexBDevice2);
@@ -973,9 +973,9 @@ namespace dawn_native::vulkan {
             secondDeviceQueue.Submit(1, &commands);
         }
 
-        dawn_native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoOpaqueFD exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(wrappedTexture.Get(),
+                                                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, &exportInfo);
 
         int memoryFd = GetMemoryFd(secondDeviceVk, allocationA);
 
@@ -1016,4 +1016,4 @@ namespace dawn_native::vulkan {
     DAWN_INSTANTIATE_TEST(VulkanImageWrappingValidationTests, VulkanBackend());
     DAWN_INSTANTIATE_TEST(VulkanImageWrappingUsageTests, VulkanBackend());
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

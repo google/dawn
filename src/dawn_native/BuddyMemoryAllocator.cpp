@@ -17,7 +17,7 @@
 #include "common/Math.h"
 #include "dawn_native/ResourceHeapAllocator.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     BuddyMemoryAllocator::BuddyMemoryAllocator(uint64_t maxSystemSize,
                                                uint64_t memoryBlockSize,
@@ -117,4 +117,4 @@ namespace dawn_native {
         return count;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

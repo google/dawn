@@ -22,7 +22,7 @@
 #include "dawn_native/IndirectDrawValidationEncoder.h"
 #include "dawn_native/RenderBundleEncoder.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     EncodingContext::EncodingContext(DeviceBase* device, const ApiObjectBase* initialEncoder)
         : mDevice(device), mTopLevelEncoder(initialEncoder), mCurrentEncoder(initialEncoder) {
@@ -214,4 +214,4 @@ namespace dawn_native {
         return mTopLevelEncoder == nullptr;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

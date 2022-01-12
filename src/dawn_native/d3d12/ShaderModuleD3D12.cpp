@@ -34,7 +34,7 @@
 #include <sstream>
 #include <unordered_map>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     namespace {
         ResultOrError<uint64_t> GetDXCompilerVersion(ComPtr<IDxcValidator> dxcValidator) {
@@ -828,4 +828,4 @@ namespace dawn_native::d3d12 {
         UNREACHABLE();
         return {};
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

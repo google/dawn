@@ -25,7 +25,7 @@
 #    include "dawn_native/XlibXcbFunctions.h"
 #endif  // defined(DAWN_USE_X11)
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Forward definitions of each backend's "Connect" function that creates new BackendConnection.
     // Conditionally compiled declarations are used to avoid using static constructors instead.
@@ -306,4 +306,4 @@ namespace dawn_native {
         return new Surface(this, descriptor);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

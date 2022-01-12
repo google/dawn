@@ -24,7 +24,7 @@
 
 #include <array>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class Device;
 
@@ -102,6 +102,6 @@ namespace dawn_native::d3d12 {
         SerialQueue<ExecutionSerial, ResourceHeapAllocation> mAllocationsToDelete;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_RESOURCEALLOCATORMANAGERD3D12_H_

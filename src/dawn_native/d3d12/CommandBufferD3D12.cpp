@@ -33,7 +33,7 @@
 #include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     namespace {
 
@@ -190,7 +190,7 @@ namespace dawn_native::d3d12 {
                                                         const Extent3D& copySize) {
             ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
             ASSERT(srcCopy.aspect == dstCopy.aspect);
-            dawn_native::Format format = srcCopy.texture->GetFormat();
+            dawn::native::Format format = srcCopy.texture->GetFormat();
             const TexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
             ASSERT(copySize.width % blockInfo.width == 0);
             uint32_t widthInBlocks = copySize.width / blockInfo.width;
@@ -867,7 +867,7 @@ namespace dawn_native::d3d12 {
                         // TODO(crbug.com/dawn/814): support copying with 1D.
                         ASSERT(source->GetDimension() != wgpu::TextureDimension::e1D &&
                                destination->GetDimension() != wgpu::TextureDimension::e1D);
-                        const dawn_native::Extent3D copyExtentOneSlice = {
+                        const dawn::native::Extent3D copyExtentOneSlice = {
                             copy->copySize.width, copy->copySize.height, 1u};
 
                         for (Aspect aspect : IterateEnumMask(srcRange.aspects)) {
@@ -1649,4 +1649,4 @@ namespace dawn_native::d3d12 {
         }
         return {};
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

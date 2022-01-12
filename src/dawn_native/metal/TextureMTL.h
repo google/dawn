@@ -23,7 +23,7 @@
 #include <IOSurface/IOSurfaceRef.h>
 #import <Metal/Metal.h>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     class CommandRecordingContext;
     class Device;
@@ -91,6 +91,6 @@ namespace dawn_native::metal {
         NSPRef<id<MTLTexture>> mMtlTextureView;
     };
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_METAL_TEXTUREMTL_H_

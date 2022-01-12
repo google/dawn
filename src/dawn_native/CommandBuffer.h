@@ -24,7 +24,7 @@
 #include "dawn_native/PassResourceUsage.h"
 #include "dawn_native/Texture.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     struct BeginRenderPassCmd;
     struct CopyTextureToBufferCmd;
@@ -67,10 +67,10 @@ namespace dawn_native {
 
     bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy);
 
-    std::array<float, 4> ConvertToFloatColor(dawn_native::Color color);
-    std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn_native::Color color);
-    std::array<uint32_t, 4> ConvertToUnsignedIntegerColor(dawn_native::Color color);
+    std::array<float, 4> ConvertToFloatColor(dawn::native::Color color);
+    std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn::native::Color color);
+    std::array<uint32_t, 4> ConvertToUnsignedIntegerColor(dawn::native::Color color);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_COMMANDBUFFER_H_

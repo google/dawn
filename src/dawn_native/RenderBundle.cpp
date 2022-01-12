@@ -20,7 +20,7 @@
 #include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/RenderBundleEncoder.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
                                        const RenderBundleDescriptor* descriptor,
@@ -88,4 +88,4 @@ namespace dawn_native {
         return mIndirectDrawMetadata;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

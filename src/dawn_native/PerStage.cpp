@@ -14,7 +14,7 @@
 
 #include "dawn_native/PerStage.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
         SingleShaderStage value,
@@ -46,4 +46,4 @@ namespace dawn_native {
         return static_cast<wgpu::ShaderStage>(1 << static_cast<uint32_t>(stage));
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

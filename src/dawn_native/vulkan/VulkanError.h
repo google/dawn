@@ -21,7 +21,7 @@
 constexpr VkResult VK_FAKE_ERROR_FOR_TESTING = VK_RESULT_MAX_ENUM;
 constexpr VkResult VK_FAKE_DEVICE_OOM_FOR_TESTING = static_cast<VkResult>(VK_RESULT_MAX_ENUM - 1);
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     // Returns a string version of the result.
     const char* VkResultAsString(::VkResult result);
@@ -34,17 +34,17 @@ namespace dawn_native::vulkan {
 //
 //   DAWN_TRY(CheckVkSuccess(vkDoSomething, "doing something"));
 #define CheckVkSuccess(resultIn, contextIn)                            \
-    ::dawn_native::vulkan::CheckVkSuccessImpl(                         \
-        ::dawn_native::vulkan::VkResult::WrapUnsafe(                   \
+    ::dawn::native::vulkan::CheckVkSuccessImpl(                        \
+        ::dawn::native::vulkan::VkResult::WrapUnsafe(                  \
             INJECT_ERROR_OR_RUN(resultIn, VK_FAKE_ERROR_FOR_TESTING)), \
         contextIn)
 
 #define CheckVkOOMThenSuccess(resultIn, contextIn)                                 \
-    ::dawn_native::vulkan::CheckVkOOMThenSuccessImpl(                              \
-        ::dawn_native::vulkan::VkResult::WrapUnsafe(INJECT_ERROR_OR_RUN(           \
+    ::dawn::native::vulkan::CheckVkOOMThenSuccessImpl(                             \
+        ::dawn::native::vulkan::VkResult::WrapUnsafe(INJECT_ERROR_OR_RUN(          \
             resultIn, VK_FAKE_DEVICE_OOM_FOR_TESTING, VK_FAKE_ERROR_FOR_TESTING)), \
         contextIn)
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANERROR_H_

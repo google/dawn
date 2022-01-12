@@ -19,7 +19,7 @@
 #include "dawn_native/d3d12/IntegerTypes.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     // Wrapper for a handle into a GPU-only descriptor heap.
     class GPUDescriptorHeapAllocation {
@@ -39,6 +39,6 @@ namespace dawn_native::d3d12 {
         HeapVersionID mHeapSerial = HeapVersionID(0);
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_CPUDESCRIPTORHEAPALLOCATION_H_

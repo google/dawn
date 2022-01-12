@@ -22,7 +22,7 @@
 #include <memory>
 
 // RingBufferAllocator is the front-end implementation used to manage a ring buffer in GPU memory.
-namespace dawn_native {
+namespace dawn::native {
 
     class RingBufferAllocator {
       public:
@@ -58,6 +58,6 @@ namespace dawn_native {
         uint64_t mCurrentRequestSize =
             0;  // Size of the sub-alloc requests (in bytes) of the current serial.
     };
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RINGBUFFERALLOCATOR_H_

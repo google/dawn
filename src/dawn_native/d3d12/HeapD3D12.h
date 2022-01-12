@@ -19,7 +19,7 @@
 #include "dawn_native/d3d12/PageableD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class Device;
 
@@ -35,6 +35,6 @@ namespace dawn_native::d3d12 {
       private:
         ComPtr<ID3D12Heap> mD3d12Heap;
     };
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_HEAPD3D12_H_

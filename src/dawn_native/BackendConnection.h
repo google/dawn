@@ -20,7 +20,7 @@
 
 #include <memory>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // An common interface for all backends. Mostly used to create adapters for a particular
     // backend.
@@ -45,6 +45,6 @@ namespace dawn_native {
         wgpu::BackendType mType;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_BACKENDCONNECTION_H_

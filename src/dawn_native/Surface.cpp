@@ -28,7 +28,7 @@
 #    include "common/xlib_with_undefs.h"
 #endif  // defined(DAWN_USE_X11)
 
-namespace dawn_native {
+namespace dawn::native {
 
     absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
         Surface::Type value,
@@ -243,4 +243,4 @@ namespace dawn_native {
         return mXWindow;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

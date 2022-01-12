@@ -36,7 +36,7 @@ namespace utils {
         WGPUDevice mDevice = nullptr;
     };
 
-    void DiscoverAdapter(dawn_native::Instance* instance,
+    void DiscoverAdapter(dawn::native::Instance* instance,
                          GLFWwindow* window,
                          wgpu::BackendType type);
     BackendBinding* CreateBinding(wgpu::BackendType type, GLFWwindow* window, WGPUDevice device);

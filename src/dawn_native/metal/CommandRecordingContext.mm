@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     CommandRecordingContext::CommandRecordingContext() = default;
 
@@ -129,4 +129,4 @@ namespace dawn_native::metal {
         mInEncoder = false;
     }
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal

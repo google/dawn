@@ -17,7 +17,7 @@
 
 #include <tint/tint.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -52,4 +52,4 @@ namespace dawn_native {
         tlDevice = nullptr;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

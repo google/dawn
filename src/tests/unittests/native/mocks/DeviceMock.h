@@ -20,7 +20,7 @@
 
 #include <gmock/gmock.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceMock : public DeviceBase {
       public:
@@ -112,6 +112,6 @@ namespace dawn_native {
         MOCK_METHOD(MaybeError, WaitForIdleForDestruction, (), (override));
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // TESTS_UNITTESTS_NATIVE_MOCKS_DEVICE_MOCK_H_

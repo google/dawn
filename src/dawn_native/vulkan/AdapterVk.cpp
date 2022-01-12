@@ -20,7 +20,7 @@
 
 #include "common/GPUInfo.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     Adapter::Adapter(InstanceBase* instance,
                      VulkanInstance* vulkanInstance,
@@ -340,7 +340,7 @@ namespace dawn_native::vulkan {
     }
 
     bool Adapter::SupportsExternalImages() const {
-        // Via dawn_native::vulkan::WrapVulkanImage
+        // Via dawn::native::vulkan::WrapVulkanImage
         return external_memory::Service::CheckSupport(mDeviceInfo) &&
                external_semaphore::Service::CheckSupport(mDeviceInfo, mPhysicalDevice,
                                                          mVulkanInstance->GetFunctions());
@@ -350,4 +350,4 @@ namespace dawn_native::vulkan {
         return Device::Create(this, descriptor);
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

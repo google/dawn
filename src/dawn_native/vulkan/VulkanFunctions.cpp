@@ -17,7 +17,7 @@
 #include "common/DynamicLib.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
 #define GET_GLOBAL_PROC(name)                                                              \
     do {                                                                                   \
@@ -329,4 +329,4 @@ namespace dawn_native::vulkan {
         return {};
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

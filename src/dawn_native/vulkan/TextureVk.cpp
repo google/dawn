@@ -31,7 +31,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
         // Converts an Dawn texture dimension to a Vulkan image view type.
@@ -577,7 +577,7 @@ namespace dawn_native::vulkan {
         return {};
     }
 
-    bool IsSampleCountSupported(const dawn_native::vulkan::Device* device,
+    bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
                                 const VkImageCreateInfo& imageCreateInfo) {
         ASSERT(device);
 
@@ -1364,4 +1364,4 @@ namespace dawn_native::vulkan {
                      reinterpret_cast<uint64_t&>(mHandle), "Dawn_InternalTextureView", GetLabel());
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

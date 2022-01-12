@@ -24,7 +24,7 @@
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
                                              wgpu::TextureFormat textureFormat) {
@@ -164,4 +164,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

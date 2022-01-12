@@ -20,7 +20,7 @@
 #include "dawn_native/CallbackTaskManager.h"
 #include "dawn_native/Error.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class ComputePipelineBase;
     class DeviceBase;
@@ -103,6 +103,6 @@ namespace dawn_native {
         void* mUserdata;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_CREATEPIPELINEASYNCTASK_H_

@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class ResourceHeapBase;
 
@@ -75,6 +75,6 @@ namespace dawn_native {
         ResourceHeapBase* mResourceHeap;
         uint8_t* mMappedPointer;
     };
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RESOURCEMEMORYALLOCATION_H_

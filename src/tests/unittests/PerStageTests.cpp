@@ -16,7 +16,7 @@
 
 #include "dawn_native/PerStage.h"
 
-using namespace dawn_native;
+using namespace dawn::native;
 
 // Tests for StageBit
 TEST(PerStage, StageBit) {

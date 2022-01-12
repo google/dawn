@@ -127,9 +127,9 @@ class EGLImageTestBase : public DawnTest {
                                   GLenum type,
                                   void* data,
                                   size_t size) {
-        dawn_native::opengl::Device* openglDevice =
-            dawn_native::opengl::ToBackend(dawn_native::FromAPI(device.Get()));
-        const dawn_native::opengl::OpenGLFunctions& gl = openglDevice->gl;
+        dawn::native::opengl::Device* openglDevice =
+            dawn::native::opengl::ToBackend(dawn::native::FromAPI(device.Get()));
+        const dawn::native::opengl::OpenGLFunctions& gl = openglDevice->gl;
         GLuint tex;
         gl.GenTextures(1, &tex);
         gl.BindTexture(GL_TEXTURE_2D, tex);
@@ -144,10 +144,10 @@ class EGLImageTestBase : public DawnTest {
         return ScopedEGLImage(egl.DestroyImage, gl.DeleteTextures, dpy, eglImage, tex);
     }
     wgpu::Texture WrapEGLImage(const wgpu::TextureDescriptor* descriptor, EGLImage eglImage) {
-        dawn_native::opengl::ExternalImageDescriptorEGLImage externDesc;
+        dawn::native::opengl::ExternalImageDescriptorEGLImage externDesc;
         externDesc.cTextureDescriptor = reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
         externDesc.image = eglImage;
-        WGPUTexture texture = dawn_native::opengl::WrapExternalEGLImage(device.Get(), &externDesc);
+        WGPUTexture texture = dawn::native::opengl::WrapExternalEGLImage(device.Get(), &externDesc);
         return wgpu::Texture::Acquire(texture);
     }
     EGLFunctions egl;
@@ -299,9 +299,9 @@ class EGLImageUsageTests : public EGLImageTestBase {
                      GLenum glType,
                      void* data,
                      size_t dataSize) {
-        dawn_native::opengl::Device* openglDevice =
-            dawn_native::opengl::ToBackend(dawn_native::FromAPI(device.Get()));
-        const dawn_native::opengl::OpenGLFunctions& gl = openglDevice->gl;
+        dawn::native::opengl::Device* openglDevice =
+            dawn::native::opengl::ToBackend(dawn::native::FromAPI(device.Get()));
+        const dawn::native::opengl::OpenGLFunctions& gl = openglDevice->gl;
 
         // Get a texture view for the eglImage
         wgpu::TextureDescriptor textureDescriptor;

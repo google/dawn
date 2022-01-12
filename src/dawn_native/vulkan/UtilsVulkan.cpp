@@ -24,7 +24,7 @@
 #include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op) {
         switch (op) {
@@ -261,4 +261,4 @@ namespace dawn_native::vulkan {
         return specializationInfo;
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

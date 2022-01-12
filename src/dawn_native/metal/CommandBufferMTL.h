@@ -20,11 +20,11 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native {
+namespace dawn::native {
     class CommandEncoder;
 }
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     class CommandRecordingContext;
     class Device;
@@ -64,6 +64,6 @@ namespace dawn_native::metal {
                                             uint32_t height);
     };
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_METAL_COMMANDBUFFERMTL_H_

@@ -21,7 +21,7 @@
 
 #include <string>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -92,6 +92,6 @@ namespace dawn_native {
         std::string mLabel;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_OBJECTBASE_H_

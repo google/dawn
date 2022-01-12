@@ -26,7 +26,7 @@
 struct ID3D11On12Device;
 struct IDXGIKeyedMutex;
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     // Wraps 11 wrapped resources in a cache.
     class D3D11on12ResourceCacheEntry : public RefCounted {
@@ -87,6 +87,6 @@ namespace dawn_native::d3d12 {
         Cache mCache;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D11ON12UTIL_H_

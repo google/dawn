@@ -18,7 +18,7 @@
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     // Limits the min/max heap size to always be some known value for testing.
     // Thresholds should be adjusted (lower == faster) to avoid tests taking too long to complete.
@@ -251,4 +251,4 @@ namespace dawn_native::d3d12 {
     ID3D12DescriptorHeap* ShaderVisibleDescriptorHeap::GetD3D12DescriptorHeap() const {
         return mD3d12DescriptorHeap.Get();
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

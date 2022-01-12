@@ -19,7 +19,7 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/IntegerTypes.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class Device;
 
@@ -65,6 +65,6 @@ namespace dawn_native::vulkan {
         SerialQueue<ExecutionSerial, VkSwapchainKHR> mSwapChainsToDelete;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_FENCEDDELETER_H_

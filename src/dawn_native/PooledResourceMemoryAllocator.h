@@ -20,7 +20,7 @@
 
 #include <deque>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -48,6 +48,6 @@ namespace dawn_native {
         std::deque<std::unique_ptr<ResourceHeapBase>> mPool;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_POOLEDRESOURCEMEMORYALLOCATOR_H_

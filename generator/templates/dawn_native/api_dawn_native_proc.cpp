@@ -14,7 +14,7 @@
 
 #include <dawn/{{metadata.api.lower()}}.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
 // This file should be kept in sync with generator/templates/dawn_native/ProcTable.cpp
 
@@ -39,7 +39,7 @@ namespace dawn_native {
 }
 
 extern "C" {
-    using namespace dawn_native;
+    using namespace dawn::native;
 
     {% for function in by_category["function"] %}
         {{as_cType(function.return_type.name)}} {{metadata.namespace}}{{as_cppType(function.name)}} (

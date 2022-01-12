@@ -28,7 +28,7 @@
 // validating against. It would be nice to improve that, but difficult to do without incurring
 // additional tracking costs.
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
         bool BufferSizesAtLeastAsBig(const ityp::span<uint32_t, uint64_t> unverifiedBufferSizes,
@@ -404,4 +404,4 @@ namespace dawn_native {
         return mIndexBufferSize;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

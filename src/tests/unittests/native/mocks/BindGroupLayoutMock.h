@@ -20,7 +20,7 @@
 
 #include <gmock/gmock.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class BindGroupLayoutMock final : public BindGroupLayoutBase {
       public:
@@ -34,6 +34,6 @@ namespace dawn_native {
         MOCK_METHOD(void, DestroyImpl, (), (override));
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // TESTS_UNITTESTS_NATIVE_MOCKS_BINDGROUPLAYOUT_MOCK_H_

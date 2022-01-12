@@ -18,7 +18,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     struct CombinedLimits {
         Limits v1;
@@ -38,6 +38,6 @@ namespace dawn_native {
     // Returns a copy of |limits| where limit tiers are applied.
     Limits ApplyLimitTiers(Limits limits);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_LIMITS_H_

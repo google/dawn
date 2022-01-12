@@ -18,7 +18,7 @@
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/Texture.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     //
     // Structs
@@ -130,4 +130,4 @@ namespace dawn_native {
         return {true};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

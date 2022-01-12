@@ -25,7 +25,7 @@ static constexpr VkExternalSemaphoreHandleTypeFlagBits kHandleType =
     VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
 #endif  // defined(DAWN_USE_SYNC_FDS)
 
-namespace dawn_native { namespace vulkan::external_semaphore {
+namespace dawn::native { namespace vulkan::external_semaphore {
 
     Service::Service(Device* device)
         : mDevice(device),
@@ -134,4 +134,4 @@ namespace dawn_native { namespace vulkan::external_semaphore {
         return fd;
     }
 
-}}  // namespace dawn_native::vulkan::external_semaphore
+}}  // namespace dawn::native::vulkan::external_semaphore

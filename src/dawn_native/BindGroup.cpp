@@ -27,7 +27,7 @@
 #include "dawn_native/Sampler.h"
 #include "dawn_native/Texture.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -483,4 +483,4 @@ namespace dawn_native {
         return static_cast<ExternalTextureBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

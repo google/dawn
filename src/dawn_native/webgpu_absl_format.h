@@ -19,7 +19,7 @@
 #include "dawn_native/dawn_platform.h"
 #include "dawn_native/webgpu_absl_format_autogen.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     //
     // Structs
@@ -67,6 +67,6 @@ namespace dawn_native {
                       const absl::FormatConversionSpec& spec,
                       absl::FormatSink* s);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_WEBGPUABSLFORMAT_H_

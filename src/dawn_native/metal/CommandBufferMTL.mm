@@ -34,7 +34,7 @@
 
 #include <tint/tint.h>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     namespace {
 
@@ -1564,4 +1564,4 @@ namespace dawn_native::metal {
         UNREACHABLE();
     }
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal

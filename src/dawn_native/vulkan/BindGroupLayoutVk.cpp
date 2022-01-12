@@ -25,7 +25,7 @@
 
 #include <map>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
 
@@ -196,4 +196,4 @@ namespace dawn_native::vulkan {
                      reinterpret_cast<uint64_t&>(mHandle), "Dawn_BindGroupLayout", GetLabel());
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

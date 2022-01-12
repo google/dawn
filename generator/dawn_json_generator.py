@@ -68,6 +68,9 @@ class Name:
     def snake_case(self):
         return '_'.join(self.chunks)
 
+    def namespace_case(self):
+        return '::'.join(self.chunks)
+
     def js_enum_case(self):
         result = self.chunks[0].lower()
         for chunk in self.chunks[1:]:

@@ -28,7 +28,7 @@
 #include <functional>
 #include <set>
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
         MaybeError ValidateStorageTextureFormat(DeviceBase* device,
@@ -553,4 +553,4 @@ namespace dawn_native {
         }
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

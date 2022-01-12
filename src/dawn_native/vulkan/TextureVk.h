@@ -23,7 +23,7 @@
 #include "dawn_native/vulkan/ExternalHandle.h"
 #include "dawn_native/vulkan/external_memory/MemoryService.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     struct CommandRecordingContext;
     class Device;
@@ -37,7 +37,7 @@ namespace dawn_native::vulkan {
     MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase* device,
                                                const TextureDescriptor* descriptor);
 
-    bool IsSampleCountSupported(const dawn_native::vulkan::Device* device,
+    bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
                                 const VkImageCreateInfo& imageCreateInfo);
 
     class Texture final : public TextureBase {
@@ -197,6 +197,6 @@ namespace dawn_native::vulkan {
         VkImageView mHandle = VK_NULL_HANDLE;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_TEXTUREVK_H_

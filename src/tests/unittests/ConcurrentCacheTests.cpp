@@ -55,7 +55,7 @@ class ConcurrentCacheTest : public testing::Test {
   protected:
     dawn::platform::Platform mPlatform;
     std::unique_ptr<dawn::platform::WorkerTaskPool> mPool;
-    dawn_native::AsyncTaskManager mTaskManager;
+    dawn::native::AsyncTaskManager mTaskManager;
     ConcurrentCache<SimpleCachedObject> mCache;
 };
 
@@ -69,10 +69,10 @@ TEST_F(ConcurrentCacheTest, InsertAtSameTime) {
     std::pair<SimpleCachedObject*, bool> anotherInsertOutput = {};
 
     ConcurrentCache<SimpleCachedObject>* cachePtr = &mCache;
-    dawn_native::AsyncTask asyncTask1([&insertOutput, cachePtr, &cachedObject] {
+    dawn::native::AsyncTask asyncTask1([&insertOutput, cachePtr, &cachedObject] {
         insertOutput = cachePtr->Insert(&cachedObject);
     });
-    dawn_native::AsyncTask asyncTask2([&anotherInsertOutput, cachePtr, &anotherCachedObject] {
+    dawn::native::AsyncTask asyncTask2([&anotherInsertOutput, cachePtr, &anotherCachedObject] {
         anotherInsertOutput = cachePtr->Insert(&anotherCachedObject);
     });
     mTaskManager.PostTask(std::move(asyncTask1));
@@ -91,12 +91,12 @@ TEST_F(ConcurrentCacheTest, EraseAfterInsertion) {
 
     std::pair<SimpleCachedObject*, bool> insertOutput = {};
     ConcurrentCache<SimpleCachedObject>* cachePtr = &mCache;
-    dawn_native::AsyncTask insertTask([&insertOutput, cachePtr, &cachedObject] {
+    dawn::native::AsyncTask insertTask([&insertOutput, cachePtr, &cachedObject] {
         insertOutput = cachePtr->Insert(&cachedObject);
     });
 
     size_t erasedObjectCount = 0;
-    dawn_native::AsyncTask eraseTask([&erasedObjectCount, cachePtr, &cachedObject] {
+    dawn::native::AsyncTask eraseTask([&erasedObjectCount, cachePtr, &cachedObject] {
         while (cachePtr->Find(&cachedObject) == nullptr) {
             utils::USleep(100);
         }

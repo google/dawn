@@ -12,9 +12,10 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-{% set native_namespace = Name(metadata.native_namespace).snake_case() %}
 {% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
-{% set native_dir = impl_dir + native_namespace %}
+{% set namespace_name = Name(metadata.native_namespace) %}
+{% set native_namespace = namespace_name.namespace_case() %}
+{% set native_dir = impl_dir + namespace_name.snake_case() %}
 #include "{{native_dir}}/ValidationUtils_autogen.h"
 
 namespace {{native_namespace}} {

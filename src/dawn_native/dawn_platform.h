@@ -20,7 +20,7 @@
 
 #include <dawn_native/dawn_platform_autogen.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // kEnumCount is a constant specifying the number of enums in a WebGPU enum type,
     // if the enums are contiguous, making it suitable for iteration.
@@ -57,6 +57,6 @@ namespace dawn_native {
 
     static constexpr wgpu::BufferBindingType kInternalStorageBufferBinding =
         static_cast<wgpu::BufferBindingType>(0xFFFFFFFF);
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_DAWNPLATFORM_H_

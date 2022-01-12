@@ -51,7 +51,7 @@ namespace {
       public:
         GetProcAddressTests()
             : testing::TestWithParam<DawnFlavor>(),
-              mNativeInstance(dawn_native::InstanceBase::Create()),
+              mNativeInstance(dawn::native::InstanceBase::Create()),
               mNativeAdapter(mNativeInstance.Get()) {
         }
 
@@ -60,7 +60,7 @@ namespace {
                 case DawnFlavor::Native: {
                     mDevice = wgpu::Device::Acquire(
                         reinterpret_cast<WGPUDevice>(mNativeAdapter.APICreateDevice()));
-                    mProcs = dawn_native::GetProcs();
+                    mProcs = dawn::native::GetProcs();
                     break;
                 }
 
@@ -90,8 +90,8 @@ namespace {
         }
 
       protected:
-        Ref<dawn_native::InstanceBase> mNativeInstance;
-        dawn_native::null::Adapter mNativeAdapter;
+        Ref<dawn::native::InstanceBase> mNativeInstance;
+        dawn::native::null::Adapter mNativeAdapter;
 
         std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
         std::unique_ptr<dawn::wire::WireClient> mWireClient;
@@ -155,7 +155,7 @@ namespace {
                              testing::PrintToStringParamName());
 
     TEST(GetProcAddressInternalTests, CheckDawnNativeProcMapOrder) {
-        std::vector<const char*> names = dawn_native::GetProcMapNamesForTesting();
+        std::vector<const char*> names = dawn::native::GetProcMapNamesForTesting();
         for (size_t i = 1; i < names.size(); i++) {
             ASSERT_LT(std::string(names[i - 1]), std::string(names[i]));
         }

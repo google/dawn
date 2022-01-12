@@ -20,7 +20,7 @@
 
 #include <gmock/gmock.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class BufferMock : public BufferBase {
       public:
@@ -44,6 +44,6 @@ namespace dawn_native {
         MOCK_METHOD(bool, IsCPUWritableAtCreation, (), (const, override));
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // TESTS_UNITTESTS_NATIVE_MOCKS_BINDGROUP_MOCK_H_

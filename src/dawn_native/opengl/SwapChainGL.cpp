@@ -20,7 +20,7 @@
 
 #include <dawn/dawn_wsi.h>
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
         : OldSwapChainBase(device, descriptor) {
@@ -48,4 +48,4 @@ namespace dawn_native::opengl {
         return {};
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

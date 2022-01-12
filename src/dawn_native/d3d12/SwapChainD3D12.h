@@ -20,7 +20,7 @@
 #include "dawn_native/IntegerTypes.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class Device;
     class Texture;
@@ -84,6 +84,6 @@ namespace dawn_native::d3d12 {
         Ref<Texture> mApiTexture;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_SWAPCHAIN_D3D12_H_

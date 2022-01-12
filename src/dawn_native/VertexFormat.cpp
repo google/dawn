@@ -18,7 +18,7 @@
 
 #include <array>
 
-namespace dawn_native {
+namespace dawn::native {
 
     static constexpr std::array<VertexFormatInfo, 31> sVertexFormatTable = {{
         //
@@ -66,4 +66,4 @@ namespace dawn_native {
         return sVertexFormatTable[static_cast<uint32_t>(format)];
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

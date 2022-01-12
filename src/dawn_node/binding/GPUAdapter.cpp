@@ -117,7 +117,7 @@ namespace wgpu::binding {
     // wgpu::bindings::GPUAdapter
     // TODO(crbug.com/dawn/1133): This is a stub implementation. Properly implement.
     ////////////////////////////////////////////////////////////////////////////////
-    GPUAdapter::GPUAdapter(dawn_native::Adapter a, const Flags& flags)
+    GPUAdapter::GPUAdapter(dawn::native::Adapter a, const Flags& flags)
         : adapter_(a), flags_(flags) {
     }
 

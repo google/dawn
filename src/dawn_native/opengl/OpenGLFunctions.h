@@ -20,7 +20,7 @@
 #include "dawn_native/opengl/OpenGLFunctionsBase_autogen.h"
 #include "dawn_native/opengl/OpenGLVersion.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     struct OpenGLFunctions : OpenGLFunctionsBase {
       public:
@@ -40,6 +40,6 @@ namespace dawn_native::opengl {
         std::unordered_set<std::string> mSupportedGLExtensionsSet;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_OPENGLFUNCTIONS_H_

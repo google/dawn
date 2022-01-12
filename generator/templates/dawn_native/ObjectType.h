@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-{% set native_namespace = namespace_name.snake_case() %}
+{% set native_namespace = namespace_name.namespace_case() %}
 namespace {{native_namespace}} {
 
     enum class ObjectType : uint32_t {

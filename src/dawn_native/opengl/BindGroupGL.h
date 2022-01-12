@@ -18,7 +18,7 @@
 #include "common/PlacementAllocated.h"
 #include "dawn_native/BindGroup.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Device;
 
@@ -36,6 +36,6 @@ namespace dawn_native::opengl {
         void DestroyImpl() override;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_BINDGROUPGL_H_

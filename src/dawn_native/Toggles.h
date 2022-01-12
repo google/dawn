@@ -21,7 +21,7 @@
 
 #include "dawn_native/DawnNative.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     enum class Toggle {
         EmulateStoreAndMSAAResolve,
@@ -92,6 +92,6 @@ namespace dawn_native {
         std::unordered_map<std::string, Toggle> mToggleNameToEnumMap;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_TOGGLES_H_

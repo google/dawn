@@ -22,7 +22,7 @@
 
 #include <mutex>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class Device;
     class PipelineLayout;
@@ -62,6 +62,6 @@ namespace dawn_native::vulkan {
         std::unique_ptr<ConcurrentTransformedShaderModuleCache> mTransformedShaderModuleCache;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_SHADERMODULEVK_H_

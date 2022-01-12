@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 #include "dawn_native/BuddyAllocator.h"
 
-using namespace dawn_native;
+using namespace dawn::native;
 
 constexpr uint64_t BuddyAllocator::kInvalidOffset;
 

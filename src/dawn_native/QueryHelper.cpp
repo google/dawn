@@ -24,15 +24,15 @@
 #include "dawn_native/InternalPipelineStore.h"
 #include "dawn_native/utils/WGPUHelpers.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
-        // Assert the offsets in dawn_native::TimestampParams are same with the ones in the shader
-        static_assert(offsetof(dawn_native::TimestampParams, first) == 0, "");
-        static_assert(offsetof(dawn_native::TimestampParams, count) == 4, "");
-        static_assert(offsetof(dawn_native::TimestampParams, offset) == 8, "");
-        static_assert(offsetof(dawn_native::TimestampParams, period) == 12, "");
+        // Assert the offsets in dawn::native::TimestampParams are same with the ones in the shader
+        static_assert(offsetof(dawn::native::TimestampParams, first) == 0, "");
+        static_assert(offsetof(dawn::native::TimestampParams, count) == 4, "");
+        static_assert(offsetof(dawn::native::TimestampParams, offset) == 8, "");
+        static_assert(offsetof(dawn::native::TimestampParams, period) == 12, "");
 
         static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
@@ -184,4 +184,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

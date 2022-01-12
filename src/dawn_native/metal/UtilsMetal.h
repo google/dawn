@@ -22,13 +22,13 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native {
+namespace dawn::native {
     struct ProgrammableStage;
     struct EntryPointMetadata;
     enum class SingleShaderStage;
 }
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction);
 
@@ -81,6 +81,6 @@ namespace dawn_native::metal {
                                  uint32_t sampleMask = 0xFFFFFFFF,
                                  const RenderPipeline* renderPipeline = nullptr);
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_METAL_UTILSMETAL_H_

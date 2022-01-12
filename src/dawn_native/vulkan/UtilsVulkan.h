@@ -19,12 +19,12 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
     struct ProgrammableStage;
     union OverridableConstantScalar;
-}  // namespace dawn_native
+}  // namespace dawn::native
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class Device;
 
@@ -116,6 +116,6 @@ namespace dawn_native::vulkan {
         std::vector<OverridableConstantScalar>* specializationDataEntries,
         std::vector<VkSpecializationMapEntry>* specializationMapEntries);
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_UTILSVULKAN_H_

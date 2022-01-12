@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -89,4 +89,4 @@ namespace dawn_native {
         return false;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

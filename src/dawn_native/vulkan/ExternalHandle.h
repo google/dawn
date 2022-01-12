@@ -3,7 +3,7 @@
 
 #include "common/vulkan_platform.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
 #if DAWN_PLATFORM_LINUX
     // File descriptor
@@ -21,6 +21,6 @@ namespace dawn_native::vulkan {
     using ExternalSemaphoreHandle = void*;
 #endif
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_EXTERNALHANDLE_H_

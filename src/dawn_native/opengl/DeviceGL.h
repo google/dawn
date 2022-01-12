@@ -33,7 +33,7 @@
 
 typedef void* EGLImage;
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Device final : public DeviceBase {
       public:
@@ -126,6 +126,6 @@ namespace dawn_native::opengl {
         GLFormatTable mFormatTable;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_DEVICEGL_H_

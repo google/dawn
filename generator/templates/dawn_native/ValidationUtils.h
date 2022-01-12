@@ -18,9 +18,10 @@
 {% set api = metadata.api.lower() %}
 #include "dawn/{{api}}_cpp.h"
 
-{% set native_namespace = Name(metadata.native_namespace).snake_case() %}
 {% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
-{% set native_dir = impl_dir + native_namespace %}
+{% set namespace_name = Name(metadata.native_namespace) %}
+{% set native_namespace = namespace_name.namespace_case() %}
+{% set native_dir = impl_dir + namespace_name.snake_case() %}
 #include "{{native_dir}}/Error.h"
 
 namespace {{native_namespace}} {

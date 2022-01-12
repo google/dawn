@@ -21,7 +21,7 @@
 
 #include <bitset>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Format
 
@@ -469,4 +469,4 @@ namespace dawn_native {
         return table;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

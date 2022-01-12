@@ -43,7 +43,7 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         mWGPUDevice = device;
 
         // Create the D3D11 device/contexts that will be used in subsequent tests
-        ComPtr<ID3D12Device> d3d12Device = dawn_native::d3d12::GetD3D12Device(device);
+        ComPtr<ID3D12Device> d3d12Device = dawn::native::d3d12::GetD3D12Device(device);
 
         const LUID adapterLuid = d3d12Device->GetAdapterLuid();
 
@@ -144,7 +144,7 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         hr = d3d11Texture.As(&dxgiKeyedMutex);
         ASSERT(hr == S_OK);
 
-        using dawn_native::d3d12::kDXGIKeyedMutexAcquireReleaseKey;
+        using dawn::native::d3d12::kDXGIKeyedMutexAcquireReleaseKey;
         hr = dxgiKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE);
         ASSERT(hr == S_OK);
 
@@ -153,18 +153,18 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
 
         // Open the DX11 texture in Dawn from the shared handle and return it as a WebGPU
         // texture.
-        dawn_native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
+        dawn::native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
         externalImageDesc.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
         externalImageDesc.sharedHandle = sharedHandle;
 
-        std::unique_ptr<dawn_native::d3d12::ExternalImageDXGI> externalImage =
-            dawn_native::d3d12::ExternalImageDXGI::Create(mWGPUDevice, &externalImageDesc);
+        std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
+            dawn::native::d3d12::ExternalImageDXGI::Create(mWGPUDevice, &externalImageDesc);
 
         // Handle is no longer needed once resources are created.
         ::CloseHandle(sharedHandle);
 
-        dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+        dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
         externalAccessDesc.isInitialized = true;
         externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(textureDesc.usage);
 

@@ -19,7 +19,7 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/Pipeline.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
     struct EntryPointMetadata;
@@ -50,6 +50,6 @@ namespace dawn_native {
         ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_COMPUTEPIPELINE_H_

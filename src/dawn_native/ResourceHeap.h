@@ -17,7 +17,7 @@
 
 #include "dawn_native/Error.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Wrapper for a resource backed by a heap.
     class ResourceHeapBase {
@@ -26,6 +26,6 @@ namespace dawn_native {
         virtual ~ResourceHeapBase() = default;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RESOURCEHEAP_H_

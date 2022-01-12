@@ -33,7 +33,7 @@
 
 #include <unordered_set>
 
-namespace dawn_native {
+namespace dawn::native {
     namespace {
 
         static const char sCopyTextureForBrowserShader[] = R"(
@@ -594,4 +594,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

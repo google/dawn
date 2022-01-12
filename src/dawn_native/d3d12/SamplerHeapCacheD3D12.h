@@ -32,7 +32,7 @@
 //
 // The cache is primary needed for the GPU sampler heap, which is much smaller than the view heap
 // and switches incur expensive pipeline flushes.
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class BindGroup;
     class Device;
@@ -102,6 +102,6 @@ namespace dawn_native::d3d12 {
         Cache mCache;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_SAMPLERHEAPCACHE_H_

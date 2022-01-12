@@ -23,7 +23,7 @@
 
 #include <windows.ui.xaml.media.dxinterop.h>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     namespace {
 
         uint32_t PresentModeToBufferCount(wgpu::PresentMode mode) {
@@ -374,4 +374,4 @@ namespace dawn_native::d3d12 {
         mBuffers.clear();
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

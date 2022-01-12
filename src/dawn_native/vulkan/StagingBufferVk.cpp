@@ -20,7 +20,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     StagingBuffer::StagingBuffer(size_t size, Device* device)
         : StagingBufferBase(size), mDevice(device) {
@@ -74,4 +74,4 @@ namespace dawn_native::vulkan {
         return mBuffer;
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

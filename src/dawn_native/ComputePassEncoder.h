@@ -21,7 +21,7 @@
 #include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/ProgrammableEncoder.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class SyncScopeUsageTracker;
 
@@ -83,6 +83,6 @@ namespace dawn_native {
         Ref<CommandEncoder> mCommandEncoder;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_COMPUTEPASSENCODER_H_

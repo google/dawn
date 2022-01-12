@@ -30,7 +30,7 @@ namespace dawn {
     using ErrorType = wgpu::ErrorType;
 }
 
-namespace dawn_native {
+namespace dawn::native {
     enum class InternalErrorType : uint32_t;
 
     class [[nodiscard]] ErrorData {
@@ -65,6 +65,6 @@ namespace dawn_native {
         std::vector<std::string> mDebugGroups;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_ERRORDATA_H_

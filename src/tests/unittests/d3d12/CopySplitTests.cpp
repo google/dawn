@@ -23,7 +23,7 @@
 #include "dawn_native/d3d12/d3d12_platform.h"
 #include "utils/TestUtils.h"
 
-using namespace dawn_native::d3d12;
+using namespace dawn::native::d3d12;
 
 namespace {
 

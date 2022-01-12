@@ -22,7 +22,7 @@
 #include "dawn/dawn_wsi.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
                                            const Surface* surface,
@@ -164,6 +164,6 @@ namespace dawn_native {
         virtual void DetachFromSurfaceImpl() = 0;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_SWAPCHAIN_H_

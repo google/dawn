@@ -23,7 +23,7 @@
 
 #include <vector>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class Device;
 
@@ -55,6 +55,6 @@ namespace dawn_native::d3d12 {
         uint32_t mCurrentBuffer;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_NATIVESWAPCHAINIMPLD3D12_H_

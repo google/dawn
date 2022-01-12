@@ -15,7 +15,7 @@
 #include "dawn_native/PooledResourceMemoryAllocator.h"
 #include "dawn_native/Device.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     PooledResourceMemoryAllocator::PooledResourceMemoryAllocator(
         ResourceHeapAllocator* heapAllocator)
@@ -57,4 +57,4 @@ namespace dawn_native {
     uint64_t PooledResourceMemoryAllocator::GetPoolSizeForTesting() const {
         return mPool.size();
     }
-}  // namespace dawn_native
+}  // namespace dawn::native

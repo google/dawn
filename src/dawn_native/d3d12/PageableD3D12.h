@@ -20,7 +20,7 @@
 #include "dawn_native/IntegerTypes.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     // This class is used to represent ID3D12Pageable allocations, and also serves as a node within
     // the ResidencyManager's LRU cache. This node is inserted into the LRU-cache when it is first
     // allocated, and any time it is scheduled to be used by the GPU. This node is removed from the
@@ -75,6 +75,6 @@ namespace dawn_native::d3d12 {
         uint32_t mResidencyLockRefCount = 0;
         uint64_t mSize = 0;
     };
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif

@@ -17,7 +17,7 @@
 
 #include "dawn_native/ToBackend.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Adapter;
     class BindGroup;
@@ -61,6 +61,6 @@ namespace dawn_native::opengl {
         return ToBackendBase<OpenGLBackendTraits>(common);
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_FORWARD_H_

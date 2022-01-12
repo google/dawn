@@ -65,7 +65,7 @@ DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(VkSomeHandle)
 // One way to get the alignment inside structures of a type is to look at the alignment of it
 // wrapped in a structure. Hence VkSameHandleNativeWrappe
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace detail {
         template <typename T>
@@ -140,17 +140,17 @@ namespace dawn_native::vulkan {
         return reinterpret_cast<HandleType*>(handle);
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
-#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object)                                   \
-    DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object)                              \
-    namespace dawn_native::vulkan {                                      \
+#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object)                               \
+    DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object)                          \
+    namespace dawn::native::vulkan {                                            \
         using object = detail::VkHandle<struct VkTag##object, ::object>;        \
         static_assert(sizeof(object) == sizeof(uint64_t), "");                  \
         static_assert(alignof(object) == detail::kUint64Alignment, "");         \
         static_assert(sizeof(object) == sizeof(::object), "");                  \
         static_assert(alignof(object) == detail::kNativeVkHandleAlignment, ""); \
-    }  // namespace dawn_native::vulkan
+    }  // namespace dawn::native::vulkan
 
 // Import additional parts of Vulkan that are supported on our architecture and preemptively include
 // headers that vulkan.h includes that we have "undefs" for.

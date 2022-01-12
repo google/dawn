@@ -27,11 +27,11 @@ namespace {
     class DeviceCreationTest : public testing::Test {
       protected:
         void SetUp() override {
-            dawnProcSetProcs(&dawn_native::GetProcs());
+            dawnProcSetProcs(&dawn::native::GetProcs());
 
-            instance = std::make_unique<dawn_native::Instance>();
+            instance = std::make_unique<dawn::native::Instance>();
             instance->DiscoverDefaultAdapters();
-            for (dawn_native::Adapter& nativeAdapter : instance->GetAdapters()) {
+            for (dawn::native::Adapter& nativeAdapter : instance->GetAdapters()) {
                 wgpu::AdapterProperties properties;
                 nativeAdapter.GetProperties(&properties);
 
@@ -49,7 +49,7 @@ namespace {
             dawnProcSetProcs(nullptr);
         }
 
-        std::unique_ptr<dawn_native::Instance> instance;
+        std::unique_ptr<dawn::native::Instance> instance;
         wgpu::Adapter adapter;
     };
 
@@ -79,7 +79,7 @@ namespace {
         wgpu::Device device = adapter.CreateDevice(&desc);
         EXPECT_NE(device, nullptr);
 
-        auto toggles = dawn_native::GetTogglesUsed(device.Get());
+        auto toggles = dawn::native::GetTogglesUsed(device.Get());
         EXPECT_THAT(toggles, testing::Contains(testing::StrEq(toggle)));
     }
 

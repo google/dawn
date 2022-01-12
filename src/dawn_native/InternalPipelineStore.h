@@ -21,7 +21,7 @@
 
 #include <unordered_map>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
     class RenderPipelineBase;
@@ -55,6 +55,6 @@ namespace dawn_native {
         Ref<ComputePipelineBase> dispatchIndirectValidationPipeline;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_INTERNALPIPELINESTORE_H_

@@ -16,7 +16,7 @@
 
 #include "dawn_native/RingBufferAllocator.h"
 
-using namespace dawn_native;
+using namespace dawn::native;
 
 constexpr uint64_t RingBufferAllocator::kInvalidOffset;
 

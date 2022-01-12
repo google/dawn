@@ -30,7 +30,7 @@
 // at-least one free block. If no AVAILABLE heap exists, a new heap is created and inserted
 // back into the pool to be immediately used. To deallocate, the block corresponding to the
 // offset is inserted back into the free-list.
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class Device;
 
@@ -80,6 +80,6 @@ namespace dawn_native::d3d12 {
         SerialQueue<ExecutionSerial, CPUDescriptorHeapAllocation> mAllocationsToDelete;
     };
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_STAGINGDESCRIPTORALLOCATOR_H_

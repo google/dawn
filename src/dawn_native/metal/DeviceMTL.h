@@ -30,7 +30,7 @@
 #include <memory>
 #include <mutex>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     namespace {
         struct KalmanInfo;
@@ -149,6 +149,6 @@ namespace dawn_native::metal {
         std::unique_ptr<KalmanInfo> mKalmanInfo;
     };
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_METAL_DEVICEMTL_H_

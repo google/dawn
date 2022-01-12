@@ -14,7 +14,7 @@
 
 #include "dawn_native/d3d12/HeapD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     Heap::Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size)
         : Pageable(std::move(d3d12Pageable), memorySegment, size) {
         mD3d12Pageable.As(&mD3d12Heap);
@@ -28,4 +28,4 @@ namespace dawn_native::d3d12 {
         return mD3d12Heap.Get();
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

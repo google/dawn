@@ -24,7 +24,7 @@
 
 #include <dawn_native/D3D12Backend.h>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     void Flush11On12DeviceToAvoidLeaks(ComPtr<ID3D11On12Device> d3d11on12Device) {
         if (d3d11on12Device == nullptr) {
@@ -184,4 +184,4 @@ namespace dawn_native::d3d12 {
         return entry;
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

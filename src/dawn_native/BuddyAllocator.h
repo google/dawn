@@ -20,7 +20,7 @@
 #include <limits>
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Buddy allocator uses the buddy memory allocation technique to satisfy an allocation request.
     // Memory is split into halves until just large enough to fit to the request. This
@@ -112,6 +112,6 @@ namespace dawn_native {
         std::vector<BlockList> mFreeLists;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_BUDDYALLOCATOR_H_

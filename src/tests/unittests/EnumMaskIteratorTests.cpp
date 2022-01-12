@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     enum class TestAspect : uint8_t {
         Color = 1,
@@ -29,18 +29,18 @@ namespace dawn_native {
         static constexpr unsigned value = 3;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 namespace dawn {
 
     template <>
-    struct IsDawnBitmask<dawn_native::TestAspect> {
+    struct IsDawnBitmask<dawn::native::TestAspect> {
         static constexpr bool enable = true;
     };
 
 }  // namespace dawn
 
-namespace dawn_native {
+namespace dawn::native {
 
     static_assert(EnumBitmaskSize<TestAspect>::value == 3, "");
 
@@ -69,4 +69,4 @@ namespace dawn_native {
         }
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

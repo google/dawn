@@ -22,7 +22,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class CommandBufferStateTracker {
       public:
@@ -81,6 +81,6 @@ namespace dawn_native {
         const RequiredBufferSizes* mMinBufferSizes = nullptr;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H

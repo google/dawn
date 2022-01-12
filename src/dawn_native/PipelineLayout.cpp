@@ -23,7 +23,7 @@
 #include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/ShaderModule.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidatePipelineLayoutDescriptor(
         DeviceBase* device,
@@ -406,4 +406,4 @@ namespace dawn_native {
         return true;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

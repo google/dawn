@@ -23,7 +23,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     class Device;
 
@@ -57,6 +57,6 @@ namespace dawn_native::metal {
         PerStage<uint32_t> mBufferBindingCount;
     };
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_METAL_PIPELINELAYOUTMTL_H_

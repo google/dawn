@@ -17,7 +17,7 @@
 
 #include "dawn/EnumClassBitmasks.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     // EnumClassBitmmasks is a helper in the dawn:: namespace.
     // Re-export it in the dawn_native namespace.
@@ -34,6 +34,6 @@ namespace dawn_native {
         return HasZeroOrOneBits(value) && value != T(0);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_ENUMCLASSBITMASK_H_

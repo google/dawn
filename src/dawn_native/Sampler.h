@@ -22,7 +22,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -75,6 +75,6 @@ namespace dawn_native {
         uint16_t mMaxAnisotropy;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_SAMPLER_H_

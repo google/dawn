@@ -21,7 +21,7 @@
 
 #include <set>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     class CommandAllocatorManager;
     class Device;
     class Heap;
@@ -53,6 +53,6 @@ namespace dawn_native::d3d12 {
 
         std::vector<Ref<Buffer>> mTempBuffers;
     };
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_COMMANDRECORDINGCONTEXT_H_

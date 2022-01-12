@@ -17,7 +17,7 @@
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/UtilsMetal.h"
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     namespace {
         MTLSamplerMinMagFilter FilterModeToMinMagFilter(wgpu::FilterMode mode) {
@@ -103,4 +103,4 @@ namespace dawn_native::metal {
         return mMtlSamplerState.Get();
     }
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal

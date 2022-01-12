@@ -82,7 +82,7 @@ namespace utils {
         class WireHelperDirect : public WireHelper {
           public:
             WireHelperDirect() {
-                dawnProcSetProcs(&dawn_native::GetProcs());
+                dawnProcSetProcs(&dawn::native::GetProcs());
             }
 
             std::pair<wgpu::Device, WGPUDevice> RegisterDevice(WGPUDevice backendDevice) override {
@@ -109,7 +109,7 @@ namespace utils {
                 mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
 
                 dawn::wire::WireServerDescriptor serverDesc = {};
-                serverDesc.procs = &dawn_native::GetProcs();
+                serverDesc.procs = &dawn::native::GetProcs();
                 serverDesc.serializer = mS2cBuf.get();
 
                 mWireServer.reset(new dawn::wire::WireServer(serverDesc));
@@ -134,7 +134,7 @@ namespace utils {
 
                 auto reservation = mWireClient->ReserveDevice();
                 mWireServer->InjectDevice(backendDevice, reservation.id, reservation.generation);
-                dawn_native::GetProcs().deviceRelease(backendDevice);
+                dawn::native::GetProcs().deviceRelease(backendDevice);
 
                 return std::make_pair(wgpu::Device::Acquire(reservation.device), backendDevice);
             }

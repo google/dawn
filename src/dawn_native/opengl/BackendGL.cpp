@@ -22,7 +22,7 @@
 
 #include <cstring>
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     namespace {
 
@@ -132,7 +132,7 @@ namespace dawn_native::opengl {
 
         // AdapterBase Implementation
         bool SupportsExternalImages() const override {
-            // Via dawn_native::opengl::WrapExternalEGLImage
+            // Via dawn::native::opengl::WrapExternalEGLImage
             return GetBackendType() == wgpu::BackendType::OpenGLES;
         }
 
@@ -242,7 +242,7 @@ namespace dawn_native::opengl {
 
                 if (supportsS3TC && (supportsTextureSRGB || supportsS3TCSRGB) && supportsRGTC &&
                     supportsBPTC) {
-                    mSupportedFeatures.EnableFeature(dawn_native::Feature::TextureCompressionBC);
+                    mSupportedFeatures.EnableFeature(dawn::native::Feature::TextureCompressionBC);
                 }
             }
 
@@ -303,4 +303,4 @@ namespace dawn_native::opengl {
         return new Backend(instance, backendType);
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

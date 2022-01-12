@@ -18,7 +18,7 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
@@ -92,4 +92,4 @@ namespace dawn_native::opengl {
         return mNumSampledTextures;
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

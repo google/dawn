@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-namespace dawn_native {
+namespace dawn::native {
     // Binding numbers in the shader and BindGroup/BindGroupLayoutDescriptors
     using BindingNumber = TypedInteger<struct BindingNumberT, uint32_t>;
 
@@ -70,6 +70,6 @@ namespace dawn_native {
     // other pipelines.
     using PipelineCompatibilityToken = TypedInteger<struct PipelineCompatibilityTokenT, uint64_t>;
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_INTEGERTYPES_H_

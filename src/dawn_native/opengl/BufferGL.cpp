@@ -17,7 +17,7 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     // Buffer
 
@@ -181,4 +181,4 @@ namespace dawn_native::opengl {
         mBuffer = 0;
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

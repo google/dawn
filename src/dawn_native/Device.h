@@ -37,7 +37,7 @@ namespace dawn::platform {
     class WorkerTaskPool;
 }  // namespace dawn::platform
 
-namespace dawn_native {
+namespace dawn::native {
     class AdapterBase;
     class AsyncTaskManager;
     class AttachmentState;
@@ -540,6 +540,6 @@ namespace dawn_native {
         std::string mLabel;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_DEVICE_H_

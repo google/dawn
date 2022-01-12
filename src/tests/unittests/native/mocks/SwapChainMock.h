@@ -20,7 +20,7 @@
 
 #include <gmock/gmock.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class SwapChainMock : public SwapChainBase {
       public:
@@ -41,6 +41,6 @@ namespace dawn_native {
         MOCK_METHOD(void, APIPresent, (), (override));
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // TESTS_UNITTESTS_NATIVE_MOCKS_SWAPCHAIN_MOCK_H_

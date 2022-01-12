@@ -25,7 +25,7 @@
 
 #include <spirv_cross.hpp>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Returns the spirv_cross equivalent for this shader stage and vice-versa.
     spv::ExecutionModel ShaderStageToExecutionModel(SingleShaderStage stage);
@@ -46,6 +46,6 @@ namespace dawn_native {
     VertexFormatBaseType SpirvBaseTypeToVertexFormatBaseType(
         spirv_cross::SPIRType::BaseType spirvBaseType);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_OPENGL_SPIRV_UTILS_H_

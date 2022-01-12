@@ -20,7 +20,7 @@
 #include "dawn_native/dawn_platform.h"
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Device;
 
@@ -53,6 +53,6 @@ namespace dawn_native::opengl {
         Device* mDevice = nullptr;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_NATIVESWAPCHAINIMPLGL_H_

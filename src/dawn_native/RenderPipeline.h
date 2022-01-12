@@ -26,7 +26,7 @@
 #include <array>
 #include <bitset>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -139,6 +139,6 @@ namespace dawn_native {
         bool mWritesStencil = false;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RENDERPIPELINE_H_

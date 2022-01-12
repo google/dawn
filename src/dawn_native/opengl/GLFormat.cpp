@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/GLFormat.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     GLFormatTable BuildGLFormatTable() {
         GLFormatTable table;
@@ -117,4 +117,4 @@ namespace dawn_native::opengl {
         return table;
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

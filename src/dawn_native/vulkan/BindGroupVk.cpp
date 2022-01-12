@@ -26,7 +26,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     // static
     ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
@@ -131,7 +131,7 @@ namespace dawn_native::vulkan {
                 }
 
                 case BindingInfoType::ExternalTexture: {
-                    const std::array<Ref<dawn_native::TextureViewBase>, kMaxPlanesPerFormat>&
+                    const std::array<Ref<dawn::native::TextureViewBase>, kMaxPlanesPerFormat>&
                         textureViews = GetBindingAsExternalTexture(bindingIndex)->GetTextureViews();
 
                     // Only single-plane formats are supported right now, so ensure only one view
@@ -177,4 +177,4 @@ namespace dawn_native::vulkan {
                      GetLabel());
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

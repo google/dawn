@@ -19,7 +19,7 @@
 
 #include "common/Assert.h"
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction) {
         switch (compareFunction) {
@@ -287,4 +287,4 @@ namespace dawn_native::metal {
         return {};
     }
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal

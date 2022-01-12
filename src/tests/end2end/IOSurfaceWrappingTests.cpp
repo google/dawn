@@ -98,13 +98,13 @@ namespace {
                                     IOSurfaceRef ioSurface,
                                     uint32_t plane,
                                     bool isInitialized = true) {
-            dawn_native::metal::ExternalImageDescriptorIOSurface externDesc;
+            dawn::native::metal::ExternalImageDescriptorIOSurface externDesc;
             externDesc.cTextureDescriptor =
                 reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
             externDesc.ioSurface = ioSurface;
             externDesc.plane = plane;
             externDesc.isInitialized = isInitialized;
-            WGPUTexture texture = dawn_native::metal::WrapIOSurface(device.Get(), &externDesc);
+            WGPUTexture texture = dawn::native::metal::WrapIOSurface(device.Get(), &externDesc);
             return wgpu::Texture::Acquire(texture);
         }
     };
@@ -362,7 +362,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         queue.Submit(1, &commands);
 
         // Wait for the commands touching the IOSurface to be scheduled
-        dawn_native::metal::WaitForCommandsToBeScheduled(device.Get());
+        dawn::native::metal::WaitForCommandsToBeScheduled(device.Get());
 
         // Check the correct data was written
         IOSurfaceLock(ioSurface, kIOSurfaceLockReadOnly, nullptr);

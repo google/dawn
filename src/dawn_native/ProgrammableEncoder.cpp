@@ -26,7 +26,7 @@
 
 #include <cstring>
 
-namespace dawn_native {
+namespace dawn::native {
 
     ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
                                              const char* label,
@@ -200,4 +200,4 @@ namespace dawn_native {
         }
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

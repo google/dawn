@@ -17,7 +17,7 @@
 
 #include "dawn_native/Error.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class StagingBufferBase {
       public:
@@ -36,6 +36,6 @@ namespace dawn_native {
         const size_t mBufferSize;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_STAGINGBUFFER_H_

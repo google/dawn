@@ -21,7 +21,7 @@
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     namespace {
         MemorySegment GetMemorySegment(Device* device, D3D12_HEAP_TYPE heapType) {
             if (device->GetDeviceInfo().isUMA) {
@@ -407,4 +407,4 @@ namespace dawn_native::d3d12 {
         }
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

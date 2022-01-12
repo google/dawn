@@ -20,7 +20,7 @@ typedef void* EGLImage;
 #include <dawn/dawn_wsi.h>
 #include <dawn_native/DawnNative.h>
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
         AdapterDiscoveryOptions();
@@ -50,6 +50,6 @@ namespace dawn_native::opengl {
     DAWN_NATIVE_EXPORT WGPUTexture
     WrapExternalEGLImage(WGPUDevice device, const ExternalImageDescriptorEGLImage* descriptor);
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGLBACKEND_H_

@@ -17,7 +17,7 @@
 
 #include "dawn_native/Queue.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Device;
 
@@ -37,6 +37,6 @@ namespace dawn_native::opengl {
                                     const Extent3D& writeSizePixel) override;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_QUEUEGL_H_

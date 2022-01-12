@@ -18,7 +18,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_platform/DawnPlatform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     PersistentCache::PersistentCache(DeviceBase* device)
         : mDevice(device), mCache(GetPlatformCache()) {
@@ -61,4 +61,4 @@ namespace dawn_native {
         }
         return nullptr;
     }
-}  // namespace dawn_native
+}  // namespace dawn::native

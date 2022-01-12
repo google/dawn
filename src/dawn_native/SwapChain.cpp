@@ -22,7 +22,7 @@
 #include "dawn_native/Texture.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -409,4 +409,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

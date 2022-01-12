@@ -22,7 +22,7 @@
 
 #include <vector>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class BindGroup;
     struct DescriptorSetAllocation;
@@ -75,6 +75,6 @@ namespace dawn_native::vulkan {
         Ref<DescriptorSetAllocator> mDescriptorSetAllocator;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_BINDGROUPLAYOUTVK_H_

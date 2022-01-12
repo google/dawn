@@ -26,7 +26,7 @@
 #include <array>
 #include <bitset>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Definition of the commands that are present in the CommandIterator given by the
     // CommandBufferBuilder. There are not defined in CommandBuffer.h to break some header
@@ -80,7 +80,7 @@ namespace dawn_native {
         Ref<TextureViewBase> resolveTarget;
         wgpu::LoadOp loadOp;
         wgpu::StoreOp storeOp;
-        dawn_native::Color clearColor;
+        dawn::native::Color clearColor;
     };
 
     struct RenderPassDepthStencilAttachmentInfo {
@@ -285,6 +285,6 @@ namespace dawn_native {
     // consuming the correct amount of data from the command iterator.
     void SkipCommand(CommandIterator* commands, Command type);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_COMMANDS_H_

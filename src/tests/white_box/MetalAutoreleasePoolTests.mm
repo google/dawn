@@ -16,7 +16,7 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
-using namespace dawn_native::metal;
+using namespace dawn::native::metal;
 
 class MetalAutoreleasePoolTests : public DawnTest {
   private:

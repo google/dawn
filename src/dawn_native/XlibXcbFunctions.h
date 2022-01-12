@@ -22,7 +22,7 @@
 
 class DynamicLib;
 
-namespace dawn_native {
+namespace dawn::native {
 
     // A helper class that dynamically loads the x11-xcb library that contains XGetXCBConnection
     // (and nothing else). This has to be dynamic because this libraries isn't present on all Linux
@@ -41,6 +41,6 @@ namespace dawn_native {
         DynamicLib mLib;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_XLIBXCBFUNCTIONS_H_

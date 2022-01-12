@@ -21,7 +21,7 @@
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/RenderEncoderBase.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateRenderBundleEncoderDescriptor(
         const DeviceBase* device,
@@ -51,6 +51,6 @@ namespace dawn_native {
         EncodingContext mBundleEncodingContext;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RENDERBUNDLEENCODER_H_

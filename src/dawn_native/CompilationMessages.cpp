@@ -19,7 +19,7 @@
 
 #include <tint/tint.h>
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -198,4 +198,4 @@ namespace dawn_native {
         mFormattedTintMessages.push_back(t.str());
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

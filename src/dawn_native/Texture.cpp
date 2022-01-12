@@ -27,7 +27,7 @@
 #include "dawn_native/PassResourceUsage.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
-namespace dawn_native {
+namespace dawn::native {
     namespace {
         // WebGPU currently does not have texture format reinterpretation. If it does, the
         // code to check for it might go here.
@@ -229,7 +229,7 @@ namespace dawn_native {
         MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor,
                                         wgpu::TextureUsage usage,
                                         const Format* format) {
-            DAWN_TRY(dawn_native::ValidateTextureUsage(usage));
+            DAWN_TRY(dawn::native::ValidateTextureUsage(usage));
 
             constexpr wgpu::TextureUsage kValidCompressedUsages =
                 wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
@@ -775,4 +775,4 @@ namespace dawn_native {
         return mRange;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/SpirvUtils.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     spv::ExecutionModel ShaderStageToExecutionModel(SingleShaderStage stage) {
         switch (stage) {
@@ -176,4 +176,4 @@ namespace dawn_native {
         }
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

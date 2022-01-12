@@ -67,7 +67,7 @@
     LIMITS_STORAGE_BUFFER_BINDING_SIZE(X) \
     LIMITS_OTHER(X)
 
-namespace dawn_native {
+namespace dawn::native {
     namespace {
         template <uint32_t A, uint32_t B>
         constexpr void StaticAssertSame() {
@@ -210,4 +210,4 @@ namespace dawn_native {
         return limits;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

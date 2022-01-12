@@ -26,7 +26,7 @@
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Performs validation of the "synchronization scope" rules of WebGPU.
     MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
@@ -465,4 +465,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

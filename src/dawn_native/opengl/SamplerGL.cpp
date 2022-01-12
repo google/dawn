@@ -18,7 +18,7 @@
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/UtilsGL.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     namespace {
         GLenum MagFilterMode(wgpu::FilterMode filter) {
@@ -127,4 +127,4 @@ namespace dawn_native::opengl {
         return mNonFilteringHandle;
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

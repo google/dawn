@@ -21,7 +21,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
@@ -67,6 +67,6 @@ namespace dawn_native {
         std::vector<bool> mQueryAvailability;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_QUERYSET_H_

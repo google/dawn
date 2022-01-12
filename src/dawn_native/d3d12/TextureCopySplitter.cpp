@@ -18,7 +18,7 @@
 #include "dawn_native/Format.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     namespace {
         Origin3D ComputeTexelOffsets(const TexelBlockInfo& blockInfo,
@@ -536,4 +536,4 @@ namespace dawn_native::d3d12 {
 
         return copySubresource;
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

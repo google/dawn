@@ -18,8 +18,8 @@
 #include <dawn/dawn_wsi.h>
 #include <dawn_native/DawnNative.h>
 
-namespace dawn_native::null {
+namespace dawn::native::null {
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl();
-}  // namespace dawn_native::null
+}  // namespace dawn::native::null
 
 #endif  // DAWNNATIVE_NULLBACKEND_H_

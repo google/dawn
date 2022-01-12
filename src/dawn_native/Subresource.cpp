@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/Format.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     Aspect ConvertSingleAspect(const Format& format, wgpu::TextureAspect aspect) {
         Aspect aspectMask = ConvertAspect(format, aspect);
@@ -129,4 +129,4 @@ namespace dawn_native {
         return {aspects, {0, layerCount}, {0, levelCount}};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

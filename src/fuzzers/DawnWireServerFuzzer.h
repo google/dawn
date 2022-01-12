@@ -17,15 +17,15 @@
 #include <cstdint>
 #include <functional>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class Instance;
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 namespace DawnWireServerFuzzer {
 
-    using MakeDeviceFn = std::function<wgpu::Device(dawn_native::Instance*)>;
+    using MakeDeviceFn = std::function<wgpu::Device(dawn::native::Instance*)>;
 
     int Initialize(int* argc, char*** argv);
 

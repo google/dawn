@@ -18,7 +18,7 @@
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     std::unique_ptr<ErrorData> ErrorData::Create(InternalErrorType type,
                                                  std::string message,
@@ -100,4 +100,4 @@ namespace dawn_native {
         return ss.str();
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

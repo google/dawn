@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/OpenGLFunctionsBase_autogen.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
 template<typename T>
 MaybeError OpenGLFunctionsBase::LoadProc(GetProcAddress getProc, T* memberProc, const char* name) {
@@ -67,4 +67,4 @@ MaybeError OpenGLFunctionsBase::LoadDesktopGLProcs(GetProcAddress getProc, int m
     return {};
 }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

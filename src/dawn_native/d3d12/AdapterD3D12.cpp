@@ -24,7 +24,7 @@
 
 #include <sstream>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     Adapter::Adapter(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
         : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12),
@@ -37,7 +37,7 @@ namespace dawn_native::d3d12 {
     }
 
     bool Adapter::SupportsExternalImages() const {
-        // Via dawn_native::d3d12::ExternalImageDXGI::Create
+        // Via dawn::native::d3d12::ExternalImageDXGI::Create
         return true;
     }
 
@@ -412,4 +412,4 @@ namespace dawn_native::d3d12 {
         return {};
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

@@ -23,7 +23,7 @@
 
 #include <stringapiset.h>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     ResultOrError<std::wstring> ConvertStringToWstring(const char* str) {
         size_t len = strlen(str);
@@ -388,4 +388,4 @@ namespace dawn_native::d3d12 {
         object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

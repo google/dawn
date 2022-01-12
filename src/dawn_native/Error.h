@@ -22,7 +22,7 @@
 
 #include <string>
 
-namespace dawn_native {
+namespace dawn::native {
 
     enum class InternalErrorType : uint32_t {
         Validation,
@@ -72,7 +72,7 @@ namespace dawn_native {
     //     more clarity.
 
 #define DAWN_MAKE_ERROR(TYPE, MESSAGE) \
-    ::dawn_native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
+    ::dawn::native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
 
 #define DAWN_VALIDATION_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::Validation, MESSAGE)
 
@@ -119,17 +119,17 @@ namespace dawn_native {
 #define DAWN_TRY_CONTEXT(EXPR, ...) \
     DAWN_TRY_WITH_CLEANUP(EXPR, { error->AppendContext(absl::StrFormat(__VA_ARGS__)); })
 
-#define DAWN_TRY_WITH_CLEANUP(EXPR, BODY)                                                    \
-    {                                                                                        \
-        auto DAWN_LOCAL_VAR = EXPR;                                                          \
-        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                                       \
-            std::unique_ptr<::dawn_native::ErrorData> error = DAWN_LOCAL_VAR.AcquireError(); \
-            {BODY} /* comment to force the formatter to insert a newline */                  \
-            error->AppendBacktrace(__FILE__, __func__, __LINE__);                            \
-            return {std::move(error)};                                                       \
-        }                                                                                    \
-    }                                                                                        \
-    for (;;)                                                                                 \
+#define DAWN_TRY_WITH_CLEANUP(EXPR, BODY)                                                     \
+    {                                                                                         \
+        auto DAWN_LOCAL_VAR = EXPR;                                                           \
+        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                                        \
+            std::unique_ptr<::dawn::native::ErrorData> error = DAWN_LOCAL_VAR.AcquireError(); \
+            {BODY} /* comment to force the formatter to insert a newline */                   \
+            error->AppendBacktrace(__FILE__, __func__, __LINE__);                             \
+            return {std::move(error)};                                                        \
+        }                                                                                     \
+    }                                                                                         \
+    for (;;)                                                                                  \
     break
 
     // DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
@@ -192,6 +192,6 @@ namespace dawn_native {
     wgpu::ErrorType ToWGPUErrorType(InternalErrorType type);
     InternalErrorType FromWGPUErrorType(wgpu::ErrorType type);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_ERROR_H_

@@ -14,9 +14,10 @@
 
 {% set Prefix = metadata.proc_table_prefix %}
 {% set prefix = Prefix.lower() %}
-{% set native_namespace = Name(metadata.native_namespace).snake_case() %}
 {% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
-{% set native_dir = impl_dir + native_namespace %}
+{% set namespace_name = Name(metadata.native_namespace) %}
+{% set native_namespace = namespace_name.namespace_case() %}
+{% set native_dir = impl_dir + namespace_name.snake_case() %}
 #include "{{native_dir}}/{{prefix}}_platform.h"
 #include "{{native_dir}}/{{Prefix}}Native.h"
 

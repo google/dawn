@@ -21,7 +21,7 @@
 
 #include <set>
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -177,4 +177,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

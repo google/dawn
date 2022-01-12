@@ -17,7 +17,7 @@
 
 #include "dawn_native/Queue.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class Device;
 
@@ -33,6 +33,6 @@ namespace dawn_native::vulkan {
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_QUEUEVK_H_

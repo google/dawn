@@ -15,7 +15,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/external_semaphore/SemaphoreService.h"
 
-namespace dawn_native { namespace vulkan::external_semaphore {
+namespace dawn::native { namespace vulkan::external_semaphore {
 
     Service::Service(Device* device) : mDevice(device) {
         DAWN_UNUSED(mDevice);
@@ -47,4 +47,4 @@ namespace dawn_native { namespace vulkan::external_semaphore {
         return DAWN_UNIMPLEMENTED_ERROR("Using null semaphore service to interop inside Vulkan");
     }
 
-}}  // namespace dawn_native::vulkan::external_semaphore
+}}  // namespace dawn::native::vulkan::external_semaphore

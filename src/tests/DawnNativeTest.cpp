@@ -19,7 +19,7 @@
 #include "dawn/dawn_proc.h"
 #include "dawn_native/ErrorData.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     void AddFatalDawnFailure(const char* expression, const ErrorData* error) {
         const auto& backtrace = error->GetBacktrace();
@@ -29,10 +29,10 @@ namespace dawn_native {
             ::testing::TestPartResult::kFatalFailure);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 DawnNativeTest::DawnNativeTest() {
-    dawnProcSetProcs(&dawn_native::GetProcs());
+    dawnProcSetProcs(&dawn::native::GetProcs());
 }
 
 DawnNativeTest::~DawnNativeTest() {
@@ -41,10 +41,10 @@ DawnNativeTest::~DawnNativeTest() {
 }
 
 void DawnNativeTest::SetUp() {
-    instance = std::make_unique<dawn_native::Instance>();
+    instance = std::make_unique<dawn::native::Instance>();
     instance->DiscoverDefaultAdapters();
 
-    std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
+    std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
 
     // DawnNative unittests run against the null backend, find the corresponding adapter
     bool foundNullAdapter = false;

@@ -21,7 +21,7 @@
 
 #include <unordered_map>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class RenderPipelineBase;
     class ShaderModuleBase;
@@ -35,4 +35,4 @@ namespace dawn_native {
 
     InternalPipelineStore::~InternalPipelineStore() = default;
 
-}  // namespace dawn_native
+}  // namespace dawn::native

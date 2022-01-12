@@ -158,7 +158,7 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;
         textureDesc.nextInChain = &internalDesc;
 
-        dawn_native::vulkan::ExternalImageDescriptorDmaBuf descriptor = {};
+        dawn::native::vulkan::ExternalImageDescriptorDmaBuf descriptor = {};
         descriptor.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
         descriptor.isInitialized = true;
@@ -169,16 +169,16 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         descriptor.waitFDs = {};
 
         return std::make_unique<PlatformTextureGbm>(
-            wgpu::Texture::Acquire(dawn_native::vulkan::WrapVulkanImage(mWGPUDevice, &descriptor)),
+            wgpu::Texture::Acquire(dawn::native::vulkan::WrapVulkanImage(mWGPUDevice, &descriptor)),
             gbmBo);
     }
 
     void DestroyVideoTextureForTest(
         std::unique_ptr<VideoViewsTestBackend::PlatformTexture>&& platformTexture) override {
         // Exports the signal and ignores it.
-        dawn_native::vulkan::ExternalImageExportInfoDmaBuf exportInfo;
-        dawn_native::vulkan::ExportVulkanImage(platformTexture->wgpuTexture.Get(),
-                                               VK_IMAGE_LAYOUT_GENERAL, &exportInfo);
+        dawn::native::vulkan::ExternalImageExportInfoDmaBuf exportInfo;
+        dawn::native::vulkan::ExportVulkanImage(platformTexture->wgpuTexture.Get(),
+                                                VK_IMAGE_LAYOUT_GENERAL, &exportInfo);
         for (int fd : exportInfo.semaphoreHandles) {
             ASSERT_NE(fd, -1);
             close(fd);

@@ -21,7 +21,7 @@
 
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class QuerySetBase;
     struct SyncScopeResourceUsage;
@@ -79,6 +79,6 @@ namespace dawn_native {
 
     MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_COMMANDVALIDATION_H_

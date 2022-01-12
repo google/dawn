@@ -17,7 +17,7 @@
 
 #include "dawn_native/QuerySet.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Device;
 
@@ -29,6 +29,6 @@ namespace dawn_native::opengl {
         ~QuerySet() override;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_QUERYSETGL_H_

@@ -48,9 +48,9 @@ namespace {
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
     // Test only discovering the SwiftShader adapter
     TEST(AdapterDiscoveryTests, OnlySwiftShader) {
-        dawn_native::Instance instance;
+        dawn::native::Instance instance;
 
-        dawn_native::vulkan::AdapterDiscoveryOptions options;
+        dawn::native::vulkan::AdapterDiscoveryOptions options;
         options.forceSwiftShader = true;
         instance.DiscoverAdapters(&options);
 
@@ -68,9 +68,9 @@ namespace {
 
     // Test discovering only Vulkan adapters
     TEST(AdapterDiscoveryTests, OnlyVulkan) {
-        dawn_native::Instance instance;
+        dawn::native::Instance instance;
 
-        dawn_native::vulkan::AdapterDiscoveryOptions options;
+        dawn::native::vulkan::AdapterDiscoveryOptions options;
         instance.DiscoverAdapters(&options);
 
         const auto& adapters = instance.GetAdapters();
@@ -86,9 +86,9 @@ namespace {
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
     // Test discovering only D3D12 adapters
     TEST(AdapterDiscoveryTests, OnlyD3D12) {
-        dawn_native::Instance instance;
+        dawn::native::Instance instance;
 
-        dawn_native::d3d12::AdapterDiscoveryOptions options;
+        dawn::native::d3d12::AdapterDiscoveryOptions options;
         instance.DiscoverAdapters(&options);
 
         const auto& adapters = instance.GetAdapters();
@@ -114,9 +114,9 @@ namespace {
                 break;  // No more adapters to enumerate.
             }
 
-            dawn_native::Instance instance;
+            dawn::native::Instance instance;
 
-            dawn_native::d3d12::AdapterDiscoveryOptions options;
+            dawn::native::d3d12::AdapterDiscoveryOptions options;
             options.dxgiAdapter = std::move(dxgiAdapter);
             instance.DiscoverAdapters(&options);
 
@@ -134,9 +134,9 @@ namespace {
 #if defined(DAWN_ENABLE_BACKEND_METAL)
     // Test discovering only Metal adapters
     TEST(AdapterDiscoveryTests, OnlyMetal) {
-        dawn_native::Instance instance;
+        dawn::native::Instance instance;
 
-        dawn_native::metal::AdapterDiscoveryOptions options;
+        dawn::native::metal::AdapterDiscoveryOptions options;
         instance.DiscoverAdapters(&options);
 
         const auto& adapters = instance.GetAdapters();
@@ -166,9 +166,9 @@ namespace {
             glfwCreateWindow(400, 400, "Dawn OpenGL test window", nullptr, nullptr);
         glfwMakeContextCurrent(window);
 
-        dawn_native::Instance instance;
+        dawn::native::Instance instance;
 
-        dawn_native::opengl::AdapterDiscoveryOptions options;
+        dawn::native::opengl::AdapterDiscoveryOptions options;
         options.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
         instance.DiscoverAdapters(&options);
         glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
@@ -207,9 +207,9 @@ namespace {
             glfwCreateWindow(400, 400, "Dawn OpenGLES test window", nullptr, nullptr);
         glfwMakeContextCurrent(window);
 
-        dawn_native::Instance instance;
+        dawn::native::Instance instance;
 
-        dawn_native::opengl::AdapterDiscoveryOptionsES options;
+        dawn::native::opengl::AdapterDiscoveryOptionsES options;
         options.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
         instance.DiscoverAdapters(&options);
         glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
@@ -230,10 +230,10 @@ namespace {
     // Test discovering the Metal backend, then the Vulkan backend
     // does not duplicate adapters.
     TEST(AdapterDiscoveryTests, OneBackendThenTheOther) {
-        dawn_native::Instance instance;
+        dawn::native::Instance instance;
         uint32_t metalAdapterCount = 0;
         {
-            dawn_native::metal::AdapterDiscoveryOptions options;
+            dawn::native::metal::AdapterDiscoveryOptions options;
             instance.DiscoverAdapters(&options);
 
             const auto& adapters = instance.GetAdapters();
@@ -246,7 +246,7 @@ namespace {
             }
         }
         {
-            dawn_native::vulkan::AdapterDiscoveryOptions options;
+            dawn::native::vulkan::AdapterDiscoveryOptions options;
             instance.DiscoverAdapters(&options);
 
             uint32_t metalAdapterCount2 = 0;

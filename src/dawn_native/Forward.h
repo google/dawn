@@ -20,7 +20,7 @@
 template <typename T>
 class Ref;
 
-namespace dawn_native {
+namespace dawn::native {
 
     enum class ObjectType : uint32_t;
 
@@ -66,6 +66,6 @@ namespace dawn_native {
     using RenderPassEncoderBase = RenderPassEncoder;
     using SurfaceBase = Surface;
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_FORWARD_H_

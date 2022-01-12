@@ -27,7 +27,7 @@
 #include <math.h>
 #include <cstring>
 
-namespace dawn_native {
+namespace dawn::native {
 
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                          const char* label,
@@ -411,4 +411,4 @@ namespace dawn_native {
             dynamicOffsetCount);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

@@ -16,7 +16,7 @@
 
 #include "common/Assert.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     bool CachedObject::IsCachedReference() const {
         return mIsCachedReference;
@@ -41,4 +41,4 @@ namespace dawn_native {
         mIsContentHashInitialized = true;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

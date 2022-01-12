@@ -26,7 +26,7 @@
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device) {
         return ToBackend(FromAPI(device))->GetD3D12Device();
@@ -176,4 +176,4 @@ namespace dawn_native::d3d12 {
     AdapterDiscoveryOptions::AdapterDiscoveryOptions(ComPtr<IDXGIAdapter> adapter)
         : AdapterDiscoveryOptionsBase(WGPUBackendType_D3D12), dxgiAdapter(std::move(adapter)) {
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

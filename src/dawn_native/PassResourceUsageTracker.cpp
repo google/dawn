@@ -24,7 +24,7 @@
 
 #include <utility>
 
-namespace dawn_native {
+namespace dawn::native {
 
     void SyncScopeUsageTracker::BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage) {
         // std::map's operator[] will create the key and return 0 if the key didn't exist
@@ -259,4 +259,4 @@ namespace dawn_native {
         return mQueryAvailabilities;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

@@ -19,7 +19,7 @@
 #include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/Texture.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     AttachmentStateBlueprint::AttachmentStateBlueprint(
         const RenderBundleEncoderDescriptor* descriptor)
@@ -162,4 +162,4 @@ namespace dawn_native {
         return mSampleCount;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

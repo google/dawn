@@ -38,7 +38,7 @@
 
 #include <algorithm>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
 
@@ -444,7 +444,7 @@ namespace dawn_native::vulkan {
         const Extent3D& copySize) {
         ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
         ASSERT(srcCopy.aspect == dstCopy.aspect);
-        dawn_native::Format format = srcCopy.texture->GetFormat();
+        dawn::native::Format format = srcCopy.texture->GetFormat();
         const TexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
         ASSERT(copySize.width % blockInfo.width == 0);
         uint32_t widthInBlocks = copySize.width / blockInfo.width;
@@ -1321,4 +1321,4 @@ namespace dawn_native::vulkan {
         UNREACHABLE();
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

@@ -22,7 +22,7 @@
 #include "dawn_native/vulkan/ResourceHeapVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
 
@@ -289,4 +289,4 @@ namespace dawn_native::vulkan {
         }
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

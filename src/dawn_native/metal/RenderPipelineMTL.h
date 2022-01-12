@@ -21,7 +21,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     class Device;
 
@@ -65,6 +65,6 @@ namespace dawn_native::metal {
         wgpu::ShaderStage mStagesRequiringStorageBufferLength = wgpu::ShaderStage::None;
     };
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_METAL_RENDERPIPELINEMTL_H_

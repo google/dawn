@@ -22,7 +22,7 @@
 #include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/ProgrammableEncoder.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class RenderEncoderBase : public ProgrammableEncoder {
       public:
@@ -82,6 +82,6 @@ namespace dawn_native {
         bool mStencilReadOnly = false;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RENDERENCODERBASE_H_

@@ -21,7 +21,7 @@
 #include <set>
 #include <vector>
 
-using namespace dawn_native;
+using namespace dawn::native;
 
 class DummyResourceHeapAllocator : public ResourceHeapAllocator {
   public:

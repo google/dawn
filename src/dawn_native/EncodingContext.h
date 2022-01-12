@@ -24,7 +24,7 @@
 
 #include <string>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class CommandEncoder;
     class DeviceBase;
@@ -177,6 +177,6 @@ namespace dawn_native {
         std::vector<std::string> mDebugGroupLabels;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_ENCODINGCONTEXT_H_

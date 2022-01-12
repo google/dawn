@@ -21,7 +21,7 @@
 
 #import <Metal/Metal.h>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     class Device;
 
@@ -37,6 +37,6 @@ namespace dawn_native::metal {
         Device* mDevice;
         NSPRef<id<MTLBuffer>> mBuffer;
     };
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_STAGINGBUFFERMETAL_H_

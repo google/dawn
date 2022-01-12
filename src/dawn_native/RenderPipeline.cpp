@@ -27,7 +27,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace dawn_native {
+namespace dawn::native {
     absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
         VertexFormatBaseType value,
         const absl::FormatConversionSpec& spec,
@@ -1062,4 +1062,4 @@ namespace dawn_native {
         return true;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

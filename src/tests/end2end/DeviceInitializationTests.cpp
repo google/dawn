@@ -19,7 +19,7 @@
 
 class DeviceInitializationTest : public testing::Test {
     void SetUp() override {
-        dawnProcSetProcs(&dawn_native::GetProcs());
+        dawnProcSetProcs(&dawn::native::GetProcs());
     }
 
     void TearDown() override {
@@ -34,9 +34,9 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
     // We want to create a device on a fresh instance and adapter each time.
     std::vector<wgpu::AdapterProperties> availableAdapterProperties;
     {
-        auto instance = std::make_unique<dawn_native::Instance>();
+        auto instance = std::make_unique<dawn::native::Instance>();
         instance->DiscoverDefaultAdapters();
-        for (const dawn_native::Adapter& adapter : instance->GetAdapters()) {
+        for (const dawn::native::Adapter& adapter : instance->GetAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 
@@ -50,9 +50,9 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
     for (const wgpu::AdapterProperties& desiredProperties : availableAdapterProperties) {
         wgpu::Device device;
 
-        auto instance = std::make_unique<dawn_native::Instance>();
+        auto instance = std::make_unique<dawn::native::Instance>();
         instance->DiscoverDefaultAdapters();
-        for (dawn_native::Adapter& adapter : instance->GetAdapters()) {
+        for (dawn::native::Adapter& adapter : instance->GetAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 

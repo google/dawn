@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -50,6 +50,6 @@ namespace dawn_native {
         Ref<BufferBase> mBuffer;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_SCRATCHBUFFER_H_

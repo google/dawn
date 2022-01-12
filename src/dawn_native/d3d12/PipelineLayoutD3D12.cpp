@@ -24,7 +24,7 @@
 
 using Microsoft::WRL::ComPtr;
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     namespace {
 
         // Reserve register names for internal use. This registers map to bindings in the shader,
@@ -364,4 +364,4 @@ namespace dawn_native::d3d12 {
         return mDispatchIndirectCommandSignatureWithNumWorkgroups.Get();
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

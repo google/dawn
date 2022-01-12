@@ -18,7 +18,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/IndirectDrawMetadata.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class CommandEncoder;
     struct CombinedLimits;
@@ -35,6 +35,6 @@ namespace dawn_native {
                                                     RenderPassResourceUsageTracker* usageTracker,
                                                     IndirectDrawMetadata* indirectDrawMetadata);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_INDIRECTDRAWVALIDATIONENCODER_H_

@@ -27,7 +27,7 @@
 #include <array>
 #include <bitset>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -78,6 +78,6 @@ namespace dawn_native {
         ~AttachmentState() override;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_ATTACHMENTSTATE_H_

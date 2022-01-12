@@ -16,7 +16,7 @@
 
 #include "dawn_native/ChainUtils_autogen.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
         BindingInfoType value,
@@ -218,4 +218,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

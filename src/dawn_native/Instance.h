@@ -32,7 +32,7 @@ namespace dawn::platform {
     class Platform;
 }  // namespace dawn::platform
 
-namespace dawn_native {
+namespace dawn::native {
 
     class Surface;
     class XlibXcbFunctions;
@@ -117,6 +117,6 @@ namespace dawn_native {
 #endif  // defined(DAWN_USE_X11)
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_INSTANCE_H_

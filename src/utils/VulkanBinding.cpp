@@ -32,18 +32,18 @@ namespace utils {
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
                 VkSurfaceKHR surface = VK_NULL_HANDLE;
-                if (glfwCreateWindowSurface(dawn_native::vulkan::GetInstance(mDevice), mWindow,
+                if (glfwCreateWindowSurface(dawn::native::vulkan::GetInstance(mDevice), mWindow,
                                             nullptr, &surface) != VK_SUCCESS) {
                     ASSERT(false);
                 }
 
-                mSwapchainImpl = dawn_native::vulkan::CreateNativeSwapChainImpl(mDevice, surface);
+                mSwapchainImpl = dawn::native::vulkan::CreateNativeSwapChainImpl(mDevice, surface);
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
         WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
             ASSERT(mSwapchainImpl.userData != nullptr);
-            return dawn_native::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+            return dawn::native::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:

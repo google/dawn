@@ -21,7 +21,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     // static
     ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
@@ -81,4 +81,4 @@ namespace dawn_native::vulkan {
                      reinterpret_cast<uint64_t&>(mHandle), "Dawn_PipelineLayout", GetLabel());
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

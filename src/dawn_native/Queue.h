@@ -23,7 +23,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class QueueBase : public ApiObjectBase {
       public:
@@ -106,6 +106,6 @@ namespace dawn_native {
         SerialQueue<ExecutionSerial, std::unique_ptr<TaskInFlight>> mTasksInFlight;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_QUEUE_H_

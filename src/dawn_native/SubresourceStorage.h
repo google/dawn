@@ -25,7 +25,7 @@
 #include <memory>
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // SubresourceStorage<T> acts like a simple map from subresource (aspect, layer, level) to a
     // value of type T except that it tries to compress similar subresources so that algorithms
@@ -550,6 +550,6 @@ namespace dawn_native {
         return mData[(aspectIndex * mArrayLayerCount + layer) * mMipLevelCount + level];
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_SUBRESOURCESTORAGE_H_

@@ -21,12 +21,12 @@
 
 #include <cstring>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
         ResultOrError<InstanceExtSet> GatherInstanceExtensions(
             const char* layerName,
-            const dawn_native::vulkan::VulkanFunctions& vkFunctions,
+            const dawn::native::vulkan::VulkanFunctions& vkFunctions,
             const std::unordered_map<std::string, InstanceExt>& knownExts) {
             uint32_t count = 0;
             VkResult vkResult = VkResult::WrapUnsafe(
@@ -331,4 +331,4 @@ namespace dawn_native::vulkan {
         return std::move(info);
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

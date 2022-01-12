@@ -21,7 +21,7 @@
 
 class DynamicLib;
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     struct VulkanGlobalInfo;
     struct VulkanDeviceInfo;
@@ -299,7 +299,7 @@ namespace dawn_native::vulkan {
 #endif
     };
 
-    // Create a wrapper around VkResult in the dawn_native::vulkan namespace. This shadows the
+    // Create a wrapper around VkResult in the dawn::native::vulkan namespace. This shadows the
     // default VkResult (::VkResult). This ensures that assigning or creating a VkResult from a raw
     // ::VkResult uses WrapUnsafe. This makes it clear that users of VkResult must be intentional
     // about handling error cases.
@@ -321,6 +321,6 @@ namespace dawn_native::vulkan {
         ::VkResult mValue;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANFUNCTIONS_H_

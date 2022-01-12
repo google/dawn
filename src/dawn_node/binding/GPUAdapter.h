@@ -23,10 +23,10 @@
 namespace wgpu::binding {
     class Flags;
 
-    // GPUAdapter is an implementation of interop::GPUAdapter that wraps a dawn_native::Adapter.
+    // GPUAdapter is an implementation of interop::GPUAdapter that wraps a dawn::native::Adapter.
     class GPUAdapter final : public interop::GPUAdapter {
       public:
-        GPUAdapter(dawn_native::Adapter a, const Flags& flags);
+        GPUAdapter(dawn::native::Adapter a, const Flags& flags);
 
         // interop::GPUAdapter interface compliance
         std::string getName(Napi::Env) override;
@@ -38,7 +38,7 @@ namespace wgpu::binding {
             interop::GPUDeviceDescriptor descriptor) override;
 
       private:
-        dawn_native::Adapter adapter_;
+        dawn::native::Adapter adapter_;
         const Flags& flags_;
     };
 

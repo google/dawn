@@ -24,7 +24,7 @@
 
 #include <string>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class CommandEncoder final : public ApiObjectBase {
       public:
@@ -102,6 +102,6 @@ namespace dawn_native {
         uint64_t mDebugGroupStackSize = 0;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_COMMANDENCODER_H_

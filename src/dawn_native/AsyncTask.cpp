@@ -2,7 +2,7 @@
 
 #include "dawn_platform/DawnPlatform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     AsyncTaskManager::AsyncTaskManager(dawn::platform::WorkerTaskPool* workerTaskPool)
         : mWorkerTaskPool(workerTaskPool) {
@@ -62,4 +62,4 @@ namespace dawn_native {
         waitableTask->taskManager->HandleTaskCompletion(waitableTask.Get());
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

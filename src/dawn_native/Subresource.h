@@ -18,7 +18,7 @@
 #include "dawn_native/EnumClassBitmasks.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Note: Subresource indices are computed by iterating the aspects in increasing order.
     // D3D12 uses these directly, so the order much match D3D12's indices.
@@ -98,12 +98,12 @@ namespace dawn_native {
     // the per plane index does not exceed the known maximum plane count.
     static constexpr uint32_t kMaxPlanesPerFormat = 3;
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 namespace dawn {
 
     template <>
-    struct IsDawnBitmask<dawn_native::Aspect> {
+    struct IsDawnBitmask<dawn::native::Aspect> {
         static constexpr bool enable = true;
     };
 

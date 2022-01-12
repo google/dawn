@@ -28,7 +28,7 @@ namespace utils {
 
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                mSwapchainImpl = dawn_native::null::CreateNativeSwapChainImpl();
+                mSwapchainImpl = dawn::native::null::CreateNativeSwapChainImpl();
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }

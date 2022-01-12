@@ -27,7 +27,7 @@ namespace dawn::platform {
     class WorkerTaskPool;
 }  // namespace dawn::platform
 
-namespace dawn_native {
+namespace dawn::native {
 
     // TODO(crbug.com/dawn/826): we'll add additional things to AsyncTask in the future, like
     // Cancel() and RunNow(). Cancelling helps avoid running the task's body when we are just
@@ -60,6 +60,6 @@ namespace dawn_native {
         dawn::platform::WorkerTaskPool* mWorkerTaskPool;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif

@@ -29,7 +29,7 @@
 #include <array>
 #include <bitset>
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidatePipelineLayoutDescriptor(
         DeviceBase*,
@@ -92,6 +92,6 @@ namespace dawn_native {
         BindGroupLayoutMask mMask;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_PIPELINELAYOUT_H_

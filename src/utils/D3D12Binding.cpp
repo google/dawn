@@ -34,14 +34,14 @@ namespace utils {
             if (mSwapchainImpl.userData == nullptr) {
                 HWND win32Window = glfwGetWin32Window(mWindow);
                 mSwapchainImpl =
-                    dawn_native::d3d12::CreateNativeSwapChainImpl(mDevice, win32Window);
+                    dawn::native::d3d12::CreateNativeSwapChainImpl(mDevice, win32Window);
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
         WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
             ASSERT(mSwapchainImpl.userData != nullptr);
-            return dawn_native::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+            return dawn::native::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:

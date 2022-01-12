@@ -23,7 +23,7 @@
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/UtilsGL.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     namespace {
 
@@ -467,7 +467,7 @@ namespace dawn_native::opengl {
             }
             size_t bufferSize = static_cast<size_t>(bufferSize64);
 
-            dawn_native::BufferDescriptor descriptor = {};
+            dawn::native::BufferDescriptor descriptor = {};
             descriptor.mappedAtCreation = true;
             descriptor.usage = wgpu::BufferUsage::CopySrc;
             descriptor.size = bufferSize;
@@ -577,4 +577,4 @@ namespace dawn_native::opengl {
         return mTarget;
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

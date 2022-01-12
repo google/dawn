@@ -14,7 +14,7 @@
 
 #include "dawn_native/XlibXcbFunctions.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     XlibXcbFunctions::XlibXcbFunctions() {
         if (!mLib.Open("libX11-xcb.so.1") ||
@@ -28,4 +28,4 @@ namespace dawn_native {
         return xGetXCBConnection != nullptr;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

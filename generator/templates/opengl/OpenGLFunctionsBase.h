@@ -18,7 +18,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
     using GetProcAddress = void* (*) (const char*);
 
     struct OpenGLFunctionsBase {
@@ -40,6 +40,6 @@ namespace dawn_native::opengl {
         MaybeError LoadProc(GetProcAddress getProc, T* memberProc, const char* name);
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif // DAWNNATIVE_OPENGL_OPENGLFUNCTIONSBASE_H_

@@ -44,7 +44,7 @@ namespace utils {
         : mWindow(window), mDevice(device) {
     }
 
-    void DiscoverAdapter(dawn_native::Instance* instance,
+    void DiscoverAdapter(dawn::native::Instance* instance,
                          GLFWwindow* window,
                          wgpu::BackendType type) {
         DAWN_UNUSED(type);
@@ -55,11 +55,11 @@ namespace utils {
             glfwMakeContextCurrent(window);
             auto getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
             if (type == wgpu::BackendType::OpenGL) {
-                dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
+                dawn::native::opengl::AdapterDiscoveryOptions adapterOptions;
                 adapterOptions.getProc = getProc;
                 instance->DiscoverAdapters(&adapterOptions);
             } else {
-                dawn_native::opengl::AdapterDiscoveryOptionsES adapterOptions;
+                dawn::native::opengl::AdapterDiscoveryOptionsES adapterOptions;
                 adapterOptions.getProc = getProc;
                 instance->DiscoverAdapters(&adapterOptions);
             }

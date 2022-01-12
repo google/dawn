@@ -52,7 +52,7 @@
 #include <mutex>
 #include <unordered_set>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // DeviceBase sub-structures
 
@@ -1729,4 +1729,4 @@ namespace dawn_native {
         return false;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

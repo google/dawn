@@ -18,7 +18,7 @@
 
 #include <limits>
 
-using namespace dawn_native;
+using namespace dawn::native;
 
 // Definition of the command types used in the tests
 enum class CommandType {

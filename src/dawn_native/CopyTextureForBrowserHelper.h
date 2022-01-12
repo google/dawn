@@ -18,7 +18,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/ObjectBase.h"
 
-namespace dawn_native {
+namespace dawn::native {
     class DeviceBase;
     struct Extent3D;
     struct ImageCopyTexture;
@@ -36,6 +36,6 @@ namespace dawn_native {
                                        const Extent3D* copySize,
                                        const CopyTextureForBrowserOptions* options);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_COPYTEXTUREFORBROWSERHELPER_H_

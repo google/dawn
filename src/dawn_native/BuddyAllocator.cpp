@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "common/Math.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     BuddyAllocator::BuddyAllocator(uint64_t maxSize) : mMaxBlockSize(maxSize) {
         ASSERT(IsPowerOfTwo(maxSize));
@@ -261,4 +261,4 @@ namespace dawn_native {
         delete block;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

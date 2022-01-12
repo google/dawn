@@ -31,7 +31,7 @@
 
 #include <vector>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     namespace {
 
@@ -272,7 +272,7 @@ namespace dawn_native::metal {
 
         // AdapterBase Implementation
         bool SupportsExternalImages() const override {
-            // Via dawn_native::metal::WrapIOSurface
+            // Via dawn::native::metal::WrapIOSurface
             return true;
         }
 
@@ -613,4 +613,4 @@ namespace dawn_native::metal {
         return new Backend(instance);
     }
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal

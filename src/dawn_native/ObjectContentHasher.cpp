@@ -14,9 +14,9 @@
 
 #include "dawn_native/ObjectContentHasher.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     size_t ObjectContentHasher::GetContentHash() const {
         return mContentHash;
     }
-}  // namespace dawn_native
+}  // namespace dawn::native

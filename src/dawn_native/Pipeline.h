@@ -27,7 +27,7 @@
 #include <array>
 #include <bitset>
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateProgrammableStage(DeviceBase* device,
                                          const ShaderModuleBase* module,
@@ -93,6 +93,6 @@ namespace dawn_native {
         RequiredBufferSizes mMinBufferSizes;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_PIPELINE_H_

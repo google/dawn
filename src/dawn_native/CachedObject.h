@@ -17,7 +17,7 @@
 
 #include <cstddef>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Some objects are cached so that instead of creating new duplicate objects,
     // we increase the refcount of an existing object.
@@ -48,6 +48,6 @@ namespace dawn_native {
         bool mIsContentHashInitialized = false;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_CACHED_OBJECT_H_

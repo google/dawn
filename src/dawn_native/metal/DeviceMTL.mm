@@ -40,7 +40,7 @@
 
 #include <type_traits>
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     namespace {
 
@@ -503,4 +503,4 @@ namespace dawn_native::metal {
         return mTimestampPeriod;
     }
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal

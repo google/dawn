@@ -17,7 +17,7 @@
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     void IgnoreErrors(MaybeError maybeError) {
         if (maybeError.IsError()) {
@@ -61,4 +61,4 @@ namespace dawn_native {
         }
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

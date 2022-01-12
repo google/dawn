@@ -32,7 +32,7 @@ namespace utils {
 
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                mSwapchainImpl = dawn_native::opengl::CreateNativeSwapChainImpl(
+                mSwapchainImpl = dawn::native::opengl::CreateNativeSwapChainImpl(
                     mDevice,
                     [](void* userdata) { glfwSwapBuffers(static_cast<GLFWwindow*>(userdata)); },
                     mWindow);
@@ -41,7 +41,7 @@ namespace utils {
         }
 
         WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return dawn_native::opengl::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+            return dawn::native::opengl::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:

@@ -23,7 +23,7 @@
 #include <array>
 #include <bitset>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Keeps track of the dirty bind groups so they can be lazily applied when we know the
     // pipeline state or it changes.
@@ -137,6 +137,6 @@ namespace dawn_native {
         }
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_BINDGROUPTRACKER_H_

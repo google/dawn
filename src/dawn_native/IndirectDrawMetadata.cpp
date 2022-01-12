@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace dawn_native {
+namespace dawn::native {
 
     uint32_t ComputeMaxIndirectValidationBatchOffsetRange(const CombinedLimits& limits) {
         return limits.v1.maxStorageBufferBindingSize - limits.v1.minStorageBufferOffsetAlignment -
@@ -190,4 +190,4 @@ namespace dawn_native {
                                           std::move(draw));
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

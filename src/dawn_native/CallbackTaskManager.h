@@ -19,7 +19,7 @@
 #include <mutex>
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     struct CallbackTask {
       public:
@@ -40,6 +40,6 @@ namespace dawn_native {
         std::vector<std::unique_ptr<CallbackTask>> mCallbackTaskQueue;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif

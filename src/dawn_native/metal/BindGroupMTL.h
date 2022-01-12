@@ -18,7 +18,7 @@
 #include "common/PlacementAllocated.h"
 #include "dawn_native/BindGroup.h"
 
-namespace dawn_native::metal {
+namespace dawn::native::metal {
 
     class Device;
 
@@ -34,6 +34,6 @@ namespace dawn_native::metal {
         void DestroyImpl() override;
     };
 
-}  // namespace dawn_native::metal
+}  // namespace dawn::native::metal
 
 #endif  // DAWNNATIVE_METAL_BINDGROUPMTL_H_

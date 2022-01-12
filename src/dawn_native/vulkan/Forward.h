@@ -17,7 +17,7 @@
 
 #include "dawn_native/ToBackend.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class Adapter;
     class BindGroup;
@@ -64,6 +64,6 @@ namespace dawn_native::vulkan {
         return ToBackendBase<VulkanBackendTraits>(common);
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_FORWARD_H_

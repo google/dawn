@@ -18,7 +18,7 @@
 
 #include "dawn_native/vulkan/BufferVk.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
     // Used to track operations that are handled after recording.
     // Currently only tracks semaphores, but may be used to do barrier coalescing in the future.
     struct CommandRecordingContext {
@@ -35,6 +35,6 @@ namespace dawn_native::vulkan {
         bool used = false;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_COMMANDRECORDINGCONTEXT_H_

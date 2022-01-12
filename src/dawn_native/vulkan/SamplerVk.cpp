@@ -19,7 +19,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     namespace {
         VkSamplerAddressMode VulkanSamplerAddressMode(wgpu::AddressMode mode) {
@@ -128,4 +128,4 @@ namespace dawn_native::vulkan {
                      reinterpret_cast<uint64_t&>(mHandle), "Dawn_Sampler", GetLabel());
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

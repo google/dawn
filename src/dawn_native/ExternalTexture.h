@@ -22,7 +22,7 @@
 
 #include <array>
 
-namespace dawn_native {
+namespace dawn::native {
 
     struct ExternalTextureDescriptor;
     class TextureViewBase;
@@ -58,6 +58,6 @@ namespace dawn_native {
         std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat> textureViews;
         ExternalTextureState mState;
     };
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_EXTERNALTEXTURE_H_

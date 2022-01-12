@@ -24,7 +24,7 @@
 
 #include <array>
 
-namespace dawn_native {
+namespace dawn::native {
 
     enum class SingleShaderStage { Vertex, Fragment, Compute };
 
@@ -85,6 +85,6 @@ namespace dawn_native {
         std::array<T, kNumStages> mData;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_PERSTAGE_H_

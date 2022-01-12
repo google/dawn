@@ -19,7 +19,7 @@
 #include "dawn_native/opengl/PersistentPipelineStateGL.h"
 #include "dawn_native/opengl/UtilsGL.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     namespace {
 
@@ -342,4 +342,4 @@ namespace dawn_native::opengl {
         }
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

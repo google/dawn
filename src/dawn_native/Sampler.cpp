@@ -20,7 +20,7 @@
 
 #include <cmath>
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descriptor) {
         DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr");
@@ -150,4 +150,4 @@ namespace dawn_native {
                a->mCompareFunction == b->mCompareFunction && a->mMaxAnisotropy == b->mMaxAnisotropy;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

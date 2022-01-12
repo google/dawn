@@ -27,7 +27,7 @@
 
 #include <d3dcompiler.h>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     namespace {
         DXGI_FORMAT VertexFormatType(wgpu::VertexFormat format) {
@@ -487,4 +487,4 @@ namespace dawn_native::d3d12 {
         CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

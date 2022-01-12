@@ -19,7 +19,7 @@
 #include <spirv-tools/libspirv.hpp>
 #include <sstream>
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateSpirv(DeviceBase* device,
                              const std::vector<uint32_t>& spirv,
@@ -71,4 +71,4 @@ namespace dawn_native {
         return {};
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

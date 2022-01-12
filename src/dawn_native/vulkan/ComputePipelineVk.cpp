@@ -22,7 +22,7 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     // static
     Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
@@ -113,4 +113,4 @@ namespace dawn_native::vulkan {
         CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

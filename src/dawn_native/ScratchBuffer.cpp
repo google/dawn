@@ -16,7 +16,7 @@
 
 #include "dawn_native/Device.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     ScratchBuffer::ScratchBuffer(DeviceBase* device, wgpu::BufferUsage usage)
         : mDevice(device), mUsage(usage) {
@@ -44,4 +44,4 @@ namespace dawn_native {
         return mBuffer.Get();
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

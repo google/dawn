@@ -19,7 +19,7 @@
 
 #include <unordered_map>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     // The list of known instance extensions. They must be in dependency order (this is checked
     // inside EnsureDependencies)
@@ -157,6 +157,6 @@ namespace dawn_native::vulkan {
     // Returns a map that maps a Vulkan layer name to its VulkanLayer.
     std::unordered_map<std::string, VulkanLayer> CreateVulkanLayerNameMap();
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANEXTENSIONS_H_

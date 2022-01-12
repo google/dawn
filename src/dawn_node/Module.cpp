@@ -51,7 +51,7 @@ namespace {
 // object.
 Napi::Object Initialize(Napi::Env env, Napi::Object exports) {
     // Begin by setting the Dawn procedure function pointers.
-    dawnProcSetProcs(&dawn_native::GetProcs());
+    dawnProcSetProcs(&dawn::native::GetProcs());
 
     // Register all the interop types
     wgpu::interop::Initialize(env);

@@ -17,7 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/DawnNative.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -67,4 +67,4 @@ namespace dawn_native {
         sHasPendingInjectedError = true;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

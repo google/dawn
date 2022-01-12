@@ -83,10 +83,10 @@ ValidationTest::ValidationTest()
 }
 
 void ValidationTest::SetUp() {
-    instance = std::make_unique<dawn_native::Instance>();
+    instance = std::make_unique<dawn::native::Instance>();
     instance->DiscoverDefaultAdapters();
 
-    std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
+    std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
 
     // Validation tests run against the null backend, find the corresponding adapter
     bool foundNullAdapter = false;
@@ -125,7 +125,7 @@ void ValidationTest::TearDown() {
 
     if (device) {
         EXPECT_EQ(mLastWarningCount,
-                  dawn_native::GetDeprecationWarningCountForTesting(backendDevice));
+                  dawn::native::GetDeprecationWarningCountForTesting(backendDevice));
     }
 }
 
@@ -180,7 +180,7 @@ void ValidationTest::WaitForAllOperations(const wgpu::Device& device) {
 }
 
 bool ValidationTest::HasToggleEnabled(const char* toggle) const {
-    auto toggles = dawn_native::GetTogglesUsed(backendDevice);
+    auto toggles = dawn::native::GetTogglesUsed(backendDevice);
     return std::find_if(toggles.begin(), toggles.end(), [toggle](const char* name) {
                return strcmp(toggle, name) == 0;
            }) != toggles.end();
@@ -189,7 +189,7 @@ bool ValidationTest::HasToggleEnabled(const char* toggle) const {
 wgpu::SupportedLimits ValidationTest::GetSupportedLimits() {
     WGPUSupportedLimits supportedLimits;
     supportedLimits.nextInChain = nullptr;
-    dawn_native::GetProcs().deviceGetLimits(backendDevice, &supportedLimits);
+    dawn::native::GetProcs().deviceGetLimits(backendDevice, &supportedLimits);
     return *reinterpret_cast<wgpu::SupportedLimits*>(&supportedLimits);
 }
 

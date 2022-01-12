@@ -14,7 +14,7 @@
 
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     GPUDescriptorHeapAllocation::GPUDescriptorHeapAllocation(
         D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor,
@@ -36,4 +36,4 @@ namespace dawn_native::d3d12 {
     HeapVersionID GPUDescriptorHeapAllocation::GetHeapSerial() const {
         return mHeapSerial;
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

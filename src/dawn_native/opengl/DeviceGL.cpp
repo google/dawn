@@ -32,7 +32,7 @@
 #include "dawn_native/opengl/SwapChainGL.h"
 #include "dawn_native/opengl/TextureGL.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     // static
     ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
@@ -312,4 +312,4 @@ namespace dawn_native::opengl {
         return 1.0f;
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

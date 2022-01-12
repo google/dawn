@@ -19,7 +19,7 @@
 
 #include "common/vulkan_platform.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     class Device;
 
@@ -42,6 +42,6 @@ namespace dawn_native::vulkan {
         VkQueryPool mHandle = VK_NULL_HANDLE;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_QUERYSETVK_H_

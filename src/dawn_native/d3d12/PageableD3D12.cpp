@@ -14,7 +14,7 @@
 
 #include "dawn_native/d3d12/PageableD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     Pageable::Pageable(ComPtr<ID3D12Pageable> d3d12Pageable,
                        MemorySegment memorySegment,
                        uint64_t size)
@@ -73,4 +73,4 @@ namespace dawn_native::d3d12 {
     bool Pageable::IsResidencyLocked() const {
         return mResidencyLockRefCount != 0;
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

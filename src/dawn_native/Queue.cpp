@@ -34,7 +34,7 @@
 
 #include <cstring>
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -509,4 +509,4 @@ namespace dawn_native {
         }
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

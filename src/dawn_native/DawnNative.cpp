@@ -24,7 +24,7 @@
 
 // Contains the entry-points into dawn_native
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
         struct ComboDeprecatedDawnDeviceDescriptor : DeviceDescriptor {
@@ -281,4 +281,4 @@ namespace dawn_native {
         return FromAPI(a)->IsLayoutEqual(FromAPI(b), excludePipelineCompatibiltyToken);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

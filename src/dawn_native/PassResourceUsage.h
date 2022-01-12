@@ -21,7 +21,7 @@
 #include <set>
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // This file declares various "ResourceUsage" structures. They are produced by the frontend
     // while recording commands to be used for later validation and also some operations in the
@@ -95,6 +95,6 @@ namespace dawn_native {
         std::set<QuerySetBase*> usedQuerySets;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_PASSRESOURCEUSAGE_H

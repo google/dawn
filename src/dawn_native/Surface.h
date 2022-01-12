@@ -32,7 +32,7 @@
 // non-windows platforms don't have this type
 struct IUnknown;
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
                                          const SurfaceDescriptor* descriptor);
@@ -105,6 +105,6 @@ namespace dawn_native {
         const absl::FormatConversionSpec& spec,
         absl::FormatSink* s);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_SURFACE_H_

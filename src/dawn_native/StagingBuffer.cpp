@@ -14,7 +14,7 @@
 
 #include "dawn_native/StagingBuffer.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     StagingBufferBase::StagingBufferBase(size_t size) : mBufferSize(size) {
     }
@@ -26,4 +26,4 @@ namespace dawn_native {
     void* StagingBufferBase::GetMappedPointer() const {
         return mMappedPointer;
     }
-}  // namespace dawn_native
+}  // namespace dawn::native

@@ -47,7 +47,7 @@ namespace tint {
 
 }  // namespace tint
 
-namespace dawn_native {
+namespace dawn::native {
 
     struct EntryPointMetadata;
 
@@ -298,6 +298,6 @@ namespace dawn_native {
         std::unique_ptr<OwnedCompilationMessages> mCompilationMessages;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_SHADERMODULE_H_

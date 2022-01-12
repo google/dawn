@@ -18,7 +18,7 @@
 #include "common/BitSetIterator.h"
 #include "dawn_native/Features.h"
 
-namespace dawn_native {
+namespace dawn::native {
     namespace {
 
         struct FeatureEnumAndInfo {
@@ -274,4 +274,4 @@ namespace dawn_native {
         return static_cast<wgpu::FeatureName>(-1);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // ObjectContentHasher records a hash that can be used as a key to lookup a cached object in a
     // cache.
@@ -77,6 +77,6 @@ namespace dawn_native {
         }
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_OBJECT_CONTENT_HASHER_H_

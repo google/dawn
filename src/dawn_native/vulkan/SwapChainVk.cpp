@@ -30,7 +30,7 @@
 #    include "dawn_native/XlibXcbFunctions.h"
 #endif  // defined(DAWN_USE_X11)
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     // OldSwapChain
 
@@ -259,7 +259,7 @@ namespace dawn_native::vulkan {
             DAWN_INVALID_IF(previousInstance != ToBackend(GetDevice())->GetVkInstance(),
                             "Vulkan SwapChain cannot switch between Vulkan instances.");
 
-            // The previous swapchain is a dawn_native::vulkan::SwapChain so we can reuse its
+            // The previous swapchain is a dawn::native::vulkan::SwapChain so we can reuse its
             // VkSurfaceKHR provided since they are on the same instance.
             std::swap(previousVulkanSwapChain->mVkSurface, mVkSurface);
 
@@ -661,4 +661,4 @@ namespace dawn_native::vulkan {
         }
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

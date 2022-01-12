@@ -28,7 +28,7 @@
 #include <math.h>
 #include <cstring>
 
-namespace dawn_native {
+namespace dawn::native {
     namespace {
 
         // Check the query at queryIndex is unavailable, otherwise it cannot be written.
@@ -390,4 +390,4 @@ namespace dawn_native {
             "encoding %s.WriteTimestamp(%s, %u).", this, querySet, queryIndex);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

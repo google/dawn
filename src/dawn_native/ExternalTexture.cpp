@@ -20,7 +20,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateExternalTexturePlane(const TextureViewBase* textureView,
                                             wgpu::TextureFormat format) {
@@ -135,4 +135,4 @@ namespace dawn_native {
         return ObjectType::ExternalTexture;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

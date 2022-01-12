@@ -21,11 +21,11 @@
 
 class CommandBufferEncodingTests : public DawnNativeTest {
   protected:
-    void ExpectCommands(dawn_native::CommandIterator* commands,
-                        std::vector<std::pair<dawn_native::Command,
-                                              std::function<void(dawn_native::CommandIterator*)>>>
+    void ExpectCommands(dawn::native::CommandIterator* commands,
+                        std::vector<std::pair<dawn::native::Command,
+                                              std::function<void(dawn::native::CommandIterator*)>>>
                             expectedCommands) {
-        dawn_native::Command commandId;
+        dawn::native::Command commandId;
         for (uint32_t commandIndex = 0; commands->NextCommandId(&commandId); ++commandIndex) {
             ASSERT_LT(commandIndex, expectedCommands.size()) << "Unexpected command";
             ASSERT_EQ(commandId, expectedCommands[commandIndex].first)
@@ -38,7 +38,7 @@ class CommandBufferEncodingTests : public DawnNativeTest {
 // Indirect dispatch validation changes the bind groups in the middle
 // of a pass. Test that bindings are restored after the validation runs.
 TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestoration) {
-    using namespace dawn_native;
+    using namespace dawn::native;
 
     wgpu::BindGroupLayout staticLayout =
         utils::MakeBindGroupLayout(device, {{
@@ -274,7 +274,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
 // and does not leak state changes that occured between a snapshot and the
 // state restoration.
 TEST_F(CommandBufferEncodingTests, StateNotLeakedAfterRestore) {
-    using namespace dawn_native;
+    using namespace dawn::native;
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();

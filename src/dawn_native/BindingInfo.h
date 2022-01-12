@@ -26,7 +26,7 @@
 
 #include <cstdint>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Not a real WebGPU limit, but the sum of the two limits is useful for internal optimizations.
     static constexpr uint32_t kMaxDynamicBuffersPerPipelineLayout =
@@ -98,6 +98,6 @@ namespace dawn_native {
     // For buffer size validation
     using RequiredBufferSizes = ityp::array<BindGroupIndex, std::vector<uint64_t>, kMaxBindGroups>;
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_BINDINGINFO_H_

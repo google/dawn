@@ -18,7 +18,7 @@
 #include "common/BitSetIterator.h"
 #include "dawn_native/EnumClassBitmasks.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     template <typename T>
     class EnumMaskIterator final {
@@ -77,6 +77,6 @@ namespace dawn_native {
         return EnumMaskIterator<T>(mask);
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_ENUMMASKITERATOR_H_

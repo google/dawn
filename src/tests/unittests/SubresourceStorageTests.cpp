@@ -18,7 +18,7 @@
 
 #include "common/Log.h"
 
-using namespace dawn_native;
+using namespace dawn::native;
 
 // A fake class that replicates the behavior of SubresourceStorage but without any compression and
 // is used to compare the results of operations on SubresourceStorage against the "ground truth" of

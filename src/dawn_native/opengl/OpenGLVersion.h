@@ -17,7 +17,7 @@
 
 #include "dawn_native/opengl/OpenGLFunctionsBase_autogen.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     struct OpenGLVersion {
       public:
@@ -39,6 +39,6 @@ namespace dawn_native::opengl {
         Standard mStandard;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_OPENGLVERSION_H_

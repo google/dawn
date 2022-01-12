@@ -26,7 +26,7 @@
 
 #include <array>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -87,6 +87,6 @@ namespace dawn_native {
         BindGroupLayoutBase::BindingDataPointers mBindingData;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_BINDGROUP_H_

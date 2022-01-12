@@ -21,7 +21,7 @@
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/ShaderModule.h"
 
-namespace dawn_native {
+namespace dawn::native {
     MaybeError ValidateProgrammableStage(DeviceBase* device,
                                          const ShaderModuleBase* module,
                                          const std::string& entryPoint,
@@ -247,4 +247,4 @@ namespace dawn_native {
         return true;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

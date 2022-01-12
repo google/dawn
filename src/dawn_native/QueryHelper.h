@@ -18,7 +18,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/ObjectBase.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     class BufferBase;
     class CommandEncoder;
@@ -35,6 +35,6 @@ namespace dawn_native {
                                                     BufferBase* availability,
                                                     BufferBase* params);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_QUERYHELPER_H_

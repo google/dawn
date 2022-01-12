@@ -25,11 +25,11 @@ namespace {
                                               wgpu::Buffer timestamps,
                                               wgpu::Buffer availability,
                                               wgpu::Buffer params) {
-        ASSERT_TRUE(dawn_native::EncodeConvertTimestampsToNanoseconds(
-                        dawn_native::FromAPI(encoder.Get()), dawn_native::FromAPI(timestamps.Get()),
-                        dawn_native::FromAPI(availability.Get()),
-                        dawn_native::FromAPI(params.Get()))
-                        .IsSuccess());
+        ASSERT_TRUE(
+            dawn::native::EncodeConvertTimestampsToNanoseconds(
+                dawn::native::FromAPI(encoder.Get()), dawn::native::FromAPI(timestamps.Get()),
+                dawn::native::FromAPI(availability.Get()), dawn::native::FromAPI(params.Get()))
+                .IsSuccess());
     }
 
     class InternalShaderExpectation : public detail::Expectation {
@@ -147,7 +147,7 @@ class QueryInternalShaderTests : public DawnTest {
                                         kQueryCount * sizeof(uint32_t), wgpu::BufferUsage::Storage);
 
         // The params uniform buffer
-        dawn_native::TimestampParams params = {firstQuery, queryCount, destinationOffset, kPeriod};
+        dawn::native::TimestampParams params = {firstQuery, queryCount, destinationOffset, kPeriod};
         wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
                                                                 wgpu::BufferUsage::Uniform);
 

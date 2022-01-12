@@ -224,8 +224,8 @@ class DawnTestEnvironment : public testing::Environment {
     void TearDown() override;
 
     bool UsesWire() const;
-    dawn_native::BackendValidationLevel GetBackendValidationLevel() const;
-    dawn_native::Instance* GetInstance() const;
+    dawn::native::BackendValidationLevel GetBackendValidationLevel() const;
+    dawn::native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
     bool HasBackendTypeFilter() const;
@@ -240,17 +240,17 @@ class DawnTestEnvironment : public testing::Environment {
     bool RunSuppressedTests() const;
 
   protected:
-    std::unique_ptr<dawn_native::Instance> mInstance;
+    std::unique_ptr<dawn::native::Instance> mInstance;
 
   private:
     void ParseArgs(int argc, char** argv);
-    std::unique_ptr<dawn_native::Instance> CreateInstanceAndDiscoverAdapters();
-    void SelectPreferredAdapterProperties(const dawn_native::Instance* instance);
-    void PrintTestConfigurationAndAdapterInfo(dawn_native::Instance* instance) const;
+    std::unique_ptr<dawn::native::Instance> CreateInstanceAndDiscoverAdapters();
+    void SelectPreferredAdapterProperties(const dawn::native::Instance* instance);
+    void PrintTestConfigurationAndAdapterInfo(dawn::native::Instance* instance) const;
 
     bool mUseWire = false;
-    dawn_native::BackendValidationLevel mBackendValidationLevel =
-        dawn_native::BackendValidationLevel::Disabled;
+    dawn::native::BackendValidationLevel mBackendValidationLevel =
+        dawn::native::BackendValidationLevel::Disabled;
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
@@ -322,7 +322,7 @@ class DawnTestBase {
     wgpu::BackendType GetBackendTypeFilter() const;
 
     wgpu::Instance GetInstance() const;
-    dawn_native::Adapter GetAdapter() const;
+    dawn::native::Adapter GetAdapter() const;
 
     virtual std::unique_ptr<dawn::platform::Platform> CreateTestPlatform();
 
@@ -597,7 +597,7 @@ class DawnTestBase {
     // Assuming the data is mapped, checks all expectations
     void ResolveExpectations();
 
-    dawn_native::Adapter mBackendAdapter;
+    dawn::native::Adapter mBackendAdapter;
 
     std::unique_ptr<dawn::platform::Platform> mTestPlatform;
 };
@@ -621,22 +621,22 @@ class DawnTestBase {
 #define DAWN_SUPPRESS_TEST_IF(condition) \
     DAWN_SKIP_TEST_IF_BASE(!RunSuppressedTests() && condition, "suppressed", condition)
 
-#define EXPECT_DEPRECATION_WARNINGS(statement, n)                                \
-    do {                                                                         \
-        if (UsesWire()) {                                                        \
-            statement;                                                           \
-        } else {                                                                 \
-            size_t warningsBefore =                                              \
-                dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
-            statement;                                                           \
-            size_t warningsAfter =                                               \
-                dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
-            EXPECT_EQ(mLastWarningCount, warningsBefore);                        \
-            if (!HasToggleEnabled("skip_validation")) {                          \
-                EXPECT_EQ(warningsAfter, warningsBefore + n);                    \
-            }                                                                    \
-            mLastWarningCount = warningsAfter;                                   \
-        }                                                                        \
+#define EXPECT_DEPRECATION_WARNINGS(statement, n)                                 \
+    do {                                                                          \
+        if (UsesWire()) {                                                         \
+            statement;                                                            \
+        } else {                                                                  \
+            size_t warningsBefore =                                               \
+                dawn::native::GetDeprecationWarningCountForTesting(device.Get()); \
+            statement;                                                            \
+            size_t warningsAfter =                                                \
+                dawn::native::GetDeprecationWarningCountForTesting(device.Get()); \
+            EXPECT_EQ(mLastWarningCount, warningsBefore);                         \
+            if (!HasToggleEnabled("skip_validation")) {                           \
+                EXPECT_EQ(warningsAfter, warningsBefore + n);                     \
+            }                                                                     \
+            mLastWarningCount = warningsAfter;                                    \
+        }                                                                         \
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 

@@ -26,7 +26,7 @@
 
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     MaybeError ValidateTextureDescriptor(const DeviceBase* device,
                                          const TextureDescriptor* descriptor);
@@ -152,6 +152,6 @@ namespace dawn_native {
         SubresourceRange mRange;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_TEXTURE_H_

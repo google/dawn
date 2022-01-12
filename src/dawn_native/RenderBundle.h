@@ -28,7 +28,7 @@
 
 #include <bitset>
 
-namespace dawn_native {
+namespace dawn::native {
 
     struct RenderBundleDescriptor;
     class RenderBundleEncoder;
@@ -68,6 +68,6 @@ namespace dawn_native {
         RenderPassResourceUsage mResourceUsage;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RENDERBUNDLE_H_

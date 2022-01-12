@@ -14,7 +14,7 @@
 
 #include "dawn_native/vulkan/ResourceHeapVk.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     ResourceHeap::ResourceHeap(VkDeviceMemory memory, size_t memoryType)
         : mMemory(memory), mMemoryType(memoryType) {
@@ -28,4 +28,4 @@ namespace dawn_native::vulkan {
         return mMemoryType;
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

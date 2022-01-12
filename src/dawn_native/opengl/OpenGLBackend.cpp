@@ -21,7 +21,7 @@
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/NativeSwapChainImplGL.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     AdapterDiscoveryOptions::AdapterDiscoveryOptions()
         : AdapterDiscoveryOptionsBase(WGPUBackendType_OpenGL) {
@@ -62,4 +62,4 @@ namespace dawn_native::opengl {
         return ToAPI(texture);
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

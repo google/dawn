@@ -17,7 +17,7 @@
 
 #include "dawn_native/BackendConnection.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     class Backend : public BackendConnection {
       public:
@@ -31,6 +31,6 @@ namespace dawn_native::opengl {
         bool mCreatedAdapter = false;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_BACKENDGL_H_

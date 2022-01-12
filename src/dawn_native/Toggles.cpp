@@ -18,7 +18,7 @@
 #include "common/BitSetIterator.h"
 #include "dawn_native/Toggles.h"
 
-namespace dawn_native {
+namespace dawn::native {
     namespace {
 
         struct ToggleEnumAndInfo {
@@ -314,4 +314,4 @@ namespace dawn_native {
         mToggleNameToEnumMapInitialized = true;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

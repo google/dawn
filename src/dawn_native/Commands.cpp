@@ -23,7 +23,7 @@
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Texture.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     void FreeCommands(CommandIterator* commands) {
         commands->Reset();
@@ -362,4 +362,4 @@ namespace dawn_native {
         }
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

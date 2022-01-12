@@ -22,7 +22,7 @@
 #include <memory>
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class ResourceHeapAllocator;
 
@@ -69,6 +69,6 @@ namespace dawn_native {
         std::vector<TrackedSubAllocations> mTrackedSubAllocations;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_BUDDYMEMORYALLOCATOR_H_

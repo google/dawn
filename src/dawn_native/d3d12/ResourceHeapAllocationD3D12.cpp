@@ -19,7 +19,7 @@
 
 #include <utility>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,
                                                    uint64_t offset,
                                                    ComPtr<ID3D12Resource> resource,
@@ -40,4 +40,4 @@ namespace dawn_native::d3d12 {
     D3D12_GPU_VIRTUAL_ADDRESS ResourceHeapAllocation::GetGPUPointer() const {
         return mResource->GetGPUVirtualAddress();
     }
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

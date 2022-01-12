@@ -17,7 +17,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     namespace {
         D3D12_TEXTURE_ADDRESS_MODE AddressMode(wgpu::AddressMode mode) {
@@ -103,4 +103,4 @@ namespace dawn_native::d3d12 {
         return mSamplerDesc;
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

@@ -23,7 +23,7 @@
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     // static
     ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
@@ -282,4 +282,4 @@ namespace dawn_native::d3d12 {
         return mDynamicStorageBufferLengths;
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

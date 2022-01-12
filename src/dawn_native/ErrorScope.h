@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class ErrorScope {
       public:
@@ -52,6 +52,6 @@ namespace dawn_native {
         std::vector<ErrorScope> mScopes;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_ERRORSCOPE_H_

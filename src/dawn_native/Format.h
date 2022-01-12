@@ -40,7 +40,7 @@
 //
 // TODO(dawn:551): Consider moving this comment.
 
-namespace dawn_native {
+namespace dawn::native {
 
     enum class Aspect : uint8_t;
     class DeviceBase;
@@ -136,12 +136,12 @@ namespace dawn_native {
     // Builds the format table with the extensions enabled on the device.
     FormatTable BuildFormatTable(const DeviceBase* device);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 namespace dawn {
 
     template <>
-    struct IsDawnBitmask<dawn_native::SampleTypeBit> {
+    struct IsDawnBitmask<dawn::native::SampleTypeBit> {
         static constexpr bool enable = true;
     };
 

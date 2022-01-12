@@ -26,7 +26,7 @@
 #include <tint/tint.h>
 #include <spirv-tools/libspirv.hpp>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     ShaderModule::ConcurrentTransformedShaderModuleCache::ConcurrentTransformedShaderModuleCache(
         Device* device)
@@ -200,4 +200,4 @@ namespace dawn_native::vulkan {
         return newHandle;
     }
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan

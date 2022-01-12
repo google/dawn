@@ -18,7 +18,7 @@
 #include <sstream>
 #include <string>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
     MaybeError CheckHRESULTImpl(HRESULT result, const char* context) {
         if (DAWN_LIKELY(SUCCEEDED(result))) {
             return {};
@@ -48,4 +48,4 @@ namespace dawn_native::d3d12 {
         return CheckHRESULTImpl(result, context);
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

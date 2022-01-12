@@ -18,7 +18,7 @@
 #include "dawn_native/dawn_platform.h"
 #include "dawn_native/opengl/opengl_platform.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     struct OpenGLFunctions;
 
@@ -40,6 +40,6 @@ namespace dawn_native::opengl {
         GLuint mStencilReference = 0;
     };
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl
 
 #endif  // DAWNNATIVE_OPENGL_PERSISTENTPIPELINESTATEGL_H_

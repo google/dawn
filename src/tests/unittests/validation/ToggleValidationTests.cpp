@@ -18,12 +18,12 @@ namespace {
 
     class ToggleValidationTest : public ValidationTest {};
 
-    // Tests querying the detail of a toggle from dawn_native::InstanceBase works correctly.
+    // Tests querying the detail of a toggle from dawn::native::InstanceBase works correctly.
     TEST_F(ToggleValidationTest, QueryToggleInfo) {
         // Query with a valid toggle name
         {
             const char* kValidToggleName = "emulate_store_and_msaa_resolve";
-            const dawn_native::ToggleInfo* toggleInfo = instance->GetToggleInfo(kValidToggleName);
+            const dawn::native::ToggleInfo* toggleInfo = instance->GetToggleInfo(kValidToggleName);
             ASSERT_NE(nullptr, toggleInfo);
             ASSERT_NE(nullptr, toggleInfo->name);
             ASSERT_NE(nullptr, toggleInfo->description);
@@ -33,7 +33,8 @@ namespace {
         // Query with an invalid toggle name
         {
             const char* kInvalidToggleName = "!@#$%^&*";
-            const dawn_native::ToggleInfo* toggleInfo = instance->GetToggleInfo(kInvalidToggleName);
+            const dawn::native::ToggleInfo* toggleInfo =
+                instance->GetToggleInfo(kInvalidToggleName);
             ASSERT_EQ(nullptr, toggleInfo);
         }
     }
@@ -50,7 +51,7 @@ namespace {
             togglesDesc.forceEnabledTogglesCount = 1;
 
             WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
-            std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(deviceWithToggle);
+            std::vector<const char*> toggleNames = dawn::native::GetTogglesUsed(deviceWithToggle);
             bool validToggleExists = false;
             for (const char* toggle : toggleNames) {
                 if (strcmp(toggle, kValidToggleName) == 0) {
@@ -70,7 +71,7 @@ namespace {
             togglesDesc.forceEnabledTogglesCount = 1;
 
             WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
-            std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(deviceWithToggle);
+            std::vector<const char*> toggleNames = dawn::native::GetTogglesUsed(deviceWithToggle);
             bool InvalidToggleExists = false;
             for (const char* toggle : toggleNames) {
                 if (strcmp(toggle, kInvalidToggleName) == 0) {
@@ -90,7 +91,7 @@ namespace {
         togglesDesc.forceEnabledTogglesCount = 1;
 
         WGPUDevice deviceWithToggle = adapter.CreateDevice(&descriptor);
-        std::vector<const char*> toggleNames = dawn_native::GetTogglesUsed(deviceWithToggle);
+        std::vector<const char*> toggleNames = dawn::native::GetTogglesUsed(deviceWithToggle);
         bool validToggleExists = false;
         for (const char* toggle : toggleNames) {
             if (strcmp(toggle, kValidToggleName) == 0) {

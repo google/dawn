@@ -16,7 +16,7 @@
 
 #include "dawn_native/opengl/DeviceGL.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     // static
     Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
@@ -42,4 +42,4 @@ namespace dawn_native::opengl {
         PipelineGL::ApplyNow(ToBackend(GetDevice())->gl);
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

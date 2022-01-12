@@ -23,7 +23,7 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     enum class Feature {
         TextureCompressionBC,
@@ -78,6 +78,6 @@ namespace dawn_native {
         std::unordered_map<std::string, Feature> mFeatureNameToEnumMap;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_FEATURES_H_

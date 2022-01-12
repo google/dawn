@@ -20,7 +20,7 @@
 #include "dawn_native/d3d12/Forward.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     ResidencyManager::ResidencyManager(Device* device)
         : mDevice(device),
@@ -368,4 +368,4 @@ namespace dawn_native::d3d12 {
         }
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

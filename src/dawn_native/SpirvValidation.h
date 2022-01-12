@@ -16,7 +16,7 @@
 
 #include <vector>
 
-namespace dawn_native {
+namespace dawn::native {
 
     class DeviceBase;
 
@@ -24,4 +24,4 @@ namespace dawn_native {
                              const std::vector<uint32_t>& spirv,
                              bool dumpSpirv);
 
-}  // namespace dawn_native
+}  // namespace dawn::native

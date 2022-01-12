@@ -15,7 +15,7 @@
 #include "dawn_native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 #include "dawn_native/Error.h"
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     CPUDescriptorHeapAllocation::CPUDescriptorHeapAllocation(
         D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
@@ -50,4 +50,4 @@ namespace dawn_native::d3d12 {
         mBaseDescriptor = {0};
     }
 
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12

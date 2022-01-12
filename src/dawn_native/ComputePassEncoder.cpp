@@ -28,7 +28,7 @@
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/utils/WGPUHelpers.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     namespace {
 
@@ -456,4 +456,4 @@ namespace dawn_native {
         return &mCommandBufferState;
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

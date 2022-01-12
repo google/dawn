@@ -20,7 +20,7 @@
 #include "dawn_native/Instance.h"
 #include "dawn_native/Surface.h"
 
-namespace dawn_native::null {
+namespace dawn::native::null {
 
     // Implementation of pre-Device objects: the null adapter, null backend connection and Connect()
 
@@ -517,4 +517,4 @@ namespace dawn_native::null {
         return 1.0f;
     }
 
-}  // namespace dawn_native::null
+}  // namespace dawn::native::null

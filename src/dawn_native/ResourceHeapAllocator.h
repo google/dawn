@@ -20,7 +20,7 @@
 
 #include <memory>
 
-namespace dawn_native {
+namespace dawn::native {
 
     // Interface for backend allocators that create memory heaps resoruces can be suballocated in.
     class ResourceHeapAllocator {
@@ -32,6 +32,6 @@ namespace dawn_native {
         virtual void DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> allocation) = 0;
     };
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_RESOURCEHEAPALLOCATOR_H_

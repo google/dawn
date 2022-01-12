@@ -19,7 +19,7 @@
 #include "dawn_native/Instance.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
         : mInstance(instance), mBackend(backend) {
@@ -218,4 +218,4 @@ namespace dawn_native {
             "ResetInternalDeviceForTesting should only be used with the D3D12 backend.");
     }
 
-}  // namespace dawn_native
+}  // namespace dawn::native

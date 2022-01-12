@@ -17,7 +17,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     enum class VertexFormatBaseType {
         Float,
@@ -35,6 +35,6 @@ namespace dawn_native {
 
     const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format);
 
-}  // namespace dawn_native
+}  // namespace dawn::native
 
 #endif  // DAWNNATIVE_VERTEXFORMAT_H_

@@ -24,7 +24,7 @@
 
 #include <array>
 
-namespace dawn_native::d3d12 {
+namespace dawn::native::d3d12 {
 
     class TextureView;
 
@@ -61,7 +61,7 @@ namespace dawn_native::d3d12 {
         void SetDepthStencilNoAccess();
         void SetRenderTargetBeginningAccess(ColorAttachmentIndex attachment,
                                             wgpu::LoadOp loadOp,
-                                            dawn_native::Color clearColor,
+                                            dawn::native::Color clearColor,
                                             DXGI_FORMAT format);
         void SetRenderTargetEndingAccess(ColorAttachmentIndex attachment, wgpu::StoreOp storeOp);
         void SetRenderTargetEndingAccessResolve(ColorAttachmentIndex attachment,
@@ -93,6 +93,6 @@ namespace dawn_native::d3d12 {
                     kMaxColorAttachments>
             mSubresourceParams;
     };
-}  // namespace dawn_native::d3d12
+}  // namespace dawn::native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_RENDERPASSBUILDERD3D12_H_

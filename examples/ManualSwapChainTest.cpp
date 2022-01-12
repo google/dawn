@@ -85,7 +85,7 @@ struct WindowData {
 static std::unordered_map<GLFWwindow*, std::unique_ptr<WindowData>> windows;
 static uint64_t windowSerial = 0;
 
-static std::unique_ptr<dawn_native::Instance> instance;
+static std::unique_ptr<dawn::native::Instance> instance;
 static wgpu::Device device;
 static wgpu::Queue queue;
 static wgpu::RenderPipeline trianglePipeline;
@@ -266,15 +266,15 @@ int main(int argc, const char* argv[]) {
 
     // Choose an adapter we like.
     // TODO: allow switching the window between devices.
-    DawnProcTable procs = dawn_native::GetProcs();
+    DawnProcTable procs = dawn::native::GetProcs();
     dawnProcSetProcs(&procs);
 
-    instance = std::make_unique<dawn_native::Instance>();
+    instance = std::make_unique<dawn::native::Instance>();
     instance->DiscoverDefaultAdapters();
 
-    std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
-    dawn_native::Adapter chosenAdapter;
-    for (dawn_native::Adapter& adapter : adapters) {
+    std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
+    dawn::native::Adapter chosenAdapter;
+    for (dawn::native::Adapter& adapter : adapters) {
         wgpu::AdapterProperties properties;
         adapter.GetProperties(&properties);
         if (properties.backendType != wgpu::BackendType::Null) {

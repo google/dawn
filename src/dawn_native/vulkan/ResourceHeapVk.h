@@ -18,7 +18,7 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/ResourceHeap.h"
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     // Wrapper for physical memory used with or without a resource object.
     class ResourceHeap : public ResourceHeapBase {
@@ -34,6 +34,6 @@ namespace dawn_native::vulkan {
         size_t mMemoryType = 0;
     };
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_RESOURCEHEAPVK_H_

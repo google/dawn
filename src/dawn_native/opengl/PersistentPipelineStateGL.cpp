@@ -16,7 +16,7 @@
 
 #include "dawn_native/opengl/OpenGLFunctions.h"
 
-namespace dawn_native::opengl {
+namespace dawn::native::opengl {
 
     void PersistentPipelineState::SetDefaultState(const OpenGLFunctions& gl) {
         CallGLStencilFunc(gl);
@@ -55,4 +55,4 @@ namespace dawn_native::opengl {
                                mStencilReadMask);
     }
 
-}  // namespace dawn_native::opengl
+}  // namespace dawn::native::opengl

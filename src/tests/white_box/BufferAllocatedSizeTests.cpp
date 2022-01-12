@@ -53,7 +53,7 @@ TEST_P(BufferAllocatedSizeTests, UniformUsage) {
     {
         const uint32_t bufferSize = kMinBufferSize;
         wgpu::Buffer buffer = CreateBuffer(wgpu::BufferUsage::Uniform, bufferSize);
-        EXPECT_EQ(dawn_native::GetAllocatedSizeForTesting(buffer.Get()),
+        EXPECT_EQ(dawn::native::GetAllocatedSizeForTesting(buffer.Get()),
                   Align(bufferSize, requiredBufferAlignment));
     }
 
@@ -63,7 +63,7 @@ TEST_P(BufferAllocatedSizeTests, UniformUsage) {
         const uint32_t bufferSize = std::max(1u + requiredBufferAlignment, kMinBufferSize);
         wgpu::Buffer buffer =
             CreateBuffer(wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage, bufferSize);
-        EXPECT_EQ(dawn_native::GetAllocatedSizeForTesting(buffer.Get()),
+        EXPECT_EQ(dawn::native::GetAllocatedSizeForTesting(buffer.Get()),
                   Align(bufferSize, requiredBufferAlignment));
     }
 
@@ -72,7 +72,7 @@ TEST_P(BufferAllocatedSizeTests, UniformUsage) {
         const uint32_t bufferSize = kMinBufferSize;
         wgpu::Buffer buffer =
             CreateBuffer(wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage, bufferSize);
-        EXPECT_EQ(dawn_native::GetAllocatedSizeForTesting(buffer.Get()),
+        EXPECT_EQ(dawn::native::GetAllocatedSizeForTesting(buffer.Get()),
                   Align(bufferSize, requiredBufferAlignment));
     }
 }

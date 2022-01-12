@@ -16,7 +16,7 @@
 #include "common/Math.h"
 #include "dawn_native/Device.h"
 
-namespace dawn_native {
+namespace dawn::native {
 
     DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {
         mRingBuffers.emplace_back(
@@ -126,4 +126,4 @@ namespace dawn_native {
         uploadHandle.startOffset += additionalOffset;
         return uploadHandle;
     }
-}  // namespace dawn_native
+}  // namespace dawn::native

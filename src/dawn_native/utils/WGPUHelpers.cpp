@@ -31,7 +31,7 @@
 #include <mutex>
 #include <sstream>
 
-namespace dawn_native::utils {
+namespace dawn::native::utils {
 
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(DeviceBase* device,
                                                             const char* source) {
@@ -189,4 +189,4 @@ namespace dawn_native::utils {
         return (label == nullptr || strlen(label) == 0) ? "None" : label;
     }
 
-}  // namespace dawn_native::utils
+}  // namespace dawn::native::utils

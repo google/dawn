@@ -32,9 +32,9 @@ class InternalResourceUsageTests : public DawnTest {
 TEST_P(InternalResourceUsageTests, InternalBufferUsage) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
-    ASSERT_DEVICE_ERROR(CreateBuffer(dawn_native::kReadOnlyStorageBuffer));
+    ASSERT_DEVICE_ERROR(CreateBuffer(dawn::native::kReadOnlyStorageBuffer));
 
-    ASSERT_DEVICE_ERROR(CreateBuffer(dawn_native::kInternalStorageBuffer));
+    ASSERT_DEVICE_ERROR(CreateBuffer(dawn::native::kInternalStorageBuffer));
 }
 
 DAWN_INSTANTIATE_TEST(InternalResourceUsageTests, NullBackend());
@@ -48,7 +48,7 @@ TEST_P(InternalBindingTypeTests, InternalStorageBufferBindingType) {
 
     wgpu::BindGroupLayoutEntry bglEntry;
     bglEntry.binding = 0;
-    bglEntry.buffer.type = dawn_native::kInternalStorageBufferBinding;
+    bglEntry.buffer.type = dawn::native::kInternalStorageBufferBinding;
     bglEntry.visibility = wgpu::ShaderStage::Compute;
 
     wgpu::BindGroupLayoutDescriptor bglDesc;

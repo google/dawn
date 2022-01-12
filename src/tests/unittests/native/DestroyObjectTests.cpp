@@ -32,7 +32,7 @@
 #include "tests/DawnNativeTest.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 
-namespace dawn_native { namespace {
+namespace dawn::native { namespace {
 
     using ::testing::_;
     using ::testing::ByMove;
@@ -754,4 +754,4 @@ namespace dawn_native { namespace {
         EXPECT_FALSE(textureView->IsAlive());
     }
 
-}}  // namespace dawn_native::
+}}  // namespace dawn::native::

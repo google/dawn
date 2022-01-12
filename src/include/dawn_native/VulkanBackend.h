@@ -22,7 +22,7 @@
 
 #include <vector>
 
-namespace dawn_native::vulkan {
+namespace dawn::native::vulkan {
 
     DAWN_NATIVE_EXPORT VkInstance GetInstance(WGPUDevice device);
 
@@ -135,6 +135,6 @@ namespace dawn_native::vulkan {
                                                   VkImageLayout desiredLayout,
                                                   ExternalImageExportInfoVk* info);
 
-}  // namespace dawn_native::vulkan
+}  // namespace dawn::native::vulkan
 
 #endif  // DAWNNATIVE_VULKANBACKEND_H_

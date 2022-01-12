@@ -72,16 +72,16 @@
         }                                                       \
     } while (0)
 
-#define EXPECT_DEPRECATION_WARNINGS(statement, n)                                                 \
-    do {                                                                                          \
-        FlushWire();                                                                              \
-        size_t warningsBefore = dawn_native::GetDeprecationWarningCountForTesting(backendDevice); \
-        EXPECT_EQ(mLastWarningCount, warningsBefore);                                             \
-        statement;                                                                                \
-        FlushWire();                                                                              \
-        size_t warningsAfter = dawn_native::GetDeprecationWarningCountForTesting(backendDevice);  \
-        EXPECT_EQ(warningsAfter, warningsBefore + n);                                             \
-        mLastWarningCount = warningsAfter;                                                        \
+#define EXPECT_DEPRECATION_WARNINGS(statement, n)                                                  \
+    do {                                                                                           \
+        FlushWire();                                                                               \
+        size_t warningsBefore = dawn::native::GetDeprecationWarningCountForTesting(backendDevice); \
+        EXPECT_EQ(mLastWarningCount, warningsBefore);                                              \
+        statement;                                                                                 \
+        FlushWire();                                                                               \
+        size_t warningsAfter = dawn::native::GetDeprecationWarningCountForTesting(backendDevice);  \
+        EXPECT_EQ(warningsAfter, warningsBefore + n);                                              \
+        mLastWarningCount = warningsAfter;                                                         \
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
@@ -135,8 +135,8 @@ class ValidationTest : public testing::Test {
   protected:
     virtual WGPUDevice CreateTestDevice();
 
-    std::unique_ptr<dawn_native::Instance> instance;
-    dawn_native::Adapter adapter;
+    std::unique_ptr<dawn::native::Instance> instance;
+    dawn::native::Adapter adapter;
     wgpu::Device device;
     WGPUDevice backendDevice;
 
