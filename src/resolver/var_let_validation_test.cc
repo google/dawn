@@ -262,13 +262,17 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Atomic) {
 }
 
 TEST_F(ResolverVarLetValidationTest, NonConstructibleType_RuntimeArray) {
-  auto* s = Structure("S", {Member("m", ty.array(ty.i32()))}, {StructBlock()});
-  auto* v = Var("v", ty.Of(s));
+  auto* s = Structure("S", {Member(Source{{56, 78}}, "m", ty.array(ty.i32()))},
+                      {StructBlock()});
+  auto* v = Var(Source{{12, 34}}, "v", ty.Of(s));
   WrapInFunction(v);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "error: function variable must have a constructible type");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+56:78 note: while analysing structure member S.m
+12:34 note: while instantiating variable v)");
 }
 
 TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Struct_WithAtomic) {

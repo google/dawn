@@ -411,9 +411,10 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
        });
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: runtime arrays may only appear as the last member of "
-            "a struct");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+12:34 note: while instantiating variable a)");
 }
 
 TEST_F(ResolverTypeValidationTest, Struct_Member_VectorNoType) {
@@ -575,7 +576,8 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsGlobalVariable) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: runtime arrays may only appear as the last member of a struct)");
+      R"(56:78 error: runtime-sized arrays can only be used in the <storage> storage class
+56:78 note: while instantiating variable g)");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsLocalVariable) {
@@ -586,7 +588,8 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsLocalVariable) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: runtime arrays may only appear as the last member of a struct)");
+      R"(56:78 error: runtime-sized arrays can only be used in the <storage> storage class
+56:78 note: while instantiating variable g)");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
@@ -610,9 +613,30 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
        });
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(),
-            "12:34 error: runtime arrays may only appear as the last member of "
-            "a struct");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+12:34 note: while instantiating parameter a)");
+}
+
+TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsParameter_Fail) {
+  // fn func(a : ptr<workgroup, array<u32>>) {}
+
+  auto* param =
+      Param(Source{{12, 34}}, "a",
+            ty.pointer(ty.array<i32>(), ast::StorageClass::kWorkgroup));
+
+  Func("func", ast::VariableList{param}, ty.void_(),
+       ast::StatementList{
+           Return(),
+       },
+       ast::DecorationList{});
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+12:34 note: while instantiating parameter a)");
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {

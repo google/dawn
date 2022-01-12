@@ -2650,6 +2650,14 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
   }
 
   if (auto* arr = ty->As<sem::Array>()) {
+    if (arr->IsRuntimeSized() && sc != ast::StorageClass::kStorage) {
+      AddError(
+          "runtime-sized arrays can only be used in the <storage> storage "
+          "class",
+          usage);
+      return false;
+    }
+
     return ApplyStorageClassUsageToType(
         sc, const_cast<sem::Type*>(arr->ElemType()), usage);
   }

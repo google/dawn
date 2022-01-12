@@ -45,6 +45,52 @@ TEST_F(ResolverStorageClassValidationTest,
             "the function storage class");
 }
 
+TEST_F(ResolverStorageClassValidationTest, Private_RuntimeArray) {
+  Global(Source{{12, 34}}, "v", ty.array(ty.i32()),
+         ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+12:34 note: while instantiating variable v)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, Private_RuntimeArrayInStruct) {
+  auto* s = Structure("S", {Member("m", ty.array(ty.i32()))}, {StructBlock()});
+  Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+note: while analysing structure member S.m
+12:34 note: while instantiating variable v)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, Workgroup_RuntimeArray) {
+  Global(Source{{12, 34}}, "v", ty.array(ty.i32()),
+         ast::StorageClass::kWorkgroup);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+12:34 note: while instantiating variable v)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, Workgroup_RuntimeArrayInStruct) {
+  auto* s = Structure("S", {Member("m", ty.array(ty.i32()))}, {StructBlock()});
+  Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kWorkgroup);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+note: while analysing structure member S.m
+12:34 note: while instantiating variable v)");
+}
+
 TEST_F(ResolverStorageClassValidationTest, StorageBufferBool) {
   // var<storage> g : i32;
   Global(Source{{56, 78}}, "g", ty.i32(), ast::StorageClass::kStorage,
@@ -170,9 +216,11 @@ TEST_F(ResolverStorageClassValidationTest, UniformBuffer_Struct_Runtime) {
          });
 
   ASSERT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "56:78 error: structure containing a runtime sized array cannot be "
-            "used as a uniform buffer\n12:34 note: structure is declared here");
+  EXPECT_EQ(
+      r()->error(),
+      R"(56:78 error: runtime-sized arrays can only be used in the <storage> storage class
+note: while analysing structure member S.m
+56:78 note: while instantiating variable svar)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferBool) {

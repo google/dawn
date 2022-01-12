@@ -571,19 +571,6 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
             decl->source);
         return false;
       }
-      for (auto* member : str->Members()) {
-        if (auto* arr = member->Type()->As<sem::Array>()) {
-          if (arr->IsRuntimeSized()) {
-            AddError(
-                "structure containing a runtime sized array "
-                "cannot be used as a uniform buffer",
-                decl->source);
-            AddNote("structure is declared here", str->Declaration()->source);
-            return false;
-          }
-        }
-      }
-
       break;
     }
     default:
