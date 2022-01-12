@@ -493,6 +493,14 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
     }
   }
 
+  if (var->StorageClass() == ast::StorageClass::kFunction) {
+    AddError(
+        "variables declared at module scope must not be in the function "
+        "storage class",
+        decl->source);
+    return false;
+  }
+
   auto binding_point = decl->BindingPoint();
   switch (var->StorageClass()) {
     case ast::StorageClass::kUniform:

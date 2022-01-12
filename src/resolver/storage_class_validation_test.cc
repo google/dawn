@@ -34,6 +34,17 @@ TEST_F(ResolverStorageClassValidationTest, GlobalVariableNoStorageClass_Fail) {
             "12:34 error: global variables must have a storage class");
 }
 
+TEST_F(ResolverStorageClassValidationTest,
+       GlobalVariableFunctionStorageClass_Fail) {
+  // var<function> g : f32;
+  Global(Source{{12, 34}}, "g", ty.f32(), ast::StorageClass::kFunction);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: variables declared at module scope must not be in "
+            "the function storage class");
+}
+
 TEST_F(ResolverStorageClassValidationTest, StorageBufferBool) {
   // var<storage> g : i32;
   Global(Source{{56, 78}}, "g", ty.i32(), ast::StorageClass::kStorage,
