@@ -423,7 +423,6 @@ namespace dawn::native::metal {
         MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
 
         mtlDesc.width = GetWidth();
-        mtlDesc.height = GetHeight();
         mtlDesc.sampleCount = GetSampleCount();
         // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
         // between linear space and sRGB. For example, creating bgra8Unorm texture view on
@@ -438,9 +437,17 @@ namespace dawn::native::metal {
         // Choose the correct MTLTextureType and paper over differences in how the array layer count
         // is specified.
         switch (GetDimension()) {
-            case wgpu::TextureDimension::e2D:
+            case wgpu::TextureDimension::e1D:
+                mtlDesc.arrayLength = 1;
                 mtlDesc.depth = 1;
+                ASSERT(mtlDesc.sampleCount == 1);
+                mtlDesc.textureType = MTLTextureType1D;
+                break;
+
+            case wgpu::TextureDimension::e2D:
+                mtlDesc.height = GetHeight();
                 mtlDesc.arrayLength = GetArrayLayers();
+                mtlDesc.depth = 1;
                 if (mtlDesc.arrayLength > 1) {
                     ASSERT(mtlDesc.sampleCount == 1);
                     mtlDesc.textureType = MTLTextureType2DArray;
@@ -451,14 +458,12 @@ namespace dawn::native::metal {
                 }
                 break;
             case wgpu::TextureDimension::e3D:
+                mtlDesc.height = GetHeight();
                 mtlDesc.depth = GetDepth();
                 mtlDesc.arrayLength = 1;
                 ASSERT(mtlDesc.sampleCount == 1);
                 mtlDesc.textureType = MTLTextureType3D;
                 break;
-
-            case wgpu::TextureDimension::e1D:
-                UNREACHABLE();
         }
 
         return mtlDescRef;

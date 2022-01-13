@@ -90,11 +90,13 @@ namespace dawn::native {
                     allowedStages &= ~wgpu::ShaderStage::Vertex;
                 }
             }
+
             if (entry.sampler.type != wgpu::SamplerBindingType::Undefined) {
                 bindingMemberCount++;
                 bindingType = BindingInfoType::Sampler;
                 DAWN_TRY(ValidateSamplerBindingType(entry.sampler.type));
             }
+
             if (entry.texture.sampleType != wgpu::TextureSampleType::Undefined) {
                 bindingMemberCount++;
                 bindingType = BindingInfoType::Texture;
@@ -113,6 +115,7 @@ namespace dawn::native {
                     "View dimension (%s) for a multisampled texture bindings was not %s.",
                     viewDimension, wgpu::TextureViewDimension::e2D);
             }
+
             if (entry.storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
                 bindingMemberCount++;
                 bindingType = BindingInfoType::StorageTexture;

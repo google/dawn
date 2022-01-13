@@ -196,6 +196,12 @@ namespace dawn::native::vulkan {
             // Fill in the image type, and paper over differences in how the array layer count is
             // specified between WebGPU and Vulkan.
             switch (texture.GetDimension()) {
+                case wgpu::TextureDimension::e1D:
+                    info->imageType = VK_IMAGE_TYPE_1D;
+                    info->extent = {size.width, 1, 1};
+                    info->arrayLayers = 1;
+                    break;
+
                 case wgpu::TextureDimension::e2D:
                     info->imageType = VK_IMAGE_TYPE_2D;
                     info->extent = {size.width, size.height, 1};
@@ -207,9 +213,6 @@ namespace dawn::native::vulkan {
                     info->extent = {size.width, size.height, size.depthOrArrayLayers};
                     info->arrayLayers = 1;
                     break;
-
-                case wgpu::TextureDimension::e1D:
-                    UNREACHABLE();
             }
         }
 

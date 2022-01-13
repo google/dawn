@@ -291,6 +291,22 @@ namespace {
 
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
+
+        // 1D textures can only have a single mip level.
+        {
+            wgpu::TextureDescriptor descriptor = defaultDescriptor;
+            descriptor.dimension = wgpu::TextureDimension::e1D;
+            descriptor.size.width = 32;
+            descriptor.size.height = 1;
+
+            // Having a single mip level is allowed.
+            descriptor.mipLevelCount = 1;
+            device.CreateTexture(&descriptor);
+
+            // Having more than 1 is an error.
+            descriptor.mipLevelCount = 2;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
     }
 
     // Test the validation of array layer count
@@ -318,6 +334,51 @@ namespace {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
             descriptor.size.depthOrArrayLayers = supportedLimits.maxTextureArrayLayers;
             device.CreateTexture(&descriptor);
+        }
+    }
+
+    // Test the validation of 1D texture size
+    TEST_F(TextureValidationTest, 1DTextureSize) {
+        wgpu::Limits supportedLimits = GetSupportedLimits().limits;
+
+        wgpu::TextureDescriptor defaultDescriptor;
+        defaultDescriptor.size = {4, 1, 1};
+        defaultDescriptor.dimension = wgpu::TextureDimension::e1D;
+        defaultDescriptor.usage = wgpu::TextureUsage::CopySrc;
+        defaultDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        // Width must be in [1, kMaxTextureDimension1D]
+        {
+            wgpu::TextureDescriptor desc = defaultDescriptor;
+            desc.size.width = 0;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+            desc.size.width = 1;
+            device.CreateTexture(&desc);
+
+            desc.size.width = supportedLimits.maxTextureDimension1D;
+            device.CreateTexture(&desc);
+            desc.size.width = supportedLimits.maxTextureDimension1D + 1u;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+        }
+
+        // Height must be 1
+        {
+            wgpu::TextureDescriptor desc = defaultDescriptor;
+            desc.size.height = 2;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+
+            desc.size.height = 0;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+        }
+
+        // DepthOrArrayLayers must be 1
+        {
+            wgpu::TextureDescriptor desc = defaultDescriptor;
+            desc.size.depthOrArrayLayers = 2;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+
+            desc.size.depthOrArrayLayers = 0;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
         }
     }
 
@@ -427,8 +488,8 @@ namespace {
         }
     }
 
-    // Test that depth/stencil formats are invalid for 3D texture
-    TEST_F(TextureValidationTest, DepthStencilFormatsFor3D) {
+    // Test that depth/stencil formats are invalid for 1D and 3D texture
+    TEST_F(TextureValidationTest, DepthStencilFormatsFor1DAnd3D) {
         wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
 
         wgpu::TextureFormat depthStencilFormats[] = {
@@ -638,8 +699,6 @@ namespace {
         }
     }
 
-    // TODO(jiawei.shao@intel.com): add tests to verify we cannot create 1D or 3D textures with
-    // compressed texture formats.
     class CompressedTextureFormatsValidationTests : public TextureValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
@@ -649,6 +708,15 @@ namespace {
                                                      wgpu::FeatureName::TextureCompressionASTC};
             descriptor.requiredFeatures = requiredFeatures;
             descriptor.requiredFeaturesCount = 3;
+
+            // TODO(dawn:814): Remove when 1D texture support is complete.
+            const char* kDisallowUnsafeApis = "disallow_unsafe_apis";
+            wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+            togglesDesc.forceDisabledToggles = &kDisallowUnsafeApis;
+            togglesDesc.forceDisabledTogglesCount = 1;
+
+            descriptor.nextInChain = &togglesDesc;
+
             return adapter.CreateDevice(&descriptor);
         }
 
@@ -715,6 +783,24 @@ namespace {
             descriptor.format = format;
             descriptor.size.depthOrArrayLayers = 6;
             device.CreateTexture(&descriptor);
+        }
+    }
+
+    // Test that it is not allowed to create a 1D texture in compressed formats.
+    TEST_F(CompressedTextureFormatsValidationTests, 1DTexture) {
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.format = format;
+            // Unfortunately we can't use the block height here otherwise validation for the max
+            // texture 1D size will trigger. We check the error message below to make sure the
+            // correct code path is covered.
+            descriptor.size.height = 1;
+            descriptor.size.depthOrArrayLayers = 1;
+            descriptor.dimension = wgpu::TextureDimension::e1D;
+            ASSERT_DEVICE_ERROR(
+                device.CreateTexture(&descriptor),
+                testing::HasSubstr(
+                    "The dimension (TextureDimension::e1D) of a texture with a compressed format"));
         }
     }
 

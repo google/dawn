@@ -101,13 +101,12 @@ namespace dawn::native::d3d12 {
 
         D3D12_RESOURCE_DIMENSION D3D12TextureDimension(wgpu::TextureDimension dimension) {
             switch (dimension) {
+                case wgpu::TextureDimension::e1D:
+                    return D3D12_RESOURCE_DIMENSION_TEXTURE1D;
                 case wgpu::TextureDimension::e2D:
                     return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
                 case wgpu::TextureDimension::e3D:
                     return D3D12_RESOURCE_DIMENSION_TEXTURE3D;
-
-                case wgpu::TextureDimension::e1D:
-                    UNREACHABLE();
             }
         }
 
