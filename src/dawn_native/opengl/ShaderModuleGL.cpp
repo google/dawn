@@ -22,6 +22,8 @@
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
 #include "dawn_native/opengl/SpirvUtils.h"
+#include "dawn_platform/DawnPlatform.h"
+#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <spirv_glsl.hpp>
 
@@ -265,23 +267,32 @@ namespace dawn::native::opengl {
                                                              CombinedSamplerInfo* combinedSamplers,
                                                              const PipelineLayout* layout,
                                                              bool* needsDummySampler) const {
+        TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
         tint::transform::SingleEntryPoint singleEntryPointTransform;
 
         tint::transform::DataMap transformInputs;
         transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
 
         tint::Program program;
-        DAWN_TRY_ASSIGN(program, RunTransforms(&singleEntryPointTransform, GetTintProgram(),
-                                               transformInputs, nullptr, nullptr));
+        {
+            TRACE_EVENT0(GetDevice()->GetPlatform(), General, "RunTransforms");
+            DAWN_TRY_ASSIGN(program, RunTransforms(&singleEntryPointTransform, GetTintProgram(),
+                                                   transformInputs, nullptr, nullptr));
+        }
 
         tint::writer::spirv::Options tintOptions;
         tintOptions.disable_workgroup_init =
             GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-        auto result = tint::writer::spirv::Generate(&program, tintOptions);
-        DAWN_INVALID_IF(!result.success, "An error occured while generating SPIR-V: %s.",
-                        result.error);
+        std::vector<uint32_t> spirv;
+        {
+            TRACE_EVENT0(GetDevice()->GetPlatform(), General, "tint::writer::spirv::Generate");
+            auto result = tint::writer::spirv::Generate(&program, tintOptions);
+            DAWN_INVALID_IF(!result.success, "An error occured while generating SPIR-V: %s.",
+                            result.error);
 
-        std::vector<uint32_t> spirv = std::move(result.spirv);
+            spirv = std::move(result.spirv);
+        }
+
         DAWN_TRY(
             ValidateSpirv(GetDevice(), spirv, GetDevice()->IsToggleEnabled(Toggle::DumpShaders)));
 

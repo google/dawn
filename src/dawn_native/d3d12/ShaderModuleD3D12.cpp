@@ -26,6 +26,8 @@
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
+#include "dawn_platform/DawnPlatform.h"
+#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <d3dcompiler.h>
 
@@ -596,7 +598,8 @@ namespace dawn::native::d3d12 {
             return std::move(compiledShader);
         }
 
-        ResultOrError<std::string> TranslateToHLSL(const ShaderCompilationRequest& request,
+        ResultOrError<std::string> TranslateToHLSL(dawn::platform::Platform* platform,
+                                                   const ShaderCompilationRequest& request,
                                                    std::string* remappedEntryPointName) {
             std::ostringstream errorStream;
             errorStream << "Tint HLSL failure:" << std::endl;
@@ -631,9 +634,12 @@ namespace dawn::native::d3d12 {
 
             tint::Program transformedProgram;
             tint::transform::DataMap transformOutputs;
-            DAWN_TRY_ASSIGN(transformedProgram,
-                            RunTransforms(&transformManager, request.program, transformInputs,
-                                          &transformOutputs, nullptr));
+            {
+                TRACE_EVENT0(platform, General, "RunTransforms");
+                DAWN_TRY_ASSIGN(transformedProgram,
+                                RunTransforms(&transformManager, request.program, transformInputs,
+                                              &transformOutputs, nullptr));
+            }
 
             if (auto* data = transformOutputs.Get<tint::transform::Renamer::Data>()) {
                 auto it = data->remappings.find(request.entryPointName);
@@ -661,6 +667,7 @@ namespace dawn::native::d3d12 {
             // them as well. This would allow us to only upload root constants that are actually
             // read by the shader.
             options.array_length_from_uniform = request.arrayLengthFromUniform;
+            TRACE_EVENT0(platform, General, "tint::writer::hlsl::Generate");
             auto result = tint::writer::hlsl::Generate(&transformedProgram, options);
             DAWN_INVALID_IF(!result.success, "An error occured while generating HLSL: %s",
                             result.error);
@@ -669,7 +676,8 @@ namespace dawn::native::d3d12 {
         }
 
         template <typename F>
-        MaybeError CompileShader(const PlatformFunctions* functions,
+        MaybeError CompileShader(dawn::platform::Platform* platform,
+                                 const PlatformFunctions* functions,
                                  IDxcLibrary* dxcLibrary,
                                  IDxcCompiler* dxcCompiler,
                                  ShaderCompilationRequest&& request,
@@ -679,7 +687,7 @@ namespace dawn::native::d3d12 {
             // Compile the source shader to HLSL.
             std::string hlslSource;
             std::string remappedEntryPoint;
-            DAWN_TRY_ASSIGN(hlslSource, TranslateToHLSL(request, &remappedEntryPoint));
+            DAWN_TRY_ASSIGN(hlslSource, TranslateToHLSL(platform, request, &remappedEntryPoint));
             if (dumpShaders) {
                 std::ostringstream dumpedMsg;
                 dumpedMsg << "/* Dumped generated HLSL */" << std::endl << hlslSource;
@@ -687,14 +695,18 @@ namespace dawn::native::d3d12 {
             }
             request.entryPointName = remappedEntryPoint.c_str();
             switch (request.compiler) {
-                case ShaderCompilationRequest::Compiler::DXC:
+                case ShaderCompilationRequest::Compiler::DXC: {
+                    TRACE_EVENT0(platform, General, "CompileShaderDXC");
                     DAWN_TRY_ASSIGN(compiledShader->compiledDXCShader,
                                     CompileShaderDXC(dxcLibrary, dxcCompiler, request, hlslSource));
                     break;
-                case ShaderCompilationRequest::Compiler::FXC:
+                }
+                case ShaderCompilationRequest::Compiler::FXC: {
+                    TRACE_EVENT0(platform, General, "CompileShaderFXC");
                     DAWN_TRY_ASSIGN(compiledShader->compiledFXCShader,
                                     CompileShaderFXC(functions, request, hlslSource));
                     break;
+                }
             }
 
             if (dumpShaders && request.compiler == ShaderCompilationRequest::Compiler::FXC) {
@@ -743,7 +755,9 @@ namespace dawn::native::d3d12 {
                                                         SingleShaderStage stage,
                                                         PipelineLayout* layout,
                                                         uint32_t compileFlags) {
+        TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleD3D12::Compile");
         ASSERT(!IsError());
+
         ScopedTintICEHandler scopedICEHandler(GetDevice());
 
         Device* device = ToBackend(GetDevice());
@@ -799,7 +813,7 @@ namespace dawn::native::d3d12 {
             device->GetPersistentCache()->GetOrCreate(
                 shaderCacheKey, [&](auto doCache) -> MaybeError {
                     DAWN_TRY(CompileShader(
-                        device->GetFunctions(),
+                        device->GetPlatform(), device->GetFunctions(),
                         device->IsToggleEnabled(Toggle::UseDXC) ? device->GetDxcLibrary().Get()
                                                                 : nullptr,
                         device->IsToggleEnabled(Toggle::UseDXC) ? device->GetDxcCompiler().Get()
