@@ -405,6 +405,12 @@ namespace dawn::native {
     }
 
     void DeviceBase::APIDestroy() {
+        // TODO(crbug.com/dawn/628) Re-enable once CTS testing is in place and passing.
+        if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+            ConsumedError(DAWN_VALIDATION_ERROR(
+                "Explicit device.destroy() is disallowed because it is not fully implemented"));
+            return;
+        }
         Destroy();
     }
 
