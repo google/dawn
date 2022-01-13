@@ -83,7 +83,7 @@ namespace dawn::native::vulkan {
 
     WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* descriptor) {
 #if defined(DAWN_PLATFORM_LINUX)
-        switch (descriptor->type) {
+        switch (descriptor->GetType()) {
             case ExternalImageType::OpaqueFD:
             case ExternalImageType::DmaBuf: {
                 Device* backendDevice = ToBackend(FromAPI(device));
@@ -108,7 +108,7 @@ namespace dawn::native::vulkan {
             return false;
         }
 #if defined(DAWN_PLATFORM_LINUX)
-        switch (info->type) {
+        switch (info->GetType()) {
             case ExternalImageType::OpaqueFD:
             case ExternalImageType::DmaBuf: {
                 Texture* backendTexture = ToBackend(FromAPI(texture));

@@ -278,12 +278,20 @@ namespace dawn::native {
 
     // ExternalImageDescriptor
 
-    ExternalImageDescriptor::ExternalImageDescriptor(ExternalImageType type) : type(type) {
+    ExternalImageDescriptor::ExternalImageDescriptor(ExternalImageType type) : mType(type) {
+    }
+
+    ExternalImageType ExternalImageDescriptor::GetType() const {
+        return mType;
     }
 
     // ExternalImageExportInfo
 
-    ExternalImageExportInfo::ExternalImageExportInfo(ExternalImageType type) : type(type) {
+    ExternalImageExportInfo::ExternalImageExportInfo(ExternalImageType type) : mType(type) {
+    }
+
+    ExternalImageType ExternalImageExportInfo::GetType() const {
+        return mType;
     }
 
     const char* GetObjectLabelForTesting(void* objectHandle) {

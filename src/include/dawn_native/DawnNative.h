@@ -217,12 +217,15 @@ namespace dawn::native {
     // Common properties of external images
     struct DAWN_NATIVE_EXPORT ExternalImageDescriptor {
       public:
-        const ExternalImageType type;
         const WGPUTextureDescriptor* cTextureDescriptor;  // Must match image creation params
         bool isInitialized;  // Whether the texture is initialized on import
+        ExternalImageType GetType() const;
 
       protected:
         ExternalImageDescriptor(ExternalImageType type);
+
+      private:
+        ExternalImageType mType;
     };
 
     struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptor {
@@ -233,11 +236,14 @@ namespace dawn::native {
 
     struct DAWN_NATIVE_EXPORT ExternalImageExportInfo {
       public:
-        const ExternalImageType type;
         bool isInitialized;  // Whether the texture is initialized after export
+        ExternalImageType GetType() const;
 
       protected:
         ExternalImageExportInfo(ExternalImageType type);
+
+      private:
+        ExternalImageType mType;
     };
 
     DAWN_NATIVE_EXPORT const char* GetObjectLabelForTesting(void* objectHandle);

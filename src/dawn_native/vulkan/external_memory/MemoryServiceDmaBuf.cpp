@@ -144,7 +144,7 @@ namespace dawn::native { namespace vulkan::external_memory {
         if (!mSupported) {
             return false;
         }
-        if (descriptor->type != ExternalImageType::DmaBuf) {
+        if (descriptor->GetType() != ExternalImageType::DmaBuf) {
             return false;
         }
         const ExternalImageDescriptorDmaBuf* dmaBufDescriptor =
@@ -226,7 +226,7 @@ namespace dawn::native { namespace vulkan::external_memory {
     ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
         const ExternalImageDescriptor* descriptor,
         VkImage image) {
-        DAWN_INVALID_IF(descriptor->type != ExternalImageType::DmaBuf,
+        DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::DmaBuf,
                         "ExternalImageDescriptor is not a ExternalImageDescriptorDmaBuf.");
 
         const ExternalImageDescriptorDmaBuf* dmaBufDescriptor =
@@ -290,7 +290,7 @@ namespace dawn::native { namespace vulkan::external_memory {
 
     ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descriptor,
                                                 const VkImageCreateInfo& baseCreateInfo) {
-        DAWN_INVALID_IF(descriptor->type != ExternalImageType::DmaBuf,
+        DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::DmaBuf,
                         "ExternalImageDescriptor is not a dma-buf descriptor.");
 
         const ExternalImageDescriptorDmaBuf* dmaBufDescriptor =

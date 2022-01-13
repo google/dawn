@@ -494,7 +494,11 @@ source_set("dawn_white_box_tests_sources") {
     if (is_chromeos) {
       sources += [ "white_box/VulkanImageWrappingTestsDmaBuf.cpp" ]
     } else if (is_linux) {
-      sources += [ "white_box/VulkanImageWrappingTestsOpaqueFD.cpp" ]
+      sources += [
+        "white_box/VulkanImageWrappingTests.cpp",
+        "white_box/VulkanImageWrappingTests.h",
+        "white_box/VulkanImageWrappingTests_OpaqueFD.cpp",
+      ]
     }
 
     if (dawn_enable_error_injection) {
