@@ -67,32 +67,7 @@ struct ResourceBinding {
     kRgba32Uint,
     kRgba32Sint,
     kRgba32Float,
-
-    // [DEPRECATED]
-    // The below are all deprecated, and will be removed.
-    kR8Unorm,
-    kR8Snorm,
-    kR8Uint,
-    kR8Sint,
-    kR16Uint,
-    kR16Sint,
-    kR16Float,
-    kRg8Unorm,
-    kRg8Snorm,
-    kRg8Uint,
-    kRg8Sint,
-    kRg16Uint,
-    kRg16Sint,
-    kRg16Float,
-    kRgba8UnormSrgb,
-    kBgra8Unorm,
-    kBgra8UnormSrgb,
-    kRgb10A2Unorm,
-    kRg11B10Float,
   };
-
-  /// Renamed field [DEPRECATED]
-  using ImageFormat = TexelFormat;
 
   /// kXXX maps to entries returned by GetXXXResourceBindings call.
   enum class ResourceType {
