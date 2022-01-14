@@ -24,9 +24,9 @@
 
 #include "src/inspector/entry_point.h"
 #include "src/inspector/resource_binding.h"
-#include "src/inspector/sampler_texture_pair.h"
 #include "src/inspector/scalar.h"
 #include "src/program.h"
+#include "src/sem/sampler_texture_pair.h"
 #include "src/utils/unique_vector.h"
 
 namespace tint {
@@ -129,7 +129,7 @@ class Inspector {
   /// @param entry_point name of the entry point to get information about.
   /// @returns vector of all of the sampler/texture sampling pairs that are used
   /// by that entry point.
-  std::vector<SamplerTexturePair> GetSamplerTextureUses(
+  std::vector<sem::SamplerTexturePair> GetSamplerTextureUses(
       const std::string& entry_point);
 
   /// @param entry_point name of the entry point to get information about.
@@ -141,7 +141,8 @@ class Inspector {
   const Program* program_;
   diag::List diagnostics_;
   std::unique_ptr<
-      std::unordered_map<std::string, utils::UniqueVector<SamplerTexturePair>>>
+      std::unordered_map<std::string,
+                         utils::UniqueVector<sem::SamplerTexturePair>>>
       sampler_targets_;
 
   /// @param name name of the entry point to find

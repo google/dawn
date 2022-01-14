@@ -224,7 +224,6 @@ set(TINT_LIB_SRCS
   inspector/inspector.h
   inspector/resource_binding.cc
   inspector/resource_binding.h
-  inspector/sampler_texture_pair.h
   inspector/scalar.cc
   inspector/scalar.h
   intrinsic_table.cc
@@ -277,6 +276,7 @@ set(TINT_LIB_SRCS
   sem/pipeline_stage_set.h
   sem/node.cc
   sem/node.h
+  sem/sampler_texture_pair.h
   sem/statement.cc
   sem/struct.cc
   sem/type_mappings.h
