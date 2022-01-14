@@ -28,6 +28,7 @@
 #include "src/transform/first_index_offset.h"
 #include "src/transform/fold_trivial_single_use_lets.h"
 #include "src/transform/manager.h"
+#include "src/transform/multiplanar_external_texture.h"
 #include "src/transform/renamer.h"
 #include "src/transform/robustness.h"
 #include "src/transform/single_entry_point.h"
