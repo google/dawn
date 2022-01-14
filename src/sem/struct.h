@@ -150,6 +150,11 @@ class Struct : public Castable<Struct, Type> {
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
 
+  /// @param symbols the program's symbol table
+  /// @returns a multiline string that describes the layout of this struct,
+  /// including size and alignment information.
+  std::string Layout(const tint::SymbolTable& symbols) const;
+
   /// @returns true if constructible as per
   /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
   bool IsConstructible() const override;

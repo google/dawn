@@ -15,8 +15,6 @@
 #include "src/resolver/resolver.h"
 
 #include <algorithm>
-#include <cmath>
-#include <iomanip>
 #include <limits>
 #include <utility>
 
@@ -257,87 +255,6 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
     return builder_->Symbols().NameFor(sm->Declaration()->symbol);
   };
 
-  auto type_name_of = [this](const sem::StructMember* sm) {
-    return TypeNameOf(sm->Type());
-  };
-
-  // TODO(amaiorano): Output struct and member decorations so that this output
-  // can be copied verbatim back into source
-  auto get_struct_layout_string = [this, member_name_of, type_name_of](
-                                      const sem::Struct* st) -> std::string {
-    std::stringstream ss;
-
-    if (st->Members().empty()) {
-      TINT_ICE(Resolver, diagnostics_) << "Validation should have ensured that "
-                                          "structs have at least one member";
-      return {};
-    }
-    const auto* const last_member = st->Members().back();
-    const uint32_t last_member_struct_padding_offset =
-        last_member->Offset() + last_member->Size();
-
-    // Compute max widths to align output
-    const auto offset_w =
-        static_cast<int>(::log10(last_member_struct_padding_offset)) + 1;
-    const auto size_w = static_cast<int>(::log10(st->Size())) + 1;
-    const auto align_w = static_cast<int>(::log10(st->Align())) + 1;
-
-    auto print_struct_begin_line = [&](size_t align, size_t size,
-                                       std::string struct_name) {
-      ss << "/*          " << std::setw(offset_w) << " "
-         << "align(" << std::setw(align_w) << align << ") size("
-         << std::setw(size_w) << size << ") */ struct " << struct_name
-         << " {\n";
-    };
-
-    auto print_struct_end_line = [&]() {
-      ss << "/*                         "
-         << std::setw(offset_w + size_w + align_w) << " "
-         << "*/ };";
-    };
-
-    auto print_member_line = [&](size_t offset, size_t align, size_t size,
-                                 std::string s) {
-      ss << "/* offset(" << std::setw(offset_w) << offset << ") align("
-         << std::setw(align_w) << align << ") size(" << std::setw(size_w)
-         << size << ") */   " << s << ";\n";
-    };
-
-    print_struct_begin_line(st->Align(), st->Size(), TypeNameOf(st));
-
-    for (size_t i = 0; i < st->Members().size(); ++i) {
-      auto* const m = st->Members()[i];
-
-      // Output field alignment padding, if any
-      auto* const prev_member = (i == 0) ? nullptr : st->Members()[i - 1];
-      if (prev_member) {
-        uint32_t padding =
-            m->Offset() - (prev_member->Offset() + prev_member->Size());
-        if (padding > 0) {
-          size_t padding_offset = m->Offset() - padding;
-          print_member_line(padding_offset, 1, padding,
-                            "// -- implicit field alignment padding --");
-        }
-      }
-
-      // Output member
-      std::string member_name = member_name_of(m);
-      print_member_line(m->Offset(), m->Align(), m->Size(),
-                        member_name_of(m) + " : " + type_name_of(m));
-    }
-
-    // Output struct size padding, if any
-    uint32_t struct_padding = st->Size() - last_member_struct_padding_offset;
-    if (struct_padding > 0) {
-      print_member_line(last_member_struct_padding_offset, 1, struct_padding,
-                        "// -- implicit struct size padding --");
-    }
-
-    print_struct_end_line();
-
-    return ss.str();
-  };
-
   if (!ast::IsHostShareable(sc)) {
     return true;
   }
@@ -348,7 +265,8 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
 
     // Validate that member is at a valid byte offset
     if (m->Offset() % required_align != 0) {
-      AddError("the offset of a struct member of type '" + type_name_of(m) +
+      AddError("the offset of a struct member of type '" +
+                   m->Type()->UnwrapRef()->FriendlyName(builder_->Symbols()) +
                    "' in storage class '" + ast::ToString(sc) +
                    "' must be a multiple of " + std::to_string(required_align) +
                    " bytes, but '" + member_name_of(m) +
@@ -357,12 +275,12 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
                    std::to_string(required_align) + ")]] on this member",
                m->Declaration()->source);
 
-      AddNote("see layout of struct:\n" + get_struct_layout_string(str),
+      AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
               str->Declaration()->source);
 
       if (auto* member_str = m->Type()->As<sem::Struct>()) {
         AddNote("and layout of struct member:\n" +
-                    get_struct_layout_string(member_str),
+                    member_str->Layout(builder_->Symbols()),
                 member_str->Declaration()->source);
       }
 
@@ -384,12 +302,12 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
                 "'. Consider setting [[align(16)]] on this member",
             m->Declaration()->source);
 
-        AddNote("see layout of struct:\n" + get_struct_layout_string(str),
+        AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
                 str->Declaration()->source);
 
         auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
         AddNote("and layout of previous member struct:\n" +
-                    get_struct_layout_string(prev_member_str),
+                    prev_member_str->Layout(builder_->Symbols()),
                 prev_member_str->Declaration()->source);
         return false;
       }
@@ -413,7 +331,7 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
                       utils::RoundUp(required_align, arr->Stride())) +
                   ")]] on the array type",
               m->Declaration()->type->source);
-          AddNote("see layout of struct:\n" + get_struct_layout_string(str),
+          AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
                   str->Declaration()->source);
           return false;
         }
