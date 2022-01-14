@@ -24,9 +24,10 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Loop_Empty) {
   // loop {
+  //   break;
   // }
 
-  auto* loop = Loop(Block(), Block());
+  auto* loop = Loop(Block(Break()), Block());
   WrapInFunction(loop);
 
   spirv::Builder& b = Build();
@@ -40,7 +41,7 @@ TEST_F(BuilderTest, Loop_Empty) {
 OpLoopMerge %2 %3 None
 OpBranch %4
 %4 = OpLabel
-OpBranch %3
+OpBranch %2
 %3 = OpLabel
 OpBranch %1
 %2 = OpLabel
@@ -50,10 +51,12 @@ OpBranch %1
 TEST_F(BuilderTest, Loop_WithoutContinuing) {
   // loop {
   //   v = 2;
+  //   break;
   // }
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = Block(Assign("v", 2));
+  auto* body = Block(Assign("v", 2),  //
+                     Break());
 
   auto* loop = Loop(body, Block());
   WrapInFunction(loop);
@@ -77,7 +80,7 @@ OpLoopMerge %6 %7 None
 OpBranch %8
 %8 = OpLabel
 OpStore %1 %9
-OpBranch %7
+OpBranch %6
 %7 = OpLabel
 OpBranch %5
 %6 = OpLabel
@@ -87,13 +90,15 @@ OpBranch %5
 TEST_F(BuilderTest, Loop_WithContinuing) {
   // loop {
   //   a = 2;
+  //   break;
   //   continuing {
   //     a = 3;
   //   }
   // }
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = Block(Assign("v", 2));
+  auto* body = Block(Assign("v", 2),  //
+                     Break());
   auto* continuing = Block(Assign("v", 3));
 
   auto* loop = Loop(body, continuing);
@@ -119,7 +124,7 @@ OpLoopMerge %6 %7 None
 OpBranch %8
 %8 = OpLabel
 OpStore %1 %9
-OpBranch %7
+OpBranch %6
 %7 = OpLabel
 OpStore %1 %10
 OpBranch %5
@@ -130,14 +135,14 @@ OpBranch %5
 TEST_F(BuilderTest, Loop_WithBodyVariableAccessInContinuing) {
   // loop {
   //   var a : i32;
+  //   break;
   //   continuing {
   //     a = 3;
   //   }
   // }
 
-  auto* var = Var("a", ty.i32());
-  auto* var_decl = WrapInStatement(var);
-  auto* body = Block(var_decl);
+  auto* body = Block(Decl(Var("a", ty.i32())),  //
+                     Break());
   auto* continuing = Block(Assign("a", 3));
 
   auto* loop = Loop(body, continuing);
@@ -159,7 +164,7 @@ TEST_F(BuilderTest, Loop_WithBodyVariableAccessInContinuing) {
 OpLoopMerge %2 %3 None
 OpBranch %4
 %4 = OpLabel
-OpBranch %3
+OpBranch %2
 %3 = OpLabel
 OpStore %5 %9
 OpBranch %1
@@ -169,9 +174,11 @@ OpBranch %1
 
 TEST_F(BuilderTest, Loop_WithContinue) {
   // loop {
+  //   if (false) { break; }
   //   continue;
   // }
-  auto* body = Block(create<ast::ContinueStatement>());
+  auto* body = Block(If(false, Block(Break())),  //
+                     Continue());
   auto* loop = Loop(body, Block());
   WrapInFunction(loop);
 
@@ -186,6 +193,11 @@ TEST_F(BuilderTest, Loop_WithContinue) {
 OpLoopMerge %2 %3 None
 OpBranch %4
 %4 = OpLabel
+OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %7
+%8 = OpLabel
+OpBranch %2
+%7 = OpLabel
 OpBranch %3
 %3 = OpLabel
 OpBranch %1

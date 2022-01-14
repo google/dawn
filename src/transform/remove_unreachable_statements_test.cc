@@ -331,11 +331,13 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(RemoveUnreachableStatementsTest, LoopWithNoBreak) {
+TEST_F(RemoveUnreachableStatementsTest, LoopWithDiscard) {
   auto* src = R"(
 fn f() {
   loop {
     var a = 1;
+    discard;
+
     continuing {
       var b = 2;
     }
@@ -351,6 +353,7 @@ fn f() {
 fn f() {
   loop {
     var a = 1;
+    discard;
 
     continuing {
       var b = 2;

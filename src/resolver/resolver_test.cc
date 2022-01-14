@@ -200,7 +200,7 @@ TEST_F(ResolverTest, Stmt_Loop) {
   auto* body_lhs = Expr("v");
   auto* body_rhs = Expr(2.3f);
 
-  auto* body = Block(Assign(body_lhs, body_rhs));
+  auto* body = Block(Assign(body_lhs, body_rhs), Break());
   auto* continuing_lhs = Expr("v");
   auto* continuing_rhs = Expr(2.3f);
 

@@ -3,5 +3,5 @@ struct S {
 };
 
 fn f() {
-  for (var i = 0;; i = i + S(1).i) {}
+  for (var i = 0; false; i = i + S(1).i) {}
 }

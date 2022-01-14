@@ -254,6 +254,7 @@ fn main() {
   var arr = array<f32, 4>();
   for (let a = &arr[foo()]; ;) {
     let x = *a;
+    break;
   }
 }
 )";
@@ -269,6 +270,7 @@ fn main() {
   let a_save = foo();
   for(; ; ) {
     let x = arr[a_save];
+    break;
   }
 }
 )";

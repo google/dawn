@@ -1,27 +1,24 @@
 SKIP: FAILED
 
-static uint var_1 = 0u;
 
-void main_1() {
+var<private> var_1 : u32;
+
+fn main_1() {
   var_1 = 1u;
-  while (true) {
+  loop {
     var_1 = 2u;
     var_1 = 3u;
     switch(42u) {
       case 40u: {
         var_1 = 4u;
-        {
-          var_1 = 6u;
-        }
         continue;
-        break;
       }
       default: {
-        break;
       }
     }
     var_1 = 5u;
-    {
+
+    continuing {
       var_1 = 6u;
     }
   }
@@ -29,15 +26,9 @@ void main_1() {
   return;
 }
 
-void main() {
+[[stage(fragment)]]
+fn main() {
   main_1();
-  return;
 }
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
 
-error: validation errors
-tint_ZKuQdB:30: error: Loop must have break.
-Validation failed.
-
-
-
+error: loop does not exit

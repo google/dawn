@@ -82,15 +82,15 @@ TEST_F(ResolverCompoundStatementTest, Block) {
 TEST_F(ResolverCompoundStatementTest, Loop) {
   // fn F() {
   //   loop {
-  //     stmt_a;
+  //     break;
   //     continuing {
-  //       stmt_b;
+  //       stmt;
   //     }
   //   }
   // }
-  auto* stmt_a = Ignore(1);
-  auto* stmt_b = Ignore(1);
-  auto* loop = Loop(Block(stmt_a), Block(stmt_b));
+  auto* brk = Break();
+  auto* stmt = Ignore(1);
+  auto* loop = Loop(Block(brk), Block(stmt));
   auto* f = Func("F", {}, ty.void_(), {loop});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -103,7 +103,7 @@ TEST_F(ResolverCompoundStatementTest, Loop) {
     EXPECT_EQ(s->Parent(), s->Block());
   }
   {
-    auto* s = Sem().Get(stmt_a);
+    auto* s = Sem().Get(brk);
     ASSERT_NE(s, nullptr);
     ASSERT_NE(s->Block(), nullptr);
     EXPECT_EQ(s->Parent(), s->Block());
@@ -122,7 +122,7 @@ TEST_F(ResolverCompoundStatementTest, Loop) {
     EXPECT_EQ(s->Parent()->Parent()->Parent()->Parent(), nullptr);
   }
   {
-    auto* s = Sem().Get(stmt_b);
+    auto* s = Sem().Get(stmt);
     ASSERT_NE(s, nullptr);
     ASSERT_NE(s->Block(), nullptr);
     EXPECT_EQ(s->Parent(), s->Block());

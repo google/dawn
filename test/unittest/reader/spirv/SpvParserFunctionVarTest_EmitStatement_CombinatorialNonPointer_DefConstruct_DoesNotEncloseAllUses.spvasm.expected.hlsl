@@ -4,7 +4,7 @@ static uint x_1 = 0u;
 
 void main_1() {
   x_1 = 0u;
-  while (true) {
+  [loop] while (true) {
     uint x_2 = 0u;
     x_1 = 1u;
     if (false) {
@@ -35,7 +35,7 @@ void main() {
 warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
 
 error: validation errors
-tint_9DZjPt:29: error: Loop must have break.
+/tmp/tint_LpDCMy:29: error: Loop must have break.
 Validation failed.
 
 

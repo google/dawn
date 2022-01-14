@@ -1,4 +1,4 @@
 fn f() {
-  for(; ; ) {
+  for(; false; ) {
   }
 }

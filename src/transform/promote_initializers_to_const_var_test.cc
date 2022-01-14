@@ -85,6 +85,7 @@ TEST_F(PromoteInitializersToConstVarTest, ArrayInForLoopInit) {
 fn f() {
   var insert_after = 1;
   for(var i = array<f32, 4u>(0.0, 1.0, 2.0, 3.0)[2]; ; ) {
+    break;
   }
 }
 )";
@@ -94,6 +95,7 @@ fn f() {
   var insert_after = 1;
   let tint_symbol = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
   for(var i = tint_symbol[2]; ; ) {
+    break;
   }
 }
 )";
@@ -114,6 +116,7 @@ struct S {
 fn f() {
   var insert_after = 1;
   for(var x = S(1, 2.0, vec3<f32>()).b; ; ) {
+    break;
   }
 }
 )";
@@ -129,6 +132,7 @@ fn f() {
   var insert_after = 1;
   let tint_symbol = S(1, 2.0, vec3<f32>());
   for(var x = tint_symbol.b; ; ) {
+    break;
   }
 }
 )";

@@ -2,6 +2,10 @@
 
 ## Changes for M99
 
+### Breaking changes
+
+Obviously infinite loops (no condition, no break) are now a validation error.
+
 ### Deprecated Features
 
 The following features have been deprecated and will be removed in M102:

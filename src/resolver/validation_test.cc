@@ -481,6 +481,7 @@ note: identifier 'z' referenced in continuing block here)");
 TEST_F(ResolverValidationTest,
        Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing_InBlocks) {
   // loop  {
+  //     if (false) { break; }
   //     var z : i32;
   //     {{{continue;}}}
   //     continue; // Ok
@@ -490,7 +491,8 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto* body = Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
+  auto* body = Block(If(false, Block(Break())),  //
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
                      Block(Block(Block(Continue()))));
   auto* continuing = Block(Assign(Expr("z"), 2));
   auto* loop_stmt = Loop(body, continuing);
@@ -636,7 +638,7 @@ TEST_F(ResolverValidationTest,
   //         break;
   //     }
   //     var z : i32;
-  //
+  //     break;
   //     continuing {
   //         z = 2;
   //     }
@@ -645,8 +647,9 @@ TEST_F(ResolverValidationTest,
   auto* inner_loop = Loop(Block(    //
       If(true, Block(Continue())),  //
       Break()));
-  auto* body =
-      Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto* body = Block(inner_loop,                                          //
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),  //
+                     Break());
   auto* continuing = Block(Assign("z", 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
@@ -662,7 +665,7 @@ TEST_F(ResolverValidationTest,
   //         break;
   //     }
   //     var z : i32;
-  //
+  //     break;
   //     continuing {
   //         if (true) {
   //             z = 2;
@@ -672,8 +675,9 @@ TEST_F(ResolverValidationTest,
 
   auto* inner_loop = Loop(Block(If(true, Block(Continue())),  //
                                 Break()));
-  auto* body =
-      Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto* body = Block(inner_loop,                                          //
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),  //
+                     Break());
   auto* continuing = Block(If(Expr(true), Block(Assign("z", 2))));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
@@ -689,19 +693,22 @@ TEST_F(ResolverValidationTest,
   //         break;
   //     }
   //     var z : i32;
-  //
+  //     break;
   //     continuing {
   //         loop {
   //             z = 2;
+  //             break;
   //         }
   //     }
   // }
 
   auto* inner_loop = Loop(Block(If(true, Block(Continue())),  //
                                 Break()));
-  auto* body =
-      Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
-  auto* continuing = Block(Loop(Block(Assign("z", 2))));
+  auto* body = Block(inner_loop,                                          //
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),  //
+                     Break());
+  auto* continuing = Block(Loop(Block(Assign("z", 2),  //
+                                      Break())));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -712,7 +719,7 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
   // loop  {
   //     var z : i32;
   //     if (true) { continue; }
-  //
+  //     break;
   //     continuing {
   //         z = 2;
   //     }
@@ -720,7 +727,8 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
 
   auto error_loc = Source{{12, 34}};
   auto* body = Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
-                     If(true, Block(Continue())));
+                     If(true, Block(Continue())),  //
+                     Break());
   auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
@@ -748,6 +756,7 @@ TEST_F(ResolverTest, Stmt_Loop_ReturnInContinuing_Direct) {
 
 TEST_F(ResolverTest, Stmt_Loop_ReturnInContinuing_Indirect) {
   // loop {
+  //   if (false) { break; }
   //   continuing {
   //     loop {
   //       return;
@@ -755,11 +764,11 @@ TEST_F(ResolverTest, Stmt_Loop_ReturnInContinuing_Indirect) {
   //   }
   // }
 
-  WrapInFunction(Loop(         // outer loop
-      Block(),                 //   outer loop block
-      Block(Source{{56, 78}},  //   outer loop continuing block
-            Loop(              //     inner loop
-                Block(         //       inner loop block
+  WrapInFunction(Loop(                   // outer loop
+      Block(If(false, Block(Break()))),  //   outer loop block
+      Block(Source{{56, 78}},            //   outer loop continuing block
+            Loop(                        //     inner loop
+                Block(                   //       inner loop block
                     Return(Source{{12, 34}}))))));
 
   EXPECT_FALSE(r()->Resolve());
@@ -789,16 +798,17 @@ TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Direct) {
 
 TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Indirect) {
   // loop {
+  //   if (false) { break; }
   //   continuing {
   //     loop { discard; }
   //   }
   // }
 
-  WrapInFunction(Loop(         // outer loop
-      Block(),                 //   outer loop block
-      Block(Source{{56, 78}},  //   outer loop continuing block
-            Loop(              //     inner loop
-                Block(         //       inner loop block
+  WrapInFunction(Loop(                   // outer loop
+      Block(If(false, Block(Break()))),  //   outer loop block
+      Block(Source{{56, 78}},            //   outer loop continuing block
+            Loop(                        //     inner loop
+                Block(                   //       inner loop block
                     Discard(Source{{12, 34}}))))));
 
   EXPECT_FALSE(r()->Resolve());
@@ -854,19 +864,23 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Direct) {
 
 TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Indirect) {
   // loop {
+  //   if (false) { break; }
   //   continuing {
   //     loop {
+  //       if (false) { break; }
   //       continue;
   //     }
   //   }
   // }
 
-  WrapInFunction(Loop(  // outer loop
-      Block(),          //   outer loop block
-      Block(            //   outer loop continuing block
-          Loop(         //     inner loop
-              Block(    //       inner loop block
-                  Continue(Source{{12, 34}}))))));
+  WrapInFunction(Loop(                        // outer loop
+      Block(                                  //   outer loop block
+          If(false, Block(Break()))),         //     if (false) { break; }
+      Block(                                  //   outer loop continuing block
+          Loop(                               //     inner loop
+              Block(                          //       inner loop block
+                  If(false, Block(Break())),  //          if (false) { break; }
+                  Continue(Source{{12, 34}}))))));  //    continue
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -970,13 +984,14 @@ TEST_F(ResolverTest, Stmt_ForLoop_ContinueInContinuing_Direct) {
 }
 
 TEST_F(ResolverTest, Stmt_ForLoop_ContinueInContinuing_Indirect) {
-  // for(;; loop { continue }) {
+  // for(;; loop { if (false) { break; } continue }) {
   //   break;
   // }
 
   WrapInFunction(For(nullptr, nullptr,
                      Loop(                                    //
-                         Block(Continue(Source{{12, 34}}))),  //
+                         Block(If(false, Block(Break())),     //
+                               Continue(Source{{12, 34}}))),  //
                      Block(Break())));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1004,7 +1019,8 @@ TEST_F(ResolverTest, Stmt_ForLoop_CondIsNotBool) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_ContinueInLoop) {
-  WrapInFunction(Loop(Block(Continue(Source{{12, 34}}))));
+  WrapInFunction(Loop(Block(If(false, Block(Break())),  //
+                            Continue(Source{{12, 34}}))));
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
@@ -1015,20 +1031,21 @@ TEST_F(ResolverValidationTest, Stmt_ContinueNotInLoop) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInLoop) {
-  WrapInFunction(Loop(Block(create<ast::BreakStatement>(Source{{12, 34}}))));
+  WrapInFunction(Loop(Block(Break(Source{{12, 34}}))));
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInSwitch) {
-  WrapInFunction(Loop(Block(Switch(
-      Expr(1),
-      Case(Expr(1), Block(create<ast::BreakStatement>(Source{{12, 34}}))),
-      DefaultCase()))));
+  WrapInFunction(Loop(Block(Switch(Expr(1),               //
+                                   Case(Expr(1),          //
+                                        Block(Break())),  //
+                                   DefaultCase()),        //
+                            Break())));                   //
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakNotInLoopOrSwitch) {
-  WrapInFunction(create<ast::BreakStatement>(Source{{12, 34}}));
+  WrapInFunction(Break(Source{{12, 34}}));
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: break statement must be in a loop or switch case");

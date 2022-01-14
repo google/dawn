@@ -22,7 +22,8 @@ namespace {
 using GlslGeneratorImplTest_Continue = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Continue, Emit_Continue) {
-  auto* loop = Loop(Block(create<ast::ContinueStatement>()));
+  auto* loop = Loop(Block(If(false, Block(Break())),  //
+                          Continue()));
   WrapInFunction(loop);
 
   GeneratorImpl& gen = Build();
@@ -31,6 +32,9 @@ TEST_F(GlslGeneratorImplTest_Continue, Emit_Continue) {
 
   ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  while (true) {
+    if (false) {
+      break;
+    }
     continue;
   }
 )");

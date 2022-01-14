@@ -216,7 +216,8 @@ TEST_F(ResolverBehaviorTest, StmtBreak) {
 
 TEST_F(ResolverBehaviorTest, StmtContinue) {
   auto* stmt = Continue();
-  WrapInFunction(Loop(Block(stmt)));
+  WrapInFunction(Loop(Block(If(true, Block(Break())),  //
+                            stmt)));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -234,14 +235,12 @@ TEST_F(ResolverBehaviorTest, StmtDiscard) {
   EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
 }
 
-TEST_F(ResolverBehaviorTest, StmtForLoopEmpty) {
-  auto* stmt = For(nullptr, nullptr, nullptr, Block());
+TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_NoExit) {
+  auto* stmt = For(Source{{12, 34}}, nullptr, nullptr, nullptr, Block());
   WrapInFunction(stmt);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-  auto* sem = Sem().Get(stmt);
-  EXPECT_TRUE(sem->Behaviors().Empty());
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: for-loop does not exit");
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopBreak) {
@@ -254,14 +253,13 @@ TEST_F(ResolverBehaviorTest, StmtForLoopBreak) {
   EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
-TEST_F(ResolverBehaviorTest, StmtForLoopContinue) {
-  auto* stmt = For(nullptr, nullptr, nullptr, Block(Continue()));
+TEST_F(ResolverBehaviorTest, StmtForLoopContinue_NoExit) {
+  auto* stmt =
+      For(Source{{12, 34}}, nullptr, nullptr, nullptr, Block(Continue()));
   WrapInFunction(stmt);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-  auto* sem = Sem().Get(stmt);
-  EXPECT_TRUE(sem->Behaviors().Empty());
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: for-loop does not exit");
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopDiscard) {
@@ -414,14 +412,12 @@ TEST_F(ResolverBehaviorTest, StmtLetDecl_RHSDiscardOrNext) {
             sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
 }
 
-TEST_F(ResolverBehaviorTest, StmtLoopEmpty) {
-  auto* stmt = Loop(Block());
+TEST_F(ResolverBehaviorTest, StmtLoopEmpty_NoExit) {
+  auto* stmt = Loop(Source{{12, 34}}, Block());
   WrapInFunction(stmt);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-  auto* sem = Sem().Get(stmt);
-  EXPECT_TRUE(sem->Behaviors().Empty());
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: loop does not exit");
 }
 
 TEST_F(ResolverBehaviorTest, StmtLoopBreak) {
@@ -434,14 +430,12 @@ TEST_F(ResolverBehaviorTest, StmtLoopBreak) {
   EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
-TEST_F(ResolverBehaviorTest, StmtLoopContinue) {
-  auto* stmt = Loop(Block(Continue()));
+TEST_F(ResolverBehaviorTest, StmtLoopContinue_NoExit) {
+  auto* stmt = Loop(Source{{12, 34}}, Block(Continue()));
   WrapInFunction(stmt);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-  auto* sem = Sem().Get(stmt);
-  EXPECT_TRUE(sem->Behaviors().Empty());
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: loop does not exit");
 }
 
 TEST_F(ResolverBehaviorTest, StmtLoopDiscard) {
@@ -464,14 +458,12 @@ TEST_F(ResolverBehaviorTest, StmtLoopReturn) {
   EXPECT_EQ(sem->Behaviors(), sem::Behavior::kReturn);
 }
 
-TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContEmpty) {
-  auto* stmt = Loop(Block(), Block());
+TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContEmpty_NoExit) {
+  auto* stmt = Loop(Source{{12, 34}}, Block(), Block());
   WrapInFunction(stmt);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-  auto* sem = Sem().Get(stmt);
-  EXPECT_TRUE(sem->Behaviors().Empty());
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: loop does not exit");
 }
 
 TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContBreak) {

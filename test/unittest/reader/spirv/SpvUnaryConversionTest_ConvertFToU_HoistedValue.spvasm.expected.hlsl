@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 void main_1() {
-  while (true) {
+  [loop] while (true) {
     float x_600 = 0.0f;
     if (true) {
       break;

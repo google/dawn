@@ -29,6 +29,7 @@ fn main_1() {
             }
           }
           loop {
+            break;
           }
           fallthrough;
         }
@@ -38,6 +39,8 @@ fn main_1() {
         default: {
         }
       }
+
+      break;
     }
 
     continuing {

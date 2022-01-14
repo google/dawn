@@ -25,10 +25,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, If_Empty) {
   // if (true) {
   // }
-  auto* cond = Expr(true);
-
-  auto* expr =
-      create<ast::IfStatement>(cond, Block(), ast::ElseStatementList{});
+  auto* expr = If(true, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -52,11 +49,9 @@ TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
   // Outside a function.
   // if (true) {
   // }
-  auto* cond = Expr(true);
 
-  ast::ElseStatementList elses;
   auto* block = Block();
-  auto* expr = create<ast::IfStatement>(cond, block, elses);
+  auto* expr = If(true, block);
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -75,8 +70,7 @@ TEST_F(BuilderTest, If_WithStatements) {
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* body = Block(Assign("v", 2));
-  auto* expr =
-      create<ast::IfStatement>(Expr(true), body, ast::ElseStatementList{});
+  auto* expr = If(true, body);
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -114,9 +108,7 @@ TEST_F(BuilderTest, If_WithElse) {
   auto* body = Block(Assign("v", 2));
   auto* else_body = Block(Assign("v", 3));
 
-  auto* expr = create<ast::IfStatement>(
-      Expr(true), body,
-      ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
+  auto* expr = If(true, body, Else(else_body));
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -158,11 +150,7 @@ TEST_F(BuilderTest, If_WithElseIf) {
   auto* body = Block(Assign("v", 2));
   auto* else_body = Block(Assign("v", 3));
 
-  auto* expr = create<ast::IfStatement>(
-      Expr(true), body,
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(Expr(true), else_body),
-      });
+  auto* expr = If(true, body, Else(true, else_body));
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -215,13 +203,10 @@ TEST_F(BuilderTest, If_WithMultiple) {
   auto* elseif_2_body = Block(Assign("v", 4));
   auto* else_body = Block(Assign("v", 5));
 
-  auto* expr = create<ast::IfStatement>(
-      Expr(true), body,
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(Expr(true), elseif_1_body),
-          create<ast::ElseStatement>(Expr(false), elseif_2_body),
-          create<ast::ElseStatement>(nullptr, else_body),
-      });
+  auto* expr = If(true, body,                  //
+                  Else(true, elseif_1_body),   //
+                  Else(false, elseif_2_body),  //
+                  Else(else_body));
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -278,10 +263,9 @@ TEST_F(BuilderTest, If_WithBreak) {
   //   }
   // }
 
-  auto* if_body = Block(create<ast::BreakStatement>());
+  auto* if_body = Block(Break());
 
-  auto* if_stmt =
-      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
+  auto* if_stmt = If(true, if_body);
 
   auto* loop_body = Block(if_stmt);
 
@@ -321,11 +305,9 @@ TEST_F(BuilderTest, If_WithElseBreak) {
   //     break;
   //   }
   // }
-  auto* else_body = Block(create<ast::BreakStatement>());
+  auto* else_body = Block(Break());
 
-  auto* if_stmt = create<ast::IfStatement>(
-      Expr(true), Block(),
-      ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
+  auto* if_stmt = If(true, Block(), Else(else_body));
 
   auto* loop_body = Block(if_stmt);
 
@@ -360,20 +342,18 @@ OpBranch %1
 )");
 }
 
-TEST_F(BuilderTest, If_WithContinue) {
+TEST_F(BuilderTest, If_WithContinueAndBreak) {
   // loop {
   //   if (true) {
   //     continue;
+  //   } else {
+  //     break;
   //   }
   // }
-  auto* if_body = Block(create<ast::ContinueStatement>());
 
-  auto* if_stmt =
-      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
+  auto* if_stmt = If(true, Block(Continue()), Else(Block(Break())));
 
-  auto* loop_body = Block(if_stmt);
-
-  auto* expr = Loop(loop_body, Block());
+  auto* expr = Loop(Block(if_stmt), Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -391,9 +371,11 @@ OpLoopMerge %2 %3 None
 OpBranch %4
 %4 = OpLabel
 OpSelectionMerge %7 None
-OpBranchConditional %6 %8 %7
+OpBranchConditional %6 %8 %9
 %8 = OpLabel
 OpBranch %3
+%9 = OpLabel
+OpBranch %2
 %7 = OpLabel
 OpBranch %3
 %3 = OpLabel
@@ -408,14 +390,13 @@ TEST_F(BuilderTest, If_WithElseContinue) {
   //   } else {
   //     continue;
   //   }
+  //   break;
   // }
   auto* else_body = Block(create<ast::ContinueStatement>());
 
-  auto* if_stmt = create<ast::IfStatement>(
-      Expr(true), Block(),
-      ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
+  auto* if_stmt = If(true, Block(), Else(else_body));
 
-  auto* loop_body = Block(if_stmt);
+  auto* loop_body = Block(if_stmt, Break());
 
   auto* expr = Loop(loop_body, Block());
   WrapInFunction(expr);
@@ -441,7 +422,7 @@ OpBranch %7
 %9 = OpLabel
 OpBranch %3
 %7 = OpLabel
-OpBranch %3
+OpBranch %2
 %3 = OpLabel
 OpBranch %1
 %2 = OpLabel
@@ -610,8 +591,7 @@ TEST_F(BuilderTest, If_ElseIf_WithReturn) {
   //   return;
   // }
 
-  auto* if_stmt = If(Expr(false), Block(),
-                     ast::ElseStatementList{Else(Expr(true), Block(Return()))});
+  auto* if_stmt = If(false, Block(), Else(true, Block(Return())));
   auto* fn = Func("f", {}, ty.void_(), {if_stmt});
 
   spirv::Builder& b = Build();
@@ -649,8 +629,7 @@ TEST_F(BuilderTest, Loop_If_ElseIf_WithBreak) {
   //   }
   // }
 
-  auto* if_stmt = If(Expr(false), Block(),
-                     ast::ElseStatementList{Else(Expr(true), Block(Break()))});
+  auto* if_stmt = If(false, Block(), Else(true, Block(Break())));
   auto* fn = Func("f", {}, ty.void_(), {Loop(Block(if_stmt))});
 
   spirv::Builder& b = Build();

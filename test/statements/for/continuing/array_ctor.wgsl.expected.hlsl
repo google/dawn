@@ -6,6 +6,9 @@ void unused_entry_point() {
 void f() {
   int i = 0;
   [loop] while (true) {
+    if (!(false)) {
+      break;
+    }
     {
       const int tint_symbol[1] = {1};
       i = (i + tint_symbol[0]);

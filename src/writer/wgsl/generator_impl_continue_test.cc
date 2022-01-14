@@ -22,8 +22,10 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Continue) {
-  auto* c = create<ast::ContinueStatement>();
-  WrapInFunction(Loop(Block(c)));
+  auto* c = Continue();
+
+  WrapInFunction(Loop(Block(If(false, Block(Break())),  //
+                            c)));
 
   GeneratorImpl& gen = Build();
 

@@ -1,4 +1,4 @@
 fn f() {
   var i : i32;
-  for (;;i = i + 1) {}
+  for (; false; i = i + 1) {}
 }

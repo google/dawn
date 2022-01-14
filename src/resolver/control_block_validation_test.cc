@@ -86,6 +86,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
 
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_Loop_continue) {
   // loop {
+  //   if (false) { break; }
   //   var z: i32;
   //   continue;
   //   z = 1;
@@ -93,7 +94,8 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_Loop_continue) {
   auto* decl_z = Decl(Var("z", ty.i32()));
   auto* cont = Continue();
   auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
-  WrapInFunction(Loop(Block(decl_z, cont, assign_z)));
+  WrapInFunction(
+      Loop(Block(If(false, Block(Break())), decl_z, cont, assign_z)));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
@@ -105,6 +107,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_Loop_continue) {
 TEST_F(ResolverControlBlockValidationTest,
        UnreachableCode_Loop_continue_InBlocks) {
   // loop {
+  //   if (false) { break; }
   //   var z: i32;
   //   {{{continue;}}}
   //   z = 1;
@@ -112,7 +115,8 @@ TEST_F(ResolverControlBlockValidationTest,
   auto* decl_z = Decl(Var("z", ty.i32()));
   auto* cont = Continue();
   auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
-  WrapInFunction(Loop(Block(decl_z, Block(Block(Block(cont))), assign_z)));
+  WrapInFunction(Loop(Block(If(false, Block(Break())), decl_z,
+                            Block(Block(Block(cont))), assign_z)));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
@@ -122,7 +126,7 @@ TEST_F(ResolverControlBlockValidationTest,
 }
 
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue) {
-  // for (;;) {
+  // for (;false;) {
   //   var z: i32;
   //   continue;
   //   z = 1;
@@ -130,7 +134,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue) {
   auto* decl_z = Decl(Var("z", ty.i32()));
   auto* cont = Continue();
   auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
-  WrapInFunction(For(nullptr, nullptr, nullptr,  //
+  WrapInFunction(For(nullptr, false, nullptr,  //
                      Block(decl_z, cont, assign_z)));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -142,7 +146,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue) {
 
 TEST_F(ResolverControlBlockValidationTest,
        UnreachableCode_ForLoop_continue_InBlocks) {
-  // for (;;) {
+  // for (;false;) {
   //   var z: i32;
   //   {{{continue;}}}
   //   z = 1;
@@ -150,7 +154,7 @@ TEST_F(ResolverControlBlockValidationTest,
   auto* decl_z = Decl(Var("z", ty.i32()));
   auto* cont = Continue();
   auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
-  WrapInFunction(For(nullptr, nullptr, nullptr,
+  WrapInFunction(For(nullptr, false, nullptr,
                      Block(decl_z, Block(Block(Block(cont))), assign_z)));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -171,10 +175,10 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
   auto* decl_z = Decl(Var("z", ty.i32()));
   auto* brk = Break();
   auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
-  WrapInFunction(                                                     //
-      Loop(Block(Switch(1,                                            //
-                        Case(Expr(1), Block(decl_z, brk, assign_z)),  //
-                        DefaultCase()))));
+  WrapInFunction(                                                //
+      Block(Switch(1,                                            //
+                   Case(Expr(1), Block(decl_z, brk, assign_z)),  //
+                   DefaultCase())));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
@@ -189,6 +193,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break_InBlocks) {
   //     case 1: { {{{break;}}} var a : u32 = 2;}
   //     default: {}
   //   }
+  //   break;
   // }
   auto* decl_z = Decl(Var("z", ty.i32()));
   auto* brk = Break();
@@ -196,7 +201,8 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break_InBlocks) {
   WrapInFunction(Loop(Block(
       Switch(1,  //
              Case(Expr(1), Block(decl_z, Block(Block(Block(brk))), assign_z)),
-             DefaultCase()))));
+             DefaultCase()),  //
+      Break())));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");

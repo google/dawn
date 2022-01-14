@@ -1039,7 +1039,7 @@ sem::LoopStatement* Resolver::LoopStatement(const ast::LoopStatement* stmt) {
       }
       behaviors.Remove(sem::Behavior::kBreak, sem::Behavior::kContinue);
 
-      return true;
+      return ValidateLoopStatement(sem);
     });
   });
 }

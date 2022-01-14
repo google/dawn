@@ -264,6 +264,7 @@ class Resolver {
                                   std::unordered_set<uint32_t>& locations,
                                   const Source& source,
                                   const bool is_input = false);
+  bool ValidateLoopStatement(const sem::LoopStatement* stmt);
   bool ValidateMatrix(const sem::Matrix* ty, const Source& source);
   bool ValidateFunctionParameter(const ast::Function* func,
                                  const sem::Variable* var);

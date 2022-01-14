@@ -3,7 +3,7 @@ SKIP: FAILED
 static uint var_1 = 0u;
 
 void main_1() {
-  while (true) {
+  [loop] while (true) {
     if (false) {
       break;
     }
@@ -18,7 +18,7 @@ void main() {
 warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
 
 error: validation errors
-tint_FvyNcC:12: error: Loop must have break.
+/tmp/tint_lRzVSG:12: error: Loop must have break.
 Validation failed.
 
 

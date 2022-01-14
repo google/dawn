@@ -11,6 +11,7 @@ fn main_1() {
   if ((x_26 > 1.0)) {
     loop {
       x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+      break;
     }
     return;
   }

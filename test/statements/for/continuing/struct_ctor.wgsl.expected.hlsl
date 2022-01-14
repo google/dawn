@@ -11,6 +11,9 @@ void f() {
   {
     int i = 0;
     [loop] while (true) {
+      if (!(false)) {
+        break;
+      }
       {
         const S tint_symbol = {1};
         i = (i + tint_symbol.i);

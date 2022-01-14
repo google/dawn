@@ -1426,7 +1426,19 @@ bool Resolver::ValidateElseStatement(const sem::ElseStatement* stmt) {
   return true;
 }
 
+bool Resolver::ValidateLoopStatement(const sem::LoopStatement* stmt) {
+  if (stmt->Behaviors().Empty()) {
+    AddError("loop does not exit", stmt->Declaration()->source.Begin());
+    return false;
+  }
+  return true;
+}
+
 bool Resolver::ValidateForLoopStatement(const sem::ForLoopStatement* stmt) {
+  if (stmt->Behaviors().Empty()) {
+    AddError("for-loop does not exit", stmt->Declaration()->source.Begin());
+    return false;
+  }
   if (auto* cond = stmt->Condition()) {
     auto* cond_ty = cond->Type()->UnwrapRef();
     if (!cond_ty->Is<sem::Bool>()) {

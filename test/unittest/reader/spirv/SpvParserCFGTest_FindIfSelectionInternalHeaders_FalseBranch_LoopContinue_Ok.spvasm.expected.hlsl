@@ -1,9 +1,10 @@
 SKIP: FAILED
 
-static uint var_1 = 0u;
 
-void main_1() {
-  while (true) {
+var<private> var_1 : u32;
+
+fn main_1() {
+  loop {
     if (false) {
     } else {
       continue;
@@ -12,15 +13,9 @@ void main_1() {
   return;
 }
 
-void main() {
+[[stage(fragment)]]
+fn main() {
   main_1();
-  return;
 }
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
 
-error: validation errors
-tint_HrNFse:13: error: Loop must have break.
-Validation failed.
-
-
-
+error: loop does not exit
