@@ -47,6 +47,7 @@
 #include "src/transform/fold_constants.h"
 #include "src/transform/for_loop_to_loop.h"
 #include "src/transform/manager.h"
+#include "src/transform/remove_unreachable_statements.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/unshadow.h"
 #include "src/transform/var_for_dynamic_index.h"
@@ -260,6 +261,7 @@ SanitizedResult Sanitize(const Program* in,
   if (!disable_workgroup_init) {
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }
+  manager.Add<transform::RemoveUnreachableStatements>();
   manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
   manager.Add<transform::FoldConstants>();
   manager.Add<transform::ExternalTextureTransform>();

@@ -1149,18 +1149,6 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
       return nullptr;
     }
 
-    // https://www.w3.org/TR/WGSL/#behaviors-rules
-    // an expression behavior is always either {Next} or {Next, Discard}
-    if (sem_expr->Behaviors() != sem::Behavior::kNext &&
-        sem_expr->Behaviors() != sem::Behaviors{sem::Behavior::kNext,  // NOLINT
-                                                sem::Behavior::kDiscard} &&
-        !IsCallStatement(expr)) {
-      TINT_ICE(Resolver, diagnostics_)
-          << expr->TypeInfo().name
-          << " behaviors are: " << sem_expr->Behaviors();
-      return nullptr;
-    }
-
     builder_->Sem().Add(expr, sem_expr);
     if (expr == root) {
       return sem_expr;
