@@ -138,8 +138,11 @@ class ReadOnlyDepthStencilAttachmentTests
                 wgpu::Texture colorTexture,
                 DepthStencilValues* values,
                 bool sampleFromAttachment) {
-        wgpu::Texture depthStencilTexture = CreateTexture(
-            format, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding);
+        wgpu::TextureUsage dsTextureUsage = wgpu::TextureUsage::RenderAttachment;
+        if (sampleFromAttachment) {
+            dsTextureUsage |= wgpu::TextureUsage::TextureBinding;
+        }
+        wgpu::Texture depthStencilTexture = CreateTexture(format, dsTextureUsage);
 
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 
@@ -316,10 +319,12 @@ TEST_P(ReadOnlyStencilAttachmentTests, NotSampleFromAttachment) {
 }
 
 DAWN_INSTANTIATE_TEST_P(ReadOnlyDepthAttachmentTests,
-                        {D3D12Backend(), MetalBackend(), VulkanBackend()},
+                        {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
+                         MetalBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kDepthFormats.begin(),
                                                          utils::kDepthFormats.end()));
 DAWN_INSTANTIATE_TEST_P(ReadOnlyStencilAttachmentTests,
-                        {D3D12Backend(), MetalBackend(), VulkanBackend()},
+                        {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
+                         MetalBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));
