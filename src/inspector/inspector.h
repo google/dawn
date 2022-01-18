@@ -32,6 +32,9 @@
 namespace tint {
 namespace inspector {
 
+/// A temporary alias to sem::SamplerTexturePair. [DEPRECATED]
+using SamplerTexturePair = sem::SamplerTexturePair;
+
 /// Extracts information from a program
 class Inspector {
  public:
