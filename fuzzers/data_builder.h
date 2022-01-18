@@ -189,6 +189,20 @@ class DataBuilder {
     }
   };
 
+  /// Specialization for writer::spirv::Options
+  template <>
+  struct BuildImpl<writer::spirv::Options> {
+    /// Generate a pseudo-random writer::spirv::Options struct
+    /// @param b - data builder to use
+    /// @returns writer::spirv::Options filled with pseudo-random data
+    static writer::spirv::Options impl(DataBuilder* b) {
+      writer::spirv::Options out{};
+      b->build(out.emit_vertex_point_size);
+      b->build(out.disable_workgroup_init);
+      return out;
+    }
+  };
+
   /// Specialization for writer::ArrayLengthFromUniformOptions
   template <>
   struct BuildImpl<writer::ArrayLengthFromUniformOptions> {
