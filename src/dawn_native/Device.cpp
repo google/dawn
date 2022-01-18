@@ -953,7 +953,13 @@ namespace dawn::native {
         if (descriptor == nullptr) {
             descriptor = &defaultDescriptor;
         }
-        return new CommandEncoder(this, descriptor);
+
+        Ref<CommandEncoder> result;
+        if (ConsumedError(CreateCommandEncoder(descriptor), &result,
+                          "calling %s.CreateCommandEncoder(%s).", this, descriptor)) {
+            return CommandEncoder::MakeError(this);
+        }
+        return result.Detach();
     }
     ComputePipelineBase* DeviceBase::APICreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {
@@ -1311,6 +1317,15 @@ namespace dawn::native {
 
         DAWN_TRY(uninitializedComputePipeline->Initialize());
         return AddOrGetCachedComputePipeline(std::move(uninitializedComputePipeline));
+    }
+
+    ResultOrError<Ref<CommandEncoder>> DeviceBase::CreateCommandEncoder(
+        const CommandEncoderDescriptor* descriptor) {
+        DAWN_TRY(ValidateIsAlive());
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateCommandEncoderDescriptor(this, descriptor));
+        }
+        return CommandEncoder::Create(this, descriptor);
     }
 
     MaybeError DeviceBase::CreateComputePipelineAsync(

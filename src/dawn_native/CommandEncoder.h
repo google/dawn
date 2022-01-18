@@ -26,9 +26,16 @@
 
 namespace dawn::native {
 
+    enum class UsageValidationMode;
+
+    MaybeError ValidateCommandEncoderDescriptor(const DeviceBase* device,
+                                                const CommandEncoderDescriptor* descriptor);
+
     class CommandEncoder final : public ApiObjectBase {
       public:
-        CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
+        static Ref<CommandEncoder> Create(DeviceBase* device,
+                                          const CommandEncoderDescriptor* descriptor);
+        static CommandEncoder* MakeError(DeviceBase* device);
 
         ObjectType GetType() const override;
 
@@ -80,6 +87,9 @@ namespace dawn::native {
         CommandBufferBase* APIFinish(const CommandBufferDescriptor* descriptor = nullptr);
 
       private:
+        CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
+        CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag);
+
         void DestroyImpl() override;
         ResultOrError<Ref<CommandBufferBase>> FinishInternal(
             const CommandBufferDescriptor* descriptor);
@@ -100,6 +110,8 @@ namespace dawn::native {
         std::set<QuerySetBase*> mUsedQuerySets;
 
         uint64_t mDebugGroupStackSize = 0;
+
+        UsageValidationMode mUsageValidationMode;
     };
 
 }  // namespace dawn::native

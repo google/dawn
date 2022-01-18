@@ -18,6 +18,7 @@
 #include "common/Math.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/Buffer.h"
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/CommandValidation.h"
@@ -159,7 +160,8 @@ namespace dawn::native {
         }
 
         MaybeError ValidateResolveTarget(const DeviceBase* device,
-                                         const RenderPassColorAttachment& colorAttachment) {
+                                         const RenderPassColorAttachment& colorAttachment,
+                                         UsageValidationMode usageValidationMode) {
             if (colorAttachment.resolveTarget == nullptr) {
                 return {};
             }
@@ -168,7 +170,7 @@ namespace dawn::native {
             const TextureViewBase* attachment = colorAttachment.view;
             DAWN_TRY(device->ValidateObject(colorAttachment.resolveTarget));
             DAWN_TRY(ValidateCanUseAs(colorAttachment.resolveTarget->GetTexture(),
-                                      wgpu::TextureUsage::RenderAttachment));
+                                      wgpu::TextureUsage::RenderAttachment, usageValidationMode));
 
             DAWN_INVALID_IF(
                 !attachment->GetTexture()->IsMultisampledTexture(),
@@ -216,11 +218,12 @@ namespace dawn::native {
             const RenderPassColorAttachment& colorAttachment,
             uint32_t* width,
             uint32_t* height,
-            uint32_t* sampleCount) {
+            uint32_t* sampleCount,
+            UsageValidationMode usageValidationMode) {
             TextureViewBase* attachment = colorAttachment.view;
             DAWN_TRY(device->ValidateObject(attachment));
-            DAWN_TRY(
-                ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment));
+            DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(),
+                                      wgpu::TextureUsage::RenderAttachment, usageValidationMode));
 
             DAWN_INVALID_IF(!(attachment->GetAspects() & Aspect::Color) ||
                                 !attachment->GetFormat().isRenderable,
@@ -241,7 +244,7 @@ namespace dawn::native {
 
             DAWN_TRY(ValidateOrSetColorAttachmentSampleCount(attachment, sampleCount));
 
-            DAWN_TRY(ValidateResolveTarget(device, colorAttachment));
+            DAWN_TRY(ValidateResolveTarget(device, colorAttachment, usageValidationMode));
 
             DAWN_TRY(ValidateAttachmentArrayLayersAndLevelCount(attachment));
             DAWN_TRY(ValidateOrSetAttachmentSize(attachment, width, height));
@@ -254,13 +257,14 @@ namespace dawn::native {
             const RenderPassDepthStencilAttachment* depthStencilAttachment,
             uint32_t* width,
             uint32_t* height,
-            uint32_t* sampleCount) {
+            uint32_t* sampleCount,
+            UsageValidationMode usageValidationMode) {
             DAWN_ASSERT(depthStencilAttachment != nullptr);
 
             TextureViewBase* attachment = depthStencilAttachment->view;
             DAWN_TRY(device->ValidateObject(attachment));
-            DAWN_TRY(
-                ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment));
+            DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(),
+                                      wgpu::TextureUsage::RenderAttachment, usageValidationMode));
 
             const Format& format = attachment->GetFormat();
             DAWN_INVALID_IF(
@@ -333,24 +337,25 @@ namespace dawn::native {
                                                 const RenderPassDescriptor* descriptor,
                                                 uint32_t* width,
                                                 uint32_t* height,
-                                                uint32_t* sampleCount) {
+                                                uint32_t* sampleCount,
+                                                UsageValidationMode usageValidationMode) {
             DAWN_INVALID_IF(
                 descriptor->colorAttachmentCount > kMaxColorAttachments,
                 "Color attachment count (%u) exceeds the maximum number of color attachments (%u).",
                 descriptor->colorAttachmentCount, kMaxColorAttachments);
 
             for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-                DAWN_TRY_CONTEXT(
-                    ValidateRenderPassColorAttachment(device, descriptor->colorAttachments[i],
-                                                      width, height, sampleCount),
-                    "validating colorAttachments[%u].", i);
+                DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(
+                                     device, descriptor->colorAttachments[i], width, height,
+                                     sampleCount, usageValidationMode),
+                                 "validating colorAttachments[%u].", i);
             }
 
             if (descriptor->depthStencilAttachment != nullptr) {
-                DAWN_TRY_CONTEXT(
-                    ValidateRenderPassDepthStencilAttachment(
-                        device, descriptor->depthStencilAttachment, width, height, sampleCount),
-                    "validating depthStencilAttachment.");
+                DAWN_TRY_CONTEXT(ValidateRenderPassDepthStencilAttachment(
+                                     device, descriptor->depthStencilAttachment, width, height,
+                                     sampleCount, usageValidationMode),
+                                 "validating depthStencilAttachment.");
             }
 
             if (descriptor->occlusionQuerySet != nullptr) {
@@ -468,9 +473,50 @@ namespace dawn::native {
 
     }  // namespace
 
+    MaybeError ValidateCommandEncoderDescriptor(const DeviceBase* device,
+                                                const CommandEncoderDescriptor* descriptor) {
+        DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
+                                     wgpu::SType::DawnEncoderInternalUsageDescriptor));
+
+        const DawnEncoderInternalUsageDescriptor* internalUsageDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &internalUsageDesc);
+
+        DAWN_INVALID_IF(internalUsageDesc != nullptr &&
+                            !device->APIHasFeature(wgpu::FeatureName::DawnInternalUsages),
+                        "%s is not available.", wgpu::FeatureName::DawnInternalUsages);
+        return {};
+    }
+
+    // static
+    Ref<CommandEncoder> CommandEncoder::Create(DeviceBase* device,
+                                               const CommandEncoderDescriptor* descriptor) {
+        return AcquireRef(new CommandEncoder(device, descriptor));
+    }
+
+    // static
+    CommandEncoder* CommandEncoder::MakeError(DeviceBase* device) {
+        return new CommandEncoder(device, ObjectBase::kError);
+    }
+
     CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor)
         : ApiObjectBase(device, descriptor->label), mEncodingContext(device, this) {
         TrackInDevice();
+
+        const DawnEncoderInternalUsageDescriptor* internalUsageDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &internalUsageDesc);
+
+        if (internalUsageDesc != nullptr && internalUsageDesc->useInternalUsages) {
+            mUsageValidationMode = UsageValidationMode::Internal;
+        } else {
+            mUsageValidationMode = UsageValidationMode::Default;
+        }
+    }
+
+    CommandEncoder::CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ApiObjectBase(device, tag),
+          mEncodingContext(device, this),
+          mUsageValidationMode(UsageValidationMode::Default) {
+        mEncodingContext.HandleError(DAWN_FORMAT_VALIDATION_ERROR("%s is invalid.", this));
     }
 
     ObjectType CommandEncoder::GetType() const {
@@ -554,7 +600,7 @@ namespace dawn::native {
                 uint32_t sampleCount = 0;
 
                 DAWN_TRY(ValidateRenderPassDescriptor(device, descriptor, &width, &height,
-                                                      &sampleCount));
+                                                      &sampleCount, mUsageValidationMode));
 
                 ASSERT(width > 0 && height > 0 && sampleCount > 0);
 
@@ -703,7 +749,8 @@ namespace dawn::native {
 
                     DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *copySize));
                     DAWN_TRY_CONTEXT(
-                        ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst),
+                        ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
+                                         mUsageValidationMode),
                         "validating destination %s usage.", destination->texture);
                     DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(destination->texture));
 
@@ -757,7 +804,8 @@ namespace dawn::native {
             [&](CommandAllocator* allocator) -> MaybeError {
                 if (GetDevice()->IsValidationEnabled()) {
                     DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *source, *copySize));
-                    DAWN_TRY_CONTEXT(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc),
+                    DAWN_TRY_CONTEXT(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
+                                                      mUsageValidationMode),
                                      "validating source %s usage.", source->texture);
                     DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(source->texture));
                     DAWN_TRY(ValidateTextureDepthStencilToBufferCopyRestrictions(*source));
@@ -846,14 +894,15 @@ namespace dawn::native {
                     // For internal usages (CopyToCopyInternal) we don't care if the user has added
                     // CopySrc as a usage for this texture, but we will always add it internally.
                     if (Internal) {
-                        DAWN_TRY(
-                            ValidateInternalCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
-                        DAWN_TRY(ValidateInternalCanUseAs(destination->texture,
-                                                          wgpu::TextureUsage::CopyDst));
+                        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
+                                                  UsageValidationMode::Internal));
+                        DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
+                                                  UsageValidationMode::Internal));
                     } else {
-                        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
-                        DAWN_TRY(
-                            ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
+                        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
+                                                  mUsageValidationMode));
+                        DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
+                                                  mUsageValidationMode));
                     }
 
                     mTopLevelTextures.insert(source->texture);

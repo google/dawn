@@ -198,6 +198,8 @@ namespace dawn::native {
             const BindGroupLayoutDescriptor* descriptor,
             bool allowInternalBinding = false);
         ResultOrError<Ref<BufferBase>> CreateBuffer(const BufferDescriptor* descriptor);
+        ResultOrError<Ref<CommandEncoder>> CreateCommandEncoder(
+            const CommandEncoderDescriptor* descriptor);
         ResultOrError<Ref<ComputePipelineBase>> CreateComputePipeline(
             const ComputePipelineDescriptor* descriptor);
         MaybeError CreateComputePipelineAsync(

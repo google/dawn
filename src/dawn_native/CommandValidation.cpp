@@ -447,19 +447,21 @@ namespace dawn::native {
         return ValidateTextureToTextureCopyCommonRestrictions(src, dst, copySize);
     }
 
-    MaybeError ValidateCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage) {
+    MaybeError ValidateCanUseAs(const TextureBase* texture,
+                                wgpu::TextureUsage usage,
+                                UsageValidationMode mode) {
         ASSERT(wgpu::HasZeroOrOneBits(usage));
-        DAWN_INVALID_IF(!(texture->GetUsage() & usage), "%s usage (%s) doesn't include %s.",
-                        texture, texture->GetUsage(), usage);
-
-        return {};
-    }
-
-    MaybeError ValidateInternalCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage) {
-        ASSERT(wgpu::HasZeroOrOneBits(usage));
-        DAWN_INVALID_IF(!(texture->GetInternalUsage() & usage),
-                        "%s internal usage (%s) doesn't include %s.", texture,
-                        texture->GetInternalUsage(), usage);
+        switch (mode) {
+            case UsageValidationMode::Default:
+                DAWN_INVALID_IF(!(texture->GetUsage() & usage), "%s usage (%s) doesn't include %s.",
+                                texture, texture->GetUsage(), usage);
+                break;
+            case UsageValidationMode::Internal:
+                DAWN_INVALID_IF(!(texture->GetInternalUsage() & usage),
+                                "%s internal usage (%s) doesn't include %s.", texture,
+                                texture->GetInternalUsage(), usage);
+                break;
+        }
 
         return {};
     }
@@ -468,7 +470,6 @@ namespace dawn::native {
         ASSERT(wgpu::HasZeroOrOneBits(usage));
         DAWN_INVALID_IF(!(buffer->GetUsage() & usage), "%s usage (%s) doesn't include %s.", buffer,
                         buffer->GetUsage(), usage);
-
         return {};
     }
 

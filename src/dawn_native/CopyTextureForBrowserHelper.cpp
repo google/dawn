@@ -350,11 +350,15 @@ namespace dawn::native {
             "not 1.",
             source->texture->GetSampleCount(), destination->texture->GetSampleCount());
 
-        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
-        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::TextureBinding));
+        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
+                                  UsageValidationMode::Default));
+        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::TextureBinding,
+                                  UsageValidationMode::Default));
 
-        DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
-        DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::RenderAttachment));
+        DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
+                                  UsageValidationMode::Default));
+        DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::RenderAttachment,
+                                  UsageValidationMode::Default));
 
         DAWN_TRY(ValidateCopyTextureFormatConversion(source->texture->GetFormat().format,
                                                      destination->texture->GetFormat().format));
