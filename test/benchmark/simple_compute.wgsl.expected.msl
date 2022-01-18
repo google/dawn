@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct SB {
+  /* 0x0000 */ int data[1];
+};
+
+void tint_symbol_1_inner(uint3 id, device SB* const tint_symbol_2) {
+  (*(tint_symbol_2)).data[id[0]] = as_type<int>((as_type<uint>((*(tint_symbol_2)).data[id[0]]) + as_type<uint>(1)));
+}
+
+kernel void tint_symbol_1(device SB* tint_symbol_3 [[buffer(0)]], uint3 id [[thread_position_in_grid]]) {
+  tint_symbol_1_inner(id, tint_symbol_3);
+  return;
+}
+

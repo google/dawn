@@ -10,6 +10,7 @@ vars = {
   'chromium_git':  'https://chromium.googlesource.com',
   'github': '/external/github.com',
 
+  'benchmark_revision': 'e991355c02b93fe17713efe04cbc2e278e00fdbd',
   'build_revision': '555c8b467c21e2c4b22d00e87e3faa0431df9ac2',
   'buildtools_revision': 'f78b4b9f33bd8ef9944d5ce643daff1c31880189',
   'catapult_revision': 'fa35beefb3429605035f98211ddb8750dee6a13d',
@@ -100,6 +101,9 @@ deps = {
 
   'third_party/catapult': Var('chromium_git') + '/catapult.git@' +
       Var('catapult_revision'),
+
+  'third_party/benchmark': Var('chromium_git') + Var('github') +
+      '/google/benchmark.git@' + Var('benchmark_revision'),
 
   'third_party/googletest': Var('chromium_git') + Var('github') +
       '/google/googletest.git@' + Var('googletest_revision'),

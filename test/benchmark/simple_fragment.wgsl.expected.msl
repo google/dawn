@@ -1,0 +1,29 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Input {
+  float4 color;
+};
+struct Output {
+  float4 color;
+};
+struct tint_symbol_2 {
+  float4 color [[user(locn0)]];
+};
+struct tint_symbol_3 {
+  float4 color [[color(0)]];
+};
+
+Output tint_symbol_inner(Input in) {
+  Output const tint_symbol_4 = {.color=in.color};
+  return tint_symbol_4;
+}
+
+fragment tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  Input const tint_symbol_5 = {.color=tint_symbol_1.color};
+  Output const inner_result = tint_symbol_inner(tint_symbol_5);
+  tint_symbol_3 wrapper_result = {};
+  wrapper_result.color = inner_result.color;
+  return wrapper_result;
+}
+

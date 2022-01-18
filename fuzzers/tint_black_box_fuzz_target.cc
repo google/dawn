@@ -56,13 +56,7 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
   }
 
   fseek(file, 0, SEEK_END);
-  auto tell_file_size = ftell(file);
-  if (tell_file_size <= 0) {
-    std::cerr << "Input file of incorrect size: " << input_file << std::endl;
-    fclose(file);
-    return {};
-  }
-  const auto file_size = static_cast<size_t>(tell_file_size);
+  const auto file_size = static_cast<size_t>(ftell(file));
   if (0 != (file_size % sizeof(T))) {
     std::cerr << "File " << input_file
               << " does not contain an integral number of objects: "

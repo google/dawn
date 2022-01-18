@@ -1,0 +1,55 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 29
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %id_1
+               OpExecutionMode %main LocalSize 1 2 3
+               OpName %id_1 "id_1"
+               OpName %SB "SB"
+               OpMemberName %SB 0 "data"
+               OpName %buffer "buffer"
+               OpName %main_inner "main_inner"
+               OpName %id "id"
+               OpName %main "main"
+               OpDecorate %id_1 BuiltIn GlobalInvocationId
+               OpDecorate %SB Block
+               OpMemberDecorate %SB 0 Offset 0
+               OpDecorate %_runtimearr_int ArrayStride 4
+               OpDecorate %buffer DescriptorSet 0
+               OpDecorate %buffer Binding 0
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+       %id_1 = OpVariable %_ptr_Input_v3uint Input
+        %int = OpTypeInt 32 1
+%_runtimearr_int = OpTypeRuntimeArray %int
+         %SB = OpTypeStruct %_runtimearr_int
+%_ptr_StorageBuffer_SB = OpTypePointer StorageBuffer %SB
+     %buffer = OpVariable %_ptr_StorageBuffer_SB StorageBuffer
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void %v3uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+      %int_1 = OpConstant %int 1
+         %24 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %10
+         %id = OpFunctionParameter %v3uint
+         %14 = OpLabel
+         %16 = OpCompositeExtract %uint %id 0
+         %18 = OpAccessChain %_ptr_StorageBuffer_int %buffer %uint_0 %16
+         %19 = OpCompositeExtract %uint %id 0
+         %20 = OpAccessChain %_ptr_StorageBuffer_int %buffer %uint_0 %19
+         %21 = OpLoad %int %20
+         %23 = OpIAdd %int %21 %int_1
+               OpStore %18 %23
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %24
+         %26 = OpLabel
+         %28 = OpLoad %v3uint %id_1
+         %27 = OpFunctionCall %void %main_inner %28
+               OpReturn
+               OpFunctionEnd

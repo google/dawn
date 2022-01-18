@@ -81,6 +81,7 @@ option_if_not_defined(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
 option_if_not_defined(TINT_BUILD_SPIRV_TOOLS_FUZZER "Build SPIRV-Tools fuzzer" OFF)
 option_if_not_defined(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
 option_if_not_defined(TINT_BUILD_REGEX_FUZZER "Build regex fuzzer" OFF)
+option_if_not_defined(TINT_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option_if_not_defined(TINT_BUILD_TESTS "Build tests" ${TINT_BUILD_TESTS_DEFAULT})
 option_if_not_defined(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 option_if_not_defined(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
@@ -111,6 +112,7 @@ message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build SPIRV-Tools fuzzer: ${TINT_BUILD_SPIRV_TOOLS_FUZZER}")
 message(STATUS "Tint build AST fuzzer: ${TINT_BUILD_AST_FUZZER}")
 message(STATUS "Tint build regex fuzzer: ${TINT_BUILD_REGEX_FUZZER}")
+message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build with ASAN: ${TINT_ENABLE_ASAN}")
 message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
@@ -254,7 +256,7 @@ if(${TINT_BUILD_DOCS})
   endif(DOXYGEN_FOUND)
 endif()
 
-function(tint_default_compile_options TARGET)
+function(tint_core_compile_options TARGET)
   target_include_directories(${TARGET} PUBLIC "${TINT_ROOT_SOURCE_DIR}")
   target_include_directories(${TARGET} PUBLIC "${TINT_ROOT_SOURCE_DIR}/include")
 
@@ -263,20 +265,48 @@ function(tint_default_compile_options TARGET)
         "${TINT_ROOT_SOURCE_DIR}/third_party/spirv-headers/include")
   endif()
 
-  target_compile_definitions(${TARGET} PUBLIC
-      -DTINT_BUILD_SPV_READER=$<BOOL:${TINT_BUILD_SPV_READER}>)
-  target_compile_definitions(${TARGET} PUBLIC
-      -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
-  target_compile_definitions(${TARGET} PUBLIC
-      -DTINT_BUILD_GLSL_WRITER=$<BOOL:${TINT_BUILD_GLSL_WRITER}>)
-  target_compile_definitions(${TARGET} PUBLIC
-      -DTINT_BUILD_HLSL_WRITER=$<BOOL:${TINT_BUILD_HLSL_WRITER}>)
-  target_compile_definitions(${TARGET} PUBLIC
-      -DTINT_BUILD_MSL_WRITER=$<BOOL:${TINT_BUILD_MSL_WRITER}>)
-  target_compile_definitions(${TARGET} PUBLIC
-      -DTINT_BUILD_SPV_WRITER=$<BOOL:${TINT_BUILD_SPV_WRITER}>)
-  target_compile_definitions(${TARGET} PUBLIC
-      -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SPV_READER=$<BOOL:${TINT_BUILD_SPV_READER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_GLSL_WRITER=$<BOOL:${TINT_BUILD_GLSL_WRITER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_HLSL_WRITER=$<BOOL:${TINT_BUILD_HLSL_WRITER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_MSL_WRITER=$<BOOL:${TINT_BUILD_MSL_WRITER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SPV_WRITER=$<BOOL:${TINT_BUILD_SPV_WRITER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
+
+  if (COMPILER_IS_LIKE_GNU)
+    target_compile_options(${TARGET} PRIVATE
+      -std=c++17
+      -fno-exceptions
+      -fno-rtti
+    )
+
+    if (${TINT_ENABLE_MSAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=memory)
+      target_link_options(${TARGET} PRIVATE -fsanitize=memory)
+    elseif (${TINT_ENABLE_ASAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=address)
+      target_link_options(${TARGET} PRIVATE -fsanitize=address)
+    elseif (${TINT_ENABLE_UBSAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=undefined)
+      target_link_options(${TARGET} PRIVATE -fsanitize=undefined)
+    endif()
+  endif(COMPILER_IS_LIKE_GNU)
+
+  if (TINT_EMIT_COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        target_compile_options(${TARGET} PRIVATE "--coverage")
+        target_link_options(${TARGET} PRIVATE "gcov")
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
+        target_link_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
+    else()
+        message(FATAL_ERROR "Coverage generation not supported for the ${CMAKE_CXX_COMPILER_ID} toolchain")
+    endif()
+  endif(TINT_EMIT_COVERAGE)
+endfunction()
+
+function(tint_default_compile_options TARGET)
+  tint_core_compile_options(${TARGET})
 
   set(COMMON_GNU_OPTIONS
     -Wall
@@ -299,11 +329,8 @@ function(tint_default_compile_options TARGET)
     -Weverything
   )
 
-  if (${COMPILER_IS_LIKE_GNU})
+  if (COMPILER_IS_LIKE_GNU)
     target_compile_options(${TARGET} PRIVATE
-      -std=c++17
-      -fno-exceptions
-      -fno-rtti
       -pedantic-errors
       ${COMMON_GNU_OPTIONS}
     )
@@ -314,30 +341,7 @@ function(tint_default_compile_options TARGET)
         ${COMMON_CLANG_OPTIONS}
       )
     endif()
-
-    if (${TINT_ENABLE_MSAN})
-      target_compile_options(${TARGET} PRIVATE -fsanitize=memory)
-      target_link_options(${TARGET} PRIVATE -fsanitize=memory)
-    elseif (${TINT_ENABLE_ASAN})
-      target_compile_options(${TARGET} PRIVATE -fsanitize=address)
-      target_link_options(${TARGET} PRIVATE -fsanitize=address)
-    elseif (${TINT_ENABLE_UBSAN})
-      target_compile_options(${TARGET} PRIVATE -fsanitize=undefined)
-      target_link_options(${TARGET} PRIVATE -fsanitize=undefined)
-    endif()
-  endif()
-
-  if (${TINT_EMIT_COVERAGE})
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        target_compile_options(${TARGET} PRIVATE "--coverage")
-        target_link_options(${TARGET} PRIVATE "gcov")
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        target_compile_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
-        target_link_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
-    else()
-        message(FATAL_ERROR "Coverage generation not supported for the ${CMAKE_CXX_COMPILER_ID} toolchain")
-    endif()
-  endif()
+  endif(COMPILER_IS_LIKE_GNU)
 
   if (MSVC)
     # Specify /EHs for exception handling.
@@ -379,7 +383,6 @@ function(tint_default_compile_options TARGET)
       )
     endif()
   endif()
-
 endfunction()
 
 add_subdirectory(third_party)

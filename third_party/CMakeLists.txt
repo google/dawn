@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (${TINT_BUILD_BENCHMARKS})
+  set(BENCHMARK_ENABLE_TESTING FALSE CACHE BOOL FALSE FORCE)
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/benchmark EXCLUDE_FROM_ALL)
+endif()
+
 if (${TINT_BUILD_TESTS} AND NOT TARGET gmock)
   set(gtest_force_shared_crt ON CACHE BOOL "Controls whether a shared run-time library should be used even when Google Test is built as static library" FORCE)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
