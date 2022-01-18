@@ -345,7 +345,7 @@ namespace dawn::native {
             std::unique_ptr<ErrorData> error = maybeError.AcquireError();
 
             ASSERT(error != nullptr);
-            dawn::InfoLog() << error->GetFormattedMessage();
+            dawn::ErrorLog() << error->GetFormattedMessage();
             return true;
         }
         return false;
