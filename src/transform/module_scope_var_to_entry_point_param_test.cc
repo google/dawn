@@ -259,6 +259,41 @@ fn main([[group(0), binding(0), internal(disable_validation__entry_point_paramet
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(ModuleScopeVarToEntryPointParamTest, Buffer_RuntimeArrayInsideFunction) {
+  auto* src = R"(
+[[group(0), binding(0)]]
+var<storage> buffer : array<f32>;
+
+fn foo() {
+  _ = buffer[0];
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  foo();
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_2 {
+  arr : array<f32>;
+}
+
+fn foo([[internal(disable_validation__ignore_storage_class), internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol : ptr<storage, array<f32>>) {
+  _ = (*(tint_symbol))[0];
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol_1 : ptr<storage, tint_symbol_2>) {
+  foo(&((*(tint_symbol_1)).arr));
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(ModuleScopeVarToEntryPointParamTest, Buffer_RuntimeArray_Alias) {
   auto* src = R"(
 type myarray = array<f32>;

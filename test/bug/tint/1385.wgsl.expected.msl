@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_3 {
+  /* 0x0000 */ int arr[1];
+};
+
+int foo(const device int (*const tint_symbol_1)[1]) {
+  return (*(tint_symbol_1))[0];
+}
+
+kernel void tint_symbol(const device tint_symbol_3* tint_symbol_2 [[buffer(0)]]) {
+  foo(&((*(tint_symbol_2)).arr));
+  return;
+}
+

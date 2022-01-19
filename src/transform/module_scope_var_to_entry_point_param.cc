@@ -141,7 +141,9 @@ struct ModuleScopeVarToEntryPointParam::State {
       struct NewVar {
         Symbol symbol;
         bool is_pointer;
+        bool is_wrapped;
       };
+      const char* kWrappedArrayMemberName = "arr";
       std::unordered_map<const sem::Variable*, NewVar> var_to_newvar;
 
       // We aggregate all workgroup variables into a struct to avoid hitting
@@ -182,7 +184,6 @@ struct ModuleScopeVarToEntryPointParam::State {
 
         // Track whether the new variable was wrapped in a struct or not.
         bool is_wrapped = false;
-        const char* kWrappedArrayMemberName = "arr";
 
         if (is_entry_point) {
           if (var->Type()->UnwrapRef()->is_handle()) {
@@ -309,7 +310,7 @@ struct ModuleScopeVarToEntryPointParam::State {
           }
         }
 
-        var_to_newvar[var] = {new_var_symbol, is_pointer};
+        var_to_newvar[var] = {new_var_symbol, is_pointer, is_wrapped};
       }
 
       if (!workgroup_parameter_members.empty()) {
@@ -344,7 +345,12 @@ struct ModuleScopeVarToEntryPointParam::State {
           auto new_var = var_to_newvar[target_var];
           bool is_handle = target_var->Type()->UnwrapRef()->is_handle();
           const ast::Expression* arg = ctx.dst->Expr(new_var.symbol);
-          if (is_entry_point && !is_handle && !new_var.is_pointer) {
+          if (new_var.is_wrapped) {
+            // The variable is wrapped in a struct, so we need to pass a pointer
+            // to the struct member instead.
+            arg = ctx.dst->AddressOf(ctx.dst->MemberAccessor(
+                ctx.dst->Deref(arg), kWrappedArrayMemberName));
+          } else if (is_entry_point && !is_handle && !new_var.is_pointer) {
             // We need to pass a pointer and we don't already have one, so take
             // the address of the new variable.
             arg = ctx.dst->AddressOf(arg);
