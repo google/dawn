@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, FunctionHeader_TrailingComma) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
-  auto p = parser("fn main() -> [[location(1)]] f32");
+  auto p = parser("fn main() -> @location(1) f32");
   auto f = p->function_header();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(f.matched);
@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType_WithArrayStride) {
-  auto p = parser("fn main() -> [[location(1), stride(16)]] array<f32, 4>");
+  auto p = parser("fn main() -> @location(1) @stride(16) array<f32, 4>");
   auto f = p->function_header();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(f.matched);

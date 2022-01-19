@@ -102,7 +102,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDec_Override_WithId) {
-  auto p = parser("[[override(7)]] let a : f32 = 1.");
+  auto p = parser("@override(7) let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -119,9 +119,9 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_WithId) {
   EXPECT_TRUE(e->type->Is<ast::F32>());
 
   EXPECT_EQ(e->source.range.begin.line, 1u);
-  EXPECT_EQ(e->source.range.begin.column, 21u);
+  EXPECT_EQ(e->source.range.begin.column, 18u);
   EXPECT_EQ(e->source.range.end.line, 1u);
-  EXPECT_EQ(e->source.range.end.column, 22u);
+  EXPECT_EQ(e->source.range.end.column, 19u);
 
   ASSERT_NE(e->constructor, nullptr);
   EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
@@ -165,7 +165,7 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_WithoutId) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDec_Override_MissingId) {
-  auto p = parser("[[override()]] let a : f32 = 1.");
+  auto p = parser("@override() let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -177,11 +177,11 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_MissingId) {
 
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:12: expected signed integer literal for override decoration");
+            "1:11: expected signed integer literal for override decoration");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDec_Override_InvalidId) {
-  auto p = parser("[[override(-7)]] let a : f32 = 1.");
+  auto p = parser("@override(-7) let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -192,7 +192,7 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_InvalidId) {
   ASSERT_NE(e.value, nullptr);
 
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:12: override decoration must be positive");
+  EXPECT_EQ(p->error(), "1:11: override decoration must be positive");
 }
 
 }  // namespace

@@ -1,4 +1,4 @@
-type RTArr = [[stride(4)]] array<u32>;
+type RTArr = @stride(4) array<u32>;
 
 struct S {
   field0 : RTArr;
@@ -6,13 +6,13 @@ struct S {
 
 var<private> x_3 : vec3<u32>;
 
-[[group(0), binding(0)]] var<storage, read_write> x_6 : S;
+@group(0) @binding(0) var<storage, read_write> x_6 : S;
 
-[[group(0), binding(1)]] var<storage, read_write> x_7 : S;
+@group(0) @binding(1) var<storage, read_write> x_7 : S;
 
-[[group(0), binding(2)]] var<storage, read_write> x_8 : S;
+@group(0) @binding(2) var<storage, read_write> x_8 : S;
 
-[[group(0), binding(3)]] var<storage, read_write> x_9 : S;
+@group(0) @binding(3) var<storage, read_write> x_9 : S;
 
 fn main_1() {
   let x_23 : u32 = x_3.x;
@@ -23,8 +23,8 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(1, 1, 1)]]
-fn main([[builtin(global_invocation_id)]] x_3_param : vec3<u32>) {
+@stage(compute) @workgroup_size(1, 1, 1)
+fn main(@builtin(global_invocation_id) x_3_param : vec3<u32>) {
   x_3 = x_3_param;
   main_1();
 }

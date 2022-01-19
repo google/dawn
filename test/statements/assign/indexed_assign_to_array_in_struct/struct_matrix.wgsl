@@ -6,9 +6,9 @@ struct OuterS {
   m1 : mat2x4<f32>;
 };
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   s1.m1[uniforms.i] = vec4<f32>(1.0);

@@ -1,28 +1,28 @@
 struct Uniforms {
   NAN : f32;
-  [[size(12)]]
+  @size(12)
   padding : u32;
   aShape : vec3<i32>;
-  [[size(4)]]
+  @size(4)
   padding_1 : u32;
   bShape : vec3<i32>;
-  [[size(4)]]
+  @size(4)
   padding_2 : u32;
   outShape : vec3<i32>;
-  [[size(4)]]
+  @size(4)
   padding_3 : u32;
   outShapeStrides : vec2<i32>;
 }
 
-type RTArr = [[stride(4)]] array<f32>;
+type RTArr = @stride(4) array<f32>;
 
-type RTArr_1 = [[stride(4)]] array<f32>;
+type RTArr_1 = @stride(4) array<f32>;
 
 struct ssbOut {
   result : RTArr_1;
 }
 
-type RTArr_2 = [[stride(4)]] array<f32>;
+type RTArr_2 = @stride(4) array<f32>;
 
 struct ssbA {
   A : RTArr_1;
@@ -34,13 +34,13 @@ struct ssbB {
 
 var<private> dimAOuter_1 : i32;
 
-[[group(0), binding(3)]] var<uniform> x_48 : Uniforms;
+@group(0) @binding(3) var<uniform> x_48 : Uniforms;
 
 var<private> dimInner_1 : i32;
 
 var<private> dimBOuter_1 : i32;
 
-[[group(0), binding(0)]] var<storage, read_write> x_54 : ssbOut;
+@group(0) @binding(0) var<storage, read_write> x_54 : ssbOut;
 
 var<private> gl_LocalInvocationID : vec3<u32>;
 
@@ -50,11 +50,11 @@ var<workgroup> mm_Asub : array<array<f32, 64u>, 64u>;
 
 var<workgroup> mm_Bsub : array<array<f32, 1u>, 64u>;
 
-[[group(0), binding(1)]] var<storage, read> x_165 : ssbA;
+@group(0) @binding(1) var<storage, read> x_165 : ssbA;
 
 var<private> batch : i32;
 
-[[group(0), binding(2)]] var<storage, read> x_185 : ssbB;
+@group(0) @binding(2) var<storage, read> x_185 : ssbB;
 
 fn coordsInBounds_vi2_vi2_(coord : ptr<function, vec2<i32>>, shape : ptr<function, vec2<i32>>) -> bool {
   var x_87 : bool;
@@ -514,8 +514,8 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(1, 64, 1)]]
-fn main([[builtin(local_invocation_id)]] gl_LocalInvocationID_param : vec3<u32>, [[builtin(global_invocation_id)]] gl_GlobalInvocationID_param : vec3<u32>) {
+@stage(compute) @workgroup_size(1, 64, 1)
+fn main(@builtin(local_invocation_id) gl_LocalInvocationID_param : vec3<u32>, @builtin(global_invocation_id) gl_GlobalInvocationID_param : vec3<u32>) {
   gl_LocalInvocationID = gl_LocalInvocationID_param;
   gl_GlobalInvocationID = gl_GlobalInvocationID_param;
   main_1();

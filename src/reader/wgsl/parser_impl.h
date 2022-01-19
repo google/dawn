@@ -669,7 +669,7 @@ class ParserImpl {
   /// Parses a `assignment_stmt` grammar element
   /// @returns the parsed assignment or nullptr
   Maybe<const ast::AssignmentStatement*> assignment_stmt();
-  /// Parses one or more bracketed decoration lists.
+  /// Parses one or more decoration lists.
   /// @return the parsed decoration list, or an empty list on error.
   Maybe<ast::DecorationList> decoration_list();
   /// Parses a list of decorations between `ATTR_LEFT` and `ATTR_RIGHT`

@@ -662,6 +662,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(TokenData{"&", Token::Type::kAnd},
                     TokenData{"&&", Token::Type::kAndAnd},
                     TokenData{"->", Token::Type::kArrow},
+                    TokenData{"@", Token::Type::kAttr},
                     TokenData{"[[", Token::Type::kAttrLeft},
                     TokenData{"]]", Token::Type::kAttrRight},
                     TokenData{"/", Token::Type::kForwardSlash},

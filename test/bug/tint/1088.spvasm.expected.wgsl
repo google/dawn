@@ -1,11 +1,11 @@
-type Arr = [[stride(64)]] array<mat4x4<f32>, 2u>;
+type Arr = @stride(64) array<mat4x4<f32>, 2u>;
 
-type Arr_1 = [[stride(16)]] array<f32, 4u>;
+type Arr_1 = @stride(16) array<f32, 4u>;
 
 struct LeftOver {
   worldViewProjection : mat4x4<f32>;
   time : f32;
-  [[size(12)]]
+  @size(12)
   padding : u32;
   test2 : Arr;
   test : Arr_1;
@@ -13,7 +13,7 @@ struct LeftOver {
 
 var<private> position : vec3<f32>;
 
-[[group(2), binding(2)]] var<uniform> x_14 : LeftOver;
+@group(2) @binding(2) var<uniform> x_14 : LeftOver;
 
 var<private> vUV : vec2<f32>;
 
@@ -49,14 +49,14 @@ fn main_1() {
 }
 
 struct main_out {
-  [[builtin(position)]]
+  @builtin(position)
   gl_Position : vec4<f32>;
-  [[location(0)]]
+  @location(0)
   vUV_1 : vec2<f32>;
 }
 
-[[stage(vertex)]]
-fn main([[location(0)]] position_param : vec3<f32>, [[location(2)]] uv_param : vec2<f32>, [[location(1)]] normal_param : vec3<f32>) -> main_out {
+@stage(vertex)
+fn main(@location(0) position_param : vec3<f32>, @location(2) uv_param : vec2<f32>, @location(1) normal_param : vec3<f32>) -> main_out {
   position = position_param;
   uv = uv_param;
   normal = normal_param;

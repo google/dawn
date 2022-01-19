@@ -13,15 +13,15 @@ struct S {
   h : vec2<i32>;
   i : mat2x3<f32>;
   j : mat3x2<f32>;
-  [[align(16)]]
+  @align(16)
   k : Inner;
-  [[align(16)]]
-  l : [[stride(16)]] array<Inner, 4>;
+  @align(16)
+  l : @stride(16) array<Inner, 4>;
 }
 
-[[binding(0), group(0)]] var<uniform> s : S;
+@binding(0) @group(0) var<uniform> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   let a = s.a;
   let b = s.b;

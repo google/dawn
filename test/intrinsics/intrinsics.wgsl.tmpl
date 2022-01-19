@@ -41,7 +41,7 @@ See:
 struct SB_RW {
 {{- $sb_rw_fields -}}
 };
-[[group(0), binding(0)]] var<storage, read_write> sb_rw : SB_RW;
+@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
 {{    end -}}
 
 {{- /* Generate RO storage buffer parameters */ -}}
@@ -54,7 +54,7 @@ struct SB_RW {
 struct SB_RO {
 {{- $sb_ro_fields -}}
 };
-[[group(0), binding(1)]] var<storage, read> sb_ro : SB_RO;
+@group(0) @binding(1) var<storage, read> sb_ro : SB_RO;
 {{    end -}}
 
 {{- /* Generate uniform buffer parameters */ -}}
@@ -67,7 +67,7 @@ struct SB_RO {
 struct UB {
 {{- $ub_fields -}}
 };
-[[group(0), binding(1)]] var<uniform> ub : UB;
+@group(0) @binding(1) var<uniform> ub : UB;
 {{    end -}}
 
 {{- /* Generate module-scoped handle variables */ -}}
@@ -76,7 +76,7 @@ struct UB {
 {{-     if eq "ptr" $p.Type.Target.Name -}}
 {{-       $el_type := Eval "Type" (index $p.Type.TemplateArguments 1)}}
 {{-       if eq "handle" $class -}}
-            [[group(1), binding({{$i}})]] var arg_{{$i}}: {{$el_type}};
+            @group(1) @binding({{$i}}) var arg_{{$i}}: {{$el_type}};
 {{          $args.Put $i (printf "&arg_%v" $i) -}}
 {{-       else if eq "workgroup" $class -}}
             var<workgroup> arg_{{$i}}: {{$el_type}};
@@ -88,7 +88,7 @@ struct UB {
 {{-     else -}}
 {{-       $type := Eval "Type" $p.Type}}
 {{-       if eq "handle" $class -}}
-            [[group(1), binding({{$i}})]] var arg_{{$i}}: {{$type}};
+            @group(1) @binding({{$i}}) var arg_{{$i}}: {{$type}};
 {{          $args.Put $i (printf "arg_%v" $i) -}}
 {{-       else if eq "workgroup" $class -}}
             var<workgroup> arg_{{$i}}: {{$type}};
@@ -131,22 +131,22 @@ fn {{$permutation}}() {
 {{/*new line*/ -}}
 
 {{- if .CanBeUsedInStage.Vertex }}
-[[stage(vertex)]]
-fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vertex_main() -> @builtin(position) vec4<f32> {
   {{$permutation}}();
   return vec4<f32>();
 }
 {{ end -}}
 
 {{- if .CanBeUsedInStage.Fragment }}
-[[stage(fragment)]]
+@stage(fragment)
 fn fragment_main() {
   {{$permutation}}();
 }
 {{ end -}}
 
 {{- if .CanBeUsedInStage.Compute }}
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn compute_main() {
   {{$permutation}}();
 }

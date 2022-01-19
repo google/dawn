@@ -22,15 +22,15 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
-[[group(1), binding(0)]] var arg_0: texture_depth_2d_array;
-[[group(1), binding(1)]] var arg_1: sampler;
+@group(1) @binding(0) var arg_0: texture_depth_2d_array;
+@group(1) @binding(1) var arg_1: sampler;
 
 // fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32) -> f32
 fn textureSample_7e9ffd() {
   var res: f32 = textureSample(arg_0, arg_1, vec2<f32>(), 1);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn fragment_main() {
   textureSample_7e9ffd();
 }

@@ -30,11 +30,11 @@ struct S {
   a : f32;
 }
 
-[[group(2), binding(1)]] var<storage, read> a : S;
+@group(2) @binding(1) var<storage, read> a : S;
 
-[[group(3), binding(2)]] var<storage, read> b : S;
+@group(3) @binding(2) var<storage, read> b : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -55,11 +55,11 @@ struct S {
   a : f32;
 };
 
-[[group(2), binding(1)]] var<storage, read> a : S;
+@group(2) @binding(1) var<storage, read> a : S;
 
-[[group(3), binding(2)]] var<storage, read> b : S;
+@group(3) @binding(2) var<storage, read> b : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -69,11 +69,11 @@ struct S {
   a : f32;
 }
 
-[[group(1), binding(2)]] var<storage, read> a : S;
+@group(1) @binding(2) var<storage, read> a : S;
 
-[[group(3), binding(2)]] var<storage, read> b : S;
+@group(3) @binding(2) var<storage, read> b : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -83,7 +83,7 @@ fn f() {
       BindingRemapper::BindingPoints{
           {{2, 1}, {1, 2}},  // Remap
           {{4, 5}, {6, 7}},  // Not found
-                             // Keep [[group(3), binding(2)]] as is
+                             // Keep @group(3) @binding(2) as is
       },
       BindingRemapper::AccessControls{});
   auto got = Run<BindingRemapper>(src, data);
@@ -97,13 +97,13 @@ struct S {
   a : f32;
 };
 
-[[group(2), binding(1)]] var<storage, read> a : S;
+@group(2) @binding(1) var<storage, read> a : S;
 
-[[group(3), binding(2)]] var<storage, write> b : S;
+@group(3) @binding(2) var<storage, write> b : S;
 
-[[group(4), binding(3)]] var<storage, read> c : S;
+@group(4) @binding(3) var<storage, read> c : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -113,13 +113,13 @@ struct S {
   a : f32;
 }
 
-[[group(2), binding(1)]] var<storage, write> a : S;
+@group(2) @binding(1) var<storage, write> a : S;
 
-[[group(3), binding(2)]] var<storage, write> b : S;
+@group(3) @binding(2) var<storage, write> b : S;
 
-[[group(4), binding(3)]] var<storage, read> c : S;
+@group(4) @binding(3) var<storage, read> c : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -129,7 +129,7 @@ fn f() {
       BindingRemapper::BindingPoints{},
       BindingRemapper::AccessControls{
           {{2, 1}, ast::Access::kWrite},  // Modify access control
-          // Keep [[group(3), binding(2)]] as is
+          // Keep @group(3) @binding(2) as is
           {{4, 3}, ast::Access::kRead},  // Add access control
       });
   auto got = Run<BindingRemapper>(src, data);
@@ -151,13 +151,13 @@ type, write WriteOnlyS = S;
 
 type A = S;
 
-[[group(2), binding(1)]] var<storage> a : ReadOnlyS;
+@group(2) @binding(1) var<storage> a : ReadOnlyS;
 
-[[group(3), binding(2)]] var<storage> b : WriteOnlyS;
+@group(3) @binding(2) var<storage> b : WriteOnlyS;
 
-[[group(4), binding(3)]] var<storage> c : A;
+@group(4) @binding(3) var<storage> c : A;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -173,13 +173,13 @@ type, write WriteOnlyS = S;
 
 type A = S;
 
-[[group(2), binding(1)]] var<storage, write> a : S;
+@group(2) @binding(1) var<storage, write> a : S;
 
-[[group(3), binding(2)]] var<storage> b : WriteOnlyS;
+@group(3) @binding(2) var<storage> b : WriteOnlyS;
 
-[[group(4), binding(3)]] var<storage, write> c : S;
+@group(4) @binding(3) var<storage, write> c : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -189,7 +189,7 @@ fn f() {
       BindingRemapper::BindingPoints{},
       BindingRemapper::AccessControls{
           {{2, 1}, ast::Access::kWrite},  // Modify access control
-          // Keep [[group(3), binding(2)]] as is
+          // Keep @group(3) @binding(2) as is
           {{4, 3}, ast::Access::kRead},  // Add access control
       });
   auto got = Run<BindingRemapper>(src, data);
@@ -203,11 +203,11 @@ struct S {
   a : f32;
 };
 
-[[group(2), binding(1)]] var<storage, read> a : S;
+@group(2) @binding(1) var<storage, read> a : S;
 
-[[group(3), binding(2)]] var<storage, read> b : S;
+@group(3) @binding(2) var<storage, read> b : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -217,11 +217,11 @@ struct S {
   a : f32;
 }
 
-[[group(4), binding(5)]] var<storage, write> a : S;
+@group(4) @binding(5) var<storage, write> a : S;
 
-[[group(6), binding(7)]] var<storage, write> b : S;
+@group(6) @binding(7) var<storage, write> b : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
 }
 )";
@@ -247,15 +247,15 @@ struct S {
   i : i32;
 };
 
-[[group(2), binding(1)]] var<storage, read> a : S;
+@group(2) @binding(1) var<storage, read> a : S;
 
-[[group(3), binding(2)]] var<storage, read> b : S;
+@group(3) @binding(2) var<storage, read> b : S;
 
-[[group(4), binding(3)]] var<storage, read> c : S;
+@group(4) @binding(3) var<storage, read> c : S;
 
-[[group(5), binding(4)]] var<storage, read> d : S;
+@group(5) @binding(4) var<storage, read> d : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x : i32 = (((a.i + b.i) + c.i) + d.i);
 }
@@ -266,15 +266,15 @@ struct S {
   i : i32;
 }
 
-[[internal(disable_validation__binding_point_collision), group(1), binding(1)]] var<storage, read> a : S;
+@internal(disable_validation__binding_point_collision) @group(1) @binding(1) var<storage, read> a : S;
 
-[[internal(disable_validation__binding_point_collision), group(1), binding(1)]] var<storage, read> b : S;
+@internal(disable_validation__binding_point_collision) @group(1) @binding(1) var<storage, read> b : S;
 
-[[internal(disable_validation__binding_point_collision), group(5), binding(4)]] var<storage, read> c : S;
+@internal(disable_validation__binding_point_collision) @group(5) @binding(4) var<storage, read> c : S;
 
-[[internal(disable_validation__binding_point_collision), group(5), binding(4)]] var<storage, read> d : S;
+@internal(disable_validation__binding_point_collision) @group(5) @binding(4) var<storage, read> d : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x : i32 = (((a.i + b.i) + c.i) + d.i);
 }
@@ -299,20 +299,20 @@ struct S {
   i : i32;
 };
 
-[[group(2), binding(1)]] var<storage, read> a : S;
+@group(2) @binding(1) var<storage, read> a : S;
 
-[[group(3), binding(2)]] var<storage, read> b : S;
+@group(3) @binding(2) var<storage, read> b : S;
 
-[[group(4), binding(3)]] var<storage, read> c : S;
+@group(4) @binding(3) var<storage, read> c : S;
 
-[[group(5), binding(4)]] var<storage, read> d : S;
+@group(5) @binding(4) var<storage, read> d : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f1() {
   let x : i32 = (a.i + c.i);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f2() {
   let x : i32 = (b.i + d.i);
 }
@@ -323,20 +323,20 @@ struct S {
   i : i32;
 }
 
-[[group(1), binding(1)]] var<storage, read> a : S;
+@group(1) @binding(1) var<storage, read> a : S;
 
-[[group(1), binding(1)]] var<storage, read> b : S;
+@group(1) @binding(1) var<storage, read> b : S;
 
-[[group(5), binding(4)]] var<storage, read> c : S;
+@group(5) @binding(4) var<storage, read> c : S;
 
-[[group(5), binding(4)]] var<storage, read> d : S;
+@group(5) @binding(4) var<storage, read> d : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f1() {
   let x : i32 = (a.i + c.i);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f2() {
   let x : i32 = (b.i + d.i);
 }
@@ -361,10 +361,10 @@ struct S {
   a : f32;
 };
 
-[[group(2), binding(1)]] var<storage, read> a : S;
-[[group(3), binding(2)]] var<storage, read> b : S;
+@group(2) @binding(1) var<storage, read> a : S;
+@group(3) @binding(2) var<storage, read> b : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {}
 )";
 

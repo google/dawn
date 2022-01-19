@@ -27,7 +27,7 @@ using ResolverAssignmentValidationTest = ResolverTest;
 
 TEST_F(ResolverAssignmentValidationTest, ReadOnlyBuffer) {
   // [[block]] struct S { m : i32 };
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<storage,read> a : S;
   auto* s = Structure("S", {Member("m", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
@@ -251,7 +251,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
   // [[block]] struct S { a : atomic<i32>; };
-  // [[group(0), binding(0)]] var<storage, read_write> v : S;
+  // @group(0) @binding(0) var<storage, read_write> v : S;
   // v.a = v.a;
 
   auto* s = Structure("S", {Member("a", ty.atomic(ty.i32()))},
@@ -273,7 +273,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
   // [[block]] struct S { a : array<f32>; };
-  // [[group(0), binding(0)]] var<storage, read_write> v : S;
+  // @group(0) @binding(0) var<storage, read_write> v : S;
   // v.a = v.a;
 
   auto* s = Structure("S", {Member("a", ty.array(ty.f32()))},
@@ -299,7 +299,7 @@ TEST_F(ResolverAssignmentValidationTest,
   // struct S {
   //   arr: array<i32>;
   // };
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   // fn f() {
   //   _ = s;
   // }
@@ -320,7 +320,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
   // struct S {
   //   arr: array<i32>;
   // };
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   // fn f() {
   //   _ = s.arr;
   // }
@@ -347,10 +347,10 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
   // struct U {
   //   i:   i32;
   // };
-  // [[group(0), binding(0)]] var tex texture_2d;
-  // [[group(0), binding(1)]] var smp sampler;
-  // [[group(0), binding(2)]] var<uniform> u : U;
-  // [[group(0), binding(3)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var tex texture_2d;
+  // @group(0) @binding(1) var smp sampler;
+  // @group(0) @binding(2) var<uniform> u : U;
+  // @group(0) @binding(3) var<storage, read_write> s : S;
   // var<workgroup> wg : array<f32, 10>
   // fn f() {
   //   _ = 1;

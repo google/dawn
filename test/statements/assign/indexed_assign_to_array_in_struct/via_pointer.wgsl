@@ -10,9 +10,9 @@ struct OuterS {
   a1 : array<InnerS, 8>;
 };
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;

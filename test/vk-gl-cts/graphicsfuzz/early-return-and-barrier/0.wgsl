@@ -2,7 +2,7 @@ struct theSSBO {
   out_data : i32;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> x_4 : theSSBO;
+@group(0) @binding(0) var<storage, read_write> x_4 : theSSBO;
 
 fn main_1() {
   var x_30 : mat2x2<f32>;
@@ -37,7 +37,7 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(1, 1, 1)]]
+@stage(compute) @workgroup_size(1, 1, 1)
 fn main() {
   main_1();
 }

@@ -20,7 +20,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, DecorationList_Parses) {
-  auto p = parser(R"([[location(4), builtin(position)]])");
+  auto p = parser(R"(@location(4) @builtin(position))");
   auto decos = p->decoration_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -39,65 +39,94 @@ TEST_F(ParserImplTest, DecorationList_Parses) {
             ast::Builtin::kPosition);
 }
 
-TEST_F(ParserImplTest, DecorationList_Empty) {
+TEST_F(ParserImplTest, DecorationList_Invalid) {
+  auto p = parser(R"(@invalid)");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_TRUE(decos.value.empty());
+  EXPECT_EQ(p->error(), R"(1:2: expected decoration)");
+}
+
+TEST_F(ParserImplTest, DecorationList_InvalidValue) {
+  auto p = parser("@builtin(invalid)");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_TRUE(decos.value.empty());
+  EXPECT_EQ(p->error(), "1:10: invalid value for builtin decoration");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_Empty) {
   auto p = parser(R"([[]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(), "1:3: empty decoration list");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:3: empty decoration list)");
 }
 
-TEST_F(ParserImplTest, DecorationList_Invalid) {
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_Invalid) {
   auto p = parser(R"([[invalid]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(), "1:3: expected decoration");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:3: expected decoration)");
 }
 
-TEST_F(ParserImplTest, DecorationList_ExtraComma) {
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_ExtraComma) {
   auto p = parser(R"([[builtin(position), ]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(), "1:22: expected decoration");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:22: expected decoration)");
 }
 
-TEST_F(ParserImplTest, DecorationList_MissingComma) {
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_MissingComma) {
   auto p = parser(R"([[binding(4) location(5)]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(), "1:14: expected ',' for decoration list");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:14: expected ',' for decoration list)");
 }
 
-TEST_F(ParserImplTest, DecorationList_BadDecoration) {
-  auto p = parser(R"([[location(bad)]])");
-  auto decos = p->decoration_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(),
-            "1:12: expected signed integer literal for location decoration");
-}
-
-TEST_F(ParserImplTest, DecorationList_InvalidBuiltin) {
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_InvalidValue) {
   auto p = parser("[[builtin(invalid)]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(), "1:11: invalid value for builtin decoration");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:11: invalid value for builtin decoration)");
 }
 
 }  // namespace

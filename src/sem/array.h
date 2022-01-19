@@ -61,12 +61,12 @@ class Array : public Castable<Array, Type> {
 
   /// @returns the byte alignment of the array
   /// @note this may differ from the alignment of a structure member of this
-  /// array type, if the member is annotated with the `[[align(n)]]` decoration.
+  /// array type, if the member is annotated with the `@align(n)` decoration.
   uint32_t Align() const override;
 
   /// @returns the byte size of the array
   /// @note this may differ from the size of a structure member of this array
-  /// type, if the member is annotated with the `[[size(n)]]` decoration.
+  /// type, if the member is annotated with the `@size(n)` decoration.
   uint32_t Size() const override;
 
   /// @returns the number of bytes from the start of one element of the

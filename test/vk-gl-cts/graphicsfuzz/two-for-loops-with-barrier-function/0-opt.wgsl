@@ -2,7 +2,7 @@ struct buf0 {
   injectionSwitch : vec2<f32>;
 };
 
-type RTArr = [[stride(4)]] array<u32>;
+type RTArr = @stride(4) array<u32>;
 
 struct doesNotMatter {
   x_compute_data : RTArr;
@@ -10,9 +10,9 @@ struct doesNotMatter {
 
 var<private> GLF_live2gl_FragCoord : vec4<f32>;
 
-[[group(0), binding(1)]] var<uniform> x_9 : buf0;
+@group(0) @binding(1) var<uniform> x_9 : buf0;
 
-[[group(0), binding(0)]] var<storage, read_write> x_12 : doesNotMatter;
+@group(0) @binding(0) var<storage, read_write> x_12 : doesNotMatter;
 
 fn main_1() {
   var GLF_live2_looplimiter1 : i32;
@@ -91,7 +91,7 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(1, 18, 6)]]
+@stage(compute) @workgroup_size(1, 18, 6)
 fn main() {
   main_1();
 }

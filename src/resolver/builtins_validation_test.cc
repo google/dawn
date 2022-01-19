@@ -201,10 +201,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          testing::ValuesIn(cases));
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn fs_main(
-  //   [[builtin(frag_depth)]] fd: f32,
-  // ) -> [[location(0)]] f32 { return 1.0; }
+  //   @builtin(frag_depth) fd: f32,
+  // ) -> @location(0) f32 { return 1.0; }
   auto* fd = Param(
       "fd", ty.f32(),
       ast::DecorationList{Builtin(Source{{12, 34}}, ast::Builtin::kFragDepth)});
@@ -219,10 +219,10 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
   // struct MyInputs {
-  //   [[builtin(frag_depth)]] ff: f32;
+  //   @builtin(frag_depth) ff: f32;
   // };
-  // [[stage(fragment)]]
-  // fn fragShader(arg: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+  // @stage(fragment)
+  // fn fragShader(arg: MyInputs) -> @location(0) f32 { return 1.0; }
 
   auto* s = Structure(
       "MyInputs", {Member("frag_depth", ty.f32(),
@@ -240,9 +240,9 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
 
 TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {
   // struct S {
-  //   [[builtin(vertex_index)]] idx: u32;
+  //   @builtin(vertex_index) idx: u32;
   // };
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn fragShader() { var s : S; }
 
   Structure("S",
@@ -257,10 +257,10 @@ TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {
 
 TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {
   // struct MyInputs {
-  //   [[builtin(kPosition)]] p: vec4<u32>;
+  //   @builtin(kPosition) p: vec4<u32>;
   // };
-  // [[stage(fragment)]]
-  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+  // @stage(fragment)
+  // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
   auto* m = Member(
       "position", ty.vec4<u32>(),
@@ -275,8 +275,8 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_ReturnType_Fail) {
-  // [[stage(vertex)]]
-  // fn main() -> [[builtin(position)]] f32 { return 1.0; }
+  // @stage(vertex)
+  // fn main() -> @builtin(position) f32 { return 1.0; }
   Func("main", {}, ty.f32(), {Return(1.0f)},
        {Stage(ast::PipelineStage::kVertex)},
        {Builtin(Source{{12, 34}}, ast::Builtin::kPosition)});
@@ -288,10 +288,10 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_ReturnType_Fail) {
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthNotF32_Struct_Fail) {
   // struct MyInputs {
-  //   [[builtin(kFragDepth)]] p: i32;
+  //   @builtin(kFragDepth) p: i32;
   // };
-  // [[stage(fragment)]]
-  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+  // @stage(fragment)
+  // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
   auto* m = Member(
       "frag_depth", ty.i32(),
@@ -307,10 +307,10 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthNotF32_Struct_Fail) {
 
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
   // struct MyInputs {
-  //   [[builtin(sample_mask)]] m: f32;
+  //   @builtin(sample_mask) m: f32;
   // };
-  // [[stage(fragment)]]
-  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+  // @stage(fragment)
+  // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
   auto* s = Structure(
       "MyInputs", {Member("m", ty.f32(),
@@ -325,8 +325,8 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
-  // [[stage(fragment)]]
-  // fn main() -> [[builtin(sample_mask)]] i32 { return 1; }
+  // @stage(fragment)
+  // fn main() -> @builtin(sample_mask) i32 { return 1; }
   Func("main", {}, ty.i32(), {Return(1)},
        {Stage(ast::PipelineStage::kFragment)},
        {Builtin(Source{{12, 34}}, ast::Builtin::kSampleMask)});
@@ -337,10 +337,10 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskIsNotU32_Fail) {
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn fs_main(
-  //   [[builtin(sample_mask)]] arg: bool
-  // ) -> [[location(0)]] f32 { return 1.0; }
+  //   @builtin(sample_mask) arg: bool
+  // ) -> @location(0) f32 { return 1.0; }
   auto* arg = Param("arg", ty.bool_(),
                     ast::DecorationList{
                         Builtin(Source{{12, 34}}, ast::Builtin::kSampleMask)});
@@ -354,10 +354,10 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskIsNotU32_Fail) {
 
 TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Struct_Fail) {
   // struct MyInputs {
-  //   [[builtin(sample_index)]] m: f32;
+  //   @builtin(sample_index) m: f32;
   // };
-  // [[stage(fragment)]]
-  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+  // @stage(fragment)
+  // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
   auto* s = Structure(
       "MyInputs", {Member("m", ty.f32(),
@@ -372,10 +372,10 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Struct_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Fail) {
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn fs_main(
-  //   [[builtin(sample_index)]] arg: bool
-  // ) -> [[location(0)]] f32 { return 1.0; }
+  //   @builtin(sample_index) arg: bool
+  // ) -> @location(0) f32 { return 1.0; }
   auto* arg = Param("arg", ty.bool_(),
                     ast::DecorationList{
                         Builtin(Source{{12, 34}}, ast::Builtin::kSampleIndex)});
@@ -388,10 +388,10 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, PositionIsNotF32_Fail) {
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn fs_main(
-  //   [[builtin(kPosition)]] p: vec3<f32>,
-  // ) -> [[location(0)]] f32 { return 1.0; }
+  //   @builtin(kPosition) p: vec3<f32>,
+  // ) -> @location(0) f32 { return 1.0; }
   auto* p = Param(
       "p", ty.vec3<f32>(),
       ast::DecorationList{Builtin(Source{{12, 34}}, ast::Builtin::kPosition)});
@@ -404,8 +404,8 @@ TEST_F(ResolverBuiltinsValidationTest, PositionIsNotF32_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsNotF32_Fail) {
-  // [[stage(fragment)]]
-  // fn fs_main() -> [[builtin(kFragDepth)]] f32 { var fd: i32; return fd; }
+  // @stage(fragment)
+  // fn fs_main() -> @builtin(kFragDepth) f32 { var fd: i32; return fd; }
   auto* fd = Var("fd", ty.i32());
   Func(
       "fs_main", {}, ty.i32(), {Decl(fd), Return(fd)},
@@ -417,11 +417,11 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsNotF32_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, VertexIndexIsNotU32_Fail) {
-  // [[stage(vertex)]]
+  // @stage(vertex)
   // fn main(
-  //   [[builtin(kVertexIndex)]] vi : f32,
-  //   [[builtin(kPosition)]] p :vec4<f32>
-  // ) -> [[builtin(kPosition)]] vec4<f32> { return vec4<f32>(); }
+  //   @builtin(kVertexIndex) vi : f32,
+  //   @builtin(kPosition) p :vec4<f32>
+  // ) -> @builtin(kPosition) vec4<f32> { return vec4<f32>(); }
   auto* p = Param("p", ty.vec4<f32>(),
                   ast::DecorationList{Builtin(ast::Builtin::kPosition)});
   auto* vi = Param("vi", ty.f32(),
@@ -436,11 +436,11 @@ TEST_F(ResolverBuiltinsValidationTest, VertexIndexIsNotU32_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, InstanceIndexIsNotU32) {
-  // [[stage(vertex)]]
+  // @stage(vertex)
   // fn main(
-  //   [[builtin(kInstanceIndex)]] ii : f32,
-  //   [[builtin(kPosition)]] p :vec4<f32>
-  // ) -> [[builtin(kPosition)]] vec4<f32> { return vec4<f32>(); }
+  //   @builtin(kInstanceIndex) ii : f32,
+  //   @builtin(kPosition) p :vec4<f32>
+  // ) -> @builtin(kPosition) vec4<f32> { return vec4<f32>(); }
   auto* p = Param("p", ty.vec4<f32>(),
                   ast::DecorationList{Builtin(ast::Builtin::kPosition)});
   auto* ii = Param("ii", ty.f32(),
@@ -455,13 +455,13 @@ TEST_F(ResolverBuiltinsValidationTest, InstanceIndexIsNotU32) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltin_Pass) {
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn fs_main(
-  //   [[builtin(kPosition)]] p: vec4<f32>,
-  //   [[builtin(front_facing)]] ff: bool,
-  //   [[builtin(sample_index)]] si: u32,
-  //   [[builtin(sample_mask)]] sm : u32
-  // ) -> [[builtin(frag_depth)]] f32 { var fd: f32; return fd; }
+  //   @builtin(kPosition) p: vec4<f32>,
+  //   @builtin(front_facing) ff: bool,
+  //   @builtin(sample_index) si: u32,
+  //   @builtin(sample_mask) sm : u32
+  // ) -> @builtin(frag_depth) f32 { var fd: f32; return fd; }
   auto* p = Param("p", ty.vec4<f32>(),
                   ast::DecorationList{Builtin(ast::Builtin::kPosition)});
   auto* ff = Param("ff", ty.bool_(),
@@ -479,11 +479,11 @@ TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltin_Pass) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, VertexBuiltin_Pass) {
-  // [[stage(vertex)]]
+  // @stage(vertex)
   // fn main(
-  //   [[builtin(vertex_index)]] vi : u32,
-  //   [[builtin(instance_index)]] ii : u32,
-  // ) -> [[builtin(position)]] vec4<f32> { var p :vec4<f32>; return p; }
+  //   @builtin(vertex_index) vi : u32,
+  //   @builtin(instance_index) ii : u32,
+  // ) -> @builtin(position) vec4<f32> { var p :vec4<f32>; return p; }
   auto* vi = Param("vi", ty.u32(),
                    ast::DecorationList{
                        Builtin(Source{{12, 34}}, ast::Builtin::kVertexIndex)});
@@ -504,13 +504,13 @@ TEST_F(ResolverBuiltinsValidationTest, VertexBuiltin_Pass) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn main(
-  //   [[builtin(local_invocationId)]] li_id: vec3<u32>,
-  //   [[builtin(local_invocationIndex)]] li_index: u32,
-  //   [[builtin(global_invocationId)]] gi: vec3<u32>,
-  //   [[builtin(workgroup_id)]] wi: vec3<u32>,
-  //   [[builtin(num_workgroups)]] nwgs: vec3<u32>,
+  //   @builtin(local_invocationId) li_id: vec3<u32>,
+  //   @builtin(local_invocationIndex) li_index: u32,
+  //   @builtin(global_invocationId) gi: vec3<u32>,
+  //   @builtin(workgroup_id) wi: vec3<u32>,
+  //   @builtin(num_workgroups) nwgs: vec3<u32>,
   // ) {}
 
   auto* li_id =
@@ -618,13 +618,13 @@ TEST_F(ResolverBuiltinsValidationTest,
 
 TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltinStruct_Pass) {
   // Struct MyInputs {
-  //   [[builtin(kPosition)]] p: vec4<f32>;
-  //   [[builtin(frag_depth)]] fd: f32;
-  //   [[builtin(sample_index)]] si: u32;
-  //   [[builtin(sample_mask)]] sm : u32;;
+  //   @builtin(kPosition) p: vec4<f32>;
+  //   @builtin(frag_depth) fd: f32;
+  //   @builtin(sample_index) si: u32;
+  //   @builtin(sample_mask) sm : u32;;
   // };
-  // [[stage(fragment)]]
-  // fn fragShader(arg: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+  // @stage(fragment)
+  // fn fragShader(arg: MyInputs) -> @location(0) f32 { return 1.0; }
 
   auto* s = Structure(
       "MyInputs",
@@ -642,10 +642,10 @@ TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltinStruct_Pass) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsNotBool_Fail) {
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn fs_main(
-  //   [[builtin(front_facing)]] is_front: i32;
-  // ) -> [[location(0)]] f32 { return 1.0; }
+  //   @builtin(front_facing) is_front: i32;
+  // ) -> @location(0) f32 { return 1.0; }
 
   auto* is_front = Param("is_front", ty.i32(),
                          ast::DecorationList{Builtin(
@@ -661,10 +661,10 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsNotBool_Fail) {
 
 TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
   // struct MyInputs {
-  //   [[builtin(front_facing)]] pos: f32;
+  //   @builtin(front_facing) pos: f32;
   // };
-  // [[stage(fragment)]]
-  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+  // @stage(fragment)
+  // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
   auto* s = Structure(
       "MyInputs", {Member("pos", ty.f32(),

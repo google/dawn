@@ -16,9 +16,9 @@ var<private> x_GLF_FragCoord : vec4<f32>;
 
 var<private> x_GLF_pos : vec4<f32>;
 
-[[group(0), binding(1)]] var<uniform> x_34 : buf1;
+@group(0) @binding(1) var<uniform> x_34 : buf1;
 
-[[group(0), binding(0)]] var<uniform> x_37 : buf0;
+@group(0) @binding(0) var<uniform> x_37 : buf0;
 
 var<private> frag_color : vec4<f32>;
 
@@ -258,14 +258,14 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   frag_color_1 : vec4<f32>;
-  [[builtin(position)]]
+  @builtin(position)
   gl_Position : vec4<f32>;
 };
 
-[[stage(vertex)]]
-fn main([[location(0)]] x_GLF_pos_param : vec4<f32>) -> main_out {
+@stage(vertex)
+fn main(@location(0) x_GLF_pos_param : vec4<f32>) -> main_out {
   x_GLF_pos = x_GLF_pos_param;
   main_1();
   return main_out(frag_color, gl_Position);

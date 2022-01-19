@@ -25,19 +25,19 @@
 struct SB_RW {
   arg_0: atomic<i32>;
 };
-[[group(0), binding(0)]] var<storage, read_write> sb_rw : SB_RW;
+@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
 
 // fn atomicAnd(ptr<storage, atomic<i32>, read_write>, i32) -> i32
 fn atomicAnd_152966() {
   var res: i32 = atomicAnd(&sb_rw.arg_0, 1);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn fragment_main() {
   atomicAnd_152966();
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn compute_main() {
   atomicAnd_152966();
 }

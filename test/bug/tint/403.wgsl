@@ -6,12 +6,12 @@ struct vertexUniformBuffer2 {
   transform2 : mat2x2<f32>;
 };
 
-[[group(0), binding(0)]] var<uniform> x_20 : vertexUniformBuffer1;
-[[group(1), binding(0)]] var<uniform> x_26 : vertexUniformBuffer2;
+@group(0) @binding(0) var<uniform> x_20 : vertexUniformBuffer1;
+@group(1) @binding(0) var<uniform> x_26 : vertexUniformBuffer2;
 
 
-[[stage(vertex)]]
-fn main([[builtin(vertex_index)]] gl_VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn main(@builtin(vertex_index) gl_VertexIndex : u32) -> @builtin(position) vec4<f32> {
   var indexable : array<vec2<f32>, 3>;
   let x_23 : mat2x2<f32> = x_20.transform1;
   let x_28 : mat2x2<f32> = x_26.transform2;

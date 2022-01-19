@@ -154,7 +154,8 @@ TEST_F(ParserImplTest, StructDecl_InvalidDecorationDecl) {
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(
       p->error(),
-      R"(1:3: use of deprecated language feature: [[block]] attributes have been removed from WGSL
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:3: use of deprecated language feature: [[block]] attributes have been removed from WGSL
 1:9: expected ']]' for decoration list)");
 }
 

@@ -46,11 +46,11 @@ var<private> arr : array<i32, 4>;
 
 TEST_F(PadArrayElementsTest, ArrayAsGlobal) {
   auto* src = R"(
-var<private> arr : [[stride(8)]] array<i32, 4>;
+var<private> arr : @stride(8) array<i32, 4>;
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 
@@ -65,12 +65,12 @@ var<private> arr : array<tint_padded_array_element, 4u>;
 TEST_F(PadArrayElementsTest, RuntimeArray) {
   auto* src = R"(
 struct S {
-  rta : [[stride(8)]] array<i32>;
+  rta : @stride(8) array<i32>;
 };
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 
@@ -87,15 +87,15 @@ struct S {
 TEST_F(PadArrayElementsTest, ArrayFunctionVar) {
   auto* src = R"(
 fn f() {
-  var arr : [[stride(16)]] array<i32, 4>;
-  arr = [[stride(16)]] array<i32, 4>();
-  arr = [[stride(16)]] array<i32, 4>(1, 2, 3, 4);
+  var arr : @stride(16) array<i32, 4>;
+  arr = @stride(16) array<i32, 4>();
+  arr = @stride(16) array<i32, 4>(1, 2, 3, 4);
   let x = arr[3];
 }
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
-  [[size(16)]]
+  @size(16)
   el : i32;
 }
 
@@ -114,13 +114,13 @@ fn f() {
 
 TEST_F(PadArrayElementsTest, ArrayAsParam) {
   auto* src = R"(
-fn f(a : [[stride(12)]] array<i32, 4>) -> i32 {
+fn f(a : @stride(12) array<i32, 4>) -> i32 {
   return a[2];
 }
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
-  [[size(12)]]
+  @size(12)
   el : i32;
 }
 
@@ -137,14 +137,14 @@ fn f(a : array<tint_padded_array_element, 4u>) -> i32 {
 // TODO(crbug.com/tint/781): Cannot parse the stride on the return array type.
 TEST_F(PadArrayElementsTest, DISABLED_ArrayAsReturn) {
   auto* src = R"(
-fn f() -> [[stride(8)]] array<i32, 4> {
+fn f() -> @stride(8) array<i32, 4> {
   return array<i32, 4>(1, 2, 3, 4);
 }
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
   el : i32;
-  [[size(4)]]
+  @size(4)
   padding : u32;
 };
 
@@ -160,7 +160,7 @@ fn f() -> array<tint_padded_array_element, 4> {
 
 TEST_F(PadArrayElementsTest, ArrayAlias) {
   auto* src = R"(
-type Array = [[stride(16)]] array<i32, 4>;
+type Array = @stride(16) array<i32, 4>;
 
 fn f() {
   var arr : Array;
@@ -173,7 +173,7 @@ fn f() {
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
-  [[size(16)]]
+  @size(16)
   el : i32;
 }
 
@@ -197,25 +197,25 @@ fn f() {
 TEST_F(PadArrayElementsTest, ArraysInStruct) {
   auto* src = R"(
 struct S {
-  a : [[stride(8)]] array<i32, 4>;
-  b : [[stride(8)]] array<i32, 8>;
-  c : [[stride(8)]] array<i32, 4>;
-  d : [[stride(12)]] array<i32, 8>;
+  a : @stride(8) array<i32, 4>;
+  b : @stride(8) array<i32, 8>;
+  c : @stride(8) array<i32, 4>;
+  d : @stride(12) array<i32, 8>;
 };
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 
 struct tint_padded_array_element_1 {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 
 struct tint_padded_array_element_2 {
-  [[size(12)]]
+  @size(12)
   el : i32;
 }
 
@@ -235,39 +235,39 @@ struct S {
 TEST_F(PadArrayElementsTest, ArraysOfArraysInStruct) {
   auto* src = R"(
 struct S {
-  a : [[stride(512)]] array<i32, 4>;
-  b : [[stride(512)]] array<[[stride(32)]] array<i32, 4>, 4>;
-  c : [[stride(512)]] array<[[stride(64)]] array<[[stride(8)]] array<i32, 4>, 4>, 4>;
+  a : @stride(512) array<i32, 4>;
+  b : @stride(512) array<@stride(32) array<i32, 4>, 4>;
+  c : @stride(512) array<@stride(64) array<@stride(8) array<i32, 4>, 4>, 4>;
 };
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
-  [[size(512)]]
+  @size(512)
   el : i32;
 }
 
 struct tint_padded_array_element_2 {
-  [[size(32)]]
+  @size(32)
   el : i32;
 }
 
 struct tint_padded_array_element_1 {
-  [[size(512)]]
+  @size(512)
   el : array<tint_padded_array_element_2, 4u>;
 }
 
 struct tint_padded_array_element_5 {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 
 struct tint_padded_array_element_4 {
-  [[size(64)]]
+  @size(64)
   el : array<tint_padded_array_element_5, 4u>;
 }
 
 struct tint_padded_array_element_3 {
-  [[size(512)]]
+  @size(512)
   el : array<tint_padded_array_element_4, 4u>;
 }
 
@@ -286,9 +286,9 @@ struct S {
 TEST_F(PadArrayElementsTest, AccessArraysOfArraysInStruct) {
   auto* src = R"(
 struct S {
-  a : [[stride(512)]] array<i32, 4>;
-  b : [[stride(512)]] array<[[stride(32)]] array<i32, 4>, 4>;
-  c : [[stride(512)]] array<[[stride(64)]] array<[[stride(8)]] array<i32, 4>, 4>, 4>;
+  a : @stride(512) array<i32, 4>;
+  b : @stride(512) array<@stride(32) array<i32, 4>, 4>;
+  c : @stride(512) array<@stride(64) array<@stride(8) array<i32, 4>, 4>, 4>;
 };
 
 fn f(s : S) -> i32 {
@@ -297,32 +297,32 @@ fn f(s : S) -> i32 {
 )";
   auto* expect = R"(
 struct tint_padded_array_element {
-  [[size(512)]]
+  @size(512)
   el : i32;
 }
 
 struct tint_padded_array_element_2 {
-  [[size(32)]]
+  @size(32)
   el : i32;
 }
 
 struct tint_padded_array_element_1 {
-  [[size(512)]]
+  @size(512)
   el : array<tint_padded_array_element_2, 4u>;
 }
 
 struct tint_padded_array_element_5 {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 
 struct tint_padded_array_element_4 {
-  [[size(64)]]
+  @size(64)
   el : array<tint_padded_array_element_5, 4u>;
 }
 
 struct tint_padded_array_element_3 {
-  [[size(512)]]
+  @size(512)
   el : array<tint_padded_array_element_4, 4u>;
 }
 
@@ -346,24 +346,24 @@ TEST_F(PadArrayElementsTest, DeclarationOrder) {
   auto* src = R"(
 type T0 = i32;
 
-type T1 = [[stride(8)]] array<i32, 1>;
+type T1 = @stride(8) array<i32, 1>;
 
 type T2 = i32;
 
-fn f1(a : [[stride(8)]] array<i32, 2>) {
+fn f1(a : @stride(8) array<i32, 2>) {
 }
 
 type T3 = i32;
 
 fn f2() {
-  var v : [[stride(8)]] array<i32, 3>;
+  var v : @stride(8) array<i32, 3>;
 }
 )";
   auto* expect = R"(
 type T0 = i32;
 
 struct tint_padded_array_element {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 
@@ -372,7 +372,7 @@ type T1 = array<tint_padded_array_element, 1u>;
 type T2 = i32;
 
 struct tint_padded_array_element_1 {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 
@@ -382,7 +382,7 @@ fn f1(a : array<tint_padded_array_element_1, 2u>) {
 type T3 = i32;
 
 struct tint_padded_array_element_2 {
-  [[size(8)]]
+  @size(8)
   el : i32;
 }
 

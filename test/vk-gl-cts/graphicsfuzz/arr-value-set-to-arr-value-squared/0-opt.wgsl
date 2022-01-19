@@ -10,7 +10,7 @@ var<private> obj : QuicksortObject;
 
 var<private> x_GLF_color : vec4<f32>;
 
-[[group(0), binding(0)]] var<uniform> x_30 : buf0;
+@group(0) @binding(0) var<uniform> x_30 : buf0;
 
 fn swap_i1_i1_(i : ptr<function, i32>, j : ptr<function, i32>) {
   var temp : i32;
@@ -185,11 +185,11 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   x_GLF_color_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() -> main_out {
   main_1();
   return main_out(x_GLF_color);

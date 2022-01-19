@@ -65,7 +65,7 @@ class DisableValidationDecoration
   ~DisableValidationDecoration() override;
 
   /// @return a short description of the internal decoration which will be
-  /// displayed in WGSL as `[[internal(<name>)]]` (but is not parsable).
+  /// displayed in WGSL as `@internal(<name>)` (but is not parsable).
   std::string InternalName() const override;
 
   /// Performs a deep clone of this object using the CloneContext `ctx`.

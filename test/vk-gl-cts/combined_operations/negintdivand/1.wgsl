@@ -16,12 +16,12 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   color_out_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
-fn main([[location(1)]] frag_color_param : vec4<f32>) -> main_out {
+@stage(fragment)
+fn main(@location(1) frag_color_param : vec4<f32>) -> main_out {
   frag_color = frag_color_param;
   main_1();
   return main_out(color_out);

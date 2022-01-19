@@ -26,7 +26,7 @@ TEST_F(GlslTest, AddEmptyEntryPoint) {
   auto* src = R"()";
 
   auto* expect = R"(
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn unused_entry_point() {
 }
 )";

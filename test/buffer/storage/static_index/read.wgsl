@@ -12,12 +12,12 @@ struct S {
     g : mat2x3<f32>;
     h : mat3x2<f32>;
     i : Inner;
-    j : [[stride(16)]] array<Inner, 4>;
+    j : @stride(16) array<Inner, 4>;
 };
 
-[[binding(0), group(0)]] var<storage, read> s : S;
+@binding(0) @group(0) var<storage, read> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
     let a = s.a;
     let b = s.b;

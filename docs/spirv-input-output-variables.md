@@ -85,8 +85,8 @@ through the copying and optimize the result.
 Current translation, through SPIR-V, SPIR-V reader, WGSL writer:
 
 ```groovy
-    [[location(0)]] var<out> frag_colour : vec4<f32>;
-    [[location(0)]] var<in> the_colour : vec4<f32>;
+    @location(0) var<out> frag_colour : vec4<f32>;
+    @location(0) var<in> the_colour : vec4<f32>;
 
     fn bar_() -> void {
       const x_14 : vec4<f32> = the_colour;
@@ -94,7 +94,7 @@ Current translation, through SPIR-V, SPIR-V reader, WGSL writer:
       return;
     }
 
-    [[stage(fragment)]]
+    @stage(fragment)
     fn main() -> void {
       bar_();
       return;
@@ -123,14 +123,14 @@ Proposed translation, through SPIR-V, SPIR-V reader, WGSL writer:
 
     // Declare a structure type to collect the return values.
     struct main_result_type {
-      [[location(0)]] frag_color : vec4<f32>;
+      @location(0) frag_color : vec4<f32>;
     };
 
-    [[stage(fragment)]]
+    @stage(fragment)
     fn main(
 
       // 'in' variables are entry point parameters
-      [[location(0)]] the_color_arg : vec4<f32>
+      @location(0) the_color_arg : vec4<f32>
 
     ) -> main_result_type {
 

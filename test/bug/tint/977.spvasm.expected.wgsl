@@ -1,12 +1,12 @@
-type RTArr = [[stride(4)]] array<f32>;
+type RTArr = @stride(4) array<f32>;
 
-type RTArr_1 = [[stride(4)]] array<f32>;
+type RTArr_1 = @stride(4) array<f32>;
 
 struct ResultMatrix {
   numbers : RTArr_1;
 }
 
-type RTArr_2 = [[stride(4)]] array<f32>;
+type RTArr_2 = @stride(4) array<f32>;
 
 struct FirstMatrix {
   numbers : RTArr_1;
@@ -24,13 +24,13 @@ struct Uniforms {
 
 var<private> gl_GlobalInvocationID : vec3<u32>;
 
-[[group(0), binding(2)]] var<storage, read_write> resultMatrix : ResultMatrix;
+@group(0) @binding(2) var<storage, read_write> resultMatrix : ResultMatrix;
 
-[[group(0), binding(0)]] var<storage, read> firstMatrix : FirstMatrix;
+@group(0) @binding(0) var<storage, read> firstMatrix : FirstMatrix;
 
-[[group(0), binding(1)]] var<storage, read> secondMatrix : SecondMatrix;
+@group(0) @binding(1) var<storage, read> secondMatrix : SecondMatrix;
 
-[[group(0), binding(3)]] var<uniform> x_46 : Uniforms;
+@group(0) @binding(3) var<uniform> x_46 : Uniforms;
 
 fn binaryOperation_f1_f1_(a : ptr<function, f32>, b : ptr<function, f32>) -> f32 {
   var x_26 : f32;
@@ -69,8 +69,8 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(1, 1, 1)]]
-fn main([[builtin(global_invocation_id)]] gl_GlobalInvocationID_param : vec3<u32>) {
+@stage(compute) @workgroup_size(1, 1, 1)
+fn main(@builtin(global_invocation_id) gl_GlobalInvocationID_param : vec3<u32>) {
   gl_GlobalInvocationID = gl_GlobalInvocationID_param;
   main_1();
 }

@@ -65,12 +65,12 @@ TEST_F(ArrayTest, FriendlyNameStaticSized) {
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSizedNonImplicitStride) {
   auto* arr = create<Array>(create<I32>(), 0, 0, 4, 8, 4);
-  EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(8)]] array<i32>");
+  EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(8) array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSizedNonImplicitStride) {
   auto* arr = create<Array>(create<I32>(), 5, 4, 20, 8, 4);
-  EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(8)]] array<i32, 5>");
+  EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(8) array<i32, 5>");
 }
 
 TEST_F(ArrayTest, TypeName_RuntimeArray) {

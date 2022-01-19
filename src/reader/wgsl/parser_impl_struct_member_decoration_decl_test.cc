@@ -28,18 +28,20 @@ TEST_F(ParserImplTest, DecorationDecl_EmptyStr) {
   EXPECT_EQ(decos.value.size(), 0u);
 }
 
-TEST_F(ParserImplTest, DecorationDecl_EmptyBlock) {
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationDecl_EmptyBlock) {
   auto p = parser("[[]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_EQ(decos.value.size(), 0u);
-  EXPECT_EQ(p->error(), "1:3: empty decoration list");
+  EXPECT_EQ(p->error(), R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:3: empty decoration list)");
 }
 
 TEST_F(ParserImplTest, DecorationDecl_Single) {
-  auto p = parser("[[size(4)]]");
+  auto p = parser("@size(4)");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(decos.errored);
@@ -51,13 +53,13 @@ TEST_F(ParserImplTest, DecorationDecl_Single) {
 }
 
 TEST_F(ParserImplTest, DecorationDecl_InvalidDecoration) {
-  auto p = parser("[[size(nan)]]");
+  auto p = parser("@size(nan)");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error()) << p->error();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_EQ(p->error(),
-            "1:8: expected signed integer literal for size decoration");
+            "1:7: expected signed integer literal for size decoration");
 }
 
 TEST_F(ParserImplTest, DecorationDecl_MissingClose) {
@@ -66,7 +68,8 @@ TEST_F(ParserImplTest, DecorationDecl_MissingClose) {
   EXPECT_TRUE(p->has_error()) << p->error();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), "1:10: expected ']]' for decoration list");
+  EXPECT_EQ(p->error(), R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:10: expected ']]' for decoration list)");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_SizeMissingClose) {
@@ -75,7 +78,8 @@ TEST_F(ParserImplTest, StructMemberDecorationDecl_SizeMissingClose) {
   EXPECT_TRUE(p->has_error()) << p->error();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), "1:10: expected ']]' for decoration list");
+  EXPECT_EQ(p->error(), R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:10: expected ']]' for decoration list)");
 }
 
 }  // namespace

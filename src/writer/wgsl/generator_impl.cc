@@ -369,7 +369,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
   if (auto* ary = ty->As<ast::Array>()) {
     for (auto* deco : ary->decorations) {
       if (auto* stride = deco->As<ast::StrideDecoration>()) {
-        out << "[[stride(" << stride->stride << ")]] ";
+        out << "@stride(" << stride->stride << ") ";
       }
     }
 
@@ -526,7 +526,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
   line() << "struct " << program_->Symbols().NameFor(str->name) << " {";
 
   auto add_padding = [&](uint32_t size) {
-    line() << "[[size(" << size << ")]]";
+    line() << "@size(" << size << ")";
 
     // Note: u32 is the smallest primitive we currently support. When WGSL
     // supports smaller types, this will need to be updated.
@@ -536,7 +536,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
   increment_indent();
   uint32_t offset = 0;
   for (auto* mem : str->members) {
-    // TODO(crbug.com/tint/798) move the [[offset]] decoration handling to the
+    // TODO(crbug.com/tint/798) move the @offset decoration handling to the
     // transform::Wgsl sanitizer.
     if (auto* mem_sem = program_->Sem().Get(mem)) {
       offset = utils::RoundUp(mem_sem->Align(), offset);
@@ -625,14 +625,13 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* var) {
 
 bool GeneratorImpl::EmitDecorations(std::ostream& out,
                                     const ast::DecorationList& decos) {
-  out << "[[";
   bool first = true;
   for (auto* deco : decos) {
     if (!first) {
-      out << ", ";
+      out << " ";
     }
     first = false;
-
+    out << "@";
     if (auto* workgroup = deco->As<ast::WorkgroupDecoration>()) {
       auto values = workgroup->Values();
       out << "workgroup_size(";
@@ -686,7 +685,6 @@ bool GeneratorImpl::EmitDecorations(std::ostream& out,
       return false;
     }
   }
-  out << "]]";
 
   return true;
 }

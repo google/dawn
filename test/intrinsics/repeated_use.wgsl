@@ -1,6 +1,6 @@
 // Check that for backends that generate intrinsic helpers, repeated use of the
 // same intrinsic overload results in single helper being generated.
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
     _ = isNormal(vec4<f32>());
     _ = isNormal(vec4<f32>(1.));

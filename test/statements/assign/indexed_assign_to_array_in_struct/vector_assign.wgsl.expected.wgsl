@@ -6,13 +6,13 @@ struct OuterS {
   a1 : array<u32, 8>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
 fn f(i : u32) -> u32 {
   return (i + 1u);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   var v : vec3<f32>;

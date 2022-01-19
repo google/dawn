@@ -79,7 +79,7 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
 }
 
 TEST_F(ResolverTypeValidationTest, GlobalConstantNoConstructor_Pass) {
-  // [[override(0)]] let a :i32;
+  // @override(0) let a :i32;
   GlobalConst(Source{{12, 34}}, "a", ty.i32(), nullptr,
               ast::DecorationList{create<ast::OverrideDecoration>(0)});
 
@@ -336,7 +336,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
-  // var<private> a : [[stride(8)]] array<f32, 0x20000000>;
+  // var<private> a : @stride(8) array<f32, 0x20000000>;
   Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x20000000, 8),
          ast::StorageClass::kPrivate);
   EXPECT_FALSE(r()->Resolve());
@@ -396,7 +396,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_InvalidExpr) {
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
-  /// [[stage(vertex)]]
+  /// @stage(vertex)
   // fn func() { var a : array<i32>; }
 
   auto* var =
@@ -594,7 +594,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsLocalVariable) {
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
   // fn func(a : array<u32>) {}
-  // [[stage(vertex)]] fn main() {}
+  // @stage(vertex) fn main() {}
 
   auto* param = Param(Source{{12, 34}}, "a", ty.array<i32>());
 
@@ -855,7 +855,7 @@ static constexpr DimensionParams Dimension_cases[] = {
 
 using StorageTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(StorageTextureDimensionTest, All) {
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var a : texture_storage_*<ru32int, write>;
   auto& params = GetParam();
 
@@ -905,13 +905,13 @@ static constexpr FormatParams format_cases[] = {
 using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {
   auto& params = GetParam();
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var a : texture_storage_1d<*, write>;
-  // [[group(0), binding(1)]]
+  // @group(0) @binding(1)
   // var b : texture_storage_2d<*, write>;
-  // [[group(0), binding(2)]]
+  // @group(0) @binding(2)
   // var c : texture_storage_2d_array<*, write>;
-  // [[group(0), binding(3)]]
+  // @group(0) @binding(3)
   // var d : texture_storage_3d<*, write>;
 
   auto* st_a = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
@@ -951,7 +951,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 using StorageTextureAccessTest = ResolverTest;
 
 TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var a : texture_storage_1d<ru32int>;
 
   auto* st =
@@ -967,7 +967,7 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
 }
 
 TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var a : texture_storage_1d<ru32int, read_write>;
 
   auto* st =
@@ -984,7 +984,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
 }
 
 TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var a : texture_storage_1d<ru32int, read>;
 
   auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
@@ -1000,7 +1000,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
 }
 
 TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var a : texture_storage_1d<ru32int, write>;
 
   auto* st =

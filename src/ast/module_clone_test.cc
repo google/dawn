@@ -28,13 +28,13 @@ TEST(ModuleCloneTest, Clone) {
   // See also fuzzers/tint_ast_clone_fuzzer.cc for further coverage of cloning.
   Source::File file("test.wgsl", R"([[block]]
 struct S0 {
-  [[size(4)]]
+  @size(4)
   m0 : u32;
   m1 : array<u32>;
 };
 
 [[block]] struct S1 {
-  [[size(4)]]
+  @size(4)
   m0 : u32;
   m1 : array<u32, 6>;
 };
@@ -42,21 +42,21 @@ struct S0 {
 let c0 : i32 = 10;
 let c1 : bool = true;
 
-type t0 = [[stride(16)]] array<vec4<f32>>;
+type t0 = @stride(16) array<vec4<f32>>;
 type t1 = array<vec4<f32>>;
 
 var<private> g0 : u32 = 20u;
 var<private> g1 : f32 = 123.0;
-[[group(0), binding(0)]] var g2 : texture_2d<f32>;
-[[group(1), binding(0)]] var g3 : texture_depth_2d;
-[[group(2), binding(0)]] var g4 : texture_storage_2d<rg32float, write>;
-[[group(3), binding(0)]] var g5 : texture_depth_cube_array;
-[[group(4), binding(0)]] var g6 : texture_external;
+@group(0) @binding(0) var g2 : texture_2d<f32>;
+@group(1) @binding(0) var g3 : texture_depth_2d;
+@group(2) @binding(0) var g4 : texture_storage_2d<rg32float, write>;
+@group(3) @binding(0) var g5 : texture_depth_cube_array;
+@group(4) @binding(0) var g6 : texture_external;
 
 var<private> g7 : vec3<f32>;
-[[group(0), binding(1)]] var<storage, write> g8 : S0;
-[[group(1), binding(1)]] var<storage, read> g9 : S0;
-[[group(2), binding(1)]] var<storage, read_write> g10 : S0;
+@group(0) @binding(1) var<storage, write> g8 : S0;
+@group(1) @binding(1) var<storage, read> g9 : S0;
+@group(2) @binding(1) var<storage, read_write> g10 : S0;
 
 fn f0(p0 : bool) -> f32 {
   if (p0) {
@@ -101,7 +101,7 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
   return 1.0;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   f1(1.0, 2);
 }

@@ -39,387 +39,491 @@ class ParserImplErrorTest : public ParserImplTest {};
 
 TEST_F(ParserImplErrorTest, AdditiveInvalidExpr) {
   EXPECT("fn f() { return 1.0 + <; }",
-         "test.wgsl:1:23 error: unable to parse right side of + expression\n"
-         "fn f() { return 1.0 + <; }\n"
-         "                      ^\n");
+         R"(test.wgsl:1:23 error: unable to parse right side of + expression
+fn f() { return 1.0 + <; }
+                      ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, AndInvalidExpr) {
   EXPECT("fn f() { return 1 & >; }",
-         "test.wgsl:1:21 error: unable to parse right side of & expression\n"
-         "fn f() { return 1 & >; }\n"
-         "                    ^\n");
+         R"(test.wgsl:1:21 error: unable to parse right side of & expression
+fn f() { return 1 & >; }
+                    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, AliasDeclInvalidDeco) {
-  EXPECT("[[override]]type e=u32;",
-         "test.wgsl:1:3 error: unexpected decorations\n"
-         "[[override]]type e=u32;\n"
-         "  ^^^^^^^^\n");
+  EXPECT(
+      "@override type e=u32;",
+      R"(test.wgsl:1:2 error: unexpected decorations
+@override type e=u32;
+ ^^^^^^^^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_AliasDeclInvalidDeco) {
+  EXPECT(
+      "[[override]]type e=u32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[override]]type e=u32;
+^^
+
+test.wgsl:1:3 error: unexpected decorations
+[[override]]type e=u32;
+  ^^^^^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, IndexExprInvalidExpr) {
   EXPECT("fn f() { x = y[^]; }",
-         "test.wgsl:1:16 error: unable to parse expression inside []\n"
-         "fn f() { x = y[^]; }\n"
-         "               ^\n");
+         R"(test.wgsl:1:16 error: unable to parse expression inside []
+fn f() { x = y[^]; }
+               ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, IndexExprMissingRBracket) {
   EXPECT("fn f() { x = y[1; }",
-         "test.wgsl:1:17 error: expected ']' for index accessor\n"
-         "fn f() { x = y[1; }\n"
-         "                ^\n");
+         R"(test.wgsl:1:17 error: expected ']' for index accessor
+fn f() { x = y[1; }
+                ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment) {
-  EXPECT("fn f() { a; }",
-         "test.wgsl:1:11 error: expected '=' for assignment\n"
-         "fn f() { a; }\n"
-         "          ^\n");
+  EXPECT("fn f() { a; }", R"(test.wgsl:1:11 error: expected '=' for assignment
+fn f() { a; }
+          ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment2) {
   EXPECT("fn f() { a : i32; }",
-         "test.wgsl:1:10 error: expected 'var' for variable declaration\n"
-         "fn f() { a : i32; }\n"
-         "         ^\n");
+         R"(test.wgsl:1:10 error: expected 'var' for variable declaration
+fn f() { a : i32; }
+         ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingSemicolon) {
   EXPECT("fn f() { a = 1 }",
-         "test.wgsl:1:16 error: expected ';' for assignment statement\n"
-         "fn f() { a = 1 }\n"
-         "               ^\n");
+         R"(test.wgsl:1:16 error: expected ';' for assignment statement
+fn f() { a = 1 }
+               ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtInvalidLHS_IntrinsicFunctionName) {
   EXPECT("normalize = 5;",
-         "test.wgsl:1:1 error: statement found outside of function body\n"
-         "normalize = 5;\n"
-         "^^^^^^^^^\n");
+         R"(test.wgsl:1:1 error: statement found outside of function body
+normalize = 5;
+^^^^^^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtInvalidRHS) {
   EXPECT("fn f() { a = >; }",
-         "test.wgsl:1:14 error: unable to parse right side of assignment\n"
-         "fn f() { a = >; }\n"
-         "             ^\n");
+         R"(test.wgsl:1:14 error: unable to parse right side of assignment
+fn f() { a = >; }
+             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingLessThan) {
   EXPECT("fn f() { x = bitcast(y); }",
-         "test.wgsl:1:21 error: expected '<' for bitcast expression\n"
-         "fn f() { x = bitcast(y); }\n"
-         "                    ^\n");
+         R"(test.wgsl:1:21 error: expected '<' for bitcast expression
+fn f() { x = bitcast(y); }
+                    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingGreaterThan) {
   EXPECT("fn f() { x = bitcast<u32(y); }",
-         "test.wgsl:1:25 error: expected '>' for bitcast expression\n"
-         "fn f() { x = bitcast<u32(y); }\n"
-         "                        ^\n");
+         R"(test.wgsl:1:25 error: expected '>' for bitcast expression
+fn f() { x = bitcast<u32(y); }
+                        ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingType) {
   EXPECT("fn f() { x = bitcast<>(y); }",
-         "test.wgsl:1:22 error: invalid type for bitcast expression\n"
-         "fn f() { x = bitcast<>(y); }\n"
-         "                     ^\n");
+         R"(test.wgsl:1:22 error: invalid type for bitcast expression
+fn f() { x = bitcast<>(y); }
+                     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, BreakStmtMissingSemicolon) {
   EXPECT("fn f() { loop { break } }",
-         "test.wgsl:1:23 error: expected ';' for break statement\n"
-         "fn f() { loop { break } }\n"
-         "                      ^\n");
+         R"(test.wgsl:1:23 error: expected ';' for break statement
+fn f() { loop { break } }
+                      ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, CallExprMissingRParen) {
   EXPECT("fn f() { x = f(1.; }",
-         "test.wgsl:1:18 error: expected ')' for function call\n"
-         "fn f() { x = f(1.; }\n"
-         "                 ^\n");
+         R"(test.wgsl:1:18 error: expected ')' for function call
+fn f() { x = f(1.; }
+                 ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtMissingRParen) {
   EXPECT("fn f() { f(1.; }",
-         "test.wgsl:1:14 error: expected ')' for function call\n"
-         "fn f() { f(1.; }\n"
-         "             ^\n");
+         R"(test.wgsl:1:14 error: expected ')' for function call
+fn f() { f(1.; }
+             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument0) {
   EXPECT("fn f() { f(<); }",
-         "test.wgsl:1:12 error: expected ')' for function call\n"
-         "fn f() { f(<); }\n"
-         "           ^\n");
+         R"(test.wgsl:1:12 error: expected ')' for function call
+fn f() { f(<); }
+           ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument1) {
   EXPECT("fn f() { f(1.0, <); }",
-         "test.wgsl:1:17 error: expected ')' for function call\n"
-         "fn f() { f(1.0, <); }\n"
-         "                ^\n");
+         R"(test.wgsl:1:17 error: expected ')' for function call
+fn f() { f(1.0, <); }
+                ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtMissingSemicolon) {
   EXPECT("fn f() { f() }",
-         "test.wgsl:1:14 error: expected ';' for function call\n"
-         "fn f() { f() }\n"
-         "             ^\n");
+         R"(test.wgsl:1:14 error: expected ';' for function call
+fn f() { f() }
+             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ConstructorExprMissingLParen) {
   EXPECT("fn f() { x = vec2<u32>1,2); }",
-         "test.wgsl:1:23 error: expected '(' for type constructor\n"
-         "fn f() { x = vec2<u32>1,2); }\n"
-         "                      ^\n");
+         R"(test.wgsl:1:23 error: expected '(' for type constructor
+fn f() { x = vec2<u32>1,2); }
+                      ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ConstructorExprMissingRParen) {
   EXPECT("fn f() { x = vec2<u32>(1,2; }",
-         "test.wgsl:1:27 error: expected ')' for type constructor\n"
-         "fn f() { x = vec2<u32>(1,2; }\n"
-         "                          ^\n");
+         R"(test.wgsl:1:27 error: expected ')' for type constructor
+fn f() { x = vec2<u32>(1,2; }
+                          ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtInvalid) {
   EXPECT("fn f() { let >; }",
-         "test.wgsl:1:14 error: expected identifier for let declaration\n"
-         "fn f() { let >; }\n"
-         "             ^\n");
+         R"(test.wgsl:1:14 error: expected identifier for let declaration
+fn f() { let >; }
+             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtMissingAssignment) {
   EXPECT("fn f() { let a : i32; }",
-         "test.wgsl:1:21 error: expected '=' for let declaration\n"
-         "fn f() { let a : i32; }\n"
-         "                    ^\n");
+         R"(test.wgsl:1:21 error: expected '=' for let declaration
+fn f() { let a : i32; }
+                    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtMissingConstructor) {
   EXPECT("fn f() { let a : i32 = >; }",
-         "test.wgsl:1:24 error: missing constructor for let declaration\n"
-         "fn f() { let a : i32 = >; }\n"
-         "                       ^\n");
+         R"(test.wgsl:1:24 error: missing constructor for let declaration
+fn f() { let a : i32 = >; }
+                       ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ContinueStmtMissingSemicolon) {
   EXPECT("fn f() { loop { continue } }",
-         "test.wgsl:1:26 error: expected ';' for continue statement\n"
-         "fn f() { loop { continue } }\n"
-         "                         ^\n");
+         R"(test.wgsl:1:26 error: expected ';' for continue statement
+fn f() { loop { continue } }
+                         ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, DiscardStmtMissingSemicolon) {
   EXPECT("fn f() { discard }",
-         "test.wgsl:1:18 error: expected ';' for discard statement\n"
-         "fn f() { discard }\n"
-         "                 ^\n");
+         R"(test.wgsl:1:18 error: expected ';' for discard statement
+fn f() { discard }
+                 ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, EqualityInvalidExpr) {
   EXPECT("fn f() { return 1 == >; }",
-         "test.wgsl:1:22 error: unable to parse right side of == expression\n"
-         "fn f() { return 1 == >; }\n"
-         "                     ^\n");
+         R"(test.wgsl:1:22 error: unable to parse right side of == expression
+fn f() { return 1 == >; }
+                     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopInitializerMissingSemicolon) {
   EXPECT("fn f() { for (var i : i32 = 0 i < 8; i=i+1) {} }",
-         "test.wgsl:1:31 error: expected ';' for initializer in for loop\n"
-         "fn f() { for (var i : i32 = 0 i < 8; i=i+1) {} }\n"
-         "                              ^\n");
+         R"(test.wgsl:1:31 error: expected ';' for initializer in for loop
+fn f() { for (var i : i32 = 0 i < 8; i=i+1) {} }
+                              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopInitializerMissingVar) {
   EXPECT("fn f() { for (i : i32 = 0; i < 8; i=i+1) {} }",
-         "test.wgsl:1:15 error: expected 'var' for variable declaration\n"
-         "fn f() { for (i : i32 = 0; i < 8; i=i+1) {} }\n"
-         "              ^\n");
+         R"(test.wgsl:1:15 error: expected 'var' for variable declaration
+fn f() { for (i : i32 = 0; i < 8; i=i+1) {} }
+              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopConditionMissingSemicolon) {
   EXPECT("fn f() { for (var i : i32 = 0; i < 8 i=i+1) {} }",
-         "test.wgsl:1:38 error: expected ';' for condition in for loop\n"
-         "fn f() { for (var i : i32 = 0; i < 8 i=i+1) {} }\n"
-         "                                     ^\n");
+         R"(test.wgsl:1:38 error: expected ';' for condition in for loop
+fn f() { for (var i : i32 = 0; i < 8 i=i+1) {} }
+                                     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingLParen) {
   EXPECT("fn f() { for var i : i32 = 0; i < 8; i=i+1) {} }",
-         "test.wgsl:1:14 error: expected '(' for for loop\n"
-         "fn f() { for var i : i32 = 0; i < 8; i=i+1) {} }\n"
-         "             ^^^\n");
+         R"(test.wgsl:1:14 error: expected '(' for for loop
+fn f() { for var i : i32 = 0; i < 8; i=i+1) {} }
+             ^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingRParen) {
   EXPECT("fn f() { for (var i : i32 = 0; i < 8; i=i+1 {} }",
-         "test.wgsl:1:45 error: expected ')' for for loop\n"
-         "fn f() { for (var i : i32 = 0; i < 8; i=i+1 {} }\n"
-         "                                            ^\n");
+         R"(test.wgsl:1:45 error: expected ')' for for loop
+fn f() { for (var i : i32 = 0; i < 8; i=i+1 {} }
+                                            ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingLBrace) {
   EXPECT("fn f() { for (var i : i32 = 0; i < 8; i=i+1) }",
-         "test.wgsl:1:46 error: expected '{' for for loop\n"
-         "fn f() { for (var i : i32 = 0; i < 8; i=i+1) }\n"
-         "                                             ^\n");
+         R"(test.wgsl:1:46 error: expected '{' for for loop
+fn f() { for (var i : i32 = 0; i < 8; i=i+1) }
+                                             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingRBrace) {
   EXPECT("fn f() { for (var i : i32 = 0; i < 8; i=i+1) {",
-         "test.wgsl:1:47 error: expected '}' for for loop\n"
-         "fn f() { for (var i : i32 = 0; i < 8; i=i+1) {\n"
-         "                                              ^\n");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclDecoMissingEnd) {
-  EXPECT("[[stage(vertex) fn f() {}",
-         "test.wgsl:1:17 error: expected ']]' for decoration list\n"
-         "[[stage(vertex) fn f() {}\n"
-         "                ^^\n");
+         R"(test.wgsl:1:47 error: expected '}' for for loop
+fn f() { for (var i : i32 = 0; i < 8; i=i+1) {
+                                              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageMissingLParen) {
-  EXPECT("[[stage vertex]] fn f() {}",
-         "test.wgsl:1:9 error: expected '(' for stage decoration\n"
-         "[[stage vertex]] fn f() {}\n"
-         "        ^^^^^^\n");
+  EXPECT(
+      "@stage vertex) fn f() {}",
+      R"(test.wgsl:1:8 error: expected '(' for stage decoration
+@stage vertex) fn f() {}
+       ^^^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageMissingRParen) {
-  EXPECT("[[stage(vertex]] fn f() {}",
-         "test.wgsl:1:15 error: expected ')' for stage decoration\n"
-         "[[stage(vertex]] fn f() {}\n"
-         "              ^^\n");
+  EXPECT(
+      "@stage(vertex fn f() {}",
+      R"(test.wgsl:1:15 error: expected ')' for stage decoration
+@stage(vertex fn f() {}
+              ^^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_FunctionDeclDecoStageMissingLParen) {
+  EXPECT(
+      "[[stage vertex]] fn f() {}",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[stage vertex]] fn f() {}
+^^
+
+test.wgsl:1:9 error: expected '(' for stage decoration
+[[stage vertex]] fn f() {}
+        ^^^^^^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_FunctionDeclDecoStageMissingRParen) {
+  EXPECT(
+      "[[stage(vertex]] fn f() {}",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[stage(vertex]] fn f() {}
+^^
+
+test.wgsl:1:15 error: expected ')' for stage decoration
+[[stage(vertex]] fn f() {}
+              ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageInvalid) {
-  EXPECT("[[stage(x)]] fn f() {}",
-         "test.wgsl:1:9 error: invalid value for stage decoration\n"
-         "[[stage(x)]] fn f() {}\n"
-         "        ^\n");
+  EXPECT("@stage(x) fn f() {}",
+         R"(test.wgsl:1:8 error: invalid value for stage decoration
+@stage(x) fn f() {}
+       ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageTypeInvalid) {
-  EXPECT("[[shader(vertex)]] fn main() {}",
-         "test.wgsl:1:3 error: expected decoration\n"
-         "[[shader(vertex)]] fn main() {}\n"
-         "  ^^^^^^\n");
+  EXPECT("@shader(vertex) fn main() {}",
+         R"(test.wgsl:1:2 error: expected decoration
+@shader(vertex) fn main() {}
+ ^^^^^^
+
+test.wgsl:1:8 error: unexpected token
+@shader(vertex) fn main() {}
+       ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingLParen) {
-  EXPECT("[[workgroup_size 1]] fn f() {}",
-         "test.wgsl:1:18 error: expected '(' for workgroup_size decoration\n"
-         "[[workgroup_size 1]] fn f() {}\n"
-         "                 ^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest,
+       DEPRECATED_FunctionDeclDecoWorkgroupSizeMissingLParen) {
+  EXPECT(
+      "[[workgroup_size 1]] fn f() {}",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[workgroup_size 1]] fn f() {}
+^^
+
+test.wgsl:1:18 error: expected '(' for workgroup_size decoration
+[[workgroup_size 1]] fn f() {}
+                 ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingRParen) {
-  EXPECT("[[workgroup_size(1]] fn f() {}",
-         "test.wgsl:1:19 error: expected ')' for workgroup_size decoration\n"
-         "[[workgroup_size(1]] fn f() {}\n"
-         "                  ^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest,
+       DEPRECATED_FunctionDeclDecoWorkgroupSizeMissingRParen) {
+  EXPECT(
+      "[[workgroup_size(1]] fn f() {}",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[workgroup_size(1]] fn f() {}
+^^
+
+test.wgsl:1:19 error: expected ')' for workgroup_size decoration
+[[workgroup_size(1]] fn f() {}
+                  ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXInvalid) {
-  EXPECT("[[workgroup_size()]] fn f() {}",
-         "test.wgsl:1:18 error: expected workgroup_size x parameter\n"
-         "[[workgroup_size()]] fn f() {}\n"
-         "                 ^\n");
+  EXPECT("@workgroup_size() fn f() {}",
+         R"(test.wgsl:1:17 error: expected workgroup_size x parameter
+@workgroup_size() fn f() {}
+                ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYInvalid) {
-  EXPECT("[[workgroup_size(1, )]] fn f() {}",
-         "test.wgsl:1:21 error: expected workgroup_size y parameter\n"
-         "[[workgroup_size(1, )]] fn f() {}\n"
-         "                    ^\n");
+  EXPECT("@workgroup_size(1, ) fn f() {}",
+         R"(test.wgsl:1:20 error: expected workgroup_size y parameter
+@workgroup_size(1, ) fn f() {}
+                   ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZInvalid) {
-  EXPECT("[[workgroup_size(1, 2, )]] fn f() {}",
-         "test.wgsl:1:24 error: expected workgroup_size z parameter\n"
-         "[[workgroup_size(1, 2, )]] fn f() {}\n"
-         "                       ^\n");
+  EXPECT("@workgroup_size(1, 2, ) fn f() {}",
+         R"(test.wgsl:1:23 error: expected workgroup_size z parameter
+@workgroup_size(1, 2, ) fn f() {}
+                      ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingIdentifier) {
   EXPECT("fn () {}",
-         "test.wgsl:1:4 error: expected identifier for function declaration\n"
-         "fn () {}\n"
-         "   ^\n");
+         R"(test.wgsl:1:4 error: expected identifier for function declaration
+fn () {}
+   ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingLParen) {
   EXPECT("fn f) {}",
-         "test.wgsl:1:5 error: expected '(' for function declaration\n"
-         "fn f) {}\n"
-         "    ^\n");
+         R"(test.wgsl:1:5 error: expected '(' for function declaration
+fn f) {}
+    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingRParen) {
   EXPECT("fn f( {}",
-         "test.wgsl:1:7 error: expected ')' for function declaration\n"
-         "fn f( {}\n"
-         "      ^\n");
+         R"(test.wgsl:1:7 error: expected ')' for function declaration
+fn f( {}
+      ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingArrow) {
-  EXPECT("fn f() f32 {}",
-         "test.wgsl:1:8 error: expected '{'\n"
-         "fn f() f32 {}\n"
-         "       ^^^\n");
+  EXPECT("fn f() f32 {}", R"(test.wgsl:1:8 error: expected '{'
+fn f() f32 {}
+       ^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclInvalidReturnType) {
   EXPECT("fn f() -> 1 {}",
-         "test.wgsl:1:11 error: unable to determine function return type\n"
-         "fn f() -> 1 {}\n"
-         "          ^\n");
+         R"(test.wgsl:1:11 error: unable to determine function return type
+fn f() -> 1 {}
+          ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamMissingColon) {
-  EXPECT("fn f(x) {}",
-         "test.wgsl:1:7 error: expected ':' for parameter\n"
-         "fn f(x) {}\n"
-         "      ^\n");
+  EXPECT("fn f(x) {}", R"(test.wgsl:1:7 error: expected ':' for parameter
+fn f(x) {}
+      ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamInvalidType) {
-  EXPECT("fn f(x : 1) {}",
-         "test.wgsl:1:10 error: invalid type for parameter\n"
-         "fn f(x : 1) {}\n"
-         "         ^\n");
+  EXPECT("fn f(x : 1) {}", R"(test.wgsl:1:10 error: invalid type for parameter
+fn f(x : 1) {}
+         ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamMissing) {
   EXPECT("fn f(x : i32, ,) {}",
-         "test.wgsl:1:15 error: expected ')' for function declaration\n"
-         "fn f(x : i32, ,) {}\n"
-         "              ^\n");
+         R"(test.wgsl:1:15 error: expected ')' for function declaration
+fn f(x : i32, ,) {}
+              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingLBrace) {
-  EXPECT("fn f() }",
-         "test.wgsl:1:8 error: expected '{'\n"
-         "fn f() }\n"
-         "       ^\n");
+  EXPECT("fn f() }", R"(test.wgsl:1:8 error: expected '{'
+fn f() }
+       ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingRBrace) {
-  EXPECT("fn f() {",
-         "test.wgsl:1:9 error: expected '}'\n"
-         "fn f() {\n"
-         "        ^\n");
+  EXPECT("fn f() {", R"(test.wgsl:1:9 error: expected '}'
+fn f() {
+        ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionScopeUnusedDecl) {
-  EXPECT("fn f(a:i32)->i32{return a;[[size(1)]]}",
-         "test.wgsl:1:29 error: unexpected decorations\n"
-         "fn f(a:i32)->i32{return a;[[size(1)]]}\n"
-         "                            ^^^^\n");
+  EXPECT("fn f(a:i32)->i32{return a;@size(1)}",
+         R"(test.wgsl:1:28 error: unexpected decorations
+fn f(a:i32)->i32{return a;@size(1)}
+                           ^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, FunctionMissingOpenLine) {
@@ -427,64 +531,72 @@ TEST_F(ParserImplErrorTest, FunctionMissingOpenLine) {
   var a : f32 = bar[0];
   return;
 })",
-         "test.wgsl:2:17 error: unable to parse const_expr\n"
-         "  var a : f32 = bar[0];\n"
-         "                ^^^\n"
-         "\n"
-         "test.wgsl:3:3 error: statement found outside of function body\n"
-         "  return;\n"
-         "  ^^^^^^\n");
+         R"(test.wgsl:2:17 error: unable to parse const_expr
+  var a : f32 = bar[0];
+                ^^^
+
+test.wgsl:3:3 error: statement found outside of function body
+  return;
+  ^^^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstInvalidIdentifier) {
   EXPECT("let ^ : i32 = 1;",
-         "test.wgsl:1:5 error: expected identifier for let declaration\n"
-         "let ^ : i32 = 1;\n"
-         "    ^\n");
+         R"(test.wgsl:1:5 error: expected identifier for let declaration
+let ^ : i32 = 1;
+    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingSemicolon) {
   EXPECT("let i : i32 = 1",
-         "test.wgsl:1:16 error: expected ';' for let declaration\n"
-         "let i : i32 = 1\n"
-         "               ^\n");
+         R"(test.wgsl:1:16 error: expected ';' for let declaration
+let i : i32 = 1
+               ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingLParen) {
   EXPECT("let i : vec2<i32> = vec2<i32>;",
-         "test.wgsl:1:30 error: expected '(' for type constructor\n"
-         "let i : vec2<i32> = vec2<i32>;\n"
-         "                             ^\n");
+         R"(test.wgsl:1:30 error: expected '(' for type constructor
+let i : vec2<i32> = vec2<i32>;
+                             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
   EXPECT("let i : vec2<i32> = vec2<i32>(1., 2.;",
-         "test.wgsl:1:37 error: expected ')' for type constructor\n"
-         "let i : vec2<i32> = vec2<i32>(1., 2.;\n"
-         "                                    ^\n");
+         R"(test.wgsl:1:37 error: expected ')' for type constructor
+let i : vec2<i32> = vec2<i32>(1., 2.;
+                                    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteral) {
   EXPECT("let i : vec2<i32> = vec2<i32>(!);",
-         "test.wgsl:1:31 error: unable to parse const_expr\n"
-         "let i : vec2<i32> = vec2<i32>(!);\n"
-         "                              ^\n");
+         R"(test.wgsl:1:31 error: unable to parse const_expr
+let i : vec2<i32> = vec2<i32>(!);
+                              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteralSpaceLessThan) {
   EXPECT("let i = 1 < 2;",
-         "test.wgsl:1:11 error: expected \';\' for let declaration\n"
-         "let i = 1 < 2;\n"
-         "          ^\n");
+         R"(test.wgsl:1:11 error: expected ';' for let declaration
+let i = 1 < 2;
+          ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstNotConstExpr) {
   EXPECT(
       "let a = 1;\n"
       "let b = a;",
-      "test.wgsl:2:9 error: unable to parse const_expr\n"
-      "let b = a;\n"
-      "        ^\n");
+      R"(test.wgsl:2:9 error: unable to parse const_expr
+let b = a;
+        ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
@@ -516,767 +628,1080 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingLParen) {
   EXPECT("let i : vec2<i32> = vec2<i32> 1, 2);",
-         "test.wgsl:1:31 error: expected '(' for type constructor\n"
-         "let i : vec2<i32> = vec2<i32> 1, 2);\n"
-         "                              ^\n");
+         R"(test.wgsl:1:31 error: expected '(' for type constructor
+let i : vec2<i32> = vec2<i32> 1, 2);
+                              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingRParen) {
   EXPECT("let i : vec2<i32> = vec2<i32>(1, 2;",
-         "test.wgsl:1:35 error: expected ')' for type constructor\n"
-         "let i : vec2<i32> = vec2<i32>(1, 2;\n"
-         "                                  ^\n");
+         R"(test.wgsl:1:35 error: expected ')' for type constructor
+let i : vec2<i32> = vec2<i32>(1, 2;
+                                  ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclInvalidDeco) {
-  EXPECT("[[stage(vertex)]] x;",
-         "test.wgsl:1:19 error: expected declaration after decorations\n"
-         "[[stage(vertex)]] x;\n"
-         "                  ^\n");
+  EXPECT("@stage(vertex) x;",
+         R"(test.wgsl:1:16 error: expected declaration after decorations
+@stage(vertex) x;
+               ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingLessThan) {
   EXPECT("var x : texture_1d;",
-         "test.wgsl:1:19 error: expected '<' for sampled texture type\n"
-         "var x : texture_1d;\n"
-         "                  ^\n");
+         R"(test.wgsl:1:19 error: expected '<' for sampled texture type
+var x : texture_1d;
+                  ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan) {
   EXPECT("var x : texture_1d<f32;",
-         "test.wgsl:1:23 error: expected '>' for sampled texture type\n"
-         "var x : texture_1d<f32;\n"
-         "                      ^\n");
+         R"(test.wgsl:1:23 error: expected '>' for sampled texture type
+var x : texture_1d<f32;
+                      ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype) {
   EXPECT("var x : texture_1d<1>;",
-         "test.wgsl:1:20 error: invalid type for sampled texture type\n"
-         "var x : texture_1d<1>;\n"
-         "                   ^\n");
+         R"(test.wgsl:1:20 error: invalid type for sampled texture type
+var x : texture_1d<1>;
+                   ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingLessThan) {
   EXPECT("var x : texture_multisampled_2d;",
-         "test.wgsl:1:32 error: expected '<' for multisampled texture type\n"
-         "var x : texture_multisampled_2d;\n"
-         "                               ^\n");
+         R"(test.wgsl:1:32 error: expected '<' for multisampled texture type
+var x : texture_multisampled_2d;
+                               ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingGreaterThan) {
   EXPECT("var x : texture_multisampled_2d<f32;",
-         "test.wgsl:1:36 error: expected '>' for multisampled texture type\n"
-         "var x : texture_multisampled_2d<f32;\n"
-         "                                   ^\n");
+         R"(test.wgsl:1:36 error: expected '>' for multisampled texture type
+var x : texture_multisampled_2d<f32;
+                                   ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureInvalidSubtype) {
   EXPECT("var x : texture_multisampled_2d<1>;",
-         "test.wgsl:1:33 error: invalid type for multisampled texture type\n"
-         "var x : texture_multisampled_2d<1>;\n"
-         "                                ^\n");
+         R"(test.wgsl:1:33 error: invalid type for multisampled texture type
+var x : texture_multisampled_2d<1>;
+                                ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingLessThan) {
   EXPECT("var x : texture_storage_2d;",
-         "test.wgsl:1:27 error: expected '<' for storage texture type\n"
-         "var x : texture_storage_2d;\n"
-         "                          ^\n");
+         R"(test.wgsl:1:27 error: expected '<' for storage texture type
+var x : texture_storage_2d;
+                          ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingGreaterThan) {
   EXPECT("var x : texture_storage_2d<r32uint, read;",
-         "test.wgsl:1:41 error: expected '>' for storage texture type\n"
-         "var x : texture_storage_2d<r32uint, read;\n"
-         "                                        ^\n");
+         R"(test.wgsl:1:41 error: expected '>' for storage texture type
+var x : texture_storage_2d<r32uint, read;
+                                        ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingSubtype) {
   EXPECT("var x : texture_storage_2d<>;",
-         "test.wgsl:1:28 error: invalid format for storage texture type\n"
-         "var x : texture_storage_2d<>;\n"
-         "                           ^\n");
+         R"(test.wgsl:1:28 error: invalid format for storage texture type
+var x : texture_storage_2d<>;
+                           ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype) {
   EXPECT("var x : texture_storage_2d<1>;",
-         "test.wgsl:1:28 error: invalid format for storage texture type\n"
-         "var x : texture_storage_2d<1>;\n"
-         "                           ^\n");
+         R"(test.wgsl:1:28 error: invalid format for storage texture type
+var x : texture_storage_2d<1>;
+                           ^
+)");
 }
 
 // TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplErrorTest, GlobalDeclStructDecoMissingStruct) {
-  EXPECT("[[block]];",
-         "test.wgsl:1:3 warning: use of deprecated language feature: [[block]] "
-         "attributes have been removed from WGSL\n"
-         "[[block]];\n"
-         "  ^^^^^\n\n"
-         "test.wgsl:1:10 error: expected declaration after decorations\n"
-         "[[block]];\n"
-         "         ^\n");
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructDecoMissingStruct) {
+  EXPECT(
+      "[[block]];",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[block]];
+^^
+
+test.wgsl:1:3 warning: use of deprecated language feature: [[block]] attributes have been removed from WGSL
+[[block]];
+  ^^^^^
+
+test.wgsl:1:10 error: expected declaration after decorations
+[[block]];
+         ^
+)");
 }
 
 // TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplErrorTest, GlobalDeclStructDecoMissingEnd) {
-  EXPECT("[[block struct {};",
-         "test.wgsl:1:3 warning: use of deprecated language feature: [[block]] "
-         "attributes have been removed from WGSL\n"
-         "[[block struct {};\n"
-         "  ^^^^^\n\n"
-         "test.wgsl:1:9 error: expected ']]' for decoration list\n"
-         "[[block struct {};\n"
-         "        ^^^^^^\n");
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructDecoMissingEnd) {
+  EXPECT(
+      "[[block struct {};",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[block struct {};
+^^
+
+test.wgsl:1:3 warning: use of deprecated language feature: [[block]] attributes have been removed from WGSL
+[[block struct {};
+  ^^^^^
+
+test.wgsl:1:9 error: expected ']]' for decoration list
+[[block struct {};
+        ^^^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingIdentifier) {
   EXPECT("struct {};",
-         "test.wgsl:1:8 error: expected identifier for struct declaration\n"
-         "struct {};\n"
-         "       ^\n");
+         R"(test.wgsl:1:8 error: expected identifier for struct declaration
+struct {};
+       ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingLBrace) {
   EXPECT("struct S };",
-         "test.wgsl:1:10 error: expected '{' for struct declaration\n"
-         "struct S };\n"
-         "         ^\n");
+         R"(test.wgsl:1:10 error: expected '{' for struct declaration
+struct S };
+         ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingRBrace) {
   EXPECT("struct S { i : i32;",
-         "test.wgsl:1:20 error: expected '}' for struct declaration\n"
-         "struct S { i : i32;\n"
-         "                   ^\n");
+         R"(test.wgsl:1:20 error: expected '}' for struct declaration
+struct S { i : i32;
+                   ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberDecoEmpty) {
-  EXPECT("struct S { [[]] i : i32; };",
-         "test.wgsl:1:14 error: empty decoration list\n"
-         "struct S { [[]] i : i32; };\n"
-         "             ^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructMemberDecoEmpty) {
+  EXPECT(
+      "struct S { [[]] i : i32; };",
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+struct S { [[]] i : i32; };
+           ^^
+
+test.wgsl:1:14 error: empty decoration list
+struct S { [[]] i : i32; };
+             ^^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberDecoMissingEnd) {
-  EXPECT("struct S { [[ i : i32; };",
-         "test.wgsl:1:15 error: expected decoration\n"
-         "struct S { [[ i : i32; };\n"
-         "              ^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructMemberDecoMissingEnd) {
+  EXPECT(
+      "struct S { [[ i : i32; };",
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+struct S { [[ i : i32; };
+           ^^
+
+test.wgsl:1:15 error: expected decoration
+struct S { [[ i : i32; };
+              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberInvalidIdentifier) {
   EXPECT("struct S { 1 : i32; };",
-         "test.wgsl:1:12 error: expected identifier for struct member\n"
-         "struct S { 1 : i32; };\n"
-         "           ^\n");
+         R"(test.wgsl:1:12 error: expected identifier for struct member
+struct S { 1 : i32; };
+           ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberMissingSemicolon) {
   EXPECT("struct S { i : i32 };",
-         "test.wgsl:1:20 error: expected ';' for struct member\n"
-         "struct S { i : i32 };\n"
-         "                   ^\n");
+         R"(test.wgsl:1:20 error: expected ';' for struct member
+struct S { i : i32 };
+                   ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignMissingLParen) {
-  EXPECT("struct S { [[align 1)]] i : i32; };",
-         "test.wgsl:1:20 error: expected '(' for align decoration\n"
-         "struct S { [[align 1)]] i : i32; };\n"
-         "                   ^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest,
+       DEPRECATED_GlobalDeclStructMemberAlignMissingLParen) {
+  EXPECT(
+      "struct S { [[align 1)]] i : i32; };",
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+struct S { [[align 1)]] i : i32; };
+           ^^
+
+test.wgsl:1:20 error: expected '(' for align decoration
+struct S { [[align 1)]] i : i32; };
+                   ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignMissingRParen) {
-  EXPECT("struct S { [[align(1]] i : i32; };",
-         "test.wgsl:1:21 error: expected ')' for align decoration\n"
-         "struct S { [[align(1]] i : i32; };\n"
-         "                    ^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest,
+       DEPRECATED_GlobalDeclStructMemberAlignMissingRParen) {
+  EXPECT(
+      "struct S { [[align(1]] i : i32; };",
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+struct S { [[align(1]] i : i32; };
+           ^^
+
+test.wgsl:1:21 error: expected ')' for align decoration
+struct S { [[align(1]] i : i32; };
+                    ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignInvaldValue) {
-  EXPECT("struct S { [[align(x)]] i : i32; };",
-         "test.wgsl:1:20 error: expected signed integer literal for align "
-         "decoration\n"
-         "struct S { [[align(x)]] i : i32; };\n"
-         "                   ^\n");
+  EXPECT(
+      "struct S { @align(x) i : i32; };",
+      R"(test.wgsl:1:19 error: expected signed integer literal for align decoration
+struct S { @align(x) i : i32; };
+                  ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignNegativeValue) {
-  EXPECT("struct S { [[align(-2)]] i : i32; };",
-         "test.wgsl:1:20 error: align decoration must be positive\n"
-         "struct S { [[align(-2)]] i : i32; };\n"
-         "                   ^^\n");
+  EXPECT("struct S { @align(-2) i : i32; };",
+         R"(test.wgsl:1:19 error: align decoration must be positive
+struct S { @align(-2) i : i32; };
+                  ^^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeMissingLParen) {
-  EXPECT("struct S { [[size 1)]] i : i32; };",
-         "test.wgsl:1:19 error: expected '(' for size decoration\n"
-         "struct S { [[size 1)]] i : i32; };\n"
-         "                  ^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest,
+       DEPRECATED_GlobalDeclStructMemberSizeMissingLParen) {
+  EXPECT(
+      "struct S { [[size 1)]] i : i32; };",
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+struct S { [[size 1)]] i : i32; };
+           ^^
+
+test.wgsl:1:19 error: expected '(' for size decoration
+struct S { [[size 1)]] i : i32; };
+                  ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeMissingRParen) {
-  EXPECT("struct S { [[size(1]] i : i32; };",
-         "test.wgsl:1:20 error: expected ')' for size decoration\n"
-         "struct S { [[size(1]] i : i32; };\n"
-         "                   ^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest,
+       DEPRECATED_GlobalDeclStructMemberSizeMissingRParen) {
+  EXPECT(
+      "struct S { [[size(1]] i : i32; };",
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+struct S { [[size(1]] i : i32; };
+           ^^
+
+test.wgsl:1:20 error: expected ')' for size decoration
+struct S { [[size(1]] i : i32; };
+                   ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeInvaldValue) {
-  EXPECT("struct S { [[size(x)]] i : i32; };",
-         "test.wgsl:1:19 error: expected signed integer literal for size "
-         "decoration\n"
-         "struct S { [[size(x)]] i : i32; };\n"
-         "                  ^\n");
+  EXPECT(
+      "struct S { @size(x) i : i32; };",
+      R"(test.wgsl:1:18 error: expected signed integer literal for size decoration
+struct S { @size(x) i : i32; };
+                 ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeNegativeValue) {
-  EXPECT("struct S { [[size(-2)]] i : i32; };",
-         "test.wgsl:1:19 error: size decoration must be positive\n"
-         "struct S { [[size(-2)]] i : i32; };\n"
-         "                  ^^\n");
+  EXPECT("struct S { @size(-2) i : i32; };",
+         R"(test.wgsl:1:18 error: size decoration must be positive
+struct S { @size(-2) i : i32; };
+                 ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingIdentifier) {
   EXPECT("type 1 = f32;",
-         "test.wgsl:1:6 error: expected identifier for type alias\n"
-         "type 1 = f32;\n"
-         "     ^\n");
+         R"(test.wgsl:1:6 error: expected identifier for type alias
+type 1 = f32;
+     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasInvalidType) {
-  EXPECT("type meow = 1;",
-         "test.wgsl:1:13 error: invalid type alias\n"
-         "type meow = 1;\n"
-         "            ^\n");
+  EXPECT("type meow = 1;", R"(test.wgsl:1:13 error: invalid type alias
+type meow = 1;
+            ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingAssignment) {
-  EXPECT("type meow f32",
-         "test.wgsl:1:11 error: expected '=' for type alias\n"
-         "type meow f32\n"
-         "          ^^^\n");
+  EXPECT("type meow f32", R"(test.wgsl:1:11 error: expected '=' for type alias
+type meow f32
+          ^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingSemicolon) {
-  EXPECT("type meow = f32",
-         "test.wgsl:1:16 error: expected ';' for type alias\n"
-         "type meow = f32\n"
-         "               ^\n");
+  EXPECT("type meow = f32", R"(test.wgsl:1:16 error: expected ';' for type alias
+type meow = f32
+               ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclTypeDecoInvalid) {
-  EXPECT("var x : [[]] i32;",
-         "test.wgsl:1:11 error: empty decoration list\n"
-         "var x : [[]] i32;\n"
-         "          ^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclTypeDecoInvalid) {
+  EXPECT(
+      "var x : [[]] i32;",
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+var x : [[]] i32;
+        ^^
+
+test.wgsl:1:11 error: empty decoration list
+var x : [[]] i32;
+          ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingLessThan) {
   EXPECT("var i : array;",
-         "test.wgsl:1:14 error: expected '<' for array declaration\n"
-         "var i : array;\n"
-         "             ^\n");
+         R"(test.wgsl:1:14 error: expected '<' for array declaration
+var i : array;
+             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingGreaterThan) {
   EXPECT("var i : array<u32, 3;",
-         "test.wgsl:1:21 error: expected '>' for array declaration\n"
-         "var i : array<u32, 3;\n"
-         "                    ^\n");
+         R"(test.wgsl:1:21 error: expected '>' for array declaration
+var i : array<u32, 3;
+                    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoNotArray) {
-  EXPECT("var i : [[stride(1)]] i32;",
-         "test.wgsl:1:11 error: unexpected decorations\n"
-         "var i : [[stride(1)]] i32;\n"
-         "          ^^^^^^\n");
+  EXPECT("var i : @stride(1) i32;",
+         R"(test.wgsl:1:10 error: unexpected decorations
+var i : @stride(1) i32;
+         ^^^^^^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoMissingEnd) {
-  EXPECT("var i : [[stride(1) array<i32>;",
-         "test.wgsl:1:21 error: expected ']]' for decoration list\n"
-         "var i : [[stride(1) array<i32>;\n"
-         "                    ^^^^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarArrayDecoMissingEnd) {
+  EXPECT(
+      "var i : [[stride(1) array<i32>;",
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+var i : [[stride(1) array<i32>;
+        ^^
+
+test.wgsl:1:21 error: expected ']]' for decoration list
+var i : [[stride(1) array<i32>;
+                    ^^^^^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideMissingLParen) {
-  EXPECT("var i : [[stride 1)]] array<i32>;",
-         "test.wgsl:1:18 error: expected '(' for stride decoration\n"
-         "var i : [[stride 1)]] array<i32>;\n"
-         "                 ^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest,
+       DEPRECATED_GlobalDeclVarArrayDecoStrideMissingLParen) {
+  EXPECT(
+      "var i : [[stride 1)]] array<i32>;",
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+var i : [[stride 1)]] array<i32>;
+        ^^
+
+test.wgsl:1:18 error: expected '(' for stride decoration
+var i : [[stride 1)]] array<i32>;
+                 ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideMissingRParen) {
-  EXPECT("var i : [[stride(1]] array<i32>;",
-         "test.wgsl:1:19 error: expected ')' for stride decoration\n"
-         "var i : [[stride(1]] array<i32>;\n"
-         "                  ^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest,
+       DEPRECATED_GlobalDeclVarArrayDecoStrideMissingRParen) {
+  EXPECT(
+      "var i : [[stride(1]] array<i32>;",
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+var i : [[stride(1]] array<i32>;
+        ^^
+
+test.wgsl:1:19 error: expected ')' for stride decoration
+var i : [[stride(1]] array<i32>;
+                  ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideInvalid) {
-  EXPECT("var i : [[stride(x)]] array<i32>;",
-         "test.wgsl:1:18 error: expected signed integer literal for stride "
-         "decoration\n"
-         "var i : [[stride(x)]] array<i32>;\n"
-         "                 ^\n");
+  EXPECT(
+      "var i : @stride(x) array<i32>;",
+      R"(test.wgsl:1:17 error: expected signed integer literal for stride decoration
+var i : @stride(x) array<i32>;
+                ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideNegative) {
-  EXPECT("var i : [[stride(-1)]] array<i32>;",
-         "test.wgsl:1:18 error: stride decoration must be greater than 0\n"
-         "var i : [[stride(-1)]] array<i32>;\n"
-         "                 ^^\n");
+  EXPECT("var i : @stride(-1) array<i32>;",
+         R"(test.wgsl:1:17 error: stride decoration must be greater than 0
+var i : @stride(-1) array<i32>;
+                ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingType) {
   EXPECT("var i : array<1, 3>;",
-         "test.wgsl:1:15 error: invalid type for array declaration\n"
-         "var i : array<1, 3>;\n"
-         "              ^\n");
+         R"(test.wgsl:1:15 error: invalid type for array declaration
+var i : array<1, 3>;
+              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingSize) {
   EXPECT("var i : array<u32, >;",
-         "test.wgsl:1:20 error: expected array size expression\n"
-         "var i : array<u32, >;\n"
-         "                   ^\n");
+         R"(test.wgsl:1:20 error: expected array size expression
+var i : array<u32, >;
+                   ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayInvalidSize) {
   EXPECT("var i : array<u32, !>;",
-         "test.wgsl:1:20 error: expected array size expression\n"
-         "var i : array<u32, !>;\n"
-         "                   ^\n");
+         R"(test.wgsl:1:20 error: expected array size expression
+var i : array<u32, !>;
+                   ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListEmpty) {
-  EXPECT("[[]] var i : i32;",
-         "test.wgsl:1:3 error: empty decoration list\n"
-         "[[]] var i : i32;\n"
-         "  ^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoListEmpty) {
+  EXPECT(
+      "[[]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[]] var i : i32;
+^^
+
+test.wgsl:1:3 error: empty decoration list
+[[]] var i : i32;
+  ^^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListInvalid) {
-  EXPECT("[[location(1), meow]] var i : i32;",
-         "test.wgsl:1:16 error: expected decoration\n"
-         "[[location(1), meow]] var i : i32;\n"
-         "               ^^^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoListInvalid) {
+  EXPECT(
+      "[[location(1), meow]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[location(1), meow]] var i : i32;
+^^
+
+test.wgsl:1:16 error: expected decoration
+[[location(1), meow]] var i : i32;
+               ^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListMissingComma) {
-  EXPECT("[[location(1) group(2)]] var i : i32;",
-         "test.wgsl:1:15 error: expected ',' for decoration list\n"
-         "[[location(1) group(2)]] var i : i32;\n"
-         "              ^^^^^\n");
+  EXPECT("@location(1) group(2) var i : i32;",
+         R"(test.wgsl:1:14 error: expected declaration after decorations
+@location(1) group(2) var i : i32;
+             ^^^^^
+
+test.wgsl:1:19 error: unexpected token
+@location(1) group(2) var i : i32;
+                  ^
+)");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListMissingEnd) {
-  EXPECT("[[location(1) meow]] var i : i32;",
-         "test.wgsl:1:15 error: expected ']]' for decoration list\n"
-         "[[location(1) meow]] var i : i32;\n"
-         "              ^^^^\n");
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoListMissingEnd) {
+  EXPECT(
+      "[[location(1) meow]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[location(1) meow]] var i : i32;
+^^
+
+test.wgsl:1:15 error: expected ']]' for decoration list
+[[location(1) meow]] var i : i32;
+              ^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationMissingLParen) {
-  EXPECT("[[location 1]] var i : i32;",
-         "test.wgsl:1:12 error: expected '(' for location decoration\n"
-         "[[location 1]] var i : i32;\n"
-         "           ^\n");
+  EXPECT(
+      "@location 1) var i : i32;",
+      R"(test.wgsl:1:11 error: expected '(' for location decoration
+@location 1) var i : i32;
+          ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationMissingRParen) {
-  EXPECT("[[location (1]] var i : i32;",
-         "test.wgsl:1:14 error: expected ')' for location decoration\n"
-         "[[location (1]] var i : i32;\n"
-         "             ^^\n");
+  EXPECT(
+      "@location (1 var i : i32;",
+      R"(test.wgsl:1:14 error: expected ')' for location decoration
+@location (1 var i : i32;
+             ^^^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoLocationMissingLParen) {
+  EXPECT(
+      "[[location 1]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[location 1]] var i : i32;
+^^
+
+test.wgsl:1:12 error: expected '(' for location decoration
+[[location 1]] var i : i32;
+           ^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoLocationMissingRParen) {
+  EXPECT(
+      "[[location (1]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[location (1]] var i : i32;
+^^
+
+test.wgsl:1:14 error: expected ')' for location decoration
+[[location (1]] var i : i32;
+             ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationInvalidValue) {
-  EXPECT("[[location(x)]] var i : i32;",
-         "test.wgsl:1:12 error: expected signed integer literal for location "
-         "decoration\n"
-         "[[location(x)]] var i : i32;\n"
-         "           ^\n");
+  EXPECT(
+      "@location(x) var i : i32;",
+      R"(test.wgsl:1:11 error: expected signed integer literal for location decoration
+@location(x) var i : i32;
+          ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinMissingLParen) {
-  EXPECT("[[builtin position]] var i : i32;",
-         "test.wgsl:1:11 error: expected '(' for builtin decoration\n"
-         "[[builtin position]] var i : i32;\n"
-         "          ^^^^^^^^\n");
+  EXPECT(
+      "@builtin position) var i : i32;",
+      R"(test.wgsl:1:10 error: expected '(' for builtin decoration
+@builtin position) var i : i32;
+         ^^^^^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinMissingRParen) {
-  EXPECT("[[builtin(position]] var i : i32;",
-         "test.wgsl:1:19 error: expected ')' for builtin decoration\n"
-         "[[builtin(position]] var i : i32;\n"
-         "                  ^^\n");
+  EXPECT(
+      "@builtin(position var i : i32;",
+      R"(test.wgsl:1:19 error: expected ')' for builtin decoration
+@builtin(position var i : i32;
+                  ^^^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoBuiltinMissingLParen) {
+  EXPECT(
+      "[[builtin position]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[builtin position]] var i : i32;
+^^
+
+test.wgsl:1:11 error: expected '(' for builtin decoration
+[[builtin position]] var i : i32;
+          ^^^^^^^^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoBuiltinMissingRParen) {
+  EXPECT(
+      "[[builtin(position]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[builtin(position]] var i : i32;
+^^
+
+test.wgsl:1:19 error: expected ')' for builtin decoration
+[[builtin(position]] var i : i32;
+                  ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinInvalidIdentifer) {
-  EXPECT("[[builtin(1)]] var i : i32;",
-         "test.wgsl:1:11 error: expected identifier for builtin\n"
-         "[[builtin(1)]] var i : i32;\n"
-         "          ^\n");
+  EXPECT("@builtin(1) var i : i32;",
+         R"(test.wgsl:1:10 error: expected identifier for builtin
+@builtin(1) var i : i32;
+         ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinInvalidValue) {
-  EXPECT("[[builtin(x)]] var i : i32;",
-         "test.wgsl:1:11 error: invalid value for builtin decoration\n"
-         "[[builtin(x)]] var i : i32;\n"
-         "          ^\n");
+  EXPECT("@builtin(x) var i : i32;",
+         R"(test.wgsl:1:10 error: invalid value for builtin decoration
+@builtin(x) var i : i32;
+         ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingMissingLParen) {
-  EXPECT("[[binding 1]] var i : i32;",
-         "test.wgsl:1:11 error: expected '(' for binding decoration\n"
-         "[[binding 1]] var i : i32;\n"
-         "          ^\n");
+  EXPECT(
+      "@binding 1) var i : i32;",
+      R"(test.wgsl:1:10 error: expected '(' for binding decoration
+@binding 1) var i : i32;
+         ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingMissingRParen) {
-  EXPECT("[[binding(1]] var i : i32;",
-         "test.wgsl:1:12 error: expected ')' for binding decoration\n"
-         "[[binding(1]] var i : i32;\n"
-         "           ^^\n");
+  EXPECT(
+      "@binding(1 var i : i32;",
+      R"(test.wgsl:1:12 error: expected ')' for binding decoration
+@binding(1 var i : i32;
+           ^^^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoBindingMissingLParen) {
+  EXPECT(
+      "[[binding 1]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[binding 1]] var i : i32;
+^^
+
+test.wgsl:1:11 error: expected '(' for binding decoration
+[[binding 1]] var i : i32;
+          ^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoBindingMissingRParen) {
+  EXPECT(
+      "[[binding(1]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[binding(1]] var i : i32;
+^^
+
+test.wgsl:1:12 error: expected ')' for binding decoration
+[[binding(1]] var i : i32;
+           ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingInvalidValue) {
-  EXPECT("[[binding(x)]] var i : i32;",
-         "test.wgsl:1:11 error: expected signed integer literal for binding "
-         "decoration\n"
-         "[[binding(x)]] var i : i32;\n"
-         "          ^\n");
+  EXPECT(
+      "@binding(x) var i : i32;",
+      R"(test.wgsl:1:10 error: expected signed integer literal for binding decoration
+@binding(x) var i : i32;
+         ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoGroupMissingLParen) {
-  EXPECT("[[group 1]] var i : i32;",
-         "test.wgsl:1:9 error: expected '(' for group decoration\n"
-         "[[group 1]] var i : i32;\n"
-         "        ^\n");
+  EXPECT(
+      "@group 1) var i : i32;",
+      R"(test.wgsl:1:8 error: expected '(' for group decoration
+@group 1) var i : i32;
+       ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoGroupMissingRParen) {
-  EXPECT("[[group(1]] var i : i32;",
-         "test.wgsl:1:10 error: expected ')' for group decoration\n"
-         "[[group(1]] var i : i32;\n"
-         "         ^^\n");
+  EXPECT(
+      "@group(1 var i : i32;",
+      R"(test.wgsl:1:10 error: expected ')' for group decoration
+@group(1 var i : i32;
+         ^^^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoGroupMissingLParen) {
+  EXPECT(
+      "[[group 1]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[group 1]] var i : i32;
+^^
+
+test.wgsl:1:9 error: expected '(' for group decoration
+[[group 1]] var i : i32;
+        ^
+)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoGroupMissingRParen) {
+  EXPECT(
+      "[[group(1]] var i : i32;",
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+[[group(1]] var i : i32;
+^^
+
+test.wgsl:1:10 error: expected ')' for group decoration
+[[group(1]] var i : i32;
+         ^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingGroupValue) {
-  EXPECT("[[group(x)]] var i : i32;",
-         "test.wgsl:1:9 error: expected signed integer literal for group "
-         "decoration\n"
-         "[[group(x)]] var i : i32;\n"
-         "        ^\n");
+  EXPECT(
+      "@group(x) var i : i32;",
+      R"(test.wgsl:1:8 error: expected signed integer literal for group decoration
+@group(x) var i : i32;
+       ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarInvalidIdentifier) {
   EXPECT("var ^ : mat4x4;",
-         "test.wgsl:1:5 error: expected identifier for variable declaration\n"
-         "var ^ : mat4x4;\n"
-         "    ^\n");
+         R"(test.wgsl:1:5 error: expected identifier for variable declaration
+var ^ : mat4x4;
+    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingGreaterThan) {
-  EXPECT("var i : mat4x4<u32;",
-         "test.wgsl:1:19 error: expected '>' for matrix\n"
-         "var i : mat4x4<u32;\n"
-         "                  ^\n");
+  EXPECT("var i : mat4x4<u32;", R"(test.wgsl:1:19 error: expected '>' for matrix
+var i : mat4x4<u32;
+                  ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingType) {
-  EXPECT("var i : mat4x4<1>;",
-         "test.wgsl:1:16 error: invalid type for matrix\n"
-         "var i : mat4x4<1>;\n"
-         "               ^\n");
+  EXPECT("var i : mat4x4<1>;", R"(test.wgsl:1:16 error: invalid type for matrix
+var i : mat4x4<1>;
+               ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarMissingSemicolon) {
   EXPECT("var i : i32",
-         "test.wgsl:1:12 error: expected ';' for variable declaration\n"
-         "var i : i32\n"
-         "           ^\n");
+         R"(test.wgsl:1:12 error: expected ';' for variable declaration
+var i : i32
+           ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingLessThan) {
   EXPECT("var i : ptr;",
-         "test.wgsl:1:12 error: expected '<' for ptr declaration\n"
-         "var i : ptr;\n"
-         "           ^\n");
+         R"(test.wgsl:1:12 error: expected '<' for ptr declaration
+var i : ptr;
+           ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingGreaterThan) {
   EXPECT("var i : ptr<private, u32;",
-         "test.wgsl:1:25 error: expected '>' for ptr declaration\n"
-         "var i : ptr<private, u32;\n"
-         "                        ^\n");
+         R"(test.wgsl:1:25 error: expected '>' for ptr declaration
+var i : ptr<private, u32;
+                        ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingComma) {
   EXPECT("var i : ptr<private u32>;",
-         "test.wgsl:1:21 error: expected ',' for ptr declaration\n"
-         "var i : ptr<private u32>;\n"
-         "                    ^^^\n");
+         R"(test.wgsl:1:21 error: expected ',' for ptr declaration
+var i : ptr<private u32>;
+                    ^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingStorageClass) {
   EXPECT("var i : ptr<meow, u32>;",
-         "test.wgsl:1:13 error: invalid storage class for ptr declaration\n"
-         "var i : ptr<meow, u32>;\n"
-         "            ^^^^\n");
+         R"(test.wgsl:1:13 error: invalid storage class for ptr declaration
+var i : ptr<meow, u32>;
+            ^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingType) {
   EXPECT("var i : ptr<private, 1>;",
-         "test.wgsl:1:22 error: invalid type for ptr declaration\n"
-         "var i : ptr<private, 1>;\n"
-         "                     ^\n");
+         R"(test.wgsl:1:22 error: invalid type for ptr declaration
+var i : ptr<private, 1>;
+                     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAtomicMissingLessThan) {
   EXPECT("var i : atomic;",
-         "test.wgsl:1:15 error: expected '<' for atomic declaration\n"
-         "var i : atomic;\n"
-         "              ^\n");
+         R"(test.wgsl:1:15 error: expected '<' for atomic declaration
+var i : atomic;
+              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAtomicMissingGreaterThan) {
   EXPECT("var i : atomic<u32 x;",
-         "test.wgsl:1:20 error: expected '>' for atomic declaration\n"
-         "var i : atomic<u32 x;\n"
-         "                   ^\n");
+         R"(test.wgsl:1:20 error: expected '>' for atomic declaration
+var i : atomic<u32 x;
+                   ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclInvalidClass) {
   EXPECT("var<fish> i : i32",
-         "test.wgsl:1:5 error: invalid storage class for variable declaration\n"
-         "var<fish> i : i32\n"
-         "    ^^^^\n");
+         R"(test.wgsl:1:5 error: invalid storage class for variable declaration
+var<fish> i : i32
+    ^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclMissingGThan) {
   EXPECT("var<private i : i32",
-         "test.wgsl:1:13 error: expected '>' for variable declaration\n"
-         "var<private i : i32\n"
-         "            ^\n");
+         R"(test.wgsl:1:13 error: expected '>' for variable declaration
+var<private i : i32
+            ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingGreaterThan) {
-  EXPECT("var i : vec3<u32;",
-         "test.wgsl:1:17 error: expected '>' for vector\n"
-         "var i : vec3<u32;\n"
-         "                ^\n");
+  EXPECT("var i : vec3<u32;", R"(test.wgsl:1:17 error: expected '>' for vector
+var i : vec3<u32;
+                ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingType) {
-  EXPECT("var i : vec3<1>;",
-         "test.wgsl:1:14 error: invalid type for vector\n"
-         "var i : vec3<1>;\n"
-         "             ^\n");
+  EXPECT("var i : vec3<1>;", R"(test.wgsl:1:14 error: invalid type for vector
+var i : vec3<1>;
+             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, IfStmtMissingLParen) {
-  EXPECT("fn f() { if true) {} }",
-         "test.wgsl:1:13 error: expected '('\n"
-         "fn f() { if true) {} }\n"
-         "            ^^^^\n");
+  EXPECT("fn f() { if true) {} }", R"(test.wgsl:1:13 error: expected '('
+fn f() { if true) {} }
+            ^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, IfStmtMissingRParen) {
-  EXPECT("fn f() { if (true {} }",
-         "test.wgsl:1:19 error: expected ')'\n"
-         "fn f() { if (true {} }\n"
-         "                  ^\n");
+  EXPECT("fn f() { if (true {} }", R"(test.wgsl:1:19 error: expected ')'
+fn f() { if (true {} }
+                  ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, IfStmtInvalidCond) {
   EXPECT("fn f() { if (>) {} }",
-         "test.wgsl:1:14 error: unable to parse expression\n"
-         "fn f() { if (>) {} }\n"
-         "             ^\n");
+         R"(test.wgsl:1:14 error: unable to parse expression
+fn f() { if (>) {} }
+             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, LogicalAndInvalidExpr) {
   EXPECT("fn f() { return 1 && >; }",
-         "test.wgsl:1:22 error: unable to parse right side of && expression\n"
-         "fn f() { return 1 && >; }\n"
-         "                     ^\n");
+         R"(test.wgsl:1:22 error: unable to parse right side of && expression
+fn f() { return 1 && >; }
+                     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, LogicalOrInvalidExpr) {
   EXPECT("fn f() { return 1 || >; }",
-         "test.wgsl:1:22 error: unable to parse right side of || expression\n"
-         "fn f() { return 1 || >; }\n"
-         "                     ^\n");
+         R"(test.wgsl:1:22 error: unable to parse right side of || expression
+fn f() { return 1 || >; }
+                     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, LoopMissingLBrace) {
-  EXPECT("fn f() { loop }",
-         "test.wgsl:1:15 error: expected '{' for loop\n"
-         "fn f() { loop }\n"
-         "              ^\n");
+  EXPECT("fn f() { loop }", R"(test.wgsl:1:15 error: expected '{' for loop
+fn f() { loop }
+              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, LoopMissingRBrace) {
-  EXPECT("fn f() { loop {",
-         "test.wgsl:1:16 error: expected '}' for loop\n"
-         "fn f() { loop {\n"
-         "               ^\n");
+  EXPECT("fn f() { loop {", R"(test.wgsl:1:16 error: expected '}' for loop
+fn f() { loop {
+               ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, MaxErrorsReached) {
-  EXPECT("x; x; x; x; x; x; x; x;",
-         "test.wgsl:1:1 error: unexpected token\n"
-         "x; x; x; x; x; x; x; x;\n"
-         "^\n\n"
-         "test.wgsl:1:4 error: unexpected token\n"
-         "x; x; x; x; x; x; x; x;\n"
-         "   ^\n\n"
-         "test.wgsl:1:7 error: unexpected token\n"
-         "x; x; x; x; x; x; x; x;\n"
-         "      ^\n\n"
-         "test.wgsl:1:10 error: unexpected token\n"
-         "x; x; x; x; x; x; x; x;\n"
-         "         ^\n\n"
-         "test.wgsl:1:13 error: unexpected token\n"
-         "x; x; x; x; x; x; x; x;\n"
-         "            ^\n\n"
-         "test.wgsl error: stopping after 5 errors");
+  EXPECT("x; x; x; x; x; x; x; x;", R"(test.wgsl:1:1 error: unexpected token
+x; x; x; x; x; x; x; x;
+^
+
+test.wgsl:1:4 error: unexpected token
+x; x; x; x; x; x; x; x;
+   ^
+
+test.wgsl:1:7 error: unexpected token
+x; x; x; x; x; x; x; x;
+      ^
+
+test.wgsl:1:10 error: unexpected token
+x; x; x; x; x; x; x; x;
+         ^
+
+test.wgsl:1:13 error: unexpected token
+x; x; x; x; x; x; x; x;
+            ^
+
+test.wgsl error: stopping after 5 errors)");
 }
 
 TEST_F(ParserImplErrorTest, MemberExprMissingIdentifier) {
   EXPECT("fn f() { x = a.; }",
-         "test.wgsl:1:16 error: expected identifier for member accessor\n"
-         "fn f() { x = a.; }\n"
-         "               ^\n");
+         R"(test.wgsl:1:16 error: expected identifier for member accessor
+fn f() { x = a.; }
+               ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, MultiplicativeInvalidExpr) {
   EXPECT("fn f() { return 1.0 * <; }",
-         "test.wgsl:1:23 error: unable to parse right side of * expression\n"
-         "fn f() { return 1.0 * <; }\n"
-         "                      ^\n");
+         R"(test.wgsl:1:23 error: unable to parse right side of * expression
+fn f() { return 1.0 * <; }
+                      ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, OrInvalidExpr) {
   EXPECT("fn f() { return 1 | >; }",
-         "test.wgsl:1:21 error: unable to parse right side of | expression\n"
-         "fn f() { return 1 | >; }\n"
-         "                    ^\n");
+         R"(test.wgsl:1:21 error: unable to parse right side of | expression
+fn f() { return 1 | >; }
+                    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, RelationalInvalidExpr) {
   EXPECT("fn f() { return 1 < >; }",
-         "test.wgsl:1:21 error: unable to parse right side of < expression\n"
-         "fn f() { return 1 < >; }\n"
-         "                    ^\n");
+         R"(test.wgsl:1:21 error: unable to parse right side of < expression
+fn f() { return 1 < >; }
+                    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ReturnStmtMissingSemicolon) {
   EXPECT("fn f() { return }",
-         "test.wgsl:1:17 error: expected ';' for return statement\n"
-         "fn f() { return }\n"
-         "                ^\n");
+         R"(test.wgsl:1:17 error: expected ';' for return statement
+fn f() { return }
+                ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, ShiftInvalidExpr) {
   EXPECT("fn f() { return 1 << >; }",
-         "test.wgsl:1:22 error: unable to parse right side of << expression\n"
-         "fn f() { return 1 << >; }\n"
-         "                     ^\n");
+         R"(test.wgsl:1:22 error: unable to parse right side of << expression
+fn f() { return 1 << >; }
+                     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtMissingLBrace) {
   EXPECT("fn f() { switch(1) }",
-         "test.wgsl:1:20 error: expected '{' for switch statement\n"
-         "fn f() { switch(1) }\n"
-         "                   ^\n");
+         R"(test.wgsl:1:20 error: expected '{' for switch statement
+fn f() { switch(1) }
+                   ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtMissingRBrace) {
   EXPECT("fn f() { switch(1) {",
-         "test.wgsl:1:21 error: expected '}' for switch statement\n"
-         "fn f() { switch(1) {\n"
-         "                    ^\n");
+         R"(test.wgsl:1:21 error: expected '}' for switch statement
+fn f() { switch(1) {
+                    ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtInvalidCase) {
   EXPECT("fn f() { switch(1) { case ^: } }",
-         "test.wgsl:1:27 error: unable to parse case selectors\n"
-         "fn f() { switch(1) { case ^: } }\n"
-         "                          ^\n");
+         R"(test.wgsl:1:27 error: unable to parse case selectors
+fn f() { switch(1) { case ^: } }
+                          ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtInvalidCase2) {
-  EXPECT(
-      "fn f() { switch(1) { case false: } }",
-      "test.wgsl:1:27 error: invalid case selector must be an integer value\n"
-      "fn f() { switch(1) { case false: } }\n"
-      "                          ^^^^^\n");
+  EXPECT("fn f() { switch(1) { case false: } }",
+         R"(test.wgsl:1:27 error: invalid case selector must be an integer value
+fn f() { switch(1) { case false: } }
+                          ^^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingColon) {
   EXPECT("fn f() { switch(1) { case 1 {} } }",
-         "test.wgsl:1:29 error: expected ':' for case statement\n"
-         "fn f() { switch(1) { case 1 {} } }\n"
-         "                            ^\n");
+         R"(test.wgsl:1:29 error: expected ':' for case statement
+fn f() { switch(1) { case 1 {} } }
+                            ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingLBrace) {
   EXPECT("fn f() { switch(1) { case 1: } }",
-         "test.wgsl:1:30 error: expected '{' for case statement\n"
-         "fn f() { switch(1) { case 1: } }\n"
-         "                             ^\n");
+         R"(test.wgsl:1:30 error: expected '{' for case statement
+fn f() { switch(1) { case 1: } }
+                             ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingRBrace) {
   EXPECT("fn f() { switch(1) { case 1: {",
-         "test.wgsl:1:31 error: expected '}' for case statement\n"
-         "fn f() { switch(1) { case 1: {\n"
-         "                              ^\n");
+         R"(test.wgsl:1:31 error: expected '}' for case statement
+fn f() { switch(1) { case 1: {
+                              ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseFallthroughMissingSemicolon) {
   EXPECT("fn f() { switch(1) { case 1: { fallthrough } case 2: {} } }",
-         "test.wgsl:1:44 error: expected ';' for fallthrough statement\n"
-         "fn f() { switch(1) { case 1: { fallthrough } case 2: {} } }\n"
-         "                                           ^\n");
+         R"(test.wgsl:1:44 error: expected ';' for fallthrough statement
+fn f() { switch(1) { case 1: { fallthrough } case 2: {} } }
+                                           ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, VarStmtMissingSemicolon) {
   EXPECT("fn f() { var a : u32 }",
-         "test.wgsl:1:22 error: expected ';' for variable declaration\n"
-         "fn f() { var a : u32 }\n"
-         "                     ^\n");
+         R"(test.wgsl:1:22 error: expected ';' for variable declaration
+fn f() { var a : u32 }
+                     ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, VarStmtInvalidAssignment) {
   EXPECT("fn f() { var a : u32 = >; }",
-         "test.wgsl:1:24 error: missing constructor for variable declaration\n"
-         "fn f() { var a : u32 = >; }\n"
-         "                       ^\n");
+         R"(test.wgsl:1:24 error: missing constructor for variable declaration
+fn f() { var a : u32 = >; }
+                       ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, UnaryInvalidExpr) {
   EXPECT("fn f() { return !<; }",
-         "test.wgsl:1:18 error: unable to parse right side of ! expression\n"
-         "fn f() { return !<; }\n"
-         "                 ^\n");
+         R"(test.wgsl:1:18 error: unable to parse right side of ! expression
+fn f() { return !<; }
+                 ^
+)");
 }
 
 TEST_F(ParserImplErrorTest, UnexpectedToken) {
-  EXPECT("unexpected",
-         "test.wgsl:1:1 error: unexpected token\n"
-         "unexpected\n"
-         "^^^^^^^^^^\n");
+  EXPECT("unexpected", R"(test.wgsl:1:1 error: unexpected token
+unexpected
+^^^^^^^^^^
+)");
 }
 
 TEST_F(ParserImplErrorTest, XorInvalidExpr) {
   EXPECT("fn f() { return 1 ^ >; }",
-         "test.wgsl:1:21 error: unable to parse right side of ^ expression\n"
-         "fn f() { return 1 ^ >; }\n"
-         "                    ^\n");
+         R"(test.wgsl:1:21 error: unable to parse right side of ^ expression
+fn f() { return 1 ^ >; }
+                    ^
+)");
 }
 
 }  // namespace

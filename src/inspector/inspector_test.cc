@@ -2726,7 +2726,7 @@ TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
 
 TEST_F(InspectorGetSamplerTextureUsesTest, None) {
   std::string shader = R"(
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
 })";
 
@@ -2739,12 +2739,12 @@ fn main() {
 
 TEST_F(InspectorGetSamplerTextureUsesTest, Simple) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
-[[stage(fragment)]]
-fn main([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return textureSample(myTexture, mySampler, fragUV) * fragPosition;
 })";
 
@@ -2762,12 +2762,12 @@ fn main([[location(0)]] fragUV: vec2<f32>,
 
 TEST_F(InspectorGetSamplerTextureUsesTest, UnknownEntryPoint) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
-[[stage(fragment)]]
-fn main([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return textureSample(myTexture, mySampler, fragUV) * fragPosition;
 })";
 
@@ -2778,12 +2778,12 @@ fn main([[location(0)]] fragUV: vec2<f32>,
 
 TEST_F(InspectorGetSamplerTextureUsesTest, MultipleCalls) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
-[[stage(fragment)]]
-fn main([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return textureSample(myTexture, mySampler, fragUV) * fragPosition;
 })";
 
@@ -2799,16 +2799,16 @@ fn main([[location(0)]] fragUV: vec2<f32>,
 
 TEST_F(InspectorGetSamplerTextureUsesTest, BothIndirect) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
 fn doSample(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
   return textureSample(t, s, uv);
 }
 
-[[stage(fragment)]]
-fn main([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return doSample(myTexture, mySampler, fragUV) * fragPosition;
 })";
 
@@ -2826,16 +2826,16 @@ fn main([[location(0)]] fragUV: vec2<f32>,
 
 TEST_F(InspectorGetSamplerTextureUsesTest, SamplerIndirect) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
 fn doSample(s: sampler, uv: vec2<f32>) -> vec4<f32> {
   return textureSample(myTexture, s, uv);
 }
 
-[[stage(fragment)]]
-fn main([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return doSample(mySampler, fragUV) * fragPosition;
 })";
 
@@ -2853,16 +2853,16 @@ fn main([[location(0)]] fragUV: vec2<f32>,
 
 TEST_F(InspectorGetSamplerTextureUsesTest, TextureIndirect) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
 fn doSample(t: texture_2d<f32>, uv: vec2<f32>) -> vec4<f32> {
   return textureSample(t, mySampler, uv);
 }
 
-[[stage(fragment)]]
-fn main([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return doSample(myTexture, fragUV) * fragPosition;
 })";
 
@@ -2880,16 +2880,16 @@ fn main([[location(0)]] fragUV: vec2<f32>,
 
 TEST_F(InspectorGetSamplerTextureUsesTest, NeitherIndirect) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
 fn doSample(uv: vec2<f32>) -> vec4<f32> {
   return textureSample(myTexture, mySampler, uv);
 }
 
-[[stage(fragment)]]
-fn main([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return doSample(fragUV) * fragPosition;
 })";
 
@@ -2907,8 +2907,8 @@ fn main([[location(0)]] fragUV: vec2<f32>,
 
 TEST_F(InspectorGetSamplerTextureUsesTest, Complex) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
 
 fn doSample(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
@@ -2927,21 +2927,21 @@ fn Z(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
   return X(t, s, uv) + Y(t, s, uv);
 }
 
-[[stage(fragment)]]
-fn via_call([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn via_call(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return Z(myTexture, mySampler, fragUV) * fragPosition;
 }
 
-[[stage(fragment)]]
-fn via_ptr([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn via_ptr(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return textureSample(myTexture, mySampler, fragUV) + fragPosition;
 }
 
-[[stage(fragment)]]
-fn direct([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn direct(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return textureSample(myTexture, mySampler, fragUV) + fragPosition;
 })";
 
@@ -3075,16 +3075,16 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
 // ::GetSamplerTextureUses was called.
 TEST_F(InspectorRegressionTest, tint967) {
   std::string shader = R"(
-[[group(0), binding(1)]] var mySampler: sampler;
-[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+@group(0) @binding(1) var mySampler: sampler;
+@group(0) @binding(2) var myTexture: texture_2d<f32>;
 
 fn doSample(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
   return textureSample(t, s, uv);
 }
 
-[[stage(fragment)]]
-fn main([[location(0)]] fragUV: vec2<f32>,
-        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) fragUV: vec2<f32>,
+        @location(1) fragPosition: vec4<f32>) -> @location(0) vec4<f32> {
   return doSample(myTexture, mySampler, fragUV) * fragPosition;
 })";
 

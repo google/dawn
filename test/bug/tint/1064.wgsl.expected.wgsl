@@ -1,4 +1,4 @@
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   loop {
     if (false) {

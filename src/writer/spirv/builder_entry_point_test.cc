@@ -37,9 +37,9 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, EntryPoint_Parameters) {
-  // [[stage(fragment)]]
-  // fn frag_main([[builtin(position)]] coord : vec4<f32>,
-  //              [[location(1)]] loc1 : f32) {
+  // @stage(fragment)
+  // fn frag_main(@builtin(position) coord : vec4<f32>,
+  //              @location(1) loc1 : f32) {
   //   var col : f32 = (coord.x * loc1);
   // }
   auto* coord =
@@ -106,8 +106,8 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, EntryPoint_ReturnValue) {
-  // [[stage(fragment)]]
-  // fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] f32 {
+  // @stage(fragment)
+  // fn frag_main(@location(0) loc_in : u32) -> @location(0) f32 {
   //   if (loc_in > 10) {
   //     return 0.5;
   //   }
@@ -183,17 +183,17 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, EntryPoint_SharedStruct) {
   // struct Interface {
-  //   [[location(1)]] value : f32;
-  //   [[builtin(position)]] pos : vec4<f32>;
+  //   @location(1) value : f32;
+  //   @builtin(position) pos : vec4<f32>;
   // };
   //
-  // [[stage(vertex)]]
+  // @stage(vertex)
   // fn vert_main() -> Interface {
   //   return Interface(42.0, vec4<f32>());
   // }
   //
-  // [[stage(fragment)]]
-  // fn frag_main(inputs : Interface) -> [[builtin(frag_depth)]] f32 {
+  // @stage(fragment)
+  // fn frag_main(inputs : Interface) -> @builtin(frag_depth) f32 {
   //   return inputs.value;
   // }
 

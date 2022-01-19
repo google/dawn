@@ -288,7 +288,7 @@ TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
   // [[block]] struct S {
   //    inner: Inner;
   // }
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   // fn f() {
   //   let p = &s.inner.arr[2];
   // }

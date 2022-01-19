@@ -18,7 +18,7 @@ let v7 = mat3x3<f32>(vec3<f32>(1.0, 1.0, 1.0), vec3<f32>(1.0, 1.0, 1.0), vec3<f3
 let v8 = MyStruct();
 let v9 = MyArray();
 
-[[stage(fragment)]]
-fn main() -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main() -> @location(0) vec4<f32> {
     return vec4<f32>(0.0,0.0,0.0,0.0);
 }

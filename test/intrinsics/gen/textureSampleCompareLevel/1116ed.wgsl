@@ -22,26 +22,26 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
-[[group(1), binding(0)]] var arg_0: texture_depth_2d_array;
-[[group(1), binding(1)]] var arg_1: sampler_comparison;
+@group(1) @binding(0) var arg_0: texture_depth_2d_array;
+@group(1) @binding(1) var arg_1: sampler_comparison;
 
 // fn textureSampleCompareLevel(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
 fn textureSampleCompareLevel_1116ed() {
   var res: f32 = textureSampleCompareLevel(arg_0, arg_1, vec2<f32>(), 1, 1.0);
 }
 
-[[stage(vertex)]]
-fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vertex_main() -> @builtin(position) vec4<f32> {
   textureSampleCompareLevel_1116ed();
   return vec4<f32>();
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn fragment_main() {
   textureSampleCompareLevel_1116ed();
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn compute_main() {
   textureSampleCompareLevel_1116ed();
 }

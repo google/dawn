@@ -188,4 +188,4 @@ static const <type> <name> = WGSL_SPEC_CONSTANT_<id>
 ```
 
 ## MSL
-`[[function_constant(<id>)]]`
+`@function_constant(<id>)`

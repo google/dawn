@@ -17,21 +17,21 @@ struct RenderParams {
   right : vec3<f32>;
   up    : vec3<f32>;
 };
-[[binding(0), group(0)]] var<uniform> render_params : RenderParams;
+@binding(0) @group(0) var<uniform> render_params : RenderParams;
 
 struct VertexInput {
-  [[location(0)]] position : vec3<f32>;
-  [[location(1)]] color    : vec4<f32>;
-  [[location(2)]] quad_pos : vec2<f32>; // -1..+1
+  @location(0) position : vec3<f32>;
+  @location(1) color    : vec4<f32>;
+  @location(2) quad_pos : vec2<f32>; // -1..+1
 };
 
 struct VertexOutput {
-  [[builtin(position)]] position : vec4<f32>;
-  [[location(0)]]       color    : vec4<f32>;
-  [[location(1)]]       quad_pos : vec2<f32>; // -1..+1
+  @builtin(position) position : vec4<f32>;
+  @location(0)       color    : vec4<f32>;
+  @location(1)       quad_pos : vec2<f32>; // -1..+1
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vs_main(in : VertexInput) -> VertexOutput {
   var quad_pos = mat2x3<f32>(render_params.right, render_params.up) * in.quad_pos;
   var position = in.position + quad_pos * 0.01;
@@ -45,8 +45,8 @@ fn vs_main(in : VertexInput) -> VertexOutput {
 ////////////////////////////////////////////////////////////////////////////////
 // Fragment shader
 ////////////////////////////////////////////////////////////////////////////////
-[[stage(fragment)]]
-fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
   var color = in.color;
   // Apply a circular particle alpha mask
   color.a = color.a * max(1.0 - length(in.quad_pos), 0.0);
@@ -72,12 +72,12 @@ struct Particles {
   particles : array<Particle>;
 };
 
-[[binding(0), group(0)]] var<uniform> sim_params : SimulationParams;
-[[binding(1), group(0)]] var<storage, read_write> data : Particles;
-[[binding(2), group(0)]] var texture : texture_2d<f32>;
+@binding(0) @group(0) var<uniform> sim_params : SimulationParams;
+@binding(1) @group(0) var<storage, read_write> data : Particles;
+@binding(2) @group(0) var texture : texture_2d<f32>;
 
-[[stage(compute), workgroup_size(64)]]
-fn simulate([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+@stage(compute) @workgroup_size(64)
+fn simulate(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   rand_seed = (sim_params.seed.xy + vec2<f32>(GlobalInvocationID.xy)) * sim_params.seed.zw;
 
   let idx = GlobalInvocationID.x;
@@ -136,11 +136,11 @@ struct Buffer {
   weights : array<f32>;
 };
 
-[[binding(3), group(0)]] var<uniform> ubo : UBO;
-[[binding(4), group(0)]] var<storage, read> buf_in : Buffer;
-[[binding(5), group(0)]] var<storage, read_write> buf_out : Buffer;
-[[binding(6), group(0)]] var tex_in : texture_2d<f32>;
-[[binding(7), group(0)]] var tex_out : texture_storage_2d<rgba8unorm, write>;
+@binding(3) @group(0) var<uniform> ubo : UBO;
+@binding(4) @group(0) var<storage, read> buf_in : Buffer;
+@binding(5) @group(0) var<storage, read_write> buf_out : Buffer;
+@binding(6) @group(0) var tex_in : texture_2d<f32>;
+@binding(7) @group(0) var tex_out : texture_storage_2d<rgba8unorm, write>;
 
 ////////////////////////////////////////////////////////////////////////////////
 // import_level
@@ -148,8 +148,8 @@ struct Buffer {
 // Loads the alpha channel from a texel of the source image, and writes it to
 // the buf_out.weights.
 ////////////////////////////////////////////////////////////////////////////////
-[[stage(compute), workgroup_size(64)]]
-fn import_level([[builtin(global_invocation_id)]] coord : vec3<u32>) {
+@stage(compute) @workgroup_size(64)
+fn import_level(@builtin(global_invocation_id) coord : vec3<u32>) {
   _ = &buf_in;
   let offset = coord.x + coord.y * ubo.width;
   buf_out.weights[offset] = textureLoad(tex_in, vec2<i32>(coord.xy), 0).w;
@@ -163,8 +163,8 @@ fn import_level([[builtin(global_invocation_id)]] coord : vec3<u32>) {
 // mip level of tex_out. See simulate() in particle.wgsl to understand the
 // probability logic.
 ////////////////////////////////////////////////////////////////////////////////
-[[stage(compute), workgroup_size(64)]]
-fn export_level([[builtin(global_invocation_id)]] coord : vec3<u32>) {
+@stage(compute) @workgroup_size(64)
+fn export_level(@builtin(global_invocation_id) coord : vec3<u32>) {
   if (all(coord.xy < vec2<u32>(textureDimensions(tex_out)))) {
     let dst_offset = coord.x    + coord.y    * ubo.width;
     let src_offset = coord.x*2u + coord.y*2u * ubo.width;

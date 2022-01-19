@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, StructMember_Parses) {
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
-  auto p = parser("[[align(2)]] a : i32;");
+  auto p = parser("@align(2) a : i32;");
 
   auto& builder = p->builder();
 
@@ -64,12 +64,12 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
   EXPECT_EQ(m->decorations[0]->As<ast::StructMemberAlignDecoration>()->align,
             2u);
 
-  EXPECT_EQ(m->source.range, (Source::Range{{1u, 14u}, {1u, 15u}}));
-  EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 18u}, {1u, 21u}}));
+  EXPECT_EQ(m->source.range, (Source::Range{{1u, 11u}, {1u, 12u}}));
+  EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 15u}, {1u, 18u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithSizeDecoration) {
-  auto p = parser("[[size(2)]] a : i32;");
+  auto p = parser("@size(2) a : i32;");
 
   auto& builder = p->builder();
 
@@ -89,12 +89,12 @@ TEST_F(ParserImplTest, StructMember_ParsesWithSizeDecoration) {
   EXPECT_TRUE(m->decorations[0]->Is<ast::StructMemberSizeDecoration>());
   EXPECT_EQ(m->decorations[0]->As<ast::StructMemberSizeDecoration>()->size, 2u);
 
-  EXPECT_EQ(m->source.range, (Source::Range{{1u, 13u}, {1u, 14u}}));
-  EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 17u}, {1u, 20u}}));
+  EXPECT_EQ(m->source.range, (Source::Range{{1u, 10u}, {1u, 11u}}));
+  EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
-  auto p = parser("[[size(2)]] a : i32;");
+  auto p = parser("@size(2) a : i32;");
 
   auto& builder = p->builder();
 
@@ -114,13 +114,13 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   EXPECT_TRUE(m->decorations[0]->Is<ast::StructMemberSizeDecoration>());
   EXPECT_EQ(m->decorations[0]->As<ast::StructMemberSizeDecoration>()->size, 2u);
 
-  EXPECT_EQ(m->source.range, (Source::Range{{1u, 13u}, {1u, 14u}}));
-  EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 17u}, {1u, 20u}}));
+  EXPECT_EQ(m->source.range, (Source::Range{{1u, 10u}, {1u, 11u}}));
+  EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
-  auto p = parser(R"([[size(2)]]
-[[align(4)]] a : i32;)");
+  auto p = parser(R"(@size(2)
+@align(4) a : i32;)");
 
   auto& builder = p->builder();
 
@@ -143,12 +143,12 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
   EXPECT_EQ(m->decorations[1]->As<ast::StructMemberAlignDecoration>()->align,
             4u);
 
-  EXPECT_EQ(m->source.range, (Source::Range{{2u, 14u}, {2u, 15u}}));
-  EXPECT_EQ(m->type->source.range, (Source::Range{{2u, 18u}, {2u, 21u}}));
+  EXPECT_EQ(m->source.range, (Source::Range{{2u, 11u}, {2u, 12u}}));
+  EXPECT_EQ(m->type->source.range, (Source::Range{{2u, 15u}, {2u, 18u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
-  auto p = parser("[[size(nan)]] a : i32;");
+  auto p = parser("@size(nan) a : i32;");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -159,7 +159,7 @@ TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
 
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:8: expected signed integer literal for size decoration");
+            "1:7: expected signed integer literal for size decoration");
 }
 
 TEST_F(ParserImplTest, StructMember_MissingSemicolon) {

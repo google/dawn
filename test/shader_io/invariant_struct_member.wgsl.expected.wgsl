@@ -1,9 +1,9 @@
 struct Out {
-  [[builtin(position), invariant]]
+  @builtin(position) @invariant
   pos : vec4<f32>;
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main() -> Out {
   return Out();
 }

@@ -21,7 +21,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, DecorationList_Parses) {
-  auto p = parser("[[workgroup_size(2), stage(compute)]]");
+  auto p = parser("@workgroup_size(2) @stage(compute)");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(decos.errored);
@@ -46,23 +46,14 @@ TEST_F(ParserImplTest, DecorationList_Parses) {
             ast::PipelineStage::kCompute);
 }
 
-TEST_F(ParserImplTest, DecorationList_Empty) {
-  auto p = parser("[[]]");
-  auto decos = p->decoration_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), "1:3: empty decoration list");
-}
-
 TEST_F(ParserImplTest, DecorationList_Invalid) {
-  auto p = parser("[[invalid]]");
+  auto p = parser("@invalid");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(), "1:3: expected decoration");
+  EXPECT_EQ(p->error(), "1:2: expected decoration");
 }
 
 TEST_F(ParserImplTest, DecorationList_ExtraComma) {
@@ -71,34 +62,98 @@ TEST_F(ParserImplTest, DecorationList_ExtraComma) {
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), "1:22: expected decoration");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:22: expected decoration)");
 }
 
-TEST_F(ParserImplTest, DecorationList_MissingComma) {
+TEST_F(ParserImplTest, DecorationList_BadDecoration) {
+  auto p = parser("@stage()");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(p->error(), "1:8: invalid value for stage decoration");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_Empty) {
+  auto p = parser("[[]]");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:3: empty decoration list)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_Invalid) {
+  auto p = parser("[[invalid]]");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_TRUE(decos.value.empty());
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:3: expected decoration)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_ExtraComma) {
+  auto p = parser("[[workgroup_size(2), ]]");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:22: expected decoration)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_MissingComma) {
   auto p = parser("[[workgroup_size(2) workgroup_size(2)]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), "1:21: expected ',' for decoration list");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:21: expected ',' for decoration list)");
 }
 
-TEST_F(ParserImplTest, DecorationList_BadDecoration) {
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_BadDecoration) {
   auto p = parser("[[stage()]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), "1:9: invalid value for stage decoration");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:9: invalid value for stage decoration)");
 }
 
-TEST_F(ParserImplTest, DecorationList_MissingRightAttr) {
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_DecorationList_MissingRightAttr) {
   auto p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), "1:45: expected ']]' for decoration list");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:45: expected ']]' for decoration list)");
 }
 
 }  // namespace

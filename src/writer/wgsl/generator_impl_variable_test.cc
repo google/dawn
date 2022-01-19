@@ -57,7 +57,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
 
   std::stringstream out;
   ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
-  EXPECT_EQ(out.str(), R"([[binding(0), group(0)]] var<storage, read> a : S;)");
+  EXPECT_EQ(out.str(), R"(@binding(0) @group(0) var<storage, read> a : S;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
@@ -74,8 +74,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
 
   std::stringstream out;
   ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
-  EXPECT_EQ(out.str(),
-            R"([[binding(0), group(0)]] var<storage, write> a : S;)");
+  EXPECT_EQ(out.str(), R"(@binding(0) @group(0) var<storage, write> a : S;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
@@ -93,7 +92,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
   std::stringstream out;
   ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
   EXPECT_EQ(out.str(),
-            R"([[binding(0), group(0)]] var<storage, read_write> a : S;)");
+            R"(@binding(0) @group(0) var<storage, read_write> a : S;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
@@ -108,7 +107,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 
   std::stringstream out;
   ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
-  EXPECT_EQ(out.str(), R"([[group(1), binding(2)]] var a : sampler;)");
+  EXPECT_EQ(out.str(), R"(@group(1) @binding(2) var a : sampler;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {

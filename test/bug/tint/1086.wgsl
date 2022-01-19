@@ -8,7 +8,7 @@ fn g() {
   x(&v);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn f() {
   g();
 }

@@ -92,9 +92,8 @@ TEST_F(ParserImplTest, ParamList_TrailingComma) {
 }
 
 TEST_F(ParserImplTest, ParamList_Decorations) {
-  auto p = parser(
-      "[[builtin(position)]] coord : vec4<f32>, "
-      "[[location(1)]] loc1 : f32");
+  auto p =
+      parser("@builtin(position) coord : vec4<f32>, @location(1) loc1 : f32");
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -113,9 +112,9 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
             ast::Builtin::kPosition);
 
   ASSERT_EQ(e.value[0]->source.range.begin.line, 1u);
-  ASSERT_EQ(e.value[0]->source.range.begin.column, 23u);
+  ASSERT_EQ(e.value[0]->source.range.begin.column, 20u);
   ASSERT_EQ(e.value[0]->source.range.end.line, 1u);
-  ASSERT_EQ(e.value[0]->source.range.end.column, 28u);
+  ASSERT_EQ(e.value[0]->source.range.end.column, 25u);
 
   EXPECT_EQ(e.value[1]->symbol, p->builder().Symbols().Get("loc1"));
   EXPECT_TRUE(e.value[1]->type->Is<ast::F32>());
@@ -125,10 +124,10 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
   EXPECT_TRUE(decos1[0]->Is<ast::LocationDecoration>());
   EXPECT_EQ(decos1[0]->As<ast::LocationDecoration>()->value, 1u);
 
-  ASSERT_EQ(e.value[1]->source.range.begin.line, 1u);
-  ASSERT_EQ(e.value[1]->source.range.begin.column, 58u);
-  ASSERT_EQ(e.value[1]->source.range.end.line, 1u);
-  ASSERT_EQ(e.value[1]->source.range.end.column, 62u);
+  EXPECT_EQ(e.value[1]->source.range.begin.line, 1u);
+  EXPECT_EQ(e.value[1]->source.range.begin.column, 52u);
+  EXPECT_EQ(e.value[1]->source.range.end.line, 1u);
+  EXPECT_EQ(e.value[1]->source.range.end.column, 56u);
 }
 
 }  // namespace

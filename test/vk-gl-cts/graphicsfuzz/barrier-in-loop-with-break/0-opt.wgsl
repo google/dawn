@@ -1,4 +1,4 @@
-type RTArr = [[stride(4)]] array<i32>;
+type RTArr = @stride(4) array<i32>;
 
 struct doesNotMatter {
   global_seed : i32;
@@ -11,9 +11,9 @@ struct buf1 {
 
 var<private> gl_LocalInvocationID : vec3<u32>;
 
-[[group(0), binding(0)]] var<storage, read_write> x_7 : doesNotMatter;
+@group(0) @binding(0) var<storage, read_write> x_7 : doesNotMatter;
 
-[[group(0), binding(1)]] var<uniform> x_10 : buf1;
+@group(0) @binding(1) var<uniform> x_10 : buf1;
 
 fn main_1() {
   var lid : i32;
@@ -55,8 +55,8 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(16, 1, 1)]]
-fn main([[builtin(local_invocation_id)]] gl_LocalInvocationID_param : vec3<u32>) {
+@stage(compute) @workgroup_size(16, 1, 1)
+fn main(@builtin(local_invocation_id) gl_LocalInvocationID_param : vec3<u32>) {
   gl_LocalInvocationID = gl_LocalInvocationID_param;
   main_1();
 }

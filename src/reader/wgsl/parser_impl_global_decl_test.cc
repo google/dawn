@@ -132,7 +132,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
-  auto p = parser("[[workgroup_size(2)]] fn main() { return; }");
+  auto p = parser("@workgroup_size(2) fn main() { return; }");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
@@ -167,7 +167,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
-  auto p = parser("struct A { data: [[stride(4)]] array<f32>; }");
+  auto p = parser("struct A { data: @stride(4) array<f32>; }");
 
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();

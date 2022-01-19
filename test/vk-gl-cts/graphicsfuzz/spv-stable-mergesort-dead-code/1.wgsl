@@ -6,7 +6,7 @@ var<private> data : array<i32, 10>;
 
 var<private> temp : array<i32, 10>;
 
-[[group(0), binding(0)]] var<uniform> x_28 : buf0;
+@group(0) @binding(0) var<uniform> x_28 : buf0;
 
 var<private> gl_FragCoord : vec4<f32>;
 
@@ -308,12 +308,12 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   x_GLF_color_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
-fn main([[builtin(position)]] gl_FragCoord_param : vec4<f32>) -> main_out {
+@stage(fragment)
+fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
   return main_out(x_GLF_color);

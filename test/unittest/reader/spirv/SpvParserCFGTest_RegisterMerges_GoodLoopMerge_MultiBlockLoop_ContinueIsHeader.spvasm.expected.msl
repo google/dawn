@@ -9,7 +9,7 @@ fn main_1() {
   return;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   main_1();
 }

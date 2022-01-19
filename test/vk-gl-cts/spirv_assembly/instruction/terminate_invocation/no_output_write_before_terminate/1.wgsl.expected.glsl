@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 vk-gl-cts/spirv_assembly/instruction/terminate_invocation/no_output_write_before_terminate/1.wgsl:22:70 warning: integral user-defined fragment inputs must have a flat interpolation attribute
-fn main([[builtin(position)]] x_2_param : vec4<f32>, [[location(0)]] x_3_param : i32) -> main_out {
+fn main(@builtin(position) x_2_param : vec4<f32>, @location(0) x_3_param : i32) -> main_out {
                                                                      ^^^^^^^^^
 
 #version 310 es
@@ -59,7 +59,7 @@ void main() {
 
 Error parsing GLSL shader:
 ERROR: 0:42: 'int' : must be qualified as flat in
-ERROR: 0:42: '' : compilation terminated 
+ERROR: 0:42: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 

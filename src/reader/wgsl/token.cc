@@ -42,6 +42,8 @@ std::string Token::TypeToName(Type type) {
       return "&&";
     case Token::Type::kArrow:
       return "->";
+    case Token::Type::kAttr:
+      return "@";
     case Token::Type::kAttrLeft:
       return "[[";
     case Token::Type::kAttrRight:

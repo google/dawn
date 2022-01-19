@@ -353,7 +353,7 @@ TEST_F(ResolverFunctionValidationTest,
 }
 
 TEST_F(ResolverFunctionValidationTest, CannotCallEntryPoint) {
-  // [[stage(compute), workgroup_size(1)]] fn entrypoint() {}
+  // @stage(compute) @workgroup_size(1) fn entrypoint() {}
   // fn func() { return entrypoint(); }
   Func("entrypoint", ast::VariableList{}, ty.void_(), {},
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
@@ -371,8 +371,8 @@ TEST_F(ResolverFunctionValidationTest, CannotCallEntryPoint) {
 }
 
 TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
-  // [[stage(fragment)]]
-  // [[stage(vertex)]]
+  // @stage(fragment)
+  // @stage(vertex)
   // fn main() { return; }
   Func(Source{{12, 34}}, "main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -440,7 +440,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
   // let x = 4u;
   // let x = 8u;
-  // [[stage(compute), workgroup_size(x, y, 16u)]]
+  // @stage(compute) @workgroup_size(x, y, 16u)
   // fn main() {}
   auto* x = GlobalConst("x", ty.u32(), Expr(4u));
   auto* y = GlobalConst("y", ty.u32(), Expr(8u));

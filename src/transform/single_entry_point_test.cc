@@ -49,8 +49,8 @@ TEST_F(SingleEntryPointTest, Error_NoEntryPoints) {
 
 TEST_F(SingleEntryPointTest, Error_InvalidEntryPoint) {
   auto* src = R"(
-[[stage(vertex)]]
-fn main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 )";
@@ -70,7 +70,7 @@ TEST_F(SingleEntryPointTest, Error_NotAnEntryPoint) {
   auto* src = R"(
 fn foo() {}
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {}
 )";
 
@@ -87,7 +87,7 @@ fn main() {}
 
 TEST_F(SingleEntryPointTest, SingleEntryPoint) {
   auto* src = R"(
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
 }
 )";
@@ -103,26 +103,26 @@ fn main() {
 
 TEST_F(SingleEntryPointTest, MultipleEntryPoints) {
   auto* src = R"(
-[[stage(vertex)]]
-fn vert_main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vert_main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main2() {
 }
 )";
 
   auto* expect = R"(
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
 }
 )";
@@ -146,23 +146,23 @@ var<private> c : f32;
 
 var<private> d : f32;
 
-[[stage(vertex)]]
-fn vert_main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vert_main() -> @builtin(position) vec4<f32> {
   a = 0.0;
   return vec4<f32>();
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
   b = 0.0;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   c = 0.0;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main2() {
   d = 0.0;
 }
@@ -171,7 +171,7 @@ fn comp_main2() {
   auto* expect = R"(
 var<private> c : f32;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   c = 0.0;
 }
@@ -196,23 +196,23 @@ let c : f32 = 1.0;
 
 let d : f32 = 1.0;
 
-[[stage(vertex)]]
-fn vert_main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vert_main() -> @builtin(position) vec4<f32> {
   let local_a : f32 = a;
   return vec4<f32>();
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
   let local_b : f32 = b;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   let local_c : f32 = c;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main2() {
   let local_d : f32 = d;
 }
@@ -221,7 +221,7 @@ fn comp_main2() {
   auto* expect = R"(
 let c : f32 = 1.0;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   let local_c : f32 = c;
 }
@@ -240,7 +240,7 @@ TEST_F(SingleEntryPointTest, WorkgroupSizeLetPreserved) {
   auto* src = R"(
 let size : i32 = 1;
 
-[[stage(compute), workgroup_size(size)]]
+@stage(compute) @workgroup_size(size)
 fn main() {
 }
 )";
@@ -258,32 +258,32 @@ fn main() {
 
 TEST_F(SingleEntryPointTest, OverridableConstants) {
   auto* src = R"(
-[[override(1001)]] let c1 : u32 = 1u;
+@override(1001) let c1 : u32 = 1u;
 [[override]] let c2 : u32 = 1u;
-[[override(0)]] let c3 : u32 = 1u;
-[[override(9999)]] let c4 : u32 = 1u;
+@override(0) let c3 : u32 = 1u;
+@override(9999) let c4 : u32 = 1u;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
     let local_d = c1;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main2() {
     let local_d = c2;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main3() {
     let local_d = c3;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main4() {
     let local_d = c4;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main5() {
     let local_d = 1u;
 }
@@ -292,9 +292,9 @@ fn comp_main5() {
   {
     SingleEntryPoint::Config cfg("comp_main1");
     auto* expect = R"(
-[[override(1001)]] let c1 : u32 = 1u;
+@override(1001) let c1 : u32 = 1u;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   let local_d = c1;
 }
@@ -310,9 +310,9 @@ fn comp_main1() {
     // The decorator is replaced with the one with explicit id
     // And should not be affected by other constants stripped away
     auto* expect = R"(
-[[override(1)]] let c2 : u32 = 1u;
+@override(1) let c2 : u32 = 1u;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main2() {
   let local_d = c2;
 }
@@ -326,9 +326,9 @@ fn comp_main2() {
   {
     SingleEntryPoint::Config cfg("comp_main3");
     auto* expect = R"(
-[[override(0)]] let c3 : u32 = 1u;
+@override(0) let c3 : u32 = 1u;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main3() {
   let local_d = c3;
 }
@@ -342,9 +342,9 @@ fn comp_main3() {
   {
     SingleEntryPoint::Config cfg("comp_main4");
     auto* expect = R"(
-[[override(9999)]] let c4 : u32 = 1u;
+@override(9999) let c4 : u32 = 1u;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main4() {
   let local_d = c4;
 }
@@ -358,7 +358,7 @@ fn comp_main4() {
   {
     SingleEntryPoint::Config cfg("comp_main5");
     auto* expect = R"(
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main5() {
   let local_d = 1u;
 }
@@ -391,12 +391,12 @@ fn outer2() {
   inner_shared();
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   outer1();
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main2() {
   outer2();
 }
@@ -414,7 +414,7 @@ fn outer1() {
   inner_shared();
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   outer1();
 }
@@ -465,12 +465,12 @@ fn outer2() {
   outer2_var = 0.0;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   outer1();
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main2() {
   outer2();
 }
@@ -497,7 +497,7 @@ fn outer1() {
   outer1_var = 0.0;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
   outer1();
 }

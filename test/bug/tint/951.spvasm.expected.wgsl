@@ -1,6 +1,6 @@
-type RTArr = [[stride(4)]] array<f32>;
+type RTArr = @stride(4) array<f32>;
 
-type RTArr_1 = [[stride(4)]] array<f32>;
+type RTArr_1 = @stride(4) array<f32>;
 
 struct ssbOut {
   result : RTArr_1;
@@ -18,13 +18,13 @@ struct Uniforms {
   size : i32;
 }
 
-[[group(0), binding(0)]] var<storage, read_write> x_16 : ssbOut;
+@group(0) @binding(0) var<storage, read_write> x_16 : ssbOut;
 
-[[group(0), binding(1)]] var<storage, read> x_20 : ssbA;
+@group(0) @binding(1) var<storage, read> x_20 : ssbA;
 
 var<private> gl_GlobalInvocationID : vec3<u32>;
 
-[[group(0), binding(2)]] var<uniform> x_24 : Uniforms;
+@group(0) @binding(2) var<uniform> x_24 : Uniforms;
 
 fn getAAtOutCoords_() -> f32 {
   let x_42 : u32 = gl_GlobalInvocationID.x;
@@ -72,8 +72,8 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(128, 1, 1)]]
-fn main([[builtin(global_invocation_id)]] gl_GlobalInvocationID_param : vec3<u32>) {
+@stage(compute) @workgroup_size(128, 1, 1)
+fn main(@builtin(global_invocation_id) gl_GlobalInvocationID_param : vec3<u32>) {
   gl_GlobalInvocationID = gl_GlobalInvocationID_param;
   main_1();
 }

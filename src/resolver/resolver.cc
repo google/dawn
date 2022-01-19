@@ -2151,7 +2151,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     return nullptr;
   }
 
-  // Look for explicit stride via [[stride(n)]] decoration
+  // Look for explicit stride via @stride(n) decoration
   uint32_t explicit_stride = 0;
   for (auto* deco : arr->decorations) {
     Mark(deco);

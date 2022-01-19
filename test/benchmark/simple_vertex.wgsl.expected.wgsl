@@ -1,14 +1,14 @@
 struct Input {
-  [[location(0)]]
+  @location(0)
   position : vec4<f32>;
 }
 
 struct Output {
-  [[builtin(position)]]
+  @builtin(position)
   position : vec4<f32>;
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main(in : Input) -> Output {
   return Output(in.position);
 }

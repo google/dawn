@@ -4,7 +4,7 @@ fn atomicStore_726882() {
   atomicStore(&(arg_0), 1u);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn compute_main() {
   atomicStore_726882();
 }

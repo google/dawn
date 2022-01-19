@@ -777,7 +777,11 @@ Token Lexer::try_punctuation() {
   auto source = begin_source();
   auto type = Token::Type::kUninitialized;
 
-  if (matches(pos_, "[[")) {
+  if (matches(pos_, "@")) {
+    type = Token::Type::kAttr;
+    pos_ += 1;
+    location_.column += 1;
+  } else if (matches(pos_, "[[")) {
     type = Token::Type::kAttrLeft;
     pos_ += 2;
     location_.column += 2;

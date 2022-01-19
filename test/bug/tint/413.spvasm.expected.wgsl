@@ -1,6 +1,6 @@
-[[group(0), binding(0)]] var Src : texture_2d<u32>;
+@group(0) @binding(0) var Src : texture_2d<u32>;
 
-[[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;
+@group(0) @binding(1) var Dst : texture_storage_2d<r32uint, write>;
 
 fn main_1() {
   var srcValue : vec4<u32>;
@@ -13,7 +13,7 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(1, 1, 1)]]
+@stage(compute) @workgroup_size(1, 1, 1)
 fn main() {
   main_1();
 }

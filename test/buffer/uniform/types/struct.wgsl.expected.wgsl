@@ -6,9 +6,9 @@ struct S {
   inner : Inner;
 }
 
-[[group(0), binding(0)]] var<uniform> u : S;
+@group(0) @binding(0) var<uniform> u : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   let x = u;
 }

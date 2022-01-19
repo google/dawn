@@ -1,7 +1,7 @@
 let slen = 4;
 let ulen = 4u;
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   var signed_literal : array<f32, 4>;
   var unsigned_literal : array<f32, 4u>;

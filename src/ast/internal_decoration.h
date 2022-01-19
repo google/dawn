@@ -35,7 +35,7 @@ class InternalDecoration : public Castable<InternalDecoration, Decoration> {
   ~InternalDecoration() override;
 
   /// @return a short description of the internal decoration which will be
-  /// displayed in WGSL as `[[internal(<name>)]]` (but is not parsable).
+  /// displayed in WGSL as `@internal(<name>)` (but is not parsable).
   virtual std::string InternalName() const = 0;
 
   /// @returns the WGSL name for the decoration

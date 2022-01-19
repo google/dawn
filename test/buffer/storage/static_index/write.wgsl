@@ -12,12 +12,12 @@ struct S {
     g : mat2x3<f32>;
     h : mat3x2<f32>;
     i : Inner;
-    j : [[stride(16)]] array<Inner, 4>;
+    j : @stride(16) array<Inner, 4>;
 };
 
-[[binding(0), group(0)]] var<storage, write> s : S;
+@binding(0) @group(0) var<storage, write> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
     s.a = vec3<i32>();
     s.b = i32();
@@ -28,5 +28,5 @@ fn main() {
     s.g = mat2x3<f32>();
     s.h = mat3x2<f32>();
     s.i = Inner();
-    s.j = [[stride(16)]] array<Inner, 4>();
+    s.j = @stride(16) array<Inner, 4>();
 }

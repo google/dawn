@@ -1,6 +1,6 @@
-[[override(1234)]] let o : bool;
+@override(1234) let o : bool;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   _ = o;
 }

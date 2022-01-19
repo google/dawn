@@ -58,7 +58,7 @@ std::string Array::type_name() const {
 std::string Array::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   if (!IsStrideImplicit()) {
-    out << "[[stride(" << stride_ << ")]] ";
+    out << "@stride(" << stride_ << ") ";
   }
   out << "array<" << element_->FriendlyName(symbols);
   if (!IsRuntimeSized()) {

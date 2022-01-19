@@ -7,12 +7,12 @@ struct LeftOver {
   u_World : mat4x4<f32>;
   u_ViewProjection : mat4x4<f32>;
   u_bumpStrength : f32;
-  [[size(12)]]
+  @size(12)
   padding : u32;
   u_cameraPosition : vec3<f32>;
   u_parallaxScale : f32;
   textureInfoName : f32;
-  [[size(4)]]
+  @size(4)
   padding_1 : u32;
   tangentSpaceParameter0 : vec2<f32>;
 }
@@ -22,7 +22,7 @@ struct Light0 {
   vLightDiffuse : vec4<f32>;
   vLightSpecular : vec4<f32>;
   vLightGround : vec3<f32>;
-  [[size(4)]]
+  @size(4)
   padding_2 : u32;
   shadowsInfo : vec4<f32>;
   depthValues : vec2<f32>;
@@ -32,13 +32,13 @@ var<private> u_Float : f32;
 
 var<private> u_Color : vec3<f32>;
 
-[[group(2), binding(1)]] var TextureSamplerTexture : texture_2d<f32>;
+@group(2) @binding(1) var TextureSamplerTexture : texture_2d<f32>;
 
-[[group(2), binding(0)]] var TextureSamplerSampler : sampler;
+@group(2) @binding(0) var TextureSamplerSampler : sampler;
 
 var<private> vMainuv : vec2<f32>;
 
-[[group(2), binding(6)]] var<uniform> x_269 : LeftOver;
+@group(2) @binding(6) var<uniform> x_269 : LeftOver;
 
 var<private> v_output1 : vec4<f32>;
 
@@ -48,17 +48,17 @@ var<private> v_uv : vec2<f32>;
 
 var<private> v_output2 : vec4<f32>;
 
-[[group(2), binding(3)]] var TextureSampler1Texture : texture_2d<f32>;
+@group(2) @binding(3) var TextureSampler1Texture : texture_2d<f32>;
 
-[[group(2), binding(2)]] var TextureSampler1Sampler : sampler;
+@group(2) @binding(2) var TextureSampler1Sampler : sampler;
 
-[[group(0), binding(5)]] var<uniform> light0 : Light0;
+@group(0) @binding(5) var<uniform> light0 : Light0;
 
 var<private> glFragColor : vec4<f32>;
 
-[[group(2), binding(4)]] var bumpSamplerSampler : sampler;
+@group(2) @binding(4) var bumpSamplerSampler : sampler;
 
-[[group(2), binding(5)]] var bumpSamplerTexture : texture_2d<f32>;
+@group(2) @binding(5) var bumpSamplerTexture : texture_2d<f32>;
 
 fn cotangent_frame_vf3_vf3_vf2_vf2_(normal_1 : ptr<function, vec3<f32>>, p : ptr<function, vec3<f32>>, uv : ptr<function, vec2<f32>>, tangentSpaceParams : ptr<function, vec2<f32>>) -> mat3x3<f32> {
   var dp1 : vec3<f32>;
@@ -436,12 +436,12 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   glFragColor_1 : vec4<f32>;
 }
 
-[[stage(fragment)]]
-fn main([[location(1)]] vMainuv_param : vec2<f32>, [[location(0)]] v_output1_param : vec4<f32>, [[builtin(front_facing)]] gl_FrontFacing_param : bool, [[location(3)]] v_uv_param : vec2<f32>, [[location(2)]] v_output2_param : vec4<f32>) -> main_out {
+@stage(fragment)
+fn main(@location(1) vMainuv_param : vec2<f32>, @location(0) v_output1_param : vec4<f32>, @builtin(front_facing) gl_FrontFacing_param : bool, @location(3) v_uv_param : vec2<f32>, @location(2) v_output2_param : vec4<f32>) -> main_out {
   vMainuv = vMainuv_param;
   v_output1 = v_output1_param;
   gl_FrontFacing = gl_FrontFacing_param;

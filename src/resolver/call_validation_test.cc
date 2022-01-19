@@ -172,7 +172,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParamWithMain) {
   // fn bar(p: ptr<function, i32>) {
   // foo(p);
   // }
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn main() {
   //   var v: i32;
   //   bar(&v);
@@ -195,7 +195,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParamWithMain) {
 
 TEST_F(ResolverCallValidationTest, LetPointer) {
   // fn x(p : ptr<function, i32>) -> i32 {}
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn main() {
   //   var v: i32;
   //   let p: ptr<function, i32> = &v;
@@ -227,7 +227,7 @@ TEST_F(ResolverCallValidationTest, LetPointerPrivate) {
   // let p: ptr<private, i32> = &v;
   // fn foo(p : ptr<private, i32>) -> i32 {}
   // var v: i32;
-  // [[stage(fragment)]]
+  // @stage(fragment)
   // fn main() {
   //   var c: i32 = foo(p);
   // }

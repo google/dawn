@@ -54,7 +54,7 @@ TEST_P(VectorizeScalarMatrixConstructorsTest, Basic) {
   }
 
   std::string tmpl = R"(
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   let m = ${matrix}(${values});
 }
@@ -83,7 +83,7 @@ TEST_P(VectorizeScalarMatrixConstructorsTest, NonScalarConstructors) {
   }
 
   std::string tmpl = R"(
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   let m = ${matrix}(${columns});
 }

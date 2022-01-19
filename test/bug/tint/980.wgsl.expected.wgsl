@@ -9,9 +9,9 @@ struct S {
   i : u32;
 }
 
-[[binding(0), group(0)]] var<storage, read_write> io : S;
+@binding(0) @group(0) var<storage, read_write> io : S;
 
-[[stage(compute), workgroup_size(1)]]
-fn main([[builtin(local_invocation_index)]] idx : u32) {
+@stage(compute) @workgroup_size(1)
+fn main(@builtin(local_invocation_index) idx : u32) {
   io.v = Bad(io.i, io.v);
 }

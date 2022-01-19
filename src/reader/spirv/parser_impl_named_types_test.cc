@@ -78,7 +78,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr("RTArr = [[stride(8)]] array<u32>;\n"));
+              HasSubstr("RTArr = @stride(8) array<u32>;\n"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -93,9 +93,9 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr(R"(type RTArr = [[stride(8)]] array<u32>;
+              HasSubstr(R"(type RTArr = @stride(8) array<u32>;
 
-type RTArr_1 = [[stride(8)]] array<u32>;
+type RTArr_1 = @stride(8) array<u32>;
 )"));
 
   p->DeliberatelyInvalidSpirv();
@@ -110,7 +110,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr("myrtarr = [[stride(8)]] array<u32>;\n"));
+              HasSubstr("myrtarr = @stride(8) array<u32>;\n"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -126,7 +126,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedArray) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr("myarr = [[stride(8)]] array<u32, 5u>;"));
+              HasSubstr("myarr = @stride(8) array<u32, 5u>;"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -142,9 +142,9 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr(R"(type Arr = [[stride(8)]] array<u32, 5u>;
+              HasSubstr(R"(type Arr = @stride(8) array<u32, 5u>;
 
-type Arr_1 = [[stride(8)]] array<u32, 5u>;
+type Arr_1 = @stride(8) array<u32, 5u>;
 )"));
 
   p->DeliberatelyInvalidSpirv();

@@ -1,4 +1,4 @@
-type Arr = [[stride(16)]] array<f32, 2>;
+type Arr = @stride(16) array<f32, 2>;
 
 struct buf1 {
   x_GLF_uniform_float_values : Arr;
@@ -8,21 +8,21 @@ struct buf2 {
   zero : f32;
 };
 
-type Arr_1 = [[stride(16)]] array<i32, 2>;
+type Arr_1 = @stride(16) array<i32, 2>;
 
 struct buf0 {
   x_GLF_uniform_int_values : Arr_1;
 };
 
-[[group(0), binding(1)]] var<uniform> x_8 : buf1;
+@group(0) @binding(1) var<uniform> x_8 : buf1;
 
-[[group(0), binding(2)]] var<uniform> x_10 : buf2;
+@group(0) @binding(2) var<uniform> x_10 : buf2;
 
 var<private> gl_FragCoord : vec4<f32>;
 
 var<private> x_GLF_color : vec4<f32>;
 
-[[group(0), binding(0)]] var<uniform> x_13 : buf0;
+@group(0) @binding(0) var<uniform> x_13 : buf0;
 
 fn func_vf2_(pos : ptr<function, vec2<f32>>) -> bool {
   let x_62 : f32 = (*(pos)).x;
@@ -60,12 +60,12 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   x_GLF_color_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
-fn main([[builtin(position)]] gl_FragCoord_param : vec4<f32>) -> main_out {
+@stage(fragment)
+fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
   return main_out(x_GLF_color);

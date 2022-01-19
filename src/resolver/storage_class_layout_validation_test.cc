@@ -28,10 +28,10 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
        StorageBuffer_UnalignedMember) {
   // [[block]]
   // struct S {
-  //     [[size(5)]] a : f32;
-  //     [[align(1)]] b : f32;
+  //     @size(5) a : f32;
+  //     @align(1) b : f32;
   // };
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<storage> a : S;
 
   Structure(Source{{12, 34}}, "S",
@@ -45,7 +45,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(34:56 error: the offset of a struct member of type 'f32' in storage class 'storage' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting [[align(4)]] on this member
+      R"(34:56 error: the offset of a struct member of type 'f32' in storage class 'storage' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting @align(4) on this member
 12:34 note: see layout of struct:
 /*           align(4) size(12) */ struct S {
 /* offset(0) align(4) size( 5) */   a : f32;
@@ -59,10 +59,10 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
        StorageBuffer_UnalignedMember_SuggestedFix) {
   // [[block]]
   // struct S {
-  //     [[size(5)]] a : f32;
-  //     [[align(4)]] b : f32;
+  //     @size(5) a : f32;
+  //     @align(4) b : f32;
   // };
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<storage> a : S;
 
   Structure(Source{{12, 34}}, "S",
@@ -89,7 +89,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   inner : Inner;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
 
   Structure(Source{{12, 34}}, "Inner", {Member("scalar", ty.i32())});
@@ -107,7 +107,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: the offset of a struct member of type 'Inner' in storage class 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting [[align(16)]] on this member
+      R"(56:78 error: the offset of a struct member of type 'Inner' in storage class 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting @align(16) on this member
 34:56 note: see layout of struct:
 /*           align(4) size(8) */ struct Outer {
 /* offset(0) align(4) size(4) */   scalar : f32;
@@ -129,10 +129,10 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   // [[block]]
   // struct Outer {
   //   scalar : f32;
-  //   [[align(16)]] inner : Inner;
+  //   @align(16) inner : Inner;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
 
   Structure(Source{{12, 34}}, "Inner", {Member("scalar", ty.i32())});
@@ -154,7 +154,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 // Detect unaligned array member for uniform buffers
 TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_UnalignedMember_Array) {
-  // type Inner = [[stride(16)]] array<f32, 10>;
+  // type Inner = @stride(16) array<f32, 10>;
   //
   // [[block]]
   // struct Outer {
@@ -162,7 +162,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   inner : Inner;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
   Alias("Inner", ty.array(ty.f32(), 10, 16));
 
@@ -179,26 +179,26 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: the offset of a struct member of type '[[stride(16)]] array<f32, 10>' in storage class 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting [[align(16)]] on this member
+      R"(56:78 error: the offset of a struct member of type '@stride(16) array<f32, 10>' in storage class 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting @align(16) on this member
 12:34 note: see layout of struct:
 /*             align(4) size(164) */ struct Outer {
 /* offset(  0) align(4) size(  4) */   scalar : f32;
-/* offset(  4) align(4) size(160) */   inner : [[stride(16)]] array<f32, 10>;
+/* offset(  4) align(4) size(160) */   inner : @stride(16) array<f32, 10>;
 /*                                */ };
 78:90 note: see declaration of variable)");
 }
 
 TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_UnalignedMember_Array_SuggestedFix) {
-  // type Inner = [[stride(16)]] array<f32, 10>;
+  // type Inner = @stride(16) array<f32, 10>;
   //
   // [[block]]
   // struct Outer {
   //   scalar : f32;
-  //   [[align(16)]] inner : Inner;
+  //   @align(16) inner : Inner;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
   Alias("Inner", ty.array(ty.f32(), 10, 16));
 
@@ -221,7 +221,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_MembersOffsetNotMultipleOf16) {
   // struct Inner {
-  //   [[align(1), size(5)]] scalar : i32;
+  //   @align(1) @size(5) scalar : i32;
   // };
   //
   // [[block]]
@@ -230,7 +230,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   scalar : i32;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
 
   Structure(Source{{12, 34}}, "Inner",
@@ -249,7 +249,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(78:90 error: uniform storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 8 bytes between 'inner' and 'scalar'. Consider setting [[align(16)]] on this member
+      R"(78:90 error: uniform storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 8 bytes between 'inner' and 'scalar'. Consider setting @align(16) on this member
 34:56 note: see layout of struct:
 /*            align(4) size(12) */ struct Outer {
 /* offset( 0) align(1) size( 5) */   inner : Inner;
@@ -270,7 +270,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   a : i32;
   //   b : i32;
   //   c : i32;
-  //   [[align(1), size(5)]] scalar : i32;
+  //   @align(1) @size(5) scalar : i32;
   // };
   //
   // [[block]]
@@ -279,7 +279,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   scalar : i32;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
 
   Structure(Source{{12, 34}}, "Inner",
@@ -303,7 +303,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(78:90 error: uniform storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 20 bytes between 'inner' and 'scalar'. Consider setting [[align(16)]] on this member
+      R"(78:90 error: uniform storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 20 bytes between 'inner' and 'scalar'. Consider setting @align(16) on this member
 34:56 note: see layout of struct:
 /*            align(4) size(24) */ struct Outer {
 /* offset( 0) align(4) size(20) */   inner : Inner;
@@ -323,16 +323,16 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_MembersOffsetNotMultipleOf16_SuggestedFix) {
   // struct Inner {
-  //   [[align(1), size(5)]] scalar : i32;
+  //   @align(1) @size(5) scalar : i32;
   // };
   //
   // [[block]]
   // struct Outer {
-  //   [[align(16)]] inner : Inner;
+  //   @align(16) inner : Inner;
   //   scalar : i32;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
 
   Structure(Source{{12, 34}}, "Inner",
@@ -360,7 +360,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //     v : vec3<f32>;
   //     s : f32;
   // };
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : ScalarPackedAtEndOfVec3;
 
   Structure("ScalarPackedAtEndOfVec3",
@@ -379,7 +379,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 // Detect array stride must be a multiple of 16 bytes for uniform buffers
 TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_InvalidArrayStride) {
-  // type Inner = [[stride(8)]] array<f32, 10>;
+  // type Inner = @stride(8) array<f32, 10>;
   //
   // [[block]]
   // struct Outer {
@@ -387,7 +387,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   scalar : i32;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
 
   Alias("Inner", ty.array(ty.f32(), 10, 8));
@@ -405,10 +405,10 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array stride of 'inner' is currently 8. Consider setting [[stride(16)]] on the array type
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array stride of 'inner' is currently 8. Consider setting @stride(16) on the array type
 12:34 note: see layout of struct:
 /*            align(4) size(84) */ struct Outer {
-/* offset( 0) align(4) size(80) */   inner : [[stride(8)]] array<f32, 10>;
+/* offset( 0) align(4) size(80) */   inner : @stride(8) array<f32, 10>;
 /* offset(80) align(4) size( 4) */   scalar : i32;
 /*                              */ };
 78:90 note: see declaration of variable)");
@@ -416,7 +416,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 
 TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_InvalidArrayStride_SuggestedFix) {
-  // type Inner = [[stride(16)]] array<f32, 10>;
+  // type Inner = @stride(16) array<f32, 10>;
   //
   // [[block]]
   // struct Outer {
@@ -424,7 +424,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   scalar : i32;
   // };
   //
-  // [[group(0), binding(0)]]
+  // @group(0) @binding(0)
   // var<uniform> a : Outer;
 
   Alias("Inner", ty.array(ty.f32(), 10, 16));

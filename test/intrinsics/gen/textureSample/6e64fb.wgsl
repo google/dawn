@@ -22,15 +22,15 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
-[[group(1), binding(0)]] var arg_0: texture_1d<f32>;
-[[group(1), binding(1)]] var arg_1: sampler;
+@group(1) @binding(0) var arg_0: texture_1d<f32>;
+@group(1) @binding(1) var arg_1: sampler;
 
 // fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
 fn textureSample_6e64fb() {
   var res: vec4<f32> = textureSample(arg_0, arg_1, 1.0);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn fragment_main() {
   textureSample_6e64fb();
 }

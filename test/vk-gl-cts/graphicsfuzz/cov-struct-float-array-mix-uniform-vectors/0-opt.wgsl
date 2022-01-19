@@ -2,7 +2,7 @@ struct S {
   numbers : array<f32, 3>;
 };
 
-type Arr = [[stride(16)]] array<f32, 5>;
+type Arr = @stride(16) array<f32, 5>;
 
 struct buf1 {
   x_GLF_uniform_float_values : Arr;
@@ -16,19 +16,19 @@ struct buf3 {
   oneVec : vec2<f32>;
 };
 
-type Arr_1 = [[stride(16)]] array<i32, 2>;
+type Arr_1 = @stride(16) array<i32, 2>;
 
 struct buf0 {
   x_GLF_uniform_int_values : Arr_1;
 };
 
-[[group(0), binding(1)]] var<uniform> x_7 : buf1;
+@group(0) @binding(1) var<uniform> x_7 : buf1;
 
-[[group(0), binding(2)]] var<uniform> x_9 : buf2;
+@group(0) @binding(2) var<uniform> x_9 : buf2;
 
-[[group(0), binding(3)]] var<uniform> x_12 : buf3;
+@group(0) @binding(3) var<uniform> x_12 : buf3;
 
-[[group(0), binding(0)]] var<uniform> x_15 : buf0;
+@group(0) @binding(0) var<uniform> x_15 : buf0;
 
 var<private> x_GLF_color : vec4<f32>;
 
@@ -78,11 +78,11 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   x_GLF_color_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() -> main_out {
   main_1();
   return main_out(x_GLF_color);

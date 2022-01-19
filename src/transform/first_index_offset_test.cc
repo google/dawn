@@ -51,8 +51,8 @@ fn test(vert_idx : u32) -> u32 {
   return vert_idx;
 }
 
-[[stage(vertex)]]
-fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   test(vert_idx);
   return vec4<f32>();
 }
@@ -63,14 +63,14 @@ struct tint_symbol {
   first_vertex_index : u32;
 }
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
+@binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
 
 fn test(vert_idx : u32) -> u32 {
   return vert_idx;
 }
 
-[[stage(vertex)]]
-fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   test((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
 }
@@ -97,8 +97,8 @@ fn test(inst_idx : u32) -> u32 {
   return inst_idx;
 }
 
-[[stage(vertex)]]
-fn entry([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   test(inst_idx);
   return vec4<f32>();
 }
@@ -109,14 +109,14 @@ struct tint_symbol {
   first_instance_index : u32;
 }
 
-[[binding(1), group(7)]] var<uniform> tint_symbol_1 : tint_symbol;
+@binding(1) @group(7) var<uniform> tint_symbol_1 : tint_symbol;
 
 fn test(inst_idx : u32) -> u32 {
   return inst_idx;
 }
 
-[[stage(vertex)]]
-fn entry([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   test((inst_idx + tint_symbol_1.first_instance_index));
   return vec4<f32>();
 }
@@ -144,12 +144,12 @@ fn test(instance_idx : u32, vert_idx : u32) -> u32 {
 }
 
 struct Inputs {
-  [[builtin(instance_index)]] instance_idx : u32;
-  [[builtin(vertex_index)]] vert_idx : u32;
+  @builtin(instance_index) instance_idx : u32;
+  @builtin(vertex_index) vert_idx : u32;
 };
 
-[[stage(vertex)]]
-fn entry(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
   test(inputs.instance_idx, inputs.vert_idx);
   return vec4<f32>();
 }
@@ -161,21 +161,21 @@ struct tint_symbol {
   first_instance_index : u32;
 }
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
+@binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
 
 fn test(instance_idx : u32, vert_idx : u32) -> u32 {
   return (instance_idx + vert_idx);
 }
 
 struct Inputs {
-  [[builtin(instance_index)]]
+  @builtin(instance_index)
   instance_idx : u32;
-  [[builtin(vertex_index)]]
+  @builtin(vertex_index)
   vert_idx : u32;
 }
 
-[[stage(vertex)]]
-fn entry(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
   test((inputs.instance_idx + tint_symbol_1.first_instance_index), (inputs.vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
 }
@@ -206,8 +206,8 @@ fn func2(vert_idx : u32) -> u32 {
   return func1(vert_idx);
 }
 
-[[stage(vertex)]]
-fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func2(vert_idx);
   return vec4<f32>();
 }
@@ -218,7 +218,7 @@ struct tint_symbol {
   first_vertex_index : u32;
 }
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
+@binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
 
 fn func1(vert_idx : u32) -> u32 {
   return vert_idx;
@@ -228,8 +228,8 @@ fn func2(vert_idx : u32) -> u32 {
   return func1(vert_idx);
 }
 
-[[stage(vertex)]]
-fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func2((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
 }
@@ -256,20 +256,20 @@ fn func(i : u32) -> u32 {
   return i;
 }
 
-[[stage(vertex)]]
-fn entry_a([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry_a(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func(vert_idx);
   return vec4<f32>();
 }
 
-[[stage(vertex)]]
-fn entry_b([[builtin(vertex_index)]] vert_idx : u32, [[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry_b(@builtin(vertex_index) vert_idx : u32, @builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(vert_idx + inst_idx);
   return vec4<f32>();
 }
 
-[[stage(vertex)]]
-fn entry_c([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(inst_idx);
   return vec4<f32>();
 }
@@ -281,26 +281,26 @@ struct tint_symbol {
   first_instance_index : u32;
 }
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
+@binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
 
 fn func(i : u32) -> u32 {
   return i;
 }
 
-[[stage(vertex)]]
-fn entry_a([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry_a(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
 }
 
-[[stage(vertex)]]
-fn entry_b([[builtin(vertex_index)]] vert_idx : u32, [[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry_b(@builtin(vertex_index) vert_idx : u32, @builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(((vert_idx + tint_symbol_1.first_vertex_index) + (inst_idx + tint_symbol_1.first_instance_index)));
   return vec4<f32>();
 }
 
-[[stage(vertex)]]
-fn entry_c([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func((inst_idx + tint_symbol_1.first_instance_index));
   return vec4<f32>();
 }

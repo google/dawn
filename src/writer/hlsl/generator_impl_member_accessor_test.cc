@@ -393,7 +393,7 @@ void main() {
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_IndexAccessor_StorageBuffer_Load_Int_FromArray) {
   // struct Data {
-  //   a : [[stride(4)]] array<i32, 5>;
+  //   a : @stride(4) array<i32, 5>;
   // };
   // var<storage> data : Data;
   // data.a[2];
@@ -425,7 +425,7 @@ void main() {
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_IndexAccessor_StorageBuffer_Load_Int_FromArray_ExprIdx) {
   // struct Data {
-  //   a : [[stride(4)]] array<i32, 5>;
+  //   a : @stride(4) array<i32, 5>;
   // };
   // var<storage> data : Data;
   // data.a[(2 + 4) - 3];
@@ -457,7 +457,7 @@ void main() {
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
   // struct Data {
-  //   a : [[stride(4)]] array<i32, 5>;
+  //   a : @stride(4) array<i32, 5>;
   // };
   // var<storage> data : Data;
   // data.a[2] = 2;
@@ -491,7 +491,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
   //   b : vec3<f32>;
   // };
   // struct Data {
-  //   var c : [[stride(32)]] array<Inner, 4>;
+  //   var c : @stride(32) array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
@@ -533,7 +533,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   b : vec3<f32>;
   // };
   // struct Data {
-  //   var c : [[stride(32)]] array<Inner, 4>;
+  //   var c : @stride(32) array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
@@ -577,7 +577,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   b : vec3<f32>;
   // };
   // struct Data {
-  //   var c : [[stride(32)]] array<Inner, 4>;
+  //   var c : @stride(32) array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
@@ -621,7 +621,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   b : vec3<f32>;
   // };
   // struct Data {
-  //   var c : [[stride(32)]] array<Inner, 4>;
+  //   var c : @stride(32) array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
@@ -664,7 +664,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
   //   b : vec3<f32>;
   // };
   // struct Data {
-  //   var c : [[stride(32)]] array<Inner, 4>;
+  //   var c : @stride(32) array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
@@ -705,7 +705,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   b : vec3<f32>;
   // };
   // struct Data {
-  //   var c : [[stride(32)]] array<Inner, 4>;
+  //   var c : @stride(32) array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;

@@ -52,13 +52,13 @@ TEST_F(DecomposeStridedMatrixTest, MissingDependencySimplify) {
 
 TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
   // struct S {
-  //   [[offset(16), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(16) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
-  // [[group(0), binding(0)]] var<uniform> s : S;
+  // @group(0) @binding(0) var<uniform> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   let x : mat2x2<f32> = s.m;
   // }
@@ -88,18 +88,18 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
 
   auto* expect = R"(
 struct S {
-  [[size(16)]]
+  @size(16)
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2u>;
+  m : @stride(32) array<vec2<f32>, 2u>;
 }
 
-[[group(0), binding(0)]] var<uniform> s : S;
+@group(0) @binding(0) var<uniform> s : S;
 
-fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2u>) -> mat2x2<f32> {
+fn arr_to_mat2x2_stride_32(arr : @stride(32) array<vec2<f32>, 2u>) -> mat2x2<f32> {
   return mat2x2<f32>(arr[0u], arr[1u]);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x : mat2x2<f32> = arr_to_mat2x2_stride_32(s.m);
 }
@@ -113,13 +113,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
   // struct S {
-  //   [[offset(16), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(16) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
-  // [[group(0), binding(0)]] var<uniform> s : S;
+  // @group(0) @binding(0) var<uniform> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   let x : vec2<f32> = s.m[1];
   // }
@@ -149,14 +149,14 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
 
   auto* expect = R"(
 struct S {
-  [[size(16)]]
+  @size(16)
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2u>;
+  m : @stride(32) array<vec2<f32>, 2u>;
 }
 
-[[group(0), binding(0)]] var<uniform> s : S;
+@group(0) @binding(0) var<uniform> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x : vec2<f32> = s.m[1];
 }
@@ -170,13 +170,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
   // struct S {
-  //   [[offset(16), stride(8)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(16) @stride(8)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
-  // [[group(0), binding(0)]] var<uniform> s : S;
+  // @group(0) @binding(0) var<uniform> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   let x : mat2x2<f32> = s.m;
   // }
@@ -206,15 +206,15 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
 
   auto* expect = R"(
 struct S {
-  [[size(16)]]
+  @size(16)
   padding : u32;
-  [[stride(8), internal(disable_validation__ignore_stride)]]
+  @stride(8) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>;
 }
 
-[[group(0), binding(0)]] var<uniform> s : S;
+@group(0) @binding(0) var<uniform> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x : mat2x2<f32> = s.m;
 }
@@ -228,13 +228,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
   // struct S {
-  //   [[offset(8), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(8) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   let x : mat2x2<f32> = s.m;
   // }
@@ -264,18 +264,18 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
 
   auto* expect = R"(
 struct S {
-  [[size(8)]]
+  @size(8)
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2u>;
+  m : @stride(32) array<vec2<f32>, 2u>;
 }
 
-[[group(0), binding(0)]] var<storage, read_write> s : S;
+@group(0) @binding(0) var<storage, read_write> s : S;
 
-fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2u>) -> mat2x2<f32> {
+fn arr_to_mat2x2_stride_32(arr : @stride(32) array<vec2<f32>, 2u>) -> mat2x2<f32> {
   return mat2x2<f32>(arr[0u], arr[1u]);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x : mat2x2<f32> = arr_to_mat2x2_stride_32(s.m);
 }
@@ -289,13 +289,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
   // struct S {
-  //   [[offset(16), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(16) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   let x : vec2<f32> = s.m[1];
   // }
@@ -325,14 +325,14 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
 
   auto* expect = R"(
 struct S {
-  [[size(16)]]
+  @size(16)
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2u>;
+  m : @stride(32) array<vec2<f32>, 2u>;
 }
 
-[[group(0), binding(0)]] var<storage, read_write> s : S;
+@group(0) @binding(0) var<storage, read_write> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x : vec2<f32> = s.m[1];
 }
@@ -346,13 +346,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
   // struct S {
-  //   [[offset(8), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(8) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   s.m = mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0));
   // }
@@ -383,18 +383,18 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
 
   auto* expect = R"(
 struct S {
-  [[size(8)]]
+  @size(8)
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2u>;
+  m : @stride(32) array<vec2<f32>, 2u>;
 }
 
-[[group(0), binding(0)]] var<storage, read_write> s : S;
+@group(0) @binding(0) var<storage, read_write> s : S;
 
-fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> [[stride(32)]] array<vec2<f32>, 2u> {
-  return [[stride(32)]] array<vec2<f32>, 2u>(mat[0u], mat[1u]);
+fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> @stride(32) array<vec2<f32>, 2u> {
+  return @stride(32) array<vec2<f32>, 2u>(mat[0u], mat[1u]);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   s.m = mat2x2_stride_32_to_arr(mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0)));
 }
@@ -408,13 +408,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
   // struct S {
-  //   [[offset(8), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(8) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   s.m[1] = vec2<f32>(1.0, 2.0);
   // }
@@ -444,14 +444,14 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
 
   auto* expect = R"(
 struct S {
-  [[size(8)]]
+  @size(8)
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2u>;
+  m : @stride(32) array<vec2<f32>, 2u>;
 }
 
-[[group(0), binding(0)]] var<storage, read_write> s : S;
+@group(0) @binding(0) var<storage, read_write> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   s.m[1] = vec2<f32>(1.0, 2.0);
 }
@@ -465,13 +465,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
   // struct S {
-  //   [[offset(8), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(8) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   let a = &s.m;
   //   let b = &*&*(a);
@@ -516,22 +516,22 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
 
   auto* expect = R"(
 struct S {
-  [[size(8)]]
+  @size(8)
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2u>;
+  m : @stride(32) array<vec2<f32>, 2u>;
 }
 
-[[group(0), binding(0)]] var<storage, read_write> s : S;
+@group(0) @binding(0) var<storage, read_write> s : S;
 
-fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2u>) -> mat2x2<f32> {
+fn arr_to_mat2x2_stride_32(arr : @stride(32) array<vec2<f32>, 2u>) -> mat2x2<f32> {
   return mat2x2<f32>(arr[0u], arr[1u]);
 }
 
-fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> [[stride(32)]] array<vec2<f32>, 2u> {
-  return [[stride(32)]] array<vec2<f32>, 2u>(mat[0u], mat[1u]);
+fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> @stride(32) array<vec2<f32>, 2u> {
+  return @stride(32) array<vec2<f32>, 2u>(mat[0u], mat[1u]);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x = arr_to_mat2x2_stride_32(s.m);
   let y = s.m[1];
@@ -549,13 +549,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
   // struct S {
-  //   [[offset(8), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(8) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
   // var<private> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   let x : mat2x2<f32> = s.m;
   // }
@@ -584,15 +584,15 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
 
   auto* expect = R"(
 struct S {
-  [[size(8)]]
+  @size(8)
   padding : u32;
-  [[stride(32), internal(disable_validation__ignore_stride)]]
+  @stride(32) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>;
 }
 
 var<private> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   let x : mat2x2<f32> = s.m;
 }
@@ -606,13 +606,13 @@ fn f() {
 
 TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
   // struct S {
-  //   [[offset(8), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
+  //   @offset(8) @stride(32)
+  //   @internal(ignore_stride_decoration)
   //   m : mat2x2<f32>;
   // };
   // var<private> s : S;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn f() {
   //   s.m = mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0));
   // }
@@ -642,15 +642,15 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
 
   auto* expect = R"(
 struct S {
-  [[size(8)]]
+  @size(8)
   padding : u32;
-  [[stride(32), internal(disable_validation__ignore_stride)]]
+  @stride(32) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>;
 }
 
 var<private> s : S;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn f() {
   s.m = mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0));
 }

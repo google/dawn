@@ -8,13 +8,13 @@ struct Matrix {
   numbers : array<f32>;
 }
 
-[[group(0), binding(0)]] var<storage, read> firstMatrix : Matrix;
+@group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
 
-[[group(0), binding(1)]] var<storage, read> secondMatrix : Matrix;
+@group(0) @binding(1) var<storage, read> secondMatrix : Matrix;
 
-[[group(0), binding(2)]] var<storage, write> resultMatrix : Matrix;
+@group(0) @binding(2) var<storage, write> resultMatrix : Matrix;
 
-[[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
+@group(0) @binding(3) var<uniform> uniforms : Uniforms;
 
 fn mm_readA(row : u32, col : u32) -> f32 {
   if (((row < uniforms.dimAOuter) && (col < uniforms.dimInner))) {
@@ -53,8 +53,8 @@ var<workgroup> mm_Asub : array<array<f32, 64>, 64>;
 
 var<workgroup> mm_Bsub : array<array<f32, 64>, 64>;
 
-[[stage(compute), workgroup_size(16, 16, 1)]]
-fn main([[builtin(local_invocation_id)]] local_id : vec3<u32>, [[builtin(global_invocation_id)]] global_id : vec3<u32>) {
+@stage(compute) @workgroup_size(16, 16, 1)
+fn main(@builtin(local_invocation_id) local_id : vec3<u32>, @builtin(global_invocation_id) global_id : vec3<u32>) {
   let tileRow : u32 = (local_id.y * RowPerThread);
   let tileCol : u32 = (local_id.x * ColPerThread);
   let globalRow : u32 = (global_id.y * RowPerThread);

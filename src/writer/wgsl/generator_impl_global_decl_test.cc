@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  [[stage(compute), workgroup_size(1, 1, 1)]]
+  EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(1, 1, 1)
   fn test_function() {
     var a : f32;
   }
@@ -91,7 +91,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
     a : i32;
   }
 
-  [[stage(compute), workgroup_size(1)]]
+  @stage(compute) @workgroup_size(1)
   fn main() {
     var s0 : S0;
     var s1 : S1;
@@ -112,7 +112,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), "  [[group(0), binding(0)]] var s : sampler;\n");
+  EXPECT_EQ(gen.result(), "  @group(0) @binding(0) var s : sampler;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
@@ -128,8 +128,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(),
-            "  [[group(0), binding(0)]] var t : texture_1d<f32>;\n");
+  EXPECT_EQ(gen.result(), "  @group(0) @binding(0) var t : texture_1d<f32>;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
@@ -141,9 +140,9 @@ TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  [[override]] let a : f32;
+  EXPECT_EQ(gen.result(), R"(  @override let a : f32;
 
-  [[override(7)]] let b : f32;
+  @override(7) let b : f32;
 )");
 }
 

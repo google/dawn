@@ -67,7 +67,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
-  auto p = parser("[[binding(2), group(1)]] var<uniform> a : f32");
+  auto p = parser("@binding(2) @group(1) var<uniform> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -83,9 +83,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   EXPECT_EQ(e->declared_storage_class, ast::StorageClass::kUniform);
 
   EXPECT_EQ(e->source.range.begin.line, 1u);
-  EXPECT_EQ(e->source.range.begin.column, 39u);
+  EXPECT_EQ(e->source.range.begin.column, 36u);
   EXPECT_EQ(e->source.range.end.line, 1u);
-  EXPECT_EQ(e->source.range.end.column, 40u);
+  EXPECT_EQ(e->source.range.end.column, 37u);
 
   ASSERT_EQ(e->constructor, nullptr);
 
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
-  auto p = parser("[[binding(2)]] [[group(1)]] var<uniform> a : f32");
+  auto p = parser("@binding(2) @group(1) var<uniform> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -113,9 +113,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   EXPECT_EQ(e->declared_storage_class, ast::StorageClass::kUniform);
 
   EXPECT_EQ(e->source.range.begin.line, 1u);
-  EXPECT_EQ(e->source.range.begin.column, 42u);
+  EXPECT_EQ(e->source.range.begin.column, 36u);
   EXPECT_EQ(e->source.range.end.line, 1u);
-  EXPECT_EQ(e->source.range.end.column, 43u);
+  EXPECT_EQ(e->source.range.end.column, 37u);
 
   ASSERT_EQ(e->constructor, nullptr);
 
@@ -126,7 +126,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
-  auto p = parser("[[binding()]] var<uniform> a : f32");
+  auto p = parser("@binding() var<uniform> a : f32");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -138,7 +138,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
 
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:11: expected signed integer literal for binding decoration");
+            "1:10: expected signed integer literal for binding decoration");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {

@@ -46,7 +46,7 @@ intrinsics/repeated_use.wgsl:19:9 warning: use of deprecated intrinsic
     _ = isNormal(3.);
         ^^^^^^^^
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   _ = isNormal(vec4<f32>());
   _ = isNormal(vec4<f32>(1.0));

@@ -161,9 +161,9 @@ struct BlockCounters {
   /// @return the current enter-exit depth for the given block token type. If
   /// `t` is not a block token type, then 0 is always returned.
   int consume(const Token& t) {
-    if (t.Is(Token::Type::kAttrLeft))
+    if (t.Is(Token::Type::kAttrLeft))  // [DEPRECATED]
       return attrs++;
-    if (t.Is(Token::Type::kAttrRight))
+    if (t.Is(Token::Type::kAttrRight))  // [DEPRECATED]
       return attrs--;
     if (t.Is(Token::Type::kBraceLeft))
       return brace++;
@@ -1383,7 +1383,8 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
   while (continue_parsing()) {
     // Check for the end of the list.
     auto t = peek();
-    if (!t.IsIdentifier() && !t.Is(Token::Type::kAttrLeft)) {
+    if (!t.IsIdentifier() && !t.Is(Token::Type::kAttr) &&
+        !t.Is(Token::Type::kAttrLeft)) {
       break;
     }
 
@@ -2834,11 +2835,21 @@ Maybe<ast::DecorationList> ParserImpl::decoration_list() {
   ast::DecorationList decos;
 
   while (continue_parsing()) {
-    auto list = decoration_bracketed_list(decos);
-    if (list.errored)
-      errored = true;
-    if (!list.matched)
-      break;
+    if (match(Token::Type::kAttr)) {
+      if (auto deco = expect_decoration(); deco.errored) {
+        errored = true;
+      } else {
+        decos.emplace_back(deco.value);
+      }
+    } else {  // [DEPRECATED] - old [[decoration]] style
+      auto list = decoration_bracketed_list(decos);
+      if (list.errored) {
+        errored = true;
+      }
+      if (!list.matched) {
+        break;
+      }
+    }
 
     matched = true;
   }
@@ -2855,11 +2866,15 @@ Maybe<ast::DecorationList> ParserImpl::decoration_list() {
 Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   const char* use = "decoration list";
 
-  if (!match(Token::Type::kAttrLeft)) {
+  Source source;
+  if (!match(Token::Type::kAttrLeft, &source)) {
     return Failure::kNoMatch;
   }
 
-  Source source;
+  deprecated(source,
+             "[[decoration]] style decorations have been replaced with "
+             "@decoration style");
+
   if (match(Token::Type::kAttrRight, &source))
     return add_error(source, "empty decoration list");
 
@@ -2879,7 +2894,7 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
 
       if (is_decoration(peek())) {
         // We have two decorations in a bracket without a separating comma.
-        // e.g. [[location(1) group(2)]]
+        // e.g. @location(1) group(2)
         //                    ^^^ expected comma
         expect(use, Token::Type::kComma);
         return Failure::kErrored;
@@ -3092,7 +3107,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     const char* use = "override decoration";
 
     if (peek_is(Token::Type::kParenLeft)) {
-      // [[override(x)]]
+      // @override(x)
       return expect_paren_block(use, [&]() -> Result {
         auto val = expect_positive_sint(use);
         if (val.errored)

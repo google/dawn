@@ -1,10 +1,10 @@
 struct FragIn {
-  [[location(0)]] a : f32;
-  [[builtin(sample_mask)]] mask : u32;
+  @location(0) a : f32;
+  @builtin(sample_mask) mask : u32;
 };
 
-[[stage(fragment)]]
-fn main(in : FragIn, [[location(1)]] b : f32) -> FragIn {
+@stage(fragment)
+fn main(in : FragIn, @location(1) b : f32) -> FragIn {
   if (in.mask == 0u) {
     return in;
   }

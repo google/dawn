@@ -21,28 +21,28 @@ struct ub_SceneParams {
 }
 
 struct ub_MaterialParams {
-  u_TexMtx : [[stride(32)]] array<Mat4x2_, 1>;
+  u_TexMtx : @stride(32) array<Mat4x2_, 1>;
   u_Misc0_ : vec4<f32>;
 }
 
 struct ub_PacketParams {
-  u_PosMtx : [[stride(48)]] array<Mat4x3_, 32>;
+  u_PosMtx : @stride(48) array<Mat4x3_, 32>;
 }
 
 struct VertexOutput {
-  [[location(0)]]
+  @location(0)
   v_Color : vec4<f32>;
-  [[location(1)]]
+  @location(1)
   v_TexCoord : vec2<f32>;
-  [[builtin(position)]]
+  @builtin(position)
   member : vec4<f32>;
 }
 
-[[group(0), binding(0)]] var<uniform> global : ub_SceneParams;
+@group(0) @binding(0) var<uniform> global : ub_SceneParams;
 
-[[group(0), binding(1)]] var<uniform> global1 : ub_MaterialParams;
+@group(0) @binding(1) var<uniform> global1 : ub_MaterialParams;
 
-[[group(0), binding(2)]] var<uniform> global2 : ub_PacketParams;
+@group(0) @binding(2) var<uniform> global2 : ub_PacketParams;
 
 var<private> a_Position1 : vec3<f32>;
 
@@ -279,8 +279,8 @@ fn main1() {
   }
 }
 
-[[stage(vertex)]]
-fn main([[location(0)]] a_Position : vec3<f32>, [[location(1)]] a_UV : vec2<f32>, [[location(2)]] a_Color : vec4<f32>, [[location(3)]] a_Normal : vec3<f32>, [[location(4)]] a_PosMtxIdx : f32) -> VertexOutput {
+@stage(vertex)
+fn main(@location(0) a_Position : vec3<f32>, @location(1) a_UV : vec2<f32>, @location(2) a_Color : vec4<f32>, @location(3) a_Normal : vec3<f32>, @location(4) a_PosMtxIdx : f32) -> VertexOutput {
   a_Position1 = a_Position;
   a_UV1 = a_UV;
   a_Color1 = a_Color;

@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, FunctionDecl) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
-  auto p = parser("[[workgroup_size(2, 3, 4)]] fn main() { return; }");
+  auto p = parser("@workgroup_size(2, 3, 4) fn main() { return; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleEntries) {
   auto p = parser(R"(
-[[workgroup_size(2, 3, 4), stage(compute)]]
+@workgroup_size(2, 3, 4) @stage(compute)
 fn main() { return; })");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -130,8 +130,8 @@ fn main() { return; })");
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleLists) {
   auto p = parser(R"(
-[[workgroup_size(2, 3, 4)]]
-[[stage(compute)]]
+@workgroup_size(2, 3, 4)
+@stage(compute)
 fn main() { return; })");
   auto decorations = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -173,7 +173,7 @@ fn main() { return; })");
 }
 
 TEST_F(ParserImplTest, FunctionDecl_ReturnTypeDecorationList) {
-  auto p = parser("fn main() -> [[location(1)]] f32 { return 1.0; }");
+  auto p = parser("fn main() -> @location(1) f32 { return 1.0; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);

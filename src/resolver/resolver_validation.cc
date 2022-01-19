@@ -271,8 +271,8 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
                    "' must be a multiple of " + std::to_string(required_align) +
                    " bytes, but '" + member_name_of(m) +
                    "' is currently at offset " + std::to_string(m->Offset()) +
-                   ". Consider setting [[align(" +
-                   std::to_string(required_align) + ")]] on this member",
+                   ". Consider setting @align(" +
+                   std::to_string(required_align) + ") on this member",
                m->Declaration()->source);
 
       AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
@@ -299,7 +299,7 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
             "member be a multiple of 16 bytes, but there are currently " +
                 std::to_string(prev_to_curr_offset) + " bytes between '" +
                 member_name_of(prev_member) + "' and '" + member_name_of(m) +
-                "'. Consider setting [[align(16)]] on this member",
+                "'. Consider setting @align(16) on this member",
             m->Declaration()->source);
 
         AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
@@ -326,10 +326,10 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
               "bytes, but array stride of '" +
                   member_name_of(m) + "' is currently " +
                   std::to_string(arr->Stride()) +
-                  ". Consider setting [[stride(" +
+                  ". Consider setting @stride(" +
                   std::to_string(
                       utils::RoundUp(required_align, arr->Stride())) +
-                  ")]] on the array type",
+                  ") on the array type",
               m->Declaration()->type->source);
           AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
                   str->Declaration()->source);
@@ -429,7 +429,7 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
       // attributes.
       if (!binding_point) {
         AddError(
-            "resource variables require [[group]] and [[binding]] "
+            "resource variables require @group and @binding "
             "decorations",
             decl->source);
         return false;
@@ -441,7 +441,7 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
         // https://gpuweb.github.io/gpuweb/wgsl/#attribute-binding
         // Must only be applied to a resource variable
         AddError(
-            "non-resource variables must not have [[group]] or [[binding]] "
+            "non-resource variables must not have @group or @binding "
             "decorations",
             decl->source);
         return false;
@@ -1037,7 +1037,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
       if (interpolate_attribute) {
         if (!pipeline_io_attribute ||
             !pipeline_io_attribute->Is<ast::LocationDecoration>()) {
-          AddError("interpolate attribute must only be used with [[location]]",
+          AddError("interpolate attribute must only be used with @location",
                    interpolate_attribute->source);
           return false;
         }
@@ -1167,9 +1167,9 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
       auto func_name = builder_->Symbols().NameFor(decl->symbol);
       AddError("entry point '" + func_name +
                    "' references multiple variables that use the "
-                   "same resource binding [[group(" +
-                   std::to_string(bp.group) + "), binding(" +
-                   std::to_string(bp.binding) + ")]]",
+                   "same resource binding @group(" +
+                   std::to_string(bp.group) + "), @binding(" +
+                   std::to_string(bp.binding) + ")",
                var_decl->source);
       AddNote("first resource binding usage declared here",
               res.first->second->source);
@@ -2035,7 +2035,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
     }
 
     if (interpolate_attribute && !has_location) {
-      AddError("interpolate attribute must only be used with [[location]]",
+      AddError("interpolate attribute must only be used with @location",
                interpolate_attribute->source);
       return false;
     }

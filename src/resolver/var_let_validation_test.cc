@@ -79,7 +79,7 @@ TEST_F(ResolverVarLetValidationTest, VarTypeNotStorable) {
 }
 
 TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
-  // [[group(0), binding(0)]] var t1 : texture_2d<f32>;
+  // @group(0) @binding(0) var t1 : texture_2d<f32>;
   // let t2 : t1;
   auto* t1 =
       Global("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
@@ -223,7 +223,7 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
   // [[block]] struct S {
   //    inner: Inner;
   // }
-  // [[group(0), binding(0)]] var<storage> s : S;
+  // @group(0) @binding(0) var<storage> s : S;
   // fn f() {
   //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2];
   // }
@@ -286,7 +286,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Struct_WithAtomic) {
 }
 
 TEST_F(ResolverVarLetValidationTest, NonConstructibleType_InferredType) {
-  // [[group(0), binding(0)]] var s : sampler;
+  // @group(0) @binding(0) var s : sampler;
   // fn foo() {
   //   var v = s;
   // }

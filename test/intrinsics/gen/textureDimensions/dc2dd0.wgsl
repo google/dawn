@@ -22,25 +22,25 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
-[[group(1), binding(0)]] var arg_0: texture_storage_1d<rgba8uint, write>;
+@group(1) @binding(0) var arg_0: texture_storage_1d<rgba8uint, write>;
 
 // fn textureDimensions(texture: texture_storage_1d<rgba8uint, write>) -> i32
 fn textureDimensions_dc2dd0() {
   var res: i32 = textureDimensions(arg_0);
 }
 
-[[stage(vertex)]]
-fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vertex_main() -> @builtin(position) vec4<f32> {
   textureDimensions_dc2dd0();
   return vec4<f32>();
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn fragment_main() {
   textureDimensions_dc2dd0();
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn compute_main() {
   textureDimensions_dc2dd0();
 }

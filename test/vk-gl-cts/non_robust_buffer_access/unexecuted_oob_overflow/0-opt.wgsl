@@ -1,18 +1,18 @@
-type Arr = [[stride(4)]] array<i32, 8>;
+type Arr = @stride(4) array<i32, 8>;
 
 struct In2 {
   data_in2 : Arr;
 };
 
-type Arr_1 = [[stride(4)]] array<i32, 1024>;
+type Arr_1 = @stride(4) array<i32, 1024>;
 
 struct Out0 {
   data_out0 : Arr_1;
 };
 
-type Arr_2 = [[stride(4)]] array<i32, 512>;
+type Arr_2 = @stride(4) array<i32, 512>;
 
-type Arr_3 = [[stride(4)]] array<i32, 512>;
+type Arr_3 = @stride(4) array<i32, 512>;
 
 struct In1 {
   data_in1 : Arr_3;
@@ -24,13 +24,13 @@ struct In0 {
 
 var<private> gl_WorkGroupID : vec3<u32>;
 
-[[group(0), binding(2)]] var<storage, read> x_13 : In2;
+@group(0) @binding(2) var<storage, read> x_13 : In2;
 
-[[group(0), binding(3)]] var<storage, read_write> x_15 : Out0;
+@group(0) @binding(3) var<storage, read_write> x_15 : Out0;
 
-[[group(0), binding(1)]] var<storage, read> x_17 : In1;
+@group(0) @binding(1) var<storage, read> x_17 : In1;
 
-[[group(0), binding(0)]] var<storage, read> x_19 : In0;
+@group(0) @binding(0) var<storage, read> x_19 : In0;
 
 fn main_1() {
   var base_index_in : u32;
@@ -109,8 +109,8 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(4, 1, 1)]]
-fn main([[builtin(workgroup_id)]] gl_WorkGroupID_param : vec3<u32>) {
+@stage(compute) @workgroup_size(4, 1, 1)
+fn main(@builtin(workgroup_id) gl_WorkGroupID_param : vec3<u32>) {
   gl_WorkGroupID = gl_WorkGroupID_param;
   main_1();
 }

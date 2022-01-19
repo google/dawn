@@ -24,10 +24,10 @@ namespace tint {
 namespace transform {
 
 /// AddSpirvBlockDecoration is a transform that adds an
-/// [[internal(spirv_block)]] attribute to any structure that is used as the
+/// `@internal(spirv_block)` attribute to any structure that is used as the
 /// store type of a buffer. If that structure is nested inside another structure
 /// or an array, then it is wrapped inside another structure which gets the
-/// [[internal(spirv_block)]] attribute instead.
+/// `@internal(spirv_block)` attribute instead.
 class AddSpirvBlockDecoration
     : public Castable<AddSpirvBlockDecoration, Transform> {
  public:
@@ -43,7 +43,7 @@ class AddSpirvBlockDecoration
     ~SpirvBlockDecoration() override;
 
     /// @return a short description of the internal decoration which will be
-    /// displayed as `[[internal(<name>)]]`
+    /// displayed as `@internal(<name>)`
     std::string InternalName() const override;
 
     /// Performs a deep clone of this object using the CloneContext `ctx`.

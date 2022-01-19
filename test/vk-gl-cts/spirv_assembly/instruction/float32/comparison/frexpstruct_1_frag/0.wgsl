@@ -14,14 +14,14 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   x_4_1 : u32;
-  [[builtin(position)]]
+  @builtin(position)
   gl_Position : vec4<f32>;
 };
 
-[[stage(vertex)]]
-fn main([[location(0)]] x_3_param : vec2<f32>) -> main_out {
+@stage(vertex)
+fn main(@location(0) x_3_param : vec2<f32>) -> main_out {
   x_3 = x_3_param;
   main_1();
   return main_out(x_4, gl_Position);

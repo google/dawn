@@ -13,6 +13,6 @@ let m3x4_let : mat3x4<f32> = mat3x4<f32>();
 let arr_let : array<f32, 4> = array<f32, 4>();
 let struct_let : S = S();
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
 }

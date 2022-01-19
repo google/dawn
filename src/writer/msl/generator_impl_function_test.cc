@@ -91,7 +91,7 @@ fragment void main() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOutVars) {
-  // fn frag_main([[location(0)]] foo : f32) -> [[location(1)]] f32 {
+  // fn frag_main(@location(0) foo : f32) -> @location(1) f32 {
   //   return foo;
   // }
   auto* foo_in = Param("foo", ty.f32(), {Location(0)});
@@ -126,7 +126,7 @@ fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
-  // fn frag_main([[position(0)]] coord : vec4<f32>) -> [[frag_depth]] f32 {
+  // fn frag_main(@position(0) coord : vec4<f32>) -> @frag_depth f32 {
   //   return coord.x;
   // }
   auto* coord_in =
@@ -163,9 +163,9 @@ fragment tint_symbol frag_main(float4 coord [[position]]) {
 TEST_F(MslGeneratorImplTest,
        Emit_Decoration_EntryPoint_SharedStruct_DifferentStages) {
   // struct Interface {
-  //   [[location(1)]] col1 : f32;
-  //   [[location(2)]] col2 : f32;
-  //   [[builtin(position)]] pos : vec4<f32>;
+  //   @location(1) col1 : f32;
+  //   @location(2) col2 : f32;
+  //   @builtin(position) pos : vec4<f32>;
   // };
   // fn vert_main() -> Interface {
   //   return Interface(0.4, 0.6, vec4<f32>());
@@ -248,7 +248,7 @@ fragment void frag_main(float4 pos [[position]], tint_symbol_2 tint_symbol_1 [[s
 TEST_F(MslGeneratorImplTest,
        Emit_Decoration_EntryPoint_SharedStruct_HelperFunction) {
   // struct VertexOutput {
-  //   [[builtin(position)]] pos : vec4<f32>;
+  //   @builtin(position) pos : vec4<f32>;
   // };
   // fn foo(x : f32) -> VertexOutput {
   //   return VertexOutput(vec4<f32>(x, x, x, 1.0));
@@ -643,14 +643,14 @@ TEST_F(MslGeneratorImplTest,
   // [[block]] struct Data {
   //   d : f32;
   // };
-  // [[binding(0), group(0)]] var<storage> data : Data;
+  // @binding(0) @group(0) var<storage> data : Data;
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn a() {
   //   return;
   // }
   //
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn b() {
   //   return;
   // }

@@ -51,11 +51,11 @@ TEST_F(CanonicalizeEntryPointIOTest, NoShaderIO) {
   // Test that we do not introduce wrapper functions when there is no shader IO
   // to process.
   auto* src = R"(
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main() {
 }
 )";
@@ -72,26 +72,26 @@ fn comp_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Spirv) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main([[location(1)]] loc1 : f32,
-             [[location(2)]] loc2 : vec4<u32>,
-             [[builtin(position)]] coord : vec4<f32>) {
+@stage(fragment)
+fn frag_main(@location(1) loc1 : f32,
+             @location(2) loc2 : vec4<u32>,
+             @builtin(position) coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 )";
 
   auto* expect = R"(
-[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> loc1_1 : f32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<in> loc1_1 : f32;
 
-[[location(2), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> loc2_1 : vec4<u32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> loc2_1 : vec4<u32>;
 
-[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> coord_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_storage_class) var<in> coord_1 : vec4<f32>;
 
 fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
   frag_main_inner(loc1_1, loc2_1, coord_1);
 }
@@ -107,19 +107,19 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Msl) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main([[location(1)]] loc1 : f32,
-             [[location(2)]] loc2 : vec4<u32>,
-             [[builtin(position)]] coord : vec4<f32>) {
+@stage(fragment)
+fn frag_main(@location(1) loc1 : f32,
+             @location(2) loc2 : vec4<u32>,
+             @builtin(position) coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  [[location(1)]]
+  @location(1)
   loc1 : f32;
-  [[location(2)]]
+  @location(2)
   loc2 : vec4<u32>;
 }
 
@@ -127,8 +127,8 @@ fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 
-[[stage(fragment)]]
-fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_1) {
+@stage(fragment)
+fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, coord);
 }
 )";
@@ -143,21 +143,21 @@ fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Hlsl) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main([[location(1)]] loc1 : f32,
-             [[location(2)]] loc2 : vec4<u32>,
-             [[builtin(position)]] coord : vec4<f32>) {
+@stage(fragment)
+fn frag_main(@location(1) loc1 : f32,
+             @location(2) loc2 : vec4<u32>,
+             @builtin(position) coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  [[location(1)]]
+  @location(1)
   loc1 : f32;
-  [[location(2)]]
+  @location(2)
   loc2 : vec4<u32>;
-  [[builtin(position)]]
+  @builtin(position)
   coord : vec4<f32>;
 }
 
@@ -165,7 +165,7 @@ fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, tint_symbol.coord);
 }
@@ -183,8 +183,8 @@ TEST_F(CanonicalizeEntryPointIOTest, Parameter_TypeAlias) {
   auto* src = R"(
 type myf32 = f32;
 
-[[stage(fragment)]]
-fn frag_main([[location(1)]] loc1 : myf32) {
+@stage(fragment)
+fn frag_main(@location(1) loc1 : myf32) {
   var x : myf32 = loc1;
 }
 )";
@@ -193,7 +193,7 @@ fn frag_main([[location(1)]] loc1 : myf32) {
 type myf32 = f32;
 
 struct tint_symbol_1 {
-  [[location(1)]]
+  @location(1)
   loc1 : f32;
 }
 
@@ -201,7 +201,7 @@ fn frag_main_inner(loc1 : myf32) {
   var x : myf32 = loc1;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc1);
 }
@@ -218,15 +218,15 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Spirv) {
   auto* src = R"(
 struct FragBuiltins {
-  [[builtin(position)]] coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>;
 };
 struct FragLocations {
-  [[location(1)]] loc1 : f32;
-  [[location(2)]] loc2 : vec4<u32>;
+  @location(1) loc1 : f32;
+  @location(2) loc2 : vec4<u32>;
 };
 
-[[stage(fragment)]]
-fn frag_main([[location(0)]] loc0 : f32,
+@stage(fragment)
+fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
@@ -234,13 +234,13 @@ fn frag_main([[location(0)]] loc0 : f32,
 )";
 
   auto* expect = R"(
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> loc0_1 : f32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<in> loc0_1 : f32;
 
-[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> loc1_1 : f32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<in> loc1_1 : f32;
 
-[[location(2), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> loc2_1 : vec4<u32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> loc2_1 : vec4<u32>;
 
-[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> coord_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_storage_class) var<in> coord_1 : vec4<f32>;
 
 struct FragBuiltins {
   coord : vec4<f32>;
@@ -255,7 +255,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
   frag_main_inner(loc0_1, FragLocations(loc1_1, loc2_1), FragBuiltins(coord_1));
 }
@@ -272,15 +272,15 @@ fn frag_main() {
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_kMsl) {
   auto* src = R"(
 struct FragBuiltins {
-  [[builtin(position)]] coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>;
 };
 struct FragLocations {
-  [[location(1)]] loc1 : f32;
-  [[location(2)]] loc2 : vec4<u32>;
+  @location(1) loc1 : f32;
+  @location(2) loc2 : vec4<u32>;
 };
 
-[[stage(fragment)]]
-fn frag_main([[location(0)]] loc0 : f32,
+@stage(fragment)
+fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
@@ -298,11 +298,11 @@ struct FragLocations {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   loc0 : f32;
-  [[location(1)]]
+  @location(1)
   loc1 : f32;
-  [[location(2)]]
+  @location(2)
   loc2 : vec4<u32>;
 }
 
@@ -310,8 +310,8 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-[[stage(fragment)]]
-fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_1) {
+@stage(fragment)
+fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(coord));
 }
 )";
@@ -327,15 +327,15 @@ fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Hlsl) {
   auto* src = R"(
 struct FragBuiltins {
-  [[builtin(position)]] coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>;
 };
 struct FragLocations {
-  [[location(1)]] loc1 : f32;
-  [[location(2)]] loc2 : vec4<u32>;
+  @location(1) loc1 : f32;
+  @location(2) loc2 : vec4<u32>;
 };
 
-[[stage(fragment)]]
-fn frag_main([[location(0)]] loc0 : f32,
+@stage(fragment)
+fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
@@ -353,13 +353,13 @@ struct FragLocations {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   loc0 : f32;
-  [[location(1)]]
+  @location(1)
   loc1 : f32;
-  [[location(2)]]
+  @location(2)
   loc2 : vec4<u32>;
-  [[builtin(position)]]
+  @builtin(position)
   coord : vec4<f32>;
 }
 
@@ -367,7 +367,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord));
 }
@@ -383,20 +383,20 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Spirv) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main() -> [[builtin(frag_depth)]] f32 {
+@stage(fragment)
+fn frag_main() -> @builtin(frag_depth) f32 {
   return 1.0;
 }
 )";
 
   auto* expect = R"(
-[[builtin(frag_depth), internal(disable_validation__ignore_storage_class)]] var<out> value : f32;
+@builtin(frag_depth) @internal(disable_validation__ignore_storage_class) var<out> value : f32;
 
 fn frag_main_inner() -> f32 {
   return 1.0;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
   let inner_result = frag_main_inner();
   value = inner_result;
@@ -413,15 +413,15 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Msl) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main() -> [[builtin(frag_depth)]] f32 {
+@stage(fragment)
+fn frag_main() -> @builtin(frag_depth) f32 {
   return 1.0;
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol {
-  [[builtin(frag_depth)]]
+  @builtin(frag_depth)
   value : f32;
 }
 
@@ -429,7 +429,7 @@ fn frag_main_inner() -> f32 {
   return 1.0;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -448,15 +448,15 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Hlsl) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main() -> [[builtin(frag_depth)]] f32 {
+@stage(fragment)
+fn frag_main() -> @builtin(frag_depth) f32 {
   return 1.0;
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol {
-  [[builtin(frag_depth)]]
+  @builtin(frag_depth)
   value : f32;
 }
 
@@ -464,7 +464,7 @@ fn frag_main_inner() -> f32 {
   return 1.0;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -484,12 +484,12 @@ fn frag_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Spirv) {
   auto* src = R"(
 struct FragOutput {
-  [[location(0)]] color : vec4<f32>;
-  [[builtin(frag_depth)]] depth : f32;
-  [[builtin(sample_mask)]] mask : u32;
+  @location(0) color : vec4<f32>;
+  @builtin(frag_depth) depth : f32;
+  @builtin(sample_mask) mask : u32;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -500,11 +500,11 @@ fn frag_main() -> FragOutput {
 )";
 
   auto* expect = R"(
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> color_1 : vec4<f32>;
+@location(0) @internal(disable_validation__ignore_storage_class) var<out> color_1 : vec4<f32>;
 
-[[builtin(frag_depth), internal(disable_validation__ignore_storage_class)]] var<out> depth_1 : f32;
+@builtin(frag_depth) @internal(disable_validation__ignore_storage_class) var<out> depth_1 : f32;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> mask_1 : array<u32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> mask_1 : array<u32, 1>;
 
 struct FragOutput {
   color : vec4<f32>;
@@ -520,7 +520,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
   let inner_result = frag_main_inner();
   color_1 = inner_result.color;
@@ -540,12 +540,12 @@ fn frag_main() {
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Msl) {
   auto* src = R"(
 struct FragOutput {
-  [[location(0)]] color : vec4<f32>;
-  [[builtin(frag_depth)]] depth : f32;
-  [[builtin(sample_mask)]] mask : u32;
+  @location(0) color : vec4<f32>;
+  @builtin(frag_depth) depth : f32;
+  @builtin(sample_mask) mask : u32;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -563,11 +563,11 @@ struct FragOutput {
 }
 
 struct tint_symbol {
-  [[location(0)]]
+  @location(0)
   color : vec4<f32>;
-  [[builtin(frag_depth)]]
+  @builtin(frag_depth)
   depth : f32;
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   mask : u32;
 }
 
@@ -579,7 +579,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -601,12 +601,12 @@ fn frag_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Hlsl) {
   auto* src = R"(
 struct FragOutput {
-  [[location(0)]] color : vec4<f32>;
-  [[builtin(frag_depth)]] depth : f32;
-  [[builtin(sample_mask)]] mask : u32;
+  @location(0) color : vec4<f32>;
+  @builtin(frag_depth) depth : f32;
+  @builtin(sample_mask) mask : u32;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -624,11 +624,11 @@ struct FragOutput {
 }
 
 struct tint_symbol {
-  [[location(0)]]
+  @location(0)
   color : vec4<f32>;
-  [[builtin(frag_depth)]]
+  @builtin(frag_depth)
   depth : f32;
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   mask : u32;
 }
 
@@ -640,7 +640,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -663,33 +663,33 @@ TEST_F(CanonicalizeEntryPointIOTest,
        StructParameters_SharedDeviceFunction_Spirv) {
   auto* src = R"(
 struct FragmentInput {
-  [[location(0)]] value : f32;
-  [[location(1)]] mul : f32;
+  @location(0) value : f32;
+  @location(1) mul : f32;
 };
 
 fn foo(x : FragmentInput) -> f32 {
   return x.value * x.mul;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 )";
 
   auto* expect = R"(
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> value_1 : f32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<in> value_1 : f32;
 
-[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> mul_1 : f32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<in> mul_1 : f32;
 
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> value_2 : f32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<in> value_2 : f32;
 
-[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> mul_2 : f32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<in> mul_2 : f32;
 
 struct FragmentInput {
   value : f32;
@@ -704,7 +704,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1() {
   frag_main1_inner(FragmentInput(value_1, mul_1));
 }
@@ -713,7 +713,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main2() {
   frag_main2_inner(FragmentInput(value_2, mul_2));
 }
@@ -731,20 +731,20 @@ TEST_F(CanonicalizeEntryPointIOTest,
        StructParameters_SharedDeviceFunction_Msl) {
   auto* src = R"(
 struct FragmentInput {
-  [[location(0)]] value : f32;
-  [[location(1)]] mul : f32;
+  @location(0) value : f32;
+  @location(1) mul : f32;
 };
 
 fn foo(x : FragmentInput) -> f32 {
   return x.value * x.mul;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
@@ -761,9 +761,9 @@ fn foo(x : FragmentInput) -> f32 {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   value : f32;
-  [[location(1)]]
+  @location(1)
   mul : f32;
 }
 
@@ -771,15 +771,15 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.value, tint_symbol.mul));
 }
 
 struct tint_symbol_3 {
-  [[location(0)]]
+  @location(0)
   value : f32;
-  [[location(1)]]
+  @location(1)
   mul : f32;
 }
 
@@ -787,7 +787,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main2(tint_symbol_2 : tint_symbol_3) {
   frag_main2_inner(FragmentInput(tint_symbol_2.value, tint_symbol_2.mul));
 }
@@ -805,20 +805,20 @@ TEST_F(CanonicalizeEntryPointIOTest,
        StructParameters_SharedDeviceFunction_Hlsl) {
   auto* src = R"(
 struct FragmentInput {
-  [[location(0)]] value : f32;
-  [[location(1)]] mul : f32;
+  @location(0) value : f32;
+  @location(1) mul : f32;
 };
 
 fn foo(x : FragmentInput) -> f32 {
   return x.value * x.mul;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
@@ -835,9 +835,9 @@ fn foo(x : FragmentInput) -> f32 {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   value : f32;
-  [[location(1)]]
+  @location(1)
   mul : f32;
 }
 
@@ -845,15 +845,15 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.value, tint_symbol.mul));
 }
 
 struct tint_symbol_3 {
-  [[location(0)]]
+  @location(0)
   value : f32;
-  [[location(1)]]
+  @location(1)
   mul : f32;
 }
 
@@ -861,7 +861,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main2(tint_symbol_2 : tint_symbol_3) {
   frag_main2_inner(FragmentInput(tint_symbol_2.value, tint_symbol_2.mul));
 }
@@ -878,8 +878,8 @@ fn frag_main2(tint_symbol_2 : tint_symbol_3) {
 TEST_F(CanonicalizeEntryPointIOTest, Struct_ModuleScopeVariable) {
   auto* src = R"(
 struct FragmentInput {
-  [[location(0)]] col1 : f32;
-  [[location(1)]] col2 : f32;
+  @location(0) col1 : f32;
+  @location(1) col2 : f32;
 };
 
 var<private> global_inputs : FragmentInput;
@@ -892,7 +892,7 @@ fn bar() -> f32 {
   return global_inputs.col2 * 2.0;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1(inputs : FragmentInput) {
  global_inputs = inputs;
  var r : f32 = foo();
@@ -917,9 +917,9 @@ fn bar() -> f32 {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   col1 : f32;
-  [[location(1)]]
+  @location(1)
   col2 : f32;
 }
 
@@ -929,7 +929,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var g : f32 = bar();
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.col1, tint_symbol.col2));
 }
@@ -948,13 +948,13 @@ TEST_F(CanonicalizeEntryPointIOTest, Struct_TypeAliases) {
 type myf32 = f32;
 
 struct FragmentInput {
-  [[location(0)]] col1 : myf32;
-  [[location(1)]] col2 : myf32;
+  @location(0) col1 : myf32;
+  @location(1) col2 : myf32;
 };
 
 struct FragmentOutput {
-  [[location(0)]] col1 : myf32;
-  [[location(1)]] col2 : myf32;
+  @location(0) col1 : myf32;
+  @location(1) col2 : myf32;
 };
 
 type MyFragmentInput = FragmentInput;
@@ -965,7 +965,7 @@ fn foo(x : MyFragmentInput) -> myf32 {
   return x.col1;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(inputs : MyFragmentInput) -> MyFragmentOutput {
   var x : myf32 = foo(inputs);
   return MyFragmentOutput(x, inputs.col2);
@@ -994,16 +994,16 @@ fn foo(x : MyFragmentInput) -> myf32 {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   col1 : f32;
-  [[location(1)]]
+  @location(1)
   col2 : f32;
 }
 
 struct tint_symbol_2 {
-  [[location(0)]]
+  @location(0)
   col1 : f32;
-  [[location(1)]]
+  @location(1)
   col2 : f32;
 }
 
@@ -1012,7 +1012,7 @@ fn frag_main_inner(inputs : MyFragmentInput) -> MyFragmentOutput {
   return MyFragmentOutput(x, inputs.col2);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = frag_main_inner(MyFragmentInput(tint_symbol.col1, tint_symbol.col2));
   var wrapper_result : tint_symbol_2;
@@ -1033,25 +1033,25 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 TEST_F(CanonicalizeEntryPointIOTest, InterpolateAttributes) {
   auto* src = R"(
 struct VertexOut {
-  [[builtin(position)]] pos : vec4<f32>;
-  [[location(1), interpolate(flat)]] loc1: f32;
-  [[location(2), interpolate(linear, sample)]] loc2 : f32;
-  [[location(3), interpolate(perspective, centroid)]] loc3 : f32;
+  @builtin(position) pos : vec4<f32>;
+  @location(1) @interpolate(flat) loc1: f32;
+  @location(2) @interpolate(linear, sample) loc2 : f32;
+  @location(3) @interpolate(perspective, centroid) loc3 : f32;
 };
 
 struct FragmentIn {
-  [[location(1), interpolate(flat)]] loc1: f32;
-  [[location(2), interpolate(linear, sample)]] loc2 : f32;
+  @location(1) @interpolate(flat) loc1: f32;
+  @location(2) @interpolate(linear, sample) loc2 : f32;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() -> VertexOut {
   return VertexOut();
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(inputs : FragmentIn,
-             [[location(3), interpolate(perspective, centroid)]] loc3 : f32) {
+             @location(3) @interpolate(perspective, centroid) loc3 : f32) {
   let x = inputs.loc1 + inputs.loc2 + loc3;
 }
 )";
@@ -1070,13 +1070,13 @@ struct FragmentIn {
 }
 
 struct tint_symbol {
-  [[location(1), interpolate(flat)]]
+  @location(1) @interpolate(flat)
   loc1 : f32;
-  [[location(2), interpolate(linear, sample)]]
+  @location(2) @interpolate(linear, sample)
   loc2 : f32;
-  [[location(3), interpolate(perspective, centroid)]]
+  @location(3) @interpolate(perspective, centroid)
   loc3 : f32;
-  [[builtin(position)]]
+  @builtin(position)
   pos : vec4<f32>;
 }
 
@@ -1084,7 +1084,7 @@ fn vert_main_inner() -> VertexOut {
   return VertexOut();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -1096,11 +1096,11 @@ fn vert_main() -> tint_symbol {
 }
 
 struct tint_symbol_2 {
-  [[location(1), interpolate(flat)]]
+  @location(1) @interpolate(flat)
   loc1 : f32;
-  [[location(2), interpolate(linear, sample)]]
+  @location(2) @interpolate(linear, sample)
   loc2 : f32;
-  [[location(3), interpolate(perspective, centroid)]]
+  @location(3) @interpolate(perspective, centroid)
   loc3 : f32;
 }
 
@@ -1108,7 +1108,7 @@ fn frag_main_inner(inputs : FragmentIn, loc3 : f32) {
   let x = ((inputs.loc1 + inputs.loc2) + loc3);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(tint_symbol_1 : tint_symbol_2) {
   frag_main_inner(FragmentIn(tint_symbol_1.loc1, tint_symbol_1.loc2), tint_symbol_1.loc3);
 }
@@ -1127,33 +1127,33 @@ TEST_F(CanonicalizeEntryPointIOTest, InterpolateAttributes_Integers_Spirv) {
   // fragment inputs, but not vertex inputs or fragment outputs.
   auto* src = R"(
 struct VertexIn {
-  [[location(0)]] i : i32;
-  [[location(1)]] u : u32;
-  [[location(2)]] vi : vec4<i32>;
-  [[location(3)]] vu : vec4<u32>;
+  @location(0) i : i32;
+  @location(1) u : u32;
+  @location(2) vi : vec4<i32>;
+  @location(3) vu : vec4<u32>;
 };
 
 struct VertexOut {
-  [[location(0)]] i : i32;
-  [[location(1)]] u : u32;
-  [[location(2)]] vi : vec4<i32>;
-  [[location(3)]] vu : vec4<u32>;
-  [[builtin(position)]] pos : vec4<f32>;
+  @location(0) i : i32;
+  @location(1) u : u32;
+  @location(2) vi : vec4<i32>;
+  @location(3) vu : vec4<u32>;
+  @builtin(position) pos : vec4<f32>;
 };
 
 struct FragmentInterface {
-  [[location(0)]] i : i32;
-  [[location(1)]] u : u32;
-  [[location(2)]] vi : vec4<i32>;
-  [[location(3)]] vu : vec4<u32>;
+  @location(0) i : i32;
+  @location(1) u : u32;
+  @location(2) vi : vec4<i32>;
+  @location(3) vu : vec4<u32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
   return inputs;
 }
@@ -1161,39 +1161,39 @@ fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
 
   auto* expect =
       R"(
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> i_1 : i32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<in> i_1 : i32;
 
-[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> u_1 : u32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<in> u_1 : u32;
 
-[[location(2), internal(disable_validation__ignore_storage_class)]] var<in> vi_1 : vec4<i32>;
+@location(2) @internal(disable_validation__ignore_storage_class) var<in> vi_1 : vec4<i32>;
 
-[[location(3), internal(disable_validation__ignore_storage_class)]] var<in> vu_1 : vec4<u32>;
+@location(3) @internal(disable_validation__ignore_storage_class) var<in> vu_1 : vec4<u32>;
 
-[[location(0), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> i_2 : i32;
+@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> i_2 : i32;
 
-[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> u_2 : u32;
+@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> u_2 : u32;
 
-[[location(2), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> vi_2 : vec4<i32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vi_2 : vec4<i32>;
 
-[[location(3), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> vu_2 : vec4<u32>;
+@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vu_2 : vec4<u32>;
 
-[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> pos_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> pos_1 : vec4<f32>;
 
-[[location(0), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> i_3 : i32;
+@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> i_3 : i32;
 
-[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> u_3 : u32;
+@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> u_3 : u32;
 
-[[location(2), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> vi_3 : vec4<i32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vi_3 : vec4<i32>;
 
-[[location(3), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> vu_3 : vec4<u32>;
+@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vu_3 : vec4<u32>;
 
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> i_4 : i32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
 
-[[location(1), internal(disable_validation__ignore_storage_class)]] var<out> u_4 : u32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
 
-[[location(2), internal(disable_validation__ignore_storage_class)]] var<out> vi_4 : vec4<i32>;
+@location(2) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
 
-[[location(3), internal(disable_validation__ignore_storage_class)]] var<out> vu_4 : vec4<u32>;
+@location(3) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
 
 struct VertexIn {
   i : i32;
@@ -1221,7 +1221,7 @@ fn vert_main_inner(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() {
   let inner_result = vert_main_inner(VertexIn(i_1, u_1, vi_1, vu_1));
   i_2 = inner_result.i;
@@ -1235,7 +1235,7 @@ fn frag_main_inner(inputs : FragmentInterface) -> FragmentInterface {
   return inputs;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
   let inner_result_1 = frag_main_inner(FragmentInterface(i_3, u_3, vi_3, vu_3));
   i_4 = inner_result_1.i;
@@ -1259,12 +1259,12 @@ struct VertexOut {
   [[builtin(position), invariant]] pos : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main1() -> VertexOut {
   return VertexOut();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main2() -> [[builtin(position), invariant]] vec4<f32> {
   return vec4<f32>();
 }
@@ -1276,7 +1276,7 @@ struct VertexOut {
 }
 
 struct tint_symbol {
-  [[builtin(position), invariant]]
+  @builtin(position) @invariant
   pos : vec4<f32>;
 }
 
@@ -1284,7 +1284,7 @@ fn main1_inner() -> VertexOut {
   return VertexOut();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main1() -> tint_symbol {
   let inner_result = main1_inner();
   var wrapper_result : tint_symbol;
@@ -1293,7 +1293,7 @@ fn main1() -> tint_symbol {
 }
 
 struct tint_symbol_1 {
-  [[builtin(position), invariant]]
+  @builtin(position) @invariant
   value : vec4<f32>;
 }
 
@@ -1301,7 +1301,7 @@ fn main2_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main2() -> tint_symbol_1 {
   let inner_result_1 = main2_inner();
   var wrapper_result_1 : tint_symbol_1;
@@ -1321,16 +1321,16 @@ fn main2() -> tint_symbol_1 {
 TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutDecorations) {
   auto* src = R"(
 struct FragmentInput {
-  [[size(16), location(1)]] value : f32;
-  [[builtin(position)]] [[align(32)]] coord : vec4<f32>;
-  [[location(0), interpolate(linear, sample)]] [[align(128)]] loc0 : f32;
+  @size(16) @location(1) value : f32;
+  @builtin(position) @align(32) coord : vec4<f32>;
+  @location(0) @interpolate(linear, sample) @align(128) loc0 : f32;
 };
 
 struct FragmentOutput {
-  [[size(16), location(1), interpolate(flat)]] value : f32;
+  @size(16) @location(1) @interpolate(flat) value : f32;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(inputs : FragmentInput) -> FragmentOutput {
   return FragmentOutput(inputs.coord.x * inputs.value + inputs.loc0);
 }
@@ -1338,30 +1338,30 @@ fn frag_main(inputs : FragmentInput) -> FragmentOutput {
 
   auto* expect = R"(
 struct FragmentInput {
-  [[size(16)]]
+  @size(16)
   value : f32;
-  [[align(32)]]
+  @align(32)
   coord : vec4<f32>;
-  [[align(128)]]
+  @align(128)
   loc0 : f32;
 }
 
 struct FragmentOutput {
-  [[size(16)]]
+  @size(16)
   value : f32;
 }
 
 struct tint_symbol_1 {
-  [[location(0), interpolate(linear, sample)]]
+  @location(0) @interpolate(linear, sample)
   loc0 : f32;
-  [[location(1)]]
+  @location(1)
   value : f32;
-  [[builtin(position)]]
+  @builtin(position)
   coord : vec4<f32>;
 }
 
 struct tint_symbol_2 {
-  [[location(1), interpolate(flat)]]
+  @location(1) @interpolate(flat)
   value : f32;
 }
 
@@ -1369,7 +1369,7 @@ fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
   return FragmentOutput(((inputs.coord.x * inputs.value) + inputs.loc0));
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = frag_main_inner(FragmentInput(tint_symbol.value, tint_symbol.coord, tint_symbol.loc0));
   var wrapper_result : tint_symbol_2;
@@ -1389,29 +1389,29 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 TEST_F(CanonicalizeEntryPointIOTest, SortedMembers) {
   auto* src = R"(
 struct VertexOutput {
-  [[location(1)]] b : u32;
-  [[builtin(position)]] pos : vec4<f32>;
-  [[location(3)]] d : u32;
-  [[location(0)]] a : f32;
-  [[location(2)]] c : i32;
+  @location(1) b : u32;
+  @builtin(position) pos : vec4<f32>;
+  @location(3) d : u32;
+  @location(0) a : f32;
+  @location(2) c : i32;
 };
 
 struct FragmentInputExtra {
-  [[location(3)]] d : u32;
-  [[builtin(position)]] pos : vec4<f32>;
-  [[location(0)]] a : f32;
+  @location(3) d : u32;
+  @builtin(position) pos : vec4<f32>;
+  @location(0) a : f32;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() -> VertexOutput {
   return VertexOutput();
 }
 
-[[stage(fragment)]]
-fn frag_main([[builtin(front_facing)]] ff : bool,
-             [[location(2)]] c : i32,
+@stage(fragment)
+fn frag_main(@builtin(front_facing) ff : bool,
+             @location(2) c : i32,
              inputs : FragmentInputExtra,
-             [[location(1)]] b : u32) {
+             @location(1) b : u32) {
 }
 )";
 
@@ -1431,15 +1431,15 @@ struct FragmentInputExtra {
 }
 
 struct tint_symbol {
-  [[location(0)]]
+  @location(0)
   a : f32;
-  [[location(1)]]
+  @location(1)
   b : u32;
-  [[location(2)]]
+  @location(2)
   c : i32;
-  [[location(3)]]
+  @location(3)
   d : u32;
-  [[builtin(position)]]
+  @builtin(position)
   pos : vec4<f32>;
 }
 
@@ -1447,7 +1447,7 @@ fn vert_main_inner() -> VertexOutput {
   return VertexOutput();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -1460,24 +1460,24 @@ fn vert_main() -> tint_symbol {
 }
 
 struct tint_symbol_2 {
-  [[location(0)]]
+  @location(0)
   a : f32;
-  [[location(1)]]
+  @location(1)
   b : u32;
-  [[location(2)]]
+  @location(2)
   c : i32;
-  [[location(3)]]
+  @location(3)
   d : u32;
-  [[builtin(position)]]
+  @builtin(position)
   pos : vec4<f32>;
-  [[builtin(front_facing)]]
+  @builtin(front_facing)
   ff : bool;
 }
 
 fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main(tint_symbol_1 : tint_symbol_2) {
   frag_main_inner(tint_symbol_1.ff, tint_symbol_1.c, FragmentInputExtra(tint_symbol_1.d, tint_symbol_1.pos, tint_symbol_1.a), tint_symbol_1.b);
 }
@@ -1493,21 +1493,21 @@ fn frag_main(tint_symbol_1 : tint_symbol_2) {
 
 TEST_F(CanonicalizeEntryPointIOTest, DontRenameSymbols) {
   auto* src = R"(
-[[stage(fragment)]]
-fn tint_symbol_1([[location(0)]] col : f32) {
+@stage(fragment)
+fn tint_symbol_1(@location(0) col : f32) {
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol_2 {
-  [[location(0)]]
+  @location(0)
   col : f32;
 }
 
 fn tint_symbol_1_inner(col : f32) {
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn tint_symbol_1(tint_symbol : tint_symbol_2) {
   tint_symbol_1_inner(tint_symbol.col);
 }
@@ -1523,21 +1523,21 @@ fn tint_symbol_1(tint_symbol : tint_symbol_2) {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_VoidNoReturn) {
   auto* src = R"(
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol {
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   fixed_sample_mask : u32;
 }
 
 fn frag_main_inner() {
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -1556,7 +1556,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_VoidWithReturn) {
   auto* src = R"(
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() {
   return;
 }
@@ -1564,7 +1564,7 @@ fn frag_main() {
 
   auto* expect = R"(
 struct tint_symbol {
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   fixed_sample_mask : u32;
 }
 
@@ -1572,7 +1572,7 @@ fn frag_main_inner() {
   return;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -1591,15 +1591,15 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_WithAuthoredMask) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main() -> [[builtin(sample_mask)]] u32 {
+@stage(fragment)
+fn frag_main() -> @builtin(sample_mask) u32 {
   return 7u;
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol {
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   value : u32;
 }
 
@@ -1607,7 +1607,7 @@ fn frag_main_inner() -> u32 {
   return 7u;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -1626,17 +1626,17 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_WithoutAuthoredMask) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main() -> [[location(0)]] f32 {
+@stage(fragment)
+fn frag_main() -> @location(0) f32 {
   return 1.0;
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol {
-  [[location(0)]]
+  @location(0)
   value : f32;
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   fixed_sample_mask : u32;
 }
 
@@ -1644,7 +1644,7 @@ fn frag_main_inner() -> f32 {
   return 1.0;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -1665,12 +1665,12 @@ fn frag_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_StructWithAuthoredMask) {
   auto* src = R"(
 struct Output {
-  [[builtin(frag_depth)]] depth : f32;
-  [[builtin(sample_mask)]] mask : u32;
-  [[location(0)]] value : f32;
+  @builtin(frag_depth) depth : f32;
+  @builtin(sample_mask) mask : u32;
+  @location(0) value : f32;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> Output {
   return Output(0.5, 7u, 1.0);
 }
@@ -1684,11 +1684,11 @@ struct Output {
 }
 
 struct tint_symbol {
-  [[location(0)]]
+  @location(0)
   value : f32;
-  [[builtin(frag_depth)]]
+  @builtin(frag_depth)
   depth : f32;
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   mask : u32;
 }
 
@@ -1696,7 +1696,7 @@ fn frag_main_inner() -> Output {
   return Output(0.5, 7u, 1.0);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -1719,11 +1719,11 @@ TEST_F(CanonicalizeEntryPointIOTest,
        FixedSampleMask_StructWithoutAuthoredMask) {
   auto* src = R"(
 struct Output {
-  [[builtin(frag_depth)]] depth : f32;
-  [[location(0)]] value : f32;
+  @builtin(frag_depth) depth : f32;
+  @location(0) value : f32;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> Output {
   return Output(0.5, 1.0);
 }
@@ -1736,11 +1736,11 @@ struct Output {
 }
 
 struct tint_symbol {
-  [[location(0)]]
+  @location(0)
   value : f32;
-  [[builtin(frag_depth)]]
+  @builtin(frag_depth)
   depth : f32;
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   fixed_sample_mask : u32;
 }
 
@@ -1748,7 +1748,7 @@ fn frag_main_inner() -> Output {
   return Output(0.5, 1.0);
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -1769,29 +1769,29 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_MultipleShaders) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main1() -> [[builtin(sample_mask)]] u32 {
+@stage(fragment)
+fn frag_main1() -> @builtin(sample_mask) u32 {
   return 7u;
 }
 
-[[stage(fragment)]]
-fn frag_main2() -> [[location(0)]] f32 {
+@stage(fragment)
+fn frag_main2() -> @location(0) f32 {
   return 1.0;
 }
 
-[[stage(vertex)]]
-fn vert_main1() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vert_main1() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol {
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   value : u32;
 }
 
@@ -1799,7 +1799,7 @@ fn frag_main1_inner() -> u32 {
   return 7u;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main1() -> tint_symbol {
   let inner_result = frag_main1_inner();
   var wrapper_result : tint_symbol;
@@ -1808,9 +1808,9 @@ fn frag_main1() -> tint_symbol {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   value : f32;
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   fixed_sample_mask : u32;
 }
 
@@ -1818,7 +1818,7 @@ fn frag_main2_inner() -> f32 {
   return 1.0;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main2() -> tint_symbol_1 {
   let inner_result_1 = frag_main2_inner();
   var wrapper_result_1 : tint_symbol_1;
@@ -1828,7 +1828,7 @@ fn frag_main2() -> tint_symbol_1 {
 }
 
 struct tint_symbol_2 {
-  [[builtin(position)]]
+  @builtin(position)
   value : vec4<f32>;
 }
 
@@ -1836,7 +1836,7 @@ fn vert_main1_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main1() -> tint_symbol_2 {
   let inner_result_2 = vert_main1_inner();
   var wrapper_result_2 : tint_symbol_2;
@@ -1844,7 +1844,7 @@ fn vert_main1() -> tint_symbol_2 {
   return wrapper_result_2;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn comp_main1() {
 }
 )";
@@ -1860,11 +1860,11 @@ fn comp_main1() {
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_AvoidNameClash) {
   auto* src = R"(
 struct FragOut {
-  [[location(0)]] fixed_sample_mask : vec4<f32>;
-  [[location(1)]] fixed_sample_mask_1 : vec4<f32>;
+  @location(0) fixed_sample_mask : vec4<f32>;
+  @location(1) fixed_sample_mask_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> FragOut {
   return FragOut();
 }
@@ -1877,11 +1877,11 @@ struct FragOut {
 }
 
 struct tint_symbol {
-  [[location(0)]]
+  @location(0)
   fixed_sample_mask : vec4<f32>;
-  [[location(1)]]
+  @location(1)
   fixed_sample_mask_1 : vec4<f32>;
-  [[builtin(sample_mask)]]
+  @builtin(sample_mask)
   fixed_sample_mask_2 : u32;
 }
 
@@ -1889,7 +1889,7 @@ fn frag_main_inner() -> FragOut {
   return FragOut();
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -1911,22 +1911,22 @@ fn frag_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest,
        EmitVertexPointSize_ReturnNonStruct_Spirv) {
   auto* src = R"(
-[[stage(vertex)]]
-fn vert_main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vert_main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 )";
 
   auto* expect = R"(
-[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> value : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> value : vec4<f32>;
 
-[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size : f32;
+@builtin(pointsize) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size : f32;
 
 fn vert_main_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() {
   let inner_result = vert_main_inner();
   value = inner_result;
@@ -1944,17 +1944,17 @@ fn vert_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnNonStruct_Msl) {
   auto* src = R"(
-[[stage(vertex)]]
-fn vert_main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn vert_main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol {
-  [[builtin(position)]]
+  @builtin(position)
   value : vec4<f32>;
-  [[builtin(pointsize)]]
+  @builtin(pointsize)
   vertex_point_size : f32;
 }
 
@@ -1962,7 +1962,7 @@ fn vert_main_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -1983,19 +1983,19 @@ fn vert_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct_Spirv) {
   auto* src = R"(
 struct VertOut {
-  [[builtin(position)]] pos : vec4<f32>;
+  @builtin(position) pos : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() -> VertOut {
   return VertOut();
 }
 )";
 
   auto* expect = R"(
-[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> pos_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> pos_1 : vec4<f32>;
 
-[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size : f32;
+@builtin(pointsize) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size : f32;
 
 struct VertOut {
   pos : vec4<f32>;
@@ -2005,7 +2005,7 @@ fn vert_main_inner() -> VertOut {
   return VertOut();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() {
   let inner_result = vert_main_inner();
   pos_1 = inner_result.pos;
@@ -2024,10 +2024,10 @@ fn vert_main() {
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct_Msl) {
   auto* src = R"(
 struct VertOut {
-  [[builtin(position)]] pos : vec4<f32>;
+  @builtin(position) pos : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() -> VertOut {
   return VertOut();
 }
@@ -2039,9 +2039,9 @@ struct VertOut {
 }
 
 struct tint_symbol {
-  [[builtin(position)]]
+  @builtin(position)
   pos : vec4<f32>;
-  [[builtin(pointsize)]]
+  @builtin(pointsize)
   vertex_point_size : f32;
 }
 
@@ -2049,7 +2049,7 @@ fn vert_main_inner() -> VertOut {
   return VertOut();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -2074,19 +2074,19 @@ var<private> vertex_point_size_1 : f32;
 var<private> vertex_point_size_2 : f32;
 
 struct VertIn1 {
-  [[location(0)]] collide : f32;
+  @location(0) collide : f32;
 };
 
 struct VertIn2 {
-  [[location(1)]] collide : f32;
+  @location(1) collide : f32;
 };
 
 struct VertOut {
-  [[location(0)]] vertex_point_size : f32;
-  [[builtin(position)]] vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : f32;
+  @builtin(position) vertex_point_size_1 : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -2094,15 +2094,15 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
 )";
 
   auto* expect = R"(
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> collide_2 : f32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<in> collide_2 : f32;
 
-[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> collide_3 : f32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<in> collide_3 : f32;
 
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size_3 : f32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_3 : f32;
 
-[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size_1_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_1_1 : vec4<f32>;
 
-[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size_4 : f32;
+@builtin(pointsize) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_4 : f32;
 
 var<private> vertex_point_size : f32;
 
@@ -2128,7 +2128,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main() {
   let inner_result = vert_main_inner(VertIn1(collide_2), VertIn2(collide_3));
   vertex_point_size_3 = inner_result.vertex_point_size;
@@ -2148,19 +2148,19 @@ fn vert_main() {
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Msl) {
   auto* src = R"(
 struct VertIn1 {
-  [[location(0)]] collide : f32;
+  @location(0) collide : f32;
 };
 
 struct VertIn2 {
-  [[location(1)]] collide : f32;
+  @location(1) collide : f32;
 };
 
 struct VertOut {
-  [[location(0)]] vertex_point_size : vec4<f32>;
-  [[builtin(position)]] vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : vec4<f32>;
+  @builtin(position) vertex_point_size_1 : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -2182,18 +2182,18 @@ struct VertOut {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   collide : f32;
-  [[location(1)]]
+  @location(1)
   collide_2 : f32;
 }
 
 struct tint_symbol_2 {
-  [[location(0)]]
+  @location(0)
   vertex_point_size : vec4<f32>;
-  [[builtin(position)]]
+  @builtin(position)
   vertex_point_size_1 : vec4<f32>;
-  [[builtin(pointsize)]]
+  @builtin(pointsize)
   vertex_point_size_2 : f32;
 }
 
@@ -2202,7 +2202,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = vert_main_inner(VertIn1(tint_symbol.collide), VertIn2(tint_symbol.collide_2));
   var wrapper_result : tint_symbol_2;
@@ -2224,19 +2224,19 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Hlsl) {
   auto* src = R"(
 struct VertIn1 {
-  [[location(0)]] collide : f32;
+  @location(0) collide : f32;
 };
 
 struct VertIn2 {
-  [[location(1)]] collide : f32;
+  @location(1) collide : f32;
 };
 
 struct VertOut {
-  [[location(0)]] vertex_point_size : vec4<f32>;
-  [[builtin(position)]] vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : vec4<f32>;
+  @builtin(position) vertex_point_size_1 : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -2258,18 +2258,18 @@ struct VertOut {
 }
 
 struct tint_symbol_1 {
-  [[location(0)]]
+  @location(0)
   collide : f32;
-  [[location(1)]]
+  @location(1)
   collide_2 : f32;
 }
 
 struct tint_symbol_2 {
-  [[location(0)]]
+  @location(0)
   vertex_point_size : vec4<f32>;
-  [[builtin(position)]]
+  @builtin(position)
   vertex_point_size_1 : vec4<f32>;
-  [[builtin(pointsize)]]
+  @builtin(pointsize)
   vertex_point_size_2 : f32;
 }
 
@@ -2278,7 +2278,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = vert_main_inner(VertIn1(tint_symbol.collide), VertIn2(tint_symbol.collide_2));
   var wrapper_result : tint_symbol_2;
@@ -2299,26 +2299,26 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 
 TEST_F(CanonicalizeEntryPointIOTest, SpirvSampleMaskBuiltins) {
   auto* src = R"(
-[[stage(fragment)]]
-fn main([[builtin(sample_index)]] sample_index : u32,
-        [[builtin(sample_mask)]] mask_in : u32
-        ) -> [[builtin(sample_mask)]] u32 {
+@stage(fragment)
+fn main(@builtin(sample_index) sample_index : u32,
+        @builtin(sample_mask) mask_in : u32
+        ) -> @builtin(sample_mask) u32 {
   return mask_in;
 }
 )";
 
   auto* expect = R"(
-[[builtin(sample_index), internal(disable_validation__ignore_storage_class)]] var<in> sample_index_1 : u32;
+@builtin(sample_index) @internal(disable_validation__ignore_storage_class) var<in> sample_index_1 : u32;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> mask_in_1 : array<u32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<in> mask_in_1 : array<u32, 1>;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> value : array<u32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> value : array<u32, 1>;
 
 fn main_inner(sample_index : u32, mask_in : u32) -> u32 {
   return mask_in;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   let inner_result = main_inner(sample_index_1, mask_in_1[0]);
   value[0] = inner_result;

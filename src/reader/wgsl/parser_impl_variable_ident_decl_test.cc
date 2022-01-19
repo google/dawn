@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
-  auto p = parser("my_var : [[stride(1)]] S");
+  auto p = parser("my_var : @stride(1) S");
 
   auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
@@ -90,19 +90,11 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:12: unexpected decorations");
-}
-
-TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightBlock) {
-  auto p = parser("my_var : [[stride(4) S");
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:22: expected ']]' for decoration list");
+  ASSERT_EQ(p->error(), "1:11: unexpected decorations");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightParen) {
-  auto p = parser("my_var : [[stride(4]] S");
+  auto p = parser("my_var : @stride(4 S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
@@ -110,19 +102,62 @@ TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightParen) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingLeftParen) {
+  auto p = parser("my_var : @stride 4) S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:18: expected '(' for stride decoration");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest,
+       DEPRECATED_VariableIdentDecl_DecorationMissingRightBlock) {
+  auto p = parser("my_var : [[stride(4) S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(
+      p->error(),
+      R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:22: expected ']]' for decoration list)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest,
+       DEPRECATED_VariableIdentDecl_DecorationMissingRightParen) {
+  auto p = parser("my_var : [[stride(4]] S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(
+      p->error(),
+      R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:20: expected ')' for stride decoration)");
+}
+
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest,
+       DEPRECATED_VariableIdentDecl_DecorationMissingLeftParen) {
   auto p = parser("my_var : [[stride 4)]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:19: expected '(' for stride decoration");
+  ASSERT_EQ(
+      p->error(),
+      R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:19: expected '(' for stride decoration)");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_DecorationEmpty) {
+// TODO(crbug.com/tint/1382): Remove
+TEST_F(ParserImplTest, DEPRECATED_VariableIdentDecl_DecorationEmpty) {
   auto p = parser("my_var : [[]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:12: empty decoration list");
+  ASSERT_EQ(
+      p->error(),
+      R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:12: empty decoration list)");
 }
 
 }  // namespace

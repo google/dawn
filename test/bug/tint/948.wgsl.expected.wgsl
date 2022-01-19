@@ -1,6 +1,6 @@
 struct LeftOver {
   time : f32;
-  [[size(12)]]
+  @size(12)
   padding : u32;
   worldViewProjection : mat4x4<f32>;
   outputSize : vec2<f32>;
@@ -11,29 +11,29 @@ struct LeftOver {
   colorMul : vec3<f32>;
 }
 
-[[group(2), binding(9)]] var<uniform> x_20 : LeftOver;
+@group(2) @binding(9) var<uniform> x_20 : LeftOver;
 
-[[group(2), binding(3)]] var frameMapTexture : texture_2d<f32>;
+@group(2) @binding(3) var frameMapTexture : texture_2d<f32>;
 
-[[group(2), binding(2)]] var frameMapSampler : sampler;
+@group(2) @binding(2) var frameMapSampler : sampler;
 
 var<private> tUV : vec2<f32>;
 
-[[group(2), binding(5)]] var tileMapsTexture0 : texture_2d<f32>;
+@group(2) @binding(5) var tileMapsTexture0 : texture_2d<f32>;
 
-[[group(2), binding(4)]] var tileMapsSampler : sampler;
+@group(2) @binding(4) var tileMapsSampler : sampler;
 
-[[group(2), binding(6)]] var tileMapsTexture1 : texture_2d<f32>;
+@group(2) @binding(6) var tileMapsTexture1 : texture_2d<f32>;
 
-[[group(2), binding(8)]] var animationMapTexture : texture_2d<f32>;
+@group(2) @binding(8) var animationMapTexture : texture_2d<f32>;
 
-[[group(2), binding(7)]] var animationMapSampler : sampler;
+@group(2) @binding(7) var animationMapSampler : sampler;
 
 var<private> mt : f32;
 
-[[group(2), binding(1)]] var spriteSheetTexture : texture_2d<f32>;
+@group(2) @binding(1) var spriteSheetTexture : texture_2d<f32>;
 
-[[group(2), binding(0)]] var spriteSheetSampler : sampler;
+@group(2) @binding(0) var spriteSheetSampler : sampler;
 
 var<private> glFragColor : vec4<f32>;
 
@@ -211,12 +211,12 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   glFragColor_1 : vec4<f32>;
 }
 
-[[stage(fragment)]]
-fn main([[location(2)]] tUV_param : vec2<f32>, [[location(5)]] tileID_1_param : vec2<f32>, [[location(4)]] levelUnits_param : vec2<f32>, [[location(3)]] stageUnits_1_param : vec2<f32>, [[location(0)]] vPosition_param : vec3<f32>, [[location(1)]] vUV_param : vec2<f32>) -> main_out {
+@stage(fragment)
+fn main(@location(2) tUV_param : vec2<f32>, @location(5) tileID_1_param : vec2<f32>, @location(4) levelUnits_param : vec2<f32>, @location(3) stageUnits_1_param : vec2<f32>, @location(0) vPosition_param : vec3<f32>, @location(1) vUV_param : vec2<f32>) -> main_out {
   tUV = tUV_param;
   tileID_1 = tileID_1_param;
   levelUnits = levelUnits_param;

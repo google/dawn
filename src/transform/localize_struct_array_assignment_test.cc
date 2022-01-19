@@ -44,7 +44,7 @@ TEST_F(LocalizeStructArrayAssignmentTest, EmptyModule) {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArray) {
   auto* src = R"(
-[[block]] struct Uniforms {
+@block struct Uniforms {
   i : u32;
 };
 
@@ -56,9 +56,9 @@ struct OuterS {
   a1 : array<InnerS, 8>;
 };
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -67,7 +67,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
 }
@@ -80,9 +80,9 @@ struct OuterS {
   a1 : array<InnerS, 8>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -102,7 +102,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructStructArray) {
   auto* src = R"(
-[[block]] struct Uniforms {
+@block struct Uniforms {
   i : u32;
 };
 
@@ -118,9 +118,9 @@ struct OuterS {
   s2 : S1;
 };
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -129,7 +129,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
 }
@@ -146,9 +146,9 @@ struct OuterS {
   s2 : S1;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -168,7 +168,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArrayArray) {
   auto* src = R"(
-[[block]] struct Uniforms {
+@block struct Uniforms {
   i : u32;
   j : u32;
 };
@@ -181,9 +181,9 @@ struct OuterS {
   a1 : array<array<InnerS, 8>, 8>;
 };
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -192,7 +192,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
   j : u32;
@@ -206,9 +206,9 @@ struct OuterS {
   a1 : array<array<InnerS, 8>, 8>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -228,7 +228,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArrayStruct) {
   auto* src = R"(
-[[block]] struct Uniforms {
+@block struct Uniforms {
   i : u32;
 };
 
@@ -244,9 +244,9 @@ struct OuterS {
   a1 : array<S1, 8>;
 };
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -255,7 +255,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
 }
@@ -272,9 +272,9 @@ struct OuterS {
   a1 : array<S1, 8>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -294,7 +294,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArrayStructArray) {
   auto* src = R"(
-[[block]] struct Uniforms {
+@block struct Uniforms {
   i : u32;
   j : u32;
 };
@@ -311,9 +311,9 @@ struct OuterS {
   a1 : array<S1, 8>;
 };
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -322,7 +322,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
   j : u32;
@@ -340,9 +340,9 @@ struct OuterS {
   a1 : array<S1, 8>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -365,7 +365,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, IndexingWithSideEffectFunc) {
   auto* src = R"(
-[[block]] struct Uniforms {
+@block struct Uniforms {
   i : u32;
   j : u32;
 };
@@ -388,9 +388,9 @@ fn getNextIndex() -> u32 {
   return nextIndex;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -399,7 +399,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
   j : u32;
@@ -424,9 +424,9 @@ fn getNextIndex() -> u32 {
   return nextIndex;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -449,7 +449,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerArg) {
   auto* src = R"(
-[[block]] struct Uniforms {
+@block struct Uniforms {
   i : u32;
 };
 struct InnerS {
@@ -458,14 +458,14 @@ struct InnerS {
 struct OuterS {
   a1 : array<InnerS, 8>;
 };
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
 fn f(p : ptr<function, OuterS>) {
   var v : InnerS;
   (*p).a1[uniforms.i] = v;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   f(&s1);
@@ -473,7 +473,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
 }
@@ -486,7 +486,7 @@ struct OuterS {
   a1 : array<InnerS, 8>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
 fn f(p : ptr<function, OuterS>) {
   var v : InnerS;
@@ -498,7 +498,7 @@ fn f(p : ptr<function, OuterS>) {
   }
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   f(&(s1));
@@ -512,7 +512,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerVar) {
   auto* src = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
 };
@@ -525,13 +525,13 @@ struct OuterS {
   a1 : array<InnerS, 8>;
 };
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
 fn f(p : ptr<function, InnerS>, v : InnerS) {
   *(p) = v;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -541,7 +541,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
 }
@@ -554,13 +554,13 @@ struct OuterS {
   a1 : array<InnerS, 8>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
 fn f(p : ptr<function, InnerS>, v : InnerS) {
   *(p) = v;
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -581,23 +581,23 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, VectorAssignment) {
   auto* src = R"(
-[[block]]
+@block
 struct Uniforms {
   i : u32;
 }
 
-[[block]]
+@block
 struct OuterS {
   a1 : array<u32, 8>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
 fn f(i : u32) -> u32 {
   return (i + 1u);
 }
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   var v : vec3<f32>;

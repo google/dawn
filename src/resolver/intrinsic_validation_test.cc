@@ -36,7 +36,7 @@ TEST_F(ResolverIntrinsicValidationTest,
 }
 
 TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageDirect) {
-  // [[stage(compute), workgroup_size(1)]] fn func { return dpdx(1.0); }
+  // @stage(compute) @workgroup_size(1) fn func { return dpdx(1.0); }
 
   auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
                                            ast::ExpressionList{Expr(1.0f)});
@@ -53,7 +53,7 @@ TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageIndirect) {
   // fn f0 { return dpdx(1.0); }
   // fn f1 { f0(); }
   // fn f2 { f1(); }
-  // [[stage(compute), workgroup_size(1)]] fn main { return f2(); }
+  // @stage(compute) @workgroup_size(1) fn main { return f2(); }
 
   auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
                                            ast::ExpressionList{Expr(1.0f)});

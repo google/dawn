@@ -23,23 +23,23 @@
     value_f32_3 : f32;
 };
 
- struct F32s { values : [[stride(4)]] array<f32>; };
- struct U32s { values : [[stride(4)]] array<u32>; };
- struct I32s { values : [[stride(4)]] array<i32>; };
- struct AU32s { values : [[stride(4)]] array<atomic<u32>>; };
- struct AI32s { values : [[stride(4)]] array<atomic<i32>>; };
+ struct F32s { values : @stride(4) array<f32>; };
+ struct U32s { values : @stride(4) array<u32>; };
+ struct I32s { values : @stride(4) array<i32>; };
+ struct AU32s { values : @stride(4) array<atomic<u32>>; };
+ struct AI32s { values : @stride(4) array<atomic<i32>>; };
 
 // IN
-[[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
-[[binding(10), group(0)]] var<storage, read_write> indices : U32s;
-[[binding(11), group(0)]] var<storage, read_write> positions : F32s;
+@binding(0) @group(0) var<uniform> uniforms : Uniforms;
+@binding(10) @group(0) var<storage, read_write> indices : U32s;
+@binding(11) @group(0) var<storage, read_write> positions : F32s;
 
 // OUT
-[[binding(20), group(0)]] var<storage, read_write> counters : AU32s;
-[[binding(21), group(0)]] var<storage, read_write> LUT : AI32s;
+@binding(20) @group(0) var<storage, read_write> counters : AU32s;
+@binding(21) @group(0) var<storage, read_write> LUT : AI32s;
 
 // DEBUG
-[[binding(50), group(0)]] var<storage, read_write> dbg : Dbg;
+@binding(50) @group(0) var<storage, read_write> dbg : Dbg;
 
 fn toVoxelPos(position : vec3<f32>) -> vec3<f32>{
 
@@ -95,8 +95,8 @@ fn doIgnore(){
 
 }
 
-[[stage(compute), workgroup_size(128)]]
-fn main_count([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+@stage(compute) @workgroup_size(128)
+fn main_count(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
     var triangleIndex = GlobalInvocationID.x;
 
@@ -132,8 +132,8 @@ fn main_count([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) 
 
 }
 
-[[stage(compute), workgroup_size(128)]]
-fn main_create_lut([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+@stage(compute) @workgroup_size(128)
+fn main_create_lut(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
     var voxelIndex = GlobalInvocationID.x;
 
@@ -155,8 +155,8 @@ fn main_create_lut([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u
 
 }
 
-[[stage(compute), workgroup_size(128)]]
-fn main_sort_triangles([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+@stage(compute) @workgroup_size(128)
+fn main_sort_triangles(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
     var triangleIndex = GlobalInvocationID.x;
 

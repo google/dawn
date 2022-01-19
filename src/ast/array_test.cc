@@ -63,7 +63,7 @@ TEST_F(AstArrayTest, FriendlyName_WithStride) {
   auto* i32 = create<I32>();
   auto* arr =
       create<Array>(i32, Expr(5), DecorationList{create<StrideDecoration>(32)});
-  EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(32)]] array<i32, 5>");
+  EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(32) array<i32, 5>");
 }
 
 }  // namespace

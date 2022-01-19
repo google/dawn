@@ -3,7 +3,7 @@ fn call_discard() -> bool {
   return true;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn f() {
     var v = call_discard();
     var also_unreachable : bool;

@@ -2,7 +2,7 @@ struct S {
   v : vec3<u32>;
 }
 
-[[group(0), binding(0)]] var<uniform> U : S;
+@group(0) @binding(0) var<uniform> U : S;
 
 fn f() {
   var v = U.v;

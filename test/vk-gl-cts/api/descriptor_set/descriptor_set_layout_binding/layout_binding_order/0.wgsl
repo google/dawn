@@ -16,13 +16,13 @@ struct block2 {
   data2 : i32;
 };
 
-[[group(0), binding(3)]] var<storage, read_write> x_4 : result;
+@group(0) @binding(3) var<storage, read_write> x_4 : result;
 
-[[group(0), binding(0)]] var<uniform> x_6 : block0;
+@group(0) @binding(0) var<uniform> x_6 : block0;
 
-[[group(0), binding(1)]] var<uniform> x_8 : block1;
+@group(0) @binding(1) var<uniform> x_8 : block1;
 
-[[group(0), binding(2)]] var<uniform> x_10 : block2;
+@group(0) @binding(2) var<uniform> x_10 : block2;
 
 fn main_1() {
   let x_25 : i32 = x_6.data0;
@@ -34,7 +34,7 @@ fn main_1() {
   return;
 }
 
-[[stage(compute), workgroup_size(1, 1, 1)]]
+@stage(compute) @workgroup_size(1, 1, 1)
 fn main() {
   main_1();
 }

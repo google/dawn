@@ -10,7 +10,7 @@ struct buf0 {
 
 var<private> struct_array : array<struct_base, 3>;
 
-[[group(0), binding(0)]] var<uniform> x_8 : buf0;
+@group(0) @binding(0) var<uniform> x_8 : buf0;
 
 var<private> x_GLF_color : vec4<f32>;
 
@@ -39,11 +39,11 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   x_GLF_color_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() -> main_out {
   main_1();
   return main_out(x_GLF_color);

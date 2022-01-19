@@ -38,7 +38,7 @@ namespace transform {
 ///  buffer_size : array<u32, 8>;
 /// };
 ///
-/// [[group(0), binding(30)]]
+/// @group(0) @binding(30)
 /// var<uniform> buffer_size_ubo : buffer_size_struct;
 /// ```
 /// The binding group and number used for this uniform buffer is provided via

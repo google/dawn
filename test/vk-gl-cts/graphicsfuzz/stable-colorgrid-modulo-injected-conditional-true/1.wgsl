@@ -6,13 +6,13 @@ struct buf1 {
   injectionSwitch : vec2<f32>;
 };
 
-[[group(0), binding(0)]] var<uniform> x_13 : buf0;
+@group(0) @binding(0) var<uniform> x_13 : buf0;
 
 var<private> gl_FragCoord : vec4<f32>;
 
 var<private> x_GLF_color : vec4<f32>;
 
-[[group(0), binding(1)]] var<uniform> x_20 : buf1;
+@group(0) @binding(1) var<uniform> x_20 : buf1;
 
 fn compute_value_f1_f1_(limit : ptr<function, f32>, thirty_two : ptr<function, f32>) -> f32 {
   var result : f32;
@@ -119,12 +119,12 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   x_GLF_color_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
-fn main([[builtin(position)]] gl_FragCoord_param : vec4<f32>) -> main_out {
+@stage(fragment)
+fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
   return main_out(x_GLF_color);

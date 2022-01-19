@@ -6,11 +6,11 @@ fn main_1() {
 }
 
 struct main_out {
-  [[builtin(position)]]
+  @builtin(position)
   gl_Position : vec4<f32>;
 }
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main() -> main_out {
   main_1();
   return main_out(gl_Position);

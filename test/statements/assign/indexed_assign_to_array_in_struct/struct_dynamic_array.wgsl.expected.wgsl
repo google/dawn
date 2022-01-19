@@ -10,11 +10,11 @@ struct OuterS {
   a1 : array<InnerS>;
 }
 
-[[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-[[binding(0), group(0)]] var<storage, read_write> s1 : OuterS;
+@binding(0) @group(0) var<storage, read_write> s1 : OuterS;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var v : InnerS;
   s1.a1[uniforms.i] = v;

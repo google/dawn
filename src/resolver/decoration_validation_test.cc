@@ -973,9 +973,9 @@ TEST_F(ResourceDecorationTest, UniformBufferMissingBinding) {
   Global(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kUniform);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: resource variables require [[group]] and [[binding]] "
-            "decorations");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: resource variables require @group and @binding decorations)");
 }
 
 TEST_F(ResourceDecorationTest, StorageBufferMissingBinding) {
@@ -985,9 +985,9 @@ TEST_F(ResourceDecorationTest, StorageBufferMissingBinding) {
          ast::Access::kRead);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: resource variables require [[group]] and [[binding]] "
-            "decorations");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: resource variables require @group and @binding decorations)");
 }
 
 TEST_F(ResourceDecorationTest, TextureMissingBinding) {
@@ -995,9 +995,9 @@ TEST_F(ResourceDecorationTest, TextureMissingBinding) {
          ast::StorageClass::kNone);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: resource variables require [[group]] and [[binding]] "
-            "decorations");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: resource variables require @group and @binding decorations)");
 }
 
 TEST_F(ResourceDecorationTest, SamplerMissingBinding) {
@@ -1005,9 +1005,9 @@ TEST_F(ResourceDecorationTest, SamplerMissingBinding) {
          ast::StorageClass::kNone);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: resource variables require [[group]] and [[binding]] "
-            "decorations");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: resource variables require @group and @binding decorations)");
 }
 
 TEST_F(ResourceDecorationTest, BindingPairMissingBinding) {
@@ -1018,9 +1018,9 @@ TEST_F(ResourceDecorationTest, BindingPairMissingBinding) {
          });
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: resource variables require [[group]] and [[binding]] "
-            "decorations");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: resource variables require @group and @binding decorations)");
 }
 
 TEST_F(ResourceDecorationTest, BindingPairMissingGroup) {
@@ -1031,9 +1031,9 @@ TEST_F(ResourceDecorationTest, BindingPairMissingGroup) {
          });
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: resource variables require [[group]] and [[binding]] "
-            "decorations");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: resource variables require @group and @binding decorations)");
 }
 
 TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByEntryPoint) {
@@ -1064,7 +1064,7 @@ TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByEntryPoint) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: entry point 'F' references multiple variables that use the same resource binding [[group(2), binding(1)]]
+      R"(56:78 error: entry point 'F' references multiple variables that use the same resource binding @group(2), @binding(1)
 12:34 note: first resource binding usage declared here)");
 }
 
@@ -1108,9 +1108,9 @@ TEST_F(ResourceDecorationTest, BindingPointOnNonResource) {
          });
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: non-resource variables must not have [[group]] or "
-            "[[binding]] decorations");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: non-resource variables must not have @group or @binding decorations)");
 }
 
 }  // namespace
@@ -1368,9 +1368,9 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: interpolate attribute must only be used with "
-            "[[location]]");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: interpolate attribute must only be used with @location)");
 }
 
 TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
@@ -1381,9 +1381,9 @@ TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
                     ast::InterpolationSampling::kNone)});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: interpolate attribute must only be used with "
-            "[[location]]");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: interpolate attribute must only be used with @location)");
 }
 
 TEST_F(InterpolateTest, MissingLocationAttribute_Struct) {
@@ -1393,9 +1393,9 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Struct) {
                                 ast::InterpolationSampling::kNone)})});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: interpolate attribute must only be used with "
-            "[[location]]");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: interpolate attribute must only be used with @location)");
 }
 
 }  // namespace

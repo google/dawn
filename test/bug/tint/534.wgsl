@@ -5,21 +5,21 @@
     channelCount : u32;
 };
  struct OutputBuf {
-    result : [[stride(4)]] array<u32>;
+    result : @stride(4) array<u32>;
 };
-[[group(0), binding(0)]] var src : texture_2d<f32>;
-[[group(0), binding(1)]] var dst : texture_2d<f32>;
-[[group(0), binding(2)]] var<storage_buffer, read_write> output : OutputBuf;
-[[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
-//[[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
+@group(0) @binding(0) var src : texture_2d<f32>;
+@group(0) @binding(1) var dst : texture_2d<f32>;
+@group(0) @binding(2) var<storage_buffer, read_write> output : OutputBuf;
+@group(0) @binding(3) var<uniform> uniforms : Uniforms;
+//@builtin(global_invocation_id) var<in> GlobalInvocationID : vec3<u32>;
 // Fp16 logic
 // Infinity and NaN won't happen in this test case.
 fn ConvertToFp16FloatValue(fp32 : f32) -> u32 {
     return 1u;
 }
 
-[[stage(compute), workgroup_size(1, 1, 1)]]
-fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+@stage(compute) @workgroup_size(1, 1, 1)
+fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
     var size : vec2<i32> = textureDimensions(src);
     var dstTexCoord : vec2<i32> = vec2<i32>(GlobalInvocationID.xy);
     var srcTexCoord : vec2<i32> = dstTexCoord;

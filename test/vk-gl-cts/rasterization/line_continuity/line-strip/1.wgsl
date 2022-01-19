@@ -1,6 +1,6 @@
 var<private> color_out : vec4<f32>;
 
-[[group(0), binding(0)]] var texture : texture_2d<f32>;
+@group(0) @binding(0) var texture : texture_2d<f32>;
 
 var<private> gl_FragCoord : vec4<f32>;
 
@@ -12,12 +12,12 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
+  @location(0)
   color_out_1 : vec4<f32>;
 };
 
-[[stage(fragment)]]
-fn main([[builtin(position)]] gl_FragCoord_param : vec4<f32>) -> main_out {
+@stage(fragment)
+fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
   return main_out(color_out);

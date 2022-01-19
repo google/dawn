@@ -3,16 +3,16 @@
   level : i32;
 };
 
-[[group(0), binding(0)]] var<uniform> constants : Constants;
-[[group(0), binding(1)]] var myTexture : texture_2d_array<f32>;
+@group(0) @binding(0) var<uniform> constants : Constants;
+@group(0) @binding(1) var myTexture : texture_2d_array<f32>;
 
  struct Result {
-  values : [[stride(4)]] array<f32>;
+  values : @stride(4) array<f32>;
 };
-[[group(0), binding(3)]] var<storage, read_write> result : Result;
+@group(0) @binding(3) var<storage, read_write> result : Result;
 
-[[stage(compute), workgroup_size(1)]]
-fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+@stage(compute) @workgroup_size(1)
+fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   var flatIndex : u32 =
     2u * 2u * GlobalInvocationID.z +
     2u * GlobalInvocationID.y +

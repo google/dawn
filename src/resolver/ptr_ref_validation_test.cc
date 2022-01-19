@@ -53,7 +53,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfLet) {
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfHandle) {
-  // [[group(0), binding(0)]] var t: texture_3d<f32>;
+  // @group(0) @binding(0) var t: texture_3d<f32>;
   // &t
   Global("t", ty.sampled_texture(ast::TextureDimension::k3d, ty.f32()),
          GroupAndBinding(0u, 0u));
@@ -95,7 +95,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_IndexAccessor) {
 }
 
 TEST_F(ResolverPtrRefValidationTest, IndirectOfAddressOfHandle) {
-  // [[group(0), binding(0)]] var t: texture_3d<f32>;
+  // @group(0) @binding(0) var t: texture_3d<f32>;
   // *&t
   Global("t", ty.sampled_texture(ast::TextureDimension::k3d, ty.f32()),
          GroupAndBinding(0u, 0u));
@@ -142,7 +142,7 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
   // [[block]] struct S {
   //    inner: Inner;
   // }
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
+  // @group(0) @binding(0) var<storage, read_write> s : S;
   // fn f() {
   //   let p : pointer<storage, i32> = &s.inner.arr[2];
   // }

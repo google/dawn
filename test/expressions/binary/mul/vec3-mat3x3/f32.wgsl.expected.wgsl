@@ -3,9 +3,9 @@ struct S {
   vector : vec3<f32>;
 }
 
-[[group(0), binding(0)]] var<uniform> data : S;
+@group(0) @binding(0) var<uniform> data : S;
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   let x = (data.vector * data.matrix);
 }

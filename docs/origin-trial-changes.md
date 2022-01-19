@@ -11,7 +11,8 @@ Obviously infinite loops (no condition, no break) are now a validation error.
 The following features have been deprecated and will be removed in M102:
 
 * The `[[block]]` attribute has been deprecated. [tint:1324](https://crbug.com/tint/1324)
-* `elseif` has been replaced with `else if` [tint:1289](https://crbug.com/tint/1289)
+* Attributes now use the `@decoration` syntax instead of the `[[decoration]]` syntax. [tint:1382](https://crbug.com/tint/1382)
+* `elseif` has been replaced with `else if`. [tint:1289](https://crbug.com/tint/1289)
 
 ### New Features
 

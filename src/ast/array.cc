@@ -54,7 +54,7 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   for (auto* deco : decorations) {
     if (auto* stride = deco->As<ast::StrideDecoration>()) {
-      out << "[[stride(" << stride->stride << ")]] ";
+      out << "@stride(" << stride->stride << ") ";
     }
   }
   out << "array<" << type->FriendlyName(symbols);

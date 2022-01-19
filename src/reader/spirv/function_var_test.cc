@@ -338,9 +338,8 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Null) {
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>();"));
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserFunctionVarTest,
@@ -368,7 +367,7 @@ TEST_F(SpvParserFunctionVarTest,
 
   auto ast_body = fe.ast_body();
   EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : Arr = [[stride(16)]] array<u32, 2u>();"));
+              HasSubstr("var x_200 : Arr = @stride(16) array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer) {

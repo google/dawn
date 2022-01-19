@@ -10,7 +10,7 @@ struct S {
   field1 : u32;
 };
 
-[[group(0), binding(0)]] var<uniform> x_75 : buf0;
+@group(0) @binding(0) var<uniform> x_75 : buf0;
 
 var<private> gl_FragCoord : vec4<f32>;
 

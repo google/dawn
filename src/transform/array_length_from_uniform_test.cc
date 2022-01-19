@@ -52,9 +52,9 @@ TEST_F(ArrayLengthFromUniformTest, Error_MissingSimplifyPointers) {
 
 TEST_F(ArrayLengthFromUniformTest, Basic) {
   auto* src = R"(
-[[group(0), binding(0)]] var<storage, read> sb : array<i32>;
+@group(0) @binding(0) var<storage, read> sb : array<i32>;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb);
 }
@@ -65,11 +65,11 @@ struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
 }
 
-[[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
+@group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
-[[group(0), binding(0)]] var<storage, read> sb : array<i32>;
+@group(0) @binding(0) var<storage, read> sb : array<i32>;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = (tint_symbol_1.buffer_size[0u][0u] / 4u);
 }
@@ -95,9 +95,9 @@ struct SB {
   arr : array<i32>;
 };
 
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+@group(0) @binding(0) var<storage, read> sb : SB;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }
@@ -108,16 +108,16 @@ struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
 }
 
-[[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
+@group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB {
   x : i32;
   arr : array<i32>;
 }
 
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+@group(0) @binding(0) var<storage, read> sb : SB;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = ((tint_symbol_1.buffer_size[0u][0u] - 4u) / 4u);
 }
@@ -138,9 +138,9 @@ fn main() {
 
 TEST_F(ArrayLengthFromUniformTest, WithStride) {
   auto* src = R"(
-[[group(0), binding(0)]] var<storage, read> sb : [[stride(64)]] array<i32>;
+@group(0) @binding(0) var<storage, read> sb : @stride(64) array<i32>;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb);
 }
@@ -151,11 +151,11 @@ struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
 }
 
-[[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
+@group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
-[[group(0), binding(0)]] var<storage, read> sb : [[stride(64)]] array<i32>;
+@group(0) @binding(0) var<storage, read> sb : @stride(64) array<i32>;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = (tint_symbol_1.buffer_size[0u][0u] / 64u);
 }
@@ -179,12 +179,12 @@ TEST_F(ArrayLengthFromUniformTest, WithStride_InStruct) {
 struct SB {
   x : i32;
   y : f32;
-  arr : [[stride(64)]] array<i32>;
+  arr : @stride(64) array<i32>;
 };
 
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+@group(0) @binding(0) var<storage, read> sb : SB;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }
@@ -195,17 +195,17 @@ struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
 }
 
-[[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
+@group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB {
   x : i32;
   y : f32;
-  arr : [[stride(64)]] array<i32>;
+  arr : @stride(64) array<i32>;
 }
 
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+@group(0) @binding(0) var<storage, read> sb : SB;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = ((tint_symbol_1.buffer_size[0u][0u] - 8u) / 64u);
 }
@@ -239,13 +239,13 @@ struct SB4 {
   arr4 : array<vec4<f32>>;
 };
 
-[[group(0), binding(2)]] var<storage, read> sb1 : SB1;
-[[group(1), binding(2)]] var<storage, read> sb2 : SB2;
-[[group(2), binding(2)]] var<storage, read> sb3 : array<vec4<f32>>;
-[[group(3), binding(2)]] var<storage, read> sb4 : SB4;
-[[group(4), binding(2)]] var<storage, read> sb5 : array<vec4<f32>>;
+@group(0) @binding(2) var<storage, read> sb1 : SB1;
+@group(1) @binding(2) var<storage, read> sb2 : SB2;
+@group(2) @binding(2) var<storage, read> sb3 : array<vec4<f32>>;
+@group(3) @binding(2) var<storage, read> sb4 : SB4;
+@group(4) @binding(2) var<storage, read> sb5 : array<vec4<f32>>;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len2 : u32 = arrayLength(&(sb2.arr2));
@@ -261,7 +261,7 @@ struct tint_symbol {
   buffer_size : array<vec4<u32>, 2u>;
 }
 
-[[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
+@group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
   x : i32;
@@ -278,17 +278,17 @@ struct SB4 {
   arr4 : array<vec4<f32>>;
 }
 
-[[group(0), binding(2)]] var<storage, read> sb1 : SB1;
+@group(0) @binding(2) var<storage, read> sb1 : SB1;
 
-[[group(1), binding(2)]] var<storage, read> sb2 : SB2;
+@group(1) @binding(2) var<storage, read> sb2 : SB2;
 
-[[group(2), binding(2)]] var<storage, read> sb3 : array<vec4<f32>>;
+@group(2) @binding(2) var<storage, read> sb3 : array<vec4<f32>>;
 
-[[group(3), binding(2)]] var<storage, read> sb4 : SB4;
+@group(3) @binding(2) var<storage, read> sb4 : SB4;
 
-[[group(4), binding(2)]] var<storage, read> sb5 : array<vec4<f32>>;
+@group(4) @binding(2) var<storage, read> sb5 : array<vec4<f32>>;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len1 : u32 = ((tint_symbol_1.buffer_size[0u][0u] - 4u) / 4u);
   var len2 : u32 = ((tint_symbol_1.buffer_size[0u][1u] - 16u) / 16u);
@@ -331,13 +331,13 @@ struct SB4 {
   arr4 : array<vec4<f32>>;
 };
 
-[[group(0), binding(2)]] var<storage, read> sb1 : SB1;
-[[group(1), binding(2)]] var<storage, read> sb2 : SB2;
-[[group(2), binding(2)]] var<storage, read> sb3 : array<vec4<f32>>;
-[[group(3), binding(2)]] var<storage, read> sb4 : SB4;
-[[group(4), binding(2)]] var<storage, read> sb5 : array<vec4<f32>>;
+@group(0) @binding(2) var<storage, read> sb1 : SB1;
+@group(1) @binding(2) var<storage, read> sb2 : SB2;
+@group(2) @binding(2) var<storage, read> sb3 : array<vec4<f32>>;
+@group(3) @binding(2) var<storage, read> sb4 : SB4;
+@group(4) @binding(2) var<storage, read> sb5 : array<vec4<f32>>;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len3 : u32 = arrayLength(&sb3);
@@ -350,7 +350,7 @@ struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
 }
 
-[[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
+@group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
   x : i32;
@@ -367,17 +367,17 @@ struct SB4 {
   arr4 : array<vec4<f32>>;
 }
 
-[[group(0), binding(2)]] var<storage, read> sb1 : SB1;
+@group(0) @binding(2) var<storage, read> sb1 : SB1;
 
-[[group(1), binding(2)]] var<storage, read> sb2 : SB2;
+@group(1) @binding(2) var<storage, read> sb2 : SB2;
 
-[[group(2), binding(2)]] var<storage, read> sb3 : array<vec4<f32>>;
+@group(2) @binding(2) var<storage, read> sb3 : array<vec4<f32>>;
 
-[[group(3), binding(2)]] var<storage, read> sb4 : SB4;
+@group(3) @binding(2) var<storage, read> sb4 : SB4;
 
-[[group(4), binding(2)]] var<storage, read> sb5 : array<vec4<f32>>;
+@group(4) @binding(2) var<storage, read> sb5 : array<vec4<f32>>;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len1 : u32 = ((tint_symbol_1.buffer_size[0u][0u] - 4u) / 4u);
   var len3 : u32 = (tint_symbol_1.buffer_size[0u][2u] / 16u);
@@ -409,9 +409,9 @@ struct SB {
   arr : array<i32>;
 }
 
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+@group(0) @binding(0) var<storage, read> sb : SB;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   ignore(&(sb.arr));
 }
@@ -442,11 +442,11 @@ struct SB2 {
   arr2 : array<vec4<f32>>;
 };
 
-[[group(0), binding(2)]] var<storage, read> sb1 : SB1;
+@group(0) @binding(2) var<storage, read> sb1 : SB1;
 
-[[group(1), binding(2)]] var<storage, read> sb2 : SB2;
+@group(1) @binding(2) var<storage, read> sb2 : SB2;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len2 : u32 = arrayLength(&(sb2.arr2));
@@ -459,7 +459,7 @@ struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
 }
 
-[[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
+@group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
   x : i32;
@@ -471,11 +471,11 @@ struct SB2 {
   arr2 : array<vec4<f32>>;
 }
 
-[[group(0), binding(2)]] var<storage, read> sb1 : SB1;
+@group(0) @binding(2) var<storage, read> sb1 : SB1;
 
-[[group(1), binding(2)]] var<storage, read> sb2 : SB2;
+@group(1) @binding(2) var<storage, read> sb2 : SB2;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len1 : u32 = ((tint_symbol_1.buffer_size[0u][0u] - 4u) / 4u);
   var len2 : u32 = arrayLength(&(sb2.arr2));

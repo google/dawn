@@ -40,32 +40,29 @@ TEST_F(ParserImplErrorResyncTest, BadFunctionDecls) {
   EXPECT(R"(
 fn .() -> . {}
 fn x(.) {}
-[[.,.]] fn -> {}
+@_ fn -> {}
 fn good() {}
 )",
-         "test.wgsl:2:4 error: expected identifier for function declaration\n"
-         "fn .() -> . {}\n"
-         "   ^\n"
-         "\n"
-         "test.wgsl:2:11 error: unable to determine function return type\n"
-         "fn .() -> . {}\n"
-         "          ^\n"
-         "\n"
-         "test.wgsl:3:6 error: expected ')' for function declaration\n"
-         "fn x(.) {}\n"
-         "     ^\n"
-         "\n"
-         "test.wgsl:4:3 error: expected decoration\n"
-         "[[.,.]] fn -> {}\n"
-         "  ^\n"
-         "\n"
-         "test.wgsl:4:5 error: expected decoration\n"
-         "[[.,.]] fn -> {}\n"
-         "    ^\n"
-         "\n"
-         "test.wgsl:4:12 error: expected identifier for function declaration\n"
-         "[[.,.]] fn -> {}\n"
-         "           ^^\n");
+         R"(test.wgsl:2:4 error: expected identifier for function declaration
+fn .() -> . {}
+   ^
+
+test.wgsl:2:11 error: unable to determine function return type
+fn .() -> . {}
+          ^
+
+test.wgsl:3:6 error: expected ')' for function declaration
+fn x(.) {}
+     ^
+
+test.wgsl:4:2 error: expected decoration
+@_ fn -> {}
+ ^
+
+test.wgsl:4:7 error: expected identifier for function declaration
+@_ fn -> {}
+      ^^
+)");
 }
 
 TEST_F(ParserImplErrorResyncTest, AssignmentStatement) {
@@ -78,17 +75,18 @@ fn f() {
   good = 1;
 }
 )",
-         "test.wgsl:3:8 error: expected '=' for assignment\n"
-         "  blah blah blah blah;\n"
-         "       ^^^^\n"
-         "\n"
-         "test.wgsl:5:8 error: expected '=' for assignment\n"
-         "  blah blah blah blah;\n"
-         "       ^^^^\n"
-         "\n"
-         "test.wgsl:6:7 error: unable to parse right side of assignment\n"
-         "  x = .;\n"
-         "      ^\n");
+         R"(test.wgsl:3:8 error: expected '=' for assignment
+  blah blah blah blah;
+       ^^^^
+
+test.wgsl:5:8 error: expected '=' for assignment
+  blah blah blah blah;
+       ^^^^
+
+test.wgsl:6:7 error: unable to parse right side of assignment
+  x = .;
+      ^
+)");
 }
 
 TEST_F(ParserImplErrorResyncTest, DiscardStatement) {
@@ -99,13 +97,14 @@ fn f() {
   discard blah blah blah;
 }
 )",
-         "test.wgsl:3:11 error: expected ';' for discard statement\n"
-         "  discard blah blah blah;\n"
-         "          ^^^^\n"
-         "\n"
-         "test.wgsl:5:11 error: expected ';' for discard statement\n"
-         "  discard blah blah blah;\n"
-         "          ^^^^\n");
+         R"(test.wgsl:3:11 error: expected ';' for discard statement
+  discard blah blah blah;
+          ^^^^
+
+test.wgsl:5:11 error: expected ';' for discard statement
+  discard blah blah blah;
+          ^^^^
+)");
 }
 
 TEST_F(ParserImplErrorResyncTest, StructMembers) {
@@ -115,21 +114,22 @@ struct S {
     a : i32;
     blah blah blah;
     b : i32;
-    [[]] x : i32;
+    @- x : i32;
     c : i32;
 }
 )",
-         "test.wgsl:3:10 error: expected ':' for struct member\n"
-         "    blah blah blah;\n"
-         "         ^^^^\n"
-         "\n"
-         "test.wgsl:5:10 error: expected ':' for struct member\n"
-         "    blah blah blah;\n"
-         "         ^^^^\n"
-         "\n"
-         "test.wgsl:7:7 error: empty decoration list\n"
-         "    [[]] x : i32;\n"
-         "      ^^\n");
+         R"(test.wgsl:3:10 error: expected ':' for struct member
+    blah blah blah;
+         ^^^^
+
+test.wgsl:5:10 error: expected ':' for struct member
+    blah blah blah;
+         ^^^^
+
+test.wgsl:7:6 error: expected decoration
+    @- x : i32;
+     ^
+)");
 }
 
 // Check that the forward scan in resynchronize() stop at nested sync points.
@@ -144,38 +144,36 @@ fn f() {
 }
 struct S { blah };
 )",
-         "test.wgsl:5:1 error: expected ';' for discard statement\n"
-         "}\n"
-         "^\n"
-         "\n"
-         "test.wgsl:6:17 error: expected ':' for struct member\n"
-         "struct S { blah };\n"
-         "                ^\n");
+         R"(test.wgsl:5:1 error: expected ';' for discard statement
+}
+^
+
+test.wgsl:6:17 error: expected ':' for struct member
+struct S { blah };
+                ^
+)");
 }
 
 TEST_F(ParserImplErrorResyncTest, BracketCounting) {
-  EXPECT(R"(
-[[woof[[[[]]]]]]
+  EXPECT(
+      R"(
 fn f(x(((())))) {
   meow = {{{}}}
 }
 struct S { blah };
 )",
-         "test.wgsl:2:3 error: expected decoration\n"
-         "[[woof[[[[]]]]]]\n"
-         "  ^^^^\n"
-         "\n"
-         "test.wgsl:3:7 error: expected ':' for parameter\n"
-         "fn f(x(((())))) {\n"
-         "      ^\n"
-         "\n"
-         "test.wgsl:4:10 error: unable to parse right side of assignment\n"
-         "  meow = {{{}}}\n"
-         "         ^\n"
-         "\n"
-         "test.wgsl:6:17 error: expected ':' for struct member\n"
-         "struct S { blah };\n"
-         "                ^\n");
+      R"(test.wgsl:2:7 error: expected ':' for parameter
+fn f(x(((())))) {
+      ^
+
+test.wgsl:3:10 error: unable to parse right side of assignment
+  meow = {{{}}}
+         ^
+
+test.wgsl:5:17 error: expected ':' for struct member
+struct S { blah };
+                ^
+)");
 }
 
 }  // namespace

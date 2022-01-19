@@ -920,7 +920,7 @@ TEST_F(ResolverTest, Function_CallSites) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
-  // [[stage(compute), workgroup_size(1)]]
+  // @stage(compute) @workgroup_size(1)
   // fn main() {}
   auto* func = Func("main", ast::VariableList{}, ty.void_(), {}, {});
 
@@ -938,7 +938,7 @@ TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
-  // [[stage(compute), workgroup_size(8, 2, 3)]]
+  // @stage(compute) @workgroup_size(8, 2, 3)
   // fn main() {}
   auto* func =
       Func("main", ast::VariableList{}, ty.void_(), {},
@@ -961,7 +961,7 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts) {
   // let width = 16;
   // let height = 8;
   // let depth = 2;
-  // [[stage(compute), workgroup_size(width, height, depth)]]
+  // @stage(compute) @workgroup_size(width, height, depth)
   // fn main() {}
   GlobalConst("width", ty.i32(), Expr(16));
   GlobalConst("height", ty.i32(), Expr(8));
@@ -986,7 +986,7 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts) {
 TEST_F(ResolverTest, Function_WorkgroupSize_Consts_NestedInitializer) {
   // let width = i32(i32(i32(8)));
   // let height = i32(i32(i32(4)));
-  // [[stage(compute), workgroup_size(width, height)]]
+  // @stage(compute) @workgroup_size(width, height)
   // fn main() {}
   GlobalConst("width", ty.i32(),
               Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 8))));
@@ -1010,10 +1010,10 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts_NestedInitializer) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
-  // [[override(0)]] let width = 16;
-  // [[override(1)]] let height = 8;
-  // [[override(2)]] let depth = 2;
-  // [[stage(compute), workgroup_size(width, height, depth)]]
+  // @override(0) let width = 16;
+  // @override(1) let height = 8;
+  // @override(2) let depth = 2;
+  // @stage(compute) @workgroup_size(width, height, depth)
   // fn main() {}
   auto* width = GlobalConst("width", ty.i32(), Expr(16), {Override(0)});
   auto* height = GlobalConst("height", ty.i32(), Expr(8), {Override(1)});
@@ -1036,10 +1036,10 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
-  // [[override(0)]] let width : i32;
-  // [[override(1)]] let height : i32;
-  // [[override(2)]] let depth : i32;
-  // [[stage(compute), workgroup_size(width, height, depth)]]
+  // @override(0) let width : i32;
+  // @override(1) let height : i32;
+  // @override(2) let depth : i32;
+  // @stage(compute) @workgroup_size(width, height, depth)
   // fn main() {}
   auto* width = GlobalConst("width", ty.i32(), nullptr, {Override(0)});
   auto* height = GlobalConst("height", ty.i32(), nullptr, {Override(1)});
@@ -1062,9 +1062,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
-  // [[override(1)]] let height = 2;
+  // @override(1) let height = 2;
   // let depth = 3;
-  // [[stage(compute), workgroup_size(8, height, depth)]]
+  // @stage(compute) @workgroup_size(8, height, depth)
   // fn main() {}
   auto* height = GlobalConst("height", ty.i32(), Expr(2), {Override(0)});
   GlobalConst("depth", ty.i32(), Expr(3));
@@ -1816,8 +1816,8 @@ TEST_F(ResolverTest, Access_SetForStorageBuffer) {
 }
 
 TEST_F(ResolverTest, BindingPoint_SetForResources) {
-  // [[group(1), binding(2)]] var s1 : sampler;
-  // [[group(3), binding(4)]] var s2 : sampler;
+  // @group(1) @binding(2) var s1 : sampler;
+  // @group(3) @binding(4) var s2 : sampler;
   auto* s1 = Global(Sym(), ty.sampler(ast::SamplerKind::kSampler),
                     ast::DecorationList{create<ast::GroupDecoration>(1),
                                         create<ast::BindingDecoration>(2)});

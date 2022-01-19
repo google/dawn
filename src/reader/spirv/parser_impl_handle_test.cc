@@ -1254,7 +1254,7 @@ INSTANTIATE_TEST_SUITE_P(
          %ptr = OpTypePointer UniformConstant %sampler
          %10 = OpVariable %ptr UniformConstant
 )",
-            R"([[group(0), binding(0)]] var x_10 : sampler;)"}));
+            R"(@group(0) @binding(0) var x_10 : sampler;)"}));
 
 INSTANTIATE_TEST_SUITE_P(
     Images,
@@ -1265,7 +1265,7 @@ INSTANTIATE_TEST_SUITE_P(
             "", R"(
          %10 = OpVariable %ptr_f_texture_1d UniformConstant
 )",
-            R"([[group(0), binding(0)]] var x_10 : texture_1d<f32>;)"},
+            R"(@group(0) @binding(0) var x_10 : texture_1d<f32>;)"},
         DeclUnderspecifiedHandleCase{
             R"(
          OpDecorate %10 NonWritable
@@ -1273,7 +1273,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(
          %10 = OpVariable %ptr_f_storage_1d UniformConstant
 )",
-            R"([[group(0), binding(0)]] var x_10 : texture_1d<f32>;)"},
+            R"(@group(0) @binding(0) var x_10 : texture_1d<f32>;)"},
         DeclUnderspecifiedHandleCase{
             R"(
          OpDecorate %10 NonReadable
@@ -1281,7 +1281,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(
          %10 = OpVariable %ptr_f_storage_1d UniformConstant
 )",
-            R"([[group(0), binding(0)]] var x_10 : texture_storage_1d<rg32float, write>;)"}));
+            R"(@group(0) @binding(0) var x_10 : texture_storage_1d<rg32float, write>;)"}));
 
 // Test handle declaration or error, when there is an image access.
 
@@ -1405,8 +1405,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 1D 0 1 1 1 Unknown", "%result = OpImageQuerySamples %uint %im",
          "WGSL arrayed textures must be 2d_array or cube_array: ", ""},
         {"%float 2D 0 0 1 1 Unknown", "%result = OpImageQuerySamples %uint %im",
-         "",
-         "[[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;"},
+         "", "@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;"},
         {"%float 2D 0 1 1 1 Unknown", "%result = OpImageQuerySamples %uint %im",
          "WGSL multisampled textures must be 2d and non-arrayed: ", ""},
         {"%float 3D 0 0 1 1 Unknown", "%result = OpImageQuerySamples %uint %im",
@@ -1560,36 +1559,36 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords12 %int_1",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
                         "textureGather(1, x_20, x_10, coords12)"},
         // OpImageGather 2D ConstOffset signed
         ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageGather "
             "%v4float %sampled_image %coords12 %int_1 ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             "textureGather(1, x_20, x_10, coords12, vec2<i32>(3, 4))"},
         // OpImageGather 2D ConstOffset unsigned
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords12 %int_1 ConstOffset "
                         "%u_offsets2d",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
                         "textureGather(1, x_20, x_10, coords12, "
                         "vec2<i32>(vec2<u32>(3u, 4u)))"},
         // OpImageGather 2D Array
         ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords123 %int_1",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
                         "textureGather(1, x_20, x_10, coords123.xy, "
                         "i32(round(coords123.z)))"},
         // OpImageGather 2D Array ConstOffset signed
@@ -1597,9 +1596,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageGather "
             "%v4float %sampled_image %coords123 %int_1 ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             "textureGather(1, x_20, x_10, coords123.xy, "
             "i32(round(coords123.z)), vec2<i32>(3, 4))"},
         // OpImageGather 2D Array ConstOffset unsigned
@@ -1607,9 +1606,9 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords123 %int_1 ConstOffset "
                         "%u_offsets2d",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
                         "textureGather(1, x_20, x_10, coords123.xy, "
                         "i32(round(coords123.z)), "
                         "vec2<i32>(vec2<u32>(3u, 4u)))"},
@@ -1617,53 +1616,53 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float Cube 0 0 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords123 %int_1",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_cube<f32>;)",
+@group(2) @binding(1) var x_20 : texture_cube<f32>;)",
                         "textureGather(1, x_20, x_10, coords123)"},
         // OpImageGather Cube Array
         ImageAccessCase{"%float Cube 0 1 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords1234 %int_1",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_cube_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_cube_array<f32>;)",
                         "textureGather(1, x_20, x_10, coords1234.xyz, "
                         "i32(round(coords1234.w)))"},
         // OpImageGather 2DDepth
         ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords12 %int_1",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d;)",
                         "textureGather(x_20, x_10, coords12)"},
         // OpImageGather 2DDepth ConstOffset signed
         ImageAccessCase{
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageGather "
             "%v4float %sampled_image %coords12 %int_1 ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d;)",
             "textureGather(x_20, x_10, coords12, vec2<i32>(3, 4))"},
         // OpImageGather 2DDepth ConstOffset unsigned
         ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords12 %int_1 ConstOffset "
                         "%u_offsets2d",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d;)",
                         "textureGather(x_20, x_10, coords12, "
                         "vec2<i32>(vec2<u32>(3u, 4u)))"},
         // OpImageGather 2DDepth Array
         ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords123 %int_1",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
                         "textureGather(x_20, x_10, coords123.xy, "
                         "i32(round(coords123.z)))"},
         // OpImageGather 2DDepth Array ConstOffset signed
@@ -1671,9 +1670,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 1 1 0 1 Unknown",
             "%result = OpImageGather "
             "%v4float %sampled_image %coords123 %int_1 ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
             "textureGather(x_20, x_10, coords123.xy, "
             "i32(round(coords123.z)), vec2<i32>(3, 4))"},
         // OpImageGather 2DDepth Array ConstOffset unsigned
@@ -1681,9 +1680,9 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords123 %int_1 ConstOffset "
                         "%u_offsets2d",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
                         "textureGather(x_20, x_10, coords123.xy, "
                         "i32(round(coords123.z)), "
                         "vec2<i32>(vec2<u32>(3u, 4u)))"},
@@ -1691,17 +1690,17 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float Cube 1 0 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords123 %int_1",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+@group(2) @binding(1) var x_20 : texture_depth_cube;)",
                         "textureGather(x_20, x_10, coords123)"},
         // OpImageGather DepthCube Array
         ImageAccessCase{"%float Cube 1 1 0 1 Unknown",
                         "%result = OpImageGather "
                         "%v4float %sampled_image %coords1234 %int_1",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
                         "textureGather(x_20, x_10, coords1234.xyz, "
                         "i32(round(coords1234.w)))"}}));
 
@@ -1714,18 +1713,18 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageDrefGather "
             "%v4float %sampled_image %coords12 %depth",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d;)",
             "textureGatherCompare(x_20, x_10, coords12, 0.200000003)"},
         // OpImageDrefGather 2DDepth ConstOffset signed
         ImageAccessCase{
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageDrefGather "
             "%v4float %sampled_image %coords12 %depth ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d;)",
             "textureGatherCompare(x_20, x_10, coords12, 0.200000003, "
             "vec2<i32>(3, 4))"},
         // OpImageDrefGather 2DDepth ConstOffset unsigned
@@ -1734,62 +1733,59 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageDrefGather "
             "%v4float %sampled_image %coords12 %depth ConstOffset "
             "%u_offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d;)",
             "textureGatherCompare(x_20, x_10, coords12, 0.200000003, "
             "vec2<i32>(vec2<u32>(3u, 4u)))"},
         // OpImageDrefGather 2DDepth Array
-        ImageAccessCase{
-            "%float 2D 1 1 0 1 Unknown",
-            "%result = OpImageDrefGather "
-            "%v4float %sampled_image %coords123 %depth",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+        ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
+                        "%result = OpImageDrefGather "
+                        "%v4float %sampled_image %coords123 %depth",
+                        R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
-            "textureGatherCompare(x_20, x_10, coords123.xy, "
-            "i32(round(coords123.z)), 0.200000003)"},
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
+                        "textureGatherCompare(x_20, x_10, coords123.xy, "
+                        "i32(round(coords123.z)), 0.200000003)"},
         // OpImageDrefGather 2DDepth Array ConstOffset signed
         ImageAccessCase{
             "%float 2D 1 1 0 1 Unknown",
             "%result = OpImageDrefGather "
             "%v4float %sampled_image %coords123 %depth ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
             "textureGatherCompare(x_20, x_10, coords123.xy, "
             "i32(round(coords123.z)), 0.200000003, vec2<i32>(3, 4))"},
         // OpImageDrefGather 2DDepth Array ConstOffset unsigned
-        ImageAccessCase{
-            "%float 2D 1 1 0 1 Unknown",
-            "%result = OpImageDrefGather "
-            "%v4float %sampled_image %coords123 %depth ConstOffset "
-            "%u_offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+        ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
+                        "%result = OpImageDrefGather "
+                        "%v4float %sampled_image %coords123 %depth ConstOffset "
+                        "%u_offsets2d",
+                        R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
-            "textureGatherCompare(x_20, x_10, coords123.xy, "
-            "i32(round(coords123.z)), 0.200000003, "
-            "vec2<i32>(vec2<u32>(3u, 4u)))"},
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
+                        "textureGatherCompare(x_20, x_10, coords123.xy, "
+                        "i32(round(coords123.z)), 0.200000003, "
+                        "vec2<i32>(vec2<u32>(3u, 4u)))"},
         // OpImageDrefGather DepthCube
         ImageAccessCase{
             "%float Cube 1 0 0 1 Unknown",
             "%result = OpImageDrefGather "
             "%v4float %sampled_image %coords123 %depth",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+@group(2) @binding(1) var x_20 : texture_depth_cube;)",
             "textureGatherCompare(x_20, x_10, coords123, 0.200000003)"},
         // OpImageDrefGather DepthCube Array
-        ImageAccessCase{
-            "%float Cube 1 1 0 1 Unknown",
-            "%result = OpImageDrefGather "
-            "%v4float %sampled_image %coords1234 %depth",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+        ImageAccessCase{"%float Cube 1 1 0 1 Unknown",
+                        "%result = OpImageDrefGather "
+                        "%v4float %sampled_image %coords1234 %depth",
+                        R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
-            "textureGatherCompare(x_20, x_10, coords1234.xyz, "
-            "i32(round(coords1234.w)), 0.200000003)"}}));
+@group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
+                        "textureGatherCompare(x_20, x_10, coords1234.xyz, "
+                        "i32(round(coords1234.w)), 0.200000003)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleImplicitLod,
@@ -1800,9 +1796,9 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords12",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
                         "textureSample(x_20, x_10, coords12)"},
 
         // OpImageSampleImplicitLod arrayed
@@ -1810,9 +1806,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords123",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             "textureSample(x_20, x_10, coords123.xy, i32(round(coords123.z)))"},
 
         // OpImageSampleImplicitLod with ConstOffset
@@ -1820,9 +1816,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords12 ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             "textureSample(x_20, x_10, coords12, vec2<i32>(3, 4))"},
 
         // OpImageSampleImplicitLod arrayed with ConstOffset
@@ -1830,18 +1826,18 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords123 ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             R"(textureSample(x_20, x_10, coords123.xy, i32(round(coords123.z)), vec2<i32>(3, 4)))"},
 
         // OpImageSampleImplicitLod with Bias
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords12 Bias %float_7",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
                         "textureSampleBias(x_20, x_10, coords12, 7.0)"},
 
         // OpImageSampleImplicitLod arrayed with Bias
@@ -1849,9 +1845,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords123 Bias %float_7",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             R"(textureSampleBias(x_20, x_10, coords123.xy, i32(round(coords123.z)), 7.0))"},
 
         // OpImageSampleImplicitLod with Bias and signed ConstOffset
@@ -1860,9 +1856,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords12 Bias|ConstOffset "
             "%float_7 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleBias(x_20, x_10, coords12, 7.0, vec2<i32>(3, 4))"},
 
         // OpImageSampleImplicitLod with Bias and unsigned ConstOffset
@@ -1872,9 +1868,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords12 Bias|ConstOffset "
             "%float_7 %u_offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleBias(x_20, x_10, coords12, 7.0, vec2<i32>(vec2<u32>(3u, 4u)))"},
         // OpImageSampleImplicitLod arrayed with Bias
         ImageAccessCase{
@@ -1882,9 +1878,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords123 Bias|ConstOffset "
             "%float_7 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             R"(textureSampleBias(x_20, x_10, coords123.xy, i32(round(coords123.z)), 7.0, vec2<i32>(3, 4))"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1903,11 +1899,11 @@ INSTANTIATE_TEST_SUITE_P(
      %200 = OpImageSampleImplicitLod %v4float %sampled_image %coords12
      %210 = OpImageSampleDrefImplicitLod %float %sampled_dref_image %coords12 %depth
 )",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 
-[[group(0), binding(1)]] var x_30 : sampler_comparison;
+@group(0) @binding(1) var x_30 : sampler_comparison;
 )",
                         R"(
   let x_200 : vec4<f32> = vec4<f32>(textureSample(x_20, x_10, coords12), 0.0, 0.0, 0.0);
@@ -1923,9 +1919,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleDrefImplicitLod "
             "%float %sampled_image %coords12 %depth",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             R"(textureSampleCompare(x_20, x_10, coords12, 0.200000003))"},
         // ImageSampleDrefImplicitLod - arrayed
@@ -1933,18 +1929,18 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleDrefImplicitLod "
             "%float %sampled_image %coords123 %depth",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
             R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003))"},
         // ImageSampleDrefImplicitLod with ConstOffset
         ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleDrefImplicitLod %float "
             "%sampled_image %coords12 %depth ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             R"(textureSampleCompare(x_20, x_10, coords12, 0.200000003, vec2<i32>(3, 4)))"},
         // ImageSampleDrefImplicitLod arrayed with ConstOffset
@@ -1952,9 +1948,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleDrefImplicitLod %float "
             "%sampled_image %coords123 %depth ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
             R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1968,9 +1964,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageSampleDrefExplicitLod "
             "%float %sampled_image %coords12 %depth Lod %float_0",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             R"(textureSampleCompareLevel(x_20, x_10, coords12, 0.200000003))"},
         // 2D array
@@ -1978,9 +1974,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 1 1 0 1 Unknown",
             "%result = OpImageSampleDrefExplicitLod "
             "%float %sampled_image %coords123 %depth Lod %float_0",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
             R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003))"},
         // 2D, ConstOffset
         ImageAccessCase{
@@ -1988,9 +1984,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleDrefExplicitLod %float "
             "%sampled_image %coords12 %depth Lod|ConstOffset "
             "%float_0 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             R"(textureSampleCompareLevel(x_20, x_10, coords12, 0.200000003, vec2<i32>(3, 4)))"},
         // 2D array, ConstOffset
@@ -1999,27 +1995,27 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleDrefExplicitLod %float "
             "%sampled_image %coords123 %depth Lod|ConstOffset "
             "%float_0 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
             R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.200000003, vec2<i32>(3, 4)))"},
         // Cube
         ImageAccessCase{
             "%float Cube 1 0 0 1 Unknown",
             "%result = OpImageSampleDrefExplicitLod "
             "%float %sampled_image %coords123 %depth Lod %float_0",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+@group(2) @binding(1) var x_20 : texture_depth_cube;)",
             R"(textureSampleCompareLevel(x_20, x_10, coords123, 0.200000003))"},
         // Cube array
         ImageAccessCase{
             "%float Cube 1 1 0 1 Unknown",
             "%result = OpImageSampleDrefExplicitLod "
             "%float %sampled_image %coords1234 %depth Lod %float_0",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+@group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
             R"(textureSampleCompareLevel(x_20, x_10, coords1234.xyz, i32(round(coords1234.w)), 0.200000003))"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2031,9 +2027,9 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords12 Lod %float_null",
-                        R"([[group(0), binding(0)]] var x_10 : sampler;
+                        R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
                         R"(textureSampleLevel(x_20, x_10, coords12, 0.0))"},
 
         // OpImageSampleExplicitLod arrayed - using Lod
@@ -2041,9 +2037,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords123 Lod %float_null",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             R"(textureSampleLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.0))"},
 
         // OpImageSampleExplicitLod - using Lod and ConstOffset
@@ -2052,9 +2048,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords12 Lod|ConstOffset "
             "%float_null %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleLevel(x_20, x_10, coords12, 0.0, vec2<i32>(3, 4)))"},
 
         // OpImageSampleExplicitLod - using Lod and unsigned ConstOffset
@@ -2064,9 +2060,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords12 Lod|ConstOffset "
             "%float_null %u_offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleLevel(x_20, x_10, coords12, 0.0, vec2<i32>(vec2<u32>(3u, 4u)))"},
 
         // OpImageSampleExplicitLod arrayed - using Lod and ConstOffset
@@ -2075,9 +2071,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords123 Lod|ConstOffset "
             "%float_null %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             R"(textureSampleLevel(x_20, x_10, coords123.xy, i32(round(coords123.z)), 0.0, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2090,9 +2086,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords12 Grad %vf12 %vf21",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleGrad(x_20, x_10, coords12, vf12, vf21))"},
 
         // OpImageSampleExplicitLod arrayed - using Grad
@@ -2100,9 +2096,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords123 Grad %vf12 %vf21",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(round(coords123.z)), vf12, vf21))"},
 
         // OpImageSampleExplicitLod - using Grad and ConstOffset
@@ -2111,9 +2107,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords12 Grad|ConstOffset "
             "%vf12 %vf21 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleGrad(x_20, x_10, coords12, vf12, vf21, vec2<i32>(3, 4)))"},
 
         // OpImageSampleExplicitLod - using Grad and unsigned ConstOffset
@@ -2122,9 +2118,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords12 Grad|ConstOffset "
             "%vf12 %vf21 %u_offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleGrad(x_20, x_10, coords12, vf12, vf21, vec2<i32>(vec2<u32>(3u, 4u)))"},
 
         // OpImageSampleExplicitLod arrayed - using Grad and ConstOffset
@@ -2133,9 +2129,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords123 Grad|ConstOffset "
             "%vf12 %vf21 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(round(coords123.z)), vf12, vf21, vec2<i32>(3, 4)))"},
 
         // OpImageSampleExplicitLod arrayed - using Grad and unsigned
@@ -2145,9 +2141,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords123 Grad|ConstOffset "
             "%vf12 %vf21 %u_offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
             R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(round(coords123.z)), vf12, vf21, vec2<i32>(vec2<u32>(3u, 4u))))"}));
 
 // Test crbug.com/378:
@@ -2164,17 +2160,17 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 0 0 1 Unknown",
          "%result = OpImageSampleExplicitLod %v4float "
          "%sampled_image %vf12 Lod %f1",
-         R"([[group(0), binding(0)]] var x_10 : sampler;
+         R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(textureSampleLevel(x_20, x_10, vf12, f1))"},
         // Test a depth case
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleExplicitLod %v4float "
          "%sampled_image %vf12 Lod %f1",
-         R"([[group(0), binding(0)]] var x_10 : sampler;
+         R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
          R"(vec4<f32>(textureSampleLevel(x_20, x_10, vf12, i32(f1)), 0.0, 0.0, 0.0))"}}));
 
@@ -2213,9 +2209,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 1D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords12",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
             R"(textureSample(x_20, x_10, (coords12.x / coords12.y)))"},
 
         // OpImageSampleProjImplicitLod 2D
@@ -2223,9 +2219,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords123",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSample(x_20, x_10, (coords123.xy / coords123.z)))"},
 
         // OpImageSampleProjImplicitLod 3D
@@ -2233,9 +2229,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 3D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords1234",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_3d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_3d<f32>;)",
             R"(textureSample(x_20, x_10, (coords1234.xyz / coords1234.w)))"},
 
         // OpImageSampleProjImplicitLod 2D with ConstOffset
@@ -2245,9 +2241,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords123 ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSample(x_20, x_10, (coords123.xy / coords123.z), vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2261,9 +2257,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords123 Bias %float_7",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleBias(x_20, x_10, (coords123.xy / coords123.z), 7.0))"},
 
         // OpImageSampleProjImplicitLod with Bias and signed ConstOffset
@@ -2272,9 +2268,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords123 Bias|ConstOffset "
             "%float_7 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleBias(x_20, x_10, (coords123.xy / coords123.z), 7.0, vec2<i32>(3, 4)))"},
 
         // OpImageSampleProjImplicitLod with Bias and unsigned ConstOffset
@@ -2284,9 +2280,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords123 Bias|ConstOffset "
             "%float_7 %u_offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleBias(x_20, x_10, (coords123.xy / coords123.z), 7.0, vec2<i32>(vec2<u32>(3u, 4u))))"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2298,9 +2294,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjExplicitLod "
             "%v4float %sampled_image %coords123 Lod %f1",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleLevel(x_20, x_10, (coords123.xy / coords123.z), f1))"},
 
         // OpImageSampleProjExplicitLod 2D Lod with ConstOffset
@@ -2308,9 +2304,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjExplicitLod "
             "%v4float %sampled_image %coords123 Lod|ConstOffset %f1 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleLevel(x_20, x_10, (coords123.xy / coords123.z), f1, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2322,9 +2318,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjExplicitLod "
             "%v4float %sampled_image %coords123 Grad %vf12 %vf21",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleGrad(x_20, x_10, (coords123.xy / coords123.z), vf12, vf21))"},
 
         // OpImageSampleProjExplicitLod 2D Lod Grad ConstOffset
@@ -2333,9 +2329,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleProjExplicitLod "
             "%v4float %sampled_image %coords123 Grad|ConstOffset "
             "%vf12 %vf21 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
             R"(textureSampleGrad(x_20, x_10, (coords123.xy / coords123.z), vf12, vf21, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2348,9 +2344,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords123",
-            R"([[group(0), binding(0)]] var x_10 : sampler;
+            R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             // Sampling the depth texture yields an f32, but the
             // SPIR-V operation yiedls vec4<f32>, so fill out the
@@ -2367,9 +2363,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageSampleProjDrefImplicitLod "
             "%float %sampled_image %coords123 %f1",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             R"(textureSampleCompare(x_20, x_10, (coords123.xy / coords123.z), f1))"},
 
@@ -2378,9 +2374,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageSampleProjDrefImplicitLod "
             "%float %sampled_image %coords123 %f1 ConstOffset %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             R"(textureSampleCompare(x_20, x_10, (coords123.xy / coords123.z), f1, vec2<i32>(3, 4)))"}));
 
@@ -2397,9 +2393,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageSampleProjDrefExplicitLod "
             "%float %sampled_image %coords123 %depth Lod %float_0",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             R"(textureSampleCompare(x_20, x_10, (coords123.xy / coords123.z), 0.200000003, 0.0))"},
 
@@ -2409,9 +2405,9 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleProjDrefExplicitLod "
             "%float %sampled_image %coords123 %depth "
             "Lod|ConstOffset %float_0 %offsets2d",
-            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+            R"(@group(0) @binding(0) var x_10 : sampler_comparison;
 
-[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+@group(2) @binding(1) var x_20 : texture_depth_2d;
 )",
             R"(textureSampleCompareLevel(x_20, x_10, (coords123.xy / coords123.z), 0.200000003, 0.0, vec2<i32>(3, 4)))"}));
 
@@ -2492,7 +2488,7 @@ INSTANTIATE_TEST_SUITE_P(ImageWrite_OptionalParams,
                              // OpImageWrite with no extra params
                              {"%float 2D 0 0 0 2 Rgba32f",
                               "OpImageWrite %im %vi12 %vf1234",
-                              "[[group(2), binding(1)]] var x_20 : "
+                              "@group(2) @binding(1) var x_20 : "
                               "texture_storage_2d<rgba32float, write>;",
                               "textureStore(x_20, vi12, vf1234);"}}));
 
@@ -2507,36 +2503,36 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Source 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %f1",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32float, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32float, write>;)",
          "textureStore(x_20, vi12, vec4<f32>(f1, 0.0, 0.0, 0.0));"},
         // Source 2 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf12",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32float, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32float, write>;)",
          "textureStore(x_20, vi12, vec4<f32>(vf12, 0.0, 0.0));"},
         // Source 3 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf123",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32float, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32float, write>;)",
          "textureStore(x_20, vi12, vec4<f32>(vf123, 0.0));"},
         // Source 4 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf1234",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32float, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32float, write>;)",
          "textureStore(x_20, vi12, vf1234);"},
         // Source 2 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf12",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rg32float, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32float, write>;)",
          "textureStore(x_20, vi12, vec4<f32>(vf12, 0.0, 0.0));"},
         // Source 3 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf123",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rg32float, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32float, write>;)",
          "textureStore(x_20, vi12, vec4<f32>(vf123, 0.0));"},
         // Source 4 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf1234",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rg32float, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32float, write>;)",
          "textureStore(x_20, vi12, vf1234);"},
         // WGSL does not support 3-component storage textures.
         // Source 4 component, dest 4 component
         {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vi12 %vf1234",
-         "[[group(2), binding(1)]] var x_20 : "
+         "@group(2) @binding(1) var x_20 : "
          "texture_storage_2d<rgba32float, write>;",
          "textureStore(x_20, vi12, vf1234);"}}));
 
@@ -2617,11 +2613,11 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Sampled type is unsigned int, texel is unsigned int
         {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vu1234",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32uint, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rgba32uint, write>;)",
          R"(textureStore(x_20, vi12, vu1234))"},
         // Sampled type is signed int, texel is signed int
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vi1234",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32sint, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rgba32sint, write>;)",
          R"(textureStore(x_20, vi12, vi1234))"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2635,25 +2631,25 @@ INSTANTIATE_TEST_SUITE_P(
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32float, write>;)"},
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rgba32float, write>;)"},
         // Sampled type is float, texel is unsigned int
         {"%int 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vi12 %vu1234",
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32float, write>;)"},
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rgba32float, write>;)"},
         // Sampled type is unsigned int, texel is float
         {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vf1234",
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32uint, write>;)"},
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rgba32uint, write>;)"},
         // Sampled type is signed int, texel is float
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vf1234",
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32sint, write>;
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rgba32sint, write>;
   })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2667,13 +2663,13 @@ INSTANTIATE_TEST_SUITE_P(
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32uint, write>;)"},
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rgba32uint, write>;)"},
         // Sampled type is signed int, texel is unsigned int
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vu1234",
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32sint, write>;
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rgba32sint, write>;
   })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2684,11 +2680,11 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Source unsigned, dest unsigned
         {"%uint 2D 0 0 0 2 R32ui", "OpImageWrite %im %vi12 %vu12",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32uint, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32uint, write>;)",
          R"(textureStore(x_20, vi12, vec4<u32>(vu12, 0u, 0u)))"},
         // Source signed, dest signed
         {"%int 2D 0 0 0 2 R32i", "OpImageWrite %im %vi12 %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32sint, write>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32sint, write>;)",
          R"(textureStore(x_20, vi12, vec4<i32>(vi12, 0, 0)))"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2698,22 +2694,22 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageFetch with no extra params, on sampled texture
         // Level of detail is injected for sampled texture
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageFetch with explicit level, on sampled texture
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Lod %int_3",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, 3);)"},
         // OpImageFetch with no extra params, on depth texture
         // Level of detail is injected for depth texture
         {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_2d;)",
          R"(let x_99 : vec4<f32> = vec4<f32>(textureLoad(x_20, vi12, 0), 0.0, 0.0, 0.0);)"},
         // OpImageFetch with extra params, on depth texture
         {"%float 2D 1 0 0 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Lod %int_3",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_2d;)",
          R"(let x_99 : vec4<f32> = vec4<f32>(textureLoad(x_20, vi12, 3), 0.0, 0.0, 0.0);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2726,7 +2722,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // ImageFetch on depth image.
         {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12 ",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_2d;)",
          R"(let x_99 : vec4<f32> = vec4<f32>(textureLoad(x_20, vi12, 0), 0.0, 0.0, 0.0);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2740,7 +2736,7 @@ INSTANTIATE_TEST_SUITE_P(
         // ImageFetch on multisampled depth image.
         {"%float 2D 1 0 1 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Sample %i1",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_multisampled_2d;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_multisampled_2d;)",
          R"(let x_99 : vec4<f32> = vec4<f32>(textureLoad(x_20, vi12, i1), 0.0, 0.0, 0.0);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2756,7 +2752,7 @@ INSTANTIATE_TEST_SUITE_P(
         // ImageFetch non-arrayed
         {"%float 2D 0 0 1 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Sample %i1",
-         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;)",
          R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, i1);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2765,7 +2761,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         {"%float 2D 0 0 1 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Sample %u1",
-         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;)",
          R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, i32(u1));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2788,11 +2784,11 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageFetch requires no conversion, float -> v4float
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageFetch requires no conversion, uint -> v4uint
         {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<u32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<u32>;)",
          R"(let x_99 : vec4<u32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageFetch requires conversion, uint -> v4int
         // is invalid SPIR-V:
@@ -2801,7 +2797,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageFetch requires no conversion, int -> v4int
         {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<i32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<i32>;)",
          R"(let x_99 : vec4<i32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageFetch requires conversion, int -> v4uint
         // is invalid SPIR-V:
@@ -2814,11 +2810,11 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageRead requires no conversion, float -> v4float
         {"%float 2D 0 0 0 2 Rgba32f", "%99 = OpImageRead %v4float %im %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageRead requires no conversion, uint -> v4uint
         {"%uint 2D 0 0 0 2 Rgba32ui", "%99 = OpImageRead %v4uint %im %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<u32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<u32>;)",
          R"(let x_99 : vec4<u32> = textureLoad(x_20, vi12, 0);)"},
 
         // OpImageRead requires conversion, uint -> v4int
@@ -2828,7 +2824,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageRead requires no conversion, int -> v4int
         {"%int 2D 0 0 0 2 Rgba32i", "%99 = OpImageRead %v4int %im %vi12",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<i32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<i32>;)",
          R"(let x_99 : vec4<i32> = textureLoad(x_20, vi12, 0);)"},
 
         // OpImageRead requires conversion, int -> v4uint
@@ -2845,9 +2841,9 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleImplicitLod requires no conversion, float -> v4float
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageSampleImplicitLod %v4float %sampled_image %vf12",
-         R"([[group(0), binding(0)]] var x_10 : sampler;
+         R"(@group(0) @binding(0) var x_10 : sampler;
 
-[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : vec4<f32> = textureSample(x_20, x_10, vf12);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2862,26 +2858,26 @@ INSTANTIATE_TEST_SUITE_P(
          "%99 = OpImageQuerySize %int %im \n"
          "%98 = OpImageRead %v4float %im %i1\n",  // Implicitly mark as
                                                   // NonWritable
-         R"([[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
          R"(let x_99 : i32 = i32(textureDimensions(x_20));)"},
         // 2D storage image
         {"%float 2D 0 0 0 2 Rgba32f",
          "%99 = OpImageQuerySize %v2int %im \n"
          "%98 = OpImageRead %v4float %im %vi12\n",  // Implicitly mark as
                                                     // NonWritable
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20))"},
         // 3D storage image
         {"%float 3D 0 0 0 2 Rgba32f",
          "%99 = OpImageQuerySize %v3int %im \n"
          "%98 = OpImageRead %v4float %im %vi123\n",  // Implicitly mark as
                                                      // NonWritable
-         R"([[group(2), binding(1)]] var x_20 : texture_3d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_3d<f32>;)",
          R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20));)"},
 
         // Multisampled
         {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySize %v2int %im \n",
-         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;)",
          R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2897,7 +2893,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 1 0 2 Rgba32f",
          "%99 = OpImageQuerySize %v3int %im \n"
          "%98 = OpImageRead %v4float %im %vi123\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
          R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20), textureNumLayers(x_20));)"}
         // 3D array storage image doesn't exist.
 
@@ -2914,37 +2910,37 @@ INSTANTIATE_TEST_SUITE_P(
         // 1D
         {"%float 1D 0 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
          R"(let x_99 : i32 = i32(textureDimensions(x_20, i1)))"},
 
         // 2D
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20, i1));)"},
 
         // 3D
         {"%float 3D 0 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_3d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_3d<f32>;)",
          R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1));)"},
 
         // Cube
         {"%float Cube 0 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_cube<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_cube<f32>;)",
          R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20, i1).xy);)"},
 
         // Depth 2D
         {"%float 2D 1 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_2d;)",
          R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20, i1));)"},
 
         // Depth Cube
         {"%float Cube 1 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_cube;)",
          R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20, i1).xy);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2960,7 +2956,7 @@ INSTANTIATE_TEST_SUITE_P(
         // 2D array
         {"%float 2D 0 1 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
          R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1), textureNumLayers(x_20));)"},
 
         // There is no 3D array
@@ -2972,13 +2968,13 @@ INSTANTIATE_TEST_SUITE_P(
         // https://github.com/gpuweb/gpuweb/issues/1345
         {"%float Cube 0 1 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_cube_array<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_cube_array<f32>;)",
          R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1).xy, textureNumLayers(x_20));)"},
 
         // Depth 2D array
         {"%float 2D 1 1 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
          R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1), textureNumLayers(x_20));)"},
 
         // Depth Cube Array
@@ -2988,7 +2984,7 @@ INSTANTIATE_TEST_SUITE_P(
         // https://github.com/gpuweb/gpuweb/issues/1345
         {"%float Cube 1 1 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
          R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1).xy, textureNumLayers(x_20));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3001,7 +2997,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         {"%float 1D 0 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %int %im %u1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
          R"(let x_99 : i32 = i32(textureDimensions(x_20, i32(u1)));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3015,7 +3011,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         {"%float 1D 0 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %uint %im %i1\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
          R"(let x_99 : u32 = u32(textureDimensions(x_20, i1));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3029,47 +3025,47 @@ INSTANTIATE_TEST_SUITE_P(
 
         // 2D
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // 2D array
         {"%float 2D 0 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // 3D
         {"%float 3D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_3d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_3d<f32>;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // Cube
         {"%float Cube 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_cube<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_cube<f32>;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // Cube array
         {"%float Cube 0 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_cube_array<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_cube_array<f32>;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // depth 2d
         {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_2d;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // depth 2d array
         {"%float 2D 1 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // depth cube
         {"%float Cube 1 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_cube;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // depth cube array
         {"%float Cube 1 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+         R"(@group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
          R"(let x_99 : i32 = textureNumLevels(x_20);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3079,7 +3075,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %uint %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
          R"(let x_99 : u32 = u32(textureNumLevels(x_20));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3088,7 +3084,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Multsample 2D
         {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %int %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;)",
          R"(let x_99 : i32 = textureNumSamples(x_20);)"}  // namespace
 
         // Multisample 2D array
@@ -3102,7 +3098,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Multsample 2D
         {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %uint %im\n",
-         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;)",
          R"(let x_99 : u32 = u32(textureNumSamples(x_20));)"}
 
         // Multisample 2D array
