@@ -42,7 +42,7 @@ namespace {
 /// It is used as a key by the array_length_by_usage map.
 struct ArrayUsage {
   ast::BlockStatement const* const block;
-  sem::Node const* const buffer;
+  sem::Variable const* const buffer;
   bool operator==(const ArrayUsage& rhs) const {
     return block == rhs.block && buffer == rhs.buffer;
   }
@@ -80,12 +80,11 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   // get_buffer_size_intrinsic() emits the function decorated with
   // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to
   // [RW]ByteAddressBuffer.GetDimensions().
-  std::unordered_map<const sem::Struct*, Symbol> buffer_size_intrinsics;
-  auto get_buffer_size_intrinsic = [&](const sem::Struct* buffer_type) {
+  std::unordered_map<const sem::Type*, Symbol> buffer_size_intrinsics;
+  auto get_buffer_size_intrinsic = [&](const sem::Type* buffer_type) {
     return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
       auto name = ctx.dst->Sym();
-      auto* buffer_typename =
-          ctx.dst->ty.type_name(ctx.Clone(buffer_type->Declaration()->name));
+      auto* type = CreateASTTypeFor(ctx, buffer_type);
       auto* disable_validation = ctx.dst->Disable(
           ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
       auto* func = ctx.dst->create<ast::Function>(
@@ -95,7 +94,7 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
               // in order for HLSL to emit this as a ByteAddressBuffer.
               ctx.dst->create<ast::Variable>(
                   ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
-                  ast::Access::kUndefined, buffer_typename, true, nullptr,
+                  ast::Access::kUndefined, type, true, nullptr,
                   ast::DecorationList{disable_validation}),
               ctx.dst->Param("result",
                              ctx.dst->ty.pointer(ctx.dst->ty.u32(),
@@ -106,8 +105,12 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
               ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID()),
           },
           ast::DecorationList{});
-      ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(),
-                      buffer_type->Declaration(), func);
+      if (auto* str = buffer_type->As<sem::Struct>()) {
+        ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), str->Declaration(),
+                        func);
+      } else {
+        ctx.InsertFront(ctx.src->AST().GlobalDeclarations(), func);
+      }
       return name;
     });
   };
@@ -123,70 +126,46 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
         if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
           // We're dealing with an arrayLength() call
 
-          // https://gpuweb.github.io/gpuweb/wgsl/#array-types states:
-          //
-          // * The last member of the structure type defining the store type for
-          //   a variable in the storage storage class may be a runtime-sized
-          //   array.
-          // * A runtime-sized array must not be used as the store type or
-          //   contained within a store type in any other cases.
-          // * An expression must not evaluate to a runtime-sized array type.
-          //
-          // We can assume that the arrayLength() call has a single argument of
-          // the form: arrayLength(&X.Y) where X is an expression that resolves
-          // to the storage buffer structure, and Y is the runtime sized array.
+          // A runtime-sized array can only appear as the store type of a
+          // variable, or the last element of a structure (which cannot itself
+          // be nested). Given that we require SimplifyPointers, we can assume
+          // that the arrayLength() call has one of two forms:
+          //   arrayLength(&struct_var.array_member)
+          //   arrayLength(&array_var)
           auto* arg = call_expr->args[0];
           auto* address_of = arg->As<ast::UnaryOpExpression>();
           if (!address_of || address_of->op != ast::UnaryOp::kAddressOf) {
             TINT_ICE(Transform, ctx.dst->Diagnostics())
-                << "arrayLength() expected pointer to member access, got "
-                << address_of->TypeInfo().name;
+                << "arrayLength() expected address-of, got "
+                << arg->TypeInfo().name;
           }
-          auto* array_expr = address_of->expr;
-
-          auto* accessor = array_expr->As<ast::MemberAccessorExpression>();
-          if (!accessor) {
+          auto* storage_buffer_expr = address_of->expr;
+          if (auto* accessor =
+                  storage_buffer_expr->As<ast::MemberAccessorExpression>()) {
+            storage_buffer_expr = accessor->structure;
+          }
+          auto* storage_buffer_sem =
+              sem.Get<sem::VariableUser>(storage_buffer_expr);
+          if (!storage_buffer_sem) {
             TINT_ICE(Transform, ctx.dst->Diagnostics())
-                << "arrayLength() expected pointer to member access, got "
-                   "pointer to "
-                << array_expr->TypeInfo().name;
+                << "expected form of arrayLength argument to be &array_var or "
+                   "&struct_var.array_member";
             break;
           }
-          auto* storage_buffer_expr = accessor->structure;
-          auto* storage_buffer_sem = sem.Get(storage_buffer_expr);
-          auto* storage_buffer_type =
-              storage_buffer_sem->Type()->UnwrapRef()->As<sem::Struct>();
+          auto* storage_buffer_var = storage_buffer_sem->Variable();
+          auto* storage_buffer_type = storage_buffer_sem->Type()->UnwrapRef();
 
           // Generate BufferSizeIntrinsic for this storage type if we haven't
           // already
           auto buffer_size = get_buffer_size_intrinsic(storage_buffer_type);
 
-          if (!storage_buffer_type) {
-            TINT_ICE(Transform, ctx.dst->Diagnostics())
-                << "arrayLength(X.Y) expected X to be sem::Struct, got "
-                << storage_buffer_type->FriendlyName(ctx.src->Symbols());
-            break;
-          }
-
           // Find the current statement block
           auto* block = call->Stmt()->Block()->Declaration();
 
-          // If the storage_buffer_expr is resolves to a variable (typically
-          // true) then key the array_length from the variable. If not, key off
-          // the expression semantic node, which will be unique per call to
-          // arrayLength().
-          const sem::Node* storage_buffer_usage = storage_buffer_sem;
-          if (auto* user = storage_buffer_sem->As<sem::VariableUser>()) {
-            storage_buffer_usage = user->Variable();
-          }
-
           auto array_length = utils::GetOrCreate(
-              array_length_by_usage, {block, storage_buffer_usage}, [&] {
+              array_length_by_usage, {block, storage_buffer_var}, [&] {
                 // First time this array length is used for this block.
                 // Let's calculate it.
-
-                // Semantic info for the runtime array structure member
-                auto* array_member_sem = storage_buffer_type->Members().back();
 
                 // Construct the variable that'll hold the result of
                 // RWByteAddressBuffer.GetDimensions()
@@ -208,14 +187,28 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                 // array_length = ----------------------------------------
                 //                             array_stride
                 auto name = ctx.dst->Sym();
-                uint32_t array_offset = array_member_sem->Offset();
-                uint32_t array_stride = array_member_sem->Size();
-                auto* array_length_var = ctx.dst->Decl(ctx.dst->Const(
-                    name, ctx.dst->ty.u32(),
-                    ctx.dst->Div(
-                        ctx.dst->Sub(buffer_size_result->variable->symbol,
-                                     array_offset),
-                        array_stride)));
+                const ast::Expression* total_size =
+                    ctx.dst->Expr(buffer_size_result->variable);
+                const sem::Array* array_type = nullptr;
+                if (auto* str = storage_buffer_type->As<sem::Struct>()) {
+                  // The variable is a struct, so subtract the byte offset of
+                  // the array member.
+                  auto* array_member_sem = str->Members().back();
+                  array_type = array_member_sem->Type()->As<sem::Array>();
+                  total_size =
+                      ctx.dst->Sub(total_size, array_member_sem->Offset());
+                } else if (auto* arr = storage_buffer_type->As<sem::Array>()) {
+                  array_type = arr;
+                } else {
+                  TINT_ICE(Transform, ctx.dst->Diagnostics())
+                      << "expected form of arrayLength argument to be "
+                         "&array_var or &struct_var.array_member";
+                  return name;
+                }
+                uint32_t array_stride = array_type->Size();
+                auto* array_length_var = ctx.dst->Decl(
+                    ctx.dst->Const(name, ctx.dst->ty.u32(),
+                                   ctx.dst->Div(total_size, array_stride)));
 
                 // Insert the array length calculations at the top of the block
                 ctx.InsertBefore(block->statements, block->statements[0],

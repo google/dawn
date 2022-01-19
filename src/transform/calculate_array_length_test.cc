@@ -38,6 +38,36 @@ TEST_F(CalculateArrayLengthTest, Error_MissingCalculateArrayLength) {
 
 TEST_F(CalculateArrayLengthTest, Basic) {
   auto* src = R"(
+[[group(0), binding(0)]] var<storage, read> sb : array<i32>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var len : u32 = arrayLength(&sb);
+}
+)";
+
+  auto* expect = R"(
+[[internal(intrinsic_buffer_size)]]
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : array<i32>, result : ptr<function, u32>)
+
+[[group(0), binding(0)]] var<storage, read> sb : array<i32>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(sb, &(tint_symbol_1));
+  let tint_symbol_2 : u32 = (tint_symbol_1 / 4u);
+  var len : u32 = tint_symbol_2;
+}
+)";
+
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CalculateArrayLengthTest, BasicInStruct) {
+  auto* src = R"(
 struct SB {
   x : i32;
   arr : array<i32>;
@@ -77,6 +107,40 @@ fn main() {
 }
 
 TEST_F(CalculateArrayLengthTest, InSameBlock) {
+  auto* src = R"(
+[[group(0), binding(0)]] var<storage, read> sb : array<i32>;;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var a : u32 = arrayLength(&sb);
+  var b : u32 = arrayLength(&sb);
+  var c : u32 = arrayLength(&sb);
+}
+)";
+
+  auto* expect = R"(
+[[internal(intrinsic_buffer_size)]]
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : array<i32>, result : ptr<function, u32>)
+
+[[group(0), binding(0)]] var<storage, read> sb : array<i32>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(sb, &(tint_symbol_1));
+  let tint_symbol_2 : u32 = (tint_symbol_1 / 4u);
+  var a : u32 = tint_symbol_2;
+  var b : u32 = tint_symbol_2;
+  var c : u32 = tint_symbol_2;
+}
+)";
+
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CalculateArrayLengthTest, InSameBlock_Struct) {
   auto* src = R"(
 struct SB {
   x : i32;
@@ -121,6 +185,36 @@ fn main() {
 }
 
 TEST_F(CalculateArrayLengthTest, WithStride) {
+  auto* src = R"(
+[[group(0), binding(0)]] var<storage, read> sb : [[stride(64)]] array<i32>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var len : u32 = arrayLength(&sb);
+}
+)";
+
+  auto* expect = R"(
+[[internal(intrinsic_buffer_size)]]
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : [[stride(64)]] array<i32>, result : ptr<function, u32>)
+
+[[group(0), binding(0)]] var<storage, read> sb : [[stride(64)]] array<i32>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(sb, &(tint_symbol_1));
+  let tint_symbol_2 : u32 = (tint_symbol_1 / 64u);
+  var len : u32 = tint_symbol_2;
+}
+)";
+
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CalculateArrayLengthTest, WithStride_InStruct) {
   auto* src = R"(
 struct SB {
   x : i32;
@@ -233,15 +327,21 @@ struct SB2 {
 
 [[group(0), binding(1)]] var<storage, read> sb2 : SB2;
 
+[[group(0), binding(2)]] var<storage, read> sb3 : array<i32>;
+
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len2 : u32 = arrayLength(&(sb2.arr2));
-  var x : u32 = (len1 + len2);
+  var len3 : u32 = arrayLength(&sb3);
+  var x : u32 = (len1 + len2 + len3);
 }
 )";
 
   auto* expect = R"(
+[[internal(intrinsic_buffer_size)]]
+fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : array<i32>, result : ptr<function, u32>)
+
 struct SB1 {
   x : i32;
   arr1 : array<i32>;
@@ -262,6 +362,8 @@ fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_pa
 
 [[group(0), binding(1)]] var<storage, read> sb2 : SB2;
 
+[[group(0), binding(2)]] var<storage, read> sb3 : array<i32>;
+
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
@@ -270,9 +372,13 @@ fn main() {
   var tint_symbol_4 : u32 = 0u;
   tint_symbol_3(sb2, &(tint_symbol_4));
   let tint_symbol_5 : u32 = ((tint_symbol_4 - 16u) / 16u);
+  var tint_symbol_7 : u32 = 0u;
+  tint_symbol_6(sb3, &(tint_symbol_7));
+  let tint_symbol_8 : u32 = (tint_symbol_7 / 4u);
   var len1 : u32 = tint_symbol_2;
   var len2 : u32 = tint_symbol_5;
-  var x : u32 = (len1 + len2);
+  var len3 : u32 = tint_symbol_8;
+  var x : u32 = ((len1 + len2) + len3);
 }
 )";
 
