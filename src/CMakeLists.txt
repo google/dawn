@@ -36,6 +36,19 @@ function(tint_spvtools_compile_options TARGET)
   endif()
 endfunction()
 
+## Tint diagnostic utilities. Used by libtint and tint_utils_io.
+add_library(tint_diagnostic_utils
+  debug.cc
+  debug.h
+  diagnostic/diagnostic.cc
+  diagnostic/diagnostic.h
+  diagnostic/formatter.cc
+  diagnostic/formatter.h
+  diagnostic/printer.cc
+  diagnostic/printer.h
+)
+tint_default_compile_options(tint_diagnostic_utils)
+
 set(TINT_LIB_SRCS
   ../include/tint/tint.h
   ast/access.cc
@@ -208,16 +221,8 @@ set(TINT_LIB_SRCS
   castable.h
   clone_context.cc
   clone_context.h
-  debug.cc
-  debug.h
   demangler.cc
   demangler.h
-  diagnostic/diagnostic.cc
-  diagnostic/diagnostic.h
-  diagnostic/formatter.cc
-  diagnostic/formatter.h
-  diagnostic/printer.cc
-  diagnostic/printer.h
   inspector/entry_point.cc
   inspector/entry_point.h
   inspector/inspector.cc
@@ -535,6 +540,7 @@ add_library(tint_utils_io
   utils/io/tmpfile.h
 )
 tint_default_compile_options(tint_utils_io)
+target_link_libraries(tint_utils_io tint_diagnostic_utils)
 
 ## Tint validation utilities. Used by tests and the tint executable.
 add_library(tint_val
@@ -562,6 +568,7 @@ target_link_libraries(tint_val tint_utils_io)
 ## Tint library
 add_library(libtint ${TINT_LIB_SRCS})
 tint_default_compile_options(libtint)
+target_link_libraries(libtint tint_diagnostic_utils)
 if (${COMPILER_IS_LIKE_GNU})
   target_compile_options(libtint PRIVATE -fvisibility=hidden)
 endif()
@@ -574,6 +581,7 @@ if (${TINT_BUILD_FUZZERS})
   # Tint library with fuzzer instrumentation
   add_library(libtint-fuzz ${TINT_LIB_SRCS})
   tint_default_compile_options(libtint-fuzz)
+  target_link_libraries(libtint-fuzz tint_diagnostic_utils)
   if (${COMPILER_IS_LIKE_GNU})
     target_compile_options(libtint-fuzz PRIVATE -fvisibility=hidden)
   endif()
