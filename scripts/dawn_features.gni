@@ -32,13 +32,9 @@ dawn_is_winuwp = is_win && target_os == "winuwp"
 declare_args() {
   dawn_use_angle = true
 
-  # Enables usage of swiftshader on the Vulkan backend.
-  # Note that this will only work in standalone and in projects that set the
-  # dawn_swiftshader_dir variable in build_overrides/dawn.gni
-  # Because of how the Vulkan loader works, setting this makes Dawn only able
-  # to find the Swiftshader ICD and not the others.
-  # Enabled by default when fuzzing.
-  dawn_use_swiftshader = build_with_chromium && use_fuzzing_engine
+  # Enables SwiftShader as the fallback adapter. Requires dawn_swiftshader_dir
+  # to be set to take effect.
+  dawn_use_swiftshader = true
 }
 
 declare_args() {

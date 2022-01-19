@@ -115,6 +115,13 @@ class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPer
         : DawnTestWithParams<Params>(),
           DawnPerfTestBase(this, iterationsPerStep, maxStepsInFlight) {
     }
+    void SetUp() override {
+        DawnTestWithParams<Params>::SetUp();
+
+        wgpu::AdapterProperties properties;
+        this->GetAdapter().GetProperties(&properties);
+        DAWN_TEST_UNSUPPORTED_IF(properties.adapterType == wgpu::AdapterType::CPU);
+    }
     ~DawnPerfTestWithParams() override = default;
 };
 
