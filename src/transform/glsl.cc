@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/program_builder.h"
+#include "src/transform/add_spirv_block_decoration.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/decompose_memory_access.h"
@@ -75,6 +76,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
   manager.Add<PadArrayElements>();
+  manager.Add<AddSpirvBlockDecoration>();
 
   // For now, canonicalize to structs for all IO, as in HLSL.
   // TODO(senorblanco): we could skip this by accessing global entry point
