@@ -121,7 +121,7 @@ struct tint_symbol_1 {
   loc1 : f32;
   [[location(2)]]
   loc2 : vec4<u32>;
-};
+}
 
 fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
@@ -159,7 +159,7 @@ struct tint_symbol_1 {
   loc2 : vec4<u32>;
   [[builtin(position)]]
   coord : vec4<f32>;
-};
+}
 
 fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
@@ -195,7 +195,7 @@ type myf32 = f32;
 struct tint_symbol_1 {
   [[location(1)]]
   loc1 : f32;
-};
+}
 
 fn frag_main_inner(loc1 : myf32) {
   var x : myf32 = loc1;
@@ -244,12 +244,12 @@ fn frag_main([[location(0)]] loc0 : f32,
 
 struct FragBuiltins {
   coord : vec4<f32>;
-};
+}
 
 struct FragLocations {
   loc1 : f32;
   loc2 : vec4<u32>;
-};
+}
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
@@ -290,12 +290,12 @@ fn frag_main([[location(0)]] loc0 : f32,
   auto* expect = R"(
 struct FragBuiltins {
   coord : vec4<f32>;
-};
+}
 
 struct FragLocations {
   loc1 : f32;
   loc2 : vec4<u32>;
-};
+}
 
 struct tint_symbol_1 {
   [[location(0)]]
@@ -304,7 +304,7 @@ struct tint_symbol_1 {
   loc1 : f32;
   [[location(2)]]
   loc2 : vec4<u32>;
-};
+}
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
@@ -345,12 +345,12 @@ fn frag_main([[location(0)]] loc0 : f32,
   auto* expect = R"(
 struct FragBuiltins {
   coord : vec4<f32>;
-};
+}
 
 struct FragLocations {
   loc1 : f32;
   loc2 : vec4<u32>;
-};
+}
 
 struct tint_symbol_1 {
   [[location(0)]]
@@ -361,7 +361,7 @@ struct tint_symbol_1 {
   loc2 : vec4<u32>;
   [[builtin(position)]]
   coord : vec4<f32>;
-};
+}
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
@@ -423,7 +423,7 @@ fn frag_main() -> [[builtin(frag_depth)]] f32 {
 struct tint_symbol {
   [[builtin(frag_depth)]]
   value : f32;
-};
+}
 
 fn frag_main_inner() -> f32 {
   return 1.0;
@@ -458,7 +458,7 @@ fn frag_main() -> [[builtin(frag_depth)]] f32 {
 struct tint_symbol {
   [[builtin(frag_depth)]]
   value : f32;
-};
+}
 
 fn frag_main_inner() -> f32 {
   return 1.0;
@@ -510,7 +510,7 @@ struct FragOutput {
   color : vec4<f32>;
   depth : f32;
   mask : u32;
-};
+}
 
 fn frag_main_inner() -> FragOutput {
   var output : FragOutput;
@@ -560,7 +560,7 @@ struct FragOutput {
   color : vec4<f32>;
   depth : f32;
   mask : u32;
-};
+}
 
 struct tint_symbol {
   [[location(0)]]
@@ -569,7 +569,7 @@ struct tint_symbol {
   depth : f32;
   [[builtin(sample_mask)]]
   mask : u32;
-};
+}
 
 fn frag_main_inner() -> FragOutput {
   var output : FragOutput;
@@ -621,7 +621,7 @@ struct FragOutput {
   color : vec4<f32>;
   depth : f32;
   mask : u32;
-};
+}
 
 struct tint_symbol {
   [[location(0)]]
@@ -630,7 +630,7 @@ struct tint_symbol {
   depth : f32;
   [[builtin(sample_mask)]]
   mask : u32;
-};
+}
 
 fn frag_main_inner() -> FragOutput {
   var output : FragOutput;
@@ -694,7 +694,7 @@ fn frag_main2(inputs : FragmentInput) {
 struct FragmentInput {
   value : f32;
   mul : f32;
-};
+}
 
 fn foo(x : FragmentInput) -> f32 {
   return (x.value * x.mul);
@@ -754,7 +754,7 @@ fn frag_main2(inputs : FragmentInput) {
 struct FragmentInput {
   value : f32;
   mul : f32;
-};
+}
 
 fn foo(x : FragmentInput) -> f32 {
   return (x.value * x.mul);
@@ -765,7 +765,7 @@ struct tint_symbol_1 {
   value : f32;
   [[location(1)]]
   mul : f32;
-};
+}
 
 fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
@@ -781,7 +781,7 @@ struct tint_symbol_3 {
   value : f32;
   [[location(1)]]
   mul : f32;
-};
+}
 
 fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
@@ -828,7 +828,7 @@ fn frag_main2(inputs : FragmentInput) {
 struct FragmentInput {
   value : f32;
   mul : f32;
-};
+}
 
 fn foo(x : FragmentInput) -> f32 {
   return (x.value * x.mul);
@@ -839,7 +839,7 @@ struct tint_symbol_1 {
   value : f32;
   [[location(1)]]
   mul : f32;
-};
+}
 
 fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
@@ -855,7 +855,7 @@ struct tint_symbol_3 {
   value : f32;
   [[location(1)]]
   mul : f32;
-};
+}
 
 fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
@@ -904,7 +904,7 @@ fn frag_main1(inputs : FragmentInput) {
 struct FragmentInput {
   col1 : f32;
   col2 : f32;
-};
+}
 
 var<private> global_inputs : FragmentInput;
 
@@ -921,7 +921,7 @@ struct tint_symbol_1 {
   col1 : f32;
   [[location(1)]]
   col2 : f32;
-};
+}
 
 fn frag_main1_inner(inputs : FragmentInput) {
   global_inputs = inputs;
@@ -978,12 +978,12 @@ type myf32 = f32;
 struct FragmentInput {
   col1 : myf32;
   col2 : myf32;
-};
+}
 
 struct FragmentOutput {
   col1 : myf32;
   col2 : myf32;
-};
+}
 
 type MyFragmentInput = FragmentInput;
 
@@ -998,14 +998,14 @@ struct tint_symbol_1 {
   col1 : f32;
   [[location(1)]]
   col2 : f32;
-};
+}
 
 struct tint_symbol_2 {
   [[location(0)]]
   col1 : f32;
   [[location(1)]]
   col2 : f32;
-};
+}
 
 fn frag_main_inner(inputs : MyFragmentInput) -> MyFragmentOutput {
   var x : myf32 = foo(inputs);
@@ -1062,12 +1062,12 @@ struct VertexOut {
   loc1 : f32;
   loc2 : f32;
   loc3 : f32;
-};
+}
 
 struct FragmentIn {
   loc1 : f32;
   loc2 : f32;
-};
+}
 
 struct tint_symbol {
   [[location(1), interpolate(flat)]]
@@ -1078,7 +1078,7 @@ struct tint_symbol {
   loc3 : f32;
   [[builtin(position)]]
   pos : vec4<f32>;
-};
+}
 
 fn vert_main_inner() -> VertexOut {
   return VertexOut();
@@ -1102,7 +1102,7 @@ struct tint_symbol_2 {
   loc2 : f32;
   [[location(3), interpolate(perspective, centroid)]]
   loc3 : f32;
-};
+}
 
 fn frag_main_inner(inputs : FragmentIn, loc3 : f32) {
   let x = ((inputs.loc1 + inputs.loc2) + loc3);
@@ -1200,7 +1200,7 @@ struct VertexIn {
   u : u32;
   vi : vec4<i32>;
   vu : vec4<u32>;
-};
+}
 
 struct VertexOut {
   i : i32;
@@ -1208,14 +1208,14 @@ struct VertexOut {
   vi : vec4<i32>;
   vu : vec4<u32>;
   pos : vec4<f32>;
-};
+}
 
 struct FragmentInterface {
   i : i32;
   u : u32;
   vi : vec4<i32>;
   vu : vec4<u32>;
-};
+}
 
 fn vert_main_inner(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
@@ -1273,12 +1273,12 @@ fn main2() -> [[builtin(position), invariant]] vec4<f32> {
   auto* expect = R"(
 struct VertexOut {
   pos : vec4<f32>;
-};
+}
 
 struct tint_symbol {
   [[builtin(position), invariant]]
   pos : vec4<f32>;
-};
+}
 
 fn main1_inner() -> VertexOut {
   return VertexOut();
@@ -1295,7 +1295,7 @@ fn main1() -> tint_symbol {
 struct tint_symbol_1 {
   [[builtin(position), invariant]]
   value : vec4<f32>;
-};
+}
 
 fn main2_inner() -> vec4<f32> {
   return vec4<f32>();
@@ -1344,12 +1344,12 @@ struct FragmentInput {
   coord : vec4<f32>;
   [[align(128)]]
   loc0 : f32;
-};
+}
 
 struct FragmentOutput {
   [[size(16)]]
   value : f32;
-};
+}
 
 struct tint_symbol_1 {
   [[location(0), interpolate(linear, sample)]]
@@ -1358,12 +1358,12 @@ struct tint_symbol_1 {
   value : f32;
   [[builtin(position)]]
   coord : vec4<f32>;
-};
+}
 
 struct tint_symbol_2 {
   [[location(1), interpolate(flat)]]
   value : f32;
-};
+}
 
 fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
   return FragmentOutput(((inputs.coord.x * inputs.value) + inputs.loc0));
@@ -1422,13 +1422,13 @@ struct VertexOutput {
   d : u32;
   a : f32;
   c : i32;
-};
+}
 
 struct FragmentInputExtra {
   d : u32;
   pos : vec4<f32>;
   a : f32;
-};
+}
 
 struct tint_symbol {
   [[location(0)]]
@@ -1441,7 +1441,7 @@ struct tint_symbol {
   d : u32;
   [[builtin(position)]]
   pos : vec4<f32>;
-};
+}
 
 fn vert_main_inner() -> VertexOutput {
   return VertexOutput();
@@ -1472,7 +1472,7 @@ struct tint_symbol_2 {
   pos : vec4<f32>;
   [[builtin(front_facing)]]
   ff : bool;
-};
+}
 
 fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
 }
@@ -1502,7 +1502,7 @@ fn tint_symbol_1([[location(0)]] col : f32) {
 struct tint_symbol_2 {
   [[location(0)]]
   col : f32;
-};
+}
 
 fn tint_symbol_1_inner(col : f32) {
 }
@@ -1532,7 +1532,7 @@ fn frag_main() {
 struct tint_symbol {
   [[builtin(sample_mask)]]
   fixed_sample_mask : u32;
-};
+}
 
 fn frag_main_inner() {
 }
@@ -1566,7 +1566,7 @@ fn frag_main() {
 struct tint_symbol {
   [[builtin(sample_mask)]]
   fixed_sample_mask : u32;
-};
+}
 
 fn frag_main_inner() {
   return;
@@ -1601,7 +1601,7 @@ fn frag_main() -> [[builtin(sample_mask)]] u32 {
 struct tint_symbol {
   [[builtin(sample_mask)]]
   value : u32;
-};
+}
 
 fn frag_main_inner() -> u32 {
   return 7u;
@@ -1638,7 +1638,7 @@ struct tint_symbol {
   value : f32;
   [[builtin(sample_mask)]]
   fixed_sample_mask : u32;
-};
+}
 
 fn frag_main_inner() -> f32 {
   return 1.0;
@@ -1681,7 +1681,7 @@ struct Output {
   depth : f32;
   mask : u32;
   value : f32;
-};
+}
 
 struct tint_symbol {
   [[location(0)]]
@@ -1690,7 +1690,7 @@ struct tint_symbol {
   depth : f32;
   [[builtin(sample_mask)]]
   mask : u32;
-};
+}
 
 fn frag_main_inner() -> Output {
   return Output(0.5, 7u, 1.0);
@@ -1733,7 +1733,7 @@ fn frag_main() -> Output {
 struct Output {
   depth : f32;
   value : f32;
-};
+}
 
 struct tint_symbol {
   [[location(0)]]
@@ -1742,7 +1742,7 @@ struct tint_symbol {
   depth : f32;
   [[builtin(sample_mask)]]
   fixed_sample_mask : u32;
-};
+}
 
 fn frag_main_inner() -> Output {
   return Output(0.5, 1.0);
@@ -1793,7 +1793,7 @@ fn comp_main1() {
 struct tint_symbol {
   [[builtin(sample_mask)]]
   value : u32;
-};
+}
 
 fn frag_main1_inner() -> u32 {
   return 7u;
@@ -1812,7 +1812,7 @@ struct tint_symbol_1 {
   value : f32;
   [[builtin(sample_mask)]]
   fixed_sample_mask : u32;
-};
+}
 
 fn frag_main2_inner() -> f32 {
   return 1.0;
@@ -1830,7 +1830,7 @@ fn frag_main2() -> tint_symbol_1 {
 struct tint_symbol_2 {
   [[builtin(position)]]
   value : vec4<f32>;
-};
+}
 
 fn vert_main1_inner() -> vec4<f32> {
   return vec4<f32>();
@@ -1874,7 +1874,7 @@ fn frag_main() -> FragOut {
 struct FragOut {
   fixed_sample_mask : vec4<f32>;
   fixed_sample_mask_1 : vec4<f32>;
-};
+}
 
 struct tint_symbol {
   [[location(0)]]
@@ -1883,7 +1883,7 @@ struct tint_symbol {
   fixed_sample_mask_1 : vec4<f32>;
   [[builtin(sample_mask)]]
   fixed_sample_mask_2 : u32;
-};
+}
 
 fn frag_main_inner() -> FragOut {
   return FragOut();
@@ -1956,7 +1956,7 @@ struct tint_symbol {
   value : vec4<f32>;
   [[builtin(pointsize)]]
   vertex_point_size : f32;
-};
+}
 
 fn vert_main_inner() -> vec4<f32> {
   return vec4<f32>();
@@ -1999,7 +1999,7 @@ fn vert_main() -> VertOut {
 
 struct VertOut {
   pos : vec4<f32>;
-};
+}
 
 fn vert_main_inner() -> VertOut {
   return VertOut();
@@ -2036,14 +2036,14 @@ fn vert_main() -> VertOut {
   auto* expect = R"(
 struct VertOut {
   pos : vec4<f32>;
-};
+}
 
 struct tint_symbol {
   [[builtin(position)]]
   pos : vec4<f32>;
   [[builtin(pointsize)]]
   vertex_point_size : f32;
-};
+}
 
 fn vert_main_inner() -> VertOut {
   return VertOut();
@@ -2112,16 +2112,16 @@ var<private> vertex_point_size_2 : f32;
 
 struct VertIn1 {
   collide : f32;
-};
+}
 
 struct VertIn2 {
   collide : f32;
-};
+}
 
 struct VertOut {
   vertex_point_size : f32;
   vertex_point_size_1 : vec4<f32>;
-};
+}
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = (collide.collide + collide_1.collide);
@@ -2170,23 +2170,23 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   auto* expect = R"(
 struct VertIn1 {
   collide : f32;
-};
+}
 
 struct VertIn2 {
   collide : f32;
-};
+}
 
 struct VertOut {
   vertex_point_size : vec4<f32>;
   vertex_point_size_1 : vec4<f32>;
-};
+}
 
 struct tint_symbol_1 {
   [[location(0)]]
   collide : f32;
   [[location(1)]]
   collide_2 : f32;
-};
+}
 
 struct tint_symbol_2 {
   [[location(0)]]
@@ -2195,7 +2195,7 @@ struct tint_symbol_2 {
   vertex_point_size_1 : vec4<f32>;
   [[builtin(pointsize)]]
   vertex_point_size_2 : f32;
-};
+}
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = (collide.collide + collide_1.collide);
@@ -2246,23 +2246,23 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   auto* expect = R"(
 struct VertIn1 {
   collide : f32;
-};
+}
 
 struct VertIn2 {
   collide : f32;
-};
+}
 
 struct VertOut {
   vertex_point_size : vec4<f32>;
   vertex_point_size_1 : vec4<f32>;
-};
+}
 
 struct tint_symbol_1 {
   [[location(0)]]
   collide : f32;
   [[location(1)]]
   collide_2 : f32;
-};
+}
 
 struct tint_symbol_2 {
   [[location(0)]]
@@ -2271,7 +2271,7 @@ struct tint_symbol_2 {
   vertex_point_size_1 : vec4<f32>;
   [[builtin(pointsize)]]
   vertex_point_size_2 : f32;
-};
+}
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = (collide.collide + collide_1.collide);

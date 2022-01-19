@@ -9,7 +9,7 @@ struct LeftOver {
   padding : u32;
   test2 : Arr;
   test : Arr_1;
-};
+}
 
 var<private> position : vec3<f32>;
 
@@ -53,7 +53,7 @@ struct main_out {
   gl_Position : vec4<f32>;
   [[location(0)]]
   vUV_1 : vec2<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[location(0)]] position_param : vec3<f32>, [[location(2)]] uv_param : vec2<f32>, [[location(1)]] normal_param : vec3<f32>) -> main_out {

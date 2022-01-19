@@ -1,6 +1,6 @@
 struct Result {
   values : array<f32>;
-};
+}
 
 let width : u32 = 128u;
 

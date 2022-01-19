@@ -218,7 +218,7 @@ fn main() {
   auto* expect = R"(
 struct S {
   a : f32;
-};
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol : ptr<uniform, S>, [[group(0), binding(1), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol_1 : ptr<storage, S>) {
@@ -246,7 +246,7 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol_1 {
   arr : array<f32>;
-};
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol : ptr<storage, tint_symbol_1>) {
@@ -275,7 +275,7 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol_1 {
   arr : array<f32>;
-};
+}
 
 type myarray = array<f32>;
 
@@ -308,11 +308,11 @@ fn main() {
   auto* expect = R"(
 struct S {
   f : f32;
-};
+}
 
 struct tint_symbol_1 {
   arr : array<S>;
-};
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol : ptr<storage, tint_symbol_1>) {
@@ -360,7 +360,7 @@ fn main() {
   auto* expect = R"(
 struct S {
   a : f32;
-};
+}
 
 fn no_uses() {
 }
@@ -479,7 +479,7 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol_2 {
   m : mat2x2<f32>;
-};
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
@@ -512,15 +512,15 @@ fn main() {
   auto* expect = R"(
 struct S1 {
   m : mat2x2<f32>;
-};
+}
 
 struct S2 {
   s : S1;
-};
+}
 
 struct tint_symbol_2 {
   m : array<S2, 4u>;
-};
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
@@ -556,12 +556,12 @@ fn main() {
   auto* expect = R"(
 struct S {
   m : mat2x2<f32>;
-};
+}
 
 struct tint_symbol_3 {
   a : S;
   b : S;
-};
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : ptr<workgroup, tint_symbol_3>) {
@@ -602,7 +602,7 @@ fn main() {
   auto* expect = R"(
 struct S {
   a : f32;
-};
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {

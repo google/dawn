@@ -9,7 +9,7 @@ struct LeftOver {
   stageScale : f32;
   spriteCount : f32;
   colorMul : vec3<f32>;
-};
+}
 
 [[group(2), binding(9)]] var<uniform> x_20 : LeftOver;
 
@@ -213,7 +213,7 @@ fn main_1() {
 struct main_out {
   [[location(0)]]
   glFragColor_1 : vec4<f32>;
-};
+}
 
 [[stage(fragment)]]
 fn main([[location(2)]] tUV_param : vec2<f32>, [[location(5)]] tileID_1_param : vec2<f32>, [[location(4)]] levelUnits_param : vec2<f32>, [[location(3)]] stageUnits_1_param : vec2<f32>, [[location(0)]] vPosition_param : vec3<f32>, [[location(1)]] vUV_param : vec2<f32>) -> main_out {

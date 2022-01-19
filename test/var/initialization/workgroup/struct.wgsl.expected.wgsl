@@ -1,7 +1,7 @@
 struct S {
   a : i32;
   b : f32;
-};
+}
 
 var<workgroup> v : S;
 

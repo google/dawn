@@ -204,7 +204,7 @@ fn f() {
   auto* expect = R"(
 struct S {
   arr : array<i32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 

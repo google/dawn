@@ -955,7 +955,7 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_TypesAndVarDeclarations) {
 struct S {
   field0 : u32;
   field1 : RTArr;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> myvar : S;
 )"));

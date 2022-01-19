@@ -1,6 +1,6 @@
 struct S {
   i : i32;
-};
+}
 
 fn main_1() {
   var i : i32;

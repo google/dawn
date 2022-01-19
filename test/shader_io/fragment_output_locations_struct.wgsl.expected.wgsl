@@ -7,7 +7,7 @@ struct FragmentOutputs {
   loc2 : f32;
   [[location(3)]]
   loc3 : vec4<f32>;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> FragmentOutputs {

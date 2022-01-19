@@ -168,7 +168,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
   [[size(4)]]
   padding_1 : u32;
   b : f32;
-};
+}
 )");
 }
 
@@ -189,7 +189,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
   [[size(4)]]
   padding_1 : u32;
   tint_2_padding : f32;
-};
+}
 )");
 }
 
@@ -207,7 +207,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructAlignDecl) {
   a : i32;
   [[align(16)]]
   b : f32;
-};
+}
 )");
 }
 
@@ -225,7 +225,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
   a : i32;
   [[size(32)]]
   b : f32;
-};
+}
 )");
 }
 
@@ -245,7 +245,7 @@ struct S {
   a : i32;
   [[align(8)]]
   b : f32;
-};
+}
 )");
 }
 
@@ -269,7 +269,7 @@ struct S {
   a : u32;
   [[location(2)]]
   b : f32;
-};
+}
 )");
 }
 

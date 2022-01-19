@@ -102,7 +102,7 @@ fn Y() {
   auto* expect = R"(
 struct a {
   m : i32;
-};
+}
 
 fn X() {
   var a_1 = true;

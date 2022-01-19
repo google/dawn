@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
   auto p = parser(R"(struct A {
   a : f32;
-};
+}
 type B = A;)");
   p->expect_global_decl();
   p->expect_global_decl();
@@ -150,7 +150,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
-  auto p = parser("struct A { b: i32; c: f32;};");
+  auto p = parser("struct A { b: i32; c: f32;}");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
@@ -167,7 +167,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
-  auto p = parser("struct A { data: [[stride(4)]] array<f32>; };");
+  auto p = parser("struct A { data: [[stride(4)]] array<f32>; }");
 
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -195,7 +195,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
 
 // TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
-  auto p = parser("[[block]] struct A { data: f32; };");
+  auto p = parser("[[block]] struct A { data: f32; }");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
@@ -212,17 +212,10 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
-  auto p = parser("A {};");
+  auto p = parser("A {}");
   p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:1: unexpected token");
-}
-
-TEST_F(ParserImplTest, GlobalDecl_StructMissing_Semi) {
-  auto p = parser("struct A {}");
-  p->expect_global_decl();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:12: expected ';' for struct declaration");
 }
 
 }  // namespace

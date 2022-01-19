@@ -3,7 +3,7 @@ struct S {
   u : u32;
   f : f32;
   b : bool;
-};
+}
 
 fn f() {
   var v = array<S, 4>();

@@ -3,7 +3,7 @@ struct VertexOutput {
   pos : vec4<f32>;
   [[location(0), interpolate(flat)]]
   loc0 : i32;
-};
+}
 
 fn foo(x : f32) -> VertexOutput {
   return VertexOutput(vec4<f32>(x, x, x, 1.0), 42);

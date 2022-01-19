@@ -1,6 +1,6 @@
 struct Inner {
   x : i32;
-};
+}
 
 struct S {
   a : vec3<i32>;
@@ -17,7 +17,7 @@ struct S {
   k : Inner;
   [[align(16)]]
   l : [[stride(16)]] array<Inner, 4>;
-};
+}
 
 [[binding(0), group(0)]] var<uniform> s : S;
 

@@ -1,10 +1,10 @@
 struct PointLight {
   position : vec4<f32>;
-};
+}
 
 struct PointLights {
   values : [[stride(16)]] array<PointLight>;
-};
+}
 
 struct Uniforms {
   worldView : mat4x4<f32>;
@@ -12,7 +12,7 @@ struct Uniforms {
   numPointLights : u32;
   color_source : u32;
   color : vec4<f32>;
-};
+}
 
 [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
 
@@ -33,12 +33,12 @@ struct FragmentInput {
   uv : vec2<f32>;
   [[location(3)]]
   color : vec4<f32>;
-};
+}
 
 struct FragmentOutput {
   [[location(0)]]
   color : vec4<f32>;
-};
+}
 
 fn getColor(fragment : FragmentInput) -> vec4<f32> {
   var color : vec4<f32>;

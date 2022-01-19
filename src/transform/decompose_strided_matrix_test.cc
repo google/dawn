@@ -91,7 +91,7 @@ struct S {
   [[size(16)]]
   padding : u32;
   m : [[stride(32)]] array<vec2<f32>, 2u>;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> s : S;
 
@@ -152,7 +152,7 @@ struct S {
   [[size(16)]]
   padding : u32;
   m : [[stride(32)]] array<vec2<f32>, 2u>;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> s : S;
 
@@ -210,7 +210,7 @@ struct S {
   padding : u32;
   [[stride(8), internal(disable_validation__ignore_stride)]]
   m : mat2x2<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> s : S;
 
@@ -267,7 +267,7 @@ struct S {
   [[size(8)]]
   padding : u32;
   m : [[stride(32)]] array<vec2<f32>, 2u>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 
@@ -328,7 +328,7 @@ struct S {
   [[size(16)]]
   padding : u32;
   m : [[stride(32)]] array<vec2<f32>, 2u>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 
@@ -386,7 +386,7 @@ struct S {
   [[size(8)]]
   padding : u32;
   m : [[stride(32)]] array<vec2<f32>, 2u>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 
@@ -447,7 +447,7 @@ struct S {
   [[size(8)]]
   padding : u32;
   m : [[stride(32)]] array<vec2<f32>, 2u>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 
@@ -519,7 +519,7 @@ struct S {
   [[size(8)]]
   padding : u32;
   m : [[stride(32)]] array<vec2<f32>, 2u>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 
@@ -588,7 +588,7 @@ struct S {
   padding : u32;
   [[stride(32), internal(disable_validation__ignore_stride)]]
   m : mat2x2<f32>;
-};
+}
 
 var<private> s : S;
 
@@ -646,7 +646,7 @@ struct S {
   padding : u32;
   [[stride(32), internal(disable_validation__ignore_stride)]]
   m : mat2x2<f32>;
-};
+}
 
 var<private> s : S;
 

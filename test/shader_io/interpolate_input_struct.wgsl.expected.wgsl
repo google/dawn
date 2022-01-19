@@ -15,7 +15,7 @@ struct In {
   linear_centroid : f32;
   [[location(7), interpolate(linear, sample)]]
   linear_sample : f32;
-};
+}
 
 [[stage(fragment)]]
 fn main(in : In) {

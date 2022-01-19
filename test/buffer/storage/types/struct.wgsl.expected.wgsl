@@ -1,10 +1,10 @@
 struct Inner {
   f : f32;
-};
+}
 
 struct S {
   inner : Inner;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> in : S;
 

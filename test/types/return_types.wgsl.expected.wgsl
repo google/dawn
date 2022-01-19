@@ -1,6 +1,6 @@
 struct S {
   a : f32;
-};
+}
 
 fn ret_bool() -> bool {
   return bool();

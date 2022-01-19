@@ -8,11 +8,11 @@ struct Inner {
   g : mat2x3<f32>;
   h : mat3x2<f32>;
   i : [[stride(16)]] array<vec4<i32>, 4>;
-};
+}
 
 struct S {
   arr : array<Inner>;
-};
+}
 
 [[binding(0), group(0)]] var<storage, read> s : S;
 

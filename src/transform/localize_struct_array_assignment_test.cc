@@ -70,15 +70,15 @@ fn main() {
 [[block]]
 struct Uniforms {
   i : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct OuterS {
   a1 : array<InnerS, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 
@@ -132,19 +132,19 @@ fn main() {
 [[block]]
 struct Uniforms {
   i : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct S1 {
   a : array<InnerS, 8>;
-};
+}
 
 struct OuterS {
   s2 : S1;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 
@@ -196,15 +196,15 @@ fn main() {
 struct Uniforms {
   i : u32;
   j : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct OuterS {
   a1 : array<array<InnerS, 8>, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 
@@ -258,19 +258,19 @@ fn main() {
 [[block]]
 struct Uniforms {
   i : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct S1 {
   s2 : InnerS;
-};
+}
 
 struct OuterS {
   a1 : array<S1, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 
@@ -326,19 +326,19 @@ fn main() {
 struct Uniforms {
   i : u32;
   j : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct S1 {
   a2 : array<InnerS, 8>;
-};
+}
 
 struct OuterS {
   a1 : array<S1, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 
@@ -403,19 +403,19 @@ fn main() {
 struct Uniforms {
   i : u32;
   j : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct S1 {
   a2 : array<InnerS, 8>;
-};
+}
 
 struct OuterS {
   a1 : array<S1, 8>;
-};
+}
 
 var<private> nextIndex : u32;
 
@@ -476,15 +476,15 @@ fn main() {
 [[block]]
 struct Uniforms {
   i : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct OuterS {
   a1 : array<InnerS, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 
@@ -544,15 +544,15 @@ fn main() {
 [[block]]
 struct Uniforms {
   i : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct OuterS {
   a1 : array<InnerS, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 
@@ -584,12 +584,12 @@ TEST_F(LocalizeStructArrayAssignmentTest, VectorAssignment) {
 [[block]]
 struct Uniforms {
   i : u32;
-};
+}
 
 [[block]]
 struct OuterS {
   a1 : array<u32, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 

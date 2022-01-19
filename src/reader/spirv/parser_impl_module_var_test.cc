@@ -473,7 +473,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   gl_Position : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -533,7 +533,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   gl_Position : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -592,7 +592,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   gl_Position : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -651,7 +651,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -709,7 +709,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -767,7 +767,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -803,7 +803,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -1405,7 +1405,7 @@ struct S {
   field0 : u32;
   field1 : f32;
   field2 : Arr;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> x_1 : S;
 )")) << module_str;
@@ -1435,7 +1435,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : mat3x2<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> myvar : S;
 )")) << module_str;
@@ -1464,7 +1464,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : mat3x2<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> myvar : S;
 )")) << module_str;
@@ -1494,7 +1494,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   [[stride(64), internal(disable_validation__ignore_stride)]]
   field0 : mat3x2<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> myvar : S;
 )")) << module_str;
@@ -1547,7 +1547,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32;
   field1 : f32;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> x_1 : S;
 )")) << module_str;
@@ -1576,7 +1576,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32;
   field1 : f32;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> x_1 : S;
 )")) << module_str;
@@ -1608,7 +1608,7 @@ TEST_F(
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32;
   field1 : f32;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> x_1 : S;
 )")) << module_str;
@@ -2364,7 +2364,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -2401,7 +2401,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -2438,7 +2438,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -2474,7 +2474,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -2511,7 +2511,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -2548,7 +2548,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -2631,7 +2631,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -2689,7 +2689,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_4_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
@@ -2727,7 +2727,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_4_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
@@ -2764,7 +2764,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_4_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
@@ -2800,7 +2800,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_4_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
@@ -2838,7 +2838,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_4_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
@@ -2875,7 +2875,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_4_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
@@ -2960,7 +2960,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   position_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
@@ -2998,7 +2998,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   position_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
@@ -3035,7 +3035,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   position_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
@@ -3095,7 +3095,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   position_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
@@ -3133,7 +3133,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   position_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
@@ -3170,7 +3170,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   position_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
@@ -3734,7 +3734,7 @@ struct main_out {
   x_2_1 : u32;
   [[location(6)]]
   x_4_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main([[location(0)]] x_1_param : u32, [[location(30)]] x_3_param : u32) -> main_out {
@@ -3786,7 +3786,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_4_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
@@ -3836,7 +3836,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_4_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
@@ -3962,7 +3962,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -4008,7 +4008,7 @@ fn main_1() {
 struct main_out {
   [[builtin(sample_mask)]]
   x_1_1 : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -4052,7 +4052,7 @@ fn main_1() {
 struct main_out {
   [[builtin(frag_depth)]]
   x_1_1 : f32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -4086,7 +4086,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   gl_Position : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -4156,7 +4156,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   gl_Position : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -4213,7 +4213,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[location(4)]] x_1_param : f32, [[location(5)]] x_1_param_1 : f32, [[location(6)]] x_1_param_2 : f32) -> main_out {
@@ -4271,7 +4271,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[location(9)]] x_1_param : vec4<f32>, [[location(10)]] x_1_param_1 : vec4<f32>) -> main_out {
@@ -4325,7 +4325,7 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenStruct_LocOnVariable) {
   const std::string expected = R"(struct Communicators {
   alice : f32;
   bob : vec4<f32>;
-};
+}
 
 var<private> x_1 : Communicators;
 
@@ -4338,7 +4338,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[location(9)]] x_1_param : f32, [[location(10)]] x_1_param_1 : vec4<f32>) -> main_out {
@@ -4397,7 +4397,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[location(7)]] x_1_param : vec4<f32>, [[location(8)]] x_1_param_1 : vec4<f32>, [[location(9)]] x_1_param_2 : vec4<f32>, [[location(10)]] x_1_param_3 : vec4<f32>) -> main_out {
@@ -4464,7 +4464,7 @@ struct main_out {
   x_1_3 : f32;
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -4523,7 +4523,7 @@ struct main_out {
   x_1_2 : vec4<f32>;
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -4575,7 +4575,7 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenStruct_LocOnVariable) {
   const std::string expected = R"(struct Communicators {
   alice : f32;
   bob : vec4<f32>;
-};
+}
 
 var<private> x_1 : Communicators;
 
@@ -4592,7 +4592,7 @@ struct main_out {
   x_1_2 : vec4<f32>;
   [[builtin(position)]]
   x_2_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -4648,7 +4648,7 @@ TEST_F(SpvModuleScopeVarParserTest, FlattenStruct_LocOnMembers) {
   const std::string expected = R"(struct Communicators {
   alice : f32;
   bob : vec4<f32>;
-};
+}
 
 var<private> x_1 : Communicators;
 
@@ -4667,7 +4667,7 @@ struct main_out {
   x_3_1 : f32;
   [[location(11)]]
   x_3_2 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[location(9)]] x_1_param : f32, [[location(11)]] x_1_param_1 : vec4<f32>) -> main_out {
@@ -4748,7 +4748,7 @@ fn main_1() {
 struct main_out {
   [[builtin(position)]]
   x_10_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main([[location(1), interpolate(flat)]] x_1_param : u32, [[location(2), interpolate(flat)]] x_2_param : vec2<u32>, [[location(3), interpolate(flat)]] x_3_param : i32, [[location(4), interpolate(flat)]] x_4_param : vec2<i32>, [[location(5), interpolate(flat)]] x_5_param : f32, [[location(6), interpolate(flat)]] x_6_param : vec2<f32>) -> main_out {
@@ -4845,7 +4845,7 @@ struct main_out {
   x_6_1 : vec2<f32>;
   [[builtin(position)]]
   x_10_1 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> main_out {
@@ -4889,7 +4889,7 @@ TEST_F(SpvModuleScopeVarParserTest,
       R"(struct S {
   field0 : f32;
   field1 : f32;
-};
+}
 
 var<private> x_1 : array<f32, 2u>;
 
@@ -5035,7 +5035,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   field3 : f32;
   field4 : f32;
   field5 : f32;
-};
+}
 
 var<private> x_1 : S;
 
@@ -5134,7 +5134,7 @@ struct main_out {
   x_5_1 : f32;
   [[location(6), interpolate(linear, sample)]]
   x_6_1 : f32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {
@@ -5192,7 +5192,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   field3 : f32;
   field4 : f32;
   field5 : f32;
-};
+}
 
 var<private> x_1 : S;
 
@@ -5213,7 +5213,7 @@ struct main_out {
   x_1_5 : f32;
   [[location(6), interpolate(linear, sample)]]
   x_1_6 : f32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {

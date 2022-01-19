@@ -1,6 +1,6 @@
 struct S {
   a : f32;
-};
+}
 
 var<private> bool_var : bool = bool();
 

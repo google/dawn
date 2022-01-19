@@ -85,7 +85,7 @@ fn main() {
 struct SB {
   x : i32;
   arr : array<i32>;
-};
+}
 
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, result : ptr<function, u32>)
@@ -161,7 +161,7 @@ fn main() {
 struct SB {
   x : i32;
   arr : array<i32>;
-};
+}
 
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, result : ptr<function, u32>)
@@ -235,7 +235,7 @@ struct SB {
   x : i32;
   y : f32;
   arr : [[stride(64)]] array<i32>;
-};
+}
 
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, result : ptr<function, u32>)
@@ -281,7 +281,7 @@ fn main() {
 struct SB {
   x : i32;
   arr : array<i32>;
-};
+}
 
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, result : ptr<function, u32>)
@@ -345,7 +345,7 @@ fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_pa
 struct SB1 {
   x : i32;
   arr1 : array<i32>;
-};
+}
 
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB1, result : ptr<function, u32>)
@@ -353,7 +353,7 @@ fn tint_symbol([[internal(disable_validation__ignore_constructible_function_para
 struct SB2 {
   x : i32;
   arr2 : array<vec4<f32>>;
-};
+}
 
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB2, result : ptr<function, u32>)
@@ -412,7 +412,7 @@ fn main() {
 struct SB {
   x : i32;
   arr : array<i32>;
-};
+}
 
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, result : ptr<function, u32>)

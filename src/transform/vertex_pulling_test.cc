@@ -109,7 +109,7 @@ fn main() -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[stage(vertex)]]
 fn main() -> [[builtin(position)]] vec4<f32> {
@@ -138,7 +138,7 @@ fn main([[location(0)]] var_a : f32) -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -176,7 +176,7 @@ fn main([[location(0)]] var_a : f32) -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -214,7 +214,7 @@ fn main([[location(0)]] var_a : f32) -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(5)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -257,14 +257,14 @@ fn main(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 struct Inputs {
   [[location(0)]]
   var_a : f32;
-};
+}
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(position)]] vec4<f32> {
@@ -305,7 +305,7 @@ fn main([[location(0)]] var_a : f32,
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -365,7 +365,7 @@ fn main(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -376,7 +376,7 @@ struct tint_symbol {
   custom_vertex_index : u32;
   [[builtin(instance_index)]]
   custom_instance_index : u32;
-};
+}
 
 struct Inputs {
   [[location(0)]]
@@ -387,7 +387,7 @@ struct Inputs {
   custom_vertex_index : u32;
   [[builtin(instance_index)]]
   custom_instance_index : u32;
-};
+}
 
 [[stage(vertex)]]
 fn main(tint_symbol_1 : tint_symbol) -> [[builtin(position)]] vec4<f32> {
@@ -447,7 +447,7 @@ fn main(inputs : Inputs, indices : Indices) -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -458,14 +458,14 @@ struct Inputs {
   var_a : f32;
   [[location(1)]]
   var_b : f32;
-};
+}
 
 struct Indices {
   [[builtin(vertex_index)]]
   custom_vertex_index : u32;
   [[builtin(instance_index)]]
   custom_instance_index : u32;
-};
+}
 
 [[stage(vertex)]]
 fn main(indices : Indices) -> [[builtin(position)]] vec4<f32> {
@@ -514,7 +514,7 @@ fn main([[location(0)]] var_a : f32,
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -559,7 +559,7 @@ fn main([[location(0)]] var_a : vec2<f32>,
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -615,7 +615,7 @@ fn main([[location(0)]] var_a : f32,
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data_1 : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0_1 : TintVertexData;
 
@@ -692,7 +692,7 @@ fn main(
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -852,7 +852,7 @@ fn main(
       R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -1011,7 +1011,7 @@ fn main(
   auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
-};
+}
 
 [[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 

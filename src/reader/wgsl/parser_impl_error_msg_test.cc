@@ -636,13 +636,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingIdentifier) {
          "       ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingSemicolon) {
-  EXPECT("struct S {}",
-         "test.wgsl:1:12 error: expected ';' for struct declaration\n"
-         "struct S {}\n"
-         "           ^\n");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingLBrace) {
   EXPECT("struct S };",
          "test.wgsl:1:10 error: expected '{' for struct declaration\n"

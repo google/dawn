@@ -1,7 +1,7 @@
 struct lightingInfo {
   diffuse : vec3<f32>;
   specular : vec3<f32>;
-};
+}
 
 struct LeftOver {
   u_World : mat4x4<f32>;
@@ -15,7 +15,7 @@ struct LeftOver {
   [[size(4)]]
   padding_1 : u32;
   tangentSpaceParameter0 : vec2<f32>;
-};
+}
 
 struct Light0 {
   vLightData : vec4<f32>;
@@ -26,7 +26,7 @@ struct Light0 {
   padding_2 : u32;
   shadowsInfo : vec4<f32>;
   depthValues : vec2<f32>;
-};
+}
 
 var<private> u_Float : f32;
 
@@ -438,7 +438,7 @@ fn main_1() {
 struct main_out {
   [[location(0)]]
   glFragColor_1 : vec4<f32>;
-};
+}
 
 [[stage(fragment)]]
 fn main([[location(1)]] vMainuv_param : vec2<f32>, [[location(0)]] v_output1_param : vec4<f32>, [[builtin(front_facing)]] gl_FrontFacing_param : bool, [[location(3)]] v_uv_param : vec2<f32>, [[location(2)]] v_output2_param : vec4<f32>) -> main_out {

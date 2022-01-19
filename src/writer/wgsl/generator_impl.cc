@@ -573,7 +573,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
   }
   decrement_indent();
 
-  line() << "};";
+  line() << "}";
   return true;
 }
 

@@ -46,7 +46,7 @@ TEST_F(WgslGeneratorImplTest, EmitTypeDecl_Struct) {
   EXPECT_EQ(gen.result(), R"(struct A {
   a : f32;
   b : i32;
-};
+}
 type B = A;
 )");
 }

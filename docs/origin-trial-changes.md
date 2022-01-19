@@ -19,6 +19,7 @@ The following features have been deprecated and will be removed in M102:
 * Added builtins `degrees()` and `radians()` for converting between degrees and radians. [tint:1329](https://crbug.com/tint/1329)
 * `let` arrays and matrices can now be dynamically indexed. [tint:1352](https://crbug.com/tint/1352)
 * Storage and Uniform buffer types no longer have to be structures. [tint:1372](crbug.com/tint/1372)
+* A struct declaration does not have to be followed by a semicolon. [tint:1380](crbug.com/tint/1380)
 
 ### Fixes
 

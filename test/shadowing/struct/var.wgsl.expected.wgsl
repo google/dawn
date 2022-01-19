@@ -1,6 +1,6 @@
 struct a {
   a : i32;
-};
+}
 
 fn f() {
   {

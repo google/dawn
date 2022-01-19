@@ -56,7 +56,7 @@ TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
   EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(struct S {
   field0 : u32;
   field1 : u32;
-};
+}
 
 struct S_1 {
   field0 : u32;

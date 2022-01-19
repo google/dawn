@@ -1,6 +1,6 @@
 struct Constants {
   level : i32;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> constants : Constants;
 
@@ -8,7 +8,7 @@ struct Constants {
 
 struct Result {
   values : [[stride(4)]] array<f32>;
-};
+}
 
 [[group(0), binding(3)]] var<storage, read_write> result : Result;
 

@@ -3,7 +3,7 @@ struct VertexInputs {
   vertex_index : u32;
   [[builtin(instance_index)]]
   instance_index : u32;
-};
+}
 
 [[stage(vertex)]]
 fn main(inputs : VertexInputs) -> [[builtin(position)]] vec4<f32> {

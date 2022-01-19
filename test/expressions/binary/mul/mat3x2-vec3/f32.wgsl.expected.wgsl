@@ -1,7 +1,7 @@
 struct S {
   matrix : mat3x2<f32>;
   vector : vec3<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> data : S;
 

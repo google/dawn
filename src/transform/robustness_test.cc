@@ -630,7 +630,7 @@ fn f() {
 struct S {
   a : f32;
   b : array<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> s : S;
 
@@ -794,7 +794,7 @@ fn f() {
 struct S {
   a : f32;
   b : array<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> s : S;
 
@@ -874,7 +874,7 @@ TEST_F(RobustnessTest, OmitNone) {
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> s : S;
 
@@ -882,7 +882,7 @@ type UArr = [[stride(16)]] array<f32, 4>;
 
 struct U {
   a : UArr;
-};
+}
 
 [[group(1), binding(0)]] var<uniform> u : U;
 
@@ -937,7 +937,7 @@ TEST_F(RobustnessTest, OmitStorage) {
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> s : S;
 
@@ -945,7 +945,7 @@ type UArr = [[stride(16)]] array<f32, 4>;
 
 struct U {
   a : UArr;
-};
+}
 
 [[group(1), binding(0)]] var<uniform> u : U;
 
@@ -1002,7 +1002,7 @@ TEST_F(RobustnessTest, OmitUniform) {
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> s : S;
 
@@ -1010,7 +1010,7 @@ type UArr = [[stride(16)]] array<f32, 4>;
 
 struct U {
   a : UArr;
-};
+}
 
 [[group(1), binding(0)]] var<uniform> u : U;
 
@@ -1067,7 +1067,7 @@ TEST_F(RobustnessTest, OmitBoth) {
 struct S {
   a : array<f32, 4>;
   b : array<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> s : S;
 
@@ -1075,7 +1075,7 @@ type UArr = [[stride(16)]] array<f32, 4>;
 
 struct U {
   a : UArr;
-};
+}
 
 [[group(1), binding(0)]] var<uniform> u : U;
 

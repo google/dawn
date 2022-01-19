@@ -37,6 +37,27 @@ fn main() -> [[location(0)]] vec4<f32> {
   ASSERT_EQ(1u, program.AST().Functions().size());
 }
 
+TEST_F(ParserImplTest, Parses_ExtraSemicolons) {
+  auto p = parser(R"(
+;
+struct S {
+  a : f32;
+};;
+;
+fn foo() -> S {
+  ;
+  return S();;;
+  ;
+};;
+;
+)");
+  ASSERT_TRUE(p->Parse()) << p->error();
+
+  Program program = p->program();
+  ASSERT_EQ(1u, program.AST().Functions().size());
+  ASSERT_EQ(1u, program.AST().TypeDecls().size());
+}
+
 TEST_F(ParserImplTest, HandlesError) {
   auto p = parser(R"(
 fn main() ->  {  // missing return type

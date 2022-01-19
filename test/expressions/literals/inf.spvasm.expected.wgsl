@@ -8,7 +8,7 @@ fn main_1() {
 struct main_out {
   [[location(0)]]
   out_var_SV_TARGET_1 : vec4<f32>;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> main_out {

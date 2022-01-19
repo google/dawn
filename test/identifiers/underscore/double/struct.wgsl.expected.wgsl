@@ -1,10 +1,10 @@
 struct a {
   b : i32;
-};
+}
 
 struct a__ {
   b__ : i32;
-};
+}
 
 fn f() {
   let c = a__();

@@ -1,6 +1,6 @@
 struct S {
   f : f32;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> in : array<S>;
 

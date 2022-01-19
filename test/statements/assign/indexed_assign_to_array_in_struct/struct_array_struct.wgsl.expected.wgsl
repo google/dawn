@@ -1,18 +1,18 @@
 struct Uniforms {
   i : u32;
-};
+}
 
 struct InnerS {
   v : i32;
-};
+}
 
 struct S1 {
   s2 : InnerS;
-};
+}
 
 struct OuterS {
   a1 : array<S1, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 

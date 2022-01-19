@@ -118,7 +118,7 @@ var<workgroup> v : i32;
 struct Params {
   [[builtin(local_invocation_index)]]
   local_idx : u32;
-};
+}
 
 [[stage(compute), workgroup_size(1)]]
 fn f(params : Params) {
@@ -187,7 +187,7 @@ fn f([[builtin(local_invocation_index)]] local_idx : u32) {
 struct S {
   x : i32;
   y : array<i32, 8>;
-};
+}
 
 var<workgroup> a : i32;
 
@@ -251,7 +251,7 @@ fn f([[builtin(local_invocation_index)]] local_idx : u32) {
 struct S {
   x : i32;
   y : array<i32, 8>;
-};
+}
 
 var<workgroup> a : i32;
 
@@ -318,7 +318,7 @@ fn f([[builtin(local_invocation_index)]] local_idx : u32) {
 struct S {
   x : i32;
   y : array<i32, 8>;
-};
+}
 
 var<workgroup> a : i32;
 
@@ -389,7 +389,7 @@ struct S {
   x : array<array<i32, 8>, 10>;
   y : array<i32, 8>;
   z : array<array<array<i32, 8>, 10>, 20>;
-};
+}
 
 var<workgroup> a : i32;
 
@@ -473,7 +473,7 @@ fn f([[builtin(local_invocation_id)]] local_invocation_id : vec3<u32>) {
 struct S {
   x : i32;
   y : array<i32, 8>;
-};
+}
 
 var<workgroup> a : i32;
 
@@ -546,7 +546,7 @@ fn f3() {
 struct S {
   x : i32;
   y : array<i32, 8>;
-};
+}
 
 var<workgroup> a : i32;
 
@@ -711,7 +711,7 @@ struct S {
   b : f32;
   u : atomic<u32>;
   c : u32;
-};
+}
 
 var<workgroup> w : S;
 
@@ -786,7 +786,7 @@ struct S {
   b : f32;
   u : atomic<u32>;
   c : u32;
-};
+}
 
 var<workgroup> w : array<S, 4>;
 

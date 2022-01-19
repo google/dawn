@@ -1,6 +1,6 @@
 struct SB_RO {
   arg_0 : array<u32>;
-};
+}
 
 [[group(0), binding(1)]] var<storage, read> sb_ro : SB_RO;
 

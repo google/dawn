@@ -2,11 +2,11 @@ type ArrayType = [[stride(16)]] array<i32, 4>;
 
 struct S {
   arr : ArrayType;
-};
+}
 
 struct S_nested {
   arr : array<array<array<i32, 2>, 3>, 4>;
-};
+}
 
 var<private> src_private : ArrayType;
 

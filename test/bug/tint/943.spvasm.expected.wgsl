@@ -12,7 +12,7 @@ struct Uniforms {
   [[size(4)]]
   padding_3 : u32;
   outShapeStrides : vec2<i32>;
-};
+}
 
 type RTArr = [[stride(4)]] array<f32>;
 
@@ -20,17 +20,17 @@ type RTArr_1 = [[stride(4)]] array<f32>;
 
 struct ssbOut {
   result : RTArr_1;
-};
+}
 
 type RTArr_2 = [[stride(4)]] array<f32>;
 
 struct ssbA {
   A : RTArr_1;
-};
+}
 
 struct ssbB {
   B : RTArr_1;
-};
+}
 
 var<private> dimAOuter_1 : i32;
 

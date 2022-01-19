@@ -1,6 +1,6 @@
 struct SSBO {
   m : [[stride(16)]] array<vec2<f32>, 2u>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 

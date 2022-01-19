@@ -7,7 +7,7 @@ struct VertexInputs {
   loc2 : f32;
   [[location(3)]]
   loc3 : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn main(inputs : VertexInputs) -> [[builtin(position)]] vec4<f32> {

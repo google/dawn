@@ -102,7 +102,7 @@ struct SB {
   t : mat4x3<f32>;
   u : mat4x4<f32>;
   v : array<vec3<f32>, 2>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -298,7 +298,7 @@ struct UB {
   t : mat4x3<f32>;
   u : mat4x4<f32>;
   v : array<vec3<f32>, 2>;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> ub : UB;
 
@@ -494,7 +494,7 @@ struct SB {
   t : mat4x3<f32>;
   u : mat4x4<f32>;
   v : array<vec3<f32>, 2>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -686,7 +686,7 @@ struct SB {
   t : mat4x3<f32>;
   u : mat4x4<f32>;
   v : array<vec3<f32>, 2>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -844,7 +844,7 @@ struct SB {
   t : mat4x3<f32>;
   u : mat4x4<f32>;
   v : array<vec3<f32>, 2>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -1021,19 +1021,19 @@ struct S1 {
   a : i32;
   b : vec3<f32>;
   c : i32;
-};
+}
 
 struct S2 {
   a : i32;
   b : [[stride(32)]] array<S1, 3>;
   c : i32;
-};
+}
 
 struct SB {
   [[size(128)]]
   a : i32;
   b : [[stride(256)]] array<S2>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -1087,19 +1087,19 @@ struct S1 {
   a : i32;
   b : vec3<f32>;
   c : i32;
-};
+}
 
 struct S2 {
   a : i32;
   b : [[stride(32)]] array<S1, 3>;
   c : i32;
-};
+}
 
 struct SB {
   [[size(128)]]
   a : i32;
   b : [[stride(256)]] array<S2>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -1164,7 +1164,7 @@ struct S1 {
   a : i32;
   b : vec3<f32>;
   c : i32;
-};
+}
 
 type A1 = S1;
 
@@ -1174,7 +1174,7 @@ struct S2 {
   a : i32;
   b : A1_Array;
   c : i32;
-};
+}
 
 type A2 = S2;
 
@@ -1184,7 +1184,7 @@ struct SB {
   [[size(128)]]
   a : i32;
   b : A2_Array;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -1248,7 +1248,7 @@ struct SB {
   padding : vec4<f32>;
   a : atomic<i32>;
   b : atomic<u32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -1356,7 +1356,7 @@ struct S {
   padding : vec4<f32>;
   a : atomic<i32>;
   b : atomic<u32>;
-};
+}
 
 var<workgroup> w : S;
 

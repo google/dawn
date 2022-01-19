@@ -3,31 +3,31 @@ struct Mat4x4_ {
   my : vec4<f32>;
   mz : vec4<f32>;
   mw : vec4<f32>;
-};
+}
 
 struct Mat4x3_ {
   mx : vec4<f32>;
   my : vec4<f32>;
   mz : vec4<f32>;
-};
+}
 
 struct Mat4x2_ {
   mx : vec4<f32>;
   my : vec4<f32>;
-};
+}
 
 struct ub_SceneParams {
   u_Projection : Mat4x4_;
-};
+}
 
 struct ub_MaterialParams {
   u_TexMtx : [[stride(32)]] array<Mat4x2_, 1>;
   u_Misc0_ : vec4<f32>;
-};
+}
 
 struct ub_PacketParams {
   u_PosMtx : [[stride(48)]] array<Mat4x3_, 32>;
-};
+}
 
 struct VertexOutput {
   [[location(0)]]
@@ -36,7 +36,7 @@ struct VertexOutput {
   v_TexCoord : vec2<f32>;
   [[builtin(position)]]
   member : vec4<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> global : ub_SceneParams;
 

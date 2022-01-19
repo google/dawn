@@ -349,7 +349,7 @@ void ParserImpl::translation_unit() {
 //  | global_variable_decl SEMICLON
 //  | global_constant_decl SEMICOLON
 //  | type_alias SEMICOLON
-//  | struct_decl SEMICOLON
+//  | struct_decl
 //  | function_decl
 Expect<bool> ParserImpl::expect_global_decl() {
   if (match(Token::Type::kSemicolon) || match(Token::Type::kEOF))
@@ -404,9 +404,6 @@ Expect<bool> ParserImpl::expect_global_decl() {
       return Failure::kErrored;
 
     if (str.matched) {
-      if (!expect("struct declaration", Token::Type::kSemicolon))
-        return Failure::kErrored;
-
       builder_.AST().AddTypeDecl(str.value);
       return true;
     }

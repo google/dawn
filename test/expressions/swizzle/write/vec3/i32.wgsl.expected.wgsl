@@ -1,6 +1,6 @@
 struct S {
   v : vec3<i32>;
-};
+}
 
 var<private> P : S;
 

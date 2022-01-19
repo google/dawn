@@ -213,7 +213,7 @@ TEST_F(WgslGeneratorImplTest,
   EXPECT_EQ(gen.result(), R"([[block]]
 struct Data {
   d : f32;
-};
+}
 
 [[binding(0), group(0)]] var<storage, read_write> data : Data;
 

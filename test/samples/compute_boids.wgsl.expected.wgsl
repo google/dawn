@@ -13,7 +13,7 @@ fn frag_main() -> [[location(0)]] vec4<f32> {
 struct Particle {
   pos : vec2<f32>;
   vel : vec2<f32>;
-};
+}
 
 struct SimParams {
   deltaT : f32;
@@ -23,11 +23,11 @@ struct SimParams {
   rule1Scale : f32;
   rule2Scale : f32;
   rule3Scale : f32;
-};
+}
 
 struct Particles {
   particles : array<Particle, 5>;
-};
+}
 
 [[binding(0), group(0)]] var<uniform> params : SimParams;
 

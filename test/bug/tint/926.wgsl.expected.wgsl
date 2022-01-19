@@ -1,6 +1,6 @@
 struct DrawIndirectArgs {
   vertexCount : atomic<u32>;
-};
+}
 
 [[group(0), binding(5)]] var<storage, read_write> drawOut : DrawIndirectArgs;
 

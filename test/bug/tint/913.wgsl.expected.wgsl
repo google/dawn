@@ -4,11 +4,11 @@ struct Uniforms {
   srcCopyOrigin : vec2<u32>;
   dstCopyOrigin : vec2<u32>;
   copySize : vec2<u32>;
-};
+}
 
 struct OutputBuf {
   result : array<u32>;
-};
+}
 
 [[group(0), binding(0)]] var src : texture_2d<f32>;
 

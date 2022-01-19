@@ -28,7 +28,7 @@ TEST_F(BindingRemapperTest, NoRemappings) {
   auto* src = R"(
 struct S {
   a : f32;
-};
+}
 
 [[group(2), binding(1)]] var<storage, read> a : S;
 
@@ -67,7 +67,7 @@ fn f() {
   auto* expect = R"(
 struct S {
   a : f32;
-};
+}
 
 [[group(1), binding(2)]] var<storage, read> a : S;
 
@@ -111,7 +111,7 @@ fn f() {
   auto* expect = R"(
 struct S {
   a : f32;
-};
+}
 
 [[group(2), binding(1)]] var<storage, write> a : S;
 
@@ -215,7 +215,7 @@ fn f() {
   auto* expect = R"(
 struct S {
   a : f32;
-};
+}
 
 [[group(4), binding(5)]] var<storage, write> a : S;
 
@@ -264,7 +264,7 @@ fn f() {
   auto* expect = R"(
 struct S {
   i : i32;
-};
+}
 
 [[internal(disable_validation__binding_point_collision), group(1), binding(1)]] var<storage, read> a : S;
 
@@ -321,7 +321,7 @@ fn f2() {
   auto* expect = R"(
 struct S {
   i : i32;
-};
+}
 
 [[group(1), binding(1)]] var<storage, read> a : S;
 

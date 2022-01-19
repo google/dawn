@@ -10,7 +10,7 @@ struct RenderParams {
   modelViewProjectionMatrix : mat4x4<f32>;
   right : vec3<f32>;
   up : vec3<f32>;
-};
+}
 
 [[binding(0), group(0)]] var<uniform> render_params : RenderParams;
 
@@ -21,7 +21,7 @@ struct VertexInput {
   color : vec4<f32>;
   [[location(2)]]
   quad_pos : vec2<f32>;
-};
+}
 
 struct VertexOutput {
   [[builtin(position)]]
@@ -30,7 +30,7 @@ struct VertexOutput {
   color : vec4<f32>;
   [[location(1)]]
   quad_pos : vec2<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn vs_main(in : VertexInput) -> VertexOutput {
@@ -53,18 +53,18 @@ fn fs_main(in : VertexOutput) -> [[location(0)]] vec4<f32> {
 struct SimulationParams {
   deltaTime : f32;
   seed : vec4<f32>;
-};
+}
 
 struct Particle {
   position : vec3<f32>;
   lifetime : f32;
   color : vec4<f32>;
   velocity : vec3<f32>;
-};
+}
 
 struct Particles {
   particles : array<Particle>;
-};
+}
 
 [[binding(0), group(0)]] var<uniform> sim_params : SimulationParams;
 
@@ -104,11 +104,11 @@ fn simulate([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
 
 struct UBO {
   width : u32;
-};
+}
 
 struct Buffer {
   weights : array<f32>;
-};
+}
 
 [[binding(3), group(0)]] var<uniform> ubo : UBO;
 

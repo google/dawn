@@ -4,23 +4,23 @@ type RTArr_1 = [[stride(4)]] array<f32>;
 
 struct ResultMatrix {
   numbers : RTArr_1;
-};
+}
 
 type RTArr_2 = [[stride(4)]] array<f32>;
 
 struct FirstMatrix {
   numbers : RTArr_1;
-};
+}
 
 struct SecondMatrix {
   numbers : RTArr_1;
-};
+}
 
 struct Uniforms {
   NAN : f32;
   sizeA : i32;
   sizeB : i32;
-};
+}
 
 var<private> gl_GlobalInvocationID : vec3<u32>;
 

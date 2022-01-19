@@ -168,7 +168,7 @@ fn matrix() {
   auto* expect = R"(
 struct S {
   i : i32;
-};
+}
 
 fn arr() {
   var a : array<S, 2>;
@@ -325,11 +325,11 @@ fn z() -> i32 {
 
 struct Inner {
   a : array<i32, 2>;
-};
+}
 
 struct Outer {
   a : array<Inner, 2>;
-};
+}
 
 fn f() {
   var arr : array<Outer, 2>;

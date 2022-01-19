@@ -3,11 +3,11 @@ struct Uniforms {
   isFloat16 : u32;
   isRGB10A2Unorm : u32;
   channelCount : u32;
-};
+}
 
 struct OutputBuf {
   result : [[stride(4)]] array<u32>;
-};
+}
 
 [[group(0), binding(0)]] var src : texture_2d<f32>;
 

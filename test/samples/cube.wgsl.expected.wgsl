@@ -1,6 +1,6 @@
 struct Uniforms {
   modelViewProjectionMatrix : mat4x4<f32>;
-};
+}
 
 [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
 
@@ -9,14 +9,14 @@ struct VertexInput {
   cur_position : vec4<f32>;
   [[location(1)]]
   color : vec4<f32>;
-};
+}
 
 struct VertexOutput {
   [[location(0)]]
   vtxFragColor : vec4<f32>;
   [[builtin(position)]]
   Position : vec4<f32>;
-};
+}
 
 [[stage(vertex)]]
 fn vtx_main(input : VertexInput) -> VertexOutput {

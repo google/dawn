@@ -1,10 +1,10 @@
 struct Uniforms {
   i : u32;
-};
+}
 
 struct OuterS {
   a1 : array<u32, 8>;
-};
+}
 
 [[group(1), binding(4)]] var<uniform> uniforms : Uniforms;
 

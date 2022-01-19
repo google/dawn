@@ -63,7 +63,7 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
 
@@ -106,14 +106,14 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB {
   x : i32;
   arr : array<i32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
@@ -149,7 +149,7 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
 
@@ -193,7 +193,7 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
 
@@ -201,7 +201,7 @@ struct SB {
   x : i32;
   y : f32;
   arr : [[stride(64)]] array<i32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
@@ -259,24 +259,24 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 2u>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
   x : i32;
   arr1 : array<i32>;
-};
+}
 
 struct SB2 {
   x : i32;
   arr2 : array<vec4<f32>>;
-};
+}
 
 struct SB4 {
   x : i32;
   arr4 : array<vec4<f32>>;
-};
+}
 
 [[group(0), binding(2)]] var<storage, read> sb1 : SB1;
 
@@ -348,24 +348,24 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
   x : i32;
   arr1 : array<i32>;
-};
+}
 
 struct SB2 {
   x : i32;
   arr2 : array<vec4<f32>>;
-};
+}
 
 struct SB4 {
   x : i32;
   arr4 : array<vec4<f32>>;
-};
+}
 
 [[group(0), binding(2)]] var<storage, read> sb1 : SB1;
 
@@ -407,7 +407,7 @@ TEST_F(ArrayLengthFromUniformTest, NoArrayLengthCalls) {
 struct SB {
   x : i32;
   arr : array<i32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
@@ -457,19 +457,19 @@ fn main() {
   auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
   x : i32;
   arr1 : array<i32>;
-};
+}
 
 struct SB2 {
   x : i32;
   arr2 : array<vec4<f32>>;
-};
+}
 
 [[group(0), binding(2)]] var<storage, read> sb1 : SB1;
 

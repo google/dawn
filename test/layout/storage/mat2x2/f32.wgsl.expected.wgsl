@@ -1,6 +1,6 @@
 struct SSBO {
   m : mat2x2<f32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 

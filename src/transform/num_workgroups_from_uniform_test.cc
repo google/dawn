@@ -68,7 +68,7 @@ fn main([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
   auto* expect = R"(
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_3 : tint_symbol_2;
 
@@ -110,13 +110,13 @@ fn main(in : Builtins) {
   auto* expect = R"(
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_3 : tint_symbol_2;
 
 struct Builtins {
   num_wgs : vec3<u32>;
-};
+}
 
 fn main_inner(in : Builtins) {
   let groups_x = in.num_wgs.x;
@@ -158,7 +158,7 @@ fn main(in : Builtins) {
   auto* expect = R"(
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_3 : tint_symbol_2;
 
@@ -166,14 +166,14 @@ struct Builtins {
   gid : vec3<u32>;
   num_wgs : vec3<u32>;
   wgid : vec3<u32>;
-};
+}
 
 struct tint_symbol_1 {
   [[builtin(global_invocation_id)]]
   gid : vec3<u32>;
   [[builtin(workgroup_id)]]
   wgid : vec3<u32>;
-};
+}
 
 fn main_inner(in : Builtins) {
   let groups_x = in.num_wgs.x;
@@ -233,19 +233,19 @@ fn main3([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
   auto* expect = R"(
 struct tint_symbol_6 {
   num_workgroups : vec3<u32>;
-};
+}
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_7 : tint_symbol_6;
 
 struct Builtins1 {
   num_wgs : vec3<u32>;
-};
+}
 
 struct Builtins2 {
   gid : vec3<u32>;
   num_wgs : vec3<u32>;
   wgid : vec3<u32>;
-};
+}
 
 fn main1_inner(in : Builtins1) {
   let groups_x = in.num_wgs.x;
@@ -263,7 +263,7 @@ struct tint_symbol_3 {
   gid : vec3<u32>;
   [[builtin(workgroup_id)]]
   wgid : vec3<u32>;
-};
+}
 
 fn main2_inner(in : Builtins2) {
   let groups_x = in.num_wgs.x;
@@ -313,14 +313,14 @@ fn main(in : Builtins) {
 struct Builtins {
   gid : vec3<u32>;
   wgid : vec3<u32>;
-};
+}
 
 struct tint_symbol_1 {
   [[builtin(global_invocation_id)]]
   gid : vec3<u32>;
   [[builtin(workgroup_id)]]
   wgid : vec3<u32>;
-};
+}
 
 fn main_inner(in : Builtins) {
 }

@@ -7,7 +7,7 @@ struct FragmentInputs {
   sample_index : u32;
   [[builtin(sample_mask)]]
   sample_mask : u32;
-};
+}
 
 [[stage(fragment)]]
 fn main(inputs : FragmentInputs) {

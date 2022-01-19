@@ -67,7 +67,7 @@ struct S {
   a : i32;
   b : f32;
   c : vec3<f32>;
-};
+}
 
 fn f() {
   let tint_symbol = S(1, 2.0, vec3<f32>());
@@ -126,7 +126,7 @@ struct S {
   a : i32;
   b : f32;
   c : vec3<f32>;
-};
+}
 
 fn f() {
   var insert_after = 1;
@@ -288,17 +288,17 @@ fn f() {
   auto* expect = R"(
 struct S1 {
   a : i32;
-};
+}
 
 struct S2 {
   a : i32;
   b : S1;
   c : i32;
-};
+}
 
 struct S3 {
   a : S2;
-};
+}
 
 fn f() {
   let tint_symbol = S1(2);
@@ -331,11 +331,11 @@ fn f() {
   auto* expect = R"(
 struct S1 {
   a : i32;
-};
+}
 
 struct S2 {
   a : array<S1, 3u>;
-};
+}
 
 fn f() {
   let tint_symbol = S1(1);
@@ -358,7 +358,7 @@ struct S {
   a : i32;
   b : f32;
   c : i32;
-};
+}
 
 fn f() {
   var local_arr = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);

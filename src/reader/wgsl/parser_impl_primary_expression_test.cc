@@ -115,7 +115,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
   auto p = parser(R"(
-  struct S { a : i32; b : f32; };
+  struct S { a : i32; b : f32; }
   S()
   )");
 
@@ -139,7 +139,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
   auto p = parser(R"(
-  struct S { a : i32; b : f32; };
+  struct S { a : i32; b : f32; }
   S(1u, 2.0)
   )");
 

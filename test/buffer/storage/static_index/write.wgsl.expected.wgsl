@@ -1,6 +1,6 @@
 struct Inner {
   x : i32;
-};
+}
 
 struct S {
   a : vec3<i32>;
@@ -13,7 +13,7 @@ struct S {
   h : mat3x2<f32>;
   i : Inner;
   j : [[stride(16)]] array<Inner, 4>;
-};
+}
 
 [[binding(0), group(0)]] var<storage, write> s : S;
 

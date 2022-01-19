@@ -61,7 +61,7 @@ fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4
   auto* expect = R"(
 struct tint_symbol {
   first_vertex_index : u32;
-};
+}
 
 [[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
@@ -107,7 +107,7 @@ fn entry([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] ve
   auto* expect = R"(
 struct tint_symbol {
   first_instance_index : u32;
-};
+}
 
 [[binding(1), group(7)]] var<uniform> tint_symbol_1 : tint_symbol;
 
@@ -159,7 +159,7 @@ fn entry(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
 struct tint_symbol {
   first_vertex_index : u32;
   first_instance_index : u32;
-};
+}
 
 [[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
@@ -172,7 +172,7 @@ struct Inputs {
   instance_idx : u32;
   [[builtin(vertex_index)]]
   vert_idx : u32;
-};
+}
 
 [[stage(vertex)]]
 fn entry(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
@@ -216,7 +216,7 @@ fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4
   auto* expect = R"(
 struct tint_symbol {
   first_vertex_index : u32;
-};
+}
 
 [[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
@@ -279,7 +279,7 @@ fn entry_c([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] 
 struct tint_symbol {
   first_vertex_index : u32;
   first_instance_index : u32;
-};
+}
 
 [[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 

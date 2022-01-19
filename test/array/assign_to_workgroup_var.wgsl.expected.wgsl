@@ -2,7 +2,7 @@ type ArrayType = [[stride(16)]] array<i32, 4>;
 
 struct S {
   arr : ArrayType;
-};
+}
 
 var<private> src_private : ArrayType;
 

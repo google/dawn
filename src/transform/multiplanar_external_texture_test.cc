@@ -84,7 +84,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 [[group(0), binding(1)]] var ext_tex_plane_1 : texture_2d<f32>;
 
@@ -128,7 +128,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 [[group(0), binding(2)]] var ext_tex_plane_1 : texture_2d<f32>;
 
@@ -181,7 +181,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 [[group(0), binding(1)]] var ext_tex_plane_1 : texture_2d<f32>;
 
@@ -238,7 +238,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 [[group(0), binding(2)]] var ext_tex_plane_1 : texture_2d<f32>;
 
@@ -311,7 +311,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 [[group(0), binding(4)]] var ext_tex_plane_1 : texture_2d<f32>;
 
@@ -393,7 +393,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {
@@ -459,7 +459,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {
@@ -527,7 +527,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {
@@ -605,7 +605,7 @@ struct ExternalTextureParams {
   ug : f32;
   vg : f32;
   ub : f32;
-};
+}
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {

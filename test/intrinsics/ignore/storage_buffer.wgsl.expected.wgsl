@@ -8,7 +8,7 @@ intrinsics/ignore/storage_buffer.wgsl:10:5 warning: use of deprecated intrinsic
 
 struct S {
   i : i32;
-};
+}
 
 [[binding(0), group(0)]] var<storage, read_write> s : S;
 

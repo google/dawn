@@ -38,7 +38,7 @@ TEST_F(AddSpirvBlockDecorationTest, Noop_UsedForPrivateVar) {
   auto* src = R"(
 struct S {
   f : f32;
-};
+}
 
 var<private> p : S;
 
@@ -59,7 +59,7 @@ TEST_F(AddSpirvBlockDecorationTest, Noop_UsedForShaderIO) {
 struct S {
   [[location(0)]]
   f : f32;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> S {
@@ -87,7 +87,7 @@ fn main() {
 [[internal(spirv_block)]]
 struct u_block {
   inner : f32;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u : u_block;
 
@@ -116,7 +116,7 @@ fn main() {
 [[internal(spirv_block)]]
 struct u_block {
   inner : array<vec4<f32>, 4u>;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u : u_block;
 
@@ -149,7 +149,7 @@ type Numbers = array<vec4<f32>, 4u>;
 [[internal(spirv_block)]]
 struct u_block {
   inner : array<vec4<f32>, 4u>;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u : u_block;
 
@@ -182,7 +182,7 @@ fn main() {
 [[internal(spirv_block)]]
 struct S {
   f : f32;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u : S;
 
@@ -218,12 +218,12 @@ fn main() {
   auto* expect = R"(
 struct Inner {
   f : f32;
-};
+}
 
 [[internal(spirv_block)]]
 struct Outer {
   i : Inner;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u : Outer;
 
@@ -263,19 +263,19 @@ fn main() {
   auto* expect = R"(
 struct Inner {
   f : f32;
-};
+}
 
 [[internal(spirv_block)]]
 struct Outer {
   i : Inner;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u0 : Outer;
 
 [[internal(spirv_block)]]
 struct u1_block {
   inner : Inner;
-};
+}
 
 [[group(0), binding(1)]] var<uniform> u1 : u1_block;
 
@@ -315,18 +315,18 @@ fn main() {
   auto* expect = R"(
 struct Inner {
   f : f32;
-};
+}
 
 struct Outer {
   i : Inner;
-};
+}
 
 var<private> p : Outer;
 
 [[internal(spirv_block)]]
 struct u_block {
   inner : Inner;
-};
+}
 
 [[group(0), binding(1)]] var<uniform> u : u_block;
 
@@ -371,19 +371,19 @@ fn main() {
   auto* expect = R"(
 struct Inner {
   f : f32;
-};
+}
 
 [[internal(spirv_block)]]
 struct S {
   i : Inner;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u0 : S;
 
 [[internal(spirv_block)]]
 struct u1_block {
   inner : Inner;
-};
+}
 
 [[group(0), binding(1)]] var<uniform> u1 : u1_block;
 
@@ -420,12 +420,12 @@ fn main() {
   auto* expect = R"(
 struct S {
   f : f32;
-};
+}
 
 [[internal(spirv_block)]]
 struct u_block {
   inner : S;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u : u_block;
 
@@ -463,12 +463,12 @@ fn main() {
   auto* expect = R"(
 struct S {
   f : f32;
-};
+}
 
 [[internal(spirv_block)]]
 struct u0_block {
   inner : S;
-};
+}
 
 [[group(0), binding(0)]] var<uniform> u0 : u0_block;
 
@@ -516,14 +516,14 @@ fn main() {
   auto* expect = R"(
 struct Inner {
   f : f32;
-};
+}
 
 type MyInner = Inner;
 
 [[internal(spirv_block)]]
 struct Outer {
   i : MyInner;
-};
+}
 
 type MyOuter = Outer;
 
@@ -532,7 +532,7 @@ type MyOuter = Outer;
 [[internal(spirv_block)]]
 struct u1_block {
   inner : Inner;
-};
+}
 
 [[group(0), binding(1)]] var<uniform> u1 : u1_block;
 

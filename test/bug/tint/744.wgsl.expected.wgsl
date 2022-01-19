@@ -2,11 +2,11 @@ struct Uniforms {
   aShape : vec2<u32>;
   bShape : vec2<u32>;
   outShape : vec2<u32>;
-};
+}
 
 struct Matrix {
   numbers : array<u32>;
-};
+}
 
 [[group(0), binding(0)]] var<storage, read> firstMatrix : Matrix;
 

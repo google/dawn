@@ -11,7 +11,7 @@ struct FragmentOutputs {
   sample_mask : u32;
   [[location(3)]]
   loc3 : vec4<f32>;
-};
+}
 
 [[stage(fragment)]]
 fn main() -> FragmentOutputs {

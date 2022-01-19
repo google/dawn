@@ -79,7 +79,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
   struct S0 {
     a : i32;
-  };
+  }
 
   fn func() -> f32 {
     return a0;
@@ -89,7 +89,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
   struct S1 {
     a : i32;
-  };
+  }
 
   [[stage(compute), workgroup_size(1)]]
   fn main() {

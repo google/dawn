@@ -2,7 +2,7 @@ type ArrayType = array<i32, 4>;
 
 struct S {
   arr : array<i32, 4>;
-};
+}
 
 fn foo() {
   let src : ArrayType = ArrayType();
