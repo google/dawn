@@ -2869,14 +2869,6 @@ bool GeneratorImpl::EmitUniformVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
   auto binding_point = decl->BindingPoint();
   auto* type = var->Type()->UnwrapRef();
-
-  auto* str = type->As<sem::Struct>();
-  if (!str) {
-    // https://www.w3.org/TR/WGSL/#module-scope-variables
-    TINT_ICE(Writer, diagnostics_)
-        << "variables with uniform storage must be structure";
-  }
-
   auto name = builder_.Symbols().NameFor(decl->symbol);
   line() << "cbuffer cbuffer_" << name << RegisterAndSpace('b', binding_point)
          << " {";
@@ -3513,13 +3505,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       out << "ByteAddressBuffer";
       return true;
     case ast::StorageClass::kUniform: {
-      auto* str = type->As<sem::Struct>();
-      if (!str) {
-        // https://www.w3.org/TR/WGSL/#module-scope-variables
-        TINT_ICE(Writer, diagnostics_)
-            << "variables with uniform storage must be structure";
-      }
-      auto array_length = (str->Size() + 15) / 16;
+      auto array_length = (type->Size() + 15) / 16;
       out << "uint4 " << name << "[" << array_length << "]";
       if (name_printed) {
         *name_printed = true;

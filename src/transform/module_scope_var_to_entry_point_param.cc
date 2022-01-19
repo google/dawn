@@ -157,6 +157,7 @@ struct ModuleScopeVarToEntryPointParam::State {
 
       for (auto* var : func_sem->TransitivelyReferencedGlobals()) {
         auto sc = var->StorageClass();
+        auto* ty = var->Type()->UnwrapRef();
         if (sc == ast::StorageClass::kNone) {
           continue;
         }
@@ -174,12 +175,14 @@ struct ModuleScopeVarToEntryPointParam::State {
         auto new_var_symbol = ctx.dst->Sym();
 
         // Helper to create an AST node for the store type of the variable.
-        auto store_type = [&]() {
-          return CreateASTTypeFor(ctx, var->Type()->UnwrapRef());
-        };
+        auto store_type = [&]() { return CreateASTTypeFor(ctx, ty); };
 
         // Track whether the new variable is a pointer or not.
         bool is_pointer = false;
+
+        // Track whether the new variable was wrapped in a struct or not.
+        bool is_wrapped = false;
+        const char* kWrappedArrayMemberName = "arr";
 
         if (is_entry_point) {
           if (var->Type()->UnwrapRef()->is_handle()) {
@@ -200,8 +203,23 @@ struct ModuleScopeVarToEntryPointParam::State {
                 ast::DisabledValidation::kEntryPointParameter));
             attributes.push_back(
                 ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass));
-            auto* param_type = ctx.dst->ty.pointer(
-                store_type(), sc, var->Declaration()->declared_access);
+
+            auto* param_type = store_type();
+            if (auto* arr = ty->As<sem::Array>();
+                arr && arr->IsRuntimeSized()) {
+              // Wrap runtime-sized arrays in structures, so that we can declare
+              // pointers to them. Ideally we'd just emit the array itself as a
+              // pointer, but this is not representable in Tint's AST.
+              CloneStructTypes(ty);
+              auto* wrapper = ctx.dst->Structure(
+                  ctx.dst->Sym(),
+                  {ctx.dst->Member(kWrappedArrayMemberName, param_type)});
+              param_type = ctx.dst->ty.Of(wrapper);
+              is_wrapped = true;
+            }
+
+            param_type = ctx.dst->ty.pointer(
+                param_type, sc, var->Declaration()->declared_access);
             auto* param =
                 ctx.dst->Param(new_var_symbol, param_type, attributes);
             ctx.InsertFront(func_ast->params, param);
@@ -282,6 +300,10 @@ struct ModuleScopeVarToEntryPointParam::State {
               }
 
               expr = ctx.dst->Deref(expr);
+            }
+            if (is_wrapped) {
+              // Get the member from the wrapper structure.
+              expr = ctx.dst->MemberAccessor(expr, kWrappedArrayMemberName);
             }
             ctx.Replace(user->Declaration(), expr);
           }

@@ -52,9 +52,9 @@ void AddSpirvBlockDecoration::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     }
   }
 
-  // A map from a struct in the source program to a block-decorated wrapper that
+  // A map from a type in the source program to a block-decorated wrapper that
   // contains it in the destination program.
-  std::unordered_map<const sem::Struct*, const ast::Struct*> wrapper_structs;
+  std::unordered_map<const sem::Type*, const ast::Struct*> wrapper_structs;
 
   // Process global variables that are buffers.
   for (auto* var : ctx.src->AST().GlobalVariables()) {
@@ -64,40 +64,33 @@ void AddSpirvBlockDecoration::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       continue;
     }
 
-    auto* str = sem.Get<sem::Struct>(var->type);
-    if (!str) {
-      // TODO(jrprice): We'll need to wrap these too, when WGSL supports this.
-      TINT_ICE(Transform, ctx.dst->Diagnostics())
-          << "non-struct buffer types are not yet supported";
-      continue;
-    }
+    auto* ty = sem.Get(var->type);
+    auto* str = ty->As<sem::Struct>();
+    if (!str || nested_structs.count(str)) {
+      const char* kMemberName = "inner";
 
-    if (nested_structs.count(str)) {
-      const char* kInnerStructMemberName = "inner";
-
-      // This struct is nested somewhere else, so we need to wrap it first.
-      auto* wrapper = utils::GetOrCreate(wrapper_structs, str, [&]() {
+      // This is a non-struct or a struct that is nested somewhere else, so we
+      // need to wrap it first.
+      auto* wrapper = utils::GetOrCreate(wrapper_structs, ty, [&]() {
         auto* block =
             ctx.dst->ASTNodes().Create<SpirvBlockDecoration>(ctx.dst->ID());
-        auto wrapper_name =
-            ctx.src->Symbols().NameFor(str->Declaration()->name) + "_block";
+        auto wrapper_name = ctx.src->Symbols().NameFor(var->symbol) + "_block";
         auto* ret = ctx.dst->create<ast::Struct>(
             ctx.dst->Symbols().New(wrapper_name),
-            ast::StructMemberList{ctx.dst->Member(kInnerStructMemberName,
-                                                  CreateASTTypeFor(ctx, str))},
+            ast::StructMemberList{
+                ctx.dst->Member(kMemberName, CreateASTTypeFor(ctx, ty))},
             ast::DecorationList{block});
-        ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), str->Declaration(),
-                        ret);
+        ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), var, ret);
         return ret;
       });
       ctx.Replace(var->type, ctx.dst->ty.Of(wrapper));
 
-      // Insert a member accessor to get the original struct from the wrapper at
+      // Insert a member accessor to get the original type from the wrapper at
       // any usage of the original variable.
       for (auto* user : sem_var->Users()) {
-        ctx.Replace(user->Declaration(),
-                    ctx.dst->MemberAccessor(ctx.Clone(var->symbol),
-                                            kInnerStructMemberName));
+        ctx.Replace(
+            user->Declaration(),
+            ctx.dst->MemberAccessor(ctx.Clone(var->symbol), kMemberName));
       }
     } else {
       // Add a block decoration to this struct directly.

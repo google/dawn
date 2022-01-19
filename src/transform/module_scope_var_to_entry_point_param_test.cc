@@ -232,6 +232,99 @@ fn main([[group(0), binding(0), internal(disable_validation__entry_point_paramet
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(ModuleScopeVarToEntryPointParamTest, Buffer_RuntimeArray) {
+  auto* src = R"(
+[[group(0), binding(0)]]
+var<storage> buffer : array<f32>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  _ = buffer[0];
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_1 {
+  arr : array<f32>;
+};
+
+[[stage(compute), workgroup_size(1)]]
+fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol : ptr<storage, tint_symbol_1>) {
+  _ = (*(tint_symbol)).arr[0];
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ModuleScopeVarToEntryPointParamTest, Buffer_RuntimeArray_Alias) {
+  auto* src = R"(
+type myarray = array<f32>;
+
+[[group(0), binding(0)]]
+var<storage> buffer : myarray;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  _ = buffer[0];
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_1 {
+  arr : array<f32>;
+};
+
+type myarray = array<f32>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol : ptr<storage, tint_symbol_1>) {
+  _ = (*(tint_symbol)).arr[0];
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ModuleScopeVarToEntryPointParamTest, Buffer_ArrayOfStruct) {
+  auto* src = R"(
+struct S {
+  f : f32;
+};
+
+[[group(0), binding(0)]]
+var<storage> buffer : array<S>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  _ = buffer[0];
+}
+)";
+
+  auto* expect = R"(
+struct S {
+  f : f32;
+};
+
+struct tint_symbol_1 {
+  arr : array<S>;
+};
+
+[[stage(compute), workgroup_size(1)]]
+fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter), internal(disable_validation__ignore_storage_class)]] tint_symbol : ptr<storage, tint_symbol_1>) {
+  _ = (*(tint_symbol)).arr[0];
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(ModuleScopeVarToEntryPointParamTest, Buffers_FunctionCalls) {
   auto* src = R"(
 struct S {

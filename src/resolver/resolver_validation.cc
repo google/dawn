@@ -459,42 +459,6 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
     return false;
   }
 
-  switch (var->StorageClass()) {
-    case ast::StorageClass::kStorage: {
-      // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-      // A variable in the storage storage class is a storage buffer variable.
-      // Its store type must be a host-shareable structure type with block
-      // attribute, satisfying the storage class constraints.
-
-      auto* str = var->Type()->UnwrapRef()->As<sem::Struct>();
-      if (!str) {
-        AddError(
-            "variables declared in the <storage> storage class must be of a "
-            "structure type",
-            decl->source);
-        return false;
-      }
-      break;
-    }
-    case ast::StorageClass::kUniform: {
-      // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-      // A variable in the uniform storage class is a uniform buffer variable.
-      // Its store type must be a host-shareable structure type with block
-      // attribute, satisfying the storage class constraints.
-      auto* str = var->Type()->UnwrapRef()->As<sem::Struct>();
-      if (!str) {
-        AddError(
-            "variables declared in the <uniform> storage class must be of a "
-            "structure type",
-            decl->source);
-        return false;
-      }
-      break;
-    }
-    default:
-      break;
-  }
-
   if (!decl->is_const) {
     if (!ValidateAtomicVariable(var)) {
       return false;
@@ -578,14 +542,6 @@ bool Resolver::ValidateVariable(const sem::Variable* var) {
     AddError(TypeNameOf(storage_ty) + " cannot be used as the type of a let",
              decl->source);
     return false;
-  }
-
-  if (auto* r = storage_ty->As<sem::Array>()) {
-    if (r->IsRuntimeSized()) {
-      AddError("runtime arrays may only appear as the last member of a struct",
-               decl->source);
-      return false;
-    }
   }
 
   if (auto* r = storage_ty->As<sem::MultisampledTexture>()) {
