@@ -1218,7 +1218,24 @@ TEST_F(InspectorGetStorageSizeTest, Empty) {
   EXPECT_EQ(0u, inspector.GetStorageSize("ep_func"));
 }
 
-TEST_F(InspectorGetStorageSizeTest, Simple) {
+TEST_F(InspectorGetStorageSizeTest, Simple_NonStruct) {
+  AddUniformBuffer("ub_var", ty.i32(), 0, 0);
+  AddStorageBuffer("sb_var", ty.i32(), ast::Access::kReadWrite, 1, 0);
+  AddStorageBuffer("rosb_var", ty.i32(), ast::Access::kRead, 1, 1);
+  Func("ep_func", {}, ty.void_(),
+       {
+           Decl(Const("ub", nullptr, Expr("ub_var"))),
+           Decl(Const("sb", nullptr, Expr("sb_var"))),
+           Decl(Const("rosb", nullptr, Expr("rosb_var"))),
+       },
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+
+  Inspector& inspector = Build();
+
+  EXPECT_EQ(12u, inspector.GetStorageSize("ep_func"));
+}
+
+TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
   auto* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32(), ty.i32()});
   AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
@@ -1237,6 +1254,33 @@ TEST_F(InspectorGetStorageSizeTest, Simple) {
                              Stage(ast::PipelineStage::kCompute),
                              WorkgroupSize(1),
                          });
+
+  Inspector& inspector = Build();
+
+  EXPECT_EQ(16u, inspector.GetStorageSize("ep_func"));
+}
+
+TEST_F(InspectorGetStorageSizeTest, NonStructVec3) {
+  AddUniformBuffer("ub_var", ty.vec3<f32>(), 0, 0);
+  Func("ep_func", {}, ty.void_(),
+       {
+           Decl(Const("ub", nullptr, Expr("ub_var"))),
+       },
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+
+  Inspector& inspector = Build();
+
+  EXPECT_EQ(12u, inspector.GetStorageSize("ep_func"));
+}
+
+TEST_F(InspectorGetStorageSizeTest, StructVec3) {
+  auto* ub_struct_type = MakeUniformBufferType("ub_type", {ty.vec3<f32>()});
+  AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
+  Func("ep_func", {}, ty.void_(),
+       {
+           Decl(Const("ub", nullptr, Expr("ub_var"))),
+       },
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   Inspector& inspector = Build();
 
@@ -1381,7 +1425,30 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
   EXPECT_TRUE(error.find("not an entry point") != std::string::npos);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
+TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_NonStruct) {
+  AddUniformBuffer("foo_ub", ty.i32(), 0, 0);
+  MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.i32(), {});
+
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[0].resource_type);
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(4u, result[0].size);
+  EXPECT_EQ(4u, result[0].size_no_padding);
+}
+
+TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_Struct) {
   auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
   AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
@@ -1456,6 +1523,29 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(16u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
+}
+
+TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonStructVec3) {
+  AddUniformBuffer("foo_ub", ty.vec3<f32>(), 0, 0);
+  MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), {});
+
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[0].resource_type);
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(12u, result[0].size);
   EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
@@ -1546,7 +1636,30 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   EXPECT_EQ(80u, result[0].size_no_padding);
 }
 
-TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
+TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_NonStruct) {
+  AddStorageBuffer("foo_sb", ty.i32(), ast::Access::kReadWrite, 0, 0);
+  MakePlainGlobalReferenceBodyFunction("sb_func", "foo_sb", ty.i32(), {});
+
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[0].resource_type);
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(4u, result[0].size);
+  EXPECT_EQ(4u, result[0].size_no_padding);
+}
+
+TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_Struct) {
   auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
   AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
@@ -1740,6 +1853,29 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(16u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
+}
+
+TEST_F(InspectorGetStorageBufferResourceBindingsTest, NonStructVec3) {
+  AddStorageBuffer("foo_ub", ty.vec3<f32>(), ast::Access::kReadWrite, 0, 0);
+  MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), {});
+
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[0].resource_type);
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(12u, result[0].size);
   EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
