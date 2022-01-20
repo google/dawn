@@ -347,6 +347,10 @@ namespace dawn::native::d3d12 {
             // get rejected and generate a debug error. Then, we request 0 to get the allowed
             // allowed alignment.
             D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT,
+
+            // WebGPU allows OOB vertex buffer access and relies on D3D12's robust buffer access
+            // behavior.
+            D3D12_MESSAGE_ID_COMMAND_LIST_DRAW_VERTEX_BUFFER_TOO_SMALL,
         };
 
         // Create a retrieval filter with a deny list to suppress messages.
