@@ -12,7 +12,7 @@ struct S {
     g : mat2x3<f32>;
     h : mat3x2<f32>;
     i : Inner;
-    j : @stride(16) array<Inner, 4>;
+    j : array<Inner, 4>;
 };
 
 @binding(0) @group(0) var<storage, write> s : S;
@@ -28,5 +28,5 @@ fn main() {
     s.g = mat2x3<f32>();
     s.h = mat3x2<f32>();
     s.i = Inner();
-    s.j = @stride(16) array<Inner, 4>();
+    s.j = array<Inner, 4>();
 }

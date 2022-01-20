@@ -37,23 +37,23 @@ struct Dbg {
 };
 
 struct F32s {
-  values : @stride(4) array<f32>;
+  values : array<f32>;
 };
 
 struct U32s {
-  values : @stride(4) array<u32>;
+  values : array<u32>;
 };
 
 struct I32s {
-  values : @stride(4) array<i32>;
+  values : array<i32>;
 };
 
 struct AU32s {
-  values : @stride(4) array<atomic<u32>>;
+  values : array<atomic<u32>>;
 };
 
 struct AI32s {
-  values : @stride(4) array<atomic<i32>>;
+  values : array<atomic<i32>>;
 };
 
 @binding(0) @group(0) var<uniform> uniforms : Uniforms;

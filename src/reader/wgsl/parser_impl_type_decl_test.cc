@@ -534,7 +534,10 @@ TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:2: unexpected decorations");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:2: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+1:2: unexpected decorations)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_UnknownDecoration) {
@@ -546,6 +549,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Decoration_UnknownDecoration) {
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), R"(1:2: expected decoration)");
 }
+
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingLeftParen) {
   auto p = parser("@stride 4) array<f32, 5>");
   auto t = p->type_decl();
@@ -563,7 +567,10 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingRightParen) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), R"(1:11: expected ')' for stride decoration)");
+  EXPECT_EQ(
+      p->error(),
+      R"(1:2: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+1:11: expected ')' for stride decoration)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingValue) {
@@ -610,6 +617,7 @@ TEST_F(ParserImplTest,
   EXPECT_EQ(
       p->error(),
       R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:3: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 1:14: expected ']]' for decoration list)");
 }
 
@@ -638,6 +646,7 @@ TEST_F(ParserImplTest, DEPRECATED_TypeDecl_Array_Stride_MissingRightParen) {
   EXPECT_EQ(
       p->error(),
       R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+1:3: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 1:11: expected ')' for stride decoration)");
 }
 

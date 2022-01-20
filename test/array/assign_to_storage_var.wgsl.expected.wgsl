@@ -1,4 +1,4 @@
-type ArrayType = @stride(16) array<i32, 4>;
+type ArrayType = array<vec4<i32>, 4>;
 
 struct S {
   arr : ArrayType;
@@ -30,7 +30,7 @@ fn ret_struct_arr() -> S {
 
 fn foo(src_param : ArrayType) {
   var src_function : ArrayType;
-  dst.arr = ArrayType(1, 2, 3, 3);
+  dst.arr = ArrayType(vec4(1), vec4(2), vec4(3), vec4(3));
   dst.arr = src_param;
   dst.arr = ret_arr();
   let src_let : ArrayType = ArrayType();

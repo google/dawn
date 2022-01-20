@@ -985,24 +985,24 @@ var i : array<u32, 3;
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoNotArray) {
-  EXPECT("var i : @stride(1) i32;",
+  EXPECT("var i : @location(1) i32;",
          R"(test.wgsl:1:10 error: unexpected decorations
-var i : @stride(1) i32;
-         ^^^^^^
+var i : @location(1) i32;
+         ^^^^^^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
 TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarArrayDecoMissingEnd) {
   EXPECT(
-      "var i : [[stride(1) array<i32>;",
+      "var i : [[location(1) array<i32>;",
       R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-var i : [[stride(1) array<i32>;
+var i : [[location(1) array<i32>;
         ^^
 
-test.wgsl:1:21 error: expected ']]' for decoration list
-var i : [[stride(1) array<i32>;
-                    ^^^^^
+test.wgsl:1:23 error: expected ']]' for decoration list
+var i : [[location(1) array<i32>;
+                      ^^^^^
 )");
 }
 
@@ -1025,14 +1025,14 @@ var i : [[stride 1)]] array<i32>;
 TEST_F(ParserImplErrorTest,
        DEPRECATED_GlobalDeclVarArrayDecoStrideMissingRParen) {
   EXPECT(
-      "var i : [[stride(1]] array<i32>;",
+      "var i : [[location(1]] array<i32>;",
       R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-var i : [[stride(1]] array<i32>;
+var i : [[location(1]] array<i32>;
         ^^
 
-test.wgsl:1:19 error: expected ')' for stride decoration
-var i : [[stride(1]] array<i32>;
-                  ^^
+test.wgsl:1:21 error: expected ')' for location decoration
+var i : [[location(1]] array<i32>;
+                    ^^
 )");
 }
 

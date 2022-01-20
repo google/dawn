@@ -1,5 +1,5 @@
 struct Inner {
-    x : i32;
+    @size(16) x : i32;
 };
 
 struct S {
@@ -14,7 +14,7 @@ struct S {
     i : mat2x3<f32>;
     j : mat3x2<f32>;
     @align(16) k : Inner;
-    @align(16) l : @stride(16) array<Inner, 4>;
+    @align(16) l : array<Inner, 4>;
 };
 
 @binding(0) @group(0) var<uniform> s : S;

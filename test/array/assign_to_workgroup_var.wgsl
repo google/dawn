@@ -1,4 +1,4 @@
-type ArrayType = @stride(16) array<i32, 4>;
+type ArrayType = array<vec4<i32>, 4>;
 
 struct S {
   arr : ArrayType;
@@ -24,7 +24,7 @@ fn foo(src_param : ArrayType) {
   var src_function : ArrayType;
 
   // Assign from type constructor.
-  dst = ArrayType(1, 2, 3, 3);
+  dst = ArrayType(vec4(1), vec4(2), vec4(3), vec4(3));
 
   // Assign from parameter.
   dst = src_param;

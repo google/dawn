@@ -1,9 +1,6 @@
 struct Inner {
   int x;
 };
-struct tint_padded_array_element {
-  Inner el;
-};
 
 cbuffer cbuffer_s : register(b0, space0) {
   uint4 s[13];
@@ -31,12 +28,12 @@ Inner tint_symbol_10(uint4 buffer[13], uint offset) {
   return tint_symbol_12;
 }
 
-typedef tint_padded_array_element tint_symbol_11_ret[4];
+typedef Inner tint_symbol_11_ret[4];
 tint_symbol_11_ret tint_symbol_11(uint4 buffer[13], uint offset) {
-  tint_padded_array_element arr[4] = (tint_padded_array_element[4])0;
+  Inner arr[4] = (Inner[4])0;
   {
     [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
-      arr[i_1].el = tint_symbol_10(buffer, (offset + (i_1 * 16u)));
+      arr[i_1] = tint_symbol_10(buffer, (offset + (i_1 * 16u)));
     }
   }
   return arr;
@@ -55,6 +52,6 @@ void main() {
   const float2x3 i = tint_symbol_7(s, 64u);
   const float3x2 j = tint_symbol_8(s, 96u);
   const Inner k = tint_symbol_10(s, 128u);
-  const tint_padded_array_element l[4] = tint_symbol_11(s, 144u);
+  const Inner l[4] = tint_symbol_11(s, 144u);
   return;
 }

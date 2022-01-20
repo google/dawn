@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
-  auto p = parser("my_var : @stride(1) S");
+  auto p = parser("my_var : @location(1) S");
 
   auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
@@ -94,11 +94,11 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightParen) {
-  auto p = parser("my_var : @stride(4 S");
+  auto p = parser("my_var : @location(4 S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:20: expected ')' for stride decoration");
+  ASSERT_EQ(p->error(), "1:22: expected ')' for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingLeftParen) {
@@ -112,27 +112,27 @@ TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingLeftParen) {
 // TODO(crbug.com/tint/1382): Remove
 TEST_F(ParserImplTest,
        DEPRECATED_VariableIdentDecl_DecorationMissingRightBlock) {
-  auto p = parser("my_var : [[stride(4) S");
+  auto p = parser("my_var : [[location(4) S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
   ASSERT_EQ(
       p->error(),
       R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:22: expected ']]' for decoration list)");
+1:24: expected ']]' for decoration list)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
 TEST_F(ParserImplTest,
        DEPRECATED_VariableIdentDecl_DecorationMissingRightParen) {
-  auto p = parser("my_var : [[stride(4]] S");
+  auto p = parser("my_var : [[location(4]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
   ASSERT_EQ(
       p->error(),
       R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:20: expected ')' for stride decoration)");
+1:22: expected ')' for location decoration)");
 }
 
 // TODO(crbug.com/tint/1382): Remove

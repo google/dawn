@@ -378,8 +378,8 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 
 // Detect array stride must be a multiple of 16 bytes for uniform buffers
 TEST_F(ResolverStorageClassLayoutValidationTest,
-       UniformBuffer_InvalidArrayStride) {
-  // type Inner = @stride(8) array<f32, 10>;
+       UniformBuffer_InvalidArrayStride_Scalar) {
+  // type Inner = array<f32, 10>;
   //
   // [[block]]
   // struct Outer {
@@ -390,7 +390,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   // @group(0) @binding(0)
   // var<uniform> a : Outer;
 
-  Alias("Inner", ty.array(ty.f32(), 10, 8));
+  Alias("Inner", ty.array(ty.f32(), 10));
 
   Structure(Source{{12, 34}}, "Outer",
             {
@@ -405,10 +405,93 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array stride of 'inner' is currently 8. Consider setting @stride(16) on the array type
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment of 'inner' is currently 4. Consider using a vector or struct as the element type instead.
+12:34 note: see layout of struct:
+/*            align(4) size(44) */ struct Outer {
+/* offset( 0) align(4) size(40) */   inner : array<f32, 10>;
+/* offset(40) align(4) size( 4) */   scalar : i32;
+/*                              */ };
+78:90 note: see declaration of variable)");
+}
+
+TEST_F(ResolverStorageClassLayoutValidationTest,
+       UniformBuffer_InvalidArrayStride_Vector) {
+  // type Inner = array<vec2<f32>, 10>;
+  //
+  // [[block]]
+  // struct Outer {
+  //   inner : Inner;
+  //   scalar : i32;
+  // };
+  //
+  // @group(0) @binding(0)
+  // var<uniform> a : Outer;
+
+  Alias("Inner", ty.array(ty.vec2<f32>(), 10));
+
+  Structure(Source{{12, 34}}, "Outer",
+            {
+                Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
+                Member("scalar", ty.i32()),
+            },
+            {StructBlock()});
+
+  Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
+         ast::StorageClass::kUniform, GroupAndBinding(0, 0));
+
+  ASSERT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment of 'inner' is currently 8. Consider using a vec4 instead.
+12:34 note: see layout of struct:
+/*            align(8) size(88) */ struct Outer {
+/* offset( 0) align(8) size(80) */   inner : array<vec2<f32>, 10>;
+/* offset(80) align(4) size( 4) */   scalar : i32;
+/* offset(84) align(1) size( 4) */   // -- implicit struct size padding --;
+/*                              */ };
+78:90 note: see declaration of variable)");
+}
+
+TEST_F(ResolverStorageClassLayoutValidationTest,
+       UniformBuffer_InvalidArrayStride_Struct) {
+  // struct ArrayElem {
+  //   a : f32;
+  //   b : i32;
+  // }
+  // type Inner = array<ArrayElem, 10>;
+  //
+  // [[block]]
+  // struct Outer {
+  //   inner : Inner;
+  //   scalar : i32;
+  // };
+  //
+  // @group(0) @binding(0)
+  // var<uniform> a : Outer;
+
+  auto* array_elem = Structure("ArrayElem", {
+                                                Member("a", ty.f32()),
+                                                Member("b", ty.i32()),
+                                            });
+  Alias("Inner", ty.array(ty.Of(array_elem), 10));
+
+  Structure(Source{{12, 34}}, "Outer",
+            {
+                Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
+                Member("scalar", ty.i32()),
+            },
+            {StructBlock()});
+
+  Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
+         ast::StorageClass::kUniform, GroupAndBinding(0, 0));
+
+  ASSERT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment of 'inner' is currently 8. Consider using the @size attribute on the last struct member.
 12:34 note: see layout of struct:
 /*            align(4) size(84) */ struct Outer {
-/* offset( 0) align(4) size(80) */   inner : @stride(8) array<f32, 10>;
+/* offset( 0) align(4) size(80) */   inner : array<ArrayElem, 10>;
 /* offset(80) align(4) size( 4) */   scalar : i32;
 /*                              */ };
 78:90 note: see declaration of variable)");

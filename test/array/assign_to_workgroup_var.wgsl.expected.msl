@@ -1,12 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_padded_array_element {
-  /* 0x0000 */ int el;
-  /* 0x0004 */ int8_t tint_pad[12];
-};
 struct tint_array_wrapper {
-  /* 0x0000 */ tint_padded_array_element arr[4];
+  /* 0x0000 */ int4 arr[4];
 };
 struct S {
   /* 0x0000 */ tint_array_wrapper arr;
@@ -33,7 +29,7 @@ S ret_struct_arr() {
 
 void foo(tint_array_wrapper src_param, threadgroup tint_array_wrapper* const tint_symbol_3, thread tint_array_wrapper* const tint_symbol_4, threadgroup tint_array_wrapper* const tint_symbol_5, const constant S* const tint_symbol_6, device S* const tint_symbol_7, threadgroup tint_array_wrapper_1* const tint_symbol_8) {
   tint_array_wrapper src_function = {};
-  tint_array_wrapper const tint_symbol_2 = {.arr={{.el=1}, {.el=2}, {.el=3}, {.el=3}}};
+  tint_array_wrapper const tint_symbol_2 = {.arr={int4(1), int4(2), int4(3), int4(3)}};
   *(tint_symbol_3) = tint_symbol_2;
   *(tint_symbol_3) = src_param;
   *(tint_symbol_3) = ret_arr();

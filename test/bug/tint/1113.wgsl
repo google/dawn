@@ -23,11 +23,11 @@
     value_f32_3 : f32;
 };
 
- struct F32s { values : @stride(4) array<f32>; };
- struct U32s { values : @stride(4) array<u32>; };
- struct I32s { values : @stride(4) array<i32>; };
- struct AU32s { values : @stride(4) array<atomic<u32>>; };
- struct AI32s { values : @stride(4) array<atomic<i32>>; };
+ struct F32s { values : array<f32>; };
+ struct U32s { values : array<u32>; };
+ struct I32s { values : array<i32>; };
+ struct AU32s { values : array<atomic<u32>>; };
+ struct AI32s { values : array<atomic<i32>>; };
 
 // IN
 @binding(0) @group(0) var<uniform> uniforms : Uniforms;

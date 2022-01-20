@@ -4,7 +4,7 @@ struct PointLight {
 };
 
  struct PointLights {
-    values : @stride(16) array<PointLight>;
+    values : array<PointLight>;
 };
 
  struct Uniforms {

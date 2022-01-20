@@ -1,9 +1,6 @@
 struct Inner {
   int x;
 };
-struct tint_padded_array_element {
-  Inner el;
-};
 
 ByteAddressBuffer s : register(t0, space0);
 
@@ -20,12 +17,12 @@ Inner tint_symbol_9(ByteAddressBuffer buffer, uint offset) {
   return tint_symbol_11;
 }
 
-typedef tint_padded_array_element tint_symbol_10_ret[4];
+typedef Inner tint_symbol_10_ret[4];
 tint_symbol_10_ret tint_symbol_10(ByteAddressBuffer buffer, uint offset) {
-  tint_padded_array_element arr[4] = (tint_padded_array_element[4])0;
+  Inner arr[4] = (Inner[4])0;
   {
     [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
-      arr[i_1].el = tint_symbol_9(buffer, (offset + (i_1 * 16u)));
+      arr[i_1] = tint_symbol_9(buffer, (offset + (i_1 * 4u)));
     }
   }
   return arr;
@@ -42,6 +39,6 @@ void main() {
   const float2x3 g = tint_symbol_6(s, 48u);
   const float3x2 h = tint_symbol_7(s, 80u);
   const Inner i = tint_symbol_9(s, 104u);
-  const tint_padded_array_element j[4] = tint_symbol_10(s, 108u);
+  const Inner j[4] = tint_symbol_10(s, 108u);
   return;
 }

@@ -7,7 +7,7 @@ struct Constants {
 @group(0) @binding(1) var myTexture : texture_2d_array<f32>;
 
 struct Result {
-  values : @stride(4) array<f32>;
+  values : array<f32>;
 }
 
 @group(0) @binding(3) var<storage, read_write> result : Result;

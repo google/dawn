@@ -1,9 +1,6 @@
 struct Inner {
   int x;
 };
-struct tint_padded_array_element {
-  Inner el;
-};
 
 RWByteAddressBuffer s : register(u0, space0);
 
@@ -22,11 +19,11 @@ void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, Inner value) {
   buffer.Store((offset + 0u), asuint(value.x));
 }
 
-void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, tint_padded_array_element value[4]) {
-  tint_padded_array_element array[4] = value;
+void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, Inner value[4]) {
+  Inner array[4] = value;
   {
     [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
-      tint_symbol_9(buffer, (offset + (i_1 * 16u)), array[i_1].el);
+      tint_symbol_9(buffer, (offset + (i_1 * 4u)), array[i_1]);
     }
   }
 }
@@ -43,7 +40,7 @@ void main() {
   tint_symbol_7(s, 80u, float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
   const Inner tint_symbol_11 = (Inner)0;
   tint_symbol_9(s, 104u, tint_symbol_11);
-  const tint_padded_array_element tint_symbol_12[4] = (tint_padded_array_element[4])0;
+  const Inner tint_symbol_12[4] = (Inner[4])0;
   tint_symbol_10(s, 108u, tint_symbol_12);
   return;
 }

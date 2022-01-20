@@ -4,9 +4,6 @@ precision mediump float;
 struct Inner {
   int x;
 };
-struct tint_padded_array_element {
-  Inner el;
-};
 struct S {
   ivec3 a;
   int b;
@@ -17,7 +14,7 @@ struct S {
   mat2x3 g;
   mat3x2 h;
   Inner i;
-  tint_padded_array_element j[4];
+  Inner j[4];
 };
 
 layout (binding = 0) buffer S_1 {
@@ -30,7 +27,7 @@ layout (binding = 0) buffer S_1 {
   mat2x3 g;
   mat3x2 h;
   Inner i;
-  tint_padded_array_element j[4];
+  Inner j[4];
 } s;
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -44,7 +41,7 @@ void tint_symbol() {
   mat2x3 g = s.g;
   mat3x2 h = s.h;
   Inner i = s.i;
-  tint_padded_array_element j[4] = s.j;
+  Inner j[4] = s.j;
   return;
 }
 void main() {

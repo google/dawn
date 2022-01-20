@@ -3076,7 +3076,9 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
       auto val = expect_nonzero_positive_sint(use);
       if (val.errored)
         return Failure::kErrored;
-
+      deprecated(t.source(),
+                 "the @stride attribute is deprecated; use a larger type if "
+                 "necessary");
       return create<ast::StrideDecoration>(t.source(), val.value);
     });
   }

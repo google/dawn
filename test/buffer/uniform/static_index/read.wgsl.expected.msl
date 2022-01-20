@@ -14,13 +14,10 @@ inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
 
 struct Inner {
   /* 0x0000 */ int x;
-};
-struct tint_padded_array_element {
-  /* 0x0000 */ Inner el;
   /* 0x0004 */ int8_t tint_pad[12];
 };
 struct tint_array_wrapper {
-  /* 0x0000 */ tint_padded_array_element arr[4];
+  /* 0x0000 */ Inner arr[4];
 };
 struct S {
   /* 0x0000 */ packed_int3 a;
@@ -35,7 +32,6 @@ struct S {
   /* 0x0060 */ float3x2 j;
   /* 0x0078 */ int8_t tint_pad_1[8];
   /* 0x0080 */ Inner k;
-  /* 0x0084 */ int8_t tint_pad_2[12];
   /* 0x0090 */ tint_array_wrapper l;
 };
 

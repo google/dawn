@@ -7,7 +7,7 @@ struct Inner {
   f : f32;
   g : mat2x3<f32>;
   h : mat3x2<f32>;
-  i : @stride(16) array<vec4<i32>, 4>;
+  i : array<vec4<i32>, 4>;
 }
 
 struct S {

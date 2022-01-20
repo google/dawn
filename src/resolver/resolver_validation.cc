@@ -321,15 +321,29 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
         // bytes above, so we only need to validate that stride is a multiple of
         // 16 bytes.
         if (arr->Stride() % 16 != 0) {
+          // Since WGSL has no stride attribute, try to provide a useful hint
+          // for how the shader author can resolve the issue.
+          std::string hint;
+          if (arr->ElemType()->is_scalar()) {
+            hint =
+                "Consider using a vector or struct as the element type "
+                "instead.";
+          } else if (auto* vec = arr->ElemType()->As<sem::Vector>();
+                     vec && vec->type()->Size() == 4) {
+            hint = "Consider using a vec4 instead.";
+          } else if (arr->ElemType()->Is<sem::Struct>()) {
+            hint =
+                "Consider using the @size attribute on the last struct member.";
+          } else {
+            hint =
+                "Consider wrapping the element type in a struct and using the "
+                "@size attribute.";
+          }
           AddError(
               "uniform storage requires that array elements be aligned to 16 "
-              "bytes, but array stride of '" +
+              "bytes, but array element alignment of '" +
                   member_name_of(m) + "' is currently " +
-                  std::to_string(arr->Stride()) +
-                  ". Consider setting @stride(" +
-                  std::to_string(
-                      utils::RoundUp(required_align, arr->Stride())) +
-                  ") on the array type",
+                  std::to_string(arr->Stride()) + ". " + hint,
               m->Declaration()->type->source);
           AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
                   str->Declaration()->source);

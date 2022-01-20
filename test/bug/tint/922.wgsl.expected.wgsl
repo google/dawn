@@ -21,12 +21,12 @@ struct ub_SceneParams {
 }
 
 struct ub_MaterialParams {
-  u_TexMtx : @stride(32) array<Mat4x2_, 1>;
+  u_TexMtx : array<Mat4x2_, 1>;
   u_Misc0_ : vec4<f32>;
 }
 
 struct ub_PacketParams {
-  u_PosMtx : @stride(48) array<Mat4x3_, 32>;
+  u_PosMtx : array<Mat4x3_, 32>;
 }
 
 struct VertexOutput {

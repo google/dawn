@@ -6,7 +6,7 @@ struct Uniforms {
 }
 
 struct OutputBuf {
-  result : @stride(4) array<u32>;
+  result : array<u32>;
 }
 
 @group(0) @binding(0) var src : texture_2d<f32>;

@@ -15,12 +15,8 @@ inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
 struct Inner {
   /* 0x0000 */ int x;
 };
-struct tint_padded_array_element {
-  /* 0x0000 */ Inner el;
-  /* 0x0004 */ int8_t tint_pad[12];
-};
 struct tint_array_wrapper {
-  /* 0x0000 */ tint_padded_array_element arr[4];
+  /* 0x0000 */ Inner arr[4];
 };
 struct S {
   /* 0x0000 */ packed_int3 a;
@@ -33,7 +29,7 @@ struct S {
   /* 0x0050 */ float3x2 h;
   /* 0x0068 */ Inner i;
   /* 0x006c */ tint_array_wrapper j;
-  /* 0x00ac */ int8_t tint_pad_1[4];
+  /* 0x007c */ int8_t tint_pad[4];
 };
 
 kernel void tint_symbol(const device S* tint_symbol_1 [[buffer(0)]]) {
