@@ -405,7 +405,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment of 'inner' is currently 4. Consider using a vector or struct as the element type instead.
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment is currently 4. Consider using a vector or struct as the element type instead.
 12:34 note: see layout of struct:
 /*            align(4) size(44) */ struct Outer {
 /* offset( 0) align(4) size(40) */   inner : array<f32, 10>;
@@ -442,7 +442,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment of 'inner' is currently 8. Consider using a vec4 instead.
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment is currently 8. Consider using a vec4 instead.
 12:34 note: see layout of struct:
 /*            align(8) size(88) */ struct Outer {
 /* offset( 0) align(8) size(80) */   inner : array<vec2<f32>, 10>;
@@ -488,11 +488,54 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   ASSERT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment of 'inner' is currently 8. Consider using the @size attribute on the last struct member.
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment is currently 8. Consider using the @size attribute on the last struct member.
 12:34 note: see layout of struct:
 /*            align(4) size(84) */ struct Outer {
 /* offset( 0) align(4) size(80) */   inner : array<ArrayElem, 10>;
 /* offset(80) align(4) size( 4) */   scalar : i32;
+/*                              */ };
+78:90 note: see declaration of variable)");
+}
+
+TEST_F(ResolverStorageClassLayoutValidationTest,
+       UniformBuffer_InvalidArrayStride_TopLevelArray) {
+  // @group(0) @binding(0)
+  // var<uniform> a : array<f32, 4>;
+  Global(Source{{78, 90}}, "a", ty.array(Source{{34, 56}}, ty.f32(), 4),
+         ast::StorageClass::kUniform, GroupAndBinding(0, 0));
+
+  ASSERT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment is currently 4. Consider using a vector or struct as the element type instead.)");
+}
+
+TEST_F(ResolverStorageClassLayoutValidationTest,
+       UniformBuffer_InvalidArrayStride_NestedArray) {
+  // struct Outer {
+  //   inner : array<array<f32, 4>, 4>
+  // };
+  //
+  // @group(0) @binding(0)
+  // var<uniform> a : array<Outer, 4>;
+
+  Structure(
+      Source{{12, 34}}, "Outer",
+      {
+          Member("inner", ty.array(Source{{34, 56}}, ty.array(ty.f32(), 4), 4)),
+      },
+      {StructBlock()});
+
+  Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
+         ast::StorageClass::kUniform, GroupAndBinding(0, 0));
+
+  ASSERT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment is currently 4. Consider using a vector or struct as the element type instead.
+12:34 note: see layout of struct:
+/*            align(4) size(64) */ struct Outer {
+/* offset( 0) align(4) size(64) */   inner : array<array<f32, 4>, 4>;
 /*                              */ };
 78:90 note: see declaration of variable)");
 }

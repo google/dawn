@@ -302,8 +302,11 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferVector) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
+  // struct S {
+  //   @size(16) f : f32;
+  // }
   // var<uniform> g : array<S, 3>;
-  auto* s = Structure("S", {Member("a", ty.f32())});
+  auto* s = Structure("S", {Member("a", ty.f32(), {MemberSize(16)})});
   auto* a = ty.array(ty.Of(s), 3);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform,
          ast::DecorationList{

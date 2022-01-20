@@ -229,8 +229,9 @@ bool Resolver::ValidateVariableConstructorOrCast(
   return true;
 }
 
-bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
-                                          ast::StorageClass sc) {
+bool Resolver::ValidateStorageClassLayout(const sem::Type* store_ty,
+                                          ast::StorageClass sc,
+                                          Source source) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class-layout-constraints
 
   auto is_uniform_struct_or_array = [sc](const sem::Type* ty) {
@@ -255,110 +256,125 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
     return builder_->Symbols().NameFor(sm->Declaration()->symbol);
   };
 
+  // Cache result of type + storage class pair.
+  if (!valid_type_storage_layouts_.emplace(store_ty, sc).second) {
+    return true;
+  }
+
   if (!ast::IsHostShareable(sc)) {
     return true;
   }
 
-  for (size_t i = 0; i < str->Members().size(); ++i) {
-    auto* const m = str->Members()[i];
-    uint32_t required_align = required_alignment_of(m->Type());
+  if (auto* str = store_ty->As<sem::Struct>()) {
+    for (size_t i = 0; i < str->Members().size(); ++i) {
+      auto* const m = str->Members()[i];
+      uint32_t required_align = required_alignment_of(m->Type());
 
-    // Validate that member is at a valid byte offset
-    if (m->Offset() % required_align != 0) {
-      AddError("the offset of a struct member of type '" +
-                   m->Type()->UnwrapRef()->FriendlyName(builder_->Symbols()) +
-                   "' in storage class '" + ast::ToString(sc) +
-                   "' must be a multiple of " + std::to_string(required_align) +
-                   " bytes, but '" + member_name_of(m) +
-                   "' is currently at offset " + std::to_string(m->Offset()) +
-                   ". Consider setting @align(" +
-                   std::to_string(required_align) + ") on this member",
-               m->Declaration()->source);
-
-      AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
-              str->Declaration()->source);
-
-      if (auto* member_str = m->Type()->As<sem::Struct>()) {
-        AddNote("and layout of struct member:\n" +
-                    member_str->Layout(builder_->Symbols()),
-                member_str->Declaration()->source);
+      // Recurse into the member type.
+      if (!ValidateStorageClassLayout(m->Type(), sc,
+                                      m->Declaration()->type->source)) {
+        AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
+                str->Declaration()->source);
+        return false;
       }
 
-      return false;
-    }
-
-    // For uniform buffers, validate that the number of bytes between the
-    // previous member of type struct and the current is a multiple of 16 bytes.
-    auto* const prev_member = (i == 0) ? nullptr : str->Members()[i - 1];
-    if (prev_member && is_uniform_struct(prev_member->Type())) {
-      const uint32_t prev_to_curr_offset = m->Offset() - prev_member->Offset();
-      if (prev_to_curr_offset % 16 != 0) {
-        AddError(
-            "uniform storage requires that the number of bytes between the "
-            "start of the previous member of type struct and the current "
-            "member be a multiple of 16 bytes, but there are currently " +
-                std::to_string(prev_to_curr_offset) + " bytes between '" +
-                member_name_of(prev_member) + "' and '" + member_name_of(m) +
-                "'. Consider setting @align(16) on this member",
-            m->Declaration()->source);
+      // Validate that member is at a valid byte offset
+      if (m->Offset() % required_align != 0) {
+        AddError("the offset of a struct member of type '" +
+                     m->Type()->UnwrapRef()->FriendlyName(builder_->Symbols()) +
+                     "' in storage class '" + ast::ToString(sc) +
+                     "' must be a multiple of " +
+                     std::to_string(required_align) + " bytes, but '" +
+                     member_name_of(m) + "' is currently at offset " +
+                     std::to_string(m->Offset()) +
+                     ". Consider setting @align(" +
+                     std::to_string(required_align) + ") on this member",
+                 m->Declaration()->source);
 
         AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
                 str->Declaration()->source);
 
-        auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
-        AddNote("and layout of previous member struct:\n" +
-                    prev_member_str->Layout(builder_->Symbols()),
-                prev_member_str->Declaration()->source);
+        if (auto* member_str = m->Type()->As<sem::Struct>()) {
+          AddNote("and layout of struct member:\n" +
+                      member_str->Layout(builder_->Symbols()),
+                  member_str->Declaration()->source);
+        }
+
         return false;
       }
-    }
 
-    // For uniform buffer array members, validate that array elements are
-    // aligned to 16 bytes
-    if (auto* arr = m->Type()->As<sem::Array>()) {
-      if (sc == ast::StorageClass::kUniform) {
-        // We already validated that this array member is itself aligned to 16
-        // bytes above, so we only need to validate that stride is a multiple of
-        // 16 bytes.
-        if (arr->Stride() % 16 != 0) {
-          // Since WGSL has no stride attribute, try to provide a useful hint
-          // for how the shader author can resolve the issue.
-          std::string hint;
-          if (arr->ElemType()->is_scalar()) {
-            hint =
-                "Consider using a vector or struct as the element type "
-                "instead.";
-          } else if (auto* vec = arr->ElemType()->As<sem::Vector>();
-                     vec && vec->type()->Size() == 4) {
-            hint = "Consider using a vec4 instead.";
-          } else if (arr->ElemType()->Is<sem::Struct>()) {
-            hint =
-                "Consider using the @size attribute on the last struct member.";
-          } else {
-            hint =
-                "Consider wrapping the element type in a struct and using the "
-                "@size attribute.";
-          }
+      // For uniform buffers, validate that the number of bytes between the
+      // previous member of type struct and the current is a multiple of 16
+      // bytes.
+      auto* const prev_member = (i == 0) ? nullptr : str->Members()[i - 1];
+      if (prev_member && is_uniform_struct(prev_member->Type())) {
+        const uint32_t prev_to_curr_offset =
+            m->Offset() - prev_member->Offset();
+        if (prev_to_curr_offset % 16 != 0) {
           AddError(
-              "uniform storage requires that array elements be aligned to 16 "
-              "bytes, but array element alignment of '" +
-                  member_name_of(m) + "' is currently " +
-                  std::to_string(arr->Stride()) + ". " + hint,
-              m->Declaration()->type->source);
+              "uniform storage requires that the number of bytes between the "
+              "start of the previous member of type struct and the current "
+              "member be a multiple of 16 bytes, but there are currently " +
+                  std::to_string(prev_to_curr_offset) + " bytes between '" +
+                  member_name_of(prev_member) + "' and '" + member_name_of(m) +
+                  "'. Consider setting @align(16) on this member",
+              m->Declaration()->source);
+
           AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
                   str->Declaration()->source);
+
+          auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
+          AddNote("and layout of previous member struct:\n" +
+                      prev_member_str->Layout(builder_->Symbols()),
+                  prev_member_str->Declaration()->source);
           return false;
         }
       }
     }
+  }
 
-    // If member is struct, recurse
-    if (auto* str_member = m->Type()->As<sem::Struct>()) {
-      // Cache result of struct + storage class pair
-      if (valid_struct_storage_layouts_.emplace(str_member, sc).second) {
-        if (!ValidateStorageClassLayout(str_member, sc)) {
-          return false;
+  // For uniform buffer array members, validate that array elements are
+  // aligned to 16 bytes
+  if (auto* arr = store_ty->As<sem::Array>()) {
+    // Recurse into the element type.
+    // TODO(crbug.com/tint/1388): Ideally we'd pass the source for nested
+    // element type here, but we can't easily get that from the semantic node.
+    // We should consider recursing through the AST type nodes instead.
+    if (!ValidateStorageClassLayout(arr->ElemType(), sc, source)) {
+      return false;
+    }
+
+    if (sc == ast::StorageClass::kUniform) {
+      // We already validated that this array member is itself aligned to 16
+      // bytes above, so we only need to validate that stride is a multiple
+      // of 16 bytes.
+      if (arr->Stride() % 16 != 0) {
+        // Since WGSL has no stride attribute, try to provide a useful hint
+        // for how the shader author can resolve the issue.
+        std::string hint;
+        if (arr->ElemType()->is_scalar()) {
+          hint =
+              "Consider using a vector or struct as the element type "
+              "instead.";
+        } else if (auto* vec = arr->ElemType()->As<sem::Vector>();
+                   vec && vec->type()->Size() == 4) {
+          hint = "Consider using a vec4 instead.";
+        } else if (arr->ElemType()->Is<sem::Struct>()) {
+          hint =
+              "Consider using the @size attribute on the last struct "
+              "member.";
+        } else {
+          hint =
+              "Consider wrapping the element type in a struct and using "
+              "the "
+              "@size attribute.";
         }
+        AddError(
+            "uniform storage requires that array elements be aligned to 16 "
+            "bytes, but array element alignment is currently " +
+                std::to_string(arr->Stride()) + ". " + hint,
+            source);
+        return false;
       }
     }
   }
@@ -368,8 +384,18 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
 
 bool Resolver::ValidateStorageClassLayout(const sem::Variable* var) {
   if (auto* str = var->Type()->UnwrapRef()->As<sem::Struct>()) {
-    if (!ValidateStorageClassLayout(str, var->StorageClass())) {
+    if (!ValidateStorageClassLayout(str, var->StorageClass(),
+                                    str->Declaration()->source)) {
       AddNote("see declaration of variable", var->Declaration()->source);
+      return false;
+    }
+  } else {
+    Source source = var->Declaration()->source;
+    if (var->Declaration()->type) {
+      source = var->Declaration()->type->source;
+    }
+    if (!ValidateStorageClassLayout(var->Type()->UnwrapRef(),
+                                    var->StorageClass(), source)) {
       return false;
     }
   }
