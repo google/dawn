@@ -25,8 +25,8 @@
 #ifndef SRC_SEM_INTRINSIC_TYPE_H_
 #define SRC_SEM_INTRINSIC_TYPE_H_
 
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace tint {
 namespace sem {

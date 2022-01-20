@@ -91,7 +91,7 @@ struct UniqueVector {
   ConstReverseIterator rend() const { return vector.rend(); }
 
   /// @returns a const reference to the internal vector
-  operator const std::vector<T> &() const { return vector; }
+  operator const std::vector<T>&() const { return vector; }
 
   /// Removes the last element from the vector
   /// @returns the popped element

@@ -36,7 +36,9 @@ TEST_F(ParserImplTest, DEPRECATED_DecorationDecl_EmptyBlock) {
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_EQ(decos.value.size(), 0u);
-  EXPECT_EQ(p->error(), R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
 1:3: empty decoration list)");
 }
 
@@ -68,7 +70,9 @@ TEST_F(ParserImplTest, DecorationDecl_MissingClose) {
   EXPECT_TRUE(p->has_error()) << p->error();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
 1:10: expected ']]' for decoration list)");
 }
 
@@ -78,7 +82,9 @@ TEST_F(ParserImplTest, StructMemberDecorationDecl_SizeMissingClose) {
   EXPECT_TRUE(p->has_error()) << p->error();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+  EXPECT_EQ(
+      p->error(),
+      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
 1:10: expected ']]' for decoration list)");
 }
 

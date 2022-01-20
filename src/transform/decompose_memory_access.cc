@@ -35,8 +35,8 @@
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
-#include "src/utils/map.h"
 #include "src/utils/hash.h"
+#include "src/utils/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess::Intrinsic);

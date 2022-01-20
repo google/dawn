@@ -38,8 +38,7 @@ TEST_F(ParserImplTest, DecorationDecl_MissingParenLeft) {
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(),
-            "1:11: expected '(' for location decoration");
+  EXPECT_EQ(p->error(), "1:11: expected '(' for location decoration");
 }
 
 TEST_F(ParserImplTest, DecorationDecl_MissingValue) {
@@ -60,8 +59,7 @@ TEST_F(ParserImplTest, DecorationDecl_MissingParenRight) {
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_TRUE(decos.value.empty());
-  EXPECT_EQ(p->error(),
-            "1:12: expected ')' for location decoration");
+  EXPECT_EQ(p->error(), "1:12: expected ')' for location decoration");
 }
 
 TEST_F(ParserImplTest, DecorationDecl_InvalidDecoration) {

@@ -610,7 +610,7 @@ Source ParserImpl::GetSourceForInst(
   if (where == inst_source_.end()) {
     return {};
   }
-  return Source{where->second};
+  return Source{where->second };
 }
 
 bool ParserImpl::ParseInternalModuleExceptFunctions() {

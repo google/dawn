@@ -54,9 +54,8 @@ fn f() { return 1 & >; }
 }
 
 TEST_F(ParserImplErrorTest, AliasDeclInvalidDeco) {
-  EXPECT(
-      "@override type e=u32;",
-      R"(test.wgsl:1:2 error: unexpected decorations
+  EXPECT("@override type e=u32;",
+         R"(test.wgsl:1:2 error: unexpected decorations
 @override type e=u32;
  ^^^^^^^^
 )");
@@ -324,18 +323,16 @@ fn f() { for (var i : i32 = 0; i < 8; i=i+1) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageMissingLParen) {
-  EXPECT(
-      "@stage vertex) fn f() {}",
-      R"(test.wgsl:1:8 error: expected '(' for stage decoration
+  EXPECT("@stage vertex) fn f() {}",
+         R"(test.wgsl:1:8 error: expected '(' for stage decoration
 @stage vertex) fn f() {}
        ^^^^^^
 )");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageMissingRParen) {
-  EXPECT(
-      "@stage(vertex fn f() {}",
-      R"(test.wgsl:1:15 error: expected ')' for stage decoration
+  EXPECT("@stage(vertex fn f() {}",
+         R"(test.wgsl:1:15 error: expected ')' for stage decoration
 @stage(vertex fn f() {}
               ^^
 )");
@@ -1135,18 +1132,16 @@ test.wgsl:1:15 error: expected ']]' for decoration list
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationMissingLParen) {
-  EXPECT(
-      "@location 1) var i : i32;",
-      R"(test.wgsl:1:11 error: expected '(' for location decoration
+  EXPECT("@location 1) var i : i32;",
+         R"(test.wgsl:1:11 error: expected '(' for location decoration
 @location 1) var i : i32;
           ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationMissingRParen) {
-  EXPECT(
-      "@location (1 var i : i32;",
-      R"(test.wgsl:1:14 error: expected ')' for location decoration
+  EXPECT("@location (1 var i : i32;",
+         R"(test.wgsl:1:14 error: expected ')' for location decoration
 @location (1 var i : i32;
              ^^^
 )");
@@ -1190,18 +1185,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationInvalidValue) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinMissingLParen) {
-  EXPECT(
-      "@builtin position) var i : i32;",
-      R"(test.wgsl:1:10 error: expected '(' for builtin decoration
+  EXPECT("@builtin position) var i : i32;",
+         R"(test.wgsl:1:10 error: expected '(' for builtin decoration
 @builtin position) var i : i32;
          ^^^^^^^^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinMissingRParen) {
-  EXPECT(
-      "@builtin(position var i : i32;",
-      R"(test.wgsl:1:19 error: expected ')' for builtin decoration
+  EXPECT("@builtin(position var i : i32;",
+         R"(test.wgsl:1:19 error: expected ')' for builtin decoration
 @builtin(position var i : i32;
                   ^^^
 )");
@@ -1252,18 +1245,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinInvalidValue) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingMissingLParen) {
-  EXPECT(
-      "@binding 1) var i : i32;",
-      R"(test.wgsl:1:10 error: expected '(' for binding decoration
+  EXPECT("@binding 1) var i : i32;",
+         R"(test.wgsl:1:10 error: expected '(' for binding decoration
 @binding 1) var i : i32;
          ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingMissingRParen) {
-  EXPECT(
-      "@binding(1 var i : i32;",
-      R"(test.wgsl:1:12 error: expected ')' for binding decoration
+  EXPECT("@binding(1 var i : i32;",
+         R"(test.wgsl:1:12 error: expected ')' for binding decoration
 @binding(1 var i : i32;
            ^^^
 )");
@@ -1307,18 +1298,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingInvalidValue) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoGroupMissingLParen) {
-  EXPECT(
-      "@group 1) var i : i32;",
-      R"(test.wgsl:1:8 error: expected '(' for group decoration
+  EXPECT("@group 1) var i : i32;",
+         R"(test.wgsl:1:8 error: expected '(' for group decoration
 @group 1) var i : i32;
        ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoGroupMissingRParen) {
-  EXPECT(
-      "@group(1 var i : i32;",
-      R"(test.wgsl:1:10 error: expected ')' for group decoration
+  EXPECT("@group(1 var i : i32;",
+         R"(test.wgsl:1:10 error: expected ')' for group decoration
 @group(1 var i : i32;
          ^^^
 )");
