@@ -824,15 +824,15 @@ EShLanguage pipeline_stage_to_esh_language(tint::ast::PipelineStage stage) {
 /// @returns true on success
 bool GenerateGlsl(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_GLSL_WRITER
-  bool success = true;
   if (options.validate) {
     glslang::InitializeProcess();
   }
-  tint::writer::glsl::Options gen_options;
-  tint::inspector::Inspector inspector(program);
-  for (auto& entry_point : inspector.GetEntryPoints()) {
+
+  auto generate = [&](const tint::Program* program,
+                      const std::string entry_point_name) -> bool {
+    tint::writer::glsl::Options gen_options;
     auto result =
-        tint::writer::glsl::Generate(program, gen_options, entry_point.name);
+        tint::writer::glsl::Generate(program, gen_options, entry_point_name);
     if (!result.success) {
       PrintWGSL(std::cerr, *program);
       std::cerr << "Failed to generate: " << result.error << std::endl;
@@ -858,10 +858,24 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
           std::cerr << "Error parsing GLSL shader:\n"
                     << shader.getInfoLog() << "\n"
                     << shader.getInfoDebugLog() << "\n";
-          success = false;
+          return false;
         }
       }
     }
+    return true;
+  };
+
+  tint::inspector::Inspector inspector(program);
+
+  if (inspector.GetEntryPoints().empty()) {
+    // Pass empty string here so that the GLSL generator will generate
+    // code for all functions, reachable or not.
+    return generate(program, "");
+  }
+
+  bool success = true;
+  for (auto& entry_point : inspector.GetEntryPoints()) {
+    success &= generate(program, entry_point.name);
   }
   return success;
 #else

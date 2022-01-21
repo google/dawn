@@ -1,8 +1,8 @@
 SKIP: FAILED
 
-bug/tint/1081.wgsl:9:25 warning: integral user-defined fragment inputs must have a flat interpolation attribute
+bug/tint/1081.wgsl:9:22 warning: integral user-defined fragment inputs must have a flat interpolation attribute
 fn main(@location(1) x: vec3<i32>) -> @location(2) i32 {
-                        ^
+                     ^
 
 #version 310 es
 precision mediump float;
@@ -51,7 +51,7 @@ void main() {
 
 Error parsing GLSL shader:
 ERROR: 0:35: 'int' : must be qualified as flat in
-ERROR: 0:35: '' : compilation terminated
+ERROR: 0:35: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

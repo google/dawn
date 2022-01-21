@@ -62,10 +62,6 @@ class Glsl : public Castable<Glsl, Transform> {
   /// @param data optional extra transform-specific data
   /// @returns the transformation result
   Output Run(const Program* program, const DataMap& data = {}) override;
-
- private:
-  /// Add an empty shader entry point if none exist in the module.
-  void AddEmptyEntryPoint(CloneContext& ctx) const;
 };
 
 }  // namespace transform

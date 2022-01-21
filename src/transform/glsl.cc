@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/program_builder.h"
+#include "src/transform/add_empty_entry_point.h"
 #include "src/transform/add_spirv_block_decoration.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
@@ -67,7 +68,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   // referenced only by phonies from being optimized out. Strictly
   // speaking, that optimization isn't incorrect, but it prevents some
   // tests (e.g., types/texture/*) from producing useful results.
-  if (cfg) {
+  if (cfg && !cfg->entry_point.empty()) {
     manager.Add<SingleEntryPoint>();
     data.Add<SingleEntryPoint::Config>(cfg->entry_point);
   }
@@ -76,6 +77,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
   manager.Add<PadArrayElements>();
+  manager.Add<AddEmptyEntryPoint>();
   manager.Add<AddSpirvBlockDecoration>();
 
   // For now, canonicalize to structs for all IO, as in HLSL.
@@ -90,22 +92,9 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
 
   ProgramBuilder builder;
   CloneContext ctx(&builder, &out.program);
-  AddEmptyEntryPoint(ctx);
   ctx.Clone();
   builder.SetTransformApplied(this);
   return Output{Program(std::move(builder))};
-}
-
-void Glsl::AddEmptyEntryPoint(CloneContext& ctx) const {
-  for (auto* func : ctx.src->AST().Functions()) {
-    if (func->IsEntryPoint()) {
-      return;
-    }
-  }
-  ctx.dst->Func(ctx.dst->Symbols().New("unused_entry_point"), {},
-                ctx.dst->ty.void_(), {},
-                {ctx.dst->Stage(ast::PipelineStage::kCompute),
-                 ctx.dst->WorkgroupSize(1)});
 }
 
 Glsl::Config::Config(const std::string& ep, bool disable_wi)
