@@ -403,6 +403,54 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputComponentCountCompatibility) 
     }
 }
 
+// Tests that when blendOperationMinOrMax is "min" or "max", both srcBlendFactor and dstBlendFactor
+// must be "one".
+TEST_F(RenderPipelineValidationTest, BlendOperationAndBlendFactors) {
+    constexpr std::array<wgpu::BlendFactor, 8> kBlendFactors = {wgpu::BlendFactor::Zero,
+                                                                wgpu::BlendFactor::One,
+                                                                wgpu::BlendFactor::SrcAlpha,
+                                                                wgpu::BlendFactor::OneMinusSrcAlpha,
+                                                                wgpu::BlendFactor::Src,
+                                                                wgpu::BlendFactor::DstAlpha,
+                                                                wgpu::BlendFactor::OneMinusDstAlpha,
+                                                                wgpu::BlendFactor::Dst};
+
+    constexpr std::array<wgpu::BlendOperation, 2> kBlendOperationsForTest = {
+        wgpu::BlendOperation::Max, wgpu::BlendOperation::Min};
+
+    for (wgpu::BlendOperation blendOperationMinOrMax : kBlendOperationsForTest) {
+        for (wgpu::BlendFactor srcFactor : kBlendFactors) {
+            for (wgpu::BlendFactor dstFactor : kBlendFactors) {
+                utils::ComboRenderPipelineDescriptor descriptor;
+                descriptor.vertex.module = vsModule;
+                descriptor.cFragment.module = fsModule;
+                descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+                descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+                descriptor.cBlends[0].color.srcFactor = srcFactor;
+                descriptor.cBlends[0].color.dstFactor = dstFactor;
+                descriptor.cBlends[0].alpha.srcFactor = srcFactor;
+                descriptor.cBlends[0].alpha.dstFactor = dstFactor;
+
+                descriptor.cBlends[0].color.operation = blendOperationMinOrMax;
+                descriptor.cBlends[0].alpha.operation = wgpu::BlendOperation::Add;
+                if (srcFactor == wgpu::BlendFactor::One && dstFactor == wgpu::BlendFactor::One) {
+                    device.CreateRenderPipeline(&descriptor);
+                } else {
+                    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                }
+
+                descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
+                descriptor.cBlends[0].alpha.operation = blendOperationMinOrMax;
+                if (srcFactor == wgpu::BlendFactor::One && dstFactor == wgpu::BlendFactor::One) {
+                    device.CreateRenderPipeline(&descriptor);
+                } else {
+                    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                }
+            }
+        }
+    }
+}
+
 /// Tests that the sample count of the render pipeline must be valid.
 TEST_F(RenderPipelineValidationTest, SampleCount) {
     {
