@@ -22,14 +22,7 @@
 
 namespace dawn::native {
 
-    MaybeError ValidateExternalTexturePlane(const TextureViewBase* textureView,
-                                            wgpu::TextureFormat format) {
-        if (textureView->GetFormat().format != format) {
-            return DAWN_VALIDATION_ERROR(
-                "The external texture descriptor specifies a texture format that is different from "
-                "at least one of the passed texture views.");
-        }
-
+    MaybeError ValidateExternalTexturePlane(const TextureViewBase* textureView) {
         DAWN_INVALID_IF(
             (textureView->GetTexture()->GetUsage() & wgpu::TextureUsage::TextureBinding) == 0,
             "The external texture plane (%s) usage (%s) doesn't include the required usage (%s)",
@@ -57,22 +50,20 @@ namespace dawn::native {
 
         DAWN_TRY(device->ValidateObject(descriptor->plane0));
 
-        const Format* format;
-        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
-        DAWN_UNUSED(format);
+        wgpu::TextureFormat plane0Format = descriptor->plane0->GetFormat().format;
 
-        switch (descriptor->format) {
+        switch (plane0Format) {
             case wgpu::TextureFormat::RGBA8Unorm:
             case wgpu::TextureFormat::BGRA8Unorm:
             case wgpu::TextureFormat::RGBA16Float:
-                DAWN_TRY_CONTEXT(
-                    ValidateExternalTexturePlane(descriptor->plane0, descriptor->format),
-                    "validating plane0 against the external texture format (%s)",
-                    descriptor->format);
+                DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
                 break;
             default:
                 return DAWN_FORMAT_VALIDATION_ERROR(
-                    "Format (%s) is not a supported external texture format.", descriptor->format);
+                    "The external texture plane (%s) format (%s) is not a supported format "
+                    "(%s, %s, %s).",
+                    descriptor->plane0, plane0Format, wgpu::TextureFormat::RGBA8Unorm,
+                    wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::RGBA16Float);
         }
 
         return {};
