@@ -63,13 +63,13 @@ mkdir %TEMP_DIR% || goto :error
 call :status "Fetching and installing DXC"
 @echo on
 set DXC_RELEASE="https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.6.2112/dxc_2021_12_08.zip"
-curl -L %DXC_RELEASE% --output "%TEMP_DIR%\dxc_release.zip" || goto :error
+curl -k -L %DXC_RELEASE% --output "%TEMP_DIR%\dxc_release.zip" || goto :error
 powershell.exe -Command "Expand-Archive -LiteralPath '%TEMP_DIR%\dxc_release.zip' -DestinationPath '%TEMP_DIR%\dxc'" || goto :error
 set DXC_PATH=%TEMP_DIR%\dxc\bin\x64
 
 rem Patch with artifact build that contains fixes not present in the release build
 set DXC_ARTIFACT="https://ci.appveyor.com/api/projects/dnovillo/directxshadercompiler/artifacts/build%%2FRelease%%2Fdxc-artifacts.zip?branch=master&pr=false&job=image%%3A%%20Visual%%20Studio%%202019"
-curl -L %DXC_ARTIFACT% --output "%TEMP_DIR%\dxc_artifact.zip" || goto :error
+curl -k -L %DXC_ARTIFACT% --output "%TEMP_DIR%\dxc_artifact.zip" || goto :error
 powershell.exe -Command "Expand-Archive -Force -LiteralPath '%TEMP_DIR%\dxc_artifact.zip' -DestinationPath '%TEMP_DIR%\dxc_artifact'" || goto :error
 move /Y %TEMP_DIR%\dxc_artifact\bin\* %DXC_PATH%
 @echo off
@@ -78,7 +78,7 @@ call :status "Fetching and installing Windows SDK for d3dcompiler DLL"
 @echo on
 set WINSDK_DLL_INSTALLER=https://go.microsoft.com/fwlink/?linkid=2164145
 set WINSDK_VERSION=10.0.20348.0
-curl -L %WINSDK_DLL_INSTALLER% --output "%TEMP_DIR%\winsdksetup.exe" || goto :error
+curl -k -L %WINSDK_DLL_INSTALLER% --output "%TEMP_DIR%\winsdksetup.exe" || goto :error
 start "download" /wait "%TEMP_DIR%\winsdksetup.exe" /quiet /norestart /ceip off /features OptionId.DesktopCPPx64 /layout "%TEMP_DIR%\winsdkinstall" || goto :error
 start "install" /wait "%TEMP_DIR%\winsdkinstall\Installers\Windows SDK for Windows Store Apps Tools-x86_en-us.msi" || goto :error
 set D3DCOMPILER_PATH=C:\Program Files (x86)\Windows Kits\10\bin\%WINSDK_VERSION%\x64
