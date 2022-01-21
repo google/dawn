@@ -1,0 +1,71 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Time {
+  /* 0x0000 */ float value;
+};
+struct Uniforms {
+  /* 0x0000 */ float scale;
+  /* 0x0004 */ float offsetX;
+  /* 0x0008 */ float offsetY;
+  /* 0x000c */ float scalar;
+  /* 0x0010 */ float scalarOffset;
+};
+struct VertexOutput {
+  float4 Position;
+  float4 v_color;
+};
+struct tint_symbol_1 {
+  float4 position [[attribute(0)]];
+  float4 color [[attribute(1)]];
+};
+struct tint_symbol_2 {
+  float4 v_color [[user(locn0)]];
+  float4 Position [[position]];
+};
+struct tint_symbol_4 {
+  float4 v_color [[user(locn0)]];
+};
+struct tint_symbol_5 {
+  float4 value [[color(0)]];
+};
+
+VertexOutput vert_main_inner(float4 position, float4 color, const constant Uniforms* const tint_symbol_6, const constant Time* const tint_symbol_7) {
+  float fade = fmod(((*(tint_symbol_6)).scalarOffset + (((*(tint_symbol_7)).value * (*(tint_symbol_6)).scalar) / 10.0f)), 1.0f);
+  if ((fade < 0.5f)) {
+    fade = (fade * 2.0f);
+  } else {
+    fade = ((1.0f - fade) * 2.0f);
+  }
+  float xpos = (position[0] * (*(tint_symbol_6)).scale);
+  float ypos = (position[1] * (*(tint_symbol_6)).scale);
+  float angle = ((3.141590118f * 2.0f) * fade);
+  float xrot = ((xpos * cos(angle)) - (ypos * sin(angle)));
+  float yrot = ((xpos * sin(angle)) + (ypos * cos(angle)));
+  xpos = (xrot + (*(tint_symbol_6)).offsetX);
+  ypos = (yrot + (*(tint_symbol_6)).offsetY);
+  VertexOutput output = {};
+  output.v_color = (float4(fade, (1.0f - fade), 0.0f, 1.0f) + color);
+  output.Position = float4(xpos, ypos, 0.0f, 1.0f);
+  return output;
+}
+
+vertex tint_symbol_2 vert_main(const constant Uniforms* tint_symbol_8 [[buffer(0)]], const constant Time* tint_symbol_9 [[buffer(1)]], tint_symbol_1 tint_symbol [[stage_in]]) {
+  VertexOutput const inner_result = vert_main_inner(tint_symbol.position, tint_symbol.color, tint_symbol_8, tint_symbol_9);
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.Position = inner_result.Position;
+  wrapper_result.v_color = inner_result.v_color;
+  return wrapper_result;
+}
+
+float4 frag_main_inner(float4 v_color) {
+  return v_color;
+}
+
+fragment tint_symbol_5 frag_main(tint_symbol_4 tint_symbol_3 [[stage_in]]) {
+  float4 const inner_result_1 = frag_main_inner(tint_symbol_3.v_color);
+  tint_symbol_5 wrapper_result_1 = {};
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
+}
+

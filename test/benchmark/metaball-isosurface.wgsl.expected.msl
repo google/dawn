@@ -1,0 +1,219 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, int N, int M>
+inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
+  return lhs * vec<T, N>(rhs);
+}
+
+template<typename T, int N, int M>
+inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
+  return vec<T, M>(lhs) * rhs;
+}
+
+struct tint_array_wrapper {
+  /* 0x0000 */ uint arr[256];
+};
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ int arr[4096];
+};
+struct Tables {
+  /* 0x0000 */ tint_array_wrapper edges;
+  /* 0x0400 */ tint_array_wrapper_1 tris;
+};
+struct IsosurfaceVolume {
+  /* 0x0000 */ packed_float3 min;
+  /* 0x000c */ int8_t tint_pad[4];
+  /* 0x0010 */ packed_float3 max;
+  /* 0x001c */ int8_t tint_pad_1[4];
+  /* 0x0020 */ packed_float3 step;
+  /* 0x002c */ int8_t tint_pad_2[4];
+  /* 0x0030 */ packed_uint3 size;
+  /* 0x003c */ float threshold;
+  /* 0x0040 */ float values[1];
+  /* 0x0044 */ int8_t tint_pad_3[12];
+};
+struct PositionBuffer {
+  /* 0x0000 */ float values[1];
+};
+struct NormalBuffer {
+  /* 0x0000 */ float values[1];
+};
+struct IndexBuffer {
+  /* 0x0000 */ uint tris[1];
+};
+struct DrawIndirectArgs {
+  /* 0x0000 */ uint vc;
+  /* 0x0004 */ atomic_uint vertexCount;
+  /* 0x0008 */ uint firstVertex;
+  /* 0x000c */ uint firstInstance;
+  /* 0x0010 */ atomic_uint indexCount;
+  /* 0x0014 */ uint indexedInstanceCount;
+  /* 0x0018 */ uint indexedFirstIndex;
+  /* 0x001c */ uint indexedBaseVertex;
+  /* 0x0020 */ uint indexedFirstInstance;
+};
+struct tint_array_wrapper_2 {
+  float3 arr[12];
+};
+struct tint_array_wrapper_3 {
+  uint arr[12];
+};
+
+float valueAt(uint3 index, device IsosurfaceVolume* const tint_symbol) {
+  if (any((index >= (*(tint_symbol)).size))) {
+    return 0.0f;
+  }
+  uint const valueIndex = ((index[0] + (index[1] * (*(tint_symbol)).size[0])) + ((index[2] * (*(tint_symbol)).size[0]) * (*(tint_symbol)).size[1]));
+  return (*(tint_symbol)).values[valueIndex];
+}
+
+float3 positionAt(uint3 index, device IsosurfaceVolume* const tint_symbol_1) {
+  return ((*(tint_symbol_1)).min + ((*(tint_symbol_1)).step * float3(uint3(index).xyz)));
+}
+
+float3 normalAt(uint3 index, device IsosurfaceVolume* const tint_symbol_2) {
+  return float3((valueAt((index - uint3(1u, 0u, 0u)), tint_symbol_2) - valueAt((index + uint3(1u, 0u, 0u)), tint_symbol_2)), (valueAt((index - uint3(0u, 1u, 0u)), tint_symbol_2) - valueAt((index + uint3(0u, 1u, 0u)), tint_symbol_2)), (valueAt((index - uint3(0u, 0u, 1u)), tint_symbol_2) - valueAt((index + uint3(0u, 0u, 1u)), tint_symbol_2)));
+}
+
+void interpX(uint index, uint3 i, float va, float vb, device IsosurfaceVolume* const tint_symbol_3, thread tint_array_wrapper_2* const tint_symbol_4, thread uint* const tint_symbol_5, thread tint_array_wrapper_2* const tint_symbol_6, thread tint_array_wrapper_3* const tint_symbol_7) {
+  float const mu = (((*(tint_symbol_3)).threshold - va) / (vb - va));
+  (*(tint_symbol_4)).arr[*(tint_symbol_5)] = (positionAt(i, tint_symbol_3) + float3(((*(tint_symbol_3)).step[0] * mu), 0.0f, 0.0f));
+  float3 const na = normalAt(i, tint_symbol_3);
+  float3 const nb = normalAt((i + uint3(1u, 0u, 0u)), tint_symbol_3);
+  (*(tint_symbol_6)).arr[*(tint_symbol_5)] = mix(na, nb, float3(mu, mu, mu));
+  (*(tint_symbol_7)).arr[index] = *(tint_symbol_5);
+  *(tint_symbol_5) = (*(tint_symbol_5) + 1u);
+}
+
+void interpY(uint index, uint3 i, float va, float vb, device IsosurfaceVolume* const tint_symbol_8, thread tint_array_wrapper_2* const tint_symbol_9, thread uint* const tint_symbol_10, thread tint_array_wrapper_2* const tint_symbol_11, thread tint_array_wrapper_3* const tint_symbol_12) {
+  float const mu = (((*(tint_symbol_8)).threshold - va) / (vb - va));
+  (*(tint_symbol_9)).arr[*(tint_symbol_10)] = (positionAt(i, tint_symbol_8) + float3(0.0f, ((*(tint_symbol_8)).step[1] * mu), 0.0f));
+  float3 const na = normalAt(i, tint_symbol_8);
+  float3 const nb = normalAt((i + uint3(0u, 1u, 0u)), tint_symbol_8);
+  (*(tint_symbol_11)).arr[*(tint_symbol_10)] = mix(na, nb, float3(mu, mu, mu));
+  (*(tint_symbol_12)).arr[index] = *(tint_symbol_10);
+  *(tint_symbol_10) = (*(tint_symbol_10) + 1u);
+}
+
+void interpZ(uint index, uint3 i, float va, float vb, device IsosurfaceVolume* const tint_symbol_13, thread tint_array_wrapper_2* const tint_symbol_14, thread uint* const tint_symbol_15, thread tint_array_wrapper_2* const tint_symbol_16, thread tint_array_wrapper_3* const tint_symbol_17) {
+  float const mu = (((*(tint_symbol_13)).threshold - va) / (vb - va));
+  (*(tint_symbol_14)).arr[*(tint_symbol_15)] = (positionAt(i, tint_symbol_13) + float3(0.0f, 0.0f, ((*(tint_symbol_13)).step[2] * mu)));
+  float3 const na = normalAt(i, tint_symbol_13);
+  float3 const nb = normalAt((i + uint3(0u, 0u, 1u)), tint_symbol_13);
+  (*(tint_symbol_16)).arr[*(tint_symbol_15)] = mix(na, nb, float3(mu, mu, mu));
+  (*(tint_symbol_17)).arr[index] = *(tint_symbol_15);
+  *(tint_symbol_15) = (*(tint_symbol_15) + 1u);
+}
+
+void computeMain_inner(uint3 global_id, device IsosurfaceVolume* const tint_symbol_18, const device Tables* const tint_symbol_19, thread tint_array_wrapper_2* const tint_symbol_20, thread uint* const tint_symbol_21, thread tint_array_wrapper_2* const tint_symbol_22, thread tint_array_wrapper_3* const tint_symbol_23, device DrawIndirectArgs* const tint_symbol_24, device PositionBuffer* const tint_symbol_25, device NormalBuffer* const tint_symbol_26, device IndexBuffer* const tint_symbol_27) {
+  uint3 const i0 = global_id;
+  uint3 const i1 = (global_id + uint3(1u, 0u, 0u));
+  uint3 const i2 = (global_id + uint3(1u, 1u, 0u));
+  uint3 const i3 = (global_id + uint3(0u, 1u, 0u));
+  uint3 const i4 = (global_id + uint3(0u, 0u, 1u));
+  uint3 const i5 = (global_id + uint3(1u, 0u, 1u));
+  uint3 const i6 = (global_id + uint3(1u, 1u, 1u));
+  uint3 const i7 = (global_id + uint3(0u, 1u, 1u));
+  float const v0 = valueAt(i0, tint_symbol_18);
+  float const v1 = valueAt(i1, tint_symbol_18);
+  float const v2 = valueAt(i2, tint_symbol_18);
+  float const v3 = valueAt(i3, tint_symbol_18);
+  float const v4 = valueAt(i4, tint_symbol_18);
+  float const v5 = valueAt(i5, tint_symbol_18);
+  float const v6 = valueAt(i6, tint_symbol_18);
+  float const v7 = valueAt(i7, tint_symbol_18);
+  uint cubeIndex = 0u;
+  if ((v0 < (*(tint_symbol_18)).threshold)) {
+    cubeIndex = (cubeIndex | 1u);
+  }
+  if ((v1 < (*(tint_symbol_18)).threshold)) {
+    cubeIndex = (cubeIndex | 2u);
+  }
+  if ((v2 < (*(tint_symbol_18)).threshold)) {
+    cubeIndex = (cubeIndex | 4u);
+  }
+  if ((v3 < (*(tint_symbol_18)).threshold)) {
+    cubeIndex = (cubeIndex | 8u);
+  }
+  if ((v4 < (*(tint_symbol_18)).threshold)) {
+    cubeIndex = (cubeIndex | 16u);
+  }
+  if ((v5 < (*(tint_symbol_18)).threshold)) {
+    cubeIndex = (cubeIndex | 32u);
+  }
+  if ((v6 < (*(tint_symbol_18)).threshold)) {
+    cubeIndex = (cubeIndex | 64u);
+  }
+  if ((v7 < (*(tint_symbol_18)).threshold)) {
+    cubeIndex = (cubeIndex | 128u);
+  }
+  uint const edges = (*(tint_symbol_19)).edges.arr[cubeIndex];
+  if (((edges & 1u) != 0u)) {
+    interpX(0u, i0, v0, v1, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 2u) != 0u)) {
+    interpY(1u, i1, v1, v2, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 4u) != 0u)) {
+    interpX(2u, i3, v3, v2, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 8u) != 0u)) {
+    interpY(3u, i0, v0, v3, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 16u) != 0u)) {
+    interpX(4u, i4, v4, v5, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 32u) != 0u)) {
+    interpY(5u, i5, v5, v6, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 64u) != 0u)) {
+    interpX(6u, i7, v7, v6, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 128u) != 0u)) {
+    interpY(7u, i4, v4, v7, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 256u) != 0u)) {
+    interpZ(8u, i0, v0, v4, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 512u) != 0u)) {
+    interpZ(9u, i1, v1, v5, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 1024u) != 0u)) {
+    interpZ(10u, i2, v2, v6, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  if (((edges & 2048u) != 0u)) {
+    interpZ(11u, i3, v3, v7, tint_symbol_18, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
+  }
+  uint const triTableOffset = ((cubeIndex << 4u) + 1u);
+  uint const indexCount = uint((*(tint_symbol_19)).tris.arr[(triTableOffset - 1u)]);
+  uint firstVertex = atomic_fetch_add_explicit(&((*(tint_symbol_24)).vertexCount), *(tint_symbol_21), memory_order_relaxed);
+  uint const bufferOffset = ((global_id[0] + (global_id[1] * (*(tint_symbol_18)).size[0])) + ((global_id[2] * (*(tint_symbol_18)).size[0]) * (*(tint_symbol_18)).size[1]));
+  uint const firstIndex = (bufferOffset * 15u);
+  for(uint i = 0u; (i < *(tint_symbol_21)); i = (i + 1u)) {
+    (*(tint_symbol_25)).values[((firstVertex * 3u) + (i * 3u))] = (*(tint_symbol_20)).arr[i][0];
+    (*(tint_symbol_25)).values[(((firstVertex * 3u) + (i * 3u)) + 1u)] = (*(tint_symbol_20)).arr[i][1];
+    (*(tint_symbol_25)).values[(((firstVertex * 3u) + (i * 3u)) + 2u)] = (*(tint_symbol_20)).arr[i][2];
+    (*(tint_symbol_26)).values[((firstVertex * 3u) + (i * 3u))] = (*(tint_symbol_22)).arr[i][0];
+    (*(tint_symbol_26)).values[(((firstVertex * 3u) + (i * 3u)) + 1u)] = (*(tint_symbol_22)).arr[i][1];
+    (*(tint_symbol_26)).values[(((firstVertex * 3u) + (i * 3u)) + 2u)] = (*(tint_symbol_22)).arr[i][2];
+  }
+  for(uint i = 0u; (i < indexCount); i = (i + 1u)) {
+    int const index = (*(tint_symbol_19)).tris.arr[(triTableOffset + i)];
+    (*(tint_symbol_27)).tris[(firstIndex + i)] = (firstVertex + (*(tint_symbol_23)).arr[index]);
+  }
+  for(uint i = indexCount; (i < 15u); i = (i + 1u)) {
+    (*(tint_symbol_27)).tris[(firstIndex + i)] = firstVertex;
+  }
+}
+
+kernel void computeMain(device IsosurfaceVolume* tint_symbol_28 [[buffer(0)]], const device Tables* tint_symbol_29 [[buffer(5)]], device DrawIndirectArgs* tint_symbol_34 [[buffer(1)]], device PositionBuffer* tint_symbol_35 [[buffer(2)]], device NormalBuffer* tint_symbol_36 [[buffer(3)]], device IndexBuffer* tint_symbol_37 [[buffer(4)]], uint3 global_id [[thread_position_in_grid]]) {
+  thread tint_array_wrapper_2 tint_symbol_30 = {};
+  thread uint tint_symbol_31 = 0u;
+  thread tint_array_wrapper_2 tint_symbol_32 = {};
+  thread tint_array_wrapper_3 tint_symbol_33 = {};
+  computeMain_inner(global_id, tint_symbol_28, tint_symbol_29, &(tint_symbol_30), &(tint_symbol_31), &(tint_symbol_32), &(tint_symbol_33), tint_symbol_34, tint_symbol_35, tint_symbol_36, tint_symbol_37);
+  return;
+}
+

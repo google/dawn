@@ -1,0 +1,48 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  float arr[3];
+};
+struct BloomUniforms {
+  /* 0x0000 */ float radius;
+  /* 0x0004 */ float dim;
+};
+struct FragmentInput {
+  float2 texCoord;
+};
+struct tint_symbol_1 {
+  float2 texCoord [[user(locn0)]];
+};
+struct tint_symbol_2 {
+  float4 value [[color(0)]];
+};
+
+constant float2 bloomDir = float2(0.0f, 1.0f);
+float4 getGaussianBlur(float2 texCoord, const constant BloomUniforms* const tint_symbol_4, texture2d<float, access::sample> tint_symbol_5, sampler tint_symbol_6, thread tint_array_wrapper* const tint_symbol_7) {
+  float2 const texelRadius = (float2((*(tint_symbol_4)).radius) / float2(int2(tint_symbol_5.get_width(), tint_symbol_5.get_height())));
+  float2 const step = (bloomDir * texelRadius);
+  float4 sum = float4(0.0f);
+  sum = (sum + (tint_symbol_5.sample(tint_symbol_6, texCoord) * (*(tint_symbol_7)).arr[0]));
+  sum = (sum + (tint_symbol_5.sample(tint_symbol_6, (texCoord + (step * 1.0f))) * (*(tint_symbol_7)).arr[1]));
+  sum = (sum + (tint_symbol_5.sample(tint_symbol_6, (texCoord - (step * 1.0f))) * (*(tint_symbol_7)).arr[1]));
+  sum = (sum + (tint_symbol_5.sample(tint_symbol_6, (texCoord + (step * 2.0f))) * (*(tint_symbol_7)).arr[2]));
+  sum = (sum + (tint_symbol_5.sample(tint_symbol_6, (texCoord - (step * 2.0f))) * (*(tint_symbol_7)).arr[2]));
+  return float4(float4(sum).rgb, 1.0f);
+}
+
+float4 fragmentMain_inner(FragmentInput input, const constant BloomUniforms* const tint_symbol_8, texture2d<float, access::sample> tint_symbol_9, sampler tint_symbol_10, thread tint_array_wrapper* const tint_symbol_11, texture2d<float, access::sample> tint_symbol_12) {
+  float4 const blurColor = getGaussianBlur(input.texCoord, tint_symbol_8, tint_symbol_9, tint_symbol_10, tint_symbol_11);
+  float4 const dimColor = (tint_symbol_12.sample(tint_symbol_10, input.texCoord) * (*(tint_symbol_8)).dim);
+  return (blurColor + dimColor);
+}
+
+fragment tint_symbol_2 fragmentMain(const constant BloomUniforms* tint_symbol_13 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_14 [[texture(0)]], sampler tint_symbol_15 [[sampler(0)]], texture2d<float, access::sample> tint_symbol_17 [[texture(1)]], tint_symbol_1 tint_symbol [[stage_in]]) {
+  thread tint_array_wrapper tint_symbol_16 = {.arr={0.227027029f, 0.31621623f, 0.07027027f}};
+  FragmentInput const tint_symbol_3 = {.texCoord=tint_symbol.texCoord};
+  float4 const inner_result = fragmentMain_inner(tint_symbol_3, tint_symbol_13, tint_symbol_14, tint_symbol_15, &(tint_symbol_16), tint_symbol_17);
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
