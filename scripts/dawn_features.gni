@@ -34,9 +34,7 @@ declare_args() {
 
   # Enables SwiftShader as the fallback adapter. Requires dawn_swiftshader_dir
   # to be set to take effect.
-  # TODO(crbug.com/1266550): Enable on Linux platforms without X11 (e.g. ChromeOS).
-  # Blocked on b/209030951
-  dawn_use_swiftshader = !is_linux || dawn_use_x11
+  dawn_use_swiftshader = true
 }
 
 declare_args() {
