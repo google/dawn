@@ -94,6 +94,18 @@ TEST_F(BufferValidationTest, CreationSuccess) {
     }
 }
 
+// Test restriction on usages must not be None (0)
+TEST_F(BufferValidationTest, CreationMapUsageNotZero) {
+    // Zero (None) usage is an error
+    {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = wgpu::BufferUsage::None;
+
+        ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+    }
+}
+
 // Test restriction on usages allowed with MapRead and MapWrite
 TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
     // MapRead with CopyDst is ok
