@@ -1102,7 +1102,7 @@ namespace dawn::native {
 
     // Returns true if future ticking is needed.
     bool DeviceBase::APITick() {
-        if (ConsumedError(Tick())) {
+        if (IsLost() || ConsumedError(Tick())) {
             return false;
         }
         return !IsDeviceIdle();

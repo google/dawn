@@ -228,11 +228,6 @@ TEST_P(DeviceLostTest, CreateTextureFails) {
     ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
 }
 
-TEST_P(DeviceLostTest, TickFails) {
-    LoseForTesting();
-    ASSERT_DEVICE_ERROR(device.Tick());
-}
-
 // Test that CreateBuffer fails when device is lost
 TEST_P(DeviceLostTest, CreateBufferFails) {
     LoseForTesting();
@@ -413,7 +408,6 @@ TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneFails) {
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_DeviceLost, nullptr))
         .Times(1);
     ASSERT_DEVICE_ERROR(queue.OnSubmittedWorkDone(0, ToMockQueueWorkDone, nullptr));
-    ASSERT_DEVICE_ERROR(device.Tick());
 }
 
 // Test that QueueOnSubmittedWorkDone when the device is lost after calling OnSubmittedWorkDone
@@ -424,7 +418,6 @@ TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneBeforeLossFails) {
     queue.OnSubmittedWorkDone(0, ToMockQueueWorkDone, nullptr);
 
     LoseForTesting();
-    ASSERT_DEVICE_ERROR(device.Tick());
 }
 
 // Test that LostForTesting can only be called on one time
