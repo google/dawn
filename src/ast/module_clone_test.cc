@@ -132,11 +132,11 @@ let declaration_order_check_4 : i32 = 1;
   EXPECT_EQ(Program::printer(&src), Program::printer(&dst));
 
   // Check that none of the AST nodes or type pointers in dst are found in src
-  std::unordered_set<ast::Node*> src_nodes;
+  std::unordered_set<const ast::Node*> src_nodes;
   for (auto* src_node : src.ASTNodes().Objects()) {
     src_nodes.emplace(src_node);
   }
-  std::unordered_set<sem::Type*> src_types;
+  std::unordered_set<const sem::Type*> src_types;
   for (auto* src_type : src.Types()) {
     src_types.emplace(src_type);
   }

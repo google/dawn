@@ -39,7 +39,7 @@ TEST_F(BlockAllocatorTest, Empty) {
       FAIL() << "BlockAllocator should be empty";
     }
   }
-  for (int* i : static_cast<const Allocator&>(allocator).Objects()) {
+  for (const int* i : static_cast<const Allocator&>(allocator).Objects()) {
     (void)i;
     if ((true)) {  // Workaround for "error: loop will run at most once"
       FAIL() << "BlockAllocator should be empty";
@@ -67,48 +67,53 @@ TEST_F(BlockAllocatorTest, ObjectLifetime) {
 TEST_F(BlockAllocatorTest, MoveConstruct) {
   using Allocator = BlockAllocator<LifetimeCounter>;
 
-  size_t count = 0;
+  for (size_t n :
+       {0, 1, 10, 16, 20, 32, 50, 64, 100, 256, 300, 512, 500, 512}) {
+    size_t count = 0;
+    {
+      Allocator allocator_a;
+      for (size_t i = 0; i < n; i++) {
+        allocator_a.Create(&count);
+      }
+      EXPECT_EQ(count, n);
 
-  {
-    Allocator allocator_a;
-    for (int i = 0; i < 10; i++) {
-      allocator_a.Create(&count);
+      Allocator allocator_b{std::move(allocator_a)};
+      EXPECT_EQ(count, n);
     }
-    EXPECT_EQ(count, 10u);
 
-    Allocator allocator_b{std::move(allocator_a)};
-    EXPECT_EQ(count, 10u);
+    EXPECT_EQ(count, 0u);
   }
-
-  EXPECT_EQ(count, 0u);
 }
 
 TEST_F(BlockAllocatorTest, MoveAssign) {
   using Allocator = BlockAllocator<LifetimeCounter>;
 
-  size_t count_a = 0;
-  size_t count_b = 0;
+  for (size_t n :
+       {0, 1, 10, 16, 20, 32, 50, 64, 100, 256, 300, 512, 500, 512}) {
+    size_t count_a = 0;
+    size_t count_b = 0;
 
-  {
-    Allocator allocator_a;
-    for (int i = 0; i < 10; i++) {
-      allocator_a.Create(&count_a);
+    {
+      Allocator allocator_a;
+      for (size_t i = 0; i < n; i++) {
+        allocator_a.Create(&count_a);
+      }
+      EXPECT_EQ(count_a, n);
+
+      Allocator allocator_b;
+      for (size_t i = 0; i < n; i++) {
+        allocator_b.Create(&count_b);
+      }
+      EXPECT_EQ(count_b, n);
+
+      allocator_b = std::move(allocator_a);
+      EXPECT_EQ(count_a, n);
+      EXPECT_EQ(count_b, 0u);
     }
-    EXPECT_EQ(count_a, 10u);
 
-    Allocator allocator_b;
-    for (int i = 0; i < 10; i++) {
-      allocator_b.Create(&count_b);
-    }
-    EXPECT_EQ(count_b, 10u);
-
-    allocator_b = std::move(allocator_a);
-    EXPECT_EQ(count_a, 10u);
+    EXPECT_EQ(count_a, 0u);
     EXPECT_EQ(count_b, 0u);
   }
-
-  EXPECT_EQ(count_a, 0u);
-  EXPECT_EQ(count_b, 0u);
 }
 
 TEST_F(BlockAllocatorTest, ObjectOrder) {
@@ -130,7 +135,7 @@ TEST_F(BlockAllocatorTest, ObjectOrder) {
   }
   {
     int i = 0;
-    for (int* p : static_cast<const Allocator&>(allocator).Objects()) {
+    for (const int* p : static_cast<const Allocator&>(allocator).Objects()) {
       EXPECT_EQ(*p, i);
       i++;
     }

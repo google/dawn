@@ -246,14 +246,14 @@ struct MultiplanarExternalTexture::State {
 
   /// Constructs a StatementList containing all the statements making up the
   /// bodies of the textureSampleExternal and textureLoadExternal functions.
-  /// @param callType determines which function body to generate
+  /// @param call_type determines which function body to generate
   /// @returns a statement list that makes of the body of the chosen function
-  ast::StatementList createTexFnExtStatementList(sem::IntrinsicType callType) {
+  ast::StatementList createTexFnExtStatementList(sem::IntrinsicType call_type) {
     using f32 = ProgramBuilder::f32;
-    const ast::CallExpression* single_plane_call;
-    const ast::CallExpression* plane_0_call;
-    const ast::CallExpression* plane_1_call;
-    if (callType == sem::IntrinsicType::kTextureSampleLevel) {
+    const ast::CallExpression* single_plane_call = nullptr;
+    const ast::CallExpression* plane_0_call = nullptr;
+    const ast::CallExpression* plane_1_call = nullptr;
+    if (call_type == sem::IntrinsicType::kTextureSampleLevel) {
       // textureSampleLevel(plane0, smp, coord.xy, 0.0);
       single_plane_call =
           b.Call("textureSampleLevel", "plane0", "smp", "coord", 0.0f);
@@ -263,13 +263,16 @@ struct MultiplanarExternalTexture::State {
       // textureSampleLevel(plane1, smp, coord.xy, 0.0);
       plane_1_call =
           b.Call("textureSampleLevel", "plane1", "smp", "coord", 0.0f);
-    } else if (callType == sem::IntrinsicType::kTextureLoad) {
+    } else if (call_type == sem::IntrinsicType::kTextureLoad) {
       // textureLoad(plane0, coords.xy, 0);
       single_plane_call = b.Call("textureLoad", "plane0", "coord", 0);
       // textureLoad(plane0, coords.xy, 0);
       plane_0_call = b.Call("textureLoad", "plane0", "coord", 0);
       // textureLoad(plane1, coords.xy, 0);
       plane_1_call = b.Call("textureLoad", "plane1", "coord", 0);
+    } else {
+      TINT_ICE(Transform, b.Diagnostics())
+          << "unhandled intrinsic: " << call_type;
     }
 
     return {
