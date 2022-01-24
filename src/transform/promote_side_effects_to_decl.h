@@ -12,27 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_
-#define SRC_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_
+#ifndef SRC_TRANSFORM_PROMOTE_SIDE_EFFECTS_TO_DECL_H_
+#define SRC_TRANSFORM_PROMOTE_SIDE_EFFECTS_TO_DECL_H_
 
 #include "src/transform/transform.h"
 
 namespace tint {
 namespace transform {
 
-/// A transform that hoists the array and structure initializers to a constant
-/// variable, declared just before the statement of usage. This transform may
-/// also decompose for-loops into loops so that let declarations can be emitted
+/// A transform that hoists expressions with side-effects to a variable
+/// declaration just before the statement of usage. This transform may also
+/// decompose for-loops into loops so that let declarations can be emitted
 /// before loop condition expressions and/or continuing statements.
 /// @see crbug.com/tint/406
-class PromoteInitializersToConstVar
-    : public Castable<PromoteInitializersToConstVar, Transform> {
+class PromoteSideEffectsToDecl
+    : public Castable<PromoteSideEffectsToDecl, Transform> {
  public:
   /// Constructor
-  PromoteInitializersToConstVar();
+  PromoteSideEffectsToDecl();
 
   /// Destructor
-  ~PromoteInitializersToConstVar() override;
+  ~PromoteSideEffectsToDecl() override;
+
+  /// Configuration options for the transform.
+  struct Config : public Castable<Config, Data> {
+    /// Constructor
+    /// @param type_ctor_to_let whether to hoist type constructor expressions
+    /// to a let
+    /// @param dynamic_index_to_var whether to hoist dynamic indexed
+    /// expressions to a var
+    Config(bool type_ctor_to_let, bool dynamic_index_to_var);
+
+    /// Destructor
+    ~Config() override;
+
+    /// Whether to hoist type constructor expressions to a let
+    const bool type_ctor_to_let;
+
+    /// Whether to hoist dynamic indexed expressions to a var
+    const bool dynamic_index_to_var;
+  };
 
  protected:
   /// Runs the transform using the CloneContext built for transforming a
@@ -42,9 +61,12 @@ class PromoteInitializersToConstVar
   /// @param inputs optional extra transform-specific input data
   /// @param outputs optional extra transform-specific output data
   void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
+
+ private:
+  class State;
 };
 
 }  // namespace transform
 }  // namespace tint
 
-#endif  // SRC_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_
+#endif  // SRC_TRANSFORM_PROMOTE_SIDE_EFFECTS_TO_DECL_H_

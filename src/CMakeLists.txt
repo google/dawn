@@ -335,8 +335,8 @@ set(TINT_LIB_SRCS
   transform/num_workgroups_from_uniform.h
   transform/pad_array_elements.cc
   transform/pad_array_elements.h
-  transform/promote_initializers_to_const_var.cc
-  transform/promote_initializers_to_const_var.h
+  transform/promote_side_effects_to_decl.cc
+  transform/promote_side_effects_to_decl.h
   transform/remove_phonies.cc
   transform/remove_phonies.h
   transform/remove_unreachable_statements.cc
@@ -355,8 +355,6 @@ set(TINT_LIB_SRCS
   transform/unshadow.h
   transform/vectorize_scalar_matrix_constructors.cc
   transform/vectorize_scalar_matrix_constructors.h
-  transform/var_for_dynamic_index.cc
-  transform/var_for_dynamic_index.h
   transform/vertex_pulling.cc
   transform/vertex_pulling.h
   transform/wrap_arrays_in_structs.cc
@@ -991,7 +989,7 @@ if(TINT_BUILD_TESTS)
       transform/multiplanar_external_texture_test.cc
       transform/num_workgroups_from_uniform_test.cc
       transform/pad_array_elements_test.cc
-      transform/promote_initializers_to_const_var_test.cc
+      transform/promote_side_effects_to_decl_test.cc
       transform/remove_phonies_test.cc
       transform/remove_unreachable_statements_test.cc
       transform/renamer_test.cc
@@ -1000,7 +998,6 @@ if(TINT_BUILD_TESTS)
       transform/single_entry_point_test.cc
       transform/test_helper.h
       transform/unshadow_test.cc
-      transform/var_for_dynamic_index_test.cc
       transform/vectorize_scalar_matrix_constructors_test.cc
       transform/vertex_pulling_test.cc
       transform/wrap_arrays_in_structs_test.cc

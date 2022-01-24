@@ -57,7 +57,7 @@
 #include "src/transform/manager.h"
 #include "src/transform/num_workgroups_from_uniform.h"
 #include "src/transform/pad_array_elements.h"
-#include "src/transform/promote_initializers_to_const_var.h"
+#include "src/transform/promote_side_effects_to_decl.h"
 #include "src/transform/remove_phonies.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/unshadow.h"
@@ -191,7 +191,11 @@ SanitizedResult Sanitize(
   // will be transformed by CalculateArrayLength
   manager.Add<transform::CalculateArrayLength>();
   manager.Add<transform::ExternalTextureTransform>();
-  manager.Add<transform::PromoteInitializersToConstVar>();
+
+  data.Add<transform::PromoteSideEffectsToDecl::Config>(
+      /* type_ctor_to_let */ true, /* dynamic_index_to_var */ false);
+  manager.Add<transform::PromoteSideEffectsToDecl>();
+
   manager.Add<transform::PadArrayElements>();
   manager.Add<transform::AddEmptyEntryPoint>();
 

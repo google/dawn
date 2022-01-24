@@ -47,10 +47,10 @@
 #include "src/transform/fold_constants.h"
 #include "src/transform/for_loop_to_loop.h"
 #include "src/transform/manager.h"
+#include "src/transform/promote_side_effects_to_decl.h"
 #include "src/transform/remove_unreachable_statements.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/unshadow.h"
-#include "src/transform/var_for_dynamic_index.h"
 #include "src/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
@@ -271,7 +271,10 @@ SanitizedResult Sanitize(const Program* in,
   manager.Add<transform::CanonicalizeEntryPointIO>();
   manager.Add<transform::AddEmptyEntryPoint>();
   manager.Add<transform::AddSpirvBlockDecoration>();
-  manager.Add<transform::VarForDynamicIndex>();
+
+  data.Add<transform::PromoteSideEffectsToDecl::Config>(
+      /* type_ctor_to_let */ false, /* dynamic_index_to_var */ true);
+  manager.Add<transform::PromoteSideEffectsToDecl>();
 
   data.Add<transform::CanonicalizeEntryPointIO::Config>(
       transform::CanonicalizeEntryPointIO::Config(

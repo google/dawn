@@ -27,7 +27,7 @@
 #include "src/transform/loop_to_for_loop.h"
 #include "src/transform/manager.h"
 #include "src/transform/pad_array_elements.h"
-#include "src/transform/promote_initializers_to_const_var.h"
+#include "src/transform/promote_side_effects_to_decl.h"
 #include "src/transform/remove_phonies.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/single_entry_point.h"
@@ -75,7 +75,11 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   manager.Add<RemovePhonies>();
   manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();
-  manager.Add<PromoteInitializersToConstVar>();
+
+  data.Add<PromoteSideEffectsToDecl::Config>(
+      /* type_ctor_to_let */ true, /* dynamic_index_to_var */ false);
+  manager.Add<PromoteSideEffectsToDecl>();
+
   manager.Add<PadArrayElements>();
   manager.Add<AddEmptyEntryPoint>();
   manager.Add<AddSpirvBlockDecoration>();

@@ -63,7 +63,7 @@
 #include "src/transform/manager.h"
 #include "src/transform/module_scope_var_to_entry_point_param.h"
 #include "src/transform/pad_array_elements.h"
-#include "src/transform/promote_initializers_to_const_var.h"
+#include "src/transform/promote_side_effects_to_decl.h"
 #include "src/transform/remove_phonies.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/unshadow.h"
@@ -124,7 +124,7 @@ SanitizedResult Sanitize(
     bool disable_workgroup_init,
     const ArrayLengthFromUniformOptions& array_length_from_uniform) {
   transform::Manager manager;
-  transform::DataMap internal_inputs;
+  transform::DataMap data;
 
   // Build the config for the internal ArrayLengthFromUniform transform.
   transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
@@ -162,7 +162,11 @@ SanitizedResult Sanitize(
   }
   manager.Add<transform::CanonicalizeEntryPointIO>();
   manager.Add<transform::ExternalTextureTransform>();
-  manager.Add<transform::PromoteInitializersToConstVar>();
+
+  data.Add<transform::PromoteSideEffectsToDecl::Config>(
+      /* type_ctor_to_let */ true, /* dynamic_index_to_var */ false);
+  manager.Add<transform::PromoteSideEffectsToDecl>();
+
   manager.Add<transform::VectorizeScalarMatrixConstructors>();
   manager.Add<transform::WrapArraysInStructs>();
   manager.Add<transform::PadArrayElements>();
@@ -172,11 +176,11 @@ SanitizedResult Sanitize(
   // it assumes that the form of the array length argument is &var.array.
   manager.Add<transform::ArrayLengthFromUniform>();
   manager.Add<transform::ModuleScopeVarToEntryPointParam>();
-  internal_inputs.Add<transform::ArrayLengthFromUniform::Config>(
+  data.Add<transform::ArrayLengthFromUniform::Config>(
       std::move(array_length_from_uniform_cfg));
-  internal_inputs.Add<transform::CanonicalizeEntryPointIO::Config>(
+  data.Add<transform::CanonicalizeEntryPointIO::Config>(
       std::move(entry_point_io_cfg));
-  auto out = manager.Run(in, internal_inputs);
+  auto out = manager.Run(in, data);
 
   SanitizedResult result;
   result.program = std::move(out.program);
