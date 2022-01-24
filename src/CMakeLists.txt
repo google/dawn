@@ -411,6 +411,7 @@ set(TINT_LIB_SRCS
   sem/vector_type.h
   sem/void_type.cc
   sem/void_type.h
+  utils/crc32.h
   utils/enum_set.h
   utils/hash.h
   utils/map.h
@@ -754,6 +755,7 @@ if(TINT_BUILD_TESTS)
     test_main.cc
     traits_test.cc
     transform/transform_test.cc
+    utils/crc32_test.cc
     utils/defer_test.cc
     utils/enum_set_test.cc
     utils/hash_test.cc

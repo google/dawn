@@ -277,8 +277,8 @@ class CloneContext {
     using TPtr = traits::ParameterType<F, 0>;
     using T = typename std::remove_pointer<TPtr>::type;
     for (auto& transform : transforms_) {
-      if (transform.typeinfo->Is(TypeInfo::Of<T>()) ||
-          TypeInfo::Of<T>().Is(*transform.typeinfo)) {
+      if (transform.typeinfo->Is(&TypeInfo::Of<T>()) ||
+          TypeInfo::Of<T>().Is(transform.typeinfo)) {
         TINT_ICE(Clone, Diagnostics())
             << "ReplaceAll() called with a handler for type "
             << TypeInfo::Of<T>().name

@@ -340,6 +340,7 @@ tint_unittests_source_set("tint_unittests_transform_src") {
 
 tint_unittests_source_set("tint_unittests_utils_src") {
   sources = [
+    "../src/utils/crc32_test.cc",
     "../src/utils/defer_test.cc",
     "../src/utils/enum_set_test.cc",
     "../src/utils/hash_test.cc",

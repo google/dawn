@@ -126,11 +126,11 @@ Function::TransitivelyReferencedMultisampledTextureVariables() const {
 }
 
 Function::VariableBindings Function::TransitivelyReferencedVariablesOfType(
-    const tint::TypeInfo& type_info) const {
+    const tint::TypeInfo* type) const {
   VariableBindings ret;
   for (auto* var : TransitivelyReferencedGlobals()) {
     auto* unwrapped_type = var->Type()->UnwrapRef();
-    if (unwrapped_type->TypeInfo().Is(type_info)) {
+    if (unwrapped_type->TypeInfo().Is(type)) {
       if (auto binding_point = var->Declaration()->BindingPoint()) {
         ret.push_back({var, binding_point});
       }

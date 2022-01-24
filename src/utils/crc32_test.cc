@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/castable.h"
+#include "src/utils/crc32.h"
 
-namespace tint {
+#include "gtest/gtest.h"
 
-/// The unique TypeInfo for the CastableBase type
-/// @return doxygen-thinks-this-static-field-is-a-function :(
-template <>
-const TypeInfo detail::TypeInfoOf<CastableBase>::info{
-    nullptr,
-    "CastableBase",
-    tint::TypeInfo::HashCodeOf<CastableBase>(),
-    tint::TypeInfo::HashCodeOf<CastableBase>(),
-};
+namespace tint::utils {
+namespace {
 
-}  // namespace tint
+TEST(CRC32Test, Compiletime) {
+  static_assert(CRC32("") == 0x00000000u);
+  static_assert(CRC32("hello world") == 0x0d4a1185u);
+  static_assert(CRC32("123456789") == 0xcbf43926u);
+}
+
+TEST(CRC32Test, Runtime) {
+  EXPECT_EQ(CRC32(""), 0x00000000u);
+  EXPECT_EQ(CRC32("hello world"), 0x0d4a1185u);
+  EXPECT_EQ(CRC32("123456789"), 0xcbf43926u);
+}
+
+}  // namespace
+}  // namespace tint::utils

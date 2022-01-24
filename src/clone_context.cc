@@ -84,7 +84,7 @@ const tint::Cloneable* CloneContext::CloneCloneable(const Cloneable* object) {
   // Attempt to clone using the registered replacer functions.
   auto& typeinfo = object->TypeInfo();
   for (auto& transform : transforms_) {
-    if (typeinfo.Is(*transform.typeinfo)) {
+    if (typeinfo.Is(transform.typeinfo)) {
       if (auto* transformed = transform.function(object)) {
         return transformed;
       }

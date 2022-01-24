@@ -232,17 +232,17 @@ class Function : public Castable<Function, CallTarget> {
 
   /// Retrieves any referenced variables of the given type. Note, the variables
   /// must be decorated with both binding and group decorations.
-  /// @param type_info the type of the variables to find
+  /// @param type the type of the variables to find
   /// @returns the referenced variables
   VariableBindings TransitivelyReferencedVariablesOfType(
-      const tint::TypeInfo& type_info) const;
+      const tint::TypeInfo* type) const;
 
   /// Retrieves any referenced variables of the given type. Note, the variables
   /// must be decorated with both binding and group decorations.
   /// @returns the referenced variables
   template <typename T>
   VariableBindings TransitivelyReferencedVariablesOfType() const {
-    return TransitivelyReferencedVariablesOfType(TypeInfo::Of<T>());
+    return TransitivelyReferencedVariablesOfType(&TypeInfo::Of<T>());
   }
 
   /// Checks if the given entry point is an ancestor

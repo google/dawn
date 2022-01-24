@@ -15,9 +15,12 @@
 #ifndef SRC_CASTABLE_H_
 #define SRC_CASTABLE_H_
 
+#include <stdint.h>
+#include <functional>
 #include <utility>
 
 #include "src/traits.h"
+#include "src/utils/crc32.h"
 
 #if defined(__clang__)
 /// Temporarily disable certain warnings when using Castable API
@@ -41,13 +44,14 @@ TINT_CASTABLE_PUSH_DISABLE_WARNINGS();
 
 namespace tint {
 
+// Forward declaration
+class CastableBase;
+
 namespace detail {
 template <typename T>
 struct TypeInfoOf;
-}  // namespace detail
 
-// Forward declaration
-class CastableBase;
+}  // namespace detail
 
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
 #define TINT_INSTANTIATE_TYPEINFO(CLASS)                      \
@@ -56,26 +60,113 @@ class CastableBase;
   const tint::TypeInfo tint::detail::TypeInfoOf<CLASS>::info{ \
       &tint::detail::TypeInfoOf<CLASS::TrueBase>::info,       \
       #CLASS,                                                 \
+      tint::TypeInfo::HashCodeOf<CLASS>(),                    \
+      tint::TypeInfo::CombinedHashCodeOf<CLASS>(),            \
   };                                                          \
   TINT_CASTABLE_POP_DISABLE_WARNINGS()
 
+/// Bit flags that can be passed to the template parameter `FLAGS` of Is() and
+/// As().
+enum CastFlags {
+  /// Disables the static_assert() inside Is(), that compile-time-verifies that
+  /// the cast is possible. This flag may be useful for highly-generic template
+  /// code that needs to compile for template permutations that generate
+  /// impossible casts.
+  kDontErrorOnImpossibleCast = 1,
+};
+
 /// TypeInfo holds type information for a Castable type.
 struct TypeInfo {
-  /// The base class of this type.
+  /// The type of a hash code
+  using HashCode = uint64_t;
+
+  /// The base class of this type
   const TypeInfo* base;
   /// The type name
   const char* name;
+  /// The type hash code
+  const HashCode hashcode;
+  /// The type hash code or'd with the base class' combined hash code
+  const HashCode combined_hashcode;
 
   /// @param type the test type info
   /// @returns true if the class with this TypeInfo is of, or derives from the
   /// class with the given TypeInfo.
-  bool Is(const tint::TypeInfo& type) const;
+  inline bool Is(const tint::TypeInfo* type) const {
+    // Optimization: Check whether the all the bits of the type's hashcode can
+    // be found in the combined_hashcode. If a single bit is missing, then we
+    // can quickly tell that that this TypeInfo does not derive from `type`.
+    if ((combined_hashcode & type->hashcode) != type->hashcode) {
+      return false;
+    }
+
+    // Walk the base types, starting with this TypeInfo, to see if any of the
+    // pointers match `type`.
+    for (auto* ti = this; ti != nullptr; ti = ti->base) {
+      if (ti == type) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// @returns true if `type` derives from the class `TO`
+  /// @param type the object type to test from, which must be, or derive from
+  /// type `FROM`.
+  /// @see CastFlags
+  template <typename TO, typename FROM, int FLAGS = 0>
+  static inline bool Is(const tint::TypeInfo* type) {
+    constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
+    constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
+    constexpr const bool nocast = std::is_same<FROM, TO>::value;
+    constexpr const bool assert_is_castable =
+        (FLAGS & kDontErrorOnImpossibleCast) == 0;
+
+    static_assert(upcast || downcast || nocast || !assert_is_castable,
+                  "impossible cast");
+
+    if (upcast || nocast) {
+      return true;
+    }
+
+    return type->Is(&Of<std::remove_const_t<TO>>());
+  }
 
   /// @returns the static TypeInfo for the type T
   template <typename T>
   static const TypeInfo& Of() {
     using NO_CV = typename std::remove_cv<T>::type;
     return detail::TypeInfoOf<NO_CV>::info;
+  }
+
+  /// @returns a compile-time hashcode for the type `T`.
+  /// @note the returned hashcode will have at most 2 bits set, as the hashes
+  /// are expected to be used in bloom-filters which will quickly saturate when
+  /// multiple hashcodes are bitwise-or'd together.
+  template <typename T>
+  static constexpr HashCode HashCodeOf() {
+    /// Use the compiler's "pretty" function name, which includes the template
+    /// type, to obtain a unique hash value.
+#ifdef _MSC_VER
+    constexpr uint32_t crc = utils::CRC32(__FUNCSIG__);
+#else
+    constexpr uint32_t crc = utils::CRC32(__PRETTY_FUNCTION__);
+#endif
+    constexpr uint32_t bit_a = (crc & 63);
+    constexpr uint32_t bit_b = ((crc >> 6) & 63);
+    return (static_cast<HashCode>(1) << bit_a) |
+           (static_cast<HashCode>(1) << bit_b);
+  }
+
+  /// @returns the hashcode of the given type, bitwise-or'd with the hashcodes
+  /// of all base classes.
+  template <typename T>
+  static constexpr HashCode CombinedHashCodeOf() {
+    if constexpr (std::is_same_v<T, CastableBase>) {
+      return HashCodeOf<CastableBase>();
+    } else {
+      return HashCodeOf<T>() | CombinedHashCodeOf<typename T::TrueBase>();
+    }
   }
 };
 
@@ -100,40 +191,16 @@ struct Infer;
 
 }  // namespace detail
 
-/// Bit flags that can be passed to the template parameter `FLAGS` of Is() and
-/// As().
-enum CastFlags {
-  /// Disables the static_assert() inside Is(), that compile-time-verifies that
-  /// the cast is possible. This flag may be useful for highly-generic template
-  /// code that needs to compile for template permutations that generate
-  /// impossible casts.
-  kDontErrorOnImpossibleCast = 1,
-};
-
 /// @returns true if `obj` is a valid pointer, and is of, or derives from the
 /// class `TO`
 /// @param obj the object to test from
 /// @see CastFlags
 template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
 inline bool Is(FROM* obj) {
-  constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
-  constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
-  constexpr const bool nocast = std::is_same<FROM, TO>::value;
-  constexpr const bool assert_is_castable =
-      (FLAGS & kDontErrorOnImpossibleCast) == 0;
-
-  static_assert(upcast || downcast || nocast || !assert_is_castable,
-                "impossible cast");
-
   if (obj == nullptr) {
     return false;
   }
-
-  if (upcast || nocast) {
-    return true;
-  }
-
-  return obj->TypeInfo().Is(TypeInfo::Of<std::remove_const_t<TO>>());
+  return TypeInfo::Is<TO, FROM, FLAGS>(&obj->TypeInfo());
 }
 
 /// @returns true if `obj` is a valid pointer, and is of, or derives from the
@@ -147,19 +214,8 @@ template <typename TO,
           typename FROM = detail::Infer,
           typename Pred = detail::Infer>
 inline bool Is(FROM* obj, Pred&& pred) {
-  constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
-  constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
-  constexpr const bool nocast = std::is_same<FROM, TO>::value;
-  static_assert(upcast || downcast || nocast, "impossible cast");
-
-  if (obj == nullptr) {
-    return false;
-  }
-
-  bool is_type = upcast || nocast ||
-                 obj->TypeInfo().Is(TypeInfo::Of<std::remove_const_t<TO>>());
-
-  return is_type && pred(static_cast<std::add_const_t<TO>*>(obj));
+  return Is<TO, FLAGS, FROM>(obj) &&
+         pred(static_cast<std::add_const_t<TO>*>(obj));
 }
 
 /// @returns true if `obj` is of, or derives from any of the `TO`
@@ -167,7 +223,20 @@ inline bool Is(FROM* obj, Pred&& pred) {
 /// @param obj the object to cast from
 template <typename... TO, typename FROM>
 inline bool IsAnyOf(FROM* obj) {
-  return detail::IsAnyOf<TO...>::Exec(obj);
+  if (!obj) {
+    return false;
+  }
+  // Optimization: Compare the object's combined_hashcode to the bitwise-or of
+  // all the tested type's hashcodes. If there's no intersection of bits in the
+  // two masks, then we can guarantee that the type is not in `TO`.
+  using Helper = detail::IsAnyOf<TO...>;
+  auto* type = &obj->TypeInfo();
+  auto hashcode = type->combined_hashcode;
+  if ((Helper::kHashCodes & hashcode) == 0) {
+    return false;
+  }
+  // Possibly one of the types in `TO`. Continue to testing against each type.
+  return Helper::template Exec<FROM>(type);
 }
 
 /// @returns obj dynamically cast to the type `TO` or `nullptr` if
@@ -337,22 +406,30 @@ namespace detail {
 /// Helper for Castable::IsAnyOf
 template <typename TO_FIRST, typename... TO_REST>
 struct IsAnyOf {
-  /// @param obj castable object to test
+  /// The bitwise-or of all typeinfo hashcodes
+  static constexpr auto kHashCodes =
+      TypeInfo::HashCodeOf<TO_FIRST>() | IsAnyOf<TO_REST...>::kHashCodes;
+
+  /// @param type castable object type to test
   /// @returns true if `obj` is of, or derives from any of `[TO_FIRST,
   /// ...TO_REST]`
   template <typename FROM>
-  static bool Exec(FROM* obj) {
-    return Is<TO_FIRST>(obj) || IsAnyOf<TO_REST...>::Exec(obj);
+  static bool Exec(const TypeInfo* type) {
+    return TypeInfo::Is<TO_FIRST, FROM>(type) ||
+           IsAnyOf<TO_REST...>::template Exec<FROM>(type);
   }
 };
 /// Terminal specialization
 template <typename TO>
 struct IsAnyOf<TO> {
-  /// @param obj castable object to test
+  /// The bitwise-or of all typeinfo hashcodes
+  static constexpr auto kHashCodes = TypeInfo::HashCodeOf<TO>();
+
+  /// @param type castable object type to test
   /// @returns true if `obj` is of, or derives from TO
   template <typename FROM>
-  static bool Exec(FROM* obj) {
-    return Is<TO>(obj);
+  static bool Exec(const TypeInfo* type) {
+    return TypeInfo::Is<TO, FROM>(type);
   }
 };
 }  // namespace detail
