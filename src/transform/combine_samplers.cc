@@ -137,6 +137,13 @@ struct CombineSamplers::State {
     for (auto* var : ctx.src->AST().GlobalVariables()) {
       if (sem.Get(var->type)->IsAnyOf<sem::Texture, sem::Sampler>()) {
         ctx.Remove(ctx.src->AST().GlobalDeclarations(), var);
+      } else if (auto binding_point = var->BindingPoint()) {
+        if (binding_point.group->value == 0 &&
+            binding_point.binding->value == 0) {
+          auto* decoration =
+              ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision);
+          ctx.InsertFront(var->decorations, decoration);
+        }
       }
     }
 

@@ -633,7 +633,7 @@ fn main() -> vec4<f32> {
 }
 )";
   auto* expect = R"(
-@group(0) @binding(0) var<uniform> gcoords : vec2<f32>;
+@internal(disable_validation__binding_point_collision) @group(0) @binding(0) var<uniform> gcoords : vec2<f32>;
 
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex_samp : texture_2d<f32>;
 
