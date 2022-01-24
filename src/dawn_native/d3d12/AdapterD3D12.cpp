@@ -351,6 +351,12 @@ namespace dawn::native::d3d12 {
             // WebGPU allows OOB vertex buffer access and relies on D3D12's robust buffer access
             // behavior.
             D3D12_MESSAGE_ID_COMMAND_LIST_DRAW_VERTEX_BUFFER_TOO_SMALL,
+
+            // WebGPU allows setVertexBuffer with offset that equals to the whole vertex buffer
+            // size.
+            // Even this means that no vertex buffer view has been set in D3D12 backend.
+            // https://crbug.com/dawn/1255
+            D3D12_MESSAGE_ID_COMMAND_LIST_DRAW_VERTEX_BUFFER_NOT_SET,
         };
 
         // Create a retrieval filter with a deny list to suppress messages.
