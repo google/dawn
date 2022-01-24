@@ -17,6 +17,7 @@ lcov.info
 /third_party/clang-format
 /third_party/catapult
 /third_party/cpplint
+/third_party/benchmark
 /third_party/binutils
 /third_party/glslang
 /third_party/googletest
