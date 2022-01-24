@@ -73,7 +73,7 @@ struct UniqueVector {
   const T& operator[](size_t i) const { return vector[i]; }
 
   /// @returns true if the vector is empty
-  size_t empty() const { return vector.empty(); }
+  bool empty() const { return vector.empty(); }
 
   /// @returns the number of items in the vector
   size_t size() const { return vector.size(); }

@@ -14,6 +14,7 @@
 
 #include "src/reader/wgsl/lexer.h"
 
+#include <cctype>
 #include <cmath>
 #include <cstring>
 #include <limits>
