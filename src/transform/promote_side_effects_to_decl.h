@@ -23,7 +23,8 @@ namespace transform {
 /// A transform that hoists expressions with side-effects to a variable
 /// declaration just before the statement of usage. This transform may also
 /// decompose for-loops into loops so that let declarations can be emitted
-/// before loop condition expressions and/or continuing statements.
+/// before loop condition expressions and/or continuing statements. It may also
+/// similarly decompose 'else if's to 'else { if }'s for the same reason.
 /// @see crbug.com/tint/406
 class PromoteSideEffectsToDecl
     : public Castable<PromoteSideEffectsToDecl, Transform> {

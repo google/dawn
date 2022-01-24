@@ -276,6 +276,93 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PromoteSideEffectsToDeclTest, TypeCtorToLet_ArrayInElseIf) {
+  auto* src = R"(
+fn f() {
+  var f = 1.0;
+  if (true) {
+    var marker = 0;
+  } else if (f == array<f32, 2u>(f, f)[0]) {
+    var marker = 1;
+  }
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var f = 1.0;
+  if (true) {
+    var marker = 0;
+  } else {
+    let tint_symbol = array<f32, 2u>(f, f);
+    if ((f == tint_symbol[0])) {
+      var marker = 1;
+    }
+  }
+}
+)";
+
+  DataMap data;
+  data.Add<PromoteSideEffectsToDecl::Config>(/* type_ctor_to_let */ true,
+                                             /* dynamic_index_to_var */ false);
+  auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, TypeCtorToLet_ArrayInElseIfChain) {
+  auto* src = R"(
+fn f() {
+  var f = 1.0;
+  if (true) {
+    var marker = 0;
+  } else if (true) {
+    var marker = 1;
+  } else if (f == array<f32, 2u>(f, f)[0]) {
+    var marker = 2;
+  } else if (f == array<f32, 2u>(f, f)[1]) {
+    var marker = 3;
+  } else if (true) {
+    var marker = 4;
+  } else {
+    var marker = 5;
+  }
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var f = 1.0;
+  if (true) {
+    var marker = 0;
+  } else if (true) {
+    var marker = 1;
+  } else {
+    let tint_symbol = array<f32, 2u>(f, f);
+    if ((f == tint_symbol[0])) {
+      var marker = 2;
+    } else {
+      let tint_symbol_1 = array<f32, 2u>(f, f);
+      if ((f == tint_symbol_1[1])) {
+        var marker = 3;
+      } else if (true) {
+        var marker = 4;
+      } else {
+        var marker = 5;
+      }
+    }
+  }
+}
+)";
+
+  DataMap data;
+  data.Add<PromoteSideEffectsToDecl::Config>(/* type_ctor_to_let */ true,
+                                             /* dynamic_index_to_var */ false);
+  auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PromoteSideEffectsToDeclTest, TypeCtorToLet_ArrayInArrayArray) {
   auto* src = R"(
 fn f() {
@@ -626,6 +713,190 @@ fn f() {
       break;
     }
     break;
+  }
+}
+)";
+
+  DataMap data;
+  data.Add<PromoteSideEffectsToDecl::Config>(/* type_ctor_to_let */ false,
+                                             /* dynamic_index_to_var */ true);
+  auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, DynamicIndexToVar_ArrayIndexInElseIf) {
+  auto* src = R"(
+fn f() {
+  var i : i32;
+  let p = array<i32, 2>(1, 2);
+  if (false) {
+    var marker = 0;
+  } else if (p[i] < 3) {
+    var marker = 1;
+  }
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var i : i32;
+  let p = array<i32, 2>(1, 2);
+  if (false) {
+    var marker = 0;
+  } else {
+    var var_for_index = p;
+    if ((var_for_index[i] < 3)) {
+      var marker = 1;
+    }
+  }
+}
+)";
+
+  DataMap data;
+  data.Add<PromoteSideEffectsToDecl::Config>(/* type_ctor_to_let */ false,
+                                             /* dynamic_index_to_var */ true);
+  auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest,
+       DynamicIndexToVar_ArrayIndexInElseIfChain) {
+  auto* src = R"(
+fn f() {
+  var i : i32;
+  let p = array<i32, 2>(1, 2);
+  if (true) {
+    var marker = 0;
+  } else if (true) {
+    var marker = 1;
+  } else if (p[i] < 3) {
+    var marker = 2;
+  } else if (p[i] < 4) {
+    var marker = 3;
+  } else if (true) {
+    var marker = 4;
+  } else {
+    var marker = 5;
+  }
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var i : i32;
+  let p = array<i32, 2>(1, 2);
+  if (true) {
+    var marker = 0;
+  } else if (true) {
+    var marker = 1;
+  } else {
+    var var_for_index = p;
+    if ((var_for_index[i] < 3)) {
+      var marker = 2;
+    } else {
+      var var_for_index_1 = p;
+      if ((var_for_index_1[i] < 4)) {
+        var marker = 3;
+      } else if (true) {
+        var marker = 4;
+      } else {
+        var marker = 5;
+      }
+    }
+  }
+}
+)";
+
+  DataMap data;
+  data.Add<PromoteSideEffectsToDecl::Config>(/* type_ctor_to_let */ false,
+                                             /* dynamic_index_to_var */ true);
+  auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, DynamicIndexToVar_MatrixIndexInElseIf) {
+  auto* src = R"(
+fn f() {
+  var i : i32;
+  let p = mat2x2(1.0, 2.0, 3.0, 4.0);
+  if (false) {
+    var marker_if = 1;
+  } else if (p[i].x < 3.0) {
+    var marker_else_if = 1;
+  }
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var i : i32;
+  let p = mat2x2(1.0, 2.0, 3.0, 4.0);
+  if (false) {
+    var marker_if = 1;
+  } else {
+    var var_for_index = p;
+    if ((var_for_index[i].x < 3.0)) {
+      var marker_else_if = 1;
+    }
+  }
+}
+)";
+
+  DataMap data;
+  data.Add<PromoteSideEffectsToDecl::Config>(/* type_ctor_to_let */ false,
+                                             /* dynamic_index_to_var */ true);
+  auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest,
+       DynamicIndexToVar_MatrixIndexInElseIfChain) {
+  auto* src = R"(
+fn f() {
+  var i : i32;
+  let p = mat2x2(1.0, 2.0, 3.0, 4.0);
+  if (true) {
+    var marker = 0;
+  } else if (true) {
+    var marker = 1;
+  } else if (p[i].x < 3.0) {
+    var marker = 2;
+  } else if (p[i].y < 3.0) {
+    var marker = 3;
+  } else if (true) {
+    var marker = 4;
+  } else {
+    var marker = 5;
+  }
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var i : i32;
+  let p = mat2x2(1.0, 2.0, 3.0, 4.0);
+  if (true) {
+    var marker = 0;
+  } else if (true) {
+    var marker = 1;
+  } else {
+    var var_for_index = p;
+    if ((var_for_index[i].x < 3.0)) {
+      var marker = 2;
+    } else {
+      var var_for_index_1 = p;
+      if ((var_for_index_1[i].y < 3.0)) {
+        var marker = 3;
+      } else if (true) {
+        var marker = 4;
+      } else {
+        var marker = 5;
+      }
+    }
   }
 }
 )";

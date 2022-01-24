@@ -23,8 +23,10 @@
 #include "src/sem/call.h"
 #include "src/sem/expression.h"
 #include "src/sem/for_loop_statement.h"
+#include "src/sem/if_statement.h"
 #include "src/sem/statement.h"
 #include "src/sem/type_constructor.h"
+#include "src/utils/reverse.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::PromoteSideEffectsToDecl);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::PromoteSideEffectsToDecl::Config);
@@ -47,15 +49,40 @@ class PromoteSideEffectsToDecl::State {
     ast::StatementList cont_decls;
   };
 
+  /// Holds information about 'if's with 'else-if' statements that need to be
+  /// decomposed into 'if {else}' so that declaration statements can be inserted
+  /// before the condition expression.
+  struct IfInfo {
+    /// Info for each else-if that needs decomposing
+    struct ElseIfInfo {
+      /// Decls to insert before condition
+      ast::StatementList cond_decls;
+    };
+
+    /// 'else if's that need to be decomposed to 'else { if }'
+    std::unordered_map<const sem::ElseStatement*, ElseIfInfo> else_ifs;
+  };
+
   // For-loops that need to be decomposed to loops.
   std::unordered_map<const sem::ForLoopStatement*, LoopInfo> loops;
 
+  /// If statements with 'else if's that need to be decomposed to 'else { if }'
+  std::unordered_map<const sem::IfStatement*, IfInfo> ifs;
+
   // Inserts `decl` before `sem_expr`, possibly marking a for-loop to be
-  // converted to a loop.
+  // converted to a loop, or an else-if to an else { if }..
   bool InsertBefore(const sem::Expression* sem_expr,
                     const ast::VariableDeclStatement* decl) {
     auto* sem_stmt = sem_expr->Stmt();
     auto* stmt = sem_stmt->Declaration();
+
+    if (auto* else_if = sem_stmt->As<sem::ElseStatement>()) {
+      // Expression used in 'else if' condition.
+      // Need to convert 'else if' to 'else { if }'.
+      auto& if_info = ifs[else_if->Parent()->As<sem::IfStatement>()];
+      if_info.else_ifs[else_if].cond_decls.push_back(decl);
+      return true;
+    }
 
     if (auto* fl = sem_stmt->As<sem::ForLoopStatement>()) {
       // Expression used in for-loop condition.
@@ -241,6 +268,80 @@ class PromoteSideEffectsToDecl::State {
         });
   }
 
+  void ElseIfsToElseWithNestedIfs() {
+    if (ifs.empty()) {
+      return;
+    }
+
+    ctx.ReplaceAll([&](const ast::IfStatement* if_stmt)  //
+                   -> const ast::IfStatement* {
+      auto& sem = ctx.src->Sem();
+      auto* sem_if = sem.Get(if_stmt);
+      if (!sem_if) {
+        return nullptr;
+      }
+
+      auto it = ifs.find(sem_if);
+      if (it == ifs.end()) {
+        return nullptr;
+      }
+      auto& if_info = it->second;
+
+      // This if statement has "else if"s that need to be converted to "else
+      // { if }"s
+
+      ast::ElseStatementList next_else_stmts;
+      next_else_stmts.reserve(if_stmt->else_statements.size());
+
+      for (auto* else_stmt : utils::Reverse(if_stmt->else_statements)) {
+        if (else_stmt->condition == nullptr) {
+          // The last 'else', keep as is
+          next_else_stmts.insert(next_else_stmts.begin(), ctx.Clone(else_stmt));
+
+        } else {
+          auto* sem_else_if = sem.Get(else_stmt);
+
+          auto it2 = if_info.else_ifs.find(sem_else_if);
+          if (it2 == if_info.else_ifs.end()) {
+            // 'else if' we don't need to modify (no decls to insert), so
+            // keep as is
+            next_else_stmts.insert(next_else_stmts.begin(),
+                                   ctx.Clone(else_stmt));
+
+          } else {
+            // 'else if' we need to replace with 'else <decls> { if }'
+            auto& else_if_info = it2->second;
+
+            // Build the else body's statements, starting with let decls for
+            // the conditional expression
+            auto& body_stmts = else_if_info.cond_decls;
+
+            // Build nested if
+            body_stmts.emplace_back(b.If(ctx.Clone(else_stmt->condition),
+                                         ctx.Clone(else_stmt->body),
+                                         next_else_stmts));
+
+            // Build else
+            auto* else_with_nested_if = b.Else(b.Block(body_stmts));
+
+            // This will be used in parent if (either another nested if, or
+            // top-level if)
+            next_else_stmts = {else_with_nested_if};
+          }
+        }
+      }
+
+      // Build a new top-level if with new else statements
+      if (next_else_stmts.empty()) {
+        TINT_ICE(Transform, b.Diagnostics())
+            << "Expected else statements to insert into new if";
+      }
+      auto* new_if = b.If(ctx.Clone(if_stmt->condition),
+                          ctx.Clone(if_stmt->body), next_else_stmts);
+      return new_if;
+    });
+  }
+
  public:
   /// Constructor
   /// @param ctx_in the CloneContext primed with the input program and
@@ -286,6 +387,7 @@ class PromoteSideEffectsToDecl::State {
     }
 
     ForLoopsToLoops();
+    ElseIfsToElseWithNestedIfs();
 
     ctx.Clone();
   }
