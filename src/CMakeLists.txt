@@ -303,6 +303,8 @@ set(TINT_LIB_SRCS
   transform/binding_remapper.h
   transform/calculate_array_length.cc
   transform/calculate_array_length.h
+  transform/combine_samplers.cc
+  transform/combine_samplers.h
   transform/canonicalize_entry_point_io.cc
   transform/canonicalize_entry_point_io.h
   transform/decompose_memory_access.cc
@@ -976,6 +978,7 @@ if(TINT_BUILD_TESTS)
       transform/binding_remapper_test.cc
       transform/calculate_array_length_test.cc
       transform/canonicalize_entry_point_io_test.cc
+      transform/combine_samplers_test.cc
       transform/decompose_memory_access_test.cc
       transform/decompose_strided_matrix_test.cc
       transform/external_texture_transform_test.cc

@@ -3,11 +3,11 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0;
+uniform highp sampler2D arg_0_arg_1;
 
 
 void textureGatherCompare_a5f587() {
-  vec4 res = textureGatherOffset(arg_0, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
 }
 
 struct tint_symbol {
@@ -44,11 +44,11 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0;
+uniform highp sampler2D arg_0_arg_1;
 
 
 void textureGatherCompare_a5f587() {
-  vec4 res = textureGatherOffset(arg_0, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
 }
 
 struct tint_symbol {
@@ -75,11 +75,11 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0;
+uniform highp sampler2D arg_0_arg_1;
 
 
 void textureGatherCompare_a5f587() {
-  vec4 res = textureGatherOffset(arg_0, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
 }
 
 struct tint_symbol {

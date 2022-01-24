@@ -25,8 +25,6 @@ layout (binding = 1) buffer PointLights_1 {
   PointLight values[];
 } pointLights;
 
-uniform highp sampler2D myTexture;
-
 struct FragmentInput {
   vec4 position;
   vec4 view_position;
@@ -80,7 +78,7 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:66: 'color' : redefinition 
+ERROR: 0:64: 'color' : redefinition 
 ERROR: 1 compilation errors.  No code generated.
 
 

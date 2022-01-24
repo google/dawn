@@ -1,11 +1,11 @@
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0;
+uniform highp sampler2DArray arg_0_arg_1;
 
 
 void textureSampleGrad_2ecd8f() {
-  vec4 res = textureGrad(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec4 res = textureGrad(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -34,11 +34,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0;
+uniform highp sampler2DArray arg_0_arg_1;
 
 
 void textureSampleGrad_2ecd8f() {
-  vec4 res = textureGrad(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec4 res = textureGrad(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -57,11 +57,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0;
+uniform highp sampler2DArray arg_0_arg_1;
 
 
 void textureSampleGrad_2ecd8f() {
-  vec4 res = textureGrad(arg_0, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec4 res = textureGrad(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
 }
 
 struct tint_symbol {

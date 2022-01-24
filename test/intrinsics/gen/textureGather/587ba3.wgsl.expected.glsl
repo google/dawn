@@ -1,11 +1,11 @@
 #version 310 es
 precision mediump float;
 
-uniform highp isampler2D arg_1;
+uniform highp isampler2D arg_1_arg_2;
 
 
 void textureGather_587ba3() {
-  ivec4 res = textureGather(arg_1, vec2(0.0f, 0.0f), 1);
+  ivec4 res = textureGather(arg_1_arg_2, vec2(0.0f, 0.0f), 1);
 }
 
 struct tint_symbol {
@@ -34,11 +34,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp isampler2D arg_1;
+uniform highp isampler2D arg_1_arg_2;
 
 
 void textureGather_587ba3() {
-  ivec4 res = textureGather(arg_1, vec2(0.0f, 0.0f), 1);
+  ivec4 res = textureGather(arg_1_arg_2, vec2(0.0f, 0.0f), 1);
 }
 
 struct tint_symbol {
@@ -57,11 +57,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp isampler2D arg_1;
+uniform highp isampler2D arg_1_arg_2;
 
 
 void textureGather_587ba3() {
-  ivec4 res = textureGather(arg_1, vec2(0.0f, 0.0f), 1);
+  ivec4 res = textureGather(arg_1_arg_2, vec2(0.0f, 0.0f), 1);
 }
 
 struct tint_symbol {

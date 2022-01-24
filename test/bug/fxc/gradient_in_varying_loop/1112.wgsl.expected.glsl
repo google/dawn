@@ -1,10 +1,6 @@
 #version 310 es
 precision mediump float;
 
-
-uniform highp sampler2D randomTexture;
-uniform highp sampler2D depthTexture;
-
 struct tint_symbol_2 {
   vec2 vUV;
 };
@@ -12,8 +8,12 @@ struct tint_symbol_3 {
   vec4 value;
 };
 
+uniform highp sampler2D randomTexture_Sampler;
+uniform highp sampler2D depthTexture_Sampler;
+
+
 vec4 tint_symbol_inner(vec2 vUV) {
-  vec3 random = texture(randomTexture, vUV).rgb;
+  vec3 random = texture(randomTexture_Sampler, vUV).rgb;
   int i = 0;
   while (true) {
     if ((i < 1)) {
@@ -37,7 +37,7 @@ vec4 tint_symbol_inner(vec2 vUV) {
       i = (i + 1);
       continue;
     }
-    float sampleDepth = texture(depthTexture, offset.xy).r;
+    float sampleDepth = texture(depthTexture_Sampler, offset.xy).r;
     i = (i + 1);
   }
   return vec4(1.0f);

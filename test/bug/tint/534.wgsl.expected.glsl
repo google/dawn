@@ -8,8 +8,6 @@ struct Uniforms {
   uint channelCount;
 };
 
-uniform highp sampler2D src;
-uniform highp sampler2D dst;
 layout (binding = 2) buffer OutputBuf_1 {
   uint result[];
 } tint_symbol;
@@ -28,15 +26,18 @@ struct tint_symbol_3 {
   uvec3 GlobalInvocationID;
 };
 
+uniform highp sampler2D src_1;
+uniform highp sampler2D dst_1;
+
 void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
-  ivec2 size = textureSize(src, 0);
+  ivec2 size = textureSize(src_1, 0);
   ivec2 dstTexCoord = ivec2(GlobalInvocationID.xy);
   ivec2 srcTexCoord = dstTexCoord;
   if ((uniforms.dstTextureFlipY == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1);
   }
-  vec4 srcColor = texelFetch(src, srcTexCoord, 0);
-  vec4 dstColor = texelFetch(dst, dstTexCoord, 0);
+  vec4 srcColor = texelFetch(src_1, srcTexCoord, 0);
+  vec4 dstColor = texelFetch(dst_1, dstTexCoord, 0);
   bool success = true;
   uvec4 srcColorBits = uvec4(0u, 0u, 0u, 0u);
   uvec4 dstColorBits = uvec4(dstColor);

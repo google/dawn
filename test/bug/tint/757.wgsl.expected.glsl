@@ -5,8 +5,6 @@ struct Constants {
   int level;
 };
 
-uniform highp sampler2DArray myTexture;
-
 layout (binding = 3) buffer Result_1 {
   float values[];
 } result;
@@ -15,10 +13,12 @@ struct tint_symbol_2 {
   uvec3 GlobalInvocationID;
 };
 
+uniform highp sampler2DArray myTexture_1;
+
 void tint_symbol_inner(uvec3 GlobalInvocationID) {
   uint flatIndex = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
-  vec4 texel = texelFetch(myTexture, ivec3(ivec2(GlobalInvocationID.xy), 0), 0);
+  vec4 texel = texelFetch(myTexture_1, ivec3(ivec2(GlobalInvocationID.xy), 0), 0);
   {
     for(uint i = 0u; (i < 1u); i = (i + 1u)) {
       result.values[(flatIndex + i)] = texel.r;

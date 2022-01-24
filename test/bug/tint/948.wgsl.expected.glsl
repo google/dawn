@@ -26,34 +26,32 @@ layout (binding = 9) uniform LeftOver_1 {
   float spriteCount;
   vec3 colorMul;
 } x_20;
-uniform highp sampler2D frameMapTexture;
-
 vec2 tUV = vec2(0.0f, 0.0f);
-uniform highp sampler2D tileMapsTexture0;
-
-uniform highp sampler2D tileMapsTexture1;
-uniform highp sampler2D animationMapTexture;
-
 float mt = 0.0f;
-uniform highp sampler2D spriteSheetTexture;
-
 vec4 glFragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 vec2 tileID_1 = vec2(0.0f, 0.0f);
 vec2 levelUnits = vec2(0.0f, 0.0f);
 vec2 stageUnits_1 = vec2(0.0f, 0.0f);
 vec3 vPosition = vec3(0.0f, 0.0f, 0.0f);
 vec2 vUV = vec2(0.0f, 0.0f);
+uniform highp sampler2D frameMapTexture_frameMapSampler;
+
 
 mat4 getFrameData_f1_(inout float frameID) {
   float fX = 0.0f;
   float x_15 = frameID;
   float x_25 = x_20.spriteCount;
   fX = (x_15 / x_25);
-  vec4 x_40 = texture(frameMapTexture, vec2(fX, 0.0f), 0.0f);
-  vec4 x_47 = texture(frameMapTexture, vec2(fX, 0.25f), 0.0f);
-  vec4 x_54 = texture(frameMapTexture, vec2(fX, 0.5f), 0.0f);
+  vec4 x_40 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.0f), 0.0f);
+  vec4 x_47 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.25f), 0.0f);
+  vec4 x_54 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.5f), 0.0f);
   return mat4(vec4(x_40.x, x_40.y, x_40.z, x_40.w), vec4(x_47.x, x_47.y, x_47.z, x_47.w), vec4(x_54.x, x_54.y, x_54.z, x_54.w), vec4(vec4(0.0f, 0.0f, 0.0f, 0.0f).x, vec4(0.0f, 0.0f, 0.0f, 0.0f).y, vec4(0.0f, 0.0f, 0.0f, 0.0f).z, vec4(0.0f, 0.0f, 0.0f, 0.0f).w));
 }
+
+uniform highp sampler2D tileMapsTexture1_tileMapsSampler;
+uniform highp sampler2D tileMapsTexture0_tileMapsSampler;
+uniform highp sampler2D animationMapTexture_animationMapSampler;
+uniform highp sampler2D spriteSheetTexture_spriteSheetSampler;
 
 void main_1() {
   vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -92,14 +90,14 @@ void main_1() {
         case 1: {
           vec2 x_150 = tileID;
           vec2 x_154 = x_20.stageSize;
-          vec4 x_156 = texture(tileMapsTexture1, ((x_150 + vec2(0.5f, 0.5f)) / x_154), 0.0f);
+          vec4 x_156 = texture(tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f, 0.5f)) / x_154), 0.0f);
           frameID_1 = x_156.x;
           break;
         }
         case 0: {
           vec2 x_136 = tileID;
           vec2 x_140 = x_20.stageSize;
-          vec4 x_142 = texture(tileMapsTexture0, ((x_136 + vec2(0.5f, 0.5f)) / x_140), 0.0f);
+          vec4 x_142 = texture(tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f, 0.5f)) / x_140), 0.0f);
           frameID_1 = x_142.x;
           break;
         }
@@ -109,7 +107,7 @@ void main_1() {
       }
       float x_166 = frameID_1;
       float x_169 = x_20.spriteCount;
-      vec4 x_172 = texture(animationMapTexture, vec2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
+      vec4 x_172 = texture(animationMapTexture_animationMapSampler, vec2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
       animationData = x_172;
       float x_174 = animationData.y;
       if ((x_174 > 0.0f)) {
@@ -127,7 +125,7 @@ void main_1() {
             }
             float x_208 = frameID_1;
             float x_211 = x_20.spriteCount;
-            vec4 x_217 = texture(animationMapTexture, vec2(((x_208 + 0.5f) / x_211), (0.125f * f)), 0.0f);
+            vec4 x_217 = texture(animationMapTexture_animationMapSampler, vec2(((x_208 + 0.5f) / x_211), (0.125f * f)), 0.0f);
             animationData = x_217;
           }
         }
@@ -149,10 +147,10 @@ void main_1() {
         tileUV = vec2(x_252.y, x_252.x);
       }
       if ((i == 0)) {
-        vec4 x_268 = texture(spriteSheetTexture, ((tileUV * frameSize) + offset_1));
+        vec4 x_268 = texture(spriteSheetTexture_spriteSheetSampler, ((tileUV * frameSize) + offset_1));
         color = x_268;
       } else {
-        vec4 x_279 = texture(spriteSheetTexture, ((tileUV * frameSize) + offset_1));
+        vec4 x_279 = texture(spriteSheetTexture_spriteSheetSampler, ((tileUV * frameSize) + offset_1));
         nc = x_279;
         float x_283 = color.w;
         float x_285 = nc.w;
@@ -229,9 +227,9 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:76: 'frac' : no matching overloaded function found 
-ERROR: 0:76: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
-ERROR: 0:76: '' : compilation terminated 
+ERROR: 0:74: 'frac' : no matching overloaded function found 
+ERROR: 0:74: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
+ERROR: 0:74: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

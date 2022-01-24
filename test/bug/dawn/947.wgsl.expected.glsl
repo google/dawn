@@ -80,10 +80,6 @@ struct tint_symbol_3 {
   vec2 texcoords;
   vec4 position;
 };
-
-
-uniform highp sampler2D myTexture;
-
 struct tint_symbol_5 {
   vec2 texcoord;
 };
@@ -91,12 +87,15 @@ struct tint_symbol_6 {
   vec4 value;
 };
 
+uniform highp sampler2D myTexture_mySampler;
+
+
 vec4 fs_main_inner(vec2 texcoord) {
   vec2 clampedTexcoord = clamp(texcoord, vec2(0.0f, 0.0f), vec2(1.0f, 1.0f));
   if (!(all(equal(clampedTexcoord, texcoord)))) {
     discard;
   }
-  vec4 srcColor = texture(myTexture, texcoord);
+  vec4 srcColor = texture(myTexture_mySampler, texcoord);
   return srcColor;
 }
 

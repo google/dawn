@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp usampler1D arg_0;
+uniform highp usampler1D arg_0_1;
 
 void textureLoad_1b8588() {
-  uvec4 res = texelFetch(arg_0, 1, 0);
+  uvec4 res = texelFetch(arg_0_1, 1, 0);
 }
 
 struct tint_symbol {
@@ -42,10 +42,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp usampler1D arg_0;
+uniform highp usampler1D arg_0_1;
 
 void textureLoad_1b8588() {
-  uvec4 res = texelFetch(arg_0, 1, 0);
+  uvec4 res = texelFetch(arg_0_1, 1, 0);
 }
 
 struct tint_symbol {
@@ -71,10 +71,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp usampler1D arg_0;
+uniform highp usampler1D arg_0_1;
 
 void textureLoad_1b8588() {
-  uvec4 res = texelFetch(arg_0, 1, 0);
+  uvec4 res = texelFetch(arg_0_1, 1, 0);
 }
 
 struct tint_symbol {

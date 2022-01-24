@@ -53,38 +53,6 @@ layout (binding = 1) uniform S_15 {
 layout (binding = 1) uniform S_16 {
   float a;
 } b15;
-uniform highp sampler2D t0;
-uniform highp sampler2D t1;
-uniform highp sampler2D t2;
-uniform highp sampler2D t3;
-uniform highp sampler2D t4;
-uniform highp sampler2D t5;
-uniform highp sampler2D t6;
-uniform highp sampler2D t7;
-uniform highp sampler2D t8;
-uniform highp sampler2D t9;
-uniform highp sampler2D t10;
-uniform highp sampler2D t11;
-uniform highp sampler2D t12;
-uniform highp sampler2D t13;
-uniform highp sampler2D t14;
-uniform highp sampler2D t15;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void tint_symbol() {
   return;

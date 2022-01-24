@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler1D arg_0;
+uniform highp sampler1D arg_0_1;
 
 void textureDimensions_002b2a() {
-  int res = textureSize(arg_0, 0);
+  int res = textureSize(arg_0_1, 0);
 }
 
 struct tint_symbol {
@@ -42,10 +42,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler1D arg_0;
+uniform highp sampler1D arg_0_1;
 
 void textureDimensions_002b2a() {
-  int res = textureSize(arg_0, 0);
+  int res = textureSize(arg_0_1, 0);
 }
 
 struct tint_symbol {
@@ -71,10 +71,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler1D arg_0;
+uniform highp sampler1D arg_0_1;
 
 void textureDimensions_002b2a() {
-  int res = textureSize(arg_0, 0);
+  int res = textureSize(arg_0_1, 0);
 }
 
 struct tint_symbol {

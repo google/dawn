@@ -1,81 +1,33 @@
+SKIP: FAILED
+
 intrinsics/gen/ignore/c8a0ee.wgsl:29:3 warning: use of deprecated intrinsic
   ignore(arg_0);
   ^^^^^^
 
-#version 310 es
-precision mediump float;
 
-uniform highp sampler2DArray arg_0;
+@group(1) @binding(0) var arg_0 : texture_depth_2d_array;
 
-void ignore_c8a0ee() {
-  arg_0;
+fn ignore_c8a0ee() {
+  ignore(arg_0);
 }
 
-struct tint_symbol {
-  vec4 value;
-};
-
-vec4 vertex_main_inner() {
+@stage(vertex)
+fn vertex_main() -> @builtin(position) vec4<f32> {
   ignore_c8a0ee();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4<f32>();
 }
 
-tint_symbol vertex_main() {
-  vec4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = tint_symbol(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-void main() {
-  tint_symbol outputs;
-  outputs = vertex_main();
-  gl_Position = outputs.value;
-  gl_Position.y = -gl_Position.y;
-}
-
-
-#version 310 es
-precision mediump float;
-
-uniform highp sampler2DArray arg_0;
-
-void ignore_c8a0ee() {
-  arg_0;
-}
-
-struct tint_symbol {
-  vec4 value;
-};
-
-void fragment_main() {
+@stage(fragment)
+fn fragment_main() {
   ignore_c8a0ee();
-  return;
-}
-void main() {
-  fragment_main();
 }
 
-
-#version 310 es
-precision mediump float;
-
-uniform highp sampler2DArray arg_0;
-
-void ignore_c8a0ee() {
-  arg_0;
-}
-
-struct tint_symbol {
-  vec4 value;
-};
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void compute_main() {
+@stage(compute) @workgroup_size(1)
+fn compute_main() {
   ignore_c8a0ee();
-  return;
-}
-void main() {
-  compute_main();
 }
 
+Failed to generate: intrinsics/gen/ignore/c8a0ee.wgsl:29:10 error: unknown identifier: 'arg_0'
+  ignore(arg_0);
+         ^^^^^
 

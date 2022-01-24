@@ -6,13 +6,10 @@ struct Params {
   uint blockDim;
 };
 
-
 layout (binding = 1) uniform Params_1 {
   uint filterDim;
   uint blockDim;
 } params;
-uniform highp sampler2D inputTex;
-uniform highp writeonly image2D outputTex;
 
 struct Flip {
   uint value;
@@ -29,6 +26,11 @@ struct tint_symbol_2 {
   uvec3 WorkGroupID;
 };
 
+uniform highp sampler2D inputTex_1;
+uniform highp sampler2D inputTex_samp;
+uniform highp writeonly image2D outputTex_1;
+
+
 void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
@@ -39,7 +41,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
   }
   memoryBarrierShared();
   uint filterOffset = ((params.filterDim - 1u) / 2u);
-  ivec2 dims = textureSize(inputTex, 0);
+  ivec2 dims = textureSize(inputTex_1, 0);
   ivec2 baseIndex = (ivec2(((WorkGroupID.xy * uvec2(params.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)))) - ivec2(int(filterOffset), 0));
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
@@ -49,7 +51,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
           if ((flip.value != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          tile[r][((4u * LocalInvocationID.x) + c)] = textureLod(inputTex, ((vec2(loadIndex) + vec2(0.25f, 0.25f)) / vec2(dims)), 0.0f).rgb;
+          tile[r][((4u * LocalInvocationID.x) + c)] = textureLod(inputTex_samp, ((vec2(loadIndex) + vec2(0.25f, 0.25f)) / vec2(dims)), 0.0f).rgb;
         }
       }
     }
@@ -80,7 +82,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
                 acc = (acc + ((1.0f / float(params.filterDim)) * tile[r][i]));
               }
             }
-            imageStore(outputTex, writeIndex, vec4(acc, 1.0f));
+            imageStore(outputTex_1, writeIndex, vec4(acc, 1.0f));
           }
         }
       }

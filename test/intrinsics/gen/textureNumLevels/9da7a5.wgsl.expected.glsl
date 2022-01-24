@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp isampler3D arg_0;
+uniform highp isampler3D arg_0_1;
 
 void textureNumLevels_9da7a5() {
-  int res = textureQueryLevels(arg_0);;
+  int res = textureQueryLevels(arg_0_1);;
 }
 
 struct tint_symbol {
@@ -43,10 +43,10 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp isampler3D arg_0;
+uniform highp isampler3D arg_0_1;
 
 void textureNumLevels_9da7a5() {
-  int res = textureQueryLevels(arg_0);;
+  int res = textureQueryLevels(arg_0_1);;
 }
 
 struct tint_symbol {
@@ -73,10 +73,10 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp isampler3D arg_0;
+uniform highp isampler3D arg_0_1;
 
 void textureNumLevels_9da7a5() {
-  int res = textureQueryLevels(arg_0);;
+  int res = textureQueryLevels(arg_0_1);;
 }
 
 struct tint_symbol {

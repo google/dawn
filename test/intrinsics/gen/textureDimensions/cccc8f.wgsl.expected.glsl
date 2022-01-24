@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D arg_0;
+uniform highp writeonly image1D arg_0_1;
 
 void textureDimensions_cccc8f() {
-  int res = imageSize(arg_0);
+  int res = imageSize(arg_0_1);
 }
 
 struct tint_symbol {
@@ -42,10 +42,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D arg_0;
+uniform highp writeonly image1D arg_0_1;
 
 void textureDimensions_cccc8f() {
-  int res = imageSize(arg_0);
+  int res = imageSize(arg_0_1);
 }
 
 struct tint_symbol {
@@ -71,10 +71,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D arg_0;
+uniform highp writeonly image1D arg_0_1;
 
 void textureDimensions_cccc8f() {
-  int res = imageSize(arg_0);
+  int res = imageSize(arg_0_1);
 }
 
 struct tint_symbol {

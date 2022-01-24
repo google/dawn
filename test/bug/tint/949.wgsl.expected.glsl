@@ -30,8 +30,6 @@ struct Light0 {
 
 float u_Float = 0.0f;
 vec3 u_Color = vec3(0.0f, 0.0f, 0.0f);
-uniform highp sampler2D TextureSamplerTexture;
-
 vec2 vMainuv = vec2(0.0f, 0.0f);
 layout (binding = 6) uniform LeftOver_1 {
   mat4 u_World;
@@ -48,8 +46,6 @@ vec4 v_output1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 bool tint_symbol = false;
 vec2 v_uv = vec2(0.0f, 0.0f);
 vec4 v_output2 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-uniform highp sampler2D TextureSampler1Texture;
-
 layout (binding = 5) uniform Light0_1 {
   vec4 vLightData;
   vec4 vLightDiffuse;
@@ -178,6 +174,10 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(inout vec3 v
   return result;
 }
 
+uniform highp sampler2D TextureSamplerTexture_TextureSamplerSampler;
+uniform highp sampler2D TextureSampler1Texture_TextureSampler1Sampler;
+
+
 void main_1() {
   vec4 tempTextureRead = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   vec3 rgb = vec3(0.0f, 0.0f, 0.0f);
@@ -234,7 +234,7 @@ void main_1() {
   vec3 output3 = vec3(0.0f, 0.0f, 0.0f);
   u_Float = 100.0f;
   u_Color = vec3(0.5f, 0.5f, 0.5f);
-  vec4 x_262 = texture(TextureSamplerTexture, vMainuv);
+  vec4 x_262 = texture(TextureSamplerTexture_TextureSamplerSampler, vMainuv);
   tempTextureRead = x_262;
   vec4 x_264 = tempTextureRead;
   float x_273 = x_269.textureInfoName;
@@ -282,7 +282,7 @@ void main_1() {
   i = 0;
   {
     for(; (i < 15); i = (i + 1)) {
-      vec4 x_397 = texture(TextureSamplerTexture, (v_uv + vCurrOffset));
+      vec4 x_397 = texture(TextureSamplerTexture_TextureSamplerSampler, (v_uv + vCurrOffset));
       currSampledHeight = x_397.w;
       if ((currSampledHeight > currRayHeight)) {
         delta1 = (currSampledHeight - currRayHeight);
@@ -300,7 +300,7 @@ void main_1() {
   }
   parallaxOcclusion_0 = vCurrOffset;
   uvOffset = parallaxOcclusion_0;
-  vec4 x_452 = texture(TextureSamplerTexture, (v_uv + uvOffset));
+  vec4 x_452 = texture(TextureSamplerTexture_TextureSamplerSampler, (v_uv + uvOffset));
   float x_454 = x_269.u_bumpStrength;
   param_8 = TBN;
   param_9 = vec3(x_452.x, x_452.y, x_452.z);
@@ -308,7 +308,7 @@ void main_1() {
   vec3 x_461 = perturbNormal_mf33_vf3_f1_(param_8, param_9, param_10);
   output4 = vec4(x_461.x, x_461.y, x_461.z, output4.w);
   output6 = (v_uv + uvOffset);
-  vec4 x_475 = texture(TextureSampler1Texture, output6);
+  vec4 x_475 = texture(TextureSampler1Texture_TextureSampler1Sampler, output6);
   tempTextureRead1 = x_475;
   vec4 x_477 = tempTextureRead1;
   rgb1 = vec3(x_477.x, x_477.y, x_477.z);
@@ -397,9 +397,9 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:73: 'ddx' : no matching overloaded function found 
-ERROR: 0:73: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
-ERROR: 0:73: '' : compilation terminated 
+ERROR: 0:69: 'ddx' : no matching overloaded function found 
+ERROR: 0:69: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
+ERROR: 0:69: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

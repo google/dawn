@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage1D arg_0;
+uniform highp writeonly iimage1D arg_0_1;
 
 void textureStore_6b80d2() {
-  imageStore(arg_0, 1, ivec4(0, 0, 0, 0));
+  imageStore(arg_0_1, 1, ivec4(0, 0, 0, 0));
 }
 
 struct tint_symbol {
@@ -42,10 +42,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage1D arg_0;
+uniform highp writeonly iimage1D arg_0_1;
 
 void textureStore_6b80d2() {
-  imageStore(arg_0, 1, ivec4(0, 0, 0, 0));
+  imageStore(arg_0_1, 1, ivec4(0, 0, 0, 0));
 }
 
 struct tint_symbol {
@@ -71,10 +71,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage1D arg_0;
+uniform highp writeonly iimage1D arg_0_1;
 
 void textureStore_6b80d2() {
-  imageStore(arg_0, 1, ivec4(0, 0, 0, 0));
+  imageStore(arg_0_1, 1, ivec4(0, 0, 0, 0));
 }
 
 struct tint_symbol {

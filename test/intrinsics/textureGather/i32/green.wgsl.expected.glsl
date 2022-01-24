@@ -1,11 +1,11 @@
 #version 310 es
 precision mediump float;
 
-uniform highp isampler2D t;
+uniform highp isampler2D t_s;
 
 
 void tint_symbol() {
-  ivec4 res = textureGather(t, vec2(0.0f, 0.0f), 1);
+  ivec4 res = textureGather(t_s, vec2(0.0f, 0.0f), 1);
   return;
 }
 void main() {

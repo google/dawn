@@ -437,6 +437,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/calculate_array_length.h",
     "transform/canonicalize_entry_point_io.cc",
     "transform/canonicalize_entry_point_io.h",
+    "transform/combine_samplers.cc",
+    "transform/combine_samplers.h",
     "transform/decompose_memory_access.cc",
     "transform/decompose_memory_access.h",
     "transform/decompose_strided_matrix.cc",

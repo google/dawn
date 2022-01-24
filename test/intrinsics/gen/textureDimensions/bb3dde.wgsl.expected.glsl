@@ -1,10 +1,10 @@
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage3D arg_0;
+uniform highp writeonly iimage3D arg_0_1;
 
 void textureDimensions_bb3dde() {
-  ivec3 res = imageSize(arg_0);
+  ivec3 res = imageSize(arg_0_1);
 }
 
 struct tint_symbol {
@@ -33,10 +33,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage3D arg_0;
+uniform highp writeonly iimage3D arg_0_1;
 
 void textureDimensions_bb3dde() {
-  ivec3 res = imageSize(arg_0);
+  ivec3 res = imageSize(arg_0_1);
 }
 
 struct tint_symbol {
@@ -55,10 +55,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage3D arg_0;
+uniform highp writeonly iimage3D arg_0_1;
 
 void textureDimensions_bb3dde() {
-  ivec3 res = imageSize(arg_0);
+  ivec3 res = imageSize(arg_0_1);
 }
 
 struct tint_symbol {

@@ -19,8 +19,10 @@
 #include "src/program_builder.h"
 #include "src/transform/add_empty_entry_point.h"
 #include "src/transform/add_spirv_block_decoration.h"
+#include "src/transform/binding_remapper.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
+#include "src/transform/combine_samplers.h"
 #include "src/transform/decompose_memory_access.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/fold_trivial_single_use_lets.h"
@@ -73,6 +75,20 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
     data.Add<SingleEntryPoint::Config>(cfg->entry_point);
   }
   manager.Add<RemovePhonies>();
+  manager.Add<CombineSamplers>();
+  if (auto* binding_info = inputs.Get<CombineSamplers::BindingInfo>()) {
+    data.Add<CombineSamplers::BindingInfo>(*binding_info);
+  } else {
+    data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  }
+  manager.Add<BindingRemapper>();
+  if (auto* remappings = inputs.Get<BindingRemapper::Remappings>()) {
+    data.Add<BindingRemapper::Remappings>(*remappings);
+  } else {
+    BindingRemapper::BindingPoints bp;
+    BindingRemapper::AccessControls ac;
+    data.Add<BindingRemapper::Remappings>(bp, ac, /* mayCollide */ true);
+  }
   manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();
 

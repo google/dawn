@@ -1,10 +1,10 @@
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0;
+uniform highp sampler2DArray arg_0_1;
 
 void textureDimensions_85d556() {
-  ivec2 res = textureSize(arg_0, 0).xy;
+  ivec2 res = textureSize(arg_0_1, 0).xy;
 }
 
 struct tint_symbol {
@@ -33,10 +33,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0;
+uniform highp sampler2DArray arg_0_1;
 
 void textureDimensions_85d556() {
-  ivec2 res = textureSize(arg_0, 0).xy;
+  ivec2 res = textureSize(arg_0_1, 0).xy;
 }
 
 struct tint_symbol {
@@ -55,10 +55,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0;
+uniform highp sampler2DArray arg_0_1;
 
 void textureDimensions_85d556() {
-  ivec2 res = textureSize(arg_0, 0).xy;
+  ivec2 res = textureSize(arg_0_1, 0).xy;
 }
 
 struct tint_symbol {

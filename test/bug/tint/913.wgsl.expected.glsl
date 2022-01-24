@@ -9,8 +9,6 @@ struct Uniforms {
   uvec2 copySize;
 };
 
-uniform highp sampler2D src;
-uniform highp sampler2D dst;
 layout (binding = 2) buffer OutputBuf_1 {
   uint result[];
 } tint_symbol;
@@ -30,9 +28,12 @@ struct tint_symbol_3 {
   uvec3 GlobalInvocationID;
 };
 
+uniform highp sampler2D src_1;
+uniform highp sampler2D dst_1;
+
 void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
-  ivec2 srcSize = textureSize(src, 0);
-  ivec2 dstSize = textureSize(dst, 0);
+  ivec2 srcSize = textureSize(src_1, 0);
+  ivec2 dstSize = textureSize(dst_1, 0);
   uvec2 dstTexCoord = uvec2(GlobalInvocationID.xy);
   vec4 nonCoveredColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
@@ -51,7 +52,7 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   if ((tint_tmp)) {
     bool tint_tmp_3 = success;
     if (tint_tmp_3) {
-      tint_tmp_3 = all(equal(texelFetch(dst, ivec2(dstTexCoord), 0), nonCoveredColor));
+      tint_tmp_3 = all(equal(texelFetch(dst_1, ivec2(dstTexCoord), 0), nonCoveredColor));
     }
     success = (tint_tmp_3);
   } else {
@@ -59,8 +60,8 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
     if ((uniforms.dstTextureFlipY == 1u)) {
       srcTexCoord.y = ((uint(srcSize.y) - srcTexCoord.y) - 1u);
     }
-    vec4 srcColor = texelFetch(src, ivec2(srcTexCoord), 0);
-    vec4 dstColor = texelFetch(dst, ivec2(dstTexCoord), 0);
+    vec4 srcColor = texelFetch(src_1, ivec2(srcTexCoord), 0);
+    vec4 dstColor = texelFetch(dst_1, ivec2(dstTexCoord), 0);
     if ((uniforms.channelCount == 2u)) {
       bool tint_tmp_5 = success;
       if (tint_tmp_5) {

@@ -1,10 +1,10 @@
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0;
+uniform highp writeonly image2DArray arg_0_1;
 
 void textureStore_9d9cd5() {
-  imageStore(arg_0, ivec3(0, 0, 1), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  imageStore(arg_0_1, ivec3(0, 0, 1), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -33,10 +33,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0;
+uniform highp writeonly image2DArray arg_0_1;
 
 void textureStore_9d9cd5() {
-  imageStore(arg_0, ivec3(0, 0, 1), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  imageStore(arg_0_1, ivec3(0, 0, 1), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -55,10 +55,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0;
+uniform highp writeonly image2DArray arg_0_1;
 
 void textureStore_9d9cd5() {
-  imageStore(arg_0, ivec3(0, 0, 1), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  imageStore(arg_0_1, ivec3(0, 0, 1), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {

@@ -1,10 +1,10 @@
 #version 310 es
 precision mediump float;
 
-uniform highp isampler2D arg_0;
+uniform highp isampler2D arg_0_1;
 
 void textureLoad_c2a480() {
-  ivec4 res = texelFetch(arg_0, ivec2(0, 0), 0);
+  ivec4 res = texelFetch(arg_0_1, ivec2(0, 0), 0);
 }
 
 struct tint_symbol {
@@ -33,10 +33,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp isampler2D arg_0;
+uniform highp isampler2D arg_0_1;
 
 void textureLoad_c2a480() {
-  ivec4 res = texelFetch(arg_0, ivec2(0, 0), 0);
+  ivec4 res = texelFetch(arg_0_1, ivec2(0, 0), 0);
 }
 
 struct tint_symbol {
@@ -55,10 +55,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp isampler2D arg_0;
+uniform highp isampler2D arg_0_1;
 
 void textureLoad_c2a480() {
-  ivec4 res = texelFetch(arg_0, ivec2(0, 0), 0);
+  ivec4 res = texelFetch(arg_0_1, ivec2(0, 0), 0);
 }
 
 struct tint_symbol {

@@ -7,10 +7,6 @@ struct FragmentInput {
 struct FragmentOutput {
   vec4 color;
 };
-
-uniform highp sampler2D depthMap;
-
-
 struct tint_symbol_3 {
   vec2 vUv;
 };
@@ -18,8 +14,11 @@ struct tint_symbol_4 {
   vec4 color;
 };
 
+uniform highp sampler2D depthMap_texSampler;
+
+
 FragmentOutput tint_symbol_inner(FragmentInput fIn) {
-  float tint_symbol_1 = texture(depthMap, fIn.vUv).x;
+  float tint_symbol_1 = texture(depthMap_texSampler, fIn.vUv).x;
   vec3 color = vec3(tint_symbol_1, tint_symbol_1, tint_symbol_1);
   FragmentOutput fOut = FragmentOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f));
   fOut.color = vec4(color, 1.0f);

@@ -1,11 +1,11 @@
 #version 310 es
 precision mediump float;
 
-uniform highp sampler3D arg_0;
+uniform highp sampler3D arg_0_arg_1;
 
 
 void textureSampleGrad_e9a2f7() {
-  vec4 res = textureGradOffset(arg_0, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), ivec3(0, 0, 0));
+  vec4 res = textureGradOffset(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), ivec3(0, 0, 0));
 }
 
 struct tint_symbol {
@@ -34,11 +34,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler3D arg_0;
+uniform highp sampler3D arg_0_arg_1;
 
 
 void textureSampleGrad_e9a2f7() {
-  vec4 res = textureGradOffset(arg_0, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), ivec3(0, 0, 0));
+  vec4 res = textureGradOffset(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), ivec3(0, 0, 0));
 }
 
 struct tint_symbol {
@@ -57,11 +57,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler3D arg_0;
+uniform highp sampler3D arg_0_arg_1;
 
 
 void textureSampleGrad_e9a2f7() {
-  vec4 res = textureGradOffset(arg_0, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), ivec3(0, 0, 0));
+  vec4 res = textureGradOffset(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), ivec3(0, 0, 0));
 }
 
 struct tint_symbol {

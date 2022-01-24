@@ -1,11 +1,11 @@
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0;
+uniform highp sampler2D arg_0_arg_1;
 
 
 void textureSampleLevel_c6aca6() {
-  vec4 res = textureLod(arg_0, vec2(0.0f, 0.0f), 1.0f);
+  vec4 res = textureLod(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f);
 }
 
 struct tint_symbol {
@@ -34,11 +34,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0;
+uniform highp sampler2D arg_0_arg_1;
 
 
 void textureSampleLevel_c6aca6() {
-  vec4 res = textureLod(arg_0, vec2(0.0f, 0.0f), 1.0f);
+  vec4 res = textureLod(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f);
 }
 
 struct tint_symbol {
@@ -57,11 +57,11 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0;
+uniform highp sampler2D arg_0_arg_1;
 
 
 void textureSampleLevel_c6aca6() {
-  vec4 res = textureLod(arg_0, vec2(0.0f, 0.0f), 1.0f);
+  vec4 res = textureLod(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f);
 }
 
 struct tint_symbol {

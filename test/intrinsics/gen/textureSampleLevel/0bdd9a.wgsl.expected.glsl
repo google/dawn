@@ -3,11 +3,11 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArray arg_0;
+uniform highp samplerCubeArray arg_0_arg_1;
 
 
 void textureSampleLevel_0bdd9a() {
-  vec4 res = textureLod(arg_0, vec4(0.0f, 0.0f, 0.0f, float(1)), 1.0f);
+  vec4 res = textureLod(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 1.0f);
 }
 
 struct tint_symbol {
@@ -43,11 +43,11 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArray arg_0;
+uniform highp samplerCubeArray arg_0_arg_1;
 
 
 void textureSampleLevel_0bdd9a() {
-  vec4 res = textureLod(arg_0, vec4(0.0f, 0.0f, 0.0f, float(1)), 1.0f);
+  vec4 res = textureLod(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 1.0f);
 }
 
 struct tint_symbol {
@@ -73,11 +73,11 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArray arg_0;
+uniform highp samplerCubeArray arg_0_arg_1;
 
 
 void textureSampleLevel_0bdd9a() {
-  vec4 res = textureLod(arg_0, vec4(0.0f, 0.0f, 0.0f, float(1)), 1.0f);
+  vec4 res = textureLod(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 1.0f);
 }
 
 struct tint_symbol {

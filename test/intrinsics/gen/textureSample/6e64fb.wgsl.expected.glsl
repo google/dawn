@@ -3,11 +3,11 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler1D arg_0;
+uniform highp sampler1D arg_0_arg_1;
 
 
 void textureSample_6e64fb() {
-  vec4 res = texture(arg_0, 1.0f);
+  vec4 res = texture(arg_0_arg_1, 1.0f);
 }
 
 void fragment_main() {
