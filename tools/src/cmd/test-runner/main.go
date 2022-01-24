@@ -52,6 +52,7 @@ const (
 // These directories contain large corpora of tests for which the generated code
 // is uninteresting.
 var dirsWithNoPassExpectations = []string{
+	"/test/benchmark/",
 	"/test/unittest/",
 	"/test/vk-gl-cts/",
 }
