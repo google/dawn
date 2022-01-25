@@ -25,13 +25,6 @@ namespace dawn::native { namespace vulkan {
     using ExternalTexture = VulkanImageWrappingTestBackend::ExternalTexture;
     using ExternalSemaphore = VulkanImageWrappingTestBackend::ExternalSemaphore;
 
-    ExternalImageDescriptorVkForTesting::ExternalImageDescriptorVkForTesting()
-        : ExternalImageDescriptorVk(ExternalImageType::OpaqueFD) {
-    }
-    ExternalImageExportInfoVkForTesting::ExternalImageExportInfoVkForTesting()
-        : ExternalImageExportInfoVk(ExternalImageType::OpaqueFD) {
-    }
-
     namespace {
 
         class VulkanImageWrappingTestBase : public DawnTest {

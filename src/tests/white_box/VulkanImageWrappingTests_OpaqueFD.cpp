@@ -23,6 +23,13 @@
 
 namespace dawn::native::vulkan {
 
+    ExternalImageDescriptorVkForTesting::ExternalImageDescriptorVkForTesting()
+        : ExternalImageDescriptorVk(ExternalImageType::OpaqueFD) {
+    }
+    ExternalImageExportInfoVkForTesting::ExternalImageExportInfoVkForTesting()
+        : ExternalImageExportInfoVk(ExternalImageType::OpaqueFD) {
+    }
+
     class ExternalSemaphoreOpaqueFD : public VulkanImageWrappingTestBackend::ExternalSemaphore {
       public:
         ExternalSemaphoreOpaqueFD(int handle) : mHandle(handle) {
