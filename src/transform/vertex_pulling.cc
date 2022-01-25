@@ -903,7 +903,9 @@ struct State {
 VertexPulling::VertexPulling() = default;
 VertexPulling::~VertexPulling() = default;
 
-void VertexPulling::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
+void VertexPulling::Run(CloneContext& ctx,
+                        const DataMap& inputs,
+                        DataMap&) const {
   auto cfg = cfg_;
   if (auto* cfg_data = inputs.Get<Config>()) {
     cfg = *cfg_data;

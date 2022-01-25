@@ -790,7 +790,9 @@ const DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
 DecomposeMemoryAccess::DecomposeMemoryAccess() = default;
 DecomposeMemoryAccess::~DecomposeMemoryAccess() = default;
 
-void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void DecomposeMemoryAccess::Run(CloneContext& ctx,
+                                const DataMap&,
+                                DataMap&) const {
   auto& sem = ctx.src->Sem();
 
   State state(ctx);

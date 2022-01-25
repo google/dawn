@@ -85,7 +85,7 @@ class Renamer : public Castable<Renamer, Transform> {
   /// @param program the source program to transform
   /// @param data optional extra transform-specific input data
   /// @returns the transformation result
-  Output Run(const Program* program, const DataMap& data = {}) override;
+  Output Run(const Program* program, const DataMap& data = {}) const override;
 };
 
 }  // namespace transform

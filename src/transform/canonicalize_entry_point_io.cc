@@ -550,7 +550,7 @@ struct CanonicalizeEntryPointIO::State {
 
 void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
                                    const DataMap& inputs,
-                                   DataMap&) {
+                                   DataMap&) const {
   if (!Requires<Unshadow>(ctx)) {
     return;
   }

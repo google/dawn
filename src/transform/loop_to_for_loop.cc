@@ -56,7 +56,7 @@ LoopToForLoop::LoopToForLoop() = default;
 
 LoopToForLoop::~LoopToForLoop() = default;
 
-void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   ctx.ReplaceAll([&](const ast::LoopStatement* loop) -> const ast::Statement* {
     // For loop condition is taken from the first statement in the loop.
     // This requires an if-statement with either:

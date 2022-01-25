@@ -39,7 +39,7 @@ RemoveUnreachableStatements::~RemoveUnreachableStatements() = default;
 
 void RemoveUnreachableStatements::Run(CloneContext& ctx,
                                       const DataMap&,
-                                      DataMap&) {
+                                      DataMap&) const {
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* stmt = ctx.src->Sem().Get<sem::Statement>(node)) {
       if (!stmt->IsReachable()) {

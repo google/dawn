@@ -91,7 +91,7 @@ Unshadow::Unshadow() = default;
 
 Unshadow::~Unshadow() = default;
 
-void Unshadow::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void Unshadow::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   State(ctx).Run();
 }
 

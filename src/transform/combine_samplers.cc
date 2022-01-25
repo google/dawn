@@ -304,7 +304,9 @@ CombineSamplers::CombineSamplers() = default;
 
 CombineSamplers::~CombineSamplers() = default;
 
-void CombineSamplers::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
+void CombineSamplers::Run(CloneContext& ctx,
+                          const DataMap& inputs,
+                          DataMap&) const {
   auto* binding_info = inputs.Get<BindingInfo>();
   if (!binding_info) {
     ctx.dst->Diagnostics().add_error(

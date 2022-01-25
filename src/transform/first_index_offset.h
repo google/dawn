@@ -122,7 +122,9 @@ class FirstIndexOffset : public Castable<FirstIndexOffset, Transform> {
   /// ProgramBuilder
   /// @param inputs optional extra transform-specific input data
   /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
+  void Run(CloneContext& ctx,
+           const DataMap& inputs,
+           DataMap& outputs) const override;
 
  private:
   uint32_t binding_ = 0;

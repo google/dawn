@@ -97,7 +97,7 @@ PadArrayElements::PadArrayElements() = default;
 
 PadArrayElements::~PadArrayElements() = default;
 
-void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   auto& sem = ctx.src->Sem();
 
   std::unordered_map<const sem::Array*, ArrayBuilder> padded_arrays;

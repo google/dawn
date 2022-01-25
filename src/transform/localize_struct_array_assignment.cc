@@ -215,7 +215,7 @@ LocalizeStructArrayAssignment::~LocalizeStructArrayAssignment() = default;
 
 void LocalizeStructArrayAssignment::Run(CloneContext& ctx,
                                         const DataMap&,
-                                        DataMap&) {
+                                        DataMap&) const {
   if (!Requires<SimplifyPointers>(ctx)) {
     return;
   }

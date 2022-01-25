@@ -27,7 +27,9 @@ AddEmptyEntryPoint::AddEmptyEntryPoint() = default;
 
 AddEmptyEntryPoint::~AddEmptyEntryPoint() = default;
 
-void AddEmptyEntryPoint::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void AddEmptyEntryPoint::Run(CloneContext& ctx,
+                             const DataMap&,
+                             DataMap&) const {
   for (auto* func : ctx.src->AST().Functions()) {
     if (func->IsEntryPoint()) {
       ctx.Clone();

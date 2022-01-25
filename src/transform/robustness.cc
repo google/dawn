@@ -293,7 +293,7 @@ Robustness::Config& Robustness::Config::operator=(const Config&) = default;
 Robustness::Robustness() = default;
 Robustness::~Robustness() = default;
 
-void Robustness::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
+void Robustness::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) const {
   Config cfg;
   if (auto* cfg_data = inputs.Get<Config>()) {
     cfg = *cfg_data;

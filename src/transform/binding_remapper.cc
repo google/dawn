@@ -42,7 +42,9 @@ BindingRemapper::Remappings::~Remappings() = default;
 BindingRemapper::BindingRemapper() = default;
 BindingRemapper::~BindingRemapper() = default;
 
-void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
+void BindingRemapper::Run(CloneContext& ctx,
+                          const DataMap& inputs,
+                          DataMap&) const {
   auto* remappings = inputs.Get<Remappings>();
   if (!remappings) {
     ctx.dst->Diagnostics().add_error(

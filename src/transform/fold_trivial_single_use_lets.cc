@@ -51,7 +51,7 @@ FoldTrivialSingleUseLets::~FoldTrivialSingleUseLets() = default;
 
 void FoldTrivialSingleUseLets::Run(CloneContext& ctx,
                                    const DataMap&,
-                                   DataMap&) {
+                                   DataMap&) const {
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* block = node->As<ast::BlockStatement>()) {
       auto& stmts = block->statements;

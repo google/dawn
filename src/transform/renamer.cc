@@ -1252,7 +1252,7 @@ Renamer::Config::~Config() = default;
 Renamer::Renamer() = default;
 Renamer::~Renamer() = default;
 
-Output Renamer::Run(const Program* in, const DataMap& inputs) {
+Output Renamer::Run(const Program* in, const DataMap& inputs) const {
   ProgramBuilder out;
   // Disable auto-cloning of symbols, since we want to rename them.
   CloneContext ctx(&out, in, false);

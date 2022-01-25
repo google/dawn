@@ -36,7 +36,7 @@ class DecomposeStridedMatrix
 
   /// @param program the program to inspect
   /// @returns true if this transform should be run for the given program
-  static bool ShouldRun(const Program* program);
+  bool ShouldRun(const Program* program) const override;
 
  protected:
   /// Runs the transform using the CloneContext built for transforming a
@@ -45,7 +45,9 @@ class DecomposeStridedMatrix
   /// ProgramBuilder
   /// @param inputs optional extra transform-specific input data
   /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
+  void Run(CloneContext& ctx,
+           const DataMap& inputs,
+           DataMap& outputs) const override;
 };
 
 }  // namespace transform

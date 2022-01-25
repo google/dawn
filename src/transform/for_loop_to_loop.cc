@@ -25,7 +25,7 @@ ForLoopToLoop::ForLoopToLoop() = default;
 
 ForLoopToLoop::~ForLoopToLoop() = default;
 
-void ForLoopToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void ForLoopToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   ctx.ReplaceAll(
       [&](const ast::ForLoopStatement* for_loop) -> const ast::Statement* {
         ast::StatementList stmts;

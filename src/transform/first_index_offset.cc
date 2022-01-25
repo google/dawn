@@ -59,7 +59,7 @@ FirstIndexOffset::~FirstIndexOffset() = default;
 
 void FirstIndexOffset::Run(CloneContext& ctx,
                            const DataMap& inputs,
-                           DataMap& outputs) {
+                           DataMap& outputs) const {
   // Get the uniform buffer binding point
   uint32_t ub_binding = binding_;
   uint32_t ub_group = group_;

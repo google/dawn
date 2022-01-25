@@ -33,7 +33,9 @@ AddSpirvBlockDecoration::AddSpirvBlockDecoration() = default;
 
 AddSpirvBlockDecoration::~AddSpirvBlockDecoration() = default;
 
-void AddSpirvBlockDecoration::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void AddSpirvBlockDecoration::Run(CloneContext& ctx,
+                                  const DataMap&,
+                                  DataMap&) const {
   auto& sem = ctx.src->Sem();
 
   // Collect the set of structs that are nested in other types.

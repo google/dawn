@@ -433,7 +433,9 @@ ZeroInitWorkgroupMemory::ZeroInitWorkgroupMemory() = default;
 
 ZeroInitWorkgroupMemory::~ZeroInitWorkgroupMemory() = default;
 
-void ZeroInitWorkgroupMemory::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void ZeroInitWorkgroupMemory::Run(CloneContext& ctx,
+                                  const DataMap&,
+                                  DataMap&) const {
   for (auto* fn : ctx.src->AST().Functions()) {
     if (fn->PipelineStage() == ast::PipelineStage::kCompute) {
       State{ctx}.Run(fn);

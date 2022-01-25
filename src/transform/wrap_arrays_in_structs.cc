@@ -38,7 +38,9 @@ WrapArraysInStructs::WrapArraysInStructs() = default;
 
 WrapArraysInStructs::~WrapArraysInStructs() = default;
 
-void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void WrapArraysInStructs::Run(CloneContext& ctx,
+                              const DataMap&,
+                              DataMap&) const {
   auto& sem = ctx.src->Sem();
 
   std::unordered_map<const sem::Array*, WrappedArrayInfo> wrapped_arrays;

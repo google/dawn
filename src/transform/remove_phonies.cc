@@ -68,7 +68,7 @@ RemovePhonies::RemovePhonies() = default;
 
 RemovePhonies::~RemovePhonies() = default;
 
-void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   auto& sem = ctx.src->Sem();
 
   std::unordered_map<SinkSignature, Symbol, SinkSignature::Hasher> sinks;

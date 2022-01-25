@@ -45,7 +45,7 @@ namespace transform {
 Glsl::Glsl() = default;
 Glsl::~Glsl() = default;
 
-Output Glsl::Run(const Program* in, const DataMap& inputs) {
+Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   Manager manager;
   DataMap data;
 

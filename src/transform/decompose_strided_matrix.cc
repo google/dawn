@@ -107,7 +107,7 @@ DecomposeStridedMatrix::DecomposeStridedMatrix() = default;
 
 DecomposeStridedMatrix::~DecomposeStridedMatrix() = default;
 
-bool DecomposeStridedMatrix::ShouldRun(const Program* program) {
+bool DecomposeStridedMatrix::ShouldRun(const Program* program) const {
   bool should_run = false;
   GatherCustomStrideMatrixMembers(
       program, [&](const sem::StructMember*, sem::Matrix*, uint32_t) {
@@ -117,7 +117,9 @@ bool DecomposeStridedMatrix::ShouldRun(const Program* program) {
   return should_run;
 }
 
-void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void DecomposeStridedMatrix::Run(CloneContext& ctx,
+                                 const DataMap&,
+                                 DataMap&) const {
   if (!Requires<SimplifyPointers>(ctx)) {
     return;
   }

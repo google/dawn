@@ -28,7 +28,7 @@ ExternalTextureTransform::~ExternalTextureTransform() = default;
 
 void ExternalTextureTransform::Run(CloneContext& ctx,
                                    const DataMap&,
-                                   DataMap&) {
+                                   DataMap&) const {
   auto& sem = ctx.src->Sem();
 
   // Within this transform, usages of texture_external are replaced with a

@@ -71,7 +71,9 @@ CalculateArrayLength::BufferSizeIntrinsic::Clone(CloneContext* ctx) const {
 CalculateArrayLength::CalculateArrayLength() = default;
 CalculateArrayLength::~CalculateArrayLength() = default;
 
-void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void CalculateArrayLength::Run(CloneContext& ctx,
+                               const DataMap&,
+                               DataMap&) const {
   auto& sem = ctx.src->Sem();
   if (!Requires<SimplifyPointers>(ctx)) {
     return;

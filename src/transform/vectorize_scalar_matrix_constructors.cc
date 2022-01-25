@@ -34,7 +34,7 @@ VectorizeScalarMatrixConstructors::~VectorizeScalarMatrixConstructors() =
 
 void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx,
                                             const DataMap&,
-                                            DataMap&) {
+                                            DataMap&) const {
   ctx.ReplaceAll(
       [&](const ast::CallExpression* expr) -> const ast::CallExpression* {
         auto* call = ctx.src->Sem().Get(expr);

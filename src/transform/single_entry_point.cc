@@ -31,7 +31,9 @@ SingleEntryPoint::SingleEntryPoint() = default;
 
 SingleEntryPoint::~SingleEntryPoint() = default;
 
-void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
+void SingleEntryPoint::Run(CloneContext& ctx,
+                           const DataMap& inputs,
+                           DataMap&) const {
   auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(

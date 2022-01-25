@@ -46,7 +46,8 @@ Output::Output(Program&& p) : program(std::move(p)) {}
 Transform::Transform() = default;
 Transform::~Transform() = default;
 
-Output Transform::Run(const Program* program, const DataMap& data /* = {} */) {
+Output Transform::Run(const Program* program,
+                      const DataMap& data /* = {} */) const {
   ProgramBuilder builder;
   CloneContext ctx(&builder, program);
   Output output;
@@ -56,13 +57,18 @@ Output Transform::Run(const Program* program, const DataMap& data /* = {} */) {
   return output;
 }
 
-void Transform::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void Transform::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   TINT_UNIMPLEMENTED(Transform, ctx.dst->Diagnostics())
       << "Transform::Run() unimplemented for " << TypeInfo().name;
 }
 
-bool Transform::Requires(CloneContext& ctx,
-                         std::initializer_list<const ::tint::TypeInfo*> deps) {
+bool Transform::ShouldRun(const Program*) const {
+  return true;
+}
+
+bool Transform::Requires(
+    CloneContext& ctx,
+    std::initializer_list<const ::tint::TypeInfo*> deps) const {
   for (auto* dep : deps) {
     if (!ctx.src->HasTransformApplied(dep)) {
       ctx.dst->Diagnostics().add_error(

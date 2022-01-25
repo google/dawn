@@ -379,7 +379,7 @@ ModuleScopeVarToEntryPointParam::~ModuleScopeVarToEntryPointParam() = default;
 
 void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
                                           const DataMap&,
-                                          DataMap&) {
+                                          DataMap&) const {
   State state{ctx};
   state.Process();
   ctx.Clone();

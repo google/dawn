@@ -398,7 +398,7 @@ PromoteSideEffectsToDecl::~PromoteSideEffectsToDecl() = default;
 
 void PromoteSideEffectsToDecl::Run(CloneContext& ctx,
                                    const DataMap& inputs,
-                                   DataMap&) {
+                                   DataMap&) const {
   auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(

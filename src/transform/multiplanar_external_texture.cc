@@ -413,10 +413,10 @@ MultiplanarExternalTexture::~MultiplanarExternalTexture() = default;
 // parameters. Calls to textureLoad or textureSampleLevel that contain a
 // texture_external parameter will be transformed into a newly generated version
 // of the function, which can perform the desired operation on a single RGBA
-// plane or on seperate Y and UV planes.
+// plane or on separate Y and UV planes.
 void MultiplanarExternalTexture::Run(CloneContext& ctx,
                                      const DataMap& inputs,
-                                     DataMap&) {
+                                     DataMap&) const {
   auto* new_binding_points = inputs.Get<NewBindingPoints>();
 
   if (!new_binding_points) {

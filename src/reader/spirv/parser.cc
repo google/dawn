@@ -52,7 +52,7 @@ Program Parse(const std::vector<uint32_t>& input) {
 
   // If the generated program contains matrices with a custom MatrixStride
   // attribute then we need to decompose these into an array of vectors
-  if (transform::DecomposeStridedMatrix::ShouldRun(&program)) {
+  if (transform::DecomposeStridedMatrix().ShouldRun(&program)) {
     transform::Manager manager;
     manager.Add<transform::Unshadow>();
     manager.Add<transform::SimplifyPointers>();

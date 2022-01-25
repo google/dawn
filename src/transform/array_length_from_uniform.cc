@@ -95,7 +95,7 @@ static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
 
 void ArrayLengthFromUniform::Run(CloneContext& ctx,
                                  const DataMap& inputs,
-                                 DataMap& outputs) {
+                                 DataMap& outputs) const {
   if (!Requires<SimplifyPointers>(ctx)) {
     return;
   }

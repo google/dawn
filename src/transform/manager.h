@@ -52,7 +52,7 @@ class Manager : public Castable<Manager, Transform> {
   /// @param program the source program to transform
   /// @param data optional extra transform-specific input data
   /// @returns the transformed program and diagnostics
-  Output Run(const Program* program, const DataMap& data = {}) override;
+  Output Run(const Program* program, const DataMap& data = {}) const override;
 
  private:
   std::vector<std::unique_ptr<Transform>> transforms_;

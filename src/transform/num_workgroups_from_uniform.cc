@@ -54,7 +54,7 @@ NumWorkgroupsFromUniform::~NumWorkgroupsFromUniform() = default;
 
 void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
                                    const DataMap& inputs,
-                                   DataMap&) {
+                                   DataMap&) const {
   if (!Requires<CanonicalizeEntryPointIO>(ctx)) {
     return;
   }
