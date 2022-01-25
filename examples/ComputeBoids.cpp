@@ -164,9 +164,9 @@ void initSim() {
         struct Particles {
             particles : array<Particle>;
         };
-        @binding(0), group(0) var<uniform> params : SimParams;
-        @binding(1), group(0) var<storage, read> particlesA : Particles;
-        @binding(2), group(0) var<storage, read_write> particlesB : Particles;
+        @binding(0) @group(0) var<uniform> params : SimParams;
+        @binding(1) @group(0) var<storage, read> particlesA : Particles;
+        @binding(2) @group(0) var<storage, read_write> particlesB : Particles;
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
         @stage(compute) @workgroup_size(1)
