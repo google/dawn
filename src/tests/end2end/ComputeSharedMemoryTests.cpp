@@ -132,16 +132,16 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
                 wg_struct.m = mat2x2<f32>(
                     vec2<f32>(f32(i), f32(i + 1u)),
                     vec2<f32>(f32(i + 2u), f32(i + 3u)));
-            } elseif (LocalInvocationID.x == 1u) {
+            } else if (LocalInvocationID.x == 1u) {
                 wg_matrix = mat2x2<f32>(
                     vec2<f32>(f32(i), f32(i + 1u)),
                     vec2<f32>(f32(i + 2u), f32(i + 3u)));
-            } elseif (LocalInvocationID.x == 2u) {
+            } else if (LocalInvocationID.x == 2u) {
                 wg_array[0u] = i;
                 wg_array[1u] = i + 1u;
                 wg_array[2u] = i + 2u;
                 wg_array[3u] = i + 3u;
-            } elseif (LocalInvocationID.x == 3u) {
+            } else if (LocalInvocationID.x == 3u) {
                 wg_vector = vec4<f32>(
                     f32(i), f32(i + 1u), f32(i + 2u), f32(i + 3u));
             }

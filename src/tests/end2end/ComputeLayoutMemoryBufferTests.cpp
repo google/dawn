@@ -196,11 +196,11 @@ struct Status {
 fn main() {
     if (input.header != {input_header_code}u) {
         status.code = {status_bad_input_header}u;
-    } elseif (input.footer != {input_footer_code}u) {
+    } else if (input.footer != {input_footer_code}u) {
         status.code = {status_bad_input_footer}u;
-    } elseif (input.data.header != {data_header_code}u) {
+    } else if (input.data.header != {data_header_code}u) {
         status.code = {status_bad_data_header}u;
-    } elseif (input.data.footer != {data_footer_code}u) {
+    } else if (input.data.footer != {data_footer_code}u) {
         status.code = {status_bad_data_footer}u;
     } else {
         status.code = {status_ok}u;
