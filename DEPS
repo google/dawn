@@ -118,7 +118,7 @@ deps = {
 
   # GLFW for tests and samples
   'third_party/glfw': {
-    'url': '{chromium_git}/external/github.com/glfw/glfw@df8d7bc892937a8b0f7c604c92a9f64f383cf48c',
+    'url': '{chromium_git}/external/github.com/glfw/glfw@94773111300fee0453844a4c9407af7e880b4df8',
     'condition': 'dawn_standalone',
   },
 

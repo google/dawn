@@ -25,23 +25,19 @@ glfw_dir = dawn_glfw_dir
 
 config("glfw_public") {
   include_dirs = [ "${glfw_dir}/include" ]
-}
-
-config("glfw_private") {
-  defines = []
 
   if (is_win) {
-    defines += [ "_GLFW_WIN32" ]
+    defines = [ "_GLFW_WIN32" ]
   }
 
   if (is_mac) {
-    defines += [ "_GLFW_COCOA" ]
+    defines = [ "_GLFW_COCOA" ]
   }
 
-  if (dawn_use_x11) {
+  if (is_linux) {
     # ANGLE builds only libEGL.so, so tell GLFW to load that instead of
     # the default libEGL.so.1.
-    defines += [
+    defines = [
       "_GLFW_X11",
       "_GLFW_EGL_LIBRARY=\"libEGL.so\"",
     ]
@@ -50,7 +46,6 @@ config("glfw_private") {
 
 static_library("glfw") {
   public_configs = [ ":glfw_public" ]
-  configs += [ ":glfw_private" ]
 
   if (dawn_has_build) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -67,7 +62,6 @@ static_library("glfw") {
     ]
   }
 
-  # Common between all OSes / platforms
   sources = [
     "${glfw_dir}/include/GLFW/glfw3.h",
     "${glfw_dir}/include/GLFW/glfw3native.h",
@@ -77,81 +71,73 @@ static_library("glfw") {
     "${glfw_dir}/src/init.c",
     "${glfw_dir}/src/input.c",
     "${glfw_dir}/src/internal.h",
-    "${glfw_dir}/src/platform.h",
-    "${glfw_dir}/src/platform.c",
-    "${glfw_dir}/src/mappings.h",
     "${glfw_dir}/src/monitor.c",
     "${glfw_dir}/src/osmesa_context.c",
-    "${glfw_dir}/src/null_platform.h",
-    "${glfw_dir}/src/null_joystick.h",
-    "${glfw_dir}/src/null_init.c",
-    "${glfw_dir}/src/null_monitor.c",
-    "${glfw_dir}/src/null_window.c",
-    "${glfw_dir}/src/null_joystick.c",
     "${glfw_dir}/src/osmesa_context.h",
     "${glfw_dir}/src/vulkan.c",
     "${glfw_dir}/src/window.c",
   ]
   libs = []
 
-  # Code shared by all platforms on the same OS.
-
-  if (is_win) {
-    sources += [
-      "${glfw_dir}/src/win32_module.c",
-      "${glfw_dir}/src/win32_module.h",
-      "${glfw_dir}/src/win32_thread.c",
-      "${glfw_dir}/src/win32_thread.h",
-      "${glfw_dir}/src/win32_time.c",
-      "${glfw_dir}/src/win32_time.h",
-    ]
-  }
-
-  if (is_mac) {
-    sources += [
-      "${glfw_dir}/src/posix_module.c",
-      "${glfw_dir}/src/posix_module.h",
-      "${glfw_dir}/src/posix_thread.c",
-      "${glfw_dir}/src/posix_thread.h",
-      "${glfw_dir}/src/cocoa_time.c",
-      "${glfw_dir}/src/cocoa_time.h",
-    ]
-  }
-
-  if (is_linux) {
-    sources += [
-      "${glfw_dir}/src/posix_module.c",
-      "${glfw_dir}/src/posix_module.h",
-      "${glfw_dir}/src/posix_thread.c",
-      "${glfw_dir}/src/posix_thread.h",
-      "${glfw_dir}/src/posix_time.c",
-      "${glfw_dir}/src/posix_time.h",
-    ]
-  }
-
-  # Individual GLFW platforms.
-
   if (is_win) {
     sources += [
       "${glfw_dir}/src/wgl_context.c",
+      "${glfw_dir}/src/wgl_context.h",
       "${glfw_dir}/src/win32_init.c",
       "${glfw_dir}/src/win32_joystick.c",
       "${glfw_dir}/src/win32_joystick.h",
       "${glfw_dir}/src/win32_monitor.c",
       "${glfw_dir}/src/win32_platform.h",
+      "${glfw_dir}/src/win32_thread.c",
+      "${glfw_dir}/src/win32_time.c",
       "${glfw_dir}/src/win32_window.c",
+    ]
+  }
+
+  if (is_linux || is_mac) {
+    sources += [
+      "${glfw_dir}/src/posix_thread.c",
+      "${glfw_dir}/src/posix_thread.h",
+    ]
+  }
+
+  if (is_linux) {
+    sources += [
+      "${glfw_dir}/src/glx_context.c",
+      "${glfw_dir}/src/glx_context.h",
+      "${glfw_dir}/src/linux_joystick.c",
+      "${glfw_dir}/src/linux_joystick.h",
+      "${glfw_dir}/src/posix_time.c",
+      "${glfw_dir}/src/posix_time.h",
+      "${glfw_dir}/src/x11_init.c",
+      "${glfw_dir}/src/x11_monitor.c",
+      "${glfw_dir}/src/x11_platform.h",
+      "${glfw_dir}/src/x11_window.c",
+      "${glfw_dir}/src/xkb_unicode.c",
+      "${glfw_dir}/src/xkb_unicode.h",
+    ]
+
+    libs += [
+      "rt",
+      "dl",
+      "X11",
+      "Xcursor",
+      "Xinerama",
+      "Xrandr",
     ]
   }
 
   if (is_mac) {
     sources += [
-      "${glfw_dir}/src/nsgl_context.m",
       "${glfw_dir}/src/cocoa_init.m",
-      "${glfw_dir}/src/cocoa_joystick.m",
       "${glfw_dir}/src/cocoa_joystick.h",
+      "${glfw_dir}/src/cocoa_joystick.m",
       "${glfw_dir}/src/cocoa_monitor.m",
       "${glfw_dir}/src/cocoa_platform.h",
+      "${glfw_dir}/src/cocoa_time.c",
       "${glfw_dir}/src/cocoa_window.m",
+      "${glfw_dir}/src/nsgl_context.h",
+      "${glfw_dir}/src/nsgl_context.m",
     ]
     frameworks = [
       "Cocoa.framework",
@@ -164,33 +150,5 @@ static_library("glfw") {
       "-Wno-unguarded-availability",
       "-Wno-objc-multiple-method-names",
     ]
-  }
-
-  if (is_linux) {
-    sources += [
-      "${glfw_dir}/src/linux_joystick.c",
-      "${glfw_dir}/src/linux_joystick.h",
-      "${glfw_dir}/src/xkb_unicode.c",
-      "${glfw_dir}/src/xkb_unicode.h",
-    ]
-    libs += [
-      "rt",
-      "dl",
-    ]
-    if (dawn_use_x11) {
-      sources += [
-        "${glfw_dir}/src/glx_context.c",
-        "${glfw_dir}/src/x11_init.c",
-        "${glfw_dir}/src/x11_monitor.c",
-        "${glfw_dir}/src/x11_platform.h",
-        "${glfw_dir}/src/x11_window.c",
-      ]
-      libs += [
-        "X11",
-        "Xcursor",
-        "Xinerama",
-        "Xrandr",
-      ]
-    }
   }
 }
