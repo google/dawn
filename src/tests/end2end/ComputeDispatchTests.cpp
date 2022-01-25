@@ -218,6 +218,8 @@ TEST_P(ComputeDispatchTests, IndirectBasic) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
+    // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     IndirectTest({2, 3, 4}, 0);
 }
@@ -248,6 +250,8 @@ TEST_P(ComputeDispatchTests, IndirectOffset) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
+    // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t));
 }
@@ -263,6 +267,8 @@ TEST_P(ComputeDispatchTests, MaxWorkgroups) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
+    // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     // TODO(crbug.com/dawn/1165): Fails with WARP
     DAWN_SUPPRESS_TEST_IF(IsWARP());
