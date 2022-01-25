@@ -487,7 +487,7 @@ struct tint_symbol_14 {
   uvec3 coord;
 };
 
-uniform highp writeonly image2D tex_out_1;
+layout(rgba8) uniform highp writeonly image2D tex_out_1;
 
 void export_level_inner(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(imageSize(tex_out_1))))) {

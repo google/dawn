@@ -1,7 +1,9 @@
+SKIP: FAILED
+
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly uimage2D arg_0_1;
+layout(rg32ui) uniform highp writeonly uimage2D arg_0_1;
 
 void textureStore_682fd6() {
   imageStore(arg_0_1, ivec2(0, 0), uvec4(0u, 0u, 0u, 0u));
@@ -30,10 +32,17 @@ void main() {
 }
 
 
+Error parsing GLSL shader:
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly uimage2D arg_0_1;
+layout(rg32ui) uniform highp writeonly uimage2D arg_0_1;
 
 void textureStore_682fd6() {
   imageStore(arg_0_1, ivec2(0, 0), uvec4(0u, 0u, 0u, 0u));
@@ -52,10 +61,17 @@ void main() {
 }
 
 
+Error parsing GLSL shader:
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly uimage2D arg_0_1;
+layout(rg32ui) uniform highp writeonly uimage2D arg_0_1;
 
 void textureStore_682fd6() {
   imageStore(arg_0_1, ivec2(0, 0), uvec4(0u, 0u, 0u, 0u));
@@ -73,5 +89,12 @@ void compute_main() {
 void main() {
   compute_main();
 }
+
+
+Error parsing GLSL shader:
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
 
 

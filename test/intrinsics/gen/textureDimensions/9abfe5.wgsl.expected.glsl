@@ -1,7 +1,7 @@
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0_1;
+layout(rgba32f) uniform highp writeonly image2DArray arg_0_1;
 
 void textureDimensions_9abfe5() {
   ivec2 res = imageSize(arg_0_1).xy;
@@ -33,7 +33,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0_1;
+layout(rgba32f) uniform highp writeonly image2DArray arg_0_1;
 
 void textureDimensions_9abfe5() {
   ivec2 res = imageSize(arg_0_1).xy;
@@ -55,7 +55,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0_1;
+layout(rgba32f) uniform highp writeonly image2DArray arg_0_1;
 
 void textureDimensions_9abfe5() {
   ivec2 res = imageSize(arg_0_1).xy;

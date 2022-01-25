@@ -28,7 +28,7 @@ struct tint_symbol_2 {
 
 uniform highp sampler2D inputTex_1;
 uniform highp sampler2D inputTex_samp;
-uniform highp writeonly image2D outputTex_1;
+layout(rgba8) uniform highp writeonly image2D outputTex_1;
 
 
 void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocation_index) {

@@ -6,7 +6,7 @@ precision mediump float;
 vec4 x_2 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 int x_3 = 0;
 int x_4 = 0;
-uniform highp writeonly iimage2D x_5_1;
+layout(r32i) uniform highp writeonly iimage2D x_5_1;
 
 void main_1() {
   x_4 = 1;

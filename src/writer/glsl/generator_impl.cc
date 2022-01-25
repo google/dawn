@@ -77,6 +77,46 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   return IsAnyOf<ast::BreakStatement, ast::FallthroughStatement>(stmts->Last());
 }
 
+const char* convert_texel_format_to_glsl(const ast::TexelFormat format) {
+  switch (format) {
+    case ast::TexelFormat::kR32Uint:
+      return "r32ui";
+    case ast::TexelFormat::kR32Sint:
+      return "r32i";
+    case ast::TexelFormat::kR32Float:
+      return "r32f";
+    case ast::TexelFormat::kRgba8Unorm:
+      return "rgba8";
+    case ast::TexelFormat::kRgba8Snorm:
+      return "rgba8_snorm";
+    case ast::TexelFormat::kRgba8Uint:
+      return "rgba8ui";
+    case ast::TexelFormat::kRgba8Sint:
+      return "rgba8i";
+    case ast::TexelFormat::kRg32Uint:
+      return "rg32ui";
+    case ast::TexelFormat::kRg32Sint:
+      return "rg32i";
+    case ast::TexelFormat::kRg32Float:
+      return "rg32f";
+    case ast::TexelFormat::kRgba16Uint:
+      return "rgba16ui";
+    case ast::TexelFormat::kRgba16Sint:
+      return "rgba16i";
+    case ast::TexelFormat::kRgba16Float:
+      return "rgba16f";
+    case ast::TexelFormat::kRgba32Uint:
+      return "rgba32ui";
+    case ast::TexelFormat::kRgba32Sint:
+      return "rgba32i";
+    case ast::TexelFormat::kRgba32Float:
+      return "rgba32f";
+    case ast::TexelFormat::kNone:
+      return "unknown";
+  }
+  return "unknown";
+}
+
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
@@ -1673,9 +1713,13 @@ bool GeneratorImpl::EmitHandleVariable(const sem::Variable* var) {
 
   auto name = builder_.Symbols().NameFor(decl->symbol);
   auto* type = var->Type()->UnwrapRef();
-  if (type->As<sem::Sampler>()) {
+  if (type->Is<sem::Sampler>()) {
     // GLSL ignores Sampler variables.
     return true;
+  }
+  if (auto* storage = type->As<sem::StorageTexture>()) {
+    out << "layout(" << convert_texel_format_to_glsl(storage->texel_format())
+        << ") ";
   }
   if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
     return false;

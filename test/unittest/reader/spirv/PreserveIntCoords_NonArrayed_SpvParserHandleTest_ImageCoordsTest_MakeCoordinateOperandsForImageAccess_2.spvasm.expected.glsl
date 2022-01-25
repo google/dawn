@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D x_20_1;
+layout(r32f) uniform highp writeonly image1D x_20_1;
 
 void main_1() {
   float float_var = 0.0f;
@@ -35,6 +35,7 @@ void main() {
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'image1D' : Reserved word. 
+WARNING: 0:4: 'layout' : useless application of layout qualifier 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

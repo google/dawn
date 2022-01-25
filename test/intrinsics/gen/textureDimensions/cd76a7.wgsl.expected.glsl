@@ -1,7 +1,7 @@
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image3D arg_0_1;
+layout(rgba8) uniform highp writeonly image3D arg_0_1;
 
 void textureDimensions_cd76a7() {
   ivec3 res = imageSize(arg_0_1);
@@ -33,7 +33,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image3D arg_0_1;
+layout(rgba8) uniform highp writeonly image3D arg_0_1;
 
 void textureDimensions_cd76a7() {
   ivec3 res = imageSize(arg_0_1);
@@ -55,7 +55,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image3D arg_0_1;
+layout(rgba8) uniform highp writeonly image3D arg_0_1;
 
 void textureDimensions_cd76a7() {
   ivec3 res = imageSize(arg_0_1);

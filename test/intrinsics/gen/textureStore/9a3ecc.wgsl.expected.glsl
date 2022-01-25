@@ -1,7 +1,7 @@
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage3D arg_0_1;
+layout(rgba32i) uniform highp writeonly iimage3D arg_0_1;
 
 void textureStore_9a3ecc() {
   imageStore(arg_0_1, ivec3(0, 0, 0), ivec4(0, 0, 0, 0));
@@ -33,7 +33,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage3D arg_0_1;
+layout(rgba32i) uniform highp writeonly iimage3D arg_0_1;
 
 void textureStore_9a3ecc() {
   imageStore(arg_0_1, ivec3(0, 0, 0), ivec4(0, 0, 0, 0));
@@ -55,7 +55,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage3D arg_0_1;
+layout(rgba32i) uniform highp writeonly iimage3D arg_0_1;
 
 void textureStore_9a3ecc() {
   imageStore(arg_0_1, ivec3(0, 0, 0), ivec4(0, 0, 0, 0));

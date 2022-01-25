@@ -1,7 +1,5 @@
 SKIP: FAILED
 
-warning: integral user-defined fragment inputs must have a flat interpolation attribute
-warning: integral user-defined fragment inputs must have a flat interpolation attribute
 #version 310 es
 precision mediump float;
 

@@ -4,10 +4,6 @@ vk-gl-cts/spirv_assembly/instruction/terminate_invocation/ssbo_store_before_term
 type RTArr = @stride(4) array<i32>;
               ^^^^^^
 
-vk-gl-cts/spirv_assembly/instruction/terminate_invocation/ssbo_store_before_terminate/1.wgsl:33:64 warning: integral user-defined fragment inputs must have a flat interpolation attribute
-fn main(@builtin(position) x_2_param : vec4<f32>, @location(0) x_3_param : i32) -> main_out {
-                                                               ^^^^^^^^^
-
 #version 310 es
 precision mediump float;
 

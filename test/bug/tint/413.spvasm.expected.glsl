@@ -2,7 +2,7 @@
 precision mediump float;
 
 uniform highp usampler2D Src_1;
-uniform highp writeonly uimage2D Dst_1;
+layout(r32ui) uniform highp writeonly uimage2D Dst_1;
 
 void main_1() {
   uvec4 srcValue = uvec4(0u, 0u, 0u, 0u);

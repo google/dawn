@@ -1,9 +1,5 @@
 SKIP: FAILED
 
-bug/tint/1081.wgsl:9:22 warning: integral user-defined fragment inputs must have a flat interpolation attribute
-fn main(@location(1) x: vec3<i32>) -> @location(2) i32 {
-                     ^
-
 #version 310 es
 precision mediump float;
 

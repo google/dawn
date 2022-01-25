@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage1D arg_0_1;
+layout(rgba8i) uniform highp writeonly iimage1D arg_0_1;
 
 void textureDimensions_9da9e2() {
   int res = imageSize(arg_0_1);
@@ -34,6 +34,7 @@ void main() {
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'iimage1D' : Reserved word. 
+WARNING: 0:4: 'layout' : useless application of layout qualifier 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -42,7 +43,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage1D arg_0_1;
+layout(rgba8i) uniform highp writeonly iimage1D arg_0_1;
 
 void textureDimensions_9da9e2() {
   int res = imageSize(arg_0_1);
@@ -63,6 +64,7 @@ void main() {
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'iimage1D' : Reserved word. 
+WARNING: 0:4: 'layout' : useless application of layout qualifier 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -71,7 +73,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly iimage1D arg_0_1;
+layout(rgba8i) uniform highp writeonly iimage1D arg_0_1;
 
 void textureDimensions_9da9e2() {
   int res = imageSize(arg_0_1);
@@ -93,6 +95,7 @@ void main() {
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'iimage1D' : Reserved word. 
+WARNING: 0:4: 'layout' : useless application of layout qualifier 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

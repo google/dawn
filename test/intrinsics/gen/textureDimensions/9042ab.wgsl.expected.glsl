@@ -1,7 +1,9 @@
+SKIP: FAILED
+
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly uimage2DArray arg_0_1;
+layout(rg32ui) uniform highp writeonly uimage2DArray arg_0_1;
 
 void textureDimensions_9042ab() {
   ivec2 res = imageSize(arg_0_1).xy;
@@ -30,10 +32,17 @@ void main() {
 }
 
 
+Error parsing GLSL shader:
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly uimage2DArray arg_0_1;
+layout(rg32ui) uniform highp writeonly uimage2DArray arg_0_1;
 
 void textureDimensions_9042ab() {
   ivec2 res = imageSize(arg_0_1).xy;
@@ -52,10 +61,17 @@ void main() {
 }
 
 
+Error parsing GLSL shader:
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly uimage2DArray arg_0_1;
+layout(rg32ui) uniform highp writeonly uimage2DArray arg_0_1;
 
 void textureDimensions_9042ab() {
   ivec2 res = imageSize(arg_0_1).xy;
@@ -73,5 +89,12 @@ void compute_main() {
 void main() {
   compute_main();
 }
+
+
+Error parsing GLSL shader:
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
 
 

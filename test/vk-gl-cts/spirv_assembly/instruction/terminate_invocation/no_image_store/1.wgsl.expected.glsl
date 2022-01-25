@@ -1,16 +1,12 @@
 SKIP: FAILED
 
-vk-gl-cts/spirv_assembly/instruction/terminate_invocation/no_image_store/1.wgsl:27:64 warning: integral user-defined fragment inputs must have a flat interpolation attribute
-fn main(@builtin(position) x_2_param : vec4<f32>, @location(0) x_3_param : i32) -> main_out {
-                                                               ^^^^^^^^^
-
 #version 310 es
 precision mediump float;
 
 vec4 x_2 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 int x_3 = 0;
 int x_4 = 0;
-uniform highp writeonly iimage2D x_5_1;
+layout(r32i) uniform highp writeonly iimage2D x_5_1;
 
 void main_1() {
   x_4 = 1;

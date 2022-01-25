@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0_1;
+layout(rg32f) uniform highp writeonly image2DArray arg_0_1;
 
 void textureNumLayers_7f1937() {
   int res = textureQueryLevels(arg_0_1);;
@@ -33,17 +33,16 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0_1;
+layout(rg32f) uniform highp writeonly image2DArray arg_0_1;
 
 void textureNumLayers_7f1937() {
   int res = textureQueryLevels(arg_0_1);;
@@ -63,17 +62,16 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image2DArray arg_0_1;
+layout(rg32f) uniform highp writeonly image2DArray arg_0_1;
 
 void textureNumLayers_7f1937() {
   int res = textureQueryLevels(arg_0_1);;
@@ -94,10 +92,9 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 0:4: 'image load-store format' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
 
 
 
