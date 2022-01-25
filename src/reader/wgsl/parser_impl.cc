@@ -70,7 +70,7 @@ const char kReadAccess[] = "read";
 const char kWriteAccess[] = "write";
 const char kReadWriteAccess[] = "read_write";
 
-ast::Builtin ident_to_builtin(const std::string& str) {
+ast::Builtin ident_to_builtin(std::string_view str) {
   if (str == "position") {
     return ast::Builtin::kPosition;
   }
@@ -266,8 +266,8 @@ ParserImpl::ParserImpl(Source::File const* file)
 ParserImpl::~ParserImpl() = default;
 
 ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
-                                                   const std::string& err,
-                                                   const std::string& use) {
+                                                   std::string_view err,
+                                                   std::string_view use) {
   std::stringstream msg;
   msg << err;
   if (!use.empty()) {
@@ -759,8 +759,7 @@ Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
 //  | 'rgba32uint'
 //  | 'rgba32sint'
 //  | 'rgba32float'
-Expect<ast::TexelFormat> ParserImpl::expect_texel_format(
-    const std::string& use) {
+Expect<ast::TexelFormat> ParserImpl::expect_texel_format(std::string_view use) {
   auto tok = next();
   if (tok.IsIdentifier()) {
     auto s = tok.to_str();
@@ -819,7 +818,7 @@ Expect<ast::TexelFormat> ParserImpl::expect_texel_format(
 // variable_ident_decl
 //   : IDENT COLON variable_decoration_list* type_decl
 Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
-    const std::string& use,
+    std::string_view use,
     bool allow_inferred) {
   auto ident = expect_ident(use);
   if (ident.errored)
@@ -849,7 +848,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   return TypedIdentifier{type.value, ident.value, ident.source};
 }
 
-Expect<ast::Access> ParserImpl::expect_access(const std::string& use) {
+Expect<ast::Access> ParserImpl::expect_access(std::string_view use) {
   auto ident = expect_ident(use);
   if (ident.errored)
     return Failure::kErrored;
@@ -1016,7 +1015,7 @@ Maybe<const ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   return Failure::kNoMatch;
 }
 
-Expect<const ast::Type*> ParserImpl::expect_type(const std::string& use) {
+Expect<const ast::Type*> ParserImpl::expect_type(std::string_view use) {
   auto type = type_decl();
   if (type.errored)
     return Failure::kErrored;
@@ -1170,7 +1169,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
 //  | PRIVATE
 //  | FUNCTION
 Expect<ast::StorageClass> ParserImpl::expect_storage_class(
-    const std::string& use) {
+    std::string_view use) {
   auto source = peek().source();
 
   if (match(Token::Type::kUniform))
@@ -2228,7 +2227,7 @@ Maybe<const ast::Expression*> ParserImpl::singular_expression() {
 //   : PAREN_LEFT ((logical_or_expression COMMA)* logical_or_expression COMMA?)?
 //   PAREN_RIGHT
 Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list(
-    const std::string& use) {
+    std::string_view use) {
   return expect_paren_block(use, [&]() -> Expect<ast::ExpressionList> {
     ast::ExpressionList ret;
     while (continue_parsing()) {
@@ -2296,8 +2295,8 @@ Maybe<const ast::Expression*> ParserImpl::unary_expression() {
     return Failure::kErrored;
   }
   if (!expr.matched) {
-    return add_error(
-        peek(), "unable to parse right side of " + t.to_name() + " expression");
+    return add_error(peek(), "unable to parse right side of " +
+                                 std::string(t.to_name()) + " expression");
   }
 
   return create<ast::UnaryOpExpression>(t.source(), op, expr.value);
@@ -2329,8 +2328,8 @@ Expect<const ast::Expression*> ParserImpl::expect_multiplicative_expr(
     if (rhs.errored)
       return Failure::kErrored;
     if (!rhs.matched) {
-      return add_error(peek(),
-                       "unable to parse right side of " + name + " expression");
+      return add_error(peek(), "unable to parse right side of " +
+                                   std::string(name) + " expression");
     }
 
     lhs = create<ast::BinaryExpression>(source, op, lhs, rhs.value);
@@ -2466,8 +2465,8 @@ Expect<const ast::Expression*> ParserImpl::expect_relational_expr(
     if (rhs.errored)
       return Failure::kErrored;
     if (!rhs.matched) {
-      return add_error(peek(),
-                       "unable to parse right side of " + name + " expression");
+      return add_error(peek(), "unable to parse right side of " +
+                                   std::string(name) + " expression");
     }
 
     lhs = create<ast::BinaryExpression>(source, op, lhs, rhs.value);
@@ -2510,8 +2509,8 @@ Expect<const ast::Expression*> ParserImpl::expect_equality_expr(
     if (rhs.errored)
       return Failure::kErrored;
     if (!rhs.matched) {
-      return add_error(peek(),
-                       "unable to parse right side of " + name + " expression");
+      return add_error(peek(), "unable to parse right side of " +
+                                   std::string(name) + " expression");
     }
 
     lhs = create<ast::BinaryExpression>(source, op, lhs, rhs.value);
@@ -3147,7 +3146,7 @@ bool ParserImpl::match(Token::Type tok, Source* source /*= nullptr*/) {
   return false;
 }
 
-bool ParserImpl::expect(const std::string& use, Token::Type tok) {
+bool ParserImpl::expect(std::string_view use, Token::Type tok) {
   auto t = peek();
   if (t.Is(tok)) {
     next();
@@ -3195,7 +3194,7 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
   return false;
 }
 
-Expect<int32_t> ParserImpl::expect_sint(const std::string& use) {
+Expect<int32_t> ParserImpl::expect_sint(std::string_view use) {
   auto t = peek();
   if (!t.Is(Token::Type::kSintLiteral))
     return add_error(t.source(), "expected signed integer literal", use);
@@ -3204,30 +3203,30 @@ Expect<int32_t> ParserImpl::expect_sint(const std::string& use) {
   return {t.to_i32(), t.source()};
 }
 
-Expect<uint32_t> ParserImpl::expect_positive_sint(const std::string& use) {
+Expect<uint32_t> ParserImpl::expect_positive_sint(std::string_view use) {
   auto sint = expect_sint(use);
   if (sint.errored)
     return Failure::kErrored;
 
   if (sint.value < 0)
-    return add_error(sint.source, use + " must be positive");
+    return add_error(sint.source, std::string(use) + " must be positive");
 
   return {static_cast<uint32_t>(sint.value), sint.source};
 }
 
 Expect<uint32_t> ParserImpl::expect_nonzero_positive_sint(
-    const std::string& use) {
+    std::string_view use) {
   auto sint = expect_sint(use);
   if (sint.errored)
     return Failure::kErrored;
 
   if (sint.value <= 0)
-    return add_error(sint.source, use + " must be greater than 0");
+    return add_error(sint.source, std::string(use) + " must be greater than 0");
 
   return {static_cast<uint32_t>(sint.value), sint.source};
 }
 
-Expect<std::string> ParserImpl::expect_ident(const std::string& use) {
+Expect<std::string> ParserImpl::expect_ident(std::string_view use) {
   auto t = peek();
   if (t.IsIdentifier()) {
     synchronized_ = true;
@@ -3247,7 +3246,7 @@ Expect<std::string> ParserImpl::expect_ident(const std::string& use) {
 template <typename F, typename T>
 T ParserImpl::expect_block(Token::Type start,
                            Token::Type end,
-                           const std::string& use,
+                           std::string_view use,
                            F&& body) {
   if (!expect(use, start)) {
     return Failure::kErrored;
@@ -3267,19 +3266,19 @@ T ParserImpl::expect_block(Token::Type start,
 }
 
 template <typename F, typename T>
-T ParserImpl::expect_paren_block(const std::string& use, F&& body) {
+T ParserImpl::expect_paren_block(std::string_view use, F&& body) {
   return expect_block(Token::Type::kParenLeft, Token::Type::kParenRight, use,
                       std::forward<F>(body));
 }
 
 template <typename F, typename T>
-T ParserImpl::expect_brace_block(const std::string& use, F&& body) {
+T ParserImpl::expect_brace_block(std::string_view use, F&& body) {
   return expect_block(Token::Type::kBraceLeft, Token::Type::kBraceRight, use,
                       std::forward<F>(body));
 }
 
 template <typename F, typename T>
-T ParserImpl::expect_lt_gt_block(const std::string& use, F&& body) {
+T ParserImpl::expect_lt_gt_block(std::string_view use, F&& body) {
   return expect_block(Token::Type::kLessThan, Token::Type::kGreaterThan, use,
                       std::forward<F>(body));
 }

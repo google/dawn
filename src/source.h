@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
@@ -33,13 +34,19 @@ class Source {
     /// @param data the file contents
     explicit FileContent(const std::string& data);
 
+    /// Copy constructor
+    /// @param rhs the FileContent to copy
+    FileContent(const FileContent& rhs);
+
     /// Destructor
     ~FileContent();
 
-    /// un-split file content
+    /// The original un-split file content
     const std::string data;
+    /// A string_view over #data
+    const std::string_view data_view;
     /// #data split by lines
-    const std::vector<std::string> lines;
+    const std::vector<std::string_view> lines;
   };
 
   /// File describes a source file, including path and content.
@@ -51,6 +58,7 @@ class Source {
     inline File(const std::string& p, const std::string& c)
         : path(p), content(c) {}
 
+    /// Destructor
     ~File();
 
     /// file path (optional)

@@ -19,7 +19,7 @@ namespace reader {
 namespace wgsl {
 
 // static
-std::string Token::TypeToName(Type type) {
+std::string_view Token::TypeToName(Type type) {
   switch (type) {
     case Token::Type::kError:
       return "kError";

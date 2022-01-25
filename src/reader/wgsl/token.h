@@ -16,6 +16,7 @@
 #define SRC_READER_WGSL_TOKEN_H_
 
 #include <string>
+#include <string_view>
 
 #include "src/source.h"
 
@@ -260,7 +261,7 @@ class Token {
   /// Converts a token type to a name
   /// @param type the type to convert
   /// @returns the token type as as string
-  static std::string TypeToName(Type type);
+  static std::string_view TypeToName(Type type);
 
   /// Creates an uninitialized token
   Token();
@@ -354,7 +355,7 @@ class Token {
   Source source() const { return source_; }
 
   /// Returns the string value of the token
-  /// @return const std::string&
+  /// @return std::string
   std::string to_str() const;
   /// Returns the float value of the token. 0 is returned if the token does not
   /// contain a float value.
@@ -370,7 +371,7 @@ class Token {
   int32_t to_i32() const;
 
   /// @returns the token type as string
-  std::string to_name() const { return Token::TypeToName(type_); }
+  std::string_view to_name() const { return Token::TypeToName(type_); }
 
  private:
   /// The Token::Type of the token

@@ -16,23 +16,50 @@
 
 #include <algorithm>
 #include <sstream>
+#include <string_view>
 #include <utility>
 
 namespace tint {
 namespace {
-std::vector<std::string> split_lines(const std::string& str) {
-  std::stringstream stream(str);
-  std::string line;
-  std::vector<std::string> lines;
-  while (std::getline(stream, line, '\n')) {
-    lines.emplace_back(std::move(line));
+std::vector<std::string_view> SplitLines(std::string_view str) {
+  std::vector<std::string_view> lines;
+
+  size_t lineStart = 0;
+  for (size_t i = 0; i < str.size(); ++i) {
+    if (str[i] == '\n') {
+      lines.push_back(str.substr(lineStart, i - lineStart));
+      lineStart = i + 1;
+    }
   }
+  if (lineStart < str.size()) {
+    lines.push_back(str.substr(lineStart));
+  }
+
   return lines;
 }
+
+std::vector<std::string_view> CopyRelativeStringViews(
+    const std::vector<std::string_view>& src_list,
+    const std::string_view& src_view,
+    const std::string_view& dst_view) {
+  std::vector<std::string_view> out(src_list.size());
+  for (size_t i = 0; i < src_list.size(); i++) {
+    auto offset = static_cast<size_t>(&src_list[i].front() - &src_view.front());
+    auto count = src_list[i].length();
+    out[i] = dst_view.substr(offset, count);
+  }
+  return out;
+}
+
 }  // namespace
 
 Source::FileContent::FileContent(const std::string& body)
-    : data(body), lines(split_lines(body)) {}
+    : data(body), data_view(data), lines(SplitLines(data_view)) {}
+
+Source::FileContent::FileContent(const FileContent& rhs)
+    : data(rhs.data),
+      data_view(data),
+      lines(CopyRelativeStringViews(rhs.lines, rhs.data_view, data_view)) {}
 
 Source::FileContent::~FileContent() = default;
 

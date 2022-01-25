@@ -750,6 +750,7 @@ if(TINT_BUILD_TESTS)
     sem/type_manager_test.cc
     sem/u32_type_test.cc
     sem/vector_type_test.cc
+    source_test.cc
     symbol_table_test.cc
     symbol_test.cc
     test_main.cc

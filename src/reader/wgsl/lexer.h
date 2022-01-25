@@ -51,7 +51,7 @@ class Lexer {
                                          size_t start,
                                          size_t end,
                                          int32_t base);
-  Token check_keyword(const Source&, const std::string&);
+  Token check_keyword(const Source&, std::string_view);
 
   /// The try_* methods have the following in common:
   /// - They assume there is at least one character to be consumed,
@@ -89,7 +89,7 @@ class Lexer {
   /// @returns true if 'ch' is a digit, an alphabetic character,
   /// or an underscore.
   bool is_alphanum_underscore(char ch) const;
-  bool matches(size_t pos, const std::string& substr);
+  bool matches(size_t pos, std::string_view substr);
 
   /// The source file path
   std::string const file_path_;

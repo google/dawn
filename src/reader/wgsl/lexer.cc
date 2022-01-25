@@ -138,10 +138,10 @@ bool Lexer::is_hex(char ch) const {
   return std::isxdigit(ch);
 }
 
-bool Lexer::matches(size_t pos, const std::string& substr) {
+bool Lexer::matches(size_t pos, std::string_view substr) {
   if (pos >= len_)
     return false;
-  return content_->data.substr(pos, substr.size()) == substr;
+  return content_->data_view.substr(pos, substr.size()) == substr;
 }
 
 Token Lexer::skip_whitespace_and_comments() {
@@ -763,7 +763,7 @@ Token Lexer::try_ident() {
     }
   }
 
-  auto str = content_->data.substr(s, pos_ - s);
+  auto str = content_->data_view.substr(s, pos_ - s);
   end_source(source);
 
   auto t = check_keyword(source, str);
@@ -771,7 +771,7 @@ Token Lexer::try_ident() {
     return t;
   }
 
-  return {Token::Type::kIdentifier, source, str};
+  return {Token::Type::kIdentifier, source, std::string(str)};
 }
 
 Token Lexer::try_punctuation() {
@@ -937,7 +937,7 @@ Token Lexer::try_punctuation() {
   return {type, source};
 }
 
-Token Lexer::check_keyword(const Source& source, const std::string& str) {
+Token Lexer::check_keyword(const Source& source, std::string_view str) {
   if (str == "array")
     return {Token::Type::kArray, source, "array"};
   if (str == "atomic")

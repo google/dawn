@@ -18,6 +18,7 @@
 #include <deque>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -367,8 +368,8 @@ class ParserImpl {
   /// @return `Failure::Errored::kError` so that you can combine an add_error()
   /// call and return on the same line.
   Failure::Errored add_error(const Source& source,
-                             const std::string& msg,
-                             const std::string& use);
+                             std::string_view msg,
+                             std::string_view use);
   /// Appends an error at `source` with the message `msg`
   /// @param source the source to associate the error with
   /// @param msg the error message
@@ -407,7 +408,7 @@ class ParserImpl {
   /// specify type
   /// @returns the identifier and type parsed or empty otherwise
   Expect<TypedIdentifier> expect_variable_ident_decl(
-      const std::string& use,
+      std::string_view use,
       bool allow_inferred = false);
   /// Parses a `variable_qualifier` grammar element
   /// @returns the variable qualifier information
@@ -426,7 +427,7 @@ class ParserImpl {
   /// Parses a `storage_class` grammar element, erroring on parse failure.
   /// @param use a description of what was being parsed if an error was raised.
   /// @returns the storage class or StorageClass::kNone if none matched
-  Expect<ast::StorageClass> expect_storage_class(const std::string& use);
+  Expect<ast::StorageClass> expect_storage_class(std::string_view use);
   /// Parses a `struct_decl` grammar element with the initial
   /// `struct_decoration_decl*` provided as `decos`.
   /// @returns the struct type or nullptr on error
@@ -472,7 +473,7 @@ class ParserImpl {
   /// Parses a `texel_format` grammar element
   /// @param use a description of what was being parsed if an error was raised
   /// @returns returns the texel format or kNone if none matched.
-  Expect<ast::TexelFormat> expect_texel_format(const std::string& use);
+  Expect<ast::TexelFormat> expect_texel_format(std::string_view use);
   /// Parses a `function_header` grammar element
   /// @returns the parsed function header
   Maybe<FunctionHeader> function_header();
@@ -490,7 +491,7 @@ class ParserImpl {
   /// match a valid access control.
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed access control.
-  Expect<ast::Access> expect_access(const std::string& use);
+  Expect<ast::Access> expect_access(std::string_view use);
   /// Parses a builtin identifier, erroring if the next token does not match a
   /// valid builtin name.
   /// @returns the parsed builtin.
@@ -566,7 +567,7 @@ class ParserImpl {
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the list of arguments
   Expect<ast::ExpressionList> expect_argument_expression_list(
-      const std::string& use);
+      std::string_view use);
   /// Parses the recursive portion of the postfix_expression
   /// @param prefix the left side of the expression
   /// @returns the parsed expression or nullptr
@@ -712,32 +713,32 @@ class ParserImpl {
   /// @param use a description of what was being parsed if an error was raised.
   /// @param tok the token to test against
   /// @returns true if the next token equals `tok`
-  bool expect(const std::string& use, Token::Type tok);
+  bool expect(std::string_view use, Token::Type tok);
   /// Parses a signed integer from the next token in the stream, erroring if the
   /// next token is not a signed integer.
   /// Consumes the next token on match.
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed integer.
-  Expect<int32_t> expect_sint(const std::string& use);
+  Expect<int32_t> expect_sint(std::string_view use);
   /// Parses a signed integer from the next token in the stream, erroring if
   /// the next token is not a signed integer or is negative.
   /// Consumes the next token if it is a signed integer (not necessarily
   /// negative).
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed integer.
-  Expect<uint32_t> expect_positive_sint(const std::string& use);
+  Expect<uint32_t> expect_positive_sint(std::string_view use);
   /// Parses a non-zero signed integer from the next token in the stream,
   /// erroring if the next token is not a signed integer or is less than 1.
   /// Consumes the next token if it is a signed integer (not necessarily
   /// >= 1).
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed integer.
-  Expect<uint32_t> expect_nonzero_positive_sint(const std::string& use);
+  Expect<uint32_t> expect_nonzero_positive_sint(std::string_view use);
   /// Errors if the next token is not an identifier.
   /// Consumes the next token on match.
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed identifier.
-  Expect<std::string> expect_ident(const std::string& use);
+  Expect<std::string> expect_ident(std::string_view use);
   /// Parses a lexical block starting with the token `start` and ending with
   /// the token `end`. `body` is called to parse the lexical block body
   /// between the `start` and `end` tokens. If the `start` or `end` tokens
@@ -754,7 +755,7 @@ class ParserImpl {
   template <typename F, typename T = ReturnType<F>>
   T expect_block(Token::Type start,
                  Token::Type end,
-                 const std::string& use,
+                 std::string_view use,
                  F&& body);
   /// A convenience function that calls expect_block() passing
   /// `Token::Type::kParenLeft` and `Token::Type::kParenRight` for the `start`
@@ -765,7 +766,7 @@ class ParserImpl {
   /// @return the value returned by `body` if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
-  T expect_paren_block(const std::string& use, F&& body);
+  T expect_paren_block(std::string_view use, F&& body);
   /// A convenience function that calls `expect_block` passing
   /// `Token::Type::kBraceLeft` and `Token::Type::kBraceRight` for the `start`
   /// and `end` arguments, respectively.
@@ -775,7 +776,7 @@ class ParserImpl {
   /// @return the value returned by `body` if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
-  T expect_brace_block(const std::string& use, F&& body);
+  T expect_brace_block(std::string_view use, F&& body);
   /// A convenience function that calls `expect_block` passing
   /// `Token::Type::kLessThan` and `Token::Type::kGreaterThan` for the `start`
   /// and `end` arguments, respectively.
@@ -785,7 +786,7 @@ class ParserImpl {
   /// @return the value returned by `body` if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
-  T expect_lt_gt_block(const std::string& use, F&& body);
+  T expect_lt_gt_block(std::string_view use, F&& body);
 
   /// sync() calls the function `func`, and attempts to resynchronize the
   /// parser to the next found resynchronization token if `func` fails. If the
@@ -853,7 +854,7 @@ class ParserImpl {
                                                   ast::DecorationList decos);
   Expect<const ast::Type*> expect_type_decl_matrix(Token t);
 
-  Expect<const ast::Type*> expect_type(const std::string& use);
+  Expect<const ast::Type*> expect_type(std::string_view use);
 
   Maybe<const ast::Statement*> non_block_statement();
   Maybe<const ast::Statement*> for_header_initializer();
