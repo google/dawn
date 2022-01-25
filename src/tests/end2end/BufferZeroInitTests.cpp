@@ -211,8 +211,8 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader);
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]]
-            fn main([[location(0)]] i_color : vec4<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) i_color : vec4<f32>) -> @location(0) vec4<f32> {
                 return i_color;
             })");
 
@@ -251,11 +251,11 @@ class BufferZeroInitTest : public DawnTest {
 
         wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                [[location(0)]] color : vec4<f32>;
-                [[builtin(position)]] position : vec4<f32>;
+                @location(0) color : vec4<f32>;
+                @builtin(position) position : vec4<f32>;
             };
 
-            [[stage(vertex)]] fn main([[location(0)]] pos : vec4<f32>) -> VertexOut {
+            @stage(vertex) fn main(@location(0) pos : vec4<f32>) -> VertexOut {
                 var output : VertexOut;
                 if (all(pos == vec4<f32>(0.0, 0.0, 0.0, 0.0))) {
                     output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
@@ -295,12 +295,12 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                [[location(0)]] color : vec4<f32>;
-                [[builtin(position)]] position : vec4<f32>;
+                @location(0) color : vec4<f32>;
+                @builtin(position) position : vec4<f32>;
             };
 
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> VertexOut {
+            @stage(vertex)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
                 var output : VertexOut;
                 if (VertexIndex == 0u) {
                     output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
@@ -345,11 +345,11 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                [[location(0)]] color : vec4<f32>;
-                [[builtin(position)]] position : vec4<f32>;
+                @location(0) color : vec4<f32>;
+                @builtin(position) position : vec4<f32>;
             };
 
-            [[stage(vertex)]] fn main() -> VertexOut {
+            @stage(vertex) fn main() -> VertexOut {
                 var output : VertexOut;
                 output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
                 output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -386,11 +386,11 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                [[location(0)]] color : vec4<f32>;
-                [[builtin(position)]] position : vec4<f32>;
+                @location(0) color : vec4<f32>;
+                @builtin(position) position : vec4<f32>;
             };
 
-            [[stage(vertex)]] fn main() -> VertexOut {
+            @stage(vertex) fn main() -> VertexOut {
                 var output : VertexOut;
                 output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
                 output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -429,9 +429,9 @@ class BufferZeroInitTest : public DawnTest {
         // As long as the comptue shader is executed once, the pixel color of outImage will be set
         // to red.
         const char* computeShader = R"(
-            [[group(0), binding(0)]] var outImage : texture_storage_2d<rgba8unorm, write>;
+            @group(0) @binding(0) var outImage : texture_storage_2d<rgba8unorm, write>;
 
-            [[stage(compute), workgroup_size(1)]] fn main() {
+            @stage(compute) @workgroup_size(1) fn main() {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })";
 
@@ -1000,10 +1000,10 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
         struct UBO {
             value : vec4<u32>;
         };
-        [[group(0), binding(0)]] var<uniform> ubo : UBO;
-        [[group(0), binding(1)]] var outImage : texture_storage_2d<rgba8unorm, write>;
+        @group(0) @binding(0) var<uniform> ubo : UBO;
+        @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
-        [[stage(compute), workgroup_size(1)]] fn main() {
+        @stage(compute) @workgroup_size(1) fn main() {
             if (all(ubo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
@@ -1039,10 +1039,10 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
         struct SSBO {
             value : vec4<u32>;
         };
-        [[group(0), binding(0)]] var<storage, read> ssbo : SSBO;
-        [[group(0), binding(1)]] var outImage : texture_storage_2d<rgba8unorm, write>;
+        @group(0) @binding(0) var<storage, read> ssbo : SSBO;
+        @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
-        [[stage(compute), workgroup_size(1)]] fn main() {
+        @stage(compute) @workgroup_size(1) fn main() {
             if (all(ssbo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
@@ -1078,10 +1078,10 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
         struct SSBO {
             value : array<vec4<u32>, 2>;
         };
-        [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
-        [[group(0), binding(1)]] var outImage : texture_storage_2d<rgba8unorm, write>;
+        @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
+        @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
-        [[stage(compute), workgroup_size(1)]] fn main() {
+        @stage(compute) @workgroup_size(1) fn main() {
             if (all(ssbo.value[0] == vec4<u32>(0u, 0u, 0u, 0u)) &&
                 all(ssbo.value[1] == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
@@ -1138,7 +1138,7 @@ TEST_P(BufferZeroInitTest, SetVertexBuffer) {
 // draw call. A backend which implements robust buffer access via clamping should
 // still see zeros at the end of the buffer.
 TEST_P(BufferZeroInitTest, PaddingInitialized) {
-    DAWN_SUPPRESS_TEST_IF(IsANGLE());  // TODO(crbug.com/dawn/1084).
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());                              // TODO(crbug.com/dawn/1084).
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());  // TODO(crbug.com/dawn/1214).
 
     constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
@@ -1150,11 +1150,11 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                [[location(0)]] color : vec4<f32>;
-                [[builtin(position)]] position : vec4<f32>;
+                @location(0) color : vec4<f32>;
+                @builtin(position) position : vec4<f32>;
             };
 
-            [[stage(vertex)]] fn main([[location(0)]] pos : vec2<f32>) -> VertexOut {
+            @stage(vertex) fn main(@location(0) pos : vec2<f32>) -> VertexOut {
                 var output : VertexOut;
                 if (all(pos == vec2<f32>(0.0, 0.0))) {
                     output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);

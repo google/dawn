@@ -96,13 +96,13 @@ void initBuffers() {
 void initRender() {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct VertexIn {
-            [[location(0)]] a_particlePos : vec2<f32>;
-            [[location(1)]] a_particleVel : vec2<f32>;
-            [[location(2)]] a_pos : vec2<f32>;
+            @location(0) a_particlePos : vec2<f32>;
+            @location(1) a_particleVel : vec2<f32>;
+            @location(2) a_pos : vec2<f32>;
         };
 
-        [[stage(vertex)]]
-        fn main(input : VertexIn) -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex)
+        fn main(input : VertexIn) -> @builtin(position) vec4<f32> {
             var angle : f32 = -atan2(input.a_particleVel.x, input.a_particleVel.y);
             var pos : vec2<f32> = vec2<f32>(
                 (input.a_pos.x * cos(angle)) - (input.a_pos.y * sin(angle)),
@@ -112,8 +112,8 @@ void initRender() {
     )");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]]
-        fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment)
+        fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(1.0, 1.0, 1.0, 1.0);
         }
     )");
@@ -164,13 +164,13 @@ void initSim() {
         struct Particles {
             particles : array<Particle>;
         };
-        [[binding(0), group(0)]] var<uniform> params : SimParams;
-        [[binding(1), group(0)]] var<storage, read> particlesA : Particles;
-        [[binding(2), group(0)]] var<storage, read_write> particlesB : Particles;
+        @binding(0), group(0) var<uniform> params : SimParams;
+        @binding(1), group(0) var<storage, read> particlesA : Particles;
+        @binding(2), group(0) var<storage, read_write> particlesB : Particles;
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
-        [[stage(compute), workgroup_size(1)]]
-        fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+        @stage(compute) @workgroup_size(1)
+        fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
             var index : u32 = GlobalInvocationID.x;
             if (index >= params.particleCount) {
                 return;

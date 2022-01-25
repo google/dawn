@@ -74,7 +74,7 @@ namespace {
         size_t index = 0;
         for (const BindingDescriptor& b : bindings) {
             ostream << "struct S" << index << " { " << b.decl << "};\n";
-            ostream << "[[group(" << b.group << "), binding(" << b.binding << ")]] ";
+            ostream << "@group(" << b.group << ") @binding(" << b.binding << ") ";
             switch (b.type) {
                 case wgpu::BufferBindingType::Uniform:
                     ostream << "var<uniform> b" << index << " : S" << index << ";\n";
@@ -115,21 +115,21 @@ namespace {
     // Creates a compute shader with given bindings
     std::string CreateComputeShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
         return kStructs + GenerateBindingString(bindings) +
-               "[[stage(compute), workgroup_size(1,1,1)]] fn main() {\n" +
+               "@stage(compute) @workgroup_size(1,1,1) fn main() {\n" +
                GenerateReferenceString(bindings, wgpu::ShaderStage::Compute) + "}";
     }
 
     // Creates a vertex shader with given bindings
     std::string CreateVertexShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
         return kStructs + GenerateBindingString(bindings) +
-               "[[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {\n" +
+               "@stage(vertex) fn main() -> @builtin(position) vec4<f32> {\n" +
                GenerateReferenceString(bindings, wgpu::ShaderStage::Vertex) +
                "\n   return vec4<f32>(); " + "}";
     }
 
     // Creates a fragment shader with given bindings
     std::string CreateFragmentShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
-        return kStructs + GenerateBindingString(bindings) + "[[stage(fragment)]] fn main() {\n" +
+        return kStructs + GenerateBindingString(bindings) + "@stage(fragment) fn main() {\n" +
                GenerateReferenceString(bindings, wgpu::ShaderStage::Fragment) + "}";
     }
 
@@ -565,11 +565,10 @@ TEST_F(MinBufferSizeDefaultLayoutTests, MultipleBindGroups) {
 
 // Test the minimum size computations with manual size/align/stride decorations.
 TEST_F(MinBufferSizeDefaultLayoutTests, NonDefaultLayout) {
-    CheckShaderBindingSizeReflection(
-        {{{0, 0, "[[size(256)]] a : u32; b : u32;", "u32", "a", 260},
-          {0, 1, "c : u32; [[align(16)]] d : u32;", "u32", "c", 20},
-          {0, 2, "d : [[stride(40)]] array<u32, 3>;", "u32", "d[0]", 120},
-          {0, 3, "e : [[stride(40)]] array<u32>;", "u32", "e[0]", 40}}});
+    CheckShaderBindingSizeReflection({{{0, 0, "@size(256) a : u32; b : u32;", "u32", "a", 260},
+                                       {0, 1, "c : u32; @align(16) d : u32;", "u32", "c", 20},
+                                       {0, 2, "d : @stride(40) array<u32, 3>;", "u32", "d[0]", 120},
+                                       {0, 3, "e : @stride(40) array<u32>;", "u32", "e[0]", 40}}});
 }
 
 // Minimum size should be the max requirement of both vertex and fragment stages.

@@ -55,17 +55,15 @@ namespace dawn::native {
                 period : f32;
             };
 
-            [[group(0), binding(0)]]
-                var<storage, read_write> timestamps : TimestampArr;
-            [[group(0), binding(1)]]
-                var<storage, read> availability : AvailabilityArr;
-            [[group(0), binding(2)]] var<uniform> params : TimestampParams;
+            @group(0) @binding(0) var<storage, read_write> timestamps : TimestampArr;
+            @group(0) @binding(1) var<storage, read> availability : AvailabilityArr;
+            @group(0) @binding(2) var<uniform> params : TimestampParams;
 
 
             let sizeofTimestamp : u32 = 8u;
 
-            [[stage(compute), workgroup_size(8, 1, 1)]]
-            fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+            @stage(compute) @workgroup_size(8, 1, 1)
+            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
                 if (GlobalInvocationID.x >= params.count) { return; }
 
                 var index = GlobalInvocationID.x + params.offset / sizeofTimestamp;

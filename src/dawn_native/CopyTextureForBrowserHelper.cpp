@@ -59,11 +59,11 @@ namespace dawn::native {
                 gamma_decoding_for_dst_srgb_params: GammaTransferParams; // 144      4       32
             };
 
-            [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
+            @binding(0) @group(0) var<uniform> uniforms : Uniforms;
 
             struct VertexOutputs {
-                [[location(0)]] texcoords : vec2<f32>;
-                [[builtin(position)]] position : vec4<f32>;
+                @location(0) texcoords : vec2<f32>;
+                @builtin(position) position : vec4<f32>;
             };
 
             // Chromium uses unified equation to construct gamma decoding function
@@ -84,9 +84,9 @@ namespace dawn::native {
                 return sign(v) * (pow(params.A * abs(v) + params.B, params.G) + params.E);
             }
 
-            [[stage(vertex)]]
+            @stage(vertex)
             fn vs_main(
-                [[builtin(vertex_index)]] VertexIndex : u32
+                @builtin(vertex_index) VertexIndex : u32
             ) -> VertexOutputs {
                 var texcoord = array<vec2<f32>, 3>(
                     vec2<f32>(-0.5, 0.0),
@@ -119,13 +119,13 @@ namespace dawn::native {
                 return output;
             }
 
-            [[binding(1), group(0)]] var mySampler: sampler;
-            [[binding(2), group(0)]] var myTexture: texture_2d<f32>;
+            @binding(1) @group(0) var mySampler: sampler;
+            @binding(2) @group(0) var myTexture: texture_2d<f32>;
 
-            [[stage(fragment)]]
+            @stage(fragment)
             fn fs_main(
-                [[location(0)]] texcoord : vec2<f32>
-            ) -> [[location(0)]] vec4<f32> {
+                @location(0) texcoord : vec2<f32>
+            ) -> @location(0) vec4<f32> {
                 // Clamp the texcoord and discard the out-of-bound pixels.
                 var clampedTexcoord =
                     clamp(texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));

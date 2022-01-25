@@ -49,14 +49,14 @@ class MultisampledRenderingTest : public DawnTest {
                 color : vec4<f32>;
                 depth : f32;
             };
-            [[group(0), binding(0)]] var<uniform> uBuffer : U;
+            @group(0) @binding(0) var<uniform> uBuffer : U;
 
             struct FragmentOut {
-                [[location(0)]] color : vec4<f32>;
-                [[builtin(frag_depth)]] depth : f32;
+                @location(0) color : vec4<f32>;
+                @builtin(frag_depth) depth : f32;
             };
 
-            [[stage(fragment)]] fn main() -> FragmentOut {
+            @stage(fragment) fn main() -> FragmentOut {
                 var output : FragmentOut;
                 output.color = uBuffer.color;
                 output.depth = uBuffer.depth;
@@ -67,9 +67,9 @@ class MultisampledRenderingTest : public DawnTest {
             struct U {
                 color : vec4<f32>;
             };
-            [[group(0), binding(0)]] var<uniform> uBuffer : U;
+            @group(0) @binding(0) var<uniform> uBuffer : U;
 
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return uBuffer.color;
             })";
 
@@ -87,14 +87,14 @@ class MultisampledRenderingTest : public DawnTest {
                 color0 : vec4<f32>;
                 color1 : vec4<f32>;
             };
-            [[group(0), binding(0)]] var<uniform> uBuffer : U;
+            @group(0) @binding(0) var<uniform> uBuffer : U;
 
             struct FragmentOut {
-                [[location(0)]] color0 : vec4<f32>;
-                [[location(1)]] color1 : vec4<f32>;
+                @location(0) color0 : vec4<f32>;
+                @location(1) color1 : vec4<f32>;
             };
 
-            [[stage(fragment)]] fn main() -> FragmentOut {
+            @stage(fragment) fn main() -> FragmentOut {
                 var output : FragmentOut;
                 output.color0 = uBuffer.color0;
                 output.color1 = uBuffer.color1;
@@ -223,8 +223,8 @@ class MultisampledRenderingTest : public DawnTest {
         // Draw a bottom-right triangle. In standard 4xMSAA pattern, for the pixels on diagonal,
         // only two of the samples will be touched.
         const char* vs = R"(
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -235,8 +235,8 @@ class MultisampledRenderingTest : public DawnTest {
 
         // Draw a bottom-left triangle.
         const char* vsFlipped = R"(
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -780,14 +780,14 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
         struct U {
             color : vec4<f32>;
         };
-        [[group(0), binding(0)]] var<uniform> uBuffer : U;
+        @group(0) @binding(0) var<uniform> uBuffer : U;
 
         struct FragmentOut {
-            [[location(0)]] color : vec4<f32>;
-            [[builtin(sample_mask)]] sampleMask : u32;
+            @location(0) color : vec4<f32>;
+            @builtin(sample_mask) sampleMask : u32;
         };
 
-        [[stage(fragment)]] fn main() -> FragmentOut {
+        @stage(fragment) fn main() -> FragmentOut {
             var output : FragmentOut;
             output.color = uBuffer.color;
             output.sampleMask = 6u;
@@ -842,15 +842,15 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
             color0 : vec4<f32>;
             color1 : vec4<f32>;
         };
-        [[group(0), binding(0)]] var<uniform> uBuffer : U;
+        @group(0) @binding(0) var<uniform> uBuffer : U;
 
         struct FragmentOut {
-            [[location(0)]] color0 : vec4<f32>;
-            [[location(1)]] color1 : vec4<f32>;
-            [[builtin(sample_mask)]] sampleMask : u32;
+            @location(0) color0 : vec4<f32>;
+            @location(1) color1 : vec4<f32>;
+            @builtin(sample_mask) sampleMask : u32;
         };
 
-        [[stage(fragment)]] fn main() -> FragmentOut {
+        @stage(fragment) fn main() -> FragmentOut {
             var output : FragmentOut;
             output.color0 = uBuffer.color0;
             output.color1 = uBuffer.color1;

@@ -28,13 +28,13 @@ class DrawIndexedIndirectTest : public DawnTest {
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]]
-            fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex)
+            fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
                 return pos;
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
@@ -143,7 +143,7 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because [[builtin(vertex_index)]]
+    // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because @builtin(vertex_index)
     // doesn't take into account BaseVertex, which breaks programmable vertex pulling.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
@@ -172,7 +172,7 @@ TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
     // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
-    // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because [[builtin(vertex_index)]]
+    // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because @builtin(vertex_index)
     // doesn't take into account BaseVertex, which breaks programmable vertex pulling.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
@@ -601,9 +601,9 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
                 instanceCount: u32;
                 firstIndex: u32;
             };
-            [[group(0), binding(0)]] var<uniform> input: Input;
-            [[group(0), binding(1)]] var<storage, write> params: Params;
-            [[stage(compute), workgroup_size(1)]] fn main() {
+            @group(0) @binding(0) var<uniform> input: Input;
+            @group(0) @binding(1) var<storage, write> params: Params;
+            @stage(compute) @workgroup_size(1) fn main() {
                 params.indexCount = 3u;
                 params.instanceCount = 1u;
                 params.firstIndex = input.firstIndex;

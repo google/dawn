@@ -67,7 +67,7 @@ namespace {
 
     // Align returns the WGSL decoration for an explicit structure field alignment
     std::string AlignDeco(uint32_t value) {
-        return "[[align(" + std::to_string(value) + ")]] ";
+        return "@align(" + std::to_string(value) + ") ";
     }
 
 }  // namespace
@@ -124,8 +124,8 @@ std::ostream& operator<<(std::ostream& o, StorageClass storageClass) {
 }
 
 std::ostream& operator<<(std::ostream& o, Field field) {
-    o << "[[align(" << field.align << "), size("
-      << (field.padded_size > 0 ? field.padded_size : field.size) << ")]] " << field.type;
+    o << "@align(" << field.align << ") @size("
+      << (field.padded_size > 0 ? field.padded_size : field.size) << ") " << field.type;
     return o;
 }
 
@@ -170,7 +170,7 @@ TEST_P(ComputeLayoutMemoryBufferTests, Fields) {
     std::string shader = R"(
 struct Data {
     header : u32;
-    [[align({field_align}), size({field_size})]] field : {field_type};
+    @align({field_align}) @size({field_size}) field : {field_type};
     footer : u32;
 };
 
@@ -188,11 +188,11 @@ struct Status {
     code : u32;
 };
 
-[[group(0), binding(0)]] var<{input_qualifiers}> input : Input;
-[[group(0), binding(1)]] var<storage, read_write> output : Output;
-[[group(0), binding(2)]] var<storage, read_write> status : Status;
+@group(0) @binding(0) var<{input_qualifiers}> input : Input;
+@group(0) @binding(1) var<storage, read_write> output : Output;
+@group(0) @binding(2) var<storage, read_write> status : Status;
 
-[[stage(compute), workgroup_size(1,1,1)]]
+@stage(compute) @workgroup_size(1,1,1)
 fn main() {
     if (input.header != {input_header_code}u) {
         status.code = {status_bad_input_header}u;
@@ -283,7 +283,7 @@ fn main() {
             PushU32(kDataFooterCode);                    // Input.data.footer
             AlignTo(field.align, kDataSizePaddingCode);  // Input.data padding
         }
-        AlignTo(footerAlign, kInputFooterAlignPaddingCode);  // Input.footer [[align]]
+        AlignTo(footerAlign, kInputFooterAlignPaddingCode);  // Input.footer @align
         PushU32(kInputFooterCode);                           // Input.footer
         AlignTo(256, kInputTailPaddingCode);                 // Input padding
     }
@@ -451,20 +451,20 @@ namespace {
                 Field{"array<u32, 2>", /* align */ 4, /* size */ 8}.StorageBufferOnly(),
                 Field{"array<u32, 3>", /* align */ 4, /* size */ 12}.StorageBufferOnly(),
                 Field{"array<u32, 4>", /* align */ 4, /* size */ 16}.StorageBufferOnly(),
-                Field{"[[stride(16)]] array<u32, 1>", /* align */ 4, /* size */ 16}
+                Field{"@stride(16) array<u32, 1>", /* align */ 4, /* size */ 16}
                     .StorageBufferOnly()
                     .Strided<4, 12>(),
-                Field{"[[stride(16)]] array<u32, 2>", /* align */ 4, /* size */ 32}
+                Field{"@stride(16) array<u32, 2>", /* align */ 4, /* size */ 32}
                     .StorageBufferOnly()
                     .Strided<4, 12>(),
-                Field{"[[stride(16)]] array<u32, 3>", /* align */ 4, /* size */ 48}
+                Field{"@stride(16) array<u32, 3>", /* align */ 4, /* size */ 48}
                     .StorageBufferOnly()
                     .Strided<4, 12>(),
-                Field{"[[stride(16)]] array<u32, 4>", /* align */ 4, /* size */ 64}
+                Field{"@stride(16) array<u32, 4>", /* align */ 4, /* size */ 64}
                     .StorageBufferOnly()
                     .Strided<4, 12>(),
                 Field{"array<vec3<u32>, 4>", /* align */ 16, /* size */ 64}.Strided<12, 4>(),
-                Field{"[[stride(32)]] array<vec3<u32>, 4>", /* align */ 16, /* size */ 128}
+                Field{"@stride(32) array<vec3<u32>, 4>", /* align */ 16, /* size */ 128}
                     .Strided<12, 20>(),
 
                 // Array types with custom alignment
@@ -472,14 +472,10 @@ namespace {
                 Field{"array<u32, 2>", /* align */ 32, /* size */ 8}.StorageBufferOnly(),
                 Field{"array<u32, 3>", /* align */ 32, /* size */ 12}.StorageBufferOnly(),
                 Field{"array<u32, 4>", /* align */ 32, /* size */ 16}.StorageBufferOnly(),
-                Field{"[[stride(16)]] array<u32, 1>", /* align */ 32, /* size */ 16}
-                    .Strided<4, 12>(),
-                Field{"[[stride(16)]] array<u32, 2>", /* align */ 32, /* size */ 32}
-                    .Strided<4, 12>(),
-                Field{"[[stride(16)]] array<u32, 3>", /* align */ 32, /* size */ 48}
-                    .Strided<4, 12>(),
-                Field{"[[stride(16)]] array<u32, 4>", /* align */ 32, /* size */ 64}
-                    .Strided<4, 12>(),
+                Field{"@stride(16) array<u32, 1>", /* align */ 32, /* size */ 16}.Strided<4, 12>(),
+                Field{"@stride(16) array<u32, 2>", /* align */ 32, /* size */ 32}.Strided<4, 12>(),
+                Field{"@stride(16) array<u32, 3>", /* align */ 32, /* size */ 48}.Strided<4, 12>(),
+                Field{"@stride(16) array<u32, 4>", /* align */ 32, /* size */ 64}.Strided<4, 12>(),
                 Field{"array<vec3<u32>, 4>", /* align */ 32, /* size */ 64}.Strided<12, 4>(),
 
                 // Array types with custom size

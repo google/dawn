@@ -27,17 +27,17 @@ class RenderPipelineValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
         fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
         fsModuleUint = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<u32> {
+            @stage(fragment) fn main() -> @location(0) vec4<u32> {
                 return vec4<u32>(0u, 255u, 0u, 255u);
             })");
     }
@@ -288,7 +288,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
         descriptor.vertex.module = vsModule;
         std::ostringstream stream;
         stream << R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<)"
+            @stage(fragment) fn main() -> @location(0) vec4<)"
                << kScalarTypes[i] << R"(> {
                 var result : vec4<)"
                << kScalarTypes[i] << R"(>;
@@ -329,7 +329,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputComponentCountCompatibility) 
 
         std::ostringstream stream;
         stream << R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] )";
+            @stage(fragment) fn main() -> @location(0) )";
         switch (componentCount) {
             case 1:
                 stream << R"(f32 {
@@ -737,10 +737,10 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                [[group(0), binding(0)]] var myTexture : texture_2d<)"
+                @group(0) @binding(0) var myTexture : texture_2d<)"
                    << kScalarTypes[i] << R"(>;
 
-                [[stage(fragment)]] fn main() {
+                @stage(fragment) fn main() {
                     textureDimensions(myTexture);
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
@@ -787,9 +787,9 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                [[group(0), binding(0)]] var myTexture : )"
+                @group(0) @binding(0) var myTexture : )"
                    << kTextureKeywords[i] << R"(<f32>;
-                [[stage(fragment)]] fn main() {
+                @stage(fragment) fn main() {
                     textureDimensions(myTexture);
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
@@ -816,8 +816,8 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
         struct Dst {
             data : array<u32, 100>;
         };
-        [[group(0), binding(0)]] var<storage, read_write> dst : Dst;
-        [[stage(vertex)]] fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+        @group(0) @binding(0) var<storage, read_write> dst : Dst;
+        @stage(vertex) fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
             dst.data[VertexIndex] = 0x1234u;
             return vec4<f32>();
         })");
@@ -918,11 +918,11 @@ TEST_F(RenderPipelineValidationTest, DepthCompareUndefinedIsError) {
 // Test that the entryPoint names must be present for the correct stage in the shader module.
 TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn vertex_main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn fragment_main() -> @location(0) vec4<f32> {
             return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
@@ -964,12 +964,12 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
 // Test that vertex attrib validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn vertex0([[location(0)]] attrib0 : vec4<f32>)
-                                    -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn vertex0(@location(0) attrib0 : vec4<f32>)
+                                    -> @builtin(position) vec4<f32> {
             return attrib0;
         }
-        [[stage(vertex)]] fn vertex1([[location(1)]] attrib1 : vec4<f32>)
-                                    -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn vertex1(@location(1) attrib1 : vec4<f32>)
+                                    -> @builtin(position) vec4<f32> {
             return attrib1;
         }
     )");
@@ -1006,10 +1006,10 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
 // Test that fragment output validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]] fn fragmentFloat() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn fragmentFloat() -> @location(0) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
-        [[stage(fragment)]] fn fragmentUint() -> [[location(0)]] vec4<u32> {
+        @stage(fragment) fn fragmentUint() -> @location(0) vec4<u32> {
             return vec4<u32>(0u, 0u, 0u, 0u);
         }
     )");
@@ -1040,33 +1040,33 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
 // Test that unwritten fragment outputs must have a write mask of 0.
 TEST_F(RenderPipelineValidationTest, UnwrittenFragmentOutputsMask0) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>();
         }
     )");
 
     wgpu::ShaderModule fsModuleWriteNone = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]] fn main() {}
+        @stage(fragment) fn main() {}
     )");
 
     wgpu::ShaderModule fsModuleWrite0 = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return vec4<f32>();
         }
     )");
 
     wgpu::ShaderModule fsModuleWrite1 = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]] fn main() -> [[location(1)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(1) vec4<f32> {
             return vec4<f32>();
         }
     )");
 
     wgpu::ShaderModule fsModuleWriteBoth = utils::CreateShaderModule(device, R"(
         struct FragmentOut {
-            [[location(0)]] target0 : vec4<f32>;
-            [[location(1)]] target1 : vec4<f32>;
+            @location(0) target0 : vec4<f32>;
+            @location(1) target1 : vec4<f32>;
         };
-        [[stage(fragment)]] fn main() -> FragmentOut {
+        @stage(fragment) fn main() -> FragmentOut {
             var out : FragmentOut;
             return out;
         }
@@ -1175,13 +1175,13 @@ TEST_F(RenderPipelineValidationTest, BindingsFromCorrectEntryPoint) {
         struct Uniforms {
             data : vec4<f32>;
         };
-        [[group(0), binding(0)]] var<uniform> var0 : Uniforms;
-        [[group(0), binding(1)]] var<uniform> var1 : Uniforms;
+        @group(0) @binding(0) var<uniform> var0 : Uniforms;
+        @group(0) @binding(1) var<uniform> var1 : Uniforms;
 
-        [[stage(vertex)]] fn vertex0() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn vertex0() -> @builtin(position) vec4<f32> {
             return var0.data;
         }
-        [[stage(vertex)]] fn vertex1() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn vertex1() -> @builtin(position) vec4<f32> {
             return var1.data;
         }
     )");
@@ -1272,34 +1272,34 @@ class InterStageVariableMatchingValidationTest : public RenderPipelineValidation
 TEST_F(InterStageVariableMatchingValidationTest, MissingDeclarationAtSameLocation) {
     wgpu::ShaderModule vertexModuleOutputAtLocation0 = utils::CreateShaderModule(device, R"(
             struct A {
-                [[location(0)]] vout: f32;
-                [[builtin(position)]] pos: vec4<f32>;
+                @location(0) vout: f32;
+                @builtin(position) pos: vec4<f32>;
             };
-            [[stage(vertex)]] fn main() -> A {
+            @stage(vertex) fn main() -> A {
                 var vertexOut: A;
                 vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                 return vertexOut;
             })");
     wgpu::ShaderModule fragmentModuleAtLocation0 = utils::CreateShaderModule(device, R"(
             struct B {
-                [[location(0)]] fin: f32;
+                @location(0) fin: f32;
             };
-            [[stage(fragment)]] fn main(fragmentIn: B) -> [[location(0)]] vec4<f32>  {
+            @stage(fragment) fn main(fragmentIn: B) -> @location(0) vec4<f32>  {
                 return vec4<f32>(fragmentIn.fin, 0.0, 0.0, 1.0);
             })");
     wgpu::ShaderModule fragmentModuleInputAtLocation1 = utils::CreateShaderModule(device, R"(
             struct A {
-                [[location(1)]] vout: f32;
+                @location(1) vout: f32;
             };
-            [[stage(fragment)]] fn main(vertexOut: A) -> [[location(0)]] vec4<f32>  {
+            @stage(fragment) fn main(vertexOut: A) -> @location(0) vec4<f32>  {
                 return vec4<f32>(vertexOut.vout, 0.0, 0.0, 1.0);
             })");
     wgpu::ShaderModule vertexModuleOutputAtLocation1 = utils::CreateShaderModule(device, R"(
             struct B {
-                [[location(1)]] fin: f32;
-                [[builtin(position)]] pos: vec4<f32>;
+                @location(1) fin: f32;
+                @builtin(position) pos: vec4<f32>;
             };
-            [[stage(vertex)]] fn main() -> B {
+            @stage(vertex) fn main() -> B {
                 var fragmentIn: B;
                 fragmentIn.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                 return fragmentIn;
@@ -1334,15 +1334,15 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
         std::string interfaceDeclaration;
         {
             std::ostringstream sstream;
-            sstream << "struct A { [[location(0)]] a: " << kTypes[i] << ";" << std::endl;
+            sstream << "struct A { @location(0) a: " << kTypes[i] << ";" << std::endl;
             interfaceDeclaration = sstream.str();
         }
         {
             std::ostringstream vertexStream;
             vertexStream << interfaceDeclaration << R"(
-                    [[builtin(position)]] pos: vec4<f32>;
+                    @builtin(position) pos: vec4<f32>;
                 };
-                [[stage(vertex)]] fn main() -> A {
+                @stage(vertex) fn main() -> A {
                     var vertexOut: A;
                     vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                     return vertexOut;
@@ -1353,7 +1353,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
             std::ostringstream fragmentStream;
             fragmentStream << interfaceDeclaration << R"(
                 };
-                [[stage(fragment)]] fn main(fragmentIn: A) -> [[location(0)]] vec4<f32> {
+                @stage(fragment) fn main(fragmentIn: A) -> @location(0) vec4<f32> {
                     return vec4<f32>(0.0, 0.0, 0.0, 1.0);
                 })";
             fragmentModules[i] = utils::CreateShaderModule(device, fragmentStream.str().c_str());
@@ -1420,9 +1420,9 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
         {
             const auto& interpolationAttribute = validInterpolationAttributes[i];
             std::ostringstream sstream;
-            sstream << "struct A { [[location(0)";
+            sstream << "struct A { @location(0)";
             if (interpolationAttribute.interpolationType != InterpolationType::None) {
-                sstream << ", interpolate("
+                sstream << " @interpolate("
                         << kInterpolationTypeString[static_cast<uint8_t>(
                                interpolationAttribute.interpolationType)];
                 if (interpolationAttribute.interpolationSampling != InterpolationSampling::None) {
@@ -1432,15 +1432,15 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
                 }
                 sstream << ")";
             }
-            sstream << " ]] a : vec4<f32>;" << std::endl;
+            sstream << " a : vec4<f32>;" << std::endl;
             interfaceDeclaration = sstream.str();
         }
         {
             std::ostringstream vertexStream;
             vertexStream << interfaceDeclaration << R"(
-                    [[builtin(position)]] pos: vec4<f32>;
+                    @builtin(position) pos: vec4<f32>;
                 };
-                [[stage(vertex)]] fn main() -> A {
+                @stage(vertex) fn main() -> A {
                     var vertexOut: A;
                     vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                     return vertexOut;
@@ -1451,7 +1451,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
             std::ostringstream fragmentStream;
             fragmentStream << interfaceDeclaration << R"(
                 };
-                [[stage(fragment)]] fn main(fragmentIn: A) -> [[location(0)]] vec4<f32> {
+                @stage(fragment) fn main(fragmentIn: A) -> @location(0) vec4<f32> {
                     return fragmentIn.a;
                 })";
             fragmentModules[i] = utils::CreateShaderModule(device, fragmentStream.str().c_str());
@@ -1463,7 +1463,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
                                                    attribute.interpolationSampling};
         switch (attribute.interpolationType) {
             // If the interpolation attribute is not specified, then
-            // [[interpolate(perspective, center)]] or [[interpolate(perspective)]] is assumed.
+            // @interpolate(perspective, center) or @interpolate(perspective) is assumed.
             case InterpolationType::None:
                 appliedAttribute.interpolationType = InterpolationType::Perspective;
                 appliedAttribute.interpolationSampling = InterpolationSampling::Center;

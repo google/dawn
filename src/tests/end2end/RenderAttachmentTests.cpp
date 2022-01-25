@@ -23,20 +23,20 @@ class RenderAttachmentTest : public DawnTest {};
 // There should be no backend validation errors or indexing out-of-bounds.
 TEST_P(RenderAttachmentTest, MoreFragmentOutputsThanAttachments) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]]
-        fn main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex)
+        fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Output {
-            [[location(0)]] color0 : vec4<f32>;
-            [[location(1)]] color1 : vec4<f32>;
-            [[location(2)]] color2 : vec4<f32>;
-            [[location(3)]] color3 : vec4<f32>;
+            @location(0) color0 : vec4<f32>;
+            @location(1) color1 : vec4<f32>;
+            @location(2) color2 : vec4<f32>;
+            @location(3) color3 : vec4<f32>;
         };
 
-        [[stage(fragment)]]
+        @stage(fragment)
         fn main() -> Output {
             var output : Output;
             output.color0 = vec4<f32>(1.0, 0.0, 0.0, 1.0);

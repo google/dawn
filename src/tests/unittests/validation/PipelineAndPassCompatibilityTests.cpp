@@ -33,11 +33,11 @@ namespace {
             // Create a NoOp pipeline
             utils::ComboRenderPipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                     return vec4<f32>();
                 })");
             pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-                [[stage(fragment)]] fn main() {
+                @stage(fragment) fn main() {
                 })");
             pipelineDescriptor.cFragment.targets = nullptr;
             pipelineDescriptor.cFragment.targetCount = 0;

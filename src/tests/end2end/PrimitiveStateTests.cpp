@@ -49,9 +49,9 @@ class DepthClampingTest : public DawnTest {
                 color : vec3<f32>;
                 depth : f32;
             };
-            [[group(0), binding(0)]] var<uniform> ubo : UBO;
+            @group(0) @binding(0) var<uniform> ubo : UBO;
 
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, ubo.depth, 1.0);
             })");
 
@@ -60,9 +60,9 @@ class DepthClampingTest : public DawnTest {
                 color : vec3<f32>;
                 depth : f32;
             };
-            [[group(0), binding(0)]] var<uniform> ubo : UBO;
+            @group(0) @binding(0) var<uniform> ubo : UBO;
 
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(ubo.color, 1.0);
             })");
     }
@@ -122,8 +122,8 @@ class DepthClampingTest : public DawnTest {
             wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
             // Create a bind group for the data
-            wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-                device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
+            wgpu::BindGroup bindGroup =
+                utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
 
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
@@ -134,7 +134,7 @@ class DepthClampingTest : public DawnTest {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_PIXEL_RGBA8_EQ(expected, renderTarget,  0, 0) << "Pixel check failed";
+        EXPECT_PIXEL_RGBA8_EQ(expected, renderTarget, 0, 0) << "Pixel check failed";
     }
 
     wgpu::Texture renderTarget;
@@ -154,16 +154,16 @@ TEST_P(DepthClampingTest, ClampOnBeyondFarPlane) {
         {
             // Draw a red triangle at depth 1.
             {
-                nullptr, /* depthClampingState */
+                nullptr,               /* depthClampingState */
                 RGBA8(255, 0, 0, 255), /* color */
-                1.f, /* depth */
+                1.f,                   /* depth */
                 wgpu::CompareFunction::Always,
             },
             // Draw a green triangle at depth 2 which should get clamped to 1.
             {
                 &clampingState,
                 RGBA8(0, 255, 0, 255), /* color */
-                2.f, /* depth */
+                2.f,                   /* depth */
                 wgpu::CompareFunction::Equal,
             },
         },
@@ -181,16 +181,16 @@ TEST_P(DepthClampingTest, ClampOnBeyondNearPlane) {
         {
             // Draw a red triangle at depth 0.
             {
-                nullptr, /* depthClampingState */
+                nullptr,               /* depthClampingState */
                 RGBA8(255, 0, 0, 255), /* color */
-                0.f, /* depth */
+                0.f,                   /* depth */
                 wgpu::CompareFunction::Always,
             },
             // Draw a green triangle at depth -1 which should get clamped to 0.
             {
                 &clampingState,
                 RGBA8(0, 255, 0, 255), /* color */
-                -1.f, /* depth */
+                -1.f,                  /* depth */
                 wgpu::CompareFunction::Equal,
             },
         },
@@ -209,13 +209,12 @@ TEST_P(DepthClampingTest, ClampOnInsideViewFrustum) {
             {
                 &clampingState,
                 RGBA8(0, 255, 0, 255), /* color */
-                0.5f, /* depth */
+                0.5f,                  /* depth */
                 wgpu::CompareFunction::Always,
             },
         },
         RGBA8(0, 255, 0, 255));
 }
-
 
 // Test that fragments outside the view frustum are clipped if depth clamping is disabled.
 TEST_P(DepthClampingTest, ClampOffOutsideViewFrustum) {
@@ -227,13 +226,13 @@ TEST_P(DepthClampingTest, ClampOffOutsideViewFrustum) {
             {
                 &clampingState,
                 RGBA8(0, 255, 0, 255), /* color */
-                2.f, /* depth */
+                2.f,                   /* depth */
                 wgpu::CompareFunction::Always,
             },
             {
                 &clampingState,
                 RGBA8(0, 255, 0, 255), /* color */
-                -1.f, /* depth */
+                -1.f,                  /* depth */
                 wgpu::CompareFunction::Always,
             },
         },
@@ -245,15 +244,15 @@ TEST_P(DepthClampingTest, ClampUnspecifiedOutsideViewFrustum) {
     DoTest(
         {
             {
-                nullptr, /* depthClampingState */
+                nullptr,               /* depthClampingState */
                 RGBA8(0, 255, 0, 255), /* color */
-                -1.f, /* depth */
+                -1.f,                  /* depth */
                 wgpu::CompareFunction::Always,
             },
             {
-                nullptr, /* depthClampingState */
+                nullptr,               /* depthClampingState */
                 RGBA8(0, 255, 0, 255), /* color */
-                2.f, /* depth */
+                2.f,                   /* depth */
                 wgpu::CompareFunction::Always,
             },
         },
@@ -275,18 +274,18 @@ TEST_P(DepthClampingTest, MultipleRenderPipelines) {
             {
                 &clampingState,
                 RGBA8(0, 255, 0, 255), /* color */
-                2.f, /* depth */
+                2.f,                   /* depth */
                 wgpu::CompareFunction::Always,
             },
             // Draw red with clipping
             {
                 &clippingState,
                 RGBA8(255, 0, 0, 255), /* color */
-                2.f, /* depth */
+                2.f,                   /* depth */
                 wgpu::CompareFunction::Always,
             },
         },
-        RGBA8(0, 255, 0, 255)); // Result should be green
+        RGBA8(0, 255, 0, 255));  // Result should be green
 }
 
 DAWN_INSTANTIATE_TEST(DepthClampingTest,

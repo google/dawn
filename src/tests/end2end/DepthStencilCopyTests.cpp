@@ -42,8 +42,8 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
 
         // Draw a square in the bottom left quarter of the screen.
         mVertexModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 6>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 0.0, -1.0),
@@ -128,7 +128,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         desc->vertex.module = mVertexModule;
 
         std::string fsSource = R"(
-        [[stage(fragment)]] fn main() -> [[builtin(frag_depth)]] f32 {
+        @stage(fragment) fn main() -> @builtin(frag_depth) f32 {
             return )" + std::to_string(regionDepth) +
                                ";\n}";
 
@@ -632,7 +632,7 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
         utils::ComboRenderPipelineDescriptor renderPipelineDesc;
         renderPipelineDesc.vertex.module = mVertexModule;
         renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() {
+            @stage(fragment) fn main() {
             })");
         wgpu::DepthStencilState* depthStencil =
             renderPipelineDesc.EnableDepthStencil(GetParam().mTextureFormat);

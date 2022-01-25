@@ -62,12 +62,12 @@ namespace {
     wgpu::ShaderModule CreateDefaultVertexShaderModule(wgpu::Device device) {
         return utils::CreateShaderModule(device, R"(
             struct VertexOut {
-                [[location(0)]] texCoord : vec2<f32>;
-                [[builtin(position)]] position : vec4<f32>;
+                @location(0) texCoord : vec2<f32>;
+                @builtin(position) position : vec4<f32>;
             };
 
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> VertexOut {
+            @stage(vertex)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
                 var output : VertexOut;
                 var pos = array<vec2<f32>, 6>(
                                             vec2<f32>(-2., -2.),
@@ -219,11 +219,11 @@ class TextureViewSamplingTest : public DawnTest {
         wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
         const char* fragmentShader = R"(
-            [[group(0), binding(0)]] var sampler0 : sampler;
-            [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture0 : texture_2d<f32>;
 
-            [[stage(fragment)]]
-            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
                 return textureSample(texture0, sampler0, texCoord);
             }
         )";
@@ -257,11 +257,11 @@ class TextureViewSamplingTest : public DawnTest {
         wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
         const char* fragmentShader = R"(
-            [[group(0), binding(0)]] var sampler0 : sampler;
-            [[group(0), binding(1)]] var texture0 : texture_2d_array<f32>;
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture0 : texture_2d_array<f32>;
 
-            [[stage(fragment)]]
-            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
                 return textureSample(texture0, sampler0, texCoord, 0) +
                        textureSample(texture0, sampler0, texCoord, 1) +
                        textureSample(texture0, sampler0, texCoord, 2);
@@ -292,11 +292,11 @@ class TextureViewSamplingTest : public DawnTest {
 
         std::ostringstream stream;
         stream << R"(
-            [[group(0), binding(0)]] var sampler0 : sampler;
-            [[group(0), binding(1)]] var texture0 : )"
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture0 : )"
                << textureType << R"(<f32>;
-            [[stage(fragment)]]
-            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
                 var sc : f32 = 2.0 * texCoord.x - 1.0;
                 var tc : f32 = 2.0 * texCoord.y - 1.0;
                 return textureSample(texture0, sampler0, vec3<f32>()"
@@ -366,11 +366,11 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
     const char* fragmentShader = R"(
-            [[group(0), binding(0)]] var sampler0 : sampler;
-            [[group(0), binding(1)]] var texture0 : texture_2d_array<f32>;
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture0 : texture_2d_array<f32>;
 
-            [[stage(fragment)]]
-            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
                 return textureSample(texture0, sampler0, texCoord, 0) +
                        textureSample(texture0, sampler0, texCoord, 1) +
                        textureSample(texture0, sampler0, texCoord, 2);
@@ -498,8 +498,8 @@ class TextureViewRenderingTest : public DawnTest {
         renderPassInfo.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
 
         const char* oneColorFragmentShader = R"(
-            [[stage(fragment)]] fn main([[location(0)]] texCoord : vec2<f32>) ->
-                [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main(@location(0) texCoord : vec2<f32>) ->
+                @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             }
         )";

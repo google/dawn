@@ -24,7 +24,7 @@ class VertexStateTest : public ValidationTest {
                         const char* vertexSource) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexSource);
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )");
@@ -44,7 +44,7 @@ class VertexStateTest : public ValidationTest {
     }
 
     const char* kDummyVertexShader = R"(
-        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )";
@@ -97,28 +97,28 @@ TEST_F(VertexStateTest, PipelineCompatibility) {
 
     // Control case: pipeline with one input per attribute
     CreatePipeline(true, state, R"(
-        [[stage(vertex)]] fn main(
-            [[location(0)]] a : vec4<f32>,
-            [[location(1)]] b : vec4<f32>
-        ) -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main(
+            @location(0) a : vec4<f32>,
+            @location(1) b : vec4<f32>
+        ) -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )");
 
     // Check it is valid for the pipeline to use a subset of the VertexState
     CreatePipeline(true, state, R"(
-        [[stage(vertex)]] fn main(
-            [[location(0)]] a : vec4<f32>
-        ) -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main(
+            @location(0) a : vec4<f32>
+        ) -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )");
 
     // Check for an error when the pipeline uses an attribute not in the vertex input
     CreatePipeline(false, state, R"(
-        [[stage(vertex)]] fn main(
-            [[location(2)]] a : vec4<f32>
-        ) -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main(
+            @location(2) a : vec4<f32>
+        ) -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )");
@@ -359,8 +359,8 @@ TEST_F(VertexStateTest, BaseTypeMatching) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].format = format;
 
-        std::string shader = "[[stage(vertex)]] fn main([[location(0)]] attrib : " + shaderType +
-                             R"() -> [[builtin(position)]] vec4<f32> {
+        std::string shader = "@stage(vertex) fn main(@location(0) attrib : " + shaderType +
+                             R"() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         })";
 
@@ -413,7 +413,7 @@ TEST_F(VertexStateTest, BaseTypeMatchingForInexistentInput) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].format = format;
 
-        std::string shader = R"([[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+        std::string shader = R"(@stage(vertex) fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         })";
 

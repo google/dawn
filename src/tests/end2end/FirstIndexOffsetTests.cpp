@@ -92,23 +92,23 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
     std::stringstream fragmentInputs;
     std::stringstream fragmentBody;
 
-    vertexInputs << "  [[location(0)]] position : vec4<f32>;\n";
-    vertexOutputs << "  [[builtin(position)]] position : vec4<f32>;\n";
+    vertexInputs << "  @location(0) position : vec4<f32>;\n";
+    vertexOutputs << "  @builtin(position) position : vec4<f32>;\n";
 
     if ((checkIndex & CheckIndex::Vertex) != 0) {
-        vertexInputs << "  [[builtin(vertex_index)]] vertex_index : u32;\n";
-        vertexOutputs << "  [[location(1), interpolate(flat)]] vertex_index : u32;\n";
+        vertexInputs << "  @builtin(vertex_index) vertex_index : u32;\n";
+        vertexOutputs << "  @location(1) @interpolate(flat) vertex_index : u32;\n";
         vertexBody << "  output.vertex_index = input.vertex_index;\n";
 
-        fragmentInputs << "  [[location(1), interpolate(flat)]] vertex_index : u32;\n";
+        fragmentInputs << "  @location(1) @interpolate(flat) vertex_index : u32;\n";
         fragmentBody << "  _ = atomicMin(&idx_vals.vertex_index, input.vertex_index);\n";
     }
     if ((checkIndex & CheckIndex::Instance) != 0) {
-        vertexInputs << "  [[builtin(instance_index)]] instance_index : u32;\n";
-        vertexOutputs << "  [[location(2), interpolate(flat)]] instance_index : u32;\n";
+        vertexInputs << "  @builtin(instance_index) instance_index : u32;\n";
+        vertexOutputs << "  @location(2) @interpolate(flat) instance_index : u32;\n";
         vertexBody << "  output.instance_index = input.instance_index;\n";
 
-        fragmentInputs << "  [[location(2), interpolate(flat)]] instance_index : u32;\n";
+        fragmentInputs << "  @location(2) @interpolate(flat) instance_index : u32;\n";
         fragmentBody << "  _ = atomicMin(&idx_vals.instance_index, input.instance_index);\n";
     }
 
@@ -119,7 +119,7 @@ struct VertexInputs {
 struct VertexOutputs {
 )" + vertexOutputs.str() + R"(
 };
-[[stage(vertex)]] fn main(input : VertexInputs) -> VertexOutputs {
+@stage(vertex) fn main(input : VertexInputs) -> VertexOutputs {
   var output : VertexOutputs;
 )" + vertexBody.str() + R"(
   output.position = input.position;
@@ -131,12 +131,12 @@ struct IndexVals {
   vertex_index : atomic<u32>;
   instance_index : atomic<u32>;
 };
-[[group(0), binding(0)]] var<storage, read_write> idx_vals : IndexVals;
+@group(0) @binding(0) var<storage, read_write> idx_vals : IndexVals;
 
 struct FragInputs {
 )" + fragmentInputs.str() + R"(
 };
-[[stage(fragment)]] fn main(input : FragInputs) {
+@stage(fragment) fn main(input : FragInputs) {
 )" + fragmentBody.str() + R"(
 })";
 
@@ -165,31 +165,37 @@ struct FragInputs {
     wgpu::Buffer indices =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0});
 
-    const uint32_t bufferInitialVertex = checkIndex & CheckIndex::Vertex ? std::numeric_limits<uint32_t>::max() : 0;
-    const uint32_t bufferInitialInstance = checkIndex & CheckIndex::Instance ? std::numeric_limits<uint32_t>::max() : 0;
-    wgpu::Buffer buffer = utils::CreateBufferFromData(
-        device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage, {bufferInitialVertex, bufferInitialInstance});
+    const uint32_t bufferInitialVertex =
+        checkIndex & CheckIndex::Vertex ? std::numeric_limits<uint32_t>::max() : 0;
+    const uint32_t bufferInitialInstance =
+        checkIndex & CheckIndex::Instance ? std::numeric_limits<uint32_t>::max() : 0;
+    wgpu::Buffer buffer =
+        utils::CreateBufferFromData(device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
+                                    {bufferInitialVertex, bufferInitialInstance});
 
     wgpu::Buffer indirectBuffer;
     switch (mode) {
-    case DrawMode::NonIndexed:
-    case DrawMode::Indexed:
-        break;
-    case DrawMode::NonIndexedIndirect:
-        // With DrawIndirect firstInstance is reserved and must be 0 according to spec.
-        ASSERT_EQ(firstInstance, 0u);
-        indirectBuffer = utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {1, 1, firstVertex, firstInstance});
-        break;
-    case DrawMode::IndexedIndirect:
-        // With DrawIndexedIndirect firstInstance is reserved and must be 0 according to spec.
-        ASSERT_EQ(firstInstance, 0u);
-        indirectBuffer = utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {1, 1, 0, firstVertex, firstInstance});
-        break;
-    default:
-        FAIL();
+        case DrawMode::NonIndexed:
+        case DrawMode::Indexed:
+            break;
+        case DrawMode::NonIndexedIndirect:
+            // With DrawIndirect firstInstance is reserved and must be 0 according to spec.
+            ASSERT_EQ(firstInstance, 0u);
+            indirectBuffer = utils::CreateBufferFromData<uint32_t>(
+                device, wgpu::BufferUsage::Indirect, {1, 1, firstVertex, firstInstance});
+            break;
+        case DrawMode::IndexedIndirect:
+            // With DrawIndexedIndirect firstInstance is reserved and must be 0 according to spec.
+            ASSERT_EQ(firstInstance, 0u);
+            indirectBuffer = utils::CreateBufferFromData<uint32_t>(
+                device, wgpu::BufferUsage::Indirect, {1, 1, 0, firstVertex, firstInstance});
+            break;
+        default:
+            FAIL();
     }
 
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -200,22 +206,22 @@ struct FragInputs {
     // We should only see the values from the second draw.
     pass.Draw(1, 1, firstVertex + 1, firstInstance + 1);
     switch (mode) {
-    case DrawMode::NonIndexed:
-        pass.Draw(1, 1, firstVertex, firstInstance);
-        break;
-    case DrawMode::Indexed:
-        pass.SetIndexBuffer(indices, wgpu::IndexFormat::Uint32);
-        pass.DrawIndexed(1, 1, 0, firstVertex, firstInstance);
-        break;
-    case DrawMode::NonIndexedIndirect:
-        pass.DrawIndirect(indirectBuffer, 0);
-        break;
-    case DrawMode::IndexedIndirect:
-        pass.SetIndexBuffer(indices, wgpu::IndexFormat::Uint32);
-        pass.DrawIndexedIndirect(indirectBuffer, 0);
-        break;
-    default:
-        FAIL();
+        case DrawMode::NonIndexed:
+            pass.Draw(1, 1, firstVertex, firstInstance);
+            break;
+        case DrawMode::Indexed:
+            pass.SetIndexBuffer(indices, wgpu::IndexFormat::Uint32);
+            pass.DrawIndexed(1, 1, 0, firstVertex, firstInstance);
+            break;
+        case DrawMode::NonIndexedIndirect:
+            pass.DrawIndirect(indirectBuffer, 0);
+            break;
+        case DrawMode::IndexedIndirect:
+            pass.SetIndexBuffer(indices, wgpu::IndexFormat::Uint32);
+            pass.DrawIndexedIndirect(indirectBuffer, 0);
+            break;
+        default:
+            FAIL();
     }
     pass.EndPass();
     wgpu::CommandBuffer commands = encoder.Finish();

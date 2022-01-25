@@ -60,8 +60,7 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
 // be compiled.
 TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachments) {
     std::ostringstream stream;
-    stream << "[[stage(fragment)]] fn main() -> [[location(" << kMaxColorAttachments
-           << R"()]]  vec4<f32> {
+    stream << "@stage(fragment) fn main() -> @location(" << kMaxColorAttachments << R"() vec4<f32> {
             return vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })";
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, stream.str().c_str()));
@@ -163,7 +162,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
 
@@ -219,14 +218,14 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
         std::ostringstream stream;
         stream << "struct ShaderIO {" << std::endl;
         for (uint32_t location = 1; location <= maximumOutputLocation; ++location) {
-            stream << "[[location(" << location << ")]] var" << location << ": f32;" << std::endl;
+            stream << "@location(" << location << ") var" << location << ": f32;" << std::endl;
         }
         switch (shaderStage) {
             case wgpu::ShaderStage::Vertex: {
                 stream << R"(
-                    [[builtin(position)]] pos: vec4<f32>;
+                    @builtin(position) pos: vec4<f32>;
                 };
-                [[stage(vertex)]] fn main() -> ShaderIO {
+                @stage(vertex) fn main() -> ShaderIO {
                     var shaderIO : ShaderIO;
                     shaderIO.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                     return shaderIO;
@@ -236,7 +235,7 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
             case wgpu::ShaderStage::Fragment: {
                 stream << R"(
                 };
-                [[stage(fragment)]] fn main(shaderIO: ShaderIO) -> [[location(0)]] vec4<f32> {
+                @stage(fragment) fn main(shaderIO: ShaderIO) -> @location(0) vec4<f32> {
                     return vec4<f32>(0.0, 0.0, 0.0, 1.0);
                 })";
             } break;
@@ -293,14 +292,13 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         uint32_t vec4InputLocations = totalUserDefinedInterStageShaderComponentCount / 4;
 
         for (uint32_t location = 0; location < vec4InputLocations; ++location) {
-            stream << "[[location(" << location << ")]] var" << location << ": vec4<f32>;"
+            stream << "@location(" << location << ") var" << location << ": vec4<f32>;"
                    << std::endl;
         }
 
         uint32_t lastComponentCount = totalUserDefinedInterStageShaderComponentCount % 4;
         if (lastComponentCount > 0) {
-            stream << "[[location(" << vec4InputLocations << ")]] var" << vec4InputLocations
-                   << ": ";
+            stream << "@location(" << vec4InputLocations << ") var" << vec4InputLocations << ": ";
             if (lastComponentCount == 1) {
                 stream << "f32;";
             } else {
@@ -312,9 +310,9 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         switch (shaderStage) {
             case wgpu::ShaderStage::Vertex: {
                 stream << R"(
-                    [[builtin(position)]] pos: vec4<f32>;
+                    @builtin(position) pos: vec4<f32>;
                 };
-                [[stage(vertex)]] fn main() -> ShaderIO {
+                @stage(vertex) fn main() -> ShaderIO {
                     var shaderIO : ShaderIO;
                     shaderIO.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                     return shaderIO;
@@ -324,7 +322,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
             case wgpu::ShaderStage::Fragment: {
                 stream << R"(
                 };
-                [[stage(fragment)]] fn main(shaderIO: ShaderIO) -> [[location(0)]] vec4<f32> {
+                @stage(fragment) fn main(shaderIO: ShaderIO) -> @location(0) vec4<f32> {
                     return vec4<f32>(0.0, 0.0, 0.0, 1.0);
                 })";
             } break;
@@ -350,8 +348,8 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, errorFragmentShader.c_str()));
     }
 
-    // [[position]] should be counted into the maximum inter-stage component count.
-    // Note that in vertex shader we always have [[position]] so we don't need to specify it
+    // @position should be counted into the maximum inter-stage component count.
+    // Note that in vertex shader we always have @position so we don't need to specify it
     // again in the parameter "builtInDeclarations" of generateShaderForTest().
     {
         constexpr uint32_t kInterStageShaderComponentCount = kMaxInterStageShaderComponents - 4;
@@ -361,7 +359,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
 
         std::string fragmentShader =
             generateShaderForTest(kInterStageShaderComponentCount, wgpu::ShaderStage::Fragment,
-                                  "[[builtin(position)]] fragCoord: vec4<f32>;");
+                                  "@builtin(position) fragCoord: vec4<f32>;");
         utils::CreateShaderModule(device, fragmentShader.c_str());
     }
 
@@ -373,13 +371,13 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
 
         std::string fragmentShader =
             generateShaderForTest(kInterStageShaderComponentCount, wgpu::ShaderStage::Fragment,
-                                  "[[builtin(position)]] fragCoord: vec4<f32>;");
+                                  "@builtin(position) fragCoord: vec4<f32>;");
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, fragmentShader.c_str()));
     }
 
-    // [[front_facing]] should be counted into the maximum inter-stage component count.
+    // front_facing should be counted into the maximum inter-stage component count.
     {
-        const char* builtinDeclaration = "[[builtin(front_facing)]] frontFacing : bool;";
+        const char* builtinDeclaration = "@builtin(front_facing) frontFacing : bool;";
 
         {
             std::string fragmentShader =
@@ -395,9 +393,9 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         }
     }
 
-    // [[sample_index]] should be counted into the maximum inter-stage component count.
+    // @sample_index should be counted into the maximum inter-stage component count.
     {
-        const char* builtinDeclaration = "[[builtin(sample_index)]] sampleIndex: u32;";
+        const char* builtinDeclaration = "@builtin(sample_index) sampleIndex: u32;";
 
         {
             std::string fragmentShader =
@@ -413,9 +411,9 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         }
     }
 
-    // [[sample_mask]] should be counted into the maximum inter-stage component count.
+    // @sample_mask should be counted into the maximum inter-stage component count.
     {
-        const char* builtinDeclaration = "[[builtin(front_facing)]] frontFacing : bool;";
+        const char* builtinDeclaration = "@builtin(front_facing) frontFacing : bool;";
 
         {
             std::string fragmentShader =
@@ -436,8 +434,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
 TEST_F(ShaderModuleValidationTest, ComputeWorkgroupSizeLimits) {
     auto MakeShaderWithWorkgroupSize = [this](uint32_t x, uint32_t y, uint32_t z) {
         std::ostringstream ss;
-        ss << "[[stage(compute), workgroup_size(" << x << "," << y << "," << z
-           << ")]] fn main() {}";
+        ss << "@stage(compute) @workgroup_size(" << x << "," << y << "," << z << ") fn main() {}";
         utils::CreateShaderModule(device, ss.str().c_str());
     };
 
@@ -482,7 +479,7 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
             ss << "var<workgroup> mat4_data: array<mat4x4<f32>, " << mat4_count << ">;";
             body << "_ = mat4_data;";
         }
-        ss << "[[stage(compute), workgroup_size(1)]] fn main() { " << body.str() << " }";
+        ss << "@stage(compute) @workgroup_size(1) fn main() { " << body.str() << " }";
         utils::CreateShaderModule(device, ss.str().c_str());
     };
 
@@ -500,16 +497,16 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
 // Test that numeric ID must be unique
 TEST_F(ShaderModuleValidationTest, OverridableConstantsNumericIDConflicts) {
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-[[override(1234)]] let c0: u32;
-[[override(1234)]] let c1: u32;
+@override(1234) let c0: u32;
+@override(1234) let c1: u32;
 
 struct Buf {
     data : array<u32, 2>;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+@group(0) @binding(0) var<storage, read_write> buf : Buf;
 
-[[stage(compute), workgroup_size(1)]] fn main() {
+@stage(compute) @workgroup_size(1) fn main() {
     // make sure the overridable constants are not optimized out
     buf.data[0] = c0;
     buf.data[1] = c1;

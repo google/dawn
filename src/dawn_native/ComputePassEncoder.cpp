@@ -60,11 +60,11 @@ namespace dawn::native {
                     data: array<u32>;
                 };
 
-                [[group(0), binding(0)]] var<uniform> uniformParams: UniformParams;
-                [[group(0), binding(1)]] var<storage, read_write> clientParams: IndirectParams;
-                [[group(0), binding(2)]] var<storage, write> validatedParams: ValidatedParams;
+                @group(0) @binding(0) var<uniform> uniformParams: UniformParams;
+                @group(0) @binding(1) var<storage, read_write> clientParams: IndirectParams;
+                @group(0) @binding(2) var<storage, write> validatedParams: ValidatedParams;
 
-                [[stage(compute), workgroup_size(1, 1, 1)]]
+                @stage(compute) @workgroup_size(1, 1, 1)
                 fn main() {
                     for (var i = 0u; i < 3u; i = i + 1u) {
                         var numWorkgroups = clientParams.data[uniformParams.clientOffsetInU32 + i];
@@ -326,7 +326,7 @@ namespace dawn::native {
                 // - Validate each indirect dispatch with a single dispatch to copy the indirect
                 //   buffer params into a scratch buffer if they're valid, and otherwise zero them
                 //   out.
-                // - Duplicate all the indirect dispatch parameters to support [[num_workgroups]] on
+                // - Duplicate all the indirect dispatch parameters to support @num_workgroups on
                 //   D3D12.
                 // - Directly return the original indirect dispatch buffer if we don't need any
                 //   transformations on it.

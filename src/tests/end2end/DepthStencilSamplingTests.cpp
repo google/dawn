@@ -95,11 +95,11 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         for (TestAspect aspect : aspects) {
             switch (aspect) {
                 case TestAspect::Depth:
-                    shaderSource << "[[group(0), binding(" << 2 * index << ")]] var tex" << index
+                    shaderSource << "@group(0) @binding(" << 2 * index << ") var tex" << index
                                  << " : texture_depth_2d;\n";
 
-                    shaderSource << "[[group(0), binding(" << 2 * index + 1
-                                 << ")]] var<storage, read_write> result" << index
+                    shaderSource << "@group(0) @binding(" << 2 * index + 1
+                                 << ") var<storage, read_write> result" << index
                                  << " : DepthResult;\n";
 
                     ASSERT(components.size() == 1 && components[0] == 0);
@@ -107,11 +107,11 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                                << ", vec2<i32>(0, 0), 0);";
                     break;
                 case TestAspect::Stencil:
-                    shaderSource << "[[group(0), binding(" << 2 * index << ")]] var tex" << index
+                    shaderSource << "@group(0) @binding(" << 2 * index << ") var tex" << index
                                  << " : texture_2d<u32>;\n";
 
-                    shaderSource << "[[group(0), binding(" << 2 * index + 1
-                                 << ")]] var<storage, read_write> result" << index
+                    shaderSource << "@group(0) @binding(" << 2 * index + 1
+                                 << ") var<storage, read_write> result" << index
                                  << " : StencilResult;\n";
 
                     shaderBody << "var texel = textureLoad(tex" << index
@@ -131,7 +131,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
     wgpu::RenderPipeline CreateSamplingRenderPipeline(std::vector<TestAspect> aspects,
                                                       std::vector<uint32_t> components) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
@@ -143,7 +143,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
         GenerateSamplingShader(aspects, components, shaderSource, shaderBody);
 
-        shaderSource << "[[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {\n";
+        shaderSource << "@stage(fragment) fn main() -> @location(0) vec4<f32> {\n";
         shaderSource << shaderBody.str() << "return vec4<f32>();\n }";
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
@@ -161,7 +161,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         std::ostringstream shaderBody;
         GenerateSamplingShader(aspects, components, shaderSource, shaderBody);
 
-        shaderSource << "[[stage(compute), workgroup_size(1)]] fn main() { " << shaderBody.str()
+        shaderSource << "@stage(compute) @workgroup_size(1) fn main() { " << shaderBody.str()
                      << "\n}";
 
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
@@ -187,19 +187,19 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
     wgpu::RenderPipeline CreateComparisonRenderPipeline() {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var samp : sampler_comparison;
-            [[group(0), binding(1)]] var tex : texture_depth_2d;
+            @group(0) @binding(0) var samp : sampler_comparison;
+            @group(0) @binding(1) var tex : texture_depth_2d;
             struct Uniforms {
                 compareRef : f32;
             };
-            [[group(0), binding(2)]] var<uniform> uniforms : Uniforms;
+            @group(0) @binding(2) var<uniform> uniforms : Uniforms;
 
-            [[stage(fragment)]] fn main() -> [[location(0)]] f32 {
+            @stage(fragment) fn main() -> @location(0) f32 {
                 return textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 
@@ -214,19 +214,19 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
     wgpu::ComputePipeline CreateComparisonComputePipeline() {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var samp : sampler_comparison;
-            [[group(0), binding(1)]] var tex : texture_depth_2d;
+            @group(0) @binding(0) var samp : sampler_comparison;
+            @group(0) @binding(1) var tex : texture_depth_2d;
             struct Uniforms {
                 compareRef : f32;
             };
-            [[group(0), binding(2)]] var<uniform> uniforms : Uniforms;
+            @group(0) @binding(2) var<uniform> uniforms : Uniforms;
 
             struct SamplerResult {
                 value : f32;
             };
-            [[group(0), binding(3)]] var<storage, read_write> samplerResult : SamplerResult;
+            @group(0) @binding(3) var<storage, read_write> samplerResult : SamplerResult;
 
-            [[stage(compute), workgroup_size(1)]] fn main() {
+            @stage(compute) @workgroup_size(1) fn main() {
                 samplerResult.value = textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 

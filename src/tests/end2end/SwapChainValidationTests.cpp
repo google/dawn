@@ -223,15 +223,15 @@ TEST_P(SwapChainValidationTests, ViewDestroyedAfterPresent) {
 TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
     utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
         struct FragmentOut {
-            [[location(0)]] target0 : vec4<f32>;
-            [[location(1)]] target1 : f32;
+            @location(0) target0 : vec4<f32>;
+            @location(1) target1 : f32;
         };
-        [[stage(fragment)]] fn main() -> FragmentOut {
+        @stage(fragment) fn main() -> FragmentOut {
             var out : FragmentOut;
             out.target0 = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             out.target1 = 0.5;

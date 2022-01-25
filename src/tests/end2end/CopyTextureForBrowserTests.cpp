@@ -258,16 +258,16 @@ class CopyTextureForBrowserTests : public Parent {
             struct OutputBuf {
                 result : array<u32>;
             };
-            [[group(0), binding(0)]] var src : texture_2d<f32>;
-            [[group(0), binding(1)]] var dst : texture_2d<f32>;
-            [[group(0), binding(2)]] var<storage, read_write> output : OutputBuf;
-            [[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
+            @group(0) @binding(0) var src : texture_2d<f32>;
+            @group(0) @binding(1) var dst : texture_2d<f32>;
+            @group(0) @binding(2) var<storage, read_write> output : OutputBuf;
+            @group(0) @binding(3) var<uniform> uniforms : Uniforms;
             fn aboutEqual(value : f32, expect : f32) -> bool {
                 // The value diff should be smaller than the hard coded tolerance.
                 return abs(value - expect) < 0.01;
             }
-            [[stage(compute), workgroup_size(1, 1, 1)]]
-            fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+            @stage(compute) @workgroup_size(1, 1, 1)
+            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
                 let srcSize = textureDimensions(src);
                 let dstSize = textureDimensions(dst);
                 let dstTexCoord = vec2<u32>(GlobalInvocationID.xy);
@@ -303,7 +303,7 @@ class CopyTextureForBrowserTests : public Parent {
                         if (uniforms.dstAlphaMode == premultiplied) {
                             // srcAlphaMode == unpremultiplied
                             srcColor = vec4<f32>(srcColor.rgb * srcColor.a, srcColor.a);
-                        } 
+                        }
 
                         if (uniforms.dstAlphaMode == unpremultiplied) {
                             // srcAlphaMode == premultiplied

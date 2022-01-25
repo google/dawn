@@ -143,8 +143,8 @@ class TextureFormatTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor desc;
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 3>(
                     vec2<f32>(-3.0, -1.0),
                     vec2<f32>( 3.0, -1.0),
@@ -157,12 +157,12 @@ class TextureFormatTest : public DawnTest {
         const char* type = utils::GetWGSLColorTextureComponentType(sampleFormatInfo.format);
 
         std::ostringstream fsSource;
-        fsSource << "[[group(0), binding(0)]] var myTexture : texture_2d<" << type << ">;\n";
+        fsSource << "@group(0) @binding(0) var myTexture : texture_2d<" << type << ">;\n";
         fsSource << "struct FragmentOut {\n";
-        fsSource << "   [[location(0)]] color : vec4<" << type << ">;\n";
+        fsSource << "   @location(0) color : vec4<" << type << ">;\n";
         fsSource << R"(};
-            [[stage(fragment)]]
-            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> FragmentOut {
+            @stage(fragment)
+            fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
                 var output : FragmentOut;
                 output.color = textureLoad(myTexture, vec2<i32>(FragCoord.xy), 0);
                 return output;

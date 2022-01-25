@@ -32,11 +32,11 @@ class ComputeDispatchTests : public DawnTest {
                 workGroups : vec3<u32>;
             };
 
-            [[group(0), binding(0)]] var<storage, read_write> output : OutputBuf;
+            @group(0) @binding(0) var<storage, read_write> output : OutputBuf;
 
-            [[stage(compute), workgroup_size(1, 1, 1)]]
-            fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>,
-                    [[builtin(num_workgroups)]] dispatch : vec3<u32>) {
+            @stage(compute) @workgroup_size(1, 1, 1)
+            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>,
+                    @builtin(num_workgroups) dispatch : vec3<u32>) {
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
                     output.workGroups = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
                     return;
@@ -52,7 +52,7 @@ class ComputeDispatchTests : public DawnTest {
         csDesc.compute.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&csDesc);
 
-        // Test the use of the compute pipelines without using [[num_workgroups]]
+        // Test the use of the compute pipelines without using @num_workgroups
         wgpu::ShaderModule moduleWithoutNumWorkgroups = utils::CreateShaderModule(device, R"(
             struct InputBuf {
                 expectedDispatch : vec3<u32>;
@@ -61,11 +61,11 @@ class ComputeDispatchTests : public DawnTest {
                 workGroups : vec3<u32>;
             };
 
-            [[group(0), binding(0)]] var<uniform> input : InputBuf;
-            [[group(0), binding(1)]] var<storage, read_write> output : OutputBuf;
+            @group(0) @binding(0) var<uniform> input : InputBuf;
+            @group(0) @binding(1) var<storage, read_write> output : OutputBuf;
 
-            [[stage(compute), workgroup_size(1, 1, 1)]]
-            fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+            @stage(compute) @workgroup_size(1, 1, 1)
+            fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
                 let dispatch : vec3<u32> = input.expectedDispatch;
 
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
@@ -224,7 +224,7 @@ TEST_P(ComputeDispatchTests, IndirectBasic) {
     IndirectTest({2, 3, 4}, 0);
 }
 
-// Test basic indirect without using [[num_workgroups]]
+// Test basic indirect without using @num_workgroups
 TEST_P(ComputeDispatchTests, IndirectBasicWithoutNumWorkgroups) {
     IndirectTest({2, 3, 4}, 0, false);
 }
@@ -256,7 +256,7 @@ TEST_P(ComputeDispatchTests, IndirectOffset) {
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t));
 }
 
-// Test indirect with buffer offset without using [[num_workgroups]]
+// Test indirect with buffer offset without using @num_workgroups
 TEST_P(ComputeDispatchTests, IndirectOffsetWithoutNumWorkgroups) {
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t), false);
 }

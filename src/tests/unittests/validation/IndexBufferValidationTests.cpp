@@ -19,16 +19,16 @@
 #include "utils/WGPUHelpers.h"
 
 class IndexBufferValidationTest : public ValidationTest {
-    protected:
+  protected:
     wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format,
-        wgpu::PrimitiveTopology primitiveTopology) {
+                                          wgpu::PrimitiveTopology primitiveTopology) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
@@ -151,10 +151,10 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
 // Test that formats given when setting an index buffers must match the format specified on the
 // pipeline for strip primitive topologies.
 TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
-    wgpu::RenderPipeline pipeline32 = MakeTestPipeline(wgpu::IndexFormat::Uint32,
-                                                       wgpu::PrimitiveTopology::TriangleStrip);
-    wgpu::RenderPipeline pipeline16 = MakeTestPipeline(wgpu::IndexFormat::Uint16,
-                                                       wgpu::PrimitiveTopology::LineStrip);
+    wgpu::RenderPipeline pipeline32 =
+        MakeTestPipeline(wgpu::IndexFormat::Uint32, wgpu::PrimitiveTopology::TriangleStrip);
+    wgpu::RenderPipeline pipeline16 =
+        MakeTestPipeline(wgpu::IndexFormat::Uint16, wgpu::PrimitiveTopology::LineStrip);
     wgpu::RenderPipeline pipelineUndef =
         MakeTestPipeline(wgpu::IndexFormat::Undefined, wgpu::PrimitiveTopology::LineStrip);
 

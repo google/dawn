@@ -92,11 +92,11 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
             s : array<vec4<u32>, 4>;
         };
 
-        [[group(0), binding(0)]] var<storage, read_write> src : Buf;
-        [[group(0), binding(1)]] var<storage, read_write> dst : Buf;
+        @group(0) @binding(0) var<storage, read_write> src : Buf;
+        @group(0) @binding(1) var<storage, read_write> dst : Buf;
 
-        [[stage(compute), workgroup_size(1)]]
-        fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+        @stage(compute) @workgroup_size(1)
+        fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
             let index : u32 = GlobalInvocationID.x;
             if (index >= 4u) { return; }
             dst.s[index] = src.s[index];
@@ -115,11 +115,11 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
             s : array<S, 4>;
         };
 
-        [[group(0), binding(0)]] var<storage, read_write> src : Buf;
-        [[group(0), binding(1)]] var<storage, read_write> dst : Buf;
+        @group(0) @binding(0) var<storage, read_write> src : Buf;
+        @group(0) @binding(1) var<storage, read_write> dst : Buf;
 
-        [[stage(compute), workgroup_size(1)]]
-        fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+        @stage(compute) @workgroup_size(1)
+        fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
             let index : u32 = GlobalInvocationID.x;
             if (index >= 4u) { return; }
             dst.s[index] = src.s[index];
@@ -133,11 +133,11 @@ TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
             s : array<vec4<u32>>;
         };
 
-        [[group(0), binding(0)]] var<storage, read_write> src : Buf;
-        [[group(0), binding(1)]] var<storage, read_write> dst : Buf;
+        @group(0) @binding(0) var<storage, read_write> src : Buf;
+        @group(0) @binding(1) var<storage, read_write> dst : Buf;
 
-        [[stage(compute), workgroup_size(1)]]
-        fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+        @stage(compute) @workgroup_size(1)
+        fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
             let index : u32 = GlobalInvocationID.x;
             if (index >= 4u) { return; }
             dst.s[index] = src.s[index];

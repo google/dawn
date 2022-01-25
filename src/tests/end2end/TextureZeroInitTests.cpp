@@ -70,7 +70,7 @@ class TextureZeroInitTest : public DawnTest {
         pipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest(depth);
         const char* fs = R"(
             ;
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                return vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )";
@@ -83,8 +83,8 @@ class TextureZeroInitTest : public DawnTest {
     }
     wgpu::ShaderModule CreateBasicVertexShaderForTest(float depth = 0.f) {
         std::string source = R"(
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 6>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>(-1.0,  1.0),
@@ -100,12 +100,12 @@ class TextureZeroInitTest : public DawnTest {
     }
     wgpu::ShaderModule CreateSampledTextureFragmentShaderForTest() {
         return utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
+            @group(0) @binding(0) var texture0 : texture_2d<f32>;
             struct FragmentOut {
-                [[location(0)]] color : vec4<f32>;
+                @location(0) color : vec4<f32>;
             };
-            [[stage(fragment)]]
-            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> FragmentOut {
+            @stage(fragment)
+            fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
                 var output : FragmentOut;
                 output.color = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0);
                 return output;
@@ -979,12 +979,12 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     wgpu::ComputePipelineDescriptor computePipelineDescriptor;
     wgpu::ProgrammableStageDescriptor compute;
     const char* cs = R"(
-        [[group(0), binding(0)]] var tex : texture_2d<f32>;
+        @group(0) @binding(0) var tex : texture_2d<f32>;
         struct Result {
             value : vec4<f32>;
         };
-        [[group(0), binding(1)]] var<storage, read_write> result : Result;
-        [[stage(compute), workgroup_size(1)]] fn main() {
+        @group(0) @binding(1) var<storage, read_write> result : Result;
+        @stage(compute) @workgroup_size(1) fn main() {
            result.value = textureLoad(tex, vec2<i32>(0,0), 0);
         }
     )";

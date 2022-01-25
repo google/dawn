@@ -39,8 +39,8 @@ class ColorStateTest : public DawnTest {
         DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
         vsModule = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]]
-                fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                @stage(vertex)
+                fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                     var pos = array<vec2<f32>, 3>(
                         vec2<f32>(-1.0, -1.0),
                         vec2<f32>(3.0, -1.0),
@@ -65,9 +65,9 @@ class ColorStateTest : public DawnTest {
                     color : vec4<f32>;
                 };
 
-                [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
+                @group(0) @binding(0) var<uniform> myUbo : MyBlock;
 
-                [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                @stage(fragment) fn main() -> @location(0) vec4<f32> {
                     return myUbo.color;
                 }
             )");
@@ -798,16 +798,16 @@ TEST_P(ColorStateTest, IndependentColorState) {
             color3 : vec4<f32>;
         };
 
-        [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
+        @group(0) @binding(0) var<uniform> myUbo : MyBlock;
 
         struct FragmentOut {
-            [[location(0)]] fragColor0 : vec4<f32>;
-            [[location(1)]] fragColor1 : vec4<f32>;
-            [[location(2)]] fragColor2 : vec4<f32>;
-            [[location(3)]] fragColor3 : vec4<f32>;
+            @location(0) fragColor0 : vec4<f32>;
+            @location(1) fragColor1 : vec4<f32>;
+            @location(2) fragColor2 : vec4<f32>;
+            @location(3) fragColor3 : vec4<f32>;
         };
 
-        [[stage(fragment)]] fn main() -> FragmentOut {
+        @stage(fragment) fn main() -> FragmentOut {
             var output : FragmentOut;
             output.fragColor0 = myUbo.color0;
             output.fragColor1 = myUbo.color1;
@@ -919,9 +919,9 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
             color : vec4<f32>;
         };
 
-        [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
+        @group(0) @binding(0) var<uniform> myUbo : MyBlock;
 
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return myUbo.color;
         }
     )");
@@ -1045,9 +1045,9 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
             color : vec4<f32>;
         };
 
-        [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
+        @group(0) @binding(0) var<uniform> myUbo : MyBlock;
 
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return myUbo.color;
         }
     )");

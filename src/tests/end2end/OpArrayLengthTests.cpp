@@ -54,14 +54,14 @@ class OpArrayLengthTest : public DawnTest {
         // 0.
         mShaderInterface = R"(
             struct DataBuffer {
-                data : [[stride(4)]] array<f32>;
+                data : @stride(4) array<f32>;
             };
 
             // The length should be 1 because the buffer is 4-byte long.
-            [[group(0), binding(0)]] var<storage, read> buffer1 : DataBuffer;
+            @group(0) @binding(0) var<storage, read> buffer1 : DataBuffer;
 
             // The length should be 64 because the buffer is 256 bytes long.
-            [[group(0), binding(1)]] var<storage, read> buffer2 : DataBuffer;
+            @group(0) @binding(1) var<storage, read> buffer2 : DataBuffer;
 
             // The length should be (512 - 16*4) / 8 = 56 because the buffer is 512 bytes long
             // and the structure is 8 bytes big.
@@ -71,10 +71,10 @@ class OpArrayLengthTest : public DawnTest {
             };
 
             struct Buffer3 {
-                [[size(64)]] garbage : mat4x4<f32>;
-                data : [[stride(8)]] array<Buffer3Data>;
+                @size(64) garbage : mat4x4<f32>;
+                data : @stride(8) array<Buffer3Data>;
             };
-            [[group(0), binding(2)]] var<storage, read> buffer3 : Buffer3;
+            @group(0) @binding(2) var<storage, read> buffer3 : Buffer3;
         )";
 
         // See comments in the shader for an explanation of these values
@@ -121,11 +121,11 @@ TEST_P(OpArrayLengthTest, Compute) {
     pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, (R"(
         struct ResultBuffer {
-            data : [[stride(4)]] array<u32, 3>;
+            data : @stride(4) array<u32, 3>;
         };
-        [[group(1), binding(0)]] var<storage, read_write> result : ResultBuffer;
+        @group(1) @binding(0) var<storage, read_write> result : ResultBuffer;
         )" + mShaderInterface + R"(
-        [[stage(compute), workgroup_size(1)]] fn main() {
+        @stage(compute) @workgroup_size(1) fn main() {
             result.data[0] = arrayLength(&buffer1.data);
             result.data[1] = arrayLength(&buffer2.data);
             result.data[2] = arrayLength(&buffer3.data);
@@ -159,12 +159,12 @@ TEST_P(OpArrayLengthTest, Fragment) {
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             var fragColor : vec4<f32>;
             fragColor.r = f32(arrayLength(&buffer1.data)) / 255.0;
             fragColor.g = f32(arrayLength(&buffer2.data)) / 255.0;
@@ -212,11 +212,11 @@ TEST_P(OpArrayLengthTest, Vertex) {
     // pass pixel.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
         struct VertexOut {
-            [[location(0)]] color : vec4<f32>;
-            [[builtin(position)]] position : vec4<f32>;
+            @location(0) color : vec4<f32>;
+            @builtin(position) position : vec4<f32>;
         };
 
-        [[stage(vertex)]] fn main() -> VertexOut {
+        @stage(vertex) fn main() -> VertexOut {
             var output : VertexOut;
             output.color.r = f32(arrayLength(&buffer1.data)) / 255.0;
             output.color.g = f32(arrayLength(&buffer2.data)) / 255.0;
@@ -229,8 +229,8 @@ TEST_P(OpArrayLengthTest, Vertex) {
                                                                         .c_str());
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]]
-        fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
+        @stage(fragment)
+        fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
             return color;
         })");
 

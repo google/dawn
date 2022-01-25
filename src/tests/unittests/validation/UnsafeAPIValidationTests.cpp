@@ -70,7 +70,7 @@ TEST_F(UnsafeAPIValidationTest, PipelineOverridableConstants) {
     {
         wgpu::ComputePipelineDescriptor pipelineDesc = pipelineDescBase;
         pipelineDesc.compute.module =
-            utils::CreateShaderModule(device, "[[stage(compute), workgroup_size(1)]] fn main() {}");
+            utils::CreateShaderModule(device, "@stage(compute) @workgroup_size(1) fn main() {}");
 
         device.CreateComputePipeline(&pipelineDesc);
     }
@@ -78,10 +78,10 @@ TEST_F(UnsafeAPIValidationTest, PipelineOverridableConstants) {
     // Error case: shader with overridable constant with default value
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-[[override(1000)]] let c0: u32 = 1u;
-[[override(1000)]] let c1: u32;
+@override(1000) let c0: u32 = 1u;
+@override(1000) let c1: u32;
 
-[[stage(compute), workgroup_size(1)]] fn main() {
+@stage(compute) @workgroup_size(1) fn main() {
     _ = c0;
     _ = c1;
 })"));
@@ -91,7 +91,7 @@ TEST_F(UnsafeAPIValidationTest, PipelineOverridableConstants) {
     {
         wgpu::ComputePipelineDescriptor pipelineDesc = pipelineDescBase;
         pipelineDesc.compute.module =
-            utils::CreateShaderModule(device, "[[stage(compute), workgroup_size(1)]] fn main() {}");
+            utils::CreateShaderModule(device, "@stage(compute) @workgroup_size(1) fn main() {}");
         std::vector<wgpu::ConstantEntry> constants{{nullptr, "c", 1u}};
         pipelineDesc.compute.constants = constants.data();
         pipelineDesc.compute.constantCount = constants.size();

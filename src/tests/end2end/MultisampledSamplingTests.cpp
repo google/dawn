@@ -57,18 +57,18 @@ class MultisampledSamplingTest : public DawnTest {
             utils::ComboRenderPipelineDescriptor desc;
 
             desc.vertex.module = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]]
-                fn main([[location(0)]] pos : vec2<f32>) -> [[builtin(position)]] vec4<f32> {
+                @stage(vertex)
+                fn main(@location(0) pos : vec2<f32>) -> @builtin(position) vec4<f32> {
                     return vec4<f32>(pos, 0.0, 1.0);
                 })");
 
             desc.cFragment.module = utils::CreateShaderModule(device, R"(
                 struct FragmentOut {
-                    [[location(0)]] color : f32;
-                    [[builtin(frag_depth)]] depth : f32;
+                    @location(0) color : f32;
+                    @builtin(frag_depth) depth : f32;
                 };
 
-                [[stage(fragment)]] fn main() -> FragmentOut {
+                @stage(fragment) fn main() -> FragmentOut {
                     var output : FragmentOut;
                     output.color = 1.0;
                     output.depth = 0.7;
@@ -96,16 +96,16 @@ class MultisampledSamplingTest : public DawnTest {
             wgpu::ComputePipelineDescriptor desc = {};
             desc.compute.entryPoint = "main";
             desc.compute.module = utils::CreateShaderModule(device, R"(
-                [[group(0), binding(0)]] var texture0 : texture_multisampled_2d<f32>;
-                [[group(0), binding(1)]] var texture1 : texture_depth_multisampled_2d;
+                @group(0) @binding(0) var texture0 : texture_multisampled_2d<f32>;
+                @group(0) @binding(1) var texture1 : texture_depth_multisampled_2d;
 
                 struct Results {
                     colorSamples : array<f32, 4>;
                     depthSamples : array<f32, 4>;
                 };
-                [[group(0), binding(2)]] var<storage, read_write> results : Results;
+                @group(0) @binding(2) var<storage, read_write> results : Results;
 
-                [[stage(compute), workgroup_size(1)]] fn main() {
+                @stage(compute) @workgroup_size(1) fn main() {
                     for (var i : i32 = 0; i < 4; i = i + 1) {
                         results.colorSamples[i] = textureLoad(texture0, vec2<i32>(0, 0), i).x;
                         results.depthSamples[i] = textureLoad(texture1, vec2<i32>(0, 0), i);

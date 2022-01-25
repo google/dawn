@@ -30,15 +30,16 @@ class IndexFormatTest : public DawnTest {
 
     utils::BasicRenderPass renderPass;
 
-    wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format,
+    wgpu::RenderPipeline MakeTestPipeline(
+        wgpu::IndexFormat format,
         wgpu::PrimitiveTopology primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             struct VertexIn {
-                [[location(0)]] pos : vec4<f32>;
-                [[builtin(vertex_index)]] idx : u32;
+                @location(0) pos : vec4<f32>;
+                @builtin(vertex_index) idx : u32;
             };
 
-            [[stage(vertex)]] fn main(input : VertexIn) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main(input : VertexIn) -> @builtin(position) vec4<f32> {
                 // 0xFFFFFFFE is a designated invalid index used by some tests.
                 if (input.idx == 0xFFFFFFFEu) {
                     return vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -47,7 +48,7 @@ class IndexFormatTest : public DawnTest {
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 

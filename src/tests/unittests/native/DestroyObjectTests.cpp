@@ -72,7 +72,7 @@ namespace dawn::native { namespace {
             }
             DAWN_TRY_ASSIGN_WITH_CLEANUP(
                 mVsModule, ShaderModuleMock::Create(&mDevice, R"(
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })"),
                 { ASSERT(false); }, mVsModule);
@@ -86,7 +86,7 @@ namespace dawn::native { namespace {
             }
             DAWN_TRY_ASSIGN_WITH_CLEANUP(
                 mCsModule, ShaderModuleMock::Create(&mDevice, R"(
-            [[stage(compute), workgroup_size(1)]] fn main() {
+            @stage(compute) @workgroup_size(1) fn main() {
             })"),
                 { ASSERT(false); }, mCsModule);
             EXPECT_CALL(*mCsModule.Get(), DestroyImpl).Times(1);
@@ -426,7 +426,7 @@ namespace dawn::native { namespace {
         {
             ShaderModuleWGSLDescriptor wgslDesc;
             wgslDesc.source = R"(
-                [[stage(compute), workgroup_size(1)]] fn main() {
+                @stage(compute) @workgroup_size(1) fn main() {
                 }
             )";
             ShaderModuleDescriptor desc = {};
@@ -696,7 +696,7 @@ namespace dawn::native { namespace {
         {
             ShaderModuleWGSLDescriptor wgslDesc;
             wgslDesc.source = R"(
-                [[stage(compute), workgroup_size(1)]] fn main() {
+                @stage(compute) @workgroup_size(1) fn main() {
                 }
             )";
             ShaderModuleDescriptor desc = {};

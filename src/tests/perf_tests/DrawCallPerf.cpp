@@ -32,9 +32,9 @@ namespace {
     };
 
     constexpr char kVertexShader[] = R"(
-        [[stage(vertex)]] fn main(
-            [[location(0)]] pos : vec4<f32>
-        ) -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main(
+            @location(0) pos : vec4<f32>
+        ) -> @builtin(position) vec4<f32> {
             return pos;
         })";
 
@@ -42,8 +42,8 @@ namespace {
         struct Uniforms {
             color : vec3<f32>;
         };
-        [[group(0), binding(0)]] var<uniform> uniforms : Uniforms;
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @group(0) @binding(0) var<uniform> uniforms : Uniforms;
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(uniforms.color * (1.0 / 5000.0), 1.0);
         })";
 
@@ -54,10 +54,10 @@ namespace {
         struct Uniforms {
             color : vec3<f32>;
         };
-        [[group(0), binding(0)]] var<uniform> constants : Constants;
-        [[group(1), binding(0)]] var<uniform> uniforms : Uniforms;
+        @group(0) @binding(0) var<uniform> constants : Constants;
+        @group(1) @binding(0) var<uniform> uniforms : Uniforms;
 
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return vec4<f32>((constants.color + uniforms.color) * (1.0 / 5000.0), 1.0);
         })";
 

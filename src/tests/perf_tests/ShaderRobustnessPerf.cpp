@@ -29,10 +29,10 @@ namespace {
             numbers: array<f32>;
         };
 
-        [[group(0), binding(0)]] var<storage, read> firstMatrix : Matrix;
-        [[group(0), binding(1)]] var<storage, read> secondMatrix : Matrix;
-        [[group(0), binding(2)]] var<storage, write> resultMatrix : Matrix;
-        [[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
+        @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
+        @group(0) @binding(1) var<storage, read> secondMatrix : Matrix;
+        @group(0) @binding(2) var<storage, write> resultMatrix : Matrix;
+        @group(0) @binding(3) var<uniform> uniforms : Uniforms;
 
         fn mm_readA(row : u32, col : u32) -> f32  {
             if (row < uniforms.dimAOuter && col < uniforms.dimInner)
@@ -73,9 +73,9 @@ namespace {
         var<workgroup> mm_Asub : array<array<f32, 32>, 32>;
         var<workgroup> mm_Bsub : array<array<f32, 32>, 32>;)";
     const std::string& kMatMulFloatBodyPart1 = R"(
-        [[stage(compute), workgroup_size(8, 8, 1)]]
-        fn main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
-                [[builtin(global_invocation_id)]] global_id  : vec3<u32>) {
+        @stage(compute) @workgroup_size(8, 8, 1)
+        fn main(@builtin(local_invocation_id) local_id : vec3<u32>,
+                @builtin(global_invocation_id) global_id  : vec3<u32>) {
             let tileRow : u32 = local_id.y * RowPerThread;
             let tileCol : u32 = local_id.x * ColPerThread;
 
@@ -196,10 +196,10 @@ namespace {
             numbers: array<vec4<f32>>;
         };
 
-        [[group(0), binding(0)]] var<storage, read> firstMatrix : Matrix;
-        [[group(0), binding(1)]] var<storage, read> secondMatrix : Matrix;
-        [[group(0), binding(2)]] var<storage, write> resultMatrix : Matrix;
-        [[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
+        @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
+        @group(0) @binding(1) var<storage, read> secondMatrix : Matrix;
+        @group(0) @binding(2) var<storage, write> resultMatrix : Matrix;
+        @group(0) @binding(3) var<uniform> uniforms : Uniforms;
 
         fn mm_readA(row : u32, col : u32) -> vec4<f32>  {
             if (row < uniforms.dimAOuter && col < uniforms.dimInner)
@@ -238,9 +238,9 @@ namespace {
         var<workgroup> mm_Asub : array<array<vec4<f32>, 8>, 32>;
         var<workgroup> mm_Bsub : array<array<vec4<f32>, 8>, 32>;)";
     const std::string& kMatMulVec4BodyPart1 = R"(
-        [[stage(compute), workgroup_size(8, 8, 1)]]
-        fn main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
-                [[builtin(global_invocation_id)]] global_id  : vec3<u32>) {
+        @stage(compute) @workgroup_size(8, 8, 1)
+        fn main(@builtin(local_invocation_id) local_id : vec3<u32>,
+                @builtin(global_invocation_id) global_id  : vec3<u32>) {
             let tileRow : u32 = local_id.y * RowPerThread;
             let tileCol : u32 = local_id.x;
 

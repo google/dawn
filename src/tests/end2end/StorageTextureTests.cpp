@@ -165,7 +165,7 @@ class StorageTextureTests : public DawnTest {
                                     wgpu::TextureViewDimension dimension,
                                     uint32_t binding) {
         std::ostringstream ostream;
-        ostream << "[[group(0), binding(" << binding << ")]] "
+        ostream << "@group(0) @binding(" << binding << ") "
                 << "var storageImage" << binding << " : ";
         switch (dimension) {
             case wgpu::TextureViewDimension::e2D:
@@ -370,15 +370,15 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
                 UNREACHABLE();
                 break;
         }
-        const char* workgroupSize = !strcmp(stage, "compute") ? ", workgroup_size(1)" : "";
+        const char* workgroupSize = !strcmp(stage, "compute") ? " @workgroup_size(1)" : "";
         const bool isFragment = strcmp(stage, "fragment") == 0;
 
         std::ostringstream ostream;
         ostream << GetImageDeclaration(format, "write", dimension, 0) << "\n";
-        ostream << "[[stage(" << stage << ")" << workgroupSize << "]]\n";
+        ostream << "@stage(" << stage << ")" << workgroupSize << "\n";
         ostream << "fn main() ";
         if (isFragment) {
-            ostream << "-> [[location(0)]] vec4<f32> ";
+            ostream << "-> @location(0) vec4<f32> ";
         }
         ostream << "{\n";
         ostream << "  let size : vec2<i32> = textureDimensions(storageImage0).xy;\n";
@@ -433,7 +433,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         std::ostringstream ostream;
         ostream << GetImageDeclaration(format, "write", dimension, 0) << "\n";
         ostream << GetImageDeclaration(format, "read", dimension, 1) << "\n";
-        ostream << "[[stage(compute), workgroup_size(1)]] fn main() {\n";
+        ostream << "@stage(compute) @workgroup_size(1) fn main() {\n";
         ostream << "  let size : vec2<i32> = textureDimensions(storageImage0).xy;\n";
         ostream << "  let sliceCount : i32 = " << sliceCount << ";\n";
         ostream << "  for (var slice : i32 = 0; slice < sliceCount; slice = slice + 1) {\n";
@@ -739,7 +739,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
     const char* kSimpleVertexShader = R"(
 ;
-[[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex) fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>(0.0, 0.0, 0.0, 1.0);
 })";
 
@@ -863,9 +863,9 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
         kTextureFormat, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding, 1u,
         1u);
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-[[group(0), binding(0)]] var Src : texture_2d<u32>;
-[[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;
-[[stage(compute), workgroup_size(1)]] fn main() {
+@group(0) @binding(0) var Src : texture_2d<u32>;
+@group(0) @binding(1) var Dst : texture_storage_2d<r32uint, write>;
+@stage(compute) @workgroup_size(1) fn main() {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0), 0);
   srcValue.x = srcValue.x + 1u;
   textureStore(Dst, vec2<i32>(0, 0), srcValue);
@@ -962,16 +962,16 @@ fn doTest() -> bool {
 })";
 
     const char* kCommonWriteOnlyZeroInitTestCodeFragment = R"(
-[[group(0), binding(0)]] var dstImage : texture_storage_2d<r32uint, write>;
+@group(0) @binding(0) var dstImage : texture_storage_2d<r32uint, write>;
 
-[[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+@stage(fragment) fn main() -> @location(0) vec4<f32> {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
   return vec4<f32>();
 })";
     const char* kCommonWriteOnlyZeroInitTestCodeCompute = R"(
-[[group(0), binding(0)]] var dstImage : texture_storage_2d<r32uint, write>;
+@group(0) @binding(0) var dstImage : texture_storage_2d<r32uint, write>;
 
-[[stage(compute), workgroup_size(1)]] fn main() {
+@stage(compute) @workgroup_size(1) fn main() {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
 })";
 };

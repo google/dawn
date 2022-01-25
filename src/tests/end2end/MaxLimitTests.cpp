@@ -38,19 +38,19 @@ TEST_P(MaxLimitTests, MaxComputeWorkgroupStorageSize) {
             value1 : u32;
         };
 
-        [[group(0), binding(0)]] var<storage, write> dst : Dst;
+        @group(0) @binding(0) var<storage, write> dst : Dst;
 
         struct WGData {
           value0 : u32;
           // padding such that value0 and value1 are the first and last bytes of the memory.
-          [[size()" + std::to_string(maxComputeWorkgroupStorageSize / 4 - 2) +
-                         R"()]] padding : u32;
+          @size()" + std::to_string(maxComputeWorkgroupStorageSize / 4 - 2) +
+                         R"() padding : u32;
           value1 : u32;
         };
         var<workgroup> wg_data : WGData;
 
-        [[stage(compute), workgroup_size(2,1,1)]]
-        fn main([[builtin(local_invocation_index)]] LocalInvocationIndex : u32) {
+        @stage(compute) @workgroup_size(2,1,1)
+        fn main(@builtin(local_invocation_index) LocalInvocationIndex : u32) {
             if (LocalInvocationIndex == 0u) {
                 // Put data into the first and last byte of workgroup memory.
                 wg_data.value0 = 79u;
@@ -138,10 +138,10 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                       value1 : u32;
                   };
 
-                  [[group(0), binding(0)]] var<storage, read> buf : Buf;
-                  [[group(0), binding(1)]] var<storage, write> result : Result;
+                  @group(0) @binding(0) var<storage, read> buf : Buf;
+                  @group(0) @binding(1) var<storage, write> result : Result;
 
-                  [[stage(compute), workgroup_size(1,1,1)]]
+                  @stage(compute) @workgroup_size(1,1,1)
                   fn main() {
                       result.value0 = buf.values[0];
                       result.value1 = buf.values[arrayLength(&buf.values) - 1u];
@@ -151,7 +151,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
             case wgpu::BufferUsage::Uniform:
                 maxBufferBindingSize = GetSupportedLimits().limits.maxUniformBufferBindingSize;
 
-                // Clamp to not exceed the maximum i32 value for the WGSL [[size(x)]] annotation.
+                // Clamp to not exceed the maximum i32 value for the WGSL @size(x) annotation.
                 maxBufferBindingSize = std::min(maxBufferBindingSize,
                                                 uint64_t(std::numeric_limits<int32_t>::max()) + 8);
 
@@ -159,8 +159,8 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                   struct Buf {
                       value0 : u32;
                       // padding such that value0 and value1 are the first and last bytes of the memory.
-                      [[size()" +
-                         std::to_string(maxBufferBindingSize - 8) + R"()]] padding : u32;
+                      @size()" +
+                         std::to_string(maxBufferBindingSize - 8) + R"() padding : u32;
                       value1 : u32;
                   };
 
@@ -169,10 +169,10 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                       value1 : u32;
                   };
 
-                  [[group(0), binding(0)]] var<uniform> buf : Buf;
-                  [[group(0), binding(1)]] var<storage, write> result : Result;
+                  @group(0) @binding(0) var<uniform> buf : Buf;
+                  @group(0) @binding(1) var<storage, write> result : Result;
 
-                  [[stage(compute), workgroup_size(1,1,1)]]
+                  @stage(compute) @workgroup_size(1,1,1)
                   fn main() {
                       result.value0 = buf.value0;
                       result.value1 = buf.value1;

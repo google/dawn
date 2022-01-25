@@ -54,9 +54,9 @@ struct Buf {
     data : array<u32, 19>;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+@group(0) @binding(0) var<storage, read_write> buf : Buf;
 
-[[stage(compute), workgroup_size(1)]] fn main() {
+@stage(compute) @workgroup_size(1) fn main() {
     let factor : f32 = 1.0001;
 
     buf.data[0] = u32(log2(1.0 * factor));
@@ -115,8 +115,8 @@ I am an invalid shader and should never pass validation!
 // can compile and link successfully.
 TEST_P(ShaderTests, WGSLParamIO) {
     std::string vertexShader = R"(
-[[stage(vertex)]]
-fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
     var pos = array<vec2<f32>, 3>(
         vec2<f32>(-1.0,  1.0),
         vec2<f32>( 1.0,  1.0),
@@ -126,8 +126,8 @@ fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] ve
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader.c_str());
 
     std::string fragmentShader = R"(
-[[stage(fragment)]]
-fn main([[builtin(position)]] fragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@builtin(position) fragCoord : vec4<f32>) -> @location(0) vec4<f32> {
     return vec4<f32>(fragCoord.xy, 0.0, 1.0);
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
@@ -143,16 +143,16 @@ fn main([[builtin(position)]] fragCoord : vec4<f32>) -> [[location(0)]] vec4<f32
 TEST_P(ShaderTests, WGSLMixedStructParamIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    [[location(0)]] position : vec3<f32>;
-    [[location(1)]] color : vec4<f32>;
+    @location(0) position : vec3<f32>;
+    @location(1) color : vec4<f32>;
 };
 
 struct VertexOut {
-    [[location(0)]] color : vec4<f32>;
-    [[builtin(position)]] position : vec4<f32>;
+    @location(0) color : vec4<f32>;
+    @builtin(position) position : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main(input : VertexIn) -> VertexOut {
     var output : VertexOut;
     output.position = vec4<f32>(input.position, 1.0);
@@ -162,8 +162,8 @@ fn main(input : VertexIn) -> VertexOut {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader.c_str());
 
     std::string fragmentShader = R"(
-[[stage(fragment)]]
-fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
     return color;
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
@@ -186,16 +186,16 @@ fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
 TEST_P(ShaderTests, WGSLStructIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    [[location(0)]] position : vec3<f32>;
-    [[location(1)]] color : vec4<f32>;
+    @location(0) position : vec3<f32>;
+    @location(1) color : vec4<f32>;
 };
 
 struct VertexOut {
-    [[location(0)]] color : vec4<f32>;
-    [[builtin(position)]] position : vec4<f32>;
+    @location(0) color : vec4<f32>;
+    @builtin(position) position : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main(input : VertexIn) -> VertexOut {
     var output : VertexOut;
     output.position = vec4<f32>(input.position, 1.0);
@@ -206,12 +206,12 @@ fn main(input : VertexIn) -> VertexOut {
 
     std::string fragmentShader = R"(
 struct FragmentIn {
-    [[location(0)]] color : vec4<f32>;
-    [[builtin(position)]] fragCoord : vec4<f32>;
+    @location(0) color : vec4<f32>;
+    @builtin(position) fragCoord : vec4<f32>;
 };
 
-[[stage(fragment)]]
-fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(input : FragmentIn) -> @location(0) vec4<f32> {
     return input.color * input.fragCoord;
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
@@ -233,16 +233,16 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
 TEST_P(ShaderTests, WGSLUnsortedStructIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    [[location(0)]] position : vec3<f32>;
-    [[location(1)]] color : vec4<f32>;
+    @location(0) position : vec3<f32>;
+    @location(1) color : vec4<f32>;
 };
 
 struct VertexOut {
-    [[builtin(position)]] position : vec4<f32>;
-    [[location(0)]] color : vec4<f32>;
+    @builtin(position) position : vec4<f32>;
+    @location(0) color : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main(input : VertexIn) -> VertexOut {
     var output : VertexOut;
     output.position = vec4<f32>(input.position, 1.0);
@@ -253,12 +253,12 @@ fn main(input : VertexIn) -> VertexOut {
 
     std::string fragmentShader = R"(
 struct FragmentIn {
-    [[location(0)]] color : vec4<f32>;
-    [[builtin(position)]] fragCoord : vec4<f32>;
+    @location(0) color : vec4<f32>;
+    @builtin(position) fragCoord : vec4<f32>;
 };
 
-[[stage(fragment)]]
-fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn main(input : FragmentIn) -> @location(0) vec4<f32> {
     return input.color * input.fragCoord;
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
@@ -280,16 +280,16 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
 TEST_P(ShaderTests, WGSLSharedStructIO) {
     std::string shader = R"(
 struct VertexIn {
-    [[location(0)]] position : vec3<f32>;
-    [[location(1)]] color : vec4<f32>;
+    @location(0) position : vec3<f32>;
+    @location(1) color : vec4<f32>;
 };
 
 struct VertexOut {
-    [[location(0)]] color : vec4<f32>;
-    [[builtin(position)]] position : vec4<f32>;
+    @location(0) color : vec4<f32>;
+    @builtin(position) position : vec4<f32>;
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vertexMain(input : VertexIn) -> VertexOut {
     var output : VertexOut;
     output.position = vec4<f32>(input.position, 1.0);
@@ -297,8 +297,8 @@ fn vertexMain(input : VertexIn) -> VertexOut {
     return output;
 }
 
-[[stage(fragment)]]
-fn fragmentMain(input : VertexOut) -> [[location(0)]] vec4<f32> {
+@stage(fragment)
+fn fragmentMain(input : VertexOut) -> @location(0) vec4<f32> {
     return input.color;
 })";
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
@@ -329,21 +329,21 @@ TEST_P(ShaderTests, FirstIndexOffsetRegisterConflictInHLSLTransforms) {
 // Dumped WGSL:
 
 struct Inputs {
-  [[location(1)]] attrib1 : u32;
+  @location(1) attrib1 : u32;
   // The extra register added to handle base_vertex for vertex_index conflicts with [1]
-  [[builtin(vertex_index)]] vertexIndex: u32;
+  @builtin(vertex_index) vertexIndex: u32;
 };
 
 // [1] a binding point that conflicts with the regitster
 struct S1 { data : array<vec4<u32>, 20>; };
-[[group(0), binding(1)]] var<uniform> providedData1 : S1;
+@group(0) @binding(1) var<uniform> providedData1 : S1;
 
-[[stage(vertex)]] fn vsMain(input : Inputs) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex) fn vsMain(input : Inputs) -> @builtin(position) vec4<f32> {
   _ = providedData1.data[input.vertexIndex][0];
   return vec4<f32>();
 }
 
-[[stage(fragment)]] fn fsMain() -> [[location(0)]] vec4<f32> {
+@stage(fragment) fn fsMain() -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
     )";
@@ -362,17 +362,17 @@ struct S1 { data : array<vec4<u32>, 20>; };
     device.CreateRenderPipeline(&rpDesc);
 }
 
-// Test that WGSL built-in variable [[sample_index]] can be used in fragment shaders.
+// Test that WGSL built-in variable @sample_index can be used in fragment shaders.
 TEST_P(ShaderTests, SampleIndex) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-[[stage(vertex)]]
-fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
     return pos;
 })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-[[stage(fragment)]] fn main([[builtin(sample_index)]] sampleIndex : u32)
-    -> [[location(0)]] vec4<f32> {
+@stage(fragment) fn main(@builtin(sample_index) sampleIndex : u32)
+    -> @location(0) vec4<f32> {
     return vec4<f32>(f32(sampleIndex), 1.0, 0.0, 1.0);
 })");
 
@@ -400,25 +400,25 @@ TEST_P(ShaderTests, OverridableConstants) {
     wgpu::Buffer buffer = CreateBuffer(kCount);
 
     std::string shader = R"(
-[[override]] let c0: bool;              // type: bool
-[[override]] let c1: bool = false;      // default override
-[[override]] let c2: f32;               // type: float32
-[[override]] let c3: f32 = 0.0;         // default override
-[[override]] let c4: f32 = 4.0;         // default
-[[override]] let c5: i32;               // type: int32
-[[override]] let c6: i32 = 0;           // default override
-[[override]] let c7: i32 = 7;           // default
-[[override]] let c8: u32;               // type: uint32
-[[override]] let c9: u32 = 0u;          // default override
-[[override]] let c10: u32 = 10u;        // default
+@override let c0: bool;              // type: bool
+@override let c1: bool = false;      // default override
+@override let c2: f32;               // type: float32
+@override let c3: f32 = 0.0;         // default override
+@override let c4: f32 = 4.0;         // default
+@override let c5: i32;               // type: int32
+@override let c6: i32 = 0;           // default override
+@override let c7: i32 = 7;           // default
+@override let c8: u32;               // type: uint32
+@override let c9: u32 = 0u;          // default override
+@override let c10: u32 = 10u;        // default
 
 struct Buf {
     data : array<u32, 11>;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+@group(0) @binding(0) var<storage, read_write> buf : Buf;
 
-[[stage(compute), workgroup_size(1)]] fn main() {
+@stage(compute) @workgroup_size(1) fn main() {
     buf.data[0] = u32(c0);
     buf.data[1] = u32(c1);
     buf.data[2] = u32(c2);
@@ -477,18 +477,18 @@ TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
     wgpu::Buffer buffer = CreateBuffer(kCount);
 
     std::string shader = R"(
-[[override(1001)]] let c1: u32;            // some big numeric id
-[[override(1)]] let c2: u32 = 0u;          // id == 1 might collide with some generated constant id
-[[override(1003)]] let c3: u32 = 3u;       // default
-[[override(1004)]] let c4: u32;            // default unspecified
+@override(1001) let c1: u32;            // some big numeric id
+@override(1) let c2: u32 = 0u;          // id == 1 might collide with some generated constant id
+@override(1003) let c3: u32 = 3u;       // default
+@override(1004) let c4: u32;            // default unspecified
 
 struct Buf {
     data : array<u32, 4>;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+@group(0) @binding(0) var<storage, read_write> buf : Buf;
 
-[[stage(compute), workgroup_size(1)]] fn main() {
+@stage(compute) @workgroup_size(1) fn main() {
     buf.data[0] = c1;
     buf.data[1] = c2;
     buf.data[2] = c3;
@@ -536,16 +536,16 @@ TEST_P(ShaderTests, OverridableConstantsPrecision) {
     wgpu::Buffer buffer = CreateBuffer(kCount);
 
     std::string shader = R"(
-[[override(1001)]] let c1: f32;
-[[override(1002)]] let c2: f32;
+@override(1001) let c1: f32;
+@override(1002) let c2: f32;
 
 struct Buf {
     data : array<f32, 2>;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+@group(0) @binding(0) var<storage, read_write> buf : Buf;
 
-[[stage(compute), workgroup_size(1)]] fn main() {
+@stage(compute) @workgroup_size(1) fn main() {
     buf.data[0] = c1;
     buf.data[1] = c2;
 })";
@@ -590,24 +590,24 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
     wgpu::Buffer buffer3 = CreateBuffer(kCount);
 
     std::string shader = R"(
-[[override(1001)]] let c1: u32;
-[[override(1002)]] let c2: u32;
+@override(1001) let c1: u32;
+@override(1002) let c2: u32;
 
 struct Buf {
     data : array<u32, 1>;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+@group(0) @binding(0) var<storage, read_write> buf : Buf;
 
-[[stage(compute), workgroup_size(1)]] fn main1() {
+@stage(compute) @workgroup_size(1) fn main1() {
     buf.data[0] = c1;
 }
 
-[[stage(compute), workgroup_size(1)]] fn main2() {
+@stage(compute) @workgroup_size(1) fn main2() {
     buf.data[0] = c2;
 }
 
-[[stage(compute), workgroup_size(1)]] fn main3() {
+@stage(compute) @workgroup_size(1) fn main3() {
     buf.data[0] = 3u;
 }
 )";
@@ -681,11 +681,11 @@ TEST_P(ShaderTests, OverridableConstantsRenderPipeline) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-[[override(1111)]] let xright: f32;
-[[override(2222)]] let ytop: f32;
-[[stage(vertex)]]
-fn main([[builtin(vertex_index)]] VertexIndex : u32)
-     -> [[builtin(position)]] vec4<f32> {
+@override(1111) let xright: f32;
+@override(2222) let ytop: f32;
+@stage(vertex)
+fn main(@builtin(vertex_index) VertexIndex : u32)
+     -> @builtin(position) vec4<f32> {
   var pos = array<vec2<f32>, 3>(
       vec2<f32>(-1.0, ytop),
       vec2<f32>(-1.0, -ytop),
@@ -695,9 +695,9 @@ fn main([[builtin(vertex_index)]] VertexIndex : u32)
 })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-[[override(1000)]] let intensity: f32 = 0.0;
-[[stage(fragment)]] fn main()
-    -> [[location(0)]] vec4<f32> {
+@override(1000) let intensity: f32 = 0.0;
+@stage(fragment) fn main()
+    -> @location(0) vec4<f32> {
     return vec4<f32>(intensity, intensity, intensity, 1.0);
 })");
 

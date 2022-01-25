@@ -82,7 +82,7 @@ namespace {
             renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
             fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
         }
@@ -107,8 +107,8 @@ namespace {
 
             for (auto buffer : bufferDescList) {
                 for (auto attr : buffer.attributes) {
-                    // [[location({shaderLocation})]] var_{id} : {typeString},
-                    inputStringStream << "[[location(" << attr.shaderLocation << ")]] var_"
+                    // @location({shaderLocation}) var_{id} : {typeString},
+                    inputStringStream << "@location(" << attr.shaderLocation << ") var_"
                                       << attributeCount << " : vec4<f32>,";
                     attributeCount++;
                 }
@@ -117,9 +117,9 @@ namespace {
             std::stringstream shaderStringStream;
 
             shaderStringStream << R"(
-            [[stage(vertex)]]
+            @stage(vertex)
             fn main()" << inputStringStream.str()
-                               << R"() -> [[builtin(position)]] vec4<f32> {
+                               << R"() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })";
 

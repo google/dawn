@@ -41,9 +41,9 @@ class D3D12DescriptorHeapTests : public DawnTest {
 
         mSimpleVSModule = utils::CreateShaderModule(device, R"(
 
-            [[stage(vertex)]] fn main(
-                [[builtin(vertex_index)]] VertexIndex : u32
-            ) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main(
+                @builtin(vertex_index) VertexIndex : u32
+            ) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -56,9 +56,9 @@ class D3D12DescriptorHeapTests : public DawnTest {
             struct U {
                 color : vec4<f32>;
             };
-            [[group(0), binding(0)]] var<uniform> colorBuffer : U;
+            @group(0) @binding(0) var<uniform> colorBuffer : U;
 
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return colorBuffer.color;
             })");
     }
@@ -176,13 +176,13 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     // sampler bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps WILL NOT switch over
     // because the sampler heap allocations are de-duplicated.
     renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var sampler0 : sampler;
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @group(0) @binding(0) var sampler0 : sampler;
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 _ = sampler0;
                 return vec4<f32>(0.0, 0.0, 0.0, 0.0);
             })");
@@ -447,9 +447,9 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
         struct U {
             heapSize : f32;
         };
-        [[group(0), binding(0)]] var<uniform> buffer0 : U;
+        @group(0) @binding(0) var<uniform> buffer0 : U;
 
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(buffer0.heapSize, 0.0, 0.0, 1.0);
         })");
 
@@ -780,11 +780,11 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
             struct U {
                 transform : mat2x2<f32>;
             };
-            [[group(0), binding(0)]] var<uniform> buffer0 : U;
+            @group(0) @binding(0) var<uniform> buffer0 : U;
 
-            [[stage(vertex)]] fn main(
-                [[builtin(vertex_index)]] VertexIndex : u32
-            ) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex) fn main(
+                @builtin(vertex_index) VertexIndex : u32
+            ) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -796,13 +796,13 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
             struct U {
                 color : vec4<f32>;
             };
-            [[group(0), binding(1)]] var sampler0 : sampler;
-            [[group(0), binding(2)]] var texture0 : texture_2d<f32>;
-            [[group(0), binding(3)]] var<uniform> buffer0 : U;
+            @group(0) @binding(1) var sampler0 : sampler;
+            @group(0) @binding(2) var texture0 : texture_2d<f32>;
+            @group(0) @binding(3) var<uniform> buffer0 : U;
 
-            [[stage(fragment)]] fn main(
-                [[builtin(position)]] FragCoord : vec4<f32>
-            ) -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main(
+                @builtin(position) FragCoord : vec4<f32>
+            ) -> @location(0) vec4<f32> {
                 return textureSample(texture0, sampler0, FragCoord.xy) + buffer0.color;
             })");
 

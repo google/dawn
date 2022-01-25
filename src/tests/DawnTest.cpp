@@ -1163,12 +1163,12 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
                                                              detail::Expectation* expectation) {
     std::ostringstream shaderSource;
     shaderSource << "let width : u32 = " << width << "u;\n";
-    shaderSource << "[[group(0), binding(0)]] var tex : " << wgslTextureType << ";\n";
+    shaderSource << "@group(0) @binding(0) var tex : " << wgslTextureType << ";\n";
     shaderSource << R"(
         struct Result {
             values : array<f32>;
         };
-        [[group(0), binding(1)]] var<storage, read_write> result : Result;
+        @group(0) @binding(1) var<storage, read_write> result : Result;
     )";
     shaderSource << "let componentCount : u32 = " << componentCount << "u;\n";
     shaderSource << "let sampleCount : u32 = " << sampleCount << "u;\n";
@@ -1192,8 +1192,8 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
         }
     }
     shaderSource << R"(
-        [[stage(compute), workgroup_size(1)]] fn main(
-            [[builtin(global_invocation_id)]] GlobalInvocationId : vec3<u32>
+        @stage(compute) @workgroup_size(1) fn main(
+            @builtin(global_invocation_id) GlobalInvocationId : vec3<u32>
         ) {
             let baseOutIndex = GlobalInvocationId.y * width + GlobalInvocationId.x;
             for (var s = 0u; s < sampleCount; s = s + 1u) {
@@ -1336,8 +1336,8 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
     pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]]
-        fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex)
+        fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
             var pos = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, -1.0),
                 vec2<f32>( 3.0, -1.0),
@@ -1349,15 +1349,15 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
         // Sample the input texture and write out depth. |result| will only be set to 1 if we
         // pass the depth test.
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
+            @group(0) @binding(0) var texture0 : texture_2d<f32>;
 
             struct FragmentOut {
-                [[location(0)]] result : u32;
-                [[builtin(frag_depth)]] fragDepth : f32;
+                @location(0) result : u32;
+                @builtin(frag_depth) fragDepth : f32;
             };
 
-            [[stage(fragment)]]
-            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> FragmentOut {
+            @stage(fragment)
+            fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
                 var output : FragmentOut;
                 output.result = 1u;
                 output.fragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
@@ -1365,8 +1365,8 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
             })");
     } else {
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]]
-            fn main() -> [[location(0)]] u32 {
+            @stage(fragment)
+            fn main() -> @location(0) u32 {
                 return 1u;
             })");
     }

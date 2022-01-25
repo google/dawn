@@ -121,12 +121,12 @@ std::vector<uint8_t> VideoViewsTests::GetTestTextureData(wgpu::TextureFormat for
 wgpu::ShaderModule VideoViewsTests::GetTestVertexShaderModule() const {
     return utils::CreateShaderModule(device, R"(
                 struct VertexOut {
-                    [[location(0)]] texCoord : vec2 <f32>;
-                    [[builtin(position)]] position : vec4<f32>;
+                    @location(0) texCoord : vec2 <f32>;
+                    @builtin(position) position : vec4<f32>;
                 };
 
-                [[stage(vertex)]]
-                fn main([[builtin(vertex_index)]] VertexIndex : u32) -> VertexOut {
+                @stage(vertex)
+                fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
                     var pos = array<vec2<f32>, 6>(
                         vec2<f32>(-1.0, 1.0),
                         vec2<f32>(-1.0, -1.0),
@@ -163,11 +163,11 @@ TEST_P(VideoViewsTests, NV12SampleYtoR) {
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var sampler0 : sampler;
-            [[group(0), binding(1)]] var texture : texture_2d<f32>;
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture : texture_2d<f32>;
 
-            [[stage(fragment)]]
-            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
                let y : f32 = textureSample(texture, sampler0, texCoord).r;
                return vec4<f32>(y, 0.0, 0.0, 1.0);
             })");
@@ -221,11 +221,11 @@ TEST_P(VideoViewsTests, NV12SampleUVtoRG) {
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var sampler0 : sampler;
-            [[group(0), binding(1)]] var texture : texture_2d<f32>;
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture : texture_2d<f32>;
 
-            [[stage(fragment)]]
-            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
                let u : f32 = textureSample(texture, sampler0, texCoord).r;
                let v : f32 = textureSample(texture, sampler0, texCoord).g;
                return vec4<f32>(u, v, 0.0, 1.0);
@@ -289,12 +289,12 @@ TEST_P(VideoViewsTests, NV12SampleYUVtoRGB) {
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var sampler0 : sampler;
-            [[group(0), binding(1)]] var lumaTexture : texture_2d<f32>;
-            [[group(0), binding(2)]] var chromaTexture : texture_2d<f32>;
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var lumaTexture : texture_2d<f32>;
+            @group(0) @binding(2) var chromaTexture : texture_2d<f32>;
 
-            [[stage(fragment)]]
-            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
                let y : f32 = textureSample(lumaTexture, sampler0, texCoord).r;
                let u : f32 = textureSample(chromaTexture, sampler0, texCoord).r;
                let v : f32 = textureSample(chromaTexture, sampler0, texCoord).g;

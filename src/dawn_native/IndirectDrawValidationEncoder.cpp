@@ -65,9 +65,9 @@ namespace dawn::native {
                 data: array<u32>;
             };
 
-            [[group(0), binding(0)]] var<storage, read> batch: BatchInfo;
-            [[group(0), binding(1)]] var<storage, read_write> clientParams: IndirectParams;
-            [[group(0), binding(2)]] var<storage, write> validatedParams: IndirectParams;
+            @group(0) @binding(0) var<storage, read> batch: BatchInfo;
+            @group(0) @binding(1) var<storage, read_write> clientParams: IndirectParams;
+            @group(0) @binding(2) var<storage, write> validatedParams: IndirectParams;
 
             fn fail(drawIndex: u32) {
                 let index = drawIndex * kNumIndirectParamsPerDrawCall;
@@ -93,8 +93,8 @@ namespace dawn::native {
                     clientParams.data[cIndex + kFirstInstanceEntry];
             }
 
-            [[stage(compute), workgroup_size(64, 1, 1)]]
-            fn main([[builtin(global_invocation_id)]] id : vec3<u32>) {
+            @stage(compute) @workgroup_size(64, 1, 1)
+            fn main(@builtin(global_invocation_id) id : vec3<u32>) {
                 if (id.x >= batch.numDraws) {
                     return;
                 }

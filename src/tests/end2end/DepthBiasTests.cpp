@@ -36,8 +36,8 @@ class DepthBiasTests : public DawnTest {
             case QuadAngle::Flat:
                 // Draw a square at z = 0.25
                 vertexSource = R"(
-    [[stage(vertex)]]
-    fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+    @stage(vertex)
+    fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
         var pos = array<vec2<f32>, 6>(
             vec2<f32>(-1.0, -1.0),
             vec2<f32>( 1.0, -1.0),
@@ -52,8 +52,8 @@ class DepthBiasTests : public DawnTest {
             case QuadAngle::TiltedX:
                 // Draw a square ranging from 0 to 0.5, bottom to top
                 vertexSource = R"(
-    [[stage(vertex)]]
-    fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+    @stage(vertex)
+    fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
         var pos = array<vec3<f32>, 6>(
             vec3<f32>(-1.0, -1.0, 0.0),
             vec3<f32>( 1.0, -1.0, 0.0),
@@ -69,7 +69,7 @@ class DepthBiasTests : public DawnTest {
         wgpu::ShaderModule vertexModule = utils::CreateShaderModule(device, vertexSource);
 
         wgpu::ShaderModule fragmentModule = utils::CreateShaderModule(device, R"(
-    [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+    @stage(fragment) fn main() -> @location(0) vec4<f32> {
         return vec4<f32>(1.0, 0.0, 0.0, 1.0);
     })");
 

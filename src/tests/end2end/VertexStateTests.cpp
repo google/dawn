@@ -74,23 +74,23 @@ class VertexStateTest : public DawnTest {
 
         // TODO(cwallez@chromium.org): this only handles float attributes, we should extend it to
         // other types Adds line of the form
-        //    [[location(1) input1 : vec4<f32>;
+        //    @location(1) input1 : vec4<f32>;
         for (const auto& input : testSpec) {
-            vs << "[[location(" << input.location << ")]] input" << input.location
+            vs << "@location(" << input.location << ") input" << input.location
                << " : vec4<f32>;\n";
         }
 
         vs << R"(
-                [[builtin(vertex_index)]] VertexIndex : u32;
-                [[builtin(instance_index)]] InstanceIndex : u32;
+                @builtin(vertex_index) VertexIndex : u32;
+                @builtin(instance_index) InstanceIndex : u32;
             };
 
             struct VertexOut {
-                [[location(0)]] color : vec4<f32>;
-                [[builtin(position)]] position : vec4<f32>;
+                @location(0) color : vec4<f32>;
+                @builtin(position) position : vec4<f32>;
             };
 
-            [[stage(vertex)]] fn main(input : VertexIn) -> VertexOut {
+            @stage(vertex) fn main(input : VertexIn) -> VertexOut {
                 var output : VertexOut;
         )";
 
@@ -138,8 +138,8 @@ class VertexStateTest : public DawnTest {
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vs.str().c_str());
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]]
-            fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
+            @stage(fragment)
+            fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
                 return color;
             }
         )");
@@ -586,18 +586,18 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
         struct VertexIn {
-            [[location(0)]] attr0 : vec4<f32>;
-            [[location(1)]] attr1 : vec2<u32>;
-            [[location(2)]] attr2 : vec4<f32>;
-            [[location(3)]] attr3 : f32;
+            @location(0) attr0 : vec4<f32>;
+            @location(1) attr1 : vec2<u32>;
+            @location(2) attr2 : vec4<f32>;
+            @location(3) attr3 : f32;
         };
 
         struct VertexOut {
-            [[location(0)]] color : vec4<f32>;
-            [[builtin(position)]] position : vec4<f32>;
+            @location(0) color : vec4<f32>;
+            @builtin(position) position : vec4<f32>;
         };
 
-        [[stage(vertex)]] fn main(input : VertexIn) -> VertexOut {
+        @stage(vertex) fn main(input : VertexIn) -> VertexOut {
             var output : VertexOut;
             output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
 
@@ -617,8 +617,8 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
             return output;
         })");
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]]
-        fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
+        @stage(fragment)
+        fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
             return color;
         })");
     pipelineDesc.vertex.bufferCount = vertexState.vertexBufferCount;
@@ -662,12 +662,12 @@ TEST_P(OptionalVertexStateTest, Basic) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
 

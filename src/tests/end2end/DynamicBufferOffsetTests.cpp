@@ -102,8 +102,8 @@ class DynamicBufferOffsetTests : public DawnTest {
 
     wgpu::RenderPipeline CreateRenderPipeline(bool isInheritedPipeline = false) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+            @stage(vertex)
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0, 0.0),
                     vec2<f32>(-1.0, 1.0),
@@ -119,21 +119,21 @@ class DynamicBufferOffsetTests : public DawnTest {
                 value : vec2<u32>;
             };
 
-            [[group(0), binding(0)]] var<uniform> uBufferNotDynamic : Buf;
-            [[group(0), binding(1)]] var<storage, read_write> sBufferNotDynamic : Buf;
-            [[group(0), binding(3)]] var<uniform> uBuffer : Buf;
-            [[group(0), binding(4)]] var<storage, read_write> sBuffer : Buf;
+            @group(0) @binding(0) var<uniform> uBufferNotDynamic : Buf;
+            @group(0) @binding(1) var<storage, read_write> sBufferNotDynamic : Buf;
+            @group(0) @binding(3) var<uniform> uBuffer : Buf;
+            @group(0) @binding(4) var<storage, read_write> sBuffer : Buf;
         )";
 
         if (isInheritedPipeline) {
             fs << R"(
-                [[group(1), binding(0)]] var<uniform> paddingBlock : Buf;
+                @group(1) @binding(0) var<uniform> paddingBlock : Buf;
             )";
         }
 
         fs << "let multipleNumber : u32 = " << multipleNumber << "u;\n";
         fs << R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 sBufferNotDynamic.value = uBufferNotDynamic.value.xy;
                 sBuffer.value = vec2<u32>(multipleNumber, multipleNumber) * (uBuffer.value.xy + uBufferNotDynamic.value.xy);
                 return vec4<f32>(f32(uBuffer.value.x) / 255.0, f32(uBuffer.value.y) / 255.0,
@@ -169,21 +169,21 @@ class DynamicBufferOffsetTests : public DawnTest {
                 value : vec2<u32>;
             };
 
-            [[group(0), binding(0)]] var<uniform> uBufferNotDynamic : Buf;
-            [[group(0), binding(1)]] var<storage, read_write> sBufferNotDynamic : Buf;
-            [[group(0), binding(3)]] var<uniform> uBuffer : Buf;
-            [[group(0), binding(4)]] var<storage, read_write> sBuffer : Buf;
+            @group(0) @binding(0) var<uniform> uBufferNotDynamic : Buf;
+            @group(0) @binding(1) var<storage, read_write> sBufferNotDynamic : Buf;
+            @group(0) @binding(3) var<uniform> uBuffer : Buf;
+            @group(0) @binding(4) var<storage, read_write> sBuffer : Buf;
         )";
 
         if (isInheritedPipeline) {
             cs << R"(
-                [[group(1), binding(0)]] var<uniform> paddingBlock : Buf;
+                @group(1) @binding(0) var<uniform> paddingBlock : Buf;
             )";
         }
 
         cs << "let multipleNumber : u32 = " << multipleNumber << "u;\n";
         cs << R"(
-            [[stage(compute), workgroup_size(1)]] fn main() {
+            @stage(compute) @workgroup_size(1) fn main() {
                 sBufferNotDynamic.value = uBufferNotDynamic.value.xy;
                 sBuffer.value = vec2<u32>(multipleNumber, multipleNumber) * (uBuffer.value.xy + uBufferNotDynamic.value.xy);
             }
@@ -456,7 +456,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
                     struct Src {
                         values : array<vec4<u32>, kArrayLength>;
                     };
-                    [[group(0), binding(0)]] var<uniform> src : Src;
+                    @group(0) @binding(0) var<uniform> src : Src;
                 )";
                 break;
             case wgpu::BufferUsage::Storage:
@@ -464,7 +464,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
                     struct Src {
                         values : array<vec4<u32>>;
                     };
-                    [[group(0), binding(0)]] var<storage, read> src : Src;
+                    @group(0) @binding(0) var<storage, read> src : Src;
                 )";
                 break;
             default:
@@ -475,10 +475,10 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
             struct Dst {
                 values : array<vec4<u32>>;
             };
-            [[group(0), binding(1)]] var<storage, read_write> dst : Dst;
+            @group(0) @binding(1) var<storage, read_write> dst : Dst;
         )";
         shader << R"(
-            [[stage(compute), workgroup_size(1)]] fn main() {
+            @stage(compute) @workgroup_size(1) fn main() {
                 for (var i: u32 = 0u; i < kArrayLength; i = i + 1u) {
                     dst.values[i + kWriteOffset] = src.values[i + kReadOffset];
                 }

@@ -101,11 +101,11 @@ TEST_P(D3D12CachingTests, SameShaderNoCache) {
     mPersistentCache.mIsDisabled = true;
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn vertex_main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn fragment_main() -> @location(0) vec4<f32> {
           return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
@@ -142,11 +142,11 @@ TEST_P(D3D12CachingTests, SameShaderNoCache) {
 // entrypoints)
 TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+        @stage(vertex) fn vertex_main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+        @stage(fragment) fn fragment_main() -> @location(0) vec4<f32> {
           return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
@@ -181,11 +181,11 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
 
     // Modify the WGSL shader functions and make sure it doesn't hit.
     wgpu::ShaderModule newModule = utils::CreateShaderModule(device, R"(
-      [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+      @stage(vertex) fn vertex_main() -> @builtin(position) vec4<f32> {
           return vec4<f32>(1.0, 1.0, 1.0, 1.0);
       }
 
-      [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+      @stage(fragment) fn fragment_main() -> @location(0) vec4<f32> {
         return vec4<f32>(1.0, 1.0, 1.0, 1.0);
       }
   )");
@@ -211,13 +211,13 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPoints) {
         struct Data {
             data : u32;
         };
-        [[binding(0), group(0)]] var<storage, read_write> data : Data;
+        @binding(0) @group(0) var<storage, read_write> data : Data;
 
-        [[stage(compute), workgroup_size(1)]] fn write1() {
+        @stage(compute) @workgroup_size(1) fn write1() {
             data.data = 1u;
         }
 
-        [[stage(compute), workgroup_size(1)]] fn write42() {
+        @stage(compute) @workgroup_size(1) fn write42() {
             data.data = 42u;
         }
     )");
