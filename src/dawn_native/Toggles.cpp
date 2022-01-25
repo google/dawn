@@ -230,13 +230,6 @@ namespace dawn::native {
               "Enable optimizations when compiling with FXC. Disabled by default because FXC "
               "miscompiles in many cases when optimizations are enabled.",
               "https://crbug.com/dawn/1203"}},
-            {Toggle::RecordDetailedTimingInTraceEvents,
-             {"record_detailed_timing_in_trace_events",
-              "Record detailed timing information in trace events at certain point. Currently the "
-              "timing information is recorded right before calling ExecuteCommandLists on a D3D12 "
-              "command queue, and the information includes system time, CPU timestamp, GPU "
-              "timestamp, and their frequency.",
-              "https://crbug.com/dawn/1264"}},
 
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};

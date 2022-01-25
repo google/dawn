@@ -61,7 +61,6 @@ namespace dawn::native {
         DisableR8RG8Mipmaps,
         UseDummyFragmentInVertexOnlyPipeline,
         FxcOptimizations,
-        RecordDetailedTimingInTraceEvents,
 
         EnumCount,
         InvalidEnum = EnumCount,
