@@ -15,9 +15,9 @@ struct S {
   mat2 m;
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   mat2 m;
 } SSBO;
-layout (binding = 0) uniform S_2 {
+layout(binding = 0) uniform S_2 {
   mat2 m;
 } UBO;

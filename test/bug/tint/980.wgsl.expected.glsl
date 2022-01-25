@@ -12,7 +12,7 @@ struct S {
   uint i;
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   vec3 v;
   uint i;
 } io;

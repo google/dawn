@@ -12,11 +12,11 @@ struct buf1 {
 };
 
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
-layout (binding = 0) buffer doesNotMatter_1 {
+layout(binding = 0) buffer doesNotMatter_1 {
   int global_seed;
   int data[];
 } x_7;
-layout (binding = 1) uniform buf1_1 {
+layout(binding = 1) uniform buf1_1 {
   vec2 injectionSwitch;
 } x_10;
 

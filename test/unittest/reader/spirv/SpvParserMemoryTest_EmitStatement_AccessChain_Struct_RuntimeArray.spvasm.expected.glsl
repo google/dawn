@@ -8,7 +8,7 @@ struct S {
   float age[];
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   float field0;
   float age[];
 } myvar;

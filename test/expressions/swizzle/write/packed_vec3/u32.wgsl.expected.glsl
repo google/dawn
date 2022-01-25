@@ -15,7 +15,7 @@ struct S {
   uvec3 v;
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   uvec3 v;
 } U;
 

@@ -10,10 +10,10 @@ struct S {
   Inner inner;
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   Inner inner;
 } tint_symbol;
-layout (binding = 1) buffer S_2 {
+layout(binding = 1) buffer S_2 {
   Inner inner;
 } tint_symbol_1;
 

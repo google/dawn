@@ -8,10 +8,10 @@ struct Uniforms {
   uint channelCount;
 };
 
-layout (binding = 2) buffer OutputBuf_1 {
+layout(binding = 2) buffer OutputBuf_1 {
   uint result[];
 } tint_symbol;
-layout (binding = 3) uniform Uniforms_1 {
+layout(binding = 3) uniform Uniforms_1 {
   uint dstTextureFlipY;
   uint isFloat16;
   uint isRGB10A2Unorm;

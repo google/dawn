@@ -5,7 +5,7 @@ struct Constants {
   int level;
 };
 
-layout (binding = 3) buffer Result_1 {
+layout(binding = 3) buffer Result_1 {
   float values[];
 } result;
 

@@ -20,11 +20,11 @@ struct buf0 {
 };
 
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 1) uniform buf1_1 {
+layout(binding = 1) uniform buf1_1 {
   uint one;
 } x_8;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   tint_padded_array_element x_GLF_uniform_int_values[1];
 } x_10;
 

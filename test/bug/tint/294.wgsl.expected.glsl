@@ -16,6 +16,6 @@ struct Light {
   vec3 colour;
 };
 
-layout (binding = 1) buffer Lights_1 {
+layout(binding = 1) buffer Lights_1 {
   Light light[];
 } lights;

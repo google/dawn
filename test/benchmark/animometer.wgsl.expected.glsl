@@ -14,10 +14,10 @@ struct Uniforms {
   float scalarOffset;
 };
 
-layout (binding = 0) uniform Time_1 {
+layout(binding = 0) uniform Time_1 {
   float value;
 } time;
-layout (binding = 1) uniform Uniforms_1 {
+layout(binding = 1) uniform Uniforms_1 {
   float scale;
   float offsetX;
   float offsetY;

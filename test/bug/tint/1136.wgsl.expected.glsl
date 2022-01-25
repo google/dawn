@@ -15,7 +15,7 @@ struct Buffer {
   uint data;
 };
 
-layout (binding = 0) buffer Buffer_1 {
+layout(binding = 0) buffer Buffer_1 {
   uint data;
 } tint_symbol;
 

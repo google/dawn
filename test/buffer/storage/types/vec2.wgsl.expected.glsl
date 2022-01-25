@@ -5,10 +5,10 @@ struct tint_symbol_block {
   ivec2 inner;
 };
 
-layout (binding = 0) buffer tint_symbol_block_1 {
+layout(binding = 0) buffer tint_symbol_block_1 {
   ivec2 inner;
 } tint_symbol;
-layout (binding = 1) buffer tint_symbol_block_2 {
+layout(binding = 1) buffer tint_symbol_block_2 {
   ivec2 inner;
 } tint_symbol_1;
 

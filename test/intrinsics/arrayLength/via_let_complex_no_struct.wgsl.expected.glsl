@@ -4,7 +4,7 @@ SKIP: FAILED
 precision mediump float;
 
 
-layout (binding = 0) buffer G_block_1 {
+layout(binding = 0) buffer G_block_1 {
   int inner[];
 } G;
 

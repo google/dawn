@@ -18,7 +18,7 @@ struct S {
   Inner arr[8];
 };
 
-layout (binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_1 {
   Inner arr[8];
 } s;
 

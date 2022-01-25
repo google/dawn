@@ -19,7 +19,7 @@ struct Uniforms {
 };
 
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
-layout (binding = 2) buffer ResultMatrix_1 {
+layout(binding = 2) buffer ResultMatrix_1 {
   float numbers[];
 } resultMatrix;
 

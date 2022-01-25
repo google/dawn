@@ -21,7 +21,7 @@ struct ssbB {
 };
 
 int dimAOuter_1 = 0;
-layout (binding = 3) uniform Uniforms_1 {
+layout(binding = 3) uniform Uniforms_1 {
   float NAN;
   ivec3 aShape;
   ivec3 bShape;
@@ -30,18 +30,18 @@ layout (binding = 3) uniform Uniforms_1 {
 } x_48;
 int dimInner_1 = 0;
 int dimBOuter_1 = 0;
-layout (binding = 0) buffer ssbOut_1 {
+layout(binding = 0) buffer ssbOut_1 {
   float result[];
 } x_54;
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
 uvec3 tint_symbol_1 = uvec3(0u, 0u, 0u);
 shared float mm_Asub[64][64];
 shared float mm_Bsub[64][1];
-layout (binding = 1) buffer ssbA_1 {
+layout(binding = 1) buffer ssbA_1 {
   float A[];
 } x_165;
 int batch = 0;
-layout (binding = 2) buffer ssbB_1 {
+layout(binding = 2) buffer ssbB_1 {
   float B[];
 } x_185;
 

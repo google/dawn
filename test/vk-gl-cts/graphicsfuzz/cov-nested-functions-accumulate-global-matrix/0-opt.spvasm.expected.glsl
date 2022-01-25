@@ -20,14 +20,14 @@ struct buf1 {
 };
 
 mat4x2 m = mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 2) uniform buf2_1 {
+layout(binding = 2) uniform buf2_1 {
   float one;
 } x_10;
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   tint_padded_array_element x_GLF_uniform_float_values[1];
 } x_12;
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 1) uniform buf1_1 {
+layout(binding = 1) uniform buf1_1 {
   tint_padded_array_element_1 x_GLF_uniform_int_values[4];
 } x_16;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

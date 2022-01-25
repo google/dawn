@@ -15,10 +15,10 @@ struct doesNotMatter {
 };
 
 vec4 GLF_live2gl_FragCoord = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 1) uniform buf0_1 {
+layout(binding = 1) uniform buf0_1 {
   vec2 injectionSwitch;
 } x_9;
-layout (binding = 0) buffer doesNotMatter_1 {
+layout(binding = 0) buffer doesNotMatter_1 {
   uint x_compute_data[];
 } x_12;
 

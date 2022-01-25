@@ -3,7 +3,7 @@ precision mediump float;
 
 
 const uint width = 128u;
-layout (binding = 1) buffer Result_1 {
+layout(binding = 1) buffer Result_1 {
   float values[];
 } result;
 

@@ -13,7 +13,7 @@ struct S {
   int i;
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   int i;
 } s;
 

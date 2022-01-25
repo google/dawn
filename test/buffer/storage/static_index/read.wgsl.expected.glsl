@@ -17,7 +17,7 @@ struct S {
   Inner j[4];
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   ivec3 a;
   int b;
   uvec3 c;

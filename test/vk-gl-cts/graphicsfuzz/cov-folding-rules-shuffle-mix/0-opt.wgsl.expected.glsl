@@ -7,7 +7,7 @@ struct buf0 {
   vec2 threeandfour;
 };
 
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   vec2 threeandfour;
 } x_6;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

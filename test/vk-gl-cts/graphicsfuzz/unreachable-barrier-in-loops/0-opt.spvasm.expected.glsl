@@ -14,13 +14,13 @@ struct doesNotMatter {
 };
 
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
-layout (binding = 1) uniform buf1_1 {
+layout(binding = 1) uniform buf1_1 {
   vec2 injectionSwitch;
 } x_10;
-layout (binding = 2) uniform buf2_1 {
+layout(binding = 2) uniform buf2_1 {
   vec2 resolution;
 } x_13;
-layout (binding = 0) buffer doesNotMatter_1 {
+layout(binding = 0) buffer doesNotMatter_1 {
   int x_compute_data[];
 } x_15;
 

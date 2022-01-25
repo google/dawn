@@ -5,7 +5,7 @@ struct Constants {
   uint zero;
 };
 
-layout (binding = 0) uniform Constants_1 {
+layout(binding = 0) uniform Constants_1 {
   uint zero;
 } constants;
 
@@ -13,7 +13,7 @@ struct Result {
   uint value;
 };
 
-layout (binding = 1) buffer Result_1 {
+layout(binding = 1) buffer Result_1 {
   uint value;
 } result;
 
@@ -21,7 +21,7 @@ struct TestData {
   int data[3];
 };
 
-layout (binding = 0) buffer TestData_1 {
+layout(binding = 0) buffer TestData_1 {
   int data[3];
 } s;
 

@@ -7,7 +7,7 @@ struct buf0 {
   vec2 injectionSwitch;
 };
 
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   vec2 injectionSwitch;
 } x_25;
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -5,7 +5,7 @@ struct u_block {
   int inner;
 };
 
-layout (binding = 0) uniform u_block_1 {
+layout(binding = 0) uniform u_block_1 {
   int inner;
 } u;
 

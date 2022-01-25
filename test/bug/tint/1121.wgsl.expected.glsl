@@ -7,7 +7,7 @@ struct LightData {
   float radius;
 };
 
-layout (binding = 0) buffer LightsBuffer_1 {
+layout(binding = 0) buffer LightsBuffer_1 {
   LightData lights[];
 } lightsBuffer;
 
@@ -19,7 +19,7 @@ struct Tiles {
   TileLightIdData data[4];
 };
 
-layout (binding = 0) buffer Tiles_1 {
+layout(binding = 0) buffer Tiles_1 {
   TileLightIdData data[4];
 } tileLightId;
 
@@ -32,7 +32,7 @@ struct Config {
   uint tileSize;
 };
 
-layout (binding = 0) uniform Config_1 {
+layout(binding = 0) uniform Config_1 {
   uint numLights;
   uint numTiles;
   uint tileCountX;
@@ -49,7 +49,7 @@ struct Uniforms {
   vec4 fullScreenSize;
 };
 
-layout (binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_1 {
   vec4 tint_symbol;
   vec4 tint_symbol_1;
   mat4 viewMatrix;

@@ -45,17 +45,17 @@ struct buf0 {
 };
 
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 1) uniform buf1_1 {
+layout(binding = 1) uniform buf1_1 {
   tint_padded_array_element x_GLF_uniform_float_values[3];
 } x_8;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 2) uniform buf2_1 {
+layout(binding = 2) uniform buf2_1 {
   tint_padded_array_element_1 x_GLF_uniform_int_values[4];
 } x_12;
-layout (binding = 3) uniform buf3_1 {
+layout(binding = 3) uniform buf3_1 {
   int three;
 } x_14;
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   tint_padded_array_element_2 x_GLF_uniform_uint_values[1];
 } x_16;
 

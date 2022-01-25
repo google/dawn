@@ -7,16 +7,16 @@ struct Uniforms {
   uint dimBOuter;
 };
 
-layout (binding = 0) buffer Matrix_1 {
+layout(binding = 0) buffer Matrix_1 {
   float numbers[];
 } firstMatrix;
-layout (binding = 1) buffer Matrix_2 {
+layout(binding = 1) buffer Matrix_2 {
   float numbers[];
 } secondMatrix;
-layout (binding = 2) buffer Matrix_3 {
+layout(binding = 2) buffer Matrix_3 {
   float numbers[];
 } resultMatrix;
-layout (binding = 3) uniform Uniforms_1 {
+layout(binding = 3) uniform Uniforms_1 {
   uint dimAOuter;
   uint dimInner;
   uint dimBOuter;

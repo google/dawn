@@ -10,7 +10,7 @@ struct buf0 {
 int data[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 int temp[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   vec2 injectionSwitch;
 } x_34;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

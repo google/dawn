@@ -9,7 +9,7 @@ struct S {
   vec4 v;
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   float f;
   uint u;
   vec4 v;

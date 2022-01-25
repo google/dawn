@@ -6,7 +6,7 @@ struct S {
   vec3 vector;
 };
 
-layout (binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_1 {
   mat3x2 matrix;
   vec3 vector;
 } data;

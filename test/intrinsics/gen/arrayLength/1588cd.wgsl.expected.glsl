@@ -4,7 +4,7 @@ SKIP: FAILED
 precision mediump float;
 
 
-layout (binding = 1) buffer SB_RO_1 {
+layout(binding = 1) buffer SB_RO_1 {
   int arg_0[];
 } sb_ro;
 
@@ -49,7 +49,7 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 
-layout (binding = 1) buffer SB_RO_1 {
+layout(binding = 1) buffer SB_RO_1 {
   int arg_0[];
 } sb_ro;
 
@@ -84,7 +84,7 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 
-layout (binding = 1) buffer SB_RO_1 {
+layout(binding = 1) buffer SB_RO_1 {
   int arg_0[];
 } sb_ro;
 

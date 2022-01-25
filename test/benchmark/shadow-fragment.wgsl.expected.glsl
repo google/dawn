@@ -11,7 +11,7 @@ struct Scene {
   vec3 lightPos;
 };
 
-layout (binding = 0) uniform Scene_1 {
+layout(binding = 0) uniform Scene_1 {
   mat4 lightViewProjMatrix;
   mat4 cameraViewProjMatrix;
   vec3 lightPos;

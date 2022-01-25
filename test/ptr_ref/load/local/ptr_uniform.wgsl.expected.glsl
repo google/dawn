@@ -5,7 +5,7 @@ struct S {
   int a;
 };
 
-layout (binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_1 {
   int a;
 } v;
 

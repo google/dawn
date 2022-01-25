@@ -39,7 +39,7 @@ struct Camera {
   float zFar;
 };
 
-layout (binding = 0) uniform Camera_1 {
+layout(binding = 0) uniform Camera_1 {
   mat4 projection;
   mat4 inverseProjection;
   mat4 view;
@@ -50,10 +50,10 @@ layout (binding = 0) uniform Camera_1 {
   float zFar;
 } camera;
 
-layout (binding = 1) buffer Joints_1 {
+layout(binding = 1) buffer Joints_1 {
   mat4 matrices[];
 } joint;
-layout (binding = 2) buffer Joints_2 {
+layout(binding = 2) buffer Joints_2 {
   mat4 matrices[];
 } inverseBind;
 

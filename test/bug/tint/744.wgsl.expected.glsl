@@ -7,16 +7,16 @@ struct Uniforms {
   uvec2 outShape;
 };
 
-layout (binding = 0) buffer Matrix_1 {
+layout(binding = 0) buffer Matrix_1 {
   uint numbers[];
 } firstMatrix;
-layout (binding = 1) buffer Matrix_2 {
+layout(binding = 1) buffer Matrix_2 {
   uint numbers[];
 } secondMatrix;
-layout (binding = 2) buffer Matrix_3 {
+layout(binding = 2) buffer Matrix_3 {
   uint numbers[];
 } resultMatrix;
-layout (binding = 3) uniform Uniforms_1 {
+layout(binding = 3) uniform Uniforms_1 {
   uvec2 aShape;
   uvec2 bShape;
   uvec2 outShape;

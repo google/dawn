@@ -8,7 +8,7 @@ struct SSBO {
   tint_padded_array_element m[2];
 };
 
-layout (binding = 0) buffer SSBO_1 {
+layout(binding = 0) buffer SSBO_1 {
   tint_padded_array_element m[2];
 } ssbo;
 

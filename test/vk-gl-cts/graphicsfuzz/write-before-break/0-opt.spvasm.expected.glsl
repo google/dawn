@@ -7,7 +7,7 @@ struct buf0 {
   int injected;
 };
 
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   int injected;
 } x_9;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

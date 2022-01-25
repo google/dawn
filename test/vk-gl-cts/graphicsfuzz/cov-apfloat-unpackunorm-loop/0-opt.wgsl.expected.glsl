@@ -21,7 +21,7 @@ struct buf0 {
   tint_padded_array_element x_GLF_uniform_int_values[3];
 };
 
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   tint_padded_array_element x_GLF_uniform_int_values[3];
 } x_6;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

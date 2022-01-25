@@ -6,7 +6,7 @@ struct Params {
   uint blockDim;
 };
 
-layout (binding = 1) uniform Params_1 {
+layout(binding = 1) uniform Params_1 {
   uint filterDim;
   uint blockDim;
 } params;
@@ -15,7 +15,7 @@ struct Flip {
   uint value;
 };
 
-layout (binding = 3) uniform Flip_1 {
+layout(binding = 3) uniform Flip_1 {
   uint value;
 } flip;
 shared vec3 tile[4][256];

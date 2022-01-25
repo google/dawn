@@ -5,7 +5,7 @@ struct u_block {
   mat2x3 inner;
 };
 
-layout (binding = 0) uniform u_block_1 {
+layout(binding = 0) uniform u_block_1 {
   mat2x3 inner;
 } u;
 

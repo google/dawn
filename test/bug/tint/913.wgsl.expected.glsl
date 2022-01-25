@@ -9,10 +9,10 @@ struct Uniforms {
   uvec2 copySize;
 };
 
-layout (binding = 2) buffer OutputBuf_1 {
+layout(binding = 2) buffer OutputBuf_1 {
   uint result[];
 } tint_symbol;
-layout (binding = 3) uniform Uniforms_1 {
+layout(binding = 3) uniform Uniforms_1 {
   uint dstTextureFlipY;
   uint channelCount;
   uvec2 srcCopyOrigin;

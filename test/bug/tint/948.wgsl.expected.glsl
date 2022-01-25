@@ -15,7 +15,7 @@ struct LeftOver {
   vec3 colorMul;
 };
 
-layout (binding = 9) uniform LeftOver_1 {
+layout(binding = 9) uniform LeftOver_1 {
   float time;
   uint padding;
   mat4 worldViewProjection;

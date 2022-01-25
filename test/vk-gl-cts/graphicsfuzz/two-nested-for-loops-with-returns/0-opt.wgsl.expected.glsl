@@ -11,7 +11,7 @@ struct doesNotMatter {
   float x_compute_data[];
 };
 
-layout (binding = 0) buffer doesNotMatter_1 {
+layout(binding = 0) buffer doesNotMatter_1 {
   float x_compute_data[];
 } x_9;
 

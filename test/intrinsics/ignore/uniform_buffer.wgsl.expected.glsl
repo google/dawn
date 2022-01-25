@@ -13,7 +13,7 @@ struct S {
   int i;
 };
 
-layout (binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_1 {
   int i;
 } u;
 

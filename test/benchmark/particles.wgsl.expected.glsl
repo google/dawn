@@ -9,7 +9,7 @@ struct RenderParams {
   vec3 up;
 };
 
-layout (binding = 0) uniform RenderParams_1 {
+layout(binding = 0) uniform RenderParams_1 {
   mat4 modelViewProjectionMatrix;
   vec3 right;
   vec3 up;
@@ -253,11 +253,11 @@ struct Particle {
   vec3 velocity;
 };
 
-layout (binding = 0) uniform SimulationParams_1 {
+layout(binding = 0) uniform SimulationParams_1 {
   float deltaTime;
   vec4 seed;
 } sim_params;
-layout (binding = 1) buffer Particles_1 {
+layout(binding = 1) buffer Particles_1 {
   Particle particles[];
 } data;
 
@@ -380,13 +380,13 @@ struct UBO {
   uint width;
 };
 
-layout (binding = 3) uniform UBO_1 {
+layout(binding = 3) uniform UBO_1 {
   uint width;
 } ubo;
-layout (binding = 4) buffer Buffer_1 {
+layout(binding = 4) buffer Buffer_1 {
   float weights[];
 } buf_in;
-layout (binding = 5) buffer Buffer_2 {
+layout(binding = 5) buffer Buffer_2 {
   float weights[];
 } buf_out;
 
@@ -470,13 +470,13 @@ struct UBO {
   uint width;
 };
 
-layout (binding = 3) uniform UBO_1 {
+layout(binding = 3) uniform UBO_1 {
   uint width;
 } ubo;
-layout (binding = 4) buffer Buffer_1 {
+layout(binding = 4) buffer Buffer_1 {
   float weights[];
 } buf_in;
-layout (binding = 5) buffer Buffer_2 {
+layout(binding = 5) buffer Buffer_2 {
   float weights[];
 } buf_out;
 

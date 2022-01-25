@@ -20,13 +20,13 @@ struct buf2 {
 };
 
 int x_GLF_global_loop_count = 0;
-layout (binding = 1) uniform buf1_1 {
+layout(binding = 1) uniform buf1_1 {
   tint_padded_array_element x_GLF_uniform_float_values[2];
 } x_7;
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   tint_padded_array_element_1 x_GLF_uniform_int_values[3];
 } x_10;
-layout (binding = 2) uniform buf2_1 {
+layout(binding = 2) uniform buf2_1 {
   vec2 injectionSwitch;
 } x_12;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

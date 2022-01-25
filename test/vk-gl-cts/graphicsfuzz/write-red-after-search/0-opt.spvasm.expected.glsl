@@ -17,7 +17,7 @@ struct Obj {
 };
 
 BST tree_1[10] = BST[10](BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0));
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   vec2 injectionSwitch;
 } x_27;
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);

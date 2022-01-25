@@ -8,10 +8,10 @@ struct InnerS {
   int v;
 };
 
-layout (binding = 4) uniform Uniforms_1 {
+layout(binding = 4) uniform Uniforms_1 {
   uint i;
 } uniforms;
-layout (binding = 0) buffer OuterS_1 {
+layout(binding = 0) buffer OuterS_1 {
   InnerS a1[];
 } s1;
 

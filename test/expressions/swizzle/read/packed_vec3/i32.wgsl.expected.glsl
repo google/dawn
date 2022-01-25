@@ -15,7 +15,7 @@ struct S {
   ivec3 v;
 };
 
-layout (binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_1 {
   ivec3 v;
 } U;
 

@@ -5,7 +5,7 @@ struct DrawIndirectArgs {
   uint vertexCount;
 };
 
-layout (binding = 5) buffer DrawIndirectArgs_1 {
+layout(binding = 5) buffer DrawIndirectArgs_1 {
   uint vertexCount;
 } drawOut;
 uint cubeVerts = 0u;

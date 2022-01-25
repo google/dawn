@@ -10,7 +10,7 @@ struct buf0 {
 
 QuicksortObject obj = QuicksortObject(int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout (binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_1 {
   vec2 resolution;
 } x_188;
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -6,7 +6,7 @@ intrinsics/ignore/runtime_array.wgsl:9:5 warning: use of deprecated intrinsic
 precision mediump float;
 
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   int arr[];
 } s;
 

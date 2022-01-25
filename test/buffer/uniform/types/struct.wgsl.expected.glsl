@@ -10,7 +10,7 @@ struct S {
   Inner inner;
 };
 
-layout (binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_1 {
   Inner inner;
 } u;
 

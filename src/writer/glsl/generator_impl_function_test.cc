@@ -438,7 +438,7 @@ struct UBO {
   vec4 coord;
 };
 
-layout (binding = 0) uniform UBO_1 {
+layout(binding = 0) uniform UBO_1 {
   vec4 coord;
 } ubo;
 
@@ -491,7 +491,7 @@ struct Uniforms {
   vec4 coord;
 };
 
-layout (binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_1 {
   vec4 coord;
 } uniforms;
 
@@ -546,7 +546,7 @@ struct Data {
   float b;
 };
 
-layout (binding = 0) buffer Data_1 {
+layout(binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -602,7 +602,7 @@ struct Data {
   float b;
 };
 
-layout (binding = 0) buffer Data_1 {
+layout(binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -654,7 +654,7 @@ struct Data {
   float b;
 };
 
-layout (binding = 0) buffer Data_1 {
+layout(binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -707,7 +707,7 @@ struct Data {
   float b;
 };
 
-layout (binding = 0) buffer Data_1 {
+layout(binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -761,7 +761,7 @@ struct S {
   float x;
 };
 
-layout (binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_1 {
   float x;
 } coord;
 
@@ -820,7 +820,7 @@ struct S {
   float x;
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   float x;
 } coord;
 
@@ -1089,7 +1089,7 @@ struct Data {
   float d;
 };
 
-layout (binding = 0) buffer Data_1 {
+layout(binding = 0) buffer Data_1 {
   float d;
 } data;
 

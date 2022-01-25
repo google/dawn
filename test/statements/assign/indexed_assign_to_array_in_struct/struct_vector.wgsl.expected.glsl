@@ -8,7 +8,7 @@ struct OuterS {
   vec3 v1;
 };
 
-layout (binding = 4) uniform Uniforms_1 {
+layout(binding = 4) uniform Uniforms_1 {
   uint i;
 } uniforms;
 

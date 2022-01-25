@@ -13,7 +13,7 @@ struct SB_RW {
   uint arg_0;
 };
 
-layout (binding = 0) buffer SB_RW_1 {
+layout(binding = 0) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
 
@@ -45,7 +45,7 @@ struct SB_RW {
   uint arg_0;
 };
 
-layout (binding = 0) buffer SB_RW_1 {
+layout(binding = 0) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
 

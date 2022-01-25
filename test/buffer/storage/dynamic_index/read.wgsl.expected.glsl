@@ -13,7 +13,7 @@ struct Inner {
   ivec4 i[4];
 };
 
-layout (binding = 0) buffer S_1 {
+layout(binding = 0) buffer S_1 {
   Inner arr[];
 } s;
 

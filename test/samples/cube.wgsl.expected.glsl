@@ -5,7 +5,7 @@ struct Uniforms {
   mat4 modelViewProjectionMatrix;
 };
 
-layout (binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_1 {
   mat4 modelViewProjectionMatrix;
 } uniforms;
 
