@@ -1790,6 +1790,10 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
         }
         SetLocation(ast_decos,
                     create<ast::LocationDecoration>(Source{}, deco[1]));
+        if (store_type->IsIntegerScalarOrVector()) {
+          // Default to flat interpolation for integral user-defined IO types.
+          type = ast::InterpolationType::kFlat;
+        }
         break;
       case SpvDecorationFlat:
         type = ast::InterpolationType::kFlat;

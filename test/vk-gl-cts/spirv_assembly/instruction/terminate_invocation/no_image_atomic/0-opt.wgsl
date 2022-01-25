@@ -14,7 +14,7 @@ fn main_1() {
 }
 
 struct main_out {
-  @location(0)
+  @location(0) @interpolate(flat)
   x_4_1 : i32;
   @builtin(position)
   gl_Position : vec4<f32>;

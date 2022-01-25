@@ -74,7 +74,7 @@ TEST_F(CanonicalizeEntryPointIOTest, Parameters_Spirv) {
   auto* src = R"(
 @stage(fragment)
 fn frag_main(@location(1) loc1 : f32,
-             @location(2) loc2 : vec4<u32>,
+             @location(2) @interpolate(flat) loc2 : vec4<u32>,
              @builtin(position) coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
@@ -109,7 +109,7 @@ TEST_F(CanonicalizeEntryPointIOTest, Parameters_Msl) {
   auto* src = R"(
 @stage(fragment)
 fn frag_main(@location(1) loc1 : f32,
-             @location(2) loc2 : vec4<u32>,
+             @location(2) @interpolate(flat) loc2 : vec4<u32>,
              @builtin(position) coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
@@ -119,7 +119,7 @@ fn frag_main(@location(1) loc1 : f32,
 struct tint_symbol_1 {
   @location(1)
   loc1 : f32;
-  @location(2)
+  @location(2) @interpolate(flat)
   loc2 : vec4<u32>;
 }
 
@@ -145,7 +145,7 @@ TEST_F(CanonicalizeEntryPointIOTest, Parameters_Hlsl) {
   auto* src = R"(
 @stage(fragment)
 fn frag_main(@location(1) loc1 : f32,
-             @location(2) loc2 : vec4<u32>,
+             @location(2) @interpolate(flat) loc2 : vec4<u32>,
              @builtin(position) coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
@@ -155,7 +155,7 @@ fn frag_main(@location(1) loc1 : f32,
 struct tint_symbol_1 {
   @location(1)
   loc1 : f32;
-  @location(2)
+  @location(2) @interpolate(flat)
   loc2 : vec4<u32>;
   @builtin(position)
   coord : vec4<f32>;
@@ -222,7 +222,7 @@ struct FragBuiltins {
 };
 struct FragLocations {
   @location(1) loc1 : f32;
-  @location(2) loc2 : vec4<u32>;
+  @location(2) @interpolate(flat) loc2 : vec4<u32>;
 };
 
 @stage(fragment)
@@ -276,7 +276,7 @@ struct FragBuiltins {
 };
 struct FragLocations {
   @location(1) loc1 : f32;
-  @location(2) loc2 : vec4<u32>;
+  @location(2) @interpolate(flat) loc2 : vec4<u32>;
 };
 
 @stage(fragment)
@@ -302,7 +302,7 @@ struct tint_symbol_1 {
   loc0 : f32;
   @location(1)
   loc1 : f32;
-  @location(2)
+  @location(2) @interpolate(flat)
   loc2 : vec4<u32>;
 }
 
@@ -331,7 +331,7 @@ struct FragBuiltins {
 };
 struct FragLocations {
   @location(1) loc1 : f32;
-  @location(2) loc2 : vec4<u32>;
+  @location(2) @interpolate(flat) loc2 : vec4<u32>;
 };
 
 @stage(fragment)
@@ -357,7 +357,7 @@ struct tint_symbol_1 {
   loc0 : f32;
   @location(1)
   loc1 : f32;
-  @location(2)
+  @location(2) @interpolate(flat)
   loc2 : vec4<u32>;
   @builtin(position)
   coord : vec4<f32>;
@@ -1134,18 +1134,18 @@ struct VertexIn {
 };
 
 struct VertexOut {
-  @location(0) i : i32;
-  @location(1) u : u32;
-  @location(2) vi : vec4<i32>;
-  @location(3) vu : vec4<u32>;
+  @location(0) @interpolate(flat) i : i32;
+  @location(1) @interpolate(flat) u : u32;
+  @location(2) @interpolate(flat) vi : vec4<i32>;
+  @location(3) @interpolate(flat) vu : vec4<u32>;
   @builtin(position) pos : vec4<f32>;
 };
 
 struct FragmentInterface {
-  @location(0) i : i32;
-  @location(1) u : u32;
-  @location(2) vi : vec4<i32>;
-  @location(3) vu : vec4<u32>;
+  @location(0) @interpolate(flat) i : i32;
+  @location(1) @interpolate(flat) u : u32;
+  @location(2) @interpolate(flat) vi : vec4<i32>;
+  @location(3) @interpolate(flat) vu : vec4<u32>;
 };
 
 @stage(vertex)
@@ -1187,13 +1187,13 @@ fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
 
 @location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vu_3 : vec4<u32>;
 
-@location(0) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
+@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
+@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
 
-@location(2) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
 
-@location(3) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
+@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
 
 struct VertexIn {
   i : i32;
@@ -1389,15 +1389,15 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 TEST_F(CanonicalizeEntryPointIOTest, SortedMembers) {
   auto* src = R"(
 struct VertexOutput {
-  @location(1) b : u32;
+  @location(1) @interpolate(flat) b : u32;
   @builtin(position) pos : vec4<f32>;
-  @location(3) d : u32;
+  @location(3) @interpolate(flat) d : u32;
   @location(0) a : f32;
-  @location(2) c : i32;
+  @location(2) @interpolate(flat) c : i32;
 };
 
 struct FragmentInputExtra {
-  @location(3) d : u32;
+  @location(3) @interpolate(flat) d : u32;
   @builtin(position) pos : vec4<f32>;
   @location(0) a : f32;
 };
@@ -1409,9 +1409,9 @@ fn vert_main() -> VertexOutput {
 
 @stage(fragment)
 fn frag_main(@builtin(front_facing) ff : bool,
-             @location(2) c : i32,
+             @location(2) @interpolate(flat) c : i32,
              inputs : FragmentInputExtra,
-             @location(1) b : u32) {
+             @location(1) @interpolate(flat) b : u32) {
 }
 )";
 
@@ -1433,11 +1433,11 @@ struct FragmentInputExtra {
 struct tint_symbol {
   @location(0)
   a : f32;
-  @location(1)
+  @location(1) @interpolate(flat)
   b : u32;
-  @location(2)
+  @location(2) @interpolate(flat)
   c : i32;
-  @location(3)
+  @location(3) @interpolate(flat)
   d : u32;
   @builtin(position)
   pos : vec4<f32>;
@@ -1462,11 +1462,11 @@ fn vert_main() -> tint_symbol {
 struct tint_symbol_2 {
   @location(0)
   a : f32;
-  @location(1)
+  @location(1) @interpolate(flat)
   b : u32;
-  @location(2)
+  @location(2) @interpolate(flat)
   c : i32;
-  @location(3)
+  @location(3) @interpolate(flat)
   d : u32;
   @builtin(position)
   pos : vec4<f32>;

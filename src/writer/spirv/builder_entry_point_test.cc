@@ -107,13 +107,14 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, EntryPoint_ReturnValue) {
   // @stage(fragment)
-  // fn frag_main(@location(0) loc_in : u32) -> @location(0) f32 {
+  // fn frag_main(@location(0) @interpolate(flat) loc_in : u32)
+  //     -> @location(0) f32 {
   //   if (loc_in > 10) {
   //     return 0.5;
   //   }
   //   return 1.0;
   // }
-  auto* loc_in = Param("loc_in", ty.u32(), {Location(0)});
+  auto* loc_in = Param("loc_in", ty.u32(), {Location(0), Flat()});
   auto* cond = create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
                                              Expr("loc_in"), Expr(10u));
   Func("frag_main", ast::VariableList{loc_in}, ty.f32(),

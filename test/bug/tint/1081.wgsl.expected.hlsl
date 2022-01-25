@@ -1,7 +1,3 @@
-bug/tint/1081.wgsl:9:22 warning: integral user-defined fragment inputs must have a flat interpolation attribute
-fn main(@location(1) x: vec3<i32>) -> @location(2) i32 {
-                     ^
-
 int f(int x) {
   if (true) {
     if ((x == 10)) {
@@ -14,7 +10,7 @@ int f(int x) {
 }
 
 struct tint_symbol_1 {
-  int3 x : TEXCOORD1;
+  nointerpolation int3 x : TEXCOORD1;
 };
 struct tint_symbol_2 {
   int value : SV_Target2;

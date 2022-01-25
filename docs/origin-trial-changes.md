@@ -1,5 +1,12 @@
 # Tint changes during Origin Trial
 
+## Changes for M100
+
+### Breaking changes
+
+* The `@interpolate(flat)` attribute must now be specified on integral user-defined IO. [tint:1224](crbug.com/tint/1224)
+
+
 ## Changes for M99
 
 ### Breaking changes

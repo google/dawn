@@ -55,7 +55,8 @@ const ast::Struct* InspectorBuilder::MakeInOutStruct(
     std::string member_name;
     uint32_t location;
     std::tie(member_name, location) = var;
-    members.push_back(Member(member_name, ty.u32(), {Location(location)}));
+    members.push_back(
+        Member(member_name, ty.u32(), {Location(location), Flat()}));
   }
   return Structure(name, members);
 }

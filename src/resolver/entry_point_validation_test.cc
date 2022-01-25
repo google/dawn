@@ -371,9 +371,9 @@ static constexpr Params cases[] = {
 
 TEST_P(TypeValidationTest, BareInputs) {
   // @stage(fragment)
-  // fn main(@location(0) a : *) {}
+  // fn main(@location(0) @interpolate(flat) a : *) {}
   auto params = GetParam();
-  auto* a = Param("a", params.create_ast_type(*this), {Location(0)});
+  auto* a = Param("a", params.create_ast_type(*this), {Location(0), Flat()});
   Func(Source{{12, 34}}, "main", {a}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -386,13 +386,13 @@ TEST_P(TypeValidationTest, BareInputs) {
 
 TEST_P(TypeValidationTest, StructInputs) {
   // struct Input {
-  //   @location(0) a : *;
+  //   @location(0) @interpolate(flat) a : *;
   // };
   // @stage(fragment)
   // fn main(a : Input) {}
   auto params = GetParam();
-  auto* input = Structure(
-      "Input", {Member("a", params.create_ast_type(*this), {Location(0)})});
+  auto* input = Structure("Input", {Member("a", params.create_ast_type(*this),
+                                           {Location(0), Flat()})});
   auto* a = Param("a", ty.Of(input), {});
   Func(Source{{12, 34}}, "main", {a}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
@@ -454,9 +454,9 @@ using LocationDecorationTests = ResolverTest;
 
 TEST_F(LocationDecorationTests, Pass) {
   // @stage(fragment)
-  // fn frag_main(@location(0) a: i32) {}
+  // fn frag_main(@location(0) @interpolate(flat) a: i32) {}
 
-  auto* p = Param(Source{{12, 34}}, "a", ty.i32(), {Location(0)});
+  auto* p = Param(Source{{12, 34}}, "a", ty.i32(), {Location(0), Flat()});
   Func("frag_main", {p}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 

@@ -303,7 +303,7 @@ TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
   std::function<const ast::Type*()> tint_type =
       GetTypeFunction(component, composition);
 
-  auto* in_var = Param("in_var", tint_type(), {Location(0u)});
+  auto* in_var = Param("in_var", tint_type(), {Location(0u), Flat()});
   Func("foo", {in_var}, tint_type(), {Return("in_var")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
   Inspector& inspector = Build();
@@ -337,9 +337,9 @@ INSTANTIATE_TEST_SUITE_P(
                                      CompositionType::kVec4)));
 
 TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
-  auto* in_var0 = Param("in_var0", ty.u32(), {Location(0u)});
-  auto* in_var1 = Param("in_var1", ty.u32(), {Location(1u)});
-  auto* in_var4 = Param("in_var4", ty.u32(), {Location(4u)});
+  auto* in_var0 = Param("in_var0", ty.u32(), {Location(0u), Flat()});
+  auto* in_var1 = Param("in_var1", ty.u32(), {Location(1u), Flat()});
+  auto* in_var4 = Param("in_var4", ty.u32(), {Location(4u), Flat()});
   Func("foo", {in_var0, in_var1, in_var4}, ty.u32(), {Return("in_var0")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
   Inspector& inspector = Build();
@@ -353,14 +353,20 @@ TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
   EXPECT_EQ("in_var0", result[0].input_variables[0].name);
   EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
   EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(InterpolationType::kFlat,
+            result[0].input_variables[0].interpolation_type);
   EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
   EXPECT_EQ("in_var1", result[0].input_variables[1].name);
   EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
   EXPECT_EQ(1u, result[0].input_variables[1].location_decoration);
+  EXPECT_EQ(InterpolationType::kFlat,
+            result[0].input_variables[1].interpolation_type);
   EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[1].component_type);
   EXPECT_EQ("in_var4", result[0].input_variables[2].name);
   EXPECT_TRUE(result[0].input_variables[2].has_location_decoration);
   EXPECT_EQ(4u, result[0].input_variables[2].location_decoration);
+  EXPECT_EQ(InterpolationType::kFlat,
+            result[0].input_variables[2].interpolation_type);
   EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[2].component_type);
 
   ASSERT_EQ(1u, result[0].output_variables.size());
@@ -371,11 +377,11 @@ TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
-  auto* in_var_foo = Param("in_var_foo", ty.u32(), {Location(0u)});
+  auto* in_var_foo = Param("in_var_foo", ty.u32(), {Location(0u), Flat()});
   Func("foo", {in_var_foo}, ty.u32(), {Return("in_var_foo")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
 
-  auto* in_var_bar = Param("in_var_bar", ty.u32(), {Location(0u)});
+  auto* in_var_bar = Param("in_var_bar", ty.u32(), {Location(0u), Flat()});
   Func("bar", {in_var_bar}, ty.u32(), {Return("in_var_bar")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(1u)});
 
@@ -390,6 +396,8 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
   EXPECT_EQ("in_var_foo", result[0].input_variables[0].name);
   EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
   EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(InterpolationType::kFlat,
+            result[0].input_variables[0].interpolation_type);
   EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
 
   ASSERT_EQ(1u, result[0].output_variables.size());
@@ -402,6 +410,8 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
   EXPECT_EQ("in_var_bar", result[1].input_variables[0].name);
   EXPECT_TRUE(result[1].input_variables[0].has_location_decoration);
   EXPECT_EQ(0u, result[1].input_variables[0].location_decoration);
+  EXPECT_EQ(InterpolationType::kFlat,
+            result[1].input_variables[0].interpolation_type);
   EXPECT_EQ(ComponentType::kUInt, result[1].input_variables[0].component_type);
 
   ASSERT_EQ(1u, result[1].output_variables.size());

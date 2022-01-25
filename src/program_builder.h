@@ -2300,7 +2300,7 @@ class ProgramBuilder {
   const ast::InterpolateDecoration* Interpolate(
       const Source& source,
       ast::InterpolationType type,
-      ast::InterpolationSampling sampling) {
+      ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone) {
     return create<ast::InterpolateDecoration>(source, type, sampling);
   }
 
@@ -2310,8 +2310,21 @@ class ProgramBuilder {
   /// @returns the interpolate decoration pointer
   const ast::InterpolateDecoration* Interpolate(
       ast::InterpolationType type,
-      ast::InterpolationSampling sampling) {
+      ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone) {
     return create<ast::InterpolateDecoration>(source_, type, sampling);
+  }
+
+  /// Creates an ast::InterpolateDecoration using flat interpolation
+  /// @param source the source information
+  /// @returns the interpolate decoration pointer
+  const ast::InterpolateDecoration* Flat(const Source& source) {
+    return Interpolate(source, ast::InterpolationType::kFlat);
+  }
+
+  /// Creates an ast::InterpolateDecoration using flat interpolation
+  /// @returns the interpolate decoration pointer
+  const ast::InterpolateDecoration* Flat() {
+    return Interpolate(ast::InterpolationType::kFlat);
   }
 
   /// Creates an ast::InvariantDecoration

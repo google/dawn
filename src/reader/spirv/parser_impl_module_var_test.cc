@@ -3727,14 +3727,14 @@ fn main_1() {
 }
 
 struct main_out {
-  @location(0)
+  @location(0) @interpolate(flat)
   x_2_1 : u32;
-  @location(6)
+  @location(6) @interpolate(flat)
   x_4_1 : u32;
 }
 
 @stage(fragment)
-fn main(@location(0) x_1_param : u32, @location(30) x_3_param : u32) -> main_out {
+fn main(@location(0) @interpolate(flat) x_1_param : u32, @location(30) @interpolate(flat) x_3_param : u32) -> main_out {
   x_1 = x_1_param;
   x_3 = x_3_param;
   main_1();
@@ -4679,7 +4679,6 @@ fn main(@location(9) x_1_param : f32, @location(11) x_1_param_1 : vec4<f32>) -> 
 
 TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_Interpolation_Flat_Vertex_In) {
-  // Flat decorations are dropped for integral
   const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Vertex %main "main" %1 %2 %3 %4 %5 %6 %10
      OpDecorate %1 Location 1
@@ -4764,7 +4763,6 @@ fn main(@location(1) @interpolate(flat) x_1_param : u32, @location(2) @interpola
 
 TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_Interpolation_Flat_Vertex_Output) {
-  // Flat decorations are dropped for integral
   const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Vertex %main "main" %1 %2 %3 %4 %5 %6 %10
      OpDecorate %1 Location 1
@@ -4855,7 +4853,6 @@ fn main() -> main_out {
 
 TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_Flatten_Interpolation_Flat_Fragment_In) {
-  // Flat decorations are dropped for integral
   const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1 %2
      OpExecutionMode %main OriginUpperLeft
@@ -4910,7 +4907,6 @@ fn main(@location(1) @interpolate(flat) x_1_param : f32, @location(2) @interpola
 
 TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_Interpolation_Floating_Fragment_In) {
-  // Flat decorations are dropped for integral
   const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1 %2 %3 %4 %5 %6
      OpExecutionMode %main OriginUpperLeft
@@ -5056,7 +5052,6 @@ fn main(@location(1) x_1_param : f32, @location(2) @interpolate(perspective, cen
 
 TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_Interpolation_Floating_Fragment_Out) {
-  // Flat decorations are dropped for integral
   const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1 %2 %3 %4 %5 %6
      OpExecutionMode %main OriginUpperLeft
@@ -5216,6 +5211,162 @@ struct main_out {
 fn main() -> main_out {
   main_1();
   return main_out(x_1.field0, x_1.field1, x_1.field2, x_1.field3, x_1.field4, x_1.field5);
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       EntryPointWrapping_Interpolation_Default_Vertex_Output) {
+  // Integral types default to @interpolate(flat).
+  // Floating types default to @interpolate(perspective, center), which is the
+  // same as WGSL and therefore dropped.
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Vertex %main "main" %1 %2 %3 %4 %5 %6 %10
+     OpDecorate %1 Location 1
+     OpDecorate %2 Location 2
+     OpDecorate %3 Location 3
+     OpDecorate %4 Location 4
+     OpDecorate %5 Location 5
+     OpDecorate %6 Location 6
+     OpDecorate %10 BuiltIn Position
+)" + CommonTypes() +
+                        R"(
+     %ptr_out_uint = OpTypePointer Output %uint
+     %ptr_out_v2uint = OpTypePointer Output %v2uint
+     %ptr_out_int = OpTypePointer Output %int
+     %ptr_out_v2int = OpTypePointer Output %v2int
+     %ptr_out_float = OpTypePointer Output %float
+     %ptr_out_v2float = OpTypePointer Output %v2float
+     %1 = OpVariable %ptr_out_uint Output
+     %2 = OpVariable %ptr_out_v2uint Output
+     %3 = OpVariable %ptr_out_int Output
+     %4 = OpVariable %ptr_out_v2int Output
+     %5 = OpVariable %ptr_out_float Output
+     %6 = OpVariable %ptr_out_v2float Output
+
+     %ptr_out_v4float = OpTypePointer Output %v4float
+     %10 = OpVariable %ptr_out_v4float Output
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = test::ToString(p->program());
+  const std::string expected =
+      R"(var<private> x_1 : u32;
+
+var<private> x_2 : vec2<u32>;
+
+var<private> x_3 : i32;
+
+var<private> x_4 : vec2<i32>;
+
+var<private> x_5 : f32;
+
+var<private> x_6 : vec2<f32>;
+
+var<private> x_10 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  @location(1) @interpolate(flat)
+  x_1_1 : u32;
+  @location(2) @interpolate(flat)
+  x_2_1 : vec2<u32>;
+  @location(3) @interpolate(flat)
+  x_3_1 : i32;
+  @location(4) @interpolate(flat)
+  x_4_1 : vec2<i32>;
+  @location(5)
+  x_5_1 : f32;
+  @location(6)
+  x_6_1 : vec2<f32>;
+  @builtin(position)
+  x_10_1 : vec4<f32>;
+}
+
+@stage(vertex)
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1, x_2, x_3, x_4, x_5, x_6, x_10);
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       EntryPointWrapping_Interpolation_Default_Fragment_In) {
+  // Integral types default to @interpolate(flat).
+  // Floating types default to @interpolate(perspective, center), which is the
+  // same as WGSL and therefore dropped.
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1 %2 %3 %4 %5 %6
+     OpDecorate %1 Location 1
+     OpDecorate %2 Location 2
+     OpDecorate %3 Location 3
+     OpDecorate %4 Location 4
+     OpDecorate %5 Location 5
+     OpDecorate %6 Location 6
+)" + CommonTypes() +
+                        R"(
+     %ptr_in_uint = OpTypePointer Input %uint
+     %ptr_in_v2uint = OpTypePointer Input %v2uint
+     %ptr_in_int = OpTypePointer Input %int
+     %ptr_in_v2int = OpTypePointer Input %v2int
+     %ptr_in_float = OpTypePointer Input %float
+     %ptr_in_v2float = OpTypePointer Input %v2float
+     %1 = OpVariable %ptr_in_uint Input
+     %2 = OpVariable %ptr_in_v2uint Input
+     %3 = OpVariable %ptr_in_int Input
+     %4 = OpVariable %ptr_in_v2int Input
+     %5 = OpVariable %ptr_in_float Input
+     %6 = OpVariable %ptr_in_v2float Input
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = test::ToString(p->program());
+  const std::string expected =
+      R"(var<private> x_1 : u32;
+
+var<private> x_2 : vec2<u32>;
+
+var<private> x_3 : i32;
+
+var<private> x_4 : vec2<i32>;
+
+var<private> x_5 : f32;
+
+var<private> x_6 : vec2<f32>;
+
+fn main_1() {
+  return;
+}
+
+@stage(fragment)
+fn main(@location(1) @interpolate(flat) x_1_param : u32, @location(2) @interpolate(flat) x_2_param : vec2<u32>, @location(3) @interpolate(flat) x_3_param : i32, @location(4) @interpolate(flat) x_4_param : vec2<i32>, @location(5) x_5_param : f32, @location(6) x_6_param : vec2<f32>) {
+  x_1 = x_1_param;
+  x_2 = x_2_param;
+  x_3 = x_3_param;
+  x_4 = x_4_param;
+  x_5 = x_5_param;
+  x_6 = x_6_param;
+  main_1();
 }
 )";
   EXPECT_EQ(got, expected) << got;

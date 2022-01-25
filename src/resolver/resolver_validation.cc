@@ -1055,21 +1055,21 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
       if (pipeline_io_attribute &&
           pipeline_io_attribute->Is<ast::LocationDecoration>()) {
         if (ty->is_integer_scalar_or_vector() && !interpolate_attribute) {
-          // TODO(crbug.com/tint/1224): Make these errors once downstream
-          // usages have caught up (no sooner than M99).
           if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
               param_or_ret == ParamOrRetType::kReturnType) {
-            AddWarning(
+            AddError(
                 "integral user-defined vertex outputs must have a flat "
                 "interpolation attribute",
                 source);
+            return false;
           }
           if (decl->PipelineStage() == ast::PipelineStage::kFragment &&
               param_or_ret == ParamOrRetType::kParameter) {
-            AddWarning(
+            AddError(
                 "integral user-defined fragment inputs must have a flat "
                 "interpolation attribute",
                 source);
+            return false;
           }
         }
       }

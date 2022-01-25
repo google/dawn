@@ -1,12 +1,8 @@
-bug/tint/1081.wgsl:9:22 warning: integral user-defined fragment inputs must have a flat interpolation attribute
-fn main(@location(1) x: vec3<i32>) -> @location(2) i32 {
-                     ^
-
 #include <metal_stdlib>
 
 using namespace metal;
 struct tint_symbol_2 {
-  int3 x [[user(locn1)]];
+  int3 x [[user(locn1)]] [[flat]];
 };
 struct tint_symbol_3 {
   int value [[color(2)]];

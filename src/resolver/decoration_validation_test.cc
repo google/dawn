@@ -1332,11 +1332,10 @@ TEST_F(InterpolateTest, FragmentInput_Integer_MissingFlatInterpolation) {
        ty.void_(), {},
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
-  // TODO(crbug.com/tint/1224): Make this an error.
-  EXPECT_TRUE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 warning: integral user-defined fragment inputs must have a "
-            "flat interpolation attribute");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: integral user-defined fragment inputs must have a flat interpolation attribute)");
 }
 
 TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
@@ -1350,11 +1349,11 @@ TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
   Func("main", {}, ty.Of(s), {Return(Construct(ty.Of(s)))},
        ast::DecorationList{Stage(ast::PipelineStage::kVertex)});
 
-  // TODO(crbug.com/tint/1224): Make this an error.
-  EXPECT_TRUE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 warning: integral user-defined vertex outputs must have a "
-            "flat interpolation attribute");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: integral user-defined vertex outputs must have a flat interpolation attribute
+note: while analysing entry point 'main')");
 }
 
 TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
