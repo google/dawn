@@ -20,12 +20,12 @@ void tint_symbol(tint_symbol_3 tint_symbol_2) {
   return;
 }
 layout(location = 0) in float none;
-layout(location = 1) in float tint_symbol_1;
+layout(location = 1) flat in float tint_symbol_1;
 layout(location = 2) in float perspective_center;
-layout(location = 3) in float perspective_centroid;
+layout(location = 3) centroid in float perspective_centroid;
 layout(location = 4) in float perspective_sample;
 layout(location = 5) in float linear_center;
-layout(location = 6) in float linear_centroid;
+layout(location = 6) centroid in float linear_centroid;
 layout(location = 7) in float linear_sample;
 void main() {
   tint_symbol_3 inputs;

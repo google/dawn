@@ -34,7 +34,7 @@ void frag_main(tint_symbol_3 tint_symbol_2) {
   return;
 }
 layout(location = 0) in float f;
-layout(location = 1) in uint u;
+layout(location = 1) flat in uint u;
 void main() {
   tint_symbol_3 inputs;
   inputs.f = f;

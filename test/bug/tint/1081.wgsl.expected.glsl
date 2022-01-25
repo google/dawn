@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -34,7 +32,7 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-layout(location = 1) in ivec3 x;
+layout(location = 1) flat in ivec3 x;
 layout(location = 2) out int value;
 void main() {
   tint_symbol_2 inputs;
@@ -43,12 +41,5 @@ void main() {
   outputs = tint_symbol(inputs);
   value = outputs.value;
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:35: 'int' : must be qualified as flat in
-ERROR: 0:35: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

@@ -39,8 +39,8 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_3, tint_symbol_1.front_facing, tint_symbol_1.loc1, tint_symbol_1.sample_index, tint_symbol_4, tint_symbol_1.loc2);
   return;
 }
-layout(location = 0) in int loc0;
-layout(location = 1) in uint loc1;
+layout(location = 0) flat in int loc0;
+layout(location = 1) flat in uint loc1;
 layout(location = 2) in float loc2;
 layout(location = 3) in vec4 loc3;
 void main() {
@@ -58,8 +58,8 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:40: 'int' : must be qualified as flat in
-ERROR: 0:40: '' : compilation terminated 
+ERROR: 0:52: 'gl_SampleID' : required extension not requested: GL_OES_sample_variables
+ERROR: 0:52: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

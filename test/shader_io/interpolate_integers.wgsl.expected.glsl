@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -44,10 +42,10 @@ tint_symbol vert_main() {
   wrapper_result.pos = inner_result.pos;
   return wrapper_result;
 }
-layout(location = 0) out int i;
-layout(location = 1) out uint u;
-layout(location = 2) out ivec4 vi;
-layout(location = 3) out uvec4 vu;
+layout(location = 0) flat out int i;
+layout(location = 1) flat out uint u;
+layout(location = 2) flat out ivec4 vi;
+layout(location = 3) flat out uvec4 vu;
 void main() {
   tint_symbol outputs;
   outputs = vert_main();
@@ -99,10 +97,10 @@ tint_symbol_3 frag_main(tint_symbol_2 tint_symbol_1) {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-layout(location = 0) in int i;
-layout(location = 1) in uint u;
-layout(location = 2) in ivec4 vi;
-layout(location = 3) in uvec4 vu;
+layout(location = 0) flat in int i;
+layout(location = 1) flat in uint u;
+layout(location = 2) flat in ivec4 vi;
+layout(location = 3) flat in uvec4 vu;
 layout(location = 0) out int value;
 void main() {
   tint_symbol_2 inputs;
@@ -115,12 +113,5 @@ void main() {
   outputs = frag_main(inputs);
   value = outputs.value;
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:40: 'int' : must be qualified as flat in
-ERROR: 0:40: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
 
 

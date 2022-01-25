@@ -44,12 +44,12 @@ tint_symbol_2 tint_symbol_1() {
   return wrapper_result;
 }
 layout(location = 0) out float none;
-layout(location = 1) out float tint_symbol;
+layout(location = 1) flat out float tint_symbol;
 layout(location = 2) out float perspective_center;
-layout(location = 3) out float perspective_centroid;
+layout(location = 3) centroid out float perspective_centroid;
 layout(location = 4) out float perspective_sample;
 layout(location = 5) out float linear_center;
-layout(location = 6) out float linear_centroid;
+layout(location = 6) centroid out float linear_centroid;
 layout(location = 7) out float linear_sample;
 void main() {
   tint_symbol_2 outputs;

@@ -292,6 +292,11 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on success
   bool EmitWorkgroupVariable(const sem::Variable* var);
 
+  /// Handles emitting interpolation qualifiers
+  /// @param out the output of the expression stream
+  /// @param decos the decorations
+  void EmitInterpolationQualifiers(std::ostream& out,
+                                   const ast::DecorationList& decos);
   /// Handles emitting decorations
   /// @param out the output of the expression stream
   /// @param decos the decorations
@@ -409,14 +414,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param builtin the builtin to convert
   /// @returns the appropriate semantic type or null on error.
   sem::Type* builtin_type(ast::Builtin builtin);
-
-  /// Converts interpolation attributes to a GLSL modifiers
-  /// @param type the interpolation type
-  /// @param sampling the interpolation sampling
-  /// @returns the string name of the attribute or blank on error
-  std::string interpolation_to_modifiers(
-      ast::InterpolationType type,
-      ast::InterpolationSampling sampling) const;
 
  private:
   enum class VarType { kIn, kOut };

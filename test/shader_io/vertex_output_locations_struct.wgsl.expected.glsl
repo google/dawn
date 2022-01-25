@@ -31,8 +31,8 @@ tint_symbol_1 tint_symbol() {
   wrapper_result.position = inner_result.position;
   return wrapper_result;
 }
-layout(location = 0) out int loc0;
-layout(location = 1) out uint loc1;
+layout(location = 0) flat out int loc0;
+layout(location = 1) flat out uint loc1;
 layout(location = 2) out float loc2;
 layout(location = 3) out vec4 loc3;
 void main() {

@@ -1840,33 +1840,30 @@ const char* GeneratorImpl::builtin_to_string(ast::Builtin builtin,
   }
 }
 
-std::string GeneratorImpl::interpolation_to_modifiers(
-    ast::InterpolationType type,
-    ast::InterpolationSampling sampling) const {
-  std::string modifiers;
-  switch (type) {
-    case ast::InterpolationType::kPerspective:
-      modifiers += "linear ";
-      break;
-    case ast::InterpolationType::kLinear:
-      modifiers += "noperspective ";
-      break;
-    case ast::InterpolationType::kFlat:
-      modifiers += "nointerpolation ";
-      break;
+void GeneratorImpl::EmitInterpolationQualifiers(
+    std::ostream& out,
+    const ast::DecorationList& decorations) {
+  for (auto* deco : decorations) {
+    if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+      switch (interpolate->type) {
+        case ast::InterpolationType::kPerspective:
+        case ast::InterpolationType::kLinear:
+          break;
+        case ast::InterpolationType::kFlat:
+          out << "flat ";
+          break;
+      }
+      switch (interpolate->sampling) {
+        case ast::InterpolationSampling::kCentroid:
+          out << "centroid ";
+          break;
+        case ast::InterpolationSampling::kSample:
+        case ast::InterpolationSampling::kCenter:
+        case ast::InterpolationSampling::kNone:
+          break;
+      }
+    }
   }
-  switch (sampling) {
-    case ast::InterpolationSampling::kCentroid:
-      modifiers += "centroid ";
-      break;
-    case ast::InterpolationSampling::kSample:
-      modifiers += "sample ";
-      break;
-    case ast::InterpolationSampling::kCenter:
-    case ast::InterpolationSampling::kNone:
-      break;
-  }
-  return modifiers;
 }
 
 bool GeneratorImpl::EmitDecorations(std::ostream& out,
@@ -1980,6 +1977,10 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
       if (!EmitDecorations(out, decorations)) {
         return false;
       }
+      // GLSL does not support interpolation qualifiers on vertex inputs
+      if (func->PipelineStage() != ast::PipelineStage::kVertex) {
+        EmitInterpolationQualifiers(out, decorations);
+      }
       if (!EmitTypeAndName(
               out, member->Type(), ast::StorageClass::kInput,
               ast::Access::kReadWrite,
@@ -2000,6 +2001,10 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
       }
       if (!EmitDecorations(out, decorations)) {
         return false;
+      }
+      // GLSL does not support interpolation qualifiers on fragment outputs
+      if (func->PipelineStage() != ast::PipelineStage::kFragment) {
+        EmitInterpolationQualifiers(out, decorations);
       }
       if (!EmitTypeAndName(
               out, member->Type(), ast::StorageClass::kOutput,
@@ -2614,28 +2619,11 @@ bool GeneratorImpl::EmitStructMembers(TextBuffer* b, const sem::Struct* str) {
 
     auto out = line(b);
 
-    std::string pre, post;
-
-    if (auto* decl = mem->Declaration()) {
-      for (auto* deco : decl->decorations) {
-        if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
-          auto mod = interpolation_to_modifiers(interpolate->type,
-                                                interpolate->sampling);
-          if (mod.empty()) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "unsupported interpolation");
-            return false;
-          }
-        }
-      }
-    }
-
-    out << pre;
     if (!EmitTypeAndName(out, ty, ast::StorageClass::kNone,
                          ast::Access::kReadWrite, name)) {
       return false;
     }
-    out << post << ";";
+    out << ";";
   }
   return true;
 }

@@ -32,7 +32,7 @@ tint_symbol vert_main1() {
   wrapper_result.loc0 = inner_result.loc0;
   return wrapper_result;
 }
-layout(location = 0) out int loc0;
+layout(location = 0) flat out int loc0;
 void main() {
   tint_symbol outputs;
   outputs = vert_main1();
@@ -75,7 +75,7 @@ tint_symbol_1 vert_main2() {
   wrapper_result_1.loc0 = inner_result_1.loc0;
   return wrapper_result_1;
 }
-layout(location = 0) out int loc0;
+layout(location = 0) flat out int loc0;
 void main() {
   tint_symbol_1 outputs;
   outputs = vert_main2();
