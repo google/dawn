@@ -1787,6 +1787,7 @@ sem::Type* GeneratorImpl::builtin_type(ast::Builtin builtin) {
     }
     case ast::Builtin::kLocalInvocationId:
     case ast::Builtin::kGlobalInvocationId:
+    case ast::Builtin::kNumWorkgroups:
     case ast::Builtin::kWorkgroupId: {
       auto* u32 = builder_.create<sem::U32>();
       return builder_.create<sem::Vector>(u32, 3);
@@ -1828,6 +1829,8 @@ const char* GeneratorImpl::builtin_to_string(ast::Builtin builtin,
       return "gl_LocalInvocationIndex";
     case ast::Builtin::kGlobalInvocationId:
       return "gl_GlobalInvocationID";
+    case ast::Builtin::kNumWorkgroups:
+      return "gl_NumWorkGroups";
     case ast::Builtin::kWorkgroupId:
       return "gl_WorkGroupID";
     case ast::Builtin::kSampleIndex:

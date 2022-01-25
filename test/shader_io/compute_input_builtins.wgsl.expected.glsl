@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -26,16 +24,8 @@ void main() {
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   inputs.global_invocation_id = gl_GlobalInvocationID;
   inputs.workgroup_id = gl_WorkGroupID;
-  inputs.num_workgroups = uvec3();
+  inputs.num_workgroups = gl_NumWorkGroups;
   tint_symbol(inputs);
 }
-
-
-Error parsing GLSL shader:
-ERROR: 0:27: 'constructor' : not enough data provided for construction 
-ERROR: 0:27: 'assign' :  cannot convert from ' const float' to ' global highp 3-component vector of uint'
-ERROR: 0:27: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
 
 
