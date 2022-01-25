@@ -246,6 +246,8 @@ namespace dawn::native {
                                         const Format* format) {
             DAWN_TRY(dawn::native::ValidateTextureUsage(usage));
 
+            DAWN_INVALID_IF(usage == wgpu::TextureUsage::None, "The texture usage must not be 0.");
+
             constexpr wgpu::TextureUsage kValidCompressedUsages =
                 wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
                 wgpu::TextureUsage::CopyDst;

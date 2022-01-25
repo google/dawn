@@ -43,7 +43,7 @@ namespace {
     // Test texture views compatibility rules.
     TEST_F(VideoViewsValidation, CreateViewFails) {
         wgpu::Texture videoTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::None);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::TextureViewDescriptor viewDesc = {};
 
@@ -66,7 +66,7 @@ namespace {
         wgpu::TextureDescriptor desc;
         desc.format = wgpu::TextureFormat::RGBA8Unorm;
         desc.dimension = wgpu::TextureDimension::e2D;
-        desc.usage = wgpu::TextureUsage::None;
+        desc.usage = wgpu::TextureUsage::TextureBinding;
         desc.size = {1, 1, 1};
 
         wgpu::Texture texture = device.CreateTexture(&desc);
@@ -91,7 +91,7 @@ namespace {
     // Test texture views compatibility rules.
     TEST_F(VideoViewsValidation, CreateViewSucceeds) {
         wgpu::Texture yuvTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::None);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         // Per plane view formats unspecified.
         wgpu::TextureViewDescriptor planeViewDesc = {};

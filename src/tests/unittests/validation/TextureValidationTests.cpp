@@ -70,6 +70,25 @@ namespace {
             wgpu::TextureFormat::RGBA8Unorm;
     };
 
+    // Test the validation of non-zero texture usage
+    TEST_F(TextureValidationTest, UsageNonZero) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+
+        // Descriptor with proper usage is allowed
+        {
+            descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+
+            device.CreateTexture(&descriptor);
+        }
+
+        // It is an error to create a texture with zero usage
+        {
+            descriptor.usage = wgpu::TextureUsage::None;
+
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+    }
+
     // Test the validation of sample count
     TEST_F(TextureValidationTest, SampleCount) {
         wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
