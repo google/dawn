@@ -24,6 +24,47 @@ namespace {
 
 using BindingRemapperTest = TransformTest;
 
+TEST_F(BindingRemapperTest, ShouldRunNoRemappings) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<BindingRemapper>(src));
+}
+
+TEST_F(BindingRemapperTest, ShouldRunEmptyRemappings) {
+  auto* src = R"()";
+
+  DataMap data;
+  data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
+                                        BindingRemapper::AccessControls{});
+
+  EXPECT_FALSE(ShouldRun<BindingRemapper>(src, data));
+}
+
+TEST_F(BindingRemapperTest, ShouldRunBindingPointRemappings) {
+  auto* src = R"()";
+
+  DataMap data;
+  data.Add<BindingRemapper::Remappings>(
+      BindingRemapper::BindingPoints{
+          {{2, 1}, {1, 2}},
+      },
+      BindingRemapper::AccessControls{});
+
+  EXPECT_TRUE(ShouldRun<BindingRemapper>(src, data));
+}
+
+TEST_F(BindingRemapperTest, ShouldRunAccessControlRemappings) {
+  auto* src = R"()";
+
+  DataMap data;
+  data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
+                                        BindingRemapper::AccessControls{
+                                            {{2, 1}, ast::Access::kWrite},
+                                        });
+
+  EXPECT_TRUE(ShouldRun<BindingRemapper>(src, data));
+}
+
 TEST_F(BindingRemapperTest, NoRemappings) {
   auto* src = R"(
 struct S {
@@ -359,17 +400,18 @@ TEST_F(BindingRemapperTest, NoData) {
   auto* src = R"(
 struct S {
   a : f32;
-};
+}
 
 @group(2) @binding(1) var<storage, read> a : S;
+
 @group(3) @binding(2) var<storage, read> b : S;
 
 @stage(compute) @workgroup_size(1)
-fn f() {}
+fn f() {
+}
 )";
 
-  auto* expect =
-      "error: missing transform data for tint::transform::BindingRemapper";
+  auto* expect = src;
 
   auto got = Run<BindingRemapper>(src);
 

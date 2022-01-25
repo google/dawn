@@ -68,6 +68,15 @@ RemovePhonies::RemovePhonies() = default;
 
 RemovePhonies::~RemovePhonies() = default;
 
+bool RemovePhonies::ShouldRun(const Program* program, const DataMap&) const {
+  for (auto* node : program->ASTNodes().Objects()) {
+    if (node->Is<ast::PhonyExpression>()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   auto& sem = ctx.src->Sem();
 

@@ -81,7 +81,7 @@ struct MultiplanarExternalTexture::State {
     // represent the secondary plane and one uniform buffer for the
     // ExternalTextureParams struct).
     ctx.ReplaceAll([&](const ast::Variable* var) -> const ast::Variable* {
-      if (!::tint::Is<ast::ExternalTexture>(var->type)) {
+      if (!sem.Get<sem::ExternalTexture>(var->type)) {
         return nullptr;
       }
 
@@ -201,7 +201,7 @@ struct MultiplanarExternalTexture::State {
     // functions.
     ctx.ReplaceAll([&](const ast::Function* fn) -> const ast::Function* {
       for (const ast::Variable* param : fn->params) {
-        if (::tint::Is<ast::ExternalTexture>(param->type)) {
+        if (sem.Get<sem::ExternalTexture>(param->type)) {
           // If we find a texture_external, we must ensure the
           // ExternalTextureParams struct exists.
           if (!params_struct_sym.IsValid()) {
@@ -406,6 +406,18 @@ MultiplanarExternalTexture::NewBindingPoints::~NewBindingPoints() = default;
 
 MultiplanarExternalTexture::MultiplanarExternalTexture() = default;
 MultiplanarExternalTexture::~MultiplanarExternalTexture() = default;
+
+bool MultiplanarExternalTexture::ShouldRun(const Program* program,
+                                           const DataMap&) const {
+  for (auto* node : program->ASTNodes().Objects()) {
+    if (auto* ty = node->As<ast::Type>()) {
+      if (program->Sem().Get<sem::ExternalTexture>(ty)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 // Within this transform, an instance of a texture_external binding is unpacked
 // into two texture_2d<f32> bindings representing two possible planes of a

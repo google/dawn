@@ -25,6 +25,9 @@ namespace transform {
 /// of N column vectors.
 /// This transform is used by the SPIR-V reader to handle the SPIR-V
 /// MatrixStride decoration.
+///
+/// @note Depends on the following transforms to have been run first:
+/// * SimplifyPointers
 class DecomposeStridedMatrix
     : public Castable<DecomposeStridedMatrix, Transform> {
  public:
@@ -35,8 +38,10 @@ class DecomposeStridedMatrix
   ~DecomposeStridedMatrix() override;
 
   /// @param program the program to inspect
+  /// @param data optional extra transform-specific input data
   /// @returns true if this transform should be run for the given program
-  bool ShouldRun(const Program* program) const override;
+  bool ShouldRun(const Program* program,
+                 const DataMap& data = {}) const override;
 
  protected:
   /// Runs the transform using the CloneContext built for transforming a

@@ -23,18 +23,6 @@ namespace {
 
 using CanonicalizeEntryPointIOTest = TransformTest;
 
-TEST_F(CanonicalizeEntryPointIOTest, Error_MissingUnshadow) {
-  auto* src = "";
-
-  auto* expect =
-      "error: tint::transform::CanonicalizeEntryPointIO depends on "
-      "tint::transform::Unshadow but the dependency was not run";
-
-  auto got = Run<CanonicalizeEntryPointIO>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(CanonicalizeEntryPointIOTest, Error_MissingTransformData) {
   auto* src = "";
 

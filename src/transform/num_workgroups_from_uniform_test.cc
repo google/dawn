@@ -26,8 +26,28 @@ namespace {
 
 using NumWorkgroupsFromUniformTest = TransformTest;
 
+TEST_F(NumWorkgroupsFromUniformTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<NumWorkgroupsFromUniform>(src));
+}
+
+TEST_F(NumWorkgroupsFromUniformTest, ShouldRunHasNumWorkgroups) {
+  auto* src = R"(
+[[stage(compute), workgroup_size(1)]]
+fn main([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
+}
+)";
+
+  EXPECT_TRUE(ShouldRun<NumWorkgroupsFromUniform>(src));
+}
+
 TEST_F(NumWorkgroupsFromUniformTest, Error_MissingTransformData) {
-  auto* src = "";
+  auto* src = R"(
+[[stage(compute), workgroup_size(1)]]
+fn main([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
+}
+)";
 
   auto* expect =
       "error: missing transform data for "
@@ -38,19 +58,6 @@ TEST_F(NumWorkgroupsFromUniformTest, Error_MissingTransformData) {
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
       src, data);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(NumWorkgroupsFromUniformTest, Error_MissingCanonicalizeEntryPointIO) {
-  auto* src = "";
-
-  auto* expect =
-      "error: tint::transform::NumWorkgroupsFromUniform depends on "
-      "tint::transform::CanonicalizeEntryPointIO but the dependency was not "
-      "run";
-
-  auto got = Run<NumWorkgroupsFromUniform>(src);
 
   EXPECT_EQ(expect, str(got));
 }

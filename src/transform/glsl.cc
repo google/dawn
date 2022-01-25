@@ -113,7 +113,6 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   ProgramBuilder builder;
   CloneContext ctx(&builder, &out.program);
   ctx.Clone();
-  builder.SetTransformApplied(this);
   return Output{Program(std::move(builder))};
 }
 

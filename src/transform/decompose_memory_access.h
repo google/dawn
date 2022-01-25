@@ -105,6 +105,12 @@ class DecomposeMemoryAccess
   /// Destructor
   ~DecomposeMemoryAccess() override;
 
+  /// @param program the program to inspect
+  /// @param data optional extra transform-specific input data
+  /// @returns true if this transform should be run for the given program
+  bool ShouldRun(const Program* program,
+                 const DataMap& data = {}) const override;
+
  protected:
   /// Runs the transform using the CloneContext built for transforming a
   /// program. Run() is responsible for calling Clone() on the CloneContext.

@@ -44,9 +44,6 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     if (gen_) {
       return *gen_;
     }
-    // Fake that the GLSL sanitizer has been applied, so that we can unit test
-    // the writer without it erroring.
-    SetTransformApplied<transform::Glsl>();
     [&]() {
       ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                              << diag::Formatter().format(Diagnostics());

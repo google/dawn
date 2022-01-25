@@ -22,6 +22,34 @@ namespace {
 
 using DecomposeMemoryAccessTest = TransformTest;
 
+TEST_F(DecomposeMemoryAccessTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<DecomposeMemoryAccess>(src));
+}
+
+TEST_F(DecomposeMemoryAccessTest, ShouldRunStorageBuffer) {
+  auto* src = R"(
+struct Buffer {
+  i : i32;
+};
+[[group(0), binding(0)]] var<storage, read_write> sb : Buffer;
+)";
+
+  EXPECT_TRUE(ShouldRun<DecomposeMemoryAccess>(src));
+}
+
+TEST_F(DecomposeMemoryAccessTest, ShouldRunUniformBuffer) {
+  auto* src = R"(
+struct Buffer {
+  i : i32;
+};
+[[group(0), binding(0)]] var<uniform> ub : Buffer;
+)";
+
+  EXPECT_TRUE(ShouldRun<DecomposeMemoryAccess>(src));
+}
+
 TEST_F(DecomposeMemoryAccessTest, SB_BasicLoad) {
   auto* src = R"(
 struct SB {

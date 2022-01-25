@@ -56,6 +56,15 @@ LoopToForLoop::LoopToForLoop() = default;
 
 LoopToForLoop::~LoopToForLoop() = default;
 
+bool LoopToForLoop::ShouldRun(const Program* program, const DataMap&) const {
+  for (auto* node : program->ASTNodes().Objects()) {
+    if (node->Is<ast::LoopStatement>()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   ctx.ReplaceAll([&](const ast::LoopStatement* loop) -> const ast::Statement* {
     // For loop condition is taken from the first statement in the loop.

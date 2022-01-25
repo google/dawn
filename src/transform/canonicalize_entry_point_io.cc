@@ -551,10 +551,6 @@ struct CanonicalizeEntryPointIO::State {
 void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
                                    const DataMap& inputs,
                                    DataMap&) const {
-  if (!Requires<Unshadow>(ctx)) {
-    return;
-  }
-
   auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(

@@ -23,18 +23,6 @@ namespace {
 
 using SimplifyPointersTest = TransformTest;
 
-TEST_F(SimplifyPointersTest, Error_MissingSimplifyPointers) {
-  auto* src = "";
-
-  auto* expect =
-      "error: tint::transform::SimplifyPointers depends on "
-      "tint::transform::Unshadow but the dependency was not run";
-
-  auto got = Run<SimplifyPointers>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(SimplifyPointersTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";

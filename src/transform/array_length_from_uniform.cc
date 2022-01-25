@@ -20,6 +20,7 @@
 
 #include "src/program_builder.h"
 #include "src/sem/call.h"
+#include "src/sem/function.h"
 #include "src/sem/variable.h"
 #include "src/transform/simplify_pointers.h"
 
@@ -93,13 +94,23 @@ static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
   }
 }
 
+bool ArrayLengthFromUniform::ShouldRun(const Program* program,
+                                       const DataMap&) const {
+  for (auto* fn : program->AST().Functions()) {
+    if (auto* sem_fn = program->Sem().Get(fn)) {
+      for (auto* intrinsic : sem_fn->DirectlyCalledIntrinsics()) {
+        if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 void ArrayLengthFromUniform::Run(CloneContext& ctx,
                                  const DataMap& inputs,
                                  DataMap& outputs) const {
-  if (!Requires<SimplifyPointers>(ctx)) {
-    return;
-  }
-
   auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(

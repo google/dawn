@@ -22,6 +22,24 @@ namespace {
 
 using LoopToForLoopTest = TransformTest;
 
+TEST_F(LoopToForLoopTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<LoopToForLoop>(src));
+}
+
+TEST_F(LoopToForLoopTest, ShouldRunHasForLoop) {
+  auto* src = R"(
+fn f() {
+  loop {
+    break;
+  }
+}
+)";
+
+  EXPECT_TRUE(ShouldRun<LoopToForLoop>(src));
+}
+
 TEST_F(LoopToForLoopTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";

@@ -25,6 +25,9 @@ namespace transform {
 /// temporary local variable, assigns to the local variable, and copies the
 /// array back. This is to work around FXC's compilation failure for these cases
 /// (see crbug.com/tint/1206).
+///
+/// @note Depends on the following transforms to have been run first:
+/// * SimplifyPointers
 class LocalizeStructArrayAssignment
     : public Castable<LocalizeStructArrayAssignment, Transform> {
  public:

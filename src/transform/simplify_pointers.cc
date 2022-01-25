@@ -232,9 +232,6 @@ SimplifyPointers::SimplifyPointers() = default;
 SimplifyPointers::~SimplifyPointers() = default;
 
 void SimplifyPointers::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-  if (!Requires<Unshadow>(ctx)) {
-    return;
-  }
   State(ctx).Run();
 }
 

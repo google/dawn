@@ -21,16 +21,6 @@ namespace {
 
 using GlslGeneratorImplTest = TestHelper;
 
-TEST_F(GlslGeneratorImplTest, ErrorIfSanitizerNotRun) {
-  auto program = std::make_unique<Program>(std::move(*this));
-  GeneratorImpl gen(program.get());
-  EXPECT_FALSE(gen.Generate());
-  EXPECT_EQ(
-      gen.error(),
-      "error: GLSL writer requires the transform::Glsl sanitizer to have been "
-      "applied to the input program");
-}
-
 TEST_F(GlslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{});

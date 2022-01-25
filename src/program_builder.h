@@ -2469,49 +2469,6 @@ class ProgramBuilder {
     source_ = Source(loc);
   }
 
-  /// Marks that the given transform has been applied to this program.
-  /// @param transform the transform that has been applied
-  void SetTransformApplied(const CastableBase* transform) {
-    transforms_applied_.emplace(&transform->TypeInfo());
-  }
-
-  /// Marks that the given transform `T` has been applied to this program.
-  template <typename T>
-  void SetTransformApplied() {
-    transforms_applied_.emplace(&TypeInfo::Of<T>());
-  }
-
-  /// Marks that the transforms with the given TypeInfos have been applied to
-  /// this program.
-  /// @param transforms the set of transform TypeInfos that has been applied
-  void SetTransformApplied(
-      const std::unordered_set<const TypeInfo*>& transforms) {
-    for (auto* transform : transforms) {
-      transforms_applied_.emplace(transform);
-    }
-  }
-
-  /// Unmarks that the given transform `T` has been applied to this program.
-  template <typename T>
-  void UnsetTransformApplied() {
-    auto it = transforms_applied_.find(&TypeInfo::Of<T>());
-    if (it != transforms_applied_.end()) {
-      transforms_applied_.erase(it);
-    }
-  }
-
-  /// @returns true if the transform of type `T` was applied.
-  template <typename T>
-  bool HasTransformApplied() {
-    return transforms_applied_.count(&TypeInfo::Of<T>());
-  }
-
-  /// @return the TypeInfo pointers of all transforms that have been applied to
-  /// this program.
-  std::unordered_set<const TypeInfo*> TransformsApplied() const {
-    return transforms_applied_;
-  }
-
   /// Helper for returning the resolved semantic type of the expression `expr`.
   /// @note As the Resolver is run when the Program is built, this will only be
   /// useful for the Resolver itself and tests that use their own Resolver.
@@ -2592,7 +2549,6 @@ class ProgramBuilder {
   sem::Info sem_;
   SymbolTable symbols_{id_};
   diag::List diagnostics_;
-  std::unordered_set<const TypeInfo*> transforms_applied_;
 
   /// The source to use when creating AST nodes without providing a Source as
   /// the first argument.

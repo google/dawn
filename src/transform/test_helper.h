@@ -81,6 +81,17 @@ class TransformTestBase : public BASE {
     return manager.Run(&program, data);
   }
 
+  /// @param in the input WGSL source
+  /// @param data the optional DataMap to pass to Transform::Run()
+  /// @return true if the transform should be run for the given input.
+  template <typename TRANSFORM>
+  bool ShouldRun(std::string in, const DataMap& data = {}) {
+    auto file = std::make_unique<Source::File>("test", in);
+    auto program = reader::wgsl::Parse(file.get());
+    EXPECT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    return TRANSFORM().ShouldRun(&program, data);
+  }
+
   /// @param output the output of the transform
   /// @returns the output program as a WGSL string, or an error string if the
   /// program is not valid.

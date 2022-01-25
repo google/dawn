@@ -31,55 +31,25 @@ namespace {
 using DecomposeStridedMatrixTest = TransformTest;
 using f32 = ProgramBuilder::f32;
 
+TEST_F(DecomposeStridedMatrixTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<DecomposeStridedMatrix>(src));
+}
+
+TEST_F(DecomposeStridedMatrixTest, ShouldRunNonStridedMatrox) {
+  auto* src = R"(
+var<private> m : mat3x2<f32>;
+)";
+
+  EXPECT_FALSE(ShouldRun<DecomposeStridedMatrix>(src));
+}
+
 TEST_F(DecomposeStridedMatrixTest, Empty) {
   auto* src = R"()";
   auto* expect = src;
 
-  auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(DecomposeStridedMatrixTest, MissingDependencySimplify) {
-  // struct S {
-  //   [[offset(16), stride(32)]]
-  //   [[internal(ignore_stride_decoration)]]
-  //   m : mat2x2<f32>;
-  // };
-  // [[group(0), binding(0)]] var<uniform> s : S;
-  //
-  // [[stage(compute), workgroup_size(1)]]
-  // fn f() {
-  //   let x : mat2x2<f32> = s.m;
-  // }
-  ProgramBuilder b;
-  auto* S = b.Structure(
-      "S",
-      {
-          b.Member(
-              "m", b.ty.mat2x2<f32>(),
-              {
-                  b.create<ast::StructMemberOffsetDecoration>(16),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
-              }),
-      });
-  b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
-           b.GroupAndBinding(0, 0));
-  b.Func(
-      "f", {}, b.ty.void_(),
-      {
-          b.Decl(b.Const("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
-      },
-      {
-          b.Stage(ast::PipelineStage::kCompute),
-          b.WorkgroupSize(1),
-      });
-
-  auto* expect =
-      R"(error: tint::transform::DecomposeStridedMatrix depends on tint::transform::SimplifyPointers but the dependency was not run)";
-
-  auto got = Run<DecomposeStridedMatrix>(Program(std::move(b)));
+  auto got = Run<DecomposeStridedMatrix>(src);
 
   EXPECT_EQ(expect, str(got));
 }

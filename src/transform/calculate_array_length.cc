@@ -22,6 +22,7 @@
 #include "src/program_builder.h"
 #include "src/sem/block_statement.h"
 #include "src/sem/call.h"
+#include "src/sem/function.h"
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
@@ -71,13 +72,24 @@ CalculateArrayLength::BufferSizeIntrinsic::Clone(CloneContext* ctx) const {
 CalculateArrayLength::CalculateArrayLength() = default;
 CalculateArrayLength::~CalculateArrayLength() = default;
 
+bool CalculateArrayLength::ShouldRun(const Program* program,
+                                     const DataMap&) const {
+  for (auto* fn : program->AST().Functions()) {
+    if (auto* sem_fn = program->Sem().Get(fn)) {
+      for (auto* intrinsic : sem_fn->DirectlyCalledIntrinsics()) {
+        if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 void CalculateArrayLength::Run(CloneContext& ctx,
                                const DataMap&,
                                DataMap&) const {
   auto& sem = ctx.src->Sem();
-  if (!Requires<SimplifyPointers>(ctx)) {
-    return;
-  }
 
   // get_buffer_size_intrinsic() emits the function decorated with
   // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to

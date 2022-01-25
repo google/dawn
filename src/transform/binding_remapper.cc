@@ -42,6 +42,14 @@ BindingRemapper::Remappings::~Remappings() = default;
 BindingRemapper::BindingRemapper() = default;
 BindingRemapper::~BindingRemapper() = default;
 
+bool BindingRemapper::ShouldRun(const Program*, const DataMap& inputs) const {
+  if (auto* remappings = inputs.Get<Remappings>()) {
+    return !remappings->binding_points.empty() ||
+           !remappings->access_controls.empty();
+  }
+  return false;
+}
+
 void BindingRemapper::Run(CloneContext& ctx,
                           const DataMap& inputs,
                           DataMap&) const {

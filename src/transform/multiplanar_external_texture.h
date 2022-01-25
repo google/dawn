@@ -76,6 +76,12 @@ class MultiplanarExternalTexture
   /// Destructor
   ~MultiplanarExternalTexture() override;
 
+  /// @param program the program to inspect
+  /// @param data optional extra transform-specific input data
+  /// @returns true if this transform should be run for the given program
+  bool ShouldRun(const Program* program,
+                 const DataMap& data = {}) const override;
+
  protected:
   struct State;
 

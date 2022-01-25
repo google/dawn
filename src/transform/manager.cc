@@ -53,7 +53,7 @@ Output Manager::Run(const Program* program, const DataMap& data) const {
 
   Output out;
   for (const auto& transform : transforms_) {
-    if (!transform->ShouldRun(in)) {
+    if (!transform->ShouldRun(in, data)) {
       TINT_IF_PRINT_PROGRAM(std::cout << "Skipping "
                                       << transform->TypeInfo().name);
       continue;

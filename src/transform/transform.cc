@@ -52,7 +52,6 @@ Output Transform::Run(const Program* program,
   CloneContext ctx(&builder, program);
   Output output;
   Run(ctx, data, output.data);
-  builder.SetTransformApplied(this);
   output.program = Program(std::move(builder));
   return output;
 }
@@ -62,22 +61,7 @@ void Transform::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
       << "Transform::Run() unimplemented for " << TypeInfo().name;
 }
 
-bool Transform::ShouldRun(const Program*) const {
-  return true;
-}
-
-bool Transform::Requires(
-    CloneContext& ctx,
-    std::initializer_list<const ::tint::TypeInfo*> deps) const {
-  for (auto* dep : deps) {
-    if (!ctx.src->HasTransformApplied(dep)) {
-      ctx.dst->Diagnostics().add_error(
-          diag::System::Transform, std::string(TypeInfo().name) +
-                                       " depends on " + std::string(dep->name) +
-                                       " but the dependency was not run");
-      return false;
-    }
-  }
+bool Transform::ShouldRun(const Program*, const DataMap&) const {
   return true;
 }
 

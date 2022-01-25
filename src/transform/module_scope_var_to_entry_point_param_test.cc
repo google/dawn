@@ -24,6 +24,20 @@ namespace {
 
 using ModuleScopeVarToEntryPointParamTest = TransformTest;
 
+TEST_F(ModuleScopeVarToEntryPointParamTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<ModuleScopeVarToEntryPointParam>(src));
+}
+
+TEST_F(ModuleScopeVarToEntryPointParamTest, ShouldRunHasGlobal) {
+  auto* src = R"(
+var<private> v : i32;
+)";
+
+  EXPECT_TRUE(ShouldRun<ModuleScopeVarToEntryPointParam>(src));
+}
+
 TEST_F(ModuleScopeVarToEntryPointParamTest, Basic) {
   auto* src = R"(
 var<private> p : f32;

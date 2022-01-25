@@ -124,14 +124,6 @@ GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-  if (!builder_.HasTransformApplied<transform::Glsl>()) {
-    diagnostics_.add_error(
-        diag::System::Writer,
-        "GLSL writer requires the transform::Glsl sanitizer to have been "
-        "applied to the input program");
-    return false;
-  }
-
   const TypeInfo* last_kind = nullptr;
   size_t last_padding_line = 0;
 

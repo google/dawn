@@ -38,6 +38,16 @@ WrapArraysInStructs::WrapArraysInStructs() = default;
 
 WrapArraysInStructs::~WrapArraysInStructs() = default;
 
+bool WrapArraysInStructs::ShouldRun(const Program* program,
+                                    const DataMap&) const {
+  for (auto* node : program->ASTNodes().Objects()) {
+    if (program->Sem().Get<sem::Array>(node->As<ast::Type>())) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void WrapArraysInStructs::Run(CloneContext& ctx,
                               const DataMap&,
                               DataMap&) const {

@@ -187,9 +187,10 @@ SanitizedResult Sanitize(
   if (!result.program.IsValid()) {
     return result;
   }
-  result.used_array_length_from_uniform_indices =
-      std::move(out.data.Get<transform::ArrayLengthFromUniform::Result>()
-                    ->used_size_indices);
+  if (auto* res = out.data.Get<transform::ArrayLengthFromUniform::Result>()) {
+    result.used_array_length_from_uniform_indices =
+        std::move(res->used_size_indices);
+  }
   result.needs_storage_buffer_sizes =
       !result.used_array_length_from_uniform_indices.empty();
   return result;

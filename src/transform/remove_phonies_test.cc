@@ -26,6 +26,22 @@ namespace {
 
 using RemovePhoniesTest = TransformTest;
 
+TEST_F(RemovePhoniesTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<RemovePhonies>(src));
+}
+
+TEST_F(RemovePhoniesTest, ShouldRunHasPhony) {
+  auto* src = R"(
+fn f() {
+  _ = 1;
+}
+)";
+
+  EXPECT_TRUE(ShouldRun<RemovePhonies>(src));
+}
+
 TEST_F(RemovePhoniesTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";

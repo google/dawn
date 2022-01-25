@@ -42,7 +42,6 @@ Program::Program(Program&& program)
       sem_(std::move(program.sem_)),
       symbols_(std::move(program.symbols_)),
       diagnostics_(std::move(program.diagnostics_)),
-      transforms_applied_(std::move(program.transforms_applied_)),
       is_valid_(program.is_valid_) {
   program.AssertNotMoved();
   program.moved_ = true;
@@ -67,7 +66,6 @@ Program::Program(ProgramBuilder&& builder) {
   sem_ = std::move(builder.Sem());
   symbols_ = std::move(builder.Symbols());
   diagnostics_.add(std::move(builder.Diagnostics()));
-  transforms_applied_ = builder.TransformsApplied();
   builder.MarkAsMoved();
 
   if (!is_valid_ && !diagnostics_.contains_errors()) {
@@ -92,7 +90,6 @@ Program& Program::operator=(Program&& program) {
   sem_ = std::move(program.sem_);
   symbols_ = std::move(program.symbols_);
   diagnostics_ = std::move(program.diagnostics_);
-  transforms_applied_ = std::move(program.transforms_applied_);
   is_valid_ = program.is_valid_;
   return *this;
 }

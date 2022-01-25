@@ -29,6 +29,9 @@ namespace transform {
 /// Note: SimplifyPointers does not operate on module-scope `let`s, as these
 /// cannot be pointers: https://gpuweb.github.io/gpuweb/wgsl/#module-constants
 /// `A module-scope let-declared constant must be of constructible type.`
+///
+/// @note Depends on the following transforms to have been run first:
+/// * Unshadow
 class SimplifyPointers : public Castable<SimplifyPointers, Transform> {
  public:
   /// Constructor

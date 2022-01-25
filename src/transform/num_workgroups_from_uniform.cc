@@ -52,13 +52,21 @@ struct Accessor {
 NumWorkgroupsFromUniform::NumWorkgroupsFromUniform() = default;
 NumWorkgroupsFromUniform::~NumWorkgroupsFromUniform() = default;
 
+bool NumWorkgroupsFromUniform::ShouldRun(const Program* program,
+                                         const DataMap&) const {
+  for (auto* node : program->ASTNodes().Objects()) {
+    if (auto* deco = node->As<ast::BuiltinDecoration>()) {
+      if (deco->builtin == ast::Builtin::kNumWorkgroups) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
                                    const DataMap& inputs,
                                    DataMap&) const {
-  if (!Requires<CanonicalizeEntryPointIO>(ctx)) {
-    return;
-  }
-
   auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(

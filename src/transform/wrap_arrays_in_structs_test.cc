@@ -25,9 +25,23 @@ namespace {
 
 using WrapArraysInStructsTest = TransformTest;
 
+TEST_F(WrapArraysInStructsTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<WrapArraysInStructs>(src));
+}
+
+TEST_F(WrapArraysInStructsTest, ShouldRunHasArray) {
+  auto* src = R"(
+var<private> arr : array<i32, 4>;
+)";
+
+  EXPECT_TRUE(ShouldRun<WrapArraysInStructs>(src));
+}
+
 TEST_F(WrapArraysInStructsTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = "";
+  auto* src = R"()";
+  auto* expect = src;
 
   auto got = Run<WrapArraysInStructs>(src);
 

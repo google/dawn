@@ -160,8 +160,10 @@ class Transform : public Castable<Transform> {
   virtual Output Run(const Program* program, const DataMap& data = {}) const;
 
   /// @param program the program to inspect
+  /// @param data optional extra transform-specific input data
   /// @returns true if this transform should be run for the given program
-  virtual bool ShouldRun(const Program* program) const;
+  virtual bool ShouldRun(const Program* program,
+                         const DataMap& data = {}) const;
 
  protected:
   /// Runs the transform using the CloneContext built for transforming a
@@ -173,23 +175,6 @@ class Transform : public Castable<Transform> {
   virtual void Run(CloneContext& ctx,
                    const DataMap& inputs,
                    DataMap& outputs) const;
-
-  /// Requires appends an error diagnostic to `ctx.dst` if the template type
-  /// transforms were not already run on `ctx.src`.
-  /// @param ctx the CloneContext
-  /// @returns true if all dependency transforms have been run
-  template <typename... TRANSFORMS>
-  bool Requires(CloneContext& ctx) const {
-    return Requires(ctx, {&::tint::TypeInfo::Of<TRANSFORMS>()...});
-  }
-
-  /// Requires appends an error diagnostic to `ctx.dst` if the list of
-  /// Transforms were not already run on `ctx.src`.
-  /// @param ctx the CloneContext
-  /// @param deps the list of Transform TypeInfos
-  /// @returns true if all dependency transforms have been run
-  bool Requires(CloneContext& ctx,
-                std::initializer_list<const ::tint::TypeInfo*> deps) const;
 
   /// Removes the statement `stmt` from the transformed program.
   /// RemoveStatement handles edge cases, like statements in the initializer and

@@ -24,16 +24,6 @@ namespace {
 
 using LocalizeStructArrayAssignmentTest = TransformTest;
 
-TEST_F(LocalizeStructArrayAssignmentTest, MissingSimplifyPointers) {
-  auto* src = R"()";
-  auto* expect =
-      "error: tint::transform::LocalizeStructArrayAssignment depends on "
-      "tint::transform::SimplifyPointers but the dependency was not run";
-
-  auto got = Run<LocalizeStructArrayAssignment>(src);
-  EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(LocalizeStructArrayAssignmentTest, EmptyModule) {
   auto* src = R"()";
   auto* expect = src;

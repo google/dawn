@@ -29,6 +29,9 @@ namespace transform {
 
 /// CalculateArrayLength is a transform used to replace calls to arrayLength()
 /// with a value calculated from the size of the storage buffer.
+///
+/// @note Depends on the following transforms to have been run first:
+/// * SimplifyPointers
 class CalculateArrayLength : public Castable<CalculateArrayLength, Transform> {
  public:
   /// BufferSizeIntrinsic is an InternalDecoration that's applied to intrinsic
@@ -55,6 +58,12 @@ class CalculateArrayLength : public Castable<CalculateArrayLength, Transform> {
   CalculateArrayLength();
   /// Destructor
   ~CalculateArrayLength() override;
+
+  /// @param program the program to inspect
+  /// @param data optional extra transform-specific input data
+  /// @returns true if this transform should be run for the given program
+  bool ShouldRun(const Program* program,
+                 const DataMap& data = {}) const override;
 
  protected:
   /// Runs the transform using the CloneContext built for transforming a

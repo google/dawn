@@ -790,6 +790,19 @@ const DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
 DecomposeMemoryAccess::DecomposeMemoryAccess() = default;
 DecomposeMemoryAccess::~DecomposeMemoryAccess() = default;
 
+bool DecomposeMemoryAccess::ShouldRun(const Program* program,
+                                      const DataMap&) const {
+  for (auto* decl : program->AST().GlobalDeclarations()) {
+    if (auto* var = program->Sem().Get<sem::Variable>(decl)) {
+      if (var->StorageClass() == ast::StorageClass::kStorage ||
+          var->StorageClass() == ast::StorageClass::kUniform) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 void DecomposeMemoryAccess::Run(CloneContext& ctx,
                                 const DataMap&,
                                 DataMap&) const {

@@ -80,6 +80,9 @@ namespace transform {
 ///   return wrapper_result;
 /// }
 /// ```
+///
+/// @note Depends on the following transforms to have been run first:
+/// * Unshadow
 class CanonicalizeEntryPointIO
     : public Castable<CanonicalizeEntryPointIO, Transform> {
  public:

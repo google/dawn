@@ -26,26 +26,67 @@ namespace {
 
 using ArrayLengthFromUniformTest = TransformTest;
 
+TEST_F(ArrayLengthFromUniformTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src));
+}
+
+TEST_F(ArrayLengthFromUniformTest, ShouldRunNoArrayLength) {
+  auto* src = R"(
+struct SB {
+  x : i32;
+  arr : array<i32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> sb : SB;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+}
+)";
+
+  EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src));
+}
+
+TEST_F(ArrayLengthFromUniformTest, ShouldRunWithArrayLength) {
+  auto* src = R"(
+struct SB {
+  x : i32;
+  arr : array<i32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> sb : SB;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var len : u32 = arrayLength(&sb.arr);
+}
+)";
+
+  EXPECT_TRUE(ShouldRun<ArrayLengthFromUniform>(src));
+}
+
 TEST_F(ArrayLengthFromUniformTest, Error_MissingTransformData) {
-  auto* src = "";
+  auto* src = R"(
+struct SB {
+  x : i32;
+  arr : array<i32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> sb : SB;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var len : u32 = arrayLength(&sb.arr);
+}
+)";
 
   auto* expect =
       "error: missing transform data for "
       "tint::transform::ArrayLengthFromUniform";
 
   auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(ArrayLengthFromUniformTest, Error_MissingSimplifyPointers) {
-  auto* src = "";
-
-  auto* expect =
-      "error: tint::transform::ArrayLengthFromUniform depends on "
-      "tint::transform::SimplifyPointers but the dependency was not run";
-
-  auto got = Run<ArrayLengthFromUniform>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -426,8 +467,7 @@ fn main() {
   auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(src, str(got));
-  EXPECT_EQ(std::unordered_set<uint32_t>(),
-            got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
+  EXPECT_EQ(got.data.Get<ArrayLengthFromUniform::Result>(), nullptr);
 }
 
 TEST_F(ArrayLengthFromUniformTest, MissingBindingPointToIndexMapping) {

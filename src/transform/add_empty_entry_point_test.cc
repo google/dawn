@@ -24,6 +24,21 @@ namespace {
 
 using AddEmptyEntryPointTest = TransformTest;
 
+TEST_F(AddEmptyEntryPointTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_TRUE(ShouldRun<AddEmptyEntryPoint>(src));
+}
+
+TEST_F(AddEmptyEntryPointTest, ShouldRunExistingEntryPoint) {
+  auto* src = R"(
+[[stage(compute), workgroup_size(1)]]
+fn existing() {}
+)";
+
+  EXPECT_FALSE(ShouldRun<AddEmptyEntryPoint>(src));
+}
+
 TEST_F(AddEmptyEntryPointTest, EmptyModule) {
   auto* src = R"()";
 

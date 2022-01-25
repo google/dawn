@@ -21,6 +21,35 @@ namespace {
 
 using MultiplanarExternalTextureTest = TransformTest;
 
+TEST_F(MultiplanarExternalTextureTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<MultiplanarExternalTexture>(src));
+}
+
+TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureAlias) {
+  auto* src = R"(
+type ET = texture_external;
+)";
+
+  EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+}
+TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureGlobal) {
+  auto* src = R"(
+[[group(0), binding(0)]] var ext_tex : texture_external;
+)";
+
+  EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+}
+
+TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureParam) {
+  auto* src = R"(
+fn f(ext_tex : texture_external) {}
+)";
+
+  EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+}
+
 // Running the transform without passing in data for the new bindings should
 // result in an error.
 TEST_F(MultiplanarExternalTextureTest, ErrorNoPassedData) {
@@ -640,6 +669,106 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 @stage(fragment)
 fn main() {
   f(ext_tex, ext_tex_plane_1_2, ext_tex_params_2, smp);
+}
+)";
+  DataMap data;
+  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+      MultiplanarExternalTexture::BindingsMap{
+          {{0, 0}, {{0, 2}, {0, 3}}},
+      });
+  auto got = Run<MultiplanarExternalTexture>(src, data);
+  EXPECT_EQ(expect, str(got));
+}
+
+// Tests that the transform works with a function using an external texture,
+// even if there's no external texture declared at module scope.
+TEST_F(MultiplanarExternalTextureTest,
+       ExternalTexturePassedAsParamWithoutGlobalDecl) {
+  auto* src = R"(
+fn f(ext_tex : texture_external) -> vec2<i32> {
+  return textureDimensions(ext_tex);
+}
+)";
+
+  auto* expect = R"(
+struct ExternalTextureParams {
+  numPlanes : u32;
+  vr : f32;
+  ug : f32;
+  vg : f32;
+  ub : f32;
+}
+
+fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) -> vec2<i32> {
+  return textureDimensions(ext_tex);
+}
+)";
+
+  DataMap data;
+  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+      MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+  auto got = Run<MultiplanarExternalTexture>(src, data);
+  EXPECT_EQ(expect, str(got));
+}
+
+// Tests that the the transform handles aliases to external textures
+TEST_F(MultiplanarExternalTextureTest, ExternalTextureAlias) {
+  auto* src = R"(
+type ET = texture_external;
+
+fn f(t : ET, s : sampler) {
+  textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
+}
+
+[[group(0), binding(0)]] var ext_tex : ET;
+[[group(0), binding(1)]] var smp : sampler;
+
+[[stage(fragment)]]
+fn main() {
+  f(ext_tex, smp);
+}
+)";
+
+  auto* expect = R"(
+type ET = texture_external;
+
+struct ExternalTextureParams {
+  numPlanes : u32;
+  vr : f32;
+  ug : f32;
+  vg : f32;
+  ub : f32;
+}
+
+fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  if ((params.numPlanes == 1u)) {
+    return textureSampleLevel(plane0, smp, coord, 0.0);
+  }
+  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
+  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
+  let u = uv.x;
+  let v = uv.y;
+  let r = ((1.164000034 * y) + (params.vr * v));
+  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
+  let b = ((1.164000034 * y) + (params.ub * u));
+  return vec4<f32>(r, g, b, 1.0);
+}
+
+fn f(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams, s : sampler) {
+  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+}
+
+@group(0) @binding(2) var ext_tex_plane_1_1 : texture_2d<f32>;
+
+@group(0) @binding(3) var<uniform> ext_tex_params_1 : ExternalTextureParams;
+
+@group(0) @binding(0) var ext_tex : texture_2d<f32>;
+
+@group(0) @binding(1) var smp : sampler;
+
+@stage(fragment)
+fn main() {
+  f(ext_tex, ext_tex_plane_1_1, ext_tex_params_1, smp);
 }
 )";
   DataMap data;

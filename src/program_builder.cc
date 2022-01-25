@@ -38,8 +38,7 @@ ProgramBuilder::ProgramBuilder(ProgramBuilder&& rhs)
       ast_(rhs.ast_),
       sem_(std::move(rhs.sem_)),
       symbols_(std::move(rhs.symbols_)),
-      diagnostics_(std::move(rhs.diagnostics_)),
-      transforms_applied_(std::move(rhs.transforms_applied_)) {
+      diagnostics_(std::move(rhs.diagnostics_)) {
   rhs.MarkAsMoved();
 }
 
@@ -56,7 +55,7 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
   sem_ = std::move(rhs.sem_);
   symbols_ = std::move(rhs.symbols_);
   diagnostics_ = std::move(rhs.diagnostics_);
-  transforms_applied_ = std::move(rhs.transforms_applied_);
+
   return *this;
 }
 
@@ -69,7 +68,6 @@ ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
   builder.sem_ = sem::Info::Wrap(program->Sem());
   builder.symbols_ = program->Symbols();
   builder.diagnostics_ = program->Diagnostics();
-  builder.transforms_applied_ = program->TransformsApplied();
   return builder;
 }
 

@@ -24,16 +24,45 @@ namespace {
 
 using CalculateArrayLengthTest = TransformTest;
 
-TEST_F(CalculateArrayLengthTest, Error_MissingCalculateArrayLength) {
-  auto* src = "";
+TEST_F(CalculateArrayLengthTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
 
-  auto* expect =
-      "error: tint::transform::CalculateArrayLength depends on "
-      "tint::transform::SimplifyPointers but the dependency was not run";
+  EXPECT_FALSE(ShouldRun<CalculateArrayLength>(src));
+}
 
-  auto got = Run<CalculateArrayLength>(src);
+TEST_F(CalculateArrayLengthTest, ShouldRunNoArrayLength) {
+  auto* src = R"(
+struct SB {
+  x : i32;
+  arr : array<i32>;
+};
 
-  EXPECT_EQ(expect, str(got));
+[[group(0), binding(0)]] var<storage, read> sb : SB;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+}
+)";
+
+  EXPECT_FALSE(ShouldRun<CalculateArrayLength>(src));
+}
+
+TEST_F(CalculateArrayLengthTest, ShouldRunWithArrayLength) {
+  auto* src = R"(
+struct SB {
+  x : i32;
+  arr : array<i32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> sb : SB;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  var len : u32 = arrayLength(&sb.arr);
+}
+)";
+
+  EXPECT_TRUE(ShouldRun<CalculateArrayLength>(src));
 }
 
 TEST_F(CalculateArrayLengthTest, Basic) {

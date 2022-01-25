@@ -26,9 +26,57 @@ namespace {
 
 using FirstIndexOffsetTest = TransformTest;
 
+TEST_F(FirstIndexOffsetTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<FirstIndexOffset>(src));
+}
+
+TEST_F(FirstIndexOffsetTest, ShouldRunFragmentStage) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn entry() {
+  return;
+}
+)";
+
+  EXPECT_FALSE(ShouldRun<FirstIndexOffset>(src));
+}
+
+TEST_F(FirstIndexOffsetTest, ShouldRunVertexStage) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn entry() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
+)";
+
+  EXPECT_TRUE(ShouldRun<FirstIndexOffset>(src));
+}
+
 TEST_F(FirstIndexOffsetTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";
+
+  DataMap config;
+  config.Add<FirstIndexOffset::BindingPoint>(0, 0);
+  auto got = Run<FirstIndexOffset>(src, std::move(config));
+
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<FirstIndexOffset::Data>();
+
+  EXPECT_EQ(data, nullptr);
+}
+
+TEST_F(FirstIndexOffsetTest, BasicVertexShader) {
+  auto* src = R"(
+@stage(vertex)
+fn entry() -> @builtin(position) vec4<f32> {
+  return vec4<f32>();
+}
+)";
+  auto* expect = src;
 
   DataMap config;
   config.Add<FirstIndexOffset::BindingPoint>(0, 0);

@@ -24,6 +24,28 @@ namespace {
 
 using ZeroInitWorkgroupMemoryTest = TransformTest;
 
+TEST_F(ZeroInitWorkgroupMemoryTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<ZeroInitWorkgroupMemory>(src));
+}
+
+TEST_F(ZeroInitWorkgroupMemoryTest, ShouldRunHasNoWorkgroupVars) {
+  auto* src = R"(
+var<private> v : i32;
+)";
+
+  EXPECT_FALSE(ShouldRun<ZeroInitWorkgroupMemory>(src));
+}
+
+TEST_F(ZeroInitWorkgroupMemoryTest, ShouldRunHasWorkgroupVars) {
+  auto* src = R"(
+var<workgroup> a : i32;
+)";
+
+  EXPECT_TRUE(ShouldRun<ZeroInitWorkgroupMemory>(src));
+}
+
 TEST_F(ZeroInitWorkgroupMemoryTest, EmptyModule) {
   auto* src = "";
   auto* expect = src;

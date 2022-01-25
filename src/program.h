@@ -126,25 +126,6 @@ class Program {
   /// information
   bool IsValid() const;
 
-  /// @return the TypeInfo pointers of all transforms that have been applied to
-  /// this program.
-  std::unordered_set<const TypeInfo*> TransformsApplied() const {
-    return transforms_applied_;
-  }
-
-  /// @param transform the TypeInfo of the transform
-  /// @returns true if the transform with the given TypeInfo was applied to the
-  /// Program
-  bool HasTransformApplied(const TypeInfo* transform) const {
-    return transforms_applied_.count(transform);
-  }
-
-  /// @returns true if the transform of type `T` was applied.
-  template <typename T>
-  bool HasTransformApplied() const {
-    return HasTransformApplied(&TypeInfo::Of<T>());
-  }
-
   /// Helper for returning the resolved semantic type of the expression `expr`.
   /// @param expr the AST expression
   /// @return the resolved semantic type for the expression, or nullptr if the
@@ -184,7 +165,6 @@ class Program {
   sem::Info sem_;
   SymbolTable symbols_{id_};
   diag::List diagnostics_;
-  std::unordered_set<const TypeInfo*> transforms_applied_;
   bool is_valid_ = false;  // Not valid until it is built
   bool moved_ = false;
 };

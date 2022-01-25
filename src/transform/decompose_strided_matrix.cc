@@ -107,7 +107,8 @@ DecomposeStridedMatrix::DecomposeStridedMatrix() = default;
 
 DecomposeStridedMatrix::~DecomposeStridedMatrix() = default;
 
-bool DecomposeStridedMatrix::ShouldRun(const Program* program) const {
+bool DecomposeStridedMatrix::ShouldRun(const Program* program,
+                                       const DataMap&) const {
   bool should_run = false;
   GatherCustomStrideMatrixMembers(
       program, [&](const sem::StructMember*, sem::Matrix*, uint32_t) {
@@ -120,10 +121,6 @@ bool DecomposeStridedMatrix::ShouldRun(const Program* program) const {
 void DecomposeStridedMatrix::Run(CloneContext& ctx,
                                  const DataMap&,
                                  DataMap&) const {
-  if (!Requires<SimplifyPointers>(ctx)) {
-    return;
-  }
-
   // Scan the program for all storage and uniform structure matrix members with
   // a custom stride attribute. Replace these matrices with an equivalent array,
   // and populate the `decomposed` map with the members that have been replaced.

@@ -22,6 +22,37 @@ namespace {
 
 using RemoveUnreachableStatementsTest = TransformTest;
 
+TEST_F(RemoveUnreachableStatementsTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<RemoveUnreachableStatements>(src));
+}
+
+TEST_F(RemoveUnreachableStatementsTest, ShouldRunHasNoUnreachable) {
+  auto* src = R"(
+fn f() {
+  if (true) {
+    var x = 1;
+  }
+}
+)";
+
+  EXPECT_FALSE(ShouldRun<RemoveUnreachableStatements>(src));
+}
+
+TEST_F(RemoveUnreachableStatementsTest, ShouldRunHasUnreachable) {
+  auto* src = R"(
+fn f() {
+  return;
+  if (true) {
+    var x = 1;
+  }
+}
+)";
+
+  EXPECT_TRUE(ShouldRun<RemoveUnreachableStatements>(src));
+}
+
 TEST_F(RemoveUnreachableStatementsTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";

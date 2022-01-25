@@ -24,6 +24,28 @@ namespace {
 
 using PadArrayElementsTest = TransformTest;
 
+TEST_F(PadArrayElementsTest, ShouldRunEmptyModule) {
+  auto* src = R"()";
+
+  EXPECT_FALSE(ShouldRun<PadArrayElements>(src));
+}
+
+TEST_F(PadArrayElementsTest, ShouldRunHasImplicitArrayStride) {
+  auto* src = R"(
+var<private> arr : array<i32, 4>;
+)";
+
+  EXPECT_FALSE(ShouldRun<PadArrayElements>(src));
+}
+
+TEST_F(PadArrayElementsTest, ShouldRunHasExplicitArrayStride) {
+  auto* src = R"(
+var<private> arr : [[stride(8)]] array<i32, 4>;
+)";
+
+  EXPECT_TRUE(ShouldRun<PadArrayElements>(src));
+}
+
 TEST_F(PadArrayElementsTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";

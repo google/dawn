@@ -377,6 +377,16 @@ ModuleScopeVarToEntryPointParam::ModuleScopeVarToEntryPointParam() = default;
 
 ModuleScopeVarToEntryPointParam::~ModuleScopeVarToEntryPointParam() = default;
 
+bool ModuleScopeVarToEntryPointParam::ShouldRun(const Program* program,
+                                                const DataMap&) const {
+  for (auto* decl : program->AST().GlobalDeclarations()) {
+    if (decl->Is<ast::Variable>()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
                                           const DataMap&,
                                           DataMap&) const {

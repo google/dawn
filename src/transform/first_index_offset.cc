@@ -57,6 +57,15 @@ FirstIndexOffset::Data::~Data() = default;
 FirstIndexOffset::FirstIndexOffset() = default;
 FirstIndexOffset::~FirstIndexOffset() = default;
 
+bool FirstIndexOffset::ShouldRun(const Program* program, const DataMap&) const {
+  for (auto* fn : program->AST().Functions()) {
+    if (fn->PipelineStage() == ast::PipelineStage::kVertex) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void FirstIndexOffset::Run(CloneContext& ctx,
                            const DataMap& inputs,
                            DataMap& outputs) const {
