@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+vk-gl-cts/spirv_assembly/instruction/compute/signed_op/uint_sdiv/0-opt.wgsl:1:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type RTArr = @stride(4) array<u32>;
+              ^^^^^^
+
 #version 310 es
 precision mediump float;
 

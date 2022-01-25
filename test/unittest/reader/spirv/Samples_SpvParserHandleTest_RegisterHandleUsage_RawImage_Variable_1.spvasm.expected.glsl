@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D x_20;
+uniform highp writeonly image1D x_20_1;
 
 void main_1() {
-  imageStore(x_20, int(1u), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  imageStore(x_20_1, int(1u), vec4(0.0f, 0.0f, 0.0f, 0.0f));
   return;
 }
 

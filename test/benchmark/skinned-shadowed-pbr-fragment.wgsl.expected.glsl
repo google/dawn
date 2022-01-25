@@ -85,10 +85,6 @@ uint getClusterIndex(vec4 fragCoord) {
   return ((tile.x + (tile.y * tileCount.x)) + ((tile.z * tileCount.x) * tileCount.y));
 }
 
-
-uniform highp sampler2D shadowTexture;
-
-
 layout (binding = 6) buffer LightShadowTable_1 {
   int light[];
 } lightShadowTable;
@@ -103,6 +99,9 @@ struct ShadowProperties {
 layout (binding = 7) buffer LightShadows_1 {
   ShadowProperties properties[];
 } shadow;
+uniform highp sampler2D shadowTexture_1;
+uniform highp sampler2D shadowTexture_shadowSampler;
+
 
 float dirLightVisibility(vec3 worldPos) {
   int shadowIndex = lightShadowTable.light[0u];
@@ -113,12 +112,12 @@ float dirLightVisibility(vec3 worldPos) {
   vec4 lightPos = (shadow.properties[shadowIndex].viewProj * vec4(worldPos, 1.0f));
   vec3 shadowPos = vec3((((lightPos.xy / lightPos.w) * vec2(0.5f, -0.5f)) + vec2(0.5f, 0.5f)), (lightPos.z / lightPos.w));
   vec2 viewportPos = vec2((viewport.xy + (shadowPos.xy * viewport.zw)));
-  vec2 texelSize = (1.0f / vec2(textureSize(shadowTexture, 0)));
+  vec2 texelSize = (1.0f / vec2(textureSize(shadowTexture_1, 0)));
   vec4 clampRect = vec4((viewport.xy - texelSize), ((viewport.xy + viewport.zw) + texelSize));
   float visibility = 0.0f;
   {
     for(uint i = 0u; (i < shadowSampleCount); i = (i + 1u)) {
-      visibility = (visibility + texture(shadowTexture, clamp((viewportPos + (shadowSampleOffsets[i] * texelSize)), clampRect.xy, clampRect.zw), (shadowPos.z - 0.003f)));
+      visibility = (visibility + texture(shadowTexture_shadowSampler, clamp((viewportPos + (shadowSampleOffsets[i] * texelSize)), clampRect.xy, clampRect.zw), (shadowPos.z - 0.003f)));
     }
   }
   return (visibility / float(shadowSampleCount));
@@ -158,12 +157,12 @@ float pointLightVisibility(uint lightIndex, vec3 worldPos, vec3 pointToLight) {
   vec4 lightPos = (shadow.properties[shadowIndex].viewProj * vec4(worldPos, 1.0f));
   vec3 shadowPos = vec3((((lightPos.xy / lightPos.w) * vec2(0.5f, -0.5f)) + vec2(0.5f, 0.5f)), (lightPos.z / lightPos.w));
   vec2 viewportPos = vec2((viewport.xy + (shadowPos.xy * viewport.zw)));
-  vec2 texelSize = (1.0f / vec2(textureSize(shadowTexture, 0)));
+  vec2 texelSize = (1.0f / vec2(textureSize(shadowTexture_1, 0)));
   vec4 clampRect = vec4(viewport.xy, (viewport.xy + viewport.zw));
   float visibility = 0.0f;
   {
     for(uint i = 0u; (i < shadowSampleCount); i = (i + 1u)) {
-      visibility = (visibility + texture(shadowTexture, clamp((viewportPos + (shadowSampleOffsets[i] * texelSize)), clampRect.xy, clampRect.zw), (shadowPos.z - 0.01f)));
+      visibility = (visibility + texture(shadowTexture_shadowSampler, clamp((viewportPos + (shadowSampleOffsets[i] * texelSize)), clampRect.xy, clampRect.zw), (shadowPos.z - 0.01f)));
     }
   }
   return (visibility / float(shadowSampleCount));
@@ -196,16 +195,6 @@ layout (binding = 8) uniform Material_1 {
   vec2 metallicRoughnessFactor;
   float alphaCutoff;
 } material;
-uniform highp sampler2D baseColorTexture;
-
-uniform highp sampler2D normalTexture;
-
-uniform highp sampler2D metallicRoughnessTexture;
-
-uniform highp sampler2D occlusionTexture;
-
-uniform highp sampler2D emissiveTexture;
-
 
 struct SurfaceInfo {
   vec4 baseColor;
@@ -219,26 +208,33 @@ struct SurfaceInfo {
   vec3 v;
 };
 
+uniform highp sampler2D normalTexture_normalSampler;
+uniform highp sampler2D baseColorTexture_baseColorSampler;
+uniform highp sampler2D metallicRoughnessTexture_metallicRoughnessSampler;
+uniform highp sampler2D occlusionTexture_occlusionSampler;
+uniform highp sampler2D emissiveTexture_emissiveSampler;
+
+
 SurfaceInfo GetSurfaceInfo(VertexOutput tint_symbol) {
   SurfaceInfo surface = SurfaceInfo(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), 0.0f, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
   surface.v = normalize(tint_symbol.view);
   mat3 tbn = mat3(tint_symbol.tangent, tint_symbol.bitangent, tint_symbol.normal);
-  vec3 normalMap = texture(normalTexture, tint_symbol.texcoord).rgb;
+  vec3 normalMap = texture(normalTexture_normalSampler, tint_symbol.texcoord).rgb;
   surface.normal = normalize((tbn * ((2.0f * normalMap) - vec3(1.0f))));
-  vec4 baseColorMap = texture(baseColorTexture, tint_symbol.texcoord);
+  vec4 baseColorMap = texture(baseColorTexture_baseColorSampler, tint_symbol.texcoord);
   surface.baseColor = ((tint_symbol.color * material.baseColorFactor) * baseColorMap);
   if ((surface.baseColor.a < material.alphaCutoff)) {
     discard;
   }
   surface.albedo = surface.baseColor.rgb;
-  vec4 metallicRoughnessMap = texture(metallicRoughnessTexture, tint_symbol.texcoord);
+  vec4 metallicRoughnessMap = texture(metallicRoughnessTexture_metallicRoughnessSampler, tint_symbol.texcoord);
   surface.metallic = (material.metallicRoughnessFactor.x * metallicRoughnessMap.b);
   surface.roughness = (material.metallicRoughnessFactor.y * metallicRoughnessMap.g);
   vec3 dielectricSpec = vec3(0.039999999f);
   surface.f0 = mix(dielectricSpec, surface.albedo, vec3(surface.metallic));
-  vec4 occlusionMap = texture(occlusionTexture, tint_symbol.texcoord);
+  vec4 occlusionMap = texture(occlusionTexture_occlusionSampler, tint_symbol.texcoord);
   surface.ao = (material.occlusionStrength * occlusionMap.r);
-  vec4 emissiveMap = texture(emissiveTexture, tint_symbol.texcoord);
+  vec4 emissiveMap = texture(emissiveTexture_emissiveSampler, tint_symbol.texcoord);
   surface.emissive = (material.emissiveFactor * emissiveMap.rgb);
   if ((tint_symbol.instanceColor.a == 0.0f)) {
     surface.albedo = (surface.albedo + tint_symbol.instanceColor.rgb);
@@ -316,8 +312,6 @@ vec3 lightRadiance(PuctualLight light, SurfaceInfo surface) {
   return (((((kD * surface.albedo) / vec3(PI)) + specular) * radiance) * NdotL);
 }
 
-uniform highp sampler2D ssaoTexture;
-
 struct FragmentOutput {
   vec4 color;
   vec4 emissive;
@@ -338,6 +332,9 @@ struct tint_symbol_5 {
   vec4 color;
   vec4 emissive;
 };
+
+uniform highp sampler2D ssaoTexture_1;
+uniform highp sampler2D ssaoTexture_defaultSampler;
 
 FragmentOutput fragmentMain_inner(VertexOutput tint_symbol) {
   SurfaceInfo surface = GetSurfaceInfo(tint_symbol);
@@ -367,8 +364,8 @@ FragmentOutput fragmentMain_inner(VertexOutput tint_symbol) {
       Lo = (Lo + (lightRadiance(light, surface) * lightVis));
     }
   }
-  vec2 ssaoCoord = (tint_symbol.position.xy / vec2(textureSize(ssaoTexture, 0).xy));
-  float ssaoFactor = texture(ssaoTexture, ssaoCoord).r;
+  vec2 ssaoCoord = (tint_symbol.position.xy / vec2(textureSize(ssaoTexture_1, 0).xy));
+  float ssaoFactor = texture(ssaoTexture_defaultSampler, ssaoCoord).r;
   vec3 ambient = (((globalLights.ambient * surface.albedo) * surface.ao) * ssaoFactor);
   vec3 color = linearTosRGB(((Lo + ambient) + surface.emissive));
   FragmentOutput tint_symbol_2 = FragmentOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));

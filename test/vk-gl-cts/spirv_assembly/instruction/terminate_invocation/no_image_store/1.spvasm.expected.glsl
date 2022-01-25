@@ -6,7 +6,7 @@ precision mediump float;
 vec4 x_2 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 int x_3 = 0;
 int x_4 = 0;
-uniform highp writeonly iimage2D x_5;
+uniform highp writeonly iimage2D x_5_1;
 
 void main_1() {
   x_4 = 1;
@@ -15,7 +15,7 @@ void main_1() {
   int x_28 = int(x_23.y);
   if (((((x_27 & 1) + (x_28 & 1)) + x_3) == int(x_23.z))) {
   }
-  imageStore(x_5, ivec2(x_27, x_28), ivec4(x_27, 0, 0, 0));
+  imageStore(x_5_1, ivec2(x_27, x_28), ivec4(x_27, 0, 0, 0));
   return;
 }
 

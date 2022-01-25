@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+vk-gl-cts/graphicsfuzz/cov-missing-return-value-function-never-called/0-opt.wgsl:5:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr = @stride(16) array<i32, 1>;
+            ^^^^^^
+
 #version 310 es
 precision mediump float;
 

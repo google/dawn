@@ -3,8 +3,9 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
+uniform highp sampler2D x_20_x_10;
+uniform highp sampler2D x_20_x_30;
 
-uniform highp sampler2D x_20;
 
 
 void main_1() {
@@ -25,8 +26,8 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  vec4 x_200 = vec4(texture(x_20, coords12).x, 0.0f, 0.0f, 0.0f);
-  float x_210 = texture(x_20, coords12, 0.200000003f);
+  vec4 x_200 = vec4(texture(x_20_x_10, coords12).x, 0.0f, 0.0f, 0.0f);
+  float x_210 = texture(x_20_x_30, coords12, 0.200000003f);
   return;
 }
 
@@ -40,8 +41,8 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:27: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
-ERROR: 0:27: '' : compilation terminated 
+ERROR: 0:28: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
+ERROR: 0:28: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

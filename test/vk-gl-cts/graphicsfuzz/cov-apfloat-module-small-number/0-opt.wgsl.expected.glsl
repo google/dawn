@@ -1,5 +1,13 @@
 SKIP: FAILED
 
+vk-gl-cts/graphicsfuzz/cov-apfloat-module-small-number/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr = @stride(16) array<i32, 2>;
+            ^^^^^^
+
+vk-gl-cts/graphicsfuzz/cov-apfloat-module-small-number/0-opt.wgsl:7:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr_1 = @stride(16) array<f32, 1>;
+              ^^^^^^
+
 vk-gl-cts/graphicsfuzz/cov-apfloat-module-small-number/0-opt.wgsl:39:22 warning: use of deprecated intrinsic
   let x_48 : bool = (isInf(x_44) || (x_46 == 1.0));
                      ^^^^^

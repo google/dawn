@@ -3,8 +3,8 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
+uniform highp sampler2DArray x_20_x_10;
 
-uniform highp sampler2DArray x_20;
 
 void main_1() {
   float f1 = 1.0f;
@@ -24,7 +24,7 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  float x_79 = textureOffset(x_20, vec3(coords123.xy, float(int(round(coords123.z)))), 0.200000003f, ivec2(3, 4));
+  float x_79 = textureOffset(x_20_x_10, vec3(coords123.xy, float(int(round(coords123.z)))), 0.200000003f, ivec2(3, 4));
   return;
 }
 

@@ -16,8 +16,6 @@ layout (binding = 0) uniform Scene_1 {
   mat4 cameraViewProjMatrix;
   vec3 lightPos;
 } scene;
-uniform highp sampler2D shadowMap;
-
 
 struct FragmentInput {
   vec3 shadowPos;
@@ -37,6 +35,9 @@ struct tint_symbol_4 {
   vec4 value;
 };
 
+uniform highp sampler2D shadowMap_shadowSampler;
+
+
 vec4 tint_symbol_inner(FragmentInput tint_symbol_1) {
   float visibility = 0.0f;
   float oneOverShadowDepthTextureSize = (1.0f / shadowDepthTextureSize);
@@ -45,7 +46,7 @@ vec4 tint_symbol_inner(FragmentInput tint_symbol_1) {
       {
         for(int x = -1; (x <= 1); x = (x + 1)) {
           vec2 offset = vec2((float(x) * oneOverShadowDepthTextureSize), (float(y) * oneOverShadowDepthTextureSize));
-          visibility = (visibility + texture(shadowMap, (tint_symbol_1.shadowPos.xy + offset), (tint_symbol_1.shadowPos.z - 0.007f)));
+          visibility = (visibility + texture(shadowMap_shadowSampler, (tint_symbol_1.shadowPos.xy + offset), (tint_symbol_1.shadowPos.z - 0.007f)));
         }
       }
     }
@@ -79,8 +80,8 @@ void main() {
 
 
 Error parsing GLSL shader:
-ERROR: 0:46: 'assign' :  cannot convert from ' temp highp 4-component vector of float' to ' temp mediump float'
-ERROR: 0:46: '' : compilation terminated 
+ERROR: 0:47: 'assign' :  cannot convert from ' temp highp 4-component vector of float' to ' temp mediump float'
+ERROR: 0:47: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

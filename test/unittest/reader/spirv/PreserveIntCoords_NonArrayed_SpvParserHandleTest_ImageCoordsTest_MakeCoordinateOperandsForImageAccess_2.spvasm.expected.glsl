@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp writeonly image1D x_20;
+uniform highp writeonly image1D x_20_1;
 
 void main_1() {
   float float_var = 0.0f;
@@ -19,7 +19,7 @@ void main_1() {
   vec2 vf12 = vec2(1.0f, 2.0f);
   vec3 vf123 = vec3(1.0f, 2.0f, 3.0f);
   vec4 vf1234 = vec4(1.0f, 2.0f, 3.0f, 4.0f);
-  imageStore(x_20, i1, vf1234);
+  imageStore(x_20_1, i1, vf1234);
   uint x_1000 = 0u;
   return;
 }

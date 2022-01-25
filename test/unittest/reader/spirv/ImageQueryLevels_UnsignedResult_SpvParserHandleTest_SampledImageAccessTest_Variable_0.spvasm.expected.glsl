@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D x_20;
+uniform highp sampler2D x_20_1;
 
 void main_1() {
   float f1 = 1.0f;
@@ -23,7 +23,7 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  uint x_99 = uint(textureQueryLevels(x_20););
+  uint x_99 = uint(textureQueryLevels(x_20_1););
   return;
 }
 

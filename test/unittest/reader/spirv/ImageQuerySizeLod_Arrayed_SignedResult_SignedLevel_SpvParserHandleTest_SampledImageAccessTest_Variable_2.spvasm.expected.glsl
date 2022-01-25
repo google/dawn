@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray x_20;
+uniform highp sampler2DArray x_20_1;
 
 void main_1() {
   float f1 = 1.0f;
@@ -23,7 +23,7 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  ivec3 x_99 = ivec3(textureSize(x_20, i1).xy, textureQueryLevels(x_20););
+  ivec3 x_99 = ivec3(textureSize(x_20_1, i1).xy, textureQueryLevels(x_20_1););
   return;
 }
 

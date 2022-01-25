@@ -85,7 +85,7 @@ func run() error {
 	var maxFilenameColumnWidth int
 	numCPU := runtime.NumCPU()
 	fxc, verbose, generateExpected, generateSkip := false, false, false, false
-	flag.StringVar(&formatList, "format", "wgsl,spvasm,msl,hlsl", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, glsl")
+	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, glsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
@@ -142,7 +142,8 @@ func run() error {
 					"**.expected.wgsl",
 					"**.expected.spvasm",
 					"**.expected.msl",
-					"**.expected.hlsl"
+					"**.expected.hlsl",
+					"**.expected.glsl"
 				]
 			}
 		]

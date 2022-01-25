@@ -1,5 +1,17 @@
 SKIP: FAILED
 
+vk-gl-cts/graphicsfuzz/cov-unpack-unorm-mix-always-one/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr = @stride(16) array<u32, 1>;
+            ^^^^^^
+
+vk-gl-cts/graphicsfuzz/cov-unpack-unorm-mix-always-one/0-opt.wgsl:7:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr_1 = @stride(16) array<i32, 2>;
+              ^^^^^^
+
+vk-gl-cts/graphicsfuzz/cov-unpack-unorm-mix-always-one/0-opt.wgsl:13:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr_2 = @stride(16) array<f32, 3>;
+              ^^^^^^
+
 #version 310 es
 precision mediump float;
 

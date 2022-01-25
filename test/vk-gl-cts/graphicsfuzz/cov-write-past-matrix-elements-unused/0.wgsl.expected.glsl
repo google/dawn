@@ -1,5 +1,13 @@
 SKIP: FAILED
 
+vk-gl-cts/graphicsfuzz/cov-write-past-matrix-elements-unused/0.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr = @stride(16) array<f32, 2>;
+            ^^^^^^
+
+vk-gl-cts/graphicsfuzz/cov-write-past-matrix-elements-unused/0.wgsl:7:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr_1 = @stride(16) array<i32, 3>;
+              ^^^^^^
+
 #version 310 es
 precision mediump float;
 

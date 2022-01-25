@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+vk-gl-cts/graphicsfuzz/cov-bitfieldreverse-loop-limit-underflow/0.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type Arr = @stride(16) array<i32, 4>;
+            ^^^^^^
+
 #version 310 es
 precision mediump float;
 

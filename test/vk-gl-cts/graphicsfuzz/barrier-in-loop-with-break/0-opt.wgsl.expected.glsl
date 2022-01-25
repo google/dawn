@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+vk-gl-cts/graphicsfuzz/barrier-in-loop-with-break/0-opt.wgsl:1:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type RTArr = @stride(4) array<i32>;
+              ^^^^^^
+
 #version 310 es
 precision mediump float;
 

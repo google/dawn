@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+vk-gl-cts/spirv_assembly/instruction/compute/arraylength/array-stride-larger-than-element-size/1.wgsl:5:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
+type RTArr = @stride(4) array<u32>;
+              ^^^^^^
+
 #version 310 es
 precision mediump float;
 

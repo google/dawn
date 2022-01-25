@@ -135,7 +135,8 @@ struct CombineSamplers::State {
     // Remove all texture and sampler global variables. These will be replaced
     // by combined samplers.
     for (auto* var : ctx.src->AST().GlobalVariables()) {
-      if (sem.Get(var->type)->IsAnyOf<sem::Texture, sem::Sampler>()) {
+      auto* type = sem.Get(var->type);
+      if (type && type->IsAnyOf<sem::Texture, sem::Sampler>()) {
         ctx.Remove(ctx.src->AST().GlobalDeclarations(), var);
       } else if (auto binding_point = var->BindingPoint()) {
         if (binding_point.group->value == 0 &&

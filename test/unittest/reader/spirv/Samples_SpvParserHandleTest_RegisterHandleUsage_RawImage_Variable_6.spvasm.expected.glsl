@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DMS x_20;
+uniform highp sampler2DMS x_20_1;
 
 void main_1() {
-  uint x_125 = uint(textureSamples(x_20););
+  uint x_125 = uint(textureSamples(x_20_1););
   return;
 }
 

@@ -3,8 +3,8 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
+uniform highp sampler2D x_20_x_10;
 
-uniform highp sampler2D x_20;
 
 void main_1() {
   float f1 = 1.0f;
@@ -23,7 +23,7 @@ void main_1() {
   float coords1 = 1.0f;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  float x_79 = texture(x_20, vf12, 0.200000003f);
+  float x_79 = texture(x_20_x_10, vf12, 0.200000003f);
   return;
 }
 
