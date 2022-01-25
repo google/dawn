@@ -228,7 +228,6 @@ TEST_F(LabelTest, ExternalTexture) {
     wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
     wgpu::ExternalTextureDescriptor descriptor;
-    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.plane0 = texture.CreateView();
 
     // The label should be empty if one was not set.

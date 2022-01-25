@@ -24,7 +24,6 @@
 
 namespace dawn::native {
 
-    struct ExternalTextureDescriptor;
     class TextureViewBase;
 
     MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
@@ -39,7 +38,7 @@ namespace dawn::native {
         const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& GetTextureViews() const;
 
         MaybeError ValidateCanUseInSubmitNow() const;
-
+        MaybeError Initialize(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
         static ExternalTextureBase* MakeError(DeviceBase* device);
 
         ObjectType GetType() const override;
@@ -55,7 +54,7 @@ namespace dawn::native {
         enum class ExternalTextureState { Alive, Destroyed };
         ExternalTextureBase(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
         ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
-        std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat> textureViews;
+        std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat> mTextureViews;
         ExternalTextureState mState;
     };
 }  // namespace dawn::native

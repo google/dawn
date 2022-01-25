@@ -52,18 +52,41 @@ namespace dawn::native {
 
         wgpu::TextureFormat plane0Format = descriptor->plane0->GetFormat().format;
 
-        switch (plane0Format) {
-            case wgpu::TextureFormat::RGBA8Unorm:
-            case wgpu::TextureFormat::BGRA8Unorm:
-            case wgpu::TextureFormat::RGBA16Float:
-                DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
-                break;
-            default:
-                return DAWN_FORMAT_VALIDATION_ERROR(
-                    "The external texture plane (%s) format (%s) is not a supported format "
-                    "(%s, %s, %s).",
-                    descriptor->plane0, plane0Format, wgpu::TextureFormat::RGBA8Unorm,
-                    wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::RGBA16Float);
+        if (descriptor->plane1) {
+            DAWN_INVALID_IF(
+                device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs),
+                "Bi-planar external textures are disabled until the implementation is completed.");
+
+            DAWN_INVALID_IF(descriptor->colorSpace != wgpu::PredefinedColorSpace::Srgb,
+                            "The specified color space (%s) is not %s.", descriptor->colorSpace,
+                            wgpu::PredefinedColorSpace::Srgb);
+
+            DAWN_TRY(device->ValidateObject(descriptor->plane1));
+            wgpu::TextureFormat plane1Format = descriptor->plane1->GetFormat().format;
+
+            DAWN_INVALID_IF(plane0Format != wgpu::TextureFormat::R8Unorm,
+                            "The bi-planar external texture plane (%s) format (%s) is not %s.",
+                            descriptor->plane0, plane0Format, wgpu::TextureFormat::R8Unorm);
+            DAWN_INVALID_IF(plane1Format != wgpu::TextureFormat::RG8Unorm,
+                            "The bi-planar external texture plane (%s) format (%s) is not %s.",
+                            descriptor->plane1, plane1Format, wgpu::TextureFormat::RG8Unorm);
+
+            DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
+            DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane1));
+        } else {
+            switch (plane0Format) {
+                case wgpu::TextureFormat::RGBA8Unorm:
+                case wgpu::TextureFormat::BGRA8Unorm:
+                case wgpu::TextureFormat::RGBA16Float:
+                    DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
+                    break;
+                default:
+                    return DAWN_FORMAT_VALIDATION_ERROR(
+                        "The external texture plane (%s) format (%s) is not a supported format "
+                        "(%s, %s, %s).",
+                        descriptor->plane0, plane0Format, wgpu::TextureFormat::RGBA8Unorm,
+                        wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::RGBA16Float);
+            }
         }
 
         return {};
@@ -75,13 +98,13 @@ namespace dawn::native {
         const ExternalTextureDescriptor* descriptor) {
         Ref<ExternalTextureBase> externalTexture =
             AcquireRef(new ExternalTextureBase(device, descriptor));
+        DAWN_TRY(externalTexture->Initialize(device, descriptor));
         return std::move(externalTexture);
     }
 
     ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
                                              const ExternalTextureDescriptor* descriptor)
         : ApiObjectBase(device, descriptor->label), mState(ExternalTextureState::Alive) {
-        textureViews[0] = descriptor->plane0;
         TrackInDevice();
     }
 
@@ -94,9 +117,18 @@ namespace dawn::native {
         : ApiObjectBase(device, tag) {
     }
 
+    MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
+                                               const ExternalTextureDescriptor* descriptor) {
+        // Store any passed in TextureViews associated with individual planes.
+        mTextureViews[0] = descriptor->plane0;
+        mTextureViews[1] = descriptor->plane1;
+
+        return {};
+    }
+
     const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>&
     ExternalTextureBase::GetTextureViews() const {
-        return textureViews;
+        return mTextureViews;
     }
 
     MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {

@@ -53,7 +53,6 @@ TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
     // Create an ExternalTextureDescriptor from the texture view
     wgpu::ExternalTextureDescriptor externalDesc;
     externalDesc.plane0 = view;
-    externalDesc.format = kFormat;
 
     // Import the external texture
     wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
@@ -106,7 +105,6 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     // Create an ExternalTextureDescriptor from the texture view
     wgpu::ExternalTextureDescriptor externalDesc;
     externalDesc.plane0 = externalView;
-    externalDesc.format = kFormat;
 
     // Import the external texture
     wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);

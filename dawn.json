@@ -1314,7 +1314,8 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "plane 0", "type": "texture view"},
-            {"name": "format", "type": "texture format"}
+            {"name": "plane 1", "type": "texture view", "optional": true},
+            {"name": "color space", "type": "predefined color space", "default": "srgb"}
         ]
     },
     "feature name": {
@@ -1505,6 +1506,13 @@
             {"value": 0, "name": "undefined"},
             {"value": 1, "name": "low power"},
             {"value": 2, "name": "high performance"}
+        ]
+    },
+    "predefined color space": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "undefined"},
+            {"value": 1, "name": "srgb"}
         ]
     },
     "present mode": {
