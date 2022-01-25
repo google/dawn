@@ -50,7 +50,7 @@ tint_symbol_3 vs_main(tint_symbol_2 tint_symbol_1) {
   wrapper_result.position = inner_result.position;
   return wrapper_result;
 }
-out vec2 texcoords;
+layout(location = 0) out vec2 texcoords;
 void main() {
   tint_symbol_2 inputs;
   inputs.VertexIndex = uint(gl_VertexID);
@@ -105,8 +105,8 @@ tint_symbol_6 fs_main(tint_symbol_5 tint_symbol_4) {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-in vec2 texcoord;
-out vec4 value;
+layout(location = 0) in vec2 texcoord;
+layout(location = 0) out vec4 value;
 void main() {
   tint_symbol_5 inputs;
   inputs.texcoord = texcoord;

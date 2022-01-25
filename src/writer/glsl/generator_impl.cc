@@ -1877,6 +1877,25 @@ std::string GeneratorImpl::interpolation_to_modifiers(
   return modifiers;
 }
 
+bool GeneratorImpl::EmitDecorations(std::ostream& out,
+                                    const ast::DecorationList& decorations) {
+  if (decorations.empty()) {
+    return true;
+  }
+  bool first = true;
+  for (auto* deco : decorations) {
+    if (auto* location = deco->As<ast::LocationDecoration>()) {
+      out << (first ? "layout(" : ", ");
+      out << "location = " << std::to_string(location->value);
+      first = false;
+    }
+  }
+  if (!first) {
+    out << ") ";
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   auto* func_sem = builder_.Sem().Get(func);
 
@@ -1962,9 +1981,12 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     auto* sem = builder_.Sem().Get(var);
     auto* str = sem->Type()->As<sem::Struct>();
     for (auto* member : str->Members()) {
-      if (ast::HasDecoration<ast::BuiltinDecoration>(
-              member->Declaration()->decorations)) {
+      auto decorations = member->Declaration()->decorations;
+      if (ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
         continue;
+      }
+      if (!EmitDecorations(out, decorations)) {
+        return false;
       }
       if (!EmitTypeAndName(
               out, member->Type(), ast::StorageClass::kInput,
@@ -1980,9 +2002,12 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   auto* return_type = func_sem->ReturnType()->As<sem::Struct>();
   if (return_type) {
     for (auto* member : return_type->Members()) {
-      if (ast::HasDecoration<ast::BuiltinDecoration>(
-              member->Declaration()->decorations)) {
+      auto decorations = member->Declaration()->decorations;
+      if (ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
         continue;
+      }
+      if (!EmitDecorations(out, decorations)) {
+        return false;
       }
       if (!EmitTypeAndName(
               out, member->Type(), ast::StorageClass::kOutput,

@@ -57,7 +57,7 @@ tint_symbol_3 frag_main() {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-out vec4 value;
+layout(location = 0) out vec4 value;
 void main() {
   tint_symbol_3 outputs;
   outputs = frag_main();

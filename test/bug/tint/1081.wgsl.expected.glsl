@@ -34,8 +34,8 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-in ivec3 x;
-out int value;
+layout(location = 1) in ivec3 x;
+layout(location = 2) out int value;
 void main() {
   tint_symbol_2 inputs;
   inputs.x = x;

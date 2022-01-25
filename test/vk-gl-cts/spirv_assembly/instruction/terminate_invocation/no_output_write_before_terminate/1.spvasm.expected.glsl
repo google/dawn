@@ -41,8 +41,8 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
   wrapper_result.x_4_1 = inner_result.x_4_1;
   return wrapper_result;
 }
-in int x_3_param;
-out int x_4_1;
+layout(location = 0) in int x_3_param;
+layout(location = 0) out int x_4_1;
 void main() {
   tint_symbol_2 inputs;
   inputs.x_3_param = x_3_param;

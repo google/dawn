@@ -43,14 +43,14 @@ tint_symbol_2 tint_symbol_1() {
   wrapper_result.linear_sample = inner_result.linear_sample;
   return wrapper_result;
 }
-out float none;
-out float tint_symbol;
-out float perspective_center;
-out float perspective_centroid;
-out float perspective_sample;
-out float linear_center;
-out float linear_centroid;
-out float linear_sample;
+layout(location = 0) out float none;
+layout(location = 1) out float tint_symbol;
+layout(location = 2) out float perspective_center;
+layout(location = 3) out float perspective_centroid;
+layout(location = 4) out float perspective_sample;
+layout(location = 5) out float linear_center;
+layout(location = 6) out float linear_centroid;
+layout(location = 7) out float linear_sample;
 void main() {
   tint_symbol_2 outputs;
   outputs = tint_symbol_1();

@@ -19,14 +19,14 @@ void tint_symbol(tint_symbol_3 tint_symbol_2) {
   tint_symbol_inner(tint_symbol_2.none, tint_symbol_2.tint_symbol_1, tint_symbol_2.perspective_center, tint_symbol_2.perspective_centroid, tint_symbol_2.perspective_sample, tint_symbol_2.linear_center, tint_symbol_2.linear_centroid, tint_symbol_2.linear_sample);
   return;
 }
-in float none;
-in float tint_symbol_1;
-in float perspective_center;
-in float perspective_centroid;
-in float perspective_sample;
-in float linear_center;
-in float linear_centroid;
-in float linear_sample;
+layout(location = 0) in float none;
+layout(location = 1) in float tint_symbol_1;
+layout(location = 2) in float perspective_center;
+layout(location = 3) in float perspective_centroid;
+layout(location = 4) in float perspective_sample;
+layout(location = 5) in float linear_center;
+layout(location = 6) in float linear_centroid;
+layout(location = 7) in float linear_sample;
 void main() {
   tint_symbol_3 inputs;
   inputs.none = none;

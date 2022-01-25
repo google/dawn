@@ -77,10 +77,10 @@ tint_symbol_4 tint_symbol_1(tint_symbol_3 tint_symbol_2) {
   wrapper_result.vUV_1 = inner_result.vUV_1;
   return wrapper_result;
 }
-in vec3 position_param;
-in vec3 normal_param;
-in vec2 uv_param;
-out vec2 vUV_1;
+layout(location = 0) in vec3 position_param;
+layout(location = 1) in vec3 normal_param;
+layout(location = 2) in vec2 uv_param;
+layout(location = 0) out vec2 vUV_1;
 void main() {
   tint_symbol_3 inputs;
   inputs.position_param = position_param;

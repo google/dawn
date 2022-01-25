@@ -32,10 +32,10 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-in int loc0;
-in uint loc1;
-in float loc2;
-in vec4 loc3;
+layout(location = 0) in int loc0;
+layout(location = 1) in uint loc1;
+layout(location = 2) in float loc2;
+layout(location = 3) in vec4 loc3;
 void main() {
   tint_symbol_2 inputs;
   inputs.loc0 = loc0;

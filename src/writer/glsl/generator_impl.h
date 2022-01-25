@@ -292,6 +292,11 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on success
   bool EmitWorkgroupVariable(const sem::Variable* var);
 
+  /// Handles emitting decorations
+  /// @param out the output of the expression stream
+  /// @param decos the decorations
+  /// @returns true if the decorations were emitted
+  bool EmitDecorations(std::ostream& out, const ast::DecorationList& decos);
   /// Handles emitting the entry point function
   /// @param func the entry point
   /// @returns true if the entry point function was emitted
@@ -316,7 +321,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating an identifier expression
   /// @param out the output of the expression stream
   /// @param expr the identifier expression
-  /// @returns true if the identifeir was emitted
+  /// @returns true if the identifier was emitted
   bool EmitIdentifier(std::ostream& out, const ast::IdentifierExpression* expr);
   /// Handles a member accessor expression
   /// @param out the output of the expression stream

@@ -161,13 +161,13 @@ tint_symbol_4 tint_symbol_1(tint_symbol_3 tint_symbol_2) {
   wrapper_result.member = inner_result.member;
   return wrapper_result;
 }
-in vec3 a_Position;
-in vec2 a_UV;
-in vec4 a_Color;
-in vec3 a_Normal;
-in float a_PosMtxIdx;
-out vec4 v_Color;
-out vec2 v_TexCoord;
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec2 a_UV;
+layout(location = 2) in vec4 a_Color;
+layout(location = 3) in vec3 a_Normal;
+layout(location = 4) in float a_PosMtxIdx;
+layout(location = 0) out vec4 v_Color;
+layout(location = 1) out vec2 v_TexCoord;
 void main() {
   tint_symbol_3 inputs;
   inputs.a_Position = a_Position;

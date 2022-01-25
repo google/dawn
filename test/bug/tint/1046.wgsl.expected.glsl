@@ -59,11 +59,11 @@ tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
   wrapper_result.color = inner_result.color;
   return wrapper_result;
 }
-in vec4 view_position;
-in vec4 normal;
-in vec2 uv;
-in vec4 color;
-out vec4 color;
+layout(location = 0) in vec4 view_position;
+layout(location = 1) in vec4 normal;
+layout(location = 2) in vec2 uv;
+layout(location = 3) in vec4 color;
+layout(location = 0) out vec4 color;
 void main() {
   tint_symbol_3 inputs;
   inputs.view_position = view_position;

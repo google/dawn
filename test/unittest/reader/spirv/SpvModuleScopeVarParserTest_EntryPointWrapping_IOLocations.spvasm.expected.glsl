@@ -40,10 +40,10 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
   wrapper_result.x_4_1 = inner_result.x_4_1;
   return wrapper_result;
 }
-in uint x_1_param;
-in uint x_3_param;
-out uint x_2_1;
-out uint x_4_1;
+layout(location = 0) in uint x_1_param;
+layout(location = 30) in uint x_3_param;
+layout(location = 0) out uint x_2_1;
+layout(location = 6) out uint x_4_1;
 void main() {
   tint_symbol_2 inputs;
   inputs.x_1_param = x_1_param;

@@ -382,17 +382,17 @@ tint_symbol_5 fragmentMain(tint_symbol_4 tint_symbol_3) {
   wrapper_result.emissive = inner_result.emissive;
   return wrapper_result;
 }
-in vec3 worldPos;
-in vec3 view;
-in vec2 texcoord;
-in vec2 texcoord2;
-in vec4 color;
-in vec4 instanceColor;
-in vec3 normal;
-in vec3 tangent;
-in vec3 bitangent;
-out vec4 color;
-out vec4 emissive;
+layout(location = 0) in vec3 worldPos;
+layout(location = 1) in vec3 view;
+layout(location = 2) in vec2 texcoord;
+layout(location = 3) in vec2 texcoord2;
+layout(location = 4) in vec4 color;
+layout(location = 5) in vec4 instanceColor;
+layout(location = 6) in vec3 normal;
+layout(location = 7) in vec3 tangent;
+layout(location = 8) in vec3 bitangent;
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec4 emissive;
 void main() {
   tint_symbol_4 inputs;
   inputs.worldPos = worldPos;

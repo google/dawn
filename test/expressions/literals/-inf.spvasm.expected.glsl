@@ -27,7 +27,7 @@ tint_symbol_1 tint_symbol() {
   wrapper_result.out_var_SV_TARGET_1 = inner_result.out_var_SV_TARGET_1;
   return wrapper_result;
 }
-out vec4 out_var_SV_TARGET_1;
+layout(location = 0) out vec4 out_var_SV_TARGET_1;
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();

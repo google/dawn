@@ -25,7 +25,7 @@ tint_symbol main0() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-out int value;
+layout(location = 0) out int value;
 void main() {
   tint_symbol outputs;
   outputs = main0();
@@ -60,7 +60,7 @@ tint_symbol_1 main1() {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-out uint value;
+layout(location = 1) out uint value;
 void main() {
   tint_symbol_1 outputs;
   outputs = main1();
@@ -95,7 +95,7 @@ tint_symbol_2 main2() {
   wrapper_result_2.value = inner_result_2;
   return wrapper_result_2;
 }
-out float value;
+layout(location = 2) out float value;
 void main() {
   tint_symbol_2 outputs;
   outputs = main2();
@@ -129,7 +129,7 @@ tint_symbol_3 main3() {
   wrapper_result_3.value = inner_result_3;
   return wrapper_result_3;
 }
-out vec4 value;
+layout(location = 3) out vec4 value;
 void main() {
   tint_symbol_3 outputs;
   outputs = main3();

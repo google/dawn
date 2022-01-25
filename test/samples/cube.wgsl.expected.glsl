@@ -48,9 +48,9 @@ tint_symbol_4 vtx_main(tint_symbol_3 tint_symbol_2) {
   wrapper_result.Position = inner_result.Position;
   return wrapper_result;
 }
-in vec4 cur_position;
-in vec4 color;
-out vec4 vtxFragColor;
+layout(location = 0) in vec4 cur_position;
+layout(location = 1) in vec4 color;
+layout(location = 0) out vec4 vtxFragColor;
 void main() {
   tint_symbol_3 inputs;
   inputs.cur_position = cur_position;
@@ -102,8 +102,8 @@ tint_symbol_7 frag_main(tint_symbol_6 tint_symbol_5) {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-in vec4 fragColor;
-out vec4 value;
+layout(location = 0) in vec4 fragColor;
+layout(location = 0) out vec4 value;
 void main() {
   tint_symbol_6 inputs;
   inputs.fragColor = fragColor;

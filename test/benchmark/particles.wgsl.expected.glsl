@@ -86,11 +86,11 @@ tint_symbol_5 vs_main(tint_symbol_4 tint_symbol_3) {
   wrapper_result.quad_pos = inner_result.quad_pos;
   return wrapper_result;
 }
-in vec3 position;
-in vec4 color;
-in vec2 quad_pos;
-out vec4 color;
-out vec2 quad_pos;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec4 color;
+layout(location = 2) in vec2 quad_pos;
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec2 quad_pos;
 void main() {
   tint_symbol_4 inputs;
   inputs.position = position;
@@ -184,9 +184,9 @@ tint_symbol_8 fs_main(tint_symbol_7 tint_symbol_6) {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-in vec4 color;
-in vec2 quad_pos;
-out vec4 value;
+layout(location = 0) in vec4 color;
+layout(location = 1) in vec2 quad_pos;
+layout(location = 0) out vec4 value;
 void main() {
   tint_symbol_7 inputs;
   inputs.color = color;

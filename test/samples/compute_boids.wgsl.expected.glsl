@@ -45,9 +45,9 @@ tint_symbol_3 vert_main(tint_symbol_2 tint_symbol_1) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-in vec2 a_particlePos;
-in vec2 a_particleVel;
-in vec2 a_pos;
+layout(location = 0) in vec2 a_particlePos;
+layout(location = 1) in vec2 a_particleVel;
+layout(location = 2) in vec2 a_pos;
 void main() {
   tint_symbol_2 inputs;
   inputs.a_particlePos = a_particlePos;
@@ -105,7 +105,7 @@ tint_symbol_4 frag_main() {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-out vec4 value;
+layout(location = 0) out vec4 value;
 void main() {
   tint_symbol_4 outputs;
   outputs = frag_main();

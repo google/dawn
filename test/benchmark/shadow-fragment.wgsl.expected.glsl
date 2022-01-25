@@ -64,10 +64,10 @@ tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-in vec3 shadowPos;
-in vec3 fragPos;
-in vec3 fragNorm;
-out vec4 value;
+layout(location = 0) in vec3 shadowPos;
+layout(location = 1) in vec3 fragPos;
+layout(location = 2) in vec3 fragNorm;
+layout(location = 0) out vec4 value;
 void main() {
   tint_symbol_3 inputs;
   inputs.shadowPos = shadowPos;

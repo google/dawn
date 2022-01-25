@@ -33,8 +33,8 @@ void frag_main(tint_symbol_3 tint_symbol_2) {
   frag_main_inner(tint_symbol_4);
   return;
 }
-in float f;
-in uint u;
+layout(location = 0) in float f;
+layout(location = 1) in uint u;
 void main() {
   tint_symbol_3 inputs;
   inputs.f = f;

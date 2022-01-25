@@ -157,8 +157,8 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-in float foo;
-out float value;
+layout(location = 0) in float foo;
+layout(location = 1) out float value;
 void main() {
   tint_symbol_1 inputs;
   inputs.foo = foo;
@@ -284,8 +284,8 @@ tint_symbol vert_main() {
   wrapper_result.col2 = inner_result.col2;
   return wrapper_result;
 }
-out float col1;
-out float col2;
+layout(location = 1) out float col1;
+layout(location = 2) out float col2;
 void main() {
   tint_symbol outputs;
   outputs = vert_main();
@@ -314,8 +314,8 @@ void frag_main(tint_symbol_2 tint_symbol_1) {
   frag_main_inner(tint_symbol_4);
   return;
 }
-in float col1;
-in float col2;
+layout(location = 1) in float col1;
+layout(location = 2) in float col2;
 void main() {
   tint_symbol_2 inputs;
   inputs.col1 = col1;

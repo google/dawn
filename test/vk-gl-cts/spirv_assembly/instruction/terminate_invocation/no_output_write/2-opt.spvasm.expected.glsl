@@ -40,7 +40,7 @@ tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   wrapper_result.out_data_1 = inner_result.out_data_1;
   return wrapper_result;
 }
-out int out_data_1;
+layout(location = 0) out int out_data_1;
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_FragCoord;

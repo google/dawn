@@ -32,8 +32,8 @@ tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
   wrapper_result.color = inner_result.color;
   return wrapper_result;
 }
-in vec2 vUv;
-out vec4 color;
+layout(location = 2) in vec2 vUv;
+layout(location = 0) out vec4 color;
 void main() {
   tint_symbol_3 inputs;
   inputs.vUv = vUv;

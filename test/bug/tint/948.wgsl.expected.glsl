@@ -205,13 +205,13 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
   wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
   return wrapper_result;
 }
-in vec3 vPosition_param;
-in vec2 vUV_param;
-in vec2 tUV_param;
-in vec2 stageUnits_1_param;
-in vec2 levelUnits_param;
-in vec2 tileID_1_param;
-out vec4 glFragColor_1;
+layout(location = 0) in vec3 vPosition_param;
+layout(location = 1) in vec2 vUV_param;
+layout(location = 2) in vec2 tUV_param;
+layout(location = 3) in vec2 stageUnits_1_param;
+layout(location = 4) in vec2 levelUnits_param;
+layout(location = 5) in vec2 tileID_1_param;
+layout(location = 0) out vec4 glFragColor_1;
 void main() {
   tint_symbol_2 inputs;
   inputs.vPosition_param = vPosition_param;

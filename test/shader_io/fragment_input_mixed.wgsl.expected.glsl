@@ -39,10 +39,10 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_3, tint_symbol_1.front_facing, tint_symbol_1.loc1, tint_symbol_1.sample_index, tint_symbol_4, tint_symbol_1.loc2);
   return;
 }
-in int loc0;
-in uint loc1;
-in float loc2;
-in vec4 loc3;
+layout(location = 0) in int loc0;
+layout(location = 1) in uint loc1;
+layout(location = 2) in float loc2;
+layout(location = 3) in vec4 loc3;
 void main() {
   tint_symbol_2 inputs;
   inputs.loc0 = loc0;

@@ -33,9 +33,9 @@ tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
   wrapper_result.mask = inner_result.mask;
   return wrapper_result;
 }
-in float a;
-in float b;
-out float a;
+layout(location = 0) in float a;
+layout(location = 1) in float b;
+layout(location = 0) out float a;
 void main() {
   tint_symbol_3 inputs;
   inputs.a = a;

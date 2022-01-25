@@ -72,9 +72,9 @@ tint_symbol_3 vert_main(tint_symbol_2 tint_symbol_1) {
   wrapper_result.v_color = inner_result.v_color;
   return wrapper_result;
 }
-in vec4 position;
-in vec4 color;
-out vec4 v_color;
+layout(location = 0) in vec4 position;
+layout(location = 1) in vec4 color;
+layout(location = 0) out vec4 v_color;
 void main() {
   tint_symbol_2 inputs;
   inputs.position = position;
@@ -136,8 +136,8 @@ tint_symbol_6 frag_main(tint_symbol_5 tint_symbol_4) {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-in vec4 v_color;
-out vec4 value;
+layout(location = 0) in vec4 v_color;
+layout(location = 0) out vec4 value;
 void main() {
   tint_symbol_5 inputs;
   inputs.v_color = v_color;

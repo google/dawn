@@ -44,10 +44,10 @@ tint_symbol vert_main() {
   wrapper_result.pos = inner_result.pos;
   return wrapper_result;
 }
-out int i;
-out uint u;
-out ivec4 vi;
-out uvec4 vu;
+layout(location = 0) out int i;
+layout(location = 1) out uint u;
+layout(location = 2) out ivec4 vi;
+layout(location = 3) out uvec4 vu;
 void main() {
   tint_symbol outputs;
   outputs = vert_main();
@@ -99,11 +99,11 @@ tint_symbol_3 frag_main(tint_symbol_2 tint_symbol_1) {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
-in int i;
-in uint u;
-in ivec4 vi;
-in uvec4 vu;
-out int value;
+layout(location = 0) in int i;
+layout(location = 1) in uint u;
+layout(location = 2) in ivec4 vi;
+layout(location = 3) in uvec4 vu;
+layout(location = 0) out int value;
 void main() {
   tint_symbol_2 inputs;
   inputs.i = i;
