@@ -68,7 +68,7 @@ namespace dawn::native {
         uint64_t length = 0;
 
         if (lineNum && linePos && diagnostic.source.file_content) {
-            const std::vector<std::string>& lines = diagnostic.source.file_content->lines;
+            const auto& lines = diagnostic.source.file_content->lines;
             size_t i = 0;
             // To find the offset of the message position, loop through each of the first lineNum-1
             // lines and add it's length (+1 to account for the line break) to the offset.
