@@ -12,11 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "dawn_native/d3d12/CommandRecordingContext.h"
+
 #include "dawn_native/d3d12/CommandAllocatorManager.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
+#include "dawn_platform/DawnPlatform.h"
+#include "dawn_platform/tracing/TraceEvent.h"
+
+#include <profileapi.h>
+#include <sysinfoapi.h>
 
 namespace dawn::native::d3d12 {
 
@@ -73,6 +79,44 @@ namespace dawn::native::d3d12 {
             }
             DAWN_TRY(device->GetResidencyManager()->EnsureHeapsAreResident(
                 mHeapsPendingUsage.data(), mHeapsPendingUsage.size()));
+
+            if (device->IsToggleEnabled(Toggle::RecordDetailedTimingInTraceEvents)) {
+                uint64_t gpuTimestamp;
+                uint64_t cpuTimestamp;
+                FILETIME fileTimeNonPrecise;
+                SYSTEMTIME systemTimeNonPrecise;
+
+                // Both supported since Windows 2000, have a accuracy of 1ms
+                GetSystemTimeAsFileTime(&fileTimeNonPrecise);
+                GetSystemTime(&systemTimeNonPrecise);
+                // Query CPU and GPU timestamps at almost the same time
+                device->GetCommandQueue()->GetClockCalibration(&gpuTimestamp, &cpuTimestamp);
+
+                uint64_t gpuFrequency;
+                uint64_t cpuFrequency;
+                LARGE_INTEGER cpuFrequencyLargeInteger;
+                device->GetCommandQueue()->GetTimestampFrequency(&gpuFrequency);
+                QueryPerformanceFrequency(
+                    &cpuFrequencyLargeInteger);  // Supported since Windows 2000
+                cpuFrequency = cpuFrequencyLargeInteger.QuadPart;
+
+                std::string timingInfo = absl::StrFormat(
+                    "UTC Time: %u/%u/%u %02u:%02u:%02u.%03u, File Time: %u, CPU "
+                    "Timestamp: %u, GPU Timestamp: %u, CPU Tick Frequency: %u, GPU Tick Frequency: "
+                    "%u",
+                    systemTimeNonPrecise.wYear, systemTimeNonPrecise.wMonth,
+                    systemTimeNonPrecise.wDay, systemTimeNonPrecise.wHour,
+                    systemTimeNonPrecise.wMinute, systemTimeNonPrecise.wSecond,
+                    systemTimeNonPrecise.wMilliseconds,
+                    (static_cast<uint64_t>(fileTimeNonPrecise.dwHighDateTime) << 32) +
+                        fileTimeNonPrecise.dwLowDateTime,
+                    cpuTimestamp, gpuTimestamp, cpuFrequency, gpuFrequency);
+
+                TRACE_EVENT_INSTANT1(
+                    device->GetPlatform(), General,
+                    "d3d12::CommandRecordingContext::ExecuteCommandList Detailed Timing", "Timing",
+                    timingInfo.c_str());
+            }
 
             ID3D12CommandList* d3d12CommandList = GetCommandList();
             device->GetCommandQueue()->ExecuteCommandLists(1, &d3d12CommandList);
