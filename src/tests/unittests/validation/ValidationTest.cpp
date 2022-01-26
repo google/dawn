@@ -105,6 +105,7 @@ void ValidationTest::SetUp() {
 
     std::tie(device, backendDevice) = mWireHelper->RegisterDevice(CreateTestDevice());
     device.SetUncapturedErrorCallback(ValidationTest::OnDeviceError, this);
+    device.SetDeviceLostCallback(ValidationTest::OnDeviceLost, this);
 
     std::string traceName =
         std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
@@ -127,6 +128,9 @@ void ValidationTest::TearDown() {
         EXPECT_EQ(mLastWarningCount,
                   dawn::native::GetDeprecationWarningCountForTesting(backendDevice));
     }
+
+    // The device will be destroyed soon after, so we want to set the expectation.
+    ExpectDeviceDestruction();
 }
 
 void ValidationTest::StartExpectDeviceError(testing::Matcher<std::string> errorMatcher) {
@@ -146,6 +150,10 @@ bool ValidationTest::EndExpectDeviceError() {
 }
 std::string ValidationTest::GetLastDeviceErrorMessage() const {
     return mDeviceErrorMessage;
+}
+
+void ValidationTest::ExpectDeviceDestruction() {
+    mExpectDestruction = true;
 }
 
 wgpu::Device ValidationTest::RegisterDevice(WGPUDevice backendDevice) {
@@ -230,6 +238,18 @@ void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void
         ASSERT_THAT(message, self->mErrorMatcher);
     }
     self->mError = true;
+}
+
+void ValidationTest::OnDeviceLost(WGPUDeviceLostReason reason,
+                                  const char* message,
+                                  void* userdata) {
+    auto self = static_cast<ValidationTest*>(userdata);
+    if (self->mExpectDestruction) {
+        EXPECT_EQ(reason, WGPUDeviceLostReason_Destroyed);
+        return;
+    }
+    ADD_FAILURE() << "Device lost during test: " << message;
+    ASSERT(false);
 }
 
 ValidationTest::DummyRenderPass::DummyRenderPass(const wgpu::Device& device)

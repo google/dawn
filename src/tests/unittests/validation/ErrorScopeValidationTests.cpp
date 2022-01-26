@@ -197,12 +197,13 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
 
         EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, this))
             .Times(1);
+        ExpectDeviceDestruction();
         device = nullptr;
     } else {
         EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this))
             .Times(1);
         device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
-
+        ExpectDeviceDestruction();
         device = nullptr;
     }
 }

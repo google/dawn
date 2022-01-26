@@ -104,6 +104,8 @@ class ValidationTest : public testing::Test {
     bool EndExpectDeviceError();
     std::string GetLastDeviceErrorMessage() const;
 
+    void ExpectDeviceDestruction();
+
     wgpu::Device RegisterDevice(WGPUDevice backendDevice);
 
     bool UsesWire() const;
@@ -146,10 +148,12 @@ class ValidationTest : public testing::Test {
     std::unique_ptr<utils::WireHelper> mWireHelper;
 
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
+    static void OnDeviceLost(WGPUDeviceLostReason reason, const char* message, void* userdata);
     std::string mDeviceErrorMessage;
     bool mExpectError = false;
     bool mError = false;
     testing::Matcher<std::string> mErrorMatcher;
+    bool mExpectDestruction = false;
 };
 
 #endif  // TESTS_UNITTESTS_VALIDATIONTEST_H_

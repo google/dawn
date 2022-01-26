@@ -14,6 +14,11 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "dawn_native/Device.h"
+#include "dawn_native/dawn_platform.h"
+
+using ::testing::HasSubstr;
+
 class RequestDeviceValidationTest : public ValidationTest {
   protected:
     void SetUp() {
@@ -202,4 +207,24 @@ TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
     wgpu::DeviceDescriptor descriptor;
     descriptor.requiredLimits = &limits;
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
+}
+
+class DeviceTickValidationTest : public ValidationTest {};
+
+// Device destroy before API-level Tick should always result in no-op and false.
+TEST_F(DeviceTickValidationTest, DestroyDeviceBeforeAPITick) {
+    ExpectDeviceDestruction();
+    device.Destroy();
+    device.Tick();
+}
+
+// Device destroy before an internal Tick should return an error.
+TEST_F(DeviceTickValidationTest, DestroyDeviceBeforeInternalTick) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    ExpectDeviceDestruction();
+    device.Destroy();
+    dawn::native::DeviceBase* nativeDevice = dawn::native::FromAPI(device.Get());
+    ASSERT_DEVICE_ERROR(nativeDevice->ConsumedError(nativeDevice->Tick()),
+                        HasSubstr("[Device] is lost."));
 }
