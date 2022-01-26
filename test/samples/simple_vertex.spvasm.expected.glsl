@@ -31,6 +31,7 @@ void main() {
   tint_symbol_2 outputs;
   outputs = tint_symbol_1();
   gl_Position = outputs.tint_symbol;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 

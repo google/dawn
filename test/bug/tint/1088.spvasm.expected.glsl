@@ -90,6 +90,7 @@ void main() {
   outputs = tint_symbol_1(inputs);
   vUV_1 = outputs.vUV_1;
   gl_Position = outputs.tint_symbol;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 

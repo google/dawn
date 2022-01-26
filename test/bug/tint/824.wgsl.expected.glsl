@@ -40,6 +40,7 @@ void main() {
   outputs = tint_symbol(inputs);
   color = outputs.color;
   gl_Position = outputs.Position;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 

@@ -180,6 +180,7 @@ void main() {
   v_Color = outputs.v_Color;
   v_TexCoord = outputs.v_TexCoord;
   gl_Position = outputs.member;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 

@@ -63,6 +63,7 @@ void main() {
   linear_centroid = outputs.linear_centroid;
   linear_sample = outputs.linear_sample;
   gl_Position = outputs.pos;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 

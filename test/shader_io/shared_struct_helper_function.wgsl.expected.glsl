@@ -38,6 +38,7 @@ void main() {
   outputs = vert_main1();
   loc0 = outputs.loc0;
   gl_Position = outputs.pos;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 
@@ -81,6 +82,7 @@ void main() {
   outputs = vert_main2();
   loc0 = outputs.loc0;
   gl_Position = outputs.pos;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 

@@ -2085,6 +2085,8 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     }
   }
   if (func->PipelineStage() == ast::PipelineStage::kVertex) {
+    out << "  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;"
+        << std::endl;
     out << "  gl_Position.y = -gl_Position.y;" << std::endl;
   }
 

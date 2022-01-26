@@ -47,6 +47,7 @@ void main() {
   tint_symbol_3 outputs;
   outputs = vertex_main();
   gl_Position = outputs.tint_symbol_1_1;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 

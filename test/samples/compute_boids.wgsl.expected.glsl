@@ -56,6 +56,7 @@ void main() {
   tint_symbol_3 outputs;
   outputs = vert_main(inputs);
   gl_Position = outputs.value;
+  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
 
