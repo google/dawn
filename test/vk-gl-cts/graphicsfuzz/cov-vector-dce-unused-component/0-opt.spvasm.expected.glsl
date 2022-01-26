@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 void main_1() {
   vec2 a = vec2(0.0f, 0.0f);
   vec2 b = vec2(0.0f, 0.0f);
@@ -24,6 +23,7 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_1 {
   vec4 x_GLF_color_1;
 };
@@ -41,17 +41,17 @@ tint_symbol_1 tint_symbol() {
   return wrapper_result;
 }
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:12: 'frac' : no matching overloaded function found 
-ERROR: 0:12: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
-ERROR: 0:12: '' : compilation terminated 
+ERROR: 0:11: 'frac' : no matching overloaded function found 
+ERROR: 0:11: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
+ERROR: 0:11: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

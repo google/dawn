@@ -4,18 +4,20 @@ precision mediump float;
 struct FragmentInput {
   vec2 vUv;
 };
+
 struct FragmentOutput {
   vec4 color;
 };
+
 struct tint_symbol_3 {
   vec2 vUv;
 };
+
 struct tint_symbol_4 {
   vec4 color;
 };
 
 uniform highp sampler2D depthMap_texSampler;
-
 
 FragmentOutput tint_symbol_inner(FragmentInput fIn) {
   float tint_symbol_1 = texture(depthMap_texSampler, fIn.vUv).x;
@@ -34,6 +36,7 @@ tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
 }
 layout(location = 2) in vec2 vUv;
 layout(location = 0) out vec4 color;
+
 void main() {
   tint_symbol_3 inputs;
   inputs.vUv = vUv;
@@ -41,5 +44,4 @@ void main() {
   outputs = tint_symbol(inputs);
   color = outputs.color;
 }
-
 

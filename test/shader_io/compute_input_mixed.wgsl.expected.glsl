@@ -4,9 +4,11 @@ precision mediump float;
 struct ComputeInputs0 {
   uvec3 local_invocation_id;
 };
+
 struct ComputeInputs1 {
   uvec3 workgroup_id;
 };
+
 struct tint_symbol_2 {
   uvec3 local_invocation_id;
   uint local_invocation_index;
@@ -25,6 +27,11 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_3, tint_symbol_1.local_invocation_index, tint_symbol_1.global_invocation_id, tint_symbol_4);
   return;
 }
+
+
+
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.local_invocation_id = gl_LocalInvocationID;
@@ -33,5 +40,4 @@ void main() {
   inputs.workgroup_id = gl_WorkGroupID;
   tint_symbol(inputs);
 }
-
 

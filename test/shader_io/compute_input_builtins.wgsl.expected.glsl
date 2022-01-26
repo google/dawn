@@ -18,6 +18,12 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.local_invocation_id, tint_symbol_1.local_invocation_index, tint_symbol_1.global_invocation_id, tint_symbol_1.workgroup_id, tint_symbol_1.num_workgroups);
   return;
 }
+
+
+
+
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.local_invocation_id = gl_LocalInvocationID;
@@ -27,5 +33,4 @@ void main() {
   inputs.num_workgroups = gl_NumWorkGroups;
   tint_symbol(inputs);
 }
-
 

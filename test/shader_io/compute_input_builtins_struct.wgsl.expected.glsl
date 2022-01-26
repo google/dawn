@@ -8,6 +8,7 @@ struct ComputeInputs {
   uvec3 workgroup_id;
   uvec3 num_workgroups;
 };
+
 struct tint_symbol_2 {
   uvec3 local_invocation_id;
   uint local_invocation_index;
@@ -26,6 +27,12 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_3);
   return;
 }
+
+
+
+
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.local_invocation_id = gl_LocalInvocationID;
@@ -35,5 +42,4 @@ void main() {
   inputs.num_workgroups = gl_NumWorkGroups;
   tint_symbol(inputs);
 }
-
 

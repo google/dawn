@@ -7,6 +7,7 @@ struct doesNotMatter {
   int global_seed;
   int data[];
 };
+
 struct buf1 {
   vec2 injectionSwitch;
 };
@@ -62,12 +63,13 @@ void tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   tint_symbol_1_inner(tint_symbol_3.tint_symbol_2);
   return;
 }
+
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_LocalInvocationID;
   tint_symbol_1(inputs);
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:6: '' : array size required 

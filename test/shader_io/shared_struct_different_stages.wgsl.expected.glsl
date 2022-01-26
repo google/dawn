@@ -6,6 +6,7 @@ struct Interface {
   float col2;
   vec4 pos;
 };
+
 struct tint_symbol {
   float col1;
   float col2;
@@ -33,6 +34,8 @@ tint_symbol vert_main() {
 }
 layout(location = 1) out float col1;
 layout(location = 2) out float col2;
+
+
 void main() {
   tint_symbol outputs;
   outputs = vert_main();
@@ -43,7 +46,6 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
@@ -52,11 +54,13 @@ struct Interface {
   float col2;
   vec4 pos;
 };
+
 struct tint_symbol {
   float col1;
   float col2;
   vec4 pos;
 };
+
 struct tint_symbol_2 {
   float col1;
   float col2;
@@ -75,6 +79,8 @@ void frag_main(tint_symbol_2 tint_symbol_1) {
 }
 layout(location = 1) in float col1;
 layout(location = 2) in float col2;
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.col1 = col1;
@@ -82,5 +88,4 @@ void main() {
   inputs.pos = gl_FragCoord;
   frag_main(inputs);
 }
-
 

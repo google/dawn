@@ -6,9 +6,11 @@ precision mediump float;
 struct buf1 {
   vec2 injectionSwitch;
 };
+
 struct buf2 {
   vec2 resolution;
 };
+
 struct doesNotMatter {
   int x_compute_data[];
 };
@@ -17,13 +19,14 @@ uvec3 tint_symbol = uvec3(0u, 0u, 0u);
 layout(binding = 1) uniform buf1_1 {
   vec2 injectionSwitch;
 } x_10;
+
 layout(binding = 2) uniform buf2_1 {
   vec2 resolution;
 } x_13;
+
 layout(binding = 0) buffer doesNotMatter_1 {
   int x_compute_data[];
 } x_15;
-
 void main_1() {
   float A[1] = float[1](0.0f);
   int i = 0;
@@ -125,16 +128,17 @@ void tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   tint_symbol_1_inner(tint_symbol_3.tint_symbol_2);
   return;
 }
+
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_GlobalInvocationID;
   tint_symbol_1(inputs);
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:11: '' : array size required 
-ERROR: 0:12: '' : compilation terminated 
+ERROR: 0:13: '' : array size required 
+ERROR: 0:14: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

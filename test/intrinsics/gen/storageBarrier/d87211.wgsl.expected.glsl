@@ -10,8 +10,8 @@ void compute_main() {
   storageBarrier_d87211();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

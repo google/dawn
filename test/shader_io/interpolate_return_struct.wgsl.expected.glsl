@@ -12,6 +12,7 @@ struct Out {
   float linear_centroid;
   float linear_sample;
 };
+
 struct tint_symbol_2 {
   float none;
   float tint_symbol;
@@ -51,6 +52,8 @@ layout(location = 4) out float perspective_sample;
 layout(location = 5) out float linear_center;
 layout(location = 6) centroid out float linear_centroid;
 layout(location = 7) out float linear_sample;
+
+
 void main() {
   tint_symbol_2 outputs;
   outputs = tint_symbol_1();
@@ -66,5 +69,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

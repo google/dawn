@@ -26,6 +26,7 @@ layout(binding = 9) uniform LeftOver_1 {
   float spriteCount;
   vec3 colorMul;
 } x_20;
+
 vec2 tUV = vec2(0.0f, 0.0f);
 float mt = 0.0f;
 vec4 glFragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -35,7 +36,6 @@ vec2 stageUnits_1 = vec2(0.0f, 0.0f);
 vec3 vPosition = vec3(0.0f, 0.0f, 0.0f);
 vec2 vUV = vec2(0.0f, 0.0f);
 uniform highp sampler2D frameMapTexture_frameMapSampler;
-
 
 mat4 getFrameData_f1_(inout float frameID) {
   float fX = 0.0f;
@@ -52,7 +52,6 @@ uniform highp sampler2D tileMapsTexture1_tileMapsSampler;
 uniform highp sampler2D tileMapsTexture0_tileMapsSampler;
 uniform highp sampler2D animationMapTexture_animationMapSampler;
 uniform highp sampler2D spriteSheetTexture_spriteSheetSampler;
-
 void main_1() {
   vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   vec2 tileUV = vec2(0.0f, 0.0f);
@@ -175,6 +174,7 @@ void main_1() {
 struct main_out {
   vec4 glFragColor_1;
 };
+
 struct tint_symbol_2 {
   vec3 vPosition_param;
   vec2 vUV_param;
@@ -183,6 +183,7 @@ struct tint_symbol_2 {
   vec2 levelUnits_param;
   vec2 tileID_1_param;
 };
+
 struct tint_symbol_3 {
   vec4 glFragColor_1;
 };
@@ -212,6 +213,7 @@ layout(location = 3) in vec2 stageUnits_1_param;
 layout(location = 4) in vec2 levelUnits_param;
 layout(location = 5) in vec2 tileID_1_param;
 layout(location = 0) out vec4 glFragColor_1;
+
 void main() {
   tint_symbol_2 inputs;
   inputs.vPosition_param = vPosition_param;
@@ -225,11 +227,10 @@ void main() {
   glFragColor_1 = outputs.glFragColor_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:74: 'frac' : no matching overloaded function found 
-ERROR: 0:74: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
-ERROR: 0:74: '' : compilation terminated 
+ERROR: 0:73: 'frac' : no matching overloaded function found 
+ERROR: 0:73: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
+ERROR: 0:73: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

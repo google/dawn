@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 const float shadowDepthTextureSize = 1024.0f;
-
 struct Scene {
   mat4 lightViewProjMatrix;
   mat4 cameraViewProjMatrix;
@@ -25,18 +24,17 @@ struct FragmentInput {
 
 const vec3 albedo = vec3(0.899999976f, 0.899999976f, 0.899999976f);
 const float ambientFactor = 0.200000003f;
-
 struct tint_symbol_3 {
   vec3 shadowPos;
   vec3 fragPos;
   vec3 fragNorm;
 };
+
 struct tint_symbol_4 {
   vec4 value;
 };
 
 uniform highp sampler2D shadowMap_shadowSampler;
-
 
 vec4 tint_symbol_inner(FragmentInput tint_symbol_1) {
   float visibility = 0.0f;
@@ -68,6 +66,7 @@ layout(location = 0) in vec3 shadowPos;
 layout(location = 1) in vec3 fragPos;
 layout(location = 2) in vec3 fragNorm;
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_3 inputs;
   inputs.shadowPos = shadowPos;
@@ -78,10 +77,9 @@ void main() {
   value = outputs.value;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:47: 'assign' :  cannot convert from ' temp highp 4-component vector of float' to ' temp mediump float'
-ERROR: 0:47: '' : compilation terminated 
+ERROR: 0:45: 'assign' :  cannot convert from ' temp highp 4-component vector of float' to ' temp mediump float'
+ERROR: 0:45: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

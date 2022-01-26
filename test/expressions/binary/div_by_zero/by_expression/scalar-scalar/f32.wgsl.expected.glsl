@@ -8,8 +8,8 @@ void f() {
   float r = (a / (b + b));
   return;
 }
+
 void main() {
   f();
 }
-
 

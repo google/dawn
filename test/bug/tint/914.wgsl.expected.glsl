@@ -62,7 +62,6 @@ const uint ColPerThread = 4u;
 const uint TileInner = 64u;
 shared float mm_Asub[64][64];
 shared float mm_Bsub[64][64];
-
 struct tint_symbol_2 {
   uvec3 local_id;
   uint local_invocation_index;
@@ -161,6 +160,10 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.local_id, tint_symbol_1.global_id, tint_symbol_1.local_invocation_index);
   return;
 }
+
+
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.local_id = gl_LocalInvocationID;
@@ -168,5 +171,4 @@ void main() {
   inputs.global_id = gl_GlobalInvocationID;
   tint_symbol(inputs);
 }
-
 

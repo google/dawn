@@ -15,8 +15,8 @@ void tint_symbol() {
   vec4 x = (data.vector * data.matrix);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

@@ -2,7 +2,6 @@
 precision mediump float;
 
 uniform highp sampler2DMS arg_0_1;
-
 void textureLoad_6273b1() {
   float res = texelFetch(arg_0_1, ivec2(0, 0), 1).x;
 }
@@ -22,6 +21,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -30,12 +31,10 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2DMS arg_0_1;
-
 void textureLoad_6273b1() {
   float res = texelFetch(arg_0_1, ivec2(0, 0), 1).x;
 }
@@ -48,16 +47,15 @@ void fragment_main() {
   textureLoad_6273b1();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2DMS arg_0_1;
-
 void textureLoad_6273b1() {
   float res = texelFetch(arg_0_1, ivec2(0, 0), 1).x;
 }
@@ -71,8 +69,8 @@ void compute_main() {
   textureLoad_6273b1();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

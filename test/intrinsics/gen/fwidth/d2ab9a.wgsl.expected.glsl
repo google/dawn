@@ -9,8 +9,8 @@ void fragment_main() {
   fwidth_d2ab9a();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 

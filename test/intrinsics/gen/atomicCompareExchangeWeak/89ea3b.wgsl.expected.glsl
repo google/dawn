@@ -10,7 +10,6 @@ ivec2 tint_atomicCompareExchangeWeak(inout int param_0, int param_1, int param_2
 
 
 shared int arg_0;
-
 void atomicCompareExchangeWeak_89ea3b() {
   ivec2 res = tint_atomicCompareExchangeWeak(arg_0, 1, 1);
 }
@@ -32,10 +31,11 @@ void compute_main(tint_symbol_1 tint_symbol) {
   compute_main_inner(tint_symbol.local_invocation_index);
   return;
 }
+
+
 void main() {
   tint_symbol_1 inputs;
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   compute_main(inputs);
 }
-
 

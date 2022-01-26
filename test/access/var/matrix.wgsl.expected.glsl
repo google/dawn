@@ -8,8 +8,8 @@ void tint_symbol() {
   float f = v[1];
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

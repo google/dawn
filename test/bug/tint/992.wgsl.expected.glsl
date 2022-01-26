@@ -18,10 +18,10 @@ tint_symbol frag_main() {
   return wrapper_result;
 }
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol outputs;
   outputs = frag_main();
   value = outputs.value;
 }
-
 

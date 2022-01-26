@@ -7,6 +7,7 @@ struct tint_symbol_2 {
   float loc2;
   vec4 loc3;
 };
+
 struct tint_symbol_3 {
   vec4 value;
 };
@@ -29,6 +30,8 @@ layout(location = 0) in int loc0;
 layout(location = 1) in uint loc1;
 layout(location = 2) in float loc2;
 layout(location = 3) in vec4 loc3;
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.loc0 = loc0;
@@ -41,5 +44,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

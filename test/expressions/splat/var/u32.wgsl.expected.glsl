@@ -5,11 +5,10 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void unused_entry_point() {
   return;
 }
+
 void main() {
   unused_entry_point();
 }
-
-
 
 void f() {
   uint v = (1u + 2u);
@@ -17,3 +16,4 @@ void f() {
   uvec3 v3 = uvec3(v);
   uvec4 v4 = uvec4(v);
 }
+

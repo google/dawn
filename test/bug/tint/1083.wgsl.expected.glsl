@@ -6,8 +6,8 @@ void f() {
   int c = (1 / 0);
   return;
 }
+
 void main() {
   f();
 }
-
 

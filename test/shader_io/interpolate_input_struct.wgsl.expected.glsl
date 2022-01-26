@@ -11,6 +11,7 @@ struct In {
   float linear_centroid;
   float linear_sample;
 };
+
 struct tint_symbol_4 {
   float none;
   float tint_symbol;
@@ -38,6 +39,7 @@ layout(location = 4) in float perspective_sample;
 layout(location = 5) in float linear_center;
 layout(location = 6) centroid in float linear_centroid;
 layout(location = 7) in float linear_sample;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.none = none;
@@ -50,5 +52,4 @@ void main() {
   inputs.linear_sample = linear_sample;
   tint_symbol_1(inputs);
 }
-
 

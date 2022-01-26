@@ -6,12 +6,15 @@ precision mediump float;
 struct ResultMatrix {
   float numbers[];
 };
+
 struct FirstMatrix {
   float numbers[];
 };
+
 struct SecondMatrix {
   float numbers[];
 };
+
 struct Uniforms {
   float NAN;
   int sizeA;
@@ -22,7 +25,6 @@ uvec3 tint_symbol = uvec3(0u, 0u, 0u);
 layout(binding = 2) buffer ResultMatrix_1 {
   float numbers[];
 } resultMatrix;
-
 float binaryOperation_f1_f1_(inout float a, inout float b) {
   float x_26 = 0.0f;
   float x_13 = b;
@@ -73,12 +75,13 @@ void tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   tint_symbol_1_inner(tint_symbol_3.tint_symbol_2);
   return;
 }
+
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_GlobalInvocationID;
   tint_symbol_1(inputs);
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: '' : array size required 

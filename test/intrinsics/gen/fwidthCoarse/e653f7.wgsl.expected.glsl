@@ -9,8 +9,8 @@ void fragment_main() {
   fwidthCoarse_e653f7();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 

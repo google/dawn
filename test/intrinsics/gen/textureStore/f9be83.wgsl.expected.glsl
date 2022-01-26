@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 layout(rg32i) uniform highp writeonly iimage2DArray arg_0_1;
-
 void textureStore_f9be83() {
   imageStore(arg_0_1, ivec3(0, 0, 1), ivec4(0, 0, 0, 0));
 }
@@ -24,6 +23,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -31,7 +32,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'image load-store format' : not supported with this profile: es
@@ -44,7 +44,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 layout(rg32i) uniform highp writeonly iimage2DArray arg_0_1;
-
 void textureStore_f9be83() {
   imageStore(arg_0_1, ivec3(0, 0, 1), ivec4(0, 0, 0, 0));
 }
@@ -57,10 +56,10 @@ void fragment_main() {
   textureStore_f9be83();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'image load-store format' : not supported with this profile: es
@@ -73,7 +72,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 layout(rg32i) uniform highp writeonly iimage2DArray arg_0_1;
-
 void textureStore_f9be83() {
   imageStore(arg_0_1, ivec3(0, 0, 1), ivec4(0, 0, 0, 0));
 }
@@ -87,10 +85,10 @@ void compute_main() {
   textureStore_f9be83();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'image load-store format' : not supported with this profile: es

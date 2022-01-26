@@ -6,6 +6,7 @@ precision mediump float;
 struct tint_padded_array_element {
   float el;
 };
+
 struct buf0 {
   tint_padded_array_element x_GLF_uniform_float_values[2];
 };
@@ -13,8 +14,8 @@ struct buf0 {
 layout(binding = 0) uniform buf0_1 {
   tint_padded_array_element x_GLF_uniform_float_values[2];
 } x_5;
-vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
+vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   float x_23 = x_5.x_GLF_uniform_float_values[1].el;
   if ((rsqrt(x_23) < -1.0f)) {
@@ -33,6 +34,7 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_1 {
   vec4 x_GLF_color_1;
 };
@@ -50,16 +52,16 @@ tint_symbol_1 tint_symbol() {
   return wrapper_result;
 }
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:18: 'rsqrt' : no matching overloaded function found 
-ERROR: 0:18: '' : compilation terminated 
+ERROR: 0:19: 'rsqrt' : no matching overloaded function found 
+ERROR: 0:19: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

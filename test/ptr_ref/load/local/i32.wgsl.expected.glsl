@@ -7,8 +7,8 @@ void tint_symbol() {
   int use = (i + 1);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

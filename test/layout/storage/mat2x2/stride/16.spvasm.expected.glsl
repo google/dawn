@@ -4,6 +4,7 @@ precision mediump float;
 struct tint_padded_array_element {
   vec2 el;
 };
+
 struct SSBO {
   tint_padded_array_element m[2];
 };
@@ -11,7 +12,6 @@ struct SSBO {
 layout(binding = 0) buffer SSBO_1 {
   tint_padded_array_element m[2];
 } ssbo;
-
 mat2 arr_to_mat2x2_stride_16(tint_padded_array_element arr[2]) {
   return mat2(arr[0u].el, arr[1u].el);
 }
@@ -32,8 +32,8 @@ void f() {
   f_1();
   return;
 }
+
 void main() {
   f();
 }
-
 

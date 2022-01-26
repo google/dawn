@@ -7,6 +7,7 @@ struct modf_result_vec2 {
   vec2 fract;
   vec2 whole;
 };
+
 modf_result_vec2 tint_modf(vec2 param_0) {
   float2 whole;
   float2 fract = modf(param_0, whole);
@@ -34,6 +35,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -42,10 +45,9 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:9: 'float2' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:10: 'float2' : undeclared identifier 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -57,6 +59,7 @@ struct modf_result_vec2 {
   vec2 fract;
   vec2 whole;
 };
+
 modf_result_vec2 tint_modf(vec2 param_0) {
   float2 whole;
   float2 fract = modf(param_0, whole);
@@ -77,14 +80,14 @@ void fragment_main() {
   modf_f5f20d();
   return;
 }
+
 void main() {
   fragment_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:9: 'float2' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:10: 'float2' : undeclared identifier 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -96,6 +99,7 @@ struct modf_result_vec2 {
   vec2 fract;
   vec2 whole;
 };
+
 modf_result_vec2 tint_modf(vec2 param_0) {
   float2 whole;
   float2 fract = modf(param_0, whole);
@@ -117,14 +121,14 @@ void compute_main() {
   modf_f5f20d();
   return;
 }
+
 void main() {
   compute_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:9: 'float2' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:10: 'float2' : undeclared identifier 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

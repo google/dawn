@@ -4,13 +4,13 @@ precision mediump float;
 struct tint_symbol_2 {
   vec2 vUV;
 };
+
 struct tint_symbol_3 {
   vec4 value;
 };
 
 uniform highp sampler2D randomTexture_Sampler;
 uniform highp sampler2D depthTexture_Sampler;
-
 
 vec4 tint_symbol_inner(vec2 vUV) {
   vec3 random = texture(randomTexture_Sampler, vUV).rgb;
@@ -51,6 +51,7 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
 }
 layout(location = 0) in vec2 vUV;
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_2 inputs;
   inputs.vUV = vUV;
@@ -58,5 +59,4 @@ void main() {
   outputs = tint_symbol(inputs);
   value = outputs.value;
 }
-
 

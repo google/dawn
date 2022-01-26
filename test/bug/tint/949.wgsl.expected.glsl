@@ -7,6 +7,7 @@ struct lightingInfo {
   vec3 diffuse;
   vec3 specular;
 };
+
 struct LeftOver {
   mat4 u_World;
   mat4 u_ViewProjection;
@@ -18,6 +19,7 @@ struct LeftOver {
   uint padding_1;
   vec2 tangentSpaceParameter0;
 };
+
 struct Light0 {
   vec4 vLightData;
   vec4 vLightDiffuse;
@@ -42,6 +44,7 @@ layout(binding = 6) uniform LeftOver_1 {
   uint padding_1;
   vec2 tangentSpaceParameter0;
 } x_269;
+
 vec4 v_output1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 bool tint_symbol = false;
 vec2 v_uv = vec2(0.0f, 0.0f);
@@ -55,8 +58,8 @@ layout(binding = 5) uniform Light0_1 {
   vec4 shadowsInfo;
   vec2 depthValues;
 } light0;
-vec4 glFragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
+vec4 glFragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout vec2 uv, inout vec2 tangentSpaceParams) {
   vec3 dp1 = vec3(0.0f, 0.0f, 0.0f);
   vec3 dp2 = vec3(0.0f, 0.0f, 0.0f);
@@ -176,7 +179,6 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(inout vec3 v
 
 uniform highp sampler2D TextureSamplerTexture_TextureSamplerSampler;
 uniform highp sampler2D TextureSampler1Texture_TextureSampler1Sampler;
-
 
 void main_1() {
   vec4 tempTextureRead = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -350,6 +352,7 @@ void main_1() {
 struct main_out {
   vec4 glFragColor_1;
 };
+
 struct tint_symbol_4 {
   vec4 v_output1_param;
   vec2 vMainuv_param;
@@ -357,6 +360,7 @@ struct tint_symbol_4 {
   vec2 v_uv_param;
   bool tint_symbol_2;
 };
+
 struct tint_symbol_5 {
   vec4 glFragColor_1;
 };
@@ -382,7 +386,9 @@ layout(location = 0) in vec4 v_output1_param;
 layout(location = 1) in vec2 vMainuv_param;
 layout(location = 2) in vec4 v_output2_param;
 layout(location = 3) in vec2 v_uv_param;
+
 layout(location = 0) out vec4 glFragColor_1;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.v_output1_param = v_output1_param;
@@ -395,11 +401,10 @@ void main() {
   glFragColor_1 = outputs.glFragColor_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:69: 'ddx' : no matching overloaded function found 
-ERROR: 0:69: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
-ERROR: 0:69: '' : compilation terminated 
+ERROR: 0:72: 'ddx' : no matching overloaded function found 
+ERROR: 0:72: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
+ERROR: 0:72: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

@@ -5,12 +5,15 @@ struct Uniforms {
   uint i;
   uint j;
 };
+
 struct InnerS {
   int v;
 };
+
 struct S1 {
   InnerS a2[8];
 };
+
 struct OuterS {
   S1 a1[8];
 };
@@ -27,8 +30,8 @@ void tint_symbol() {
   s.a1[uniforms.i].a2[uniforms.j] = v;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

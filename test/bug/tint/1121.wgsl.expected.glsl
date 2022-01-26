@@ -10,11 +10,11 @@ struct LightData {
 layout(binding = 0) buffer LightsBuffer_1 {
   LightData lights[];
 } lightsBuffer;
-
 struct TileLightIdData {
   uint count;
   uint lightId[64];
 };
+
 struct Tiles {
   TileLightIdData data[4];
 };
@@ -22,7 +22,6 @@ struct Tiles {
 layout(binding = 0) buffer Tiles_1 {
   TileLightIdData data[4];
 } tileLightId;
-
 struct Config {
   uint numLights;
   uint numTiles;
@@ -146,10 +145,11 @@ void tint_symbol_2(tint_symbol_4 tint_symbol_3) {
   tint_symbol_2_inner(tint_symbol_3.GlobalInvocationID);
   return;
 }
+
+
 void main() {
   tint_symbol_4 inputs;
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   tint_symbol_2(inputs);
 }
-
 

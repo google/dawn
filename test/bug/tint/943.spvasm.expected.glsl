@@ -10,12 +10,15 @@ struct Uniforms {
   ivec3 outShape;
   ivec2 outShapeStrides;
 };
+
 struct ssbOut {
   float result[];
 };
+
 struct ssbA {
   float A[];
 };
+
 struct ssbB {
   float B[];
 };
@@ -28,6 +31,7 @@ layout(binding = 3) uniform Uniforms_1 {
   ivec3 outShape;
   ivec2 outShapeStrides;
 } x_48;
+
 int dimInner_1 = 0;
 int dimBOuter_1 = 0;
 layout(binding = 0) buffer ssbOut_1 {
@@ -44,7 +48,6 @@ int batch = 0;
 layout(binding = 2) buffer ssbB_1 {
   float B[];
 } x_185;
-
 bool coordsInBounds_vi2_vi2_(inout ivec2 coord, inout ivec2 shape) {
   bool x_87 = false;
   bool x_88_phi = false;
@@ -401,6 +404,10 @@ void tint_symbol_2(tint_symbol_6 tint_symbol_5) {
   tint_symbol_2_inner(tint_symbol_5.tint_symbol_3, tint_symbol_5.tint_symbol_4, tint_symbol_5.local_invocation_index);
   return;
 }
+
+
+
+
 void main() {
   tint_symbol_6 inputs;
   inputs.tint_symbol_3 = gl_LocalInvocationID;
@@ -409,10 +416,9 @@ void main() {
   tint_symbol_2(inputs);
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:12: '' : array size required 
-ERROR: 0:13: '' : compilation terminated 
+ERROR: 0:13: '' : array size required 
+ERROR: 0:14: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

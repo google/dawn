@@ -15,9 +15,11 @@ struct VertexOutputs {
   vec2 texcoords;
   vec4 position;
 };
+
 struct tint_symbol_2 {
   uint VertexIndex;
 };
+
 struct tint_symbol_3 {
   vec2 texcoords;
   vec4 position;
@@ -39,6 +41,7 @@ VertexOutputs vs_main_inner(uint VertexIndex) {
 struct tint_symbol_5 {
   vec2 texcoord;
 };
+
 struct tint_symbol_6 {
   vec4 value;
 };
@@ -50,7 +53,10 @@ tint_symbol_3 vs_main(tint_symbol_2 tint_symbol_1) {
   wrapper_result.position = inner_result.position;
   return wrapper_result;
 }
+
 layout(location = 0) out vec2 texcoords;
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.VertexIndex = uint(gl_VertexID);
@@ -62,7 +68,6 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
@@ -70,26 +75,30 @@ struct Uniforms {
   vec2 u_scale;
   vec2 u_offset;
 };
+
 struct VertexOutputs {
   vec2 texcoords;
   vec4 position;
 };
+
 struct tint_symbol_2 {
   uint VertexIndex;
 };
+
 struct tint_symbol_3 {
   vec2 texcoords;
   vec4 position;
 };
+
 struct tint_symbol_5 {
   vec2 texcoord;
 };
+
 struct tint_symbol_6 {
   vec4 value;
 };
 
 uniform highp sampler2D myTexture_mySampler;
-
 
 vec4 fs_main_inner(vec2 texcoord) {
   vec2 clampedTexcoord = clamp(texcoord, vec2(0.0f, 0.0f), vec2(1.0f, 1.0f));
@@ -108,6 +117,7 @@ tint_symbol_6 fs_main(tint_symbol_5 tint_symbol_4) {
 }
 layout(location = 0) in vec2 texcoord;
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_5 inputs;
   inputs.texcoord = texcoord;
@@ -115,5 +125,4 @@ void main() {
   outputs = fs_main(inputs);
   value = outputs.value;
 }
-
 

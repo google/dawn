@@ -34,8 +34,8 @@ void tint_symbol() {
   v4b[i] = true;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

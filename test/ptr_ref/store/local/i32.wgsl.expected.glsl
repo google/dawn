@@ -8,8 +8,8 @@ void tint_symbol() {
   i = ((100 + 20) + 3);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

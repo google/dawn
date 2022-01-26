@@ -2,7 +2,6 @@
 precision mediump float;
 
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 void main_1() {
   tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   return;
@@ -11,6 +10,7 @@ void main_1() {
 struct main_out {
   vec4 tint_symbol;
 };
+
 struct tint_symbol_2 {
   vec4 tint_symbol;
 };
@@ -27,6 +27,8 @@ tint_symbol_2 tint_symbol_1() {
   wrapper_result.tint_symbol = inner_result.tint_symbol;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol_2 outputs;
   outputs = tint_symbol_1();
@@ -34,5 +36,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

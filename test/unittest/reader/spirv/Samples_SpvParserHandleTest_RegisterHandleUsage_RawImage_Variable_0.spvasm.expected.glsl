@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 uniform highp sampler1D x_20_1;
-
 void main_1() {
   vec4 x_125 = texelFetch(x_20_1, int(1u), 0);
   return;
@@ -14,10 +13,10 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'sampler1D' : Reserved word. 

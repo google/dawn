@@ -7,6 +7,7 @@ struct modf_result {
   float fract;
   float whole;
 };
+
 modf_result tint_modf(float param_0) {
   float whole;
   float fract = modf(param_0, whole);
@@ -22,14 +23,14 @@ void tint_symbol() {
   float whole = res.whole;
   return;
 }
+
 void main() {
   tint_symbol();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:11: '{ } style initializers' : not supported with this profile: es
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:12: '{ } style initializers' : not supported with this profile: es
+ERROR: 0:12: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

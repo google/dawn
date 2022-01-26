@@ -16,7 +16,6 @@ layout(binding = 0) buffer S_1 {
   vec3 v;
   uint i;
 } io;
-
 struct tint_symbol_2 {
   uint idx;
 };
@@ -30,10 +29,11 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.idx);
   return;
 }
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.idx = uint(gl_LocalInvocationIndex);
   tint_symbol(inputs);
 }
-
 

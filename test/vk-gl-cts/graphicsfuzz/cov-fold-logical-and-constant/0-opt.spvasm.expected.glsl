@@ -5,7 +5,6 @@ precision mediump float;
 
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 void main_1() {
   int i = 0;
   i = 2;
@@ -30,9 +29,11 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_4 {
   vec4 tint_symbol_2;
 };
+
 struct tint_symbol_5 {
   vec4 x_GLF_color_1;
 };
@@ -50,7 +51,9 @@ tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_FragCoord;
@@ -59,10 +62,9 @@ void main() {
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:14: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' const bool' (or there is no acceptable conversion)
-ERROR: 0:14: '' : compilation terminated 
+ERROR: 0:13: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' const bool' (or there is no acceptable conversion)
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

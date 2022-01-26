@@ -20,16 +20,19 @@ struct VertexInput {
   vec4 color;
   vec2 quad_pos;
 };
+
 struct VertexOutput {
   vec4 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_4 {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_5 {
   vec4 color;
   vec2 quad_pos;
@@ -51,28 +54,35 @@ struct tint_symbol_7 {
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_8 {
   vec4 value;
 };
+
 struct SimulationParams {
   float deltaTime;
   vec4 seed;
 };
+
 struct Particle {
   vec3 position;
   float lifetime;
   vec4 color;
   vec3 velocity;
 };
+
 struct tint_symbol_10 {
   uvec3 GlobalInvocationID;
 };
+
 struct UBO {
   uint width;
 };
+
 struct tint_symbol_12 {
   uvec3 coord;
 };
+
 struct tint_symbol_14 {
   uvec3 coord;
 };
@@ -91,6 +101,8 @@ layout(location = 1) in vec4 color;
 layout(location = 2) in vec2 quad_pos;
 layout(location = 0) out vec4 color;
 layout(location = 1) out vec2 quad_pos;
+
+
 void main() {
   tint_symbol_4 inputs;
   inputs.position = position;
@@ -105,9 +117,8 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:90: 'color' : redefinition 
+ERROR: 0:100: 'color' : redefinition 
 ERROR: 1 compilation errors.  No code generated.
 
 
@@ -120,31 +131,37 @@ struct RenderParams {
   vec3 right;
   vec3 up;
 };
+
 struct VertexInput {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct VertexOutput {
   vec4 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_4 {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_5 {
   vec4 color;
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_7 {
   vec4 color;
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_8 {
   vec4 value;
 };
@@ -159,21 +176,26 @@ struct SimulationParams {
   float deltaTime;
   vec4 seed;
 };
+
 struct Particle {
   vec3 position;
   float lifetime;
   vec4 color;
   vec3 velocity;
 };
+
 struct tint_symbol_10 {
   uvec3 GlobalInvocationID;
 };
+
 struct UBO {
   uint width;
 };
+
 struct tint_symbol_12 {
   uvec3 coord;
 };
+
 struct tint_symbol_14 {
   uvec3 coord;
 };
@@ -187,7 +209,9 @@ tint_symbol_8 fs_main(tint_symbol_7 tint_symbol_6) {
 }
 layout(location = 0) in vec4 color;
 layout(location = 1) in vec2 quad_pos;
+
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_7 inputs;
   inputs.color = color;
@@ -198,12 +222,10 @@ void main() {
   value = outputs.value;
 }
 
-
 #version 310 es
 precision mediump float;
 
 vec2 rand_seed = vec2(0.0f, 0.0f);
-
 float rand() {
   rand_seed.x = frac((cos(dot(rand_seed, vec2(23.140779495f, 232.616897583f))) * 136.816802979f));
   rand_seed.y = frac((cos(dot(rand_seed, vec2(54.478565216f, 345.841522217f))) * 534.764526367f));
@@ -215,38 +237,46 @@ struct RenderParams {
   vec3 right;
   vec3 up;
 };
+
 struct VertexInput {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct VertexOutput {
   vec4 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_4 {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_5 {
   vec4 color;
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_7 {
   vec4 color;
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_8 {
   vec4 value;
 };
+
 struct SimulationParams {
   float deltaTime;
   vec4 seed;
 };
+
 struct Particle {
   vec3 position;
   float lifetime;
@@ -258,16 +288,15 @@ layout(binding = 0) uniform SimulationParams_1 {
   float deltaTime;
   vec4 seed;
 } sim_params;
+
 layout(binding = 1) buffer Particles_1 {
   Particle particles[];
 } data;
-
 struct tint_symbol_10 {
   uvec3 GlobalInvocationID;
 };
 
 uniform highp sampler2D tint_symbol_2_1;
-
 void simulate_inner(uvec3 GlobalInvocationID) {
   rand_seed = ((sim_params.seed.xy + vec2(GlobalInvocationID.xy)) * sim_params.seed.zw);
   uint idx = GlobalInvocationID.x;
@@ -302,9 +331,11 @@ void simulate_inner(uvec3 GlobalInvocationID) {
 struct UBO {
   uint width;
 };
+
 struct tint_symbol_12 {
   uvec3 coord;
 };
+
 struct tint_symbol_14 {
   uvec3 coord;
 };
@@ -314,16 +345,17 @@ void simulate(tint_symbol_10 tint_symbol_9) {
   simulate_inner(tint_symbol_9.GlobalInvocationID);
   return;
 }
+
+
 void main() {
   tint_symbol_10 inputs;
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   simulate(inputs);
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:7: 'frac' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'frac' : no matching overloaded function found 
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -336,47 +368,57 @@ struct RenderParams {
   vec3 right;
   vec3 up;
 };
+
 struct VertexInput {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct VertexOutput {
   vec4 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_4 {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_5 {
   vec4 color;
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_7 {
   vec4 color;
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_8 {
   vec4 value;
 };
+
 struct SimulationParams {
   float deltaTime;
   vec4 seed;
 };
+
 struct Particle {
   vec3 position;
   float lifetime;
   vec4 color;
   vec3 velocity;
 };
+
 struct tint_symbol_10 {
   uvec3 GlobalInvocationID;
 };
+
 struct UBO {
   uint width;
 };
@@ -384,19 +426,18 @@ struct UBO {
 layout(binding = 3) uniform UBO_1 {
   uint width;
 } ubo;
+
 layout(binding = 4) buffer Buffer_1 {
   float weights[];
 } buf_in;
 layout(binding = 5) buffer Buffer_2 {
   float weights[];
 } buf_out;
-
 struct tint_symbol_12 {
   uvec3 coord;
 };
 
 uniform highp sampler2D tex_in_1;
-
 void import_level_inner(uvec3 coord) {
   uint offset = (coord.x + (coord.y * ubo.width));
   buf_out.weights[offset] = texelFetch(tex_in_1, ivec2(coord.xy), 0).w;
@@ -411,12 +452,13 @@ void import_level(tint_symbol_12 tint_symbol_11) {
   import_level_inner(tint_symbol_11.coord);
   return;
 }
+
+
 void main() {
   tint_symbol_12 inputs;
   inputs.coord = gl_GlobalInvocationID;
   import_level(inputs);
 }
-
 
 #version 310 es
 precision mediump float;
@@ -426,47 +468,57 @@ struct RenderParams {
   vec3 right;
   vec3 up;
 };
+
 struct VertexInput {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct VertexOutput {
   vec4 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_4 {
   vec3 position;
   vec4 color;
   vec2 quad_pos;
 };
+
 struct tint_symbol_5 {
   vec4 color;
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_7 {
   vec4 color;
   vec2 quad_pos;
   vec4 position;
 };
+
 struct tint_symbol_8 {
   vec4 value;
 };
+
 struct SimulationParams {
   float deltaTime;
   vec4 seed;
 };
+
 struct Particle {
   vec3 position;
   float lifetime;
   vec4 color;
   vec3 velocity;
 };
+
 struct tint_symbol_10 {
   uvec3 GlobalInvocationID;
 };
+
 struct UBO {
   uint width;
 };
@@ -474,22 +526,22 @@ struct UBO {
 layout(binding = 3) uniform UBO_1 {
   uint width;
 } ubo;
+
 layout(binding = 4) buffer Buffer_1 {
   float weights[];
 } buf_in;
 layout(binding = 5) buffer Buffer_2 {
   float weights[];
 } buf_out;
-
 struct tint_symbol_12 {
   uvec3 coord;
 };
+
 struct tint_symbol_14 {
   uvec3 coord;
 };
 
 layout(rgba8) uniform highp writeonly image2D tex_out_1;
-
 void export_level_inner(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(imageSize(tex_out_1))))) {
     uint dst_offset = (coord.x + (coord.y * ubo.width));
@@ -510,10 +562,11 @@ void export_level(tint_symbol_14 tint_symbol_13) {
   export_level_inner(tint_symbol_13.coord);
   return;
 }
+
+
 void main() {
   tint_symbol_14 inputs;
   inputs.coord = gl_GlobalInvocationID;
   export_level(inputs);
 }
-
 

@@ -16,6 +16,7 @@ struct VertexInput {
   vec4 instance3;
   vec4 instanceColor;
 };
+
 struct VertexOutput {
   vec4 position;
   vec3 worldPos;
@@ -28,6 +29,7 @@ struct VertexOutput {
   vec3 tangent;
   vec3 bitangent;
 };
+
 struct Camera {
   mat4 projection;
   mat4 inverseProjection;
@@ -56,7 +58,6 @@ layout(binding = 1) buffer Joints_1 {
 layout(binding = 2) buffer Joints_2 {
   mat4 matrices[];
 } inverseBind;
-
 mat4 getSkinMatrix(VertexInput tint_symbol) {
   mat4 joint0 = (joint.matrices[tint_symbol.joints.x] * inverseBind.matrices[tint_symbol.joints.x]);
   mat4 joint1 = (joint.matrices[tint_symbol.joints.y] * inverseBind.matrices[tint_symbol.joints.y]);
@@ -79,6 +80,7 @@ struct tint_symbol_3 {
   vec4 instance3;
   vec4 instanceColor;
 };
+
 struct tint_symbol_4 {
   vec3 worldPos;
   vec3 view;
@@ -144,6 +146,8 @@ layout(location = 5) out vec4 instanceColor;
 layout(location = 6) out vec3 normal;
 layout(location = 7) out vec3 tangent;
 layout(location = 8) out vec3 bitangent;
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.position = position;
@@ -173,9 +177,8 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:138: 'texcoord' : redefinition 
+ERROR: 0:140: 'texcoord' : redefinition 
 ERROR: 1 compilation errors.  No code generated.
 
 

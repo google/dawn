@@ -12,6 +12,7 @@ layout(binding = 0) uniform UBO_1 {
 struct S {
   int data[64];
 };
+
 struct Result {
   int tint_symbol;
 };
@@ -19,7 +20,6 @@ struct Result {
 layout(binding = 1) buffer Result_1 {
   int tint_symbol;
 } result;
-
 void x(inout S p) {
   p.data[ubo.dynamic_idx] = 1;
 }
@@ -31,8 +31,8 @@ void f() {
   result.tint_symbol = s.data[3];
   return;
 }
+
 void main() {
   f();
 }
-
 

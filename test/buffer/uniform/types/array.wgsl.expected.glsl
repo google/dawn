@@ -14,8 +14,8 @@ void tint_symbol() {
   vec4 x[4] = u.inner;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

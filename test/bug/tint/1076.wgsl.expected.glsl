@@ -7,11 +7,13 @@ struct FragIn {
   float a;
   uint mask;
 };
+
 struct tint_symbol_3 {
   float a;
   float b;
   uint mask;
 };
+
 struct tint_symbol_4 {
   float a;
   uint mask;
@@ -35,7 +37,10 @@ tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
 }
 layout(location = 0) in float a;
 layout(location = 1) in float b;
+
 layout(location = 0) out float a;
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.a = a;
@@ -47,9 +52,8 @@ void main() {
   gl_SampleMask = outputs.mask;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:36: 'a' : redefinition 
+ERROR: 0:39: 'a' : redefinition 
 ERROR: 1 compilation errors.  No code generated.
 
 

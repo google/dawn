@@ -8,8 +8,8 @@ void f() {
   ivec3 r = (a % (b + b));
   return;
 }
+
 void main() {
   f();
 }
-
 

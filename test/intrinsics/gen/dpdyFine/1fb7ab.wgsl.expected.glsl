@@ -11,10 +11,10 @@ void fragment_main() {
   dpdyFine_1fb7ab();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddy_fine' : no matching overloaded function found 

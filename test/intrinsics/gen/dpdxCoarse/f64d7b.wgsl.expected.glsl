@@ -11,10 +11,10 @@ void fragment_main() {
   dpdxCoarse_f64d7b();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddx_coarse' : no matching overloaded function found 

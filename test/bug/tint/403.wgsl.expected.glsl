@@ -4,6 +4,7 @@ precision mediump float;
 struct vertexUniformBuffer1 {
   mat2 transform1;
 };
+
 struct vertexUniformBuffer2 {
   mat2 transform2;
 };
@@ -11,6 +12,7 @@ struct vertexUniformBuffer2 {
 layout(binding = 0) uniform vertexUniformBuffer1_1 {
   mat2 transform1;
 } x_20;
+
 layout(binding = 0) uniform vertexUniformBuffer2_1 {
   mat2 transform2;
 } x_26;
@@ -18,6 +20,7 @@ layout(binding = 0) uniform vertexUniformBuffer2_1 {
 struct tint_symbol_3 {
   uint tint_symbol_1;
 };
+
 struct tint_symbol_4 {
   vec4 value;
 };
@@ -40,6 +43,9 @@ tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.tint_symbol_1 = uint(gl_VertexID);
@@ -49,5 +55,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

@@ -3,7 +3,6 @@ precision mediump float;
 
 uniform highp sampler2D arg_0_arg_1;
 
-
 void textureGather_c409ae() {
   vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), ivec2(0, 0));
 }
@@ -23,6 +22,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -31,12 +32,10 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2D arg_0_arg_1;
-
 
 void textureGather_c409ae() {
   vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), ivec2(0, 0));
@@ -50,16 +49,15 @@ void fragment_main() {
   textureGather_c409ae();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2D arg_0_arg_1;
-
 
 void textureGather_c409ae() {
   vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), ivec2(0, 0));
@@ -74,8 +72,8 @@ void compute_main() {
   textureGather_c409ae();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

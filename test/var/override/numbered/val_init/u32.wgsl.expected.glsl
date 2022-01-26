@@ -5,13 +5,12 @@ precision mediump float;
 #define WGSL_SPEC_CONSTANT_1234 1u
 #endif
 const uint o = WGSL_SPEC_CONSTANT_1234;
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

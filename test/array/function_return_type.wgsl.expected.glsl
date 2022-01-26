@@ -23,8 +23,8 @@ void tint_symbol() {
   float a3[2][3][4] = f3();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

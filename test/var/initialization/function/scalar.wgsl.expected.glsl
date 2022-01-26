@@ -6,8 +6,8 @@ void tint_symbol() {
   int v = 0;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

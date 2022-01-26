@@ -6,8 +6,8 @@ void f() {
   int r = (1 >> 2u);
   return;
 }
+
 void main() {
   f();
 }
-
 

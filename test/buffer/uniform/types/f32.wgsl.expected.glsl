@@ -14,8 +14,8 @@ void tint_symbol() {
   float x = u.inner;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

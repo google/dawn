@@ -14,8 +14,8 @@ void tint_symbol() {
   mat2x3 x = u.inner;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

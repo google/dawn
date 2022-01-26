@@ -26,8 +26,8 @@ void tint_symbol() {
   bvec4 v4bool_var5 = bvec4(bvec2(vec2(123.0f, 0.0f)), bvec2(true, bool(float(0.0f))));
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

@@ -13,7 +13,6 @@ int x_4 = 0;
 layout(binding = 0) buffer S_1 {
   int field0[];
 } x_5;
-
 void main_1() {
   x_4 = 1;
   vec4 x_23 = x_2;
@@ -28,10 +27,12 @@ void main_1() {
 struct main_out {
   int x_4_1;
 };
+
 struct tint_symbol_2 {
   int x_3_param;
   vec4 x_2_param;
 };
+
 struct tint_symbol_3 {
   int x_4_1;
 };
@@ -51,7 +52,9 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
   return wrapper_result;
 }
 layout(location = 0) flat in int x_3_param;
+
 layout(location = 0) out int x_4_1;
+
 void main() {
   tint_symbol_2 inputs;
   inputs.x_3_param = x_3_param;
@@ -60,7 +63,6 @@ void main() {
   outputs = tint_symbol(inputs);
   x_4_1 = outputs.x_4_1;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: '' : array size required 

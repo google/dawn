@@ -14,8 +14,8 @@ void tint_symbol() {
   int use = (v.a + 1);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

@@ -11,10 +11,10 @@ void fragment_main() {
   dpdx_0763f7();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddx' : no matching overloaded function found 

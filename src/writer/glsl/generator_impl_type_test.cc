@@ -180,6 +180,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl) {
   int a;
   float b;
 };
+
 )");
 }
 
@@ -235,6 +236,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
   int a;
   float b;
 };
+
 )");
 }
 

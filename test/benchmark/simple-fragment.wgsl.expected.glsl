@@ -6,12 +6,15 @@ precision mediump float;
 struct Input {
   vec4 color;
 };
+
 struct Output {
   vec4 color;
 };
+
 struct tint_symbol_3 {
   vec4 color;
 };
+
 struct tint_symbol_4 {
   vec4 color;
 };
@@ -30,6 +33,7 @@ tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
 }
 layout(location = 0) in vec4 color;
 layout(location = 0) out vec4 color;
+
 void main() {
   tint_symbol_3 inputs;
   inputs.color = color;
@@ -38,9 +42,8 @@ void main() {
   color = outputs.color;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:30: 'color' : redefinition 
+ERROR: 0:33: 'color' : redefinition 
 ERROR: 1 compilation errors.  No code generated.
 
 

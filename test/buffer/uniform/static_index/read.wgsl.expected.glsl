@@ -4,6 +4,7 @@ precision mediump float;
 struct Inner {
   int x;
 };
+
 struct S {
   ivec3 a;
   int b;
@@ -50,8 +51,8 @@ void tint_symbol() {
   Inner l[4] = s.l;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

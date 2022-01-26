@@ -7,8 +7,8 @@ void f() {
   uvec3 b = floatBitsToUint(a);
   return;
 }
+
 void main() {
   f();
 }
-
 

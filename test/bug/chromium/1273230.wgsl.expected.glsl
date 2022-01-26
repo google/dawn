@@ -29,6 +29,7 @@ struct Uniforms {
   vec3 bbMin;
   vec3 bbMax;
 };
+
 struct Dbg {
   uint offsetCounter;
   uint pad0;
@@ -52,6 +53,7 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMin;
   vec3 bbMax;
 } uniforms;
+
 layout(binding = 10) buffer U32s_1 {
   uint values[];
 } indices;
@@ -78,7 +80,6 @@ layout(binding = 50) buffer Dbg_1 {
   float value_f32_2;
   float value_f32_3;
 } dbg;
-
 vec3 toVoxelPos(vec3 position) {
   vec3 bbMin = vec3(uniforms.bbMin.x, uniforms.bbMin.y, uniforms.bbMin.z);
   vec3 bbMax = vec3(uniforms.bbMax.x, uniforms.bbMax.y, uniforms.bbMax.z);
@@ -137,10 +138,11 @@ void main_count(tint_symbol_1 tint_symbol) {
   main_count_inner(tint_symbol.GlobalInvocationID);
   return;
 }
+
+
 void main() {
   tint_symbol_1 inputs;
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   main_count(inputs);
 }
-
 

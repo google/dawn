@@ -13,8 +13,8 @@ void tint_symbol() {
   phony_sink(f(1, 2, 3), f(4, 5, 6), f(7, f(8, 9, 10), 11));
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

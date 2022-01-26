@@ -2,10 +2,10 @@
 precision mediump float;
 
 const vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));
-
 struct tint_symbol_1 {
   uint VertexIndex;
 };
+
 struct tint_symbol_2 {
   vec4 value;
 };
@@ -24,6 +24,9 @@ tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
+
 void main() {
   tint_symbol_1 inputs;
   inputs.VertexIndex = uint(gl_VertexID);
@@ -34,16 +37,17 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
 struct tint_symbol_1 {
   uint VertexIndex;
 };
+
 struct tint_symbol_2 {
   vec4 value;
 };
+
 struct tint_symbol_3 {
   vec4 value;
 };
@@ -59,10 +63,10 @@ tint_symbol_3 frag_main() {
   return wrapper_result_1;
 }
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_3 outputs;
   outputs = frag_main();
   value = outputs.value;
 }
-
 

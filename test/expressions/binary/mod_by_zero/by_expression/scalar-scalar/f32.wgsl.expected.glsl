@@ -10,10 +10,10 @@ void f() {
   float r = (a % (b + b));
   return;
 }
+
 void main() {
   f();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:8: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' temp mediump float' (or there is no acceptable conversion)

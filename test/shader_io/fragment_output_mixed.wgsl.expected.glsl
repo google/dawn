@@ -11,6 +11,7 @@ struct FragmentOutputs {
   uint sample_mask;
   vec4 loc3;
 };
+
 struct tint_symbol_1 {
   int loc0;
   uint loc1;
@@ -40,6 +41,9 @@ layout(location = 0) out int loc0;
 layout(location = 1) out uint loc1;
 layout(location = 2) out float loc2;
 layout(location = 3) out vec4 loc3;
+
+
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
@@ -51,10 +55,9 @@ void main() {
   gl_SampleMask = outputs.sample_mask;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:49: 'gl_SampleMask' : required extension not requested: GL_OES_sample_variables
-ERROR: 0:49: '' : compilation terminated 
+ERROR: 0:53: 'gl_SampleMask' : required extension not requested: GL_OES_sample_variables
+ERROR: 0:53: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

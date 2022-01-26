@@ -4,9 +4,11 @@ precision mediump float;
 struct Uniforms {
   uint i;
 };
+
 struct InnerS {
   int v;
 };
+
 struct OuterS {
   InnerS a1[8];
 };
@@ -26,8 +28,8 @@ void tint_symbol() {
   }
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

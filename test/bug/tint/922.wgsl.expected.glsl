@@ -9,25 +9,31 @@ struct Mat4x4_ {
   vec4 mz;
   vec4 mw;
 };
+
 struct Mat4x3_ {
   vec4 mx;
   vec4 my;
   vec4 mz;
 };
+
 struct Mat4x2_ {
   vec4 mx;
   vec4 my;
 };
+
 struct ub_SceneParams {
   Mat4x4_ u_Projection;
 };
+
 struct ub_MaterialParams {
   Mat4x2_ u_TexMtx[1];
   vec4 u_Misc0_;
 };
+
 struct ub_PacketParams {
   Mat4x3_ u_PosMtx[32];
 };
+
 struct VertexOutput {
   vec4 v_Color;
   vec2 v_TexCoord;
@@ -37,13 +43,16 @@ struct VertexOutput {
 layout(binding = 0) uniform ub_SceneParams_1 {
   Mat4x4_ u_Projection;
 } global;
+
 layout(binding = 1) uniform ub_MaterialParams_1 {
   Mat4x2_ u_TexMtx[1];
   vec4 u_Misc0_;
 } global1;
+
 layout(binding = 2) uniform ub_PacketParams_1 {
   Mat4x3_ u_PosMtx[32];
 } global2;
+
 vec3 a_Position1 = vec3(0.0f, 0.0f, 0.0f);
 vec2 a_UV1 = vec2(0.0f, 0.0f);
 vec4 a_Color1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -52,7 +61,6 @@ float a_PosMtxIdx1 = 0.0f;
 vec4 v_Color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 vec2 v_TexCoord = vec2(0.0f, 0.0f);
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 vec4 Mul(Mat4x4_ m8, vec4 v) {
   Mat4x4_ m9 = Mat4x4_(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
   vec4 v1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -136,6 +144,7 @@ struct tint_symbol_3 {
   vec3 a_Normal;
   float a_PosMtxIdx;
 };
+
 struct tint_symbol_4 {
   vec4 v_Color;
   vec2 v_TexCoord;
@@ -168,6 +177,8 @@ layout(location = 3) in vec3 a_Normal;
 layout(location = 4) in float a_PosMtxIdx;
 layout(location = 0) out vec4 v_Color;
 layout(location = 1) out vec2 v_TexCoord;
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.a_Position = a_Position;
@@ -184,9 +195,8 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:167: 'v_Color' : redefinition 
+ERROR: 0:176: 'v_Color' : redefinition 
 ERROR: 1 compilation errors.  No code generated.
 
 

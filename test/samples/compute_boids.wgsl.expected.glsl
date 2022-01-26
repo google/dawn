@@ -6,6 +6,7 @@ struct tint_symbol_2 {
   vec2 a_particleVel;
   vec2 a_pos;
 };
+
 struct tint_symbol_3 {
   vec4 value;
 };
@@ -19,10 +20,12 @@ vec4 vert_main_inner(vec2 a_particlePos, vec2 a_particleVel, vec2 a_pos) {
 struct tint_symbol_4 {
   vec4 value;
 };
+
 struct Particle {
   vec2 pos;
   vec2 vel;
 };
+
 struct SimParams {
   float deltaT;
   float rule1Distance;
@@ -32,9 +35,11 @@ struct SimParams {
   float rule2Scale;
   float rule3Scale;
 };
+
 struct Particles {
   Particle particles[5];
 };
+
 struct tint_symbol_6 {
   uvec3 tint_symbol;
 };
@@ -48,6 +53,8 @@ tint_symbol_3 vert_main(tint_symbol_2 tint_symbol_1) {
 layout(location = 0) in vec2 a_particlePos;
 layout(location = 1) in vec2 a_particleVel;
 layout(location = 2) in vec2 a_pos;
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.a_particlePos = a_particlePos;
@@ -60,7 +67,6 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
@@ -69,9 +75,11 @@ struct tint_symbol_2 {
   vec2 a_particleVel;
   vec2 a_pos;
 };
+
 struct tint_symbol_3 {
   vec4 value;
 };
+
 struct tint_symbol_4 {
   vec4 value;
 };
@@ -84,6 +92,7 @@ struct Particle {
   vec2 pos;
   vec2 vel;
 };
+
 struct SimParams {
   float deltaT;
   float rule1Distance;
@@ -93,9 +102,11 @@ struct SimParams {
   float rule2Scale;
   float rule3Scale;
 };
+
 struct Particles {
   Particle particles[5];
 };
+
 struct tint_symbol_6 {
   uvec3 tint_symbol;
 };
@@ -107,12 +118,12 @@ tint_symbol_4 frag_main() {
   return wrapper_result_1;
 }
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_4 outputs;
   outputs = frag_main();
   value = outputs.value;
 }
-
 
 #version 310 es
 precision mediump float;
@@ -122,16 +133,20 @@ struct tint_symbol_2 {
   vec2 a_particleVel;
   vec2 a_pos;
 };
+
 struct tint_symbol_3 {
   vec4 value;
 };
+
 struct tint_symbol_4 {
   vec4 value;
 };
+
 struct Particle {
   vec2 pos;
   vec2 vel;
 };
+
 struct SimParams {
   float deltaT;
   float rule1Distance;
@@ -141,6 +156,7 @@ struct SimParams {
   float rule2Scale;
   float rule3Scale;
 };
+
 struct Particles {
   Particle particles[5];
 };
@@ -154,13 +170,13 @@ layout(binding = 0) uniform SimParams_1 {
   float rule2Scale;
   float rule3Scale;
 } params;
+
 layout(binding = 1) buffer Particles_1 {
   Particle particles[5];
 } particlesA;
 layout(binding = 2) buffer Particles_2 {
   Particle particles[5];
 } particlesB;
-
 struct tint_symbol_6 {
   uvec3 tint_symbol;
 };
@@ -229,10 +245,11 @@ void comp_main(tint_symbol_6 tint_symbol_5) {
   comp_main_inner(tint_symbol_5.tint_symbol);
   return;
 }
+
+
 void main() {
   tint_symbol_6 inputs;
   inputs.tint_symbol = gl_GlobalInvocationID;
   comp_main(inputs);
 }
-
 

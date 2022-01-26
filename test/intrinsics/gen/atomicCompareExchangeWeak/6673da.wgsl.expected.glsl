@@ -16,7 +16,6 @@ struct SB_RW {
 layout(binding = 0) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
-
 void atomicCompareExchangeWeak_6673da() {
   uvec2 res = tint_atomicCompareExchangeWeak(sb_rw.arg_0, 1u, 1u);
 }
@@ -25,10 +24,10 @@ void fragment_main() {
   atomicCompareExchangeWeak_6673da();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 #version 310 es
 precision mediump float;
@@ -48,7 +47,6 @@ struct SB_RW {
 layout(binding = 0) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
-
 void atomicCompareExchangeWeak_6673da() {
   uvec2 res = tint_atomicCompareExchangeWeak(sb_rw.arg_0, 1u, 1u);
 }
@@ -58,8 +56,8 @@ void compute_main() {
   atomicCompareExchangeWeak_6673da();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

@@ -405,10 +405,10 @@ void test_function() {
   float tint_symbol = tint_degrees(val);
   return;
 }
+
 void main() {
   test_function();
 }
-
 
 )");
 }
@@ -435,10 +435,10 @@ void test_function() {
   vec3 tint_symbol = tint_degrees(val);
   return;
 }
+
 void main() {
   test_function();
 }
-
 
 )");
 }
@@ -465,10 +465,10 @@ void test_function() {
   float tint_symbol = tint_radians(val);
   return;
 }
+
 void main() {
   test_function();
 }
-
 
 )");
 }
@@ -495,10 +495,10 @@ void test_function() {
   vec3 tint_symbol = tint_radians(val);
   return;
 }
+
 void main() {
   test_function();
 }
-
 
 )");
 }
@@ -736,16 +736,15 @@ int tint_int_dot(ivec3 a, ivec3 b) {
 }
 
 ivec3 v = ivec3(0, 0, 0);
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   tint_int_dot(v, v);
   return;
 }
+
 void main() {
   test_function();
 }
-
 
 )");
 }
@@ -765,16 +764,15 @@ uint tint_int_dot(uvec3 a, uvec3 b) {
 }
 
 uvec3 v = uvec3(0u, 0u, 0u);
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   tint_int_dot(v, v);
   return;
 }
+
 void main() {
   test_function();
 }
-
 
 )");
 }

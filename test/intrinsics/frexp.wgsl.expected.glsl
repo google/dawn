@@ -7,6 +7,7 @@ struct frexp_result {
   float sig;
   int exp;
 };
+
 frexp_result tint_frexp(float param_0) {
   float exp;
   float sig = frexp(param_0, exp);
@@ -22,14 +23,14 @@ void tint_symbol() {
   float sig = res.sig;
   return;
 }
+
 void main() {
   tint_symbol();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:10: 'frexp' : no matching overloaded function found 
-ERROR: 0:10: '' : compilation terminated 
+ERROR: 0:11: 'frexp' : no matching overloaded function found 
+ERROR: 0:11: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

@@ -13,10 +13,10 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:6: 'ddy_coarse' : no matching overloaded function found 

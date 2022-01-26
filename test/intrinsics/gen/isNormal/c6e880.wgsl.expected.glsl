@@ -33,6 +33,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -40,7 +42,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'asuint' : no matching overloaded function found 
@@ -72,10 +73,10 @@ void fragment_main() {
   isNormal_c6e880();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'asuint' : no matching overloaded function found 
@@ -108,10 +109,10 @@ void compute_main() {
   isNormal_c6e880();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'asuint' : no matching overloaded function found 

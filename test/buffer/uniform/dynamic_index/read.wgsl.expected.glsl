@@ -14,6 +14,7 @@ struct Inner {
   mat3x2 j;
   ivec4 k[4];
 };
+
 struct S {
   Inner arr[8];
 };
@@ -45,10 +46,11 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.idx);
   return;
 }
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.idx = uint(gl_LocalInvocationIndex);
   tint_symbol(inputs);
 }
-
 

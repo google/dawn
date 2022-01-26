@@ -13,14 +13,17 @@ struct VertexInput {
   vec4 cur_position;
   vec4 color;
 };
+
 struct VertexOutput {
   vec4 vtxFragColor;
   vec4 Position;
 };
+
 struct tint_symbol_3 {
   vec4 cur_position;
   vec4 color;
 };
+
 struct tint_symbol_4 {
   vec4 vtxFragColor;
   vec4 Position;
@@ -36,6 +39,7 @@ VertexOutput vtx_main_inner(VertexInput tint_symbol) {
 struct tint_symbol_6 {
   vec4 fragColor;
 };
+
 struct tint_symbol_7 {
   vec4 value;
 };
@@ -51,6 +55,8 @@ tint_symbol_4 vtx_main(tint_symbol_3 tint_symbol_2) {
 layout(location = 0) in vec4 cur_position;
 layout(location = 1) in vec4 color;
 layout(location = 0) out vec4 vtxFragColor;
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.cur_position = cur_position;
@@ -63,32 +69,37 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
 struct Uniforms {
   mat4 modelViewProjectionMatrix;
 };
+
 struct VertexInput {
   vec4 cur_position;
   vec4 color;
 };
+
 struct VertexOutput {
   vec4 vtxFragColor;
   vec4 Position;
 };
+
 struct tint_symbol_3 {
   vec4 cur_position;
   vec4 color;
 };
+
 struct tint_symbol_4 {
   vec4 vtxFragColor;
   vec4 Position;
 };
+
 struct tint_symbol_6 {
   vec4 fragColor;
 };
+
 struct tint_symbol_7 {
   vec4 value;
 };
@@ -105,6 +116,7 @@ tint_symbol_7 frag_main(tint_symbol_6 tint_symbol_5) {
 }
 layout(location = 0) in vec4 fragColor;
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_6 inputs;
   inputs.fragColor = fragColor;
@@ -112,5 +124,4 @@ void main() {
   outputs = frag_main(inputs);
   value = outputs.value;
 }
-
 

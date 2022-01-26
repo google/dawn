@@ -8,7 +8,6 @@ struct SB_RW {
 layout(binding = 0) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
-
 void atomicLoad_fe6cc3() {
   uint res = atomicOr(sb_rw.arg_0, 0u);
 }
@@ -17,10 +16,10 @@ void fragment_main() {
   atomicLoad_fe6cc3();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 #version 310 es
 precision mediump float;
@@ -32,7 +31,6 @@ struct SB_RW {
 layout(binding = 0) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
-
 void atomicLoad_fe6cc3() {
   uint res = atomicOr(sb_rw.arg_0, 0u);
 }
@@ -42,8 +40,8 @@ void compute_main() {
   atomicLoad_fe6cc3();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

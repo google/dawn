@@ -5,7 +5,6 @@ precision mediump float;
 
 uniform highp sampler2D x_20_x_10;
 
-
 void main_1() {
   float f1 = 1.0f;
   vec2 vf12 = vec2(1.0f, 2.0f);
@@ -32,14 +31,14 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:25: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
-ERROR: 0:25: '' : compilation terminated 
+ERROR: 0:24: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
+ERROR: 0:24: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

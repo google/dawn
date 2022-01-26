@@ -11,8 +11,8 @@ void tint_symbol() {
   int r = func(i, i);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

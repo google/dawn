@@ -6,6 +6,7 @@ precision mediump float;
 struct PointLight {
   vec4 position;
 };
+
 struct Uniforms {
   mat4 worldView;
   mat4 proj;
@@ -21,10 +22,10 @@ layout(binding = 0) uniform Uniforms_1 {
   uint color_source;
   vec4 color;
 } uniforms;
+
 layout(binding = 1) buffer PointLights_1 {
   PointLight values[];
 } pointLights;
-
 struct FragmentInput {
   vec4 position;
   vec4 view_position;
@@ -32,9 +33,11 @@ struct FragmentInput {
   vec2 uv;
   vec4 color;
 };
+
 struct FragmentOutput {
   vec4 color;
 };
+
 struct tint_symbol_3 {
   vec4 view_position;
   vec4 normal;
@@ -42,6 +45,7 @@ struct tint_symbol_3 {
   vec4 color;
   vec4 position;
 };
+
 struct tint_symbol_4 {
   vec4 color;
 };
@@ -63,7 +67,9 @@ layout(location = 0) in vec4 view_position;
 layout(location = 1) in vec4 normal;
 layout(location = 2) in vec2 uv;
 layout(location = 3) in vec4 color;
+
 layout(location = 0) out vec4 color;
+
 void main() {
   tint_symbol_3 inputs;
   inputs.view_position = view_position;
@@ -76,9 +82,8 @@ void main() {
   color = outputs.color;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:64: 'color' : redefinition 
+ERROR: 0:69: 'color' : redefinition 
 ERROR: 1 compilation errors.  No code generated.
 
 

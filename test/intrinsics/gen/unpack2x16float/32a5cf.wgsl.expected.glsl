@@ -28,6 +28,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -35,7 +37,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:6: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp highp uint' and a right operand of type ' const int' (or there is no acceptable conversion)
@@ -65,10 +66,10 @@ void fragment_main() {
   unpack2x16float_32a5cf();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:6: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp mediump uint' and a right operand of type ' const int' (or there is no acceptable conversion)
@@ -99,10 +100,10 @@ void compute_main() {
   unpack2x16float_32a5cf();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:6: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp highp uint' and a right operand of type ' const int' (or there is no acceptable conversion)

@@ -6,8 +6,8 @@ void f() {
   uint b = floatBitsToUint(1.0f);
   return;
 }
+
 void main() {
   f();
 }
-
 

@@ -4,6 +4,7 @@ precision mediump float;
 struct Uniforms {
   uint i;
 };
+
 struct OuterS {
   uint a1[8];
 };
@@ -24,8 +25,8 @@ void tint_symbol() {
   v[f(s1.a1[uniforms.i])] = 1.0f;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

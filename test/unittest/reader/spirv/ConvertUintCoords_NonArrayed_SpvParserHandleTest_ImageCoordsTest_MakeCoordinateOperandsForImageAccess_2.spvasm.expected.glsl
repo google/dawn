@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 layout(r32f) uniform highp writeonly image1D x_20_1;
-
 void main_1() {
   float float_var = 0.0f;
   int i1 = 1;
@@ -28,10 +27,10 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'image1D' : Reserved word. 

@@ -124,9 +124,6 @@ GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-  const TypeInfo* last_kind = nullptr;
-  size_t last_padding_line = 0;
-
   line() << "#version 310 es";
   line() << "precision mediump float;";
 
@@ -138,17 +135,6 @@ bool GeneratorImpl::Generate() {
     if (decl->Is<ast::Alias>()) {
       continue;  // Ignore aliases.
     }
-
-    // Emit a new line between declarations if the type of declaration has
-    // changed, or we're about to emit a function
-    auto* kind = &decl->TypeInfo();
-    if (current_buffer_->lines.size() != last_padding_line) {
-      if (last_kind && (last_kind != kind || decl->Is<ast::Function>())) {
-        line();
-        last_padding_line = current_buffer_->lines.size();
-      }
-    }
-    last_kind = kind;
 
     if (auto* global = decl->As<ast::Variable>()) {
       if (!EmitGlobalVariable(global)) {
@@ -1632,6 +1618,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
   }
 
   line() << "}";
+  line();
 
   return true;
 }
@@ -1677,6 +1664,7 @@ bool GeneratorImpl::EmitUniformVariable(const sem::Variable* var) {
   EmitStructMembers(current_buffer_, str);
   auto name = builder_.Symbols().NameFor(decl->symbol);
   line() << "} " << name << ";";
+  line();
 
   return true;
 }
@@ -1891,36 +1879,37 @@ bool GeneratorImpl::EmitDecorations(std::ostream& out,
 bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   auto* func_sem = builder_.Sem().Get(func);
 
+  if (func->PipelineStage() == ast::PipelineStage::kCompute) {
+    auto out = line();
+    // Emit the layout(local_size) attributes.
+    auto wgsize = func_sem->WorkgroupSize();
+    out << "layout(";
+    for (int i = 0; i < 3; i++) {
+      if (i > 0) {
+        out << ", ";
+      }
+      out << "local_size_" << (i == 0 ? "x" : i == 1 ? "y" : "z") << " = ";
+
+      if (wgsize[i].overridable_const) {
+        auto* global = builder_.Sem().Get<sem::GlobalVariable>(
+            wgsize[i].overridable_const);
+        if (!global->IsOverridable()) {
+          TINT_ICE(Writer, builder_.Diagnostics())
+              << "expected a pipeline-overridable constant";
+        }
+        out << kSpecConstantPrefix << global->ConstantId();
+      } else {
+        out << std::to_string(wgsize[i].value);
+      }
+    }
+    out << ") in;";
+  }
+
+  // Emit original entry point signature
   {
     auto out = line();
-    if (func->PipelineStage() == ast::PipelineStage::kCompute) {
-      // Emit the layout(local_size) attributes.
-      auto wgsize = func_sem->WorkgroupSize();
-      out << "layout(";
-      for (int i = 0; i < 3; i++) {
-        if (i > 0) {
-          out << ", ";
-        }
-        out << "local_size_" << (i == 0 ? "x" : i == 1 ? "y" : "z") << " = ";
-
-        if (wgsize[i].overridable_const) {
-          auto* global = builder_.Sem().Get<sem::GlobalVariable>(
-              wgsize[i].overridable_const);
-          if (!global->IsOverridable()) {
-            TINT_ICE(Writer, builder_.Diagnostics())
-                << "expected a pipeline-overridable constant";
-          }
-          out << kSpecConstantPrefix << global->ConstantId();
-        } else {
-          out << std::to_string(wgsize[i].value);
-        }
-      }
-      out << ") in;" << std::endl;
-    }
-
-    out << func->return_type->FriendlyName(builder_.Symbols());
-
-    out << " " << builder_.Symbols().NameFor(func->symbol) << "(";
+    out << func->return_type->FriendlyName(builder_.Symbols()) << " "
+        << builder_.Symbols().NameFor(func->symbol) << "(";
 
     bool first = true;
 
@@ -1949,6 +1938,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     out << ") {";
   }
 
+  // Emit original entry point function body
   {
     ScopedIndent si(this);
 
@@ -1966,13 +1956,13 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 
   line() << "}";
 
-  auto out = line();
-
   // Declare entry point input variables
   for (auto* var : func->params) {
     auto* sem = builder_.Sem().Get(var);
     auto* str = sem->Type()->As<sem::Struct>();
     for (auto* member : str->Members()) {
+      auto out = line();
+
       auto decorations = member->Declaration()->decorations;
       if (ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
         continue;
@@ -1990,7 +1980,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
               builder_.Symbols().NameFor(member->Declaration()->symbol))) {
         return false;
       }
-      out << ";" << std::endl;
+      out << ";";
     }
   }
 
@@ -1998,6 +1988,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   auto* return_type = func_sem->ReturnType()->As<sem::Struct>();
   if (return_type) {
     for (auto* member : return_type->Members()) {
+      auto out = line();
       auto decorations = member->Declaration()->decorations;
       if (ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
         continue;
@@ -2015,82 +2006,93 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
               builder_.Symbols().NameFor(member->Declaration()->symbol))) {
         return false;
       }
-      out << ";" << std::endl;
+      out << ";";
     }
   }
+  line();
 
   // Create a main() function which calls the entry point.
-  out << "void main() {" << std::endl;
-  std::string printed_name;
-  for (auto* var : func->params) {
-    out << "  ";
-    auto* sem = builder_.Sem().Get(var);
-    if (!EmitTypeAndName(out, sem->Type(), sem->StorageClass(), sem->Access(),
-                         "inputs")) {
-      return false;
-    }
-    out << ";" << std::endl;
-    auto* type = sem->Type();
-    auto* str = type->As<sem::Struct>();
-    for (auto* member : str->Members()) {
-      std::string name =
-          builder_.Symbols().NameFor(member->Declaration()->symbol);
-      out << "  inputs." << name << " = ";
-      if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-              member->Declaration()->decorations)) {
-        if (builtin_type(builtin->builtin) != member->Type()) {
-          if (!EmitType(out, member->Type(), ast::StorageClass::kNone,
-                        ast::Access::kReadWrite, "")) {
-            return false;
-          }
-          out << "(";
-          out << builtin_to_string(builtin->builtin, func->PipelineStage());
-          out << ")";
-        } else {
-          out << builtin_to_string(builtin->builtin, func->PipelineStage());
+  line() << "void main() {";
+
+  // Emit main function body
+  {
+    ScopedIndent si(this);
+    for (auto* var : func->params) {
+      auto* sem = builder_.Sem().Get(var);
+      auto* type = sem->Type();
+      {
+        auto out = line();
+        if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
+                             "inputs")) {
+          return false;
         }
-      } else {
-        out << name;
+        out << ";";
       }
-      out << ";" << std::endl;
+      auto* str = type->As<sem::Struct>();
+      for (auto* member : str->Members()) {
+        auto out = line();
+        std::string name =
+            builder_.Symbols().NameFor(member->Declaration()->symbol);
+        out << "inputs." << name << " = ";
+        if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
+                member->Declaration()->decorations)) {
+          if (builtin_type(builtin->builtin) != member->Type()) {
+            if (!EmitType(out, member->Type(), ast::StorageClass::kNone,
+                          ast::Access::kReadWrite, "")) {
+              return false;
+            }
+            out << "(";
+            out << builtin_to_string(builtin->builtin, func->PipelineStage());
+            out << ")";
+          } else {
+            out << builtin_to_string(builtin->builtin, func->PipelineStage());
+          }
+        } else {
+          out << name;
+        }
+        out << ";";
+      }
+    }
+
+    if (return_type) {
+      line() << return_type->FriendlyName(builder_.Symbols()) << " outputs;";
+    }
+    {
+      auto out = line();
+      if (return_type) {
+        out << "outputs = ";
+      }
+      out << builder_.Symbols().NameFor(func->symbol);
+      if (func->params.empty()) {
+        out << "()";
+      } else {
+        out << "(inputs)";
+      }
+      out << ";";
+    }
+
+    auto* str = func_sem->ReturnType()->As<sem::Struct>();
+    if (str) {
+      for (auto* member : str->Members()) {
+        auto out = line();
+        std::string name =
+            builder_.Symbols().NameFor(member->Declaration()->symbol);
+        if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
+                member->Declaration()->decorations)) {
+          out << builtin_to_string(builtin->builtin, func->PipelineStage());
+        } else {
+          out << name;
+        }
+        out << " = outputs." << name << ";";
+      }
+    }
+    if (func->PipelineStage() == ast::PipelineStage::kVertex) {
+      line() << "gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;";
+      line() << "gl_Position.y = -gl_Position.y;";
     }
   }
-  out << "  ";
-  if (return_type) {
-    out << return_type->FriendlyName(builder_.Symbols()) << " "
-        << "outputs;" << std::endl;
-    out << "  outputs = ";
-  }
-  out << builder_.Symbols().NameFor(func->symbol);
-  if (func->params.empty()) {
-    out << "()";
-  } else {
-    out << "(inputs)";
-  }
-  out << ";" << std::endl;
-
-  auto* str = func_sem->ReturnType()->As<sem::Struct>();
-  if (str) {
-    for (auto* member : str->Members()) {
-      std::string name =
-          builder_.Symbols().NameFor(member->Declaration()->symbol);
-      out << "  ";
-      if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-              member->Declaration()->decorations)) {
-        out << builtin_to_string(builtin->builtin, func->PipelineStage());
-      } else {
-        out << name;
-      }
-      out << " = outputs." << name << ";" << std::endl;
-    }
-  }
-  if (func->PipelineStage() == ast::PipelineStage::kVertex) {
-    out << "  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;"
-        << std::endl;
-    out << "  gl_Position.y = -gl_Position.y;" << std::endl;
-  }
-
-  out << "}" << std::endl << std::endl;
+  line() << "}";
+  line();
 
   return true;
 }
@@ -2611,6 +2613,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
   line(b) << "struct " << StructName(str) << " {";
   EmitStructMembers(b, str);
   line(b) << "};";
+  line(b);
 
   return true;
 }

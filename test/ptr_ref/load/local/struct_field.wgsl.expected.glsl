@@ -11,8 +11,8 @@ void tint_symbol() {
   int i = V.i;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

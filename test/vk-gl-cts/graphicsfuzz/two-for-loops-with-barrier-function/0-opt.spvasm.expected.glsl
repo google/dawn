@@ -6,6 +6,7 @@ precision mediump float;
 struct buf0 {
   vec2 injectionSwitch;
 };
+
 struct doesNotMatter {
   uint x_compute_data[];
 };
@@ -14,10 +15,10 @@ vec4 GLF_live2gl_FragCoord = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 layout(binding = 1) uniform buf0_1 {
   vec2 injectionSwitch;
 } x_9;
+
 layout(binding = 0) buffer doesNotMatter_1 {
   uint x_compute_data[];
 } x_12;
-
 void main_1() {
   int GLF_live2_looplimiter1 = 0;
   int i = 0;
@@ -73,14 +74,14 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: '' : array size required 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:9: '' : array size required 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

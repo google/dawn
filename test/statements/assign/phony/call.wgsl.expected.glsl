@@ -10,8 +10,8 @@ void tint_symbol() {
   f(1, 2, 3);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

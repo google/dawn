@@ -6,6 +6,7 @@ precision mediump float;
 struct Buf1 {
   int result;
 };
+
 struct Buf0 {
   uint values[];
 };
@@ -16,7 +17,6 @@ layout(binding = 1) buffer Buf1_1 {
 layout(binding = 0) buffer Buf0_1 {
   uint values[];
 } x_7;
-
 void main_1() {
   uint i = 0u;
   x_4.result = 1;
@@ -37,14 +37,14 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: '' : array size required 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:9: '' : array size required 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

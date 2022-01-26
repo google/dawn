@@ -4,6 +4,7 @@ precision mediump float;
 struct Inner {
   int x;
 };
+
 struct S {
   ivec3 a;
   int b;
@@ -29,7 +30,6 @@ layout(binding = 0) buffer S_1 {
   Inner i;
   Inner j[4];
 } s;
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   s.a = ivec3(0, 0, 0);
@@ -46,8 +46,8 @@ void tint_symbol() {
   s.j = tint_symbol_2;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

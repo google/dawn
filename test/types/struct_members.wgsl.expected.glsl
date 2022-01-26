@@ -4,6 +4,7 @@ precision mediump float;
 struct S_inner {
   float a;
 };
+
 struct S {
   bool member_bool;
   int member_i32;
@@ -22,8 +23,8 @@ void tint_symbol() {
   S s = S(false, 0, 0u, 0.0f, ivec2(0, 0), uvec3(0u, 0u, 0u), vec4(0.0f, 0.0f, 0.0f, 0.0f), mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), float[4](0.0f, 0.0f, 0.0f, 0.0f), S_inner(0.0f));
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

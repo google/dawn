@@ -5,10 +5,12 @@ struct VertexInputs {
   uint vertex_index;
   uint instance_index;
 };
+
 struct tint_symbol_2 {
   uint vertex_index;
   uint instance_index;
 };
+
 struct tint_symbol_3 {
   vec4 value;
 };
@@ -25,6 +27,10 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.vertex_index = uint(gl_VertexID);
@@ -35,5 +41,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

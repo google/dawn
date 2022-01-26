@@ -45,6 +45,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function) {
   void my_func() {
     return;
   }
+
 )");
 }
 
@@ -82,6 +83,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithParams) {
   void my_func(float a, int b) {
     return;
   }
+
 )");
 }
 
@@ -101,10 +103,10 @@ precision mediump float;
 void func() {
   return;
 }
+
 void main() {
   func();
 }
-
 
 )");
 }
@@ -143,6 +145,7 @@ precision mediump float;
 struct tint_symbol_1 {
   float foo;
 };
+
 struct tint_symbol_2 {
   float value;
 };
@@ -159,6 +162,7 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
 }
 layout(location = 0) in float foo;
 layout(location = 1) out float value;
+
 void main() {
   tint_symbol_1 inputs;
   inputs.foo = foo;
@@ -166,7 +170,6 @@ void main() {
   outputs = frag_main(inputs);
   value = outputs.value;
 }
-
 
 )");
 }
@@ -192,6 +195,7 @@ precision mediump float;
 struct tint_symbol_1 {
   vec4 coord;
 };
+
 struct tint_symbol_2 {
   float value;
 };
@@ -206,6 +210,9 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
+
 void main() {
   tint_symbol_1 inputs;
   inputs.coord = gl_FragCoord;
@@ -213,7 +220,6 @@ void main() {
   outputs = frag_main(inputs);
   gl_FragDepth = outputs.value;
 }
-
 
 )");
 }
@@ -265,6 +271,7 @@ struct Interface {
   float col1;
   float col2;
 };
+
 struct tint_symbol {
   float col1;
   float col2;
@@ -286,6 +293,8 @@ tint_symbol vert_main() {
 }
 layout(location = 1) out float col1;
 layout(location = 2) out float col2;
+
+
 void main() {
   tint_symbol outputs;
   outputs = vert_main();
@@ -295,8 +304,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
-
 
 struct tint_symbol_2 {
   float col1;
@@ -317,6 +324,8 @@ void frag_main(tint_symbol_2 tint_symbol_1) {
 }
 layout(location = 1) in float col1;
 layout(location = 2) in float col2;
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.col1 = col1;
@@ -324,7 +333,6 @@ void main() {
   inputs.pos = gl_FragCoord;
   frag_main(inputs);
 }
-
 
 )");
 }
@@ -451,10 +459,10 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
+
 void main() {
   frag_main();
 }
-
 
 )");
 }
@@ -500,10 +508,10 @@ void frag_main() {
   float v = uniforms.coord.x;
   return;
 }
+
 void main() {
   frag_main();
 }
-
 
 )");
 }
@@ -551,15 +559,14 @@ layout(binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
-
 void frag_main() {
   float v = coord.b;
   return;
 }
+
 void main() {
   frag_main();
 }
-
 
 )");
 }
@@ -607,15 +614,14 @@ layout(binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
-
 void frag_main() {
   float v = coord.b;
   return;
 }
+
 void main() {
   frag_main();
 }
-
 
 )");
 }
@@ -659,15 +665,14 @@ layout(binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
-
 void frag_main() {
   coord.b = 2.0f;
   return;
 }
+
 void main() {
   frag_main();
 }
-
 
 )");
 }
@@ -712,15 +717,14 @@ layout(binding = 0) buffer Data_1 {
   int a;
   float b;
 } coord;
-
 void frag_main() {
   coord.b = 2.0f;
   return;
 }
+
 void main() {
   frag_main();
 }
-
 
 )");
 }
@@ -774,10 +778,10 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
+
 void main() {
   frag_main();
 }
-
 
 )");
 }
@@ -824,7 +828,6 @@ struct S {
 layout(binding = 0) buffer S_1 {
   float x;
 } coord;
-
 float sub_func(float param) {
   return coord.x;
 }
@@ -833,10 +836,10 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
+
 void main() {
   frag_main();
 }
-
 
 )");
 }
@@ -857,10 +860,10 @@ precision mediump float;
 void tint_symbol() {
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 )");
 }
@@ -882,10 +885,10 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   return;
 }
+
 void main() {
   main();
 }
-
 
 )");
 }
@@ -908,10 +911,10 @@ layout(local_size_x = 2, local_size_y = 4, local_size_z = 6) in;
 void main() {
   return;
 }
+
 void main() {
   main();
 }
-
 
 )");
 }
@@ -936,15 +939,14 @@ precision mediump float;
 const int width = int(2);
 const int height = int(3);
 const int depth = int(4);
-
 layout(local_size_x = 2, local_size_y = 3, local_size_z = 4) in;
 void main() {
   return;
 }
+
 void main() {
   main();
 }
-
 
 )");
 }
@@ -978,15 +980,14 @@ const int height = WGSL_SPEC_CONSTANT_8;
 #define WGSL_SPEC_CONSTANT_9 int(4)
 #endif
 const int depth = WGSL_SPEC_CONSTANT_9;
-
 layout(local_size_x = WGSL_SPEC_CONSTANT_7, local_size_y = WGSL_SPEC_CONSTANT_8, local_size_z = WGSL_SPEC_CONSTANT_9) in;
 void main() {
   return;
 }
+
 void main() {
   main();
 }
-
 
 )");
 }
@@ -1006,6 +1007,7 @@ precision mediump float;
 void my_func(float a[5]) {
   return;
 }
+
 )");
 }
 
@@ -1024,6 +1026,7 @@ precision mediump float;
 float[5] my_func() {
   return float[5](0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
+
 )");
 }
 
@@ -1093,27 +1096,25 @@ struct Data {
 layout(binding = 0) buffer Data_1 {
   float d;
 } data;
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void a() {
   float v = data.d;
   return;
 }
+
 void main() {
   a();
 }
-
-
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void b() {
   float v = data.d;
   return;
 }
+
 void main() {
   b();
 }
-
 
 )");
 }

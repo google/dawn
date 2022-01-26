@@ -15,7 +15,6 @@ vec4 v4f32_var = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 mat2x3 m2x3_var = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 float arr_var[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
 S struct_var = S(0.0f);
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   bool_var = false;
@@ -32,8 +31,8 @@ void tint_symbol() {
   struct_var = tint_symbol_2;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

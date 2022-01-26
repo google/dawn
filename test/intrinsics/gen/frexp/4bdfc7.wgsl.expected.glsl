@@ -7,6 +7,7 @@ struct frexp_result_vec2 {
   vec2 sig;
   ivec2 exp;
 };
+
 frexp_result_vec2 tint_frexp(vec2 param_0) {
   float2 exp;
   float2 sig = frexp(param_0, exp);
@@ -34,6 +35,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -42,10 +45,9 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:9: 'float2' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:10: 'float2' : undeclared identifier 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -57,6 +59,7 @@ struct frexp_result_vec2 {
   vec2 sig;
   ivec2 exp;
 };
+
 frexp_result_vec2 tint_frexp(vec2 param_0) {
   float2 exp;
   float2 sig = frexp(param_0, exp);
@@ -77,14 +80,14 @@ void fragment_main() {
   frexp_4bdfc7();
   return;
 }
+
 void main() {
   fragment_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:9: 'float2' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:10: 'float2' : undeclared identifier 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -96,6 +99,7 @@ struct frexp_result_vec2 {
   vec2 sig;
   ivec2 exp;
 };
+
 frexp_result_vec2 tint_frexp(vec2 param_0) {
   float2 exp;
   float2 sig = frexp(param_0, exp);
@@ -117,14 +121,14 @@ void compute_main() {
   frexp_4bdfc7();
   return;
 }
+
 void main() {
   compute_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:9: 'float2' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:10: 'float2' : undeclared identifier 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

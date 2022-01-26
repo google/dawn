@@ -6,6 +6,7 @@ precision mediump float;
 struct tint_padded_array_element {
   int el;
 };
+
 struct buf0 {
   tint_padded_array_element x_GLF_uniform_int_values[4];
 };
@@ -13,8 +14,8 @@ struct buf0 {
 layout(binding = 0) uniform buf0_1 {
   tint_padded_array_element x_GLF_uniform_int_values[4];
 } x_5;
-vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
+vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   mat2 m = mat2(0.0f, 0.0f, 0.0f, 0.0f);
   float f = 0.0f;
@@ -79,6 +80,7 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_1 {
   vec4 x_GLF_color_1;
 };
@@ -96,16 +98,16 @@ tint_symbol_1 tint_symbol() {
   return wrapper_result;
 }
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:63: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' global bool' and a right operand of type ' global bool' (or there is no acceptable conversion)
-ERROR: 0:63: '' : compilation terminated 
+ERROR: 0:64: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' global bool' and a right operand of type ' global bool' (or there is no acceptable conversion)
+ERROR: 0:64: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

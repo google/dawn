@@ -8,7 +8,6 @@ struct SB_RW {
 layout(binding = 0) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
-
 void atomicStore_cdc29e() {
   atomicExchange(sb_rw.arg_0, 1u);
 }
@@ -17,10 +16,10 @@ void fragment_main() {
   atomicStore_cdc29e();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 #version 310 es
 precision mediump float;
@@ -32,7 +31,6 @@ struct SB_RW {
 layout(binding = 0) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
-
 void atomicStore_cdc29e() {
   atomicExchange(sb_rw.arg_0, 1u);
 }
@@ -42,8 +40,8 @@ void compute_main() {
   atomicStore_cdc29e();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

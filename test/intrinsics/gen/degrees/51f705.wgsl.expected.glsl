@@ -25,6 +25,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -32,7 +34,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 
 #version 310 es
 precision mediump float;
@@ -54,10 +55,10 @@ void fragment_main() {
   degrees_51f705();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 #version 310 es
 precision mediump float;
@@ -80,8 +81,8 @@ void compute_main() {
   degrees_51f705();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

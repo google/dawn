@@ -9,8 +9,8 @@ void tint_symbol() {
   vec3 swizzle3 = v.xzy;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

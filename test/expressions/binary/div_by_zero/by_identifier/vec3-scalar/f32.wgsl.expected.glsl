@@ -8,8 +8,8 @@ void f() {
   vec3 r = (a / b);
   return;
 }
+
 void main() {
   f();
 }
-
 

@@ -7,6 +7,7 @@ struct FragmentOutputs {
   float loc2;
   vec4 loc3;
 };
+
 struct tint_symbol_1 {
   int loc0;
   uint loc1;
@@ -32,6 +33,7 @@ layout(location = 0) out int loc0;
 layout(location = 1) out uint loc1;
 layout(location = 2) out float loc2;
 layout(location = 3) out vec4 loc3;
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
@@ -40,5 +42,4 @@ void main() {
   loc2 = outputs.loc2;
   loc3 = outputs.loc3;
 }
-
 

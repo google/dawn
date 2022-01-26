@@ -8,8 +8,8 @@ void f() {
   ivec3 r = (a >> b);
   return;
 }
+
 void main() {
   f();
 }
-
 

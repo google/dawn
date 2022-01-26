@@ -14,8 +14,8 @@ void f() {
   }
   return;
 }
+
 void main() {
   f();
 }
-
 

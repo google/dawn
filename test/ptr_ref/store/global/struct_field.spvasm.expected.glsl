@@ -6,7 +6,6 @@ struct S {
 };
 
 S V = S(0);
-
 void main_1() {
   V.i = 5;
   return;
@@ -17,8 +16,8 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

@@ -16,7 +16,6 @@ struct Result {
 layout(binding = 1) buffer Result_1 {
   uint value;
 } result;
-
 struct TestData {
   int data[3];
 };
@@ -24,7 +23,6 @@ struct TestData {
 layout(binding = 0) buffer TestData_1 {
   int data[3];
 } s;
-
 int runTest() {
   return atomicOr(s.data[(0u + uint(constants.zero))], 0);
 }
@@ -34,8 +32,8 @@ void tint_symbol() {
   result.value = uint(runTest());
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

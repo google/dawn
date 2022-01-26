@@ -5,18 +5,20 @@ struct Uniforms {
   uint i;
   uint j;
 };
+
 struct InnerS {
   int v;
 };
+
 struct S1 {
   InnerS a2[8];
 };
+
 struct OuterS {
   S1 a1[8];
 };
 
 uint nextIndex = 0u;
-
 uint getNextIndex() {
   nextIndex = (nextIndex + 1u);
   return nextIndex;
@@ -34,8 +36,8 @@ void tint_symbol() {
   s.a1[getNextIndex()].a2[uniforms.j] = v;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

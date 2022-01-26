@@ -5,7 +5,6 @@ precision mediump float;
 
 uniform highp sampler2D arg_0_arg_1;
 
-
 void textureSampleLevel_02be59() {
   float res = textureLod(arg_0_arg_1, vec2(0.0f, 0.0f), 0).x;
 }
@@ -25,6 +24,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -33,10 +34,9 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: 'textureLod' : no matching overloaded function found 
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:7: 'textureLod' : no matching overloaded function found 
+ERROR: 0:7: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -45,7 +45,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp sampler2D arg_0_arg_1;
-
 
 void textureSampleLevel_02be59() {
   float res = textureLod(arg_0_arg_1, vec2(0.0f, 0.0f), 0).x;
@@ -59,14 +58,14 @@ void fragment_main() {
   textureSampleLevel_02be59();
   return;
 }
+
 void main() {
   fragment_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: 'textureLod' : no matching overloaded function found 
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:7: 'textureLod' : no matching overloaded function found 
+ERROR: 0:7: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -75,7 +74,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp sampler2D arg_0_arg_1;
-
 
 void textureSampleLevel_02be59() {
   float res = textureLod(arg_0_arg_1, vec2(0.0f, 0.0f), 0).x;
@@ -90,14 +88,14 @@ void compute_main() {
   textureSampleLevel_02be59();
   return;
 }
+
 void main() {
   compute_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: 'textureLod' : no matching overloaded function found 
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:7: 'textureLod' : no matching overloaded function found 
+ERROR: 0:7: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

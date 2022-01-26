@@ -17,8 +17,8 @@ void tint_symbol() {
   m1[uniforms.i][uniforms.j] = 1.0f;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

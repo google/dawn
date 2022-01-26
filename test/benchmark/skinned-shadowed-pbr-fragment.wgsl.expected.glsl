@@ -8,7 +8,6 @@ benchmark/skinned-shadowed-pbr-fragment.wgsl:51:13 warning: use of deprecated la
 precision mediump float;
 
 const float GAMMA = 2.200000048f;
-
 vec3 linearTosRGB(vec3 linear) {
   float INV_GAMMA = (1.0f / GAMMA);
   return pow(linear, vec3(INV_GAMMA));
@@ -40,6 +39,7 @@ struct ClusterLights {
   uint offset;
   uint count;
 };
+
 struct ClusterLightGroup {
   uint offset;
   ClusterLights lights[27648];
@@ -51,7 +51,6 @@ layout(binding = 1) buffer ClusterLightGroup_1 {
   ClusterLights lights[27648];
   uint indices[1769472];
 } clusterLights;
-
 struct Light {
   vec3 position;
   float range;
@@ -68,7 +67,6 @@ layout(binding = 2) buffer GlobalLights_1 {
   Light lights[];
 } globalLights;
 const uvec3 tileCount = uvec3(32u, 18u, 48u);
-
 float linearDepth(float depthSample) {
   return ((camera.zFar * camera.zNear) / mad(depthSample, (camera.zNear - camera.zFar), camera.zFar));
 }
@@ -90,7 +88,6 @@ layout(binding = 6) buffer LightShadowTable_1 {
 } lightShadowTable;
 vec2 shadowSampleOffsets[16] = vec2[16](vec2(-1.5f, -1.5f), vec2(-1.5f, -0.5f), vec2(-1.5f, 0.5f), vec2(-1.5f, 1.5f), vec2(-0.5f, -1.5f), vec2(-0.5f, -0.5f), vec2(-0.5f, 0.5f), vec2(-0.5f, 1.5f), vec2(0.5f, -1.5f), vec2(0.5f, -0.5f), vec2(0.5f, 0.5f), vec2(0.5f, 1.5f), vec2(1.5f, -1.5f), vec2(1.5f, -0.5f), vec2(1.5f, 0.5f), vec2(1.5f, 1.5f));
 const uint shadowSampleCount = 16u;
-
 struct ShadowProperties {
   vec4 viewport;
   mat4 viewProj;
@@ -101,7 +98,6 @@ layout(binding = 7) buffer LightShadows_1 {
 } shadow;
 uniform highp sampler2D shadowTexture_1;
 uniform highp sampler2D shadowTexture_shadowSampler;
-
 
 float dirLightVisibility(vec3 worldPos) {
   int shadowIndex = lightShadowTable.light[0u];
@@ -180,6 +176,7 @@ struct VertexOutput {
   vec3 tangent;
   vec3 bitangent;
 };
+
 struct Material {
   vec4 baseColorFactor;
   vec3 emissiveFactor;
@@ -214,7 +211,6 @@ uniform highp sampler2D metallicRoughnessTexture_metallicRoughnessSampler;
 uniform highp sampler2D occlusionTexture_occlusionSampler;
 uniform highp sampler2D emissiveTexture_emissiveSampler;
 
-
 SurfaceInfo GetSurfaceInfo(VertexOutput tint_symbol) {
   SurfaceInfo surface = SurfaceInfo(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), 0.0f, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
   surface.v = normalize(tint_symbol.view);
@@ -247,7 +243,6 @@ SurfaceInfo GetSurfaceInfo(VertexOutput tint_symbol) {
 const float PI = 3.141592741f;
 const uint LightType_Point = 0u;
 const uint LightType_Directional = 2u;
-
 struct PuctualLight {
   uint lightType;
   vec3 pointToLight;
@@ -316,6 +311,7 @@ struct FragmentOutput {
   vec4 color;
   vec4 emissive;
 };
+
 struct tint_symbol_4 {
   vec3 worldPos;
   vec3 view;
@@ -328,6 +324,7 @@ struct tint_symbol_4 {
   vec3 bitangent;
   vec4 position;
 };
+
 struct tint_symbol_5 {
   vec4 color;
   vec4 emissive;
@@ -335,7 +332,6 @@ struct tint_symbol_5 {
 
 uniform highp sampler2D ssaoTexture_1;
 uniform highp sampler2D ssaoTexture_defaultSampler;
-
 FragmentOutput fragmentMain_inner(VertexOutput tint_symbol) {
   SurfaceInfo surface = GetSurfaceInfo(tint_symbol);
   vec3 Lo = vec3(0.0f, 0.0f, 0.0f);
@@ -391,8 +387,10 @@ layout(location = 5) in vec4 instanceColor;
 layout(location = 6) in vec3 normal;
 layout(location = 7) in vec3 tangent;
 layout(location = 8) in vec3 bitangent;
+
 layout(location = 0) out vec4 color;
 layout(location = 1) out vec4 emissive;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.worldPos = worldPos;
@@ -411,10 +409,9 @@ void main() {
   emissive = outputs.emissive;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:67: 'mad' : no matching overloaded function found 
-ERROR: 0:67: '' : compilation terminated 
+ERROR: 0:65: 'mad' : no matching overloaded function found 
+ERROR: 0:65: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

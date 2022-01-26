@@ -10,7 +10,6 @@ struct doesNotMatter {
 layout(binding = 0) buffer doesNotMatter_1 {
   float x_compute_data[];
 } x_9;
-
 float nb_mod_() {
   float s = 0.0f;
   int i = 0;
@@ -64,10 +63,10 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: '' : array size required 

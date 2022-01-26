@@ -9,6 +9,7 @@ struct Uniforms {
   vec3 bbMin;
   vec3 bbMax;
 };
+
 struct Dbg {
   uint offsetCounter;
   uint pad0;
@@ -32,6 +33,7 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMin;
   vec3 bbMax;
 } uniforms;
+
 layout(binding = 10) buffer U32s_1 {
   uint values[];
 } indices;
@@ -58,7 +60,6 @@ layout(binding = 50) buffer Dbg_1 {
   float value_f32_2;
   float value_f32_3;
 } dbg;
-
 vec3 toVoxelPos(vec3 position) {
   vec3 bbMin = vec3(uniforms.bbMin.x, uniforms.bbMin.y, uniforms.bbMin.z);
   vec3 bbMax = vec3(uniforms.bbMax.x, uniforms.bbMax.y, uniforms.bbMax.z);
@@ -121,6 +122,7 @@ void main_count_inner(uvec3 GlobalInvocationID) {
 struct tint_symbol_3 {
   uvec3 GlobalInvocationID;
 };
+
 struct tint_symbol_5 {
   uvec3 GlobalInvocationID;
 };
@@ -130,12 +132,13 @@ void main_count(tint_symbol_1 tint_symbol) {
   main_count_inner(tint_symbol.GlobalInvocationID);
   return;
 }
+
+
 void main() {
   tint_symbol_1 inputs;
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   main_count(inputs);
 }
-
 
 #version 310 es
 precision mediump float;
@@ -148,6 +151,7 @@ struct Uniforms {
   vec3 bbMin;
   vec3 bbMax;
 };
+
 struct Dbg {
   uint offsetCounter;
   uint pad0;
@@ -171,6 +175,7 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMin;
   vec3 bbMax;
 } uniforms;
+
 layout(binding = 10) buffer U32s_1 {
   uint values[];
 } indices;
@@ -197,7 +202,6 @@ layout(binding = 50) buffer Dbg_1 {
   float value_f32_2;
   float value_f32_3;
 } dbg;
-
 void doIgnore() {
   uint g42 = uniforms.numTriangles;
   uint kj6 = dbg.value1;
@@ -210,6 +214,7 @@ void doIgnore() {
 struct tint_symbol_1 {
   uvec3 GlobalInvocationID;
 };
+
 struct tint_symbol_3 {
   uvec3 GlobalInvocationID;
 };
@@ -238,12 +243,13 @@ void main_create_lut(tint_symbol_3 tint_symbol_2) {
   main_create_lut_inner(tint_symbol_2.GlobalInvocationID);
   return;
 }
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   main_create_lut(inputs);
 }
-
 
 #version 310 es
 precision mediump float;
@@ -256,6 +262,7 @@ struct Uniforms {
   vec3 bbMin;
   vec3 bbMax;
 };
+
 struct Dbg {
   uint offsetCounter;
   uint pad0;
@@ -279,6 +286,7 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMin;
   vec3 bbMax;
 } uniforms;
+
 layout(binding = 10) buffer U32s_1 {
   uint values[];
 } indices;
@@ -305,7 +313,6 @@ layout(binding = 50) buffer Dbg_1 {
   float value_f32_2;
   float value_f32_3;
 } dbg;
-
 vec3 toVoxelPos(vec3 position) {
   vec3 bbMin = vec3(uniforms.bbMin.x, uniforms.bbMin.y, uniforms.bbMin.z);
   vec3 bbMax = vec3(uniforms.bbMax.x, uniforms.bbMax.y, uniforms.bbMax.z);
@@ -340,9 +347,11 @@ void doIgnore() {
 struct tint_symbol_1 {
   uvec3 GlobalInvocationID;
 };
+
 struct tint_symbol_3 {
   uvec3 GlobalInvocationID;
 };
+
 struct tint_symbol_5 {
   uvec3 GlobalInvocationID;
 };
@@ -370,10 +379,11 @@ void main_sort_triangles(tint_symbol_5 tint_symbol_4) {
   main_sort_triangles_inner(tint_symbol_4.GlobalInvocationID);
   return;
 }
+
+
 void main() {
   tint_symbol_5 inputs;
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   main_sort_triangles(inputs);
 }
-
 

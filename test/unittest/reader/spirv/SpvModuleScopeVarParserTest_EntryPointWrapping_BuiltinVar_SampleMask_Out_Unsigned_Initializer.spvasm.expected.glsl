@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 uint x_1[1] = uint[1](0u);
-
 void main_1() {
   return;
 }
@@ -12,6 +11,7 @@ void main_1() {
 struct main_out {
   uint x_1_1;
 };
+
 struct tint_symbol_1 {
   uint x_1_1;
 };
@@ -28,16 +28,17 @@ tint_symbol_1 tint_symbol() {
   wrapper_result.x_1_1 = inner_result.x_1_1;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
   gl_SampleMask = outputs.x_1_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:32: 'gl_SampleMask' : required extension not requested: GL_OES_sample_variables
-ERROR: 0:32: '' : compilation terminated 
+ERROR: 0:34: 'gl_SampleMask' : required extension not requested: GL_OES_sample_variables
+ERROR: 0:34: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

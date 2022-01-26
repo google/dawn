@@ -6,8 +6,8 @@ void f() {
   uint b = uint(-2147483648);
   return;
 }
+
 void main() {
   f();
 }
-
 

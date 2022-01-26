@@ -7,8 +7,8 @@ void f() {
   vec3 r = (a + 4.0f);
   return;
 }
+
 void main() {
   f();
 }
-
 

@@ -8,8 +8,8 @@ void f() {
   uint r = (a % (b + b));
   return;
 }
+
 void main() {
   f();
 }
-
 

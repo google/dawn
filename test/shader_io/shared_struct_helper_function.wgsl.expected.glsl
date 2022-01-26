@@ -33,6 +33,8 @@ tint_symbol vert_main1() {
   return wrapper_result;
 }
 layout(location = 0) flat out int loc0;
+
+
 void main() {
   tint_symbol outputs;
   outputs = vert_main1();
@@ -41,7 +43,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 
 #version 310 es
 precision mediump float;
@@ -60,6 +61,7 @@ struct tint_symbol {
   int loc0;
   vec4 pos;
 };
+
 struct tint_symbol_1 {
   int loc0;
   vec4 pos;
@@ -77,6 +79,8 @@ tint_symbol_1 vert_main2() {
   return wrapper_result_1;
 }
 layout(location = 0) flat out int loc0;
+
+
 void main() {
   tint_symbol_1 outputs;
   outputs = vert_main2();
@@ -85,5 +89,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

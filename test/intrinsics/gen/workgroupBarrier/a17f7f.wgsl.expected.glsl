@@ -10,8 +10,8 @@ void compute_main() {
   workgroupBarrier_a17f7f();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

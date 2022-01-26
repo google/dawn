@@ -16,8 +16,8 @@ void tint_symbol() {
   }
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

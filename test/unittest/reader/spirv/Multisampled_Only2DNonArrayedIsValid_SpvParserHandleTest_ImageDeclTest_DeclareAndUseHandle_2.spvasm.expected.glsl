@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 uniform highp sampler2DMS x_20_1;
-
 void main_1() {
   float float_var = 0.0f;
   int i1 = 1;
@@ -28,14 +27,14 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:20: 'textureSamples' : no matching overloaded function found 
-ERROR: 0:20: '' : compilation terminated 
+ERROR: 0:19: 'textureSamples' : no matching overloaded function found 
+ERROR: 0:19: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

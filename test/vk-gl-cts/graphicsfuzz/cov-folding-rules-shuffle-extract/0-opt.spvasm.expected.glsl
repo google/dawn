@@ -10,8 +10,8 @@ struct buf0 {
 layout(binding = 0) uniform buf0_1 {
   vec2 injectionSwitch;
 } x_5;
-vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
+vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   vec2 x_29 = x_5.injectionSwitch;
   if (((bvec2(false, false) ? vec2(1.0f, 1.0f) : x_29).x == 0.0f)) {
@@ -25,6 +25,7 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_1 {
   vec4 x_GLF_color_1;
 };
@@ -42,12 +43,12 @@ tint_symbol_1 tint_symbol() {
   return wrapper_result;
 }
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:15: '' : boolean expression expected 

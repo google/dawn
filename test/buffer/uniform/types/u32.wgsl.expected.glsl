@@ -14,8 +14,8 @@ void tint_symbol() {
   uint x = u.inner;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

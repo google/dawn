@@ -19,8 +19,8 @@ void f() {
   bool also_unreachable = false;
   return;
 }
+
 void main() {
   f();
 }
-
 

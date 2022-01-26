@@ -28,7 +28,6 @@ struct tint_symbol_3 {
 
 uniform highp sampler2D src_1;
 uniform highp sampler2D dst_1;
-
 void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   ivec2 size = textureSize(src_1, 0);
   ivec2 dstTexCoord = ivec2(GlobalInvocationID.xy);
@@ -64,10 +63,11 @@ void tint_symbol_1(tint_symbol_3 tint_symbol_2) {
   tint_symbol_1_inner(tint_symbol_2.GlobalInvocationID);
   return;
 }
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.GlobalInvocationID = gl_GlobalInvocationID;
   tint_symbol_1(inputs);
 }
-
 

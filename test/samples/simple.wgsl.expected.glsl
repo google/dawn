@@ -21,10 +21,10 @@ tint_symbol_1 tint_symbol() {
   return wrapper_result;
 }
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
   value = outputs.value;
 }
-
 

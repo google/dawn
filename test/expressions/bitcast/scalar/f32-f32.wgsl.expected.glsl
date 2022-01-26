@@ -6,8 +6,8 @@ void f() {
   float b = 1.0f;
   return;
 }
+
 void main() {
   f();
 }
-
 

@@ -11,10 +11,10 @@ void fragment_main() {
   dpdy_feb40f();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddy' : no matching overloaded function found 

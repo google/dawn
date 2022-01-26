@@ -92,10 +92,10 @@ void tint_symbol() {
   tint_isNormal_3(3.0f);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'uint4' : undeclared identifier 

@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 uniform highp sampler2D x_20_1;
-
 void main_1() {
   uint x_125 = uint(textureQueryLevels(x_20_1););
   return;
@@ -14,14 +13,14 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

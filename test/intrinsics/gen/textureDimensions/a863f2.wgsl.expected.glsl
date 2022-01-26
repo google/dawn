@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 layout(r32f) uniform highp writeonly image1D arg_0_1;
-
 void textureDimensions_a863f2() {
   int res = imageSize(arg_0_1);
 }
@@ -24,6 +23,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -31,7 +32,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'image1D' : Reserved word. 
@@ -45,7 +45,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 layout(r32f) uniform highp writeonly image1D arg_0_1;
-
 void textureDimensions_a863f2() {
   int res = imageSize(arg_0_1);
 }
@@ -58,10 +57,10 @@ void fragment_main() {
   textureDimensions_a863f2();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'image1D' : Reserved word. 
@@ -75,7 +74,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 layout(r32f) uniform highp writeonly image1D arg_0_1;
-
 void textureDimensions_a863f2() {
   int res = imageSize(arg_0_1);
 }
@@ -89,10 +87,10 @@ void compute_main() {
   textureDimensions_a863f2();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'image1D' : Reserved word. 

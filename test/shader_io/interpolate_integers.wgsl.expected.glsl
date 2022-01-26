@@ -8,6 +8,7 @@ struct Interface {
   uvec4 vu;
   vec4 pos;
 };
+
 struct tint_symbol {
   int i;
   uint u;
@@ -28,6 +29,7 @@ struct tint_symbol_2 {
   uvec4 vu;
   vec4 pos;
 };
+
 struct tint_symbol_3 {
   int value;
 };
@@ -46,6 +48,8 @@ layout(location = 0) flat out int i;
 layout(location = 1) flat out uint u;
 layout(location = 2) flat out ivec4 vi;
 layout(location = 3) flat out uvec4 vu;
+
+
 void main() {
   tint_symbol outputs;
   outputs = vert_main();
@@ -58,7 +62,6 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
@@ -69,6 +72,7 @@ struct Interface {
   uvec4 vu;
   vec4 pos;
 };
+
 struct tint_symbol {
   int i;
   uint u;
@@ -76,6 +80,7 @@ struct tint_symbol {
   uvec4 vu;
   vec4 pos;
 };
+
 struct tint_symbol_2 {
   int i;
   uint u;
@@ -83,6 +88,7 @@ struct tint_symbol_2 {
   uvec4 vu;
   vec4 pos;
 };
+
 struct tint_symbol_3 {
   int value;
 };
@@ -102,7 +108,9 @@ layout(location = 0) flat in int i;
 layout(location = 1) flat in uint u;
 layout(location = 2) flat in ivec4 vi;
 layout(location = 3) flat in uvec4 vu;
+
 layout(location = 0) out int value;
+
 void main() {
   tint_symbol_2 inputs;
   inputs.i = i;
@@ -114,5 +122,4 @@ void main() {
   outputs = frag_main(inputs);
   value = outputs.value;
 }
-
 

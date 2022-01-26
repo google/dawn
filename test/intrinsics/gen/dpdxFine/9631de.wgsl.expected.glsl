@@ -11,10 +11,10 @@ void fragment_main() {
   dpdxFine_9631de();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddx_fine' : no matching overloaded function found 

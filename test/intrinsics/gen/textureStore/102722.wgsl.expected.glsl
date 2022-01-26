@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 layout(r32ui) uniform highp writeonly uimage1D arg_0_1;
-
 void textureStore_102722() {
   imageStore(arg_0_1, 1, uvec4(0u, 0u, 0u, 0u));
 }
@@ -24,6 +23,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -31,7 +32,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'uimage1D' : Reserved word. 
@@ -45,7 +45,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 layout(r32ui) uniform highp writeonly uimage1D arg_0_1;
-
 void textureStore_102722() {
   imageStore(arg_0_1, 1, uvec4(0u, 0u, 0u, 0u));
 }
@@ -58,10 +57,10 @@ void fragment_main() {
   textureStore_102722();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'uimage1D' : Reserved word. 
@@ -75,7 +74,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 layout(r32ui) uniform highp writeonly uimage1D arg_0_1;
-
 void textureStore_102722() {
   imageStore(arg_0_1, 1, uvec4(0u, 0u, 0u, 0u));
 }
@@ -89,10 +87,10 @@ void compute_main() {
   textureStore_102722();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'uimage1D' : Reserved word. 

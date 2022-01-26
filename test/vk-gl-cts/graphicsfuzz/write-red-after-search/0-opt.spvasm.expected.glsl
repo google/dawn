@@ -8,9 +8,11 @@ struct BST {
   int leftIndex;
   int rightIndex;
 };
+
 struct buf0 {
   vec2 injectionSwitch;
 };
+
 struct Obj {
   float odd_numbers[10];
   float even_numbers[10];
@@ -20,9 +22,9 @@ BST tree_1[10] = BST[10](BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0), BST(0, 0, 0),
 layout(binding = 0) uniform buf0_1 {
   vec2 injectionSwitch;
 } x_27;
+
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 void makeTreeNode_struct_BST_i1_i1_i11_i1_(inout BST tree, inout int data) {
   int x_74 = data;
   tree.data = x_74;
@@ -343,9 +345,11 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_4 {
   vec4 tint_symbol_2;
 };
+
 struct tint_symbol_5 {
   vec4 x_GLF_color_1;
 };
@@ -363,7 +367,9 @@ tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_FragCoord;
@@ -372,10 +378,9 @@ void main() {
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:85: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:85: '' : compilation terminated 
+ERROR: 0:87: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:87: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

@@ -2,7 +2,6 @@
 precision mediump float;
 
 layout(rgba8_snorm) uniform highp writeonly image2D arg_0_1;
-
 void textureStore_805dae() {
   imageStore(arg_0_1, ivec2(0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
@@ -22,6 +21,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -30,12 +31,10 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 #version 310 es
 precision mediump float;
 
 layout(rgba8_snorm) uniform highp writeonly image2D arg_0_1;
-
 void textureStore_805dae() {
   imageStore(arg_0_1, ivec2(0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
@@ -48,16 +47,15 @@ void fragment_main() {
   textureStore_805dae();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 #version 310 es
 precision mediump float;
 
 layout(rgba8_snorm) uniform highp writeonly image2D arg_0_1;
-
 void textureStore_805dae() {
   imageStore(arg_0_1, ivec2(0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
@@ -71,8 +69,8 @@ void compute_main() {
   textureStore_805dae();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 

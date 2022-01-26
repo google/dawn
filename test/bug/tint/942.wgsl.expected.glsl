@@ -18,8 +18,8 @@ struct Flip {
 layout(binding = 3) uniform Flip_1 {
   uint value;
 } flip;
-shared vec3 tile[4][256];
 
+shared vec3 tile[4][256];
 struct tint_symbol_2 {
   uvec3 LocalInvocationID;
   uint local_invocation_index;
@@ -29,7 +29,6 @@ struct tint_symbol_2 {
 uniform highp sampler2D inputTex_1;
 uniform highp sampler2D inputTex_samp;
 layout(rgba8) uniform highp writeonly image2D outputTex_1;
-
 
 void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocation_index) {
   {
@@ -95,6 +94,10 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.WorkGroupID, tint_symbol_1.LocalInvocationID, tint_symbol_1.local_invocation_index);
   return;
 }
+
+
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.LocalInvocationID = gl_LocalInvocationID;
@@ -102,5 +105,4 @@ void main() {
   inputs.WorkGroupID = gl_WorkGroupID;
   tint_symbol(inputs);
 }
-
 

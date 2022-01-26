@@ -21,7 +21,6 @@ uvec3 v3u32_var2 = uvec3(vec3(1.0f));
 uvec3 v3u32_var3 = uvec3(bvec3(true));
 bvec3 v3bool_var4 = bvec3(bvec2(vec2(123.0f)), true);
 bvec4 v4bool_var5 = bvec4(bvec2(vec2(123.0f, 0.0f)), bvec2(true, bool(float(0.0f))));
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   bool_var1 = false;
@@ -46,8 +45,8 @@ void tint_symbol() {
   v3u32_var3 = uvec3(0u, 0u, 0u);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

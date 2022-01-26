@@ -21,6 +21,11 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.position, tint_symbol_1.front_facing, tint_symbol_1.sample_index, tint_symbol_1.sample_mask);
   return;
 }
+
+
+
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.position = gl_FragCoord;
@@ -30,10 +35,9 @@ void main() {
   tint_symbol(inputs);
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:26: 'gl_SampleID' : required extension not requested: GL_OES_sample_variables
-ERROR: 0:26: '' : compilation terminated 
+ERROR: 0:31: 'gl_SampleID' : required extension not requested: GL_OES_sample_variables
+ERROR: 0:31: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

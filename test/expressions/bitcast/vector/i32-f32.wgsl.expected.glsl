@@ -7,8 +7,8 @@ void f() {
   vec3 b = intBitsToFloat(a);
   return;
 }
+
 void main() {
   f();
 }
-
 

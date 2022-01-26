@@ -6,6 +6,7 @@ precision mediump float;
 struct buf1 {
   vec2 injectionSwitch;
 };
+
 struct buf0 {
   vec2 resolution;
 };
@@ -13,6 +14,7 @@ struct buf0 {
 layout(binding = 1) uniform buf1_1 {
   vec2 injectionSwitch;
 } x_11;
+
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 layout(binding = 0) uniform buf0_1 {
@@ -162,9 +164,11 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_4 {
   vec4 tint_symbol_2;
 };
+
 struct tint_symbol_5 {
   vec4 x_GLF_color_1;
 };
@@ -182,7 +186,9 @@ tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_FragCoord;
@@ -191,10 +197,9 @@ void main() {
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:67: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:67: '' : compilation terminated 
+ERROR: 0:69: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:69: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

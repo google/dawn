@@ -2,7 +2,6 @@
 precision mediump float;
 
 shared int a;
-
 void uses_a() {
   a = (a + 1);
 }
@@ -23,6 +22,7 @@ void main1_inner(uint local_invocation_index) {
 struct tint_symbol_3 {
   uint local_invocation_index_1;
 };
+
 struct tint_symbol_5 {
   uint local_invocation_index_2;
 };
@@ -32,18 +32,18 @@ void main1(tint_symbol_1 tint_symbol) {
   main1_inner(tint_symbol.local_invocation_index);
   return;
 }
+
+
 void main() {
   tint_symbol_1 inputs;
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   main1(inputs);
 }
 
-
 #version 310 es
 precision mediump float;
 
 shared int b;
-
 void uses_b() {
   b = (b * 2);
 }
@@ -51,6 +51,7 @@ void uses_b() {
 struct tint_symbol_1 {
   uint local_invocation_index;
 };
+
 struct tint_symbol_3 {
   uint local_invocation_index_1;
 };
@@ -73,19 +74,19 @@ void main2(tint_symbol_3 tint_symbol_2) {
   main2_inner(tint_symbol_2.local_invocation_index_1);
   return;
 }
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.local_invocation_index_1 = uint(gl_LocalInvocationIndex);
   main2(inputs);
 }
 
-
 #version 310 es
 precision mediump float;
 
 shared int a;
 shared int b;
-
 void uses_a() {
   a = (a + 1);
 }
@@ -112,9 +113,11 @@ void outer() {
 struct tint_symbol_1 {
   uint local_invocation_index;
 };
+
 struct tint_symbol_3 {
   uint local_invocation_index_1;
 };
+
 struct tint_symbol_5 {
   uint local_invocation_index_2;
 };
@@ -134,12 +137,13 @@ void main3(tint_symbol_5 tint_symbol_4) {
   main3_inner(tint_symbol_4.local_invocation_index_2);
   return;
 }
+
+
 void main() {
   tint_symbol_5 inputs;
   inputs.local_invocation_index_2 = uint(gl_LocalInvocationIndex);
   main3(inputs);
 }
-
 
 #version 310 es
 precision mediump float;
@@ -150,9 +154,11 @@ void no_uses() {
 struct tint_symbol_1 {
   uint local_invocation_index;
 };
+
 struct tint_symbol_3 {
   uint local_invocation_index_1;
 };
+
 struct tint_symbol_5 {
   uint local_invocation_index_2;
 };
@@ -162,8 +168,8 @@ void main4() {
   no_uses();
   return;
 }
+
 void main() {
   main4();
 }
-
 

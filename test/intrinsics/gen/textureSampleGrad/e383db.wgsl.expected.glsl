@@ -5,7 +5,6 @@ precision mediump float;
 
 uniform highp samplerCubeArray arg_0_arg_1;
 
-
 void textureSampleGrad_e383db() {
   vec4 res = textureGrad(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
 }
@@ -25,6 +24,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -32,7 +33,6 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
@@ -45,7 +45,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp samplerCubeArray arg_0_arg_1;
-
 
 void textureSampleGrad_e383db() {
   vec4 res = textureGrad(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
@@ -59,10 +58,10 @@ void fragment_main() {
   textureSampleGrad_e383db();
   return;
 }
+
 void main() {
   fragment_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
@@ -75,7 +74,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp samplerCubeArray arg_0_arg_1;
-
 
 void textureSampleGrad_e383db() {
   vec4 res = textureGrad(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
@@ -90,10 +88,10 @@ void compute_main() {
   textureSampleGrad_e383db();
   return;
 }
+
 void main() {
   compute_main();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'samplerCubeArray' : Reserved word. 

@@ -12,6 +12,7 @@ layout(binding = 0) uniform UBO_1 {
 struct S {
   int data[64];
 };
+
 struct Result {
   int tint_symbol;
 };
@@ -20,7 +21,6 @@ layout(binding = 1) buffer Result_1 {
   int tint_symbol;
 } result;
 shared S s;
-
 struct tint_symbol_2 {
   uint local_invocation_index;
 };
@@ -41,10 +41,11 @@ void f(tint_symbol_2 tint_symbol_1) {
   f_inner(tint_symbol_1.local_invocation_index);
   return;
 }
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   f(inputs);
 }
-
 

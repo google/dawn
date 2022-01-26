@@ -6,8 +6,8 @@ void f() {
   float r = (1.0f / 0.0f);
   return;
 }
+
 void main() {
   f();
 }
-
 

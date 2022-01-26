@@ -5,7 +5,6 @@ precision mediump float;
 
 vec4 tint_symbol_1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 uniform highp sampler2DMS arg_0_1;
-
 void textureNumSamples_a3c8a0() {
   int res = 0;
   int x_16 = textureSamples(arg_0_1);;
@@ -27,6 +26,7 @@ void vertex_main_1() {
 struct vertex_main_out {
   vec4 tint_symbol_1_1;
 };
+
 struct tint_symbol_3 {
   vec4 tint_symbol_1_1;
 };
@@ -43,6 +43,8 @@ tint_symbol_3 vertex_main() {
   wrapper_result.tint_symbol_1_1 = inner_result.tint_symbol_1_1;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol_3 outputs;
   outputs = vertex_main();
@@ -51,11 +53,10 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:9: 'textureSamples' : no matching overloaded function found 
-ERROR: 0:9: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:8: 'textureSamples' : no matching overloaded function found 
+ERROR: 0:8: '=' :  cannot convert from ' const float' to ' temp highp int'
+ERROR: 0:8: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -64,7 +65,6 @@ ERROR: 3 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp sampler2DMS arg_0_1;
-
 void textureNumSamples_a3c8a0() {
   int res = 0;
   int x_16 = textureSamples(arg_0_1);;
@@ -75,6 +75,7 @@ void textureNumSamples_a3c8a0() {
 struct vertex_main_out {
   vec4 tint_symbol_1_1;
 };
+
 struct tint_symbol_3 {
   vec4 tint_symbol_1_1;
 };
@@ -88,15 +89,15 @@ void fragment_main() {
   fragment_main_1();
   return;
 }
+
 void main() {
   fragment_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: 'textureSamples' : no matching overloaded function found 
-ERROR: 0:8: '=' :  cannot convert from ' const float' to ' temp mediump int'
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:7: 'textureSamples' : no matching overloaded function found 
+ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump int'
+ERROR: 0:7: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -105,7 +106,6 @@ ERROR: 3 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp sampler2DMS arg_0_1;
-
 void textureNumSamples_a3c8a0() {
   int res = 0;
   int x_16 = textureSamples(arg_0_1);;
@@ -116,6 +116,7 @@ void textureNumSamples_a3c8a0() {
 struct vertex_main_out {
   vec4 tint_symbol_1_1;
 };
+
 struct tint_symbol_3 {
   vec4 tint_symbol_1_1;
 };
@@ -130,15 +131,15 @@ void compute_main() {
   compute_main_1();
   return;
 }
+
 void main() {
   compute_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: 'textureSamples' : no matching overloaded function found 
-ERROR: 0:8: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:7: 'textureSamples' : no matching overloaded function found 
+ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp int'
+ERROR: 0:7: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

@@ -4,6 +4,7 @@ precision mediump float;
 struct tint_padded_array_element {
   float el;
 };
+
 struct LeftOver {
   mat4 worldViewProjection;
   float time;
@@ -18,11 +19,11 @@ layout(binding = 2) uniform LeftOver_1 {
   mat4 test2[2];
   tint_padded_array_element test[4];
 } x_14;
+
 vec2 vUV = vec2(0.0f, 0.0f);
 vec2 uv = vec2(0.0f, 0.0f);
 vec3 normal = vec3(0.0f, 0.0f, 0.0f);
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 void main_1() {
   vec4 q = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   vec3 p = vec3(0.0f, 0.0f, 0.0f);
@@ -51,11 +52,13 @@ struct main_out {
   vec4 tint_symbol;
   vec2 vUV_1;
 };
+
 struct tint_symbol_3 {
   vec3 position_param;
   vec3 normal_param;
   vec2 uv_param;
 };
+
 struct tint_symbol_4 {
   vec2 vUV_1;
   vec4 tint_symbol;
@@ -81,6 +84,8 @@ layout(location = 0) in vec3 position_param;
 layout(location = 1) in vec3 normal_param;
 layout(location = 2) in vec2 uv_param;
 layout(location = 0) out vec2 vUV_1;
+
+
 void main() {
   tint_symbol_3 inputs;
   inputs.position_param = position_param;
@@ -93,5 +98,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

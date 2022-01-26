@@ -6,8 +6,8 @@ void f() {
   uint b = 1u;
   return;
 }
+
 void main() {
   f();
 }
-
 

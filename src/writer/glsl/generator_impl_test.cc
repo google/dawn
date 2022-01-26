@@ -33,6 +33,7 @@ precision mediump float;
 
 void my_func() {
 }
+
 )");
 }
 

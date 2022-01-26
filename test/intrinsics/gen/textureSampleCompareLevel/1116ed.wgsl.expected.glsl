@@ -5,7 +5,6 @@ precision mediump float;
 
 uniform highp sampler2DArray arg_0_arg_1;
 
-
 void textureSampleCompareLevel_1116ed() {
   float res = texture(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), 1.0f);
 }
@@ -25,6 +24,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -33,10 +34,9 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: 'texture' : no matching overloaded function found 
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:7: 'texture' : no matching overloaded function found 
+ERROR: 0:7: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -45,7 +45,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp sampler2DArray arg_0_arg_1;
-
 
 void textureSampleCompareLevel_1116ed() {
   float res = texture(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), 1.0f);
@@ -59,14 +58,14 @@ void fragment_main() {
   textureSampleCompareLevel_1116ed();
   return;
 }
+
 void main() {
   fragment_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:7: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
+ERROR: 0:7: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -75,7 +74,6 @@ ERROR: 2 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp sampler2DArray arg_0_arg_1;
-
 
 void textureSampleCompareLevel_1116ed() {
   float res = texture(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), 1.0f);
@@ -90,14 +88,14 @@ void compute_main() {
   textureSampleCompareLevel_1116ed();
   return;
 }
+
 void main() {
   compute_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:8: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:7: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
+ERROR: 0:7: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

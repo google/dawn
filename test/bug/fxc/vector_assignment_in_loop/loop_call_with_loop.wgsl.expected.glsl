@@ -5,7 +5,6 @@ vec2 v2f = vec2(0.0f, 0.0f);
 ivec3 v3i = ivec3(0, 0, 0);
 uvec4 v4u = uvec4(0u, 0u, 0u, 0u);
 bvec2 v2b = bvec2(false, false);
-
 void foo() {
   {
     for(int i = 0; (i < 2); i = (i + 1)) {
@@ -26,8 +25,8 @@ void tint_symbol() {
   }
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

@@ -10,9 +10,9 @@ struct buf0 {
 layout(binding = 0) uniform buf0_1 {
   vec2 resolution;
 } x_13;
+
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 float compute_value_f1_f1_(inout float limit, inout float thirty_two) {
   float result = 0.0f;
   int i = 0;
@@ -88,9 +88,11 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_4 {
   vec4 tint_symbol_2;
 };
+
 struct tint_symbol_5 {
   vec4 x_GLF_color_1;
 };
@@ -108,7 +110,9 @@ tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_FragCoord;
@@ -116,7 +120,6 @@ void main() {
   outputs = tint_symbol_1(inputs);
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:26: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp float' and a right operand of type ' global mediump float' (or there is no acceptable conversion)

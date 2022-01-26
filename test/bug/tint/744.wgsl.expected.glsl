@@ -47,10 +47,11 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.global_id);
   return;
 }
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.global_id = gl_GlobalInvocationID;
   tint_symbol(inputs);
 }
-
 

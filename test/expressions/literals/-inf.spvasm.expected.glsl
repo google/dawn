@@ -2,7 +2,6 @@
 precision mediump float;
 
 vec4 out_var_SV_TARGET = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 void main_1() {
   out_var_SV_TARGET = vec4(uintBitsToFloat(0xff800000u), uintBitsToFloat(0xff800000u), uintBitsToFloat(0xff800000u), uintBitsToFloat(0xff800000u));
   return;
@@ -11,6 +10,7 @@ void main_1() {
 struct main_out {
   vec4 out_var_SV_TARGET_1;
 };
+
 struct tint_symbol_1 {
   vec4 out_var_SV_TARGET_1;
 };
@@ -28,10 +28,10 @@ tint_symbol_1 tint_symbol() {
   return wrapper_result;
 }
 layout(location = 0) out vec4 out_var_SV_TARGET_1;
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
   out_var_SV_TARGET_1 = outputs.out_var_SV_TARGET_1;
 }
-
 

@@ -2,7 +2,6 @@
 precision mediump float;
 
 shared int arg_0;
-
 void atomicLoad_afcc03() {
   int res = atomicOr(arg_0, 0);
 }
@@ -24,10 +23,11 @@ void compute_main(tint_symbol_1 tint_symbol) {
   compute_main_inner(tint_symbol.local_invocation_index);
   return;
 }
+
+
 void main() {
   tint_symbol_1 inputs;
   inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
   compute_main(inputs);
 }
-
 

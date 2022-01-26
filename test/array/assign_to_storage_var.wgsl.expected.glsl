@@ -5,15 +5,15 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void unused_entry_point() {
   return;
 }
+
 void main() {
   unused_entry_point();
 }
 
-
-
 struct S {
   ivec4 arr[4];
 };
+
 struct S_nested {
   int arr[4][3][2];
 };
@@ -23,6 +23,7 @@ shared ivec4 src_workgroup[4];
 layout(binding = 0) uniform S_1 {
   ivec4 arr[4];
 } src_uniform;
+
 layout(binding = 1) buffer S_2 {
   ivec4 arr[4];
 } src_storage;
@@ -32,7 +33,6 @@ layout(binding = 2) buffer S_3 {
 layout(binding = 3) buffer S_nested_1 {
   int arr[4][3][2];
 } dst_nested;
-
 ivec4[4] ret_arr() {
   ivec4 tint_symbol[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
   return tint_symbol;
@@ -60,3 +60,4 @@ void foo(ivec4 src_param[4]) {
   int src_nested[4][3][2] = int[4][3][2](int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)));
   dst_nested.arr = src_nested;
 }
+

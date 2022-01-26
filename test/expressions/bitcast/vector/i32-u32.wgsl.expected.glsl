@@ -7,8 +7,8 @@ void f() {
   uvec3 b = uvec3(a);
   return;
 }
+
 void main() {
   f();
 }
-
 

@@ -4,6 +4,7 @@ precision mediump float;
 struct Simulation {
   uint i;
 };
+
 struct Particle {
   vec3 position[8];
   float lifetime;
@@ -24,8 +25,8 @@ void tint_symbol() {
   particle.position[sim.i] = particle.position[sim.i];
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

@@ -23,8 +23,8 @@ void tint_symbol() {
   u.i;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

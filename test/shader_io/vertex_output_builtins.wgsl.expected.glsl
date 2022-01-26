@@ -15,6 +15,8 @@ tint_symbol_1 tint_symbol() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
@@ -22,5 +24,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

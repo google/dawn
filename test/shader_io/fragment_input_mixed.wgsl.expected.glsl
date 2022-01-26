@@ -7,10 +7,12 @@ struct FragmentInputs0 {
   vec4 position;
   int loc0;
 };
+
 struct FragmentInputs1 {
   vec4 loc3;
   uint sample_mask;
 };
+
 struct tint_symbol_2 {
   int loc0;
   uint loc1;
@@ -43,6 +45,11 @@ layout(location = 0) flat in int loc0;
 layout(location = 1) flat in uint loc1;
 layout(location = 2) in float loc2;
 layout(location = 3) in vec4 loc3;
+
+
+
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.loc0 = loc0;
@@ -56,10 +63,9 @@ void main() {
   tint_symbol(inputs);
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:52: 'gl_SampleID' : required extension not requested: GL_OES_sample_variables
-ERROR: 0:52: '' : compilation terminated 
+ERROR: 0:59: 'gl_SampleID' : required extension not requested: GL_OES_sample_variables
+ERROR: 0:59: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

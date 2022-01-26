@@ -10,9 +10,9 @@ struct buf0 {
 layout(binding = 0) uniform buf0_1 {
   vec2 resolution;
 } x_15;
+
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
 float cross2d_vf2_vf2_(inout vec2 a, inout vec2 b) {
   float x_85 = a.x;
   float x_87 = b.y;
@@ -144,9 +144,11 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_4 {
   vec4 tint_symbol_2;
 };
+
 struct tint_symbol_5 {
   vec4 x_GLF_color_1;
 };
@@ -164,7 +166,9 @@ tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_FragCoord;
@@ -172,7 +176,6 @@ void main() {
   outputs = tint_symbol_1(inputs);
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:87: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)

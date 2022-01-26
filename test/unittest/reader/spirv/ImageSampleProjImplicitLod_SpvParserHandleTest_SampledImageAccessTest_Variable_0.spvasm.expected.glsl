@@ -5,7 +5,6 @@ precision mediump float;
 
 uniform highp sampler1D x_20_x_10;
 
-
 void main_1() {
   float f1 = 1.0f;
   vec2 vf12 = vec2(1.0f, 2.0f);
@@ -32,10 +31,10 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:4: 'sampler1D' : Reserved word. 

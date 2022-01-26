@@ -7,8 +7,8 @@ void tint_symbol() {
   m[1] = vec3(5.0f, 5.0f, 5.0f);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

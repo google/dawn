@@ -38,8 +38,8 @@ void tint_symbol() {
   int subexpr_nested_nonempty_with_expr[4] = tint_symbol_20[1];
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

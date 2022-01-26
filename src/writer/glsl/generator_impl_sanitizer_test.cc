@@ -51,11 +51,9 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
-
 layout(binding = 1) buffer my_struct_1 {
   float a[];
 } b;
-
 void a_func() {
   uint tint_symbol_1 = 0u;
   b.GetDimensions(tint_symbol_1);
@@ -63,10 +61,10 @@ void a_func() {
   uint len = tint_symbol_2;
   return;
 }
+
 void main() {
   a_func();
 }
-
 
 )";
   EXPECT_EQ(expect, got);
@@ -102,12 +100,10 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
-
 layout(binding = 1) buffer my_struct_1 {
   float z;
   float a[];
 } b;
-
 void a_func() {
   uint tint_symbol_1 = 0u;
   b.GetDimensions(tint_symbol_1);
@@ -115,10 +111,10 @@ void a_func() {
   uint len = tint_symbol_2;
   return;
 }
+
 void main() {
   a_func();
 }
-
 
 )";
 
@@ -156,11 +152,9 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_ViaLets) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
-
 layout(binding = 1) buffer my_struct_1 {
   float a[];
 } b;
-
 void a_func() {
   uint tint_symbol_1 = 0u;
   b.GetDimensions(tint_symbol_1);
@@ -168,10 +162,10 @@ void a_func() {
   uint len = tint_symbol_2;
   return;
 }
+
 void main() {
   a_func();
 }
-
 
 )";
 
@@ -204,10 +198,10 @@ void tint_symbol() {
   int pos = tint_symbol_1[3];
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 )";
   EXPECT_EQ(expect, got);
@@ -251,10 +245,10 @@ void tint_symbol() {
   vec3 pos = tint_symbol_1.b;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 )";
   EXPECT_EQ(expect, got);
@@ -292,10 +286,10 @@ void tint_symbol() {
   int x = v;
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 )";
   EXPECT_EQ(expect, got);
@@ -345,10 +339,10 @@ void tint_symbol() {
   vec4 v = a[3][2];
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 )";
   EXPECT_EQ(expect, got);

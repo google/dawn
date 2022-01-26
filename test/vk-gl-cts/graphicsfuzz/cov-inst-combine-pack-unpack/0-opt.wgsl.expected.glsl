@@ -26,12 +26,15 @@ vec4 tint_unpack4x8snorm(uint param_0) {
 struct tint_padded_array_element {
   float el;
 };
+
 struct buf1 {
   tint_padded_array_element x_GLF_uniform_float_values[7];
 };
+
 struct tint_padded_array_element_1 {
   int el;
 };
+
 struct buf0 {
   tint_padded_array_element_1 x_GLF_uniform_int_values[4];
 };
@@ -39,11 +42,12 @@ struct buf0 {
 layout(binding = 1) uniform buf1_1 {
   tint_padded_array_element x_GLF_uniform_float_values[7];
 } x_6;
+
 layout(binding = 0) uniform buf0_1 {
   tint_padded_array_element_1 x_GLF_uniform_int_values[4];
 } x_10;
-vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
+vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   uint a = 0u;
   vec4 v1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -109,6 +113,7 @@ void main_1() {
 struct main_out {
   vec4 x_GLF_color_1;
 };
+
 struct tint_symbol_1 {
   vec4 x_GLF_color_1;
 };
@@ -126,12 +131,12 @@ tint_symbol_1 tint_symbol() {
   return wrapper_result;
 }
 layout(location = 0) out vec4 x_GLF_color_1;
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
   x_GLF_color_1 = outputs.x_GLF_color_1;
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: 'uint2' : undeclared identifier 

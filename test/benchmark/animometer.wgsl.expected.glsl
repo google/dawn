@@ -6,6 +6,7 @@ precision mediump float;
 struct Time {
   float value;
 };
+
 struct Uniforms {
   float scale;
   float offsetX;
@@ -17,6 +18,7 @@ struct Uniforms {
 layout(binding = 0) uniform Time_1 {
   float value;
 } time;
+
 layout(binding = 1) uniform Uniforms_1 {
   float scale;
   float offsetX;
@@ -29,10 +31,12 @@ struct VertexOutput {
   vec4 Position;
   vec4 v_color;
 };
+
 struct tint_symbol_2 {
   vec4 position;
   vec4 color;
 };
+
 struct tint_symbol_3 {
   vec4 v_color;
   vec4 Position;
@@ -61,6 +65,7 @@ VertexOutput vert_main_inner(vec4 position, vec4 color) {
 struct tint_symbol_5 {
   vec4 v_color;
 };
+
 struct tint_symbol_6 {
   vec4 value;
 };
@@ -75,6 +80,8 @@ tint_symbol_3 vert_main(tint_symbol_2 tint_symbol_1) {
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec4 color;
 layout(location = 0) out vec4 v_color;
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.position = position;
@@ -87,10 +94,9 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:40: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' const float' (or there is no acceptable conversion)
-ERROR: 0:40: '' : compilation terminated 
+ERROR: 0:44: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' const float' (or there is no acceptable conversion)
+ERROR: 0:44: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -101,6 +107,7 @@ precision mediump float;
 struct Time {
   float value;
 };
+
 struct Uniforms {
   float scale;
   float offsetX;
@@ -108,21 +115,26 @@ struct Uniforms {
   float scalar;
   float scalarOffset;
 };
+
 struct VertexOutput {
   vec4 Position;
   vec4 v_color;
 };
+
 struct tint_symbol_2 {
   vec4 position;
   vec4 color;
 };
+
 struct tint_symbol_3 {
   vec4 v_color;
   vec4 Position;
 };
+
 struct tint_symbol_5 {
   vec4 v_color;
 };
+
 struct tint_symbol_6 {
   vec4 value;
 };
@@ -139,6 +151,7 @@ tint_symbol_6 frag_main(tint_symbol_5 tint_symbol_4) {
 }
 layout(location = 0) in vec4 v_color;
 layout(location = 0) out vec4 value;
+
 void main() {
   tint_symbol_5 inputs;
   inputs.v_color = v_color;
@@ -146,5 +159,4 @@ void main() {
   outputs = frag_main(inputs);
   value = outputs.value;
 }
-
 

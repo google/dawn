@@ -18,7 +18,6 @@ layout(binding = 0) buffer S_1 {
 layout(binding = 1) buffer S_2 {
   uint field0[];
 } x_7;
-
 void main_1() {
   uint x_21 = x_3.x;
   uint x_23 = x_6.field0[x_21];
@@ -40,12 +39,13 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.x_3_param);
   return;
 }
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.x_3_param = gl_GlobalInvocationID;
   tint_symbol(inputs);
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:5: '' : array size required 

@@ -101,7 +101,6 @@ shared mat2 m96;
 shared mat2 m97;
 shared mat2 m98;
 shared mat2 m99;
-
 struct tint_symbol_2 {
   uint idx;
 };
@@ -317,10 +316,11 @@ void tint_symbol(tint_symbol_2 tint_symbol_1) {
   tint_symbol_inner(tint_symbol_1.idx);
   return;
 }
+
+
 void main() {
   tint_symbol_2 inputs;
   inputs.idx = uint(gl_LocalInvocationIndex);
   tint_symbol(inputs);
 }
-
 

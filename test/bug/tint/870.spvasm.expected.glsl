@@ -7,6 +7,7 @@ struct sspp962805860buildInformationS {
   int essence;
   int orientation[6];
 };
+
 struct x_B4_BuildInformation {
   sspp962805860buildInformationS passthru;
 };
@@ -14,7 +15,6 @@ struct x_B4_BuildInformation {
 layout(binding = 2) buffer x_B4_BuildInformation_1 {
   sspp962805860buildInformationS passthru;
 } sspp962805860buildInformation;
-
 void main_1() {
   int orientation[6] = int[6](0, 0, 0, 0, 0, 0);
   int x_23[6] = sspp962805860buildInformation.passthru.orientation;
@@ -31,8 +31,8 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

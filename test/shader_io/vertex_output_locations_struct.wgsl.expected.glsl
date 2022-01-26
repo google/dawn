@@ -8,6 +8,7 @@ struct VertexOutputs {
   vec4 loc3;
   vec4 position;
 };
+
 struct tint_symbol_1 {
   int loc0;
   uint loc1;
@@ -35,6 +36,8 @@ layout(location = 0) flat out int loc0;
 layout(location = 1) flat out uint loc1;
 layout(location = 2) out float loc2;
 layout(location = 3) out vec4 loc3;
+
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
@@ -46,5 +49,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

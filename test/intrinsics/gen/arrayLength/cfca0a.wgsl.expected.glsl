@@ -3,11 +3,9 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-
 layout(binding = 1) buffer SB_RO_1 {
   uint arg_0[];
 } sb_ro;
-
 void arrayLength_cfca0a() {
   uint tint_symbol_2 = 0u;
   sb_ro.GetDimensions(tint_symbol_2);
@@ -30,6 +28,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -38,10 +38,9 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:11: 'GetDimensions' : no such field in structure 
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:9: 'GetDimensions' : no such field in structure 
+ERROR: 0:9: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -49,11 +48,9 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-
 layout(binding = 1) buffer SB_RO_1 {
   uint arg_0[];
 } sb_ro;
-
 void arrayLength_cfca0a() {
   uint tint_symbol_2 = 0u;
   sb_ro.GetDimensions(tint_symbol_2);
@@ -69,14 +66,14 @@ void fragment_main() {
   arrayLength_cfca0a();
   return;
 }
+
 void main() {
   fragment_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:11: 'GetDimensions' : no such field in structure 
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:9: 'GetDimensions' : no such field in structure 
+ERROR: 0:9: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -84,11 +81,9 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-
 layout(binding = 1) buffer SB_RO_1 {
   uint arg_0[];
 } sb_ro;
-
 void arrayLength_cfca0a() {
   uint tint_symbol_2 = 0u;
   sb_ro.GetDimensions(tint_symbol_2);
@@ -105,14 +100,14 @@ void compute_main() {
   arrayLength_cfca0a();
   return;
 }
+
 void main() {
   compute_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:11: 'GetDimensions' : no such field in structure 
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:9: 'GetDimensions' : no such field in structure 
+ERROR: 0:9: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

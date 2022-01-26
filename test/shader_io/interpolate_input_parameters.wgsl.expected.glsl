@@ -27,6 +27,7 @@ layout(location = 4) in float perspective_sample;
 layout(location = 5) in float linear_center;
 layout(location = 6) centroid in float linear_centroid;
 layout(location = 7) in float linear_sample;
+
 void main() {
   tint_symbol_3 inputs;
   inputs.none = none;
@@ -39,5 +40,4 @@ void main() {
   inputs.linear_sample = linear_sample;
   tint_symbol(inputs);
 }
-
 

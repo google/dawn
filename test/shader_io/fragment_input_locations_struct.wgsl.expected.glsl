@@ -7,6 +7,7 @@ struct FragmentInputs {
   float loc2;
   vec4 loc3;
 };
+
 struct tint_symbol_2 {
   int loc0;
   uint loc1;
@@ -30,6 +31,7 @@ layout(location = 0) flat in int loc0;
 layout(location = 1) flat in uint loc1;
 layout(location = 2) in float loc2;
 layout(location = 3) in vec4 loc3;
+
 void main() {
   tint_symbol_2 inputs;
   inputs.loc0 = loc0;
@@ -38,5 +40,4 @@ void main() {
   inputs.loc3 = loc3;
   tint_symbol(inputs);
 }
-
 

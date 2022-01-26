@@ -7,15 +7,18 @@ struct S1 {
   int c;
   int d;
 };
+
 struct S2 {
   int e;
   S1 f;
 };
+
 struct S3 {
   int g;
   S1 h;
   S2 i;
 };
+
 struct T {
   int a[2];
 };
@@ -59,8 +62,8 @@ void tint_symbol() {
   T aosoa_nonempty_with_expr[2] = T[2](tint_symbol_19, aosoa_nonempty[1]);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

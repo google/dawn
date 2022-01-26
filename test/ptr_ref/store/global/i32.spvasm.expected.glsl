@@ -2,7 +2,6 @@
 precision mediump float;
 
 int I = 0;
-
 void main_1() {
   I = 123;
   I = ((100 + 20) + 3);
@@ -14,8 +13,8 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

@@ -8,8 +8,8 @@ void f() {
   mat2 r = (a * b);
   return;
 }
+
 void main() {
   f();
 }
-
 

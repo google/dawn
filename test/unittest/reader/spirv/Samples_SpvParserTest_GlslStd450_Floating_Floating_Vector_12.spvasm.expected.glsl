@@ -35,10 +35,10 @@ void tint_symbol() {
   main_1();
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 
 Error parsing GLSL shader:
 ERROR: 0:27: 'rsqrt' : no matching overloaded function found 

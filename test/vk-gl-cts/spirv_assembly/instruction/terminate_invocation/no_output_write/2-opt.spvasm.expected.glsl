@@ -5,7 +5,6 @@ precision mediump float;
 
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 int out_data = 0;
-
 void main_1() {
   bool x_is_odd = false;
   bool y_is_odd = false;
@@ -20,9 +19,11 @@ void main_1() {
 struct main_out {
   int out_data_1;
 };
+
 struct tint_symbol_4 {
   vec4 tint_symbol_2;
 };
+
 struct tint_symbol_5 {
   int out_data_1;
 };
@@ -40,7 +41,9 @@ tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
   wrapper_result.out_data_1 = inner_result.out_data_1;
   return wrapper_result;
 }
+
 layout(location = 0) out int out_data_1;
+
 void main() {
   tint_symbol_4 inputs;
   inputs.tint_symbol_2 = gl_FragCoord;
@@ -49,10 +52,9 @@ void main() {
   out_data_1 = outputs.out_data_1;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:14: '|' :  wrong operand types: no operation '|' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:14: '' : compilation terminated 
+ERROR: 0:13: '|' :  wrong operand types: no operation '|' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

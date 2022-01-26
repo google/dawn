@@ -29,8 +29,8 @@ void tint_symbol() {
   S struct_let = S(0.0f);
   return;
 }
+
 void main() {
   tint_symbol();
 }
-
 

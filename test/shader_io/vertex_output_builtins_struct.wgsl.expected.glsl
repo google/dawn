@@ -4,6 +4,7 @@ precision mediump float;
 struct VertexOutputs {
   vec4 position;
 };
+
 struct tint_symbol_1 {
   vec4 position;
 };
@@ -19,6 +20,8 @@ tint_symbol_1 tint_symbol() {
   wrapper_result.position = inner_result.position;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol_1 outputs;
   outputs = tint_symbol();
@@ -26,5 +29,4 @@ void main() {
   gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
   gl_Position.y = -gl_Position.y;
 }
-
 

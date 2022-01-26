@@ -11,6 +11,7 @@ int f(int x) {
 struct tint_symbol_2 {
   ivec3 x;
 };
+
 struct tint_symbol_3 {
   int value;
 };
@@ -34,6 +35,7 @@ tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
 }
 layout(location = 1) flat in ivec3 x;
 layout(location = 2) out int value;
+
 void main() {
   tint_symbol_2 inputs;
   inputs.x = x;
@@ -41,5 +43,4 @@ void main() {
   outputs = tint_symbol(inputs);
   value = outputs.value;
 }
-
 

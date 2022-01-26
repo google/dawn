@@ -2,7 +2,6 @@
 precision mediump float;
 
 int a = 0;
-
 void uses_a() {
   a = (a + 1);
 }
@@ -13,16 +12,15 @@ void main1() {
   uses_a();
   return;
 }
+
 void main() {
   main1();
 }
-
 
 #version 310 es
 precision mediump float;
 
 int b = 0;
-
 void uses_b() {
   b = (b * 2);
 }
@@ -33,17 +31,16 @@ void main2() {
   uses_b();
   return;
 }
+
 void main() {
   main2();
 }
-
 
 #version 310 es
 precision mediump float;
 
 int a = 0;
 int b = 0;
-
 void uses_a() {
   a = (a + 1);
 }
@@ -73,10 +70,10 @@ void main3() {
   no_uses();
   return;
 }
+
 void main() {
   main3();
 }
-
 
 #version 310 es
 precision mediump float;
@@ -89,8 +86,8 @@ void main4() {
   no_uses();
   return;
 }
+
 void main() {
   main4();
 }
-
 

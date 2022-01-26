@@ -4,7 +4,6 @@ SKIP: FAILED
 precision mediump float;
 
 uniform highp samplerCube arg_0_1;
-
 void textureNumLevels_897aaf() {
   int res = textureQueryLevels(arg_0_1);;
 }
@@ -24,6 +23,8 @@ tint_symbol vertex_main() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+
 void main() {
   tint_symbol outputs;
   outputs = vertex_main();
@@ -32,11 +33,10 @@ void main() {
   gl_Position.y = -gl_Position.y;
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:6: '=' :  cannot convert from ' const float' to ' temp highp int'
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -45,7 +45,6 @@ ERROR: 3 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp samplerCube arg_0_1;
-
 void textureNumLevels_897aaf() {
   int res = textureQueryLevels(arg_0_1);;
 }
@@ -58,15 +57,15 @@ void fragment_main() {
   textureNumLevels_897aaf();
   return;
 }
+
 void main() {
   fragment_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump int'
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:6: '=' :  cannot convert from ' const float' to ' temp mediump int'
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -75,7 +74,6 @@ ERROR: 3 compilation errors.  No code generated.
 precision mediump float;
 
 uniform highp samplerCube arg_0_1;
-
 void textureNumLevels_897aaf() {
   int res = textureQueryLevels(arg_0_1);;
 }
@@ -89,15 +87,15 @@ void compute_main() {
   textureNumLevels_897aaf();
   return;
 }
+
 void main() {
   compute_main();
 }
 
-
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:6: '=' :  cannot convert from ' const float' to ' temp highp int'
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
