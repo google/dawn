@@ -259,6 +259,16 @@ class VertexFormatTest : public DawnTest {
                 return bitcast<f32>(fp32u);
             }
 
+            // NaN defination in IEEE 754-1985 is :
+            //   - sign = either 0 or 1.
+            //   - biased exponent = all 1 bits.
+            //   - fraction = anything except all 0 bits (since all 0 bits represents infinity).
+            // https://en.wikipedia.org/wiki/IEEE_754-1985#Representation_of_non-numbers
+            fn isNaNCustom(val: f32) -> bool {
+               let floatToUint: u32 = bitcast<u32>(val);
+               return (floatToUint & 0x7fffffffu) > 0x7f800000u;
+            }
+
             struct VertexOut {
                 @location(0) color : vec4<f32>;
                 @builtin(position) position : vec4<f32>;
@@ -330,8 +340,8 @@ class VertexFormatTest : public DawnTest {
                 // TODO(shaobo.yan@intel.com) : a difference of 8 ULPs is allowed in this test
                 // because it is required on MacbookPro 11.5,AMD Radeon HD 8870M(on macOS 10.13.6),
                 // but that it might be possible to tighten.
-                vs << "    if (isNan(" << expectedVal << ")) {\n";
-                vs << "       success = success && isNan(" << testVal << ");\n";
+                vs << "    if (isNaNCustom(" << expectedVal << ")) {\n";
+                vs << "       success = success && isNaNCustom(" << testVal << ");\n";
                 vs << "    } else {\n";
                 vs << "        let testValFloatToUint : u32 = bitcast<u32>(" << testVal << ");\n";
                 vs << "        let expectedValFloatToUint : u32 = bitcast<u32>(" << expectedVal
