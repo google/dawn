@@ -574,6 +574,9 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
     // on some Intel drivers.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
+    // TODO(crbug.com/dawn/1273): Fails on Win11 with D3D12 debug layer and full validation
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
     // Create a stencil texture
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;

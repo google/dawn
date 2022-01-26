@@ -740,6 +740,9 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
     DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
         dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
+    // TODO(crbug.com/dawn/1255): Fails on Win11 with D3D12 debug layer and full validation
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
     // Create a solid filled texture.
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
