@@ -128,11 +128,12 @@ namespace dawn::native::d3d12 {
 
         StagingDescriptorAllocator* GetDepthStencilViewAllocator() const;
 
-        Ref<TextureBase> CreateExternalTexture(const TextureDescriptor* descriptor,
-                                               ComPtr<ID3D12Resource> d3d12Texture,
-                                               Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-                                               bool isSwapChainTexture,
-                                               bool isInitialized);
+        Ref<TextureBase> CreateD3D12ExternalTexture(
+            const TextureDescriptor* descriptor,
+            ComPtr<ID3D12Resource> d3d12Texture,
+            Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
+            bool isSwapChainTexture,
+            bool isInitialized);
 
         ComPtr<ID3D11On12Device> GetOrCreateD3D11on12Device();
 

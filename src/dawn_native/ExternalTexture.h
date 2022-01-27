@@ -26,6 +26,14 @@ namespace dawn::native {
 
     class TextureViewBase;
 
+    struct ExternalTextureParams {
+        uint32_t numPlanes;
+        float vr;
+        float vg;
+        float ub;
+        float ug;
+    };
+
     MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
                                                  const ExternalTextureDescriptor* descriptor);
 
@@ -54,7 +62,10 @@ namespace dawn::native {
         enum class ExternalTextureState { Alive, Destroyed };
         ExternalTextureBase(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
         ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
+        Ref<BufferBase> mParamsBuffer;
         std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat> mTextureViews;
+
         ExternalTextureState mState;
     };
 }  // namespace dawn::native

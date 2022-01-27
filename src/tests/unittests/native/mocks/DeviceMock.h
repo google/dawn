@@ -68,6 +68,10 @@ namespace dawn::native {
                     CreateUninitializedComputePipelineImpl,
                     (const ComputePipelineDescriptor*),
                     (override));
+        MOCK_METHOD(ResultOrError<Ref<ExternalTextureBase>>,
+                    CreateExternalTextureImpl,
+                    (const ExternalTextureDescriptor*),
+                    (override));
         MOCK_METHOD(ResultOrError<Ref<PipelineLayoutBase>>,
                     CreatePipelineLayoutImpl,
                     (const PipelineLayoutDescriptor*),

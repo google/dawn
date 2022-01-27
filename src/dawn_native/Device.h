@@ -206,8 +206,7 @@ namespace dawn::native {
             const ComputePipelineDescriptor* descriptor,
             WGPUCreateComputePipelineAsyncCallback callback,
             void* userdata);
-        ResultOrError<Ref<ExternalTextureBase>> CreateExternalTexture(
-            const ExternalTextureDescriptor* descriptor);
+
         ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayout(
             const PipelineLayoutDescriptor* descriptor);
         ResultOrError<Ref<QuerySetBase>> CreateQuerySet(const QuerySetDescriptor* descriptor);
@@ -394,6 +393,8 @@ namespace dawn::native {
             PipelineCompatibilityToken pipelineCompatibilityToken) = 0;
         virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(
             const BufferDescriptor* descriptor) = 0;
+        virtual ResultOrError<Ref<ExternalTextureBase>> CreateExternalTextureImpl(
+            const ExternalTextureDescriptor* descriptor);
         virtual ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(

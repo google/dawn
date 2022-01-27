@@ -106,7 +106,7 @@ namespace dawn::native::d3d12 {
             return nullptr;
         }
 
-        Ref<TextureBase> texture = backendDevice->CreateExternalTexture(
+        Ref<TextureBase> texture = backendDevice->CreateD3D12ExternalTexture(
             &textureDescriptor, mD3D12Resource, std::move(d3d11on12Resource),
             descriptor->isSwapChainTexture, descriptor->isInitialized);
 

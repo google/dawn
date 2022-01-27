@@ -1152,7 +1152,7 @@ namespace dawn::native {
     ExternalTextureBase* DeviceBase::APICreateExternalTexture(
         const ExternalTextureDescriptor* descriptor) {
         Ref<ExternalTextureBase> result = nullptr;
-        if (ConsumedError(CreateExternalTexture(descriptor), &result,
+        if (ConsumedError(CreateExternalTextureImpl(descriptor), &result,
                           "calling %s.CreateExternalTexture(%s).", this, descriptor)) {
             return ExternalTextureBase::MakeError(this);
         }
@@ -1418,7 +1418,7 @@ namespace dawn::native {
         return GetOrCreatePipelineLayout(descriptor);
     }
 
-    ResultOrError<Ref<ExternalTextureBase>> DeviceBase::CreateExternalTexture(
+    ResultOrError<Ref<ExternalTextureBase>> DeviceBase::CreateExternalTextureImpl(
         const ExternalTextureDescriptor* descriptor) {
         if (IsValidationEnabled()) {
             DAWN_TRY_CONTEXT(ValidateExternalTextureDescriptor(this, descriptor), "validating %s",

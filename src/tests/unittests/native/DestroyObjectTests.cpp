@@ -285,13 +285,18 @@ namespace dawn::native { namespace {
         EXPECT_FALSE(externalTextureMock.IsAlive());
     }
 
-    // We can use an actual ExternalTexture object to test the implicit case.
     TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
-        ExternalTextureDescriptor desc = {};
-        Ref<ExternalTextureBase> externalTexture;
-        DAWN_ASSERT_AND_ASSIGN(externalTexture, mDevice.CreateExternalTexture(&desc));
+        ExternalTextureMock* externalTextureMock = new ExternalTextureMock(&mDevice);
+        EXPECT_CALL(*externalTextureMock, DestroyImpl).Times(1);
+        {
+            ExternalTextureDescriptor desc = {};
+            Ref<ExternalTextureBase> externalTexture;
+            EXPECT_CALL(mDevice, CreateExternalTextureImpl)
+                .WillOnce(Return(ByMove(AcquireRef(externalTextureMock))));
+            DAWN_ASSERT_AND_ASSIGN(externalTexture, mDevice.CreateExternalTextureImpl(&desc));
 
-        EXPECT_TRUE(externalTexture->IsAlive());
+            EXPECT_TRUE(externalTexture->IsAlive());
+        }
     }
 
     TEST_F(DestroyObjectTests, PipelineLayoutExplicit) {
@@ -552,6 +557,7 @@ namespace dawn::native { namespace {
         BufferMock* bufferMock = new BufferMock(&mDevice, BufferBase::BufferState::Unmapped);
         CommandBufferMock* commandBufferMock = new CommandBufferMock(&mDevice);
         ComputePipelineMock* computePipelineMock = new ComputePipelineMock(&mDevice);
+        ExternalTextureMock* externalTextureMock = new ExternalTextureMock(&mDevice);
         PipelineLayoutMock* pipelineLayoutMock = new PipelineLayoutMock(&mDevice);
         QuerySetMock* querySetMock = new QuerySetMock(&mDevice);
         RenderPipelineMock* renderPipelineMock = new RenderPipelineMock(&mDevice);
@@ -571,6 +577,7 @@ namespace dawn::native { namespace {
             EXPECT_CALL(*bindGroupMock, DestroyImpl).Times(1);
             EXPECT_CALL(*bindGroupLayoutMock, DestroyImpl).Times(1);
             EXPECT_CALL(*shaderModuleMock, DestroyImpl).Times(1);
+            EXPECT_CALL(*externalTextureMock, DestroyImpl).Times(1);
             EXPECT_CALL(*textureViewMock, DestroyImpl).Times(1);
             EXPECT_CALL(*textureMock, DestroyImpl).Times(1);
             EXPECT_CALL(*querySetMock, DestroyImpl).Times(1);
@@ -638,7 +645,9 @@ namespace dawn::native { namespace {
         Ref<ExternalTextureBase> externalTexture;
         {
             ExternalTextureDescriptor desc = {};
-            DAWN_ASSERT_AND_ASSIGN(externalTexture, mDevice.CreateExternalTexture(&desc));
+            EXPECT_CALL(mDevice, CreateExternalTextureImpl)
+                .WillOnce(Return(ByMove(AcquireRef(externalTextureMock))));
+            DAWN_ASSERT_AND_ASSIGN(externalTexture, mDevice.CreateExternalTextureImpl(&desc));
             EXPECT_TRUE(externalTexture->IsAlive());
         }
 
