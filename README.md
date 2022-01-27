@@ -1,4 +1,4 @@
-![Dawn's logo: a sun rising behind a stylized mountain inspired by the WebGPU logo. The text "Dawn" is written below it.](docs/logo/dawn_logo.png "Dawn's logo")
+![Dawn's logo: a sun rising behind a stylized mountain inspired by the WebGPU logo. The text "Dawn" is written below it.](docs/imgs/dawn_logo.png "Dawn's logo")
 
 # Dawn, a WebGPU implementation
 
@@ -29,13 +29,13 @@ Helpful links:
 
 Developer documentation:
 
- - [Dawn overview](docs/overview.md)
- - [Building Dawn](docs/building.md)
- - [Contributing to Dawn](docs/contributing.md)
- - [Testing Dawn](docs/testing.md)
- - [Debugging Dawn](docs/debugging.md)
- - [Dawn's infrastructure](docs/infra.md)
- - [Dawn errors](docs/errors.md)
+ - [Dawn overview](docs/dawn/overview.md)
+ - [Building Dawn](docs/dawn/building.md)
+ - [Contributing to Dawn](docs/dawn/contributing.md)
+ - [Testing Dawn](docs/dawn/testing.md)
+ - [Debugging Dawn](docs/dawn/debugging.md)
+ - [Dawn's infrastructure](docs/dawn/infra.md)
+ - [Dawn errors](docs/dawn/errors.md)
 
 User documentation: (TODO, figure out what overlaps with the webgpu.h docs)
 

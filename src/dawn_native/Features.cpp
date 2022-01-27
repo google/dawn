@@ -76,7 +76,7 @@ namespace dawn::native {
               {"dawn-internal-usages",
                "Add internal usages to resources to affect how the texture is allocated, but not "
                "frontend validation. Other internal commands may access this usage.",
-               "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/features/"
+               "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
                "dawn_internal_usages.md"},
               &WGPUDeviceProperties::dawnInternalUsages},
              {Feature::MultiPlanarFormats,
@@ -86,7 +86,7 @@ namespace dawn::native {
               &WGPUDeviceProperties::multiPlanarFormats},
              {Feature::DawnNative,
               {"dawn-native", "WebGPU is running on top of dawn_native.",
-               "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/features/"
+               "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
                "dawn_native.md"},
               &WGPUDeviceProperties::dawnNative}}};
 

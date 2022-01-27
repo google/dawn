@@ -8,4 +8,4 @@ kainino@chromium.org
 
 per-file dawn.json=kainino@chromium.org
 per-file DEPS=*
-per-file README.md=file://docs/OWNERS
+per-file README.md=file://docs/dawn/OWNERS
