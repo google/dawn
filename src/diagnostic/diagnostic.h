@@ -15,6 +15,7 @@
 #ifndef SRC_DIAGNOSTIC_DIAGNOSTIC_H_
 #define SRC_DIAGNOSTIC_DIAGNOSTIC_H_
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -87,6 +88,8 @@ class List {
   /// Move constructor. Moves the diagnostics from `list` into this list.
   /// @param list the list of diagnostics to move into this list.
   List(List&& list);
+
+  /// Destructor
   ~List();
 
   /// Assignment operator. Copies the diagnostics from `list` into this list.
@@ -205,6 +208,13 @@ class List {
     add(std::move(ice));
   }
 
+  /// Adds the file to the list of files owned by this diagnostic list.
+  /// When this list is destructed, all the owned files will be deleted.
+  /// @param file the file that this List should own
+  void own_file(const Source::File* file) {
+    owned_files_.emplace_back(std::unique_ptr<const Source::File>(file));
+  }
+
   /// @returns true iff the diagnostic list contains errors diagnostics (or of
   /// higher severity).
   bool contains_errors() const { return error_count_ > 0; }
@@ -222,6 +232,7 @@ class List {
 
  private:
   std::vector<Diagnostic> entries_;
+  std::vector<std::unique_ptr<const Source::File>> owned_files_;
   size_t error_count_ = 0;
 };
 

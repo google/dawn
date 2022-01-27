@@ -14,6 +14,8 @@
 
 #include "src/diagnostic/diagnostic.h"
 
+#include <unordered_map>
+
 #include "src/diagnostic/formatter.h"
 
 namespace tint {
@@ -21,13 +23,39 @@ namespace diag {
 
 List::List() = default;
 List::List(std::initializer_list<Diagnostic> list) : entries_(list) {}
-List::List(const List&) = default;
-List::List(List&&) = default;
+List::List(const List& rhs) {
+  *this = rhs;
+}
+
+List::List(List&& rhs) = default;
 
 List::~List() = default;
 
-List& List::operator=(const List&) = default;
-List& List::operator=(List&&) = default;
+List& List::operator=(const List& rhs) {
+  // Create copies of any of owned files, maintaining a map of rhs-file to
+  // new-file.
+  std::unordered_map<const Source::File*, const Source::File*> files;
+  owned_files_.reserve(rhs.owned_files_.size());
+  files.reserve(rhs.owned_files_.size());
+  for (auto& rhs_file : rhs.owned_files_) {
+    auto file = std::make_unique<Source::File>(*rhs_file);
+    files.emplace(rhs_file.get(), file.get());
+    owned_files_.emplace_back(std::move(file));
+  }
+
+  // Copy the diagnostic entries, then fix up pointers to the file copies.
+  entries_ = rhs.entries_;
+  for (auto& entry : entries_) {
+    if (auto it = files.find(entry.source.file); it != files.end()) {
+      entry.source.file = it->second;
+    }
+  }
+
+  error_count_ = rhs.error_count_;
+  return *this;
+}
+
+List& List::operator=(List&& rhs) = default;
 
 std::string List::str() const {
   diag::Formatter::Style style;

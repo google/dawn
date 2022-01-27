@@ -142,12 +142,12 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
   std::vector<TextAndColor> prefix;
   prefix.reserve(6);
 
-  if (style_.print_file && !src.file_path.empty()) {
+  if (style_.print_file && src.file != nullptr) {
     if (rng.begin.line > 0) {
-      prefix.emplace_back(TextAndColor{src.file_path + ":" + to_str(rng.begin),
+      prefix.emplace_back(TextAndColor{src.file->path + ":" + to_str(rng.begin),
                                        Color::kDefault});
     } else {
-      prefix.emplace_back(TextAndColor{src.file_path, Color::kDefault});
+      prefix.emplace_back(TextAndColor{src.file->path, Color::kDefault});
     }
   } else if (rng.begin.line > 0) {
     prefix.emplace_back(TextAndColor{to_str(rng.begin), Color::kDefault});
@@ -190,15 +190,15 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
   }
   state << diag.message;
 
-  if (style_.print_line && src.file_content != nullptr && rng.begin.line > 0) {
+  if (style_.print_line && src.file && rng.begin.line > 0) {
     state.newline();
     state.set_style({Color::kDefault, false});
 
     for (size_t line_num = rng.begin.line;
          (line_num <= rng.end.line) &&
-         (line_num <= src.file_content->lines.size());
+         (line_num <= src.file->content.lines.size());
          line_num++) {
-      auto& line = src.file_content->lines[line_num - 1];
+      auto& line = src.file->content.lines[line_num - 1];
       auto line_len = line.size();
 
       for (auto c : line) {

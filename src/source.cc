@@ -68,8 +68,8 @@ Source::File::~File() = default;
 std::ostream& operator<<(std::ostream& out, const Source& source) {
   auto rng = source.range;
 
-  if (!source.file_path.empty()) {
-    out << source.file_path << ":";
+  if (source.file) {
+    out << source.file->path << ":";
   }
   if (rng.begin.line) {
     out << rng.begin.line << ":";
@@ -77,7 +77,7 @@ std::ostream& operator<<(std::ostream& out, const Source& source) {
       out << rng.begin.column;
     }
 
-    if (source.file_content) {
+    if (source.file) {
       out << std::endl << std::endl;
 
       auto repeat = [&](char c, size_t n) {
@@ -87,10 +87,10 @@ std::ostream& operator<<(std::ostream& out, const Source& source) {
       };
 
       for (size_t line = rng.begin.line; line <= rng.end.line; line++) {
-        if (line < source.file_content->lines.size() + 1) {
-          auto len = source.file_content->lines[line - 1].size();
+        if (line < source.file->content.lines.size() + 1) {
+          auto len = source.file->content.lines[line - 1].size();
 
-          out << source.file_content->lines[line - 1];
+          out << source.file->content.lines[line - 1];
 
           out << std::endl;
 

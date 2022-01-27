@@ -215,6 +215,7 @@ tint_unittests_source_set("tint_unittests_ast_src") {
 
 tint_unittests_source_set("tint_unittests_diagnostic_src") {
   sources = [
+    "../src/diagnostic/diagnostic_test.cc",
     "../src/diagnostic/formatter_test.cc",
     "../src/diagnostic/printer_test.cc",
   ]

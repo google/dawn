@@ -40,6 +40,8 @@ endfunction()
 add_library(tint_diagnostic_utils
   debug.cc
   debug.h
+  source.h
+  source.cc
   diagnostic/diagnostic.cc
   diagnostic/diagnostic.h
   diagnostic/formatter.cc
@@ -286,8 +288,6 @@ set(TINT_LIB_SRCS
   sem/struct.cc
   sem/type_mappings.h
   sem/variable.cc
-  source.cc
-  source.h
   symbol_table.cc
   symbol_table.h
   symbol.cc
@@ -686,6 +686,7 @@ if(TINT_BUILD_TESTS)
     clone_context_test.cc
     debug_test.cc
     demangler_test.cc
+    diagnostic/diagnostic_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
     intrinsic_table_test.cc

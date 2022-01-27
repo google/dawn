@@ -255,7 +255,7 @@ ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
 ParserImpl::VarDeclInfo::~VarDeclInfo() = default;
 
 ParserImpl::ParserImpl(Source::File const* file)
-    : lexer_(std::make_unique<Lexer>(file->path, &file->content)) {}
+    : lexer_(std::make_unique<Lexer>(file)) {}
 
 ParserImpl::~ParserImpl() = default;
 
@@ -331,7 +331,7 @@ void ParserImpl::translation_unit() {
     }
     expect_global_decl();
     if (builder_.Diagnostics().error_count() >= max_errors_) {
-      add_error(Source{{}, p.source().file_path},
+      add_error(Source{{}, p.source().file},
                 "stopping after " + std::to_string(max_errors_) + " errors");
       break;
     }

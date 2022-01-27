@@ -32,7 +32,8 @@ InternalCompilerError::InternalCompilerError(const char* file,
     : file_(file), line_(line), system_(system), diagnostics_(diagnostics) {}
 
 InternalCompilerError::~InternalCompilerError() {
-  Source source{Source::Range{Source::Location{line_}}, file_};
+  Source source{Source::Range{{line_}}, new Source::File{file_, ""}};
+  diagnostics_.own_file(source.file);
   diagnostics_.add_ice(system_, msg_.str(), source);
 
   if (ice_reporter) {

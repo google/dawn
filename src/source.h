@@ -58,10 +58,16 @@ class Source {
     inline File(const std::string& p, const std::string& c)
         : path(p), content(c) {}
 
+    /// Copy constructor
+    File(const File&) = default;
+
+    /// Move constructor
+    File(File&&) = default;
+
     /// Destructor
     ~File();
 
-    /// file path (optional)
+    /// file path
     const std::string path;
     /// file content
     const FileContent content;
@@ -152,45 +158,25 @@ class Source {
 
   /// Constructs the Source with the Range `rng` and File `file`
   /// @param rng the source range
-  /// @param file the source file
-  inline Source(const Range& rng, File const* file)
-      : range(rng), file_path(file->path), file_content(&file->content) {}
-
-  /// Constructs the Source with the Range `rng`, file path `path` and content
-  /// `content`
-  /// @param rng the source range
-  /// @param path the source file path
-  /// @param content the source file content
-  inline Source(const Range& rng,
-                const std::string& path,
-                const FileContent* content = nullptr)
-      : range(rng), file_path(path), file_content(content) {}
+  /// @param f the source file
+  inline Source(const Range& rng, File const* f) : range(rng), file(f) {}
 
   /// @returns a Source that points to the begin range of this Source.
-  inline Source Begin() const {
-    return Source(Range{range.begin}, file_path, file_content);
-  }
+  inline Source Begin() const { return Source(Range{range.begin}, file); }
 
   /// @returns a Source that points to the end range of this Source.
-  inline Source End() const {
-    return Source(Range{range.end}, file_path, file_content);
-  }
+  inline Source End() const { return Source(Range{range.end}, file); }
 
   /// Return a column-shifted Source
   /// @param n the number of characters to shift by
   /// @returns a Source with the range's columns shifted by `n`
-  inline Source operator+(size_t n) const {
-    return Source(range + n, file_path, file_content);
-  }
+  inline Source operator+(size_t n) const { return Source(range + n, file); }
 
   /// Returns true of `this` Source is lexicographically less than `rhs`
   /// @param rhs source to compare against
   /// @returns true if `this` < `rhs`
   inline bool operator<(const Source& rhs) {
-    if (file_path != rhs.file_path) {
-      return false;
-    }
-    if (file_content != rhs.file_content) {
+    if (file != rhs.file) {
       return false;
     }
     return range.begin < rhs.range.begin;
@@ -202,16 +188,13 @@ class Source {
   /// @param end the end source of the range
   /// @returns the combined source
   inline static Source Combine(const Source& start, const Source& end) {
-    return Source(Source::Range(start.range.begin, end.range.end),
-                  start.file_path, start.file_content);
+    return Source(Source::Range(start.range.begin, end.range.end), start.file);
   }
 
-  /// range is the span of text this source refers to in #file_path
+  /// range is the span of text this source refers to in #file
   Range range;
-  /// file is the optional file path this source refers to
-  std::string file_path;
   /// file is the optional source content this source refers to
-  const FileContent* file_content = nullptr;
+  const File* file = nullptr;
 };
 
 /// Writes the Source::Location to the std::ostream.
