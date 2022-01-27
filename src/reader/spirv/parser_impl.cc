@@ -1483,7 +1483,6 @@ bool ParserImpl::EmitModuleScopeVariables() {
       case ast::StorageClass::kUniform:
       case ast::StorageClass::kUniformConstant:
       case ast::StorageClass::kStorage:
-      case ast::StorageClass::kImage:
       case ast::StorageClass::kWorkgroup:
       case ast::StorageClass::kPrivate:
         break;

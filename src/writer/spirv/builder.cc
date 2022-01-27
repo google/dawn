@@ -4219,8 +4219,6 @@ SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
       return SpvStorageClassUniformConstant;
     case ast::StorageClass::kStorage:
       return SpvStorageClassStorageBuffer;
-    case ast::StorageClass::kImage:
-      return SpvStorageClassImage;
     case ast::StorageClass::kPrivate:
       return SpvStorageClassPrivate;
     case ast::StorageClass::kFunction:

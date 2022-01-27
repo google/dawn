@@ -971,8 +971,6 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     return {Token::Type::kI32, source, "i32"};
   if (str == "if")
     return {Token::Type::kIf, source, "if"};
-  if (str == "image")
-    return {Token::Type::kImage, source, "image"};
   if (str == "import")
     return {Token::Type::kImport, source, "import"};
   if (str == "let")

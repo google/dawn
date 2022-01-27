@@ -738,7 +738,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"function", Token::Type::kFunction},
         TokenData{"i32", Token::Type::kI32},
         TokenData{"if", Token::Type::kIf},
-        TokenData{"image", Token::Type::kImage},
         TokenData{"import", Token::Type::kImport},
         TokenData{"let", Token::Type::kLet},
         TokenData{"loop", Token::Type::kLoop},

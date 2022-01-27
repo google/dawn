@@ -153,8 +153,6 @@ std::string_view Token::TypeToName(Type type) {
       return "i32";
     case Token::Type::kIf:
       return "if";
-    case Token::Type::kImage:
-      return "image";
     case Token::Type::kImport:
       return "import";
     case Token::Type::kLet:

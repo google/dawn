@@ -30,7 +30,6 @@ enum class StorageClass {
   kWorkgroup,
   kUniformConstant,
   kStorage,
-  kImage,
   kPrivate,
   kFunction
 };

@@ -52,8 +52,6 @@ ast::StorageClass EnumConverter::ToStorageClass(const SpvStorageClass sc) {
       return ast::StorageClass::kNone;
     case SpvStorageClassStorageBuffer:
       return ast::StorageClass::kStorage;
-    case SpvStorageClassImage:
-      return ast::StorageClass::kImage;
     case SpvStorageClassPrivate:
       return ast::StorageClass::kPrivate;
     case SpvStorageClassFunction:

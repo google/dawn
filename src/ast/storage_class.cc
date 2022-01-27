@@ -35,8 +35,6 @@ const char* ToString(StorageClass sc) {
       return "uniform_constant";
     case StorageClass::kStorage:
       return "storage";
-    case StorageClass::kImage:
-      return "image";
     case StorageClass::kPrivate:
       return "private";
     case StorageClass::kFunction:

@@ -58,8 +58,6 @@ INSTANTIATE_TEST_SUITE_P(
                             ast::Access::kUndefined},
         VariableStorageData{"storage_buffer", ast::StorageClass::kStorage,
                             ast::Access::kUndefined},
-        VariableStorageData{"image", ast::StorageClass::kImage,
-                            ast::Access::kUndefined},
         VariableStorageData{"private", ast::StorageClass::kPrivate,
                             ast::Access::kUndefined},
         VariableStorageData{"function", ast::StorageClass::kFunction,

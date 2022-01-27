@@ -50,7 +50,6 @@ INSTANTIATE_TEST_SUITE_P(
         StorageClassData{"workgroup", ast::StorageClass::kWorkgroup},
         StorageClassData{"storage", ast::StorageClass::kStorage},
         StorageClassData{"storage_buffer", ast::StorageClass::kStorage},
-        StorageClassData{"image", ast::StorageClass::kImage},
         StorageClassData{"private", ast::StorageClass::kPrivate},
         StorageClassData{"function", ast::StorageClass::kFunction}));
 

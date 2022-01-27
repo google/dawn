@@ -823,7 +823,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{ast::StorageClass::kWorkgroup, true},
                     TestParams{ast::StorageClass::kUniformConstant, false},
                     TestParams{ast::StorageClass::kStorage, false},
-                    TestParams{ast::StorageClass::kImage, false},
                     TestParams{ast::StorageClass::kPrivate, true},
                     TestParams{ast::StorageClass::kFunction, true}));
 

@@ -163,8 +163,6 @@ class Token {
     kI32,
     /// A 'if'
     kIf,
-    /// A 'image'
-    kImage,
     /// A 'import'
     kImport,
     /// A 'let'

@@ -1156,7 +1156,6 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
 //  | UNIFORM
 //  | WORKGROUP
 //  | STORAGE
-//  | IMAGE
 //  | PRIVATE
 //  | FUNCTION
 Expect<ast::StorageClass> ParserImpl::expect_storage_class(
@@ -1171,9 +1170,6 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
   if (match(Token::Type::kStorage))
     return {ast::StorageClass::kStorage, source};
-
-  if (match(Token::Type::kImage))
-    return {ast::StorageClass::kImage, source};
 
   if (match(Token::Type::kPrivate))
     return {ast::StorageClass::kPrivate, source};
