@@ -254,19 +254,25 @@ std::string_view Token::TypeToName(Type type) {
 
 Token::Token() : type_(Type::kUninitialized) {}
 
-Token::Token(Type type, const Source& source, const std::string& val)
-    : type_(type), source_(source), val_str_(val) {}
+Token::Token(Type type, const Source& source, const std::string_view& view)
+    : type_(type), source_(source), value_(view) {}
+
+Token::Token(Type type, const Source& source, const std::string& str)
+    : type_(type), source_(source), value_(str) {}
+
+Token::Token(Type type, const Source& source, const char* str)
+    : type_(type), source_(source), value_(std::string_view(str)) {}
 
 Token::Token(const Source& source, uint32_t val)
-    : type_(Type::kUintLiteral), source_(source), val_uint_(val) {}
+    : type_(Type::kUintLiteral), source_(source), value_(val) {}
 
 Token::Token(const Source& source, int32_t val)
-    : type_(Type::kSintLiteral), source_(source), val_int_(val) {}
+    : type_(Type::kSintLiteral), source_(source), value_(val) {}
 
 Token::Token(const Source& source, float val)
-    : type_(Type::kFloatLiteral), source_(source), val_float_(val) {}
+    : type_(Type::kFloatLiteral), source_(source), value_(val) {}
 
-Token::Token(Type type, const Source& source) : Token(type, source, "") {}
+Token::Token(Type type, const Source& source) : type_(type), source_(source) {}
 
 Token::Token(Token&&) = default;
 
@@ -274,31 +280,47 @@ Token::Token(const Token&) = default;
 
 Token::~Token() = default;
 
-Token& Token::operator=(const Token&) = default;
+Token& Token::operator=(const Token& rhs) = default;
+
+bool Token::operator==(std::string_view ident) {
+  if (type_ != Type::kIdentifier) {
+    return false;
+  }
+  if (auto* view = std::get_if<std::string_view>(&value_)) {
+    return *view == ident;
+  }
+  return std::get<std::string>(value_) == ident;
+}
 
 std::string Token::to_str() const {
-  if (type_ == Type::kFloatLiteral) {
-    return std::to_string(val_float_);
+  switch (type_) {
+    case Type::kFloatLiteral:
+      return std::to_string(std::get<float>(value_));
+    case Type::kSintLiteral:
+      return std::to_string(std::get<int32_t>(value_));
+    case Type::kUintLiteral:
+      return std::to_string(std::get<uint32_t>(value_));
+    case Type::kIdentifier:
+    case Type::kError:
+      if (auto* view = std::get_if<std::string_view>(&value_)) {
+        return std::string(*view);
+      }
+      return std::get<std::string>(value_);
+    default:
+      return "";
   }
-  if (type_ == Type::kSintLiteral) {
-    return std::to_string(val_int_);
-  }
-  if (type_ == Type::kUintLiteral) {
-    return std::to_string(val_uint_);
-  }
-  return val_str_;
 }
 
 float Token::to_f32() const {
-  return val_float_;
+  return std::get<float>(value_);
 }
 
 uint32_t Token::to_u32() const {
-  return val_uint_;
+  return std::get<uint32_t>(value_);
 }
 
 int32_t Token::to_i32() const {
-  return val_int_;
+  return std::get<int32_t>(value_);
 }
 
 }  // namespace wgsl

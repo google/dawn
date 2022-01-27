@@ -125,28 +125,22 @@ const char kStrideDecoration[] = "stride";
 const char kWorkgroupSizeDecoration[] = "workgroup_size";
 
 bool is_decoration(Token t) {
-  if (!t.IsIdentifier()) {
-    return false;
-  }
-
-  auto s = t.to_str();
-  return s == kAlignDecoration || s == kBindingDecoration ||
-         s == kBlockDecoration || s == kBuiltinDecoration ||
-         s == kGroupDecoration || s == kInterpolateDecoration ||
-         s == kLocationDecoration || s == kOverrideDecoration ||
-         s == kSizeDecoration || s == kStageDecoration ||
-         s == kStrideDecoration || s == kWorkgroupSizeDecoration;
+  return t == kAlignDecoration || t == kBindingDecoration ||
+         t == kBlockDecoration || t == kBuiltinDecoration ||
+         t == kGroupDecoration || t == kInterpolateDecoration ||
+         t == kLocationDecoration || t == kOverrideDecoration ||
+         t == kSizeDecoration || t == kStageDecoration ||
+         t == kStrideDecoration || t == kWorkgroupSizeDecoration;
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
 bool is_reserved(Token t) {
-  auto s = t.to_str();
-  return s == "asm" || s == "bf16" || s == "const" || s == "do" ||
-         s == "enum" || s == "f16" || s == "f64" || s == "handle" ||
-         s == "i8" || s == "i16" || s == "i64" || s == "mat" ||
-         s == "premerge" || s == "regardless" || s == "typedef" || s == "u8" ||
-         s == "u16" || s == "u64" || s == "unless" || s == "using" ||
-         s == "vec" || s == "void" || s == "while";
+  return t == "asm" || t == "bf16" || t == "const" || t == "do" ||
+         t == "enum" || t == "f16" || t == "f64" || t == "handle" ||
+         t == "i8" || t == "i16" || t == "i64" || t == "mat" ||
+         t == "premerge" || t == "regardless" || t == "typedef" || t == "u8" ||
+         t == "u16" || t == "u64" || t == "unless" || t == "using" ||
+         t == "vec" || t == "void" || t == "while";
 }
 
 /// Enter-exit counters for block token types.
@@ -760,59 +754,56 @@ Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
 //  | 'rgba32sint'
 //  | 'rgba32float'
 Expect<ast::TexelFormat> ParserImpl::expect_texel_format(std::string_view use) {
-  auto tok = next();
-  if (tok.IsIdentifier()) {
-    auto s = tok.to_str();
-    if (s == "rgba8unorm") {
-      return ast::TexelFormat::kRgba8Unorm;
-    }
-    if (s == "rgba8snorm") {
-      return ast::TexelFormat::kRgba8Snorm;
-    }
-    if (s == "rgba8uint") {
-      return ast::TexelFormat::kRgba8Uint;
-    }
-    if (s == "rgba8sint") {
-      return ast::TexelFormat::kRgba8Sint;
-    }
-    if (s == "rgba16uint") {
-      return ast::TexelFormat::kRgba16Uint;
-    }
-    if (s == "rgba16sint") {
-      return ast::TexelFormat::kRgba16Sint;
-    }
-    if (s == "rgba16float") {
-      return ast::TexelFormat::kRgba16Float;
-    }
-    if (s == "r32uint") {
-      return ast::TexelFormat::kR32Uint;
-    }
-    if (s == "r32sint") {
-      return ast::TexelFormat::kR32Sint;
-    }
-    if (s == "r32float") {
-      return ast::TexelFormat::kR32Float;
-    }
-    if (s == "rg32uint") {
-      return ast::TexelFormat::kRg32Uint;
-    }
-    if (s == "rg32sint") {
-      return ast::TexelFormat::kRg32Sint;
-    }
-    if (s == "rg32float") {
-      return ast::TexelFormat::kRg32Float;
-    }
-    if (s == "rgba32uint") {
-      return ast::TexelFormat::kRgba32Uint;
-    }
-    if (s == "rgba32sint") {
-      return ast::TexelFormat::kRgba32Sint;
-    }
-    if (s == "rgba32float") {
-      return ast::TexelFormat::kRgba32Float;
-    }
+  auto t = next();
+  if (t == "rgba8unorm") {
+    return ast::TexelFormat::kRgba8Unorm;
   }
-  return add_error(tok.source(), "invalid format", use);
+  if (t == "rgba8snorm") {
+    return ast::TexelFormat::kRgba8Snorm;
+  }
+  if (t == "rgba8uint") {
+    return ast::TexelFormat::kRgba8Uint;
+  }
+  if (t == "rgba8sint") {
+    return ast::TexelFormat::kRgba8Sint;
+  }
+  if (t == "rgba16uint") {
+    return ast::TexelFormat::kRgba16Uint;
+  }
+  if (t == "rgba16sint") {
+    return ast::TexelFormat::kRgba16Sint;
+  }
+  if (t == "rgba16float") {
+    return ast::TexelFormat::kRgba16Float;
+  }
+  if (t == "r32uint") {
+    return ast::TexelFormat::kR32Uint;
+  }
+  if (t == "r32sint") {
+    return ast::TexelFormat::kR32Sint;
+  }
+  if (t == "r32float") {
+    return ast::TexelFormat::kR32Float;
+  }
+  if (t == "rg32uint") {
+    return ast::TexelFormat::kRg32Uint;
+  }
+  if (t == "rg32sint") {
+    return ast::TexelFormat::kRg32Sint;
+  }
+  if (t == "rg32float") {
+    return ast::TexelFormat::kRg32Float;
+  }
+  if (t == "rgba32uint") {
+    return ast::TexelFormat::kRgba32Uint;
+  }
+  if (t == "rgba32sint") {
+    return ast::TexelFormat::kRgba32Sint;
+  }
+  if (t == "rgba32float") {
+    return ast::TexelFormat::kRgba32Float;
+  }
+  return add_error(t.source(), "invalid format", use);
 }
 
 // variable_ident_decl
@@ -1431,24 +1422,18 @@ Expect<ast::Variable*> ParserImpl::expect_param() {
 //   | COMPUTE
 Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
   auto t = peek();
-  if (!t.IsIdentifier()) {
-    return add_error(t, "invalid value for stage decoration");
-  }
-
-  auto s = t.to_str();
-  if (s == kVertexStage) {
+  if (t == kVertexStage) {
     next();  // Consume the peek
     return {ast::PipelineStage::kVertex, t.source()};
   }
-  if (s == kFragmentStage) {
+  if (t == kFragmentStage) {
     next();  // Consume the peek
     return {ast::PipelineStage::kFragment, t.source()};
   }
-  if (s == kComputeStage) {
+  if (t == kComputeStage) {
     next();  // Consume the peek
     return {ast::PipelineStage::kCompute, t.source()};
   }
-
   return add_error(peek(), "invalid value for stage decoration");
 }
 
@@ -2932,9 +2917,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     return Failure::kNoMatch;
   }
 
-  auto s = t.to_str();
-
-  if (s == kLocationDecoration) {
+  if (t == kLocationDecoration) {
     const char* use = "location decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -2945,7 +2928,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kBindingDecoration) {
+  if (t == kBindingDecoration) {
     const char* use = "binding decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -2956,7 +2939,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kGroupDecoration) {
+  if (t == kGroupDecoration) {
     const char* use = "group decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -2967,18 +2950,17 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kInterpolateDecoration) {
+  if (t == kInterpolateDecoration) {
     return expect_paren_block("interpolate decoration", [&]() -> Result {
       ast::InterpolationType type;
       ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone;
 
       auto type_tok = next();
-      auto type_str = type_tok.to_str();
-      if (type_str == "perspective") {
+      if (type_tok == "perspective") {
         type = ast::InterpolationType::kPerspective;
-      } else if (type_str == "linear") {
+      } else if (type_tok == "linear") {
         type = ast::InterpolationType::kLinear;
-      } else if (type_str == "flat") {
+      } else if (type_tok == "flat") {
         type = ast::InterpolationType::kFlat;
       } else {
         return add_error(type_tok, "invalid interpolation type");
@@ -2986,12 +2968,11 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
 
       if (match(Token::Type::kComma)) {
         auto sampling_tok = next();
-        auto sampling_str = sampling_tok.to_str();
-        if (sampling_str == "center") {
+        if (sampling_tok == "center") {
           sampling = ast::InterpolationSampling::kCenter;
-        } else if (sampling_str == "centroid") {
+        } else if (sampling_tok == "centroid") {
           sampling = ast::InterpolationSampling::kCentroid;
-        } else if (sampling_str == "sample") {
+        } else if (sampling_tok == "sample") {
           sampling = ast::InterpolationSampling::kSample;
         } else {
           return add_error(sampling_tok, "invalid interpolation sampling");
@@ -3002,11 +2983,11 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kInvariantDecoration) {
+  if (t == kInvariantDecoration) {
     return create<ast::InvariantDecoration>(t.source());
   }
 
-  if (s == kBuiltinDecoration) {
+  if (t == kBuiltinDecoration) {
     return expect_paren_block("builtin decoration", [&]() -> Result {
       auto builtin = expect_builtin();
       if (builtin.errored)
@@ -3016,7 +2997,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kWorkgroupSizeDecoration) {
+  if (t == kWorkgroupSizeDecoration) {
     return expect_paren_block("workgroup_size decoration", [&]() -> Result {
       const ast::Expression* x = nullptr;
       const ast::Expression* y = nullptr;
@@ -3054,7 +3035,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kStageDecoration) {
+  if (t == kStageDecoration) {
     return expect_paren_block("stage decoration", [&]() -> Result {
       auto stage = expect_pipeline_stage();
       if (stage.errored)
@@ -3064,12 +3045,12 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kBlockDecoration) {
+  if (t == kBlockDecoration) {
     deprecated(t.source(), "[[block]] attributes have been removed from WGSL");
     return create<ast::StructBlockDecoration>(t.source());
   }
 
-  if (s == kStrideDecoration) {
+  if (t == kStrideDecoration) {
     const char* use = "stride decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_nonzero_positive_sint(use);
@@ -3082,7 +3063,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kSizeDecoration) {
+  if (t == kSizeDecoration) {
     const char* use = "size decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -3093,7 +3074,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kAlignDecoration) {
+  if (t == kAlignDecoration) {
     const char* use = "align decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -3104,7 +3085,7 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kOverrideDecoration) {
+  if (t == kOverrideDecoration) {
     const char* use = "override decoration";
 
     if (peek_is(Token::Type::kParenLeft)) {

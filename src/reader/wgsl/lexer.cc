@@ -62,38 +62,31 @@ Lexer::Lexer(const std::string& file_path, const Source::FileContent* content)
 Lexer::~Lexer() = default;
 
 Token Lexer::next() {
-  auto t = skip_whitespace_and_comments();
-  if (!t.IsUninitialized()) {
+  if (auto t = skip_whitespace_and_comments(); !t.IsUninitialized()) {
     return t;
   }
 
-  t = try_hex_float();
-  if (!t.IsUninitialized()) {
+  if (auto t = try_hex_float(); !t.IsUninitialized()) {
     return t;
   }
 
-  t = try_hex_integer();
-  if (!t.IsUninitialized()) {
+  if (auto t = try_hex_integer(); !t.IsUninitialized()) {
     return t;
   }
 
-  t = try_float();
-  if (!t.IsUninitialized()) {
+  if (auto t = try_float(); !t.IsUninitialized()) {
     return t;
   }
 
-  t = try_integer();
-  if (!t.IsUninitialized()) {
+  if (auto t = try_integer(); !t.IsUninitialized()) {
     return t;
   }
 
-  t = try_ident();
-  if (!t.IsUninitialized()) {
+  if (auto t = try_ident(); !t.IsUninitialized()) {
     return t;
   }
 
-  t = try_punctuation();
-  if (!t.IsUninitialized()) {
+  if (auto t = try_punctuation(); !t.IsUninitialized()) {
     return t;
   }
 
@@ -771,7 +764,7 @@ Token Lexer::try_ident() {
     return t;
   }
 
-  return {Token::Type::kIdentifier, source, std::string(str)};
+  return {Token::Type::kIdentifier, source, str};
 }
 
 Token Lexer::try_punctuation() {

@@ -17,6 +17,7 @@
 
 #include <string>
 #include <string_view>
+#include <variant>  // NOLINT: cpplint doesn't recognise this
 
 #include "src/source.h"
 
@@ -273,8 +274,18 @@ class Token {
   /// Create a string Token
   /// @param type the Token::Type of the token
   /// @param source the source of the token
-  /// @param val the source string for the token
-  Token(Type type, const Source& source, const std::string& val);
+  /// @param view the source string view for the token
+  Token(Type type, const Source& source, const std::string_view& view);
+  /// Create a string Token
+  /// @param type the Token::Type of the token
+  /// @param source the source of the token
+  /// @param str the source string for the token
+  Token(Type type, const Source& source, const std::string& str);
+  /// Create a string Token
+  /// @param type the Token::Type of the token
+  /// @param source the source of the token
+  /// @param str the source string for the token
+  Token(Type type, const Source& source, const char* str);
   /// Create a unsigned integer Token
   /// @param source the source of the token
   /// @param val the source unsigned for the token
@@ -297,6 +308,11 @@ class Token {
   /// @param b the token to copy
   /// @return Token
   Token& operator=(const Token& b);
+
+  /// Equality operator with an identifier
+  /// @param ident the identifier string
+  /// @return true if this token is an identifier and is equal to ident.
+  bool operator==(std::string_view ident);
 
   /// Returns true if the token is of the given type
   /// @param t the type to check against.
@@ -378,14 +394,8 @@ class Token {
   Type type_ = Type::kError;
   /// The source where the token appeared
   Source source_;
-  /// The string represented by the token
-  std::string val_str_;
-  /// The signed integer represented by the token
-  int32_t val_int_ = 0;
-  /// The unsigned integer represented by the token
-  uint32_t val_uint_ = 0;
-  /// The float value represented by the token
-  float val_float_ = 0.0;
+  /// The value represented by the token
+  std::variant<int32_t, uint32_t, float, std::string, std::string_view> value_;
 };
 
 #ifndef NDEBUG
