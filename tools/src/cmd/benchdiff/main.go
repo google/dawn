@@ -23,9 +23,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sort"
-	"strings"
-	"text/tabwriter"
 	"time"
 
 	"dawn.googlesource.com/tint/tools/src/bench"
@@ -77,7 +74,18 @@ func run(pathA, pathB string) error {
 		return err
 	}
 
-	compare(benchA, benchB, fileName(pathA), fileName(pathB))
+	cmp := bench.Compare(benchA.Benchmarks, benchB.Benchmarks, *minDiff, *minRelDiff)
+	diff := cmp.Format(bench.DiffFormat{
+		TestName:        true,
+		Delta:           true,
+		PercentChangeAB: true,
+		TimeA:           true,
+		TimeB:           true,
+	})
+
+	fmt.Println("A:", pathA, "  B:", pathB)
+	fmt.Println()
+	fmt.Println(diff)
 
 	return nil
 }
@@ -85,93 +93,4 @@ func run(pathA, pathB string) error {
 func fileName(path string) string {
 	_, name := filepath.Split(path)
 	return name
-}
-
-func compare(benchA, benchB bench.Benchmark, nameA, nameB string) {
-	type times struct {
-		a time.Duration
-		b time.Duration
-	}
-	byName := map[string]times{}
-	for _, test := range benchA.Tests {
-		byName[test.Name] = times{a: test.Duration}
-	}
-	for _, test := range benchB.Tests {
-		t := byName[test.Name]
-		t.b = test.Duration
-		byName[test.Name] = t
-	}
-
-	type delta struct {
-		name       string
-		times      times
-		relDiff    float64
-		absRelDiff float64
-	}
-	deltas := []delta{}
-	for name, times := range byName {
-		if times.a == 0 || times.b == 0 {
-			continue // Assuming test was missing from a or b
-		}
-		diff := times.b - times.a
-		absDiff := diff
-		if absDiff < 0 {
-			absDiff = -absDiff
-		}
-		if absDiff < *minDiff {
-			continue
-		}
-
-		relDiff := float64(times.b) / float64(times.a)
-		absRelDiff := relDiff
-		if absRelDiff < 1 {
-			absRelDiff = 1.0 / absRelDiff
-		}
-		if absRelDiff < (1.0 + *minRelDiff) {
-			continue
-		}
-
-		d := delta{
-			name:       name,
-			times:      times,
-			relDiff:    relDiff,
-			absRelDiff: absRelDiff,
-		}
-		deltas = append(deltas, d)
-	}
-
-	sort.Slice(deltas, func(i, j int) bool { return deltas[j].relDiff < deltas[i].relDiff })
-
-	fmt.Println("A:", nameA)
-	fmt.Println("B:", nameB)
-	fmt.Println()
-
-	buf := strings.Builder{}
-	{
-		w := tabwriter.NewWriter(&buf, 1, 1, 0, ' ', 0)
-		fmt.Fprintln(w, "Test name\t | Δ (A → B)\t | % (A → B)\t | % (B → A)\t | × (A → B)\t | × (B → A)\t | A \t | B")
-		fmt.Fprintln(w, "\t-+\t-+\t-+\t-+\t-+\t-+\t-+\t-")
-		for _, delta := range deltas {
-			a2b := delta.times.b - delta.times.a
-			fmt.Fprintf(w, "%v \t | %v \t | %+2.1f%% \t | %+2.1f%% \t | %+.4f \t | %+.4f \t | %v \t | %v \t|\n",
-				delta.name,
-				a2b, // Δ (A → B)
-				100*float64(a2b)/float64(delta.times.a),       // % (A → B)
-				100*float64(-a2b)/float64(delta.times.b),      // % (B → A)
-				float64(delta.times.b)/float64(delta.times.a), // × (A → B)
-				float64(delta.times.a)/float64(delta.times.b), // × (B → A)
-				delta.times.a, // A
-				delta.times.b, // B
-			)
-		}
-		w.Flush()
-	}
-
-	// Split the table by line so we can add in a header line
-	lines := strings.Split(buf.String(), "\n")
-	fmt.Println(lines[0])
-	fmt.Println(strings.ReplaceAll(lines[1], " ", "-"))
-	for _, l := range lines[2:] {
-		fmt.Println(l)
-	}
 }
