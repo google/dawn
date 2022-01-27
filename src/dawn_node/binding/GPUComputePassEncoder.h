@@ -37,9 +37,9 @@ namespace wgpu::binding {
         void setPipeline(Napi::Env,
                          interop::Interface<interop::GPUComputePipeline> pipeline) override;
         void dispatch(Napi::Env,
-                      interop::GPUSize32 x,
-                      interop::GPUSize32 y,
-                      interop::GPUSize32 z) override;
+                      interop::GPUSize32 workgroupCountX,
+                      interop::GPUSize32 workgroupCountY,
+                      interop::GPUSize32 workgroupCountZ) override;
         void dispatchIndirect(Napi::Env,
                               interop::Interface<interop::GPUBuffer> indirectBuffer,
                               interop::GPUSize64 indirectOffset) override;

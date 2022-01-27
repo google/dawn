@@ -37,10 +37,10 @@ namespace wgpu::binding {
     }
 
     void GPUComputePassEncoder::dispatch(Napi::Env,
-                                         interop::GPUSize32 x,
-                                         interop::GPUSize32 y,
-                                         interop::GPUSize32 z) {
-        enc_.Dispatch(x, y, z);
+                                         interop::GPUSize32 workgroupCountX,
+                                         interop::GPUSize32 workgroupCountY,
+                                         interop::GPUSize32 workgroupCountZ) {
+        enc_.Dispatch(workgroupCountX, workgroupCountY, workgroupCountZ);
     }
 
     void GPUComputePassEncoder::dispatchIndirect(

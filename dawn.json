@@ -799,9 +799,9 @@
             {
                 "name": "dispatch",
                 "args": [
-                    {"name": "x", "type": "uint32_t"},
-                    {"name": "y", "type": "uint32_t", "default": "1"},
-                    {"name": "z", "type": "uint32_t", "default": "1"}
+                    {"name": "workgroupCountX", "type": "uint32_t"},
+                    {"name": "workgroupCountY", "type": "uint32_t", "default": "1"},
+                    {"name": "workgroupCountZ", "type": "uint32_t", "default": "1"}
                 ]
             },
             {

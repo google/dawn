@@ -40,7 +40,9 @@ namespace dawn::native {
 
         void APIEndPass();
 
-        void APIDispatch(uint32_t x, uint32_t y = 1, uint32_t z = 1);
+        void APIDispatch(uint32_t workgroupCountX,
+                         uint32_t workgroupCountY = 1,
+                         uint32_t workgroupCountZ = 1);
         void APIDispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
         void APISetPipeline(ComputePipelineBase* pipeline);
 

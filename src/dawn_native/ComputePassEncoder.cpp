@@ -159,7 +159,9 @@ namespace dawn::native {
         }
     }
 
-    void ComputePassEncoder::APIDispatch(uint32_t x, uint32_t y, uint32_t z) {
+    void ComputePassEncoder::APIDispatch(uint32_t workgroupCountX,
+                                         uint32_t workgroupCountY,
+                                         uint32_t workgroupCountZ) {
         mEncodingContext->TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
@@ -169,20 +171,20 @@ namespace dawn::native {
                     uint32_t workgroupsPerDimension =
                         GetDevice()->GetLimits().v1.maxComputeWorkgroupsPerDimension;
 
-                    DAWN_INVALID_IF(
-                        x > workgroupsPerDimension,
-                        "Dispatch size X (%u) exceeds max compute workgroups per dimension (%u).",
-                        x, workgroupsPerDimension);
+                    DAWN_INVALID_IF(workgroupCountX > workgroupsPerDimension,
+                                    "Dispatch workgroup count X (%u) exceeds max compute "
+                                    "workgroups per dimension (%u).",
+                                    workgroupCountX, workgroupsPerDimension);
 
-                    DAWN_INVALID_IF(
-                        y > workgroupsPerDimension,
-                        "Dispatch size Y (%u) exceeds max compute workgroups per dimension (%u).",
-                        y, workgroupsPerDimension);
+                    DAWN_INVALID_IF(workgroupCountY > workgroupsPerDimension,
+                                    "Dispatch workgroup count Y (%u) exceeds max compute "
+                                    "workgroups per dimension (%u).",
+                                    workgroupCountY, workgroupsPerDimension);
 
-                    DAWN_INVALID_IF(
-                        z > workgroupsPerDimension,
-                        "Dispatch size Z (%u) exceeds max compute workgroups per dimension (%u).",
-                        z, workgroupsPerDimension);
+                    DAWN_INVALID_IF(workgroupCountZ > workgroupsPerDimension,
+                                    "Dispatch workgroup count Z (%u) exceeds max compute "
+                                    "workgroups per dimension (%u).",
+                                    workgroupCountZ, workgroupsPerDimension);
                 }
 
                 // Record the synchronization scope for Dispatch, which is just the current
@@ -190,13 +192,14 @@ namespace dawn::native {
                 AddDispatchSyncScope();
 
                 DispatchCmd* dispatch = allocator->Allocate<DispatchCmd>(Command::Dispatch);
-                dispatch->x = x;
-                dispatch->y = y;
-                dispatch->z = z;
+                dispatch->x = workgroupCountX;
+                dispatch->y = workgroupCountY;
+                dispatch->z = workgroupCountZ;
 
                 return {};
             },
-            "encoding %s.Dispatch(%u, %u, %u).", this, x, y, z);
+            "encoding %s.Dispatch(%u, %u, %u).", this, workgroupCountX, workgroupCountY,
+            workgroupCountZ);
     }
 
     ResultOrError<std::pair<Ref<BufferBase>, uint64_t>>
