@@ -119,7 +119,14 @@ void CalculateArrayLength::Run(CloneContext& ctx,
               ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID()),
           },
           ast::DecorationList{});
-      if (auto* str = buffer_type->As<sem::Struct>()) {
+      // Insert the intrinsic function after the structure or array structure
+      // element type. TODO(crbug.com/tint/1266): Once we allow out-of-order
+      // declarations, this can be simplified.
+      auto* insert_after = buffer_type;
+      while (auto* arr = insert_after->As<sem::Array>()) {
+        insert_after = arr->ElemType();
+      }
+      if (auto* str = insert_after->As<sem::Struct>()) {
         ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), str->Declaration(),
                         func);
       } else {

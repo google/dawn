@@ -65,7 +65,7 @@ fn main() {
   EXPECT_TRUE(ShouldRun<CalculateArrayLength>(src));
 }
 
-TEST_F(CalculateArrayLengthTest, Basic) {
+TEST_F(CalculateArrayLengthTest, BasicArray) {
   auto* src = R"(
 @group(0) @binding(0) var<storage, read> sb : array<i32>;
 
@@ -127,6 +127,80 @@ fn main() {
   tint_symbol(sb, &(tint_symbol_1));
   let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
   var len : u32 = tint_symbol_2;
+}
+)";
+
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CalculateArrayLengthTest, ArrayOfStruct) {
+  auto* src = R"(
+struct S {
+  f : f32;
+}
+
+@group(0) @binding(0) var<storage, read> arr : array<S>;
+
+@stage(compute) @workgroup_size(1)
+fn main() {
+  let len = arrayLength(&arr);
+}
+)";
+  auto* expect = R"(
+struct S {
+  f : f32;
+}
+
+@internal(intrinsic_buffer_size)
+fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<S>, result : ptr<function, u32>)
+
+@group(0) @binding(0) var<storage, read> arr : array<S>;
+
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(arr, &(tint_symbol_1));
+  let tint_symbol_2 : u32 = (tint_symbol_1 / 4u);
+  let len = tint_symbol_2;
+}
+)";
+
+  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CalculateArrayLengthTest, ArrayOfArrayOfStruct) {
+  auto* src = R"(
+struct S {
+  f : f32;
+}
+
+@group(0) @binding(0) var<storage, read> arr : array<array<S, 4>>;
+
+@stage(compute) @workgroup_size(1)
+fn main() {
+  let len = arrayLength(&arr);
+}
+)";
+  auto* expect = R"(
+struct S {
+  f : f32;
+}
+
+@internal(intrinsic_buffer_size)
+fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<array<S, 4u>>, result : ptr<function, u32>)
+
+@group(0) @binding(0) var<storage, read> arr : array<array<S, 4>>;
+
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(arr, &(tint_symbol_1));
+  let tint_symbol_2 : u32 = (tint_symbol_1 / 16u);
+  let len = tint_symbol_2;
 }
 )";
 
