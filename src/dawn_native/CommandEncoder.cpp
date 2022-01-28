@@ -654,13 +654,6 @@ namespace dawn::native {
                         descriptor->depthStencilAttachment->stencilReadOnly;
 
                     if (IsReadOnlyDepthStencilAttachment(descriptor->depthStencilAttachment)) {
-                        // TODO(dawn:485): Readonly depth/stencil attachment is not fully
-                        // implemented. Disallow it as unsafe until the implementaion is completed.
-                        DAWN_INVALID_IF(
-                            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs),
-                            "Readonly depth/stencil attachment is disallowed because it's not "
-                            "fully implemented");
-
                         usageTracker.TextureViewUsedAs(view, kReadOnlyRenderAttachment);
                     } else {
                         usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::RenderAttachment);
