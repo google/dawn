@@ -33,9 +33,11 @@ Manager::Manager() = default;
 Manager::~Manager() = default;
 
 Output Manager::Run(const Program* program, const DataMap& data) const {
+  const Program* in = program;
+
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
   auto print_program = [&](const char* msg, const Transform* transform) {
-    auto wgsl = Program::printer(program);
+    auto wgsl = Program::printer(in);
     std::cout << "---------------------------------------------------------"
               << std::endl;
     std::cout << "-- " << msg << " " << transform->TypeInfo().name << ":"
@@ -48,8 +50,6 @@ Output Manager::Run(const Program* program, const DataMap& data) const {
               << std::endl;
   };
 #endif
-
-  const Program* in = program;
 
   Output out;
   for (const auto& transform : transforms_) {
