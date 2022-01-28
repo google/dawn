@@ -114,6 +114,16 @@ CommonFuzzer::~CommonFuzzer() = default;
 int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
+#if TINT_BUILD_WGSL_WRITER
+  tint::Program::printer = [](const tint::Program* program) {
+    auto result = tint::writer::wgsl::Generate(program, {});
+    if (!result.error.empty()) {
+      return "error: " + result.error;
+    }
+    return result.wgsl;
+  };
+#endif  //  TINT_BUILD_WGSL_WRITER
+
   Program program;
 
 #if TINT_BUILD_SPV_READER
