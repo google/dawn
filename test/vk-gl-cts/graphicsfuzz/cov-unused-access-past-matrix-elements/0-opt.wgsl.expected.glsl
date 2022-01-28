@@ -11,6 +11,7 @@ type Arr_1 = @stride(16) array<i32, 4>;
 #version 310 es
 precision mediump float;
 
+layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
   float el;
 };
@@ -52,8 +53,8 @@ void main_1() {
   float x_58 = x_6.x_GLF_uniform_float_values[0].el;
   float x_60 = x_6.x_GLF_uniform_float_values[0].el;
   float x_62 = x_6.x_GLF_uniform_float_values[0].el;
-  tint_padded_array_element tint_symbol_2[3] = tint_padded_array_element[3](tint_padded_array_element(x_58), tint_padded_array_element(x_60), tint_padded_array_element(x_62));
-  sums = tint_symbol_2;
+  tint_padded_array_element tint_symbol_1[3] = tint_padded_array_element[3](tint_padded_array_element(x_58), tint_padded_array_element(x_60), tint_padded_array_element(x_62));
+  sums = tint_symbol_1;
   int x_65 = x_8.x_GLF_uniform_int_values[0].el;
   i = x_65;
   x_67_phi = x_65;
@@ -107,34 +108,21 @@ struct main_out {
   vec4 x_GLF_color_1;
 };
 
-struct tint_symbol_1 {
-  vec4 x_GLF_color_1;
-};
-
-main_out tint_symbol_inner() {
+main_out tint_symbol() {
   main_1();
-  main_out tint_symbol_3 = main_out(x_GLF_color);
-  return tint_symbol_3;
+  main_out tint_symbol_2 = main_out(x_GLF_color);
+  return tint_symbol_2;
 }
-
-tint_symbol_1 tint_symbol() {
-  main_out inner_result = tint_symbol_inner();
-  tint_symbol_1 wrapper_result = tint_symbol_1(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
-  return wrapper_result;
-}
-layout(location = 0) out vec4 x_GLF_color_1;
 
 void main() {
-  tint_symbol_1 outputs;
-  outputs = tint_symbol();
-  x_GLF_color_1 = outputs.x_GLF_color_1;
+  main_out inner_result = tint_symbol();
+  x_GLF_color_1_1 = inner_result.x_GLF_color_1;
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:73: '[' :  matrix index out of range '4'
-ERROR: 0:73: '=' :  cannot convert from ' temp mediump 3-component vector of float' to ' temp mediump float'
-ERROR: 0:73: '' : compilation terminated 
+ERROR: 0:74: '[' :  matrix index out of range '4'
+ERROR: 0:74: '=' :  cannot convert from ' temp mediump 3-component vector of float' to ' temp mediump float'
+ERROR: 0:74: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

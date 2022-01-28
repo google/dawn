@@ -3,6 +3,11 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
+layout(location = 1) in vec2 vMainuv_param_1;
+layout(location = 0) in vec4 v_output1_param_1;
+layout(location = 3) in vec2 v_uv_param_1;
+layout(location = 2) in vec4 v_output2_param_1;
+layout(location = 0) out vec4 glFragColor_1_1;
 struct lightingInfo {
   vec3 diffuse;
   vec3 specular;
@@ -353,58 +358,26 @@ struct main_out {
   vec4 glFragColor_1;
 };
 
-struct tint_symbol_4 {
-  vec4 v_output1_param;
-  vec2 vMainuv_param;
-  vec4 v_output2_param;
-  vec2 v_uv_param;
-  bool tint_symbol_2;
-};
-
-struct tint_symbol_5 {
-  vec4 glFragColor_1;
-};
-
-main_out tint_symbol_1_inner(vec2 vMainuv_param, vec4 v_output1_param, bool tint_symbol_2, vec2 v_uv_param, vec4 v_output2_param) {
+main_out tint_symbol_1(vec2 vMainuv_param, vec4 v_output1_param, bool tint_symbol_2, vec2 v_uv_param, vec4 v_output2_param) {
   vMainuv = vMainuv_param;
   v_output1 = v_output1_param;
   tint_symbol = tint_symbol_2;
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();
-  main_out tint_symbol_6 = main_out(glFragColor);
-  return tint_symbol_6;
+  main_out tint_symbol_3 = main_out(glFragColor);
+  return tint_symbol_3;
 }
-
-tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
-  main_out inner_result = tint_symbol_1_inner(tint_symbol_3.vMainuv_param, tint_symbol_3.v_output1_param, tint_symbol_3.tint_symbol_2, tint_symbol_3.v_uv_param, tint_symbol_3.v_output2_param);
-  tint_symbol_5 wrapper_result = tint_symbol_5(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
-  return wrapper_result;
-}
-layout(location = 0) in vec4 v_output1_param;
-layout(location = 1) in vec2 vMainuv_param;
-layout(location = 2) in vec4 v_output2_param;
-layout(location = 3) in vec2 v_uv_param;
-
-layout(location = 0) out vec4 glFragColor_1;
 
 void main() {
-  tint_symbol_4 inputs;
-  inputs.v_output1_param = v_output1_param;
-  inputs.vMainuv_param = vMainuv_param;
-  inputs.v_output2_param = v_output2_param;
-  inputs.v_uv_param = v_uv_param;
-  inputs.tint_symbol_2 = gl_FrontFacing;
-  tint_symbol_5 outputs;
-  outputs = tint_symbol_1(inputs);
-  glFragColor_1 = outputs.glFragColor_1;
+  main_out inner_result = tint_symbol_1(vMainuv_param_1, v_output1_param_1, gl_FrontFacing, v_uv_param_1, v_output2_param_1);
+  glFragColor_1_1 = inner_result.glFragColor_1;
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:72: 'ddx' : no matching overloaded function found 
-ERROR: 0:72: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
-ERROR: 0:72: '' : compilation terminated 
+ERROR: 0:77: 'ddx' : no matching overloaded function found 
+ERROR: 0:77: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
+ERROR: 0:77: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

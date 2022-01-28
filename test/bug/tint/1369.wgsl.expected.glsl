@@ -17,10 +17,9 @@ bool call_discard() {
 void f() {
   bool v = call_discard();
   bool also_unreachable = false;
-  return;
 }
 
 void main() {
   f();
+  return;
 }
-

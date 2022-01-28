@@ -25,14 +25,13 @@ void x(inout S p) {
   p.data[ubo.dynamic_idx] = 1;
 }
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void f() {
   x(s);
   result.tint_symbol = s.data[3];
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f();
+  return;
 }
-

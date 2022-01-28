@@ -9,10 +9,9 @@ void textureSampleBias_df91bb() {
 
 void fragment_main() {
   textureSampleBias_df91bb();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-

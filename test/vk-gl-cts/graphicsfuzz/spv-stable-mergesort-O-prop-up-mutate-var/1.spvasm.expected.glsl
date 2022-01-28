@@ -3,6 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
+layout(location = 0) out vec4 x_GLF_color_1_1;
 struct buf0 {
   vec2 injectionSwitch;
 };
@@ -39,8 +40,8 @@ void main_1() {
     int x_64_phi = 0;
     int x_63 = x_63_phi;
     int x_68[10] = data;
-    int tint_symbol_6[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    data = tint_symbol_6;
+    int tint_symbol_3[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    data = tint_symbol_3;
     data = x_68;
     int x_69 = (x_63 + 1);
     x_64_phi = x_69;
@@ -341,41 +342,21 @@ struct main_out {
   vec4 x_GLF_color_1;
 };
 
-struct tint_symbol_4 {
-  vec4 tint_symbol_2;
-};
-
-struct tint_symbol_5 {
-  vec4 x_GLF_color_1;
-};
-
-main_out tint_symbol_1_inner(vec4 tint_symbol_2) {
+main_out tint_symbol_1(vec4 tint_symbol_2) {
   tint_symbol = tint_symbol_2;
   main_1();
-  main_out tint_symbol_7 = main_out(x_GLF_color);
-  return tint_symbol_7;
+  main_out tint_symbol_4 = main_out(x_GLF_color);
+  return tint_symbol_4;
 }
-
-tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
-  main_out inner_result = tint_symbol_1_inner(tint_symbol_3.tint_symbol_2);
-  tint_symbol_5 wrapper_result = tint_symbol_5(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
-  return wrapper_result;
-}
-
-layout(location = 0) out vec4 x_GLF_color_1;
 
 void main() {
-  tint_symbol_4 inputs;
-  inputs.tint_symbol_2 = gl_FragCoord;
-  tint_symbol_5 outputs;
-  outputs = tint_symbol_1(inputs);
-  x_GLF_color_1 = outputs.x_GLF_color_1;
+  main_out inner_result = tint_symbol_1(gl_FragCoord);
+  x_GLF_color_1_1 = inner_result.x_GLF_color_1;
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:173: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:173: '' : compilation terminated 
+ERROR: 0:174: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:174: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

@@ -11,13 +11,12 @@ void textureSampleCompare_dd431d() {
 
 void fragment_main() {
   textureSampleCompare_dd431d();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:7: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
 ERROR: 0:7: '' : compilation terminated 

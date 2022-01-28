@@ -1640,6 +1640,9 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
       return EmitPrivateVariable(sem);
     case ast::StorageClass::kWorkgroup:
       return EmitWorkgroupVariable(sem);
+    case ast::StorageClass::kInput:
+    case ast::StorageClass::kOutput:
+      return EmitIOVariable(sem);
     default:
       break;
   }
@@ -1757,78 +1760,33 @@ bool GeneratorImpl::EmitWorkgroupVariable(const sem::Variable* var) {
   return true;
 }
 
-sem::Type* GeneratorImpl::builtin_type(ast::Builtin builtin) {
-  switch (builtin) {
-    case ast::Builtin::kPosition: {
-      auto* f32 = builder_.create<sem::F32>();
-      return builder_.create<sem::Vector>(f32, 4);
-    }
-    case ast::Builtin::kVertexIndex:
-    case ast::Builtin::kInstanceIndex: {
-      return builder_.create<sem::I32>();
-    }
-    case ast::Builtin::kFrontFacing: {
-      return builder_.create<sem::Bool>();
-    }
-    case ast::Builtin::kFragDepth: {
-      return builder_.create<sem::F32>();
-    }
-    case ast::Builtin::kLocalInvocationId:
-    case ast::Builtin::kGlobalInvocationId:
-    case ast::Builtin::kNumWorkgroups:
-    case ast::Builtin::kWorkgroupId: {
-      auto* u32 = builder_.create<sem::U32>();
-      return builder_.create<sem::Vector>(u32, 3);
-    }
-    case ast::Builtin::kSampleIndex: {
-      return builder_.create<sem::I32>();
-    }
-    case ast::Builtin::kSampleMask:
-    default:
-      return nullptr;
-  }
-}
+bool GeneratorImpl::EmitIOVariable(const sem::Variable* var) {
+  auto* decl = var->Declaration();
 
-const char* GeneratorImpl::builtin_to_string(ast::Builtin builtin,
-                                             ast::PipelineStage stage) {
-  switch (builtin) {
-    case ast::Builtin::kPosition:
-      switch (stage) {
-        case ast::PipelineStage::kVertex:
-          return "gl_Position";
-        case ast::PipelineStage::kFragment:
-          return "gl_FragCoord";
-        default:
-          TINT_ICE(Writer, builder_.Diagnostics())
-              << "position builtin unexpected in this pipeline stage";
-          return "";
-      }
-    case ast::Builtin::kVertexIndex:
-      return "gl_VertexID";
-    case ast::Builtin::kInstanceIndex:
-      return "gl_InstanceID";
-    case ast::Builtin::kFrontFacing:
-      return "gl_FrontFacing";
-    case ast::Builtin::kFragDepth:
-      return "gl_FragDepth";
-    case ast::Builtin::kLocalInvocationId:
-      return "gl_LocalInvocationID";
-    case ast::Builtin::kLocalInvocationIndex:
-      return "gl_LocalInvocationIndex";
-    case ast::Builtin::kGlobalInvocationId:
-      return "gl_GlobalInvocationID";
-    case ast::Builtin::kNumWorkgroups:
-      return "gl_NumWorkGroups";
-    case ast::Builtin::kWorkgroupId:
-      return "gl_WorkGroupID";
-    case ast::Builtin::kSampleIndex:
-      return "gl_SampleID";
-    case ast::Builtin::kSampleMask:
-      // FIXME: is this always available?
-      return "gl_SampleMask";
-    default:
-      return "";
+  // Do not emit builtin (gl_) variables.
+  if (ast::HasDecoration<ast::BuiltinDecoration>(decl->decorations)) {
+    return true;
   }
+
+  auto out = line();
+  EmitDecorations(out, decl->decorations);
+  EmitInterpolationQualifiers(out, decl->decorations);
+
+  auto name = builder_.Symbols().NameFor(decl->symbol);
+  auto* type = var->Type()->UnwrapRef();
+  if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
+    return false;
+  }
+
+  if (auto* constructor = decl->constructor) {
+    out << " = ";
+    if (!EmitExpression(out, constructor)) {
+      return false;
+    }
+  }
+
+  out << ";";
+  return true;
 }
 
 void GeneratorImpl::EmitInterpolationQualifiers(
@@ -1955,144 +1913,6 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   }
 
   line() << "}";
-
-  // Declare entry point input variables
-  for (auto* var : func->params) {
-    auto* sem = builder_.Sem().Get(var);
-    auto* str = sem->Type()->As<sem::Struct>();
-    for (auto* member : str->Members()) {
-      auto out = line();
-
-      auto decorations = member->Declaration()->decorations;
-      if (ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
-        continue;
-      }
-      if (!EmitDecorations(out, decorations)) {
-        return false;
-      }
-      // GLSL does not support interpolation qualifiers on vertex inputs
-      if (func->PipelineStage() != ast::PipelineStage::kVertex) {
-        EmitInterpolationQualifiers(out, decorations);
-      }
-      if (!EmitTypeAndName(
-              out, member->Type(), ast::StorageClass::kInput,
-              ast::Access::kReadWrite,
-              builder_.Symbols().NameFor(member->Declaration()->symbol))) {
-        return false;
-      }
-      out << ";";
-    }
-  }
-
-  // Declare entry point output variables
-  auto* return_type = func_sem->ReturnType()->As<sem::Struct>();
-  if (return_type) {
-    for (auto* member : return_type->Members()) {
-      auto out = line();
-      auto decorations = member->Declaration()->decorations;
-      if (ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
-        continue;
-      }
-      if (!EmitDecorations(out, decorations)) {
-        return false;
-      }
-      // GLSL does not support interpolation qualifiers on fragment outputs
-      if (func->PipelineStage() != ast::PipelineStage::kFragment) {
-        EmitInterpolationQualifiers(out, decorations);
-      }
-      if (!EmitTypeAndName(
-              out, member->Type(), ast::StorageClass::kOutput,
-              ast::Access::kReadWrite,
-              builder_.Symbols().NameFor(member->Declaration()->symbol))) {
-        return false;
-      }
-      out << ";";
-    }
-  }
-  line();
-
-  // Create a main() function which calls the entry point.
-  line() << "void main() {";
-
-  // Emit main function body
-  {
-    ScopedIndent si(this);
-    for (auto* var : func->params) {
-      auto* sem = builder_.Sem().Get(var);
-      auto* type = sem->Type();
-      {
-        auto out = line();
-        if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
-                             "inputs")) {
-          return false;
-        }
-        out << ";";
-      }
-      auto* str = type->As<sem::Struct>();
-      for (auto* member : str->Members()) {
-        auto out = line();
-        std::string name =
-            builder_.Symbols().NameFor(member->Declaration()->symbol);
-        out << "inputs." << name << " = ";
-        if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-                member->Declaration()->decorations)) {
-          if (builtin_type(builtin->builtin) != member->Type()) {
-            if (!EmitType(out, member->Type(), ast::StorageClass::kNone,
-                          ast::Access::kReadWrite, "")) {
-              return false;
-            }
-            out << "(";
-            out << builtin_to_string(builtin->builtin, func->PipelineStage());
-            out << ")";
-          } else {
-            out << builtin_to_string(builtin->builtin, func->PipelineStage());
-          }
-        } else {
-          out << name;
-        }
-        out << ";";
-      }
-    }
-
-    if (return_type) {
-      line() << return_type->FriendlyName(builder_.Symbols()) << " outputs;";
-    }
-    {
-      auto out = line();
-      if (return_type) {
-        out << "outputs = ";
-      }
-      out << builder_.Symbols().NameFor(func->symbol);
-      if (func->params.empty()) {
-        out << "()";
-      } else {
-        out << "(inputs)";
-      }
-      out << ";";
-    }
-
-    auto* str = func_sem->ReturnType()->As<sem::Struct>();
-    if (str) {
-      for (auto* member : str->Members()) {
-        auto out = line();
-        std::string name =
-            builder_.Symbols().NameFor(member->Declaration()->symbol);
-        if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-                member->Declaration()->decorations)) {
-          out << builtin_to_string(builtin->builtin, func->PipelineStage());
-        } else {
-          out << name;
-        }
-        out << " = outputs." << name << ";";
-      }
-    }
-    if (func->PipelineStage() == ast::PipelineStage::kVertex) {
-      line() << "gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;";
-      line() << "gl_Position.y = -gl_Position.y;";
-    }
-  }
-  line() << "}";
-  line();
 
   return true;
 }

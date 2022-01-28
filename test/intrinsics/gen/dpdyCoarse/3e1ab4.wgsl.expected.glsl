@@ -9,13 +9,12 @@ void dpdyCoarse_3e1ab4() {
 
 void fragment_main() {
   dpdyCoarse_3e1ab4();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddy_coarse' : no matching overloaded function found 
 ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'

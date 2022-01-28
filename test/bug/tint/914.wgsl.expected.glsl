@@ -62,13 +62,7 @@ const uint ColPerThread = 4u;
 const uint TileInner = 64u;
 shared float mm_Asub[64][64];
 shared float mm_Bsub[64][64];
-struct tint_symbol_2 {
-  uvec3 local_id;
-  uint local_invocation_index;
-  uvec3 global_id;
-};
-
-void tint_symbol_inner(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
+void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
       uint i = (idx / 64u);
@@ -156,19 +150,7 @@ void tint_symbol_inner(uvec3 local_id, uvec3 global_id, uint local_invocation_in
 }
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
-void tint_symbol(tint_symbol_2 tint_symbol_1) {
-  tint_symbol_inner(tint_symbol_1.local_id, tint_symbol_1.global_id, tint_symbol_1.local_invocation_index);
+void main() {
+  tint_symbol(gl_LocalInvocationID, gl_GlobalInvocationID, gl_LocalInvocationIndex);
   return;
 }
-
-
-
-
-void main() {
-  tint_symbol_2 inputs;
-  inputs.local_id = gl_LocalInvocationID;
-  inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
-  inputs.global_id = gl_GlobalInvocationID;
-  tint_symbol(inputs);
-}
-

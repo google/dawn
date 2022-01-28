@@ -1,8 +1,13 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
+layout(location = 0) in vec3 a_Position_1;
+layout(location = 1) in vec2 a_UV_1;
+layout(location = 2) in vec4 a_Color_1;
+layout(location = 3) in vec3 a_Normal_1;
+layout(location = 4) in float a_PosMtxIdx_1;
+layout(location = 0) out vec4 v_Color_1;
+layout(location = 1) out vec2 v_TexCoord_1;
 struct Mat4x4_ {
   vec4 mx;
   vec4 my;
@@ -137,67 +142,23 @@ void main1() {
   }
 }
 
-struct tint_symbol_3 {
-  vec3 a_Position;
-  vec2 a_UV;
-  vec4 a_Color;
-  vec3 a_Normal;
-  float a_PosMtxIdx;
-};
-
-struct tint_symbol_4 {
-  vec4 v_Color;
-  vec2 v_TexCoord;
-  vec4 member;
-};
-
-VertexOutput tint_symbol_1_inner(vec3 a_Position, vec2 a_UV, vec4 a_Color, vec3 a_Normal, float a_PosMtxIdx) {
+VertexOutput tint_symbol_1(vec3 a_Position, vec2 a_UV, vec4 a_Color, vec3 a_Normal, float a_PosMtxIdx) {
   a_Position1 = a_Position;
   a_UV1 = a_UV;
   a_Color1 = a_Color;
   a_Normal1 = a_Normal;
   a_PosMtxIdx1 = a_PosMtxIdx;
   main1();
-  VertexOutput tint_symbol_5 = VertexOutput(v_Color, v_TexCoord, tint_symbol);
-  return tint_symbol_5;
+  VertexOutput tint_symbol_2 = VertexOutput(v_Color, v_TexCoord, tint_symbol);
+  return tint_symbol_2;
 }
-
-tint_symbol_4 tint_symbol_1(tint_symbol_3 tint_symbol_2) {
-  VertexOutput inner_result = tint_symbol_1_inner(tint_symbol_2.a_Position, tint_symbol_2.a_UV, tint_symbol_2.a_Color, tint_symbol_2.a_Normal, tint_symbol_2.a_PosMtxIdx);
-  tint_symbol_4 wrapper_result = tint_symbol_4(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.v_Color = inner_result.v_Color;
-  wrapper_result.v_TexCoord = inner_result.v_TexCoord;
-  wrapper_result.member = inner_result.member;
-  return wrapper_result;
-}
-layout(location = 0) in vec3 a_Position;
-layout(location = 1) in vec2 a_UV;
-layout(location = 2) in vec4 a_Color;
-layout(location = 3) in vec3 a_Normal;
-layout(location = 4) in float a_PosMtxIdx;
-layout(location = 0) out vec4 v_Color;
-layout(location = 1) out vec2 v_TexCoord;
-
 
 void main() {
-  tint_symbol_3 inputs;
-  inputs.a_Position = a_Position;
-  inputs.a_UV = a_UV;
-  inputs.a_Color = a_Color;
-  inputs.a_Normal = a_Normal;
-  inputs.a_PosMtxIdx = a_PosMtxIdx;
-  tint_symbol_4 outputs;
-  outputs = tint_symbol_1(inputs);
-  v_Color = outputs.v_Color;
-  v_TexCoord = outputs.v_TexCoord;
-  gl_Position = outputs.member;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  VertexOutput inner_result = tint_symbol_1(a_Position_1, a_UV_1, a_Color_1, a_Normal_1, a_PosMtxIdx_1);
+  v_Color_1 = inner_result.v_Color;
+  v_TexCoord_1 = inner_result.v_TexCoord;
+  gl_Position = inner_result.member;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-
-Error parsing GLSL shader:
-ERROR: 0:176: 'v_Color' : redefinition 
-ERROR: 1 compilation errors.  No code generated.
-
-
-

@@ -29,13 +29,12 @@ void main_1() {
 
 void tint_symbol() {
   main_1();
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:24: 'textureOffset' : no matching overloaded function found 
 ERROR: 0:24: '' : compilation terminated 

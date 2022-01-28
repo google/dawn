@@ -24,13 +24,12 @@ void main_1() {
 
 void tint_symbol() {
   main_1();
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:4: 'image load-store format' : not supported with this profile: es
 ERROR: 0:4: '' : compilation terminated 

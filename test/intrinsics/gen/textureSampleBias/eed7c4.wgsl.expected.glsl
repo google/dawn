@@ -11,13 +11,12 @@ void textureSampleBias_eed7c4() {
 
 void fragment_main() {
   textureSampleBias_eed7c4();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 

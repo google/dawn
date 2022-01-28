@@ -22,13 +22,9 @@ uint ConvertToFp16FloatValue(float fp32) {
   return 1u;
 }
 
-struct tint_symbol_3 {
-  uvec3 GlobalInvocationID;
-};
-
 uniform highp sampler2D src_1;
 uniform highp sampler2D dst_1;
-void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
+void tint_symbol_1(uvec3 GlobalInvocationID) {
   ivec2 size = textureSize(src_1, 0);
   ivec2 dstTexCoord = ivec2(GlobalInvocationID.xy);
   ivec2 srcTexCoord = dstTexCoord;
@@ -59,15 +55,7 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void tint_symbol_1(tint_symbol_3 tint_symbol_2) {
-  tint_symbol_1_inner(tint_symbol_2.GlobalInvocationID);
+void main() {
+  tint_symbol_1(gl_GlobalInvocationID);
   return;
 }
-
-
-void main() {
-  tint_symbol_3 inputs;
-  inputs.GlobalInvocationID = gl_GlobalInvocationID;
-  tint_symbol_1(inputs);
-}
-

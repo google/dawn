@@ -76,7 +76,6 @@ bool tint_isNormal_3(float param_0) {
 }
 
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   tint_isNormal(vec4(0.0f, 0.0f, 0.0f, 0.0f));
   tint_isNormal(vec4(1.0f));
@@ -90,13 +89,13 @@ void tint_symbol() {
   tint_isNormal_3(1.0f);
   tint_isNormal_3(2.0f);
   tint_isNormal_3(3.0f);
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_symbol();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'uint4' : undeclared identifier 
 ERROR: 0:5: '' : compilation terminated 

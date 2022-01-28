@@ -14,13 +14,12 @@ void atomicXor_54510e() {
 
 void fragment_main() {
   atomicXor_54510e();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 #version 310 es
 precision mediump float;
 
@@ -35,13 +34,12 @@ void atomicXor_54510e() {
   uint res = atomicXor(sb_rw.arg_0, 1u);
 }
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void compute_main() {
   atomicXor_54510e();
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   compute_main();
+  return;
 }
-

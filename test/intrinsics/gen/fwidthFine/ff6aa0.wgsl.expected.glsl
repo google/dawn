@@ -7,10 +7,9 @@ void fwidthFine_ff6aa0() {
 
 void fragment_main() {
   fwidthFine_ff6aa0();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-

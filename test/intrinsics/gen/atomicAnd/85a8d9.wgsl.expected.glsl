@@ -14,13 +14,12 @@ void atomicAnd_85a8d9() {
 
 void fragment_main() {
   atomicAnd_85a8d9();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 #version 310 es
 precision mediump float;
 
@@ -35,13 +34,12 @@ void atomicAnd_85a8d9() {
   uint res = atomicAnd(sb_rw.arg_0, 1u);
 }
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void compute_main() {
   atomicAnd_85a8d9();
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   compute_main();
+  return;
 }
-

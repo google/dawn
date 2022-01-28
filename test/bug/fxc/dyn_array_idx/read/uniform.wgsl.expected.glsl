@@ -18,13 +18,12 @@ struct Result {
 layout(binding = 2) buffer Result_1 {
   int tint_symbol;
 } result;
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void f() {
   result.tint_symbol = ubo.data[ubo.dynamic_idx].x;
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f();
+  return;
 }
-

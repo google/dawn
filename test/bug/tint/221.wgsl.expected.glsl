@@ -10,7 +10,6 @@ layout(binding = 0) buffer Buf_1 {
   uint count;
   uint data[50];
 } b;
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   uint i = 0u;
   while (true) {
@@ -34,7 +33,8 @@ void tint_symbol() {
   return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_symbol();
+  return;
 }
-

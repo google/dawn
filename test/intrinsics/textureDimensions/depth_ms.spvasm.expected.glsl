@@ -25,32 +25,19 @@ struct vertex_main_out {
   vec4 tint_symbol_1_1;
 };
 
-struct tint_symbol_3 {
-  vec4 tint_symbol_1_1;
-};
-
-vertex_main_out vertex_main_inner() {
+vertex_main_out vertex_main() {
   vertex_main_1();
-  vertex_main_out tint_symbol_4 = vertex_main_out(tint_symbol_1);
-  return tint_symbol_4;
+  vertex_main_out tint_symbol_3 = vertex_main_out(tint_symbol_1);
+  return tint_symbol_3;
 }
-
-tint_symbol_3 vertex_main() {
-  vertex_main_out inner_result = vertex_main_inner();
-  tint_symbol_3 wrapper_result = tint_symbol_3(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.tint_symbol_1_1 = inner_result.tint_symbol_1_1;
-  return wrapper_result;
-}
-
 
 void main() {
-  tint_symbol_3 outputs;
-  outputs = vertex_main();
-  gl_Position = outputs.tint_symbol_1_1;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  vertex_main_out inner_result = vertex_main();
+  gl_Position = inner_result.tint_symbol_1_1;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-
 #version 310 es
 precision mediump float;
 
@@ -63,10 +50,6 @@ void textureDimensions_f60bdb() {
 }
 
 struct vertex_main_out {
-  vec4 tint_symbol_1_1;
-};
-
-struct tint_symbol_3 {
   vec4 tint_symbol_1_1;
 };
 
@@ -77,13 +60,12 @@ void fragment_main_1() {
 
 void fragment_main() {
   fragment_main_1();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 #version 310 es
 precision mediump float;
 
@@ -99,22 +81,17 @@ struct vertex_main_out {
   vec4 tint_symbol_1_1;
 };
 
-struct tint_symbol_3 {
-  vec4 tint_symbol_1_1;
-};
-
 void compute_main_1() {
   textureDimensions_f60bdb();
   return;
 }
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void compute_main() {
   compute_main_1();
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   compute_main();
+  return;
 }
-

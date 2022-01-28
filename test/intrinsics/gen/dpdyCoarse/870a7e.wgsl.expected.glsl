@@ -9,13 +9,12 @@ void dpdyCoarse_870a7e() {
 
 void fragment_main() {
   dpdyCoarse_870a7e();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddy_coarse' : no matching overloaded function found 
 ERROR: 0:5: '' : compilation terminated 

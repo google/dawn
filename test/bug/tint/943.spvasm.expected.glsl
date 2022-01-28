@@ -374,13 +374,7 @@ void main_1() {
   return;
 }
 
-struct tint_symbol_6 {
-  uvec3 tint_symbol_3;
-  uint local_invocation_index;
-  uvec3 tint_symbol_4;
-};
-
-void tint_symbol_2_inner(uvec3 tint_symbol_3, uvec3 tint_symbol_4, uint local_invocation_index) {
+void tint_symbol_2(uvec3 tint_symbol_3, uvec3 tint_symbol_4, uint local_invocation_index) {
   {
     uint i_1 = local_invocation_index;
     uint i_2 = (local_invocation_index % 1u);
@@ -400,22 +394,10 @@ void tint_symbol_2_inner(uvec3 tint_symbol_3, uvec3 tint_symbol_4, uint local_in
 }
 
 layout(local_size_x = 1, local_size_y = 64, local_size_z = 1) in;
-void tint_symbol_2(tint_symbol_6 tint_symbol_5) {
-  tint_symbol_2_inner(tint_symbol_5.tint_symbol_3, tint_symbol_5.tint_symbol_4, tint_symbol_5.local_invocation_index);
+void main() {
+  tint_symbol_2(gl_LocalInvocationID, gl_GlobalInvocationID, gl_LocalInvocationIndex);
   return;
 }
-
-
-
-
-void main() {
-  tint_symbol_6 inputs;
-  inputs.tint_symbol_3 = gl_LocalInvocationID;
-  inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
-  inputs.tint_symbol_4 = gl_GlobalInvocationID;
-  tint_symbol_2(inputs);
-}
-
 Error parsing GLSL shader:
 ERROR: 0:13: '' : array size required 
 ERROR: 0:14: '' : compilation terminated 

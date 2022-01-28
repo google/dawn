@@ -1,6 +1,10 @@
 #version 310 es
 precision mediump float;
 
+layout(location = 0) in vec3 position_param_1;
+layout(location = 2) in vec2 uv_param_1;
+layout(location = 1) in vec3 normal_param_1;
+layout(location = 0) out vec2 vUV_1_1;
 struct tint_padded_array_element {
   float el;
 };
@@ -53,49 +57,20 @@ struct main_out {
   vec2 vUV_1;
 };
 
-struct tint_symbol_3 {
-  vec3 position_param;
-  vec3 normal_param;
-  vec2 uv_param;
-};
-
-struct tint_symbol_4 {
-  vec2 vUV_1;
-  vec4 tint_symbol;
-};
-
-main_out tint_symbol_1_inner(vec3 position_param, vec2 uv_param, vec3 normal_param) {
+main_out tint_symbol_1(vec3 position_param, vec2 uv_param, vec3 normal_param) {
   position = position_param;
   uv = uv_param;
   normal = normal_param;
   main_1();
-  main_out tint_symbol_5 = main_out(tint_symbol, vUV);
-  return tint_symbol_5;
+  main_out tint_symbol_2 = main_out(tint_symbol, vUV);
+  return tint_symbol_2;
 }
-
-tint_symbol_4 tint_symbol_1(tint_symbol_3 tint_symbol_2) {
-  main_out inner_result = tint_symbol_1_inner(tint_symbol_2.position_param, tint_symbol_2.uv_param, tint_symbol_2.normal_param);
-  tint_symbol_4 wrapper_result = tint_symbol_4(vec2(0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.tint_symbol = inner_result.tint_symbol;
-  wrapper_result.vUV_1 = inner_result.vUV_1;
-  return wrapper_result;
-}
-layout(location = 0) in vec3 position_param;
-layout(location = 1) in vec3 normal_param;
-layout(location = 2) in vec2 uv_param;
-layout(location = 0) out vec2 vUV_1;
-
 
 void main() {
-  tint_symbol_3 inputs;
-  inputs.position_param = position_param;
-  inputs.normal_param = normal_param;
-  inputs.uv_param = uv_param;
-  tint_symbol_4 outputs;
-  outputs = tint_symbol_1(inputs);
-  vUV_1 = outputs.vUV_1;
-  gl_Position = outputs.tint_symbol;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  main_out inner_result = tint_symbol_1(position_param_1, uv_param_1, normal_param_1);
+  gl_Position = inner_result.tint_symbol;
+  vUV_1_1 = inner_result.vUV_1;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-

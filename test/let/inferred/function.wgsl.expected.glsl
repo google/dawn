@@ -1,29 +1,17 @@
 #version 310 es
 precision mediump float;
 
+layout(location = 0) out vec4 value;
 struct MyStruct {
   float f1;
 };
 
-struct tint_symbol_1 {
-  vec4 value;
-};
-
-vec4 tint_symbol_inner() {
+vec4 tint_symbol() {
   return vec4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-tint_symbol_1 tint_symbol() {
-  vec4 inner_result = tint_symbol_inner();
-  tint_symbol_1 wrapper_result = tint_symbol_1(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-layout(location = 0) out vec4 value;
-
 void main() {
-  tint_symbol_1 outputs;
-  outputs = tint_symbol();
-  value = outputs.value;
+  vec4 inner_result = tint_symbol();
+  value = inner_result;
+  return;
 }
-

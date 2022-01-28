@@ -56,11 +56,7 @@ layout(binding = 0) uniform Uniforms_1 {
   vec4 fullScreenSize;
 } uniforms;
 
-struct tint_symbol_4 {
-  uvec3 GlobalInvocationID;
-};
-
-void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
+void tint_symbol_2(uvec3 GlobalInvocationID) {
   uint index = GlobalInvocationID.x;
   if ((index >= config.numLights)) {
     return;
@@ -141,15 +137,7 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
 }
 
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
-void tint_symbol_2(tint_symbol_4 tint_symbol_3) {
-  tint_symbol_2_inner(tint_symbol_3.GlobalInvocationID);
+void main() {
+  tint_symbol_2(gl_GlobalInvocationID);
   return;
 }
-
-
-void main() {
-  tint_symbol_4 inputs;
-  inputs.GlobalInvocationID = gl_GlobalInvocationID;
-  tint_symbol_2(inputs);
-}
-

@@ -140,16 +140,15 @@ struct Data {
 };
 
 Data str = Data(0.0f);
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   float expr = str.mem;
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
+  return;
 }
-
 )");
 }
 
@@ -306,13 +305,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   data.b = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -355,13 +353,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   float x = data.a[2][1];
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -402,13 +399,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   int x = data.a[2];
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -450,13 +446,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   int x = data.a[((2 + 4) - 3)];
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -495,13 +490,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   data.a[2] = 2;
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -554,13 +548,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   vec3 x = data.c[2].b;
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -616,13 +609,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   vec2 x = data.c[2].b.xy;
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -678,13 +670,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   float x = data.c[2].b.g;
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -740,13 +731,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   float x = data.c[2].b[1];
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -798,13 +788,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   data.c[2].b = vec3(1.0f, 2.0f, 3.0f);
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }
@@ -860,13 +849,12 @@ layout(binding = 0) buffer Data_1 {
 } data;
 void tint_symbol() {
   data.c[2].b.y = 1.0f;
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(gen.result(), expected);
 }

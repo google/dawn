@@ -12,10 +12,9 @@ void g() {
 
 void f() {
   g();
-  return;
 }
 
 void main() {
   f();
+  return;
 }
-

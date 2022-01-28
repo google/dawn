@@ -1,7 +1,6 @@
 #version 310 es
 precision mediump float;
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   bool bool_var1 = bool(123u);
   bool bool_var2 = bool(123);
@@ -24,10 +23,10 @@ void tint_symbol() {
   uvec3 v3u32_var3 = uvec3(bvec3(true));
   bvec3 v3bool_var4 = bvec3(bvec2(vec2(123.0f)), true);
   bvec4 v4bool_var5 = bvec4(bvec2(vec2(123.0f, 0.0f)), bvec2(true, bool(float(0.0f))));
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_symbol();
+  return;
 }
-

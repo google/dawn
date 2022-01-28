@@ -1,7 +1,6 @@
 #version 310 es
 precision mediump float;
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   int x = 42;
   int empty[4] = int[4](0, 0, 0, 0);
@@ -36,10 +35,10 @@ void tint_symbol() {
   int tint_symbol_19[4] = int[4](1, x, (x + 1), nonempty[3]);
   int tint_symbol_20[2][4] = int[2][4](tint_symbol_19, nested_nonempty[1][2]);
   int subexpr_nested_nonempty_with_expr[4] = tint_symbol_20[1];
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_symbol();
+  return;
 }
-

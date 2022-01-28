@@ -11,6 +11,7 @@ type Arr_1 = @stride(16) array<i32, 3>;
 #version 310 es
 precision mediump float;
 
+layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
   float el;
 };
@@ -80,42 +81,22 @@ struct main_out {
   vec4 x_GLF_color_1;
 };
 
-struct tint_symbol_4 {
-  vec4 tint_symbol_2;
-};
-
-struct tint_symbol_5 {
-  vec4 x_GLF_color_1;
-};
-
-main_out tint_symbol_1_inner(vec4 tint_symbol_2) {
+main_out tint_symbol_1(vec4 tint_symbol_2) {
   tint_symbol = tint_symbol_2;
   main_1();
-  main_out tint_symbol_6 = main_out(x_GLF_color);
-  return tint_symbol_6;
+  main_out tint_symbol_3 = main_out(x_GLF_color);
+  return tint_symbol_3;
 }
-
-tint_symbol_5 tint_symbol_1(tint_symbol_4 tint_symbol_3) {
-  main_out inner_result = tint_symbol_1_inner(tint_symbol_3.tint_symbol_2);
-  tint_symbol_5 wrapper_result = tint_symbol_5(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
-  return wrapper_result;
-}
-
-layout(location = 0) out vec4 x_GLF_color_1;
 
 void main() {
-  tint_symbol_4 inputs;
-  inputs.tint_symbol_2 = gl_FragCoord;
-  tint_symbol_5 outputs;
-  outputs = tint_symbol_1(inputs);
-  x_GLF_color_1 = outputs.x_GLF_color_1;
+  main_out inner_result = tint_symbol_1(gl_FragCoord);
+  x_GLF_color_1_1 = inner_result.x_GLF_color_1;
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:39: 'countbits' : no matching overloaded function found 
-ERROR: 0:39: 'assign' :  cannot convert from ' const float' to ' temp mediump int'
-ERROR: 0:39: '' : compilation terminated 
+ERROR: 0:40: 'countbits' : no matching overloaded function found 
+ERROR: 0:40: 'assign' :  cannot convert from ' const float' to ' temp mediump int'
+ERROR: 0:40: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

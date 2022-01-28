@@ -91,11 +91,7 @@ void doIgnore() {
   int g55 = atomicOr(LUT.values[0], 0);
 }
 
-struct tint_symbol_1 {
-  uvec3 GlobalInvocationID;
-};
-
-void main_count_inner(uvec3 GlobalInvocationID) {
+void main_count(uvec3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= uniforms.numTriangles)) {
     return;
@@ -119,27 +115,11 @@ void main_count_inner(uvec3 GlobalInvocationID) {
   }
 }
 
-struct tint_symbol_3 {
-  uvec3 GlobalInvocationID;
-};
-
-struct tint_symbol_5 {
-  uvec3 GlobalInvocationID;
-};
-
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
-void main_count(tint_symbol_1 tint_symbol) {
-  main_count_inner(tint_symbol.GlobalInvocationID);
+void main() {
+  main_count(gl_GlobalInvocationID);
   return;
 }
-
-
-void main() {
-  tint_symbol_1 inputs;
-  inputs.GlobalInvocationID = gl_GlobalInvocationID;
-  main_count(inputs);
-}
-
 #version 310 es
 precision mediump float;
 
@@ -211,15 +191,7 @@ void doIgnore() {
   int g55 = atomicOr(LUT.values[0], 0);
 }
 
-struct tint_symbol_1 {
-  uvec3 GlobalInvocationID;
-};
-
-struct tint_symbol_3 {
-  uvec3 GlobalInvocationID;
-};
-
-void main_create_lut_inner(uvec3 GlobalInvocationID) {
+void main_create_lut(uvec3 GlobalInvocationID) {
   uint voxelIndex = GlobalInvocationID.x;
   doIgnore();
   uint maxVoxels = ((uniforms.gridSize * uniforms.gridSize) * uniforms.gridSize);
@@ -234,23 +206,11 @@ void main_create_lut_inner(uvec3 GlobalInvocationID) {
   atomicExchange(LUT.values[voxelIndex], offset);
 }
 
-struct tint_symbol_5 {
-  uvec3 GlobalInvocationID;
-};
-
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
-void main_create_lut(tint_symbol_3 tint_symbol_2) {
-  main_create_lut_inner(tint_symbol_2.GlobalInvocationID);
+void main() {
+  main_create_lut(gl_GlobalInvocationID);
   return;
 }
-
-
-void main() {
-  tint_symbol_3 inputs;
-  inputs.GlobalInvocationID = gl_GlobalInvocationID;
-  main_create_lut(inputs);
-}
-
 #version 310 es
 precision mediump float;
 
@@ -344,19 +304,7 @@ void doIgnore() {
   int g55 = atomicOr(LUT.values[0], 0);
 }
 
-struct tint_symbol_1 {
-  uvec3 GlobalInvocationID;
-};
-
-struct tint_symbol_3 {
-  uvec3 GlobalInvocationID;
-};
-
-struct tint_symbol_5 {
-  uvec3 GlobalInvocationID;
-};
-
-void main_sort_triangles_inner(uvec3 GlobalInvocationID) {
+void main_sort_triangles(uvec3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
   doIgnore();
   if ((triangleIndex >= uniforms.numTriangles)) {
@@ -375,15 +323,7 @@ void main_sort_triangles_inner(uvec3 GlobalInvocationID) {
 }
 
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
-void main_sort_triangles(tint_symbol_5 tint_symbol_4) {
-  main_sort_triangles_inner(tint_symbol_4.GlobalInvocationID);
+void main() {
+  main_sort_triangles(gl_GlobalInvocationID);
   return;
 }
-
-
-void main() {
-  tint_symbol_5 inputs;
-  inputs.GlobalInvocationID = gl_GlobalInvocationID;
-  main_sort_triangles(inputs);
-}
-

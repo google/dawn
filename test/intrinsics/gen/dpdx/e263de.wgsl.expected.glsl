@@ -9,13 +9,12 @@ void dpdx_e263de() {
 
 void fragment_main() {
   dpdx_e263de();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddx' : no matching overloaded function found 
 ERROR: 0:5: '' : compilation terminated 

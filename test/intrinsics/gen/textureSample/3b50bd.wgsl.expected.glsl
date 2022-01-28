@@ -9,10 +9,9 @@ void textureSample_3b50bd() {
 
 void fragment_main() {
   textureSample_3b50bd();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-

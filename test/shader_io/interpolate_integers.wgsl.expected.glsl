@@ -1,6 +1,10 @@
 #version 310 es
 precision mediump float;
 
+layout(location = 0) flat out int i_1;
+layout(location = 1) flat out uint u_1;
+layout(location = 2) flat out ivec4 vi_1;
+layout(location = 3) flat out uvec4 vu_1;
 struct Interface {
   int i;
   uint u;
@@ -9,62 +13,30 @@ struct Interface {
   vec4 pos;
 };
 
-struct tint_symbol {
-  int i;
-  uint u;
-  ivec4 vi;
-  uvec4 vu;
-  vec4 pos;
-};
-
-Interface vert_main_inner() {
-  Interface tint_symbol_4 = Interface(0, 0u, ivec4(0, 0, 0, 0), uvec4(0u, 0u, 0u, 0u), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  return tint_symbol_4;
+Interface vert_main() {
+  Interface tint_symbol = Interface(0, 0u, ivec4(0, 0, 0, 0), uvec4(0u, 0u, 0u, 0u), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  return tint_symbol;
 }
-
-struct tint_symbol_2 {
-  int i;
-  uint u;
-  ivec4 vi;
-  uvec4 vu;
-  vec4 pos;
-};
-
-struct tint_symbol_3 {
-  int value;
-};
-
-tint_symbol vert_main() {
-  Interface inner_result = vert_main_inner();
-  tint_symbol wrapper_result = tint_symbol(0, 0u, ivec4(0, 0, 0, 0), uvec4(0u, 0u, 0u, 0u), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.i = inner_result.i;
-  wrapper_result.u = inner_result.u;
-  wrapper_result.vi = inner_result.vi;
-  wrapper_result.vu = inner_result.vu;
-  wrapper_result.pos = inner_result.pos;
-  return wrapper_result;
-}
-layout(location = 0) flat out int i;
-layout(location = 1) flat out uint u;
-layout(location = 2) flat out ivec4 vi;
-layout(location = 3) flat out uvec4 vu;
-
 
 void main() {
-  tint_symbol outputs;
-  outputs = vert_main();
-  i = outputs.i;
-  u = outputs.u;
-  vi = outputs.vi;
-  vu = outputs.vu;
-  gl_Position = outputs.pos;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  Interface inner_result = vert_main();
+  i_1 = inner_result.i;
+  u_1 = inner_result.u;
+  vi_1 = inner_result.vi;
+  vu_1 = inner_result.vu;
+  gl_Position = inner_result.pos;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-
 #version 310 es
 precision mediump float;
 
+layout(location = 0) flat in int i_1;
+layout(location = 1) flat in uint u_1;
+layout(location = 2) flat in ivec4 vi_1;
+layout(location = 3) flat in uvec4 vu_1;
+layout(location = 0) out int value;
 struct Interface {
   int i;
   uint u;
@@ -73,53 +45,13 @@ struct Interface {
   vec4 pos;
 };
 
-struct tint_symbol {
-  int i;
-  uint u;
-  ivec4 vi;
-  uvec4 vu;
-  vec4 pos;
-};
-
-struct tint_symbol_2 {
-  int i;
-  uint u;
-  ivec4 vi;
-  uvec4 vu;
-  vec4 pos;
-};
-
-struct tint_symbol_3 {
-  int value;
-};
-
-int frag_main_inner(Interface inputs) {
+int frag_main(Interface inputs) {
   return inputs.i;
 }
 
-tint_symbol_3 frag_main(tint_symbol_2 tint_symbol_1) {
-  Interface tint_symbol_4 = Interface(tint_symbol_1.i, tint_symbol_1.u, tint_symbol_1.vi, tint_symbol_1.vu, tint_symbol_1.pos);
-  int inner_result_1 = frag_main_inner(tint_symbol_4);
-  tint_symbol_3 wrapper_result_1 = tint_symbol_3(0);
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
-}
-layout(location = 0) flat in int i;
-layout(location = 1) flat in uint u;
-layout(location = 2) flat in ivec4 vi;
-layout(location = 3) flat in uvec4 vu;
-
-layout(location = 0) out int value;
-
 void main() {
-  tint_symbol_2 inputs;
-  inputs.i = i;
-  inputs.u = u;
-  inputs.vi = vi;
-  inputs.vu = vu;
-  inputs.pos = gl_FragCoord;
-  tint_symbol_3 outputs;
-  outputs = frag_main(inputs);
-  value = outputs.value;
+  Interface tint_symbol = Interface(i_1, u_1, vi_1, vu_1, gl_FragCoord);
+  int inner_result = frag_main(tint_symbol);
+  value = inner_result;
+  return;
 }
-

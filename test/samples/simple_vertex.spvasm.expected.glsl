@@ -11,29 +11,16 @@ struct main_out {
   vec4 tint_symbol;
 };
 
-struct tint_symbol_2 {
-  vec4 tint_symbol;
-};
-
-main_out tint_symbol_1_inner() {
+main_out tint_symbol_1() {
   main_1();
-  main_out tint_symbol_3 = main_out(tint_symbol);
-  return tint_symbol_3;
+  main_out tint_symbol_2 = main_out(tint_symbol);
+  return tint_symbol_2;
 }
-
-tint_symbol_2 tint_symbol_1() {
-  main_out inner_result = tint_symbol_1_inner();
-  tint_symbol_2 wrapper_result = tint_symbol_2(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.tint_symbol = inner_result.tint_symbol;
-  return wrapper_result;
-}
-
 
 void main() {
-  tint_symbol_2 outputs;
-  outputs = tint_symbol_1();
-  gl_Position = outputs.tint_symbol;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  main_out inner_result = tint_symbol_1();
+  gl_Position = inner_result.tint_symbol;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-

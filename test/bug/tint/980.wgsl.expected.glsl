@@ -16,24 +16,12 @@ layout(binding = 0) buffer S_1 {
   vec3 v;
   uint i;
 } io;
-struct tint_symbol_2 {
-  uint idx;
-};
-
-void tint_symbol_inner(uint idx) {
+void tint_symbol(uint idx) {
   io.v = Bad(io.i, io.v);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void tint_symbol(tint_symbol_2 tint_symbol_1) {
-  tint_symbol_inner(tint_symbol_1.idx);
+void main() {
+  tint_symbol(gl_LocalInvocationIndex);
   return;
 }
-
-
-void main() {
-  tint_symbol_2 inputs;
-  inputs.idx = uint(gl_LocalInvocationIndex);
-  tint_symbol(inputs);
-}
-

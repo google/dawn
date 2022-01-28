@@ -1,26 +1,45 @@
 #version 310 es
 precision mediump float;
 
-struct tint_symbol_2 {
-  vec2 a_particlePos;
-  vec2 a_particleVel;
-  vec2 a_pos;
+layout(location = 0) in vec2 a_particlePos_1;
+layout(location = 1) in vec2 a_particleVel_1;
+layout(location = 2) in vec2 a_pos_1;
+struct Particle {
+  vec2 pos;
+  vec2 vel;
 };
 
-struct tint_symbol_3 {
-  vec4 value;
+struct SimParams {
+  float deltaT;
+  float rule1Distance;
+  float rule2Distance;
+  float rule3Distance;
+  float rule1Scale;
+  float rule2Scale;
+  float rule3Scale;
 };
 
-vec4 vert_main_inner(vec2 a_particlePos, vec2 a_particleVel, vec2 a_pos) {
+struct Particles {
+  Particle particles[5];
+};
+
+vec4 vert_main(vec2 a_particlePos, vec2 a_particleVel, vec2 a_pos) {
   float angle = -(atan(a_particleVel.x, a_particleVel.y));
   vec2 pos = vec2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
   return vec4((pos + a_particlePos), 0.0f, 1.0f);
 }
 
-struct tint_symbol_4 {
-  vec4 value;
-};
+void main() {
+  vec4 inner_result = vert_main(a_particlePos_1, a_particleVel_1, a_pos_1);
+  gl_Position = inner_result;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
+}
+#version 310 es
+precision mediump float;
 
+layout(location = 0) out vec4 value;
 struct Particle {
   vec2 pos;
   vec2 vel;
@@ -40,107 +59,17 @@ struct Particles {
   Particle particles[5];
 };
 
-struct tint_symbol_6 {
-  uvec3 tint_symbol;
-};
-
-tint_symbol_3 vert_main(tint_symbol_2 tint_symbol_1) {
-  vec4 inner_result = vert_main_inner(tint_symbol_1.a_particlePos, tint_symbol_1.a_particleVel, tint_symbol_1.a_pos);
-  tint_symbol_3 wrapper_result = tint_symbol_3(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-layout(location = 0) in vec2 a_particlePos;
-layout(location = 1) in vec2 a_particleVel;
-layout(location = 2) in vec2 a_pos;
-
-
-void main() {
-  tint_symbol_2 inputs;
-  inputs.a_particlePos = a_particlePos;
-  inputs.a_particleVel = a_particleVel;
-  inputs.a_pos = a_pos;
-  tint_symbol_3 outputs;
-  outputs = vert_main(inputs);
-  gl_Position = outputs.value;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
-}
-
-#version 310 es
-precision mediump float;
-
-struct tint_symbol_2 {
-  vec2 a_particlePos;
-  vec2 a_particleVel;
-  vec2 a_pos;
-};
-
-struct tint_symbol_3 {
-  vec4 value;
-};
-
-struct tint_symbol_4 {
-  vec4 value;
-};
-
-vec4 frag_main_inner() {
+vec4 frag_main() {
   return vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-struct Particle {
-  vec2 pos;
-  vec2 vel;
-};
-
-struct SimParams {
-  float deltaT;
-  float rule1Distance;
-  float rule2Distance;
-  float rule3Distance;
-  float rule1Scale;
-  float rule2Scale;
-  float rule3Scale;
-};
-
-struct Particles {
-  Particle particles[5];
-};
-
-struct tint_symbol_6 {
-  uvec3 tint_symbol;
-};
-
-tint_symbol_4 frag_main() {
-  vec4 inner_result_1 = frag_main_inner();
-  tint_symbol_4 wrapper_result_1 = tint_symbol_4(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
-}
-layout(location = 0) out vec4 value;
-
 void main() {
-  tint_symbol_4 outputs;
-  outputs = frag_main();
-  value = outputs.value;
+  vec4 inner_result = frag_main();
+  value = inner_result;
+  return;
 }
-
 #version 310 es
 precision mediump float;
-
-struct tint_symbol_2 {
-  vec2 a_particlePos;
-  vec2 a_particleVel;
-  vec2 a_pos;
-};
-
-struct tint_symbol_3 {
-  vec4 value;
-};
-
-struct tint_symbol_4 {
-  vec4 value;
-};
 
 struct Particle {
   vec2 pos;
@@ -177,11 +106,7 @@ layout(binding = 1) buffer Particles_1 {
 layout(binding = 2) buffer Particles_2 {
   Particle particles[5];
 } particlesB;
-struct tint_symbol_6 {
-  uvec3 tint_symbol;
-};
-
-void comp_main_inner(uvec3 tint_symbol) {
+void comp_main(uvec3 tint_symbol) {
   uint index = tint_symbol.x;
   if ((index >= 5u)) {
     return;
@@ -241,15 +166,7 @@ void comp_main_inner(uvec3 tint_symbol) {
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void comp_main(tint_symbol_6 tint_symbol_5) {
-  comp_main_inner(tint_symbol_5.tint_symbol);
+void main() {
+  comp_main(gl_GlobalInvocationID);
   return;
 }
-
-
-void main() {
-  tint_symbol_6 inputs;
-  inputs.tint_symbol = gl_GlobalInvocationID;
-  comp_main(inputs);
-}
-

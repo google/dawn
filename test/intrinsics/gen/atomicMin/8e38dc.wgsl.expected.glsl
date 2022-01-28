@@ -14,13 +14,12 @@ void atomicMin_8e38dc() {
 
 void fragment_main() {
   atomicMin_8e38dc();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 #version 310 es
 precision mediump float;
 
@@ -35,13 +34,12 @@ void atomicMin_8e38dc() {
   int res = atomicMin(sb_rw.arg_0, 1);
 }
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void compute_main() {
   atomicMin_8e38dc();
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   compute_main();
+  return;
 }
-

@@ -9,13 +9,12 @@ void dpdx_0763f7() {
 
 void fragment_main() {
   dpdx_0763f7();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddx' : no matching overloaded function found 
 ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'

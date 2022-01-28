@@ -8,13 +8,12 @@ int foo() {
   return data.inner[0];
 }
 
-layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void tint_symbol() {
   foo();
-  return;
 }
 
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main() {
   tint_symbol();
+  return;
 }
-

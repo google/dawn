@@ -11,13 +11,12 @@ void textureSampleCompare_98b85c() {
 
 void fragment_main() {
   textureSampleCompare_98b85c();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:7: 'textureOffset' : no matching overloaded function found 
 ERROR: 0:7: '' : compilation terminated 

@@ -59,13 +59,12 @@ void a_func() {
   b.GetDimensions(tint_symbol_1);
   uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
   uint len = tint_symbol_2;
-  return;
 }
 
 void main() {
   a_func();
+  return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -109,13 +108,12 @@ void a_func() {
   b.GetDimensions(tint_symbol_1);
   uint tint_symbol_2 = ((tint_symbol_1 - 4u) / 4u);
   uint len = tint_symbol_2;
-  return;
 }
 
 void main() {
   a_func();
+  return;
 }
-
 )";
 
   EXPECT_EQ(expect, got);
@@ -160,13 +158,12 @@ void a_func() {
   b.GetDimensions(tint_symbol_1);
   uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
   uint len = tint_symbol_2;
-  return;
 }
 
 void main() {
   a_func();
+  return;
 }
-
 )";
 
   EXPECT_EQ(expect, got);
@@ -196,13 +193,12 @@ precision mediump float;
 void tint_symbol() {
   int tint_symbol_1[4] = int[4](1, 2, 3, 4);
   int pos = tint_symbol_1[3];
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -243,13 +239,12 @@ struct S {
 void tint_symbol() {
   S tint_symbol_1 = S(1, vec3(2.0f, 3.0f, 4.0f), 4);
   vec3 pos = tint_symbol_1.b;
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -284,13 +279,12 @@ precision mediump float;
 void tint_symbol() {
   int v = 0;
   int x = v;
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -337,13 +331,12 @@ precision mediump float;
 void tint_symbol() {
   mat4 a[4] = mat4[4](mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
   vec4 v = a[3][2];
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }

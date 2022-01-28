@@ -9,13 +9,12 @@ void dpdy_7f8d84() {
 
 void fragment_main() {
   dpdy_7f8d84();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddy' : no matching overloaded function found 
 ERROR: 0:5: '' : compilation terminated 

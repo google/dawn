@@ -62,10 +62,9 @@ layout(binding = 1) uniform S_16 {
 } b15;
 
 void tint_symbol() {
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-

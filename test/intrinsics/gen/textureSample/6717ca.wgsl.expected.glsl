@@ -9,10 +9,9 @@ void textureSample_6717ca() {
 
 void fragment_main() {
   textureSample_6717ca();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-

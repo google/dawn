@@ -20,17 +20,11 @@ layout(binding = 3) uniform Flip_1 {
 } flip;
 
 shared vec3 tile[4][256];
-struct tint_symbol_2 {
-  uvec3 LocalInvocationID;
-  uint local_invocation_index;
-  uvec3 WorkGroupID;
-};
-
 uniform highp sampler2D inputTex_1;
 uniform highp sampler2D inputTex_samp;
 layout(rgba8) uniform highp writeonly image2D outputTex_1;
 
-void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocation_index) {
+void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
       uint i_1 = (idx / 256u);
@@ -90,19 +84,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_in
 }
 
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
-void tint_symbol(tint_symbol_2 tint_symbol_1) {
-  tint_symbol_inner(tint_symbol_1.WorkGroupID, tint_symbol_1.LocalInvocationID, tint_symbol_1.local_invocation_index);
+void main() {
+  tint_symbol(gl_WorkGroupID, gl_LocalInvocationID, gl_LocalInvocationIndex);
   return;
 }
-
-
-
-
-void main() {
-  tint_symbol_2 inputs;
-  inputs.LocalInvocationID = gl_LocalInvocationID;
-  inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
-  inputs.WorkGroupID = gl_WorkGroupID;
-  tint_symbol(inputs);
-}
-

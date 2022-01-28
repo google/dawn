@@ -30,7 +30,6 @@ layout(binding = 0) buffer S_1 {
   Inner i;
   Inner j[4];
 } s;
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   s.a = ivec3(0, 0, 0);
   s.b = 0;
@@ -44,10 +43,10 @@ void tint_symbol() {
   s.i = tint_symbol_1;
   Inner tint_symbol_2[4] = Inner[4](Inner(0), Inner(0), Inner(0), Inner(0));
   s.j = tint_symbol_2;
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_symbol();
+  return;
 }
-

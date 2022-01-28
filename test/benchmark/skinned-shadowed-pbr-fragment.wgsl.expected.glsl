@@ -7,6 +7,17 @@ benchmark/skinned-shadowed-pbr-fragment.wgsl:51:13 warning: use of deprecated la
 #version 310 es
 precision mediump float;
 
+layout(location = 0) in vec3 worldPos_1;
+layout(location = 1) in vec3 view_1;
+layout(location = 2) in vec2 texcoord_1;
+layout(location = 3) in vec2 texcoord2_1;
+layout(location = 4) in vec4 color_1;
+layout(location = 5) in vec4 instanceColor_1;
+layout(location = 6) in vec3 normal_1;
+layout(location = 7) in vec3 tangent_1;
+layout(location = 8) in vec3 bitangent_1;
+layout(location = 0) out vec4 color_2;
+layout(location = 1) out vec4 emissive_1;
 const float GAMMA = 2.200000048f;
 vec3 linearTosRGB(vec3 linear) {
   float INV_GAMMA = (1.0f / GAMMA);
@@ -312,27 +323,9 @@ struct FragmentOutput {
   vec4 emissive;
 };
 
-struct tint_symbol_4 {
-  vec3 worldPos;
-  vec3 view;
-  vec2 texcoord;
-  vec2 texcoord2;
-  vec4 color;
-  vec4 instanceColor;
-  vec3 normal;
-  vec3 tangent;
-  vec3 bitangent;
-  vec4 position;
-};
-
-struct tint_symbol_5 {
-  vec4 color;
-  vec4 emissive;
-};
-
 uniform highp sampler2D ssaoTexture_1;
 uniform highp sampler2D ssaoTexture_defaultSampler;
-FragmentOutput fragmentMain_inner(VertexOutput tint_symbol) {
+FragmentOutput fragmentMain(VertexOutput tint_symbol) {
   SurfaceInfo surface = GetSurfaceInfo(tint_symbol);
   vec3 Lo = vec3(0.0f, 0.0f, 0.0f);
   if ((globalLights.dirIntensity > 0.0f)) {
@@ -370,48 +363,16 @@ FragmentOutput fragmentMain_inner(VertexOutput tint_symbol) {
   return tint_symbol_2;
 }
 
-tint_symbol_5 fragmentMain(tint_symbol_4 tint_symbol_3) {
-  VertexOutput tint_symbol_6 = VertexOutput(tint_symbol_3.position, tint_symbol_3.worldPos, tint_symbol_3.view, tint_symbol_3.texcoord, tint_symbol_3.texcoord2, tint_symbol_3.color, tint_symbol_3.instanceColor, tint_symbol_3.normal, tint_symbol_3.tangent, tint_symbol_3.bitangent);
-  FragmentOutput inner_result = fragmentMain_inner(tint_symbol_6);
-  tint_symbol_5 wrapper_result = tint_symbol_5(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.color = inner_result.color;
-  wrapper_result.emissive = inner_result.emissive;
-  return wrapper_result;
-}
-layout(location = 0) in vec3 worldPos;
-layout(location = 1) in vec3 view;
-layout(location = 2) in vec2 texcoord;
-layout(location = 3) in vec2 texcoord2;
-layout(location = 4) in vec4 color;
-layout(location = 5) in vec4 instanceColor;
-layout(location = 6) in vec3 normal;
-layout(location = 7) in vec3 tangent;
-layout(location = 8) in vec3 bitangent;
-
-layout(location = 0) out vec4 color;
-layout(location = 1) out vec4 emissive;
-
 void main() {
-  tint_symbol_4 inputs;
-  inputs.worldPos = worldPos;
-  inputs.view = view;
-  inputs.texcoord = texcoord;
-  inputs.texcoord2 = texcoord2;
-  inputs.color = color;
-  inputs.instanceColor = instanceColor;
-  inputs.normal = normal;
-  inputs.tangent = tangent;
-  inputs.bitangent = bitangent;
-  inputs.position = gl_FragCoord;
-  tint_symbol_5 outputs;
-  outputs = fragmentMain(inputs);
-  color = outputs.color;
-  emissive = outputs.emissive;
+  VertexOutput tint_symbol_3 = VertexOutput(gl_FragCoord, worldPos_1, view_1, texcoord_1, texcoord2_1, color_1, instanceColor_1, normal_1, tangent_1, bitangent_1);
+  FragmentOutput inner_result = fragmentMain(tint_symbol_3);
+  color_2 = inner_result.color;
+  emissive_1 = inner_result.emissive;
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:65: 'mad' : no matching overloaded function found 
-ERROR: 0:65: '' : compilation terminated 
+ERROR: 0:76: 'mad' : no matching overloaded function found 
+ERROR: 0:76: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

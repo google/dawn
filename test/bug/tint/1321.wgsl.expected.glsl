@@ -14,10 +14,9 @@ void tint_symbol() {
       break;
     }
   }
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-

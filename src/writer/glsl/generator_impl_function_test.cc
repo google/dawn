@@ -103,11 +103,6 @@ precision mediump float;
 void func() {
   return;
 }
-
-void main() {
-  func();
-}
-
 )");
 }
 
@@ -142,35 +137,17 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct tint_symbol_1 {
-  float foo;
-};
-
-struct tint_symbol_2 {
-  float value;
-};
-
-float frag_main_inner(float foo) {
+layout(location = 0) in float foo_1;
+layout(location = 1) out float value;
+float frag_main(float foo) {
   return foo;
 }
 
-tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  float inner_result = frag_main_inner(tint_symbol.foo);
-  tint_symbol_2 wrapper_result = tint_symbol_2(0.0f);
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-layout(location = 0) in float foo;
-layout(location = 1) out float value;
-
 void main() {
-  tint_symbol_1 inputs;
-  inputs.foo = foo;
-  tint_symbol_2 outputs;
-  outputs = frag_main(inputs);
-  value = outputs.value;
+  float inner_result = frag_main(foo_1);
+  value = inner_result;
+  return;
 }
-
 )");
 }
 
@@ -192,35 +169,15 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct tint_symbol_1 {
-  vec4 coord;
-};
-
-struct tint_symbol_2 {
-  float value;
-};
-
-float frag_main_inner(vec4 coord) {
+float frag_main(vec4 coord) {
   return coord.x;
 }
 
-tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  float inner_result = frag_main_inner(tint_symbol.coord);
-  tint_symbol_2 wrapper_result = tint_symbol_2(0.0f);
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-
-
-
 void main() {
-  tint_symbol_1 inputs;
-  inputs.coord = gl_FragCoord;
-  tint_symbol_2 outputs;
-  outputs = frag_main(inputs);
-  gl_FragDepth = outputs.value;
+  float inner_result = frag_main(gl_FragCoord);
+  gl_FragDepth = inner_result;
+  return;
 }
-
 )");
 }
 
@@ -266,74 +223,41 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+layout(location = 1) out float col1_1;
+layout(location = 2) out float col2_1;
+layout(location = 1) in float col1_2;
+layout(location = 2) in float col2_2;
 struct Interface {
   vec4 pos;
   float col1;
   float col2;
 };
 
-struct tint_symbol {
-  float col1;
-  float col2;
-  vec4 pos;
-};
-
-Interface vert_main_inner() {
-  Interface tint_symbol_3 = Interface(vec4(0.0f, 0.0f, 0.0f, 0.0f), 0.5f, 0.25f);
-  return tint_symbol_3;
+Interface vert_main() {
+  Interface tint_symbol = Interface(vec4(0.0f, 0.0f, 0.0f, 0.0f), 0.5f, 0.25f);
+  return tint_symbol;
 }
-
-tint_symbol vert_main() {
-  Interface inner_result = vert_main_inner();
-  tint_symbol wrapper_result = tint_symbol(0.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.col1 = inner_result.col1;
-  wrapper_result.col2 = inner_result.col2;
-  return wrapper_result;
-}
-layout(location = 1) out float col1;
-layout(location = 2) out float col2;
-
 
 void main() {
-  tint_symbol outputs;
-  outputs = vert_main();
-  col1 = outputs.col1;
-  col2 = outputs.col2;
-  gl_Position = outputs.pos;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  Interface inner_result = vert_main();
+  gl_Position = inner_result.pos;
+  col1_1 = inner_result.col1;
+  col2_1 = inner_result.col2;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-
-struct tint_symbol_2 {
-  float col1;
-  float col2;
-  vec4 pos;
-};
-
-void frag_main_inner(Interface inputs) {
+void frag_main(Interface inputs) {
   float r = inputs.col1;
   float g = inputs.col2;
   vec4 p = inputs.pos;
 }
 
-void frag_main(tint_symbol_2 tint_symbol_1) {
-  Interface tint_symbol_4 = Interface(tint_symbol_1.pos, tint_symbol_1.col1, tint_symbol_1.col2);
-  frag_main_inner(tint_symbol_4);
+void main_1() {
+  Interface tint_symbol_1 = Interface(gl_FragCoord, col1_2, col2_2);
+  frag_main(tint_symbol_1);
   return;
 }
-layout(location = 1) in float col1;
-layout(location = 2) in float col2;
-
-
-void main() {
-  tint_symbol_2 inputs;
-  inputs.col1 = col1;
-  inputs.col2 = col2;
-  inputs.pos = gl_FragCoord;
-  frag_main(inputs);
-}
-
 )");
 }
 
@@ -459,11 +383,6 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
-
-void main() {
-  frag_main();
-}
-
 )");
 }
 
@@ -508,11 +427,6 @@ void frag_main() {
   float v = uniforms.coord.x;
   return;
 }
-
-void main() {
-  frag_main();
-}
-
 )");
 }
 
@@ -566,8 +480,8 @@ void frag_main() {
 
 void main() {
   frag_main();
+  return;
 }
-
 )");
 }
 
@@ -621,8 +535,8 @@ void frag_main() {
 
 void main() {
   frag_main();
+  return;
 }
-
 )");
 }
 
@@ -672,8 +586,8 @@ void frag_main() {
 
 void main() {
   frag_main();
+  return;
 }
-
 )");
 }
 
@@ -724,8 +638,8 @@ void frag_main() {
 
 void main() {
   frag_main();
+  return;
 }
-
 )");
 }
 
@@ -778,11 +692,6 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
-
-void main() {
-  frag_main();
-}
-
 )");
 }
 
@@ -839,8 +748,8 @@ void frag_main() {
 
 void main() {
   frag_main();
+  return;
 }
-
 )");
 }
 
@@ -858,13 +767,12 @@ TEST_F(GlslGeneratorImplTest_Function,
 precision mediump float;
 
 void tint_symbol() {
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 )");
 }
 
@@ -885,11 +793,6 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   return;
 }
-
-void main() {
-  main();
-}
-
 )");
 }
 
@@ -911,11 +814,6 @@ layout(local_size_x = 2, local_size_y = 4, local_size_z = 6) in;
 void main() {
   return;
 }
-
-void main() {
-  main();
-}
-
 )");
 }
 
@@ -943,11 +841,6 @@ layout(local_size_x = 2, local_size_y = 3, local_size_z = 4) in;
 void main() {
   return;
 }
-
-void main() {
-  main();
-}
-
 )");
 }
 
@@ -984,11 +877,6 @@ layout(local_size_x = WGSL_SPEC_CONSTANT_7, local_size_y = WGSL_SPEC_CONSTANT_8,
 void main() {
   return;
 }
-
-void main() {
-  main();
-}
-
 )");
 }
 
@@ -1096,26 +984,26 @@ struct Data {
 layout(binding = 0) buffer Data_1 {
   float d;
 } data;
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void a() {
   float v = data.d;
   return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   a();
+  return;
 }
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void b() {
   float v = data.d;
   return;
 }
 
-void main() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main_1() {
   b();
+  return;
 }
-
 )");
 }
 

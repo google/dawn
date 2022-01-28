@@ -63,17 +63,13 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     // ZeroInitWorkgroupMemory may inject new builtin parameters.
     manager.Add<ZeroInitWorkgroupMemory>();
   }
-  manager.Add<CanonicalizeEntryPointIO>();
-  manager.Add<SimplifyPointers>();
-
-  // Running SingleEntryPoint before RemovePhonies prevents variables
-  // referenced only by phonies from being optimized out. Strictly
-  // speaking, that optimization isn't incorrect, but it prevents some
-  // tests (e.g., types/texture/*) from producing useful results.
   if (cfg && !cfg->entry_point.empty()) {
     manager.Add<SingleEntryPoint>();
     data.Add<SingleEntryPoint::Config>(cfg->entry_point);
   }
+  manager.Add<CanonicalizeEntryPointIO>();
+  manager.Add<SimplifyPointers>();
+
   manager.Add<RemovePhonies>();
   manager.Add<CombineSamplers>();
   if (auto* binding_info = inputs.Get<CombineSamplers::BindingInfo>()) {
@@ -100,11 +96,8 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   manager.Add<AddEmptyEntryPoint>();
   manager.Add<AddSpirvBlockDecoration>();
 
-  // For now, canonicalize to structs for all IO, as in HLSL.
-  // TODO(senorblanco): we could skip this by accessing global entry point
-  // variables directly.
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+      CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;

@@ -11,6 +11,7 @@ type Arr_1 = @stride(16) array<f32, 1>;
 #version 310 es
 precision mediump float;
 
+layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
   int el;
 };
@@ -70,33 +71,20 @@ struct main_out {
   vec4 x_GLF_color_1;
 };
 
-struct tint_symbol_1 {
-  vec4 x_GLF_color_1;
-};
-
-main_out tint_symbol_inner() {
+main_out tint_symbol() {
   main_1();
-  main_out tint_symbol_2 = main_out(x_GLF_color);
-  return tint_symbol_2;
+  main_out tint_symbol_1 = main_out(x_GLF_color);
+  return tint_symbol_1;
 }
-
-tint_symbol_1 tint_symbol() {
-  main_out inner_result = tint_symbol_inner();
-  tint_symbol_1 wrapper_result = tint_symbol_1(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
-  return wrapper_result;
-}
-layout(location = 0) out vec4 x_GLF_color_1;
 
 void main() {
-  tint_symbol_1 outputs;
-  outputs = tint_symbol();
-  x_GLF_color_1 = outputs.x_GLF_color_1;
+  main_out inner_result = tint_symbol();
+  x_GLF_color_1_1 = inner_result.x_GLF_color_1;
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:33: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' const float' and a right operand of type ' const float' (or there is no acceptable conversion)
-ERROR: 0:33: '' : compilation terminated 
+ERROR: 0:34: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' const float' and a right operand of type ' const float' (or there is no acceptable conversion)
+ERROR: 0:34: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

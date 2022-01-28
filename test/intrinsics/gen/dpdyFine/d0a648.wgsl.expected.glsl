@@ -9,13 +9,12 @@ void dpdyFine_d0a648() {
 
 void fragment_main() {
   dpdyFine_d0a648();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddy_fine' : no matching overloaded function found 
 ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'

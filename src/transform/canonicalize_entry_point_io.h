@@ -90,6 +90,8 @@ class CanonicalizeEntryPointIO
   enum class ShaderStyle {
     /// Target SPIR-V (using global variables).
     kSpirv,
+    /// Target GLSL (using global variables).
+    kGlsl,
     /// Target MSL (using non-struct function parameters for builtins).
     kMsl,
     /// Target HLSL (using structures for all IO).

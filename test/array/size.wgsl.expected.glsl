@@ -10,10 +10,9 @@ void tint_symbol() {
   float unsigned_constant[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   signed_literal = unsigned_constant;
   signed_constant = unsigned_literal;
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-

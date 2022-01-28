@@ -3,7 +3,6 @@ precision mediump float;
 
 uniform highp usampler2D Src_1;
 layout(r32ui) uniform highp writeonly uimage2D Dst_1;
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void tint_symbol() {
   uvec4 srcValue = uvec4(0u, 0u, 0u, 0u);
   uvec4 x_22 = texelFetch(Src_1, ivec2(0, 0), 0);
@@ -14,7 +13,8 @@ void tint_symbol() {
   return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_symbol();
+  return;
 }
-

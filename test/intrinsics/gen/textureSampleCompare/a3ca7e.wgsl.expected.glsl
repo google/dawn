@@ -11,13 +11,12 @@ void textureSampleCompare_a3ca7e() {
 
 void fragment_main() {
   textureSampleCompare_a3ca7e();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 

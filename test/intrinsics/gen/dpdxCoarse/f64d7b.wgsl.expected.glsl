@@ -9,13 +9,12 @@ void dpdxCoarse_f64d7b() {
 
 void fragment_main() {
   dpdxCoarse_f64d7b();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddx_coarse' : no matching overloaded function found 
 ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'

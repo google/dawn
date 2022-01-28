@@ -9,13 +9,12 @@ void dpdxCoarse_029152() {
 
 void fragment_main() {
   dpdxCoarse_029152();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddx_coarse' : no matching overloaded function found 
 ERROR: 0:5: '' : compilation terminated 

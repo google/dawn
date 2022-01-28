@@ -25,13 +25,12 @@ void main_1() {
 
 void tint_symbol() {
   main_1();
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:19: 'textureSamples' : no matching overloaded function found 
 ERROR: 0:19: '' : compilation terminated 

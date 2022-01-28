@@ -21,13 +21,12 @@ layout(binding = 1) buffer Result_1 {
   int tint_symbol;
 } result;
 S s = S(int[64](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void f() {
   result.tint_symbol = s.data[ubo.dynamic_idx];
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f();
+  return;
 }
-

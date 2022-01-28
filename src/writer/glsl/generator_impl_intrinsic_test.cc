@@ -399,17 +399,16 @@ float tint_degrees(float param_0) {
 }
 
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   float val = 0.0f;
   float tint_symbol = tint_degrees(val);
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
+  return;
 }
-
 )");
 }
 
@@ -429,17 +428,16 @@ vec3 tint_degrees(vec3 param_0) {
 }
 
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   vec3 val = vec3(0.0f, 0.0f, 0.0f);
   vec3 tint_symbol = tint_degrees(val);
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
+  return;
 }
-
 )");
 }
 
@@ -459,17 +457,16 @@ float tint_radians(float param_0) {
 }
 
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   float val = 0.0f;
   float tint_symbol = tint_radians(val);
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
+  return;
 }
-
 )");
 }
 
@@ -489,17 +486,16 @@ vec3 tint_radians(vec3 param_0) {
 }
 
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   vec3 val = vec3(0.0f, 0.0f, 0.0f);
   vec3 tint_symbol = tint_radians(val);
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
+  return;
 }
-
 )");
 }
 
@@ -736,16 +732,15 @@ int tint_int_dot(ivec3 a, ivec3 b) {
 }
 
 ivec3 v = ivec3(0, 0, 0);
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   tint_int_dot(v, v);
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
+  return;
 }
-
 )");
 }
 
@@ -764,16 +759,15 @@ uint tint_int_dot(uvec3 a, uvec3 b) {
 }
 
 uvec3 v = uvec3(0u, 0u, 0u);
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void test_function() {
   tint_int_dot(v, v);
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
+  return;
 }
-
 )");
 }
 

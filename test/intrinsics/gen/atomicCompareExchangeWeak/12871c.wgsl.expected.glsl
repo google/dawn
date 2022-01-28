@@ -22,13 +22,12 @@ void atomicCompareExchangeWeak_12871c() {
 
 void fragment_main() {
   atomicCompareExchangeWeak_12871c();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 #version 310 es
 precision mediump float;
 
@@ -51,13 +50,12 @@ void atomicCompareExchangeWeak_12871c() {
   ivec2 res = tint_atomicCompareExchangeWeak(sb_rw.arg_0, 1, 1);
 }
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void compute_main() {
   atomicCompareExchangeWeak_12871c();
-  return;
 }
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   compute_main();
+  return;
 }
-

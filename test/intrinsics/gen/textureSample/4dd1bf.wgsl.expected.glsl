@@ -11,13 +11,12 @@ void textureSample_4dd1bf() {
 
 void fragment_main() {
   textureSample_4dd1bf();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 

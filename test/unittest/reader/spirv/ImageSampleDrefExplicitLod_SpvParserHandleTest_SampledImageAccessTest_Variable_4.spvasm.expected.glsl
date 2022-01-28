@@ -28,13 +28,12 @@ void main_1() {
 
 void tint_symbol() {
   main_1();
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:23: '=' :  cannot convert from ' global highp 4-component vector of float' to ' temp mediump float'
 ERROR: 0:23: '' : compilation terminated 

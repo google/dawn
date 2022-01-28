@@ -21,11 +21,7 @@ layout(binding = 1) buffer Result_1 {
   int tint_symbol;
 } result;
 shared S s;
-struct tint_symbol_2 {
-  uint local_invocation_index;
-};
-
-void f_inner(uint local_invocation_index) {
+void f(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
       uint i = idx;
@@ -37,15 +33,7 @@ void f_inner(uint local_invocation_index) {
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void f(tint_symbol_2 tint_symbol_1) {
-  f_inner(tint_symbol_1.local_invocation_index);
+void main() {
+  f(gl_LocalInvocationIndex);
   return;
 }
-
-
-void main() {
-  tint_symbol_2 inputs;
-  inputs.local_invocation_index = uint(gl_LocalInvocationIndex);
-  f(inputs);
-}
-

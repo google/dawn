@@ -7,10 +7,9 @@ void fwidthFine_f1742d() {
 
 void fragment_main() {
   fwidthFine_f1742d();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-

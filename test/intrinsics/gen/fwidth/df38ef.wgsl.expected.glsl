@@ -7,10 +7,9 @@ void fwidth_df38ef() {
 
 void fragment_main() {
   fwidth_df38ef();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-

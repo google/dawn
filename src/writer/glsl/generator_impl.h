@@ -292,6 +292,11 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on success
   bool EmitWorkgroupVariable(const sem::Variable* var);
 
+  /// Handles emitting a global variable with the input or output storage class
+  /// @param var the global variable
+  /// @returns true on success
+  bool EmitIOVariable(const sem::Variable* var);
+
   /// Handles emitting interpolation qualifiers
   /// @param out the output of the expression stream
   /// @param decos the decorations

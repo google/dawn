@@ -1,18 +1,11 @@
 #version 310 es
 precision mediump float;
 
-struct tint_symbol_2 {
-  int loc0;
-  uint loc1;
-  float loc2;
-  vec4 loc3;
-};
-
-struct tint_symbol_3 {
-  vec4 value;
-};
-
-vec4 tint_symbol_inner(int loc0, uint loc1, float loc2, vec4 loc3) {
+layout(location = 0) in int loc0_1;
+layout(location = 1) in uint loc1_1;
+layout(location = 2) in float loc2_1;
+layout(location = 3) in vec4 loc3_1;
+vec4 tint_symbol(int loc0, uint loc1, float loc2, vec4 loc3) {
   int i = loc0;
   uint u = loc1;
   float f = loc2;
@@ -20,28 +13,10 @@ vec4 tint_symbol_inner(int loc0, uint loc1, float loc2, vec4 loc3) {
   return vec4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
-  vec4 inner_result = tint_symbol_inner(tint_symbol_1.loc0, tint_symbol_1.loc1, tint_symbol_1.loc2, tint_symbol_1.loc3);
-  tint_symbol_3 wrapper_result = tint_symbol_3(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-layout(location = 0) in int loc0;
-layout(location = 1) in uint loc1;
-layout(location = 2) in float loc2;
-layout(location = 3) in vec4 loc3;
-
-
 void main() {
-  tint_symbol_2 inputs;
-  inputs.loc0 = loc0;
-  inputs.loc1 = loc1;
-  inputs.loc2 = loc2;
-  inputs.loc3 = loc3;
-  tint_symbol_3 outputs;
-  outputs = tint_symbol(inputs);
-  gl_Position = outputs.value;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  vec4 inner_result = tint_symbol(loc0_1, loc1_1, loc2_1, loc3_1);
+  gl_Position = inner_result;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-

@@ -15,6 +15,7 @@ vec4 tint_unpack4x8snorm(uint param_0) {
 }
 
 
+layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
   float el;
 };
@@ -114,30 +115,17 @@ struct main_out {
   vec4 x_GLF_color_1;
 };
 
-struct tint_symbol_1 {
-  vec4 x_GLF_color_1;
-};
-
-main_out tint_symbol_inner() {
+main_out tint_symbol() {
   main_1();
-  main_out tint_symbol_2 = main_out(x_GLF_color);
-  return tint_symbol_2;
+  main_out tint_symbol_1 = main_out(x_GLF_color);
+  return tint_symbol_1;
 }
-
-tint_symbol_1 tint_symbol() {
-  main_out inner_result = tint_symbol_inner();
-  tint_symbol_1 wrapper_result = tint_symbol_1(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
-  return wrapper_result;
-}
-layout(location = 0) out vec4 x_GLF_color_1;
 
 void main() {
-  tint_symbol_1 outputs;
-  outputs = tint_symbol();
-  x_GLF_color_1 = outputs.x_GLF_color_1;
+  main_out inner_result = tint_symbol();
+  x_GLF_color_1_1 = inner_result.x_GLF_color_1;
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'uint4' : undeclared identifier 
 ERROR: 0:5: '' : compilation terminated 

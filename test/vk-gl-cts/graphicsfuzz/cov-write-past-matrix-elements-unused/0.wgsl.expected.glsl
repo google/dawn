@@ -11,6 +11,7 @@ type Arr_1 = @stride(16) array<i32, 3>;
 #version 310 es
 precision mediump float;
 
+layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
   float el;
 };
@@ -46,8 +47,8 @@ void main_1() {
   if ((x_45 == 1)) {
     m32[3][x_45] = x_40;
   }
-  float tint_symbol_2[3] = float[3](x_40, x_40, x_40);
-  sums = tint_symbol_2;
+  float tint_symbol_1[3] = float[3](x_40, x_40, x_40);
+  sums = tint_symbol_1;
   x_52_phi = x_45;
   while (true) {
     int x_53 = 0;
@@ -78,33 +79,20 @@ struct main_out {
   vec4 x_GLF_color_1;
 };
 
-struct tint_symbol_1 {
-  vec4 x_GLF_color_1;
-};
-
-main_out tint_symbol_inner() {
+main_out tint_symbol() {
   main_1();
-  main_out tint_symbol_3 = main_out(x_GLF_color);
-  return tint_symbol_3;
+  main_out tint_symbol_2 = main_out(x_GLF_color);
+  return tint_symbol_2;
 }
-
-tint_symbol_1 tint_symbol() {
-  main_out inner_result = tint_symbol_inner();
-  tint_symbol_1 wrapper_result = tint_symbol_1(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
-  return wrapper_result;
-}
-layout(location = 0) out vec4 x_GLF_color_1;
 
 void main() {
-  tint_symbol_1 outputs;
-  outputs = tint_symbol();
-  x_GLF_color_1 = outputs.x_GLF_color_1;
+  main_out inner_result = tint_symbol();
+  x_GLF_color_1_1 = inner_result.x_GLF_color_1;
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:37: '[' :  matrix index out of range '3'
-ERROR: 0:37: '' : compilation terminated 
+ERROR: 0:38: '[' :  matrix index out of range '3'
+ERROR: 0:38: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

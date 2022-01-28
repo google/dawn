@@ -3,6 +3,13 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
+layout(location = 2) in vec2 tUV_param_1;
+layout(location = 5) in vec2 tileID_1_param_1;
+layout(location = 4) in vec2 levelUnits_param_1;
+layout(location = 3) in vec2 stageUnits_1_param_1;
+layout(location = 0) in vec3 vPosition_param_1;
+layout(location = 1) in vec2 vUV_param_1;
+layout(location = 0) out vec4 glFragColor_1_1;
 struct LeftOver {
   float time;
   uint padding;
@@ -175,20 +182,7 @@ struct main_out {
   vec4 glFragColor_1;
 };
 
-struct tint_symbol_2 {
-  vec3 vPosition_param;
-  vec2 vUV_param;
-  vec2 tUV_param;
-  vec2 stageUnits_1_param;
-  vec2 levelUnits_param;
-  vec2 tileID_1_param;
-};
-
-struct tint_symbol_3 {
-  vec4 glFragColor_1;
-};
-
-main_out tint_symbol_inner(vec2 tUV_param, vec2 tileID_1_param, vec2 levelUnits_param, vec2 stageUnits_1_param, vec3 vPosition_param, vec2 vUV_param) {
+main_out tint_symbol(vec2 tUV_param, vec2 tileID_1_param, vec2 levelUnits_param, vec2 stageUnits_1_param, vec3 vPosition_param, vec2 vUV_param) {
   tUV = tUV_param;
   tileID_1 = tileID_1_param;
   levelUnits = levelUnits_param;
@@ -196,41 +190,19 @@ main_out tint_symbol_inner(vec2 tUV_param, vec2 tileID_1_param, vec2 levelUnits_
   vPosition = vPosition_param;
   vUV = vUV_param;
   main_1();
-  main_out tint_symbol_4 = main_out(glFragColor);
-  return tint_symbol_4;
+  main_out tint_symbol_1 = main_out(glFragColor);
+  return tint_symbol_1;
 }
-
-tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1) {
-  main_out inner_result = tint_symbol_inner(tint_symbol_1.tUV_param, tint_symbol_1.tileID_1_param, tint_symbol_1.levelUnits_param, tint_symbol_1.stageUnits_1_param, tint_symbol_1.vPosition_param, tint_symbol_1.vUV_param);
-  tint_symbol_3 wrapper_result = tint_symbol_3(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
-  return wrapper_result;
-}
-layout(location = 0) in vec3 vPosition_param;
-layout(location = 1) in vec2 vUV_param;
-layout(location = 2) in vec2 tUV_param;
-layout(location = 3) in vec2 stageUnits_1_param;
-layout(location = 4) in vec2 levelUnits_param;
-layout(location = 5) in vec2 tileID_1_param;
-layout(location = 0) out vec4 glFragColor_1;
 
 void main() {
-  tint_symbol_2 inputs;
-  inputs.vPosition_param = vPosition_param;
-  inputs.vUV_param = vUV_param;
-  inputs.tUV_param = tUV_param;
-  inputs.stageUnits_1_param = stageUnits_1_param;
-  inputs.levelUnits_param = levelUnits_param;
-  inputs.tileID_1_param = tileID_1_param;
-  tint_symbol_3 outputs;
-  outputs = tint_symbol(inputs);
-  glFragColor_1 = outputs.glFragColor_1;
+  main_out inner_result = tint_symbol(tUV_param_1, tileID_1_param_1, levelUnits_param_1, stageUnits_1_param_1, vPosition_param_1, vUV_param_1);
+  glFragColor_1_1 = inner_result.glFragColor_1;
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:73: 'frac' : no matching overloaded function found 
-ERROR: 0:73: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
-ERROR: 0:73: '' : compilation terminated 
+ERROR: 0:80: 'frac' : no matching overloaded function found 
+ERROR: 0:80: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
+ERROR: 0:80: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

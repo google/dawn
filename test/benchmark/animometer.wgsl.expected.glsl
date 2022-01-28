@@ -3,6 +3,9 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
+layout(location = 0) in vec4 position_1;
+layout(location = 1) in vec4 color_1;
+layout(location = 0) out vec4 v_color_1;
 struct Time {
   float value;
 };
@@ -32,17 +35,7 @@ struct VertexOutput {
   vec4 v_color;
 };
 
-struct tint_symbol_2 {
-  vec4 position;
-  vec4 color;
-};
-
-struct tint_symbol_3 {
-  vec4 v_color;
-  vec4 Position;
-};
-
-VertexOutput vert_main_inner(vec4 position, vec4 color) {
+VertexOutput vert_main(vec4 position, vec4 color) {
   float fade = ((uniforms.scalarOffset + ((time.value * uniforms.scalar) / 10.0f)) % 1.0f);
   if ((fade < 0.5f)) {
     fade = (fade * 2.0f);
@@ -62,41 +55,17 @@ VertexOutput vert_main_inner(vec4 position, vec4 color) {
   return tint_symbol;
 }
 
-struct tint_symbol_5 {
-  vec4 v_color;
-};
-
-struct tint_symbol_6 {
-  vec4 value;
-};
-
-tint_symbol_3 vert_main(tint_symbol_2 tint_symbol_1) {
-  VertexOutput inner_result = vert_main_inner(tint_symbol_1.position, tint_symbol_1.color);
-  tint_symbol_3 wrapper_result = tint_symbol_3(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.Position = inner_result.Position;
-  wrapper_result.v_color = inner_result.v_color;
-  return wrapper_result;
-}
-layout(location = 0) in vec4 position;
-layout(location = 1) in vec4 color;
-layout(location = 0) out vec4 v_color;
-
-
 void main() {
-  tint_symbol_2 inputs;
-  inputs.position = position;
-  inputs.color = color;
-  tint_symbol_3 outputs;
-  outputs = vert_main(inputs);
-  v_color = outputs.v_color;
-  gl_Position = outputs.Position;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  VertexOutput inner_result = vert_main(position_1, color_1);
+  gl_Position = inner_result.Position;
+  v_color_1 = inner_result.v_color;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-
 Error parsing GLSL shader:
-ERROR: 0:44: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' const float' (or there is no acceptable conversion)
-ERROR: 0:44: '' : compilation terminated 
+ERROR: 0:37: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' const float' (or there is no acceptable conversion)
+ERROR: 0:37: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -104,6 +73,8 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
+layout(location = 0) in vec4 v_color_1;
+layout(location = 0) out vec4 value_1;
 struct Time {
   float value;
 };
@@ -121,42 +92,12 @@ struct VertexOutput {
   vec4 v_color;
 };
 
-struct tint_symbol_2 {
-  vec4 position;
-  vec4 color;
-};
-
-struct tint_symbol_3 {
-  vec4 v_color;
-  vec4 Position;
-};
-
-struct tint_symbol_5 {
-  vec4 v_color;
-};
-
-struct tint_symbol_6 {
-  vec4 value;
-};
-
-vec4 frag_main_inner(vec4 v_color) {
+vec4 frag_main(vec4 v_color) {
   return v_color;
 }
 
-tint_symbol_6 frag_main(tint_symbol_5 tint_symbol_4) {
-  vec4 inner_result_1 = frag_main_inner(tint_symbol_4.v_color);
-  tint_symbol_6 wrapper_result_1 = tint_symbol_6(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
-}
-layout(location = 0) in vec4 v_color;
-layout(location = 0) out vec4 value;
-
 void main() {
-  tint_symbol_5 inputs;
-  inputs.v_color = v_color;
-  tint_symbol_6 outputs;
-  outputs = frag_main(inputs);
-  value = outputs.value;
+  vec4 inner_result = frag_main(v_color_1);
+  value_1 = inner_result;
+  return;
 }
-

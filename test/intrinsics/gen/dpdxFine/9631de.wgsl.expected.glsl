@@ -9,13 +9,12 @@ void dpdxFine_9631de() {
 
 void fragment_main() {
   dpdxFine_9631de();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:5: 'ddx_fine' : no matching overloaded function found 
 ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'

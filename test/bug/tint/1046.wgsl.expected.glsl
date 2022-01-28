@@ -1,8 +1,11 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
+layout(location = 0) in vec4 view_position_1;
+layout(location = 1) in vec4 normal_1;
+layout(location = 2) in vec2 uv_1;
+layout(location = 3) in vec4 color_1;
+layout(location = 0) out vec4 color_2;
 struct PointLight {
   vec4 position;
 };
@@ -38,53 +41,15 @@ struct FragmentOutput {
   vec4 color;
 };
 
-struct tint_symbol_3 {
-  vec4 view_position;
-  vec4 normal;
-  vec2 uv;
-  vec4 color;
-  vec4 position;
-};
-
-struct tint_symbol_4 {
-  vec4 color;
-};
-
-FragmentOutput tint_symbol_inner(FragmentInput fragment) {
+FragmentOutput tint_symbol(FragmentInput fragment) {
   FragmentOutput tint_symbol_1 = FragmentOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f));
   tint_symbol_1.color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
   return tint_symbol_1;
 }
 
-tint_symbol_4 tint_symbol(tint_symbol_3 tint_symbol_2) {
-  FragmentInput tint_symbol_5 = FragmentInput(tint_symbol_2.position, tint_symbol_2.view_position, tint_symbol_2.normal, tint_symbol_2.uv, tint_symbol_2.color);
-  FragmentOutput inner_result = tint_symbol_inner(tint_symbol_5);
-  tint_symbol_4 wrapper_result = tint_symbol_4(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.color = inner_result.color;
-  return wrapper_result;
-}
-layout(location = 0) in vec4 view_position;
-layout(location = 1) in vec4 normal;
-layout(location = 2) in vec2 uv;
-layout(location = 3) in vec4 color;
-
-layout(location = 0) out vec4 color;
-
 void main() {
-  tint_symbol_3 inputs;
-  inputs.view_position = view_position;
-  inputs.normal = normal;
-  inputs.uv = uv;
-  inputs.color = color;
-  inputs.position = gl_FragCoord;
-  tint_symbol_4 outputs;
-  outputs = tint_symbol(inputs);
-  color = outputs.color;
+  FragmentInput tint_symbol_2 = FragmentInput(gl_FragCoord, view_position_1, normal_1, uv_1, color_1);
+  FragmentOutput inner_result = tint_symbol(tint_symbol_2);
+  color_2 = inner_result.color;
+  return;
 }
-
-Error parsing GLSL shader:
-ERROR: 0:69: 'color' : redefinition 
-ERROR: 1 compilation errors.  No code generated.
-
-
-

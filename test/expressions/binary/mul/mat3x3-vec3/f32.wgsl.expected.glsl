@@ -13,10 +13,9 @@ layout(binding = 0) uniform S_1 {
 
 void tint_symbol() {
   vec3 x = (data.matrix * data.vector);
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-

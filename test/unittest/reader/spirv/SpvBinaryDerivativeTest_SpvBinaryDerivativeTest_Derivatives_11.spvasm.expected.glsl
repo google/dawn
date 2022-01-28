@@ -11,13 +11,12 @@ void main_1() {
 
 void tint_symbol() {
   main_1();
-  return;
 }
 
 void main() {
   tint_symbol();
+  return;
 }
-
 Error parsing GLSL shader:
 ERROR: 0:6: 'ddx_fine' : no matching overloaded function found 
 ERROR: 0:6: '=' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'

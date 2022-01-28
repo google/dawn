@@ -9,10 +9,9 @@ void textureSampleBias_81c19a() {
 
 void fragment_main() {
   textureSampleBias_81c19a();
-  return;
 }
 
 void main() {
   fragment_main();
+  return;
 }
-

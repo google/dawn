@@ -1,6 +1,9 @@
 #version 310 es
 precision mediump float;
 
+layout(location = 0) in vec4 cur_position_1;
+layout(location = 1) in vec4 color_1;
+layout(location = 0) out vec4 vtxFragColor_1;
 struct Uniforms {
   mat4 modelViewProjectionMatrix;
 };
@@ -19,59 +22,27 @@ struct VertexOutput {
   vec4 Position;
 };
 
-struct tint_symbol_3 {
-  vec4 cur_position;
-  vec4 color;
-};
-
-struct tint_symbol_4 {
-  vec4 vtxFragColor;
-  vec4 Position;
-};
-
-VertexOutput vtx_main_inner(VertexInput tint_symbol) {
+VertexOutput vtx_main(VertexInput tint_symbol) {
   VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
   tint_symbol_1.Position = (uniforms.modelViewProjectionMatrix * tint_symbol.cur_position);
   tint_symbol_1.vtxFragColor = tint_symbol.color;
   return tint_symbol_1;
 }
 
-struct tint_symbol_6 {
-  vec4 fragColor;
-};
-
-struct tint_symbol_7 {
-  vec4 value;
-};
-
-tint_symbol_4 vtx_main(tint_symbol_3 tint_symbol_2) {
-  VertexInput tint_symbol_8 = VertexInput(tint_symbol_2.cur_position, tint_symbol_2.color);
-  VertexOutput inner_result = vtx_main_inner(tint_symbol_8);
-  tint_symbol_4 wrapper_result = tint_symbol_4(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result.vtxFragColor = inner_result.vtxFragColor;
-  wrapper_result.Position = inner_result.Position;
-  return wrapper_result;
-}
-layout(location = 0) in vec4 cur_position;
-layout(location = 1) in vec4 color;
-layout(location = 0) out vec4 vtxFragColor;
-
-
 void main() {
-  tint_symbol_3 inputs;
-  inputs.cur_position = cur_position;
-  inputs.color = color;
-  tint_symbol_4 outputs;
-  outputs = vtx_main(inputs);
-  vtxFragColor = outputs.vtxFragColor;
-  gl_Position = outputs.Position;
-  gl_Position.z = 2.0 * gl_Position.z - gl_Position.w;
-  gl_Position.y = -gl_Position.y;
+  VertexInput tint_symbol_2 = VertexInput(cur_position_1, color_1);
+  VertexOutput inner_result = vtx_main(tint_symbol_2);
+  vtxFragColor_1 = inner_result.vtxFragColor;
+  gl_Position = inner_result.Position;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
+  return;
 }
-
 #version 310 es
 precision mediump float;
 
+layout(location = 0) in vec4 fragColor_1;
+layout(location = 0) out vec4 value;
 struct Uniforms {
   mat4 modelViewProjectionMatrix;
 };
@@ -86,42 +57,12 @@ struct VertexOutput {
   vec4 Position;
 };
 
-struct tint_symbol_3 {
-  vec4 cur_position;
-  vec4 color;
-};
-
-struct tint_symbol_4 {
-  vec4 vtxFragColor;
-  vec4 Position;
-};
-
-struct tint_symbol_6 {
-  vec4 fragColor;
-};
-
-struct tint_symbol_7 {
-  vec4 value;
-};
-
-vec4 frag_main_inner(vec4 fragColor) {
+vec4 frag_main(vec4 fragColor) {
   return fragColor;
 }
 
-tint_symbol_7 frag_main(tint_symbol_6 tint_symbol_5) {
-  vec4 inner_result_1 = frag_main_inner(tint_symbol_5.fragColor);
-  tint_symbol_7 wrapper_result_1 = tint_symbol_7(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
-}
-layout(location = 0) in vec4 fragColor;
-layout(location = 0) out vec4 value;
-
 void main() {
-  tint_symbol_6 inputs;
-  inputs.fragColor = fragColor;
-  tint_symbol_7 outputs;
-  outputs = frag_main(inputs);
-  value = outputs.value;
+  vec4 inner_result = frag_main(fragColor_1);
+  value = inner_result;
+  return;
 }
-
