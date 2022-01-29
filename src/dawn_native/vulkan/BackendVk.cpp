@@ -61,6 +61,8 @@ struct SkippedMessage {
 constexpr SkippedMessage kSkippedMessages[] = {
     // These errors are generated when simultaneously using a read-only depth/stencil attachment as
     // a texture binding. This is valid Vulkan.
+    // The substring matching matches both
+    // VK_PIPELINE_STAGE_2_NONE and VK_PIPELINE_STAGE_2_NONE_KHR.
     //
     // When storeOp=NONE is not present, Dawn uses storeOp=STORE, but Vulkan validation layer
     // considers the image read-only and produces a hazard. Dawn can't rely on storeOp=NONE and
@@ -69,12 +71,12 @@ constexpr SkippedMessage kSkippedMessages[] = {
     {"SYNC-HAZARD-WRITE_AFTER_READ",
      "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
      "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE_KHR, "},
+     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
 
     {"SYNC-HAZARD-WRITE_AFTER_READ",
      "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
      "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE_KHR, "},
+     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
 };
 
 namespace dawn::native::vulkan {
