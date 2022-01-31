@@ -31,8 +31,8 @@ TEST_F(TypedIntegerTest, ConstructionAndCast) {
     Unsigned uvalue(7);
     EXPECT_EQ(static_cast<uint32_t>(uvalue), 7u);
 
-    static_assert(static_cast<int32_t>(Signed(3)) == 3, "");
-    static_assert(static_cast<uint32_t>(Unsigned(28)) == 28, "");
+    static_assert(static_cast<int32_t>(Signed(3)) == 3);
+    static_assert(static_cast<uint32_t>(Unsigned(28)) == 28);
 }
 
 // Test typed integer comparison operators
@@ -146,8 +146,8 @@ TEST_F(TypedIntegerTest, NumericLimits) {
 }
 
 TEST_F(TypedIntegerTest, UnderlyingType) {
-    static_assert(std::is_same<UnderlyingType<Unsigned>, uint32_t>::value, "");
-    static_assert(std::is_same<UnderlyingType<Signed>, int32_t>::value, "");
+    static_assert(std::is_same<UnderlyingType<Unsigned>, uint32_t>::value);
+    static_assert(std::is_same<UnderlyingType<Signed>, int32_t>::value);
 }
 
 // Tests for bounds assertions on arithmetic overflow and underflow.

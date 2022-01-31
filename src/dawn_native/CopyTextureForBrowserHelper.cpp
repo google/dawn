@@ -219,7 +219,7 @@ namespace dawn::native {
             GammaTransferParams gammaEncodingParams = {};
             GammaTransferParams gammaDecodingForDstSrgbParams = {};
         };
-        static_assert(sizeof(Uniform) == 176, "");
+        static_assert(sizeof(Uniform) == 176);
 
         // TODO(crbug.com/dawn/856): Expand copyTextureForBrowser to support any
         // non-depth, non-stencil, non-compressed texture format pair copy. Now this API

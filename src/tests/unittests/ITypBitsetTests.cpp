@@ -28,17 +28,17 @@ class ITypBitsetTest : public testing::Test {
     struct ConstexprTest {
         static constexpr Bitset kBitset = {1 << 0 | 1 << 3 | 1 << 7 | 1 << 8};
 
-        static_assert(kBitset[Key(0)] == true, "");
-        static_assert(kBitset[Key(1)] == false, "");
-        static_assert(kBitset[Key(2)] == false, "");
-        static_assert(kBitset[Key(3)] == true, "");
-        static_assert(kBitset[Key(4)] == false, "");
-        static_assert(kBitset[Key(5)] == false, "");
-        static_assert(kBitset[Key(6)] == false, "");
-        static_assert(kBitset[Key(7)] == true, "");
-        static_assert(kBitset[Key(8)] == true, "");
+        static_assert(kBitset[Key(0)] == true);
+        static_assert(kBitset[Key(1)] == false);
+        static_assert(kBitset[Key(2)] == false);
+        static_assert(kBitset[Key(3)] == true);
+        static_assert(kBitset[Key(4)] == false);
+        static_assert(kBitset[Key(5)] == false);
+        static_assert(kBitset[Key(6)] == false);
+        static_assert(kBitset[Key(7)] == true);
+        static_assert(kBitset[Key(8)] == true);
 
-        static_assert(kBitset.size() == 9, "");
+        static_assert(kBitset.size() == 9);
     };
 
     void ExpectBits(const Bitset& bits, std::set<size_t> indices) {

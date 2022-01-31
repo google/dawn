@@ -49,7 +49,7 @@ namespace dawn::native {
             static constexpr void Call(ObjectContentHasher* recorder, T* obj) {
                 // Calling Record(objPtr) is not allowed. This check exists to only prevent such
                 // mistakes.
-                static_assert(obj == nullptr, "");
+                static_assert(obj == nullptr);
             }
         };
 

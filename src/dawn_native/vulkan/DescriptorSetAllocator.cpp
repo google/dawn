@@ -56,7 +56,7 @@ namespace dawn::native::vulkan {
             mMaxSets = kMaxDescriptorsPerPool;
         } else {
             ASSERT(totalDescriptorCount <= kMaxBindingsPerPipelineLayout);
-            static_assert(kMaxBindingsPerPipelineLayout <= kMaxDescriptorsPerPool, "");
+            static_assert(kMaxBindingsPerPipelineLayout <= kMaxDescriptorsPerPool);
 
             // Compute the total number of descriptors sets that fits given the max.
             mMaxSets = kMaxDescriptorsPerPool / totalDescriptorCount;

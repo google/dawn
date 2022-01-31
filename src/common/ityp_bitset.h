@@ -28,7 +28,7 @@ namespace ityp {
         using I = UnderlyingType<Index>;
         using Base = std::bitset<N>;
 
-        static_assert(sizeof(I) <= sizeof(size_t), "");
+        static_assert(sizeof(I) <= sizeof(size_t));
 
         constexpr bitset(const Base& rhs) : Base(rhs) {
         }

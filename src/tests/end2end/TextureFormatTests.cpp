@@ -350,7 +350,7 @@ class TextureFormatTest : public DawnTest {
 
     template <typename T>
     void DoUnormTest(FormatTestInfo formatInfo) {
-        static_assert(!std::is_signed<T>::value && std::is_integral<T>::value, "");
+        static_assert(!std::is_signed<T>::value && std::is_integral<T>::value);
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
         ASSERT(formatInfo.type == wgpu::TextureComponentType::Float);
 
@@ -364,7 +364,7 @@ class TextureFormatTest : public DawnTest {
 
     template <typename T>
     void DoSnormTest(FormatTestInfo formatInfo) {
-        static_assert(std::is_signed<T>::value && std::is_integral<T>::value, "");
+        static_assert(std::is_signed<T>::value && std::is_integral<T>::value);
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
         ASSERT(formatInfo.type == wgpu::TextureComponentType::Float);
 
@@ -380,7 +380,7 @@ class TextureFormatTest : public DawnTest {
 
     template <typename T>
     void DoUintTest(FormatTestInfo formatInfo) {
-        static_assert(!std::is_signed<T>::value && std::is_integral<T>::value, "");
+        static_assert(!std::is_signed<T>::value && std::is_integral<T>::value);
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
         ASSERT(formatInfo.type == wgpu::TextureComponentType::Uint);
 
@@ -394,7 +394,7 @@ class TextureFormatTest : public DawnTest {
 
     template <typename T>
     void DoSintTest(FormatTestInfo formatInfo) {
-        static_assert(std::is_signed<T>::value && std::is_integral<T>::value, "");
+        static_assert(std::is_signed<T>::value && std::is_integral<T>::value);
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
         ASSERT(formatInfo.type == wgpu::TextureComponentType::Sint);
 

@@ -53,7 +53,7 @@ namespace dawn::native {
                 break;
         }
 
-        static_assert(static_cast<uint32_t>(wgpu::TextureSampleType::Undefined) == 0, "");
+        static_assert(static_cast<uint32_t>(wgpu::TextureSampleType::Undefined) == 0);
         if (sampleType == wgpu::TextureSampleType::Undefined) {
             return SampleTypeBit::None;
         }
@@ -61,26 +61,21 @@ namespace dawn::native {
         // Check that SampleTypeBit bits are in the same position / order as the respective
         // wgpu::TextureSampleType value.
         static_assert(SampleTypeBit::Float ==
-                          static_cast<SampleTypeBit>(
-                              1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Float) - 1)),
-                      "");
+                      static_cast<SampleTypeBit>(
+                          1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Float) - 1)));
         static_assert(
             SampleTypeBit::UnfilterableFloat ==
-                static_cast<SampleTypeBit>(
-                    1 << (static_cast<uint32_t>(wgpu::TextureSampleType::UnfilterableFloat) - 1)),
-            "");
+            static_cast<SampleTypeBit>(
+                1 << (static_cast<uint32_t>(wgpu::TextureSampleType::UnfilterableFloat) - 1)));
         static_assert(SampleTypeBit::Uint ==
-                          static_cast<SampleTypeBit>(
-                              1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Uint) - 1)),
-                      "");
+                      static_cast<SampleTypeBit>(
+                          1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Uint) - 1)));
         static_assert(SampleTypeBit::Sint ==
-                          static_cast<SampleTypeBit>(
-                              1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Sint) - 1)),
-                      "");
+                      static_cast<SampleTypeBit>(
+                          1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Sint) - 1)));
         static_assert(SampleTypeBit::Depth ==
-                          static_cast<SampleTypeBit>(
-                              1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Depth) - 1)),
-                      "");
+                      static_cast<SampleTypeBit>(
+                          1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Depth) - 1)));
         return static_cast<SampleTypeBit>(1 << (static_cast<uint32_t>(sampleType) - 1));
     }
 
@@ -131,8 +126,8 @@ namespace dawn::native {
     size_t ComputeFormatIndex(wgpu::TextureFormat format) {
         // This takes advantage of overflows to make the index of TextureFormat::Undefined outside
         // of the range of the FormatTable.
-        static_assert(static_cast<uint32_t>(wgpu::TextureFormat::Undefined) - 1 > kKnownFormatCount,
-                      "");
+        static_assert(static_cast<uint32_t>(wgpu::TextureFormat::Undefined) - 1 >
+                      kKnownFormatCount);
         return static_cast<size_t>(static_cast<uint32_t>(format) - 1);
     }
 

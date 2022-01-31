@@ -69,8 +69,8 @@ namespace detail {
 
       public:
         constexpr TypedIntegerImpl() : mValue(0) {
-            static_assert(alignof(TypedIntegerImpl) == alignof(T), "");
-            static_assert(sizeof(TypedIntegerImpl) == sizeof(T), "");
+            static_assert(alignof(TypedIntegerImpl) == alignof(T));
+            static_assert(sizeof(TypedIntegerImpl) == sizeof(T));
         }
 
         // Construction from non-narrowing integral types.
@@ -134,7 +134,7 @@ namespace detail {
         template <typename T2 = T>
         static constexpr std::enable_if_t<std::is_unsigned<T2>::value, decltype(T(0) + T2(0))>
         AddImpl(TypedIntegerImpl<Tag, T> lhs, TypedIntegerImpl<Tag, T2> rhs) {
-            static_assert(std::is_same<T, T2>::value, "");
+            static_assert(std::is_same<T, T2>::value);
 
             // Overflow would wrap around
             ASSERT(lhs.mValue + rhs.mValue >= lhs.mValue);
@@ -144,7 +144,7 @@ namespace detail {
         template <typename T2 = T>
         static constexpr std::enable_if_t<std::is_signed<T2>::value, decltype(T(0) + T2(0))>
         AddImpl(TypedIntegerImpl<Tag, T> lhs, TypedIntegerImpl<Tag, T2> rhs) {
-            static_assert(std::is_same<T, T2>::value, "");
+            static_assert(std::is_same<T, T2>::value);
 
             if (lhs.mValue > 0) {
                 // rhs is positive: |rhs| is at most the distance between max and |lhs|.
@@ -162,7 +162,7 @@ namespace detail {
         template <typename T2 = T>
         static constexpr std::enable_if_t<std::is_unsigned<T>::value, decltype(T(0) - T2(0))>
         SubImpl(TypedIntegerImpl<Tag, T> lhs, TypedIntegerImpl<Tag, T2> rhs) {
-            static_assert(std::is_same<T, T2>::value, "");
+            static_assert(std::is_same<T, T2>::value);
 
             // Overflow would wrap around
             ASSERT(lhs.mValue - rhs.mValue <= lhs.mValue);
@@ -173,7 +173,7 @@ namespace detail {
         static constexpr std::enable_if_t<std::is_signed<T>::value, decltype(T(0) - T2(0))> SubImpl(
             TypedIntegerImpl<Tag, T> lhs,
             TypedIntegerImpl<Tag, T2> rhs) {
-            static_assert(std::is_same<T, T2>::value, "");
+            static_assert(std::is_same<T, T2>::value);
 
             if (lhs.mValue > 0) {
                 // rhs is positive: positive minus positive won't overflow
@@ -190,7 +190,7 @@ namespace detail {
 
         template <typename T2 = T>
         constexpr std::enable_if_t<std::is_signed<T2>::value, TypedIntegerImpl> operator-() const {
-            static_assert(std::is_same<T, T2>::value, "");
+            static_assert(std::is_same<T, T2>::value);
             // The negation of the most negative value cannot be represented.
             ASSERT(this->mValue != std::numeric_limits<T>::min());
             return TypedIntegerImpl(-this->mValue);

@@ -35,10 +35,10 @@ namespace {
         {1, dawn::platform::TraceCategory::GPUWork},
     };
 
-    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::General) == 0, "");
-    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Validation) == 1, "");
-    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Recording) == 2, "");
-    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::GPUWork) == 3, "");
+    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::General) == 0);
+    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Validation) == 1);
+    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Recording) == 2);
+    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::GPUWork) == 3);
 
 }  // anonymous namespace
 

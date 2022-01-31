@@ -210,17 +210,13 @@ namespace dawn::native::vulkan {
                                                    bool isDeclaredInFragmentShader) {
             // Vulkan and Dawn color write masks match, static assert it and return the mask
             static_assert(static_cast<VkColorComponentFlagBits>(wgpu::ColorWriteMask::Red) ==
-                              VK_COLOR_COMPONENT_R_BIT,
-                          "");
+                          VK_COLOR_COMPONENT_R_BIT);
             static_assert(static_cast<VkColorComponentFlagBits>(wgpu::ColorWriteMask::Green) ==
-                              VK_COLOR_COMPONENT_G_BIT,
-                          "");
+                          VK_COLOR_COMPONENT_G_BIT);
             static_assert(static_cast<VkColorComponentFlagBits>(wgpu::ColorWriteMask::Blue) ==
-                              VK_COLOR_COMPONENT_B_BIT,
-                          "");
+                          VK_COLOR_COMPONENT_B_BIT);
             static_assert(static_cast<VkColorComponentFlagBits>(wgpu::ColorWriteMask::Alpha) ==
-                              VK_COLOR_COMPONENT_A_BIT,
-                          "");
+                          VK_COLOR_COMPONENT_A_BIT);
 
             // According to Vulkan SPEC (Chapter 14.3): "The input values to blending or color
             // attachment writes are undefined for components which do not correspond to a fragment

@@ -71,8 +71,8 @@ namespace dawn::wire::server {
     // an std::unordered_set. This lets us avoid providing our own hash and
     // equality comparison operators.
     inline uint64_t PackObjectTypeAndId(ObjectType type, ObjectId id) {
-        static_assert(sizeof(ObjectType) * 8 <= 32, "");
-        static_assert(sizeof(ObjectId) * 8 <= 32, "");
+        static_assert(sizeof(ObjectType) * 8 <= 32);
+        static_assert(sizeof(ObjectId) * 8 <= 32);
         return (static_cast<uint64_t>(type) << 32) + id;
     }
 

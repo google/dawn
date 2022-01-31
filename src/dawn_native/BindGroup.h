@@ -70,7 +70,7 @@ namespace dawn::native {
                             descriptor,
                             AlignPtr(reinterpret_cast<char*>(derived) + sizeof(Derived),
                                      descriptor->layout->GetBindingDataAlignment())) {
-            static_assert(std::is_base_of<BindGroupBase, Derived>::value, "");
+            static_assert(std::is_base_of<BindGroupBase, Derived>::value);
         }
 
         // Constructor used only for mocking and testing.

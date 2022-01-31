@@ -577,7 +577,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
         uint32_t uints[2];
         uint16_t halfs[2];
     };
-    static_assert(sizeof(Data) == 16, "");
+    static_assert(sizeof(Data) == 16);
     Data data{1.f, {2u, 3u}, {Float32ToFloat16(4.f), Float32ToFloat16(5.f)}};
 
     wgpu::Buffer vertexBuffer =

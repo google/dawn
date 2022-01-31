@@ -310,14 +310,14 @@ template <typename T, typename E>
 template <typename TChild>
 Result<T*, E>::Result(Result<TChild*, E>&& other) : mPayload(other.mPayload) {
     other.mPayload = detail::kEmptyPayload;
-    static_assert(std::is_same<T, TChild>::value || std::is_base_of<T, TChild>::value, "");
+    static_assert(std::is_same<T, TChild>::value || std::is_base_of<T, TChild>::value);
 }
 
 template <typename T, typename E>
 template <typename TChild>
 Result<T*, E>& Result<T*, E>::operator=(Result<TChild*, E>&& other) {
     ASSERT(mPayload == detail::kEmptyPayload);
-    static_assert(std::is_same<T, TChild>::value || std::is_base_of<T, TChild>::value, "");
+    static_assert(std::is_same<T, TChild>::value || std::is_base_of<T, TChild>::value);
     mPayload = other.mPayload;
     other.mPayload = detail::kEmptyPayload;
     return *this;
@@ -410,7 +410,7 @@ template <typename T, typename E>
 template <typename U>
 Result<Ref<T>, E>::Result(Ref<U>&& success)
     : mPayload(detail::MakePayload(success.Detach(), detail::Success)) {
-    static_assert(std::is_convertible<U*, T*>::value, "");
+    static_assert(std::is_convertible<U*, T*>::value);
 }
 
 template <typename T, typename E>
@@ -426,14 +426,14 @@ Result<Ref<T>, E>::Result(std::unique_ptr<E> error)
 template <typename T, typename E>
 template <typename U>
 Result<Ref<T>, E>::Result(Result<Ref<U>, E>&& other) : mPayload(other.mPayload) {
-    static_assert(std::is_convertible<U*, T*>::value, "");
+    static_assert(std::is_convertible<U*, T*>::value);
     other.mPayload = detail::kEmptyPayload;
 }
 
 template <typename T, typename E>
 template <typename U>
 Result<Ref<U>, E>& Result<Ref<T>, E>::operator=(Result<Ref<U>, E>&& other) {
-    static_assert(std::is_convertible<U*, T*>::value, "");
+    static_assert(std::is_convertible<U*, T*>::value);
     ASSERT(mPayload == detail::kEmptyPayload);
     mPayload = other.mPayload;
     other.mPayload = detail::kEmptyPayload;

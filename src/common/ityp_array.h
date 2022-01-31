@@ -33,7 +33,7 @@ namespace ityp {
         using I = UnderlyingType<Index>;
         using Base = std::array<Value, Size>;
 
-        static_assert(Size <= std::numeric_limits<I>::max(), "");
+        static_assert(Size <= std::numeric_limits<I>::max());
 
       public:
         constexpr array() = default;

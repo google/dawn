@@ -33,19 +33,16 @@ namespace dawn::native {
         const absl::FormatConversionSpec& spec,
         absl::FormatSink* s);
 
-    static_assert(static_cast<uint32_t>(SingleShaderStage::Vertex) < kNumStages, "");
-    static_assert(static_cast<uint32_t>(SingleShaderStage::Fragment) < kNumStages, "");
-    static_assert(static_cast<uint32_t>(SingleShaderStage::Compute) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(SingleShaderStage::Vertex) < kNumStages);
+    static_assert(static_cast<uint32_t>(SingleShaderStage::Fragment) < kNumStages);
+    static_assert(static_cast<uint32_t>(SingleShaderStage::Compute) < kNumStages);
 
     static_assert(static_cast<uint32_t>(wgpu::ShaderStage::Vertex) ==
-                      (1 << static_cast<uint32_t>(SingleShaderStage::Vertex)),
-                  "");
+                  (1 << static_cast<uint32_t>(SingleShaderStage::Vertex)));
     static_assert(static_cast<uint32_t>(wgpu::ShaderStage::Fragment) ==
-                      (1 << static_cast<uint32_t>(SingleShaderStage::Fragment)),
-                  "");
+                  (1 << static_cast<uint32_t>(SingleShaderStage::Fragment)));
     static_assert(static_cast<uint32_t>(wgpu::ShaderStage::Compute) ==
-                      (1 << static_cast<uint32_t>(SingleShaderStage::Compute)),
-                  "");
+                  (1 << static_cast<uint32_t>(SingleShaderStage::Compute)));
 
     BitSetIterator<kNumStages, SingleShaderStage> IterateStages(wgpu::ShaderStage stages);
     wgpu::ShaderStage StageBit(SingleShaderStage stage);

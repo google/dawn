@@ -26,7 +26,7 @@ namespace ityp {
         using I = UnderlyingType<Index>;
         using Base = StackVector<Value, StaticCapacity>;
         using VectorBase = std::vector<Value, StackAllocator<Value, StaticCapacity>>;
-        static_assert(StaticCapacity <= std::numeric_limits<I>::max(), "");
+        static_assert(StaticCapacity <= std::numeric_limits<I>::max());
 
       public:
         stack_vec() : Base() {

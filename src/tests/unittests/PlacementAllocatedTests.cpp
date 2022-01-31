@@ -66,7 +66,7 @@ TEST_F(PlacementAllocatedTests, DeletionDoesNotFreeMemory) {
     delete foo;
 
     // Touch the memory, this shouldn't crash.
-    static_assert(sizeof(Foo) >= sizeof(uint32_t), "");
+    static_assert(sizeof(Foo) >= sizeof(uint32_t));
     *reinterpret_cast<uint32_t*>(foo) = 42;
 
     free(ptr);
@@ -87,7 +87,7 @@ TEST_F(PlacementAllocatedTests, DeletingDerivedClassCallsBaseDestructor) {
     }
 
     // Touch the memory, this shouldn't crash.
-    static_assert(sizeof(Bar) >= sizeof(uint32_t), "");
+    static_assert(sizeof(Bar) >= sizeof(uint32_t));
     *reinterpret_cast<uint32_t*>(bar) = 42;
 
     free(ptr);
@@ -108,7 +108,7 @@ TEST_F(PlacementAllocatedTests, DeletingBaseClassCallsDerivedDestructor) {
     }
 
     // Touch the memory, this shouldn't crash.
-    static_assert(sizeof(Bar) >= sizeof(uint32_t), "");
+    static_assert(sizeof(Bar) >= sizeof(uint32_t));
     *reinterpret_cast<uint32_t*>(foo) = 42;
 
     free(ptr);

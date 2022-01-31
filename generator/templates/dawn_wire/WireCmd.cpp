@@ -138,12 +138,12 @@
     };
 
     {% if is_cmd %}
-        static_assert(offsetof({{Return}}{{name}}Transfer, commandSize) == 0, "");
-        static_assert(offsetof({{Return}}{{name}}Transfer, commandId) == sizeof(CmdHeader), "");
+        static_assert(offsetof({{Return}}{{name}}Transfer, commandSize) == 0);
+        static_assert(offsetof({{Return}}{{name}}Transfer, commandId) == sizeof(CmdHeader));
     {% endif %}
 
     {% if record.chained %}
-        static_assert(offsetof({{Return}}{{name}}Transfer, chain) == 0, "");
+        static_assert(offsetof({{Return}}{{name}}Transfer, chain) == 0);
     {% endif %}
 
     //* Returns the required transfer size for `record` in addition to the transfer structure.

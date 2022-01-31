@@ -106,7 +106,7 @@ namespace dawn::native {
         // this layout.
         size_t GetBindingDataSize() const;
         static constexpr size_t GetBindingDataAlignment() {
-            static_assert(alignof(Ref<ObjectBase>) <= alignof(BufferBindingData), "");
+            static_assert(alignof(Ref<ObjectBase>) <= alignof(BufferBindingData));
             return alignof(BufferBindingData);
         }
 

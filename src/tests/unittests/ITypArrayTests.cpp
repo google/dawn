@@ -28,9 +28,9 @@ class ITypArrayTest : public testing::Test {
         static constexpr Array kArr = {Val(0), Val(1), Val(2), Val(3), Val(4),
                                        Val(5), Val(6), Val(7), Val(8), Val(9)};
 
-        static_assert(kArr[Key(3)] == Val(3), "");
-        static_assert(kArr.at(Key(7)) == Val(7), "");
-        static_assert(kArr.size() == Key(10), "");
+        static_assert(kArr[Key(3)] == Val(3));
+        static_assert(kArr.at(Key(7)) == Val(7));
+        static_assert(kArr.size() == Key(10));
     };
 };
 

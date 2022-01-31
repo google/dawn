@@ -23,7 +23,7 @@ namespace dawn::native {
     template <typename T>
     class EnumMaskIterator final {
         static constexpr size_t N = EnumBitmaskSize<T>::value;
-        static_assert(N > 0, "");
+        static_assert(N > 0);
 
         using U = std::underlying_type_t<T>;
 

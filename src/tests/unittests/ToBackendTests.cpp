@@ -45,7 +45,7 @@ TEST(ToBackend, Pointers) {
         const AdapterBase* base = adapter;
 
         auto backendAdapter = ToBackend(base);
-        static_assert(std::is_same<decltype(backendAdapter), const MyAdapter*>::value, "");
+        static_assert(std::is_same<decltype(backendAdapter), const MyAdapter*>::value);
         ASSERT_EQ(adapter, backendAdapter);
 
         adapter->Release();
@@ -55,7 +55,7 @@ TEST(ToBackend, Pointers) {
         AdapterBase* base = adapter;
 
         auto backendAdapter = ToBackend(base);
-        static_assert(std::is_same<decltype(backendAdapter), MyAdapter*>::value, "");
+        static_assert(std::is_same<decltype(backendAdapter), MyAdapter*>::value);
         ASSERT_EQ(adapter, backendAdapter);
 
         adapter->Release();
@@ -69,7 +69,7 @@ TEST(ToBackend, Ref) {
         const Ref<AdapterBase> base(adapter);
 
         const auto& backendAdapter = ToBackend(base);
-        static_assert(std::is_same<decltype(ToBackend(base)), const Ref<MyAdapter>&>::value, "");
+        static_assert(std::is_same<decltype(ToBackend(base)), const Ref<MyAdapter>&>::value);
         ASSERT_EQ(adapter, backendAdapter.Get());
 
         adapter->Release();
@@ -79,7 +79,7 @@ TEST(ToBackend, Ref) {
         Ref<AdapterBase> base(adapter);
 
         auto backendAdapter = ToBackend(base);
-        static_assert(std::is_same<decltype(ToBackend(base)), Ref<MyAdapter>&>::value, "");
+        static_assert(std::is_same<decltype(ToBackend(base)), Ref<MyAdapter>&>::value);
         ASSERT_EQ(adapter, backendAdapter.Get());
 
         adapter->Release();

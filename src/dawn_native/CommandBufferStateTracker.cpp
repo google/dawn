@@ -53,7 +53,7 @@ namespace dawn::native {
 
         VALIDATION_ASPECT_COUNT
     };
-    static_assert(VALIDATION_ASPECT_COUNT == CommandBufferStateTracker::kNumAspects, "");
+    static_assert(VALIDATION_ASPECT_COUNT == CommandBufferStateTracker::kNumAspects);
 
     static constexpr CommandBufferStateTracker::ValidationAspects kDispatchAspects =
         1 << VALIDATION_ASPECT_PIPELINE | 1 << VALIDATION_ASPECT_BIND_GROUPS;

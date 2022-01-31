@@ -29,10 +29,10 @@ namespace dawn::native {
     namespace {
 
         // Assert the offsets in dawn::native::TimestampParams are same with the ones in the shader
-        static_assert(offsetof(dawn::native::TimestampParams, first) == 0, "");
-        static_assert(offsetof(dawn::native::TimestampParams, count) == 4, "");
-        static_assert(offsetof(dawn::native::TimestampParams, offset) == 8, "");
-        static_assert(offsetof(dawn::native::TimestampParams, period) == 12, "");
+        static_assert(offsetof(dawn::native::TimestampParams, first) == 0);
+        static_assert(offsetof(dawn::native::TimestampParams, count) == 4);
+        static_assert(offsetof(dawn::native::TimestampParams, offset) == 8);
+        static_assert(offsetof(dawn::native::TimestampParams, period) == 12);
 
         static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
