@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_BENCHMARK_BENCHMARK_H_
-#define SRC_BENCHMARK_BENCHMARK_H_
+#ifndef SRC_BENCH_BENCHMARK_H_
+#define SRC_BENCH_BENCHMARK_H_
 
 #include <memory>
 #include <string>
@@ -23,7 +23,7 @@
 #include "src/utils/concat.h"
 #include "tint/tint.h"
 
-namespace tint::benchmark {
+namespace tint::bench {
 
 /// Error indicates an operation did not complete successfully.
 struct Error {
@@ -71,6 +71,6 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
   TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-fragment.wgsl"); \
   TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-vertex.wgsl");
 
-}  // namespace tint::benchmark
+}  // namespace tint::bench
 
-#endif  // SRC_BENCHMARK_BENCHMARK_H_
+#endif  // SRC_BENCH_BENCHMARK_H_

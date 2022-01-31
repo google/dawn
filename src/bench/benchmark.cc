@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/benchmark/benchmark.h"
+#include "src/bench/benchmark.h"
 
 #include <filesystem>
 #include <sstream>
 #include <utility>
 #include <vector>
 
-namespace tint::benchmark {
+namespace tint::bench {
 namespace {
 
 std::filesystem::path kInputFileDir;
@@ -96,8 +96,8 @@ std::variant<tint::Source::File, Error> LoadInputFile(std::string name) {
 }
 
 std::variant<ProgramAndFile, Error> LoadProgram(std::string name) {
-  auto res = benchmark::LoadInputFile(name);
-  if (auto err = std::get_if<benchmark::Error>(&res)) {
+  auto res = bench::LoadInputFile(name);
+  if (auto err = std::get_if<bench::Error>(&res)) {
     return *err;
   }
   auto& file = std::get<Source::File>(res);
@@ -108,16 +108,16 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name) {
   return ProgramAndFile{std::move(program), std::move(file)};
 }
 
-}  // namespace tint::benchmark
+}  // namespace tint::bench
 
 int main(int argc, char** argv) {
-  ::benchmark::Initialize(&argc, argv);
-  if (::benchmark::ReportUnrecognizedArguments(argc, argv)) {
+  benchmark::Initialize(&argc, argv);
+  if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
     return 1;
   }
-  if (!tint::benchmark::FindBenchmarkInputDir()) {
+  if (!tint::bench::FindBenchmarkInputDir()) {
     std::cerr << "failed to locate benchmark input files" << std::endl;
     return 1;
   }
-  ::benchmark::RunSpecifiedBenchmarks();
+  benchmark::RunSpecifiedBenchmarks();
 }

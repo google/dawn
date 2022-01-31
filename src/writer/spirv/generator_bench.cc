@@ -14,18 +14,18 @@
 
 #include <string>
 
-#include "src/benchmark/benchmark.h"
+#include "src/bench/benchmark.h"
 
 namespace tint::writer::spirv {
 namespace {
 
-void GenerateSPIRV(::benchmark::State& state, std::string input_name) {
-  auto res = benchmark::LoadProgram(input_name);
-  if (auto err = std::get_if<benchmark::Error>(&res)) {
+void GenerateSPIRV(benchmark::State& state, std::string input_name) {
+  auto res = bench::LoadProgram(input_name);
+  if (auto err = std::get_if<bench::Error>(&res)) {
     state.SkipWithError(err->msg.c_str());
     return;
   }
-  auto& program = std::get<benchmark::ProgramAndFile>(res).program;
+  auto& program = std::get<bench::ProgramAndFile>(res).program;
   for (auto _ : state) {
     auto res = Generate(&program, {});
     if (!res.error.empty()) {

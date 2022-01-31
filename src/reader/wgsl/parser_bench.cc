@@ -14,14 +14,14 @@
 
 #include <string>
 
-#include "src/benchmark/benchmark.h"
+#include "src/bench/benchmark.h"
 
 namespace tint::reader::wgsl {
 namespace {
 
-void ParseWGSL(::benchmark::State& state, std::string input_name) {
-  auto res = benchmark::LoadInputFile(input_name);
-  if (auto err = std::get_if<benchmark::Error>(&res)) {
+void ParseWGSL(benchmark::State& state, std::string input_name) {
+  auto res = bench::LoadInputFile(input_name);
+  if (auto err = std::get_if<bench::Error>(&res)) {
     state.SkipWithError(err->msg.c_str());
     return;
   }
