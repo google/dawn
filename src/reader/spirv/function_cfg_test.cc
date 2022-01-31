@@ -2249,7 +2249,10 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_Switch_CaseContinues) {
       << assembly;
 }
 
-TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
+// TODO(crbug.com/tint/1406): Re-enable with the typo fix (preceeded->preceded)
+// once that typo fix is rolled in Tint's SPIRV-Tools.
+TEST_F(SpvParserCFGTest,
+       DISABLED_ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -2419,7 +2422,9 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_HasBreakUnless) {
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
 }
 
-TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
+// TODO(crbug.com/tint/1406): Re-enable with the typo fix (preceeded->preceded)
+// once that typo fix is rolled in Tint's SPIRV-Tools.
+TEST_F(SpvParserCFGTest, DISABLED_ComputeBlockOrder_Loop_Continue_SwitchBreak) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
