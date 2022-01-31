@@ -119,6 +119,8 @@ namespace dawn::native {
         : ApiObjectBase(device, tag) {
     }
 
+    ExternalTextureBase::~ExternalTextureBase() = default;
+
     MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
                                                const ExternalTextureDescriptor* descriptor) {
         // Store any passed in TextureViews associated with individual planes.

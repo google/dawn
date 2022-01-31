@@ -58,6 +58,8 @@ namespace dawn::native {
         ExternalTextureBase(DeviceBase* device);
         void DestroyImpl() override;
 
+        ~ExternalTextureBase() override;
+
       private:
         enum class ExternalTextureState { Alive, Destroyed };
         ExternalTextureBase(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
