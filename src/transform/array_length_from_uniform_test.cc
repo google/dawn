@@ -454,7 +454,7 @@ struct SB {
 
 @stage(compute) @workgroup_size(1)
 fn main() {
-  ignore(&(sb.arr));
+  _ = &(sb.arr);
 }
 )";
 

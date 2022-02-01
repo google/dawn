@@ -2880,7 +2880,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Struct_Empty) {
 
 TEST_F(ResolverTypeConstructorValidationTest, NonConstructibleType_Atomic) {
   WrapInFunction(
-      Call("ignore", Construct(Source{{12, 34}}, ty.atomic(ty.i32()))));
+      Assign(Phony(), Construct(Source{{12, 34}}, ty.atomic(ty.i32()))));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
@@ -2888,8 +2888,8 @@ TEST_F(ResolverTypeConstructorValidationTest, NonConstructibleType_Atomic) {
 
 TEST_F(ResolverTypeConstructorValidationTest,
        NonConstructibleType_AtomicArray) {
-  WrapInFunction(Call(
-      "ignore", Construct(Source{{12, 34}}, ty.array(ty.atomic(ty.i32()), 4))));
+  WrapInFunction(Assign(
+      Phony(), Construct(Source{{12, 34}}, ty.array(ty.atomic(ty.i32()), 4))));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -2900,7 +2900,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 TEST_F(ResolverTypeConstructorValidationTest,
        NonConstructibleType_AtomicStructMember) {
   auto* str = Structure("S", {Member("a", ty.atomic(ty.i32()))});
-  WrapInFunction(Call("ignore", Construct(Source{{12, 34}}, ty.Of(str))));
+  WrapInFunction(Assign(Phony(), Construct(Source{{12, 34}}, ty.Of(str))));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -2908,8 +2908,8 @@ TEST_F(ResolverTypeConstructorValidationTest,
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, NonConstructibleType_Sampler) {
-  WrapInFunction(Call(
-      "ignore",
+  WrapInFunction(Assign(
+      Phony(),
       Construct(Source{{12, 34}}, ty.sampler(ast::SamplerKind::kSampler))));
 
   EXPECT_FALSE(r()->Resolve());

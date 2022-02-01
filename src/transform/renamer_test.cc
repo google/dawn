@@ -49,7 +49,7 @@ fn test(vert_idx : u32) -> u32 {
 @stage(vertex)
 fn entry(@builtin(vertex_index) vert_idx : u32
         ) -> @builtin(position) vec4<f32>  {
-  ignore(test(vert_idx));
+  _ = test(vert_idx);
   return vec4<f32>();
 }
 )";
@@ -61,7 +61,7 @@ fn tint_symbol(tint_symbol_1 : u32) -> u32 {
 
 @stage(vertex)
 fn tint_symbol_2(@builtin(vertex_index) tint_symbol_1 : u32) -> @builtin(position) vec4<f32> {
-  ignore(tint_symbol(tint_symbol_1));
+  _ = tint_symbol(tint_symbol_1);
   return vec4<f32>();
 }
 )";

@@ -132,9 +132,6 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   if (name == "fwidthFine") {
     return IntrinsicType::kFwidthFine;
   }
-  if (name == "ignore") {
-    return IntrinsicType::kIgnore;
-  }
   if (name == "inverseSqrt") {
     return IntrinsicType::kInverseSqrt;
   }
@@ -414,8 +411,6 @@ const char* str(IntrinsicType i) {
       return "fwidthCoarse";
     case IntrinsicType::kFwidthFine:
       return "fwidthFine";
-    case IntrinsicType::kIgnore:
-      return "ignore";
     case IntrinsicType::kInverseSqrt:
       return "inverseSqrt";
     case IntrinsicType::kIsFinite:

@@ -922,19 +922,6 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx,
     if (auto* call_expr = node->As<ast::CallExpression>()) {
       auto* call = sem.Get(call_expr);
       if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
-        if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {  // [DEPRECATED]
-          // ignore(X)
-          // If X is an memory access, don't transform it into a load, as it
-          // may refer to a structure holding a runtime array, which cannot be
-          // loaded. Instead replace X with the underlying storage / uniform
-          // buffer variable.
-          if (auto access = state.TakeAccess(call_expr->args[0])) {
-            ctx.Replace(call_expr->args[0], [=, &ctx] {
-              return ctx.CloneWithoutTransform(access.var->Declaration());
-            });
-          }
-          continue;
-        }
         if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
           // arrayLength(X)
           // Don't convert X into a load, this intrinsic actually requires the

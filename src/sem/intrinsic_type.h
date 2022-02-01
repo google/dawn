@@ -68,7 +68,6 @@ enum class IntrinsicType {
   kFwidth,
   kFwidthCoarse,
   kFwidthFine,
-  kIgnore,
   kInverseSqrt,
   kIsFinite,
   kIsInf,

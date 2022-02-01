@@ -529,9 +529,6 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
   if (intrinsic->Type() == sem::IntrinsicType::kRadians) {
     return EmitRadiansCall(out, expr, intrinsic);
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {
-    return EmitExpression(out, expr->args[0]);  // [DEPRECATED]
-  }
   if (intrinsic->IsDataPacking()) {
     return EmitDataPackingCall(out, expr, intrinsic);
   }

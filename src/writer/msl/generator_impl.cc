@@ -627,13 +627,6 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
       out << "threadgroup_barrier(mem_flags::mem_threadgroup)";
       return true;
     }
-    case sem::IntrinsicType::kIgnore: {  // [DEPRECATED]
-      out << "(void) ";
-      if (!EmitExpression(out, expr->args[0])) {
-        return false;
-      }
-      return true;
-    }
 
     case sem::IntrinsicType::kLength: {
       auto* sem = builder_.Sem().Get(expr->args[0]);

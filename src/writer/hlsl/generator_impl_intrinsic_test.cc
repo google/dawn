@@ -791,31 +791,6 @@ void main() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Intrinsic, Ignore) {
-  Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
-       ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
-
-  Func("main", {}, ty.void_(), {CallStmt(Call("ignore", Call("f", 1, 2, 3)))},
-       {
-           Stage(ast::PipelineStage::kCompute),
-           WorkgroupSize(1),
-       });
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(int f(int a, int b, int c) {
-  return ((a + b) * c);
-}
-
-[numthreads(1, 1, 1)]
-void main() {
-  f(1, 2, 3);
-  return;
-}
-)");
-}
-
 }  // namespace
 }  // namespace hlsl
 }  // namespace writer

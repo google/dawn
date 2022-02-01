@@ -99,7 +99,7 @@ var<workgroup> v : i32;
 
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
-  ignore(v); // Initialization should be inserted above this statement
+  _ = v; // Initialization should be inserted above this statement
 }
 )";
   auto* expect = R"(
@@ -111,7 +111,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
     v = i32();
   }
   workgroupBarrier();
-  ignore(v);
+  _ = v;
 }
 )";
 
@@ -131,7 +131,7 @@ struct Params {
 
 @stage(compute) @workgroup_size(1)
 fn f(params : Params) {
-  ignore(v); // Initialization should be inserted above this statement
+  _ = v; // Initialization should be inserted above this statement
 }
 )";
   auto* expect = R"(
@@ -148,7 +148,7 @@ fn f(params : Params) {
     v = i32();
   }
   workgroupBarrier();
-  ignore(v);
+  _ = v;
 }
 )";
 
@@ -163,7 +163,7 @@ var<workgroup> v : i32;
 
 @stage(compute) @workgroup_size(1)
 fn f() {
-  ignore(v); // Initialization should be inserted above this statement
+  _ = v; // Initialization should be inserted above this statement
 }
 )";
   auto* expect = R"(
@@ -175,7 +175,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
     v = i32();
   }
   workgroupBarrier();
-  ignore(v);
+  _ = v;
 }
 )";
 
@@ -200,9 +200,9 @@ var<workgroup> c : array<S, 32>;
 
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
-  ignore(a); // Initialization should be inserted above this statement
-  ignore(b);
-  ignore(c);
+  _ = a; // Initialization should be inserted above this statement
+  _ = b;
+  _ = c;
 }
 )";
   auto* expect = R"(
@@ -237,9 +237,9 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
     c[i_2].y[i] = i32();
   }
   workgroupBarrier();
-  ignore(a);
-  ignore(b);
-  ignore(c);
+  _ = a;
+  _ = b;
+  _ = c;
 }
 )";
 
@@ -264,9 +264,9 @@ var<workgroup> c : array<S, 32>;
 
 @stage(compute) @workgroup_size(2, 3)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
-  ignore(a); // Initialization should be inserted above this statement
-  ignore(b);
-  ignore(c);
+  _ = a; // Initialization should be inserted above this statement
+  _ = b;
+  _ = c;
 }
 )";
   auto* expect = R"(
@@ -301,9 +301,9 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
     c[i_2].y[i] = i32();
   }
   workgroupBarrier();
-  ignore(a);
-  ignore(b);
-  ignore(c);
+  _ = a;
+  _ = b;
+  _ = c;
 }
 )";
 
@@ -330,9 +330,9 @@ var<workgroup> c : array<S, 32>;
 
 @stage(compute) @workgroup_size(2, 3, X)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
-  ignore(a); // Initialization should be inserted above this statement
-  ignore(b);
-  ignore(c);
+  _ = a; // Initialization should be inserted above this statement
+  _ = b;
+  _ = c;
 }
 )";
   auto* expect =
@@ -370,9 +370,9 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
     c[i_2].y[i] = i32();
   }
   workgroupBarrier();
-  ignore(a);
-  ignore(b);
-  ignore(c);
+  _ = a;
+  _ = b;
+  _ = c;
 }
 )";
 
@@ -400,9 +400,9 @@ var<workgroup> c : array<S, 32>;
 
 @stage(compute) @workgroup_size(5u, X, 10u)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
-  ignore(a); // Initialization should be inserted above this statement
-  ignore(b);
-  ignore(c);
+  _ = a; // Initialization should be inserted above this statement
+  _ = b;
+  _ = c;
 }
 )";
   auto* expect =
@@ -460,9 +460,9 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
     c[i_5].z[i_2][i][i_1] = i32();
   }
   workgroupBarrier();
-  ignore(a);
-  ignore(b);
-  ignore(c);
+  _ = a;
+  _ = b;
+  _ = c;
 }
 )";
 
@@ -486,9 +486,9 @@ var<workgroup> c : array<S, 32>;
 
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
-  ignore(a); // Initialization should be inserted above this statement
-  ignore(b);
-  ignore(c);
+  _ = a; // Initialization should be inserted above this statement
+  _ = b;
+  _ = c;
 }
 )";
   auto* expect = R"(
@@ -523,9 +523,9 @@ fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(loc
     c[i_2].y[i] = i32();
   }
   workgroupBarrier();
-  ignore(a);
-  ignore(b);
-  ignore(c);
+  _ = a;
+  _ = b;
+  _ = c;
 }
 )";
 
@@ -549,19 +549,19 @@ var<workgroup> c : array<S, 32>;
 
 @stage(compute) @workgroup_size(1)
 fn f1() {
-  ignore(a); // Initialization should be inserted above this statement
-  ignore(c);
+  _ = a; // Initialization should be inserted above this statement
+  _ = c;
 }
 
 @stage(compute) @workgroup_size(1, 2, 3)
 fn f2(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
-  ignore(b); // Initialization should be inserted above this statement
+  _ = b; // Initialization should be inserted above this statement
 }
 
 @stage(compute) @workgroup_size(4, 5, 6)
 fn f3() {
-  ignore(c); // Initialization should be inserted above this statement
-  ignore(a);
+  _ = c; // Initialization should be inserted above this statement
+  _ = a;
 }
 )";
   auto* expect = R"(
@@ -591,8 +591,8 @@ fn f1(@builtin(local_invocation_index) local_invocation_index : u32) {
     c[i_1].y[i_2] = i32();
   }
   workgroupBarrier();
-  ignore(a);
-  ignore(c);
+  _ = a;
+  _ = c;
 }
 
 @stage(compute) @workgroup_size(1, 2, 3)
@@ -605,7 +605,7 @@ fn f2(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(lo
     b.y[i_3] = i32();
   }
   workgroupBarrier();
-  ignore(b);
+  _ = b;
 }
 
 @stage(compute) @workgroup_size(4, 5, 6)
@@ -623,8 +623,8 @@ fn f3(@builtin(local_invocation_index) local_invocation_index_2 : u32) {
     c[i_5].y[i_6] = i32();
   }
   workgroupBarrier();
-  ignore(c);
-  ignore(a);
+  _ = c;
+  _ = a;
 }
 )";
 
@@ -638,7 +638,7 @@ TEST_F(ZeroInitWorkgroupMemoryTest, TransitiveUsage) {
 var<workgroup> v : i32;
 
 fn use_v() {
-  ignore(v);
+  _ = v;
 }
 
 fn call_use_v() {
@@ -654,7 +654,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 var<workgroup> v : i32;
 
 fn use_v() {
-  ignore(v);
+  _ = v;
 }
 
 fn call_use_v() {
@@ -683,8 +683,8 @@ var<workgroup> u : atomic<u32>;
 
 @stage(compute) @workgroup_size(1)
 fn f() {
-  ignore(i); // Initialization should be inserted above this statement
-  ignore(u);
+  atomicLoad(&(i)); // Initialization should be inserted above this statement
+  atomicLoad(&(u));
 }
 )";
   auto* expect = R"(
@@ -699,8 +699,8 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
     atomicStore(&(u), u32());
   }
   workgroupBarrier();
-  ignore(i);
-  ignore(u);
+  atomicLoad(&(i));
+  atomicLoad(&(u));
 }
 )";
 
@@ -723,7 +723,7 @@ var<workgroup> w : S;
 
 @stage(compute) @workgroup_size(1)
 fn f() {
-  ignore(w); // Initialization should be inserted above this statement
+  _ = w.a; // Initialization should be inserted above this statement
 }
 )";
   auto* expect = R"(
@@ -747,7 +747,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
     w.c = u32();
   }
   workgroupBarrier();
-  ignore(w);
+  _ = w.a;
 }
 )";
 
@@ -762,7 +762,7 @@ var<workgroup> w : array<atomic<u32>, 4>;
 
 @stage(compute) @workgroup_size(1)
 fn f() {
-  ignore(w); // Initialization should be inserted above this statement
+  atomicLoad(&w[0]); // Initialization should be inserted above this statement
 }
 )";
   auto* expect = R"(
@@ -775,7 +775,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
     atomicStore(&(w[i]), u32());
   }
   workgroupBarrier();
-  ignore(w);
+  atomicLoad(&(w[0]));
 }
 )";
 
@@ -798,7 +798,7 @@ var<workgroup> w : array<S, 4>;
 
 @stage(compute) @workgroup_size(1)
 fn f() {
-  ignore(w); // Initialization should be inserted above this statement
+  _ = w[0].a; // Initialization should be inserted above this statement
 }
 )";
   auto* expect = R"(
@@ -823,7 +823,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
     w[i_1].c = u32();
   }
   workgroupBarrier();
-  ignore(w);
+  _ = w[0].a;
 }
 )";
 

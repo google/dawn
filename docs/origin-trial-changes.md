@@ -5,7 +5,7 @@
 ### Breaking changes
 
 * The `@interpolate(flat)` attribute must now be specified on integral user-defined IO. [tint:1224](crbug.com/tint/1224)
-
+* The `ignore()` intrinsic has been removed. Use phoney-assignment instead: `ignore(expr);` -> `_ = expr;`.
 
 ## Changes for M99
 

@@ -2460,14 +2460,6 @@ uint32_t Builder::GenerateIntrinsicCall(const sem::Call* call,
     case IntrinsicType::kFwidthFine:
       op = spv::Op::OpFwidthFine;
       break;
-    case IntrinsicType::kIgnore:  // [DEPRECATED]
-      // Evaluate the single argument, return the non-zero result_id which isn't
-      // associated with any op (ignore returns void, so this cannot be used in
-      // an expression).
-      if (!get_arg_as_value_id(0, false)) {
-        return 0;
-      }
-      return result_id;
     case IntrinsicType::kIsInf:
       op = spv::Op::OpIsInf;
       break;
