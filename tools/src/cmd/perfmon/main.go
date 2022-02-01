@@ -112,50 +112,16 @@ func run(cfgPath string) error {
 	}
 
 	for true {
-		{
-			log.Println("scanning for review changes to benchmark...")
-			change, err := e.findGerritChangeToBenchmark()
-			if err != nil {
-				return err
-			}
-			if change != nil {
-				if err := e.benchmarkGerritChange(*change); err != nil {
-					return err
-				}
-				continue
-			}
+		didSomething, err := e.doSomeWork()
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			time.Sleep(time.Minute * 10)
+			continue
 		}
-
-		{
-			log.Println("scanning for submitted changes to benchmark...")
-			changesToBenchmark, err := e.changesToBenchmark()
-			if err != nil {
-				return err
-			}
-
-			if len(changesToBenchmark) > 0 {
-				log.Printf("benchmarking %v changes...\n", len(changesToBenchmark))
-				for i, c := range changesToBenchmark {
-					log.Printf("benchmarking %v/%v....\n", i+1, len(changesToBenchmark))
-					benchRes, err := e.benchmarkTintChange(c)
-					if err != nil {
-						return err
-					}
-					commitRes, err := e.benchmarksToCommitResults(c, *benchRes)
-					if err != nil {
-						return err
-					}
-					log.Printf("pushing results...\n")
-					if err := e.pushUpdatedResults(*commitRes); err != nil {
-						return err
-					}
-				}
-				continue
-			}
+		if !didSomething {
+			log.Println("nothing to do. Sleeping...")
+			time.Sleep(time.Minute * 5)
 		}
-
-		log.Println("nothing to do. Sleeping...")
-		time.Sleep(time.Minute * 5)
 	}
 
 	return nil
@@ -281,6 +247,53 @@ type env struct {
 	benchmarkCache map[git.Hash]*bench.Run
 }
 
+// doSomeWork scans gerrit for changes up for review and submitted changes to
+// benchmark. If something was found to do, then returns true.
+func (e env) doSomeWork() (bool, error) {
+	{
+		log.Println("scanning for review changes to benchmark...")
+		change, err := e.findGerritChangeToBenchmark()
+		if err != nil {
+			return true, err
+		}
+		if change != nil {
+			if err := e.benchmarkGerritChange(*change); err != nil {
+				return true, err
+			}
+			return true, nil
+		}
+	}
+
+	{
+		log.Println("scanning for submitted changes to benchmark...")
+		changesToBenchmark, err := e.changesToBenchmark()
+		if err != nil {
+			return true, err
+		}
+
+		if len(changesToBenchmark) > 0 {
+			log.Printf("benchmarking %v changes...", len(changesToBenchmark))
+			for i, c := range changesToBenchmark {
+				log.Printf("benchmarking %v/%v....", i+1, len(changesToBenchmark))
+				benchRes, err := e.benchmarkTintChange(c)
+				if err != nil {
+					return true, err
+				}
+				commitRes, err := e.benchmarksToCommitResults(c, *benchRes)
+				if err != nil {
+					return true, err
+				}
+				log.Printf("pushing results...")
+				if err := e.pushUpdatedResults(*commitRes); err != nil {
+					return true, err
+				}
+			}
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 // changesToBenchmark fetches the list of changes that do not currently have
 // benchmark results, which should be benchmarked.
 func (e env) changesToBenchmark() ([]git.Hash, error) {
@@ -319,11 +332,11 @@ func (e env) changesToBenchmark() ([]git.Hash, error) {
 // dependencies, builds tint, then runs the benchmarks, returning the results.
 func (e env) benchmarkTintChange(hash git.Hash) (*bench.Run, error) {
 	if cached, ok := e.benchmarkCache[hash]; ok {
-		log.Printf("reusing cached benchmark results of '%v'...\n", hash)
+		log.Printf("reusing cached benchmark results of '%v'...", hash)
 		return cached, nil
 	}
 
-	log.Printf("checking out tint at '%v'...\n", hash)
+	log.Printf("checking out tint at '%v'...", hash)
 	if err := checkout(hash, e.tintRepo); err != nil {
 		return nil, err
 	}
@@ -345,6 +358,8 @@ func (e env) benchmarkTintChange(hash git.Hash) (*bench.Run, error) {
 	return run, nil
 }
 
+// benchmarksToCommitResults converts the benchmarks in the provided bench.Run
+// to a CommitResults.
 func (e env) benchmarksToCommitResults(hash git.Hash, results bench.Run) (*CommitResults, error) {
 	commits, err := e.tintRepo.Log(&git.LogOptions{
 		From:  hash.String(),
@@ -502,8 +517,7 @@ func (e env) loadHistoricResults(path string) (*HistoricResults, error) {
 	if !reflect.DeepEqual(res.System, e.system) {
 		log.Printf(`WARNING: results file '%v' has different system information!
 File: %+v
-System: %+v
-`, path, res.System, e.system)
+System: %+v`, path, res.System, e.system)
 	}
 
 	return res, nil
@@ -546,12 +560,22 @@ func (e env) buildTint() error {
 		"-DTINT_BUILD_WGSL_WRITER=1",
 		"-DTINT_BUILD_BENCHMARKS=1",
 	); err != nil {
-		return fmt.Errorf("failed to generate tint build config:\n  %w", err)
+		return errFailedToBuild{fmt.Errorf("failed to generate tint build config:\n  %w", err)}
 	}
 	if _, err := call(tools.ninja, e.buildDir, e.cfg.Timeouts.Build); err != nil {
-		return fmt.Errorf("failed to build tint:\n  %w", err)
+		return errFailedToBuild{err}
 	}
 	return nil
+}
+
+// errFailedToBuild is the error returned by buildTint() if the build failed
+type errFailedToBuild struct {
+	// The reason
+	reason error
+}
+
+func (e errFailedToBuild) Error() string {
+	return fmt.Sprintf("failed to build: %v", e.reason)
 }
 
 // benchmarkTint runs the tint benchmarks, returning the results.
@@ -666,7 +690,7 @@ func (e env) findGerritChangeToBenchmark() (*gerrit.ChangeInfo, error) {
 	})
 
 	if len(candidates) > 0 {
-		log.Printf("%d gerrit changes to benchmark\n", len(candidates))
+		log.Printf("%d gerrit changes to benchmark", len(candidates))
 		return &candidates[0].change, nil
 	}
 	return nil, nil
@@ -675,7 +699,7 @@ func (e env) findGerritChangeToBenchmark() (*gerrit.ChangeInfo, error) {
 // benchmarks the gerrit change, posting the findings to the change
 func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 	current := change.Revisions[change.CurrentRevision]
-	log.Printf("fetching '%v'...\n", current.Ref)
+	log.Printf("fetching '%v'...", current.Ref)
 	currentHash, err := e.tintRepo.Fetch(current.Ref, &git.FetchOptions{Auth: e.cfg.Tint.Auth})
 	if err != nil {
 		return err
@@ -685,8 +709,25 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse parent hash '%v':\n  %v", parent, err)
 	}
+
+	postMsg := func(notify, msg string) error {
+		_, _, err = e.gerrit.Changes.SetReview(change.ChangeID, currentHash.String(), &gerrit.ReviewInput{
+			Message: msg,
+			Tag:     "autogenerated:perfmon",
+			Notify:  notify,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to post message to gerrit change:\n  %v", err)
+		}
+		return nil
+	}
+
 	newRun, err := e.benchmarkTintChange(currentHash)
 	if err != nil {
+		var ftb errFailedToBuild
+		if errors.As(err, &ftb) {
+			return postMsg("OWNER", fmt.Sprintf("patchset %v failed to build", current.Number))
+		}
 		return err
 	}
 	if _, err := e.tintRepo.Fetch(parent, &git.FetchOptions{Auth: e.cfg.Tint.Auth}); err != nil {
@@ -735,15 +776,7 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 	if len(diff) > 0 {
 		notify = "OWNER_REVIEWERS"
 	}
-	_, _, err = e.gerrit.Changes.SetReview(change.ChangeID, currentHash.String(), &gerrit.ReviewInput{
-		Message: msg.String(),
-		Tag:     "autogenerated:perfmon",
-		Notify:  notify,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to post benchmark results to gerrit change:\n  %v", err)
-	}
-	return nil
+	return postMsg(notify, msg.String())
 }
 
 // createOrOpenGitRepo creates a new local repo by cloning cfg.URL into
