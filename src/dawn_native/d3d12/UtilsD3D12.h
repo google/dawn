@@ -44,42 +44,25 @@ namespace dawn::native::d3d12 {
 
     bool IsTypeless(DXGI_FORMAT format);
 
-    void RecordCopyBufferToTextureFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
-                                                       const TextureCopySubresource& baseCopySplit,
-                                                       ID3D12Resource* bufferResource,
-                                                       uint64_t baseOffset,
-                                                       uint64_t bufferBytesPerRow,
-                                                       Texture* texture,
-                                                       uint32_t textureMiplevel,
-                                                       uint32_t textureLayer,
-                                                       Aspect aspect);
+    enum class BufferTextureCopyDirection {
+        B2T,
+        T2B,
+    };
 
-    void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
-                                   const TextureCopy& textureCopy,
-                                   ID3D12Resource* bufferResource,
-                                   const uint64_t offset,
-                                   const uint32_t bytesPerRow,
-                                   const uint32_t rowsPerImage,
-                                   const Extent3D& copySize,
-                                   Texture* texture,
-                                   Aspect aspect);
+    void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection direction,
+                                                 ID3D12GraphicsCommandList* commandList,
+                                                 ID3D12Resource* bufferResource,
+                                                 const uint64_t offset,
+                                                 const uint32_t bytesPerRow,
+                                                 const uint32_t rowsPerImage,
+                                                 const TextureCopy& textureCopy,
+                                                 const Extent3D& copySize);
 
-    void RecordCopyTextureToBufferFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
-                                                       const TextureCopySubresource& baseCopySplit,
-                                                       Buffer* buffer,
-                                                       uint64_t baseOffset,
-                                                       uint64_t bufferBytesPerRow,
-                                                       Texture* texture,
-                                                       uint32_t textureMiplevel,
-                                                       uint32_t textureLayer,
-                                                       Aspect aspect);
-
-    void RecordCopyTextureToBuffer(ID3D12GraphicsCommandList* commandList,
-                                   const TextureCopy& textureCopy,
-                                   const BufferCopy& bufferCopy,
-                                   Texture* texture,
-                                   Buffer* buffer,
-                                   const Extent3D& copySize);
+    void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
+                                 ID3D12GraphicsCommandList* commandList,
+                                 const BufferCopy& bufferCopy,
+                                 const TextureCopy& textureCopy,
+                                 const Extent3D& copySize);
 
     void SetDebugName(Device* device,
                       ID3D12Object* object,

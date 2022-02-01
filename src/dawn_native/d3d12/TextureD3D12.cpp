@@ -1101,9 +1101,6 @@ namespace dawn::native::d3d12 {
                     // compute d3d12 texture copy locations for texture and buffer
                     Extent3D copySize = GetMipLevelPhysicalSize(level);
 
-                    TextureCopySubresource copySplit = Compute2DTextureCopySubresource(
-                        {0, 0, 0}, copySize, blockInfo, uploadHandle.startOffset, bytesPerRow);
-
                     for (uint32_t layer = range.baseArrayLayer;
                          layer < range.baseArrayLayer + range.layerCount; ++layer) {
                         if (clearValue == TextureBase::ClearValue::Zero &&
@@ -1113,10 +1110,16 @@ namespace dawn::native::d3d12 {
                             continue;
                         }
 
-                        RecordCopyBufferToTextureFromTextureCopySplit(
-                            commandList, copySplit,
-                            ToBackend(uploadHandle.stagingBuffer)->GetResource(), 0, bytesPerRow,
-                            this, level, layer, aspect);
+                        TextureCopy textureCopy;
+                        textureCopy.texture = this;
+                        textureCopy.origin = {0, 0, layer};
+                        textureCopy.mipLevel = level;
+                        textureCopy.aspect = aspect;
+                        RecordBufferTextureCopyWithBufferHandle(
+                            BufferTextureCopyDirection::B2T, commandList,
+                            ToBackend(uploadHandle.stagingBuffer)->GetResource(),
+                            uploadHandle.startOffset, bytesPerRow, GetHeight(), textureCopy,
+                            copySize);
                     }
                 }
             }

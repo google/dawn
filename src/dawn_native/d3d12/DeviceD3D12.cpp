@@ -511,9 +511,10 @@ namespace dawn::native::d3d12 {
 
         texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst, range);
 
-        RecordCopyBufferToTexture(commandContext, *dst, ToBackend(source)->GetResource(),
-                                  src.offset, src.bytesPerRow, src.rowsPerImage, copySizePixels,
-                                  texture, range.aspects);
+        RecordBufferTextureCopyWithBufferHandle(
+            BufferTextureCopyDirection::B2T, commandContext->GetCommandList(),
+            ToBackend(source)->GetResource(), src.offset, src.bytesPerRow, src.rowsPerImage, *dst,
+            copySizePixels);
 
         return {};
     }

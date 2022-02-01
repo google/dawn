@@ -144,16 +144,17 @@ namespace dawn::native::d3d12 {
         }
     }
 
-    void RecordCopyBufferToTextureFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
-                                                       const TextureCopySubresource& baseCopySplit,
-                                                       ID3D12Resource* bufferResource,
-                                                       uint64_t baseOffset,
-                                                       uint64_t bufferBytesPerRow,
-                                                       Texture* texture,
-                                                       uint32_t textureMiplevel,
-                                                       uint32_t textureLayer,
-                                                       Aspect aspect) {
-        ASSERT(HasOneBit(aspect));
+    void RecordBufferTextureCopyFromSplits(BufferTextureCopyDirection direction,
+                                           ID3D12GraphicsCommandList* commandList,
+                                           const TextureCopySubresource& baseCopySplit,
+                                           ID3D12Resource* bufferResource,
+                                           uint64_t baseOffset,
+                                           uint64_t bufferBytesPerRow,
+                                           TextureBase* textureBase,
+                                           uint32_t textureMiplevel,
+                                           uint32_t textureLayer,
+                                           Aspect aspect) {
+        Texture* texture = ToBackend(textureBase);
         const D3D12_TEXTURE_COPY_LOCATION textureLocation =
             ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureLayer, aspect);
 
@@ -166,27 +167,35 @@ namespace dawn::native::d3d12 {
             const D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                 ComputeBufferLocationForCopyTextureRegion(texture, bufferResource, info.bufferSize,
                                                           offsetBytes, bufferBytesPerRow, aspect);
-            const D3D12_BOX sourceRegion =
-                ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
+            if (direction == BufferTextureCopyDirection::B2T) {
+                const D3D12_BOX sourceRegion =
+                    ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
 
-            commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x,
-                                           info.textureOffset.y, info.textureOffset.z,
-                                           &bufferLocation, &sourceRegion);
+                commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x,
+                                               info.textureOffset.y, info.textureOffset.z,
+                                               &bufferLocation, &sourceRegion);
+            } else {
+                ASSERT(direction == BufferTextureCopyDirection::T2B);
+                const D3D12_BOX sourceRegion =
+                    ComputeD3D12BoxFromOffsetAndSize(info.textureOffset, info.copySize);
+
+                commandList->CopyTextureRegion(&bufferLocation, info.bufferOffset.x,
+                                               info.bufferOffset.y, info.bufferOffset.z,
+                                               &textureLocation, &sourceRegion);
+            }
         }
     }
 
-    void CopyBufferTo2DTextureWithCopySplit(CommandRecordingContext* commandContext,
-                                            const TextureCopy& textureCopy,
+    void Record2DBufferTextureCopyWithSplit(BufferTextureCopyDirection direction,
+                                            ID3D12GraphicsCommandList* commandList,
                                             ID3D12Resource* bufferResource,
                                             const uint64_t offset,
                                             const uint32_t bytesPerRow,
                                             const uint32_t rowsPerImage,
-                                            const Extent3D& copySize,
-                                            Texture* texture,
-                                            Aspect aspect) {
-        ASSERT(HasOneBit(aspect));
+                                            const TextureCopy& textureCopy,
+                                            const TexelBlockInfo& blockInfo,
+                                            const Extent3D& copySize) {
         // See comments in Compute2DTextureCopySplits() for more details.
-        const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(aspect).block;
         const TextureCopySplits copySplits = Compute2DTextureCopySplits(
             textureCopy.origin, copySize, blockInfo, offset, bytesPerRow, rowsPerImage);
 
@@ -210,166 +219,66 @@ namespace dawn::native::d3d12 {
             const uint64_t bufferOffsetForNextLayer = bufferOffsetsForNextLayer[splitIndex];
             const uint32_t copyTextureLayer = copyLayer + textureCopy.origin.z;
 
-            RecordCopyBufferToTextureFromTextureCopySplit(
-                commandContext->GetCommandList(), copySplitPerLayerBase, bufferResource,
-                bufferOffsetForNextLayer, bytesPerRow, texture, textureCopy.mipLevel,
-                copyTextureLayer, aspect);
+            RecordBufferTextureCopyFromSplits(direction, commandList, copySplitPerLayerBase,
+                                              bufferResource, bufferOffsetForNextLayer, bytesPerRow,
+                                              textureCopy.texture.Get(), textureCopy.mipLevel,
+                                              copyTextureLayer, textureCopy.aspect);
 
             bufferOffsetsForNextLayer[splitIndex] +=
                 bytesPerLayer * copySplits.copySubresources.size();
         }
     }
 
-    void CopyBufferTo3DTexture(CommandRecordingContext* commandContext,
-                               const TextureCopy& textureCopy,
-                               ID3D12Resource* bufferResource,
-                               const uint64_t offset,
-                               const uint32_t bytesPerRow,
-                               const uint32_t rowsPerImage,
-                               const Extent3D& copySize,
-                               Texture* texture,
-                               Aspect aspect) {
-        ASSERT(HasOneBit(aspect));
-        // See comments in Compute3DTextureCopySplits() for more details.
-        const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(aspect).block;
-        const TextureCopySubresource copyRegions = Compute3DTextureCopySplits(
-            textureCopy.origin, copySize, blockInfo, offset, bytesPerRow, rowsPerImage);
-
-        RecordCopyBufferToTextureFromTextureCopySplit(commandContext->GetCommandList(), copyRegions,
-                                                      bufferResource, 0, bytesPerRow, texture,
-                                                      textureCopy.mipLevel, 0, aspect);
-    }
-
-    void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
-                                   const TextureCopy& textureCopy,
-                                   ID3D12Resource* bufferResource,
-                                   const uint64_t offset,
-                                   const uint32_t bytesPerRow,
-                                   const uint32_t rowsPerImage,
-                                   const Extent3D& copySize,
-                                   Texture* texture,
-                                   Aspect aspect) {
-        // Record the CopyTextureRegion commands for 3D textures. Multiple depths of 3D
-        // textures can be copied in one shot and copySplits are not needed.
-        if (texture->GetDimension() == wgpu::TextureDimension::e3D) {
-            CopyBufferTo3DTexture(commandContext, textureCopy, bufferResource, offset, bytesPerRow,
-                                  rowsPerImage, copySize, texture, aspect);
-        } else {
-            // Compute the copySplits and record the CopyTextureRegion commands for 2D
-            // textures.
-            CopyBufferTo2DTextureWithCopySplit(commandContext, textureCopy, bufferResource, offset,
-                                               bytesPerRow, rowsPerImage, copySize, texture,
-                                               aspect);
-        }
-    }
-
-    void RecordCopyTextureToBufferFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
-                                                       const TextureCopySubresource& baseCopySplit,
-                                                       Buffer* buffer,
-                                                       uint64_t baseOffset,
-                                                       uint64_t bufferBytesPerRow,
-                                                       Texture* texture,
-                                                       uint32_t textureMiplevel,
-                                                       uint32_t textureLayer,
-                                                       Aspect aspect) {
-        const D3D12_TEXTURE_COPY_LOCATION textureLocation =
-            ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureLayer, aspect);
-
-        for (uint32_t i = 0; i < baseCopySplit.count; ++i) {
-            const TextureCopySubresource::CopyInfo& info = baseCopySplit.copies[i];
-
-            // TODO(jiawei.shao@intel.com): pre-compute bufferLocation and sourceRegion as
-            // members in TextureCopySubresource::CopyInfo.
-            const uint64_t offsetBytes = info.alignedOffset + baseOffset;
-            const D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-                ComputeBufferLocationForCopyTextureRegion(texture, buffer->GetD3D12Resource(),
-                                                          info.bufferSize, offsetBytes,
-                                                          bufferBytesPerRow, aspect);
-            const D3D12_BOX sourceRegion =
-                ComputeD3D12BoxFromOffsetAndSize(info.textureOffset, info.copySize);
-
-            commandList->CopyTextureRegion(&bufferLocation, info.bufferOffset.x,
-                                           info.bufferOffset.y, info.bufferOffset.z,
-                                           &textureLocation, &sourceRegion);
-        }
-    }
-
-    void Copy2DTextureToBufferWithCopySplit(ID3D12GraphicsCommandList* commandList,
-                                            const TextureCopy& textureCopy,
-                                            const BufferCopy& bufferCopy,
-                                            Texture* texture,
-                                            Buffer* buffer,
-                                            const Extent3D& copySize) {
+    void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection direction,
+                                                 ID3D12GraphicsCommandList* commandList,
+                                                 ID3D12Resource* bufferResource,
+                                                 const uint64_t offset,
+                                                 const uint32_t bytesPerRow,
+                                                 const uint32_t rowsPerImage,
+                                                 const TextureCopy& textureCopy,
+                                                 const Extent3D& copySize) {
         ASSERT(HasOneBit(textureCopy.aspect));
+
+        TextureBase* texture = textureCopy.texture.Get();
         const TexelBlockInfo& blockInfo =
             texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
 
-        // See comments around Compute2DTextureCopySplits() for more details.
-        const TextureCopySplits copySplits =
-            Compute2DTextureCopySplits(textureCopy.origin, copySize, blockInfo, bufferCopy.offset,
-                                       bufferCopy.bytesPerRow, bufferCopy.rowsPerImage);
+        switch (texture->GetDimension()) {
+            case wgpu::TextureDimension::e1D: {
+                UNREACHABLE();
+                break;
+            }
 
-        const uint64_t bytesPerLayer = bufferCopy.bytesPerRow * bufferCopy.rowsPerImage;
+            // Record the CopyTextureRegion commands for 2D textures, with special handling of array
+            // layers since each require their own set of copies.
+            case wgpu::TextureDimension::e2D:
+                Record2DBufferTextureCopyWithSplit(direction, commandList, bufferResource, offset,
+                                                   bytesPerRow, rowsPerImage, textureCopy,
+                                                   blockInfo, copySize);
+                break;
 
-        // copySplits.copySubresources[1] is always calculated for the second copy layer with
-        // extra "bytesPerLayer" copy offset compared with the first copy layer. So
-        // here we use an array bufferOffsetsForNextLayer to record the extra offsets
-        // for each copy layer: bufferOffsetsForNextLayer[0] is the extra offset for
-        // the next copy layer that uses copySplits.copySubresources[0], and
-        // bufferOffsetsForNextLayer[1] is the extra offset for the next copy layer
-        // that uses copySplits.copySubresources[1].
-        std::array<uint64_t, TextureCopySplits::kMaxTextureCopySubresources>
-            bufferOffsetsForNextLayer = {{0u, 0u}};
-        for (uint32_t copyLayer = 0; copyLayer < copySize.depthOrArrayLayers; ++copyLayer) {
-            const uint32_t splitIndex = copyLayer % copySplits.copySubresources.size();
+            case wgpu::TextureDimension::e3D: {
+                // See comments in Compute3DTextureCopySplits() for more details.
+                const TextureCopySubresource copyRegions = Compute3DTextureCopySplits(
+                    textureCopy.origin, copySize, blockInfo, offset, bytesPerRow, rowsPerImage);
 
-            const TextureCopySubresource& copySplitPerLayerBase =
-                copySplits.copySubresources[splitIndex];
-            const uint64_t bufferOffsetForNextLayer = bufferOffsetsForNextLayer[splitIndex];
-            const uint32_t copyTextureLayer = copyLayer + textureCopy.origin.z;
-
-            RecordCopyTextureToBufferFromTextureCopySplit(
-                commandList, copySplitPerLayerBase, buffer, bufferOffsetForNextLayer,
-                bufferCopy.bytesPerRow, texture, textureCopy.mipLevel, copyTextureLayer,
-                textureCopy.aspect);
-
-            bufferOffsetsForNextLayer[splitIndex] +=
-                bytesPerLayer * copySplits.copySubresources.size();
+                RecordBufferTextureCopyFromSplits(direction, commandList, copyRegions,
+                                                  bufferResource, 0, bytesPerRow, texture,
+                                                  textureCopy.mipLevel, 0, textureCopy.aspect);
+                break;
+            }
         }
     }
 
-    void Copy3DTextureToBuffer(ID3D12GraphicsCommandList* commandList,
-                               const TextureCopy& textureCopy,
-                               const BufferCopy& bufferCopy,
-                               Texture* texture,
-                               Buffer* buffer,
-                               const Extent3D& copySize) {
-        ASSERT(HasOneBit(textureCopy.aspect));
-        const TexelBlockInfo& blockInfo =
-            texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
-
-        // See comments around Compute3DTextureCopySplits() for more details.
-        const TextureCopySubresource copyRegions =
-            Compute3DTextureCopySplits(textureCopy.origin, copySize, blockInfo, bufferCopy.offset,
-                                       bufferCopy.bytesPerRow, bufferCopy.rowsPerImage);
-
-        RecordCopyTextureToBufferFromTextureCopySplit(commandList, copyRegions, buffer, 0,
-                                                      bufferCopy.bytesPerRow, texture,
-                                                      textureCopy.mipLevel, 0, textureCopy.aspect);
-    }
-
-    void RecordCopyTextureToBuffer(ID3D12GraphicsCommandList* commandList,
-                                   const TextureCopy& textureCopy,
-                                   const BufferCopy& bufferCopy,
-                                   Texture* texture,
-                                   Buffer* buffer,
-                                   const Extent3D& copySize) {
-        if (texture->GetDimension() == wgpu::TextureDimension::e3D) {
-            Copy3DTextureToBuffer(commandList, textureCopy, bufferCopy, texture, buffer, copySize);
-        } else {
-            Copy2DTextureToBufferWithCopySplit(commandList, textureCopy, bufferCopy, texture,
-                                               buffer, copySize);
-        }
+    void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
+                                 ID3D12GraphicsCommandList* commandList,
+                                 const BufferCopy& bufferCopy,
+                                 const TextureCopy& textureCopy,
+                                 const Extent3D& copySize) {
+        RecordBufferTextureCopyWithBufferHandle(direction, commandList,
+                                                ToBackend(bufferCopy.buffer)->GetD3D12Resource(),
+                                                bufferCopy.offset, bufferCopy.bytesPerRow,
+                                                bufferCopy.rowsPerImage, textureCopy, copySize);
     }
 
     void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std::string label) {
