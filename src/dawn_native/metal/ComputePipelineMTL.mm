@@ -14,6 +14,7 @@
 
 #include "dawn_native/metal/ComputePipelineMTL.h"
 
+#include "common/Math.h"
 #include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/ShaderModuleMTL.h"
@@ -62,7 +63,9 @@ namespace dawn::native::metal {
             if (mWorkgroupAllocations[i] == 0) {
                 continue;
             }
-            [encoder setThreadgroupMemoryLength:mWorkgroupAllocations[i] atIndex:i];
+            // Size must be a multiple of 16 bytes.
+            uint32_t rounded = Align<uint32_t>(mWorkgroupAllocations[i], 16);
+            [encoder setThreadgroupMemoryLength:rounded atIndex:i];
         }
     }
 
