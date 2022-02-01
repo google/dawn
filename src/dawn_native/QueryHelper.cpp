@@ -24,6 +24,8 @@
 #include "dawn_native/InternalPipelineStore.h"
 #include "dawn_native/utils/WGPUHelpers.h"
 
+#include <cmath>
+
 namespace dawn::native {
 
     namespace {
@@ -32,7 +34,8 @@ namespace dawn::native {
         static_assert(offsetof(dawn::native::TimestampParams, first) == 0);
         static_assert(offsetof(dawn::native::TimestampParams, count) == 4);
         static_assert(offsetof(dawn::native::TimestampParams, offset) == 8);
-        static_assert(offsetof(dawn::native::TimestampParams, period) == 12);
+        static_assert(offsetof(dawn::native::TimestampParams, multiplier) == 12);
+        static_assert(offsetof(dawn::native::TimestampParams, rightShift) == 16);
 
         static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
@@ -52,13 +55,13 @@ namespace dawn::native {
                 first  : u32;
                 count  : u32;
                 offset : u32;
-                period : f32;
+                multiplier : u32;
+                right_shift  : u32;
             };
 
             @group(0) @binding(0) var<storage, read_write> timestamps : TimestampArr;
             @group(0) @binding(1) var<storage, read> availability : AvailabilityArr;
             @group(0) @binding(2) var<uniform> params : TimestampParams;
-
 
             let sizeofTimestamp : u32 = 8u;
 
@@ -68,8 +71,6 @@ namespace dawn::native {
 
                 var index = GlobalInvocationID.x + params.offset / sizeofTimestamp;
 
-                var timestamp = timestamps.t[index];
-
                 // Return 0 for the unavailable value.
                 if (availability.v[GlobalInvocationID.x + params.first] == 0u) {
                     timestamps.t[index].low = 0u;
@@ -77,31 +78,40 @@ namespace dawn::native {
                     return;
                 }
 
-                // Multiply the values in timestamps buffer by the period.
-                var period = params.period;
-                var w = 0u;
+                var timestamp = timestamps.t[index];
 
-                // If the product of low 32-bits and the period does not exceed the maximum of u32,
-                // directly do the multiplication, otherwise, use two u32 to represent the high
-                // 16-bits and low 16-bits of this u32, then multiply them by the period separately.
-                if (timestamp.low <= u32(f32(0xFFFFFFFFu) / period)) {
-                    timestamps.t[index].low = u32(round(f32(timestamp.low) * period));
-                } else {
-                    var lo = timestamp.low & 0xFFFFu;
-                    var hi = timestamp.low >> 16u;
+                // TODO(dawn:1250): Consider using the umulExtended and uaddCarry intrinsics once
+                // available.
+                var chunks : array<u32, 5>;
+                chunks[0] = timestamp.low & 0xFFFFu;
+                chunks[1] = timestamp.low >> 16u;
+                chunks[2] = timestamp.high & 0xFFFFu;
+                chunks[3] = timestamp.high >> 16u;
+                chunks[4] = 0u;
 
-                    var t0 = u32(round(f32(lo) * period));
-                    var t1 = u32(round(f32(hi) * period)) + (t0 >> 16u);
-                    w = t1 >> 16u;
-
-                    var result = t1 << 16u;
-                    result = result | (t0 & 0xFFFFu);
-                    timestamps.t[index].low = result;
+                // Multiply all the chunks with the integer period.
+                for (var i = 0u; i < 4u; i = i + 1u) {
+                    chunks[i] = chunks[i] * params.multiplier;
                 }
 
-                // Get the nearest integer to the float result. For high 32-bits, the round
-                // function will greatly help reduce the accuracy loss of the final result.
-                timestamps.t[index].high = u32(round(f32(timestamp.high) * period)) + w;
+                // Propagate the carry
+                var carry = 0u;
+                for (var i = 0u; i < 4u; i = i + 1u) {
+                    var chunk_with_carry = chunks[i] + carry;
+                    carry = chunk_with_carry >> 16u;
+                    chunks[i] = chunk_with_carry & 0xFFFFu;
+                }
+                chunks[4] = carry;
+
+                // Apply the right shift.
+                for (var i = 0u; i < 4u; i = i + 1u) {
+                    var low = chunks[i] >> params.right_shift;
+                    var high = (chunks[i + 1u] << (16u - params.right_shift)) & 0xFFFFu;
+                    chunks[i] = low | high;
+                }
+
+                timestamps.t[index].low = chunks[0] | (chunks[1] << 16u);
+                timestamps.t[index].high = chunks[2] | (chunks[3] << 16u);
             }
         )";
 
@@ -149,6 +159,30 @@ namespace dawn::native {
         }
 
     }  // anonymous namespace
+
+    TimestampParams::TimestampParams(uint32_t first, uint32_t count, uint32_t offset, float period)
+        : first(first), count(count), offset(offset) {
+        // The overall conversion happening, if p is the period, m the multiplier, s the shift, is::
+        //
+        //   m = round(p * 2^s)
+        //
+        // Then in the shader we compute:
+        //
+        //   m / 2^s = round(p * 2^s) / 2*s ~= p
+        //
+        // The goal is to find the best shift to keep the precision of computations. The
+        // conversion shader uses chunks of 16 bits to compute the multiplication with the perios,
+        // so we need to keep the multiplier under 2^16. At the same time, the larger the
+        // multiplier, the better the precision, so we maximize the value of the right shift while
+        // keeping the multiplier under 2 ^ 16
+        uint32_t upperLog2 = ceil(log2(period));
+
+        // Clamp the shift to 16 because we're doing computations in 16bit chunks. The
+        // multiplication by the period will overflow the chunks, but timestamps are mostly
+        // informational so that's ok.
+        rightShift = 16u - std::min(upperLog2, 16u);
+        multiplier = uint32_t(period * (1 << rightShift));
+    }
 
     MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
                                                     BufferBase* timestamps,

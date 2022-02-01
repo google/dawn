@@ -43,22 +43,31 @@ namespace {
         // Expect the actual results are approximately equal to the expected values.
         testing::AssertionResult Check(const void* data, size_t size) override {
             DAWN_ASSERT(size == sizeof(uint64_t) * mExpected.size());
-            constexpr static float kErrorToleranceRatio = 0.002f;
+            // The computations in the shader use a multiplier that's a 16bit integer plus a shift
+            // that maximize the multiplier. This means that for the range of periods we care about
+            // (1 to 2^16-1 ns per tick), the high order bit of the multiplier will always be set.
+            // Intuitively this means that we have 15 bits of precision in the computation so we
+            // expect that for the error tolerance.
+            constexpr static float kErrorToleranceRatio = 1.0 / (1 << 15);  // about 3e-5.
 
             const uint64_t* actual = static_cast<const uint64_t*>(data);
             for (size_t i = 0; i < mExpected.size(); ++i) {
-                if (mExpected[i] == 0 && actual[i] != 0) {
-                    return testing::AssertionFailure()
-                           << "Expected data[" << i << "] to be 0, actual " << actual[i]
-                           << std::endl;
+                if (mExpected[i] == 0) {
+                    if (actual[i] != 0) {
+                        return testing::AssertionFailure()
+                               << "Expected data[" << i << "] to be 0, actual " << actual[i]
+                               << std::endl;
+                    }
+                    return testing::AssertionSuccess();
                 }
 
-                if (abs(static_cast<int64_t>(mExpected[i] - actual[i])) >
-                    mExpected[i] * kErrorToleranceRatio) {
+                float errorRate =
+                    abs(static_cast<int64_t>(mExpected[i] - actual[i])) / float(mExpected[i]);
+                if (errorRate > kErrorToleranceRatio) {
                     return testing::AssertionFailure()
                            << "Expected data[" << i << "] to be " << mExpected[i] << ", actual "
-                           << actual[i] << ". Error rate is larger than " << kErrorToleranceRatio
-                           << std::endl;
+                           << actual[i] << ". Error rate " << errorRate << " is larger than "
+                           << kErrorToleranceRatio << std::endl;
                 }
             }
 
@@ -72,12 +81,6 @@ namespace {
 }  // anonymous namespace
 
 constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
-
-// A gpu frequency on Intel D3D12 (ticks/second)
-constexpr uint64_t kGPUFrequency = 12000048u;
-constexpr uint64_t kNsPerSecond = 1000000000u;
-// Timestamp period in nanoseconds
-constexpr float kPeriod = static_cast<float>(kNsPerSecond) / kGPUFrequency;
 
 class QueryInternalShaderTests : public DawnTest {
   protected:
@@ -103,7 +106,8 @@ class QueryInternalShaderTests : public DawnTest {
     const std::vector<uint64_t> GetExpectedResults(const std::vector<uint64_t>& origin,
                                                    uint32_t start,
                                                    uint32_t firstQuery,
-                                                   uint32_t queryCount) {
+                                                   uint32_t queryCount,
+                                                   float period) {
         std::vector<uint64_t> expected(origin.begin(), origin.end());
         for (size_t i = 0; i < queryCount; i++) {
             if (availabilities[firstQuery + i] == 0) {
@@ -113,13 +117,16 @@ class QueryInternalShaderTests : public DawnTest {
                 // Maybe the timestamp * period is larger than the maximum of uint64, so cast the
                 // delta value to double (higher precision than float)
                 expected[start + i] =
-                    static_cast<uint64_t>(static_cast<double>(origin[start + i]) * kPeriod);
+                    static_cast<uint64_t>(static_cast<double>(origin[start + i]) * period);
             }
         }
         return expected;
     }
 
-    void RunTest(uint32_t firstQuery, uint32_t queryCount, uint32_t destinationOffset) {
+    void RunTest(uint32_t firstQuery,
+                 uint32_t queryCount,
+                 uint32_t destinationOffset,
+                 float period) {
         ASSERT(destinationOffset % 256 == 0);
 
         uint64_t size = queryCount * sizeof(uint64_t) + destinationOffset;
@@ -147,7 +154,7 @@ class QueryInternalShaderTests : public DawnTest {
                                         kQueryCount * sizeof(uint32_t), wgpu::BufferUsage::Storage);
 
         // The params uniform buffer
-        dawn::native::TimestampParams params = {firstQuery, queryCount, destinationOffset, kPeriod};
+        dawn::native::TimestampParams params(firstQuery, queryCount, destinationOffset, period);
         wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
                                                                 wgpu::BufferUsage::Uniform);
 
@@ -158,13 +165,13 @@ class QueryInternalShaderTests : public DawnTest {
         queue.Submit(1, &commands);
 
         const std::vector<uint64_t> expected =
-            GetExpectedResults(timestampValues, start, firstQuery, queryCount);
+            GetExpectedResults(timestampValues, start, firstQuery, queryCount, period);
 
         EXPECT_BUFFER(timestampsBuffer, 0, size,
-                      new InternalShaderExpectation(expected.data(), size / sizeof(uint64_t)));
+                      new InternalShaderExpectation(expected.data(), size / sizeof(uint64_t)))
+            << "Conversion test for period:" << period << " firstQuery:" << firstQuery
+            << " queryCount:" << queryCount << " destinationOffset:" << destinationOffset;
     }
-
-  private:
 };
 
 // Test the accuracy of timestamp compute shader which uses unsigned 32-bit integers to simulate
@@ -185,17 +192,28 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
 
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
-    // Convert timestamps in timestamps buffer with offset 0
-    // Test for ResolveQuerySet(querySet, 0, kQueryCount, timestampsBuffer, 0)
-    RunTest(0, kQueryCount, 0);
+    constexpr std::array<float, 5> kPeriodsToTest = {
+        1,
+        7,
+        // A gpu frequency on Intel D3D12 (ticks/second)
+        83.33,
+        1042,
+        65535,
+    };
 
-    // Convert timestamps in timestamps buffer with offset 256
-    // Test for ResolveQuerySet(querySet, 1, kQueryCount - 1, timestampsBuffer, 256)
-    RunTest(1, kQueryCount - 1, 256);
+    for (float period : kPeriodsToTest) {
+        // Convert timestamps in timestamps buffer with offset 0
+        // Test for ResolveQuerySet(querySet, 0, kQueryCount, timestampsBuffer, 0)
+        RunTest(0, kQueryCount, 0, period);
 
-    // Convert partial timestamps in timestamps buffer with offset 256
-    // Test for ResolveQuerySet(querySet, 1, 4, timestampsBuffer, 256)
-    RunTest(1, 4, 256);
+        // Convert timestamps in timestamps buffer with offset 256
+        // Test for ResolveQuerySet(querySet, 1, kQueryCount - 1, timestampsBuffer, 256)
+        RunTest(1, kQueryCount - 1, 256, period);
+
+        // Convert partial timestamps in timestamps buffer with offset 256
+        // Test for ResolveQuerySet(querySet, 1, 4, timestampsBuffer, 256)
+        RunTest(1, 4, 256, period);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(QueryInternalShaderTests, D3D12Backend(), MetalBackend(), VulkanBackend());

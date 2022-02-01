@@ -439,9 +439,8 @@ namespace dawn::native {
                                                      availability.size() * sizeof(uint32_t)));
 
             // Timestamp params uniform buffer
-            TimestampParams params = {firstQuery, queryCount,
-                                      static_cast<uint32_t>(destinationOffset),
-                                      device->GetTimestampPeriodInNS()};
+            TimestampParams params(firstQuery, queryCount, static_cast<uint32_t>(destinationOffset),
+                                   device->GetTimestampPeriodInNS());
 
             BufferDescriptor parmsDesc = {};
             parmsDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
