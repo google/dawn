@@ -18,7 +18,7 @@ This repository contains the implementation of Dawn, which is itself composed of
       - `<backend>`: code for the implementation of the backend on a specific graphics API, for example `d3d12`, `metal` or `vulkan`.
   - [`dawn_platform`](../src/dawn_platform): definition of interfaces for dependency injection in `dawn_native` or `dawn_wire`.
   - [`dawn_wire`](../src/dawn_wire): code for an implementation of WebGPU as a client-server architecture.
-  - [`fuzzers`](../src/fuzzers): various fuzzers for Dawn that are running in [Clusterfuzz](https://google.github.io/clusterfuzz/).
+  - [`fuzzers`](../src/dawn/fuzzers): various fuzzers for Dawn that are running in [Clusterfuzz](https://google.github.io/clusterfuzz/).
   - [`include`](../src/include): public headers with subdirectories for each library. Note that some headers are auto-generated and not present directly in the directory.
   - [`tests`](../src/tests):
     - [`end2end`](../src/tests/end2end): tests for the execution of the WebGPU API and require a GPU to run.
