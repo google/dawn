@@ -268,12 +268,6 @@ namespace dawn::native {
         const TextureBase* texture = textureCopy.texture;
         DAWN_TRY(device->ValidateObject(texture));
 
-        // TODO(https://crbug.com/dawn/814): Disallow 1D texture copies until they are implemented.
-        DAWN_INVALID_IF(texture->GetDimension() == wgpu::TextureDimension::e1D,
-                        "%s is used in a copy and has dimension %s. Copies with %s aren't "
-                        "implemented (yet) and are disallowed. See https://crbug.com/dawn/814.",
-                        texture, wgpu::TextureDimension::e1D, wgpu::TextureDimension::e1D);
-
         DAWN_INVALID_IF(textureCopy.mipLevel >= texture->GetNumMipLevels(),
                         "MipLevel (%u) is greater than the number of mip levels (%u) in %s.",
                         textureCopy.mipLevel, texture->GetNumMipLevels(), texture);
@@ -305,8 +299,6 @@ namespace dawn::native {
                                         const ImageCopyTexture& textureCopy,
                                         const Extent3D& copySize) {
         const TextureBase* texture = textureCopy.texture;
-
-        ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
 
         // Validation for the copy being in-bounds:
         Extent3D mipSize = texture->GetMipLevelPhysicalSize(textureCopy.mipLevel);
@@ -420,14 +412,29 @@ namespace dawn::native {
             "(%s).",
             dst.texture, dst.aspect, format.format);
 
-        if (src.texture == dst.texture && src.mipLevel == dst.mipLevel) {
-            wgpu::TextureDimension dimension = src.texture->GetDimension();
-            ASSERT(dimension != wgpu::TextureDimension::e1D);
-            DAWN_INVALID_IF(
-                (dimension == wgpu::TextureDimension::e2D &&
-                 IsRangeOverlapped(src.origin.z, dst.origin.z, copySize.depthOrArrayLayers)) ||
-                    dimension == wgpu::TextureDimension::e3D,
-                "Cannot copy between overlapping subresources of %s.", src.texture);
+        if (src.texture == dst.texture) {
+            switch (src.texture->GetDimension()) {
+                case wgpu::TextureDimension::e1D:
+                    ASSERT(src.mipLevel == 0 && src.origin.z == 0 && dst.origin.z == 0);
+                    return DAWN_FORMAT_VALIDATION_ERROR("Copy is from %s to itself.", src.texture);
+
+                case wgpu::TextureDimension::e2D:
+                    DAWN_INVALID_IF(src.mipLevel == dst.mipLevel &&
+                                        IsRangeOverlapped(src.origin.z, dst.origin.z,
+                                                          copySize.depthOrArrayLayers),
+                                    "Copy source and destination are overlapping layer ranges "
+                                    "([%u, %u) and [%u, %u)) of %s mip level %u",
+                                    src.origin.z, src.origin.z + copySize.depthOrArrayLayers,
+                                    dst.origin.z, dst.origin.z + copySize.depthOrArrayLayers,
+                                    src.texture, src.mipLevel);
+                    break;
+
+                case wgpu::TextureDimension::e3D:
+                    DAWN_INVALID_IF(src.mipLevel == dst.mipLevel,
+                                    "Copy is from %s mip level %u to itself.", src.texture,
+                                    src.mipLevel);
+                    break;
+            }
         }
 
         return {};

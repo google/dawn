@@ -1042,9 +1042,6 @@ namespace dawn::native::vulkan {
         wgpu::TextureUsage allUsages = wgpu::TextureUsage::None;
         wgpu::TextureUsage allLastUsages = wgpu::TextureUsage::None;
 
-        // TODO(crbug.com/dawn/814): support 1D textures.
-        ASSERT(GetDimension() != wgpu::TextureDimension::e1D);
-
         mSubresourceLastUsages->Merge(
             subresourceUsages, [&](const SubresourceRange& range, wgpu::TextureUsage* lastUsage,
                                    const wgpu::TextureUsage& newUsage) {

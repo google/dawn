@@ -614,6 +614,20 @@ namespace dawn::native::metal {
         for (const auto& copyInfo : splitCopies) {
             uint64_t bufferOffset = copyInfo.bufferOffset;
             switch (texture->GetDimension()) {
+                case wgpu::TextureDimension::e1D: {
+                    [commandContext->EnsureBlit()
+                             copyFromBuffer:mtlBuffer
+                               sourceOffset:bufferOffset
+                          sourceBytesPerRow:copyInfo.bytesPerRow
+                        sourceBytesPerImage:copyInfo.bytesPerImage
+                                 sourceSize:MTLSizeMake(copyInfo.copyExtent.width, 1, 1)
+                                  toTexture:texture->GetMTLTexture()
+                           destinationSlice:0
+                           destinationLevel:mipLevel
+                          destinationOrigin:MTLOriginMake(copyInfo.textureOrigin.x, 0, 0)
+                                    options:blitOption];
+                    break;
+                }
                 case wgpu::TextureDimension::e2D: {
                     const MTLOrigin textureOrigin =
                         MTLOriginMake(copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, 0);
@@ -655,8 +669,6 @@ namespace dawn::native::metal {
                                     options:blitOption];
                     break;
                 }
-                case wgpu::TextureDimension::e1D:
-                    UNREACHABLE();
             }
         }
     }
@@ -797,6 +809,23 @@ namespace dawn::native::metal {
                         uint64_t bufferOffset = copyInfo.bufferOffset;
 
                         switch (texture->GetDimension()) {
+                            case wgpu::TextureDimension::e1D: {
+                                [commandContext->EnsureBlit()
+                                             copyFromTexture:texture->GetMTLTexture()
+                                                 sourceSlice:0
+                                                 sourceLevel:src.mipLevel
+                                                sourceOrigin:MTLOriginMake(copyInfo.textureOrigin.x,
+                                                                           0, 0)
+                                                  sourceSize:MTLSizeMake(copyInfo.copyExtent.width,
+                                                                         1, 1)
+                                                    toBuffer:buffer->GetMTLBuffer()
+                                           destinationOffset:bufferOffset
+                                      destinationBytesPerRow:copyInfo.bytesPerRow
+                                    destinationBytesPerImage:copyInfo.bytesPerImage
+                                                     options:blitOption];
+                                break;
+                            }
+
                             case wgpu::TextureDimension::e2D: {
                                 const MTLOrigin textureOrigin = MTLOriginMake(
                                     copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, 0);
@@ -841,8 +870,6 @@ namespace dawn::native::metal {
                                                      options:blitOption];
                                 break;
                             }
-                            case wgpu::TextureDimension::e1D:
-                                UNREACHABLE();
                         }
                     }
                     break;
@@ -864,10 +891,6 @@ namespace dawn::native::metal {
                         GetSubresourcesAffectedByCopy(copy->source, copy->copySize));
                     EnsureDestinationTextureInitialized(commandContext, dstTexture,
                                                         copy->destination, copy->copySize);
-
-                    // TODO(crbug.com/dawn/814): support copies with 1D textures.
-                    ASSERT(srcTexture->GetDimension() != wgpu::TextureDimension::e1D &&
-                           dstTexture->GetDimension() != wgpu::TextureDimension::e1D);
 
                     const MTLSize sizeOneSlice =
                         MTLSizeMake(copy->copySize.width, copy->copySize.height, 1);
@@ -892,7 +915,7 @@ namespace dawn::native::metal {
                         destinationZPtr = &destinationOriginZ;
                     }
 
-                    // TODO(crbug.com/dawn/782): Do a single T2T copy if both are 3D.
+                    // TODO(crbug.com/dawn/782): Do a single T2T copy if both are 1D or 3D.
                     for (uint32_t z = 0; z < copy->copySize.depthOrArrayLayers; ++z) {
                         *sourceZPtr = copy->source.origin.z + z;
                         *destinationZPtr = copy->destination.origin.z + z;

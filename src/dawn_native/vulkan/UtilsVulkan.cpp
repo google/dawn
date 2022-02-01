@@ -136,11 +136,24 @@ namespace dawn::native::vulkan {
         region.imageSubresource.mipLevel = textureCopy.mipLevel;
 
         switch (textureCopy.texture->GetDimension()) {
+            case wgpu::TextureDimension::e1D:
+                ASSERT(textureCopy.origin.z == 0 && copySize.depthOrArrayLayers == 1);
+                region.imageOffset.x = textureCopy.origin.x;
+                region.imageOffset.y = 0;
+                region.imageOffset.z = 0;
+                region.imageSubresource.baseArrayLayer = 0;
+                region.imageSubresource.layerCount = 1;
+
+                ASSERT(!textureCopy.texture->GetFormat().isCompressed);
+                region.imageExtent.width = copySize.width;
+                region.imageExtent.height = 1;
+                region.imageExtent.depth = 1;
+                break;
+
             case wgpu::TextureDimension::e2D: {
                 region.imageOffset.x = textureCopy.origin.x;
                 region.imageOffset.y = textureCopy.origin.y;
                 region.imageOffset.z = 0;
-
                 region.imageSubresource.baseArrayLayer = textureCopy.origin.z;
                 region.imageSubresource.layerCount = copySize.depthOrArrayLayers;
 
@@ -155,19 +168,15 @@ namespace dawn::native::vulkan {
                 region.imageOffset.x = textureCopy.origin.x;
                 region.imageOffset.y = textureCopy.origin.y;
                 region.imageOffset.z = textureCopy.origin.z;
-
                 region.imageSubresource.baseArrayLayer = 0;
                 region.imageSubresource.layerCount = 1;
 
-                Extent3D imageExtent = ComputeTextureCopyExtent(textureCopy, copySize);
-                region.imageExtent.width = imageExtent.width;
-                region.imageExtent.height = imageExtent.height;
-                region.imageExtent.depth = imageExtent.depthOrArrayLayers;
+                ASSERT(!textureCopy.texture->GetFormat().isCompressed);
+                region.imageExtent.width = copySize.width;
+                region.imageExtent.height = copySize.height;
+                region.imageExtent.depth = copySize.depthOrArrayLayers;
                 break;
             }
-
-            case wgpu::TextureDimension::e1D:
-                UNREACHABLE();
         }
 
         return region;

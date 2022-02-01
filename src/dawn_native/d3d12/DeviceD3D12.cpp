@@ -499,7 +499,6 @@ namespace dawn::native::d3d12 {
         CommandRecordingContext* commandContext;
         DAWN_TRY_ASSIGN(commandContext, GetPendingCommandContext());
         Texture* texture = ToBackend(dst->texture.Get());
-        ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
 
         SubresourceRange range = GetSubresourcesAffectedByCopy(*dst, copySizePixels);
 

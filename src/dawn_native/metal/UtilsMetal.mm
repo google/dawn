@@ -84,8 +84,6 @@ namespace dawn::native::metal {
         const Extent3D clampedCopyExtent =
             texture->ClampToMipLevelVirtualSize(mipLevel, origin, copyExtent);
 
-        ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
-
         // Check whether buffer size is big enough.
         bool needWorkaround =
             bufferSize - bufferOffset < bytesPerImage * copyExtent.depthOrArrayLayers;

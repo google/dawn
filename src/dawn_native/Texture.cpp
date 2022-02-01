@@ -538,7 +538,6 @@ namespace dawn::native {
     }
     uint32_t TextureBase::GetHeight() const {
         ASSERT(!IsError());
-        ASSERT(mDimension != wgpu::TextureDimension::e1D);
         return mSize.height;
     }
     uint32_t TextureBase::GetDepth() const {

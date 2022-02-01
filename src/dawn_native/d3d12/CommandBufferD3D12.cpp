@@ -745,7 +745,6 @@ namespace dawn::native::d3d12 {
 
                     DAWN_TRY(buffer->EnsureDataInitialized(commandContext));
 
-                    ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
                     SubresourceRange subresources =
                         GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
 
@@ -778,7 +777,6 @@ namespace dawn::native::d3d12 {
 
                     DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
 
-                    ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
                     SubresourceRange subresources =
                         GetSubresourcesAffectedByCopy(copy->source, copy->copySize);
 
@@ -862,9 +860,6 @@ namespace dawn::native::d3d12 {
                                                            &sourceRegion);
                         }
                     } else {
-                        // TODO(crbug.com/dawn/814): support copying with 1D.
-                        ASSERT(source->GetDimension() != wgpu::TextureDimension::e1D &&
-                               destination->GetDimension() != wgpu::TextureDimension::e1D);
                         const dawn::native::Extent3D copyExtentOneSlice = {
                             copy->copySize.width, copy->copySize.height, 1u};
 
@@ -873,27 +868,29 @@ namespace dawn::native::d3d12 {
                                 uint32_t sourceLayer = 0;
                                 uint32_t sourceZ = 0;
                                 switch (source->GetDimension()) {
+                                    case wgpu::TextureDimension::e1D:
+                                        ASSERT(copy->source.origin.z == 0);
+                                        break;
                                     case wgpu::TextureDimension::e2D:
                                         sourceLayer = copy->source.origin.z + z;
                                         break;
                                     case wgpu::TextureDimension::e3D:
                                         sourceZ = copy->source.origin.z + z;
                                         break;
-                                    case wgpu::TextureDimension::e1D:
-                                        UNREACHABLE();
                                 }
 
                                 uint32_t destinationLayer = 0;
                                 uint32_t destinationZ = 0;
                                 switch (destination->GetDimension()) {
+                                    case wgpu::TextureDimension::e1D:
+                                        ASSERT(copy->destination.origin.z == 0);
+                                        break;
                                     case wgpu::TextureDimension::e2D:
                                         destinationLayer = copy->destination.origin.z + z;
                                         break;
                                     case wgpu::TextureDimension::e3D:
                                         destinationZ = copy->destination.origin.z + z;
                                         break;
-                                    case wgpu::TextureDimension::e1D:
-                                        UNREACHABLE();
                                 }
                                 D3D12_TEXTURE_COPY_LOCATION srcLocation =
                                     ComputeTextureCopyLocationForTexture(

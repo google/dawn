@@ -245,7 +245,15 @@ namespace dawn::native::d3d12 {
 
         switch (texture->GetDimension()) {
             case wgpu::TextureDimension::e1D: {
-                UNREACHABLE();
+                // 1D textures copy splits are a subset of the single-layer 2D texture copy splits,
+                // at least while 1D textures can only have a single array layer.
+                ASSERT(texture->GetArrayLayers() == 1);
+
+                TextureCopySubresource copyRegions = Compute2DTextureCopySubresource(
+                    textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+                RecordBufferTextureCopyFromSplits(direction, commandList, copyRegions,
+                                                  bufferResource, 0, bytesPerRow, texture,
+                                                  textureCopy.mipLevel, 0, textureCopy.aspect);
                 break;
             }
 
@@ -259,7 +267,7 @@ namespace dawn::native::d3d12 {
 
             case wgpu::TextureDimension::e3D: {
                 // See comments in Compute3DTextureCopySplits() for more details.
-                const TextureCopySubresource copyRegions = Compute3DTextureCopySplits(
+                TextureCopySubresource copyRegions = Compute3DTextureCopySplits(
                     textureCopy.origin, copySize, blockInfo, offset, bytesPerRow, rowsPerImage);
 
                 RecordBufferTextureCopyFromSplits(direction, commandList, copyRegions,
