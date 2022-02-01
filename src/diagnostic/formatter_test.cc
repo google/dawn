@@ -14,12 +14,28 @@
 
 #include "src/diagnostic/formatter.h"
 
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "src/diagnostic/diagnostic.h"
 
 namespace tint {
 namespace diag {
 namespace {
+
+Diagnostic Diag(Severity severity,
+                Source source,
+                std::string message,
+                System system,
+                const char* code = nullptr) {
+  Diagnostic d;
+  d.severity = severity;
+  d.source = source;
+  d.message = std::move(message);
+  d.system = system;
+  d.code = code;
+  return d;
+}
 
 constexpr const char* content =  // Note: words are tab-delimited
     R"(the	cat	says	meow
@@ -31,21 +47,28 @@ the	snail	says	???
 class DiagFormatterTest : public testing::Test {
  public:
   Source::File file{"file.name", content};
-  Diagnostic diag_note{Severity::Note,
-                       Source{Source::Range{Source::Location{1, 14}}, &file},
-                       "purr", System::Test};
-  Diagnostic diag_warn{Severity::Warning,
-                       Source{Source::Range{{2, 14}, {2, 18}}, &file}, "grrr",
-                       System::Test};
-  Diagnostic diag_err{Severity::Error,
-                      Source{Source::Range{{3, 16}, {3, 21}}, &file}, "hiss",
-                      System::Test, "abc123"};
-  Diagnostic diag_ice{Severity::InternalCompilerError,
-                      Source{Source::Range{{4, 16}, {4, 19}}, &file},
-                      "unreachable", System::Test};
-  Diagnostic diag_fatal{Severity::Fatal,
-                        Source{Source::Range{{4, 16}, {4, 19}}, &file},
-                        "nothing", System::Test};
+  Diagnostic diag_note =
+      Diag(Severity::Note,
+           Source{Source::Range{Source::Location{1, 14}}, &file},
+           "purr",
+           System::Test);
+  Diagnostic diag_warn = Diag(Severity::Warning,
+                              Source{Source::Range{{2, 14}, {2, 18}}, &file},
+                              "grrr",
+                              System::Test);
+  Diagnostic diag_err = Diag(Severity::Error,
+                             Source{Source::Range{{3, 16}, {3, 21}}, &file},
+                             "hiss",
+                             System::Test,
+                             "abc123");
+  Diagnostic diag_ice = Diag(Severity::InternalCompilerError,
+                             Source{Source::Range{{4, 16}, {4, 19}}, &file},
+                             "unreachable",
+                             System::Test);
+  Diagnostic diag_fatal = Diag(Severity::Fatal,
+                               Source{Source::Range{{4, 16}, {4, 19}}, &file},
+                               "nothing",
+                               System::Test);
 };
 
 TEST_F(DiagFormatterTest, Simple) {
@@ -69,7 +92,7 @@ TEST_F(DiagFormatterTest, SimpleNewlineAtEnd) {
 
 TEST_F(DiagFormatterTest, SimpleNoSource) {
   Formatter fmt{{false, false, false, false}};
-  Diagnostic diag{Severity::Note, Source{}, "no source!", System::Test};
+  auto diag = Diag(Severity::Note, Source{}, "no source!", System::Test);
   auto got = fmt.format(List{diag});
   auto* expect = "no source!";
   ASSERT_EQ(expect, got);
@@ -130,9 +153,9 @@ the  snake  says  quack
 }
 
 TEST_F(DiagFormatterTest, BasicWithMultiLine) {
-  Diagnostic multiline{Severity::Warning,
-                       Source{Source::Range{{2, 9}, {4, 15}}, &file},
-                       "multiline", System::Test};
+  auto multiline =
+      Diag(Severity::Warning, Source{Source::Range{{2, 9}, {4, 15}}, &file},
+           "multiline", System::Test);
   Formatter fmt{{false, false, true, false}};
   auto got = fmt.format(List{multiline});
   auto* expect = R"(2:9: multiline
@@ -165,9 +188,9 @@ the    snake    says    quack
 }
 
 TEST_F(DiagFormatterTest, BasicWithMultiLineTab4) {
-  Diagnostic multiline{Severity::Warning,
-                       Source{Source::Range{{2, 9}, {4, 15}}, &file},
-                       "multiline", System::Test};
+  auto multiline =
+      Diag(Severity::Warning, Source{Source::Range{{2, 9}, {4, 15}}, &file},
+           "multiline", System::Test);
   Formatter fmt{{false, false, true, false, 4u}};
   auto got = fmt.format(List{multiline});
   auto* expect = R"(2:9: multiline

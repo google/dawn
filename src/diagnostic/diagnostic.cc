@@ -21,39 +21,20 @@
 namespace tint {
 namespace diag {
 
+Diagnostic::Diagnostic() = default;
+Diagnostic::Diagnostic(const Diagnostic&) = default;
+Diagnostic::~Diagnostic() = default;
+Diagnostic& Diagnostic::operator=(const Diagnostic&) = default;
+
 List::List() = default;
 List::List(std::initializer_list<Diagnostic> list) : entries_(list) {}
-List::List(const List& rhs) {
-  *this = rhs;
-}
+List::List(const List& rhs) = default;
 
 List::List(List&& rhs) = default;
 
 List::~List() = default;
 
-List& List::operator=(const List& rhs) {
-  // Create copies of any of owned files, maintaining a map of rhs-file to
-  // new-file.
-  std::unordered_map<const Source::File*, const Source::File*> files;
-  owned_files_.reserve(rhs.owned_files_.size());
-  files.reserve(rhs.owned_files_.size());
-  for (auto& rhs_file : rhs.owned_files_) {
-    auto file = std::make_unique<Source::File>(*rhs_file);
-    files.emplace(rhs_file.get(), file.get());
-    owned_files_.emplace_back(std::move(file));
-  }
-
-  // Copy the diagnostic entries, then fix up pointers to the file copies.
-  entries_ = rhs.entries_;
-  for (auto& entry : entries_) {
-    if (auto it = files.find(entry.source.file); it != files.end()) {
-      entry.source.file = it->second;
-    }
-  }
-
-  error_count_ = rhs.error_count_;
-  return *this;
-}
+List& List::operator=(const List& rhs) = default;
 
 List& List::operator=(List&& rhs) = default;
 

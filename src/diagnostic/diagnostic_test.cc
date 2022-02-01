@@ -21,43 +21,20 @@ namespace tint {
 namespace diag {
 namespace {
 
-TEST(DiagListTest, UnownedFilesNotCopied) {
-  Source::File file{"path", "content"};
+TEST(DiagListTest, OwnedFilesShared) {
+  auto file = std::make_shared<Source::File>("path", "content");
 
   diag::List list_a, list_b;
   {
     diag::Diagnostic diag{};
-    diag.source = Source{Source::Range{{0, 0}}, &file};
+    diag.source = Source{Source::Range{{0, 0}}, file.get()};
     list_a.add(std::move(diag));
   }
 
   list_b = list_a;
 
   ASSERT_EQ(list_b.count(), list_a.count());
-  EXPECT_EQ(list_b.begin()->source.file, &file);
-}
-
-TEST(DiagListTest, OwnedFilesCopied) {
-  auto* file = new Source::File{"path", "content"};
-
-  diag::List list_a, list_b;
-  {
-    diag::Diagnostic diag{};
-    diag.source = Source{Source::Range{{0, 0}}, file};
-    list_a.add(std::move(diag));
-    list_a.own_file(file);
-  }
-
-  list_b = list_a;
-
-  ASSERT_EQ(list_b.count(), list_a.count());
-  EXPECT_NE(list_b.begin()->source.file, file);
-  ASSERT_NE(list_b.begin()->source.file, nullptr);
-  EXPECT_EQ(list_b.begin()->source.file->path, file->path);
-  EXPECT_EQ(list_b.begin()->source.file->content.data, file->content.data);
-  EXPECT_EQ(list_b.begin()->source.file->content.data_view,
-            file->content.data_view);
-  EXPECT_EQ(list_b.begin()->source.file->content.lines, file->content.lines);
+  EXPECT_EQ(list_b.begin()->source.file, file.get());
 }
 
 }  // namespace

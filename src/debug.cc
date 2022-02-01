@@ -14,6 +14,8 @@
 
 #include "src/debug.h"
 
+#include <memory>
+
 namespace tint {
 namespace {
 
@@ -32,9 +34,9 @@ InternalCompilerError::InternalCompilerError(const char* file,
     : file_(file), line_(line), system_(system), diagnostics_(diagnostics) {}
 
 InternalCompilerError::~InternalCompilerError() {
-  Source source{Source::Range{{line_}}, new Source::File{file_, ""}};
-  diagnostics_.own_file(source.file);
-  diagnostics_.add_ice(system_, msg_.str(), source);
+  auto file = std::make_shared<Source::File>(file_, "");
+  Source source{Source::Range{{line_}}, file.get()};
+  diagnostics_.add_ice(system_, msg_.str(), source, std::move(file));
 
   if (ice_reporter) {
     ice_reporter(diagnostics_);
