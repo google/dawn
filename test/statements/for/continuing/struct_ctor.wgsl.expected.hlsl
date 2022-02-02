@@ -15,6 +15,8 @@ void f() {
         break;
       }
       {
+      }
+      {
         const S tint_symbol = {1};
         i = (i + tint_symbol.i);
       }

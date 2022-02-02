@@ -17,6 +17,8 @@ void f() {
         break;
       }
       {
+      }
+      {
         S tint_symbol = S(1);
         i = (i + tint_symbol.i);
       }

@@ -242,9 +242,7 @@ class PromoteSideEffectsToDecl::State {
                 body_stmts.emplace_back(b.If(not_cond, break_body));
               }
               // Next emit the for-loop body
-              for (auto* body_stmt : for_loop->body->statements) {
-                body_stmts.emplace_back(ctx.Clone(body_stmt));
-              }
+              body_stmts.emplace_back(ctx.Clone(for_loop->body));
 
               // Finally create the continuing block if there was one.
               const ast::BlockStatement* continuing = nullptr;

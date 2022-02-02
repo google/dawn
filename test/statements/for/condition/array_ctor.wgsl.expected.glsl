@@ -12,6 +12,8 @@ void f() {
     if (!((i < tint_symbol[0]))) {
       break;
     }
+    {
+    }
   }
 }
 

@@ -10,6 +10,8 @@ void f() {
       break;
     }
     {
+    }
+    {
       const int tint_symbol[1] = {1};
       i = (i + tint_symbol[0]);
     }

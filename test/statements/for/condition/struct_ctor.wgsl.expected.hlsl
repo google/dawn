@@ -14,5 +14,7 @@ void f() {
     if (!((i < tint_symbol.i))) {
       break;
     }
+    {
+    }
   }
 }

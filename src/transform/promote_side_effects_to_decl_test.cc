@@ -184,7 +184,9 @@ fn f() {
     if (!((f == tint_symbol[0]))) {
       break;
     }
-    var marker = 1;
+    {
+      var marker = 1;
+    }
 
     continuing {
       f = (f + 1.0);
@@ -218,7 +220,9 @@ fn f() {
     if (!((f < 10.0))) {
       break;
     }
-    var marker = 1;
+    {
+      var marker = 1;
+    }
 
     continuing {
       let tint_symbol = array<f32, 1u>(1.0);
@@ -257,7 +261,9 @@ fn f() {
       if (!((f < tint_symbol_1[0]))) {
         break;
       }
-      var marker = 1;
+      {
+        var marker = 1;
+      }
 
       continuing {
         let tint_symbol_2 = array<f32, 1u>(2.0);
@@ -678,7 +684,9 @@ fn f() {
     if (!((var_for_index[i] < 3))) {
       break;
     }
-    break;
+    {
+      break;
+    }
   }
 }
 )";
@@ -712,7 +720,52 @@ fn f() {
     if (!((var_for_index[i].x < 3.0))) {
       break;
     }
+    {
+      break;
+    }
+  }
+}
+)";
+
+  DataMap data;
+  data.Add<PromoteSideEffectsToDecl::Config>(/* type_ctor_to_let */ false,
+                                             /* dynamic_index_to_var */ true);
+  auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest,
+       DynamicIndexToVar_MatrixIndexInForLoopCondWithNestedIndex) {
+  auto* src = R"(
+fn f() {
+  var i : i32;
+  let p = mat2x2(1.0, 2.0, 3.0, 4.0);
+  for(; p[i].x < 3.0; ) {
+    if (p[i].x < 1.0) {
+        var marker = 1;
+    }
     break;
+  }
+}
+)";
+
+  auto* expect = R"(
+fn f() {
+  var i : i32;
+  let p = mat2x2(1.0, 2.0, 3.0, 4.0);
+  loop {
+    var var_for_index = p;
+    if (!((var_for_index[i].x < 3.0))) {
+      break;
+    }
+    {
+      var var_for_index_1 = p;
+      if ((var_for_index_1[i].x < 1.0)) {
+        var marker = 1;
+      }
+      break;
+    }
   }
 }
 )";
