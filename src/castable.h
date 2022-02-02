@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <functional>
+#include <tuple>
 #include <utility>
 
 #include "src/traits.h"
@@ -61,7 +62,7 @@ struct TypeInfoOf;
       &tint::detail::TypeInfoOf<CLASS::TrueBase>::info,       \
       #CLASS,                                                 \
       tint::TypeInfo::HashCodeOf<CLASS>(),                    \
-      tint::TypeInfo::CombinedHashCodeOf<CLASS>(),            \
+      tint::TypeInfo::FullHashCodeOf<CLASS>(),                \
   };                                                          \
   TINT_CASTABLE_POP_DISABLE_WARNINGS()
 
@@ -86,17 +87,17 @@ struct TypeInfo {
   const char* name;
   /// The type hash code
   const HashCode hashcode;
-  /// The type hash code or'd with the base class' combined hash code
-  const HashCode combined_hashcode;
+  /// The type hash code bitwise-or'd with all ancestor's hashcodes.
+  const HashCode full_hashcode;
 
   /// @param type the test type info
   /// @returns true if the class with this TypeInfo is of, or derives from the
   /// class with the given TypeInfo.
   inline bool Is(const tint::TypeInfo* type) const {
     // Optimization: Check whether the all the bits of the type's hashcode can
-    // be found in the combined_hashcode. If a single bit is missing, then we
+    // be found in the full_hashcode. If a single bit is missing, then we
     // can quickly tell that that this TypeInfo does not derive from `type`.
-    if ((combined_hashcode & type->hashcode) != type->hashcode) {
+    if ((full_hashcode & type->hashcode) != type->hashcode) {
       return false;
     }
 
@@ -145,6 +146,8 @@ struct TypeInfo {
   /// multiple hashcodes are bitwise-or'd together.
   template <typename T>
   static constexpr HashCode HashCodeOf() {
+    static_assert(traits::IsTypeOrDerived<T, CastableBase>::value,
+                  "T is not Castable");
     /// Use the compiler's "pretty" function name, which includes the template
     /// type, to obtain a unique hash value.
 #ifdef _MSC_VER
@@ -161,12 +164,74 @@ struct TypeInfo {
   /// @returns the hashcode of the given type, bitwise-or'd with the hashcodes
   /// of all base classes.
   template <typename T>
-  static constexpr HashCode CombinedHashCodeOf() {
+  static constexpr HashCode FullHashCodeOf() {
     if constexpr (std::is_same_v<T, CastableBase>) {
       return HashCodeOf<CastableBase>();
     } else {
-      return HashCodeOf<T>() | CombinedHashCodeOf<typename T::TrueBase>();
+      return HashCodeOf<T>() | FullHashCodeOf<typename T::TrueBase>();
     }
+  }
+
+  /// @returns the bitwise-or'd hashcodes of all the types of the tuple `TUPLE`.
+  /// @see HashCodeOf
+  template <typename TUPLE>
+  static constexpr HashCode CombinedHashCodeOfTuple() {
+    constexpr auto kCount = std::tuple_size_v<TUPLE>;
+    if constexpr (kCount == 0) {
+      return 0;
+    } else if constexpr (kCount == 1) {
+      return HashCodeOf<std::tuple_element_t<0, TUPLE>>();
+    } else {
+      constexpr auto kMid = kCount / 2;
+      return CombinedHashCodeOfTuple<traits::SliceTuple<0, kMid, TUPLE>>() |
+             CombinedHashCodeOfTuple<
+                 traits::SliceTuple<kMid, kCount - kMid, TUPLE>>();
+    }
+  }
+
+  /// @returns the bitwise-or'd hashcodes of all the template parameter types.
+  /// @see HashCodeOf
+  template <typename... TYPES>
+  static constexpr HashCode CombinedHashCodeOf() {
+    return CombinedHashCodeOfTuple<std::tuple<TYPES...>>();
+  }
+
+  /// @returns true if this TypeInfo is of, or derives from any of the types in
+  /// `TUPLE`.
+  template <typename TUPLE>
+  inline bool IsAnyOfTuple() const {
+    constexpr auto kCount = std::tuple_size_v<TUPLE>;
+    if constexpr (kCount == 0) {
+      return false;
+    } else if constexpr (kCount == 1) {
+      return Is(&Of<std::tuple_element_t<0, TUPLE>>());
+    } else if constexpr (kCount == 2) {
+      return Is(&Of<std::tuple_element_t<0, TUPLE>>()) ||
+             Is(&Of<std::tuple_element_t<1, TUPLE>>());
+    } else if constexpr (kCount == 3) {
+      return Is(&Of<std::tuple_element_t<0, TUPLE>>()) ||
+             Is(&Of<std::tuple_element_t<1, TUPLE>>()) ||
+             Is(&Of<std::tuple_element_t<2, TUPLE>>());
+    } else {
+      // Optimization: Compare the object's hashcode to the bitwise-or of all
+      // the tested type's hashcodes. If there's no intersection of bits in
+      // the two masks, then we can guarantee that the type is not in `TO`.
+      if (full_hashcode & TypeInfo::CombinedHashCodeOfTuple<TUPLE>()) {
+        // Possibly one of the types in `TUPLE`.
+        // Split the search in two, and scan each block.
+        static constexpr auto kMid = kCount / 2;
+        return IsAnyOfTuple<traits::SliceTuple<0, kMid, TUPLE>>() ||
+               IsAnyOfTuple<traits::SliceTuple<kMid, kCount - kMid, TUPLE>>();
+      }
+      return false;
+    }
+  }
+
+  /// @returns true if this TypeInfo is of, or derives from any of the types in
+  /// `TYPES`.
+  template <typename... TYPES>
+  inline bool IsAnyOf() const {
+    return IsAnyOfTuple<std::tuple<TYPES...>>();
   }
 };
 
@@ -180,10 +245,6 @@ struct TypeInfoOf {
   /// The unique TypeInfo for the type T.
   static const TypeInfo info;
 };
-
-// Forward declaration
-template <typename TO_FIRST, typename... TO_REST>
-struct IsAnyOf;
 
 /// A placeholder structure used for template parameters that need a default
 /// type, but can always be automatically inferred.
@@ -204,39 +265,29 @@ inline bool Is(FROM* obj) {
 }
 
 /// @returns true if `obj` is a valid pointer, and is of, or derives from the
-/// class `TO`, and pred(const TO*) returns true
+/// type `TYPE`, and pred(const TYPE*) returns true
 /// @param obj the object to test from
-/// @param pred predicate function with signature `bool(const TO*)` called iff
-/// object is of, or derives from the class `TO`.
+/// @param pred predicate function with signature `bool(const TYPE*)` called iff
+/// object is of, or derives from the class `TYPE`.
 /// @see CastFlags
-template <typename TO,
+template <typename TYPE,
           int FLAGS = 0,
-          typename FROM = detail::Infer,
+          typename OBJ = detail::Infer,
           typename Pred = detail::Infer>
-inline bool Is(FROM* obj, Pred&& pred) {
-  return Is<TO, FLAGS, FROM>(obj) &&
-         pred(static_cast<std::add_const_t<TO>*>(obj));
+inline bool Is(OBJ* obj, Pred&& pred) {
+  return Is<TYPE, FLAGS, OBJ>(obj) &&
+         pred(static_cast<std::add_const_t<TYPE>*>(obj));
 }
 
-/// @returns true if `obj` is of, or derives from any of the `TO`
-/// classes.
-/// @param obj the object to cast from
-template <typename... TO, typename FROM>
-inline bool IsAnyOf(FROM* obj) {
+/// @returns true if `obj` is a valid pointer, and is of, or derives from any of
+/// the types in `TYPES`.OBJ
+/// @param obj the object to query.
+template <typename... TYPES, typename OBJ>
+inline bool IsAnyOf(OBJ* obj) {
   if (!obj) {
     return false;
   }
-  // Optimization: Compare the object's combined_hashcode to the bitwise-or of
-  // all the tested type's hashcodes. If there's no intersection of bits in the
-  // two masks, then we can guarantee that the type is not in `TO`.
-  using Helper = detail::IsAnyOf<TO...>;
-  auto* type = &obj->TypeInfo();
-  auto hashcode = type->combined_hashcode;
-  if ((Helper::kHashCodes & hashcode) == 0) {
-    return false;
-  }
-  // Possibly one of the types in `TO`. Continue to testing against each type.
-  return Helper::template Exec<FROM>(type);
+  return obj->TypeInfo().template IsAnyOf<TYPES...>();
 }
 
 /// @returns obj dynamically cast to the type `TO` or `nullptr` if
@@ -401,38 +452,6 @@ class Castable : public BASE {
     return tint::As<const TO, FLAGS>(this);
   }
 };
-
-namespace detail {
-/// Helper for Castable::IsAnyOf
-template <typename TO_FIRST, typename... TO_REST>
-struct IsAnyOf {
-  /// The bitwise-or of all typeinfo hashcodes
-  static constexpr auto kHashCodes =
-      TypeInfo::HashCodeOf<TO_FIRST>() | IsAnyOf<TO_REST...>::kHashCodes;
-
-  /// @param type castable object type to test
-  /// @returns true if `obj` is of, or derives from any of `[TO_FIRST,
-  /// ...TO_REST]`
-  template <typename FROM>
-  static bool Exec(const TypeInfo* type) {
-    return TypeInfo::Is<TO_FIRST, FROM>(type) ||
-           IsAnyOf<TO_REST...>::template Exec<FROM>(type);
-  }
-};
-/// Terminal specialization
-template <typename TO>
-struct IsAnyOf<TO> {
-  /// The bitwise-or of all typeinfo hashcodes
-  static constexpr auto kHashCodes = TypeInfo::HashCodeOf<TO>();
-
-  /// @param type castable object type to test
-  /// @returns true if `obj` is of, or derives from TO
-  template <typename FROM>
-  static bool Exec(const TypeInfo* type) {
-    return TypeInfo::Is<TO, FROM>(type);
-  }
-};
-}  // namespace detail
 
 }  // namespace tint
 

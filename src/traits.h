@@ -16,9 +16,9 @@
 #define SRC_TRAITS_H_
 
 #include <tuple>
+#include <utility>
 
-namespace tint {
-namespace traits {
+namespace tint::traits {
 
 /// Convience type definition for std::decay<T>::type
 template <typename T>
@@ -109,7 +109,51 @@ using EnableIfIsType = EnableIf<IsTypeOrDerived<T, BASE>::value, T>;
 template <typename T, typename BASE>
 using EnableIfIsNotType = EnableIf<!IsTypeOrDerived<T, BASE>::value, T>;
 
-}  // namespace traits
-}  // namespace tint
+/// @returns the std::index_sequence with all the indices shifted by OFFSET.
+template <std::size_t OFFSET, std::size_t... INDICES>
+constexpr auto Shift(std::index_sequence<INDICES...>) {
+  return std::integer_sequence<std::size_t, OFFSET + INDICES...>{};
+}
+
+/// @returns a std::integer_sequence with the integers `[OFFSET..OFFSET+COUNT)`
+template <std::size_t OFFSET, std::size_t COUNT>
+constexpr auto Range() {
+  return Shift<OFFSET>(std::make_index_sequence<COUNT>{});
+}
+
+namespace detail {
+
+/// @returns the tuple `t` swizzled by `INDICES`
+template <class TUPLE, std::size_t... INDICES>
+constexpr auto Swizzle(TUPLE&& t, std::index_sequence<INDICES...>) {
+  return std::make_tuple(std::get<INDICES>(std::forward<TUPLE>(t))...);
+}
+
+/// @returns a nullptr of the tuple type `TUPLE` swizzled by `INDICES`.
+/// @note: This function is intended to be used in a `decltype()` expression,
+/// and returns a pointer-to-tuple as the tuple may hold non-constructable
+/// types.
+template <class TUPLE, std::size_t... INDICES>
+constexpr auto* SwizzlePtrTy(std::index_sequence<INDICES...>) {
+  using Swizzled = std::tuple<std::tuple_element_t<INDICES, TUPLE>...>;
+  return static_cast<Swizzled*>(nullptr);
+}
+
+}  // namespace detail
+
+/// @returns the slice of the tuple `t` with the tuple elements
+/// `[OFFSET..OFFSET+COUNT)`
+template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
+constexpr auto Slice(TUPLE&& t) {
+  return detail::Swizzle<TUPLE>(std::forward<TUPLE>(t), Range<OFFSET, COUNT>());
+}
+
+/// Resolves to the slice of the tuple `t` with the tuple elements
+/// `[OFFSET..OFFSET+COUNT)`
+template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
+using SliceTuple = std::remove_pointer_t<decltype(
+    detail::SwizzlePtrTy<TUPLE>(Range<OFFSET, COUNT>()))>;
+
+}  // namespace tint::traits
 
 #endif  // SRC_TRAITS_H_

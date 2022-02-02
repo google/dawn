@@ -23,7 +23,7 @@ const TypeInfo detail::TypeInfoOf<CastableBase>::info{
     nullptr,
     "CastableBase",
     tint::TypeInfo::HashCodeOf<CastableBase>(),
-    tint::TypeInfo::HashCodeOf<CastableBase>(),
+    tint::TypeInfo::FullHashCodeOf<CastableBase>(),
 };
 
 }  // namespace tint
