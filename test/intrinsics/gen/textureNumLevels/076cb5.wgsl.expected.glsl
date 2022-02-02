@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_1;
+uniform highp samplerCubeShadow arg_0_1;
 void textureNumLevels_076cb5() {
   int res = textureQueryLevels(arg_0_1);;
 }
@@ -31,7 +31,7 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_1;
+uniform highp samplerCubeShadow arg_0_1;
 void textureNumLevels_076cb5() {
   int res = textureQueryLevels(arg_0_1);;
 }
@@ -55,7 +55,7 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_1;
+uniform highp samplerCubeShadow arg_0_1;
 void textureNumLevels_076cb5() {
   int res = textureQueryLevels(arg_0_1);;
 }

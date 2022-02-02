@@ -1,10 +1,10 @@
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_arg_1;
+uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGather_10c554() {
-  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f));
+  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), 0.0);
 }
 
 vec4 vertex_main() {
@@ -22,10 +22,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_arg_1;
+uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGather_10c554() {
-  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f));
+  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), 0.0);
 }
 
 void fragment_main() {
@@ -39,10 +39,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_arg_1;
+uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGather_10c554() {
-  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f));
+  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), 0.0);
 }
 
 void compute_main() {

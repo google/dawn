@@ -1,7 +1,7 @@
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_1;
+uniform highp samplerCubeShadow arg_0_1;
 void textureDimensions_57e28f() {
   ivec2 res = textureSize(arg_0_1, 0);
 }
@@ -21,7 +21,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_1;
+uniform highp samplerCubeShadow arg_0_1;
 void textureDimensions_57e28f() {
   ivec2 res = textureSize(arg_0_1, 0);
 }
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_1;
+uniform highp samplerCubeShadow arg_0_1;
 void textureDimensions_57e28f() {
   ivec2 res = textureSize(arg_0_1, 0);
 }

@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray x_20_x_10;
+uniform highp sampler2DArrayShadow x_20_x_10;
 
 void main_1() {
   float f1 = 1.0f;
@@ -23,7 +23,7 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  float x_79 = textureOffset(x_20_x_10, vec3(coords123.xy, float(int(round(coords123.z)))), 0.200000003f, ivec2(3, 4));
+  float x_79 = textureOffset(x_20_x_10, vec4(vec3(coords123.xy, float(int(round(coords123.z)))), 0.200000003f), ivec2(3, 4));
   return;
 }
 
@@ -36,7 +36,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:24: 'textureOffset' : no matching overloaded function found 
+ERROR: 0:24: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
 ERROR: 0:24: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

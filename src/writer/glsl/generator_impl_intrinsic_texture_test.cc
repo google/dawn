@@ -76,27 +76,27 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kGatherCubeArrayF32:
       return R"(textureGather(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), 0))";
     case ValidTextureOverload::kGatherDepth2dF32:
-      return R"(textureGather(tint_symbol_sampler, vec2(1.0f, 2.0f)))";
+      return R"(textureGather(tint_symbol_sampler, vec2(1.0f, 2.0f), 0.0))";
     case ValidTextureOverload::kGatherDepth2dOffsetF32:
-      return R"(textureGatherOffset(tint_symbol_sampler, vec2(1.0f, 2.0f), ivec2(3, 4)))";
+      return R"(textureGatherOffset(tint_symbol_sampler, vec2(1.0f, 2.0f), 0.0, ivec2(3, 4))";
     case ValidTextureOverload::kGatherDepth2dArrayF32:
-      return R"(textureGather(tint_symbol_sampler, vec3(1.0f, 2.0f, float(3))))";
+      return R"(textureGather(tint_symbol_sampler, vec3(1.0f, 2.0f, float(3)), 0.0))";
     case ValidTextureOverload::kGatherDepth2dArrayOffsetF32:
-      return R"(textureGatherOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, float(3)), ivec2(4, 5)))";
+      return R"(textureGatherOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, float(3)), 0.0, ivec2(4, 5)))";
     case ValidTextureOverload::kGatherDepthCubeF32:
-      return R"(textureGather(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f)))";
+      return R"(textureGather(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f), 0.0))";
     case ValidTextureOverload::kGatherDepthCubeArrayF32:
-      return R"(textureGather(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4))))";
+      return R"(textureGather(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), 0.0))";
     case ValidTextureOverload::kGatherCompareDepth2dF32:
-      return R"(textureGather(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f))";
+      return R"(textureGather(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f))";
     case ValidTextureOverload::kGatherCompareDepth2dOffsetF32:
-      return R"(textureGatherOffset(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f, ivec2(4, 5)))";
+      return R"(textureGatherOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f), ivec2(4, 5)))";
     case ValidTextureOverload::kGatherCompareDepth2dArrayF32:
-      return R"(textureGather(tint_symbol_sampler, vec3(1.0f, 2.0f, float(3)), 4.0f))";
+      return R"(textureGather(tint_symbol_sampler, vec4(1.0f, 2.0f, float(3), 4.0f)))";
     case ValidTextureOverload::kGatherCompareDepth2dArrayOffsetF32:
-      return R"(textureGatherOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, float(3)), 4.0f, ivec2(5, 6)))";
+      return R"(textureGatherOffset(tint_symbol_sampler, vec4(1.0f, 2.0f, float(3), 4.0f), ivec2(5, 6)))";
     case ValidTextureOverload::kGatherCompareDepthCubeF32:
-      return R"(textureGather(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f), 4.0f))";
+      return R"(textureGather(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, 4.0f)))";
     case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
       return R"(textureGather(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), 5.0f))";
     case ValidTextureOverload::kNumLayers2dArray:
@@ -136,17 +136,17 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kSampleCubeArrayF32:
       return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)));)";
     case ValidTextureOverload::kSampleDepth2dF32:
-      return R"(texture(tint_symbol_sampler, vec2(1.0f, 2.0f)).x;)";
+      return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, 0.0f));)";
     case ValidTextureOverload::kSampleDepth2dOffsetF32:
-      return R"(textureOffset(tint_symbol_sampler, vec2(1.0f, 2.0f), ivec2(3, 4)).x;)";
+      return R"(textureOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, 0.0f), ivec2(3, 4));)";
     case ValidTextureOverload::kSampleDepth2dArrayF32:
-      return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, float(3))).x;)";
+      return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, float(3), 0.0f));)";
     case ValidTextureOverload::kSampleDepth2dArrayOffsetF32:
-      return R"(textureOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, float(3)), ivec2(4, 5)).x;)";
+      return R"(textureOffset(tint_symbol_sampler, vec4(1.0f, 2.0f, float(3), 0.0f), ivec2(4, 5));)";
     case ValidTextureOverload::kSampleDepthCubeF32:
-      return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f)).x;)";
+      return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, 0.0f));)";
     case ValidTextureOverload::kSampleDepthCubeArrayF32:
-      return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4))).x;)";
+      return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), 0.0f);)";
     case ValidTextureOverload::kSampleBias2dF32:
       return R"(texture(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f);)";
     case ValidTextureOverload::kSampleBias2dOffsetF32:
@@ -208,23 +208,23 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kSampleGradCubeArrayF32:
       return R"(textureGrad(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), vec3(5.0f, 6.0f, 7.0f), vec3(8.0f, 9.0f, 10.0f));)";
     case ValidTextureOverload::kSampleCompareDepth2dF32:
-      return R"(texture(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f);)";
+      return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f));)";
     case ValidTextureOverload::kSampleCompareDepth2dOffsetF32:
-      return R"(textureOffset(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f, ivec2(4, 5));)";
+      return R"(textureOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f), ivec2(4, 5));)";
     case ValidTextureOverload::kSampleCompareDepth2dArrayF32:
-      return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, float(4)), 3.0f);)";
+      return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, float(4), 3.0f));)";
     case ValidTextureOverload::kSampleCompareDepth2dArrayOffsetF32:
-      return R"(textureOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, float(4)), 3.0f, ivec2(5, 6));)";
+      return R"(textureOffset(tint_symbol_sampler, vec4(1.0f, 2.0f, float(4), 3.0f), ivec2(5, 6));)";
     case ValidTextureOverload::kSampleCompareDepthCubeF32:
-      return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f), 4.0f);)";
+      return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, 4.0f));)";
     case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
       return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), 5.0f);)";
     case ValidTextureOverload::kSampleCompareLevelDepth2dF32:
-      return R"(texture(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f);)";
+      return R"(yyytexture(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f);)";
     case ValidTextureOverload::kSampleCompareLevelDepth2dOffsetF32:
-      return R"(textureOffset(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f, ivec2(4, 5));)";
+      return R"(yyytextureOffset(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f, ivec2(4, 5));)";
     case ValidTextureOverload::kSampleCompareLevelDepth2dArrayF32:
-      return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, float(4)), 3.0f);)";
+      return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, float(4)), 3.0f);)";
     case ValidTextureOverload::kSampleCompareLevelDepth2dArrayOffsetF32:
       return R"(textureOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, float(4)), 3.0f, ivec2(5, 6));)";
     case ValidTextureOverload::kSampleCompareLevelDepthCubeF32:

@@ -107,8 +107,8 @@ struct ShadowProperties {
 layout(binding = 7) buffer LightShadows_1 {
   ShadowProperties properties[];
 } shadow;
-uniform highp sampler2D shadowTexture_1;
-uniform highp sampler2D shadowTexture_shadowSampler;
+uniform highp sampler2DShadow shadowTexture_1;
+uniform highp sampler2DShadow shadowTexture_shadowSampler;
 
 float dirLightVisibility(vec3 worldPos) {
   int shadowIndex = lightShadowTable.light[0u];
@@ -124,7 +124,7 @@ float dirLightVisibility(vec3 worldPos) {
   float visibility = 0.0f;
   {
     for(uint i = 0u; (i < shadowSampleCount); i = (i + 1u)) {
-      visibility = (visibility + texture(shadowTexture_shadowSampler, clamp((viewportPos + (shadowSampleOffsets[i] * texelSize)), clampRect.xy, clampRect.zw), (shadowPos.z - 0.003f)));
+      visibility = (visibility + texture(shadowTexture_shadowSampler, vec3(clamp((viewportPos + (shadowSampleOffsets[i] * texelSize)), clampRect.xy, clampRect.zw), (shadowPos.z - 0.003f))));
     }
   }
   return (visibility / float(shadowSampleCount));
@@ -169,7 +169,7 @@ float pointLightVisibility(uint lightIndex, vec3 worldPos, vec3 pointToLight) {
   float visibility = 0.0f;
   {
     for(uint i = 0u; (i < shadowSampleCount); i = (i + 1u)) {
-      visibility = (visibility + texture(shadowTexture_shadowSampler, clamp((viewportPos + (shadowSampleOffsets[i] * texelSize)), clampRect.xy, clampRect.zw), (shadowPos.z - 0.01f)));
+      visibility = (visibility + texture(shadowTexture_shadowSampler, vec3(clamp((viewportPos + (shadowSampleOffsets[i] * texelSize)), clampRect.xy, clampRect.zw), (shadowPos.z - 0.01f))));
     }
   }
   return (visibility / float(shadowSampleCount));

@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArray x_20_x_10;
+uniform highp samplerCubeArrayShadow x_20_x_10;
 
 void main_1() {
   float f1 = 1.0f;
@@ -36,7 +36,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
+ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

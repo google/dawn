@@ -1,7 +1,7 @@
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0_1;
+uniform highp sampler2DArrayShadow arg_0_1;
 void textureDimensions_7bf826() {
   ivec2 res = textureSize(arg_0_1, 0).xy;
 }
@@ -21,7 +21,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0_1;
+uniform highp sampler2DArrayShadow arg_0_1;
 void textureDimensions_7bf826() {
   ivec2 res = textureSize(arg_0_1, 0).xy;
 }
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0_1;
+uniform highp sampler2DArrayShadow arg_0_1;
 void textureDimensions_7bf826() {
   ivec2 res = textureSize(arg_0_1, 0).xy;
 }

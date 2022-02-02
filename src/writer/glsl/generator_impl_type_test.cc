@@ -330,13 +330,14 @@ TEST_P(GlslDepthTexturesTest, Emit) {
 INSTANTIATE_TEST_SUITE_P(
     GlslGeneratorImplTest_Type,
     GlslDepthTexturesTest,
-    testing::Values(
-        GlslDepthTextureData{ast::TextureDimension::k2d, "sampler2D tex;"},
-        GlslDepthTextureData{ast::TextureDimension::k2dArray,
-                             "sampler2DArray tex;"},
-        GlslDepthTextureData{ast::TextureDimension::kCube, "samplerCube tex;"},
-        GlslDepthTextureData{ast::TextureDimension::kCubeArray,
-                             "samplerCubeArray tex;"}));
+    testing::Values(GlslDepthTextureData{ast::TextureDimension::k2d,
+                                         "sampler2DShadow tex;"},
+                    GlslDepthTextureData{ast::TextureDimension::k2dArray,
+                                         "sampler2DArrayShadow tex;"},
+                    GlslDepthTextureData{ast::TextureDimension::kCube,
+                                         "samplerCubeShadow tex;"},
+                    GlslDepthTextureData{ast::TextureDimension::kCubeArray,
+                                         "samplerCubeArrayShadow tex;"}));
 
 using GlslDepthMultisampledTexturesTest = TestHelper;
 TEST_F(GlslDepthMultisampledTexturesTest, Emit) {

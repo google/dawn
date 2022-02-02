@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0_arg_1;
+uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_47daa4() {
   float res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0, ivec2(0, 0)).x;
@@ -31,7 +31,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0_arg_1;
+uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_47daa4() {
   float res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0, ivec2(0, 0)).x;
@@ -55,7 +55,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0_arg_1;
+uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_47daa4() {
   float res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0, ivec2(0, 0)).x;

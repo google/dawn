@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArray arg_0_arg_1;
+uniform highp samplerCubeArrayShadow arg_0_arg_1;
 
 void textureGather_43025d() {
-  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)));
+  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 0.0);
 }
 
 vec4 vertex_main() {
@@ -22,7 +22,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
+ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -31,10 +31,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArray arg_0_arg_1;
+uniform highp samplerCubeArrayShadow arg_0_arg_1;
 
 void textureGather_43025d() {
-  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)));
+  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 0.0);
 }
 
 void fragment_main() {
@@ -46,7 +46,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
+ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -55,10 +55,10 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArray arg_0_arg_1;
+uniform highp samplerCubeArrayShadow arg_0_arg_1;
 
 void textureGather_43025d() {
-  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)));
+  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, float(1)), 0.0);
 }
 
 void compute_main() {
@@ -71,7 +71,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
+ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

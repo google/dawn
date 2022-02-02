@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D x_20_x_10;
+uniform highp sampler2DShadow x_20_x_10;
 
 void main_1() {
   float f1 = 1.0f;

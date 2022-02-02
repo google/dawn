@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0_arg_1;
+uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureGatherCompare_6f1267() {
-  vec4 res = textureGatherOffset(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec4(0.0f, 0.0f, float(1), 1.0f), ivec2(0, 0));
 }
 
 vec4 vertex_main() {
@@ -32,10 +32,10 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0_arg_1;
+uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureGatherCompare_6f1267() {
-  vec4 res = textureGatherOffset(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec4(0.0f, 0.0f, float(1), 1.0f), ivec2(0, 0));
 }
 
 void fragment_main() {
@@ -57,10 +57,10 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2DArray arg_0_arg_1;
+uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureGatherCompare_6f1267() {
-  vec4 res = textureGatherOffset(arg_0_arg_1, vec3(0.0f, 0.0f, float(1)), 1.0f, ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec4(0.0f, 0.0f, float(1), 1.0f), ivec2(0, 0));
 }
 
 void compute_main() {

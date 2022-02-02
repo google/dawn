@@ -1229,11 +1229,15 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   }
 
   uint32_t glsl_ret_width = 4u;
+  bool is_depth = texture_type->Is<sem::DepthTexture>();
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureSample:
     case sem::IntrinsicType::kTextureSampleBias:
       out << "texture";
+      if (is_depth) {
+        glsl_ret_width = 1u;
+      }
       break;
     case sem::IntrinsicType::kTextureSampleLevel:
       out << "textureLod";
@@ -1283,24 +1287,68 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
   if (auto* array_index = arg(Usage::kArrayIndex)) {
     // Array index needs to be appended to the coordinates.
-    auto* packed = AppendVector(&builder_, param_coords, array_index);
-    if (!EmitExpression(out, packed->Declaration())) {
-      return false;
-    }
-  } else {
-    if (!EmitExpression(out, param_coords)) {
-      return false;
+    param_coords =
+        AppendVector(&builder_, param_coords, array_index)->Declaration();
+  }
+  bool is_cube_array = texture_type->dim() == ast::TextureDimension::kCubeArray;
+
+  // GLSL requires Dref to be appended to the coordinates, *unless* it's
+  // samplerCubeArrayShadow, in which case it will be handled as a separate
+  // parameter [1].
+  if (is_depth && !is_cube_array) {
+    if (auto* depth_ref = arg(Usage::kDepthRef)) {
+      param_coords =
+          AppendVector(&builder_, param_coords, depth_ref)->Declaration();
+    } else if (intrinsic->Type() == sem::IntrinsicType::kTextureSample) {
+      // Sampling a depth texture in GLSL always requires a depth reference, so
+      // append zero here.
+      auto* f32 = builder_.create<sem::F32>();
+      auto* zero = builder_.Expr(0.0f);
+      auto* stmt = builder_.Sem().Get(param_coords)->Stmt();
+      auto* sem_zero =
+          builder_.create<sem::Expression>(zero, f32, stmt, sem::Constant{});
+      builder_.Sem().Add(zero, sem_zero);
+      param_coords = AppendVector(&builder_, param_coords, zero)->Declaration();
     }
   }
 
-  for (auto usage : {Usage::kDepthRef, Usage::kLevel, Usage::kDdx, Usage::kDdy,
-                     Usage::kSampleIndex, Usage::kOffset, Usage::kBias,
-                     Usage::kComponent, Usage::kValue}) {
+  if (!EmitExpression(out, param_coords)) {
+    return false;
+  }
+
+  for (auto usage : {Usage::kLevel, Usage::kDdx, Usage::kDdy,
+                     Usage::kSampleIndex, Usage::kValue}) {
     if (auto* e = arg(usage)) {
       out << ", ";
       if (!EmitExpression(out, e)) {
         return false;
       }
+    }
+  }
+
+  // GLSL's textureGather always requires a refZ parameter.
+  if (is_depth && intrinsic->Type() == sem::IntrinsicType::kTextureGather) {
+    out << ", 0.0";
+  }
+
+  for (auto usage : {Usage::kOffset, Usage::kComponent, Usage::kBias}) {
+    if (auto* e = arg(usage)) {
+      out << ", ";
+      if (!EmitExpression(out, e)) {
+        return false;
+      }
+    }
+  }
+
+  // [1] samplerCubeArrayShadow requires a separate depthRef parameter
+  if (is_depth && is_cube_array) {
+    if (auto* e = arg(Usage::kDepthRef)) {
+      out << ", ";
+      if (!EmitExpression(out, e)) {
+        return false;
+      }
+    } else if (intrinsic->Type() == sem::IntrinsicType::kTextureSample) {
+      out << ", 0.0f";
     }
   }
 
@@ -2376,6 +2424,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         TINT_UNREACHABLE(Writer, diagnostics_)
             << "unexpected TextureDimension " << tex->dim();
         return false;
+    }
+    if (tex->Is<sem::DepthTexture>()) {
+      out << "Shadow";
     }
   } else if (type->Is<sem::U32>()) {
     out << "uint";

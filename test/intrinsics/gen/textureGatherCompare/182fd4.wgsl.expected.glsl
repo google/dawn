@@ -3,10 +3,10 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_arg_1;
+uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGatherCompare_182fd4() {
-  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), 1.0f);
+  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 vec4 vertex_main() {
@@ -32,10 +32,10 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_arg_1;
+uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGatherCompare_182fd4() {
-  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), 1.0f);
+  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 void fragment_main() {
@@ -57,10 +57,10 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCube arg_0_arg_1;
+uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGatherCompare_182fd4() {
-  vec4 res = textureGather(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), 1.0f);
+  vec4 res = textureGather(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 void compute_main() {

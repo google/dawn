@@ -1,10 +1,10 @@
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0_arg_1;
+uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureGather_c409ae() {
-  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0.0, ivec2(0, 0));
 }
 
 vec4 vertex_main() {
@@ -22,10 +22,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0_arg_1;
+uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureGather_c409ae() {
-  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0.0, ivec2(0, 0));
 }
 
 void fragment_main() {
@@ -39,10 +39,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uniform highp sampler2D arg_0_arg_1;
+uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureGather_c409ae() {
-  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), ivec2(0, 0));
+  vec4 res = textureGatherOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0.0, ivec2(0, 0));
 }
 
 void compute_main() {
