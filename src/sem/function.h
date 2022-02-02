@@ -35,7 +35,7 @@ class ReturnStatement;
 
 namespace sem {
 
-class Intrinsic;
+class Builtin;
 class Variable;
 
 /// WorkgroupDimension describes the size of a single dimension of an entry
@@ -120,16 +120,15 @@ class Function : public Castable<Function, CallTarget> {
     transitively_called_functions_.add(function);
   }
 
-  /// @returns the list of intrinsics that this function directly calls.
-  const utils::UniqueVector<const Intrinsic*>& DirectlyCalledIntrinsics()
-      const {
-    return directly_called_intrinsics_;
+  /// @returns the list of builtins that this function directly calls.
+  const utils::UniqueVector<const Builtin*>& DirectlyCalledBuiltins() const {
+    return directly_called_builtins_;
   }
 
-  /// Records that this function transitively calls `intrinsic`.
-  /// @param intrinsic the intrinsic this function directly calls
-  void AddDirectlyCalledIntrinsic(const Intrinsic* intrinsic) {
-    directly_called_intrinsics_.add(intrinsic);
+  /// Records that this function transitively calls `builtin`.
+  /// @param builtin the builtin this function directly calls
+  void AddDirectlyCalledBuiltin(const Builtin* builtin) {
+    directly_called_builtins_.add(builtin);
   }
 
   /// Adds the given texture/sampler pair to the list of unique pairs
@@ -149,13 +148,13 @@ class Function : public Castable<Function, CallTarget> {
     return texture_sampler_pairs_;
   }
 
-  /// @returns the list of direct calls to functions / intrinsics made by this
+  /// @returns the list of direct calls to functions / builtins made by this
   /// function
   std::vector<const Call*> DirectCallStatements() const {
     return direct_calls_;
   }
 
-  /// Adds a record of the direct function / intrinsic calls made by this
+  /// Adds a record of the direct function / builtin calls made by this
   /// function
   /// @param call the call
   void AddDirectCall(const Call* call) { direct_calls_.emplace_back(call); }
@@ -275,7 +274,7 @@ class Function : public Castable<Function, CallTarget> {
   utils::UniqueVector<const GlobalVariable*> directly_referenced_globals_;
   utils::UniqueVector<const GlobalVariable*> transitively_referenced_globals_;
   utils::UniqueVector<const Function*> transitively_called_functions_;
-  utils::UniqueVector<const Intrinsic*> directly_called_intrinsics_;
+  utils::UniqueVector<const Builtin*> directly_called_builtins_;
   utils::UniqueVector<VariablePair> texture_sampler_pairs_;
   std::vector<const Call*> direct_calls_;
   std::vector<const Call*> callsites_;

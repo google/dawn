@@ -17,8 +17,8 @@
 
 #include <vector>
 
+#include "src/sem/builtin.h"
 #include "src/sem/expression.h"
-#include "src/sem/intrinsic.h"
 
 namespace tint {
 namespace sem {

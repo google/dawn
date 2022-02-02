@@ -933,8 +933,8 @@ bool GeneratorImpl::EmitCall(std::ostream& out,
   if (auto* func = target->As<sem::Function>()) {
     return EmitFunctionCall(out, call, func);
   }
-  if (auto* intrinsic = target->As<sem::Intrinsic>()) {
-    return EmitIntrinsicCall(out, call, intrinsic);
+  if (auto* builtin = target->As<sem::Builtin>()) {
+    return EmitBuiltinCall(out, call, builtin);
   }
   if (auto* conv = target->As<sem::TypeConversion>()) {
     return EmitTypeConversion(out, call, conv);
@@ -1001,44 +1001,44 @@ bool GeneratorImpl::EmitFunctionCall(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
-                                      const sem::Call* call,
-                                      const sem::Intrinsic* intrinsic) {
+bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
+                                    const sem::Call* call,
+                                    const sem::Builtin* builtin) {
   auto* expr = call->Declaration();
-  if (intrinsic->IsTexture()) {
-    return EmitTextureCall(out, call, intrinsic);
+  if (builtin->IsTexture()) {
+    return EmitTextureCall(out, call, builtin);
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
+  if (builtin->Type() == sem::BuiltinType::kSelect) {
     return EmitSelectCall(out, expr);
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kModf) {
-    return EmitModfCall(out, expr, intrinsic);
+  if (builtin->Type() == sem::BuiltinType::kModf) {
+    return EmitModfCall(out, expr, builtin);
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kFrexp) {
-    return EmitFrexpCall(out, expr, intrinsic);
+  if (builtin->Type() == sem::BuiltinType::kFrexp) {
+    return EmitFrexpCall(out, expr, builtin);
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
-    return EmitIsNormalCall(out, expr, intrinsic);
+  if (builtin->Type() == sem::BuiltinType::kIsNormal) {
+    return EmitIsNormalCall(out, expr, builtin);
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kDegrees) {
-    return EmitDegreesCall(out, expr, intrinsic);
+  if (builtin->Type() == sem::BuiltinType::kDegrees) {
+    return EmitDegreesCall(out, expr, builtin);
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kRadians) {
-    return EmitRadiansCall(out, expr, intrinsic);
+  if (builtin->Type() == sem::BuiltinType::kRadians) {
+    return EmitRadiansCall(out, expr, builtin);
   }
-  if (intrinsic->IsDataPacking()) {
-    return EmitDataPackingCall(out, expr, intrinsic);
+  if (builtin->IsDataPacking()) {
+    return EmitDataPackingCall(out, expr, builtin);
   }
-  if (intrinsic->IsDataUnpacking()) {
-    return EmitDataUnpackingCall(out, expr, intrinsic);
+  if (builtin->IsDataUnpacking()) {
+    return EmitDataUnpackingCall(out, expr, builtin);
   }
-  if (intrinsic->IsBarrier()) {
-    return EmitBarrierCall(out, intrinsic);
+  if (builtin->IsBarrier()) {
+    return EmitBarrierCall(out, builtin);
   }
-  if (intrinsic->IsAtomic()) {
-    return EmitWorkgroupAtomicCall(out, expr, intrinsic);
+  if (builtin->IsAtomic()) {
+    return EmitWorkgroupAtomicCall(out, expr, builtin);
   }
-  auto name = generate_builtin_name(intrinsic);
+  auto name = generate_builtin_name(builtin);
   if (name.empty()) {
     return false;
   }
@@ -1637,17 +1637,17 @@ bool GeneratorImpl::EmitStorageAtomicCall(
 
 bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
                                             const ast::CallExpression* expr,
-                                            const sem::Intrinsic* intrinsic) {
+                                            const sem::Builtin* builtin) {
   std::string result = UniqueIdentifier("atomic_result");
 
-  if (!intrinsic->ReturnType()->Is<sem::Void>()) {
+  if (!builtin->ReturnType()->Is<sem::Void>()) {
     auto pre = line();
-    if (!EmitTypeAndName(pre, intrinsic->ReturnType(), ast::StorageClass::kNone,
+    if (!EmitTypeAndName(pre, builtin->ReturnType(), ast::StorageClass::kNone,
                          ast::Access::kUndefined, result)) {
       return false;
     }
     pre << " = ";
-    if (!EmitZeroValue(pre, intrinsic->ReturnType())) {
+    if (!EmitZeroValue(pre, builtin->ReturnType())) {
       return false;
     }
     pre << ";";
@@ -1664,7 +1664,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
         if (i > 0) {
           pre << ", ";
         }
-        if (i == 1 && intrinsic->Type() == sem::IntrinsicType::kAtomicSub) {
+        if (i == 1 && builtin->Type() == sem::BuiltinType::kAtomicSub) {
           // Sub uses InterlockedAdd with the operand negated.
           pre << "-";
         }
@@ -1682,8 +1682,8 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
     return true;
   };
 
-  switch (intrinsic->Type()) {
-    case sem::IntrinsicType::kAtomicLoad: {
+  switch (builtin->Type()) {
+    case sem::BuiltinType::kAtomicLoad: {
       // HLSL does not have an InterlockedLoad, so we emulate it with
       // InterlockedOr using 0 as the OR value
       auto pre = line();
@@ -1700,12 +1700,12 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
       out << result;
       return true;
     }
-    case sem::IntrinsicType::kAtomicStore: {
+    case sem::BuiltinType::kAtomicStore: {
       // HLSL does not have an InterlockedStore, so we emulate it with
       // InterlockedExchange and discard the returned value
       {  // T result = 0;
         auto pre = line();
-        auto* value_ty = intrinsic->Parameters()[1]->Type()->UnwrapRef();
+        auto* value_ty = builtin->Parameters()[1]->Type()->UnwrapRef();
         if (!EmitTypeAndName(pre, value_ty, ast::StorageClass::kNone,
                              ast::Access::kUndefined, result)) {
           return false;
@@ -1731,7 +1731,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
       }
       return true;
     }
-    case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
+    case sem::BuiltinType::kAtomicCompareExchangeWeak: {
       auto* dest = expr->args[0];
       auto* compare_value = expr->args[1];
       auto* value = expr->args[2];
@@ -1777,26 +1777,26 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
       return true;
     }
 
-    case sem::IntrinsicType::kAtomicAdd:
-    case sem::IntrinsicType::kAtomicSub:
+    case sem::BuiltinType::kAtomicAdd:
+    case sem::BuiltinType::kAtomicSub:
       return call("InterlockedAdd");
 
-    case sem::IntrinsicType::kAtomicMax:
+    case sem::BuiltinType::kAtomicMax:
       return call("InterlockedMax");
 
-    case sem::IntrinsicType::kAtomicMin:
+    case sem::BuiltinType::kAtomicMin:
       return call("InterlockedMin");
 
-    case sem::IntrinsicType::kAtomicAnd:
+    case sem::BuiltinType::kAtomicAnd:
       return call("InterlockedAnd");
 
-    case sem::IntrinsicType::kAtomicOr:
+    case sem::BuiltinType::kAtomicOr:
       return call("InterlockedOr");
 
-    case sem::IntrinsicType::kAtomicXor:
+    case sem::BuiltinType::kAtomicXor:
       return call("InterlockedXor");
 
-    case sem::IntrinsicType::kAtomicExchange:
+    case sem::BuiltinType::kAtomicExchange:
       return call("InterlockedExchange");
 
     default:
@@ -1804,7 +1804,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
   }
 
   TINT_UNREACHABLE(Writer, diagnostics_)
-      << "unsupported atomic intrinsic: " << intrinsic->Type();
+      << "unsupported atomic builtin: " << builtin->Type();
   return false;
 }
 
@@ -1835,11 +1835,11 @@ bool GeneratorImpl::EmitSelectCall(std::ostream& out,
 
 bool GeneratorImpl::EmitModfCall(std::ostream& out,
                                  const ast::CallExpression* expr,
-                                 const sem::Intrinsic* intrinsic) {
-  return CallIntrinsicHelper(
-      out, expr, intrinsic,
+                                 const sem::Builtin* builtin) {
+  return CallBuiltinHelper(
+      out, expr, builtin,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
-        auto* ty = intrinsic->Parameters()[0]->Type();
+        auto* ty = builtin->Parameters()[0]->Type();
         auto in = params[0];
 
         std::string width;
@@ -1850,7 +1850,7 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
         // Emit the builtin return type unique to this overload. This does not
         // exist in the AST, so it will not be generated in Generate().
         if (!EmitStructType(&helpers_,
-                            intrinsic->ReturnType()->As<sem::Struct>())) {
+                            builtin->ReturnType()->As<sem::Struct>())) {
           return false;
         }
 
@@ -1858,7 +1858,7 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
         line(b) << "float" << width << " fract = modf(" << in << ", whole);";
         {
           auto l = line(b);
-          if (!EmitType(l, intrinsic->ReturnType(), ast::StorageClass::kNone,
+          if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
                         ast::Access::kUndefined, "")) {
             return false;
           }
@@ -1871,11 +1871,11 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
 
 bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                                   const ast::CallExpression* expr,
-                                  const sem::Intrinsic* intrinsic) {
-  return CallIntrinsicHelper(
-      out, expr, intrinsic,
+                                  const sem::Builtin* builtin) {
+  return CallBuiltinHelper(
+      out, expr, builtin,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
-        auto* ty = intrinsic->Parameters()[0]->Type();
+        auto* ty = builtin->Parameters()[0]->Type();
         auto in = params[0];
 
         std::string width;
@@ -1886,7 +1886,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
         // Emit the builtin return type unique to this overload. This does not
         // exist in the AST, so it will not be generated in Generate().
         if (!EmitStructType(&helpers_,
-                            intrinsic->ReturnType()->As<sem::Struct>())) {
+                            builtin->ReturnType()->As<sem::Struct>())) {
           return false;
         }
 
@@ -1894,7 +1894,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
         line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
         {
           auto l = line(b);
-          if (!EmitType(l, intrinsic->ReturnType(), ast::StorageClass::kNone,
+          if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
                         ast::Access::kUndefined, "")) {
             return false;
           }
@@ -1907,12 +1907,12 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
 
 bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
                                      const ast::CallExpression* expr,
-                                     const sem::Intrinsic* intrinsic) {
-  // HLSL doesn't have a isNormal intrinsic, we need to emulate
-  return CallIntrinsicHelper(
-      out, expr, intrinsic,
+                                     const sem::Builtin* builtin) {
+  // HLSL doesn't have a isNormal builtin, we need to emulate
+  return CallBuiltinHelper(
+      out, expr, builtin,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
-        auto* input_ty = intrinsic->Parameters()[0]->Type();
+        auto* input_ty = builtin->Parameters()[0]->Type();
 
         std::string width;
         if (auto* vec = input_ty->As<sem::Vector>()) {
@@ -1935,9 +1935,9 @@ bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
 
 bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
                                     const ast::CallExpression* expr,
-                                    const sem::Intrinsic* intrinsic) {
-  return CallIntrinsicHelper(
-      out, expr, intrinsic,
+                                    const sem::Builtin* builtin) {
+  return CallBuiltinHelper(
+      out, expr, builtin,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
         line(b) << "return " << params[0] << " * " << std::setprecision(20)
                 << sem::kRadToDeg << ";";
@@ -1947,9 +1947,9 @@ bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
 
 bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
                                     const ast::CallExpression* expr,
-                                    const sem::Intrinsic* intrinsic) {
-  return CallIntrinsicHelper(
-      out, expr, intrinsic,
+                                    const sem::Builtin* builtin) {
+  return CallBuiltinHelper(
+      out, expr, builtin,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
         line(b) << "return " << params[0] << " * " << std::setprecision(20)
                 << sem::kDegToRad << ";";
@@ -1959,28 +1959,28 @@ bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
 
 bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
                                         const ast::CallExpression* expr,
-                                        const sem::Intrinsic* intrinsic) {
-  return CallIntrinsicHelper(
-      out, expr, intrinsic,
+                                        const sem::Builtin* builtin) {
+  return CallBuiltinHelper(
+      out, expr, builtin,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
         uint32_t dims = 2;
         bool is_signed = false;
         uint32_t scale = 65535;
-        if (intrinsic->Type() == sem::IntrinsicType::kPack4x8snorm ||
-            intrinsic->Type() == sem::IntrinsicType::kPack4x8unorm) {
+        if (builtin->Type() == sem::BuiltinType::kPack4x8snorm ||
+            builtin->Type() == sem::BuiltinType::kPack4x8unorm) {
           dims = 4;
           scale = 255;
         }
-        if (intrinsic->Type() == sem::IntrinsicType::kPack4x8snorm ||
-            intrinsic->Type() == sem::IntrinsicType::kPack2x16snorm) {
+        if (builtin->Type() == sem::BuiltinType::kPack4x8snorm ||
+            builtin->Type() == sem::BuiltinType::kPack2x16snorm) {
           is_signed = true;
           scale = (scale - 1) / 2;
         }
-        switch (intrinsic->Type()) {
-          case sem::IntrinsicType::kPack4x8snorm:
-          case sem::IntrinsicType::kPack4x8unorm:
-          case sem::IntrinsicType::kPack2x16snorm:
-          case sem::IntrinsicType::kPack2x16unorm: {
+        switch (builtin->Type()) {
+          case sem::BuiltinType::kPack4x8snorm:
+          case sem::BuiltinType::kPack4x8unorm:
+          case sem::BuiltinType::kPack2x16snorm:
+          case sem::BuiltinType::kPack2x16unorm: {
             {
               auto l = line(b);
               l << (is_signed ? "" : "u") << "int" << dims
@@ -2007,7 +2007,7 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
             }
             break;
           }
-          case sem::IntrinsicType::kPack2x16float: {
+          case sem::BuiltinType::kPack2x16float: {
             line(b) << "uint2 i = f32tof16(" << params[0] << ");";
             line(b) << "return i.x | (i.y << 16);";
             break;
@@ -2015,7 +2015,7 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
           default:
             diagnostics_.add_error(
                 diag::System::Writer,
-                "Internal error: unhandled data packing intrinsic");
+                "Internal error: unhandled data packing builtin");
             return false;
         }
 
@@ -2025,26 +2025,26 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
 
 bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
                                           const ast::CallExpression* expr,
-                                          const sem::Intrinsic* intrinsic) {
-  return CallIntrinsicHelper(
-      out, expr, intrinsic,
+                                          const sem::Builtin* builtin) {
+  return CallBuiltinHelper(
+      out, expr, builtin,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
         uint32_t dims = 2;
         bool is_signed = false;
         uint32_t scale = 65535;
-        if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8snorm ||
-            intrinsic->Type() == sem::IntrinsicType::kUnpack4x8unorm) {
+        if (builtin->Type() == sem::BuiltinType::kUnpack4x8snorm ||
+            builtin->Type() == sem::BuiltinType::kUnpack4x8unorm) {
           dims = 4;
           scale = 255;
         }
-        if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8snorm ||
-            intrinsic->Type() == sem::IntrinsicType::kUnpack2x16snorm) {
+        if (builtin->Type() == sem::BuiltinType::kUnpack4x8snorm ||
+            builtin->Type() == sem::BuiltinType::kUnpack2x16snorm) {
           is_signed = true;
           scale = (scale - 1) / 2;
         }
-        switch (intrinsic->Type()) {
-          case sem::IntrinsicType::kUnpack4x8snorm:
-          case sem::IntrinsicType::kUnpack2x16snorm: {
+        switch (builtin->Type()) {
+          case sem::BuiltinType::kUnpack4x8snorm:
+          case sem::BuiltinType::kUnpack2x16snorm: {
             line(b) << "int j = int(" << params[0] << ");";
             {  // Perform sign extension on the converted values.
               auto l = line(b);
@@ -2060,8 +2060,8 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
                     << ".0, " << (is_signed ? "-1.0" : "0.0") << ", 1.0);";
             break;
           }
-          case sem::IntrinsicType::kUnpack4x8unorm:
-          case sem::IntrinsicType::kUnpack2x16unorm: {
+          case sem::BuiltinType::kUnpack4x8unorm:
+          case sem::BuiltinType::kUnpack2x16unorm: {
             line(b) << "uint j = " << params[0] << ";";
             {
               auto l = line(b);
@@ -2078,14 +2078,14 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
             line(b) << "return float" << dims << "(i) / " << scale << ".0;";
             break;
           }
-          case sem::IntrinsicType::kUnpack2x16float:
+          case sem::BuiltinType::kUnpack2x16float:
             line(b) << "uint i = " << params[0] << ";";
             line(b) << "return f16tof32(uint2(i & 0xffff, i >> 16));";
             break;
           default:
             diagnostics_.add_error(
                 diag::System::Writer,
-                "Internal error: unhandled data packing intrinsic");
+                "Internal error: unhandled data packing builtin");
             return false;
         }
 
@@ -2094,16 +2094,16 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
-                                    const sem::Intrinsic* intrinsic) {
+                                    const sem::Builtin* builtin) {
   // TODO(crbug.com/tint/661): Combine sequential barriers to a single
   // instruction.
-  if (intrinsic->Type() == sem::IntrinsicType::kWorkgroupBarrier) {
+  if (builtin->Type() == sem::BuiltinType::kWorkgroupBarrier) {
     out << "GroupMemoryBarrierWithGroupSync()";
-  } else if (intrinsic->Type() == sem::IntrinsicType::kStorageBarrier) {
+  } else if (builtin->Type() == sem::BuiltinType::kStorageBarrier) {
     out << "DeviceMemoryBarrierWithGroupSync()";
   } else {
     TINT_UNREACHABLE(Writer, diagnostics_)
-        << "unexpected barrier intrinsic type " << sem::str(intrinsic->Type());
+        << "unexpected barrier builtin type " << sem::str(builtin->Type());
     return false;
   }
   return true;
@@ -2111,10 +2111,10 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
 
 bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                                     const sem::Call* call,
-                                    const sem::Intrinsic* intrinsic) {
+                                    const sem::Builtin* builtin) {
   using Usage = sem::ParameterUsage;
 
-  auto& signature = intrinsic->Signature();
+  auto& signature = builtin->Signature();
   auto* expr = call->Declaration();
   auto arguments = expr->args;
 
@@ -2132,19 +2132,19 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
   auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
 
-  switch (intrinsic->Type()) {
-    case sem::IntrinsicType::kTextureDimensions:
-    case sem::IntrinsicType::kTextureNumLayers:
-    case sem::IntrinsicType::kTextureNumLevels:
-    case sem::IntrinsicType::kTextureNumSamples: {
-      // All of these intrinsics use the GetDimensions() method on the texture
+  switch (builtin->Type()) {
+    case sem::BuiltinType::kTextureDimensions:
+    case sem::BuiltinType::kTextureNumLayers:
+    case sem::BuiltinType::kTextureNumLevels:
+    case sem::BuiltinType::kTextureNumSamples: {
+      // All of these builtins use the GetDimensions() method on the texture
       bool is_ms = texture_type->IsAnyOf<sem::MultisampledTexture,
                                          sem::DepthMultisampledTexture>();
       int num_dimensions = 0;
       std::string swizzle;
 
-      switch (intrinsic->Type()) {
-        case sem::IntrinsicType::kTextureDimensions:
+      switch (builtin->Type()) {
+        case sem::BuiltinType::kTextureDimensions:
           switch (texture_type->dim()) {
             case ast::TextureDimension::kNone:
               TINT_ICE(Writer, diagnostics_) << "texture dimension is kNone";
@@ -2172,7 +2172,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
               break;
           }
           break;
-        case sem::IntrinsicType::kTextureNumLayers:
+        case sem::BuiltinType::kTextureNumLayers:
           switch (texture_type->dim()) {
             default:
               TINT_ICE(Writer, diagnostics_)
@@ -2188,7 +2188,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
               break;
           }
           break;
-        case sem::IntrinsicType::kTextureNumLevels:
+        case sem::BuiltinType::kTextureNumLevels:
           switch (texture_type->dim()) {
             default:
               TINT_ICE(Writer, diagnostics_)
@@ -2211,7 +2211,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
               break;
           }
           break;
-        case sem::IntrinsicType::kTextureNumSamples:
+        case sem::BuiltinType::kTextureNumSamples:
           switch (texture_type->dim()) {
             default:
               TINT_ICE(Writer, diagnostics_)
@@ -2228,7 +2228,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
           }
           break;
         default:
-          TINT_ICE(Writer, diagnostics_) << "unexpected intrinsic";
+          TINT_ICE(Writer, diagnostics_) << "unexpected builtin";
           return false;
       }
 
@@ -2251,7 +2251,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
       if (num_dimensions > 4) {
         TINT_ICE(Writer, diagnostics_)
-            << "Texture query intrinsic temporary vector has " << num_dimensions
+            << "Texture query builtin temporary vector has " << num_dimensions
             << " dimensions";
         return false;
       }
@@ -2276,7 +2276,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             return false;
           }
           pre << ", ";
-        } else if (intrinsic->Type() == sem::IntrinsicType::kTextureNumLevels) {
+        } else if (builtin->Type() == sem::BuiltinType::kTextureNumLevels) {
           pre << "0, ";
         }
 
@@ -2314,44 +2314,44 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     return false;
 
   // If pack_level_in_coords is true, then the mip level will be appended as the
-  // last value of the coordinates argument. If the WGSL intrinsic overload does
+  // last value of the coordinates argument. If the WGSL builtin overload does
   // not have a level parameter and pack_level_in_coords is true, then a zero
   // mip level will be inserted.
   bool pack_level_in_coords = false;
 
   uint32_t hlsl_ret_width = 4u;
 
-  switch (intrinsic->Type()) {
-    case sem::IntrinsicType::kTextureSample:
+  switch (builtin->Type()) {
+    case sem::BuiltinType::kTextureSample:
       out << ".Sample(";
       break;
-    case sem::IntrinsicType::kTextureSampleBias:
+    case sem::BuiltinType::kTextureSampleBias:
       out << ".SampleBias(";
       break;
-    case sem::IntrinsicType::kTextureSampleLevel:
+    case sem::BuiltinType::kTextureSampleLevel:
       out << ".SampleLevel(";
       break;
-    case sem::IntrinsicType::kTextureSampleGrad:
+    case sem::BuiltinType::kTextureSampleGrad:
       out << ".SampleGrad(";
       break;
-    case sem::IntrinsicType::kTextureSampleCompare:
+    case sem::BuiltinType::kTextureSampleCompare:
       out << ".SampleCmp(";
       hlsl_ret_width = 1;
       break;
-    case sem::IntrinsicType::kTextureSampleCompareLevel:
+    case sem::BuiltinType::kTextureSampleCompareLevel:
       out << ".SampleCmpLevelZero(";
       hlsl_ret_width = 1;
       break;
-    case sem::IntrinsicType::kTextureLoad:
+    case sem::BuiltinType::kTextureLoad:
       out << ".Load(";
       // Multisampled textures do not support mip-levels.
       if (!texture_type->Is<sem::MultisampledTexture>()) {
         pack_level_in_coords = true;
       }
       break;
-    case sem::IntrinsicType::kTextureGather:
+    case sem::BuiltinType::kTextureGather:
       out << ".Gather";
-      if (intrinsic->Parameters()[0]->Usage() ==
+      if (builtin->Parameters()[0]->Usage() ==
           sem::ParameterUsage::kComponent) {
         switch (call->Arguments()[0]->ConstantValue().Elements()[0].i32) {
           case 0:
@@ -2370,17 +2370,17 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       }
       out << "(";
       break;
-    case sem::IntrinsicType::kTextureGatherCompare:
+    case sem::BuiltinType::kTextureGatherCompare:
       out << ".GatherCmp(";
       break;
-    case sem::IntrinsicType::kTextureStore:
+    case sem::BuiltinType::kTextureStore:
       out << "[";
       break;
     default:
       diagnostics_.add_error(
           diag::System::Writer,
-          "Internal compiler error: Unhandled texture intrinsic '" +
-              std::string(intrinsic->str()) + "'");
+          "Internal compiler error: Unhandled texture builtin '" +
+              std::string(builtin->str()) + "'");
       return false;
   }
 
@@ -2451,7 +2451,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     }
   }
 
-  if (intrinsic->Type() == sem::IntrinsicType::kTextureStore) {
+  if (builtin->Type() == sem::BuiltinType::kTextureStore) {
     out << "] = ";
     if (!EmitExpression(out, arg(Usage::kValue))) {
       return false;
@@ -2459,11 +2459,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   } else {
     out << ")";
 
-    // If the intrinsic return type does not match the number of elements of the
-    // HLSL intrinsic, we need to swizzle the expression to generate the correct
+    // If the builtin return type does not match the number of elements of the
+    // HLSL builtin, we need to swizzle the expression to generate the correct
     // number of components.
     uint32_t wgsl_ret_width = 1;
-    if (auto* vec = intrinsic->ReturnType()->As<sem::Vector>()) {
+    if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
       wgsl_ret_width = vec->Width();
     }
     if (wgsl_ret_width < hlsl_ret_width) {
@@ -2476,7 +2476,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       TINT_ICE(Writer, diagnostics_)
           << "WGSL return width (" << wgsl_ret_width
           << ") is wider than HLSL return width (" << hlsl_ret_width << ") for "
-          << intrinsic->Type();
+          << builtin->Type();
       return false;
     }
   }
@@ -2484,92 +2484,91 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   return true;
 }
 
-std::string GeneratorImpl::generate_builtin_name(
-    const sem::Intrinsic* intrinsic) {
-  switch (intrinsic->Type()) {
-    case sem::IntrinsicType::kAbs:
-    case sem::IntrinsicType::kAcos:
-    case sem::IntrinsicType::kAll:
-    case sem::IntrinsicType::kAny:
-    case sem::IntrinsicType::kAsin:
-    case sem::IntrinsicType::kAtan:
-    case sem::IntrinsicType::kAtan2:
-    case sem::IntrinsicType::kCeil:
-    case sem::IntrinsicType::kClamp:
-    case sem::IntrinsicType::kCos:
-    case sem::IntrinsicType::kCosh:
-    case sem::IntrinsicType::kCross:
-    case sem::IntrinsicType::kDeterminant:
-    case sem::IntrinsicType::kDistance:
-    case sem::IntrinsicType::kDot:
-    case sem::IntrinsicType::kExp:
-    case sem::IntrinsicType::kExp2:
-    case sem::IntrinsicType::kFloor:
-    case sem::IntrinsicType::kFrexp:
-    case sem::IntrinsicType::kLdexp:
-    case sem::IntrinsicType::kLength:
-    case sem::IntrinsicType::kLog:
-    case sem::IntrinsicType::kLog2:
-    case sem::IntrinsicType::kMax:
-    case sem::IntrinsicType::kMin:
-    case sem::IntrinsicType::kModf:
-    case sem::IntrinsicType::kNormalize:
-    case sem::IntrinsicType::kPow:
-    case sem::IntrinsicType::kReflect:
-    case sem::IntrinsicType::kRefract:
-    case sem::IntrinsicType::kRound:
-    case sem::IntrinsicType::kSign:
-    case sem::IntrinsicType::kSin:
-    case sem::IntrinsicType::kSinh:
-    case sem::IntrinsicType::kSqrt:
-    case sem::IntrinsicType::kStep:
-    case sem::IntrinsicType::kTan:
-    case sem::IntrinsicType::kTanh:
-    case sem::IntrinsicType::kTranspose:
-    case sem::IntrinsicType::kTrunc:
-      return intrinsic->str();
-    case sem::IntrinsicType::kCountOneBits:
+std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
+  switch (builtin->Type()) {
+    case sem::BuiltinType::kAbs:
+    case sem::BuiltinType::kAcos:
+    case sem::BuiltinType::kAll:
+    case sem::BuiltinType::kAny:
+    case sem::BuiltinType::kAsin:
+    case sem::BuiltinType::kAtan:
+    case sem::BuiltinType::kAtan2:
+    case sem::BuiltinType::kCeil:
+    case sem::BuiltinType::kClamp:
+    case sem::BuiltinType::kCos:
+    case sem::BuiltinType::kCosh:
+    case sem::BuiltinType::kCross:
+    case sem::BuiltinType::kDeterminant:
+    case sem::BuiltinType::kDistance:
+    case sem::BuiltinType::kDot:
+    case sem::BuiltinType::kExp:
+    case sem::BuiltinType::kExp2:
+    case sem::BuiltinType::kFloor:
+    case sem::BuiltinType::kFrexp:
+    case sem::BuiltinType::kLdexp:
+    case sem::BuiltinType::kLength:
+    case sem::BuiltinType::kLog:
+    case sem::BuiltinType::kLog2:
+    case sem::BuiltinType::kMax:
+    case sem::BuiltinType::kMin:
+    case sem::BuiltinType::kModf:
+    case sem::BuiltinType::kNormalize:
+    case sem::BuiltinType::kPow:
+    case sem::BuiltinType::kReflect:
+    case sem::BuiltinType::kRefract:
+    case sem::BuiltinType::kRound:
+    case sem::BuiltinType::kSign:
+    case sem::BuiltinType::kSin:
+    case sem::BuiltinType::kSinh:
+    case sem::BuiltinType::kSqrt:
+    case sem::BuiltinType::kStep:
+    case sem::BuiltinType::kTan:
+    case sem::BuiltinType::kTanh:
+    case sem::BuiltinType::kTranspose:
+    case sem::BuiltinType::kTrunc:
+      return builtin->str();
+    case sem::BuiltinType::kCountOneBits:
       return "countbits";
-    case sem::IntrinsicType::kDpdx:
+    case sem::BuiltinType::kDpdx:
       return "ddx";
-    case sem::IntrinsicType::kDpdxCoarse:
+    case sem::BuiltinType::kDpdxCoarse:
       return "ddx_coarse";
-    case sem::IntrinsicType::kDpdxFine:
+    case sem::BuiltinType::kDpdxFine:
       return "ddx_fine";
-    case sem::IntrinsicType::kDpdy:
+    case sem::BuiltinType::kDpdy:
       return "ddy";
-    case sem::IntrinsicType::kDpdyCoarse:
+    case sem::BuiltinType::kDpdyCoarse:
       return "ddy_coarse";
-    case sem::IntrinsicType::kDpdyFine:
+    case sem::BuiltinType::kDpdyFine:
       return "ddy_fine";
-    case sem::IntrinsicType::kFaceForward:
+    case sem::BuiltinType::kFaceForward:
       return "faceforward";
-    case sem::IntrinsicType::kFract:
+    case sem::BuiltinType::kFract:
       return "frac";
-    case sem::IntrinsicType::kFma:
+    case sem::BuiltinType::kFma:
       return "mad";
-    case sem::IntrinsicType::kFwidth:
-    case sem::IntrinsicType::kFwidthCoarse:
-    case sem::IntrinsicType::kFwidthFine:
+    case sem::BuiltinType::kFwidth:
+    case sem::BuiltinType::kFwidthCoarse:
+    case sem::BuiltinType::kFwidthFine:
       return "fwidth";
-    case sem::IntrinsicType::kInverseSqrt:
+    case sem::BuiltinType::kInverseSqrt:
       return "rsqrt";
-    case sem::IntrinsicType::kIsFinite:
+    case sem::BuiltinType::kIsFinite:
       return "isfinite";
-    case sem::IntrinsicType::kIsInf:
+    case sem::BuiltinType::kIsInf:
       return "isinf";
-    case sem::IntrinsicType::kIsNan:
+    case sem::BuiltinType::kIsNan:
       return "isnan";
-    case sem::IntrinsicType::kMix:
+    case sem::BuiltinType::kMix:
       return "lerp";
-    case sem::IntrinsicType::kReverseBits:
+    case sem::BuiltinType::kReverseBits:
       return "reversebits";
-    case sem::IntrinsicType::kSmoothStep:
+    case sem::BuiltinType::kSmoothStep:
       return "smoothstep";
     default:
       diagnostics_.add_error(
           diag::System::Writer,
-          "Unknown builtin method: " + std::string(intrinsic->str()));
+          "Unknown builtin method: " + std::string(builtin->str()));
   }
 
   return "";
@@ -3892,28 +3891,28 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
 }
 
 template <typename F>
-bool GeneratorImpl::CallIntrinsicHelper(std::ostream& out,
-                                        const ast::CallExpression* call,
-                                        const sem::Intrinsic* intrinsic,
-                                        F&& build) {
+bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
+                                      const ast::CallExpression* call,
+                                      const sem::Builtin* builtin,
+                                      F&& build) {
   // Generate the helper function if it hasn't been created already
-  auto fn = utils::GetOrCreate(intrinsics_, intrinsic, [&]() -> std::string {
+  auto fn = utils::GetOrCreate(builtins_, builtin, [&]() -> std::string {
     TextBuffer b;
     TINT_DEFER(helpers_.Append(b));
 
     auto fn_name =
-        UniqueIdentifier(std::string("tint_") + sem::str(intrinsic->Type()));
+        UniqueIdentifier(std::string("tint_") + sem::str(builtin->Type()));
     std::vector<std::string> parameter_names;
     {
       auto decl = line(&b);
-      if (!EmitTypeAndName(decl, intrinsic->ReturnType(),
+      if (!EmitTypeAndName(decl, builtin->ReturnType(),
                            ast::StorageClass::kNone, ast::Access::kUndefined,
                            fn_name)) {
         return "";
       }
       {
         ScopedParen sp(decl);
-        for (auto* param : intrinsic->Parameters()) {
+        for (auto* param : builtin->Parameters()) {
           if (!parameter_names.empty()) {
             decl << ", ";
           }

@@ -71,7 +71,7 @@ struct CombineSamplers::State {
 
   /// Placeholder global samplers used when a function contains texture-only
   /// references (one comparison sampler, one regular). These are also used as
-  /// temporary sampler parameters to the texture intrinsics to satsify the WGSL
+  /// temporary sampler parameters to the texture builtins to satisfy the WGSL
   /// resolver, but are then ignored and removed by the GLSL writer.
   const ast::Variable* placeholder_samplers_[2] = {};
 
@@ -210,9 +210,9 @@ struct CombineSamplers::State {
                        -> const ast::Expression* {
       if (auto* call = sem.Get(expr)) {
         ast::ExpressionList args;
-        // Replace all texture intrinsic calls.
-        if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
-          const auto& signature = intrinsic->Signature();
+        // Replace all texture builtin calls.
+        if (auto* builtin = call->Target()->As<sem::Builtin>()) {
+          const auto& signature = builtin->Signature();
           int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
           int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
           if (texture_index == -1) {

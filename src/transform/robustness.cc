@@ -200,24 +200,24 @@ struct Robustness::State {
     return b.IndexAccessor(src, obj, idx.expr);
   }
 
-  /// @param type intrinsic type
-  /// @returns true if the given intrinsic is a texture function that requires
+  /// @param type builtin type
+  /// @returns true if the given builtin is a texture function that requires
   /// argument clamping,
-  bool TextureIntrinsicNeedsClamping(sem::IntrinsicType type) {
-    return type == sem::IntrinsicType::kTextureLoad ||
-           type == sem::IntrinsicType::kTextureStore;
+  bool TextureBuiltinNeedsClamping(sem::BuiltinType type) {
+    return type == sem::BuiltinType::kTextureLoad ||
+           type == sem::BuiltinType::kTextureStore;
   }
 
   /// Apply bounds clamping to the coordinates, array index and level arguments
-  /// of the `textureLoad()` and `textureStore()` intrinsics.
-  /// @param expr the intrinsic call expression
+  /// of the `textureLoad()` and `textureStore()` builtins.
+  /// @param expr the builtin call expression
   /// @return the clamped replacement call expression, or nullptr if `expr`
   /// should be cloned without changes.
   const ast::CallExpression* Transform(const ast::CallExpression* expr) {
     auto* call = ctx.src->Sem().Get(expr);
     auto* call_target = call->Target();
-    auto* intrinsic = call_target->As<sem::Intrinsic>();
-    if (!intrinsic || !TextureIntrinsicNeedsClamping(intrinsic->Type())) {
+    auto* builtin = call_target->As<sem::Builtin>();
+    if (!builtin || !TextureBuiltinNeedsClamping(builtin->Type())) {
       return nullptr;  // No transform, just clone.
     }
 
@@ -225,7 +225,7 @@ struct Robustness::State {
 
     // Indices of the mandatory texture and coords parameters, and the optional
     // array and level parameters.
-    auto& signature = intrinsic->Signature();
+    auto& signature = builtin->Signature();
     auto texture_idx = signature.IndexOf(sem::ParameterUsage::kTexture);
     auto coords_idx = signature.IndexOf(sem::ParameterUsage::kCoords);
     auto array_idx = signature.IndexOf(sem::ParameterUsage::kArrayIndex);
@@ -233,7 +233,7 @@ struct Robustness::State {
 
     auto* texture_arg = expr->args[texture_idx];
     auto* coords_arg = expr->args[coords_idx];
-    auto* coords_ty = intrinsic->Parameters()[coords_idx]->Type();
+    auto* coords_ty = builtin->Parameters()[coords_idx]->Type();
 
     // If the level is provided, then we need to clamp this. As the level is
     // used by textureDimensions() and the texture[Load|Store]() calls, we need

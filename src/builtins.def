@@ -1,0 +1,554 @@
+// Copyright 2021 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+////////////////////////////////////////////////////////////////////////////////
+// WGSL builtin definition file                                               //
+//                                                                            //
+// This file is used to generate parts of the Tint BuiltinTable, various      //
+// enum definition files, as well as test .wgsl files.                        //
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// Enumerators                                                                //
+////////////////////////////////////////////////////////////////////////////////
+
+// https://gpuweb.github.io/gpuweb/wgsl/#storage-class
+enum storage_class {
+  function
+  private
+  workgroup
+  uniform
+  storage
+  [[internal]] handle
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl/#memory-access-mode
+enum access {
+  read
+  write
+  read_write
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl/#texel-formats
+enum texel_format {
+  rgba8unorm
+  rgba8snorm
+  rgba8uint
+  rgba8sint
+  rgba16uint
+  rgba16sint
+  rgba16float
+  r32uint
+  r32sint
+  r32float
+  rg32uint
+  rg32sint
+  rg32float
+  rgba32uint
+  rgba32sint
+  rgba32float
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// WGSL primitive types                                                       //
+////////////////////////////////////////////////////////////////////////////////
+
+// https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
+type bool
+type f32
+type i32
+type u32
+type vec2<T>
+type vec3<T>
+type vec4<T>
+[[display("vec{N}<{T}>")]]     type vec<N: num, T>
+[[display("mat{N}x{M}<{T}>")]] type mat<N: num, M: num, T>
+type ptr<S: storage_class, T, A: access>
+type atomic<T>
+type array<T>
+type sampler
+type sampler_comparison
+type texture_1d<T>
+type texture_2d<T>
+type texture_2d_array<T>
+type texture_3d<T>
+type texture_cube<T>
+type texture_cube_array<T>
+type texture_multisampled_2d<T>
+type texture_depth_2d
+type texture_depth_2d_array
+type texture_depth_cube
+type texture_depth_cube_array
+type texture_depth_multisampled_2d
+type texture_storage_1d<F: texel_format, A: access>
+type texture_storage_2d<F: texel_format, A: access>
+type texture_storage_2d_array<F: texel_format, A: access>
+type texture_storage_3d<F: texel_format, A: access>
+type texture_external
+
+type __modf_result
+[[display("__modf_result_vec{N}")]] type __modf_result_vec<N: num>
+type __frexp_result
+[[display("__frexp_result_vec{N}")]] type __frexp_result_vec<N: num>
+
+////////////////////////////////////////////////////////////////////////////////
+// Type matchers                                                              //
+//                                                                            //
+// A type matcher that can match one or more types.                           //
+////////////////////////////////////////////////////////////////////////////////
+
+match fiu32: f32 | i32 | u32
+match iu32: i32 | u32
+match scalar: f32 | i32 | u32 | bool
+
+////////////////////////////////////////////////////////////////////////////////
+// Enum matchers                                                              //
+//                                                                            //
+// A number matcher that can match one or more enumerator values.             //
+// All enumerator values listed in the match declaration need to be from the  //
+// same enum.                                                                 //
+////////////////////////////////////////////////////////////////////////////////
+
+// https://gpuweb.github.io/gpuweb/wgsl/#texel-formats
+match f32_texel_format:
+  rgba8unorm | rgba8snorm | rgba16float | r32float | rg32float | rgba32float
+match i32_texel_format:
+  rgba8sint | rgba16sint | r32sint | rg32sint | rgba32sint
+match u32_texel_format:
+  rgba8uint | rgba16uint | r32uint | rg32uint | rgba32uint
+
+match write_only: write
+
+match function_private_workgroup: function | private | workgroup
+match workgroup_or_storage: workgroup | storage
+
+////////////////////////////////////////////////////////////////////////////////
+// Builtin Functions                                                          //
+//                                                                            //
+// The builtin function declarations below declare all the built-in           //
+// functions supported by the WGSL language. This builtin definition          //
+// language supports simple static-type function declarations, as well as     //
+// single overload declarations that can match a number of different          //
+// argument types via the use of 'open-types' and 'open-numbers'.             //
+//                                                                            //
+// * Basic example:                                                           //
+//                                                                            //
+//    fn isInf(f32) -> bool                                                   //
+//                                                                            //
+//   Declares an overload of the function 'isInf' that accepts a single       //
+//   parameter of type 'f32' and returns a 'bool'.                            //
+//                                                                            //
+// An 'open-type' can be thought as a template type that is determined by the //
+// arguments to the builtin.                                                  //
+//                                                                            //
+// * Open-type example without constraint:                                    //
+//                                                                            //
+//    fn arrayLength<T>(array<T>) -> u32                                      //
+//                                                                            //
+//    Declares an overload of the function 'arrayLength' that accepts a       //
+//    single argument of an array type with no constraints on the array       //
+//    element type. This overload will always return a value of the same type //
+//    as its single argument.                                                 //
+//                                                                            //
+// * Open-type example with constraint:                                       //
+//                                                                            //
+//    fn abs<T: fiu32>(T) -> T                                                //
+//                                                                            //
+//    Declares an overload of the function 'abs' that accepts a single        //
+//    argument of type 'f32', 'i32' or 'u32', which returns a value of the    //
+//    same argument type.                                                     //
+//                                                                            //
+// Similarly an 'open-number' can be thought as a template number or          //
+// enumerator that is determined by the arguments to the builtin.             //
+//                                                                            //
+// * Open-number example:                                                     //
+//                                                                            //
+//    fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>                             //
+//                                                                            //
+//    Declares an overload of the function 'dpdx' that accepts a single       //
+//    argument of a variable-sized vector of 'f32', which returns a value of  //
+//    the same argument type.                                                 //
+//                                                                            //
+//                                                                            //
+// Matching algorithm:                                                        //
+// -------------------                                                        //
+//                                                                            //
+// Prior to matching an overload, all open-types are undefined.               //
+//                                                                            //
+// Open-types become closed-types (pinned to a fixed type) on the first       //
+// attempt to match an argument to that open-type.                            //
+// Once open-types are closed, they remain that type for the rest of the      //
+// overload evaluation.                                                       //
+//                                                                            //
+// To better understand, let's consider the following hypothetical overload   //
+// declaration:                                                               //
+//                                                                            //
+//    fn foo<T: scalar>(T, T);                                                //
+//                                                                            //
+//    T           - is the open-type                                          //
+//    scalar      - is a matcher for the types 'f32', 'i32', 'u32' or 'bool'  //
+//                  (declared above)                                          //
+//    <T: scalar> - declares the open-type T, with the constraint that T must //
+//                  match one of 'f32', 'i32', 'u32' or 'bool'.               //
+//                                                                            //
+// The process for resolving this overload is as follows:                     //
+//                                                                            //
+//   (1) The overload resolver begins by attempting to match the argument     //
+//       types from left to right.                                            //
+//       The first parameter type is compared against the argument type.      //
+//       As the open-type T has not been closed yet, T is closed as the type  //
+//       of the first argument.                                               //
+//       There's no verification that the T type is a scalar at this stage.   //
+//   (2) The second parameter is then compared against the second argument.   //
+//       As the open-type T is now closed, the argument type is compared      //
+//       against the value of the closed-type of T. If the types match, then  //
+//       the overload is still a candidate for matching, otherwise the        //
+//       overload is no longer considered.                                    //
+//   (3) If all the parameters matched, constraints on the open-types need    //
+//       to be checked next. If the closed-type does not match the 'match'    //
+//       constraint, then the overload is no longer considered.               //
+//                                                                            //
+// The algorithm for matching open-numbers is almost identical to open-types, //
+// except of course, they match against integer numbers or enumerators        //
+// instead of types.                                                          //
+//                                                                            //
+//                                                                            //
+// * More examples:                                                           //
+//                                                                            //
+//   fn F()                                                                   //
+//     - Function called F.                                                   //
+//       No open types or numbers, no parameters, no return value             //
+//                                                                            //
+//   fn F() -> RETURN_TYPE                                                    //
+//     - Function with RETURN_TYPE as the return type value                   //
+//                                                                            //
+//   fn F(f32, i32)                                                           //
+//     - Two fixed-type, anonymous parameters                                 //
+//                                                                            //
+//   fn F(USAGE : f32)                                                        //
+//     - Single parameter with name USAGE.                                    //
+//       Note: Parameter names are used by Tint to infer parameter order for  //
+//       some builtin functions                                               //
+//                                                                            //
+//   fn F<T>(T)                                                               //
+//     - Single parameter of unconstrained open-type T (any type)             //
+//                                                                            //
+//   fn F<T: scalar>(T)                                                       //
+//     - Single parameter of constrained open-type T (must be a scalar)       //
+//                                                                            //
+//   fn F<T: fiu32>(T) -> T                                                   //
+//     - Single parameter of constrained open-type T (must be a one of fiu32) //
+//       Return type matches parameter type                                   //
+//                                                                            //
+//   fn F<T, N: num>(vec<N, T>)                                               //
+//     - Single parameter of vector type with open-number size N and element  //
+//       open-type T                                                          //
+//                                                                            //
+//   fn F<A: access>(texture_storage_1d<f32_texel_format, A>)                 //
+//     - Single parameter of texture_storage_1d type with open-number         //
+//       access-control C, and of a texel format that is listed in            //
+//       f32_texel_format                                                     //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+// https://gpuweb.github.io/gpuweb/wgsl/#builtin-functions
+fn abs<T: fiu32>(T) -> T
+fn abs<N: num, T: fiu32>(vec<N, T>) -> vec<N, T>
+fn acos(f32) -> f32
+fn acos<N: num>(vec<N, f32>) -> vec<N, f32>
+fn all(bool) -> bool
+fn all<N: num>(vec<N, bool>) -> bool
+fn any(bool) -> bool
+fn any<N: num>(vec<N, bool>) -> bool
+fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
+fn asin(f32) -> f32
+fn asin<N: num>(vec<N, f32>) -> vec<N, f32>
+fn atan(f32) -> f32
+fn atan<N: num>(vec<N, f32>) -> vec<N, f32>
+fn atan2(f32, f32) -> f32
+fn atan2<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn ceil(f32) -> f32
+fn ceil<N: num>(vec<N, f32>) -> vec<N, f32>
+fn clamp<T: fiu32>(T, T, T) -> T
+fn clamp<N: num, T: fiu32>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+fn cos(f32) -> f32
+fn cos<N: num>(vec<N, f32>) -> vec<N, f32>
+fn cosh(f32) -> f32
+fn cosh<N: num>(vec<N, f32>) -> vec<N, f32>
+fn countOneBits<T: iu32>(T) -> T
+fn countOneBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+fn cross(vec3<f32>, vec3<f32>) -> vec3<f32>
+fn degrees(f32) -> f32
+fn degrees<N: num>(vec<N, f32>) -> vec<N, f32>
+fn determinant<N: num>(mat<N, N, f32>) -> f32
+fn distance(f32, f32) -> f32
+fn distance<N: num>(vec<N, f32>, vec<N, f32>) -> f32
+fn dot<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> T
+[[stage("fragment")]] fn dpdx(f32) -> f32
+[[stage("fragment")]] fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdxCoarse(f32) -> f32
+[[stage("fragment")]] fn dpdxCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdxFine(f32) -> f32
+[[stage("fragment")]] fn dpdxFine<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdy(f32) -> f32
+[[stage("fragment")]] fn dpdy<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdyCoarse(f32) -> f32
+[[stage("fragment")]] fn dpdyCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdyFine(f32) -> f32
+[[stage("fragment")]] fn dpdyFine<N: num>(vec<N, f32>) -> vec<N, f32>
+fn exp(f32) -> f32
+fn exp<N: num>(vec<N, f32>) -> vec<N, f32>
+fn exp2(f32) -> f32
+fn exp2<N: num>(vec<N, f32>) -> vec<N, f32>
+fn faceForward<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn floor(f32) -> f32
+fn floor<N: num>(vec<N, f32>) -> vec<N, f32>
+fn fma(f32, f32, f32) -> f32
+fn fma<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn fract(f32) -> f32
+fn fract<N: num>(vec<N, f32>) -> vec<N, f32>
+fn frexp(f32) -> __frexp_result
+fn frexp<N: num>(vec<N, f32>) -> __frexp_result_vec<N>
+[[stage("fragment")]] fn fwidth(f32) -> f32
+[[stage("fragment")]] fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn fwidthCoarse(f32) -> f32
+[[stage("fragment")]] fn fwidthCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn fwidthFine(f32) -> f32
+[[stage("fragment")]] fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
+fn inverseSqrt(f32) -> f32
+fn inverseSqrt<N: num>(vec<N, f32>) -> vec<N, f32>
+[[deprecated]] fn isFinite(f32) -> bool
+[[deprecated]] fn isFinite<N: num>(vec<N, f32>) -> vec<N, bool>
+[[deprecated]] fn isInf(f32) -> bool
+[[deprecated]] fn isInf<N: num>(vec<N, f32>) -> vec<N, bool>
+[[deprecated]] fn isNan(f32) -> bool
+[[deprecated]] fn isNan<N: num>(vec<N, f32>) -> vec<N, bool>
+[[deprecated]] fn isNormal(f32) -> bool
+[[deprecated]] fn isNormal<N: num>(vec<N, f32>) -> vec<N, bool>
+fn ldexp(f32, i32) -> f32
+fn ldexp<N: num>(vec<N, f32>, vec<N, i32>) -> vec<N, f32>
+fn length(f32) -> f32
+fn length<N: num>(vec<N, f32>) -> f32
+fn log(f32) -> f32
+fn log<N: num>(vec<N, f32>) -> vec<N, f32>
+fn log2(f32) -> f32
+fn log2<N: num>(vec<N, f32>) -> vec<N, f32>
+fn max<T: fiu32>(T, T) -> T
+fn max<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> vec<N, T>
+fn min<T: fiu32>(T, T) -> T
+fn min<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> vec<N, T>
+fn mix(f32, f32, f32) -> f32
+fn mix<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn mix<N: num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32>
+fn modf(f32) -> __modf_result
+fn modf<N: num>(vec<N, f32>) -> __modf_result_vec<N>
+fn normalize<N: num>(vec<N, f32>) -> vec<N, f32>
+fn pack2x16float(vec2<f32>) -> u32
+fn pack2x16snorm(vec2<f32>) -> u32
+fn pack2x16unorm(vec2<f32>) -> u32
+fn pack4x8snorm(vec4<f32>) -> u32
+fn pack4x8unorm(vec4<f32>) -> u32
+fn pow(f32, f32) -> f32
+fn pow<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn radians(f32) -> f32
+fn radians<N: num>(vec<N, f32>) -> vec<N, f32>
+fn reflect<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn refract<N: num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32>
+fn reverseBits<T: iu32>(T) -> T
+fn reverseBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+fn round(f32) -> f32
+fn round<N: num>(vec<N, f32>) -> vec<N, f32>
+fn select<T: scalar>(T, T, bool) -> T
+fn select<T: scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
+fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
+fn sign(f32) -> f32
+fn sign<N: num>(vec<N, f32>) -> vec<N, f32>
+fn sin(f32) -> f32
+fn sin<N: num>(vec<N, f32>) -> vec<N, f32>
+fn sinh(f32) -> f32
+fn sinh<N: num>(vec<N, f32>) -> vec<N, f32>
+fn smoothStep(f32, f32, f32) -> f32
+fn smoothStep<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn sqrt(f32) -> f32
+fn sqrt<N: num>(vec<N, f32>) -> vec<N, f32>
+fn step(f32, f32) -> f32
+fn step<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+[[stage("compute")]] fn storageBarrier()
+fn tan(f32) -> f32
+fn tan<N: num>(vec<N, f32>) -> vec<N, f32>
+fn tanh(f32) -> f32
+fn tanh<N: num>(vec<N, f32>) -> vec<N, f32>
+fn transpose<M: num, N: num>(mat<M, N, f32>) -> mat<N, M, f32>
+fn trunc(f32) -> f32
+fn trunc<N: num>(vec<N, f32>) -> vec<N, f32>
+fn unpack2x16float(u32) -> vec2<f32>
+fn unpack2x16snorm(u32) -> vec2<f32>
+fn unpack2x16unorm(u32) -> vec2<f32>
+fn unpack4x8snorm(u32) -> vec4<f32>
+fn unpack4x8unorm(u32) -> vec4<f32>
+[[stage("compute")]] fn workgroupBarrier()
+
+fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> i32
+fn textureDimensions<T: fiu32>(texture: texture_1d<T>, level: i32) -> i32
+fn textureDimensions<T: fiu32>(texture: texture_2d<T>) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_2d<T>, level: i32) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_2d_array<T>) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_2d_array<T>, level: i32) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_3d<T>) -> vec3<i32>
+fn textureDimensions<T: fiu32>(texture: texture_3d<T>, level: i32) -> vec3<i32>
+fn textureDimensions<T: fiu32>(texture: texture_cube<T>) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_cube<T>, level: i32) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_cube_array<T>) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_cube_array<T>, level: i32) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_multisampled_2d<T>) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_2d) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_2d, level: i32) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_2d_array) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_2d_array, level: i32) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_cube) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_cube, level: i32) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_cube_array) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<i32>
+fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_1d<F, A>) -> i32
+fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_2d<F, A>) -> vec2<i32>
+fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_2d_array<F, A>) -> vec2<i32>
+fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_3d<F, A>) -> vec3<i32>
+fn textureDimensions(texture: texture_external) -> vec2<i32>
+fn textureGather<T: fiu32>(component: i32, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_2d_array<T>, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_2d_array<T>, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_cube<T>, sampler: sampler, coords: vec3<f32>) -> vec4<T>
+fn textureGather<T: fiu32>(component: i32, texture: texture_cube_array<T>, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<T>
+fn textureGather(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+fn textureGather(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
+fn textureGather(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<f32>
+fn textureGather(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<f32>
+fn textureGather(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+fn textureGather(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32, offset: vec2<i32>) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> vec4<f32>
+fn textureGatherCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> vec4<f32>
+fn textureNumLayers<T: fiu32>(texture: texture_2d_array<T>) -> i32
+fn textureNumLayers<T: fiu32>(texture: texture_cube_array<T>) -> i32
+fn textureNumLayers(texture: texture_depth_2d_array) -> i32
+fn textureNumLayers(texture: texture_depth_cube_array) -> i32
+fn textureNumLayers<F: texel_format, A: write_only>(texture: texture_storage_2d_array<F, A>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_1d<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_2d<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_2d_array<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_3d<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_cube<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_cube_array<T>) -> i32
+fn textureNumLevels(texture: texture_depth_2d) -> i32
+fn textureNumLevels(texture: texture_depth_2d_array) -> i32
+fn textureNumLevels(texture: texture_depth_cube) -> i32
+fn textureNumLevels(texture: texture_depth_cube_array) -> i32
+fn textureNumSamples<T: fiu32>(texture: texture_multisampled_2d<T>) -> i32
+fn textureNumSamples(texture: texture_depth_multisampled_2d) -> i32
+[[stage("fragment")]] fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, offset: vec3<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> f32
+[[stage("fragment")]] fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32, offset: vec2<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32, offset: vec2<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32, offset: vec3<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32, offset: vec2<i32>) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32
+fn textureSampleCompareLevel(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
+fn textureSampleCompareLevel(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> f32
+fn textureSampleCompareLevel(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
+fn textureSampleCompareLevel(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32, offset: vec2<i32>) -> f32
+fn textureSampleCompareLevel(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
+fn textureSampleCompareLevel(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32
+fn textureSampleGrad(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>
+fn textureSampleGrad(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, ddx: vec2<f32>, ddy: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
+fn textureSampleGrad(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>
+fn textureSampleGrad(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, ddx: vec2<f32>, ddy: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
+fn textureSampleGrad(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>) -> vec4<f32>
+fn textureSampleGrad(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>, offset: vec3<i32>) -> vec4<f32>
+fn textureSampleGrad(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>) -> vec4<f32>
+fn textureSampleGrad(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, ddx: vec3<f32>, ddy: vec3<f32>) -> vec4<f32>
+fn textureSampleLevel(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, level: f32) -> vec4<f32>
+fn textureSampleLevel(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, level: f32, offset: vec2<i32>) -> vec4<f32>
+fn textureSampleLevel(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, level: f32) -> vec4<f32>
+fn textureSampleLevel(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, level: f32, offset: vec2<i32>) -> vec4<f32>
+fn textureSampleLevel(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, level: f32) -> vec4<f32>
+fn textureSampleLevel(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, level: f32, offset: vec3<i32>) -> vec4<f32>
+fn textureSampleLevel(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, level: f32) -> vec4<f32>
+fn textureSampleLevel(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, level: f32) -> vec4<f32>
+fn textureSampleLevel(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, level: i32) -> f32
+fn textureSampleLevel(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, level: i32, offset: vec2<i32>) -> f32
+fn textureSampleLevel(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, level: i32) -> f32
+fn textureSampleLevel(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, level: i32, offset: vec2<i32>) -> f32
+fn textureSampleLevel(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>, level: i32) -> f32
+fn textureSampleLevel(texture: texture_depth_cube_array,sampler: sampler, coords: vec3<f32>, array_index: i32, level: i32) -> f32
+fn textureSampleLevel(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+fn textureStore(texture: texture_storage_1d<f32_texel_format, write>, coords: i32, value: vec4<f32>)
+fn textureStore(texture: texture_storage_2d<f32_texel_format, write>, coords: vec2<i32>, value: vec4<f32>)
+fn textureStore(texture: texture_storage_2d_array<f32_texel_format, write>, coords: vec2<i32>, array_index: i32, value: vec4<f32>)
+fn textureStore(texture: texture_storage_3d<f32_texel_format, write>, coords: vec3<i32>, value: vec4<f32>)
+fn textureStore(texture: texture_storage_1d<i32_texel_format, write>, coords: i32, value: vec4<i32>)
+fn textureStore(texture: texture_storage_2d<i32_texel_format, write>, coords: vec2<i32>, value: vec4<i32>)
+fn textureStore(texture: texture_storage_2d_array<i32_texel_format, write>, coords: vec2<i32>, array_index: i32, value: vec4<i32>)
+fn textureStore(texture: texture_storage_3d<i32_texel_format, write>, coords: vec3<i32>, value: vec4<i32>)
+fn textureStore(texture: texture_storage_1d<u32_texel_format, write>, coords: i32, value: vec4<u32>)
+fn textureStore(texture: texture_storage_2d<u32_texel_format, write>, coords: vec2<i32>, value: vec4<u32>)
+fn textureStore(texture: texture_storage_2d_array<u32_texel_format, write>, coords: vec2<i32>, array_index: i32, value: vec4<u32>)
+fn textureStore(texture: texture_storage_3d<u32_texel_format, write>, coords: vec3<i32>, value: vec4<u32>)
+fn textureLoad<T: fiu32>(texture: texture_1d<T>, coords: i32, level: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_2d<T>, coords: vec2<i32>, level: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_2d_array<T>, coords: vec2<i32>, array_index: i32, level: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_3d<T>, coords: vec3<i32>, level: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_multisampled_2d<T>, coords: vec2<i32>, sample_index: i32) -> vec4<T>
+fn textureLoad(texture: texture_depth_2d, coords: vec2<i32>, level: i32) -> f32
+fn textureLoad(texture: texture_depth_2d_array, coords: vec2<i32>, array_index: i32, level: i32) -> f32
+fn textureLoad(texture: texture_depth_multisampled_2d, coords: vec2<i32>, sample_index: i32) -> f32
+fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
+
+[[stage("fragment", "compute")]] fn atomicLoad<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>) -> T
+[[stage("fragment", "compute")]] fn atomicStore<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T)
+[[stage("fragment", "compute")]] fn atomicAdd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicSub<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicMax<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicMin<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicAnd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicOr<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicXor<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicExchange<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> vec2<T>

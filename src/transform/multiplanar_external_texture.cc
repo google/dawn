@@ -148,11 +148,11 @@ struct MultiplanarExternalTexture::State {
     // textureLoadExternal and textureSampleExternal calls.
     ctx.ReplaceAll(
         [&](const ast::CallExpression* expr) -> const ast::CallExpression* {
-          auto* intrinsic = sem.Get(expr)->Target()->As<sem::Intrinsic>();
+          auto* builtin = sem.Get(expr)->Target()->As<sem::Builtin>();
 
-          if (intrinsic && !intrinsic->Parameters().empty() &&
-              intrinsic->Parameters()[0]->Type()->Is<sem::ExternalTexture>() &&
-              intrinsic->Type() != sem::IntrinsicType::kTextureDimensions) {
+          if (builtin && !builtin->Parameters().empty() &&
+              builtin->Parameters()[0]->Type()->Is<sem::ExternalTexture>() &&
+              builtin->Type() != sem::BuiltinType::kTextureDimensions) {
             auto it = new_binding_symbols.find(
                 expr->args[0]->As<ast::IdentifierExpression>()->symbol);
             if (it == new_binding_symbols.end()) {
@@ -164,11 +164,11 @@ struct MultiplanarExternalTexture::State {
             }
             auto& syms = it->second;
 
-            if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad) {
+            if (builtin->Type() == sem::BuiltinType::kTextureLoad) {
               return createTexLdExt(expr, syms);
             }
 
-            if (intrinsic->Type() == sem::IntrinsicType::kTextureSampleLevel) {
+            if (builtin->Type() == sem::BuiltinType::kTextureSampleLevel) {
               return createTexSmpExt(expr, syms);
             }
 
@@ -248,12 +248,12 @@ struct MultiplanarExternalTexture::State {
   /// bodies of the textureSampleExternal and textureLoadExternal functions.
   /// @param call_type determines which function body to generate
   /// @returns a statement list that makes of the body of the chosen function
-  ast::StatementList createTexFnExtStatementList(sem::IntrinsicType call_type) {
+  ast::StatementList createTexFnExtStatementList(sem::BuiltinType call_type) {
     using f32 = ProgramBuilder::f32;
     const ast::CallExpression* single_plane_call = nullptr;
     const ast::CallExpression* plane_0_call = nullptr;
     const ast::CallExpression* plane_1_call = nullptr;
-    if (call_type == sem::IntrinsicType::kTextureSampleLevel) {
+    if (call_type == sem::BuiltinType::kTextureSampleLevel) {
       // textureSampleLevel(plane0, smp, coord.xy, 0.0);
       single_plane_call =
           b.Call("textureSampleLevel", "plane0", "smp", "coord", 0.0f);
@@ -263,7 +263,7 @@ struct MultiplanarExternalTexture::State {
       // textureSampleLevel(plane1, smp, coord.xy, 0.0);
       plane_1_call =
           b.Call("textureSampleLevel", "plane1", "smp", "coord", 0.0f);
-    } else if (call_type == sem::IntrinsicType::kTextureLoad) {
+    } else if (call_type == sem::BuiltinType::kTextureLoad) {
       // textureLoad(plane0, coords.xy, 0);
       single_plane_call = b.Call("textureLoad", "plane0", "coord", 0);
       // textureLoad(plane0, coords.xy, 0);
@@ -272,7 +272,7 @@ struct MultiplanarExternalTexture::State {
       plane_1_call = b.Call("textureLoad", "plane1", "coord", 0);
     } else {
       TINT_ICE(Transform, b.Diagnostics())
-          << "unhandled intrinsic: " << call_type;
+          << "unhandled builtin: " << call_type;
     }
 
     return {
@@ -343,7 +343,7 @@ struct MultiplanarExternalTexture::State {
           b.Param("params", b.ty.type_name(params_struct_sym))};
 
       ast::StatementList statementList =
-          createTexFnExtStatementList(sem::IntrinsicType::kTextureSampleLevel);
+          createTexFnExtStatementList(sem::BuiltinType::kTextureSampleLevel);
 
       b.Func(texture_sample_external_sym, varList, b.ty.vec4(b.ty.f32()),
              statementList, {});
@@ -386,7 +386,7 @@ struct MultiplanarExternalTexture::State {
           b.Param("params", b.ty.type_name(params_struct_sym))};
 
       ast::StatementList statement_list =
-          createTexFnExtStatementList(sem::IntrinsicType::kTextureLoad);
+          createTexFnExtStatementList(sem::BuiltinType::kTextureLoad);
 
       b.Func(texture_load_external_sym, var_list, b.ty.vec4(b.ty.f32()),
              statement_list, {});

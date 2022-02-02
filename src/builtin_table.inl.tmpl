@@ -1,0 +1,401 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/builtin-gen to generate builtin_table.inl
+Used by BuiltinTable.cc for builtin overload resolution.
+
+See:
+* tools/cmd/builtin-gen/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+// clang-format off
+
+{{  with .Sem -}}
+{{    range .Types -}}
+{{      template "Type" . }}
+{{    end -}}
+{{    range .TypeMatchers -}}
+{{      template "TypeMatcher" . }}
+{{    end -}}
+{{    range .EnumMatchers -}}
+{{      template "EnumMatcher" . }}
+{{    end -}}
+{{- end -}}
+
+{{- with BuiltinTable -}}
+{{- template "Matchers" . }}
+
+constexpr MatcherIndex kMatcherIndices[] = {
+{{- range $i, $idx := .MatcherIndices }}
+  /* [{{$i}}] */ {{$idx}},
+{{- end }}
+};
+
+// Assert that the MatcherIndex is big enough to index all the matchers, plus
+// kNoMatcher.
+static_assert(static_cast<int>(sizeof(kMatcherIndices) / sizeof(kMatcherIndices[0])) <
+              static_cast<int>(std::numeric_limits<MatcherIndex>::max() - 1),
+              "MatcherIndex is not large enough to index kMatcherIndices");
+
+constexpr ParameterInfo kParameters[] = {
+{{- range $i, $p := .Parameters }}
+  {
+    /* [{{$i}}] */
+    /* usage */ ParameterUsage::
+{{-   if $p.Usage }}k{{PascalCase $p.Usage}}
+{{-   else        }}kNone
+{{-   end         }},
+    /* matcher indices */ &kMatcherIndices[{{$p.MatcherIndicesOffset}}],
+  },
+{{- end }}
+};
+
+constexpr OpenTypeInfo kOpenTypes[] = {
+{{- range $i, $o := .OpenTypes }}
+  {
+    /* [{{$i}}] */
+    /* name */ "{{$o.Name}}",
+    /* matcher index */
+{{-   if ge $o.MatcherIndex 0 }} {{$o.MatcherIndex}}
+{{-   else                    }} kNoMatcher
+{{-   end                     }},
+  },
+{{- end }}
+};
+
+constexpr OpenNumberInfo kOpenNumbers[] = {
+{{- range $i, $o := .OpenNumbers }}
+  {
+    /* [{{$i}}] */
+    /* name */ "{{$o.Name}}",
+    /* matcher index */
+{{-   if ge $o.MatcherIndex 0 }} {{$o.MatcherIndex}}
+{{-   else                    }} kNoMatcher
+{{-   end                     }},
+  },
+{{- end }}
+};
+
+constexpr OverloadInfo kOverloads[] = {
+{{- range $i, $o := .Overloads }}
+  {
+    /* [{{$i}}] */
+    /* num parameters */ {{$o.NumParameters}},
+    /* num open types */ {{$o.NumOpenTypes}},
+    /* num open numbers */ {{$o.NumOpenNumbers}},
+    /* open types */
+{{-   if $o.OpenTypesOffset }} &kOpenTypes[{{$o.OpenTypesOffset}}],
+{{-   else                  }} nullptr,
+{{-   end }}
+    /* open numbers */
+{{-   if $o.OpenNumbersOffset }} &kOpenNumbers[{{$o.OpenNumbersOffset}}]
+{{-   else                    }} nullptr
+{{-   end }},
+    /* parameters */ &kParameters[{{$o.ParametersOffset}}],
+    /* return matcher indices */
+{{-   if $o.ReturnMatcherIndicesOffset }} &kMatcherIndices[{{$o.ReturnMatcherIndicesOffset}}]
+{{-   else                             }} nullptr
+{{-   end }},
+    /* supported_stages */ PipelineStageSet(
+{{-   range $i, $u := $o.CanBeUsedInStage.List -}}
+{{-     if $i -}}, {{end}}PipelineStage::k{{Title $u}}
+{{-   end }}),
+    /* is_deprecated */ {{$o.IsDeprecated}},
+  },
+{{- end }}
+};
+
+constexpr BuiltinInfo kBuiltins[] = {
+{{- range $i, $f := .Functions }}
+  {
+    /* [{{$i}}] */
+{{-   range $f.OverloadDescriptions }}
+    /* {{.}} */
+{{-   end }}
+    /* num overloads */ {{$f.NumOverloads}},
+    /* overloads */ &kOverloads[{{$f.OverloadsOffset}}],
+  },
+{{- end }}
+};
+
+// clang-format on
+{{ end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                              define "Type"                               -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{- $class := PascalCase .Name -}}
+/// TypeMatcher for 'type {{.Name}}'
+{{- if .Decl.Source.S.Filepath  }}
+/// @see {{.Decl.Source}}
+{{- end  }}
+class {{$class}} : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules.
+  /// Match may close open types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState& state) const override;
+};
+
+const sem::Type* {{$class}}::Match(MatchState& state, const sem::Type* ty) const {
+{{- range .TemplateParams }}
+{{-   template "DeclareLocalTemplateParam" . }}
+{{- end  }}
+  if (!match_{{TrimLeft .Name "_"}}(ty{{range .TemplateParams}}, {{.GetName}}{{end}})) {
+    return nullptr;
+  }
+{{- range .TemplateParams }}
+  {{.Name}} = {{ template "MatchTemplateParam" .}}({{.Name}});
+  if ({{ template "IsTemplateParamInvalid" .}}) {
+    return nullptr;
+  }
+{{- end  }}
+  return build_{{TrimLeft .Name "_"}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
+}
+
+std::string {{$class}}::String(MatchState&{{if .TemplateParams}} state{{end}}) const {
+{{- range .TemplateParams }}
+{{-   template "DeclareLocalTemplateParamName" . }}
+{{- end  }}
+
+{{- if .DisplayName }}
+  std::stringstream ss;
+  ss{{range SplitDisplayName .DisplayName}} << {{.}}{{end}};
+  return ss.str();
+{{- else if .TemplateParams }}
+  return "{{.Name}}<"{{template "AppendTemplateParamNames" .TemplateParams}} + ">";
+{{- else }}
+  return "{{.Name}}";
+{{- end  }}
+}
+{{  end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                          define "TypeMatcher"                            -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{- $class := PascalCase .Name -}}
+/// TypeMatcher for 'match {{.Name}}'
+{{- if .Decl.Source.S.Filepath  }}
+/// @see {{.Decl.Source}}
+{{- end  }}
+class {{$class}} : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may close open types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState& state) const override;
+};
+
+const sem::Type* {{$class}}::Match(MatchState& state, const sem::Type* ty) const {
+{{- range .Types }}
+  if (match_{{.Name}}(ty)) {
+    return build_{{.Name}}(state);
+  }
+{{- end }}
+  return nullptr;
+}
+
+std::string {{$class}}::String(MatchState&) const {
+  return "
+{{- range .Types -}}
+{{-   if      IsFirstIn . $.Types }}{{.Name}}
+{{-   else if IsLastIn  . $.Types }} or {{.Name}}
+{{-   else                        }}, {{.Name}}
+{{-   end -}}
+{{- end -}}
+  ";
+}
+{{  end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                          define "EnumMatcher"                            -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{- $class := PascalCase .Name -}}
+{{- $enum := PascalCase .Enum.Name -}}
+/// EnumMatcher for 'match {{.Name}}'
+{{- if .Decl.Source.S.Filepath  }}
+/// @see {{.Decl.Source}}
+{{- end  }}
+class {{$class}} : public NumberMatcher {
+ public:
+  /// Checks whether the given number matches the enum matcher rules.
+  /// Match may close open types and numbers in state.
+  /// @param state the MatchState
+  /// @param number the enum value as a Number
+  /// @return true if the enum value matches the set
+  Number Match(MatchState& state, Number number) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState& state) const override;
+};
+
+{{ if eq 1 (len .Options) -}}
+{{-   $option := index .Options 0 }}
+{{-   $entry := printf "k%v" (PascalCase $option.Name) -}}
+Number {{$class}}::Match(MatchState&, Number number) const {
+  if (number.IsAny() || number.Value() == static_cast<uint32_t>({{$enum}}::{{$entry}})) {
+    return Number(static_cast<uint32_t>({{$enum}}::{{$entry}}));
+  }
+  return Number::invalid;
+}
+{{- else -}}
+Number {{$class}}::Match(MatchState&, Number number) const {
+  switch (static_cast<{{$enum}}>(number.Value())) {
+{{-   range .Options }}
+    case {{$enum}}::k{{PascalCase .Name}}:
+{{-   end }}
+      return number;
+    default:
+      return Number::invalid;
+  }
+}
+{{- end }}
+
+std::string {{$class}}::String(MatchState&) const {
+  return "
+{{- range .Options -}}
+{{-   if      IsFirstIn . $.Options }}{{.Name}}
+{{-   else if IsLastIn  . $.Options }} or {{.Name}}
+{{-   else                          }}, {{.Name}}
+{{-   end -}}
+{{- end -}}
+";
+}
+{{  end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                            define "Matchers"                             -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+/// Matchers holds type and number matchers
+class Matchers {
+ private:
+{{- $t_names := Map -}}
+{{- $n_names := Map -}}
+{{- range Iterate .Sem.MaxOpenTypes -}}
+{{-   $name := printf "open_type_%v" . -}}
+{{-   $t_names.Put . $name }}
+  OpenTypeMatcher {{$name}}_{ {{- . -}} };
+{{- end }}
+{{- range Iterate .Sem.MaxOpenNumbers -}}
+{{-   $name := printf "open_number_%v" . -}}
+{{-   $n_names.Put . $name }}
+  OpenNumberMatcher {{$name}}_{ {{- . -}} };
+{{- end }}
+{{- range .Sem.Types -}}
+{{-   $name := PascalCase .Name -}}
+{{-   $t_names.Put . $name }}
+  {{$name}} {{$name}}_;
+{{- end }}
+{{- range .Sem.TypeMatchers -}}
+{{-   $name := PascalCase .Name -}}
+{{-   $t_names.Put . $name }}
+  {{$name}} {{$name}}_;
+{{- end }}
+{{- range .Sem.EnumMatchers -}}
+{{-   $name := PascalCase .Name -}}
+{{-   $n_names.Put . $name }}
+  {{$name}} {{$name}}_;
+{{- end }}
+
+ public:
+  /// Constructor
+  Matchers();
+  /// Destructor
+  ~Matchers();
+
+  /// The open-types, types, and type matchers
+  TypeMatcher const* const type[{{len .TMatchers}}] = {
+{{- range $i, $m := .TMatchers }}
+    /* [{{$i}}] */
+{{-   if $m }} &{{$t_names.Get $m}}_,
+{{-   else  }} &{{$t_names.Get $i}}_,
+{{-   end   }}
+{{- end }}
+  };
+
+  /// The open-numbers, and number matchers
+  NumberMatcher const* const number[{{len .NMatchers}}] = {
+{{- range $i, $m := .NMatchers }}
+    /* [{{$i}}] */
+{{-   if $m }} &{{$n_names.Get $m}}_,
+{{-   else  }} &{{$n_names.Get $i}}_,
+{{-   end   }}
+{{- end }}
+  };
+};
+
+Matchers::Matchers() = default;
+Matchers::~Matchers() = default;
+{{- end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                     define "DeclareLocalTemplateParam"                   -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   if      IsTemplateTypeParam . }}
+  const sem::Type* {{.Name}} = nullptr;
+{{-   else if IsTemplateNumberParam . }}
+  Number {{.Name}} = Number::invalid;
+{{-   else if IsTemplateEnumParam . }}
+  Number {{.Name}} = Number::invalid;
+{{-   end -}}
+{{- end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                   define "DeclareLocalTemplateParamName"                 -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   if      IsTemplateTypeParam . }}
+  const std::string {{.Name}} = state.TypeName();
+{{-   else if IsTemplateNumberParam . }}
+  const std::string {{.Name}} = state.NumName();
+{{-   else if IsTemplateEnumParam . }}
+  const std::string {{.Name}} = state.NumName();
+{{-   end -}}
+{{- end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                       define "MatchTemplateParam"                        -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   if      IsTemplateTypeParam . -}}
+  state.Type
+{{-   else if IsTemplateNumberParam . -}}
+  state.Num
+{{-   else if IsTemplateEnumParam . -}}
+  state.Num
+{{-   end -}}
+{{- end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                       define "IsTemplateParamInvalid"                    -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   if      IsTemplateTypeParam . -}}
+  {{.Name}} == nullptr
+{{-   else if IsTemplateNumberParam . -}}
+  !{{.Name}}.IsValid()
+{{-   else if IsTemplateEnumParam . -}}
+  !{{.Name}}.IsValid()
+{{-   end -}}
+{{- end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                      define "AppendTemplateParamNames"                   -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   range $i, $ := . -}}
+{{-     if $i }} + ", " + {{.Name}}
+{{-     else }} + {{.Name}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}

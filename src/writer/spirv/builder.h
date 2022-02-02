@@ -35,7 +35,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
-#include "src/sem/intrinsic.h"
+#include "src/sem/builtin.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/scalar_constant.h"
@@ -376,44 +376,44 @@ class Builder {
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateFunctionCall(const sem::Call* call,
                                 const sem::Function* function);
-  /// Handles generating an intrinsic call expression
+  /// Handles generating a builtin call expression
   /// @param call the call expression
-  /// @param intrinsic the intrinsic being called
+  /// @param builtin the builtin being called
   /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateIntrinsicCall(const sem::Call* call,
-                                 const sem::Intrinsic* intrinsic);
+  uint32_t GenerateBuiltinCall(const sem::Call* call,
+                               const sem::Builtin* builtin);
   /// Handles generating a type constructor or type conversion expression
   /// @param call the call expression
   /// @param var the variable that is being initialized. May be null.
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateTypeConstructorOrConversion(const sem::Call* call,
                                                const ast::Variable* var);
-  /// Generates a texture intrinsic call. Emits an error and returns false if
+  /// Generates a texture builtin call. Emits an error and returns false if
   /// we're currently outside a function.
   /// @param call the call expression
-  /// @param intrinsic the semantic information for the texture intrinsic
+  /// @param builtin the semantic information for the texture builtin
   /// @param result_type result type operand of the texture instruction
   /// @param result_id result identifier operand of the texture instruction
   /// parameters
   /// @returns true on success
-  bool GenerateTextureIntrinsic(const sem::Call* call,
-                                const sem::Intrinsic* intrinsic,
-                                spirv::Operand result_type,
-                                spirv::Operand result_id);
+  bool GenerateTextureBuiltin(const sem::Call* call,
+                              const sem::Builtin* builtin,
+                              spirv::Operand result_type,
+                              spirv::Operand result_id);
   /// Generates a control barrier statement.
-  /// @param intrinsic the semantic information for the barrier intrinsic call
+  /// @param builtin the semantic information for the barrier builtin call
   /// @returns true on success
-  bool GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic);
-  /// Generates an atomic intrinsic call.
+  bool GenerateControlBarrierBuiltin(const sem::Builtin* builtin);
+  /// Generates an atomic builtin call.
   /// @param call the call expression
-  /// @param intrinsic the semantic information for the atomic intrinsic call
+  /// @param builtin the semantic information for the atomic builtin call
   /// @param result_type result type operand of the texture instruction
   /// @param result_id result identifier operand of the texture instruction
   /// @returns true on success
-  bool GenerateAtomicIntrinsic(const sem::Call* call,
-                               const sem::Intrinsic* intrinsic,
-                               Operand result_type,
-                               Operand result_id);
+  bool GenerateAtomicBuiltin(const sem::Call* call,
+                             const sem::Builtin* builtin,
+                             Operand result_type,
+                             Operand result_id);
   /// Generates a sampled image
   /// @param texture_type the texture type
   /// @param texture_operand the texture operand

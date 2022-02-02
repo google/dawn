@@ -24,7 +24,7 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/traverse_expressions.h"
 #include "src/scope_stack.h"
-#include "src/sem/intrinsic.h"
+#include "src/sem/builtin.h"
 #include "src/utils/defer.h"
 #include "src/utils/map.h"
 #include "src/utils/scoped_assignment.h"
@@ -297,7 +297,7 @@ class DependencyScanner {
           if (auto* ident = expr->As<ast::IdentifierExpression>()) {
             auto* node = scope_stack_.Get(ident->symbol);
             if (node == nullptr) {
-              if (!IsIntrinsic(ident->symbol)) {
+              if (!IsBuiltin(ident->symbol)) {
                 UnknownSymbol(ident->symbol, ident->source, "identifier");
               }
               return ast::TraverseAction::Descend;
@@ -313,7 +313,7 @@ class DependencyScanner {
           }
           if (auto* call = expr->As<ast::CallExpression>()) {
             if (call->target.name) {
-              if (!IsIntrinsic(call->target.name->symbol)) {
+              if (!IsBuiltin(call->target.name->symbol)) {
                 AddGlobalDependency(call->target.name,
                                     call->target.name->symbol, "function",
                                     "calls");
@@ -436,10 +436,10 @@ class DependencyScanner {
     }
   }
 
-  /// @returns true if `name` is the name of an intrinsic function
-  bool IsIntrinsic(Symbol name) const {
-    return sem::ParseIntrinsicType(symbols_.NameFor(name)) !=
-           sem::IntrinsicType::kNone;
+  /// @returns true if `name` is the name of a builtin function
+  bool IsBuiltin(Symbol name) const {
+    return sem::ParseBuiltinType(symbols_.NameFor(name)) !=
+           sem::BuiltinType::kNone;
   }
 
   /// Appends an error to the diagnostics that the given symbol cannot be

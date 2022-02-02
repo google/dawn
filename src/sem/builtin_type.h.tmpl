@@ -1,0 +1,45 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/builtin-gen to generate builtin_type.h
+
+See:
+* tools/cmd/builtin-gen/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+#ifndef SRC_SEM_BUILTIN_TYPE_H_
+#define SRC_SEM_BUILTIN_TYPE_H_
+
+#include <sstream>
+#include <string>
+
+namespace tint {
+namespace sem {
+
+/// Enumerator of all builtin functions
+enum class BuiltinType {
+  kNone = -1,
+{{- range .Sem.Functions }}
+  k{{Title .Name}},
+{{- end }}
+};
+
+/// Matches the BuiltinType by name
+/// @param name the builtin name to parse
+/// @returns the parsed BuiltinType, or BuiltinType::kNone if `name` did not
+/// match any builtin.
+BuiltinType ParseBuiltinType(const std::string& name);
+
+/// @returns the name of the builtin function type. The spelling, including
+/// case, matches the name in the WGSL spec.
+const char* str(BuiltinType i);
+
+/// Emits the name of the builtin function type. The spelling, including case,
+/// matches the name in the WGSL spec.
+std::ostream& operator<<(std::ostream& out, BuiltinType i);
+
+}  // namespace sem
+}  // namespace tint
+
+#endif  // SRC_SEM_BUILTIN_TYPE_H_

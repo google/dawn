@@ -84,7 +84,7 @@ namespace resolver {
 Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
-      intrinsic_table_(IntrinsicTable::Create(*builder)) {}
+      builtin_table_(BuiltinTable::Create(*builder)) {}
 
 Resolver::~Resolver() = default;
 
@@ -1354,10 +1354,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   }
 
   auto name = builder_->Symbols().NameFor(ident->symbol);
-  auto intrinsic_type = sem::ParseIntrinsicType(name);
-  if (intrinsic_type != sem::IntrinsicType::kNone) {
-    return IntrinsicCall(expr, intrinsic_type, std::move(args),
-                         std::move(arg_tys));
+  auto builtin_type = sem::ParseBuiltinType(name);
+  if (builtin_type != sem::BuiltinType::kNone) {
+    return BuiltinCall(expr, builtin_type, std::move(args), std::move(arg_tys));
   }
 
   TINT_ICE(Resolver, diagnostics_)
@@ -1368,36 +1367,35 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   return nullptr;
 }
 
-sem::Call* Resolver::IntrinsicCall(
-    const ast::CallExpression* expr,
-    sem::IntrinsicType intrinsic_type,
-    const std::vector<const sem::Expression*> args,
-    const std::vector<const sem::Type*> arg_tys) {
-  auto* intrinsic = intrinsic_table_->Lookup(intrinsic_type, std::move(arg_tys),
-                                             expr->source);
-  if (!intrinsic) {
+sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
+                                 sem::BuiltinType builtin_type,
+                                 const std::vector<const sem::Expression*> args,
+                                 const std::vector<const sem::Type*> arg_tys) {
+  auto* builtin =
+      builtin_table_->Lookup(builtin_type, std::move(arg_tys), expr->source);
+  if (!builtin) {
     return nullptr;
   }
 
-  if (intrinsic->IsDeprecated()) {
-    AddWarning("use of deprecated intrinsic", expr->source);
+  if (builtin->IsDeprecated()) {
+    AddWarning("use of deprecated builtin", expr->source);
   }
 
-  auto* call = builder_->create<sem::Call>(expr, intrinsic, std::move(args),
+  auto* call = builder_->create<sem::Call>(expr, builtin, std::move(args),
                                            current_statement_, sem::Constant{});
 
-  current_function_->AddDirectlyCalledIntrinsic(intrinsic);
+  current_function_->AddDirectlyCalledBuiltin(builtin);
 
-  if (IsTextureIntrinsic(intrinsic_type)) {
-    if (!ValidateTextureIntrinsicFunction(call)) {
+  if (IsTextureBuiltin(builtin_type)) {
+    if (!ValidateTextureBuiltinFunction(call)) {
       return nullptr;
     }
-    // Collect a texture/sampler pair for this intrinsic.
-    const auto& signature = intrinsic->Signature();
+    // Collect a texture/sampler pair for this builtin.
+    const auto& signature = builtin->Signature();
     int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
     if (texture_index == -1) {
       TINT_ICE(Resolver, diagnostics_)
-          << "texture intrinsic without texture parameter";
+          << "texture builtin without texture parameter";
     }
 
     auto* texture = args[texture_index]->As<sem::VariableUser>()->Variable();
@@ -1409,7 +1407,7 @@ sem::Call* Resolver::IntrinsicCall(
     current_function_->AddTextureSamplerPair(texture, sampler);
   }
 
-  if (!ValidateIntrinsicCall(call)) {
+  if (!ValidateBuiltinCall(call)) {
     return nullptr;
   }
 
@@ -1662,8 +1660,8 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     return nullptr;
   }
 
-  if (IsIntrinsic(symbol)) {
-    AddError("missing '(' for intrinsic call", expr->source.End());
+  if (IsBuiltin(symbol)) {
+    AddError("missing '(' for builtin call", expr->source.End());
     return nullptr;
   }
 
@@ -2786,9 +2784,9 @@ bool Resolver::IsHostShareable(const sem::Type* type) const {
   return false;
 }
 
-bool Resolver::IsIntrinsic(Symbol symbol) const {
+bool Resolver::IsBuiltin(Symbol symbol) const {
   std::string name = builder_->Symbols().NameFor(symbol);
-  return sem::ParseIntrinsicType(name) != sem::IntrinsicType::kNone;
+  return sem::ParseBuiltinType(name) != sem::BuiltinType::kNone;
 }
 
 bool Resolver::IsCallStatement(const ast::Expression* expr) const {

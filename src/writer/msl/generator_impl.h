@@ -46,7 +46,7 @@ namespace tint {
 // Forward declarations
 namespace sem {
 class Call;
-class Intrinsic;
+class Builtin;
 class TypeConstructor;
 class TypeConversion;
 }  // namespace sem
@@ -143,14 +143,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
   bool EmitCall(std::ostream& out, const ast::CallExpression* expr);
-  /// Handles generating an intrinsic call expression
+  /// Handles generating a builtin call expression
   /// @param out the output of the expression stream
   /// @param call the call expression
-  /// @param intrinsic the intrinsic being called
+  /// @param builtin the builtin being called
   /// @returns true if the call expression is emitted
-  bool EmitIntrinsicCall(std::ostream& out,
-                         const sem::Call* call,
-                         const sem::Intrinsic* intrinsic);
+  bool EmitBuiltinCall(std::ostream& out,
+                       const sem::Call* call,
+                       const sem::Builtin* builtin);
   /// Handles generating a type conversion expression
   /// @param out the output of the expression stream
   /// @param call the call expression
@@ -179,60 +179,60 @@ class GeneratorImpl : public TextGenerator {
   /// `atomicMax`, etc)
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the atomic intrinsic
+  /// @param builtin the semantic information for the atomic builtin
   /// @returns true if the call expression is emitted
   bool EmitAtomicCall(std::ostream& out,
                       const ast::CallExpression* expr,
-                      const sem::Intrinsic* intrinsic);
+                      const sem::Builtin* builtin);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param out the output of the expression stream
   /// @param call the call expression
-  /// @param intrinsic the semantic information for the texture intrinsic
+  /// @param builtin the semantic information for the texture builtin
   /// @returns true if the call expression is emitted
   bool EmitTextureCall(std::ostream& out,
                        const sem::Call* call,
-                       const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `dot()` intrinsic
+                       const sem::Builtin* builtin);
+  /// Handles generating a call to the `dot()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitDotCall(std::ostream& out,
                    const ast::CallExpression* expr,
-                   const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `modf()` intrinsic
+                   const sem::Builtin* builtin);
+  /// Handles generating a call to the `modf()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitModfCall(std::ostream& out,
                     const ast::CallExpression* expr,
-                    const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `frexp()` intrinsic
+                    const sem::Builtin* builtin);
+  /// Handles generating a call to the `frexp()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitFrexpCall(std::ostream& out,
                      const ast::CallExpression* expr,
-                     const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `degrees()` intrinsic
+                     const sem::Builtin* builtin);
+  /// Handles generating a call to the `degrees()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitDegreesCall(std::ostream& out,
                        const ast::CallExpression* expr,
-                       const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `radians()` intrinsic
+                       const sem::Builtin* builtin);
+  /// Handles generating a call to the `radians()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitRadiansCall(std::ostream& out,
                        const ast::CallExpression* expr,
-                       const sem::Intrinsic* intrinsic);
+                       const sem::Builtin* builtin);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully
@@ -368,9 +368,9 @@ class GeneratorImpl : public TextGenerator {
   bool EmitZeroValue(std::ostream& out, const sem::Type* type);
 
   /// Handles generating a builtin name
-  /// @param intrinsic the semantic info for the intrinsic
+  /// @param builtin the semantic info for the builtin
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(const sem::Intrinsic* intrinsic);
+  std::string generate_builtin_name(const sem::Builtin* builtin);
 
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
@@ -392,13 +392,13 @@ class GeneratorImpl : public TextGenerator {
     uint32_t align;
   };
 
-  /// CallIntrinsicHelper will call the intrinsic helper function, creating it
-  /// if it hasn't been built already. If the intrinsic needs to be built then
-  /// CallIntrinsicHelper will generate the function signature and will call
+  /// CallBuiltinHelper will call the builtin helper function, creating it
+  /// if it hasn't been built already. If the builtin needs to be built then
+  /// CallBuiltinHelper will generate the function signature and will call
   /// `build` to emit the body of the function.
   /// @param out the output of the expression stream
   /// @param call the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @param build a function with the signature:
   ///        `bool(TextBuffer* buffer, const std::vector<std::string>& params)`
   ///        Where:
@@ -406,10 +406,10 @@ class GeneratorImpl : public TextGenerator {
   ///          `params` is the name of all the generated function parameters
   /// @returns true if the call expression is emitted
   template <typename F>
-  bool CallIntrinsicHelper(std::ostream& out,
-                           const ast::CallExpression* call,
-                           const sem::Intrinsic* intrinsic,
-                           F&& build);
+  bool CallBuiltinHelper(std::ostream& out,
+                         const ast::CallExpression* call,
+                         const sem::Builtin* builtin,
+                         F&& build);
 
   TextBuffer helpers_;  // Helper functions emitted at the top of the output
 
@@ -438,7 +438,7 @@ class GeneratorImpl : public TextGenerator {
   /// should be created for that index.
   std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations_;
 
-  std::unordered_map<const sem::Intrinsic*, std::string> intrinsics_;
+  std::unordered_map<const sem::Builtin*, std::string> builtins_;
   std::unordered_map<const sem::Type*, std::string> unary_minus_funcs_;
   std::unordered_map<uint32_t, std::string> int_dot_funcs_;
 };

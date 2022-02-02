@@ -219,6 +219,9 @@ set(TINT_LIB_SRCS
   ast/workgroup_attribute.cc
   ast/workgroup_attribute.h
   block_allocator.h
+  builtin_table.cc
+  builtin_table.h
+  builtin_table.inl
   castable.cc
   castable.h
   clone_context.cc
@@ -233,9 +236,6 @@ set(TINT_LIB_SRCS
   inspector/resource_binding.h
   inspector/scalar.cc
   inspector/scalar.h
-  intrinsic_table.cc
-  intrinsic_table.h
-  intrinsic_table.inl
   program_builder.cc
   program_builder.h
   program_id.cc
@@ -260,6 +260,10 @@ set(TINT_LIB_SRCS
   sem/binding_point.h
   sem/block_statement.cc
   sem/block_statement.h
+  sem/builtin_type.cc
+  sem/builtin_type.h
+  sem/builtin.cc
+  sem/builtin.h
   sem/call_target.cc
   sem/call_target.h
   sem/call.cc
@@ -273,10 +277,6 @@ set(TINT_LIB_SRCS
   sem/function.cc
   sem/info.cc
   sem/info.h
-  sem/intrinsic_type.cc
-  sem/intrinsic_type.h
-  sem/intrinsic.cc
-  sem/intrinsic.h
   sem/member_accessor_expression.cc
   sem/parameter_usage.cc
   sem/parameter_usage.h
@@ -624,6 +624,8 @@ if(TINT_BUILD_TESTS)
     ast/bool_test.cc
     ast/break_statement_test.cc
     ast/builtin_attribute_test.cc
+    ast/builtin_texture_helper_test.cc
+    ast/builtin_texture_helper_test.h
     ast/call_expression_test.cc
     ast/call_statement_test.cc
     ast/case_statement_test.cc
@@ -645,8 +647,6 @@ if(TINT_BUILD_TESTS)
     ast/index_accessor_expression_test.cc
     ast/int_literal_expression_test.cc
     ast/interpolate_attribute_test.cc
-    ast/intrinsic_texture_helper_test.cc
-    ast/intrinsic_texture_helper_test.h
     ast/invariant_attribute_test.cc
     ast/location_attribute_test.cc
     ast/loop_statement_test.cc
@@ -682,6 +682,7 @@ if(TINT_BUILD_TESTS)
     ast/vector_test.cc
     ast/workgroup_attribute_test.cc
     block_allocator_test.cc
+    builtin_table_test.cc
     castable_test.cc
     clone_context_test.cc
     debug_test.cc
@@ -689,7 +690,6 @@ if(TINT_BUILD_TESTS)
     diagnostic/diagnostic_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
-    intrinsic_table_test.cc
     program_test.cc
     resolver/array_accessor_test.cc
     resolver/assignment_validation_test.cc
@@ -697,6 +697,8 @@ if(TINT_BUILD_TESTS)
     resolver/atomics_validation_test.cc
     resolver/bitcast_validation_test.cc
     resolver/builtins_validation_test.cc
+    resolver/builtin_test.cc
+    resolver/builtin_validation_test.cc
     resolver/call_test.cc
     resolver/call_validation_test.cc
     resolver/compound_statement_test.cc
@@ -707,8 +709,6 @@ if(TINT_BUILD_TESTS)
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
     resolver/inferred_type_test.cc
-    resolver/intrinsic_test.cc
-    resolver/intrinsic_validation_test.cc
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
     resolver/pipeline_overridable_constant_test.cc
@@ -732,12 +732,12 @@ if(TINT_BUILD_TESTS)
     scope_stack_test.cc
     sem/atomic_type_test.cc
     sem/bool_type_test.cc
+    sem/builtin_test.cc
     sem/depth_multisampled_texture_type_test.cc
     sem/depth_texture_type_test.cc
     sem/external_texture_type_test.cc
     sem/f32_type_test.cc
     sem/i32_type_test.cc
-    sem/intrinsic_test.cc
     sem/matrix_type_test.cc
     sem/multisampled_texture_type_test.cc
     sem/pointer_type_test.cc
@@ -911,6 +911,8 @@ if(TINT_BUILD_TESTS)
       writer/spirv/builder_binary_expression_test.cc
       writer/spirv/builder_bitcast_expression_test.cc
       writer/spirv/builder_block_test.cc
+      writer/spirv/builder_builtin_test.cc
+      writer/spirv/builder_builtin_texture_test.cc
       writer/spirv/builder_call_test.cc
       writer/spirv/builder_constructor_expression_test.cc
       writer/spirv/builder_discard_test.cc
@@ -922,8 +924,6 @@ if(TINT_BUILD_TESTS)
       writer/spirv/builder_global_variable_test.cc
       writer/spirv/builder_ident_expression_test.cc
       writer/spirv/builder_if_test.cc
-      writer/spirv/builder_intrinsic_test.cc
-      writer/spirv/builder_intrinsic_texture_test.cc
       writer/spirv/builder_literal_test.cc
       writer/spirv/builder_loop_test.cc
       writer/spirv/builder_return_test.cc
@@ -1020,6 +1020,8 @@ if(TINT_BUILD_TESTS)
       writer/msl/generator_impl_bitcast_test.cc
       writer/msl/generator_impl_block_test.cc
       writer/msl/generator_impl_break_test.cc
+      writer/msl/generator_impl_builtin_test.cc
+      writer/msl/generator_impl_builtin_texture_test.cc
       writer/msl/generator_impl_call_test.cc
       writer/msl/generator_impl_case_test.cc
       writer/msl/generator_impl_cast_test.cc
@@ -1030,8 +1032,6 @@ if(TINT_BUILD_TESTS)
       writer/msl/generator_impl_identifier_test.cc
       writer/msl/generator_impl_if_test.cc
       writer/msl/generator_impl_import_test.cc
-      writer/msl/generator_impl_intrinsic_test.cc
-      writer/msl/generator_impl_intrinsic_texture_test.cc
       writer/msl/generator_impl_loop_test.cc
       writer/msl/generator_impl_member_accessor_test.cc
       writer/msl/generator_impl_module_constant_test.cc
@@ -1054,6 +1054,8 @@ if(TINT_BUILD_TESTS)
       writer/glsl/generator_impl_bitcast_test.cc
       writer/glsl/generator_impl_block_test.cc
       writer/glsl/generator_impl_break_test.cc
+      writer/glsl/generator_impl_builtin_test.cc
+      writer/glsl/generator_impl_builtin_texture_test.cc
       writer/glsl/generator_impl_call_test.cc
       writer/glsl/generator_impl_case_test.cc
       writer/glsl/generator_impl_cast_test.cc
@@ -1063,8 +1065,6 @@ if(TINT_BUILD_TESTS)
       writer/glsl/generator_impl_function_test.cc
       writer/glsl/generator_impl_identifier_test.cc
       writer/glsl/generator_impl_if_test.cc
-      writer/glsl/generator_impl_intrinsic_test.cc
-      writer/glsl/generator_impl_intrinsic_texture_test.cc
       writer/glsl/generator_impl_import_test.cc
       writer/glsl/generator_impl_loop_test.cc
       writer/glsl/generator_impl_member_accessor_test.cc
@@ -1089,6 +1089,8 @@ if(TINT_BUILD_TESTS)
       writer/hlsl/generator_impl_bitcast_test.cc
       writer/hlsl/generator_impl_block_test.cc
       writer/hlsl/generator_impl_break_test.cc
+      writer/hlsl/generator_impl_builtin_test.cc
+      writer/hlsl/generator_impl_builtin_texture_test.cc
       writer/hlsl/generator_impl_call_test.cc
       writer/hlsl/generator_impl_case_test.cc
       writer/hlsl/generator_impl_cast_test.cc
@@ -1098,8 +1100,6 @@ if(TINT_BUILD_TESTS)
       writer/hlsl/generator_impl_function_test.cc
       writer/hlsl/generator_impl_identifier_test.cc
       writer/hlsl/generator_impl_if_test.cc
-      writer/hlsl/generator_impl_intrinsic_test.cc
-      writer/hlsl/generator_impl_intrinsic_texture_test.cc
       writer/hlsl/generator_impl_import_test.cc
       writer/hlsl/generator_impl_loop_test.cc
       writer/hlsl/generator_impl_member_accessor_test.cc

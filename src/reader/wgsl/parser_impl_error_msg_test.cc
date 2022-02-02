@@ -114,7 +114,7 @@ fn f() { a = 1 }
 )");
 }
 
-TEST_F(ParserImplErrorTest, AssignmentStmtInvalidLHS_IntrinsicFunctionName) {
+TEST_F(ParserImplErrorTest, AssignmentStmtInvalidLHS_BuiltinFunctionName) {
   EXPECT("normalize = 5;",
          R"(test.wgsl:1:1 error: statement found outside of function body
 normalize = 5;

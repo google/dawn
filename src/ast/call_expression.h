@@ -26,7 +26,7 @@ class IdentifierExpression;
 
 /// A call expression - represents either a:
 /// * sem::Function
-/// * sem::Intrinsic
+/// * sem::Builtin
 /// * sem::TypeConstructor
 /// * sem::TypeConversion
 class CallExpression : public Castable<CallExpression, Expression> {
@@ -64,7 +64,7 @@ class CallExpression : public Castable<CallExpression, Expression> {
   /// Target is either an identifier, or a Type.
   /// One of these must be nullptr and the other a non-nullptr.
   struct Target {
-    /// name is a function or intrinsic to call, or type name to construct or
+    /// name is a function or builtin to call, or type name to construct or
     /// cast-to
     const IdentifierExpression* name = nullptr;
     /// type to construct or cast-to

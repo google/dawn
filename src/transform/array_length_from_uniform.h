@@ -84,7 +84,7 @@ class ArrayLengthFromUniform
   };
 
   /// Information produced about what the transform did.
-  /// If there were no calls to the arrayLength() intrinsic, then no Result will
+  /// If there were no calls to the arrayLength() builtin, then no Result will
   /// be emitted.
   struct Result : public Castable<Result, transform::Data> {
     /// Constructor

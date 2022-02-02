@@ -19,11 +19,11 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/builtin_texture_helper_test.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_attribute.h"
@@ -156,11 +156,11 @@ TEST_F(ResolverValidationTest, Expr_DontCall_Function) {
   EXPECT_EQ(r()->error(), "3:8 error: missing '(' for function call");
 }
 
-TEST_F(ResolverValidationTest, Expr_DontCall_Intrinsic) {
+TEST_F(ResolverValidationTest, Expr_DontCall_Builtin) {
   WrapInFunction(Expr(Source{{{3, 3}, {3, 8}}}, "round"));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "3:8 error: missing '(' for intrinsic call");
+  EXPECT_EQ(r()->error(), "3:8 error: missing '(' for builtin call");
 }
 
 TEST_F(ResolverValidationTest, Expr_DontCall_Type) {
@@ -172,8 +172,7 @@ TEST_F(ResolverValidationTest, Expr_DontCall_Type) {
             "3:8 error: missing '(' for type constructor or cast");
 }
 
-TEST_F(ResolverValidationTest,
-       AssignmentStmt_InvalidLHS_IntrinsicFunctionName) {
+TEST_F(ResolverValidationTest, AssignmentStmt_InvalidLHS_BuiltinFunctionName) {
   // normalize = 2;
 
   auto* lhs = Expr(Source{{12, 34}}, "normalize");
@@ -182,7 +181,7 @@ TEST_F(ResolverValidationTest,
   WrapInFunction(assign);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: missing '(' for intrinsic call");
+  EXPECT_EQ(r()->error(), "12:34 error: missing '(' for builtin call");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {

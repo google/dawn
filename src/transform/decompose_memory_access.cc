@@ -115,7 +115,7 @@ struct LoadStoreKey {
 struct AtomicKey {
   sem::Type const* buf_ty = nullptr;  // buffer type
   sem::Type const* el_ty = nullptr;   // element type
-  sem::IntrinsicType const op;        // atomic op
+  sem::BuiltinType const op;          // atomic op
   bool operator==(const AtomicKey& rhs) const {
     return buf_ty == rhs.buf_ty && el_ty == rhs.el_ty && op == rhs.op;
   }
@@ -224,41 +224,41 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
 /// to a stub function for the atomic op and the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
-                                                     sem::IntrinsicType ity,
+                                                     sem::BuiltinType ity,
                                                      const sem::Type* ty) {
   auto op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
   switch (ity) {
-    case sem::IntrinsicType::kAtomicLoad:
+    case sem::BuiltinType::kAtomicLoad:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
       break;
-    case sem::IntrinsicType::kAtomicStore:
+    case sem::BuiltinType::kAtomicStore:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicStore;
       break;
-    case sem::IntrinsicType::kAtomicAdd:
+    case sem::BuiltinType::kAtomicAdd:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAdd;
       break;
-    case sem::IntrinsicType::kAtomicSub:
+    case sem::BuiltinType::kAtomicSub:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicSub;
       break;
-    case sem::IntrinsicType::kAtomicMax:
+    case sem::BuiltinType::kAtomicMax:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMax;
       break;
-    case sem::IntrinsicType::kAtomicMin:
+    case sem::BuiltinType::kAtomicMin:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMin;
       break;
-    case sem::IntrinsicType::kAtomicAnd:
+    case sem::BuiltinType::kAtomicAnd:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAnd;
       break;
-    case sem::IntrinsicType::kAtomicOr:
+    case sem::BuiltinType::kAtomicOr:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicOr;
       break;
-    case sem::IntrinsicType::kAtomicXor:
+    case sem::BuiltinType::kAtomicXor:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicXor;
       break;
-    case sem::IntrinsicType::kAtomicExchange:
+    case sem::BuiltinType::kAtomicExchange:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicExchange;
       break;
-    case sem::IntrinsicType::kAtomicCompareExchangeWeak:
+    case sem::BuiltinType::kAtomicCompareExchangeWeak:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicCompareExchangeWeak;
       break;
     default:
@@ -641,7 +641,7 @@ struct DecomposeMemoryAccess::State {
   /// @return the name of the function that performs the load
   Symbol AtomicFunc(const sem::Type* buf_ty,
                     const sem::Type* el_ty,
-                    const sem::Intrinsic* intrinsic,
+                    const sem::Builtin* intrinsic,
                     const sem::VariableUser* var_user) {
     auto op = intrinsic->Type();
     return utils::GetOrCreate(atomic_funcs, AtomicKey{buf_ty, el_ty, op}, [&] {
@@ -921,15 +921,15 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx,
 
     if (auto* call_expr = node->As<ast::CallExpression>()) {
       auto* call = sem.Get(call_expr);
-      if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
-        if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
+      if (auto* builtin = call->Target()->As<sem::Builtin>()) {
+        if (builtin->Type() == sem::BuiltinType::kArrayLength) {
           // arrayLength(X)
-          // Don't convert X into a load, this intrinsic actually requires the
+          // Don't convert X into a load, this builtin actually requires the
           // real pointer.
           state.TakeAccess(call_expr->args[0]);
           continue;
         }
-        if (intrinsic->IsAtomic()) {
+        if (builtin->IsAtomic()) {
           if (auto access = state.TakeAccess(call_expr->args[0])) {
             // atomic___(X)
             ctx.Replace(call_expr, [=, &ctx, &state] {
@@ -937,9 +937,8 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx,
               auto* offset = access.offset->Build(ctx);
               auto* buf_ty = access.var->Type()->UnwrapRef();
               auto* el_ty = access.type->UnwrapRef()->As<sem::Atomic>()->Type();
-              Symbol func =
-                  state.AtomicFunc(buf_ty, el_ty, intrinsic,
-                                   access.var->As<sem::VariableUser>());
+              Symbol func = state.AtomicFunc(
+                  buf_ty, el_ty, builtin, access.var->As<sem::VariableUser>());
 
               ast::ExpressionList args{ctx.Clone(buf), offset};
               for (size_t i = 1; i < call_expr->args.size(); i++) {

@@ -935,11 +935,11 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
       << got;
 }
 
-struct IntrinsicData {
+struct BuiltinData {
   const std::string spirv;
   const std::string wgsl;
 };
-inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
+inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
   out << "OpData{" << data.spirv << "," << data.wgsl << "}";
   return out;
 }
@@ -955,10 +955,10 @@ inline std::ostream& operator<<(std::ostream& out, ArgAndTypeData data) {
 }
 
 using SpvBinaryDerivativeTest = SpvParserTestBase<
-    ::testing::TestWithParam<std::tuple<IntrinsicData, ArgAndTypeData>>>;
+    ::testing::TestWithParam<std::tuple<BuiltinData, ArgAndTypeData>>>;
 
 TEST_P(SpvBinaryDerivativeTest, Derivatives) {
-  auto& intrinsic = std::get<0>(GetParam());
+  auto& builtin = std::get<0>(GetParam());
   auto& arg = std::get<1>(GetParam());
 
   const auto assembly = R"(
@@ -968,7 +968,7 @@ TEST_P(SpvBinaryDerivativeTest, Derivatives) {
      %entry = OpLabel
      %1 = OpCopyObject %)" +
                         arg.spirv_type + " %" + arg.spirv_arg + R"(
-     %2 = )" + intrinsic.spirv +
+     %2 = )" + builtin.spirv +
                         " %" + arg.spirv_type + R"( %1
      OpReturn
      OpFunctionEnd
@@ -979,24 +979,24 @@ TEST_P(SpvBinaryDerivativeTest, Derivatives) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_2 : " + arg.ast_type + " = " + intrinsic.wgsl +
-                        "(x_1);"));
+  EXPECT_THAT(
+      test::ToString(p->program(), ast_body),
+      HasSubstr("let x_2 : " + arg.ast_type + " = " + builtin.wgsl + "(x_1);"));
 }
 
 INSTANTIATE_TEST_SUITE_P(
     SpvBinaryDerivativeTest,
     SpvBinaryDerivativeTest,
     testing::Combine(
-        ::testing::Values(IntrinsicData{"OpDPdx", "dpdx"},
-                          IntrinsicData{"OpDPdy", "dpdy"},
-                          IntrinsicData{"OpFwidth", "fwidth"},
-                          IntrinsicData{"OpDPdxFine", "dpdxFine"},
-                          IntrinsicData{"OpDPdyFine", "dpdyFine"},
-                          IntrinsicData{"OpFwidthFine", "fwidthFine"},
-                          IntrinsicData{"OpDPdxCoarse", "dpdxCoarse"},
-                          IntrinsicData{"OpDPdyCoarse", "dpdyCoarse"},
-                          IntrinsicData{"OpFwidthCoarse", "fwidthCoarse"}),
+        ::testing::Values(BuiltinData{"OpDPdx", "dpdx"},
+                          BuiltinData{"OpDPdy", "dpdy"},
+                          BuiltinData{"OpFwidth", "fwidth"},
+                          BuiltinData{"OpDPdxFine", "dpdxFine"},
+                          BuiltinData{"OpDPdyFine", "dpdyFine"},
+                          BuiltinData{"OpFwidthFine", "fwidthFine"},
+                          BuiltinData{"OpDPdxCoarse", "dpdxCoarse"},
+                          BuiltinData{"OpDPdyCoarse", "dpdyCoarse"},
+                          BuiltinData{"OpFwidthCoarse", "fwidthCoarse"}),
         ::testing::Values(
             ArgAndTypeData{"float", "float_50", "f32"},
             ArgAndTypeData{"v2float", "v2float_50_60", "vec2<f32>"},

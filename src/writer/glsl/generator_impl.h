@@ -42,7 +42,7 @@ namespace tint {
 // Forward declarations
 namespace sem {
 class Call;
-class Intrinsic;
+class Builtin;
 class TypeConstructor;
 class TypeConversion;
 }  // namespace sem
@@ -116,14 +116,14 @@ class GeneratorImpl : public TextGenerator {
   bool EmitFunctionCall(std::ostream& out,
                         const sem::Call* call,
                         const sem::Function* function);
-  /// Handles generating an intrinsic call expression
+  /// Handles generating a builtin call expression
   /// @param out the output of the expression stream
   /// @param call the call expression
-  /// @param intrinsic the intrinsic being called
+  /// @param builtin the builtin being called
   /// @returns true if the expression is emitted
-  bool EmitIntrinsicCall(std::ostream& out,
-                         const sem::Call* call,
-                         const sem::Intrinsic* intrinsic);
+  bool EmitBuiltinCall(std::ostream& out,
+                       const sem::Call* call,
+                       const sem::Builtin* builtin);
   /// Handles generating a type conversion expression
   /// @param out the output of the expression stream
   /// @param call the call expression
@@ -140,11 +140,11 @@ class GeneratorImpl : public TextGenerator {
   bool EmitTypeConstructor(std::ostream& out,
                            const sem::Call* call,
                            const sem::TypeConstructor* ctor);
-  /// Handles generating a barrier intrinsic call
+  /// Handles generating a barrier builtin call
   /// @param out the output of the expression stream
-  /// @param intrinsic the semantic information for the barrier intrinsic
+  /// @param builtin the semantic information for the barrier builtin
   /// @returns true if the call expression is emitted
-  bool EmitBarrierCall(std::ostream& out, const sem::Intrinsic* intrinsic);
+  bool EmitBarrierCall(std::ostream& out, const sem::Builtin* builtin);
   /// Handles generating an atomic intrinsic call for a storage buffer variable
   /// @param out the output of the expression stream
   /// @param expr the call expression
@@ -154,92 +154,92 @@ class GeneratorImpl : public TextGenerator {
       std::ostream& out,
       const ast::CallExpression* expr,
       const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
-  /// Handles generating an atomic intrinsic call for a workgroup variable
+  /// Handles generating an atomic builtin call for a workgroup variable
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the atomic intrinsic
+  /// @param builtin the semantic information for the atomic builtin
   /// @returns true if the call expression is emitted
   bool EmitWorkgroupAtomicCall(std::ostream& out,
                                const ast::CallExpression* expr,
-                               const sem::Intrinsic* intrinsic);
+                               const sem::Builtin* builtin);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param out the output of the expression stream
   /// @param call the call expression
-  /// @param intrinsic the semantic information for the texture intrinsic
+  /// @param builtin the semantic information for the texture builtin
   /// @returns true if the call expression is emitted
   bool EmitTextureCall(std::ostream& out,
                        const sem::Call* call,
-                       const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `select()` intrinsic
+                       const sem::Builtin* builtin);
+  /// Handles generating a call to the `select()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
   bool EmitSelectCall(std::ostream& out, const ast::CallExpression* expr);
-  /// Handles generating a call to the `dot()` intrinsic
+  /// Handles generating a call to the `dot()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitDotCall(std::ostream& out,
                    const ast::CallExpression* expr,
-                   const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `modf()` intrinsic
+                   const sem::Builtin* builtin);
+  /// Handles generating a call to the `modf()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitModfCall(std::ostream& out,
                     const ast::CallExpression* expr,
-                    const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `frexp()` intrinsic
+                    const sem::Builtin* builtin);
+  /// Handles generating a call to the `frexp()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitFrexpCall(std::ostream& out,
                      const ast::CallExpression* expr,
-                     const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `isNormal()` intrinsic
+                     const sem::Builtin* builtin);
+  /// Handles generating a call to the `isNormal()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitIsNormalCall(std::ostream& out,
                         const ast::CallExpression* expr,
-                        const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `degrees()` intrinsic
+                        const sem::Builtin* builtin);
+  /// Handles generating a call to the `degrees()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitDegreesCall(std::ostream& out,
                        const ast::CallExpression* expr,
-                       const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to the `radians()` intrinsic
+                       const sem::Builtin* builtin);
+  /// Handles generating a call to the `radians()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @returns true if the call expression is emitted
   bool EmitRadiansCall(std::ostream& out,
                        const ast::CallExpression* expr,
-                       const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to data packing intrinsic
+                       const sem::Builtin* builtin);
+  /// Handles generating a call to data packing builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the texture intrinsic
+  /// @param builtin the semantic information for the texture builtin
   /// @returns true if the call expression is emitted
   bool EmitDataPackingCall(std::ostream& out,
                            const ast::CallExpression* expr,
-                           const sem::Intrinsic* intrinsic);
-  /// Handles generating a call to data unpacking intrinsic
+                           const sem::Builtin* builtin);
+  /// Handles generating a call to data unpacking builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the semantic information for the texture intrinsic
+  /// @param builtin the semantic information for the texture builtin
   /// @returns true if the call expression is emitted
   bool EmitDataUnpackingCall(std::ostream& out,
                              const ast::CallExpression* expr,
-                             const sem::Intrinsic* intrinsic);
+                             const sem::Builtin* builtin);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully
@@ -407,9 +407,9 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the variable was emitted
   bool EmitProgramConstVariable(const ast::Variable* var);
   /// Handles generating a builtin method name
-  /// @param intrinsic the semantic info for the intrinsic
+  /// @param builtin the semantic info for the builtin
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(const sem::Intrinsic* intrinsic);
+  std::string generate_builtin_name(const sem::Builtin* builtin);
   /// Converts a builtin to a gl_ string
   /// @param builtin the builtin to convert
   /// @param stage pipeline stage in which this builtin is used
@@ -444,13 +444,13 @@ class GeneratorImpl : public TextGenerator {
     };
   };
 
-  /// CallIntrinsicHelper will call the intrinsic helper function, creating it
-  /// if it hasn't been built already. If the intrinsic needs to be built then
-  /// CallIntrinsicHelper will generate the function signature and will call
+  /// CallBuiltinHelper will call the builtin helper function, creating it
+  /// if it hasn't been built already. If the builtin needs to be built then
+  /// CallBuiltinHelper will generate the function signature and will call
   /// `build` to emit the body of the function.
   /// @param out the output of the expression stream
   /// @param call the call expression
-  /// @param intrinsic the semantic information for the intrinsic
+  /// @param builtin the semantic information for the builtin
   /// @param build a function with the signature:
   ///        `bool(TextBuffer* buffer, const std::vector<std::string>& params)`
   ///        Where:
@@ -458,16 +458,16 @@ class GeneratorImpl : public TextGenerator {
   ///          `params` is the name of all the generated function parameters
   /// @returns true if the call expression is emitted
   template <typename F>
-  bool CallIntrinsicHelper(std::ostream& out,
-                           const ast::CallExpression* call,
-                           const sem::Intrinsic* intrinsic,
-                           F&& build);
+  bool CallBuiltinHelper(std::ostream& out,
+                         const ast::CallExpression* call,
+                         const sem::Builtin* builtin,
+                         F&& build);
 
   TextBuffer helpers_;  // Helper functions emitted at the top of the output
   std::function<bool()> emit_continuing_;
   std::unordered_map<DMAIntrinsic, std::string, DMAIntrinsic::Hasher>
       dma_intrinsics_;
-  std::unordered_map<const sem::Intrinsic*, std::string> intrinsics_;
+  std::unordered_map<const sem::Builtin*, std::string> builtins_;
   std::unordered_map<const sem::Struct*, std::string> structure_builders_;
   std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
   std::unordered_map<const sem::Vector*, std::string> int_dot_funcs_;

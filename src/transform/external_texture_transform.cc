@@ -46,10 +46,9 @@ void ExternalTextureTransform::Run(CloneContext& ctx,
   // Scan the AST nodes for calls to textureLoad or textureSampleLevel.
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* call_expr = node->As<ast::CallExpression>()) {
-      if (auto* intrinsic =
-              sem.Get(call_expr)->Target()->As<sem::Intrinsic>()) {
-        if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad ||
-            intrinsic->Type() == sem::IntrinsicType::kTextureSampleLevel) {
+      if (auto* builtin = sem.Get(call_expr)->Target()->As<sem::Builtin>()) {
+        if (builtin->Type() == sem::BuiltinType::kTextureLoad ||
+            builtin->Type() == sem::BuiltinType::kTextureSampleLevel) {
           // When a textureLoad or textureSampleLevel has been identified, check
           // if the first parameter is an external texture.
           if (auto* var =
@@ -58,7 +57,7 @@ void ExternalTextureTransform::Run(CloneContext& ctx,
                     ->Type()
                     ->UnwrapRef()
                     ->Is<sem::ExternalTexture>()) {
-              if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad &&
+              if (builtin->Type() == sem::BuiltinType::kTextureLoad &&
                   call_expr->args.size() != 2) {
                 TINT_ICE(Transform, ctx.dst->Diagnostics())
                     << "expected textureLoad call with a texture_external to "
@@ -66,8 +65,7 @@ void ExternalTextureTransform::Run(CloneContext& ctx,
                     << call_expr->args.size() << " parameters";
               }
 
-              if (intrinsic->Type() ==
-                      sem::IntrinsicType::kTextureSampleLevel &&
+              if (builtin->Type() == sem::BuiltinType::kTextureSampleLevel &&
                   call_expr->args.size() != 3) {
                 TINT_ICE(Transform, ctx.dst->Diagnostics())
                     << "expected textureSampleLevel call with a "
@@ -82,12 +80,12 @@ void ExternalTextureTransform::Run(CloneContext& ctx,
               auto* externalTextureParam = ctx.Clone(call_expr->args[0]);
 
               ast::ExpressionList params;
-              if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad) {
+              if (builtin->Type() == sem::BuiltinType::kTextureLoad) {
                 auto* coordsParam = ctx.Clone(call_expr->args[1]);
                 auto* levelParam = ctx.dst->Expr(0);
                 params = {externalTextureParam, coordsParam, levelParam};
-              } else if (intrinsic->Type() ==
-                         sem::IntrinsicType::kTextureSampleLevel) {
+              } else if (builtin->Type() ==
+                         sem::BuiltinType::kTextureSampleLevel) {
                 auto* samplerParam = ctx.Clone(call_expr->args[1]);
                 auto* coordsParam = ctx.Clone(call_expr->args[2]);
                 auto* levelParam = ctx.dst->Expr(0.0f);

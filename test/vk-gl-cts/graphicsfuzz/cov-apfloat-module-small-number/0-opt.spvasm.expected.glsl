@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-warning: use of deprecated intrinsic
+warning: use of deprecated builtin
 #version 310 es
 precision mediump float;
 
@@ -92,7 +92,7 @@ void main() {
 }
 Error parsing GLSL shader:
 ERROR: 0:43: '|' :  wrong operand types: no operation '|' exists that takes a left-hand operand of type ' global bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:43: '' : compilation terminated 
+ERROR: 0:43: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 

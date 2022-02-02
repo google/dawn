@@ -35,7 +35,7 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   auto param = GetParam();
   auto* call = Call(param.name, 1.f);
 
-  // The resolver will set the intrinsic data for the ident
+  // The resolver will set the builtin data for the ident
   WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
@@ -44,10 +44,10 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   ASSERT_NE(sem, nullptr);
   auto* target = sem->Target();
   ASSERT_NE(target, nullptr);
-  auto* intrinsic = target->As<sem::Intrinsic>();
-  ASSERT_NE(intrinsic, nullptr);
+  auto* builtin = target->As<sem::Builtin>();
+  ASSERT_NE(builtin, nullptr);
 
-  ASSERT_EQ(gen.generate_builtin_name(intrinsic), param.msl_name);
+  ASSERT_EQ(gen.generate_builtin_name(builtin), param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_SingleParamTest,

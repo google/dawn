@@ -76,8 +76,8 @@ bool CalculateArrayLength::ShouldRun(const Program* program,
                                      const DataMap&) const {
   for (auto* fn : program->AST().Functions()) {
     if (auto* sem_fn = program->Sem().Get(fn)) {
-      for (auto* intrinsic : sem_fn->DirectlyCalledIntrinsics()) {
-        if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
+      for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
+        if (builtin->Type() == sem::BuiltinType::kArrayLength) {
           return true;
         }
       }
@@ -143,8 +143,8 @@ void CalculateArrayLength::Run(CloneContext& ctx,
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* call_expr = node->As<ast::CallExpression>()) {
       auto* call = sem.Get(call_expr);
-      if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
-        if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
+      if (auto* builtin = call->Target()->As<sem::Builtin>()) {
+        if (builtin->Type() == sem::BuiltinType::kArrayLength) {
           // We're dealing with an arrayLength() call
 
           // A runtime-sized array can only appear as the store type of a

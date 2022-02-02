@@ -34,7 +34,7 @@ namespace transform {
 ArrayLengthFromUniform::ArrayLengthFromUniform() = default;
 ArrayLengthFromUniform::~ArrayLengthFromUniform() = default;
 
-/// Iterate over all arrayLength() intrinsics that operate on
+/// Iterate over all arrayLength() builtins that operate on
 /// storage buffer variables.
 /// @param ctx the CloneContext.
 /// @param functor of type void(const ast::CallExpression*, const
@@ -46,7 +46,7 @@ template <typename F>
 static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
   auto& sem = ctx.src->Sem();
 
-  // Find all calls to the arrayLength() intrinsic.
+  // Find all calls to the arrayLength() builtin.
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     auto* call_expr = node->As<ast::CallExpression>();
     if (!call_expr) {
@@ -54,8 +54,8 @@ static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
     }
 
     auto* call = sem.Get(call_expr);
-    auto* intrinsic = call->Target()->As<sem::Intrinsic>();
-    if (!intrinsic || intrinsic->Type() != sem::IntrinsicType::kArrayLength) {
+    auto* builtin = call->Target()->As<sem::Builtin>();
+    if (!builtin || builtin->Type() != sem::BuiltinType::kArrayLength) {
       continue;
     }
 
@@ -98,8 +98,8 @@ bool ArrayLengthFromUniform::ShouldRun(const Program* program,
                                        const DataMap&) const {
   for (auto* fn : program->AST().Functions()) {
     if (auto* sem_fn = program->Sem().Get(fn)) {
-      for (auto* intrinsic : sem_fn->DirectlyCalledIntrinsics()) {
-        if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
+      for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
+        if (builtin->Type() == sem::BuiltinType::kArrayLength) {
           return true;
         }
       }

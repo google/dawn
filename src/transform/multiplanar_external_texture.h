@@ -20,7 +20,7 @@
 
 #include "src/ast/struct_member.h"
 #include "src/sem/binding_point.h"
-#include "src/sem/intrinsic_type.h"
+#include "src/sem/builtin_type.h"
 #include "src/transform/transform.h"
 
 namespace tint {

@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/intrinsic_table.h"
+#include "src/builtin_table.h"
 #include "src/program_builder.h"
 #include "src/resolver/dependency_graph.h"
 #include "src/scope_stack.h"
@@ -59,11 +59,11 @@ namespace sem {
 class Array;
 class Atomic;
 class BlockStatement;
+class Builtin;
 class CaseStatement;
 class ElseStatement;
 class ForLoopStatement;
 class IfStatement;
-class Intrinsic;
 class LoopStatement;
 class Statement;
 class SwitchStatement;
@@ -191,10 +191,10 @@ class Resolver {
                           const std::vector<const sem::Expression*> args,
                           sem::Behaviors arg_behaviors);
   sem::Expression* Identifier(const ast::IdentifierExpression*);
-  sem::Call* IntrinsicCall(const ast::CallExpression*,
-                           sem::IntrinsicType,
-                           const std::vector<const sem::Expression*> args,
-                           const std::vector<const sem::Type*> arg_tys);
+  sem::Call* BuiltinCall(const ast::CallExpression*,
+                         sem::BuiltinType,
+                         const std::vector<const sem::Expression*> args,
+                         const std::vector<const sem::Type*> arg_tys);
   sem::Expression* Literal(const ast::LiteralExpression*);
   sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
   sem::Call* TypeConversion(const ast::CallExpression* expr,
@@ -258,7 +258,7 @@ class Resolver {
   bool ValidateIfStatement(const sem::IfStatement* stmt);
   bool ValidateInterpolateAttribute(const ast::InterpolateAttribute* attr,
                                     const sem::Type* storage_type);
-  bool ValidateIntrinsicCall(const sem::Call* call);
+  bool ValidateBuiltinCall(const sem::Call* call);
   bool ValidateLocationAttribute(const ast::LocationAttribute* location,
                                  const sem::Type* type,
                                  std::unordered_set<uint32_t>& locations,
@@ -290,7 +290,7 @@ class Resolver {
                                        const sem::Type* type);
   bool ValidateArrayConstructorOrCast(const ast::CallExpression* ctor,
                                       const sem::Array* arr_type);
-  bool ValidateTextureIntrinsicFunction(const sem::Call* call);
+  bool ValidateTextureBuiltinFunction(const sem::Call* call);
   bool ValidateNoDuplicateAttributes(const ast::AttributeList& attributes);
   bool ValidateStorageClassLayout(const sem::Type* type,
                                   ast::StorageClass sc,
@@ -462,9 +462,8 @@ class Resolver {
     return const_cast<T*>(As<T>(sem));
   }
 
-  /// @returns true if the symbol is the name of an intrinsic (builtin)
-  /// function.
-  bool IsIntrinsic(Symbol) const;
+  /// @returns true if the symbol is the name of a builtin function.
+  bool IsBuiltin(Symbol) const;
 
   /// @returns true if `expr` is the current CallStatement's CallExpression
   bool IsCallStatement(const ast::Expression* expr) const;
@@ -520,7 +519,7 @@ class Resolver {
 
   ProgramBuilder* const builder_;
   diag::List& diagnostics_;
-  std::unique_ptr<IntrinsicTable> const intrinsic_table_;
+  std::unique_ptr<BuiltinTable> const builtin_table_;
   DependencyGraph dependencies_;
   std::vector<sem::Function*> entry_points_;
   std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;

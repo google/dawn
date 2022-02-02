@@ -785,7 +785,7 @@ void Inspector::GenerateSamplerTargets() {
       continue;
     }
 
-    auto* i = call->Target()->As<sem::Intrinsic>();
+    auto* i = call->Target()->As<sem::Builtin>();
     if (!i) {
       continue;
     }

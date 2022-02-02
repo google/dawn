@@ -89,12 +89,12 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         if (!ast::TraverseExpressions(
                 stmt->rhs, ctx.dst->Diagnostics(),
                 [&](const ast::CallExpression* call) {
-                  // ast::CallExpression may map to a function or intrinsic call
+                  // ast::CallExpression may map to a function or builtin call
                   // (both may have side-effects), or a type constructor or
                   // type conversion (both do not have side effects).
                   if (sem.Get(call)
                           ->Target()
-                          ->IsAnyOf<sem::Function, sem::Intrinsic>()) {
+                          ->IsAnyOf<sem::Function, sem::Builtin>()) {
                     side_effects.push_back(call);
                     return ast::TraverseAction::Skip;
                   }

@@ -560,7 +560,7 @@ bool Resolver::ValidateVariable(const sem::Variable* var) {
 
   if (var->Is<sem::GlobalVariable>()) {
     auto name = builder_->Symbols().NameFor(decl->symbol);
-    if (sem::ParseIntrinsicType(name) != sem::IntrinsicType::kNone) {
+    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
       auto* kind = var->Declaration()->is_const ? "let" : "var";
       AddError(
           "'" + name +
@@ -840,7 +840,7 @@ bool Resolver::ValidateFunction(const sem::Function* func) {
   auto* decl = func->Declaration();
 
   auto name = builder_->Symbols().NameFor(decl->symbol);
-  if (sem::ParseIntrinsicType(name) != sem::IntrinsicType::kNone) {
+  if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
     AddError(
         "'" + name + "' is a builtin and cannot be redeclared as a function",
         decl->source);
@@ -1369,7 +1369,7 @@ bool Resolver::ValidateIfStatement(const sem::IfStatement* stmt) {
   return true;
 }
 
-bool Resolver::ValidateIntrinsicCall(const sem::Call* call) {
+bool Resolver::ValidateBuiltinCall(const sem::Call* call) {
   if (call->Type()->Is<sem::Void>()) {
     bool is_call_statement = false;
     if (auto* call_stmt = As<ast::CallStatement>(call->Stmt()->Declaration())) {
@@ -1383,7 +1383,7 @@ bool Resolver::ValidateIntrinsicCall(const sem::Call* call) {
       // statement should be used instead.
       auto* ident = call->Declaration()->target.name;
       auto name = builder_->Symbols().NameFor(ident->symbol);
-      AddError("intrinsic '" + name + "' does not return a value",
+      AddError("builtin '" + name + "' does not return a value",
                call->Declaration()->source);
       return false;
     }
@@ -1392,14 +1392,14 @@ bool Resolver::ValidateIntrinsicCall(const sem::Call* call) {
   return true;
 }
 
-bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
-  auto* intrinsic = call->Target()->As<sem::Intrinsic>();
-  if (!intrinsic) {
+bool Resolver::ValidateTextureBuiltinFunction(const sem::Call* call) {
+  auto* builtin = call->Target()->As<sem::Builtin>();
+  if (!builtin) {
     return false;
   }
 
-  std::string func_name = intrinsic->str();
-  auto& signature = intrinsic->Signature();
+  std::string func_name = builtin->str();
+  auto& signature = builtin->Signature();
 
   auto check_arg_is_constexpr = [&](sem::ParameterUsage usage, int min,
                                     int max) {
@@ -1431,7 +1431,7 @@ bool Resolver::ValidateTextureIntrinsicFunction(const sem::Call* call) {
             return ast::TraverseAction::Stop;
           });
       if (is_const_expr) {
-        auto vector = intrinsic->Parameters()[index]->Type()->Is<sem::Vector>();
+        auto vector = builtin->Parameters()[index]->Type()->Is<sem::Vector>();
         for (size_t i = 0; i < values.Elements().size(); i++) {
           auto value = values.Elements()[i].i32;
           if (value < min || value > max) {
@@ -1895,12 +1895,12 @@ bool Resolver::ValidatePipelineStages() {
     }
   }
 
-  auto check_intrinsic_calls = [&](const sem::Function* func,
-                                   const sem::Function* entry_point) {
+  auto check_builtin_calls = [&](const sem::Function* func,
+                                 const sem::Function* entry_point) {
     auto stage = entry_point->Declaration()->PipelineStage();
-    for (auto* intrinsic : func->DirectlyCalledIntrinsics()) {
-      if (!intrinsic->SupportedStages().Contains(stage)) {
-        auto* call = func->FindDirectCallTo(intrinsic);
+    for (auto* builtin : func->DirectlyCalledBuiltins()) {
+      if (!builtin->SupportedStages().Contains(stage)) {
+        auto* call = func->FindDirectCallTo(builtin);
         std::stringstream err;
         err << "built-in cannot be used by " << stage << " pipeline stage";
         AddError(err.str(), call ? call->Declaration()->source
@@ -1927,11 +1927,11 @@ bool Resolver::ValidatePipelineStages() {
   };
 
   for (auto* entry_point : entry_points_) {
-    if (!check_intrinsic_calls(entry_point, entry_point)) {
+    if (!check_builtin_calls(entry_point, entry_point)) {
       return false;
     }
     for (auto* func : entry_point->TransitivelyCalledFunctions()) {
-      if (!check_intrinsic_calls(func, entry_point)) {
+      if (!check_builtin_calls(func, entry_point)) {
         return false;
       }
     }
@@ -1974,7 +1974,7 @@ bool Resolver::ValidateArrayStrideAttribute(const ast::StrideAttribute* attr,
 
 bool Resolver::ValidateAlias(const ast::Alias* alias) {
   auto name = builder_->Symbols().NameFor(alias->name);
-  if (sem::ParseIntrinsicType(name) != sem::IntrinsicType::kNone) {
+  if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
     AddError("'" + name + "' is a builtin and cannot be redeclared as an alias",
              alias->source);
     return false;
@@ -1985,7 +1985,7 @@ bool Resolver::ValidateAlias(const ast::Alias* alias) {
 
 bool Resolver::ValidateStructure(const sem::Struct* str) {
   auto name = builder_->Symbols().NameFor(str->Declaration()->name);
-  if (sem::ParseIntrinsicType(name) != sem::IntrinsicType::kNone) {
+  if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
     AddError("'" + name + "' is a builtin and cannot be redeclared as a struct",
              str->Declaration()->source);
     return false;

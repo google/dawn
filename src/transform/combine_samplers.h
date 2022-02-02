@@ -38,9 +38,9 @@ namespace transform {
 /// parameter. In this case, a new parameter is added to the function
 /// signature. All separate texture/sampler parameters are removed.
 ///
-/// All texture intrinsic callsites are modified to pass the combined
+/// All texture builtin callsites are modified to pass the combined
 /// texture/sampler as the first argument, and separate texture/sampler
-/// arugments are removed.
+/// arguments are removed.
 ///
 /// Note that the sampler may be null, indicating that only a texture
 /// reference was required (e.g., textureLoad). In this case, a

@@ -33,8 +33,8 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/sem/builtin_type.h"
 #include "src/sem/depth_texture_type.h"
-#include "src/sem/intrinsic_type.h"
 #include "src/sem/sampled_texture_type.h"
 
 // Terms:
@@ -437,38 +437,38 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
   return "";
 }
 
-// Returns the WGSL standard library function intrinsic for the
-// given instruction, or sem::IntrinsicType::kNone
-sem::IntrinsicType GetIntrinsic(SpvOp opcode) {
+// Returns the WGSL standard library function builtin for the
+// given instruction, or sem::BuiltinType::kNone
+sem::BuiltinType GetBuiltin(SpvOp opcode) {
   switch (opcode) {
     case SpvOpBitCount:
-      return sem::IntrinsicType::kCountOneBits;
+      return sem::BuiltinType::kCountOneBits;
     case SpvOpBitReverse:
-      return sem::IntrinsicType::kReverseBits;
+      return sem::BuiltinType::kReverseBits;
     case SpvOpDot:
-      return sem::IntrinsicType::kDot;
+      return sem::BuiltinType::kDot;
     case SpvOpDPdx:
-      return sem::IntrinsicType::kDpdx;
+      return sem::BuiltinType::kDpdx;
     case SpvOpDPdy:
-      return sem::IntrinsicType::kDpdy;
+      return sem::BuiltinType::kDpdy;
     case SpvOpFwidth:
-      return sem::IntrinsicType::kFwidth;
+      return sem::BuiltinType::kFwidth;
     case SpvOpDPdxFine:
-      return sem::IntrinsicType::kDpdxFine;
+      return sem::BuiltinType::kDpdxFine;
     case SpvOpDPdyFine:
-      return sem::IntrinsicType::kDpdyFine;
+      return sem::BuiltinType::kDpdyFine;
     case SpvOpFwidthFine:
-      return sem::IntrinsicType::kFwidthFine;
+      return sem::BuiltinType::kFwidthFine;
     case SpvOpDPdxCoarse:
-      return sem::IntrinsicType::kDpdxCoarse;
+      return sem::BuiltinType::kDpdxCoarse;
     case SpvOpDPdyCoarse:
-      return sem::IntrinsicType::kDpdyCoarse;
+      return sem::BuiltinType::kDpdyCoarse;
     case SpvOpFwidthCoarse:
-      return sem::IntrinsicType::kFwidthCoarse;
+      return sem::BuiltinType::kFwidthCoarse;
     default:
       break;
   }
-  return sem::IntrinsicType::kNone;
+  return sem::BuiltinType::kNone;
 }
 
 // @param opcode a SPIR-V opcode
@@ -3888,9 +3888,9 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
                 std::move(params))};
   }
 
-  const auto intrinsic = GetIntrinsic(opcode);
-  if (intrinsic != sem::IntrinsicType::kNone) {
-    return MakeIntrinsicCall(inst);
+  const auto builtin = GetBuiltin(opcode);
+  if (builtin != sem::BuiltinType::kNone) {
+    return MakeBuiltinCall(inst);
   }
 
   if (opcode == SpvOpFMod) {
@@ -5081,10 +5081,10 @@ bool FunctionEmitter::EmitControlBarrier(
   return true;
 }
 
-TypedExpression FunctionEmitter::MakeIntrinsicCall(
+TypedExpression FunctionEmitter::MakeBuiltinCall(
     const spvtools::opt::Instruction& inst) {
-  const auto intrinsic = GetIntrinsic(inst.opcode());
-  auto* name = sem::str(intrinsic);
+  const auto builtin = GetBuiltin(inst.opcode());
+  auto* name = sem::str(builtin);
   auto* ident = create<ast::IdentifierExpression>(
       Source{}, builder_.Symbols().Register(name));
 
@@ -5864,7 +5864,7 @@ TypedExpression FunctionEmitter::MakeArrayLength(
   auto* member_access = create<ast::MemberAccessorExpression>(
       Source{}, member_expr.expr, member_ident);
 
-  // Generate the intrinsic function call.
+  // Generate the builtin function call.
   auto* call_expr =
       builder_.Call(Source{}, "arrayLength", builder_.AddressOf(member_access));
 

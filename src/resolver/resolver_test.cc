@@ -21,11 +21,11 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/builtin_texture_helper_test.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/float_literal_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/override_attribute.h"
 #include "src/ast/return_statement.h"
@@ -535,7 +535,7 @@ TEST_F(ResolverTest, Expr_Call_WithParams) {
   EXPECT_TRUE(TypeOf(param)->Is<sem::F32>());
 }
 
-TEST_F(ResolverTest, Expr_Call_Intrinsic) {
+TEST_F(ResolverTest, Expr_Call_Builtin) {
   auto* call = Call("round", 2.4f);
   WrapInFunction(call);
 
