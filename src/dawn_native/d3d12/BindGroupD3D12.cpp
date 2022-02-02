@@ -180,9 +180,6 @@ namespace dawn::native::d3d12 {
                     const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& views =
                         GetBindingAsExternalTexture(bindingIndex)->GetTextureViews();
 
-                    // Only single-plane formats are supported right now, so assert only one view
-                    // exists.
-                    ASSERT(views[1].Get() == nullptr);
                     ASSERT(views[2].Get() == nullptr);
 
                     auto& srv = ToBackend(views[0])->GetSRVDescriptor();

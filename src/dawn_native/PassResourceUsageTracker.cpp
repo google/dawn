@@ -131,9 +131,6 @@ namespace dawn::native {
                     const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& textureViews =
                         externalTexture->GetTextureViews();
 
-                    // Only single-plane formats are supported right now, so assert only one
-                    // view exists.
-                    ASSERT(textureViews[1].Get() == nullptr);
                     ASSERT(textureViews[2].Get() == nullptr);
 
                     mExternalTextureUsages.insert(externalTexture);
@@ -205,9 +202,6 @@ namespace dawn::native {
                     const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& textureViews =
                         externalTexture->GetTextureViews();
 
-                    // Only single-plane formats are supported right now, so assert only one
-                    // view exists.
-                    ASSERT(textureViews[1].Get() == nullptr);
                     ASSERT(textureViews[2].Get() == nullptr);
 
                     mUsage.referencedExternalTextures.insert(externalTexture);

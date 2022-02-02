@@ -370,9 +370,6 @@ namespace dawn::native::opengl {
                                                    ->GetBindingAsExternalTexture(bindingIndex)
                                                    ->GetTextureViews();
 
-                            // Only single-plane formats are supported right now, so assert only one
-                            // view exists.
-                            ASSERT(textureViews[1].Get() == nullptr);
                             ASSERT(textureViews[2].Get() == nullptr);
 
                             TextureView* view = ToBackend(textureViews[0].Get());

@@ -134,9 +134,6 @@ namespace dawn::native::vulkan {
                     const std::array<Ref<dawn::native::TextureViewBase>, kMaxPlanesPerFormat>&
                         textureViews = GetBindingAsExternalTexture(bindingIndex)->GetTextureViews();
 
-                    // Only single-plane formats are supported right now, so ensure only one view
-                    // exists.
-                    ASSERT(textureViews[1].Get() == nullptr);
                     ASSERT(textureViews[2].Get() == nullptr);
 
                     TextureView* view = ToBackend(textureViews[0].Get());
