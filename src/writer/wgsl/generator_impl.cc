@@ -28,30 +28,30 @@
 #include "src/ast/f32.h"
 #include "src/ast/float_literal_expression.h"
 #include "src/ast/i32.h"
-#include "src/ast/internal_decoration.h"
-#include "src/ast/interpolate_decoration.h"
-#include "src/ast/invariant_decoration.h"
+#include "src/ast/internal_attribute.h"
+#include "src/ast/interpolate_attribute.h"
+#include "src/ast/invariant_attribute.h"
 #include "src/ast/matrix.h"
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/pointer.h"
 #include "src/ast/sampled_texture.h"
 #include "src/ast/sint_literal_expression.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/ast/storage_texture.h"
-#include "src/ast/stride_decoration.h"
-#include "src/ast/struct_block_decoration.h"
-#include "src/ast/struct_member_align_decoration.h"
-#include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/struct_member_size_decoration.h"
+#include "src/ast/stride_attribute.h"
+#include "src/ast/struct_block_attribute.h"
+#include "src/ast/struct_member_align_attribute.h"
+#include "src/ast/struct_member_offset_attribute.h"
+#include "src/ast/struct_member_size_attribute.h"
 #include "src/ast/type_name.h"
 #include "src/ast/u32.h"
 #include "src/ast/uint_literal_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
 #include "src/ast/void.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/sem/struct.h"
 #include "src/utils/math.h"
 #include "src/utils/scoped_assignment.h"
@@ -272,8 +272,8 @@ bool GeneratorImpl::EmitIdentifier(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitFunction(const ast::Function* func) {
-  if (func->decorations.size()) {
-    if (!EmitDecorations(line(), func->decorations)) {
+  if (func->attributes.size()) {
+    if (!EmitAttributes(line(), func->attributes)) {
       return false;
     }
   }
@@ -288,8 +288,8 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
       }
       first = false;
 
-      if (!v->decorations.empty()) {
-        if (!EmitDecorations(out, v->decorations)) {
+      if (!v->attributes.empty()) {
+        if (!EmitAttributes(out, v->attributes)) {
           return false;
         }
         out << " ";
@@ -305,11 +305,11 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     out << ")";
 
     if (!func->return_type->Is<ast::Void>() ||
-        !func->return_type_decorations.empty()) {
+        !func->return_type_attributes.empty()) {
       out << " -> ";
 
-      if (!func->return_type_decorations.empty()) {
-        if (!EmitDecorations(out, func->return_type_decorations)) {
+      if (!func->return_type_attributes.empty()) {
+        if (!EmitAttributes(out, func->return_type_attributes)) {
           return false;
         }
         out << " ";
@@ -367,8 +367,8 @@ bool GeneratorImpl::EmitAccess(std::ostream& out, const ast::Access access) {
 
 bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
   if (auto* ary = ty->As<ast::Array>()) {
-    for (auto* deco : ary->decorations) {
-      if (auto* stride = deco->As<ast::StrideDecoration>()) {
+    for (auto* attr : ary->attributes) {
+      if (auto* stride = attr->As<ast::StrideAttribute>()) {
         out << "@stride(" << stride->stride << ") ";
       }
     }
@@ -518,8 +518,8 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
 }
 
 bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
-  if (str->decorations.size()) {
-    if (!EmitDecorations(line(), str->decorations)) {
+  if (str->attributes.size()) {
+    if (!EmitAttributes(line(), str->attributes)) {
       return false;
     }
   }
@@ -536,7 +536,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
   increment_indent();
   uint32_t offset = 0;
   for (auto* mem : str->members) {
-    // TODO(crbug.com/tint/798) move the @offset decoration handling to the
+    // TODO(crbug.com/tint/798) move the @offset attribute handling to the
     // transform::Wgsl sanitizer.
     if (auto* mem_sem = program_->Sem().Get(mem)) {
       offset = utils::RoundUp(mem_sem->Align(), offset);
@@ -547,19 +547,19 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
       offset += mem_sem->Size();
     }
 
-    // Offset decorations no longer exist in the WGSL spec, but are emitted
+    // Offset attributes no longer exist in the WGSL spec, but are emitted
     // by the SPIR-V reader and are consumed by the Resolver(). These should not
     // be emitted, but instead struct padding fields should be emitted.
-    ast::DecorationList decorations_sanitized;
-    decorations_sanitized.reserve(mem->decorations.size());
-    for (auto* deco : mem->decorations) {
-      if (!deco->Is<ast::StructMemberOffsetDecoration>()) {
-        decorations_sanitized.emplace_back(deco);
+    ast::AttributeList attributes_sanitized;
+    attributes_sanitized.reserve(mem->attributes.size());
+    for (auto* attr : mem->attributes) {
+      if (!attr->Is<ast::StructMemberOffsetAttribute>()) {
+        attributes_sanitized.emplace_back(attr);
       }
     }
 
-    if (!decorations_sanitized.empty()) {
-      if (!EmitDecorations(line(), decorations_sanitized)) {
+    if (!attributes_sanitized.empty()) {
+      if (!EmitAttributes(line(), attributes_sanitized)) {
         return false;
       }
     }
@@ -578,8 +578,8 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
 }
 
 bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* var) {
-  if (!var->decorations.empty()) {
-    if (!EmitDecorations(out, var->decorations)) {
+  if (!var->attributes.empty()) {
+    if (!EmitAttributes(out, var->attributes)) {
       return false;
     }
     out << " ";
@@ -623,16 +623,16 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* var) {
   return true;
 }
 
-bool GeneratorImpl::EmitDecorations(std::ostream& out,
-                                    const ast::DecorationList& decos) {
+bool GeneratorImpl::EmitAttributes(std::ostream& out,
+                                   const ast::AttributeList& attrs) {
   bool first = true;
-  for (auto* deco : decos) {
+  for (auto* attr : attrs) {
     if (!first) {
       out << " ";
     }
     first = false;
     out << "@";
-    if (auto* workgroup = deco->As<ast::WorkgroupDecoration>()) {
+    if (auto* workgroup = attr->As<ast::WorkgroupAttribute>()) {
       auto values = workgroup->Values();
       out << "workgroup_size(";
       for (int i = 0; i < 3; i++) {
@@ -646,42 +646,42 @@ bool GeneratorImpl::EmitDecorations(std::ostream& out,
         }
       }
       out << ")";
-    } else if (deco->Is<ast::StructBlockDecoration>()) {
+    } else if (attr->Is<ast::StructBlockAttribute>()) {
       out << "block";
-    } else if (auto* stage = deco->As<ast::StageDecoration>()) {
+    } else if (auto* stage = attr->As<ast::StageAttribute>()) {
       out << "stage(" << stage->stage << ")";
-    } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
+    } else if (auto* binding = attr->As<ast::BindingAttribute>()) {
       out << "binding(" << binding->value << ")";
-    } else if (auto* group = deco->As<ast::GroupDecoration>()) {
+    } else if (auto* group = attr->As<ast::GroupAttribute>()) {
       out << "group(" << group->value << ")";
-    } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+    } else if (auto* location = attr->As<ast::LocationAttribute>()) {
       out << "location(" << location->value << ")";
-    } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+    } else if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
       out << "builtin(" << builtin->builtin << ")";
-    } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+    } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
       out << "interpolate(" << interpolate->type;
       if (interpolate->sampling != ast::InterpolationSampling::kNone) {
         out << ", " << interpolate->sampling;
       }
       out << ")";
-    } else if (deco->Is<ast::InvariantDecoration>()) {
+    } else if (attr->Is<ast::InvariantAttribute>()) {
       out << "invariant";
-    } else if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
+    } else if (auto* override_attr = attr->As<ast::OverrideAttribute>()) {
       out << "override";
-      if (override_deco->has_value) {
-        out << "(" << override_deco->value << ")";
+      if (override_attr->has_value) {
+        out << "(" << override_attr->value << ")";
       }
-    } else if (auto* size = deco->As<ast::StructMemberSizeDecoration>()) {
+    } else if (auto* size = attr->As<ast::StructMemberSizeAttribute>()) {
       out << "size(" << size->size << ")";
-    } else if (auto* align = deco->As<ast::StructMemberAlignDecoration>()) {
+    } else if (auto* align = attr->As<ast::StructMemberAlignAttribute>()) {
       out << "align(" << align->align << ")";
-    } else if (auto* stride = deco->As<ast::StrideDecoration>()) {
+    } else if (auto* stride = attr->As<ast::StrideAttribute>()) {
       out << "stride(" << stride->stride << ")";
-    } else if (auto* internal = deco->As<ast::InternalDecoration>()) {
+    } else if (auto* internal = attr->As<ast::InternalAttribute>()) {
       out << "internal(" << internal->InternalName() << ")";
     } else {
       TINT_ICE(Writer, diagnostics_)
-          << "Unsupported decoration '" << deco->TypeInfo().name << "'";
+          << "Unsupported attribute '" << attr->TypeInfo().name << "'";
       return false;
     }
   }

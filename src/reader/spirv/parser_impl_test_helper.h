@@ -196,10 +196,10 @@ class ParserImplWrapperForTest {
   /// @param member_ty the type of the member
   /// @param decoration an encoded SPIR-V Decoration
   /// @returns the AST decorations
-  ast::DecorationList ConvertMemberDecoration(uint32_t struct_type_id,
-                                              uint32_t member_index,
-                                              const Type* member_ty,
-                                              const Decoration& decoration) {
+  ast::AttributeList ConvertMemberDecoration(uint32_t struct_type_id,
+                                             uint32_t member_index,
+                                             const Type* member_ty,
+                                             const Decoration& decoration) {
     return impl_.ConvertMemberDecoration(struct_type_id, member_index,
                                          member_ty, decoration);
   }

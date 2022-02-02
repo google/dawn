@@ -25,7 +25,7 @@ using StructTest = TestHelper;
 TEST_F(StructTest, Creation) {
   auto name = Sym("S");
   auto* impl =
-      create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
+      create<ast::Struct>(name, ast::StructMemberList{}, ast::AttributeList{});
   auto* ptr = impl;
   auto* s =
       create<sem::Struct>(impl, impl->name, StructMemberList{}, 4 /* align */,
@@ -39,7 +39,7 @@ TEST_F(StructTest, Creation) {
 TEST_F(StructTest, TypeName) {
   auto name = Sym("my_struct");
   auto* impl =
-      create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
+      create<ast::Struct>(name, ast::StructMemberList{}, ast::AttributeList{});
   auto* s =
       create<sem::Struct>(impl, impl->name, StructMemberList{}, 4 /* align */,
                           4 /* size */, 4 /* size_no_padding */);
@@ -49,7 +49,7 @@ TEST_F(StructTest, TypeName) {
 TEST_F(StructTest, FriendlyName) {
   auto name = Sym("my_struct");
   auto* impl =
-      create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
+      create<ast::Struct>(name, ast::StructMemberList{}, ast::AttributeList{});
   auto* s =
       create<sem::Struct>(impl, impl->name, StructMemberList{}, 4 /* align */,
                           4 /* size */, 4 /* size_no_padding */);

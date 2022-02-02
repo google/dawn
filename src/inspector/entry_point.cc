@@ -17,6 +17,10 @@
 namespace tint {
 namespace inspector {
 
+StageVariable::StageVariable() = default;
+StageVariable::StageVariable(const StageVariable&) = default;
+StageVariable::~StageVariable() = default;
+
 EntryPoint::EntryPoint() = default;
 EntryPoint::EntryPoint(EntryPoint&) = default;
 EntryPoint::EntryPoint(EntryPoint&&) = default;

@@ -441,7 +441,7 @@ class FunctionEmitter {
   /// @returns false if emission failed
   bool EmitPipelineInput(std::string var_name,
                          const Type* var_type,
-                         ast::DecorationList* decos,
+                         ast::AttributeList* decos,
                          std::vector<int> index_prefix,
                          const Type* tip_type,
                          const Type* forced_param_type,
@@ -470,24 +470,24 @@ class FunctionEmitter {
   /// @returns false if emission failed
   bool EmitPipelineOutput(std::string var_name,
                           const Type* var_type,
-                          ast::DecorationList* decos,
+                          ast::AttributeList* decos,
                           std::vector<int> index_prefix,
                           const Type* tip_type,
                           const Type* forced_member_type,
                           ast::StructMemberList* return_members,
                           ast::ExpressionList* return_exprs);
 
-  /// Updates the decoration list, replacing an existing Location decoration
+  /// Updates the attribute list, replacing an existing Location attribute
   /// with another having one higher location value. Does nothing if no
-  /// location decoration exists.
-  /// Assumes the list contains at most one Location decoration.
-  /// @param decos the decoration list to modify
-  void IncrementLocation(ast::DecorationList* decos);
+  /// location attribute exists.
+  /// Assumes the list contains at most one Location attribute.
+  /// @param attributes the attribute list to modify
+  void IncrementLocation(ast::AttributeList* attributes);
 
-  /// Returns the Location dcoration, if it exists.
-  /// @param decos the list of decorations to search
-  /// @returns the Location decoration, or nullptr if it doesn't exist
-  const ast::Decoration* GetLocation(const ast::DecorationList& decos);
+  /// Returns the Location attribute, if it exists.
+  /// @param attributes the list of attributes to search
+  /// @returns the Location attribute, or nullptr if it doesn't exist
+  const ast::Attribute* GetLocation(const ast::AttributeList& attributes);
 
   /// Create an ast::BlockStatement representing the body of the function.
   /// This creates the statement stack, which is non-empty for the lifetime
@@ -948,8 +948,8 @@ class FunctionEmitter {
     ast::VariableList params;
     /// Function return type
     const Type* return_type;
-    /// Function decorations
-    ast::DecorationList decorations;
+    /// Function attributes
+    ast::AttributeList attributes;
   };
 
   /// Parse the function declaration, which comprises the name, parameters, and

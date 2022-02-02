@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
@@ -28,12 +28,12 @@ using BuilderTest_Type = TestHelper;
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   auto* ary = ty.array(ty.i32());
-  auto* str = Structure("S", {Member("x", ary)},
-                        {create<ast::StructBlockDecoration>()});
+  auto* str =
+      Structure("S", {Member("x", ary)}, {create<ast::StructBlockAttribute>()});
   Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();
@@ -49,12 +49,12 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   auto* ary = ty.array(ty.i32());
-  auto* str = Structure("S", {Member("x", ary)},
-                        {create<ast::StructBlockDecoration>()});
+  auto* str =
+      Structure("S", {Member("x", ary)}, {create<ast::StructBlockAttribute>()});
   Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();
@@ -793,9 +793,9 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d) {
                          ast::TexelFormat::kR32Float, ast::Access::kWrite);
 
   Global("test_var", s,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();
@@ -813,9 +813,9 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
                          ast::TexelFormat::kR32Float, ast::Access::kWrite);
 
   Global("test_var", s,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();
@@ -833,9 +833,9 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
                          ast::TexelFormat::kR32Float, ast::Access::kWrite);
 
   Global("test_var", s,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();
@@ -853,9 +853,9 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
                          ast::TexelFormat::kR32Float, ast::Access::kWrite);
 
   Global("test_var", s,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();
@@ -874,9 +874,9 @@ TEST_F(BuilderTest_Type,
                          ast::TexelFormat::kR32Float, ast::Access::kWrite);
 
   Global("test_var", s,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();
@@ -894,9 +894,9 @@ TEST_F(BuilderTest_Type,
                                ast::TexelFormat::kR32Sint, ast::Access::kWrite);
 
   Global("test_var", s,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();
@@ -914,9 +914,9 @@ TEST_F(BuilderTest_Type,
                                ast::TexelFormat::kR32Uint, ast::Access::kWrite);
 
   Global("test_var", s,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   spirv::Builder& b = Build();

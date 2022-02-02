@@ -113,7 +113,7 @@ using VertexStateDescriptor = std::vector<VertexBufferLayoutDescriptor>;
 
 /// Converts a program to use vertex pulling
 ///
-/// Variables which accept vertex input are var<in> with a location decoration.
+/// Variables which accept vertex input are var<in> with a location attribute.
 /// This transform will convert those to be assigned from storage buffers
 /// instead. The intention is to allow vertex input to rely on a storage buffer
 /// clamping pass for out of bounds reads. We bind the storage buffers as arrays

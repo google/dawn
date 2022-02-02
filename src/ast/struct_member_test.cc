@@ -25,8 +25,8 @@ TEST_F(StructMemberTest, Creation) {
   auto* st = Member("a", ty.i32(), {MemberSize(4)});
   EXPECT_EQ(st->symbol, Symbol(1, ID()));
   EXPECT_TRUE(st->type->Is<ast::I32>());
-  EXPECT_EQ(st->decorations.size(), 1u);
-  EXPECT_TRUE(st->decorations[0]->Is<StructMemberSizeDecoration>());
+  EXPECT_EQ(st->attributes.size(), 1u);
+  EXPECT_TRUE(st->attributes[0]->Is<StructMemberSizeAttribute>());
   EXPECT_EQ(st->source.range.begin.line, 0u);
   EXPECT_EQ(st->source.range.begin.column, 0u);
   EXPECT_EQ(st->source.range.end.line, 0u);
@@ -39,7 +39,7 @@ TEST_F(StructMemberTest, CreationWithSource) {
       "a", ty.i32());
   EXPECT_EQ(st->symbol, Symbol(1, ID()));
   EXPECT_TRUE(st->type->Is<ast::I32>());
-  EXPECT_EQ(st->decorations.size(), 0u);
+  EXPECT_EQ(st->attributes.size(), 0u);
   EXPECT_EQ(st->source.range.begin.line, 27u);
   EXPECT_EQ(st->source.range.begin.column, 4u);
   EXPECT_EQ(st->source.range.end.line, 27u);
@@ -64,7 +64,7 @@ TEST_F(StructMemberTest, Assert_Null_Type) {
       "internal compiler error");
 }
 
-TEST_F(StructMemberTest, Assert_Null_Decoration) {
+TEST_F(StructMemberTest, Assert_Null_Attribute) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -83,7 +83,7 @@ TEST_F(StructMemberTest, Assert_DifferentProgramID_Symbol) {
       "internal compiler error");
 }
 
-TEST_F(StructMemberTest, Assert_DifferentProgramID_Decoration) {
+TEST_F(StructMemberTest, Assert_DifferentProgramID_Attribute) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b1;

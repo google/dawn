@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 
@@ -25,7 +25,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
-  Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::DecorationList{});
+  Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
 
   spirv::Builder& b = Build();
 
@@ -46,7 +46,7 @@ TEST_F(BuilderTest, Function_Terminator_Return) {
        ast::StatementList{
            Return(),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   spirv::Builder& b = Build();
 
@@ -66,7 +66,7 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
   Func("a_func", {}, ty.f32(), ast::StatementList{Return("a")},
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   spirv::Builder& b = Build();
 
@@ -95,7 +95,7 @@ TEST_F(BuilderTest, Function_Terminator_Discard) {
        ast::StatementList{
            create<ast::DiscardStatement>(),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   spirv::Builder& b = Build();
 
@@ -115,7 +115,7 @@ TEST_F(BuilderTest, Function_WithParams) {
   ast::VariableList params = {Param("a", ty.f32()), Param("b", ty.i32())};
 
   Func("a_func", params, ty.f32(), ast::StatementList{Return("a")},
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   spirv::Builder& b = Build();
 
@@ -141,7 +141,7 @@ TEST_F(BuilderTest, Function_WithBody) {
        ast::StatementList{
            Return(),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   spirv::Builder& b = Build();
 
@@ -158,7 +158,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionType) {
-  Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::DecorationList{});
+  Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
 
   spirv::Builder& b = Build();
 
@@ -171,9 +171,9 @@ TEST_F(BuilderTest, FunctionType) {
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
   auto* func1 = Func("a_func", {}, ty.void_(), ast::StatementList{},
-                     ast::DecorationList{});
+                     ast::AttributeList{});
   auto* func2 = Func("b_func", {}, ty.void_(), ast::StatementList{},
-                     ast::DecorationList{});
+                     ast::AttributeList{});
 
   spirv::Builder& b = Build();
 
@@ -202,12 +202,12 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   // }
 
   auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   {
@@ -219,8 +219,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
              Decl(var),
              Return(),
          },
-         ast::DecorationList{Stage(ast::PipelineStage::kCompute),
-                             WorkgroupSize(1)});
+         ast::AttributeList{Stage(ast::PipelineStage::kCompute),
+                            WorkgroupSize(1)});
   }
 
   {
@@ -232,8 +232,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
              Decl(var),
              Return(),
          },
-         ast::DecorationList{Stage(ast::PipelineStage::kCompute),
-                             WorkgroupSize(1)});
+         ast::AttributeList{Stage(ast::PipelineStage::kCompute),
+                            WorkgroupSize(1)});
   }
 
   spirv::Builder& b = SanitizeAndBuild();

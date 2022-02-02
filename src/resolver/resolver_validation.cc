@@ -26,16 +26,16 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/depth_texture.h"
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/for_loop_statement.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/internal_decoration.h"
-#include "src/ast/interpolate_decoration.h"
+#include "src/ast/internal_attribute.h"
+#include "src/ast/interpolate_attribute.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
@@ -47,7 +47,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
@@ -117,12 +117,12 @@ bool IsValidStorageTextureTexelFormat(ast::TexelFormat format) {
   }
 }
 
-// Helper to stringify a pipeline IO decoration.
-std::string deco_to_str(const ast::Decoration* deco) {
+// Helper to stringify a pipeline IO attribute.
+std::string attr_to_str(const ast::Attribute* attr) {
   std::stringstream str;
-  if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+  if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
     str << "builtin(" << builtin->builtin << ")";
-  } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+  } else if (auto* location = attr->As<ast::LocationAttribute>()) {
     str << "location(" << location->value << ")";
   }
   return str.str();
@@ -405,47 +405,47 @@ bool Resolver::ValidateStorageClassLayout(const sem::Variable* var) {
 
 bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
-  if (!ValidateNoDuplicateDecorations(decl->decorations)) {
+  if (!ValidateNoDuplicateAttributes(decl->attributes)) {
     return false;
   }
 
-  for (auto* deco : decl->decorations) {
+  for (auto* attr : decl->attributes) {
     if (decl->is_const) {
-      if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
-        if (override_deco->has_value) {
-          uint32_t id = override_deco->value;
+      if (auto* override_attr = attr->As<ast::OverrideAttribute>()) {
+        if (override_attr->has_value) {
+          uint32_t id = override_attr->value;
           auto it = constant_ids_.find(id);
           if (it != constant_ids_.end() && it->second != var) {
-            AddError("pipeline constant IDs must be unique", deco->source);
+            AddError("pipeline constant IDs must be unique", attr->source);
             AddNote("a pipeline constant with an ID of " + std::to_string(id) +
                         " was previously declared "
                         "here:",
-                    ast::GetDecoration<ast::OverrideDecoration>(
-                        it->second->Declaration()->decorations)
+                    ast::GetAttribute<ast::OverrideAttribute>(
+                        it->second->Declaration()->attributes)
                         ->source);
             return false;
           }
           if (id > 65535) {
             AddError("pipeline constant IDs must be between 0 and 65535",
-                     deco->source);
+                     attr->source);
             return false;
           }
         }
       } else {
-        AddError("decoration is not valid for constants", deco->source);
+        AddError("attribute is not valid for constants", attr->source);
         return false;
       }
     } else {
-      bool is_shader_io_decoration =
-          deco->IsAnyOf<ast::BuiltinDecoration, ast::InterpolateDecoration,
-                        ast::InvariantDecoration, ast::LocationDecoration>();
+      bool is_shader_io_attribute =
+          attr->IsAnyOf<ast::BuiltinAttribute, ast::InterpolateAttribute,
+                        ast::InvariantAttribute, ast::LocationAttribute>();
       bool has_io_storage_class =
           var->StorageClass() == ast::StorageClass::kInput ||
           var->StorageClass() == ast::StorageClass::kOutput;
-      if (!(deco->IsAnyOf<ast::BindingDecoration, ast::GroupDecoration,
-                          ast::InternalDecoration>()) &&
-          (!is_shader_io_decoration || !has_io_storage_class)) {
-        AddError("decoration is not valid for variables", deco->source);
+      if (!(attr->IsAnyOf<ast::BindingAttribute, ast::GroupAttribute,
+                          ast::InternalAttribute>()) &&
+          (!is_shader_io_attribute || !has_io_storage_class)) {
+        AddError("attribute is not valid for variables", attr->source);
         return false;
       }
     }
@@ -470,7 +470,7 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
       if (!binding_point) {
         AddError(
             "resource variables require @group and @binding "
-            "decorations",
+            "attributes",
             decl->source);
         return false;
       }
@@ -482,7 +482,7 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
         // Must only be applied to a resource variable
         AddError(
             "non-resource variables must not have @group or @binding "
-            "decorations",
+            "attributes",
             decl->source);
         return false;
       }
@@ -598,7 +598,7 @@ bool Resolver::ValidateVariable(const sem::Variable* var) {
   }
 
   if (var->Is<sem::LocalVariable>() && !decl->is_const &&
-      IsValidationEnabled(decl->decorations,
+      IsValidationEnabled(decl->attributes,
                           ast::DisabledValidation::kIgnoreStorageClass)) {
     if (!var->Type()->UnwrapRef()->IsConstructible()) {
       AddError("function variable must have a constructible type",
@@ -611,7 +611,7 @@ bool Resolver::ValidateVariable(const sem::Variable* var) {
       decl->declared_storage_class != ast::StorageClass::kNone) {
     // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
     // If the store type is a texture type or a sampler type, then the
-    // variable declaration must not have a storage class decoration. The
+    // variable declaration must not have a storage class attribute. The
     // storage class will always be handle.
     AddError("variables of type '" + TypeNameOf(storage_ty) +
                  "' must not have a storage class",
@@ -619,7 +619,7 @@ bool Resolver::ValidateVariable(const sem::Variable* var) {
     return false;
   }
 
-  if (IsValidationEnabled(decl->decorations,
+  if (IsValidationEnabled(decl->attributes,
                           ast::DisabledValidation::kIgnoreStorageClass) &&
       (decl->declared_storage_class == ast::StorageClass::kInput ||
        decl->declared_storage_class == ast::StorageClass::kOutput)) {
@@ -637,24 +637,22 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
 
   auto* decl = var->Declaration();
 
-  for (auto* deco : decl->decorations) {
-    if (!func->IsEntryPoint() && !deco->Is<ast::InternalDecoration>()) {
-      AddError(
-          "decoration is not valid for non-entry point function parameters",
-          deco->source);
+  for (auto* attr : decl->attributes) {
+    if (!func->IsEntryPoint() && !attr->Is<ast::InternalAttribute>()) {
+      AddError("attribute is not valid for non-entry point function parameters",
+               attr->source);
       return false;
-    } else if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InvariantDecoration,
-                              ast::LocationDecoration,
-                              ast::InterpolateDecoration,
-                              ast::InternalDecoration>() &&
+    } else if (!attr->IsAnyOf<ast::BuiltinAttribute, ast::InvariantAttribute,
+                              ast::LocationAttribute, ast::InterpolateAttribute,
+                              ast::InternalAttribute>() &&
                (IsValidationEnabled(
-                    decl->decorations,
+                    decl->attributes,
                     ast::DisabledValidation::kEntryPointParameter) &&
                 IsValidationEnabled(
-                    decl->decorations,
+                    decl->attributes,
                     ast::DisabledValidation::
                         kIgnoreConstructibleFunctionParameter))) {
-      AddError("decoration is not valid for function parameters", deco->source);
+      AddError("attribute is not valid for function parameters", attr->source);
       return false;
     }
   }
@@ -664,7 +662,7 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
     if (!(sc == ast::StorageClass::kFunction ||
           sc == ast::StorageClass::kPrivate ||
           sc == ast::StorageClass::kWorkgroup) &&
-        IsValidationEnabled(decl->decorations,
+        IsValidationEnabled(decl->attributes,
                             ast::DisabledValidation::kIgnoreStorageClass)) {
       std::stringstream ss;
       ss << "function parameter of pointer type cannot be in '" << sc
@@ -677,7 +675,7 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
   if (IsPlain(var->Type())) {
     if (!var->Type()->IsConstructible() &&
         IsValidationEnabled(
-            decl->decorations,
+            decl->attributes,
             ast::DisabledValidation::kIgnoreConstructibleFunctionParameter)) {
       AddError("store type of function parameter must be a constructible type",
                decl->source);
@@ -694,9 +692,9 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
   return true;
 }
 
-bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
-                                         const sem::Type* storage_ty,
-                                         const bool is_input) {
+bool Resolver::ValidateBuiltinAttribute(const ast::BuiltinAttribute* attr,
+                                        const sem::Type* storage_ty,
+                                        const bool is_input) {
   auto* type = storage_ty->UnwrapRef();
   const auto stage = current_function_
                          ? current_function_->Declaration()->PipelineStage()
@@ -705,7 +703,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
   stage_name << stage;
   bool is_stage_mismatch = false;
   bool is_output = !is_input;
-  switch (deco->builtin) {
+  switch (attr->builtin) {
     case ast::Builtin::kPosition:
       if (stage != ast::PipelineStage::kNone &&
           !((is_input && stage == ast::PipelineStage::kFragment) ||
@@ -713,8 +711,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         is_stage_mismatch = true;
       }
       if (!(type->is_float_vector() && type->As<sem::Vector>()->Width() == 4)) {
-        AddError("store type of " + deco_to_str(deco) + " must be 'vec4<f32>'",
-                 deco->source);
+        AddError("store type of " + attr_to_str(attr) + " must be 'vec4<f32>'",
+                 attr->source);
         return false;
       }
       break;
@@ -728,8 +726,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       if (!(type->is_unsigned_integer_vector() &&
             type->As<sem::Vector>()->Width() == 3)) {
-        AddError("store type of " + deco_to_str(deco) + " must be 'vec3<u32>'",
-                 deco->source);
+        AddError("store type of " + attr_to_str(attr) + " must be 'vec3<u32>'",
+                 attr->source);
         return false;
       }
       break;
@@ -739,8 +737,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         is_stage_mismatch = true;
       }
       if (!type->Is<sem::F32>()) {
-        AddError("store type of " + deco_to_str(deco) + " must be 'f32'",
-                 deco->source);
+        AddError("store type of " + attr_to_str(attr) + " must be 'f32'",
+                 attr->source);
         return false;
       }
       break;
@@ -750,8 +748,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         is_stage_mismatch = true;
       }
       if (!type->Is<sem::Bool>()) {
-        AddError("store type of " + deco_to_str(deco) + " must be 'bool'",
-                 deco->source);
+        AddError("store type of " + attr_to_str(attr) + " must be 'bool'",
+                 attr->source);
         return false;
       }
       break;
@@ -761,8 +759,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         is_stage_mismatch = true;
       }
       if (!type->Is<sem::U32>()) {
-        AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
-                 deco->source);
+        AddError("store type of " + attr_to_str(attr) + " must be 'u32'",
+                 attr->source);
         return false;
       }
       break;
@@ -773,8 +771,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         is_stage_mismatch = true;
       }
       if (!type->Is<sem::U32>()) {
-        AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
-                 deco->source);
+        AddError("store type of " + attr_to_str(attr) + " must be 'u32'",
+                 attr->source);
         return false;
       }
       break;
@@ -784,8 +782,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         is_stage_mismatch = true;
       }
       if (!type->Is<sem::U32>()) {
-        AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
-                 deco->source);
+        AddError("store type of " + attr_to_str(attr) + " must be 'u32'",
+                 attr->source);
         return false;
       }
       break;
@@ -795,8 +793,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         is_stage_mismatch = true;
       }
       if (!type->Is<sem::U32>()) {
-        AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
-                 deco->source);
+        AddError("store type of " + attr_to_str(attr) + " must be 'u32'",
+                 attr->source);
         return false;
       }
       break;
@@ -805,33 +803,33 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
   }
 
   if (is_stage_mismatch) {
-    AddError(deco_to_str(deco) + " cannot be used in " +
+    AddError(attr_to_str(attr) + " cannot be used in " +
                  (is_input ? "input of " : "output of ") + stage_name.str() +
                  " pipeline stage",
-             deco->source);
+             attr->source);
     return false;
   }
 
   return true;
 }
 
-bool Resolver::ValidateInterpolateDecoration(
-    const ast::InterpolateDecoration* deco,
+bool Resolver::ValidateInterpolateAttribute(
+    const ast::InterpolateAttribute* attr,
     const sem::Type* storage_ty) {
   auto* type = storage_ty->UnwrapRef();
 
   if (type->is_integer_scalar_or_vector() &&
-      deco->type != ast::InterpolationType::kFlat) {
+      attr->type != ast::InterpolationType::kFlat) {
     AddError(
         "interpolation type must be 'flat' for integral user-defined IO types",
-        deco->source);
+        attr->source);
     return false;
   }
 
-  if (deco->type == ast::InterpolationType::kFlat &&
-      deco->sampling != ast::InterpolationSampling::kNone) {
+  if (attr->type == ast::InterpolationType::kFlat &&
+      attr->sampling != ast::InterpolationSampling::kNone) {
     AddError("flat interpolation attribute must not have a sampling parameter",
-             deco->source);
+             attr->source);
     return false;
   }
 
@@ -849,19 +847,18 @@ bool Resolver::ValidateFunction(const sem::Function* func) {
     return false;
   }
 
-  auto workgroup_deco_count = 0;
-  for (auto* deco : decl->decorations) {
-    if (deco->Is<ast::WorkgroupDecoration>()) {
-      workgroup_deco_count++;
+  auto workgroup_attr_count = 0;
+  for (auto* attr : decl->attributes) {
+    if (attr->Is<ast::WorkgroupAttribute>()) {
+      workgroup_attr_count++;
       if (decl->PipelineStage() != ast::PipelineStage::kCompute) {
         AddError(
             "the workgroup_size attribute is only valid for compute stages",
-            deco->source);
+            attr->source);
         return false;
       }
-    } else if (!deco->IsAnyOf<ast::StageDecoration,
-                              ast::InternalDecoration>()) {
-      AddError("decoration is not valid for functions", deco->source);
+    } else if (!attr->IsAnyOf<ast::StageAttribute, ast::InternalAttribute>()) {
+      AddError("attribute is not valid for functions", attr->source);
       return false;
     }
   }
@@ -894,30 +891,30 @@ bool Resolver::ValidateFunction(const sem::Function* func) {
         return false;
       }
     } else if (IsValidationEnabled(
-                   decl->decorations,
+                   decl->attributes,
                    ast::DisabledValidation::kFunctionHasNoBody)) {
       TINT_ICE(Resolver, diagnostics_)
           << "Function " << builder_->Symbols().NameFor(decl->symbol)
           << " has no body";
     }
 
-    for (auto* deco : decl->return_type_decorations) {
+    for (auto* attr : decl->return_type_attributes) {
       if (!decl->IsEntryPoint()) {
         AddError(
-            "decoration is not valid for non-entry point function return types",
-            deco->source);
+            "attribute is not valid for non-entry point function return types",
+            attr->source);
         return false;
       }
-      if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InternalDecoration,
-                         ast::LocationDecoration, ast::InterpolateDecoration,
-                         ast::InvariantDecoration>() &&
-          (IsValidationEnabled(decl->decorations,
+      if (!attr->IsAnyOf<ast::BuiltinAttribute, ast::InternalAttribute,
+                         ast::LocationAttribute, ast::InterpolateAttribute,
+                         ast::InvariantAttribute>() &&
+          (IsValidationEnabled(decl->attributes,
                                ast::DisabledValidation::kEntryPointParameter) &&
-           IsValidationEnabled(decl->decorations,
+           IsValidationEnabled(decl->attributes,
                                ast::DisabledValidation::
                                    kIgnoreConstructibleFunctionParameter))) {
-        AddError("decoration is not valid for entry point return types",
-                 deco->source);
+        AddError("attribute is not valid for entry point return types",
+                 attr->source);
         return false;
       }
     }
@@ -947,7 +944,7 @@ bool Resolver::ValidateFunction(const sem::Function* func) {
 bool Resolver::ValidateEntryPoint(const sem::Function* func) {
   auto* decl = func->Declaration();
 
-  // Use a lambda to validate the entry point decorations for a type.
+  // Use a lambda to validate the entry point attributes for a type.
   // Persistent state is used to track which builtins and locations have
   // already been seen, in order to catch conflicts.
   // TODO(jrprice): This state could be stored in sem::Function instead, and
@@ -960,30 +957,30 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
   };
 
   // Inner lambda that is applied to a type and all of its members.
-  auto validate_entry_point_decorations_inner = [&](const ast::DecorationList&
-                                                        decos,
-                                                    const sem::Type* ty,
-                                                    Source source,
-                                                    ParamOrRetType param_or_ret,
-                                                    bool is_struct_member) {
-    // Scan decorations for pipeline IO attributes.
+  auto validate_entry_point_attributes_inner = [&](const ast::AttributeList&
+                                                       attrs,
+                                                   const sem::Type* ty,
+                                                   Source source,
+                                                   ParamOrRetType param_or_ret,
+                                                   bool is_struct_member) {
+    // Scan attributes for pipeline IO attributes.
     // Check for overlap with attributes that have been seen previously.
-    const ast::Decoration* pipeline_io_attribute = nullptr;
-    const ast::InterpolateDecoration* interpolate_attribute = nullptr;
-    const ast::InvariantDecoration* invariant_attribute = nullptr;
-    for (auto* deco : decos) {
-      auto is_invalid_compute_shader_decoration = false;
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+    const ast::Attribute* pipeline_io_attribute = nullptr;
+    const ast::InterpolateAttribute* interpolate_attribute = nullptr;
+    const ast::InvariantAttribute* invariant_attribute = nullptr;
+    for (auto* attr : attrs) {
+      auto is_invalid_compute_shader_attribute = false;
+      if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
         if (pipeline_io_attribute) {
-          AddError("multiple entry point IO attributes", deco->source);
-          AddNote("previously consumed " + deco_to_str(pipeline_io_attribute),
+          AddError("multiple entry point IO attributes", attr->source);
+          AddNote("previously consumed " + attr_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source);
           return false;
         }
-        pipeline_io_attribute = deco;
+        pipeline_io_attribute = attr;
 
         if (builtins.count(builtin->builtin)) {
-          AddError(deco_to_str(builtin) +
+          AddError(attr_to_str(builtin) +
                        " attribute appears multiple times as pipeline " +
                        (param_or_ret == ParamOrRetType::kParameter ? "input"
                                                                    : "output"),
@@ -991,50 +988,49 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
           return false;
         }
 
-        if (!ValidateBuiltinDecoration(
+        if (!ValidateBuiltinAttribute(
                 builtin, ty,
                 /* is_input */ param_or_ret == ParamOrRetType::kParameter)) {
           return false;
         }
         builtins.emplace(builtin->builtin);
-      } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+      } else if (auto* location = attr->As<ast::LocationAttribute>()) {
         if (pipeline_io_attribute) {
-          AddError("multiple entry point IO attributes", deco->source);
-          AddNote("previously consumed " + deco_to_str(pipeline_io_attribute),
+          AddError("multiple entry point IO attributes", attr->source);
+          AddNote("previously consumed " + attr_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source);
           return false;
         }
-        pipeline_io_attribute = deco;
+        pipeline_io_attribute = attr;
 
         bool is_input = param_or_ret == ParamOrRetType::kParameter;
-        if (!ValidateLocationDecoration(location, ty, locations, source,
-                                        is_input)) {
+        if (!ValidateLocationAttribute(location, ty, locations, source,
+                                       is_input)) {
           return false;
         }
-      } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+      } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
         if (decl->PipelineStage() == ast::PipelineStage::kCompute) {
-          is_invalid_compute_shader_decoration = true;
-        } else if (!ValidateInterpolateDecoration(interpolate, ty)) {
+          is_invalid_compute_shader_attribute = true;
+        } else if (!ValidateInterpolateAttribute(interpolate, ty)) {
           return false;
         }
         interpolate_attribute = interpolate;
-      } else if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
+      } else if (auto* invariant = attr->As<ast::InvariantAttribute>()) {
         if (decl->PipelineStage() == ast::PipelineStage::kCompute) {
-          is_invalid_compute_shader_decoration = true;
+          is_invalid_compute_shader_attribute = true;
         }
         invariant_attribute = invariant;
       }
-      if (is_invalid_compute_shader_decoration) {
+      if (is_invalid_compute_shader_attribute) {
         std::string input_or_output =
             param_or_ret == ParamOrRetType::kParameter ? "inputs" : "output";
-        AddError(
-            "decoration is not valid for compute shader " + input_or_output,
-            deco->source);
+        AddError("attribute is not valid for compute shader " + input_or_output,
+                 attr->source);
         return false;
       }
     }
 
-    if (IsValidationEnabled(decos,
+    if (IsValidationEnabled(attrs,
                             ast::DisabledValidation::kEntryPointParameter)) {
       if (is_struct_member && ty->Is<sem::Struct>()) {
         AddError("nested structures cannot be used for entry point IO", source);
@@ -1053,7 +1049,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
       }
 
       if (pipeline_io_attribute &&
-          pipeline_io_attribute->Is<ast::LocationDecoration>()) {
+          pipeline_io_attribute->Is<ast::LocationAttribute>()) {
         if (ty->is_integer_scalar_or_vector() && !interpolate_attribute) {
           if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
               param_or_ret == ParamOrRetType::kReturnType) {
@@ -1076,7 +1072,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
 
       if (interpolate_attribute) {
         if (!pipeline_io_attribute ||
-            !pipeline_io_attribute->Is<ast::LocationDecoration>()) {
+            !pipeline_io_attribute->Is<ast::LocationAttribute>()) {
           AddError("interpolate attribute must only be used with @location",
                    interpolate_attribute->source);
           return false;
@@ -1087,7 +1083,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
         bool has_position = false;
         if (pipeline_io_attribute) {
           if (auto* builtin =
-                  pipeline_io_attribute->As<ast::BuiltinDecoration>()) {
+                  pipeline_io_attribute->As<ast::BuiltinAttribute>()) {
             has_position = (builtin->builtin == ast::Builtin::kPosition);
           }
         }
@@ -1103,20 +1099,19 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
     return true;
   };
 
-  // Outer lambda for validating the entry point decorations for a type.
-  auto validate_entry_point_decorations = [&](const ast::DecorationList& decos,
-                                              const sem::Type* ty,
-                                              Source source,
-                                              ParamOrRetType param_or_ret) {
-    if (!validate_entry_point_decorations_inner(decos, ty, source, param_or_ret,
-                                                /*is_struct_member*/ false)) {
+  // Outer lambda for validating the entry point attributes for a type.
+  auto validate_entry_point_attributes = [&](const ast::AttributeList& attrs,
+                                             const sem::Type* ty, Source source,
+                                             ParamOrRetType param_or_ret) {
+    if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
+                                               /*is_struct_member*/ false)) {
       return false;
     }
 
     if (auto* str = ty->As<sem::Struct>()) {
       for (auto* member : str->Members()) {
-        if (!validate_entry_point_decorations_inner(
-                member->Declaration()->decorations, member->Type(),
+        if (!validate_entry_point_attributes_inner(
+                member->Declaration()->attributes, member->Type(),
                 member->Declaration()->source, param_or_ret,
                 /*is_struct_member*/ true)) {
           AddNote("while analysing entry point '" +
@@ -1132,9 +1127,9 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
 
   for (auto* param : func->Parameters()) {
     auto* param_decl = param->Declaration();
-    if (!validate_entry_point_decorations(param_decl->decorations,
-                                          param->Type(), param_decl->source,
-                                          ParamOrRetType::kParameter)) {
+    if (!validate_entry_point_attributes(param_decl->attributes, param->Type(),
+                                         param_decl->source,
+                                         ParamOrRetType::kParameter)) {
       return false;
     }
   }
@@ -1146,9 +1141,9 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
   locations.clear();
 
   if (!func->ReturnType()->Is<sem::Void>()) {
-    if (!validate_entry_point_decorations(decl->return_type_decorations,
-                                          func->ReturnType(), decl->source,
-                                          ParamOrRetType::kReturnType)) {
+    if (!validate_entry_point_attributes(decl->return_type_attributes,
+                                         func->ReturnType(), decl->source,
+                                         ParamOrRetType::kReturnType)) {
       return false;
     }
   }
@@ -1158,8 +1153,8 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
     // Check module-scope variables, as the SPIR-V sanitizer generates these.
     bool found = false;
     for (auto* global : func->TransitivelyReferencedGlobals()) {
-      if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-              global->Declaration()->decorations)) {
+      if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(
+              global->Declaration()->attributes)) {
         if (builtin->builtin == ast::Builtin::kPosition) {
           found = true;
           break;
@@ -1176,7 +1171,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
   }
 
   if (decl->PipelineStage() == ast::PipelineStage::kCompute) {
-    if (!ast::HasDecoration<ast::WorkgroupDecoration>(decl->decorations)) {
+    if (!ast::HasAttribute<ast::WorkgroupAttribute>(decl->attributes)) {
       AddError(
           "a compute shader must include 'workgroup_size' in its "
           "attributes",
@@ -1195,9 +1190,9 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
     auto bp = var->BindingPoint();
     auto res = binding_points.emplace(bp, var_decl);
     if (!res.second &&
-        IsValidationEnabled(decl->decorations,
+        IsValidationEnabled(decl->attributes,
                             ast::DisabledValidation::kBindingPointCollision) &&
-        IsValidationEnabled(res.first->second->decorations,
+        IsValidationEnabled(res.first->second->attributes,
                             ast::DisabledValidation::kBindingPointCollision)) {
       // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
       // Bindings must not alias within a shader stage: two different
@@ -1542,7 +1537,7 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) {
 
       if (!is_valid &&
           IsValidationEnabled(
-              param->Declaration()->decorations,
+              param->Declaration()->attributes,
               ast::DisabledValidation::kIgnoreInvalidPointerArgument)) {
         AddError(
             "expected an address-of expression of a variable identifier "
@@ -1955,11 +1950,11 @@ bool Resolver::ValidateArray(const sem::Array* arr, const Source& source) {
   return true;
 }
 
-bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
-                                             uint32_t el_size,
-                                             uint32_t el_align,
-                                             const Source& source) {
-  auto stride = deco->stride;
+bool Resolver::ValidateArrayStrideAttribute(const ast::StrideAttribute* attr,
+                                            uint32_t el_size,
+                                            uint32_t el_align,
+                                            const Source& source) {
+  auto stride = attr->stride;
   bool is_valid_stride =
       (stride >= el_size) && (stride >= el_align) && (stride % el_align == 0);
   if (!is_valid_stride) {
@@ -2023,46 +2018,46 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
 
     auto has_location = false;
     auto has_position = false;
-    const ast::InvariantDecoration* invariant_attribute = nullptr;
-    const ast::InterpolateDecoration* interpolate_attribute = nullptr;
-    for (auto* deco : member->Declaration()->decorations) {
-      if (!deco->IsAnyOf<ast::BuiltinDecoration,             //
-                         ast::InternalDecoration,            //
-                         ast::InterpolateDecoration,         //
-                         ast::InvariantDecoration,           //
-                         ast::LocationDecoration,            //
-                         ast::StructMemberOffsetDecoration,  //
-                         ast::StructMemberSizeDecoration,    //
-                         ast::StructMemberAlignDecoration>()) {
-        if (deco->Is<ast::StrideDecoration>() &&
+    const ast::InvariantAttribute* invariant_attribute = nullptr;
+    const ast::InterpolateAttribute* interpolate_attribute = nullptr;
+    for (auto* attr : member->Declaration()->attributes) {
+      if (!attr->IsAnyOf<ast::BuiltinAttribute,             //
+                         ast::InternalAttribute,            //
+                         ast::InterpolateAttribute,         //
+                         ast::InvariantAttribute,           //
+                         ast::LocationAttribute,            //
+                         ast::StructMemberOffsetAttribute,  //
+                         ast::StructMemberSizeAttribute,    //
+                         ast::StructMemberAlignAttribute>()) {
+        if (attr->Is<ast::StrideAttribute>() &&
             IsValidationDisabled(
-                member->Declaration()->decorations,
-                ast::DisabledValidation::kIgnoreStrideDecoration)) {
+                member->Declaration()->attributes,
+                ast::DisabledValidation::kIgnoreStrideAttribute)) {
           continue;
         }
-        AddError("decoration is not valid for structure members", deco->source);
+        AddError("attribute is not valid for structure members", attr->source);
         return false;
       }
 
-      if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
+      if (auto* invariant = attr->As<ast::InvariantAttribute>()) {
         invariant_attribute = invariant;
-      } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+      } else if (auto* location = attr->As<ast::LocationAttribute>()) {
         has_location = true;
-        if (!ValidateLocationDecoration(location, member->Type(), locations,
-                                        member->Declaration()->source)) {
+        if (!ValidateLocationAttribute(location, member->Type(), locations,
+                                       member->Declaration()->source)) {
           return false;
         }
-      } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        if (!ValidateBuiltinDecoration(builtin, member->Type(),
-                                       /* is_input */ false)) {
+      } else if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
+        if (!ValidateBuiltinAttribute(builtin, member->Type(),
+                                      /* is_input */ false)) {
           return false;
         }
         if (builtin->builtin == ast::Builtin::kPosition) {
           has_position = true;
         }
-      } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+      } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
         interpolate_attribute = interpolate;
-        if (!ValidateInterpolateDecoration(interpolate, member->Type())) {
+        if (!ValidateInterpolateAttribute(interpolate, member->Type())) {
           return false;
         }
       }
@@ -2081,10 +2076,9 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
     }
   }
 
-  for (auto* deco : str->Declaration()->decorations) {
-    if (!(deco->IsAnyOf<ast::StructBlockDecoration,
-                        ast::InternalDecoration>())) {
-      AddError("decoration is not valid for struct declarations", deco->source);
+  for (auto* attr : str->Declaration()->attributes) {
+    if (!(attr->IsAnyOf<ast::StructBlockAttribute, ast::InternalAttribute>())) {
+      AddError("attribute is not valid for struct declarations", attr->source);
       return false;
     }
   }
@@ -2092,8 +2086,8 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
   return true;
 }
 
-bool Resolver::ValidateLocationDecoration(
-    const ast::LocationDecoration* location,
+bool Resolver::ValidateLocationAttribute(
+    const ast::LocationAttribute* location,
     const sem::Type* type,
     std::unordered_set<uint32_t>& locations,
     const Source& source,
@@ -2101,7 +2095,7 @@ bool Resolver::ValidateLocationDecoration(
   std::string inputs_or_output = is_input ? "inputs" : "output";
   if (current_function_ && current_function_->Declaration()->PipelineStage() ==
                                ast::PipelineStage::kCompute) {
-    AddError("decoration is not valid for compute shader " + inputs_or_output,
+    AddError("attribute is not valid for compute shader " + inputs_or_output,
              location->source);
     return false;
   }
@@ -2119,7 +2113,7 @@ bool Resolver::ValidateLocationDecoration(
   }
 
   if (locations.count(location->value)) {
-    AddError(deco_to_str(location) + " attribute appears multiple times",
+    AddError(attr_to_str(location) + " attribute appears multiple times",
              location->source);
     return false;
   }
@@ -2284,24 +2278,24 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   return true;
 }
 
-bool Resolver::ValidateNoDuplicateDecorations(
-    const ast::DecorationList& decorations) {
+bool Resolver::ValidateNoDuplicateAttributes(
+    const ast::AttributeList& attributes) {
   std::unordered_map<const TypeInfo*, Source> seen;
-  for (auto* d : decorations) {
+  for (auto* d : attributes) {
     auto res = seen.emplace(&d->TypeInfo(), d->source);
-    if (!res.second && !d->Is<ast::InternalDecoration>()) {
-      AddError("duplicate " + d->Name() + " decoration", d->source);
-      AddNote("first decoration declared here", res.first->second);
+    if (!res.second && !d->Is<ast::InternalAttribute>()) {
+      AddError("duplicate " + d->Name() + " attribute", d->source);
+      AddNote("first attribute declared here", res.first->second);
       return false;
     }
   }
   return true;
 }
 
-bool Resolver::IsValidationDisabled(const ast::DecorationList& decorations,
+bool Resolver::IsValidationDisabled(const ast::AttributeList& attributes,
                                     ast::DisabledValidation validation) const {
-  for (auto* decoration : decorations) {
-    if (auto* dv = decoration->As<ast::DisableValidationDecoration>()) {
+  for (auto* attribute : attributes) {
+    if (auto* dv = attribute->As<ast::DisableValidationAttribute>()) {
       if (dv->validation == validation) {
         return true;
       }
@@ -2310,9 +2304,9 @@ bool Resolver::IsValidationDisabled(const ast::DecorationList& decorations,
   return false;
 }
 
-bool Resolver::IsValidationEnabled(const ast::DecorationList& decorations,
+bool Resolver::IsValidationEnabled(const ast::AttributeList& attributes,
                                    ast::DisabledValidation validation) const {
-  return !IsValidationDisabled(decorations, validation);
+  return !IsValidationDisabled(attributes, validation);
 }
 
 }  // namespace resolver

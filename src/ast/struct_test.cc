@@ -22,7 +22,7 @@
 #include "src/ast/matrix.h"
 #include "src/ast/pointer.h"
 #include "src/ast/sampler.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/ast/test_helper.h"
 #include "src/ast/texture.h"
 #include "src/ast/u32.h"
@@ -37,43 +37,43 @@ using AstStructTest = TestHelper;
 TEST_F(AstStructTest, Creation) {
   auto name = Sym("s");
   auto* s = create<Struct>(name, StructMemberList{Member("a", ty.i32())},
-                           DecorationList{});
+                           AttributeList{});
   EXPECT_EQ(s->name, name);
   EXPECT_EQ(s->members.size(), 1u);
-  EXPECT_TRUE(s->decorations.empty());
+  EXPECT_TRUE(s->attributes.empty());
   EXPECT_EQ(s->source.range.begin.line, 0u);
   EXPECT_EQ(s->source.range.begin.column, 0u);
   EXPECT_EQ(s->source.range.end.line, 0u);
   EXPECT_EQ(s->source.range.end.column, 0u);
 }
 
-TEST_F(AstStructTest, Creation_WithDecorations) {
+TEST_F(AstStructTest, Creation_WithAttributes) {
   auto name = Sym("s");
-  DecorationList decos;
-  decos.push_back(create<StructBlockDecoration>());
+  AttributeList attrs;
+  attrs.push_back(create<StructBlockAttribute>());
 
   auto* s =
-      create<Struct>(name, StructMemberList{Member("a", ty.i32())}, decos);
+      create<Struct>(name, StructMemberList{Member("a", ty.i32())}, attrs);
   EXPECT_EQ(s->name, name);
   EXPECT_EQ(s->members.size(), 1u);
-  ASSERT_EQ(s->decorations.size(), 1u);
-  EXPECT_TRUE(s->decorations[0]->Is<StructBlockDecoration>());
+  ASSERT_EQ(s->attributes.size(), 1u);
+  EXPECT_TRUE(s->attributes[0]->Is<StructBlockAttribute>());
   EXPECT_EQ(s->source.range.begin.line, 0u);
   EXPECT_EQ(s->source.range.begin.column, 0u);
   EXPECT_EQ(s->source.range.end.line, 0u);
   EXPECT_EQ(s->source.range.end.column, 0u);
 }
 
-TEST_F(AstStructTest, CreationWithSourceAndDecorations) {
+TEST_F(AstStructTest, CreationWithSourceAndAttributes) {
   auto name = Sym("s");
   auto* s = create<Struct>(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
       name, StructMemberList{Member("a", ty.i32())},
-      DecorationList{create<StructBlockDecoration>()});
+      AttributeList{create<StructBlockAttribute>()});
   EXPECT_EQ(s->name, name);
   EXPECT_EQ(s->members.size(), 1u);
-  ASSERT_EQ(s->decorations.size(), 1u);
-  EXPECT_TRUE(s->decorations[0]->Is<StructBlockDecoration>());
+  ASSERT_EQ(s->attributes.size(), 1u);
+  EXPECT_TRUE(s->attributes[0]->Is<StructBlockAttribute>());
   EXPECT_EQ(s->source.range.begin.line, 27u);
   EXPECT_EQ(s->source.range.begin.column, 4u);
   EXPECT_EQ(s->source.range.end.line, 27u);
@@ -86,18 +86,18 @@ TEST_F(AstStructTest, Assert_Null_StructMember) {
         ProgramBuilder b;
         b.create<Struct>(b.Sym("S"),
                          StructMemberList{b.Member("a", b.ty.i32()), nullptr},
-                         DecorationList{});
+                         AttributeList{});
       },
       "internal compiler error");
 }
 
-TEST_F(AstStructTest, Assert_Null_Decoration) {
+TEST_F(AstStructTest, Assert_Null_Attribute) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<Struct>(b.Sym("S"),
                          StructMemberList{b.Member("a", b.ty.i32())},
-                         DecorationList{nullptr});
+                         AttributeList{nullptr});
       },
       "internal compiler error");
 }
@@ -109,19 +109,19 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_StructMember) {
         ProgramBuilder b2;
         b1.create<Struct>(b1.Sym("S"),
                           StructMemberList{b2.Member("a", b2.ty.i32())},
-                          DecorationList{});
+                          AttributeList{});
       },
       "internal compiler error");
 }
 
-TEST_F(AstStructTest, Assert_DifferentProgramID_Decoration) {
+TEST_F(AstStructTest, Assert_DifferentProgramID_Attribute) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
         b1.create<Struct>(b1.Sym("S"),
                           StructMemberList{b1.Member("a", b1.ty.i32())},
-                          DecorationList{b2.create<StructBlockDecoration>()});
+                          AttributeList{b2.create<StructBlockAttribute>()});
       },
       "internal compiler error");
 }

@@ -21,9 +21,9 @@
 
 #include "source/opt/build_module.h"
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/disable_validation_decoration.h"
-#include "src/ast/interpolate_decoration.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
+#include "src/ast/interpolate_attribute.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/type_name.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/spirv/function.h"
@@ -439,7 +439,7 @@ std::string ParserImpl::ShowType(uint32_t type_id) {
   return "SPIR-V type " + std::to_string(type_id);
 }
 
-ast::DecorationList ParserImpl::ConvertMemberDecoration(
+ast::AttributeList ParserImpl::ConvertMemberDecoration(
     uint32_t struct_type_id,
     uint32_t member_index,
     const Type* member_ty,
@@ -458,7 +458,7 @@ ast::DecorationList ParserImpl::ConvertMemberDecoration(
         return {};
       }
       return {
-          create<ast::StructMemberOffsetDecoration>(Source{}, decoration[1]),
+          create<ast::StructMemberOffsetAttribute>(Source{}, decoration[1]),
       };
     case SpvDecorationNonReadable:
       // WGSL doesn't have a member decoration for this.  Silently drop it.
@@ -505,9 +505,9 @@ ast::DecorationList ParserImpl::ConvertMemberDecoration(
         return {};
       }
       return {
-          create<ast::StrideDecoration>(Source{}, decoration[1]),
-          builder_.ASTNodes().Create<ast::DisableValidationDecoration>(
-              builder_.ID(), ast::DisabledValidation::kIgnoreStrideDecoration),
+          create<ast::StrideAttribute>(Source{}, decoration[1]),
+          builder_.ASTNodes().Create<ast::DisableValidationAttribute>(
+              builder_.ID(), ast::DisabledValidation::kIgnoreStrideAttribute),
       };
     }
     default:
@@ -1152,7 +1152,7 @@ const Type* ParserImpl::ConvertType(
     }
 
     bool is_non_writable = false;
-    ast::DecorationList ast_member_decorations;
+    ast::AttributeList ast_member_decorations;
     for (auto& decoration : GetDecorationsForMember(type_id, member_index)) {
       if (IsPipelineDecoration(decoration)) {
         // IO decorations are handled when emitting the entry point.
@@ -1198,7 +1198,7 @@ const Type* ParserImpl::ConvertType(
   // Now make the struct.
   auto sym = builder_.Symbols().Register(name);
   auto* ast_struct = create<ast::Struct>(Source{}, sym, std::move(ast_members),
-                                         ast::DecorationList());
+                                         ast::AttributeList());
   if (num_non_writable_members == members.size()) {
     read_only_struct_types_.insert(ast_struct->name);
   }
@@ -1386,7 +1386,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
         break;
     }
     if (ast_type && ast_expr) {
-      ast::DecorationList spec_id_decos;
+      ast::AttributeList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
           const uint32_t id = deco[1];
@@ -1395,7 +1395,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
                              "between 0 and 65535: ID %"
                           << inst.result_id() << " has SpecId " << id;
           }
-          auto* cid = create<ast::OverrideDecoration>(Source{}, id);
+          auto* cid = create<ast::OverrideAttribute>(Source{}, id);
           spec_id_decos.push_back(cid);
           break;
         }
@@ -1526,7 +1526,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     }
     auto* ast_var =
         MakeVariable(var.result_id(), ast_storage_class, ast_store_type, false,
-                     ast_constructor, ast::DecorationList{});
+                     ast_constructor, ast::AttributeList{});
     // TODO(dneto): initializers (a.k.a. constructor expression)
     if (ast_var) {
       builder_.AST().AddGlobalVariable(ast_var);
@@ -1599,7 +1599,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                                         const Type* storage_type,
                                         bool is_const,
                                         const ast::Expression* constructor,
-                                        ast::DecorationList decorations) {
+                                        ast::AttributeList decorations) {
   if (storage_type == nullptr) {
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;
@@ -1640,7 +1640,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
 
 bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
                                                const Type** store_type,
-                                               ast::DecorationList* decorations,
+                                               ast::AttributeList* decorations,
                                                bool transfer_pipeline_io) {
   DecorationList non_builtin_pipeline_decorations;
   for (auto& deco : GetDecorationsFor(id)) {
@@ -1702,7 +1702,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
       }
       if (transfer_pipeline_io) {
         decorations->emplace_back(
-            create<ast::BuiltinDecoration>(Source{}, ast_builtin));
+            create<ast::BuiltinAttribute>(Source{}, ast_builtin));
       }
     }
     if (transfer_pipeline_io && IsPipelineDecoration(deco)) {
@@ -1713,8 +1713,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
         return Fail() << "malformed DescriptorSet decoration on ID " << id
                       << ": has no operand";
       }
-      decorations->emplace_back(
-          create<ast::GroupDecoration>(Source{}, deco[1]));
+      decorations->emplace_back(create<ast::GroupAttribute>(Source{}, deco[1]));
     }
     if (deco[0] == SpvDecorationBinding) {
       if (deco.size() == 1) {
@@ -1722,7 +1721,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
                       << ": has no operand";
       }
       decorations->emplace_back(
-          create<ast::BindingDecoration>(Source{}, deco[1]));
+          create<ast::BindingAttribute>(Source{}, deco[1]));
     }
   }
 
@@ -1750,31 +1749,31 @@ DecorationList ParserImpl::GetMemberPipelineDecorations(
   return result;
 }
 
-const ast::Decoration* ParserImpl::SetLocation(
-    ast::DecorationList* decos,
-    const ast::Decoration* replacement) {
+const ast::Attribute* ParserImpl::SetLocation(
+    ast::AttributeList* attributes,
+    const ast::Attribute* replacement) {
   if (!replacement) {
     return nullptr;
   }
-  for (auto*& deco : *decos) {
-    if (deco->Is<ast::LocationDecoration>()) {
-      // Replace this location decoration with the replacement.
+  for (auto*& attribute : *attributes) {
+    if (attribute->Is<ast::LocationAttribute>()) {
+      // Replace this location attribute with the replacement.
       // The old one doesn't leak because it's kept in the builder's AST node
       // list.
-      const ast::Decoration* result = nullptr;
-      result = deco;
-      deco = replacement;
+      const ast::Attribute* result = nullptr;
+      result = attribute;
+      attribute = replacement;
       return result;  // Assume there is only one such decoration.
     }
   }
   // The list didn't have a location. Add it.
-  decos->push_back(replacement);
+  attributes->push_back(replacement);
   return nullptr;
 }
 
 bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
                                             const DecorationList& decorations,
-                                            ast::DecorationList* ast_decos) {
+                                            ast::AttributeList* attributes) {
   // Vulkan defaults to perspective-correct interpolation.
   ast::InterpolationType type = ast::InterpolationType::kPerspective;
   ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone;
@@ -1787,8 +1786,8 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
           return Fail() << "malformed Location decoration on ID requires one "
                            "literal operand";
         }
-        SetLocation(ast_decos,
-                    create<ast::LocationDecoration>(Source{}, deco[1]));
+        SetLocation(attributes,
+                    create<ast::LocationAttribute>(Source{}, deco[1]));
         if (store_type->IsIntegerScalarOrVector()) {
           // Default to flat interpolation for integral user-defined IO types.
           type = ast::InterpolationType::kFlat;
@@ -1830,7 +1829,7 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
       sampling == ast::InterpolationSampling::kNone) {
     // This is the default. Don't add a decoration.
   } else {
-    ast_decos->emplace_back(create<ast::InterpolateDecoration>(type, sampling));
+    attributes->emplace_back(create<ast::InterpolateAttribute>(type, sampling));
   }
 
   return success();

@@ -18,7 +18,7 @@
 #include <string>
 #include <utility>
 
-#include "src/ast/decoration.h"
+#include "src/ast/attribute.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/type_decl.h"
 
@@ -33,12 +33,12 @@ class Struct : public Castable<Struct, TypeDecl> {
   /// @param src the source of this node for the import statement
   /// @param name The name of the structure
   /// @param members The struct members
-  /// @param decorations The struct decorations
+  /// @param attributes The struct attributes
   Struct(ProgramID pid,
          const Source& src,
          Symbol name,
          StructMemberList members,
-         DecorationList decorations);
+         AttributeList attributes);
   /// Move constructor
   Struct(Struct&&);
 
@@ -53,8 +53,8 @@ class Struct : public Castable<Struct, TypeDecl> {
   /// The members
   const StructMemberList members;
 
-  /// The struct decorations
-  const DecorationList decorations;
+  /// The struct attributes
+  const AttributeList attributes;
 };
 
 }  // namespace ast

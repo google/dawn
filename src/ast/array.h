@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/ast/decoration.h"
+#include "src/ast/attribute.h"
 #include "src/ast/type.h"
 
 namespace tint {
@@ -35,12 +35,12 @@ class Array : public Castable<Array, Type> {
   /// @param subtype the type of the array elements
   /// @param count the number of elements in the array. nullptr represents a
   /// runtime-sized array.
-  /// @param decorations the array decorations
+  /// @param attributes the array attributes
   Array(ProgramID pid,
         const Source& src,
         const Type* subtype,
         const Expression* count,
-        DecorationList decorations);
+        AttributeList attributes);
   /// Move constructor
   Array(Array&&);
   ~Array() override;
@@ -65,8 +65,8 @@ class Array : public Castable<Array, Type> {
   /// the array size in elements, or nullptr for a runtime array
   const Expression* const count;
 
-  /// the array decorations
-  const DecorationList decorations;
+  /// the array attributes
+  const AttributeList attributes;
 };
 
 }  // namespace ast

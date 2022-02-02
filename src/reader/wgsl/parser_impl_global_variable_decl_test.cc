@@ -21,10 +21,10 @@ namespace {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
   auto p = parser("var<private> a : f32");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto e = p->global_variable_decl(decos.value);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto e = p->global_variable_decl(attrs.value);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -44,10 +44,10 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   auto p = parser("var<private> a : f32 = 1.");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto e = p->global_variable_decl(decos.value);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto e = p->global_variable_decl(attrs.value);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -66,12 +66,12 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   ASSERT_TRUE(e->constructor->Is<ast::FloatLiteralExpression>());
 }
 
-TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
+TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
   auto p = parser("@binding(2) @group(1) var<uniform> a : f32");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  auto e = p->global_variable_decl(decos.value);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
+  auto e = p->global_variable_decl(attrs.value);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -89,19 +89,19 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 
   ASSERT_EQ(e->constructor, nullptr);
 
-  auto& decorations = e->decorations;
-  ASSERT_EQ(decorations.size(), 2u);
-  ASSERT_TRUE(decorations[0]->Is<ast::BindingDecoration>());
-  ASSERT_TRUE(decorations[1]->Is<ast::GroupDecoration>());
+  auto& attributes = e->attributes;
+  ASSERT_EQ(attributes.size(), 2u);
+  ASSERT_TRUE(attributes[0]->Is<ast::BindingAttribute>());
+  ASSERT_TRUE(attributes[1]->Is<ast::GroupAttribute>());
 }
 
-TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
+TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
   auto p = parser("@binding(2) @group(1) var<uniform> a : f32");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
 
-  auto e = p->global_variable_decl(decos.value);
+  auto e = p->global_variable_decl(attrs.value);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -119,34 +119,34 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
 
   ASSERT_EQ(e->constructor, nullptr);
 
-  auto& decorations = e->decorations;
-  ASSERT_EQ(decorations.size(), 2u);
-  ASSERT_TRUE(decorations[0]->Is<ast::BindingDecoration>());
-  ASSERT_TRUE(decorations[1]->Is<ast::GroupDecoration>());
+  auto& attributes = e->attributes;
+  ASSERT_EQ(attributes.size(), 2u);
+  ASSERT_TRUE(attributes[0]->Is<ast::BindingAttribute>());
+  ASSERT_TRUE(attributes[1]->Is<ast::GroupAttribute>());
 }
 
-TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
+TEST_F(ParserImplTest, GlobalVariableDecl_InvalidAttribute) {
   auto p = parser("@binding() var<uniform> a : f32");
-  auto decos = p->decoration_list();
-  EXPECT_TRUE(decos.errored);
-  EXPECT_FALSE(decos.matched);
+  auto attrs = p->attribute_list();
+  EXPECT_TRUE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
 
-  auto e = p->global_variable_decl(decos.value);
+  auto e = p->global_variable_decl(attrs.value);
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
   EXPECT_NE(e.value, nullptr);
 
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:10: expected signed integer literal for binding decoration");
+            "1:10: expected signed integer literal for binding attribute");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
   auto p = parser("var<private> a : f32 = if (a) {}");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto e = p->global_variable_decl(decos.value);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto e = p->global_variable_decl(attrs.value);
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
@@ -156,10 +156,10 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
   auto p = parser("var<invalid> a : f32;");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto e = p->global_variable_decl(decos.value);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto e = p->global_variable_decl(attrs.value);
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);

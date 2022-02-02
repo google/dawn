@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -34,8 +34,8 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   auto* var = GlobalConst("pos", ty.f32(), Expr(3.0f),
-                          ast::DecorationList{
-                              create<ast::OverrideDecoration>(23),
+                          ast::AttributeList{
+                              create<ast::OverrideAttribute>(23),
                           });
 
   GeneratorImpl& gen = Build();
@@ -50,8 +50,8 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   auto* var = GlobalConst("pos", ty.f32(), nullptr,
-                          ast::DecorationList{
-                              create<ast::OverrideDecoration>(23),
+                          ast::AttributeList{
+                              create<ast::OverrideAttribute>(23),
                           });
 
   GeneratorImpl& gen = Build();
@@ -66,12 +66,12 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoId) {
   auto* a = GlobalConst("a", ty.f32(), Expr(3.0f),
-                        ast::DecorationList{
-                            create<ast::OverrideDecoration>(0),
+                        ast::AttributeList{
+                            create<ast::OverrideAttribute>(0),
                         });
   auto* b = GlobalConst("b", ty.f32(), Expr(2.0f),
-                        ast::DecorationList{
-                            create<ast::OverrideDecoration>(),
+                        ast::AttributeList{
+                            create<ast::OverrideAttribute>(),
                         });
 
   GeneratorImpl& gen = Build();

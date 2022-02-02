@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, PipelineStage_NoMatch) {
   auto stage = p->expect_pipeline_stage();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(stage.errored);
-  ASSERT_EQ(p->error(), "1:1: invalid value for stage decoration");
+  ASSERT_EQ(p->error(), "1:1: invalid value for stage attribute");
 }
 
 }  // namespace

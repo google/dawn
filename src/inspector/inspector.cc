@@ -20,10 +20,10 @@
 #include "src/ast/bool_literal_expression.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/float_literal_expression.h"
-#include "src/ast/interpolate_decoration.h"
-#include "src/ast/location_decoration.h"
+#include "src/ast/interpolate_attribute.h"
+#include "src/ast/location_attribute.h"
 #include "src/ast/module.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/sint_literal_expression.h"
 #include "src/ast/uint_literal_expression.h"
 #include "src/sem/array.h"
@@ -102,19 +102,19 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
 
 std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
     const sem::Type* type,
-    const ast::DecorationList& decorations) {
-  auto* interpolation_decoration =
-      ast::GetDecoration<ast::InterpolateDecoration>(decorations);
+    const ast::AttributeList& attributes) {
+  auto* interpolation_attribute =
+      ast::GetAttribute<ast::InterpolateAttribute>(attributes);
   if (type->is_integer_scalar_or_vector()) {
     return {InterpolationType::kFlat, InterpolationSampling::kNone};
   }
 
-  if (!interpolation_decoration) {
+  if (!interpolation_attribute) {
     return {InterpolationType::kPerspective, InterpolationSampling::kCenter};
   }
 
-  auto interpolation_type = interpolation_decoration->type;
-  auto sampling = interpolation_decoration->sampling;
+  auto interpolation_type = interpolation_attribute->type;
+  auto sampling = interpolation_attribute->sampling;
   if (interpolation_type != ast::InterpolationType::kFlat &&
       sampling == ast::InterpolationSampling::kNone) {
     sampling = ast::InterpolationSampling::kCenter;
@@ -157,34 +157,34 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     for (auto* param : sem->Parameters()) {
       AddEntryPointInOutVariables(
           program_->Symbols().NameFor(param->Declaration()->symbol),
-          param->Type(), param->Declaration()->decorations,
+          param->Type(), param->Declaration()->attributes,
           entry_point.input_variables);
 
       entry_point.input_position_used |=
           ContainsBuiltin(ast::Builtin::kPosition, param->Type(),
-                          param->Declaration()->decorations);
+                          param->Declaration()->attributes);
       entry_point.front_facing_used |=
           ContainsBuiltin(ast::Builtin::kFrontFacing, param->Type(),
-                          param->Declaration()->decorations);
+                          param->Declaration()->attributes);
       entry_point.sample_index_used |=
           ContainsBuiltin(ast::Builtin::kSampleIndex, param->Type(),
-                          param->Declaration()->decorations);
+                          param->Declaration()->attributes);
       entry_point.input_sample_mask_used |=
           ContainsBuiltin(ast::Builtin::kSampleMask, param->Type(),
-                          param->Declaration()->decorations);
+                          param->Declaration()->attributes);
       entry_point.num_workgroups_used |=
           ContainsBuiltin(ast::Builtin::kNumWorkgroups, param->Type(),
-                          param->Declaration()->decorations);
+                          param->Declaration()->attributes);
     }
 
     if (!sem->ReturnType()->Is<sem::Void>()) {
       AddEntryPointInOutVariables("<retval>", sem->ReturnType(),
-                                  func->return_type_decorations,
+                                  func->return_type_attributes,
                                   entry_point.output_variables);
 
       entry_point.output_sample_mask_used =
           ContainsBuiltin(ast::Builtin::kSampleMask, sem->ReturnType(),
-                          func->return_type_decorations);
+                          func->return_type_attributes);
     }
 
     for (auto* var : sem->TransitivelyReferencedGlobals()) {
@@ -213,10 +213,10 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
         overridable_constant.is_initialized =
             global->Declaration()->constructor;
-        auto* override_deco = ast::GetDecoration<ast::OverrideDecoration>(
-            global->Declaration()->decorations);
+        auto* override_attr = ast::GetAttribute<ast::OverrideAttribute>(
+            global->Declaration()->attributes);
         overridable_constant.is_numeric_id_specified =
-            override_deco ? override_deco->has_value : false;
+            override_attr ? override_attr->has_value : false;
 
         entry_point.overridable_constants.push_back(overridable_constant);
       }
@@ -579,10 +579,10 @@ const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
 void Inspector::AddEntryPointInOutVariables(
     std::string name,
     const sem::Type* type,
-    const ast::DecorationList& decorations,
+    const ast::AttributeList& attributes,
     std::vector<StageVariable>& variables) const {
   // Skip builtins.
-  if (ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
+  if (ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
     return;
   }
 
@@ -594,7 +594,7 @@ void Inspector::AddEntryPointInOutVariables(
       AddEntryPointInOutVariables(
           name + "." +
               program_->Symbols().NameFor(member->Declaration()->symbol),
-          member->Type(), member->Declaration()->decorations, variables);
+          member->Type(), member->Declaration()->attributes, variables);
     }
     return;
   }
@@ -606,28 +606,28 @@ void Inspector::AddEntryPointInOutVariables(
   std::tie(stage_variable.component_type, stage_variable.composition_type) =
       CalculateComponentAndComposition(type);
 
-  auto* location = ast::GetDecoration<ast::LocationDecoration>(decorations);
+  auto* location = ast::GetAttribute<ast::LocationAttribute>(attributes);
   TINT_ASSERT(Inspector, location != nullptr);
-  stage_variable.has_location_decoration = true;
-  stage_variable.location_decoration = location->value;
+  stage_variable.has_location_attribute = true;
+  stage_variable.location_attribute = location->value;
 
   std::tie(stage_variable.interpolation_type,
            stage_variable.interpolation_sampling) =
-      CalculateInterpolationData(type, decorations);
+      CalculateInterpolationData(type, attributes);
 
   variables.push_back(stage_variable);
 }
 
 bool Inspector::ContainsBuiltin(ast::Builtin builtin,
                                 const sem::Type* type,
-                                const ast::DecorationList& decorations) const {
+                                const ast::AttributeList& attributes) const {
   auto* unwrapped_type = type->UnwrapRef();
 
   if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
     // Recurse into members.
     for (auto* member : struct_ty->Members()) {
       if (ContainsBuiltin(builtin, member->Type(),
-                          member->Declaration()->decorations)) {
+                          member->Declaration()->attributes)) {
         return true;
       }
     }
@@ -636,7 +636,7 @@ bool Inspector::ContainsBuiltin(ast::Builtin builtin,
 
   // Base case: check for builtin
   auto* builtin_declaration =
-      ast::GetDecoration<ast::BuiltinDecoration>(decorations);
+      ast::GetAttribute<ast::BuiltinAttribute>(attributes);
   if (!builtin_declaration || builtin_declaration->builtin != builtin) {
     return false;
   }

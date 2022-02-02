@@ -20,12 +20,12 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/binding_decoration.h"
+#include "src/ast/attribute.h"
+#include "src/ast/binding_attribute.h"
 #include "src/ast/block_statement.h"
-#include "src/ast/builtin_decoration.h"
-#include "src/ast/decoration.h"
-#include "src/ast/group_decoration.h"
-#include "src/ast/location_decoration.h"
+#include "src/ast/builtin_attribute.h"
+#include "src/ast/group_attribute.h"
+#include "src/ast/location_attribute.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/variable.h"
 
@@ -42,16 +42,16 @@ class Function : public Castable<Function, Node> {
   /// @param params the function parameters
   /// @param return_type the return type
   /// @param body the function body
-  /// @param decorations the function decorations
-  /// @param return_type_decorations the return type decorations
+  /// @param attributes the function attributes
+  /// @param return_type_attributes the return type attributes
   Function(ProgramID program_id,
            const Source& source,
            Symbol symbol,
            VariableList params,
            const Type* return_type,
            const BlockStatement* body,
-           DecorationList decorations,
-           DecorationList return_type_decorations);
+           AttributeList attributes,
+           AttributeList return_type_attributes);
   /// Move constructor
   Function(Function&&);
 
@@ -81,11 +81,11 @@ class Function : public Castable<Function, Node> {
   /// The function body
   const BlockStatement* const body;
 
-  /// The decorations attached to this function
-  const DecorationList decorations;
+  /// The attributes attached to this function
+  const AttributeList attributes;
 
-  /// The decorations attached to the function return type.
-  const DecorationList return_type_decorations;
+  /// The attributes attached to the function return type.
+  const AttributeList return_type_attributes;
 };
 
 /// A list of functions

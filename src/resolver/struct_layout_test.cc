@@ -15,7 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/struct.h"
 
@@ -129,12 +129,11 @@ TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayStaticSize) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
-  auto* s =
-      Structure("S",
-                {
-                    Member("c", ty.array<f32>()),
-                },
-                ast::DecorationList{create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("c", ty.array<f32>()),
+                      },
+                      ast::AttributeList{create<ast::StructBlockAttribute>()});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -150,12 +149,11 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
 }
 
 TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayRuntimeSized) {
-  auto* s =
-      Structure("S",
-                {
-                    Member("c", ty.array<f32>(/*stride*/ 32)),
-                },
-                ast::DecorationList{create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("c", ty.array<f32>(/*stride*/ 32)),
+                      },
+                      ast::AttributeList{create<ast::StructBlockAttribute>()});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -319,7 +317,7 @@ TEST_F(ResolverStructLayoutTest, NestedStruct) {
   EXPECT_EQ(sem->Members()[2]->Size(), 4u);
 }
 
-TEST_F(ResolverStructLayoutTest, SizeDecorations) {
+TEST_F(ResolverStructLayoutTest, SizeAttributes) {
   auto* inner = Structure("Inner", {
                                        Member("a", ty.f32(), {MemberSize(8)}),
                                        Member("b", ty.f32(), {MemberSize(16)}),
@@ -354,7 +352,7 @@ TEST_F(ResolverStructLayoutTest, SizeDecorations) {
   EXPECT_EQ(sem->Members()[3]->Size(), 32u);
 }
 
-TEST_F(ResolverStructLayoutTest, AlignDecorations) {
+TEST_F(ResolverStructLayoutTest, AlignAttributes) {
   auto* inner = Structure("Inner", {
                                        Member("a", ty.f32(), {MemberAlign(8)}),
                                        Member("b", ty.f32(), {MemberAlign(16)}),

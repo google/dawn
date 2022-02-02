@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/ast/internal_decoration.h"
+#include "src/ast/internal_attribute.h"
 #include "src/transform/transform.h"
 
 namespace tint {
@@ -33,11 +33,11 @@ namespace transform {
 class DecomposeMemoryAccess
     : public Castable<DecomposeMemoryAccess, Transform> {
  public:
-  /// Intrinsic is an InternalDecoration that's used to decorate a stub function
+  /// Intrinsic is an InternalAttribute that's used to decorate a stub function
   /// so that the HLSL transforms this into calls to
   /// `[RW]ByteAddressBuffer.Load[N]()` or `[RW]ByteAddressBuffer.Store[N]()`,
   /// with a possible cast.
-  class Intrinsic : public Castable<Intrinsic, ast::InternalDecoration> {
+  class Intrinsic : public Castable<Intrinsic, ast::InternalAttribute> {
    public:
     /// Intrinsic op
     enum class Op {
@@ -81,7 +81,7 @@ class DecomposeMemoryAccess
     /// Destructor
     ~Intrinsic() override;
 
-    /// @return a short description of the internal decoration which will be
+    /// @return a short description of the internal attribute which will be
     /// displayed as `@internal(<name>)`
     std::string InternalName() const override;
 

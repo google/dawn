@@ -192,11 +192,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
   bool EmitVariable(std::ostream& out, const ast::Variable* var);
-  /// Handles generating a decoration list
+  /// Handles generating a attribute list
   /// @param out the output of the expression stream
-  /// @param decos the decoration list
-  /// @returns true if the decorations were emitted
-  bool EmitDecorations(std::ostream& out, const ast::DecorationList& decos);
+  /// @param attrs the attribute list
+  /// @returns true if the attributes were emitted
+  bool EmitAttributes(std::ostream& out, const ast::AttributeList& attrs);
 };
 
 }  // namespace wgsl

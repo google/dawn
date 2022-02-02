@@ -16,7 +16,7 @@
 
 #include "gmock/gmock.h"
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -122,11 +122,11 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayWithStride) {
   auto* s = Structure("s", {Member("arr", ty.array<f32, 4>(64))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   auto* ubo = Global("ubo", ty.Of(s), ast::StorageClass::kUniform,
-                     ast::DecorationList{
-                         create<ast::GroupDecoration>(0),
-                         create<ast::BindingDecoration>(1),
+                     ast::AttributeList{
+                         create<ast::GroupAttribute>(0),
+                         create<ast::BindingAttribute>(1),
                      });
   WrapInFunction(MemberAccessor(ubo, "arr"));
 
@@ -261,12 +261,12 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                     Member("y", ty.mat4x4<f32>()),
                     Member("z", ty.f32()),
                 },
-                {create<ast::StructBlockDecoration>()});
+                {create<ast::StructBlockAttribute>()});
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();
@@ -371,12 +371,12 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                           Member("d", ty.Of(inner_y)),
                           Member("e", ty.f32()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();
@@ -456,22 +456,21 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
   // array_z: size(4), align(4)
   auto* array_z = ty.array<f32>();
 
-  auto* s =
-      Structure("S",
-                {
-                    Member("a", ty.i32()),
-                    Member("b", array_x),
-                    Member("c", ty.f32()),
-                    Member("d", array_y),
-                    Member("e", ty.f32()),
-                    Member("f", array_z),
-                },
-                ast::DecorationList{create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", array_x),
+                          Member("c", ty.f32()),
+                          Member("d", array_y),
+                          Member("e", ty.f32()),
+                          Member("f", array_z),
+                      },
+                      ast::AttributeList{create<ast::StructBlockAttribute>()});
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();
@@ -545,19 +544,18 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
   // array: size(64), align(16)
   auto* array = ty.array(ty.vec3<f32>(), 4);
 
-  auto* s =
-      Structure("S",
-                {
-                    Member("a", ty.i32()),
-                    Member("b", array),
-                    Member("c", ty.i32()),
-                },
-                ast::DecorationList{create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", array),
+                          Member("c", ty.i32()),
+                      },
+                      ast::AttributeList{create<ast::StructBlockAttribute>()});
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();
@@ -615,12 +613,12 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
           Member("tint_pad_4", ty.mat4x4<f32>()),
           Member("tint_pad_21", ty.f32()),
       },
-      {create<ast::StructBlockDecoration>()});
+      {create<ast::StructBlockAttribute>()});
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();
@@ -672,19 +670,19 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 )");
 }
 
-// TODO(dsinclair): How to translate [[block]]
-TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
+// TODO(dsinclair): How to translate @block
+TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithAttribute) {
   auto* s = Structure("S",
                       {
                           Member("a", ty.i32()),
                           Member("b", ty.f32()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();
@@ -855,9 +853,9 @@ TEST_P(MslStorageTexturesTest, Emit) {
   auto* s = ty.storage_texture(params.dim, ast::TexelFormat::kR32Float,
                                ast::Access::kWrite);
   Global("test_var", s,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/reference_type.h"
@@ -62,19 +62,19 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
   auto* buf = Structure("S", {Member("m", ty.i32())},
-                        {create<ast::StructBlockDecoration>()});
+                        {create<ast::StructBlockAttribute>()});
   auto* function = Var("f", ty.i32());
   auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
   auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);
   auto* uniform = Global("ub", ty.Of(buf), ast::StorageClass::kUniform,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(0),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(0),
+                             create<ast::GroupAttribute>(0),
                          });
   auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(1),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(1),
+                             create<ast::GroupAttribute>(0),
                          });
 
   auto* function_ptr =

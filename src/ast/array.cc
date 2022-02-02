@@ -43,8 +43,8 @@ Array::Array(ProgramID pid,
              const Source& src,
              const Type* subtype,
              const Expression* cnt,
-             DecorationList decos)
-    : Base(pid, src), type(subtype), count(cnt), decorations(decos) {}
+             AttributeList attrs)
+    : Base(pid, src), type(subtype), count(cnt), attributes(attrs) {}
 
 Array::Array(Array&&) = default;
 
@@ -52,8 +52,8 @@ Array::~Array() = default;
 
 std::string Array::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
-  for (auto* deco : decorations) {
-    if (auto* stride = deco->As<ast::StrideDecoration>()) {
+  for (auto* attr : attributes) {
+    if (auto* stride = attr->As<ast::StrideAttribute>()) {
       out << "@stride(" << stride->stride << ") ";
     }
   }
@@ -70,8 +70,8 @@ const Array* Array::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   auto* ty = ctx->Clone(type);
   auto* cnt = ctx->Clone(count);
-  auto decos = ctx->Clone(decorations);
-  return ctx->dst->create<Array>(src, ty, cnt, decos);
+  auto attrs = ctx->Clone(attributes);
+  return ctx->dst->create<Array>(src, ty, cnt, attrs);
 }
 
 }  // namespace ast

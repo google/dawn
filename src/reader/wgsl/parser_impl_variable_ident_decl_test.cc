@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
@@ -76,88 +76,87 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
   ASSERT_EQ(p->error(), "1:1: expected identifier for test");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
+TEST_F(ParserImplTest, VariableIdentDecl_NonAccessAttrFail) {
   auto p = parser("my_var : @location(1) S");
 
-  auto* mem = Member("a", ty.i32(), ast::DecorationList{});
+  auto* mem = Member("a", ty.i32(), ast::AttributeList{});
   ast::StructMemberList members;
   members.push_back(mem);
 
-  auto* block_deco = create<ast::StructBlockDecoration>();
-  ast::DecorationList decos;
-  decos.push_back(block_deco);
+  auto* block_attr = create<ast::StructBlockAttribute>();
+  ast::AttributeList attrs;
+  attrs.push_back(block_attr);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:11: unexpected decorations");
+  ASSERT_EQ(p->error(), "1:11: unexpected attributes");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightParen) {
+TEST_F(ParserImplTest, VariableIdentDecl_AttributeMissingRightParen) {
   auto p = parser("my_var : @location(4 S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:22: expected ')' for location decoration");
+  ASSERT_EQ(p->error(), "1:22: expected ')' for location attribute");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingLeftParen) {
+TEST_F(ParserImplTest, VariableIdentDecl_AttributeMissingLeftParen) {
   auto p = parser("my_var : @stride 4) S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:18: expected '(' for stride decoration");
+  ASSERT_EQ(p->error(), "1:18: expected '(' for stride attribute");
 }
 
 // TODO(crbug.com/tint/1382): Remove
 TEST_F(ParserImplTest,
-       DEPRECATED_VariableIdentDecl_DecorationMissingRightBlock) {
+       DEPRECATED_VariableIdentDecl_AttributeMissingRightBlock) {
   auto p = parser("my_var : [[location(4) S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
   ASSERT_EQ(
       p->error(),
-      R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:24: expected ']]' for decoration list)");
+      R"(1:10: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
+1:24: expected ']]' for attribute list)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
 TEST_F(ParserImplTest,
-       DEPRECATED_VariableIdentDecl_DecorationMissingRightParen) {
+       DEPRECATED_VariableIdentDecl_AttributeMissingRightParen) {
   auto p = parser("my_var : [[location(4]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
   ASSERT_EQ(
       p->error(),
-      R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:22: expected ')' for location decoration)");
+      R"(1:10: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
+1:22: expected ')' for location attribute)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest,
-       DEPRECATED_VariableIdentDecl_DecorationMissingLeftParen) {
+TEST_F(ParserImplTest, DEPRECATED_VariableIdentDecl_AttributeMissingLeftParen) {
   auto p = parser("my_var : [[stride 4)]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
   ASSERT_EQ(
       p->error(),
-      R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:19: expected '(' for stride decoration)");
+      R"(1:10: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
+1:19: expected '(' for stride attribute)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_VariableIdentDecl_DecorationEmpty) {
+TEST_F(ParserImplTest, DEPRECATED_VariableIdentDecl_AttributeEmpty) {
   auto p = parser("my_var : [[]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
   ASSERT_EQ(
       p->error(),
-      R"(1:10: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:12: empty decoration list)");
+      R"(1:10: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
+1:12: empty attribute list)");
 }
 
 }  // namespace

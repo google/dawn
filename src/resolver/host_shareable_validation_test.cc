@@ -15,7 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/struct.h"
 
@@ -27,13 +27,13 @@ using ResolverHostShareableValidationTest = ResolverTest;
 
 TEST_F(ResolverHostShareableValidationTest, BoolMember) {
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.bool_())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   ASSERT_FALSE(r()->Resolve());
@@ -47,13 +47,13 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
 
 TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.vec3<bool>())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   ASSERT_FALSE(r()->Resolve());
@@ -68,13 +68,13 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
 TEST_F(ResolverHostShareableValidationTest, Aliases) {
   auto* a1 = Alias("a1", ty.bool_());
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.Of(a1))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   auto* a2 = Alias("a2", ty.Of(s));
   Global(Source{{56, 78}}, "g", ty.Of(a2), ast::StorageClass::kStorage,
          ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   ASSERT_FALSE(r()->Resolve());
@@ -92,13 +92,13 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
   auto* i3 = Structure("I3", {Member(Source{{5, 6}}, "z", ty.Of(i2))});
 
   auto* s = Structure("S", {Member(Source{{7, 8}}, "m", ty.Of(i3))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global(Source{{9, 10}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   ASSERT_FALSE(r()->Resolve());
@@ -133,13 +133,13 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
                              });
 
   auto* s = Structure("S", {Member(Source{{7, 8}}, "m", ty.Of(i3))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global(Source{{9, 10}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
   WrapInFunction();
 

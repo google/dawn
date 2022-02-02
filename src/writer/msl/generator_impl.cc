@@ -24,12 +24,12 @@
 #include "src/ast/alias.h"
 #include "src/ast/bool_literal_expression.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal_expression.h"
-#include "src/ast/interpolate_decoration.h"
+#include "src/ast/interpolate_attribute.h"
 #include "src/ast/module.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/sint_literal_expression.h"
 #include "src/ast/uint_literal_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -1786,22 +1786,22 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
           return false;
         }
       } else {
-        auto& decos = var->decorations;
+        auto& attrs = var->attributes;
         bool builtin_found = false;
-        for (auto* deco : decos) {
-          auto* builtin = deco->As<ast::BuiltinDecoration>();
+        for (auto* attr : attrs) {
+          auto* builtin = attr->As<ast::BuiltinAttribute>();
           if (!builtin) {
             continue;
           }
 
           builtin_found = true;
 
-          auto attr = builtin_to_attribute(builtin->builtin);
-          if (attr.empty()) {
+          auto name = builtin_to_attribute(builtin->builtin);
+          if (name.empty()) {
             diagnostics_.add_error(diag::System::Writer, "unknown builtin");
             return false;
           }
-          out << " [[" << attr << "]]";
+          out << " [[" << name << "]]";
         }
         if (!builtin_found) {
           TINT_ICE(Writer, diagnostics_) << "Unsupported entry point parameter";
@@ -2504,7 +2504,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
   uint32_t msl_offset = 0;
   for (auto* mem : str->Members()) {
     auto out = line(b);
-    auto name = program_->Symbols().NameFor(mem->Name());
+    auto mem_name = program_->Symbols().NameFor(mem->Name());
     auto wgsl_offset = mem->Offset();
 
     if (is_host_shareable) {
@@ -2524,11 +2524,11 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
       add_byte_offset_comment(out, msl_offset);
 
-      if (!EmitPackedType(out, mem->Type(), name)) {
+      if (!EmitPackedType(out, mem->Type(), mem_name)) {
         return false;
       }
     } else {
-      if (!EmitType(out, mem->Type(), name)) {
+      if (!EmitType(out, mem->Type(), mem_name)) {
         return false;
       }
     }
@@ -2537,20 +2537,20 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
     // Array member name will be output with the type
     if (!ty->Is<sem::Array>()) {
-      out << " " << name;
+      out << " " << mem_name;
     }
 
-    // Emit decorations
+    // Emit attributes
     if (auto* decl = mem->Declaration()) {
-      for (auto* deco : decl->decorations) {
-        if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-          auto attr = builtin_to_attribute(builtin->builtin);
-          if (attr.empty()) {
+      for (auto* attr : decl->attributes) {
+        if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
+          auto name = builtin_to_attribute(builtin->builtin);
+          if (name.empty()) {
             diagnostics_.add_error(diag::System::Writer, "unknown builtin");
             return false;
           }
-          out << " [[" << attr << "]]";
-        } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
+          out << " [[" << name << "]]";
+        } else if (auto* loc = attr->As<ast::LocationAttribute>()) {
           auto& pipeline_stage_uses = str->PipelineStageUses();
           if (pipeline_stage_uses.size() != 1) {
             TINT_ICE(Writer, diagnostics_)
@@ -2571,27 +2571,27 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
             out << " [[color(" + std::to_string(loc->value) + ")]]";
           } else {
             TINT_ICE(Writer, diagnostics_)
-                << "invalid use of location decoration";
+                << "invalid use of location attribute";
           }
-        } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
-          auto attr = interpolation_to_attribute(interpolate->type,
+        } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
+          auto name = interpolation_to_attribute(interpolate->type,
                                                  interpolate->sampling);
-          if (attr.empty()) {
+          if (name.empty()) {
             diagnostics_.add_error(diag::System::Writer,
                                    "unknown interpolation attribute");
             return false;
           }
-          out << " [[" << attr << "]]";
-        } else if (deco->Is<ast::InvariantDecoration>()) {
+          out << " [[" << name << "]]";
+        } else if (attr->Is<ast::InvariantAttribute>()) {
           if (invariant_define_name_.empty()) {
             invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
           }
           out << " " << invariant_define_name_;
-        } else if (!deco->IsAnyOf<ast::StructMemberOffsetDecoration,
-                                  ast::StructMemberAlignDecoration,
-                                  ast::StructMemberSizeDecoration>()) {
+        } else if (!attr->IsAnyOf<ast::StructMemberOffsetAttribute,
+                                  ast::StructMemberAlignAttribute,
+                                  ast::StructMemberSizeAttribute>()) {
           TINT_ICE(Writer, diagnostics_)
-              << "unhandled struct member attribute: " << deco->Name();
+              << "unhandled struct member attribute: " << attr->Name();
         }
       }
     }
@@ -2604,7 +2604,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
       if (msl_offset % size_align.align) {
         TINT_ICE(Writer, diagnostics_)
             << "Misaligned MSL structure member "
-            << ty->FriendlyName(program_->Symbols()) << " " << name;
+            << ty->FriendlyName(program_->Symbols()) << " " << mem_name;
         return false;
       }
       msl_offset += size_align.size;
@@ -2701,9 +2701,9 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& out,
 bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
 
-  for (auto* deco : decl->decorations) {
-    if (!deco->Is<ast::InternalDecoration>()) {
-      TINT_ICE(Writer, diagnostics_) << "unexpected variable decoration";
+  for (auto* attr : decl->attributes) {
+    if (!attr->Is<ast::InternalAttribute>()) {
+      TINT_ICE(Writer, diagnostics_) << "unexpected variable attribute";
       return false;
     }
   }
@@ -2759,8 +2759,8 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
 }
 
 bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
-  for (auto* d : var->decorations) {
-    if (!d->Is<ast::OverrideDecoration>()) {
+  for (auto* d : var->attributes) {
+    if (!d->Is<ast::OverrideAttribute>()) {
       diagnostics_.add_error(diag::System::Writer,
                              "Decorated const values not valid");
       return false;

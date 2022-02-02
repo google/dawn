@@ -154,9 +154,9 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
       buffer_size_ubo = ctx.dst->Global(
           ctx.dst->Sym(), ctx.dst->ty.Of(buffer_size_struct),
           ast::StorageClass::kUniform,
-          ast::DecorationList{
-              ctx.dst->create<ast::GroupDecoration>(cfg->ubo_binding.group),
-              ctx.dst->create<ast::BindingDecoration>(
+          ast::AttributeList{
+              ctx.dst->create<ast::GroupAttribute>(cfg->ubo_binding.group),
+              ctx.dst->create<ast::BindingAttribute>(
                   cfg->ubo_binding.binding)});
     }
     return buffer_size_ubo;

@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/ast/internal_decoration.h"
+#include "src/ast/internal_attribute.h"
 #include "src/transform/transform.h"
 
 namespace tint {
@@ -34,10 +34,10 @@ namespace transform {
 /// * SimplifyPointers
 class CalculateArrayLength : public Castable<CalculateArrayLength, Transform> {
  public:
-  /// BufferSizeIntrinsic is an InternalDecoration that's applied to intrinsic
+  /// BufferSizeIntrinsic is an InternalAttribute that's applied to intrinsic
   /// functions used to obtain the runtime size of a storage buffer.
   class BufferSizeIntrinsic
-      : public Castable<BufferSizeIntrinsic, ast::InternalDecoration> {
+      : public Castable<BufferSizeIntrinsic, ast::InternalAttribute> {
    public:
     /// Constructor
     /// @param program_id the identifier of the program that owns this node

@@ -28,7 +28,7 @@ TEST_F(ModuleTest, Creation) {
 
 TEST_F(ModuleTest, LookupFunction) {
   auto* func = Func("main", VariableList{}, ty.f32(), StatementList{},
-                    ast::DecorationList{});
+                    ast::AttributeList{});
 
   Program program(std::move(*this));
   EXPECT_EQ(func,
@@ -66,7 +66,7 @@ TEST_F(ModuleTest, Assert_DifferentProgramID_Function) {
         ProgramBuilder b2;
         b1.AST().AddFunction(b2.create<ast::Function>(
             b2.Symbols().Register("func"), VariableList{}, b2.ty.f32(),
-            b2.Block(), DecorationList{}, DecorationList{}));
+            b2.Block(), AttributeList{}, AttributeList{}));
       },
       "internal compiler error");
 }

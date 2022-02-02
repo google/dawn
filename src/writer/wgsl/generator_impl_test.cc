@@ -24,7 +24,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   GeneratorImpl& gen = Build();
 

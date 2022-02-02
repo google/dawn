@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/writer/glsl/test_helper.h"
 
 namespace tint {
@@ -96,20 +96,20 @@ class GlslGeneratorImplTest_MemberAccessorBase : public BASE {
     ProgramBuilder& b = *this;
 
     auto* s =
-        b.Structure("Data", members, {b.create<ast::StructBlockDecoration>()});
+        b.Structure("Data", members, {b.create<ast::StructBlockAttribute>()});
 
     b.Global("data", b.ty.Of(s), ast::StorageClass::kStorage,
              ast::Access::kReadWrite,
-             ast::DecorationList{
-                 b.create<ast::BindingDecoration>(0),
-                 b.create<ast::GroupDecoration>(1),
+             ast::AttributeList{
+                 b.create<ast::BindingAttribute>(0),
+                 b.create<ast::GroupAttribute>(1),
              });
   }
 
   void SetupFunction(ast::StatementList statements) {
     ProgramBuilder& b = *this;
     b.Func("main", ast::VariableList{}, b.ty.void_(), statements,
-           ast::DecorationList{
+           ast::AttributeList{
                b.Stage(ast::PipelineStage::kFragment),
            });
   }

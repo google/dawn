@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/writer/wgsl/test_helper.h"
@@ -53,7 +53,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
        ast::StatementList{
            Return("a0"),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   Global("a1", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -65,7 +65,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
            Decl(Var("s1", ty.Of(s1))),
            Assign("a1", Call("func")),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
        });
@@ -102,9 +102,9 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
   Global("s", ty.sampler(ast::SamplerKind::kSampler),
-         ast::DecorationList{
-             create<ast::GroupDecoration>(0),
-             create<ast::BindingDecoration>(0),
+         ast::AttributeList{
+             create<ast::GroupAttribute>(0),
+             create<ast::BindingAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();
@@ -118,9 +118,9 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
   auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   Global("t", st,
-         ast::DecorationList{
-             create<ast::GroupDecoration>(0),
-             create<ast::BindingDecoration>(0),
+         ast::AttributeList{
+             create<ast::GroupAttribute>(0),
+             create<ast::BindingAttribute>(0),
          });
 
   GeneratorImpl& gen = Build();

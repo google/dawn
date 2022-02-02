@@ -42,13 +42,13 @@ Function::Function(const ast::Function* declaration,
 
 Function::~Function() = default;
 
-std::vector<std::pair<const Variable*, const ast::LocationDecoration*>>
+std::vector<std::pair<const Variable*, const ast::LocationAttribute*>>
 Function::TransitivelyReferencedLocationVariables() const {
-  std::vector<std::pair<const Variable*, const ast::LocationDecoration*>> ret;
+  std::vector<std::pair<const Variable*, const ast::LocationAttribute*>> ret;
 
   for (auto* var : TransitivelyReferencedGlobals()) {
-    for (auto* deco : var->Declaration()->decorations) {
-      if (auto* location = deco->As<ast::LocationDecoration>()) {
+    for (auto* attr : var->Declaration()->attributes) {
+      if (auto* location = attr->As<ast::LocationAttribute>()) {
         ret.push_back({var, location});
         break;
       }
@@ -89,13 +89,13 @@ Function::TransitivelyReferencedStorageBufferVariables() const {
   return ret;
 }
 
-std::vector<std::pair<const Variable*, const ast::BuiltinDecoration*>>
+std::vector<std::pair<const Variable*, const ast::BuiltinAttribute*>>
 Function::TransitivelyReferencedBuiltinVariables() const {
-  std::vector<std::pair<const Variable*, const ast::BuiltinDecoration*>> ret;
+  std::vector<std::pair<const Variable*, const ast::BuiltinAttribute*>> ret;
 
   for (auto* var : TransitivelyReferencedGlobals()) {
-    for (auto* deco : var->Declaration()->decorations) {
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+    for (auto* attr : var->Declaration()->attributes) {
+      if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
         ret.push_back({var, builtin});
         break;
       }

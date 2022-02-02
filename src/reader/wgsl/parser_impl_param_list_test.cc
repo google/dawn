@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, ParamList_TrailingComma) {
   EXPECT_EQ(e.value.size(), 1u);
 }
 
-TEST_F(ParserImplTest, ParamList_Decorations) {
+TEST_F(ParserImplTest, ParamList_Attributes) {
   auto p =
       parser("@builtin(position) coord : vec4<f32>, @location(1) loc1 : f32");
 
@@ -105,10 +105,10 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
   EXPECT_TRUE(e.value[0]->type->As<ast::Vector>()->type->Is<ast::F32>());
   EXPECT_EQ(e.value[0]->type->As<ast::Vector>()->width, 4u);
   EXPECT_TRUE(e.value[0]->is_const);
-  auto decos0 = e.value[0]->decorations;
-  ASSERT_EQ(decos0.size(), 1u);
-  EXPECT_TRUE(decos0[0]->Is<ast::BuiltinDecoration>());
-  EXPECT_EQ(decos0[0]->As<ast::BuiltinDecoration>()->builtin,
+  auto attrs_0 = e.value[0]->attributes;
+  ASSERT_EQ(attrs_0.size(), 1u);
+  EXPECT_TRUE(attrs_0[0]->Is<ast::BuiltinAttribute>());
+  EXPECT_EQ(attrs_0[0]->As<ast::BuiltinAttribute>()->builtin,
             ast::Builtin::kPosition);
 
   ASSERT_EQ(e.value[0]->source.range.begin.line, 1u);
@@ -119,10 +119,10 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
   EXPECT_EQ(e.value[1]->symbol, p->builder().Symbols().Get("loc1"));
   EXPECT_TRUE(e.value[1]->type->Is<ast::F32>());
   EXPECT_TRUE(e.value[1]->is_const);
-  auto decos1 = e.value[1]->decorations;
-  ASSERT_EQ(decos1.size(), 1u);
-  EXPECT_TRUE(decos1[0]->Is<ast::LocationDecoration>());
-  EXPECT_EQ(decos1[0]->As<ast::LocationDecoration>()->value, 1u);
+  auto attrs_1 = e.value[1]->attributes;
+  ASSERT_EQ(attrs_1.size(), 1u);
+  EXPECT_TRUE(attrs_1[0]->Is<ast::LocationAttribute>());
+  EXPECT_EQ(attrs_1[0]->As<ast::LocationAttribute>()->value, 1u);
 
   EXPECT_EQ(e.value[1]->source.range.begin.line, 1u);
   EXPECT_EQ(e.value[1]->source.range.begin.column, 52u);

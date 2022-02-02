@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/builtin_decoration.h"
-#include "src/ast/location_decoration.h"
+#include "src/ast/builtin_attribute.h"
+#include "src/ast/location_attribute.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 
@@ -448,11 +448,11 @@ INSTANTIATE_TEST_SUITE_P(ResolverEntryPointValidationTest,
 
 }  // namespace TypeValidationTests
 
-namespace LocationDecorationTests {
+namespace LocationAttributeTests {
 namespace {
-using LocationDecorationTests = ResolverTest;
+using LocationAttributeTests = ResolverTest;
 
-TEST_F(LocationDecorationTests, Pass) {
+TEST_F(LocationAttributeTests, Pass) {
   // @stage(fragment)
   // fn frag_main(@location(0) @interpolate(flat) a: i32) {}
 
@@ -463,7 +463,7 @@ TEST_F(LocationDecorationTests, Pass) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(LocationDecorationTests, BadType_Input_bool) {
+TEST_F(LocationAttributeTests, BadType_Input_bool) {
   // @stage(fragment)
   // fn frag_main(@location(0) a: bool) {}
 
@@ -480,7 +480,7 @@ TEST_F(LocationDecorationTests, BadType_Input_bool) {
             "declarations of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, BadType_Output_Array) {
+TEST_F(LocationAttributeTests, BadType_Output_Array) {
   // @stage(fragment)
   // fn frag_main()->@location(0) array<f32, 2> { return array<f32, 2>(); }
 
@@ -496,7 +496,7 @@ TEST_F(LocationDecorationTests, BadType_Output_Array) {
             "declarations of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, BadType_Input_Struct) {
+TEST_F(LocationAttributeTests, BadType_Input_Struct) {
   // struct Input {
   //   a : f32;
   // };
@@ -516,7 +516,7 @@ TEST_F(LocationDecorationTests, BadType_Input_Struct) {
             "declarations of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, BadType_Input_Struct_NestedStruct) {
+TEST_F(LocationAttributeTests, BadType_Input_Struct_NestedStruct) {
   // struct Inner {
   //   @location(0) b : f32;
   // };
@@ -539,7 +539,7 @@ TEST_F(LocationDecorationTests, BadType_Input_Struct_NestedStruct) {
             "12:34 note: while analysing entry point 'main'");
 }
 
-TEST_F(LocationDecorationTests, BadType_Input_Struct_RuntimeArray) {
+TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
   // [[block]]
   // struct Input {
   //   @location(0) a : array<f32>;
@@ -549,7 +549,7 @@ TEST_F(LocationDecorationTests, BadType_Input_Struct_RuntimeArray) {
   auto* input = Structure(
       "Input",
       {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})},
-      {create<ast::StructBlockDecoration>()});
+      {create<ast::StructBlockAttribute>()});
   auto* param = Param("param", ty.Of(input));
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
@@ -562,15 +562,15 @@ TEST_F(LocationDecorationTests, BadType_Input_Struct_RuntimeArray) {
             "of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, BadMemberType_Input) {
+TEST_F(LocationAttributeTests, BadMemberType_Input) {
   // [[block]]
   // struct S { @location(0) m: array<i32>; };
   // @stage(fragment)
   // fn frag_main( a: S) {}
 
   auto* m = Member(Source{{34, 56}}, "m", ty.array<i32>(),
-                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
-  auto* s = Structure("S", {m}, ast::DecorationList{StructBlock()});
+                   ast::AttributeList{Location(Source{{12, 34}}, 0u)});
+  auto* s = Structure("S", {m}, ast::AttributeList{StructBlock()});
   auto* p = Param("a", ty.Of(s));
 
   Func("frag_main", {p}, ty.void_(), {},
@@ -584,12 +584,12 @@ TEST_F(LocationDecorationTests, BadMemberType_Input) {
             "declarations of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, BadMemberType_Output) {
+TEST_F(LocationAttributeTests, BadMemberType_Output) {
   // struct S { @location(0) m: atomic<i32>; };
   // @stage(fragment)
   // fn frag_main() -> S {}
   auto* m = Member(Source{{34, 56}}, "m", ty.atomic<i32>(),
-                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+                   ast::AttributeList{Location(Source{{12, 34}}, 0u)});
   auto* s = Structure("S", {m});
 
   Func("frag_main", {}, ty.Of(s), {Return(Construct(ty.Of(s)))},
@@ -603,11 +603,11 @@ TEST_F(LocationDecorationTests, BadMemberType_Output) {
             "declarations of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, BadMemberType_Unused) {
+TEST_F(LocationAttributeTests, BadMemberType_Unused) {
   // struct S { @location(0) m: mat3x2<f32>; };
 
   auto* m = Member(Source{{34, 56}}, "m", ty.mat3x2<f32>(),
-                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+                   ast::AttributeList{Location(Source{{12, 34}}, 0u)});
   Structure("S", {m});
 
   EXPECT_FALSE(r()->Resolve());
@@ -618,7 +618,7 @@ TEST_F(LocationDecorationTests, BadMemberType_Unused) {
             "declarations of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, ReturnType_Struct_Valid) {
+TEST_F(LocationAttributeTests, ReturnType_Struct_Valid) {
   // struct Output {
   //   @location(0) a : f32;
   //   @builtin(frag_depth) b : f32;
@@ -637,7 +637,7 @@ TEST_F(LocationDecorationTests, ReturnType_Struct_Valid) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(LocationDecorationTests, ReturnType_Struct) {
+TEST_F(LocationAttributeTests, ReturnType_Struct) {
   // struct Output {
   //   a : f32;
   // };
@@ -658,7 +658,7 @@ TEST_F(LocationDecorationTests, ReturnType_Struct) {
             "declarations of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, ReturnType_Struct_NestedStruct) {
+TEST_F(LocationAttributeTests, ReturnType_Struct_NestedStruct) {
   // struct Inner {
   //   @location(0) b : f32;
   // };
@@ -681,7 +681,7 @@ TEST_F(LocationDecorationTests, ReturnType_Struct_NestedStruct) {
             "12:34 note: while analysing entry point 'main'");
 }
 
-TEST_F(LocationDecorationTests, ReturnType_Struct_RuntimeArray) {
+TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
   // [[block]]
   // struct Output {
   //   @location(0) a : array<f32>;
@@ -693,7 +693,7 @@ TEST_F(LocationDecorationTests, ReturnType_Struct_RuntimeArray) {
   auto* output = Structure("Output",
                            {Member(Source{{13, 43}}, "a", ty.array<float>(),
                                    {Location(Source{{12, 34}}, 0)})},
-                           {create<ast::StructBlockDecoration>()});
+                           {create<ast::StructBlockAttribute>()});
   Func(Source{{12, 34}}, "main", {}, ty.Of(output),
        {Return(Construct(ty.Of(output)))},
        {Stage(ast::PipelineStage::kFragment)});
@@ -706,60 +706,60 @@ TEST_F(LocationDecorationTests, ReturnType_Struct_RuntimeArray) {
             "declarations of numeric scalar or numeric vector type");
 }
 
-TEST_F(LocationDecorationTests, ComputeShaderLocation_Input) {
+TEST_F(LocationAttributeTests, ComputeShaderLocation_Input) {
   Func("main", {}, ty.i32(), {Return(Expr(1))},
        {Stage(ast::PipelineStage::kCompute),
-        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))},
-       ast::DecorationList{Location(Source{{12, 34}}, 1)});
+        create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))},
+       ast::AttributeList{Location(Source{{12, 34}}, 1)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: decoration is not valid for compute shader output");
+            "12:34 error: attribute is not valid for compute shader output");
 }
 
-TEST_F(LocationDecorationTests, ComputeShaderLocation_Output) {
+TEST_F(LocationAttributeTests, ComputeShaderLocation_Output) {
   auto* input = Param("input", ty.i32(),
-                      ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+                      ast::AttributeList{Location(Source{{12, 34}}, 0u)});
   Func("main", {input}, ty.void_(), {},
        {Stage(ast::PipelineStage::kCompute),
-        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+        create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: decoration is not valid for compute shader inputs");
+            "12:34 error: attribute is not valid for compute shader inputs");
 }
 
-TEST_F(LocationDecorationTests, ComputeShaderLocationStructMember_Output) {
-  auto* m = Member("m", ty.i32(),
-                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
+  auto* m =
+      Member("m", ty.i32(), ast::AttributeList{Location(Source{{12, 34}}, 0u)});
   auto* s = Structure("S", {m});
   Func(Source{{56, 78}}, "main", {}, ty.Of(s),
        ast::StatementList{Return(Expr(Construct(ty.Of(s))))},
        {Stage(ast::PipelineStage::kCompute),
-        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+        create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: decoration is not valid for compute shader output\n"
+            "12:34 error: attribute is not valid for compute shader output\n"
             "56:78 note: while analysing entry point 'main'");
 }
 
-TEST_F(LocationDecorationTests, ComputeShaderLocationStructMember_Input) {
-  auto* m = Member("m", ty.i32(),
-                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
+  auto* m =
+      Member("m", ty.i32(), ast::AttributeList{Location(Source{{12, 34}}, 0u)});
   auto* s = Structure("S", {m});
   auto* input = Param("input", ty.Of(s));
   Func(Source{{56, 78}}, "main", {input}, ty.void_(), {},
        {Stage(ast::PipelineStage::kCompute),
-        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+        create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: decoration is not valid for compute shader inputs\n"
+            "12:34 error: attribute is not valid for compute shader inputs\n"
             "56:78 note: while analysing entry point 'main'");
 }
 
-TEST_F(LocationDecorationTests, Duplicate_input) {
+TEST_F(LocationAttributeTests, Duplicate_input) {
   // @stage(fragment)
   // fn main(@location(1) param_a : f32,
   //         @location(1) param_b : f32) {}
@@ -773,7 +773,7 @@ TEST_F(LocationDecorationTests, Duplicate_input) {
             "12:34 error: location(1) attribute appears multiple times");
 }
 
-TEST_F(LocationDecorationTests, Duplicate_struct) {
+TEST_F(LocationAttributeTests, Duplicate_struct) {
   // struct InputA {
   //   @location(1) a : f32;
   // };
@@ -797,7 +797,7 @@ TEST_F(LocationDecorationTests, Duplicate_struct) {
 }
 
 }  // namespace
-}  // namespace LocationDecorationTests
+}  // namespace LocationAttributeTests
 
 }  // namespace
 }  // namespace resolver

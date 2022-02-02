@@ -107,14 +107,14 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx,
   }
   if (auto* a = ty->As<sem::Array>()) {
     auto* el = CreateASTTypeFor(ctx, a->ElemType());
-    ast::DecorationList decos;
+    ast::AttributeList attrs;
     if (!a->IsStrideImplicit()) {
-      decos.emplace_back(ctx.dst->create<ast::StrideDecoration>(a->Stride()));
+      attrs.emplace_back(ctx.dst->create<ast::StrideAttribute>(a->Stride()));
     }
     if (a->IsRuntimeSized()) {
-      return ctx.dst->ty.array(el, nullptr, std::move(decos));
+      return ctx.dst->ty.array(el, nullptr, std::move(attrs));
     } else {
-      return ctx.dst->ty.array(el, a->Count(), std::move(decos));
+      return ctx.dst->ty.array(el, a->Count(), std::move(attrs));
     }
   }
   if (auto* s = ty->As<sem::Struct>()) {

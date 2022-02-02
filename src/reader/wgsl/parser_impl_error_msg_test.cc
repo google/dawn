@@ -53,23 +53,23 @@ fn f() { return 1 & >; }
 )");
 }
 
-TEST_F(ParserImplErrorTest, AliasDeclInvalidDeco) {
+TEST_F(ParserImplErrorTest, AliasDeclInvalidAttribute) {
   EXPECT("@override type e=u32;",
-         R"(test.wgsl:1:2 error: unexpected decorations
+         R"(test.wgsl:1:2 error: unexpected attributes
 @override type e=u32;
  ^^^^^^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_AliasDeclInvalidDeco) {
+TEST_F(ParserImplErrorTest, DEPRECATED_AliasDeclInvalidAttribute) {
   EXPECT(
       "[[override]]type e=u32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[override]]type e=u32;
 ^^
 
-test.wgsl:1:3 error: unexpected decorations
+test.wgsl:1:3 error: unexpected attributes
 [[override]]type e=u32;
   ^^^^^^^^
 )");
@@ -322,61 +322,61 @@ fn f() { for (var i : i32 = 0; i < 8; i=i+1) {
 )");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoStageMissingLParen) {
+TEST_F(ParserImplErrorTest, FunctionDeclStageMissingLParen) {
   EXPECT("@stage vertex) fn f() {}",
-         R"(test.wgsl:1:8 error: expected '(' for stage decoration
+         R"(test.wgsl:1:8 error: expected '(' for stage attribute
 @stage vertex) fn f() {}
        ^^^^^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoStageMissingRParen) {
+TEST_F(ParserImplErrorTest, FunctionDeclStageMissingRParen) {
   EXPECT("@stage(vertex fn f() {}",
-         R"(test.wgsl:1:15 error: expected ')' for stage decoration
+         R"(test.wgsl:1:15 error: expected ')' for stage attribute
 @stage(vertex fn f() {}
               ^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_FunctionDeclDecoStageMissingLParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_FunctionDeclStageMissingLParen) {
   EXPECT(
       "[[stage vertex]] fn f() {}",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[stage vertex]] fn f() {}
 ^^
 
-test.wgsl:1:9 error: expected '(' for stage decoration
+test.wgsl:1:9 error: expected '(' for stage attribute
 [[stage vertex]] fn f() {}
         ^^^^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_FunctionDeclDecoStageMissingRParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_FunctionDeclStageMissingRParen) {
   EXPECT(
       "[[stage(vertex]] fn f() {}",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[stage(vertex]] fn f() {}
 ^^
 
-test.wgsl:1:15 error: expected ')' for stage decoration
+test.wgsl:1:15 error: expected ')' for stage attribute
 [[stage(vertex]] fn f() {}
               ^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoStageInvalid) {
+TEST_F(ParserImplErrorTest, FunctionDeclStageInvalid) {
   EXPECT("@stage(x) fn f() {}",
-         R"(test.wgsl:1:8 error: invalid value for stage decoration
+         R"(test.wgsl:1:8 error: invalid value for stage attribute
 @stage(x) fn f() {}
        ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoStageTypeInvalid) {
+TEST_F(ParserImplErrorTest, FunctionDeclStageTypeInvalid) {
   EXPECT("@shader(vertex) fn main() {}",
-         R"(test.wgsl:1:2 error: expected decoration
+         R"(test.wgsl:1:2 error: expected attribute
 @shader(vertex) fn main() {}
  ^^^^^^
 
@@ -387,36 +387,34 @@ test.wgsl:1:8 error: unexpected token
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest,
-       DEPRECATED_FunctionDeclDecoWorkgroupSizeMissingLParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_FunctionDeclWorkgroupSizeMissingLParen) {
   EXPECT(
       "[[workgroup_size 1]] fn f() {}",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[workgroup_size 1]] fn f() {}
 ^^
 
-test.wgsl:1:18 error: expected '(' for workgroup_size decoration
+test.wgsl:1:18 error: expected '(' for workgroup_size attribute
 [[workgroup_size 1]] fn f() {}
                  ^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest,
-       DEPRECATED_FunctionDeclDecoWorkgroupSizeMissingRParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_FunctionDeclWorkgroupSizeMissingRParen) {
   EXPECT(
       "[[workgroup_size(1]] fn f() {}",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[workgroup_size(1]] fn f() {}
 ^^
 
-test.wgsl:1:19 error: expected ')' for workgroup_size decoration
+test.wgsl:1:19 error: expected ')' for workgroup_size attribute
 [[workgroup_size(1]] fn f() {}
                   ^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXInvalid) {
+TEST_F(ParserImplErrorTest, FunctionDeclWorkgroupSizeXInvalid) {
   EXPECT("@workgroup_size() fn f() {}",
          R"(test.wgsl:1:17 error: expected workgroup_size x parameter
 @workgroup_size() fn f() {}
@@ -424,7 +422,7 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXInvalid) {
 )");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYInvalid) {
+TEST_F(ParserImplErrorTest, FunctionDeclWorkgroupSizeYInvalid) {
   EXPECT("@workgroup_size(1, ) fn f() {}",
          R"(test.wgsl:1:20 error: expected workgroup_size y parameter
 @workgroup_size(1, ) fn f() {}
@@ -432,7 +430,7 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYInvalid) {
 )");
 }
 
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZInvalid) {
+TEST_F(ParserImplErrorTest, FunctionDeclWorkgroupSizeZInvalid) {
   EXPECT("@workgroup_size(1, 2, ) fn f() {}",
          R"(test.wgsl:1:23 error: expected workgroup_size z parameter
 @workgroup_size(1, 2, ) fn f() {}
@@ -517,7 +515,7 @@ fn f() {
 
 TEST_F(ParserImplErrorTest, FunctionScopeUnusedDecl) {
   EXPECT("fn f(a:i32)->i32{return a;@size(1)}",
-         R"(test.wgsl:1:28 error: unexpected decorations
+         R"(test.wgsl:1:28 error: unexpected attributes
 fn f(a:i32)->i32{return a;@size(1)}
                            ^^^^
 )");
@@ -639,9 +637,9 @@ let i : vec2<i32> = vec2<i32>(1, 2;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclInvalidDeco) {
+TEST_F(ParserImplErrorTest, GlobalDeclInvalidAttribute) {
   EXPECT("@stage(vertex) x;",
-         R"(test.wgsl:1:16 error: expected declaration after decorations
+         R"(test.wgsl:1:16 error: expected declaration after attributes
 @stage(vertex) x;
                ^
 )");
@@ -728,10 +726,10 @@ var x : texture_storage_2d<1>;
 }
 
 // TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructDecoMissingStruct) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructAttrMissingStruct) {
   EXPECT(
       "[[block]];",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[block]];
 ^^
 
@@ -739,17 +737,17 @@ test.wgsl:1:3 warning: use of deprecated language feature: [[block]] attributes 
 [[block]];
   ^^^^^
 
-test.wgsl:1:10 error: expected declaration after decorations
+test.wgsl:1:10 error: expected declaration after attributes
 [[block]];
          ^
 )");
 }
 
 // TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructDecoMissingEnd) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructAttrMissingEnd) {
   EXPECT(
       "[[block struct {};",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[block struct {};
 ^^
 
@@ -757,7 +755,7 @@ test.wgsl:1:3 warning: use of deprecated language feature: [[block]] attributes 
 [[block struct {};
   ^^^^^
 
-test.wgsl:1:9 error: expected ']]' for decoration list
+test.wgsl:1:9 error: expected ']]' for attribute list
 [[block struct {};
         ^^^^^^
 )");
@@ -788,28 +786,28 @@ struct S { i : i32;
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructMemberDecoEmpty) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructMemberAttrEmpty) {
   EXPECT(
       "struct S { [[]] i : i32; };",
-      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 struct S { [[]] i : i32; };
            ^^
 
-test.wgsl:1:14 error: empty decoration list
+test.wgsl:1:14 error: empty attribute list
 struct S { [[]] i : i32; };
              ^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructMemberDecoMissingEnd) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructMemberAttrMissingEnd) {
   EXPECT(
       "struct S { [[ i : i32; };",
-      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 struct S { [[ i : i32; };
            ^^
 
-test.wgsl:1:15 error: expected decoration
+test.wgsl:1:15 error: expected attribute
 struct S { [[ i : i32; };
               ^
 )");
@@ -836,11 +834,11 @@ TEST_F(ParserImplErrorTest,
        DEPRECATED_GlobalDeclStructMemberAlignMissingLParen) {
   EXPECT(
       "struct S { [[align 1)]] i : i32; };",
-      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 struct S { [[align 1)]] i : i32; };
            ^^
 
-test.wgsl:1:20 error: expected '(' for align decoration
+test.wgsl:1:20 error: expected '(' for align attribute
 struct S { [[align 1)]] i : i32; };
                    ^
 )");
@@ -851,11 +849,11 @@ TEST_F(ParserImplErrorTest,
        DEPRECATED_GlobalDeclStructMemberAlignMissingRParen) {
   EXPECT(
       "struct S { [[align(1]] i : i32; };",
-      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 struct S { [[align(1]] i : i32; };
            ^^
 
-test.wgsl:1:21 error: expected ')' for align decoration
+test.wgsl:1:21 error: expected ')' for align attribute
 struct S { [[align(1]] i : i32; };
                     ^^
 )");
@@ -864,7 +862,7 @@ struct S { [[align(1]] i : i32; };
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignInvaldValue) {
   EXPECT(
       "struct S { @align(x) i : i32; };",
-      R"(test.wgsl:1:19 error: expected signed integer literal for align decoration
+      R"(test.wgsl:1:19 error: expected signed integer literal for align attribute
 struct S { @align(x) i : i32; };
                   ^
 )");
@@ -872,7 +870,7 @@ struct S { @align(x) i : i32; };
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignNegativeValue) {
   EXPECT("struct S { @align(-2) i : i32; };",
-         R"(test.wgsl:1:19 error: align decoration must be positive
+         R"(test.wgsl:1:19 error: align attribute must be positive
 struct S { @align(-2) i : i32; };
                   ^^
 )");
@@ -883,11 +881,11 @@ TEST_F(ParserImplErrorTest,
        DEPRECATED_GlobalDeclStructMemberSizeMissingLParen) {
   EXPECT(
       "struct S { [[size 1)]] i : i32; };",
-      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 struct S { [[size 1)]] i : i32; };
            ^^
 
-test.wgsl:1:19 error: expected '(' for size decoration
+test.wgsl:1:19 error: expected '(' for size attribute
 struct S { [[size 1)]] i : i32; };
                   ^
 )");
@@ -898,11 +896,11 @@ TEST_F(ParserImplErrorTest,
        DEPRECATED_GlobalDeclStructMemberSizeMissingRParen) {
   EXPECT(
       "struct S { [[size(1]] i : i32; };",
-      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:12 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 struct S { [[size(1]] i : i32; };
            ^^
 
-test.wgsl:1:20 error: expected ')' for size decoration
+test.wgsl:1:20 error: expected ')' for size attribute
 struct S { [[size(1]] i : i32; };
                    ^^
 )");
@@ -911,7 +909,7 @@ struct S { [[size(1]] i : i32; };
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeInvaldValue) {
   EXPECT(
       "struct S { @size(x) i : i32; };",
-      R"(test.wgsl:1:18 error: expected signed integer literal for size decoration
+      R"(test.wgsl:1:18 error: expected signed integer literal for size attribute
 struct S { @size(x) i : i32; };
                  ^
 )");
@@ -919,7 +917,7 @@ struct S { @size(x) i : i32; };
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeNegativeValue) {
   EXPECT("struct S { @size(-2) i : i32; };",
-         R"(test.wgsl:1:18 error: size decoration must be positive
+         R"(test.wgsl:1:18 error: size attribute must be positive
 struct S { @size(-2) i : i32; };
                  ^^
 )");
@@ -955,14 +953,14 @@ type meow = f32
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclTypeDecoInvalid) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclTypeAttrInvalid) {
   EXPECT(
       "var x : [[]] i32;",
-      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 var x : [[]] i32;
         ^^
 
-test.wgsl:1:11 error: empty decoration list
+test.wgsl:1:11 error: empty attribute list
 var x : [[]] i32;
           ^^
 )");
@@ -984,70 +982,68 @@ var i : array<u32, 3;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoNotArray) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarArrayAttrNotArray) {
   EXPECT("var i : @location(1) i32;",
-         R"(test.wgsl:1:10 error: unexpected decorations
+         R"(test.wgsl:1:10 error: unexpected attributes
 var i : @location(1) i32;
          ^^^^^^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarArrayDecoMissingEnd) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarArrayAttrMissingEnd) {
   EXPECT(
       "var i : [[location(1) array<i32>;",
-      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 var i : [[location(1) array<i32>;
         ^^
 
-test.wgsl:1:23 error: expected ']]' for decoration list
+test.wgsl:1:23 error: expected ']]' for attribute list
 var i : [[location(1) array<i32>;
                       ^^^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest,
-       DEPRECATED_GlobalDeclVarArrayDecoStrideMissingLParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarArrayStrideMissingLParen) {
   EXPECT(
       "var i : [[stride 1)]] array<i32>;",
-      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 var i : [[stride 1)]] array<i32>;
         ^^
 
-test.wgsl:1:18 error: expected '(' for stride decoration
+test.wgsl:1:18 error: expected '(' for stride attribute
 var i : [[stride 1)]] array<i32>;
                  ^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest,
-       DEPRECATED_GlobalDeclVarArrayDecoStrideMissingRParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarArrayStrideMissingRParen) {
   EXPECT(
       "var i : [[location(1]] array<i32>;",
-      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 var i : [[location(1]] array<i32>;
         ^^
 
-test.wgsl:1:21 error: expected ')' for location decoration
+test.wgsl:1:21 error: expected ')' for location attribute
 var i : [[location(1]] array<i32>;
                     ^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideInvalid) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarArrayStrideInvalid) {
   EXPECT(
       "var i : @stride(x) array<i32>;",
-      R"(test.wgsl:1:17 error: expected signed integer literal for stride decoration
+      R"(test.wgsl:1:17 error: expected signed integer literal for stride attribute
 var i : @stride(x) array<i32>;
                 ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideNegative) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarArrayStrideNegative) {
   EXPECT("var i : @stride(-1) array<i32>;",
-         R"(test.wgsl:1:17 error: stride decoration must be greater than 0
+         R"(test.wgsl:1:17 error: stride attribute must be greater than 0
 var i : @stride(-1) array<i32>;
                 ^^
 )");
@@ -1078,36 +1074,36 @@ var i : array<u32, !>;
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoListEmpty) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrListEmpty) {
   EXPECT(
       "[[]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[]] var i : i32;
 ^^
 
-test.wgsl:1:3 error: empty decoration list
+test.wgsl:1:3 error: empty attribute list
 [[]] var i : i32;
   ^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoListInvalid) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrListInvalid) {
   EXPECT(
       "[[location(1), meow]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[location(1), meow]] var i : i32;
 ^^
 
-test.wgsl:1:16 error: expected decoration
+test.wgsl:1:16 error: expected attribute
 [[location(1), meow]] var i : i32;
                ^^^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListMissingComma) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrListMissingComma) {
   EXPECT("@location(1) group(2) var i : i32;",
-         R"(test.wgsl:1:14 error: expected declaration after decorations
+         R"(test.wgsl:1:14 error: expected declaration after attributes
 @location(1) group(2) var i : i32;
              ^^^^^
 
@@ -1118,117 +1114,117 @@ test.wgsl:1:19 error: unexpected token
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoListMissingEnd) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrListMissingEnd) {
   EXPECT(
       "[[location(1) meow]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[location(1) meow]] var i : i32;
 ^^
 
-test.wgsl:1:15 error: expected ']]' for decoration list
+test.wgsl:1:15 error: expected ']]' for attribute list
 [[location(1) meow]] var i : i32;
               ^^^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationMissingLParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrLocationMissingLParen) {
   EXPECT("@location 1) var i : i32;",
-         R"(test.wgsl:1:11 error: expected '(' for location decoration
+         R"(test.wgsl:1:11 error: expected '(' for location attribute
 @location 1) var i : i32;
           ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationMissingRParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrLocationMissingRParen) {
   EXPECT("@location (1 var i : i32;",
-         R"(test.wgsl:1:14 error: expected ')' for location decoration
+         R"(test.wgsl:1:14 error: expected ')' for location attribute
 @location (1 var i : i32;
              ^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoLocationMissingLParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrLocationMissingLParen) {
   EXPECT(
       "[[location 1]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[location 1]] var i : i32;
 ^^
 
-test.wgsl:1:12 error: expected '(' for location decoration
+test.wgsl:1:12 error: expected '(' for location attribute
 [[location 1]] var i : i32;
            ^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoLocationMissingRParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrLocationMissingRParen) {
   EXPECT(
       "[[location (1]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[location (1]] var i : i32;
 ^^
 
-test.wgsl:1:14 error: expected ')' for location decoration
+test.wgsl:1:14 error: expected ')' for location attribute
 [[location (1]] var i : i32;
              ^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationInvalidValue) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrLocationInvalidValue) {
   EXPECT(
       "@location(x) var i : i32;",
-      R"(test.wgsl:1:11 error: expected signed integer literal for location decoration
+      R"(test.wgsl:1:11 error: expected signed integer literal for location attribute
 @location(x) var i : i32;
           ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinMissingLParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinMissingLParen) {
   EXPECT("@builtin position) var i : i32;",
-         R"(test.wgsl:1:10 error: expected '(' for builtin decoration
+         R"(test.wgsl:1:10 error: expected '(' for builtin attribute
 @builtin position) var i : i32;
          ^^^^^^^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinMissingRParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinMissingRParen) {
   EXPECT("@builtin(position var i : i32;",
-         R"(test.wgsl:1:19 error: expected ')' for builtin decoration
+         R"(test.wgsl:1:19 error: expected ')' for builtin attribute
 @builtin(position var i : i32;
                   ^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoBuiltinMissingLParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrBuiltinMissingLParen) {
   EXPECT(
       "[[builtin position]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[builtin position]] var i : i32;
 ^^
 
-test.wgsl:1:11 error: expected '(' for builtin decoration
+test.wgsl:1:11 error: expected '(' for builtin attribute
 [[builtin position]] var i : i32;
           ^^^^^^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoBuiltinMissingRParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrBuiltinMissingRParen) {
   EXPECT(
       "[[builtin(position]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[builtin(position]] var i : i32;
 ^^
 
-test.wgsl:1:19 error: expected ')' for builtin decoration
+test.wgsl:1:19 error: expected ')' for builtin attribute
 [[builtin(position]] var i : i32;
                   ^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinInvalidIdentifer) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinInvalidIdentifer) {
   EXPECT("@builtin(1) var i : i32;",
          R"(test.wgsl:1:10 error: expected identifier for builtin
 @builtin(1) var i : i32;
@@ -1236,115 +1232,115 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinInvalidIdentifer) {
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBuiltinInvalidValue) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinInvalidValue) {
   EXPECT("@builtin(x) var i : i32;",
-         R"(test.wgsl:1:10 error: invalid value for builtin decoration
+         R"(test.wgsl:1:10 error: invalid value for builtin attribute
 @builtin(x) var i : i32;
          ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingMissingLParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBindingMissingLParen) {
   EXPECT("@binding 1) var i : i32;",
-         R"(test.wgsl:1:10 error: expected '(' for binding decoration
+         R"(test.wgsl:1:10 error: expected '(' for binding attribute
 @binding 1) var i : i32;
          ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingMissingRParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBindingMissingRParen) {
   EXPECT("@binding(1 var i : i32;",
-         R"(test.wgsl:1:12 error: expected ')' for binding decoration
+         R"(test.wgsl:1:12 error: expected ')' for binding attribute
 @binding(1 var i : i32;
            ^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoBindingMissingLParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrBindingMissingLParen) {
   EXPECT(
       "[[binding 1]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[binding 1]] var i : i32;
 ^^
 
-test.wgsl:1:11 error: expected '(' for binding decoration
+test.wgsl:1:11 error: expected '(' for binding attribute
 [[binding 1]] var i : i32;
           ^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoBindingMissingRParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrBindingMissingRParen) {
   EXPECT(
       "[[binding(1]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[binding(1]] var i : i32;
 ^^
 
-test.wgsl:1:12 error: expected ')' for binding decoration
+test.wgsl:1:12 error: expected ')' for binding attribute
 [[binding(1]] var i : i32;
            ^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingInvalidValue) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBindingInvalidValue) {
   EXPECT(
       "@binding(x) var i : i32;",
-      R"(test.wgsl:1:10 error: expected signed integer literal for binding decoration
+      R"(test.wgsl:1:10 error: expected signed integer literal for binding attribute
 @binding(x) var i : i32;
          ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoGroupMissingLParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrGroupMissingLParen) {
   EXPECT("@group 1) var i : i32;",
-         R"(test.wgsl:1:8 error: expected '(' for group decoration
+         R"(test.wgsl:1:8 error: expected '(' for group attribute
 @group 1) var i : i32;
        ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoGroupMissingRParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrGroupMissingRParen) {
   EXPECT("@group(1 var i : i32;",
-         R"(test.wgsl:1:10 error: expected ')' for group decoration
+         R"(test.wgsl:1:10 error: expected ')' for group attribute
 @group(1 var i : i32;
          ^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoGroupMissingLParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrGroupMissingLParen) {
   EXPECT(
       "[[group 1]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[group 1]] var i : i32;
 ^^
 
-test.wgsl:1:9 error: expected '(' for group decoration
+test.wgsl:1:9 error: expected '(' for group attribute
 [[group 1]] var i : i32;
         ^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarDecoGroupMissingRParen) {
+TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclVarAttrGroupMissingRParen) {
   EXPECT(
       "[[group(1]] var i : i32;",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 [[group(1]] var i : i32;
 ^^
 
-test.wgsl:1:10 error: expected ')' for group decoration
+test.wgsl:1:10 error: expected ')' for group attribute
 [[group(1]] var i : i32;
          ^^
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingGroupValue) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBindingGroupValue) {
   EXPECT(
       "@group(x) var i : i32;",
-      R"(test.wgsl:1:8 error: expected signed integer literal for group decoration
+      R"(test.wgsl:1:8 error: expected signed integer literal for group attribute
 @group(x) var i : i32;
        ^
 )");

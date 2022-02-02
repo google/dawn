@@ -14,8 +14,8 @@
 
 #include "src/ast/function.h"
 
-#include "src/ast/stage_decoration.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Function);
@@ -29,15 +29,15 @@ Function::Function(ProgramID pid,
                    VariableList parameters,
                    const Type* return_ty,
                    const BlockStatement* b,
-                   DecorationList decos,
-                   DecorationList return_type_decos)
+                   AttributeList attrs,
+                   AttributeList return_type_attrs)
     : Base(pid, src),
       symbol(sym),
       params(std::move(parameters)),
       return_type(return_ty),
       body(b),
-      decorations(std::move(decos)),
-      return_type_decorations(std::move(return_type_decos)) {
+      attributes(std::move(attrs)),
+      return_type_attributes(std::move(return_type_attrs)) {
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
   for (auto* param : params) {
@@ -46,11 +46,11 @@ Function::Function(ProgramID pid,
   }
   TINT_ASSERT(AST, symbol.IsValid());
   TINT_ASSERT(AST, return_type);
-  for (auto* deco : decorations) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
+  for (auto* attr : attributes) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
   }
-  for (auto* deco : return_type_decorations) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
+  for (auto* attr : return_type_attributes) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
   }
 }
 
@@ -59,7 +59,7 @@ Function::Function(Function&&) = default;
 Function::~Function() = default;
 
 PipelineStage Function::PipelineStage() const {
-  if (auto* stage = GetDecoration<StageDecoration>(decorations)) {
+  if (auto* stage = GetAttribute<StageAttribute>(attributes)) {
     return stage->stage;
   }
   return PipelineStage::kNone;
@@ -72,9 +72,9 @@ const Function* Function::Clone(CloneContext* ctx) const {
   auto p = ctx->Clone(params);
   auto* ret = ctx->Clone(return_type);
   auto* b = ctx->Clone(body);
-  auto decos = ctx->Clone(decorations);
-  auto ret_decos = ctx->Clone(return_type_decorations);
-  return ctx->dst->create<Function>(src, sym, p, ret, b, decos, ret_decos);
+  auto attrs = ctx->Clone(attributes);
+  auto ret_attrs = ctx->Clone(return_type_attributes);
+  return ctx->dst->create<Function>(src, sym, p, ret, b, attrs, ret_attrs);
 }
 
 const Function* FunctionList::Find(Symbol sym) const {

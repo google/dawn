@@ -78,17 +78,17 @@ void SingleEntryPoint::Run(CloneContext& ctx,
     } else if (auto* var = decl->As<ast::Variable>()) {
       if (referenced_vars.count(var)) {
         if (var->is_const) {
-          if (auto* deco = ast::GetDecoration<ast::OverrideDecoration>(
-                  var->decorations)) {
+          if (auto* attr =
+                  ast::GetAttribute<ast::OverrideAttribute>(var->attributes)) {
             // It is an overridable constant
-            if (!deco->has_value) {
-              // If the decoration doesn't have numeric ID specified explicitly
-              // Make their ids explicitly assigned in the decoration so that
+            if (!attr->has_value) {
+              // If the attribute doesn't have numeric ID specified explicitly
+              // Make their ids explicitly assigned in the attribute so that
               // they won't be affected by other stripped away constants
               auto* global = sem.Get(var)->As<sem::GlobalVariable>();
               const auto* new_deco =
-                  ctx.dst->Override(deco->source, global->ConstantId());
-              ctx.Replace(deco, new_deco);
+                  ctx.dst->Override(attr->source, global->ConstantId());
+              ctx.Replace(attr, new_deco);
             }
           }
         }

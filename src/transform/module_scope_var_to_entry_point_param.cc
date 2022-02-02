@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/program_builder.h"
 #include "src/sem/call.h"
 #include "src/sem/function.h"
@@ -191,15 +191,15 @@ struct ModuleScopeVarToEntryPointParam::State {
             // parameter. Disable entry point parameter validation.
             auto* disable_validation =
                 ctx.dst->Disable(ast::DisabledValidation::kEntryPointParameter);
-            auto decos = ctx.Clone(var->Declaration()->decorations);
-            decos.push_back(disable_validation);
-            auto* param = ctx.dst->Param(new_var_symbol, store_type(), decos);
+            auto attrs = ctx.Clone(var->Declaration()->attributes);
+            attrs.push_back(disable_validation);
+            auto* param = ctx.dst->Param(new_var_symbol, store_type(), attrs);
             ctx.InsertFront(func_ast->params, param);
           } else if (sc == ast::StorageClass::kStorage ||
                      sc == ast::StorageClass::kUniform) {
             // Variables into the Storage and Uniform storage classes are
             // redeclared as entry point parameters with a pointer type.
-            auto attributes = ctx.Clone(var->Declaration()->decorations);
+            auto attributes = ctx.Clone(var->Declaration()->attributes);
             attributes.push_back(ctx.dst->Disable(
                 ast::DisabledValidation::kEntryPointParameter));
             attributes.push_back(
@@ -258,7 +258,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             auto* constructor = ctx.Clone(var->Declaration()->constructor);
             auto* local_var =
                 ctx.dst->Var(new_var_symbol, store_type(), sc, constructor,
-                             ast::DecorationList{disable_validation});
+                             ast::AttributeList{disable_validation});
             ctx.InsertFront(func_ast->body->statements,
                             ctx.dst->Decl(local_var));
           }
@@ -266,7 +266,7 @@ struct ModuleScopeVarToEntryPointParam::State {
           // For a regular function, redeclare the variable as a parameter.
           // Use a pointer for non-handle types.
           auto* param_type = store_type();
-          ast::DecorationList attributes;
+          ast::AttributeList attributes;
           if (!var->Type()->UnwrapRef()->is_handle()) {
             param_type = ctx.dst->ty.pointer(
                 param_type, sc, var->Declaration()->declared_access);

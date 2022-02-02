@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
@@ -22,11 +22,11 @@ namespace {
 
 TEST_F(ParserImplTest, FunctionDecl) {
   auto p = parser("fn main(a : i32, b : f32) { return; }");
-  auto decos = p->decoration_list();
+  auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto f = p->function_decl(decos.value);
+  ASSERT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto f = p->function_decl(attrs.value);
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(f.errored);
   EXPECT_TRUE(f.matched);
@@ -48,13 +48,13 @@ TEST_F(ParserImplTest, FunctionDecl) {
   EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
-TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
+TEST_F(ParserImplTest, FunctionDecl_AttributeList) {
   auto p = parser("@workgroup_size(2, 3, 4) fn main() { return; }");
-  auto decos = p->decoration_list();
+  auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decos.errored);
-  ASSERT_TRUE(decos.matched);
-  auto f = p->function_decl(decos.value);
+  ASSERT_FALSE(attrs.errored);
+  ASSERT_TRUE(attrs.matched);
+  auto f = p->function_decl(attrs.value);
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(f.errored);
   EXPECT_TRUE(f.matched);
@@ -65,11 +65,11 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
   EXPECT_TRUE(f->return_type->Is<ast::Void>());
   ASSERT_EQ(f->params.size(), 0u);
 
-  auto& decorations = f->decorations;
-  ASSERT_EQ(decorations.size(), 1u);
-  ASSERT_TRUE(decorations[0]->Is<ast::WorkgroupDecoration>());
+  auto& attributes = f->attributes;
+  ASSERT_EQ(attributes.size(), 1u);
+  ASSERT_TRUE(attributes[0]->Is<ast::WorkgroupAttribute>());
 
-  auto values = decorations[0]->As<ast::WorkgroupDecoration>()->Values();
+  auto values = attributes[0]->As<ast::WorkgroupAttribute>()->Values();
 
   ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
   EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
@@ -85,15 +85,15 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
   EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
-TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleEntries) {
+TEST_F(ParserImplTest, FunctionDecl_AttributeList_MultipleEntries) {
   auto p = parser(R"(
 @workgroup_size(2, 3, 4) @stage(compute)
 fn main() { return; })");
-  auto decos = p->decoration_list();
+  auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decos.errored);
-  ASSERT_TRUE(decos.matched);
-  auto f = p->function_decl(decos.value);
+  ASSERT_FALSE(attrs.errored);
+  ASSERT_TRUE(attrs.matched);
+  auto f = p->function_decl(attrs.value);
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(f.errored);
   EXPECT_TRUE(f.matched);
@@ -104,11 +104,11 @@ fn main() { return; })");
   EXPECT_TRUE(f->return_type->Is<ast::Void>());
   ASSERT_EQ(f->params.size(), 0u);
 
-  auto& decorations = f->decorations;
-  ASSERT_EQ(decorations.size(), 2u);
+  auto& attributes = f->attributes;
+  ASSERT_EQ(attributes.size(), 2u);
 
-  ASSERT_TRUE(decorations[0]->Is<ast::WorkgroupDecoration>());
-  auto values = decorations[0]->As<ast::WorkgroupDecoration>()->Values();
+  ASSERT_TRUE(attributes[0]->Is<ast::WorkgroupAttribute>());
+  auto values = attributes[0]->As<ast::WorkgroupAttribute>()->Values();
 
   ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
   EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
@@ -119,8 +119,8 @@ fn main() { return; })");
   ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
   EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
-  ASSERT_TRUE(decorations[1]->Is<ast::StageDecoration>());
-  EXPECT_EQ(decorations[1]->As<ast::StageDecoration>()->stage,
+  ASSERT_TRUE(attributes[1]->Is<ast::StageAttribute>());
+  EXPECT_EQ(attributes[1]->As<ast::StageAttribute>()->stage,
             ast::PipelineStage::kCompute);
 
   auto* body = f->body;
@@ -128,16 +128,16 @@ fn main() { return; })");
   EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
-TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleLists) {
+TEST_F(ParserImplTest, FunctionDecl_AttributeList_MultipleLists) {
   auto p = parser(R"(
 @workgroup_size(2, 3, 4)
 @stage(compute)
 fn main() { return; })");
-  auto decorations = p->decoration_list();
+  auto attributes = p->attribute_list();
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decorations.errored);
-  ASSERT_TRUE(decorations.matched);
-  auto f = p->function_decl(decorations.value);
+  ASSERT_FALSE(attributes.errored);
+  ASSERT_TRUE(attributes.matched);
+  auto f = p->function_decl(attributes.value);
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(f.errored);
   EXPECT_TRUE(f.matched);
@@ -148,11 +148,11 @@ fn main() { return; })");
   EXPECT_TRUE(f->return_type->Is<ast::Void>());
   ASSERT_EQ(f->params.size(), 0u);
 
-  auto& decos = f->decorations;
-  ASSERT_EQ(decos.size(), 2u);
+  auto& attrs = f->attributes;
+  ASSERT_EQ(attrs.size(), 2u);
 
-  ASSERT_TRUE(decos[0]->Is<ast::WorkgroupDecoration>());
-  auto values = decos[0]->As<ast::WorkgroupDecoration>()->Values();
+  ASSERT_TRUE(attrs[0]->Is<ast::WorkgroupAttribute>());
+  auto values = attrs[0]->As<ast::WorkgroupAttribute>()->Values();
 
   ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
   EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
@@ -163,8 +163,8 @@ fn main() { return; })");
   ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
   EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
-  ASSERT_TRUE(decos[1]->Is<ast::StageDecoration>());
-  EXPECT_EQ(decos[1]->As<ast::StageDecoration>()->stage,
+  ASSERT_TRUE(attrs[1]->Is<ast::StageAttribute>());
+  EXPECT_EQ(attrs[1]->As<ast::StageAttribute>()->stage,
             ast::PipelineStage::kCompute);
 
   auto* body = f->body;
@@ -172,13 +172,13 @@ fn main() { return; })");
   EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
-TEST_F(ParserImplTest, FunctionDecl_ReturnTypeDecorationList) {
+TEST_F(ParserImplTest, FunctionDecl_ReturnTypeAttributeList) {
   auto p = parser("fn main() -> @location(1) f32 { return 1.0; }");
-  auto decos = p->decoration_list();
+  auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto f = p->function_decl(decos.value);
+  ASSERT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto f = p->function_decl(attrs.value);
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(f.errored);
   EXPECT_TRUE(f.matched);
@@ -189,12 +189,12 @@ TEST_F(ParserImplTest, FunctionDecl_ReturnTypeDecorationList) {
   EXPECT_TRUE(f->return_type->Is<ast::F32>());
   ASSERT_EQ(f->params.size(), 0u);
 
-  auto& decorations = f->decorations;
-  EXPECT_EQ(decorations.size(), 0u);
+  auto& attributes = f->attributes;
+  EXPECT_EQ(attributes.size(), 0u);
 
-  auto& ret_type_decorations = f->return_type_decorations;
-  ASSERT_EQ(ret_type_decorations.size(), 1u);
-  auto* loc = ret_type_decorations[0]->As<ast::LocationDecoration>();
+  auto& ret_type_attributes = f->return_type_attributes;
+  ASSERT_EQ(ret_type_attributes.size(), 1u);
+  auto* loc = ret_type_attributes[0]->As<ast::LocationAttribute>();
   ASSERT_TRUE(loc != nullptr);
   EXPECT_EQ(loc->value, 1u);
 
@@ -205,11 +205,11 @@ TEST_F(ParserImplTest, FunctionDecl_ReturnTypeDecorationList) {
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
   auto p = parser("fn main() -> { }");
-  auto decos = p->decoration_list();
+  auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto f = p->function_decl(decos.value);
+  ASSERT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto f = p->function_decl(attrs.value);
   EXPECT_TRUE(f.errored);
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(p->has_error());
@@ -219,11 +219,11 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
   auto p = parser("fn main() { return }");
-  auto decos = p->decoration_list();
+  auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto f = p->function_decl(decos.value);
+  ASSERT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto f = p->function_decl(attrs.value);
   EXPECT_TRUE(f.errored);
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(p->has_error());
@@ -233,11 +233,11 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
 
 TEST_F(ParserImplTest, FunctionDecl_MissingLeftBrace) {
   auto p = parser("fn main() return; }");
-  auto decos = p->decoration_list();
+  auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto f = p->function_decl(decos.value);
+  ASSERT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  auto f = p->function_decl(attrs.value);
   EXPECT_TRUE(f.errored);
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(p->has_error());

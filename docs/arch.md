@@ -94,7 +94,7 @@ Each `ast::Node` represents a **single** part of the program's source, and so
 `ast::Node`s are not shared.
 
 The AST does not perform any verification of its content. For example, the
-`ast::StrideDecoration` node has numeric stride parameter, which is a count of
+`ast::StrideAttribute` node has numeric stride parameter, which is a count of
 the number of bytes from the start of one array element to the start of the
 next. The AST node itself does not constrain the set of stride values that you
 can set, aside from storing it as an unsigned integer.

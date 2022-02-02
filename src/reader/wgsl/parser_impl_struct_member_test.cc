@@ -24,151 +24,149 @@ TEST_F(ParserImplTest, StructMember_Parses) {
 
   auto& builder = p->builder();
 
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(decos.value.size(), 0u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  EXPECT_EQ(attrs.value.size(), 0u);
 
-  auto m = p->expect_struct_member(decos.value);
+  auto m = p->expect_struct_member(attrs.value);
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
   EXPECT_TRUE(m->type->Is<ast::I32>());
-  EXPECT_EQ(m->decorations.size(), 0u);
+  EXPECT_EQ(m->attributes.size(), 0u);
 
   EXPECT_EQ(m->source.range, (Source::Range{{1u, 1u}, {1u, 2u}}));
   EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 5u}, {1u, 8u}}));
 }
 
-TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
+TEST_F(ParserImplTest, StructMember_ParsesWithAlignAttribute) {
   auto p = parser("@align(2) a : i32;");
 
   auto& builder = p->builder();
 
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  EXPECT_EQ(decos.value.size(), 1u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
+  EXPECT_EQ(attrs.value.size(), 1u);
 
-  auto m = p->expect_struct_member(decos.value);
+  auto m = p->expect_struct_member(attrs.value);
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
   EXPECT_TRUE(m->type->Is<ast::I32>());
-  EXPECT_EQ(m->decorations.size(), 1u);
-  EXPECT_TRUE(m->decorations[0]->Is<ast::StructMemberAlignDecoration>());
-  EXPECT_EQ(m->decorations[0]->As<ast::StructMemberAlignDecoration>()->align,
-            2u);
+  EXPECT_EQ(m->attributes.size(), 1u);
+  EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberAlignAttribute>());
+  EXPECT_EQ(m->attributes[0]->As<ast::StructMemberAlignAttribute>()->align, 2u);
 
   EXPECT_EQ(m->source.range, (Source::Range{{1u, 11u}, {1u, 12u}}));
   EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 15u}, {1u, 18u}}));
 }
 
-TEST_F(ParserImplTest, StructMember_ParsesWithSizeDecoration) {
+TEST_F(ParserImplTest, StructMember_ParsesWithSizeAttribute) {
   auto p = parser("@size(2) a : i32;");
 
   auto& builder = p->builder();
 
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  EXPECT_EQ(decos.value.size(), 1u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
+  EXPECT_EQ(attrs.value.size(), 1u);
 
-  auto m = p->expect_struct_member(decos.value);
+  auto m = p->expect_struct_member(attrs.value);
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
   EXPECT_TRUE(m->type->Is<ast::I32>());
-  EXPECT_EQ(m->decorations.size(), 1u);
-  EXPECT_TRUE(m->decorations[0]->Is<ast::StructMemberSizeDecoration>());
-  EXPECT_EQ(m->decorations[0]->As<ast::StructMemberSizeDecoration>()->size, 2u);
+  EXPECT_EQ(m->attributes.size(), 1u);
+  EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
+  EXPECT_EQ(m->attributes[0]->As<ast::StructMemberSizeAttribute>()->size, 2u);
 
   EXPECT_EQ(m->source.range, (Source::Range{{1u, 10u}, {1u, 11u}}));
   EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
 }
 
-TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
+TEST_F(ParserImplTest, StructMember_ParsesWithAttribute) {
   auto p = parser("@size(2) a : i32;");
 
   auto& builder = p->builder();
 
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  EXPECT_EQ(decos.value.size(), 1u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
+  EXPECT_EQ(attrs.value.size(), 1u);
 
-  auto m = p->expect_struct_member(decos.value);
+  auto m = p->expect_struct_member(attrs.value);
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
   EXPECT_TRUE(m->type->Is<ast::I32>());
-  EXPECT_EQ(m->decorations.size(), 1u);
-  EXPECT_TRUE(m->decorations[0]->Is<ast::StructMemberSizeDecoration>());
-  EXPECT_EQ(m->decorations[0]->As<ast::StructMemberSizeDecoration>()->size, 2u);
+  EXPECT_EQ(m->attributes.size(), 1u);
+  EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
+  EXPECT_EQ(m->attributes[0]->As<ast::StructMemberSizeAttribute>()->size, 2u);
 
   EXPECT_EQ(m->source.range, (Source::Range{{1u, 10u}, {1u, 11u}}));
   EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
 }
 
-TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
+TEST_F(ParserImplTest, StructMember_ParsesWithMultipleattributes) {
   auto p = parser(R"(@size(2)
 @align(4) a : i32;)");
 
   auto& builder = p->builder();
 
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  EXPECT_EQ(decos.value.size(), 2u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
+  EXPECT_EQ(attrs.value.size(), 2u);
 
-  auto m = p->expect_struct_member(decos.value);
+  auto m = p->expect_struct_member(attrs.value);
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
   EXPECT_TRUE(m->type->Is<ast::I32>());
-  EXPECT_EQ(m->decorations.size(), 2u);
-  EXPECT_TRUE(m->decorations[0]->Is<ast::StructMemberSizeDecoration>());
-  EXPECT_EQ(m->decorations[0]->As<ast::StructMemberSizeDecoration>()->size, 2u);
-  EXPECT_TRUE(m->decorations[1]->Is<ast::StructMemberAlignDecoration>());
-  EXPECT_EQ(m->decorations[1]->As<ast::StructMemberAlignDecoration>()->align,
-            4u);
+  EXPECT_EQ(m->attributes.size(), 2u);
+  EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
+  EXPECT_EQ(m->attributes[0]->As<ast::StructMemberSizeAttribute>()->size, 2u);
+  EXPECT_TRUE(m->attributes[1]->Is<ast::StructMemberAlignAttribute>());
+  EXPECT_EQ(m->attributes[1]->As<ast::StructMemberAlignAttribute>()->align, 4u);
 
   EXPECT_EQ(m->source.range, (Source::Range{{2u, 11u}, {2u, 12u}}));
   EXPECT_EQ(m->type->source.range, (Source::Range{{2u, 15u}, {2u, 18u}}));
 }
 
-TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
+TEST_F(ParserImplTest, StructMember_InvalidAttribute) {
   auto p = parser("@size(nan) a : i32;");
-  auto decos = p->decoration_list();
-  EXPECT_TRUE(decos.errored);
-  EXPECT_FALSE(decos.matched);
+  auto attrs = p->attribute_list();
+  EXPECT_TRUE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
 
-  auto m = p->expect_struct_member(decos.value);
+  auto m = p->expect_struct_member(attrs.value);
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:7: expected signed integer literal for size decoration");
+            "1:7: expected signed integer literal for size attribute");
 }
 
 TEST_F(ParserImplTest, StructMember_MissingSemicolon) {
   auto p = parser("a : i32");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
 
-  auto m = p->expect_struct_member(decos.value);
+  auto m = p->expect_struct_member(attrs.value);
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(m.errored);
   ASSERT_EQ(m.value, nullptr);

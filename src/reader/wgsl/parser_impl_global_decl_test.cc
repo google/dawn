@@ -131,7 +131,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
             "main");
 }
 
-TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
+TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
   auto p = parser("@workgroup_size(2) fn main() { return; }");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -187,14 +187,14 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   ASSERT_TRUE(ty->Is<ast::Array>());
   const auto* arr = ty->As<ast::Array>();
 
-  ASSERT_EQ(arr->decorations.size(), 1u);
-  auto* stride = arr->decorations[0];
-  ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
-  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride, 4u);
+  ASSERT_EQ(arr->attributes.size(), 1u);
+  auto* stride = arr->attributes[0];
+  ASSERT_TRUE(stride->Is<ast::StrideAttribute>());
+  ASSERT_EQ(stride->As<ast::StrideAttribute>()->stride, 4u);
 }
 
-// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
+// TODO(crbug.com/tint/1324): DEPRECATED: Remove when @block is removed.
+TEST_F(ParserImplTest, GlobalDecl_Struct_WithAttribute) {
   auto p = parser("[[block]] struct A { data: f32; }");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();

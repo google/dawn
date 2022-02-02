@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 
@@ -229,11 +229,11 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
   auto* buf = Structure("S", {Member("inner", ty.Of(inner))},
-                        {create<ast::StructBlockDecoration>()});
+                        {create<ast::StructBlockAttribute>()});
   auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(0),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(0),
+                             create<ast::GroupAttribute>(0),
                          });
 
   auto* expr =

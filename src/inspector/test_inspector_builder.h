@@ -21,11 +21,11 @@
 #include <vector>
 
 #include "src/ast/call_statement.h"
-#include "src/ast/disable_validation_decoration.h"
-#include "src/ast/override_decoration.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
+#include "src/ast/override_attribute.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/program_builder.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
@@ -45,16 +45,16 @@ class InspectorBuilder : public ProgramBuilder {
 
   /// Generates an empty function
   /// @param name name of the function created
-  /// @param decorations the function decorations
-  void MakeEmptyBodyFunction(std::string name, ast::DecorationList decorations);
+  /// @param attributes the function attributes
+  void MakeEmptyBodyFunction(std::string name, ast::AttributeList attributes);
 
   /// Generates a function that calls other functions
   /// @param caller name of the function created
   /// @param callees names of the functions to be called
-  /// @param decorations the function decorations
+  /// @param attributes the function attributes
   void MakeCallerBodyFunction(std::string caller,
                               std::vector<std::string> callees,
-                              ast::DecorationList decorations);
+                              ast::AttributeList attributes);
 
   /// Generates a struct that contains user-defined IO members
   /// @param name the name of the generated struct
@@ -76,11 +76,11 @@ class InspectorBuilder : public ProgramBuilder {
   /// @param name name of the function created
   /// @param inout_vars tuples of {in, out} that will be converted into out = in
   ///                   calls in the function body
-  /// @param decorations the function decorations
+  /// @param attributes the function attributes
   void MakeInOutVariableBodyFunction(
       std::string name,
       std::vector<std::tuple<std::string, std::string>> inout_vars,
-      ast::DecorationList decorations);
+      ast::AttributeList attributes);
 
   // TODO(crbug.com/tint/697): Remove this.
   /// Generates a function that references in/out variables and calls another
@@ -89,13 +89,13 @@ class InspectorBuilder : public ProgramBuilder {
   /// @param callee name of the function to be called
   /// @param inout_vars tuples of {in, out} that will be converted into out = in
   ///                   calls in the function body
-  /// @param decorations the function decorations
+  /// @param attributes the function attributes
   /// @returns a function object
   const ast::Function* MakeInOutVariableCallerBodyFunction(
       std::string caller,
       std::string callee,
       std::vector<std::tuple<std::string, std::string>> inout_vars,
-      ast::DecorationList decorations);
+      ast::AttributeList attributes);
 
   /// Add a pipeline constant to the global variables, with a specific ID.
   /// @param name name of the variable to add
@@ -110,7 +110,7 @@ class InspectorBuilder : public ProgramBuilder {
       const ast::Type* type,
       const ast::Expression* constructor) {
     return GlobalConst(name, type, constructor,
-                       ast::DecorationList{
+                       ast::AttributeList{
                            Override(id),
                        });
   }
@@ -126,7 +126,7 @@ class InspectorBuilder : public ProgramBuilder {
       const ast::Type* type,
       const ast::Expression* constructor) {
     return GlobalConst(name, type, constructor,
-                       ast::DecorationList{
+                       ast::AttributeList{
                            Override(),
                        });
   }
@@ -136,13 +136,13 @@ class InspectorBuilder : public ProgramBuilder {
   /// @param func name of the function created
   /// @param var name of the constant to be reference
   /// @param type type of the const being referenced
-  /// @param decorations the function decorations
+  /// @param attributes the function attributes
   /// @returns a function object
   const ast::Function* MakePlainGlobalReferenceBodyFunction(
       std::string func,
       std::string var,
       const ast::Type* type,
-      ast::DecorationList decorations);
+      ast::AttributeList attributes);
 
   /// @param vec Vector of StageVariable to be searched
   /// @param name Name to be searching for
@@ -177,11 +177,11 @@ class InspectorBuilder : public ProgramBuilder {
   /// Generates a struct member with a specified index and type.
   /// @param index index of the field within the struct
   /// @param type the type of the member field
-  /// @param decorations a list of decorations to apply to the member field
+  /// @param attributes a list of attributes to apply to the member field
   /// @returns a struct member
   const ast::StructMember* MakeStructMember(size_t index,
                                             const ast::Type* type,
-                                            ast::DecorationList decorations);
+                                            ast::AttributeList attributes);
 
   /// Generates types appropriate for using in an uniform buffer
   /// @param name name for the type
@@ -270,7 +270,7 @@ class InspectorBuilder : public ProgramBuilder {
   /// @param sampler_name name of the sampler to use
   /// @param coords_name name of the coords variable to use
   /// @param base_type sampler base type
-  /// @param decorations the function decorations
+  /// @param attributes the function attributes
   /// @returns a function that references all of the values specified
   const ast::Function* MakeSamplerReferenceBodyFunction(
       const std::string& func_name,
@@ -278,7 +278,7 @@ class InspectorBuilder : public ProgramBuilder {
       const std::string& sampler_name,
       const std::string& coords_name,
       const ast::Type* base_type,
-      ast::DecorationList decorations);
+      ast::AttributeList attributes);
 
   /// Generates a function that references a specific sampler variable
   /// @param func_name name of the function created
@@ -287,7 +287,7 @@ class InspectorBuilder : public ProgramBuilder {
   /// @param coords_name name of the coords variable to use
   /// @param array_index name of the array index variable to use
   /// @param base_type sampler base type
-  /// @param decorations the function decorations
+  /// @param attributes the function attributes
   /// @returns a function that references all of the values specified
   const ast::Function* MakeSamplerReferenceBodyFunction(
       const std::string& func_name,
@@ -296,7 +296,7 @@ class InspectorBuilder : public ProgramBuilder {
       const std::string& coords_name,
       const std::string& array_index,
       const ast::Type* base_type,
-      ast::DecorationList decorations);
+      ast::AttributeList attributes);
 
   /// Generates a function that references a specific comparison sampler
   /// variable.
@@ -306,7 +306,7 @@ class InspectorBuilder : public ProgramBuilder {
   /// @param coords_name name of the coords variable to use
   /// @param depth_name name of the depth reference to use
   /// @param base_type sampler base type
-  /// @param decorations the function decorations
+  /// @param attributes the function attributes
   /// @returns a function that references all of the values specified
   const ast::Function* MakeComparisonSamplerReferenceBodyFunction(
       const std::string& func_name,
@@ -315,7 +315,7 @@ class InspectorBuilder : public ProgramBuilder {
       const std::string& coords_name,
       const std::string& depth_name,
       const ast::Type* base_type,
-      ast::DecorationList decorations);
+      ast::AttributeList attributes);
 
   /// Gets an appropriate type for the data in a given texture type.
   /// @param sampled_kind type of in the texture
@@ -351,13 +351,13 @@ class InspectorBuilder : public ProgramBuilder {
   /// @param func_name name of the function created
   /// @param st_name name of the storage texture to use
   /// @param dim_type type expected by textureDimensons to return
-  /// @param decorations the function decorations
+  /// @param attributes the function attributes
   /// @returns a function that references all of the values specified
   const ast::Function* MakeStorageTextureBodyFunction(
       const std::string& func_name,
       const std::string& st_name,
       const ast::Type* dim_type,
-      ast::DecorationList decorations);
+      ast::AttributeList attributes);
 
   /// Get a generator function that returns a type appropriate for a stage
   /// variable with the given combination of component and composition type.

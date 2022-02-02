@@ -234,18 +234,18 @@ class Resolver {
   // Each return true on success, false on failure.
   bool ValidateAlias(const ast::Alias*);
   bool ValidateArray(const sem::Array* arr, const Source& source);
-  bool ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
-                                     uint32_t el_size,
-                                     uint32_t el_align,
-                                     const Source& source);
+  bool ValidateArrayStrideAttribute(const ast::StrideAttribute* attr,
+                                    uint32_t el_size,
+                                    uint32_t el_align,
+                                    const Source& source);
   bool ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s);
   bool ValidateAtomicVariable(const sem::Variable* var);
   bool ValidateAssignment(const ast::AssignmentStatement* a);
   bool ValidateBitcast(const ast::BitcastExpression* cast, const sem::Type* to);
   bool ValidateBreakStatement(const sem::Statement* stmt);
-  bool ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
-                                 const sem::Type* storage_type,
-                                 const bool is_input);
+  bool ValidateBuiltinAttribute(const ast::BuiltinAttribute* attr,
+                                const sem::Type* storage_type,
+                                const bool is_input);
   bool ValidateContinueStatement(const sem::Statement* stmt);
   bool ValidateDiscardStatement(const sem::Statement* stmt);
   bool ValidateElseStatement(const sem::ElseStatement* stmt);
@@ -256,14 +256,14 @@ class Resolver {
   bool ValidateFunctionCall(const sem::Call* call);
   bool ValidateGlobalVariable(const sem::Variable* var);
   bool ValidateIfStatement(const sem::IfStatement* stmt);
-  bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
-                                     const sem::Type* storage_type);
+  bool ValidateInterpolateAttribute(const ast::InterpolateAttribute* attr,
+                                    const sem::Type* storage_type);
   bool ValidateIntrinsicCall(const sem::Call* call);
-  bool ValidateLocationDecoration(const ast::LocationDecoration* location,
-                                  const sem::Type* type,
-                                  std::unordered_set<uint32_t>& locations,
-                                  const Source& source,
-                                  const bool is_input = false);
+  bool ValidateLocationAttribute(const ast::LocationAttribute* location,
+                                 const sem::Type* type,
+                                 std::unordered_set<uint32_t>& locations,
+                                 const Source& source,
+                                 const bool is_input = false);
   bool ValidateLoopStatement(const sem::LoopStatement* stmt);
   bool ValidateMatrix(const sem::Matrix* ty, const Source& source);
   bool ValidateFunctionParameter(const ast::Function* func,
@@ -291,22 +291,22 @@ class Resolver {
   bool ValidateArrayConstructorOrCast(const ast::CallExpression* ctor,
                                       const sem::Array* arr_type);
   bool ValidateTextureIntrinsicFunction(const sem::Call* call);
-  bool ValidateNoDuplicateDecorations(const ast::DecorationList& decorations);
+  bool ValidateNoDuplicateAttributes(const ast::AttributeList& attributes);
   bool ValidateStorageClassLayout(const sem::Type* type,
                                   ast::StorageClass sc,
                                   Source source);
   bool ValidateStorageClassLayout(const sem::Variable* var);
 
-  /// @returns true if the decoration list contains a
-  /// ast::DisableValidationDecoration with the validation mode equal to
+  /// @returns true if the attribute list contains a
+  /// ast::DisableValidationAttribute with the validation mode equal to
   /// `validation`
-  bool IsValidationDisabled(const ast::DecorationList& decorations,
+  bool IsValidationDisabled(const ast::AttributeList& attributes,
                             ast::DisabledValidation validation) const;
 
-  /// @returns true if the decoration list does not contains a
-  /// ast::DisableValidationDecoration with the validation mode equal to
+  /// @returns true if the attribute list does not contains a
+  /// ast::DisableValidationAttribute with the validation mode equal to
   /// `validation`
-  bool IsValidationEnabled(const ast::DecorationList& decorations,
+  bool IsValidationEnabled(const ast::AttributeList& attributes,
                            ast::DisabledValidation validation) const;
 
   /// Resolves the WorkgroupSize for the given function, assigning it to
@@ -346,7 +346,7 @@ class Resolver {
 
   /// @returns the semantic info for the variable `var`. If an error is
   /// raised, nullptr is returned.
-  /// @note this method does not resolve the decorations as these are
+  /// @note this method does not resolve the attributes as these are
   /// context-dependent (global, local, parameter)
   /// @param var the variable to create or return the `VariableInfo` for
   /// @param kind what kind of variable we are declaring

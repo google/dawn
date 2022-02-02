@@ -179,7 +179,7 @@ fn f() {
 }
 
 // TODO(crbug.com/676): Possibly enable if the spec allows for access
-// decorations in type aliases. If not, just remove.
+// attributes in type aliases. If not, just remove.
 TEST_F(BindingRemapperTest, DISABLED_RemapAccessControlsWithAliases) {
   auto* src = R"(
 struct S {

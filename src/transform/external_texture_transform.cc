@@ -115,11 +115,11 @@ void ExternalTextureTransform::Run(CloneContext& ctx,
         auto clonedSrc = ctx.Clone(var->source);
         auto clonedSym = ctx.Clone(var->symbol);
         auto* clonedConstructor = ctx.Clone(var->constructor);
-        auto clonedDecorations = ctx.Clone(var->decorations);
+        auto clonedAttributes = ctx.Clone(var->attributes);
         auto* newVar = ctx.dst->create<ast::Variable>(
             clonedSrc, clonedSym, var->declared_storage_class,
             var->declared_access, newType, var->is_const, clonedConstructor,
-            clonedDecorations);
+            clonedAttributes);
 
         ctx.Replace(var, newVar);
       }

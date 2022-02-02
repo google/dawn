@@ -55,6 +55,8 @@ set(TINT_LIB_SRCS
   ../include/tint/tint.h
   ast/access.cc
   ast/access.h
+  ast/attribute.cc
+  ast/attribute.h
   ast/alias.cc
   ast/alias.h
   ast/index_accessor_expression.cc
@@ -67,8 +69,8 @@ set(TINT_LIB_SRCS
   ast/atomic.h
   ast/binary_expression.cc
   ast/binary_expression.h
-  ast/binding_decoration.cc
-  ast/binding_decoration.h
+  ast/binding_attribute.cc
+  ast/binding_attribute.h
   ast/bitcast_expression.cc
   ast/bitcast_expression.h
   ast/block_statement.cc
@@ -79,8 +81,8 @@ set(TINT_LIB_SRCS
   ast/bool.h
   ast/break_statement.cc
   ast/break_statement.h
-  ast/builtin_decoration.cc
-  ast/builtin_decoration.h
+  ast/builtin_attribute.cc
+  ast/builtin_attribute.h
   ast/builtin.cc
   ast/builtin.h
   ast/call_expression.cc
@@ -91,12 +93,10 @@ set(TINT_LIB_SRCS
   ast/case_statement.h
   ast/continue_statement.cc
   ast/continue_statement.h
-  ast/decoration.cc
-  ast/decoration.h
   ast/depth_multisampled_texture.cc
   ast/depth_multisampled_texture.h
-  ast/disable_validation_decoration.cc
-  ast/disable_validation_decoration.h
+  ast/disable_validation_attribute.cc
+  ast/disable_validation_attribute.h
   ast/depth_texture.cc
   ast/depth_texture.h
   ast/discard_statement.cc
@@ -117,8 +117,8 @@ set(TINT_LIB_SRCS
   ast/for_loop_statement.h
   ast/function.cc
   ast/function.h
-  ast/group_decoration.cc
-  ast/group_decoration.h
+  ast/group_attribute.cc
+  ast/group_attribute.h
   ast/i32.cc
   ast/i32.h
   ast/identifier_expression.cc
@@ -127,16 +127,16 @@ set(TINT_LIB_SRCS
   ast/if_statement.h
   ast/int_literal_expression.cc
   ast/int_literal_expression.h
-  ast/internal_decoration.cc
-  ast/internal_decoration.h
-  ast/interpolate_decoration.cc
-  ast/interpolate_decoration.h
-  ast/invariant_decoration.cc
-  ast/invariant_decoration.h
+  ast/internal_attribute.cc
+  ast/internal_attribute.h
+  ast/interpolate_attribute.cc
+  ast/interpolate_attribute.h
+  ast/invariant_attribute.cc
+  ast/invariant_attribute.h
   ast/literal_expression.cc
   ast/literal_expression.h
-  ast/location_decoration.cc
-  ast/location_decoration.h
+  ast/location_attribute.cc
+  ast/location_attribute.h
   ast/loop_statement.cc
   ast/loop_statement.h
   ast/matrix.cc
@@ -149,8 +149,8 @@ set(TINT_LIB_SRCS
   ast/multisampled_texture.h
   ast/node.cc
   ast/node.h
-  ast/override_decoration.cc
-  ast/override_decoration.h
+  ast/override_attribute.cc
+  ast/override_attribute.h
   ast/phony_expression.cc
   ast/phony_expression.h
   ast/pipeline_stage.cc
@@ -165,24 +165,24 @@ set(TINT_LIB_SRCS
   ast/sampler.h
   ast/sint_literal_expression.cc
   ast/sint_literal_expression.h
-  ast/stage_decoration.cc
-  ast/stage_decoration.h
+  ast/stage_attribute.cc
+  ast/stage_attribute.h
   ast/statement.cc
   ast/statement.h
   ast/storage_class.cc
   ast/storage_class.h
   ast/storage_texture.cc
   ast/storage_texture.h
-  ast/stride_decoration.cc
-  ast/stride_decoration.h
-  ast/struct_block_decoration.cc
-  ast/struct_block_decoration.h
-  ast/struct_member_align_decoration.cc
-  ast/struct_member_align_decoration.h
-  ast/struct_member_offset_decoration.cc
-  ast/struct_member_offset_decoration.h
-  ast/struct_member_size_decoration.cc
-  ast/struct_member_size_decoration.h
+  ast/stride_attribute.cc
+  ast/stride_attribute.h
+  ast/struct_block_attribute.cc
+  ast/struct_block_attribute.h
+  ast/struct_member_align_attribute.cc
+  ast/struct_member_align_attribute.h
+  ast/struct_member_offset_attribute.cc
+  ast/struct_member_offset_attribute.h
+  ast/struct_member_size_attribute.cc
+  ast/struct_member_size_attribute.h
   ast/struct_member.cc
   ast/struct_member.h
   ast/struct.cc
@@ -216,8 +216,8 @@ set(TINT_LIB_SRCS
   ast/vector.h
   ast/void.cc
   ast/void.h
-  ast/workgroup_decoration.cc
-  ast/workgroup_decoration.h
+  ast/workgroup_attribute.cc
+  ast/workgroup_attribute.h
   block_allocator.h
   castable.cc
   castable.h
@@ -295,8 +295,8 @@ set(TINT_LIB_SRCS
   traits.h
   transform/add_empty_entry_point.cc
   transform/add_empty_entry_point.h
-  transform/add_spirv_block_decoration.cc
-  transform/add_spirv_block_decoration.h
+  transform/add_spirv_block_attribute.cc
+  transform/add_spirv_block_attribute.h
   transform/array_length_from_uniform.cc
   transform/array_length_from_uniform.h
   transform/binding_remapper.cc
@@ -617,13 +617,13 @@ if(TINT_BUILD_TESTS)
     ast/assignment_statement_test.cc
     ast/atomic_test.cc
     ast/binary_expression_test.cc
-    ast/binding_decoration_test.cc
+    ast/binding_attribute_test.cc
     ast/bitcast_expression_test.cc
     ast/block_statement_test.cc
     ast/bool_literal_expression_test.cc
     ast/bool_test.cc
     ast/break_statement_test.cc
-    ast/builtin_decoration_test.cc
+    ast/builtin_attribute_test.cc
     ast/call_expression_test.cc
     ast/call_statement_test.cc
     ast/case_statement_test.cc
@@ -638,36 +638,36 @@ if(TINT_BUILD_TESTS)
     ast/float_literal_expression_test.cc
     ast/for_loop_statement_test.cc
     ast/function_test.cc
-    ast/group_decoration_test.cc
+    ast/group_attribute_test.cc
     ast/i32_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
     ast/index_accessor_expression_test.cc
     ast/int_literal_expression_test.cc
-    ast/interpolate_decoration_test.cc
+    ast/interpolate_attribute_test.cc
     ast/intrinsic_texture_helper_test.cc
     ast/intrinsic_texture_helper_test.h
-    ast/invariant_decoration_test.cc
-    ast/location_decoration_test.cc
+    ast/invariant_attribute_test.cc
+    ast/location_attribute_test.cc
     ast/loop_statement_test.cc
     ast/matrix_test.cc
     ast/member_accessor_expression_test.cc
     ast/module_clone_test.cc
     ast/module_test.cc
     ast/multisampled_texture_test.cc
-    ast/override_decoration_test.cc
+    ast/override_attribute_test.cc
     ast/phony_expression_test.cc
     ast/pointer_test.cc
     ast/return_statement_test.cc
     ast/sampled_texture_test.cc
     ast/sampler_test.cc
     ast/sint_literal_expression_test.cc
-    ast/stage_decoration_test.cc
+    ast/stage_attribute_test.cc
     ast/storage_texture_test.cc
-    ast/stride_decoration_test.cc
-    ast/struct_member_align_decoration_test.cc
-    ast/struct_member_offset_decoration_test.cc
-    ast/struct_member_size_decoration_test.cc
+    ast/stride_attribute_test.cc
+    ast/struct_member_align_attribute_test.cc
+    ast/struct_member_offset_attribute_test.cc
+    ast/struct_member_size_attribute_test.cc
     ast/struct_member_test.cc
     ast/struct_test.cc
     ast/switch_statement_test.cc
@@ -680,7 +680,7 @@ if(TINT_BUILD_TESTS)
     ast/variable_decl_statement_test.cc
     ast/variable_test.cc
     ast/vector_test.cc
-    ast/workgroup_decoration_test.cc
+    ast/workgroup_attribute_test.cc
     block_allocator_test.cc
     castable_test.cc
     clone_context_test.cc
@@ -701,7 +701,7 @@ if(TINT_BUILD_TESTS)
     resolver/call_validation_test.cc
     resolver/compound_statement_test.cc
     resolver/control_block_validation_test.cc
-    resolver/decoration_validation_test.cc
+    resolver/attribute_validation_test.cc
     resolver/dependency_graph_test.cc
     resolver/entry_point_validation_test.cc
     resolver/function_validation_test.cc
@@ -850,8 +850,8 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_exclusive_or_expression_test.cc
       reader/wgsl/parser_impl_for_stmt_test.cc
       reader/wgsl/parser_impl_function_decl_test.cc
-      reader/wgsl/parser_impl_function_decoration_list_test.cc
-      reader/wgsl/parser_impl_function_decoration_test.cc
+      reader/wgsl/parser_impl_function_attribute_list_test.cc
+      reader/wgsl/parser_impl_function_attribute_test.cc
       reader/wgsl/parser_impl_function_header_test.cc
       reader/wgsl/parser_impl_global_constant_decl_test.cc
       reader/wgsl/parser_impl_global_decl_test.cc
@@ -878,10 +878,10 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_storage_texture_type_test.cc
       reader/wgsl/parser_impl_struct_body_decl_test.cc
       reader/wgsl/parser_impl_struct_decl_test.cc
-      reader/wgsl/parser_impl_struct_decoration_decl_test.cc
-      reader/wgsl/parser_impl_struct_decoration_test.cc
-      reader/wgsl/parser_impl_struct_member_decoration_decl_test.cc
-      reader/wgsl/parser_impl_struct_member_decoration_test.cc
+      reader/wgsl/parser_impl_struct_attribute_decl_test.cc
+      reader/wgsl/parser_impl_struct_attribute_test.cc
+      reader/wgsl/parser_impl_struct_member_attribute_decl_test.cc
+      reader/wgsl/parser_impl_struct_member_attribute_test.cc
       reader/wgsl/parser_impl_struct_member_test.cc
       reader/wgsl/parser_impl_switch_body_test.cc
       reader/wgsl/parser_impl_switch_stmt_test.cc
@@ -894,8 +894,8 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_type_decl_test.cc
       reader/wgsl/parser_impl_unary_expression_test.cc
       reader/wgsl/parser_impl_variable_decl_test.cc
-      reader/wgsl/parser_impl_variable_decoration_list_test.cc
-      reader/wgsl/parser_impl_variable_decoration_test.cc
+      reader/wgsl/parser_impl_variable_attribute_list_test.cc
+      reader/wgsl/parser_impl_variable_attribute_test.cc
       reader/wgsl/parser_impl_variable_ident_decl_test.cc
       reader/wgsl/parser_impl_variable_stmt_test.cc
       reader/wgsl/parser_impl_variable_qualifier_test.cc
@@ -916,7 +916,7 @@ if(TINT_BUILD_TESTS)
       writer/spirv/builder_discard_test.cc
       writer/spirv/builder_entry_point_test.cc
       writer/spirv/builder_format_conversion_test.cc
-      writer/spirv/builder_function_decoration_test.cc
+      writer/spirv/builder_function_attribute_test.cc
       writer/spirv/builder_function_test.cc
       writer/spirv/builder_function_variable_test.cc
       writer/spirv/builder_global_variable_test.cc
@@ -977,7 +977,7 @@ if(TINT_BUILD_TESTS)
   if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
       transform/add_empty_entry_point_test.cc
-      transform/add_spirv_block_decoration_test.cc
+      transform/add_spirv_block_attribute_test.cc
       transform/array_length_from_uniform_test.cc
       transform/binding_remapper_test.cc
       transform/calculate_array_length_test.cc

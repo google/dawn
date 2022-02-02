@@ -43,8 +43,8 @@ class Array : public Castable<Array, Type> {
   /// @param stride the number of bytes from the start of one element of the
   /// array to the start of the next element
   /// @param implicit_stride the number of bytes from the start of one element
-  /// of the array to the start of the next element, if there was no [[stride]]
-  /// decoration applied.
+  /// of the array to the start of the next element, if there was no `@stride`
+  /// attribute applied.
   Array(Type const* element,
         uint32_t count,
         uint32_t align,
@@ -61,12 +61,12 @@ class Array : public Castable<Array, Type> {
 
   /// @returns the byte alignment of the array
   /// @note this may differ from the alignment of a structure member of this
-  /// array type, if the member is annotated with the `@align(n)` decoration.
+  /// array type, if the member is annotated with the `@align(n)` attribute.
   uint32_t Align() const override;
 
   /// @returns the byte size of the array
   /// @note this may differ from the size of a structure member of this array
-  /// type, if the member is annotated with the `@size(n)` decoration.
+  /// type, if the member is annotated with the `@size(n)` attribute.
   uint32_t Size() const override;
 
   /// @returns the number of bytes from the start of one element of the
@@ -74,8 +74,8 @@ class Array : public Castable<Array, Type> {
   uint32_t Stride() const { return stride_; }
 
   /// @returns the number of bytes from the start of one element of the
-  /// array to the start of the next element, if there was no [[stride]]
-  /// decoration applied
+  /// array to the start of the next element, if there was no `@stride`
+  /// attribute applied
   uint32_t ImplicitStride() const { return implicit_stride_; }
 
   /// @returns true if the value returned by Stride() matches the element's

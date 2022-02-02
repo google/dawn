@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/program_builder.h"
 #include "src/sem/atomic_type.h"
 #include "src/sem/function.h"
@@ -116,7 +116,7 @@ struct ZeroInitWorkgroupMemory::State {
     auto& sem = ctx.src->Sem();
 
     CalculateWorkgroupSize(
-        ast::GetDecoration<ast::WorkgroupDecoration>(fn->decorations));
+        ast::GetAttribute<ast::WorkgroupAttribute>(fn->attributes));
 
     // Generate a list of statements to zero initialize each of the
     // workgroup storage variables used by `fn`. This will populate #statements.
@@ -140,7 +140,7 @@ struct ZeroInitWorkgroupMemory::State {
     std::function<const ast::Expression*()> local_index;
     for (auto* param : fn->params) {
       if (auto* builtin =
-              ast::GetDecoration<ast::BuiltinDecoration>(param->decorations)) {
+              ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
         if (builtin->builtin == ast::Builtin::kLocalInvocationIndex) {
           local_index = [=] { return b.Expr(ctx.Clone(param->symbol)); };
           break;
@@ -149,8 +149,8 @@ struct ZeroInitWorkgroupMemory::State {
 
       if (auto* str = sem.Get(param)->Type()->As<sem::Struct>()) {
         for (auto* member : str->Members()) {
-          if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-                  member->Declaration()->decorations)) {
+          if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(
+                  member->Declaration()->attributes)) {
             if (builtin->builtin == ast::Builtin::kLocalInvocationIndex) {
               local_index = [=] {
                 auto* param_expr = b.Expr(ctx.Clone(param->symbol));
@@ -359,12 +359,12 @@ struct ZeroInitWorkgroupMemory::State {
 
   /// CalculateWorkgroupSize initializes the members #workgroup_size_const and
   /// #workgroup_size_expr with the linear workgroup size.
-  /// @param deco the workgroup decoration applied to the entry point function
-  void CalculateWorkgroupSize(const ast::WorkgroupDecoration* deco) {
+  /// @param attr the workgroup attribute applied to the entry point function
+  void CalculateWorkgroupSize(const ast::WorkgroupAttribute* attr) {
     bool is_signed = false;
     workgroup_size_const = 1u;
     workgroup_size_expr = nullptr;
-    for (auto* expr : deco->Values()) {
+    for (auto* expr : attr->Values()) {
       if (!expr) {
         continue;
       }

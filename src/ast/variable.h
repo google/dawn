@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "src/ast/access.h"
-#include "src/ast/decoration.h"
+#include "src/ast/attribute.h"
 #include "src/ast/expression.h"
 #include "src/ast/storage_class.h"
 
@@ -27,20 +27,20 @@ namespace tint {
 namespace ast {
 
 // Forward declarations
-class BindingDecoration;
-class GroupDecoration;
-class LocationDecoration;
+class BindingAttribute;
+class GroupAttribute;
+class LocationAttribute;
 class Type;
 
-/// VariableBindingPoint holds a group and binding decoration.
+/// VariableBindingPoint holds a group and binding attribute.
 struct VariableBindingPoint {
-  /// The `[[group]]` part of the binding point
-  const GroupDecoration* group = nullptr;
-  /// The `[[binding]]` part of the binding point
-  const BindingDecoration* binding = nullptr;
+  /// The `@group` part of the binding point
+  const GroupAttribute* group = nullptr;
+  /// The `@binding` part of the binding point
+  const BindingAttribute* binding = nullptr;
 
   /// @returns true if the BindingPoint has a valid group and binding
-  /// decoration.
+  /// attribute.
   inline operator bool() const { return group && binding; }
 };
 
@@ -108,7 +108,7 @@ class Variable : public Castable<Variable, Node> {
   /// @param type the declared variable type
   /// @param is_const true if the variable is const
   /// @param constructor the constructor expression
-  /// @param decorations the variable decorations
+  /// @param attributes the variable attributes
   Variable(ProgramID program_id,
            const Source& source,
            const Symbol& sym,
@@ -117,7 +117,7 @@ class Variable : public Castable<Variable, Node> {
            const ast::Type* type,
            bool is_const,
            const Expression* constructor,
-           DecorationList decorations);
+           AttributeList attributes);
   /// Move constructor
   Variable(Variable&&);
 
@@ -146,8 +146,8 @@ class Variable : public Castable<Variable, Node> {
   /// The constructor expression or nullptr if none set
   const Expression* const constructor;
 
-  /// The decorations attached to this variable
-  const DecorationList decorations;
+  /// The attributes attached to this variable
+  const AttributeList attributes;
 
   /// The declared storage class
   const StorageClass declared_storage_class;

@@ -18,7 +18,7 @@
 #include <utility>
 
 #include "src/ast/call_statement.h"
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/program_builder.h"
 #include "src/sem/block_statement.h"
 #include "src/sem/call.h"
@@ -109,16 +109,16 @@ void CalculateArrayLength::Run(CloneContext& ctx,
               ctx.dst->create<ast::Variable>(
                   ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
                   ast::Access::kUndefined, type, true, nullptr,
-                  ast::DecorationList{disable_validation}),
+                  ast::AttributeList{disable_validation}),
               ctx.dst->Param("result",
                              ctx.dst->ty.pointer(ctx.dst->ty.u32(),
                                                  ast::StorageClass::kFunction)),
           },
           ctx.dst->ty.void_(), nullptr,
-          ast::DecorationList{
+          ast::AttributeList{
               ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID()),
           },
-          ast::DecorationList{});
+          ast::AttributeList{});
       // Insert the intrinsic function after the structure or array structure
       // element type. TODO(crbug.com/tint/1266): Once we allow out-of-order
       // declarations, this can be simplified.

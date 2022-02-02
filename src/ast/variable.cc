@@ -14,7 +14,7 @@
 
 #include "src/ast/variable.h"
 
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/program_builder.h"
 #include "src/sem/variable.h"
 
@@ -31,13 +31,13 @@ Variable::Variable(ProgramID pid,
                    const ast::Type* ty,
                    bool constant,
                    const Expression* ctor,
-                   DecorationList decos)
+                   AttributeList attrs)
     : Base(pid, src),
       symbol(sym),
       type(ty),
       is_const(constant),
       constructor(ctor),
-      decorations(std::move(decos)),
+      attributes(std::move(attrs)),
       declared_storage_class(dsc),
       declared_access(da) {
   TINT_ASSERT(AST, symbol.IsValid());
@@ -50,12 +50,12 @@ Variable::Variable(Variable&&) = default;
 Variable::~Variable() = default;
 
 VariableBindingPoint Variable::BindingPoint() const {
-  const GroupDecoration* group = nullptr;
-  const BindingDecoration* binding = nullptr;
-  for (auto* deco : decorations) {
-    if (auto* g = deco->As<GroupDecoration>()) {
+  const GroupAttribute* group = nullptr;
+  const BindingAttribute* binding = nullptr;
+  for (auto* attr : attributes) {
+    if (auto* g = attr->As<GroupAttribute>()) {
       group = g;
-    } else if (auto* b = deco->As<BindingDecoration>()) {
+    } else if (auto* b = attr->As<BindingAttribute>()) {
       binding = b;
     }
   }
@@ -67,9 +67,9 @@ const Variable* Variable::Clone(CloneContext* ctx) const {
   auto sym = ctx->Clone(symbol);
   auto* ty = ctx->Clone(type);
   auto* ctor = ctx->Clone(constructor);
-  auto decos = ctx->Clone(decorations);
+  auto attrs = ctx->Clone(attributes);
   return ctx->dst->create<Variable>(src, sym, declared_storage_class,
-                                    declared_access, ty, is_const, ctor, decos);
+                                    declared_access, ty, is_const, ctor, attrs);
 }
 
 }  // namespace ast

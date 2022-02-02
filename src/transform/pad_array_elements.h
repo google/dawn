@@ -23,7 +23,7 @@ namespace transform {
 /// PadArrayElements is a transform that replaces array types with an explicit
 /// stride that is larger than the implicit stride, with an array of a new
 /// structure type. This structure holds with a single field of the element
-/// type, decorated with a [[size]] decoration to pad the structure to the
+/// type, decorated with a `@size` attribute to pad the structure to the
 /// required array stride. The new array types have no explicit stride,
 /// structure size is equal to the desired stride.
 /// Array index expressions and constructors are also adjusted to deal with this

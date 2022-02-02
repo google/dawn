@@ -243,34 +243,34 @@ class ParserImpl : Reader {
   /// @param id the ID of the SPIR-V variable
   /// @param store_type the WGSL store type for the variable, which should be
   /// prepopulatd
-  /// @param ast_decos the decoration list to populate
+  /// @param attributes the attribute list to populate
   /// @param transfer_pipeline_io true if pipeline IO decorations (builtins,
   /// or locations) will update the store type and the decorations list
   /// @returns false when the variable should not be emitted as a variable
   bool ConvertDecorationsForVariable(uint32_t id,
                                      const Type** store_type,
-                                     ast::DecorationList* ast_decos,
+                                     ast::AttributeList* attributes,
                                      bool transfer_pipeline_io);
 
   /// Converts SPIR-V decorations for pipeline IO into AST decorations.
   /// @param store_type the store type for the variable or member
   /// @param decorations the SPIR-V interpolation decorations
-  /// @param ast_decos the decoration list to populate.
+  /// @param attributes the attribute list to populate.
   /// @returns false if conversion fails
   bool ConvertPipelineDecorations(const Type* store_type,
                                   const DecorationList& decorations,
-                                  ast::DecorationList* ast_decos);
+                                  ast::AttributeList* attributes);
 
-  /// Updates the decoration list, placing a non-null location decoration into
+  /// Updates the attribute list, placing a non-null location decoration into
   /// the list, replacing an existing one if it exists. Does nothing if the
   /// replacement is nullptr.
   /// Assumes the list contains at most one Location decoration.
-  /// @param decos the decoration list to modify
+  /// @param decos the attribute list to modify
   /// @param replacement the location decoration to place into the list
   /// @returns the location decoration that was replaced, if one was replaced,
   /// or null otherwise.
-  const ast::Decoration* SetLocation(ast::DecorationList* decos,
-                                     const ast::Decoration* replacement);
+  const ast::Attribute* SetLocation(ast::AttributeList* decos,
+                                    const ast::Attribute* replacement);
 
   /// Converts a SPIR-V struct member decoration into a number of AST
   /// decorations. If the decoration is recognized but deliberately dropped,
@@ -281,10 +281,10 @@ class ParserImpl : Reader {
   /// @param member_ty the type of the member
   /// @param decoration an encoded SPIR-V Decoration
   /// @returns the AST decorations
-  ast::DecorationList ConvertMemberDecoration(uint32_t struct_type_id,
-                                              uint32_t member_index,
-                                              const Type* member_ty,
-                                              const Decoration& decoration);
+  ast::AttributeList ConvertMemberDecoration(uint32_t struct_type_id,
+                                             uint32_t member_index,
+                                             const Type* member_ty,
+                                             const Decoration& decoration);
 
   /// Returns a string for the given type.  If the type ID is invalid,
   /// then the resulting string only names the type ID.
@@ -430,7 +430,7 @@ class ParserImpl : Reader {
                               const Type* storage_type,
                               bool is_const,
                               const ast::Expression* constructor,
-                              ast::DecorationList decorations);
+                              ast::AttributeList decorations);
 
   /// Returns true if a constant expression can be generated.
   /// @param id the SPIR-V ID of the value

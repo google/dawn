@@ -27,7 +27,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/interpolate_decoration.h"
+#include "src/ast/interpolate_attribute.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/switch_statement.h"

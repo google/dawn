@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/program_builder.h"
 #include "src/sem/function.h"
 #include "src/transform/unshadow.h"
@@ -41,10 +41,10 @@ namespace {
 // those with builtin attributes.
 bool StructMemberComparator(const ast::StructMember* a,
                             const ast::StructMember* b) {
-  auto* a_loc = ast::GetDecoration<ast::LocationDecoration>(a->decorations);
-  auto* b_loc = ast::GetDecoration<ast::LocationDecoration>(b->decorations);
-  auto* a_blt = ast::GetDecoration<ast::BuiltinDecoration>(a->decorations);
-  auto* b_blt = ast::GetDecoration<ast::BuiltinDecoration>(b->decorations);
+  auto* a_loc = ast::GetAttribute<ast::LocationAttribute>(a->attributes);
+  auto* b_loc = ast::GetAttribute<ast::LocationAttribute>(b->attributes);
+  auto* a_blt = ast::GetAttribute<ast::BuiltinAttribute>(a->attributes);
+  auto* b_blt = ast::GetAttribute<ast::BuiltinAttribute>(b->attributes);
   if (a_loc) {
     if (!b_loc) {
       // `a` has location attribute and `b` does not: `a` goes first.
@@ -62,15 +62,15 @@ bool StructMemberComparator(const ast::StructMember* a,
   }
 }
 
-// Returns true if `deco` is a shader IO decoration.
-bool IsShaderIODecoration(const ast::Decoration* deco) {
-  return deco->IsAnyOf<ast::BuiltinDecoration, ast::InterpolateDecoration,
-                       ast::InvariantDecoration, ast::LocationDecoration>();
+// Returns true if `attr` is a shader IO attribute.
+bool IsShaderIOAttribute(const ast::Attribute* attr) {
+  return attr->IsAnyOf<ast::BuiltinAttribute, ast::InterpolateAttribute,
+                       ast::InvariantAttribute, ast::LocationAttribute>();
 }
 
-// Returns true if `decos` contains a `sample_mask` builtin.
-bool HasSampleMask(const ast::DecorationList& decos) {
-  auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(decos);
+// Returns true if `attrs` contains a `sample_mask` builtin.
+bool HasSampleMask(const ast::AttributeList& attrs) {
+  auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attrs);
   return builtin && builtin->builtin == ast::Builtin::kSampleMask;
 }
 
@@ -85,7 +85,7 @@ struct CanonicalizeEntryPointIO::State {
     /// The type of the output value.
     const ast::Type* type;
     /// The shader IO attributes.
-    ast::DecorationList attributes;
+    ast::AttributeList attributes;
     /// The value itself.
     const ast::Expression* value;
   };
@@ -128,20 +128,20 @@ struct CanonicalizeEntryPointIO::State {
         func_ast(function),
         func_sem(ctx.src->Sem().Get(function)) {}
 
-  /// Clones the shader IO decorations from `src`.
-  /// @param src the decorations to clone
-  /// @param do_interpolate whether to clone InterpolateDecoration
-  /// @return the cloned decorations
-  ast::DecorationList CloneShaderIOAttributes(const ast::DecorationList& src,
-                                              bool do_interpolate) {
-    ast::DecorationList new_decorations;
-    for (auto* deco : src) {
-      if (IsShaderIODecoration(deco) &&
-          (do_interpolate || !deco->Is<ast::InterpolateDecoration>())) {
-        new_decorations.push_back(ctx.Clone(deco));
+  /// Clones the shader IO attributes from `src`.
+  /// @param src the attributes to clone
+  /// @param do_interpolate whether to clone InterpolateAttribute
+  /// @return the cloned attributes
+  ast::AttributeList CloneShaderIOAttributes(const ast::AttributeList& src,
+                                             bool do_interpolate) {
+    ast::AttributeList new_attributes;
+    for (auto* attr : src) {
+      if (IsShaderIOAttribute(attr) &&
+          (do_interpolate || !attr->Is<ast::InterpolateAttribute>())) {
+        new_attributes.push_back(ctx.Clone(attr));
       }
     }
-    return new_decorations;
+    return new_attributes;
   }
 
   /// Create or return a symbol for the wrapper function's struct parameter.
@@ -160,7 +160,7 @@ struct CanonicalizeEntryPointIO::State {
   /// @returns an expression which evaluates to the value of the shader input
   const ast::Expression* AddInput(std::string name,
                                   const sem::Type* type,
-                                  ast::DecorationList attributes) {
+                                  ast::AttributeList attributes) {
     auto* ast_type = CreateASTTypeFor(ctx, type);
     if (cfg.shader_style == ShaderStyle::kSpirv ||
         cfg.shader_style == ShaderStyle::kGlsl) {
@@ -169,8 +169,8 @@ struct CanonicalizeEntryPointIO::State {
       // TODO(crbug.com/tint/1224): Remove this once a flat interpolation
       // attribute is required for integers.
       if (type->is_integer_scalar_or_vector() &&
-          ast::HasDecoration<ast::LocationDecoration>(attributes) &&
-          !ast::HasDecoration<ast::InterpolateDecoration>(attributes) &&
+          ast::HasAttribute<ast::LocationAttribute>(attributes) &&
+          !ast::HasAttribute<ast::InterpolateAttribute>(attributes) &&
           func_ast->PipelineStage() == ast::PipelineStage::kFragment) {
         attributes.push_back(ctx.dst->Interpolate(
             ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone));
@@ -182,7 +182,7 @@ struct CanonicalizeEntryPointIO::State {
 
       // In GLSL, if it's a builtin, override the name with the
       // corresponding gl_ builtin name
-      auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(attributes);
+      auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attributes);
       if (cfg.shader_style == ShaderStyle::kGlsl && builtin) {
         name = GLSLBuiltinToString(builtin->builtin, func_ast->PipelineStage());
       }
@@ -207,7 +207,7 @@ struct CanonicalizeEntryPointIO::State {
                       std::move(attributes));
       return value;
     } else if (cfg.shader_style == ShaderStyle::kMsl &&
-               ast::HasDecoration<ast::BuiltinDecoration>(attributes)) {
+               ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
       // If this input is a builtin and we are targeting MSL, then add it to the
       // parameter list and pass it directly to the inner function.
       Symbol symbol = input_names.emplace(name).second
@@ -234,7 +234,7 @@ struct CanonicalizeEntryPointIO::State {
   /// @param value the value of the shader output
   void AddOutput(std::string name,
                  const sem::Type* type,
-                 ast::DecorationList attributes,
+                 ast::AttributeList attributes,
                  const ast::Expression* value) {
     // Vulkan requires that integer user-defined vertex outputs are
     // always decorated with `Flat`.
@@ -242,8 +242,8 @@ struct CanonicalizeEntryPointIO::State {
     // attribute is required for integers.
     if (cfg.shader_style == ShaderStyle::kSpirv &&
         type->is_integer_scalar_or_vector() &&
-        ast::HasDecoration<ast::LocationDecoration>(attributes) &&
-        !ast::HasDecoration<ast::InterpolateDecoration>(attributes) &&
+        ast::HasAttribute<ast::LocationAttribute>(attributes) &&
+        !ast::HasAttribute<ast::InterpolateAttribute>(attributes) &&
         func_ast->PipelineStage() == ast::PipelineStage::kVertex) {
       attributes.push_back(ctx.dst->Interpolate(
           ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone));
@@ -251,7 +251,7 @@ struct CanonicalizeEntryPointIO::State {
 
     // In GLSL, if it's a builtin, override the name with the
     // corresponding gl_ builtin name
-    auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(attributes);
+    auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attributes);
     if (cfg.shader_style == ShaderStyle::kGlsl && builtin) {
       name = GLSLBuiltinToString(builtin->builtin, func_ast->PipelineStage());
     }
@@ -272,11 +272,11 @@ struct CanonicalizeEntryPointIO::State {
   void ProcessNonStructParameter(const sem::Parameter* param) {
     // Remove the shader IO attributes from the inner function parameter, and
     // attach them to the new object instead.
-    ast::DecorationList attributes;
-    for (auto* deco : param->Declaration()->decorations) {
-      if (IsShaderIODecoration(deco)) {
-        ctx.Remove(param->Declaration()->decorations, deco);
-        attributes.push_back(ctx.Clone(deco));
+    ast::AttributeList attributes;
+    for (auto* attr : param->Declaration()->attributes) {
+      if (IsShaderIOAttribute(attr)) {
+        ctx.Remove(param->Declaration()->attributes, attr);
+        attributes.push_back(ctx.Clone(attr));
       }
     }
 
@@ -305,14 +305,14 @@ struct CanonicalizeEntryPointIO::State {
       auto* member_ast = member->Declaration();
       auto name = ctx.src->Symbols().NameFor(member_ast->symbol);
 
-      // In GLSL, do not add interpolation decorations on vertex input
+      // In GLSL, do not add interpolation attributes on vertex input
       bool do_interpolate = true;
       if (cfg.shader_style == ShaderStyle::kGlsl &&
           func_ast->PipelineStage() == ast::PipelineStage::kVertex) {
         do_interpolate = false;
       }
       auto attributes =
-          CloneShaderIOAttributes(member_ast->decorations, do_interpolate);
+          CloneShaderIOAttributes(member_ast->attributes, do_interpolate);
       auto* input_expr = AddInput(name, member->Type(), std::move(attributes));
       inner_struct_values.push_back(input_expr);
     }
@@ -330,7 +330,7 @@ struct CanonicalizeEntryPointIO::State {
   void ProcessReturnType(const sem::Type* inner_ret_type,
                          Symbol original_result) {
     bool do_interpolate = true;
-    // In GLSL, do not add interpolation decorations on fragment output
+    // In GLSL, do not add interpolation attributes on fragment output
     if (cfg.shader_style == ShaderStyle::kGlsl &&
         func_ast->PipelineStage() == ast::PipelineStage::kFragment) {
       do_interpolate = false;
@@ -345,7 +345,7 @@ struct CanonicalizeEntryPointIO::State {
         auto* member_ast = member->Declaration();
         auto name = ctx.src->Symbols().NameFor(member_ast->symbol);
         auto attributes =
-            CloneShaderIOAttributes(member_ast->decorations, do_interpolate);
+            CloneShaderIOAttributes(member_ast->attributes, do_interpolate);
 
         // Extract the original structure member.
         AddOutput(name, member->Type(), std::move(attributes),
@@ -353,7 +353,7 @@ struct CanonicalizeEntryPointIO::State {
       }
     } else if (!inner_ret_type->Is<sem::Void>()) {
       auto attributes = CloneShaderIOAttributes(
-          func_ast->return_type_decorations, do_interpolate);
+          func_ast->return_type_attributes, do_interpolate);
 
       // Propagate the non-struct return value as is.
       AddOutput("value", func_sem->ReturnType(), std::move(attributes),
@@ -406,7 +406,7 @@ struct CanonicalizeEntryPointIO::State {
     // Create the new struct type.
     auto struct_name = ctx.dst->Sym();
     auto* in_struct = ctx.dst->create<ast::Struct>(
-        struct_name, wrapper_struct_param_members, ast::DecorationList{});
+        struct_name, wrapper_struct_param_members, ast::AttributeList{});
     ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, in_struct);
 
     // Create a new function parameter using this struct type.
@@ -446,7 +446,7 @@ struct CanonicalizeEntryPointIO::State {
 
     // Create the new struct type.
     auto* out_struct = ctx.dst->create<ast::Struct>(
-        ctx.dst->Sym(), wrapper_struct_output_members, ast::DecorationList{});
+        ctx.dst->Sym(), wrapper_struct_output_members, ast::AttributeList{});
     ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, out_struct);
 
     // Create the output struct object, assign its members, and return it.
@@ -464,7 +464,7 @@ struct CanonicalizeEntryPointIO::State {
   void CreateGlobalOutputVariables() {
     for (auto& outval : wrapper_output_values) {
       // Disable validation for use of the `output` storage class.
-      ast::DecorationList attributes = std::move(outval.attributes);
+      ast::AttributeList attributes = std::move(outval.attributes);
       attributes.push_back(
           ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass));
 
@@ -505,7 +505,7 @@ struct CanonicalizeEntryPointIO::State {
     auto* inner_function = ctx.dst->create<ast::Function>(
         inner_name, ctx.Clone(func_ast->params),
         ctx.Clone(func_ast->return_type), ctx.Clone(func_ast->body),
-        ast::DecorationList{}, ast::DecorationList{});
+        ast::AttributeList{}, ast::AttributeList{});
     ctx.Replace(func_ast, inner_function);
 
     // Call the function.
@@ -617,8 +617,8 @@ struct CanonicalizeEntryPointIO::State {
 
     auto* wrapper_func = ctx.dst->create<ast::Function>(
         name, wrapper_ep_parameters, wrapper_ret_type(),
-        ctx.dst->Block(wrapper_body), ctx.Clone(func_ast->decorations),
-        ast::DecorationList{});
+        ctx.dst->Block(wrapper_body), ctx.Clone(func_ast->attributes),
+        ast::AttributeList{});
     ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), func_ast,
                     wrapper_func);
   }
@@ -699,9 +699,9 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
   for (auto* ty : ctx.src->AST().TypeDecls()) {
     if (auto* struct_ty = ty->As<ast::Struct>()) {
       for (auto* member : struct_ty->members) {
-        for (auto* deco : member->decorations) {
-          if (IsShaderIODecoration(deco)) {
-            ctx.Remove(member->decorations, deco);
+        for (auto* attr : member->attributes) {
+          if (IsShaderIOAttribute(attr)) {
+            ctx.Remove(member->attributes, attr);
           }
         }
       }

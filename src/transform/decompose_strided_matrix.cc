@@ -84,12 +84,12 @@ void GatherCustomStrideMatrixMembers(const Program* program, F&& callback) {
         if (!matrix) {
           continue;
         }
-        auto* deco = ast::GetDecoration<ast::StrideDecoration>(
-            member->Declaration()->decorations);
-        if (!deco) {
+        auto* attr = ast::GetAttribute<ast::StrideAttribute>(
+            member->Declaration()->attributes);
+        if (!attr) {
           continue;
         }
-        uint32_t stride = deco->stride;
+        uint32_t stride = attr->stride;
         if (matrix->ColumnStride() == stride) {
           continue;
         }

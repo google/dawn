@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/program_builder.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/test_helper.h"
@@ -57,7 +57,7 @@ TEST_F(DecomposeStridedMatrixTest, Empty) {
 TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
   // struct S {
   //   @offset(16) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // @group(0) @binding(0) var<uniform> s : S;
@@ -73,9 +73,9 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(16),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(16),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
@@ -118,7 +118,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
   // struct S {
   //   @offset(16) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // @group(0) @binding(0) var<uniform> s : S;
@@ -134,9 +134,9 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(16),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(16),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
@@ -175,7 +175,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
   // struct S {
   //   @offset(16) @stride(8)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // @group(0) @binding(0) var<uniform> s : S;
@@ -191,9 +191,9 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(16),
-                  b.create<ast::StrideDecoration>(8),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(16),
+                  b.create<ast::StrideAttribute>(8),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
@@ -233,7 +233,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
   // struct S {
   //   @offset(8) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
@@ -249,9 +249,9 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(8),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(8),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
@@ -294,7 +294,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
   // struct S {
   //   @offset(16) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
@@ -310,9 +310,9 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(16),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(16),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
@@ -351,7 +351,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
   // struct S {
   //   @offset(8) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
@@ -367,9 +367,9 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(8),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(8),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
@@ -413,7 +413,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
   // struct S {
   //   @offset(8) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
@@ -429,9 +429,9 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(8),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(8),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
@@ -470,7 +470,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
   // struct S {
   //   @offset(8) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
@@ -492,9 +492,9 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(8),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(8),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
@@ -554,7 +554,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
   // struct S {
   //   @offset(8) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // var<private> s : S;
@@ -570,9 +570,9 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(8),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(8),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kPrivate);
@@ -611,7 +611,7 @@ fn f() {
 TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
   // struct S {
   //   @offset(8) @stride(32)
-  //   @internal(ignore_stride_decoration)
+  //   @internal(ignore_stride_attribute)
   //   m : mat2x2<f32>;
   // };
   // var<private> s : S;
@@ -627,9 +627,9 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
           b.Member(
               "m", b.ty.mat2x2<f32>(),
               {
-                  b.create<ast::StructMemberOffsetDecoration>(8),
-                  b.create<ast::StrideDecoration>(32),
-                  b.Disable(ast::DisabledValidation::kIgnoreStrideDecoration),
+                  b.create<ast::StructMemberOffsetAttribute>(8),
+                  b.create<ast::StrideAttribute>(32),
+                  b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kPrivate);

@@ -395,8 +395,8 @@ struct SymbolTestHelper {
   std::vector<const ast::Statement*> statements;
   /// Nested function local var / let declaration statements
   std::vector<const ast::Statement*> nested_statements;
-  /// Function decorations
-  ast::DecorationList func_decos;
+  /// Function attributes
+  ast::AttributeList func_attrs;
 
   /// Constructor
   /// @param builder the program builder
@@ -633,7 +633,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind,
     }
     case SymbolUseKind::WorkgroupSizeValue: {
       auto* node = b.Expr(source, symbol);
-      func_decos.emplace_back(b.WorkgroupSize(1, node, 2));
+      func_attrs.emplace_back(b.WorkgroupSize(1, node, 2));
       return node;
     }
   }
@@ -646,11 +646,11 @@ void SymbolTestHelper::Build() {
     statements.emplace_back(b.Block(nested_statements));
     nested_statements.clear();
   }
-  if (!parameters.empty() || !statements.empty() || !func_decos.empty()) {
-    b.Func("func", parameters, b.ty.void_(), statements, func_decos);
+  if (!parameters.empty() || !statements.empty() || !func_attrs.empty()) {
+    b.Func("func", parameters, b.ty.void_(), statements, func_attrs);
     parameters.clear();
     statements.clear();
-    func_decos.clear();
+    func_attrs.clear();
   }
 }
 

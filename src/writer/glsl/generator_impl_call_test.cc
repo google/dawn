@@ -61,7 +61,7 @@ TEST_F(GlslGeneratorImplTest_Call, EmitStatement_Call) {
            Param(Sym(), ty.f32()),
            Param(Sym(), ty.f32()),
        },
-       ty.void_(), ast::StatementList{}, ast::DecorationList{});
+       ty.void_(), ast::StatementList{}, ast::AttributeList{});
   Global("param1", ty.f32(), ast::StorageClass::kPrivate);
   Global("param2", ty.f32(), ast::StorageClass::kPrivate);
 

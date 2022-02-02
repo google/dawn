@@ -20,8 +20,8 @@
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/fallthrough_statement.h"
-#include "src/ast/internal_decoration.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/internal_attribute.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/traverse_expressions.h"
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
@@ -41,7 +41,7 @@
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
 #include "src/transform/add_empty_entry_point.h"
-#include "src/transform/add_spirv_block_decoration.h"
+#include "src/transform/add_spirv_block_attribute.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/fold_constants.h"
@@ -270,7 +270,7 @@ SanitizedResult Sanitize(const Program* in,
                                             // ZeroInitWorkgroupMemory
   manager.Add<transform::CanonicalizeEntryPointIO>();
   manager.Add<transform::AddEmptyEntryPoint>();
-  manager.Add<transform::AddSpirvBlockDecoration>();
+  manager.Add<transform::AddSpirvBlockAttribute>();
 
   data.Add<transform::PromoteSideEffectsToDecl::Config>(
       /* type_ctor_to_let */ false, /* dynamic_index_to_var */ true);
@@ -766,8 +766,8 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
   if (var->is_const) {
     if (!var->constructor) {
       // Constants must have an initializer unless they have an override
-      // decoration.
-      if (!ast::HasDecoration<ast::OverrideDecoration>(var->decorations)) {
+      // attribute.
+      if (!ast::HasAttribute<ast::OverrideAttribute>(var->attributes)) {
         error_ = "missing constructor for constant";
         return false;
       }
@@ -860,34 +860,34 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
 
   push_type(spv::Op::OpVariable, std::move(ops));
 
-  for (auto* deco : var->decorations) {
-    if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+  for (auto* attr : var->attributes) {
+    if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
                   Operand::Int(
                       ConvertBuiltin(builtin->builtin, sem->StorageClass()))});
-    } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+    } else if (auto* location = attr->As<ast::LocationAttribute>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
                   Operand::Int(location->value)});
-    } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+    } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
       AddInterpolationDecorations(var_id, interpolate->type,
                                   interpolate->sampling);
-    } else if (deco->Is<ast::InvariantDecoration>()) {
+    } else if (attr->Is<ast::InvariantAttribute>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationInvariant)});
-    } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
+    } else if (auto* binding = attr->As<ast::BindingAttribute>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
                   Operand::Int(binding->value)});
-    } else if (auto* group = deco->As<ast::GroupDecoration>()) {
+    } else if (auto* group = attr->As<ast::GroupAttribute>()) {
       push_annot(spv::Op::OpDecorate, {Operand::Int(var_id),
                                        Operand::Int(SpvDecorationDescriptorSet),
                                        Operand::Int(group->value)});
-    } else if (deco->Is<ast::OverrideDecoration>()) {
+    } else if (attr->Is<ast::OverrideAttribute>()) {
       // Spec constants are handled elsewhere
-    } else if (!deco->Is<ast::InternalDecoration>()) {
-      error_ = "unknown decoration";
+    } else if (!attr->Is<ast::InternalAttribute>()) {
+      error_ = "unknown attribute";
       return false;
     }
   }
@@ -4124,9 +4124,9 @@ bool Builder::GenerateStructType(const sem::Struct* struct_type,
   ops.push_back(result);
 
   auto* decl = struct_type->Declaration();
-  if (decl && ast::HasDecoration<
-                  transform::AddSpirvBlockDecoration::SpirvBlockDecoration>(
-                  decl->decorations)) {
+  if (decl &&
+      ast::HasAttribute<transform::AddSpirvBlockAttribute::SpirvBlockAttribute>(
+          decl->attributes)) {
     push_annot(spv::Op::OpDecorate,
                {Operand::Int(struct_id), Operand::Int(SpvDecorationBlock)});
   }

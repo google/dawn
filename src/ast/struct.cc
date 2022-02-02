@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Struct);
@@ -28,15 +28,15 @@ Struct::Struct(ProgramID pid,
                const Source& src,
                Symbol n,
                StructMemberList m,
-               DecorationList decos)
-    : Base(pid, src, n), members(std::move(m)), decorations(std::move(decos)) {
+               AttributeList attrs)
+    : Base(pid, src, n), members(std::move(m)), attributes(std::move(attrs)) {
   for (auto* mem : members) {
     TINT_ASSERT(AST, mem);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, mem, program_id);
   }
-  for (auto* deco : decorations) {
-    TINT_ASSERT(AST, deco);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
+  for (auto* attr : attributes) {
+    TINT_ASSERT(AST, attr);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
   }
 }
 
@@ -49,8 +49,8 @@ const Struct* Struct::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   auto n = ctx->Clone(name);
   auto mem = ctx->Clone(members);
-  auto decos = ctx->Clone(decorations);
-  return ctx->dst->create<Struct>(src, n, mem, decos);
+  auto attrs = ctx->Clone(attributes);
+  return ctx->dst->create<Struct>(src, n, mem, attrs);
 }
 
 }  // namespace ast

@@ -55,8 +55,8 @@ NumWorkgroupsFromUniform::~NumWorkgroupsFromUniform() = default;
 bool NumWorkgroupsFromUniform::ShouldRun(const Program* program,
                                          const DataMap&) const {
   for (auto* node : program->ASTNodes().Objects()) {
-    if (auto* deco = node->As<ast::BuiltinDecoration>()) {
-      if (deco->builtin == ast::Builtin::kNumWorkgroups) {
+    if (auto* attr = node->As<ast::BuiltinAttribute>()) {
+      if (attr->builtin == ast::Builtin::kNumWorkgroups) {
         return true;
       }
     }
@@ -94,8 +94,8 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
       }
 
       for (auto* member : str->Members()) {
-        auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-            member->Declaration()->decorations);
+        auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(
+            member->Declaration()->attributes);
         if (!builtin || builtin->builtin != ast::Builtin::kNumWorkgroups) {
           continue;
         }
@@ -134,7 +134,7 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx,
       num_workgroups_ubo = ctx.dst->Global(
           ctx.dst->Sym(), ctx.dst->ty.Of(num_workgroups_struct),
           ast::StorageClass::kUniform,
-          ast::DecorationList{ctx.dst->GroupAndBinding(
+          ast::AttributeList{ctx.dst->GroupAndBinding(
               cfg->ubo_binding.group, cfg->ubo_binding.binding)});
     }
     return num_workgroups_ubo;

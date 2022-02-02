@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/reference_type.h"
@@ -217,24 +217,24 @@ TEST_F(ResolverVarLetTest, DefaultVarStorageClass) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
   auto* buf = Structure("S", {Member("m", ty.i32())},
-                        {create<ast::StructBlockDecoration>()});
+                        {create<ast::StructBlockAttribute>()});
   auto* function = Var("f", ty.i32());
   auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
   auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);
   auto* uniform = Global("ub", ty.Of(buf), ast::StorageClass::kUniform,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(0),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(0),
+                             create<ast::GroupAttribute>(0),
                          });
   auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(1),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(1),
+                             create<ast::GroupAttribute>(0),
                          });
   auto* handle = Global("h", ty.depth_texture(ast::TextureDimension::k2d),
-                        ast::DecorationList{
-                            create<ast::BindingDecoration>(2),
-                            create<ast::GroupDecoration>(0),
+                        ast::AttributeList{
+                            create<ast::BindingAttribute>(2),
+                            create<ast::GroupAttribute>(0),
                         });
 
   WrapInFunction(function);
@@ -265,12 +265,12 @@ TEST_F(ResolverVarLetTest, ExplicitVarStorageClass) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
   auto* buf = Structure("S", {Member("m", ty.i32())},
-                        {create<ast::StructBlockDecoration>()});
+                        {create<ast::StructBlockAttribute>()});
   auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::Access::kReadWrite,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(1),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(1),
+                             create<ast::GroupAttribute>(0),
                          });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -294,12 +294,12 @@ TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
   auto* buf = Structure("S", {Member("inner", ty.Of(inner))},
-                        {create<ast::StructBlockDecoration>()});
+                        {create<ast::StructBlockAttribute>()});
   auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::Access::kReadWrite,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(0),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(0),
+                             create<ast::GroupAttribute>(0),
                          });
 
   auto* expr =

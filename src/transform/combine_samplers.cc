@@ -75,14 +75,14 @@ struct CombineSamplers::State {
   /// resolver, but are then ignored and removed by the GLSL writer.
   const ast::Variable* placeholder_samplers_[2] = {};
 
-  /// Group and binding decorations used by all combined sampler globals.
+  /// Group and binding attributes used by all combined sampler globals.
   /// Group 0 and binding 0 are used, with collisions disabled.
-  /// @returns the newly-created decoration list
-  ast::DecorationList Decorations() const {
-    auto decorations = ctx.dst->GroupAndBinding(0, 0);
-    decorations.push_back(
+  /// @returns the newly-created attribute list
+  ast::AttributeList Attributes() const {
+    auto attributes = ctx.dst->GroupAndBinding(0, 0);
+    attributes.push_back(
         ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision));
-    return decorations;
+    return attributes;
   }
 
   /// Constructor
@@ -113,7 +113,7 @@ struct CombineSamplers::State {
     }
     const ast::Type* type = CreateASTTypeFor(ctx, texture_var->Type());
     Symbol symbol = ctx.dst->Symbols().New(name);
-    return ctx.dst->Global(symbol, type, Decorations());
+    return ctx.dst->Global(symbol, type, Attributes());
   }
 
   /// Creates placeholder global sampler variables.
@@ -125,7 +125,7 @@ struct CombineSamplers::State {
                            ? "placeholder_comparison_sampler"
                            : "placeholder_sampler";
     Symbol symbol = ctx.dst->Symbols().New(name);
-    return ctx.dst->Global(symbol, type, Decorations());
+    return ctx.dst->Global(symbol, type, Attributes());
   }
 
   /// Performs the transformation
@@ -141,9 +141,9 @@ struct CombineSamplers::State {
       } else if (auto binding_point = var->BindingPoint()) {
         if (binding_point.group->value == 0 &&
             binding_point.binding->value == 0) {
-          auto* decoration =
+          auto* attribute =
               ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision);
-          ctx.InsertFront(var->decorations, decoration);
+          ctx.InsertFront(var->attributes, attribute);
         }
       }
     }
@@ -194,11 +194,11 @@ struct CombineSamplers::State {
         auto symbol = ctx.Clone(src->symbol);
         auto* return_type = ctx.Clone(src->return_type);
         auto* body = ctx.Clone(src->body);
-        auto decorations = ctx.Clone(src->decorations);
-        auto return_type_decorations = ctx.Clone(src->return_type_decorations);
+        auto attributes = ctx.Clone(src->attributes);
+        auto return_type_attributes = ctx.Clone(src->return_type_attributes);
         return ctx.dst->create<ast::Function>(
-            symbol, params, return_type, body, std::move(decorations),
-            std::move(return_type_decorations));
+            symbol, params, return_type, body, std::move(attributes),
+            std::move(return_type_attributes));
       }
       return nullptr;
     });

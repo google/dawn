@@ -14,7 +14,7 @@
 
 #include "gmock/gmock.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/sem/call.h"
 #include "src/writer/glsl/test_helper.h"
 
@@ -168,7 +168,7 @@ TEST_P(GlslIntrinsicTest, Emit) {
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
   Func("func", {}, ty.void_(), {CallStmt(call)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 

@@ -23,7 +23,7 @@ using GlslGeneratorImplTest = TestHelper;
 
 TEST_F(GlslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   GeneratorImpl& gen = Build();
 

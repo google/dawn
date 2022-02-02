@@ -29,14 +29,14 @@ InspectorBuilder::InspectorBuilder() = default;
 InspectorBuilder::~InspectorBuilder() = default;
 
 void InspectorBuilder::MakeEmptyBodyFunction(std::string name,
-                                             ast::DecorationList decorations) {
+                                             ast::AttributeList attributes) {
   Func(name, ast::VariableList(), ty.void_(), ast::StatementList{Return()},
-       decorations);
+       attributes);
 }
 
 void InspectorBuilder::MakeCallerBodyFunction(std::string caller,
                                               std::vector<std::string> callees,
-                                              ast::DecorationList decorations) {
+                                              ast::AttributeList attributes) {
   ast::StatementList body;
   body.reserve(callees.size() + 1);
   for (auto callee : callees) {
@@ -44,7 +44,7 @@ void InspectorBuilder::MakeCallerBodyFunction(std::string caller,
   }
   body.push_back(Return());
 
-  Func(caller, ast::VariableList(), ty.void_(), body, decorations);
+  Func(caller, ast::VariableList(), ty.void_(), body, attributes);
 }
 
 const ast::Struct* InspectorBuilder::MakeInOutStruct(
@@ -65,13 +65,13 @@ const ast::Function* InspectorBuilder::MakePlainGlobalReferenceBodyFunction(
     std::string func,
     std::string var,
     const ast::Type* type,
-    ast::DecorationList decorations) {
+    ast::AttributeList attributes) {
   ast::StatementList stmts;
   stmts.emplace_back(Decl(Var("local_" + var, type)));
   stmts.emplace_back(Assign("local_" + var, var));
   stmts.emplace_back(Return());
 
-  return Func(func, ast::VariableList(), ty.void_(), stmts, decorations);
+  return Func(func, ast::VariableList(), ty.void_(), stmts, attributes);
 }
 
 bool InspectorBuilder::ContainsName(const std::vector<StageVariable>& vec,
@@ -104,18 +104,18 @@ const ast::Struct* InspectorBuilder::MakeStructTypeFromMembers(
     const std::string& name,
     ast::StructMemberList members,
     bool is_block) {
-  ast::DecorationList decos;
+  ast::AttributeList attrs;
   if (is_block) {
-    decos.push_back(create<ast::StructBlockDecoration>());
+    attrs.push_back(create<ast::StructBlockAttribute>());
   }
-  return Structure(name, std::move(members), decos);
+  return Structure(name, std::move(members), attrs);
 }
 
 const ast::StructMember* InspectorBuilder::MakeStructMember(
     size_t index,
     const ast::Type* type,
-    ast::DecorationList decorations) {
-  return Member(StructMemberName(index, type), type, std::move(decorations));
+    ast::AttributeList attributes) {
+  return Member(StructMemberName(index, type), type, std::move(attributes));
 }
 
 const ast::Struct* InspectorBuilder::MakeUniformBufferType(
@@ -136,9 +136,9 @@ void InspectorBuilder::AddUniformBuffer(const std::string& name,
                                         uint32_t group,
                                         uint32_t binding) {
   Global(name, type, ast::StorageClass::kUniform,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(binding),
+             create<ast::GroupAttribute>(group),
          });
 }
 
@@ -153,9 +153,9 @@ void InspectorBuilder::AddStorageBuffer(const std::string& name,
                                         uint32_t group,
                                         uint32_t binding) {
   Global(name, type, ast::StorageClass::kStorage, access,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(binding),
+             create<ast::GroupAttribute>(group),
          });
 }
 
@@ -185,17 +185,16 @@ void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
 
   stmts.emplace_back(Return());
 
-  Func(func_name, ast::VariableList(), ty.void_(), stmts,
-       ast::DecorationList{});
+  Func(func_name, ast::VariableList(), ty.void_(), stmts, ast::AttributeList{});
 }
 
 void InspectorBuilder::AddSampler(const std::string& name,
                                   uint32_t group,
                                   uint32_t binding) {
   Global(name, sampler_type(),
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(binding),
+             create<ast::GroupAttribute>(group),
          });
 }
 
@@ -203,9 +202,9 @@ void InspectorBuilder::AddComparisonSampler(const std::string& name,
                                             uint32_t group,
                                             uint32_t binding) {
   Global(name, comparison_sampler_type(),
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(binding),
+             create<ast::GroupAttribute>(group),
          });
 }
 
@@ -214,9 +213,9 @@ void InspectorBuilder::AddResource(const std::string& name,
                                    uint32_t group,
                                    uint32_t binding) {
   Global(name, type,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(binding),
+             create<ast::GroupAttribute>(group),
          });
 }
 
@@ -231,7 +230,7 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
     const std::string& sampler_name,
     const std::string& coords_name,
     const ast::Type* base_type,
-    ast::DecorationList decorations) {
+    ast::AttributeList attributes) {
   std::string result_name = "sampler_result";
 
   ast::StatementList stmts;
@@ -241,7 +240,7 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
                                               sampler_name, coords_name)));
   stmts.emplace_back(Return());
 
-  return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
+  return Func(func_name, ast::VariableList(), ty.void_(), stmts, attributes);
 }
 
 const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
@@ -251,7 +250,7 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
     const std::string& coords_name,
     const std::string& array_index,
     const ast::Type* base_type,
-    ast::DecorationList decorations) {
+    ast::AttributeList attributes) {
   std::string result_name = "sampler_result";
 
   ast::StatementList stmts;
@@ -263,7 +262,7 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
                                     coords_name, array_index)));
   stmts.emplace_back(Return());
 
-  return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
+  return Func(func_name, ast::VariableList(), ty.void_(), stmts, attributes);
 }
 
 const ast::Function*
@@ -274,7 +273,7 @@ InspectorBuilder::MakeComparisonSamplerReferenceBodyFunction(
     const std::string& coords_name,
     const std::string& depth_name,
     const ast::Type* base_type,
-    ast::DecorationList decorations) {
+    ast::AttributeList attributes) {
   std::string result_name = "sampler_result";
 
   ast::StatementList stmts;
@@ -285,7 +284,7 @@ InspectorBuilder::MakeComparisonSamplerReferenceBodyFunction(
                                     sampler_name, coords_name, depth_name)));
   stmts.emplace_back(Return());
 
-  return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
+  return Func(func_name, ast::VariableList(), ty.void_(), stmts, attributes);
 }
 
 const ast::Type* InspectorBuilder::GetBaseType(
@@ -331,9 +330,9 @@ void InspectorBuilder::AddStorageTexture(const std::string& name,
                                          uint32_t group,
                                          uint32_t binding) {
   Global(name, type,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(binding),
+             create<ast::GroupAttribute>(group),
          });
 }
 
@@ -341,14 +340,14 @@ const ast::Function* InspectorBuilder::MakeStorageTextureBodyFunction(
     const std::string& func_name,
     const std::string& st_name,
     const ast::Type* dim_type,
-    ast::DecorationList decorations) {
+    ast::AttributeList attributes) {
   ast::StatementList stmts;
 
   stmts.emplace_back(Decl(Var("dim", dim_type)));
   stmts.emplace_back(Assign("dim", Call("textureDimensions", st_name)));
   stmts.emplace_back(Return());
 
-  return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
+  return Func(func_name, ast::VariableList(), ty.void_(), stmts, attributes);
 }
 
 std::function<const ast::Type*()> InspectorBuilder::GetTypeFunction(

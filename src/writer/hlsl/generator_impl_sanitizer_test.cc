@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "src/ast/call_statement.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/hlsl/test_helper.h"
 
@@ -27,11 +27,11 @@ using HlslSanitizerTest = TestHelper;
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength) {
   auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", ast::VariableList{}, ty.void_(),
@@ -39,7 +39,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength) {
            Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                     Call("arrayLength", AddressOf(MemberAccessor("b", "a"))))),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -67,11 +67,11 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
                           Member(0, "z", ty.f32()),
                           Member(4, "a", ty.array<f32>(4)),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", ast::VariableList{}, ty.void_(),
@@ -79,7 +79,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
            Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                     Call("arrayLength", AddressOf(MemberAccessor("b", "a"))))),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -104,11 +104,11 @@ void a_func() {
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
   auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   auto* p = Const("p", nullptr, AddressOf("b"));
@@ -121,7 +121,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
            Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                     Call("arrayLength", p2))),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -146,16 +146,16 @@ void a_func() {
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
   auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
   Global("c", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(2),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(2),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", ast::VariableList{}, ty.void_(),
@@ -165,7 +165,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
                Add(Call("arrayLength", AddressOf(MemberAccessor("b", "a"))),
                    Call("arrayLength", AddressOf(MemberAccessor("c", "a")))))),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 

@@ -480,7 +480,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
            Param(Sym(), ty.bool_()),
            Param(Sym(), ty.bool_()),
        },
-       ty.void_(), ast::StatementList{}, ast::DecorationList{});
+       ty.void_(), ast::StatementList{}, ast::AttributeList{});
   Global("a", ty.bool_(), ast::StorageClass::kPrivate);
   Global("b", ty.bool_(), ast::StorageClass::kPrivate);
   Global("c", ty.bool_(), ast::StorageClass::kPrivate);

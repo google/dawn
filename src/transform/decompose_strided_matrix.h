@@ -21,10 +21,10 @@ namespace tint {
 namespace transform {
 
 /// DecomposeStridedMatrix transforms replaces matrix members of storage or
-/// uniform buffer structures, that have a [[stride]] decoration, into an array
+/// uniform buffer structures, that have a [[stride]] attribute, into an array
 /// of N column vectors.
 /// This transform is used by the SPIR-V reader to handle the SPIR-V
-/// MatrixStride decoration.
+/// MatrixStride attribute.
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers

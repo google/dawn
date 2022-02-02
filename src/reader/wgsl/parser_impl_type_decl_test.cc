@@ -391,7 +391,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type->Is<ast::F32>());
-  EXPECT_EQ(a->decorations.size(), 0u);
+  EXPECT_EQ(a->attributes.size(), 0u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 
   auto* size = a->count->As<ast::SintLiteralExpression>();
@@ -411,7 +411,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type->Is<ast::F32>());
-  EXPECT_EQ(a->decorations.size(), 0u);
+  EXPECT_EQ(a->attributes.size(), 0u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 15u}}));
 
   auto* size = a->count->As<ast::UintLiteralExpression>();
@@ -431,7 +431,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type->Is<ast::F32>());
-  EXPECT_EQ(a->decorations.size(), 0u);
+  EXPECT_EQ(a->attributes.size(), 0u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 
   auto* count_expr = a->count->As<ast::IdentifierExpression>();
@@ -456,10 +456,10 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   ASSERT_NE(size, nullptr);
   EXPECT_EQ(size->ValueAsI32(), 5);
 
-  ASSERT_EQ(a->decorations.size(), 1u);
-  auto* stride = a->decorations[0];
-  ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
-  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride, 16u);
+  ASSERT_EQ(a->attributes.size(), 1u);
+  auto* stride = a->attributes[0];
+  ASSERT_TRUE(stride->Is<ast::StrideAttribute>());
+  ASSERT_EQ(stride->As<ast::StrideAttribute>()->stride, 16u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 13u}, {1u, 26u}}));
 }
 
@@ -476,14 +476,14 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  ASSERT_EQ(a->decorations.size(), 1u);
-  auto* stride = a->decorations[0];
-  ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
-  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride, 16u);
+  ASSERT_EQ(a->attributes.size(), 1u);
+  auto* stride = a->attributes[0];
+  ASSERT_TRUE(stride->Is<ast::StrideAttribute>());
+  ASSERT_EQ(stride->As<ast::StrideAttribute>()->stride, 16u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 13u}, {1u, 23u}}));
 }
 
-TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
+TEST_F(ParserImplTest, TypeDecl_Array_MultipleAttributes_OneBlock) {
   auto p = parser("@stride(16) @stride(32) array<f32>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -496,16 +496,16 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  auto& decos = a->decorations;
-  ASSERT_EQ(decos.size(), 2u);
-  EXPECT_TRUE(decos[0]->Is<ast::StrideDecoration>());
-  EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride, 16u);
-  EXPECT_TRUE(decos[1]->Is<ast::StrideDecoration>());
-  EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride, 32u);
+  auto& attrs = a->attributes;
+  ASSERT_EQ(attrs.size(), 2u);
+  EXPECT_TRUE(attrs[0]->Is<ast::StrideAttribute>());
+  EXPECT_EQ(attrs[0]->As<ast::StrideAttribute>()->stride, 16u);
+  EXPECT_TRUE(attrs[1]->Is<ast::StrideAttribute>());
+  EXPECT_EQ(attrs[1]->As<ast::StrideAttribute>()->stride, 32u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 25u}, {1u, 35u}}));
 }
 
-TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
+TEST_F(ParserImplTest, TypeDecl_Array_MultipleAttributes_MultipleBlocks) {
   auto p = parser("@stride(16) @stride(32) array<f32>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -518,16 +518,16 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type->Is<ast::F32>());
 
-  auto& decos = a->decorations;
-  ASSERT_EQ(decos.size(), 2u);
-  EXPECT_TRUE(decos[0]->Is<ast::StrideDecoration>());
-  EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride, 16u);
-  EXPECT_TRUE(decos[1]->Is<ast::StrideDecoration>());
-  EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride, 32u);
+  auto& attrs = a->attributes;
+  ASSERT_EQ(attrs.size(), 2u);
+  EXPECT_TRUE(attrs[0]->Is<ast::StrideAttribute>());
+  EXPECT_EQ(attrs[0]->As<ast::StrideAttribute>()->stride, 16u);
+  EXPECT_TRUE(attrs[1]->Is<ast::StrideAttribute>());
+  EXPECT_EQ(attrs[1]->As<ast::StrideAttribute>()->stride, 32u);
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 25u}, {1u, 35u}}));
 }
 
-TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
+TEST_F(ParserImplTest, TypeDecl_Array_Attribute_MissingArray) {
   auto p = parser("@stride(16) f32");
   auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
@@ -537,17 +537,17 @@ TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
   EXPECT_EQ(
       p->error(),
       R"(1:2: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
-1:2: unexpected decorations)");
+1:2: unexpected attributes)");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Array_Decoration_UnknownDecoration) {
+TEST_F(ParserImplTest, TypeDecl_Array_Attribute_UnknownAttribute) {
   auto p = parser("@unknown(16) array<f32, 5>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), R"(1:2: expected decoration)");
+  EXPECT_EQ(p->error(), R"(1:2: expected attribute)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingLeftParen) {
@@ -557,7 +557,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingLeftParen) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), R"(1:9: expected '(' for stride decoration)");
+  EXPECT_EQ(p->error(), R"(1:9: expected '(' for stride attribute)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingRightParen) {
@@ -570,7 +570,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingRightParen) {
   EXPECT_EQ(
       p->error(),
       R"(1:2: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
-1:11: expected ')' for stride decoration)");
+1:11: expected ')' for stride attribute)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingValue) {
@@ -581,7 +581,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingValue) {
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:9: expected signed integer literal for stride decoration");
+            "1:9: expected signed integer literal for stride attribute");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue) {
@@ -592,7 +592,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue) {
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:9: expected signed integer literal for stride decoration");
+            "1:9: expected signed integer literal for stride attribute");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue_Negative) {
@@ -602,12 +602,11 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue_Negative) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: stride decoration must be greater than 0");
+  EXPECT_EQ(p->error(), "1:9: stride attribute must be greater than 0");
 }
 
 // TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest,
-       DEPRECATED_TypeDecl_Array_Decoration_MissingClosingAttr) {
+TEST_F(ParserImplTest, DEPRECATED_TypeDecl_Array_Attribute_MissingClosingAttr) {
   auto p = parser("[[stride(16) array<f32, 5>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
@@ -616,9 +615,9 @@ TEST_F(ParserImplTest,
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(
       p->error(),
-      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 1:3: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
-1:14: expected ']]' for decoration list)");
+1:14: expected ']]' for attribute list)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
@@ -631,8 +630,8 @@ TEST_F(ParserImplTest, DEPRECATED_TypeDecl_Array_Stride_MissingLeftParen) {
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(
       p->error(),
-      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:10: expected '(' for stride decoration)");
+      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
+1:10: expected '(' for stride attribute)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
@@ -645,9 +644,9 @@ TEST_F(ParserImplTest, DEPRECATED_TypeDecl_Array_Stride_MissingRightParen) {
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(
       p->error(),
-      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 1:3: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
-1:11: expected ')' for stride decoration)");
+1:11: expected ')' for stride attribute)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
@@ -660,8 +659,8 @@ TEST_F(ParserImplTest, DEPRECATED_TypeDecl_Array_Stride_MissingValue) {
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(
       p->error(),
-      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:10: expected signed integer literal for stride decoration)");
+      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
+1:10: expected signed integer literal for stride attribute)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
@@ -674,8 +673,8 @@ TEST_F(ParserImplTest, DEPRECATED_TypeDecl_Array_Stride_InvalidValue) {
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(
       p->error(),
-      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:10: expected signed integer literal for stride decoration)");
+      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
+1:10: expected signed integer literal for stride attribute)");
 }
 
 // TODO(crbug.com/tint/1382): Remove
@@ -688,8 +687,8 @@ TEST_F(ParserImplTest, DEPRECATED_TypeDecl_Array_Stride_InvalidValue_Negative) {
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(
       p->error(),
-      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
-1:10: stride decoration must be greater than 0)");
+      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
+1:10: stride attribute must be greater than 0)");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {

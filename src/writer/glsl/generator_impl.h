@@ -299,14 +299,14 @@ class GeneratorImpl : public TextGenerator {
 
   /// Handles emitting interpolation qualifiers
   /// @param out the output of the expression stream
-  /// @param decos the decorations
+  /// @param attrs the attributes
   void EmitInterpolationQualifiers(std::ostream& out,
-                                   const ast::DecorationList& decos);
-  /// Handles emitting decorations
+                                   const ast::AttributeList& attrs);
+  /// Handles emitting attributes
   /// @param out the output of the expression stream
-  /// @param decos the decorations
-  /// @returns true if the decorations were emitted
-  bool EmitDecorations(std::ostream& out, const ast::DecorationList& decos);
+  /// @param attrs the attributes
+  /// @returns true if the attributes were emitted
+  bool EmitAttributes(std::ostream& out, const ast::AttributeList& attrs);
   /// Handles emitting the entry point function
   /// @param func the entry point
   /// @returns true if the entry point function was emitted

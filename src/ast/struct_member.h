@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/decoration.h"
+#include "src/ast/attribute.h"
 
 namespace tint {
 namespace ast {
@@ -34,12 +34,12 @@ class StructMember : public Castable<StructMember, Node> {
   /// @param src the source of this node for the struct member statement
   /// @param sym The struct member symbol
   /// @param type The struct member type
-  /// @param decorations The struct member decorations
+  /// @param attributes The struct member attributes
   StructMember(ProgramID pid,
                const Source& src,
                const Symbol& sym,
                const ast::Type* type,
-               DecorationList decorations);
+               AttributeList attributes);
   /// Move constructor
   StructMember(StructMember&&);
 
@@ -57,8 +57,8 @@ class StructMember : public Castable<StructMember, Node> {
   /// The type
   const ast::Type* const type;
 
-  /// The decorations
-  const DecorationList decorations;
+  /// The attributes
+  const AttributeList attributes;
 };
 
 /// A list of struct members

@@ -85,10 +85,10 @@ struct MultiplanarExternalTexture::State {
         return nullptr;
       }
 
-      // If the decorations are empty, then this must be a texture_external
+      // If the attributes are empty, then this must be a texture_external
       // passed as a function parameter. These variables are transformed
       // elsewhere.
-      if (var->decorations.empty()) {
+      if (var->attributes.empty()) {
         return nullptr;
       }
 
@@ -136,12 +136,12 @@ struct MultiplanarExternalTexture::State {
 
       // Replace the original texture_external binding with a texture_2d<f32>
       // binding.
-      ast::DecorationList cloned_decorations = ctx.Clone(var->decorations);
+      ast::AttributeList cloned_attributes = ctx.Clone(var->attributes);
       const ast::Expression* cloned_constructor = ctx.Clone(var->constructor);
 
       return b.Var(syms.plane_0,
                    b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32()),
-                   cloned_constructor, cloned_decorations);
+                   cloned_constructor, cloned_attributes);
     });
 
     // Transform the original textureLoad and textureSampleLevel calls into

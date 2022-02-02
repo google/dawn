@@ -28,16 +28,16 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/depth_texture.h"
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/for_loop_statement.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/internal_decoration.h"
-#include "src/ast/interpolate_decoration.h"
+#include "src/ast/internal_attribute.h"
+#include "src/ast/interpolate_attribute.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
@@ -49,7 +49,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
@@ -312,7 +312,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
       storage_ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
     }
   } else if (var->is_const && kind != VariableKind::kParameter &&
-             !ast::HasDecoration<ast::OverrideDecoration>(var->decorations)) {
+             !ast::HasAttribute<ast::OverrideAttribute>(var->attributes)) {
     AddError("let declaration must have an initializer", var->source);
     return nullptr;
   } else if (!var->type) {
@@ -340,7 +340,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
     } else if (storage_ty->UnwrapRef()->is_handle()) {
       // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
       // If the store type is a texture type or a sampler type, then the
-      // variable declaration must not have a storage class decoration. The
+      // variable declaration must not have a storage class attribute. The
       // storage class will always be handle.
       storage_class = ast::StorageClass::kUniformConstant;
     }
@@ -348,7 +348,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
 
   if (kind == VariableKind::kLocal && !var->is_const &&
       storage_class != ast::StorageClass::kFunction &&
-      IsValidationEnabled(var->decorations,
+      IsValidationEnabled(var->attributes,
                           ast::DisabledValidation::kIgnoreStorageClass)) {
     AddError("function variable has a non-function storage class", var->source);
     return nullptr;
@@ -405,7 +405,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
       }
 
       auto* override =
-          ast::GetDecoration<ast::OverrideDecoration>(var->decorations);
+          ast::GetAttribute<ast::OverrideAttribute>(var->attributes);
       bool has_const_val = rhs && var->is_const && !override;
 
       auto* global = builder_->create<sem::GlobalVariable>(
@@ -473,15 +473,15 @@ void Resolver::AllocateOverridableConstantIds() {
     if (!var) {
       continue;
     }
-    auto* override_deco =
-        ast::GetDecoration<ast::OverrideDecoration>(var->decorations);
-    if (!override_deco) {
+    auto* override_attr =
+        ast::GetAttribute<ast::OverrideAttribute>(var->attributes);
+    if (!override_attr) {
       continue;
     }
 
     uint16_t constant_id;
-    if (override_deco->has_value) {
-      constant_id = static_cast<uint16_t>(override_deco->value);
+    if (override_attr->has_value) {
+      constant_id = static_cast<uint16_t>(override_attr->value);
     } else {
       // No ID was specified, so allocate the next available ID.
       constant_id = next_constant_id;
@@ -529,18 +529,18 @@ bool Resolver::GlobalVariable(const ast::Variable* var) {
     return false;
   }
 
-  for (auto* deco : var->decorations) {
-    Mark(deco);
+  for (auto* attr : var->attributes) {
+    Mark(attr);
 
-    if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
+    if (auto* override_attr = attr->As<ast::OverrideAttribute>()) {
       // Track the constant IDs that are specified in the shader.
-      if (override_deco->has_value) {
-        constant_ids_.emplace(override_deco->value, sem);
+      if (override_attr->has_value) {
+        constant_ids_.emplace(override_attr->value, sem);
       }
     }
   }
 
-  if (!ValidateNoDuplicateDecorations(var->decorations)) {
+  if (!ValidateNoDuplicateAttributes(var->attributes)) {
     return false;
   }
 
@@ -582,10 +582,10 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
       return nullptr;
     }
 
-    for (auto* deco : param->decorations) {
-      Mark(deco);
+    for (auto* attr : param->attributes) {
+      Mark(attr);
     }
-    if (!ValidateNoDuplicateDecorations(param->decorations)) {
+    if (!ValidateNoDuplicateAttributes(param->attributes)) {
       return nullptr;
     }
 
@@ -681,17 +681,17 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
   }
 
-  for (auto* deco : decl->decorations) {
-    Mark(deco);
+  for (auto* attr : decl->attributes) {
+    Mark(attr);
   }
-  if (!ValidateNoDuplicateDecorations(decl->decorations)) {
+  if (!ValidateNoDuplicateAttributes(decl->attributes)) {
     return nullptr;
   }
 
-  for (auto* deco : decl->return_type_decorations) {
-    Mark(deco);
+  for (auto* attr : decl->return_type_attributes) {
+    Mark(attr);
   }
-  if (!ValidateNoDuplicateDecorations(decl->return_type_decorations)) {
+  if (!ValidateNoDuplicateAttributes(decl->return_type_attributes)) {
     return nullptr;
   }
 
@@ -718,16 +718,16 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     ws[i].overridable_const = nullptr;
   }
 
-  auto* deco = ast::GetDecoration<ast::WorkgroupDecoration>(func->decorations);
-  if (!deco) {
+  auto* attr = ast::GetAttribute<ast::WorkgroupAttribute>(func->attributes);
+  if (!attr) {
     return true;
   }
 
-  auto values = deco->Values();
+  auto values = attr->Values();
   auto any_i32 = false;
   auto any_u32 = false;
   for (int i = 0; i < 3; i++) {
-    // Each argument to this decoration can either be a literal, an
+    // Each argument to this attribute can either be a literal, an
     // identifier for a module-scope constants, or nullptr if not specified.
 
     auto* expr = values[i];
@@ -773,7 +773,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         return false;
       }
       // Capture the constant if an [[override]] attribute is present.
-      if (ast::HasDecoration<ast::OverrideDecoration>(decl->decorations)) {
+      if (ast::HasAttribute<ast::OverrideAttribute>(decl->attributes)) {
         ws[i].overridable_const = decl;
       }
 
@@ -2147,23 +2147,23 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
   uint32_t el_align = elem_type->Align();
   uint32_t el_size = elem_type->Size();
 
-  if (!ValidateNoDuplicateDecorations(arr->decorations)) {
+  if (!ValidateNoDuplicateAttributes(arr->attributes)) {
     return nullptr;
   }
 
-  // Look for explicit stride via @stride(n) decoration
+  // Look for explicit stride via @stride(n) attribute
   uint32_t explicit_stride = 0;
-  for (auto* deco : arr->decorations) {
-    Mark(deco);
-    if (auto* sd = deco->As<ast::StrideDecoration>()) {
+  for (auto* attr : arr->attributes) {
+    Mark(attr);
+    if (auto* sd = attr->As<ast::StrideAttribute>()) {
       explicit_stride = sd->stride;
-      if (!ValidateArrayStrideDecoration(sd, el_size, el_align, source)) {
+      if (!ValidateArrayStrideAttribute(sd, el_size, el_align, source)) {
         return nullptr;
       }
       continue;
     }
 
-    AddError("decoration is not valid for array types", deco->source);
+    AddError("attribute is not valid for array types", attr->source);
     return nullptr;
   }
 
@@ -2198,8 +2198,8 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
                  size_source);
         return nullptr;
       }
-      if (ast::HasDecoration<ast::OverrideDecoration>(
-              var->Declaration()->decorations)) {
+      if (ast::HasAttribute<ast::OverrideAttribute>(
+              var->Declaration()->attributes)) {
         AddError("array size expression must not be pipeline-overridable",
                  size_source);
         return nullptr;
@@ -2277,11 +2277,11 @@ sem::Type* Resolver::Alias(const ast::Alias* alias) {
 }
 
 sem::Struct* Resolver::Structure(const ast::Struct* str) {
-  if (!ValidateNoDuplicateDecorations(str->decorations)) {
+  if (!ValidateNoDuplicateAttributes(str->attributes)) {
     return nullptr;
   }
-  for (auto* deco : str->decorations) {
-    Mark(deco);
+  for (auto* attr : str->attributes) {
+    Mark(attr);
   }
 
   sem::StructMemberList sem_members;
@@ -2330,17 +2330,17 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     uint64_t align = type->Align();
     uint64_t size = type->Size();
 
-    if (!ValidateNoDuplicateDecorations(member->decorations)) {
+    if (!ValidateNoDuplicateAttributes(member->attributes)) {
       return nullptr;
     }
 
-    bool has_offset_deco = false;
-    bool has_align_deco = false;
-    bool has_size_deco = false;
-    for (auto* deco : member->decorations) {
-      Mark(deco);
-      if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
-        // Offset decorations are not part of the WGSL spec, but are emitted
+    bool has_offset_attr = false;
+    bool has_align_attr = false;
+    bool has_size_attr = false;
+    for (auto* attr : member->attributes) {
+      Mark(attr);
+      if (auto* o = attr->As<ast::StructMemberOffsetAttribute>()) {
+        // Offset attributes are not part of the WGSL spec, but are emitted
         // by the SPIR-V reader.
         if (o->offset < struct_size) {
           AddError("offsets must be in ascending order", o->source);
@@ -2348,16 +2348,16 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         }
         offset = o->offset;
         align = 1;
-        has_offset_deco = true;
-      } else if (auto* a = deco->As<ast::StructMemberAlignDecoration>()) {
+        has_offset_attr = true;
+      } else if (auto* a = attr->As<ast::StructMemberAlignAttribute>()) {
         if (a->align <= 0 || !utils::IsPowerOfTwo(a->align)) {
           AddError("align value must be a positive, power-of-two integer",
                    a->source);
           return nullptr;
         }
         align = a->align;
-        has_align_deco = true;
-      } else if (auto* s = deco->As<ast::StructMemberSizeDecoration>()) {
+        has_align_attr = true;
+      } else if (auto* s = attr->As<ast::StructMemberSizeAttribute>()) {
         if (s->size < size) {
           AddError("size must be at least as big as the type's size (" +
                        std::to_string(size) + ")",
@@ -2365,14 +2365,13 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
           return nullptr;
         }
         size = s->size;
-        has_size_deco = true;
+        has_size_attr = true;
       }
     }
 
-    if (has_offset_deco && (has_align_deco || has_size_deco)) {
-      AddError(
-          "offset decorations cannot be used with align or size decorations",
-          member->source);
+    if (has_offset_attr && (has_align_attr || has_size_attr)) {
+      AddError("offset attributes cannot be used with align or size attributes",
+               member->source);
       return nullptr;
     }
 
@@ -2505,10 +2504,10 @@ sem::Statement* Resolver::VariableDeclStatement(
       return false;
     }
 
-    for (auto* deco : stmt->variable->decorations) {
-      Mark(deco);
-      if (!deco->Is<ast::InternalDecoration>()) {
-        AddError("decorations are not valid on local variables", deco->source);
+    for (auto* attr : stmt->variable->attributes) {
+      Mark(attr);
+      if (!attr->Is<ast::InternalAttribute>()) {
+        AddError("attributes are not valid on local variables", attr->source);
         return false;
       }
     }

@@ -1306,7 +1306,7 @@ fn main2() -> tint_symbol_1 {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutDecorations) {
+TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutAttributes) {
   auto* src = R"(
 struct FragmentInput {
   @size(16) @location(1) value : f32;

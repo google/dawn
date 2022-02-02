@@ -26,7 +26,7 @@
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -66,8 +66,8 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInVertexStage) {
 
   Func(Source{{9, 10}}, "f0", ast::VariableList{}, ty.vec4<f32>(),
        {stmt, Return(Expr("dst"))},
-       ast::DecorationList{Stage(ast::PipelineStage::kVertex)},
-       ast::DecorationList{Builtin(ast::Builtin::kPosition)});
+       ast::AttributeList{Stage(ast::PipelineStage::kVertex)},
+       ast::AttributeList{Builtin(ast::Builtin::kPosition)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -92,7 +92,7 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
   Func(Source{{5, 6}}, "f2", {}, ty.void_(), {stmt});
   Func(Source{{7, 8}}, "f1", {}, ty.void_(), {CallStmt(Call("f2"))});
   Func(Source{{9, 10}}, "f0", {}, ty.void_(), {CallStmt(Call("f1"))},
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -300,7 +300,7 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableWorkgroupClass) {
   auto* var = Var("var", ty.i32(), ast::StorageClass::kWorkgroup);
 
   auto* stmt = Decl(var);
-  Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::DecorationList{});
+  Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::AttributeList{});
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -312,7 +312,7 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableI32) {
   auto* var = Var("s", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* stmt = Decl(var);
-  Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::DecorationList{});
+  Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::AttributeList{});
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -323,9 +323,9 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableI32) {
 TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
   auto* t = ty.sampler(ast::SamplerKind::kSampler);
   Global(Source{{12, 34}}, "var", t, ast::StorageClass::kUniformConstant,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   EXPECT_FALSE(r()->Resolve());
@@ -338,9 +338,9 @@ TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
 TEST_F(ResolverValidationTest, StorageClass_TextureExplicitStorageClass) {
   auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   Global(Source{{12, 34}}, "var", t, ast::StorageClass::kUniformConstant,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
@@ -1073,7 +1073,7 @@ TEST_F(ResolverValidationTest, StructMemberDuplicateNamePass) {
   EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverValidationTest, NonPOTStructMemberAlignDecoration) {
+TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
   Structure("S", {
                      Member("a", ty.f32(), {MemberAlign(Source{{12, 34}}, 3)}),
                  });
@@ -1084,7 +1084,7 @@ TEST_F(ResolverValidationTest, NonPOTStructMemberAlignDecoration) {
       "12:34 error: align value must be a positive, power-of-two integer");
 }
 
-TEST_F(ResolverValidationTest, ZeroStructMemberAlignDecoration) {
+TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
   Structure("S", {
                      Member("a", ty.f32(), {MemberAlign(Source{{12, 34}}, 0)}),
                  });
@@ -1095,7 +1095,7 @@ TEST_F(ResolverValidationTest, ZeroStructMemberAlignDecoration) {
       "12:34 error: align value must be a positive, power-of-two integer");
 }
 
-TEST_F(ResolverValidationTest, ZeroStructMemberSizeDecoration) {
+TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
   Structure("S", {
                      Member("a", ty.f32(), {MemberSize(Source{{12, 34}}, 0)}),
                  });
@@ -1105,7 +1105,7 @@ TEST_F(ResolverValidationTest, ZeroStructMemberSizeDecoration) {
             "12:34 error: size must be at least as big as the type's size (4)");
 }
 
-TEST_F(ResolverValidationTest, OffsetAndSizeDecoration) {
+TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
   Structure("S", {
                      Member(Source{{12, 34}}, "a", ty.f32(),
                             {MemberOffset(0), MemberSize(4)}),
@@ -1113,11 +1113,11 @@ TEST_F(ResolverValidationTest, OffsetAndSizeDecoration) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: offset decorations cannot be used with align or size "
-            "decorations");
+            "12:34 error: offset attributes cannot be used with align or size "
+            "attributes");
 }
 
-TEST_F(ResolverValidationTest, OffsetAndAlignDecoration) {
+TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
   Structure("S", {
                      Member(Source{{12, 34}}, "a", ty.f32(),
                             {MemberOffset(0), MemberAlign(4)}),
@@ -1125,11 +1125,11 @@ TEST_F(ResolverValidationTest, OffsetAndAlignDecoration) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: offset decorations cannot be used with align or size "
-            "decorations");
+            "12:34 error: offset attributes cannot be used with align or size "
+            "attributes");
 }
 
-TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeDecoration) {
+TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
   Structure("S", {
                      Member(Source{{12, 34}}, "a", ty.f32(),
                             {MemberOffset(0), MemberAlign(4), MemberSize(4)}),
@@ -1137,8 +1137,8 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeDecoration) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: offset decorations cannot be used with align or size "
-            "decorations");
+            "12:34 error: offset attributes cannot be used with align or size "
+            "attributes");
 }
 
 TEST_F(ResolverTest, Expr_Constructor_Cast_Pointer) {

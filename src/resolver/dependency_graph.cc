@@ -154,7 +154,7 @@ class DependencyScanner {
     }
     if (auto* func = global->node->As<ast::Function>()) {
       Declare(func->symbol, func);
-      TraverseDecorations(func->decorations);
+      TraverseAttributes(func->attributes);
       TraverseFunction(func);
       return;
     }
@@ -385,36 +385,35 @@ class DependencyScanner {
     UnhandledNode(diagnostics_, ty);
   }
 
-  /// Traverses the decoration list, performing symbol resolution and
+  /// Traverses the attribute list, performing symbol resolution and
   /// determining global dependencies.
-  void TraverseDecorations(const ast::DecorationList& decos) {
-    for (auto* deco : decos) {
-      TraverseDecoration(deco);
+  void TraverseAttributes(const ast::AttributeList& attrs) {
+    for (auto* attr : attrs) {
+      TraverseAttribute(attr);
     }
   }
 
-  /// Traverses the decoration, performing symbol resolution and determining
+  /// Traverses the attribute, performing symbol resolution and determining
   /// global dependencies.
-  void TraverseDecoration(const ast::Decoration* deco) {
-    if (auto* wg = deco->As<ast::WorkgroupDecoration>()) {
+  void TraverseAttribute(const ast::Attribute* attr) {
+    if (auto* wg = attr->As<ast::WorkgroupAttribute>()) {
       TraverseExpression(wg->x);
       TraverseExpression(wg->y);
       TraverseExpression(wg->z);
       return;
     }
-    if (deco->IsAnyOf<ast::BindingDecoration, ast::BuiltinDecoration,
-                      ast::GroupDecoration, ast::InternalDecoration,
-                      ast::InterpolateDecoration, ast::InvariantDecoration,
-                      ast::LocationDecoration, ast::OverrideDecoration,
-                      ast::StageDecoration, ast::StrideDecoration,
-                      ast::StructBlockDecoration,
-                      ast::StructMemberAlignDecoration,
-                      ast::StructMemberOffsetDecoration,
-                      ast::StructMemberSizeDecoration>()) {
+    if (attr->IsAnyOf<
+            ast::BindingAttribute, ast::BuiltinAttribute, ast::GroupAttribute,
+            ast::InternalAttribute, ast::InterpolateAttribute,
+            ast::InvariantAttribute, ast::LocationAttribute,
+            ast::OverrideAttribute, ast::StageAttribute, ast::StrideAttribute,
+            ast::StructBlockAttribute, ast::StructMemberAlignAttribute,
+            ast::StructMemberOffsetAttribute,
+            ast::StructMemberSizeAttribute>()) {
       return;
     }
 
-    UnhandledNode(diagnostics_, deco);
+    UnhandledNode(diagnostics_, attr);
   }
 
   /// Adds the dependency to the currently processed global

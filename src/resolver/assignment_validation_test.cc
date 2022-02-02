@@ -15,7 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/storage_texture_type.h"
 
@@ -30,12 +30,12 @@ TEST_F(ResolverAssignmentValidationTest, ReadOnlyBuffer) {
   // @group(0) @binding(0)
   // var<storage,read> a : S;
   auto* s = Structure("S", {Member("m", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global(Source{{12, 34}}, "a", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("a", "m"), 1));
@@ -232,14 +232,14 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
   };
 
   Global("a", make_type(), ast::StorageClass::kNone,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
   Global("b", make_type(), ast::StorageClass::kNone,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(0),
          });
 
   WrapInFunction(Assign(Source{{56, 78}}, "a", "b"));
@@ -255,12 +255,12 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
   // v.a = v.a;
 
   auto* s = Structure("S", {Member("a", ty.atomic(ty.i32()))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("v", "a"),
@@ -277,12 +277,12 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
   // v.a = v.a;
 
   auto* s = Structure("S", {Member("a", ty.array(ty.f32()))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("v", "a"),

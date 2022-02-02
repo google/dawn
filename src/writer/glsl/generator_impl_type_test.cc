@@ -14,8 +14,8 @@
 
 #include "gmock/gmock.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
@@ -224,7 +224,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
                           Member("a", ty.i32(), {MemberOffset(0)}),
                           Member("b", ty.f32(), {MemberOffset(8)}),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("g", ty.Of(s), ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
@@ -314,9 +314,9 @@ TEST_P(GlslDepthTexturesTest, Emit) {
   auto* t = ty.depth_texture(params.dim);
 
   Global("tex", t,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
@@ -344,9 +344,9 @@ TEST_F(GlslDepthMultisampledTexturesTest, Emit) {
   auto* t = ty.depth_multisampled_texture(ast::TextureDimension::k2d);
 
   Global("tex", t,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
@@ -388,9 +388,9 @@ TEST_P(GlslSampledTexturesTest, Emit) {
   auto* t = ty.sampled_texture(params.dim, datatype);
 
   Global("tex", t,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
@@ -524,9 +524,9 @@ TEST_P(GlslStorageTexturesTest, Emit) {
   auto* t = ty.storage_texture(params.dim, params.imgfmt, ast::Access::kWrite);
 
   Global("tex", t,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},

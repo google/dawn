@@ -151,36 +151,36 @@ const ast::Type* TextureOverloadCase::BuildResultVectorComponentType(
 
 const ast::Variable* TextureOverloadCase::BuildTextureVariable(
     ProgramBuilder* b) const {
-  DecorationList decos = {
-      b->create<ast::GroupDecoration>(0),
-      b->create<ast::BindingDecoration>(0),
+  AttributeList attrs = {
+      b->create<ast::GroupAttribute>(0),
+      b->create<ast::BindingAttribute>(0),
   };
   switch (texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
       return b->Global("texture",
                        b->ty.sampled_texture(texture_dimension,
                                              BuildResultVectorComponentType(b)),
-                       decos);
+                       attrs);
 
     case ast::intrinsic::test::TextureKind::kDepth:
       return b->Global("texture", b->ty.depth_texture(texture_dimension),
-                       decos);
+                       attrs);
 
     case ast::intrinsic::test::TextureKind::kDepthMultisampled:
       return b->Global("texture",
                        b->ty.depth_multisampled_texture(texture_dimension),
-                       decos);
+                       attrs);
 
     case ast::intrinsic::test::TextureKind::kMultisampled:
       return b->Global(
           "texture",
           b->ty.multisampled_texture(texture_dimension,
                                      BuildResultVectorComponentType(b)),
-          decos);
+          attrs);
 
     case ast::intrinsic::test::TextureKind::kStorage: {
       auto* st = b->ty.storage_texture(texture_dimension, texel_format, access);
-      return b->Global("texture", st, decos);
+      return b->Global("texture", st, attrs);
     }
   }
 
@@ -190,11 +190,11 @@ const ast::Variable* TextureOverloadCase::BuildTextureVariable(
 
 const ast::Variable* TextureOverloadCase::BuildSamplerVariable(
     ProgramBuilder* b) const {
-  DecorationList decos = {
-      b->create<ast::GroupDecoration>(0),
-      b->create<ast::BindingDecoration>(1),
+  AttributeList attrs = {
+      b->create<ast::GroupAttribute>(0),
+      b->create<ast::BindingAttribute>(1),
   };
-  return b->Global("sampler", b->ty.sampler(sampler_kind), decos);
+  return b->Global("sampler", b->ty.sampler(sampler_kind), attrs);
 }
 
 std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {

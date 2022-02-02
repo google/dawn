@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   const auto* mem = m.value[0];
   EXPECT_EQ(mem->symbol, builder.Symbols().Get("a"));
   EXPECT_TRUE(mem->type->Is<ast::I32>());
-  EXPECT_EQ(mem->decorations.size(), 0u);
+  EXPECT_EQ(mem->attributes.size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidAlign) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(m.errored);
   EXPECT_EQ(p->error(),
-            "3:10: expected signed integer literal for align decoration");
+            "3:10: expected signed integer literal for align attribute");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidSize) {
@@ -64,7 +64,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidSize) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(m.errored);
   EXPECT_EQ(p->error(),
-            "3:9: expected signed integer literal for size decoration");
+            "3:9: expected signed integer literal for size attribute");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {

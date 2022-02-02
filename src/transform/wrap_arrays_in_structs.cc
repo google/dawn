@@ -149,12 +149,12 @@ WrapArraysInStructs::WrappedArrayInfo WrapArraysInStructs::WrapArray(
 
     // Construct the single structure field type
     info.array_type = [=](CloneContext& c) {
-      ast::DecorationList decos;
+      ast::AttributeList attrs;
       if (!array->IsStrideImplicit()) {
-        decos.emplace_back(
-            c.dst->create<ast::StrideDecoration>(array->Stride()));
+        attrs.emplace_back(
+            c.dst->create<ast::StrideAttribute>(array->Stride()));
       }
-      return c.dst->ty.array(el_type(c), array->Count(), std::move(decos));
+      return c.dst->ty.array(el_type(c), array->Count(), std::move(attrs));
     };
 
     // Structure() will create and append the ast::Struct to the

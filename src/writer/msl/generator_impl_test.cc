@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {
@@ -24,7 +24,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
        });

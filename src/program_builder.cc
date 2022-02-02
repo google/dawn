@@ -131,7 +131,7 @@ const ast::Statement* ProgramBuilder::WrapInStatement(
 const ast::Function* ProgramBuilder::WrapInFunction(
     const ast::StatementList stmts) {
   return Func("test_function", {}, ty.void_(), std::move(stmts),
-              {create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+              {create<ast::StageAttribute>(ast::PipelineStage::kCompute),
                WorkgroupSize(1, 1, 1)});
 }
 

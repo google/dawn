@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/writer/hlsl/test_helper.h"
 
 using ::testing::HasSubstr;
@@ -80,7 +80,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_NoReturn_Void) {
+       Emit_Attribute_EntryPoint_NoReturn_Void) {
   Func("main", ast::VariableList{}, ty.void_(), {/* no explicit return */},
        {
            Stage(ast::PipelineStage::kFragment),
@@ -112,7 +112,7 @@ TEST_F(HlslGeneratorImplTest_Function, PtrParameter) {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_WithInOutVars) {
+       Emit_Attribute_EntryPoint_WithInOutVars) {
   // fn frag_main(@location(0) foo : f32) -> @location(1) f32 {
   //   return foo;
   // }
@@ -144,7 +144,7 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_WithInOut_Builtins) {
+       Emit_Attribute_EntryPoint_WithInOut_Builtins) {
   // fn frag_main(@position(0) coord : vec4<f32>) -> @frag_depth f32 {
   //   return coord.x;
   // }
@@ -179,7 +179,7 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_SharedStruct_DifferentStages) {
+       Emit_Attribute_EntryPoint_SharedStruct_DifferentStages) {
   // struct Interface {
   //   @builtin(position) pos : vec4<f32>;
   //   @location(1) col1 : f32;
@@ -263,7 +263,7 @@ void frag_main(tint_symbol_2 tint_symbol_1) {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_SharedStruct_HelperFunction) {
+       Emit_Attribute_EntryPoint_SharedStruct_HelperFunction) {
   // struct VertexOutput {
   //   @builtin(position) pos : vec4<f32>;
   // };
@@ -336,14 +336,13 @@ tint_symbol_1 vert_main2() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_With_Uniform) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
   auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
-                           {create<ast::StructBlockDecoration>()});
+                           {create<ast::StructBlockAttribute>()});
   auto* ubo = Global("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform,
-                     ast::DecorationList{
-                         create<ast::BindingDecoration>(0),
-                         create<ast::GroupDecoration>(1),
+                     ast::AttributeList{
+                         create<ast::BindingAttribute>(0),
+                         create<ast::GroupAttribute>(1),
                      });
 
   Func("sub_func",
@@ -386,14 +385,14 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_With_UniformStruct) {
+       Emit_Attribute_EntryPoint_With_UniformStruct) {
   auto* s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("uniforms", ty.Of(s), ast::StorageClass::kUniform,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(1),
          });
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
@@ -423,19 +422,19 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_With_RW_StorageBuffer_Read) {
+       Emit_Attribute_EntryPoint_With_RW_StorageBuffer_Read) {
   auto* s = Structure("Data",
                       {
                           Member("a", ty.i32()),
                           Member("b", ty.f32()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(1),
          });
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
@@ -464,18 +463,18 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_With_RO_StorageBuffer_Read) {
+       Emit_Attribute_EntryPoint_With_RO_StorageBuffer_Read) {
   auto* s = Structure("Data",
                       {
                           Member("a", ty.i32()),
                           Member("b", ty.f32()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(1),
          });
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
@@ -504,18 +503,18 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_With_WO_StorageBuffer_Store) {
+       Emit_Attribute_EntryPoint_With_WO_StorageBuffer_Store) {
   auto* s = Structure("Data",
                       {
                           Member("a", ty.i32()),
                           Member("b", ty.f32()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(1),
          });
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -541,19 +540,19 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_With_StorageBuffer_Store) {
+       Emit_Attribute_EntryPoint_With_StorageBuffer_Store) {
   auto* s = Structure("Data",
                       {
                           Member("a", ty.i32()),
                           Member("b", ty.f32()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(1),
          });
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -579,13 +578,13 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_Called_By_EntryPoint_With_Uniform) {
+       Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
   auto* s = Structure("S", {Member("x", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("coord", ty.Of(s), ast::StorageClass::kUniform,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(1),
          });
 
   Func("sub_func", ast::VariableList{Param("param", ty.f32())}, ty.f32(),
@@ -624,14 +623,14 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_Called_By_EntryPoint_With_StorageBuffer) {
+       Emit_Attribute_Called_By_EntryPoint_With_StorageBuffer) {
   auto* s = Structure("S", {Member("x", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("coord", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(1),
          });
 
   Func("sub_func", ast::VariableList{Param("param", ty.f32())}, ty.f32(),
@@ -669,7 +668,7 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_WithNameCollision) {
+       Emit_Attribute_EntryPoint_WithNameCollision) {
   Func("GeometryShader", ast::VariableList{}, ty.void_(), {},
        {
            Stage(ast::PipelineStage::kFragment),
@@ -684,7 +683,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Function, Emit_Decoration_EntryPoint_Compute) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute) {
   Func("main", ast::VariableList{}, ty.void_(),
        {
            Return(),
@@ -702,7 +701,7 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_Compute_WithWorkgroup_Literal) {
+       Emit_Attribute_EntryPoint_Compute_WithWorkgroup_Literal) {
   Func("main", ast::VariableList{}, ty.void_(), {},
        {
            Stage(ast::PipelineStage::kCompute),
@@ -720,7 +719,7 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_Compute_WithWorkgroup_Const) {
+       Emit_Attribute_EntryPoint_Compute_WithWorkgroup_Const) {
   GlobalConst("width", ty.i32(), Construct(ty.i32(), 2));
   GlobalConst("height", ty.i32(), Construct(ty.i32(), 3));
   GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4));
@@ -745,7 +744,7 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
+       Emit_Attribute_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
   GlobalConst("width", ty.i32(), Construct(ty.i32(), 2), {Override(7u)});
   GlobalConst("height", ty.i32(), Construct(ty.i32(), 3), {Override(8u)});
   GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4), {Override(9u)});
@@ -875,12 +874,12 @@ TEST_F(HlslGeneratorImplTest_Function,
   // }
 
   auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   {

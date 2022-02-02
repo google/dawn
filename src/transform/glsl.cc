@@ -18,7 +18,7 @@
 
 #include "src/program_builder.h"
 #include "src/transform/add_empty_entry_point.h"
-#include "src/transform/add_spirv_block_decoration.h"
+#include "src/transform/add_spirv_block_attribute.h"
 #include "src/transform/binding_remapper.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
@@ -94,7 +94,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
 
   manager.Add<PadArrayElements>();
   manager.Add<AddEmptyEntryPoint>();
-  manager.Add<AddSpirvBlockDecoration>();
+  manager.Add<AddSpirvBlockAttribute>();
 
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kGlsl);

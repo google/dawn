@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 
@@ -154,7 +154,7 @@ TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
 
 TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
   auto* member = Member("x", ty.i32());
-  auto* str = Structure("S", {member}, {create<ast::StructBlockDecoration>()});
+  auto* str = Structure("S", {member}, {create<ast::StructBlockAttribute>()});
 
   auto* expected_type = create<sem::Struct>(
       str, str->name,

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
@@ -26,12 +26,12 @@ struct S {
   a : i32;
   b : f32;
 })");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  ASSERT_EQ(decos.value.size(), 0u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  ASSERT_EQ(attrs.value.size(), 0u);
 
-  auto s = p->struct_decl(decos.value);
+  auto s = p->struct_decl(attrs.value);
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
@@ -42,18 +42,18 @@ struct S {
   EXPECT_EQ(s->members[1]->symbol, p->builder().Symbols().Register("b"));
 }
 
-TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
+TEST_F(ParserImplTest, StructDecl_ParsesWithAttribute) {
   auto p = parser(R"(
 [[block]] struct B {
   a : f32;
   b : f32;
 })");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  ASSERT_EQ(decos.value.size(), 1u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
+  ASSERT_EQ(attrs.value.size(), 1u);
 
-  auto s = p->struct_decl(decos.value);
+  auto s = p->struct_decl(attrs.value);
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
@@ -62,23 +62,23 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   ASSERT_EQ(s->members.size(), 2u);
   EXPECT_EQ(s->members[0]->symbol, p->builder().Symbols().Register("a"));
   EXPECT_EQ(s->members[1]->symbol, p->builder().Symbols().Register("b"));
-  ASSERT_EQ(s->decorations.size(), 1u);
-  EXPECT_TRUE(s->decorations[0]->Is<ast::StructBlockDecoration>());
+  ASSERT_EQ(s->attributes.size(), 1u);
+  EXPECT_TRUE(s->attributes[0]->Is<ast::StructBlockAttribute>());
 }
 
-TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
+TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleAttribute) {
   auto p = parser(R"(
 [[block]]
 [[block]] struct S {
   a : f32;
   b : f32;
 })");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  ASSERT_EQ(decos.value.size(), 2u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
+  ASSERT_EQ(attrs.value.size(), 2u);
 
-  auto s = p->struct_decl(decos.value);
+  auto s = p->struct_decl(attrs.value);
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
@@ -87,19 +87,19 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
   ASSERT_EQ(s->members.size(), 2u);
   EXPECT_EQ(s->members[0]->symbol, p->builder().Symbols().Register("a"));
   EXPECT_EQ(s->members[1]->symbol, p->builder().Symbols().Register("b"));
-  ASSERT_EQ(s->decorations.size(), 2u);
-  EXPECT_TRUE(s->decorations[0]->Is<ast::StructBlockDecoration>());
-  EXPECT_TRUE(s->decorations[1]->Is<ast::StructBlockDecoration>());
+  ASSERT_EQ(s->attributes.size(), 2u);
+  EXPECT_TRUE(s->attributes[0]->Is<ast::StructBlockAttribute>());
+  EXPECT_TRUE(s->attributes[1]->Is<ast::StructBlockAttribute>());
 }
 
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
   auto p = parser("struct S {}");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  ASSERT_EQ(decos.value.size(), 0u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  ASSERT_EQ(attrs.value.size(), 0u);
 
-  auto s = p->struct_decl(decos.value);
+  auto s = p->struct_decl(attrs.value);
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
@@ -109,12 +109,12 @@ TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
 
 TEST_F(ParserImplTest, StructDecl_MissingIdent) {
   auto p = parser("struct {}");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  ASSERT_EQ(decos.value.size(), 0u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  ASSERT_EQ(attrs.value.size(), 0u);
 
-  auto s = p->struct_decl(decos.value);
+  auto s = p->struct_decl(attrs.value);
   EXPECT_TRUE(s.errored);
   EXPECT_FALSE(s.matched);
   EXPECT_EQ(s.value, nullptr);
@@ -125,12 +125,12 @@ TEST_F(ParserImplTest, StructDecl_MissingIdent) {
 
 TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
   auto p = parser("struct S }");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  ASSERT_EQ(decos.value.size(), 0u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  ASSERT_EQ(attrs.value.size(), 0u);
 
-  auto s = p->struct_decl(decos.value);
+  auto s = p->struct_decl(attrs.value);
   EXPECT_TRUE(s.errored);
   EXPECT_FALSE(s.matched);
   EXPECT_EQ(s.value, nullptr);
@@ -139,14 +139,14 @@ TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
   EXPECT_EQ(p->error(), "1:10: expected '{' for struct declaration");
 }
 
-// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplTest, StructDecl_InvalidDecorationDecl) {
+// TODO(crbug.com/tint/1324): DEPRECATED: Remove when @block is removed.
+TEST_F(ParserImplTest, StructDecl_InvalidAttributeDecl) {
   auto p = parser("[[block struct S { a : i32; }");
-  auto decos = p->decoration_list();
-  EXPECT_TRUE(decos.errored);
-  EXPECT_FALSE(decos.matched);
+  auto attrs = p->attribute_list();
+  EXPECT_TRUE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
 
-  auto s = p->struct_decl(decos.value);
+  auto s = p->struct_decl(attrs.value);
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   EXPECT_NE(s.value, nullptr);
@@ -154,20 +154,20 @@ TEST_F(ParserImplTest, StructDecl_InvalidDecorationDecl) {
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(
       p->error(),
-      R"(1:1: use of deprecated language feature: [[decoration]] style decorations have been replaced with @decoration style
+      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
 1:3: use of deprecated language feature: [[block]] attributes have been removed from WGSL
-1:9: expected ']]' for decoration list)");
+1:9: expected ']]' for attribute list)");
 }
 
 // TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
 TEST_F(ParserImplTest, StructDecl_MissingStruct) {
   auto p = parser("[[block]] S {}");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  ASSERT_EQ(decos.value.size(), 1u);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_TRUE(attrs.matched);
+  ASSERT_EQ(attrs.value.size(), 1u);
 
-  auto s = p->struct_decl(decos.value);
+  auto s = p->struct_decl(attrs.value);
   EXPECT_FALSE(s.errored);
   EXPECT_FALSE(s.matched);
   EXPECT_EQ(s.value, nullptr);

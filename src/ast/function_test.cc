@@ -14,9 +14,9 @@
 
 #include "gtest/gtest-spi.h"
 #include "src/ast/discard_statement.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 
 namespace tint {
 namespace ast {
@@ -29,7 +29,7 @@ TEST_F(FunctionTest, Creation) {
   params.push_back(Param("var", ty.i32()));
   auto* var = params[0];
 
-  auto* f = Func("func", params, ty.void_(), StatementList{}, DecorationList{});
+  auto* f = Func("func", params, ty.void_(), StatementList{}, AttributeList{});
   EXPECT_EQ(f->symbol, Symbols().Get("func"));
   ASSERT_EQ(f->params.size(), 1u);
   EXPECT_TRUE(f->return_type->Is<ast::Void>());
@@ -41,7 +41,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
   params.push_back(Param("var", ty.i32()));
 
   auto* f = Func(Source{Source::Location{20, 2}}, "func", params, ty.void_(),
-                 StatementList{}, DecorationList{});
+                 StatementList{}, AttributeList{});
   auto src = f->source;
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -52,7 +52,7 @@ TEST_F(FunctionTest, Assert_InvalidName) {
       {
         ProgramBuilder b;
         b.Func("", VariableList{}, b.ty.void_(), StatementList{},
-               DecorationList{});
+               AttributeList{});
       },
       "internal compiler error");
 }
@@ -61,7 +61,7 @@ TEST_F(FunctionTest, Assert_Null_ReturnType) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
-        b.Func("f", VariableList{}, nullptr, StatementList{}, DecorationList{});
+        b.Func("f", VariableList{}, nullptr, StatementList{}, AttributeList{});
       },
       "internal compiler error");
 }
@@ -74,7 +74,7 @@ TEST_F(FunctionTest, Assert_Null_Param) {
         params.push_back(b.Param("var", b.ty.i32()));
         params.push_back(nullptr);
 
-        b.Func("f", params, b.ty.void_(), StatementList{}, DecorationList{});
+        b.Func("f", params, b.ty.void_(), StatementList{}, AttributeList{});
       },
       "internal compiler error");
 }
@@ -100,27 +100,27 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_Param) {
       "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_DifferentProgramID_Deco) {
+TEST_F(FunctionTest, Assert_DifferentProgramID_Attr) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
         b1.Func("func", VariableList{}, b1.ty.void_(), StatementList{},
-                DecorationList{
+                AttributeList{
                     b2.WorkgroupSize(2, 4, 6),
                 });
       },
       "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnDeco) {
+TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnAttr) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
         b1.Func("func", VariableList{}, b1.ty.void_(), StatementList{},
-                DecorationList{},
-                DecorationList{
+                AttributeList{},
+                AttributeList{
                     b2.WorkgroupSize(2, 4, 6),
                 });
       },
@@ -134,7 +134,7 @@ TEST_F(FunctionTest, Assert_NonConstParam) {
         VariableList params;
         params.push_back(b.Var("var", b.ty.i32(), ast::StorageClass::kNone));
 
-        b.Func("f", params, b.ty.void_(), StatementList{}, DecorationList{});
+        b.Func("f", params, b.ty.void_(), StatementList{}, AttributeList{});
       },
       "internal compiler error");
 }
@@ -143,7 +143,7 @@ using FunctionListTest = TestHelper;
 
 TEST_F(FunctionListTest, FindSymbol) {
   auto* func = Func("main", VariableList{}, ty.f32(), StatementList{},
-                    ast::DecorationList{});
+                    ast::AttributeList{});
   FunctionList list;
   list.Add(func);
   EXPECT_EQ(func, list.Find(Symbols().Register("main")));
@@ -156,11 +156,11 @@ TEST_F(FunctionListTest, FindSymbolMissing) {
 
 TEST_F(FunctionListTest, FindSymbolStage) {
   auto* fs = Func("main", VariableList{}, ty.f32(), StatementList{},
-                  ast::DecorationList{
+                  ast::AttributeList{
                       Stage(PipelineStage::kFragment),
                   });
   auto* vs = Func("main", VariableList{}, ty.f32(), StatementList{},
-                  ast::DecorationList{
+                  ast::AttributeList{
                       Stage(PipelineStage::kVertex),
                   });
   FunctionList list;
@@ -174,7 +174,7 @@ TEST_F(FunctionListTest, FindSymbolStage) {
 TEST_F(FunctionListTest, FindSymbolStageMissing) {
   FunctionList list;
   list.Add(Func("main", VariableList{}, ty.f32(), StatementList{},
-                ast::DecorationList{
+                ast::AttributeList{
                     Stage(PipelineStage::kFragment),
                 }));
   EXPECT_EQ(nullptr,
@@ -184,7 +184,7 @@ TEST_F(FunctionListTest, FindSymbolStageMissing) {
 TEST_F(FunctionListTest, HasStage) {
   FunctionList list;
   list.Add(Func("main", VariableList{}, ty.f32(), StatementList{},
-                ast::DecorationList{
+                ast::AttributeList{
                     Stage(PipelineStage::kFragment),
                 }));
   EXPECT_TRUE(list.HasStage(PipelineStage::kFragment));

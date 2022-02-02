@@ -15,7 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 
@@ -3736,7 +3736,7 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
   auto* call = Call(param.function, param.args(this));
   auto* stmt = CallStmt(call);
   Func("func", {}, ty.void_(), {stmt},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
 

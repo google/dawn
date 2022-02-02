@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest-spi.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -37,7 +37,7 @@ TEST_F(VariableTest, Creation) {
 TEST_F(VariableTest, CreationWithSource) {
   auto* v = Var(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}},
-      "i", ty.f32(), StorageClass::kPrivate, nullptr, DecorationList{});
+      "i", ty.f32(), StorageClass::kPrivate, nullptr, AttributeList{});
 
   EXPECT_EQ(v->symbol, Symbol(1, ID()));
   EXPECT_EQ(v->declared_storage_class, StorageClass::kPrivate);
@@ -51,7 +51,7 @@ TEST_F(VariableTest, CreationWithSource) {
 TEST_F(VariableTest, CreationEmpty) {
   auto* v = Var(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}},
-      "a_var", ty.i32(), StorageClass::kWorkgroup, nullptr, DecorationList{});
+      "a_var", ty.i32(), StorageClass::kWorkgroup, nullptr, AttributeList{});
 
   EXPECT_EQ(v->symbol, Symbol(1, ID()));
   EXPECT_EQ(v->declared_storage_class, StorageClass::kWorkgroup);
@@ -91,29 +91,29 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
       "internal compiler error");
 }
 
-TEST_F(VariableTest, WithDecorations) {
+TEST_F(VariableTest, WithAttributes) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                  DecorationList{
-                      create<LocationDecoration>(1),
-                      create<BuiltinDecoration>(Builtin::kPosition),
-                      create<OverrideDecoration>(1200),
+                  AttributeList{
+                      create<LocationAttribute>(1),
+                      create<BuiltinAttribute>(Builtin::kPosition),
+                      create<OverrideAttribute>(1200),
                   });
 
-  auto& decorations = var->decorations;
-  EXPECT_TRUE(ast::HasDecoration<ast::LocationDecoration>(decorations));
-  EXPECT_TRUE(ast::HasDecoration<ast::BuiltinDecoration>(decorations));
-  EXPECT_TRUE(ast::HasDecoration<ast::OverrideDecoration>(decorations));
+  auto& attributes = var->attributes;
+  EXPECT_TRUE(ast::HasAttribute<ast::LocationAttribute>(attributes));
+  EXPECT_TRUE(ast::HasAttribute<ast::BuiltinAttribute>(attributes));
+  EXPECT_TRUE(ast::HasAttribute<ast::OverrideAttribute>(attributes));
 
-  auto* location = ast::GetDecoration<ast::LocationDecoration>(decorations);
+  auto* location = ast::GetAttribute<ast::LocationAttribute>(attributes);
   ASSERT_NE(nullptr, location);
   EXPECT_EQ(1u, location->value);
 }
 
 TEST_F(VariableTest, BindingPoint) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                  DecorationList{
-                      create<BindingDecoration>(2),
-                      create<GroupDecoration>(1),
+                  AttributeList{
+                      create<BindingAttribute>(2),
+                      create<GroupAttribute>(1),
                   });
   EXPECT_TRUE(var->BindingPoint());
   ASSERT_NE(var->BindingPoint().binding, nullptr);
@@ -122,18 +122,18 @@ TEST_F(VariableTest, BindingPoint) {
   EXPECT_EQ(var->BindingPoint().group->value, 1u);
 }
 
-TEST_F(VariableTest, BindingPointoDecorations) {
+TEST_F(VariableTest, BindingPointAttributes) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                  DecorationList{});
+                  AttributeList{});
   EXPECT_FALSE(var->BindingPoint());
   EXPECT_EQ(var->BindingPoint().group, nullptr);
   EXPECT_EQ(var->BindingPoint().binding, nullptr);
 }
 
-TEST_F(VariableTest, BindingPointMissingGroupDecoration) {
+TEST_F(VariableTest, BindingPointMissingGroupAttribute) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                  DecorationList{
-                      create<BindingDecoration>(2),
+                  AttributeList{
+                      create<BindingAttribute>(2),
                   });
   EXPECT_FALSE(var->BindingPoint());
   ASSERT_NE(var->BindingPoint().binding, nullptr);
@@ -141,9 +141,9 @@ TEST_F(VariableTest, BindingPointMissingGroupDecoration) {
   EXPECT_EQ(var->BindingPoint().group, nullptr);
 }
 
-TEST_F(VariableTest, BindingPointMissingBindingDecoration) {
+TEST_F(VariableTest, BindingPointMissingBindingAttribute) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                  DecorationList{create<GroupDecoration>(1)});
+                  AttributeList{create<GroupAttribute>(1)});
   EXPECT_FALSE(var->BindingPoint());
   ASSERT_NE(var->BindingPoint().group, nullptr);
   EXPECT_EQ(var->BindingPoint().group->value, 1u);

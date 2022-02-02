@@ -15,7 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/struct.h"
 
@@ -169,16 +169,16 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
 
 TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
   auto* s = Structure("S", {Member("a", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("x", ty.Of(s), ast::StorageClass::kUniform,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
   Global("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(0),
          });
   WrapInFunction(Var("g", ty.Of(s)));
 

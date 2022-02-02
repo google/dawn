@@ -24,8 +24,8 @@
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -56,7 +56,7 @@ TEST_P(ResolverIntrinsicDerivativeTest, Scalar) {
 
   auto* expr = Call(name, "ident");
   Func("func", {}, ty.void_(), {Ignore(expr)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -70,7 +70,7 @@ TEST_P(ResolverIntrinsicDerivativeTest, Vector) {
 
   auto* expr = Call(name, "ident");
   Func("func", {}, ty.void_(), {Ignore(expr)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -260,9 +260,9 @@ class ResolverIntrinsicTest_TextureOperation
                       ast::ExpressionList* call_params) {
     if (type->IsAnyOf<ast::Texture, ast::Sampler>()) {
       Global(name, type,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
+             ast::AttributeList{
+                 create<ast::BindingAttribute>(0),
+                 create<ast::GroupAttribute>(0),
              });
 
     } else {
@@ -704,12 +704,12 @@ using ResolverIntrinsicDataTest = ResolverTest;
 
 TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
   auto* ary = ty.array<i32>();
-  auto* str = Structure("S", {Member("x", ary)},
-                        {create<ast::StructBlockDecoration>()});
+  auto* str =
+      Structure("S", {Member("x", ary)}, {create<ast::StructBlockAttribute>()});
   Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(0),
+             create<ast::GroupAttribute>(0),
          });
 
   auto* call = Call("arrayLength", AddressOf(MemberAccessor("a", "x")));

@@ -21,7 +21,7 @@
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/builtin.h"
-#include "src/ast/builtin_decoration.h"
+#include "src/ast/builtin_attribute.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
@@ -29,7 +29,7 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -712,8 +712,8 @@ struct LoopStatementBuilder
 
 /// @param decos a list of parsed decorations
 /// @returns true if the decorations include a SampleMask builtin
-bool HasBuiltinSampleMask(const ast::DecorationList& decos) {
-  if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(decos)) {
+bool HasBuiltinSampleMask(const ast::AttributeList& decos) {
+  if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(decos)) {
     return builtin->builtin == ast::Builtin::kSampleMask;
   }
   return false;
@@ -915,7 +915,7 @@ bool FunctionEmitter::Emit() {
     builder_.AST().AddFunction(create<ast::Function>(
         decl.source, builder_.Symbols().Register(decl.name),
         std::move(decl.params), decl.return_type->Build(builder_), body,
-        std::move(decl.decorations), ast::DecorationList{}));
+        std::move(decl.attributes), ast::AttributeList{}));
   }
 
   if (ep_info_ && !ep_info_->inner_name.empty()) {
@@ -953,7 +953,7 @@ const ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
 
 bool FunctionEmitter::EmitPipelineInput(std::string var_name,
                                         const Type* var_type,
-                                        ast::DecorationList* decos,
+                                        ast::AttributeList* decos,
                                         std::vector<int> index_prefix,
                                         const Type* tip_type,
                                         const Type* forced_param_type,
@@ -997,7 +997,7 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
     index_prefix.push_back(0);
     for (int i = 0; i < static_cast<int>(members.size()); ++i) {
       index_prefix.back() = i;
-      ast::DecorationList member_decos(*decos);
+      ast::AttributeList member_decos(*decos);
       if (!parser_impl_.ConvertPipelineDecorations(
               struct_type,
               parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
@@ -1015,7 +1015,7 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
     return success();
   }
 
-  const bool is_builtin = ast::HasDecoration<ast::BuiltinDecoration>(*decos);
+  const bool is_builtin = ast::HasAttribute<ast::BuiltinAttribute>(*decos);
 
   const Type* param_type = is_builtin ? forced_param_type : tip_type;
 
@@ -1067,22 +1067,22 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
   return success();
 }
 
-void FunctionEmitter::IncrementLocation(ast::DecorationList* decos) {
-  for (auto*& deco : *decos) {
-    if (auto* loc_deco = deco->As<ast::LocationDecoration>()) {
-      // Replace this location decoration with a new one with one higher index.
+void FunctionEmitter::IncrementLocation(ast::AttributeList* attributes) {
+  for (auto*& attr : *attributes) {
+    if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
+      // Replace this location attribute with a new one with one higher index.
       // The old one doesn't leak because it's kept in the builder's AST node
       // list.
-      deco = builder_.Location(loc_deco->source, loc_deco->value + 1);
+      attr = builder_.Location(loc_attr->source, loc_attr->value + 1);
     }
   }
 }
 
-const ast::Decoration* FunctionEmitter::GetLocation(
-    const ast::DecorationList& decos) {
-  for (auto* const& deco : decos) {
-    if (deco->Is<ast::LocationDecoration>()) {
-      return deco;
+const ast::Attribute* FunctionEmitter::GetLocation(
+    const ast::AttributeList& attributes) {
+  for (auto* const& attr : attributes) {
+    if (attr->Is<ast::LocationAttribute>()) {
+      return attr;
     }
   }
   return nullptr;
@@ -1090,7 +1090,7 @@ const ast::Decoration* FunctionEmitter::GetLocation(
 
 bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                                          const Type* var_type,
-                                         ast::DecorationList* decos,
+                                         ast::AttributeList* decos,
                                          std::vector<int> index_prefix,
                                          const Type* tip_type,
                                          const Type* forced_member_type,
@@ -1135,7 +1135,7 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
     index_prefix.push_back(0);
     for (int i = 0; i < static_cast<int>(members.size()); ++i) {
       index_prefix.back() = i;
-      ast::DecorationList member_decos(*decos);
+      ast::AttributeList member_decos(*decos);
       if (!parser_impl_.ConvertPipelineDecorations(
               struct_type,
               parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
@@ -1153,7 +1153,7 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
     return success();
   }
 
-  const bool is_builtin = ast::HasDecoration<ast::BuiltinDecoration>(*decos);
+  const bool is_builtin = ast::HasAttribute<ast::BuiltinAttribute>(*decos);
 
   const Type* member_type = is_builtin ? forced_member_type : tip_type;
   // Derive the member name directly from the variable name.  They can't
@@ -1224,7 +1224,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     TINT_ASSERT(Reader, var->opcode() == SpvOpVariable);
     auto* store_type = GetVariableStoreType(*var);
     auto* forced_param_type = store_type;
-    ast::DecorationList param_decos;
+    ast::AttributeList param_decos;
     if (!parser_impl_.ConvertDecorationsForVariable(var_id, &forced_param_type,
                                                     &param_decos, true)) {
       // This occurs, and is not an error, for the PointSize builtin.
@@ -1293,8 +1293,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         // The SPIR-V gl_PerVertex variable has already been remapped to
         // a gl_Position variable.  Substitute the type.
         const Type* param_type = ty_.Vector(ty_.F32(), 4);
-        ast::DecorationList out_decos{
-            create<ast::BuiltinDecoration>(source, ast::Builtin::kPosition)};
+        ast::AttributeList out_decos{
+            create<ast::BuiltinAttribute>(source, ast::Builtin::kPosition)};
 
         const auto var_name = namer_.GetName(var_id);
         return_members.push_back(
@@ -1307,7 +1307,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         TINT_ASSERT(Reader, var->opcode() == SpvOpVariable);
         const Type* store_type = GetVariableStoreType(*var);
         const Type* forced_member_type = store_type;
-        ast::DecorationList out_decos;
+        ast::AttributeList out_decos;
         if (!parser_impl_.ConvertDecorationsForVariable(
                 var_id, &forced_member_type, &out_decos, true)) {
           // This occurs, and is not an error, for the PointSize builtin.
@@ -1349,7 +1349,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     } else {
       // Create and register the result type.
       auto* str = create<ast::Struct>(Source{}, return_struct_sym,
-                                      return_members, ast::DecorationList{});
+                                      return_members, ast::AttributeList{});
       parser_impl_.AddTypeDecl(return_struct_sym, str);
       return_type = builder_.ty.Of(str);
 
@@ -1361,8 +1361,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
   }
 
   auto* body = create<ast::BlockStatement>(source, stmts);
-  ast::DecorationList fn_decos;
-  fn_decos.emplace_back(create<ast::StageDecoration>(source, ep_info_->stage));
+  ast::AttributeList fn_attrs;
+  fn_attrs.emplace_back(create<ast::StageAttribute>(source, ep_info_->stage));
 
   if (ep_info_->stage == ast::PipelineStage::kCompute) {
     auto& size = ep_info_->workgroup_size;
@@ -1372,15 +1372,14 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
           size.y ? builder_.Expr(static_cast<int>(size.y)) : nullptr;
       const ast::Expression* z =
           size.z ? builder_.Expr(static_cast<int>(size.z)) : nullptr;
-      fn_decos.emplace_back(
-          create<ast::WorkgroupDecoration>(Source{}, x, y, z));
+      fn_attrs.emplace_back(create<ast::WorkgroupAttribute>(Source{}, x, y, z));
     }
   }
 
   builder_.AST().AddFunction(
       create<ast::Function>(source, builder_.Symbols().Register(ep_info_->name),
                             std::move(decl.params), return_type, body,
-                            std::move(fn_decos), ast::DecorationList{}));
+                            std::move(fn_attrs), ast::AttributeList{}));
 
   return true;
 }
@@ -1412,7 +1411,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
         if (type != nullptr) {
           auto* ast_param = parser_impl_.MakeVariable(
               param->result_id(), ast::StorageClass::kNone, type, true, nullptr,
-              ast::DecorationList{});
+              ast::AttributeList{});
           // Parameters are treated as const declarations.
           ast_params.emplace_back(ast_param);
           // The value is accessible by name.
@@ -1428,7 +1427,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
   decl->name = name;
   decl->params = std::move(ast_params);
   decl->return_type = ret_ty;
-  decl->decorations.clear();
+  decl->attributes.clear();
 
   return success();
 }
@@ -2513,7 +2512,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
     }
     auto* var = parser_impl_.MakeVariable(
         inst.result_id(), ast::StorageClass::kNone, var_store_type, false,
-        constructor, ast::DecorationList{});
+        constructor, ast::AttributeList{});
     auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
     AddStatement(var_decl_stmt);
     auto* var_type = ty_.Reference(var_store_type, ast::StorageClass::kNone);
@@ -3417,7 +3416,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     AddStatement(create<ast::VariableDeclStatement>(
         Source{},
         parser_impl_.MakeVariable(id, ast::StorageClass::kNone, storage_type,
-                                  false, nullptr, ast::DecorationList{})));
+                                  false, nullptr, ast::AttributeList{})));
     auto* type = ty_.Reference(storage_type, ast::StorageClass::kNone);
     identifier_types_.emplace(id, type);
   }
@@ -3490,7 +3489,7 @@ bool FunctionEmitter::EmitConstDefinition(
   expr = AddressOfIfNeeded(expr, &inst);
   auto* ast_const = parser_impl_.MakeVariable(
       inst.result_id(), ast::StorageClass::kNone, expr.type, true, expr.expr,
-      ast::DecorationList{});
+      ast::AttributeList{});
   if (!ast_const) {
     return false;
   }

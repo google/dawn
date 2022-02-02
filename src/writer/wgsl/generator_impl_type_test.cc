@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
@@ -48,7 +48,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
   EXPECT_EQ(out.str(), "array<bool, 4>");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
+TEST_F(WgslGeneratorImplTest, EmitType_Array_Attribute) {
   auto* a = ty.array(ty.bool_(), 4, 16u);
   Alias("make_type_reachable", a);
 
@@ -229,13 +229,13 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
 )");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
+TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithAttribute) {
   auto* s = Structure("S",
                       {
                           Member("a", ty.i32()),
                           Member("b", ty.f32(), {MemberAlign(8)}),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
 
   GeneratorImpl& gen = Build();
 
@@ -249,16 +249,16 @@ struct S {
 )");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointDecorations) {
-  ast::DecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>());
+TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointAttributes) {
+  ast::AttributeList attrs;
+  attrs.push_back(create<ast::StructBlockAttribute>());
 
   auto* s = Structure(
       "S",
       ast::StructMemberList{
           Member("a", ty.u32(), {Builtin(ast::Builtin::kVertexIndex)}),
           Member("b", ty.f32(), {Location(2u)})},
-      decos);
+      attrs);
 
   GeneratorImpl& gen = Build();
 
@@ -438,9 +438,9 @@ TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
 
   auto* t = ty.storage_texture(param.dim, param.fmt, param.access);
   Global("g", t,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   GeneratorImpl& gen = Build();

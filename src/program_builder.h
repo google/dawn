@@ -24,7 +24,7 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/atomic.h"
 #include "src/ast/binary_expression.h"
-#include "src/ast/binding_decoration.h"
+#include "src/ast/binding_attribute.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/bool.h"
 #include "src/ast/bool_literal_expression.h"
@@ -35,7 +35,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/depth_multisampled_texture.h"
 #include "src/ast/depth_texture.h"
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/external_texture.h"
 #include "src/ast/f32.h"
@@ -45,27 +45,27 @@
 #include "src/ast/i32.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/index_accessor_expression.h"
-#include "src/ast/interpolate_decoration.h"
-#include "src/ast/invariant_decoration.h"
+#include "src/ast/interpolate_attribute.h"
+#include "src/ast/invariant_attribute.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/phony_expression.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
 #include "src/ast/sampler.h"
 #include "src/ast/sint_literal_expression.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/ast/storage_texture.h"
-#include "src/ast/stride_decoration.h"
-#include "src/ast/struct_block_decoration.h"
-#include "src/ast/struct_member_align_decoration.h"
-#include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/struct_member_size_decoration.h"
+#include "src/ast/stride_attribute.h"
+#include "src/ast/struct_block_attribute.h"
+#include "src/ast/struct_member_align_attribute.h"
+#include "src/ast/struct_member_offset_attribute.h"
+#include "src/ast/struct_member_size_attribute.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_name.h"
 #include "src/ast/u32.h"
@@ -74,7 +74,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
 #include "src/ast/void.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/program.h"
 #include "src/program_id.h"
 #include "src/sem/array.h"
@@ -131,13 +131,13 @@ class ProgramBuilder {
     ast::StorageClass storage = ast::StorageClass::kNone;
     ast::Access access = ast::Access::kUndefined;
     const ast::Expression* constructor = nullptr;
-    ast::DecorationList decorations = {};
+    ast::AttributeList attributes = {};
 
    private:
     void Set(ast::StorageClass sc) { storage = sc; }
     void Set(ast::Access ac) { access = ac; }
     void Set(const ast::Expression* c) { constructor = c; }
-    void Set(const ast::DecorationList& l) { decorations = l; }
+    void Set(const ast::AttributeList& l) { attributes = l; }
 
     template <typename FIRST, typename... ARGS>
     void Apply(FIRST&& first, ARGS&&... args) {
@@ -640,28 +640,28 @@ class ProgramBuilder {
 
     /// @param subtype the array element type
     /// @param n the array size. nullptr represents a runtime-array
-    /// @param decos the optional decorations for the array
+    /// @param attrs the optional attributes for the array
     /// @return the tint AST type for a array of size `n` of type `T`
     template <typename EXPR = ast::Expression*>
     const ast::Array* array(const ast::Type* subtype,
                             EXPR&& n = nullptr,
-                            ast::DecorationList decos = {}) const {
+                            ast::AttributeList attrs = {}) const {
       return builder->create<ast::Array>(
-          subtype, builder->Expr(std::forward<EXPR>(n)), decos);
+          subtype, builder->Expr(std::forward<EXPR>(n)), attrs);
     }
 
     /// @param source the Source of the node
     /// @param subtype the array element type
     /// @param n the array size. nullptr represents a runtime-array
-    /// @param decos the optional decorations for the array
+    /// @param attrs the optional attributes for the array
     /// @return the tint AST type for a array of size `n` of type `T`
     template <typename EXPR = ast::Expression*>
     const ast::Array* array(const Source& source,
                             const ast::Type* subtype,
                             EXPR&& n = nullptr,
-                            ast::DecorationList decos = {}) const {
+                            ast::AttributeList attrs = {}) const {
       return builder->create<ast::Array>(
-          source, subtype, builder->Expr(std::forward<EXPR>(n)), decos);
+          source, subtype, builder->Expr(std::forward<EXPR>(n)), attrs);
     }
 
     /// @param subtype the array element type
@@ -672,11 +672,11 @@ class ProgramBuilder {
     const ast::Array* array(const ast::Type* subtype,
                             EXPR&& n,
                             uint32_t stride) const {
-      ast::DecorationList decos;
+      ast::AttributeList attrs;
       if (stride) {
-        decos.emplace_back(builder->create<ast::StrideDecoration>(stride));
+        attrs.emplace_back(builder->create<ast::StrideAttribute>(stride));
       }
-      return array(subtype, std::forward<EXPR>(n), std::move(decos));
+      return array(subtype, std::forward<EXPR>(n), std::move(attrs));
     }
 
     /// @param source the Source of the node
@@ -689,11 +689,11 @@ class ProgramBuilder {
                             const ast::Type* subtype,
                             EXPR&& n,
                             uint32_t stride) const {
-      ast::DecorationList decos;
+      ast::AttributeList attrs;
       if (stride) {
-        decos.emplace_back(builder->create<ast::StrideDecoration>(stride));
+        attrs.emplace_back(builder->create<ast::StrideAttribute>(stride));
       }
-      return array(source, subtype, std::forward<EXPR>(n), std::move(decos));
+      return array(source, subtype, std::forward<EXPR>(n), std::move(attrs));
     }
 
     /// @return the tint AST type for a runtime-sized array of type `T`
@@ -1322,7 +1322,7 @@ class ProgramBuilder {
   ///   * ast::StorageClass   - specifies the variable storage class
   ///   * ast::Access         - specifies the variable's access control
   ///   * ast::Expression*    - specifies the variable's initializer expression
-  ///   * ast::DecorationList - specifies the variable's decorations
+  ///   * ast::AttributeList - specifies the variable's attributes
   /// Note that repeated arguments of the same type will use the last argument's
   /// value.
   /// @returns a `ast::Variable` with the given name, type and additional
@@ -1334,7 +1334,7 @@ class ProgramBuilder {
     VarOptionals opts(std::forward<OPTIONAL>(optional)...);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)), opts.storage,
                                  opts.access, type, false, opts.constructor,
-                                 std::move(opts.decorations));
+                                 std::move(opts.attributes));
   }
 
   /// @param source the variable source
@@ -1345,7 +1345,7 @@ class ProgramBuilder {
   ///   * ast::StorageClass   - specifies the variable storage class
   ///   * ast::Access         - specifies the variable's access control
   ///   * ast::Expression*    - specifies the variable's initializer expression
-  ///   * ast::DecorationList - specifies the variable's decorations
+  ///   * ast::AttributeList - specifies the variable's attributes
   /// Note that repeated arguments of the same type will use the last argument's
   /// value.
   /// @returns a `ast::Variable` with the given name, storage and type
@@ -1357,67 +1357,67 @@ class ProgramBuilder {
     VarOptionals opts(std::forward<OPTIONAL>(optional)...);
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
                                  opts.storage, opts.access, type, false,
-                                 opts.constructor, std::move(opts.decorations));
+                                 opts.constructor, std::move(opts.attributes));
   }
 
   /// @param name the variable name
   /// @param type the variable type
   /// @param constructor constructor expression
-  /// @param decorations optional variable decorations
+  /// @param attributes optional variable attributes
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   const ast::Variable* Const(NAME&& name,
                              const ast::Type* type,
                              const ast::Expression* constructor,
-                             ast::DecorationList decorations = {}) {
+                             ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-        ast::Access::kUndefined, type, true, constructor, decorations);
+        ast::Access::kUndefined, type, true, constructor, attributes);
   }
 
   /// @param source the variable source
   /// @param name the variable name
   /// @param type the variable type
   /// @param constructor constructor expression
-  /// @param decorations optional variable decorations
+  /// @param attributes optional variable attributes
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   const ast::Variable* Const(const Source& source,
                              NAME&& name,
                              const ast::Type* type,
                              const ast::Expression* constructor,
-                             ast::DecorationList decorations = {}) {
+                             ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-        ast::Access::kUndefined, type, true, constructor, decorations);
+        ast::Access::kUndefined, type, true, constructor, attributes);
   }
 
   /// @param name the parameter name
   /// @param type the parameter type
-  /// @param decorations optional parameter decorations
+  /// @param attributes optional parameter attributes
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   const ast::Variable* Param(NAME&& name,
                              const ast::Type* type,
-                             ast::DecorationList decorations = {}) {
+                             ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-        ast::Access::kUndefined, type, true, nullptr, decorations);
+        ast::Access::kUndefined, type, true, nullptr, attributes);
   }
 
   /// @param source the parameter source
   /// @param name the parameter name
   /// @param type the parameter type
-  /// @param decorations optional parameter decorations
+  /// @param attributes optional parameter attributes
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   const ast::Variable* Param(const Source& source,
                              NAME&& name,
                              const ast::Type* type,
-                             ast::DecorationList decorations = {}) {
+                             ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-        ast::Access::kUndefined, type, true, nullptr, decorations);
+        ast::Access::kUndefined, type, true, nullptr, attributes);
   }
 
   /// @param name the variable name
@@ -1427,7 +1427,7 @@ class ProgramBuilder {
   ///   * ast::StorageClass   - specifies the variable storage class
   ///   * ast::Access         - specifies the variable's access control
   ///   * ast::Expression*    - specifies the variable's initializer expression
-  ///   * ast::DecorationList - specifies the variable's decorations
+  ///   * ast::AttributeList - specifies the variable's attributes
   /// Note that repeated arguments of the same type will use the last argument's
   /// value.
   /// @returns a new `ast::Variable`, which is automatically registered as a
@@ -1452,7 +1452,7 @@ class ProgramBuilder {
   ///   * ast::StorageClass   - specifies the variable storage class
   ///   * ast::Access         - specifies the variable's access control
   ///   * ast::Expression*    - specifies the variable's initializer expression
-  ///   * ast::DecorationList - specifies the variable's decorations
+  ///   * ast::AttributeList - specifies the variable's attributes
   /// Note that repeated arguments of the same type will use the last argument's
   /// value.
   /// @returns a new `ast::Variable`, which is automatically registered as a
@@ -1471,7 +1471,7 @@ class ProgramBuilder {
   /// @param name the variable name
   /// @param type the variable type
   /// @param constructor constructor expression
-  /// @param decorations optional variable decorations
+  /// @param attributes optional variable attributes
   /// @returns a const `ast::Variable` constructed by calling Var() with the
   /// arguments of `args`, which is automatically registered as a global
   /// variable with the ast::Module.
@@ -1479,9 +1479,9 @@ class ProgramBuilder {
   const ast::Variable* GlobalConst(NAME&& name,
                                    const ast::Type* type,
                                    const ast::Expression* constructor,
-                                   ast::DecorationList decorations = {}) {
+                                   ast::AttributeList attributes = {}) {
     auto* var = Const(std::forward<NAME>(name), type, constructor,
-                      std::move(decorations));
+                      std::move(attributes));
     AST().AddGlobalVariable(var);
     return var;
   }
@@ -1490,7 +1490,7 @@ class ProgramBuilder {
   /// @param name the variable name
   /// @param type the variable type
   /// @param constructor constructor expression
-  /// @param decorations optional variable decorations
+  /// @param attributes optional variable attributes
   /// @returns a const `ast::Variable` constructed by calling Var() with the
   /// arguments of `args`, which is automatically registered as a global
   /// variable with the ast::Module.
@@ -1499,9 +1499,9 @@ class ProgramBuilder {
                                    NAME&& name,
                                    const ast::Type* type,
                                    const ast::Expression* constructor,
-                                   ast::DecorationList decorations = {}) {
+                                   ast::AttributeList attributes = {}) {
     auto* var = Const(source, std::forward<NAME>(name), type, constructor,
-                      std::move(decorations));
+                      std::move(attributes));
     AST().AddGlobalVariable(var);
     return var;
   }
@@ -1747,71 +1747,71 @@ class ProgramBuilder {
                                                  Expr(std::forward<IDX>(idx)));
   }
 
-  /// Creates a ast::StructMemberOffsetDecoration
+  /// Creates a ast::StructMemberOffsetAttribute
   /// @param val the offset value
-  /// @returns the offset decoration pointer
-  const ast::StructMemberOffsetDecoration* MemberOffset(uint32_t val) {
-    return create<ast::StructMemberOffsetDecoration>(source_, val);
+  /// @returns the offset attribute pointer
+  const ast::StructMemberOffsetAttribute* MemberOffset(uint32_t val) {
+    return create<ast::StructMemberOffsetAttribute>(source_, val);
   }
 
-  /// Creates a ast::StructMemberSizeDecoration
+  /// Creates a ast::StructMemberSizeAttribute
   /// @param source the source information
   /// @param val the size value
-  /// @returns the size decoration pointer
-  const ast::StructMemberSizeDecoration* MemberSize(const Source& source,
-                                                    uint32_t val) {
-    return create<ast::StructMemberSizeDecoration>(source, val);
+  /// @returns the size attribute pointer
+  const ast::StructMemberSizeAttribute* MemberSize(const Source& source,
+                                                   uint32_t val) {
+    return create<ast::StructMemberSizeAttribute>(source, val);
   }
 
-  /// Creates a ast::StructMemberSizeDecoration
+  /// Creates a ast::StructMemberSizeAttribute
   /// @param val the size value
-  /// @returns the size decoration pointer
-  const ast::StructMemberSizeDecoration* MemberSize(uint32_t val) {
-    return create<ast::StructMemberSizeDecoration>(source_, val);
+  /// @returns the size attribute pointer
+  const ast::StructMemberSizeAttribute* MemberSize(uint32_t val) {
+    return create<ast::StructMemberSizeAttribute>(source_, val);
   }
 
-  /// Creates a ast::StructMemberAlignDecoration
+  /// Creates a ast::StructMemberAlignAttribute
   /// @param source the source information
   /// @param val the align value
-  /// @returns the align decoration pointer
-  const ast::StructMemberAlignDecoration* MemberAlign(const Source& source,
-                                                      uint32_t val) {
-    return create<ast::StructMemberAlignDecoration>(source, val);
+  /// @returns the align attribute pointer
+  const ast::StructMemberAlignAttribute* MemberAlign(const Source& source,
+                                                     uint32_t val) {
+    return create<ast::StructMemberAlignAttribute>(source, val);
   }
 
-  /// Creates a ast::StructMemberAlignDecoration
+  /// Creates a ast::StructMemberAlignAttribute
   /// @param val the align value
-  /// @returns the align decoration pointer
-  const ast::StructMemberAlignDecoration* MemberAlign(uint32_t val) {
-    return create<ast::StructMemberAlignDecoration>(source_, val);
+  /// @returns the align attribute pointer
+  const ast::StructMemberAlignAttribute* MemberAlign(uint32_t val) {
+    return create<ast::StructMemberAlignAttribute>(source_, val);
   }
 
-  /// Creates a ast::StructBlockDecoration
-  /// @returns the struct block decoration pointer
-  const ast::StructBlockDecoration* StructBlock() {
-    return create<ast::StructBlockDecoration>();
+  /// Creates a ast::StructBlockAttribute
+  /// @returns the struct block attribute pointer
+  const ast::StructBlockAttribute* StructBlock() {
+    return create<ast::StructBlockAttribute>();
   }
 
-  /// Creates the ast::GroupDecoration
-  /// @param value group decoration index
-  /// @returns the group decoration pointer
-  const ast::GroupDecoration* Group(uint32_t value) {
-    return create<ast::GroupDecoration>(value);
+  /// Creates the ast::GroupAttribute
+  /// @param value group attribute index
+  /// @returns the group attribute pointer
+  const ast::GroupAttribute* Group(uint32_t value) {
+    return create<ast::GroupAttribute>(value);
   }
 
-  /// Creates the ast::BindingDecoration
+  /// Creates the ast::BindingAttribute
   /// @param value the binding index
   /// @returns the binding deocration pointer
-  const ast::BindingDecoration* Binding(uint32_t value) {
-    return create<ast::BindingDecoration>(value);
+  const ast::BindingAttribute* Binding(uint32_t value) {
+    return create<ast::BindingAttribute>(value);
   }
 
-  /// Convenience function to create both a ast::GroupDecoration and
-  /// ast::BindingDecoration
+  /// Convenience function to create both a ast::GroupAttribute and
+  /// ast::BindingAttribute
   /// @param group the group index
   /// @param binding the binding index
-  /// @returns a decoration list with both the group and binding decorations
-  ast::DecorationList GroupAndBinding(uint32_t group, uint32_t binding) {
+  /// @returns a attribute list with both the group and binding attributes
+  ast::AttributeList GroupAndBinding(uint32_t group, uint32_t binding) {
     return {Group(group), Binding(binding)};
   }
 
@@ -1821,9 +1821,9 @@ class ProgramBuilder {
   /// @param params the function parameters
   /// @param type the function return type
   /// @param body the function body
-  /// @param decorations the optional function decorations
-  /// @param return_type_decorations the optional function return type
-  /// decorations
+  /// @param attributes the optional function attributes
+  /// @param return_type_attributes the optional function return type
+  /// attributes
   /// @returns the function pointer
   template <typename NAME>
   const ast::Function* Func(const Source& source,
@@ -1831,12 +1831,11 @@ class ProgramBuilder {
                             ast::VariableList params,
                             const ast::Type* type,
                             ast::StatementList body,
-                            ast::DecorationList decorations = {},
-                            ast::DecorationList return_type_decorations = {}) {
-    auto* func =
-        create<ast::Function>(source, Sym(std::forward<NAME>(name)), params,
-                              type, create<ast::BlockStatement>(body),
-                              decorations, return_type_decorations);
+                            ast::AttributeList attributes = {},
+                            ast::AttributeList return_type_attributes = {}) {
+    auto* func = create<ast::Function>(
+        source, Sym(std::forward<NAME>(name)), params, type,
+        create<ast::BlockStatement>(body), attributes, return_type_attributes);
     AST().AddFunction(func);
     return func;
   }
@@ -1846,20 +1845,20 @@ class ProgramBuilder {
   /// @param params the function parameters
   /// @param type the function return type
   /// @param body the function body
-  /// @param decorations the optional function decorations
-  /// @param return_type_decorations the optional function return type
-  /// decorations
+  /// @param attributes the optional function attributes
+  /// @param return_type_attributes the optional function return type
+  /// attributes
   /// @returns the function pointer
   template <typename NAME>
   const ast::Function* Func(NAME&& name,
                             ast::VariableList params,
                             const ast::Type* type,
                             ast::StatementList body,
-                            ast::DecorationList decorations = {},
-                            ast::DecorationList return_type_decorations = {}) {
+                            ast::AttributeList attributes = {},
+                            ast::AttributeList return_type_attributes = {}) {
     auto* func = create<ast::Function>(Sym(std::forward<NAME>(name)), params,
                                        type, create<ast::BlockStatement>(body),
-                                       decorations, return_type_decorations);
+                                       attributes, return_type_attributes);
     AST().AddFunction(func);
     return func;
   }
@@ -1960,16 +1959,16 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param name the struct name
   /// @param members the struct members
-  /// @param decorations the optional struct decorations
+  /// @param attributes the optional struct attributes
   /// @returns the struct type
   template <typename NAME>
   const ast::Struct* Structure(const Source& source,
                                NAME&& name,
                                ast::StructMemberList members,
-                               ast::DecorationList decorations = {}) {
+                               ast::AttributeList attributes = {}) {
     auto sym = Sym(std::forward<NAME>(name));
     auto* type = create<ast::Struct>(source, sym, std::move(members),
-                                     std::move(decorations));
+                                     std::move(attributes));
     AST().AddTypeDecl(type);
     return type;
   }
@@ -1977,15 +1976,15 @@ class ProgramBuilder {
   /// Creates a ast::Struct registering it with the AST().TypeDecls().
   /// @param name the struct name
   /// @param members the struct members
-  /// @param decorations the optional struct decorations
+  /// @param attributes the optional struct attributes
   /// @returns the struct type
   template <typename NAME>
   const ast::Struct* Structure(NAME&& name,
                                ast::StructMemberList members,
-                               ast::DecorationList decorations = {}) {
+                               ast::AttributeList attributes = {}) {
     auto sym = Sym(std::forward<NAME>(name));
     auto* type =
-        create<ast::Struct>(sym, std::move(members), std::move(decorations));
+        create<ast::Struct>(sym, std::move(members), std::move(attributes));
     AST().AddTypeDecl(type);
     return type;
   }
@@ -1994,32 +1993,32 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param name the struct member name
   /// @param type the struct member type
-  /// @param decorations the optional struct member decorations
+  /// @param attributes the optional struct member attributes
   /// @returns the struct member pointer
   template <typename NAME>
   const ast::StructMember* Member(const Source& source,
                                   NAME&& name,
                                   const ast::Type* type,
-                                  ast::DecorationList decorations = {}) {
+                                  ast::AttributeList attributes = {}) {
     return create<ast::StructMember>(source, Sym(std::forward<NAME>(name)),
-                                     type, std::move(decorations));
+                                     type, std::move(attributes));
   }
 
   /// Creates a ast::StructMember
   /// @param name the struct member name
   /// @param type the struct member type
-  /// @param decorations the optional struct member decorations
+  /// @param attributes the optional struct member attributes
   /// @returns the struct member pointer
   template <typename NAME>
   const ast::StructMember* Member(NAME&& name,
                                   const ast::Type* type,
-                                  ast::DecorationList decorations = {}) {
+                                  ast::AttributeList attributes = {}) {
     return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)),
-                                     type, std::move(decorations));
+                                     type, std::move(attributes));
   }
 
   /// Creates a ast::StructMember with the given byte offset
-  /// @param offset the offset to use in the StructMemberOffsetDecoration
+  /// @param offset the offset to use in the StructMemberOffsetattribute
   /// @param name the struct member name
   /// @param type the struct member type
   /// @returns the struct member pointer
@@ -2029,8 +2028,8 @@ class ProgramBuilder {
                                   const ast::Type* type) {
     return create<ast::StructMember>(
         source_, Sym(std::forward<NAME>(name)), type,
-        ast::DecorationList{
-            create<ast::StructMemberOffsetDecoration>(offset),
+        ast::AttributeList{
+            create<ast::StructMemberOffsetAttribute>(offset),
         });
   }
 
@@ -2276,183 +2275,182 @@ class ProgramBuilder {
     return create<ast::FallthroughStatement>();
   }
 
-  /// Creates an ast::BuiltinDecoration
+  /// Creates an ast::BuiltinAttribute
   /// @param source the source information
   /// @param builtin the builtin value
-  /// @returns the builtin decoration pointer
-  const ast::BuiltinDecoration* Builtin(const Source& source,
-                                        ast::Builtin builtin) {
-    return create<ast::BuiltinDecoration>(source, builtin);
+  /// @returns the builtin attribute pointer
+  const ast::BuiltinAttribute* Builtin(const Source& source,
+                                       ast::Builtin builtin) {
+    return create<ast::BuiltinAttribute>(source, builtin);
   }
 
-  /// Creates an ast::BuiltinDecoration
+  /// Creates an ast::BuiltinAttribute
   /// @param builtin the builtin value
-  /// @returns the builtin decoration pointer
-  const ast::BuiltinDecoration* Builtin(ast::Builtin builtin) {
-    return create<ast::BuiltinDecoration>(source_, builtin);
+  /// @returns the builtin attribute pointer
+  const ast::BuiltinAttribute* Builtin(ast::Builtin builtin) {
+    return create<ast::BuiltinAttribute>(source_, builtin);
   }
 
-  /// Creates an ast::InterpolateDecoration
+  /// Creates an ast::InterpolateAttribute
   /// @param source the source information
   /// @param type the interpolation type
   /// @param sampling the interpolation sampling
-  /// @returns the interpolate decoration pointer
-  const ast::InterpolateDecoration* Interpolate(
+  /// @returns the interpolate attribute pointer
+  const ast::InterpolateAttribute* Interpolate(
       const Source& source,
       ast::InterpolationType type,
       ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone) {
-    return create<ast::InterpolateDecoration>(source, type, sampling);
+    return create<ast::InterpolateAttribute>(source, type, sampling);
   }
 
-  /// Creates an ast::InterpolateDecoration
+  /// Creates an ast::InterpolateAttribute
   /// @param type the interpolation type
   /// @param sampling the interpolation sampling
-  /// @returns the interpolate decoration pointer
-  const ast::InterpolateDecoration* Interpolate(
+  /// @returns the interpolate attribute pointer
+  const ast::InterpolateAttribute* Interpolate(
       ast::InterpolationType type,
       ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone) {
-    return create<ast::InterpolateDecoration>(source_, type, sampling);
+    return create<ast::InterpolateAttribute>(source_, type, sampling);
   }
 
-  /// Creates an ast::InterpolateDecoration using flat interpolation
+  /// Creates an ast::InterpolateAttribute using flat interpolation
   /// @param source the source information
-  /// @returns the interpolate decoration pointer
-  const ast::InterpolateDecoration* Flat(const Source& source) {
+  /// @returns the interpolate attribute pointer
+  const ast::InterpolateAttribute* Flat(const Source& source) {
     return Interpolate(source, ast::InterpolationType::kFlat);
   }
 
-  /// Creates an ast::InterpolateDecoration using flat interpolation
-  /// @returns the interpolate decoration pointer
-  const ast::InterpolateDecoration* Flat() {
+  /// Creates an ast::InterpolateAttribute using flat interpolation
+  /// @returns the interpolate attribute pointer
+  const ast::InterpolateAttribute* Flat() {
     return Interpolate(ast::InterpolationType::kFlat);
   }
 
-  /// Creates an ast::InvariantDecoration
+  /// Creates an ast::InvariantAttribute
   /// @param source the source information
-  /// @returns the invariant decoration pointer
-  const ast::InvariantDecoration* Invariant(const Source& source) {
-    return create<ast::InvariantDecoration>(source);
+  /// @returns the invariant attribute pointer
+  const ast::InvariantAttribute* Invariant(const Source& source) {
+    return create<ast::InvariantAttribute>(source);
   }
 
-  /// Creates an ast::InvariantDecoration
-  /// @returns the invariant decoration pointer
-  const ast::InvariantDecoration* Invariant() {
-    return create<ast::InvariantDecoration>(source_);
+  /// Creates an ast::InvariantAttribute
+  /// @returns the invariant attribute pointer
+  const ast::InvariantAttribute* Invariant() {
+    return create<ast::InvariantAttribute>(source_);
   }
 
-  /// Creates an ast::LocationDecoration
+  /// Creates an ast::LocationAttribute
   /// @param source the source information
   /// @param location the location value
-  /// @returns the location decoration pointer
-  const ast::LocationDecoration* Location(const Source& source,
-                                          uint32_t location) {
-    return create<ast::LocationDecoration>(source, location);
+  /// @returns the location attribute pointer
+  const ast::LocationAttribute* Location(const Source& source,
+                                         uint32_t location) {
+    return create<ast::LocationAttribute>(source, location);
   }
 
-  /// Creates an ast::LocationDecoration
+  /// Creates an ast::LocationAttribute
   /// @param location the location value
-  /// @returns the location decoration pointer
-  const ast::LocationDecoration* Location(uint32_t location) {
-    return create<ast::LocationDecoration>(source_, location);
+  /// @returns the location attribute pointer
+  const ast::LocationAttribute* Location(uint32_t location) {
+    return create<ast::LocationAttribute>(source_, location);
   }
 
-  /// Creates an ast::OverrideDecoration with a specific constant ID
+  /// Creates an ast::OverrideAttribute with a specific constant ID
   /// @param source the source information
   /// @param id the id value
-  /// @returns the override decoration pointer
-  const ast::OverrideDecoration* Override(const Source& source, uint32_t id) {
-    return create<ast::OverrideDecoration>(source, id);
+  /// @returns the override attribute pointer
+  const ast::OverrideAttribute* Override(const Source& source, uint32_t id) {
+    return create<ast::OverrideAttribute>(source, id);
   }
 
-  /// Creates an ast::OverrideDecoration with a specific constant ID
+  /// Creates an ast::OverrideAttribute with a specific constant ID
   /// @param id the optional id value
-  /// @returns the override decoration pointer
-  const ast::OverrideDecoration* Override(uint32_t id) {
+  /// @returns the override attribute pointer
+  const ast::OverrideAttribute* Override(uint32_t id) {
     return Override(source_, id);
   }
 
-  /// Creates an ast::OverrideDecoration without a constant ID
+  /// Creates an ast::OverrideAttribute without a constant ID
   /// @param source the source information
-  /// @returns the override decoration pointer
-  const ast::OverrideDecoration* Override(const Source& source) {
-    return create<ast::OverrideDecoration>(source);
+  /// @returns the override attribute pointer
+  const ast::OverrideAttribute* Override(const Source& source) {
+    return create<ast::OverrideAttribute>(source);
   }
 
-  /// Creates an ast::OverrideDecoration without a constant ID
-  /// @returns the override decoration pointer
-  const ast::OverrideDecoration* Override() { return Override(source_); }
+  /// Creates an ast::OverrideAttribute without a constant ID
+  /// @returns the override attribute pointer
+  const ast::OverrideAttribute* Override() { return Override(source_); }
 
-  /// Creates an ast::StageDecoration
+  /// Creates an ast::StageAttribute
   /// @param source the source information
   /// @param stage the pipeline stage
-  /// @returns the stage decoration pointer
-  const ast::StageDecoration* Stage(const Source& source,
-                                    ast::PipelineStage stage) {
-    return create<ast::StageDecoration>(source, stage);
+  /// @returns the stage attribute pointer
+  const ast::StageAttribute* Stage(const Source& source,
+                                   ast::PipelineStage stage) {
+    return create<ast::StageAttribute>(source, stage);
   }
 
-  /// Creates an ast::StageDecoration
+  /// Creates an ast::StageAttribute
   /// @param stage the pipeline stage
-  /// @returns the stage decoration pointer
-  const ast::StageDecoration* Stage(ast::PipelineStage stage) {
-    return create<ast::StageDecoration>(source_, stage);
+  /// @returns the stage attribute pointer
+  const ast::StageAttribute* Stage(ast::PipelineStage stage) {
+    return create<ast::StageAttribute>(source_, stage);
   }
 
-  /// Creates an ast::WorkgroupDecoration
+  /// Creates an ast::WorkgroupAttribute
   /// @param x the x dimension expression
-  /// @returns the workgroup decoration pointer
+  /// @returns the workgroup attribute pointer
   template <typename EXPR_X>
-  const ast::WorkgroupDecoration* WorkgroupSize(EXPR_X&& x) {
+  const ast::WorkgroupAttribute* WorkgroupSize(EXPR_X&& x) {
     return WorkgroupSize(std::forward<EXPR_X>(x), nullptr, nullptr);
   }
 
-  /// Creates an ast::WorkgroupDecoration
+  /// Creates an ast::WorkgroupAttribute
   /// @param x the x dimension expression
   /// @param y the y dimension expression
-  /// @returns the workgroup decoration pointer
+  /// @returns the workgroup attribute pointer
   template <typename EXPR_X, typename EXPR_Y>
-  const ast::WorkgroupDecoration* WorkgroupSize(EXPR_X&& x, EXPR_Y&& y) {
+  const ast::WorkgroupAttribute* WorkgroupSize(EXPR_X&& x, EXPR_Y&& y) {
     return WorkgroupSize(std::forward<EXPR_X>(x), std::forward<EXPR_Y>(y),
                          nullptr);
   }
 
-  /// Creates an ast::WorkgroupDecoration
+  /// Creates an ast::WorkgroupAttribute
   /// @param source the source information
   /// @param x the x dimension expression
   /// @param y the y dimension expression
   /// @param z the z dimension expression
-  /// @returns the workgroup decoration pointer
+  /// @returns the workgroup attribute pointer
   template <typename EXPR_X, typename EXPR_Y, typename EXPR_Z>
-  const ast::WorkgroupDecoration* WorkgroupSize(const Source& source,
-                                                EXPR_X&& x,
-                                                EXPR_Y&& y,
-                                                EXPR_Z&& z) {
-    return create<ast::WorkgroupDecoration>(
+  const ast::WorkgroupAttribute* WorkgroupSize(const Source& source,
+                                               EXPR_X&& x,
+                                               EXPR_Y&& y,
+                                               EXPR_Z&& z) {
+    return create<ast::WorkgroupAttribute>(
         source, Expr(std::forward<EXPR_X>(x)), Expr(std::forward<EXPR_Y>(y)),
         Expr(std::forward<EXPR_Z>(z)));
   }
 
-  /// Creates an ast::WorkgroupDecoration
+  /// Creates an ast::WorkgroupAttribute
   /// @param x the x dimension expression
   /// @param y the y dimension expression
   /// @param z the z dimension expression
-  /// @returns the workgroup decoration pointer
+  /// @returns the workgroup attribute pointer
   template <typename EXPR_X, typename EXPR_Y, typename EXPR_Z>
-  const ast::WorkgroupDecoration* WorkgroupSize(EXPR_X&& x,
-                                                EXPR_Y&& y,
-                                                EXPR_Z&& z) {
-    return create<ast::WorkgroupDecoration>(
+  const ast::WorkgroupAttribute* WorkgroupSize(EXPR_X&& x,
+                                               EXPR_Y&& y,
+                                               EXPR_Z&& z) {
+    return create<ast::WorkgroupAttribute>(
         source_, Expr(std::forward<EXPR_X>(x)), Expr(std::forward<EXPR_Y>(y)),
         Expr(std::forward<EXPR_Z>(z)));
   }
 
-  /// Creates an ast::DisableValidationDecoration
+  /// Creates an ast::DisableValidationAttribute
   /// @param validation the validation to disable
-  /// @returns the disable validation decoration pointer
-  const ast::DisableValidationDecoration* Disable(
+  /// @returns the disable validation attribute pointer
+  const ast::DisableValidationAttribute* Disable(
       ast::DisabledValidation validation) {
-    return ASTNodes().Create<ast::DisableValidationDecoration>(ID(),
-                                                               validation);
+    return ASTNodes().Create<ast::DisableValidationAttribute>(ID(), validation);
   }
 
   /// Sets the current builder source to `src`

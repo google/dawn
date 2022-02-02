@@ -15,7 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

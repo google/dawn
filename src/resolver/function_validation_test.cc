@@ -14,7 +14,7 @@
 
 #include "src/ast/discard_statement.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 
@@ -93,7 +93,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionUsingSameVariableName_Pass) {
            Decl(var),
            Return(Source{{12, 34}}, Expr("func")),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -108,13 +108,13 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{
            Decl(var),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   Func(Source{{12, 34}}, "b", ast::VariableList{}, ty.i32(),
        ast::StatementList{
            Return(2),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -211,7 +211,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
        ast::StatementList{
            Decl(var),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error: missing return at end of function");
@@ -232,7 +232,7 @@ TEST_F(ResolverFunctionValidationTest,
   // fn func() -> int {}
 
   Func(Source{{12, 34}}, "func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{}, ast::DecorationList{});
+       ast::StatementList{}, ast::AttributeList{});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error: missing return at end of function");
@@ -257,7 +257,7 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{
            Return(Source{{12, 34}}, Expr(2)),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -286,7 +286,7 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{
            Return(Source{{12, 34}}, nullptr),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -301,7 +301,7 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{
            Return(Source{{12, 34}}, Expr(2.f)),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -313,7 +313,7 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{
            Return(Source{{12, 34}}, Expr(2)),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -330,7 +330,7 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{
            Return(Source{{12, 34}}, Expr(2.f)),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -344,7 +344,7 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{
            Return(Source{{12, 34}}, Expr(2u)),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -378,15 +378,15 @@ TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
        ast::StatementList{
            Return(),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(Source{{12, 34}}, ast::PipelineStage::kVertex),
            Stage(Source{{56, 78}}, ast::PipelineStage::kFragment),
        });
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            R"(56:78 error: duplicate stage decoration
-12:34 note: first decoration declared here)");
+            R"(56:78 error: duplicate stage attribute
+12:34 note: first attribute declared here)");
 }
 
 TEST_F(ResolverFunctionValidationTest, NoPipelineEntryPoints) {
@@ -394,7 +394,7 @@ TEST_F(ResolverFunctionValidationTest, NoPipelineEntryPoints) {
        ast::StatementList{
            Return(),
        },
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -408,7 +408,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
   auto* baz = Var("baz", ty.f32(), Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -422,7 +422,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
   auto* baz = Const("baz", ty.f32(), Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
-       ast::DecorationList{});
+       ast::AttributeList{});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

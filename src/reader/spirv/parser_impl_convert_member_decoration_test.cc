@@ -56,8 +56,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
   auto result =
       p->ConvertMemberDecoration(1, 1, nullptr, {SpvDecorationOffset, 8});
   ASSERT_FALSE(result.empty());
-  EXPECT_TRUE(result[0]->Is<ast::StructMemberOffsetDecoration>());
-  auto* offset_deco = result[0]->As<ast::StructMemberOffsetDecoration>();
+  EXPECT_TRUE(result[0]->Is<ast::StructMemberOffsetAttribute>());
+  auto* offset_deco = result[0]->As<ast::StructMemberOffsetAttribute>();
   ASSERT_NE(offset_deco, nullptr);
   EXPECT_EQ(offset_deco->offset, 8u);
   EXPECT_TRUE(p->error().empty());
@@ -82,8 +82,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Custom) {
   auto result = p->ConvertMemberDecoration(1, 1, &matrix,
                                            {SpvDecorationMatrixStride, 16});
   ASSERT_FALSE(result.empty());
-  EXPECT_TRUE(result[0]->Is<ast::StrideDecoration>());
-  auto* stride_deco = result[0]->As<ast::StrideDecoration>();
+  EXPECT_TRUE(result[0]->Is<ast::StrideAttribute>());
+  auto* stride_deco = result[0]->As<ast::StrideAttribute>();
   ASSERT_NE(stride_deco, nullptr);
   EXPECT_EQ(stride_deco->stride, 16u);
   EXPECT_TRUE(p->error().empty());
@@ -108,8 +108,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Custom) {
   auto result = p->ConvertMemberDecoration(1, 1, &matrix,
                                            {SpvDecorationMatrixStride, 64});
   ASSERT_FALSE(result.empty());
-  EXPECT_TRUE(result[0]->Is<ast::StrideDecoration>());
-  auto* stride_deco = result[0]->As<ast::StrideDecoration>();
+  EXPECT_TRUE(result[0]->Is<ast::StrideAttribute>());
+  auto* stride_deco = result[0]->As<ast::StrideAttribute>();
   ASSERT_NE(stride_deco, nullptr);
   EXPECT_EQ(stride_deco->stride, 64u);
   EXPECT_TRUE(p->error().empty());
@@ -123,8 +123,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x3_Stride_Custom) {
   auto result = p->ConvertMemberDecoration(1, 1, &matrix,
                                            {SpvDecorationMatrixStride, 32});
   ASSERT_FALSE(result.empty());
-  EXPECT_TRUE(result[0]->Is<ast::StrideDecoration>());
-  auto* stride_deco = result[0]->As<ast::StrideDecoration>();
+  EXPECT_TRUE(result[0]->Is<ast::StrideAttribute>());
+  auto* stride_deco = result[0]->As<ast::StrideAttribute>();
   ASSERT_NE(stride_deco, nullptr);
   EXPECT_EQ(stride_deco->stride, 32u);
   EXPECT_TRUE(p->error().empty());

@@ -239,12 +239,12 @@ class ParserImpl {
     /// @param n function name
     /// @param p function parameters
     /// @param ret_ty function return type
-    /// @param ret_decos return type decorations
+    /// @param ret_attrs return type attributes
     FunctionHeader(Source src,
                    std::string n,
                    ast::VariableList p,
                    const ast::Type* ret_ty,
-                   ast::DecorationList ret_decos);
+                   ast::AttributeList ret_attrs);
     /// Destructor
     ~FunctionHeader();
     /// Assignment operator
@@ -260,8 +260,8 @@ class ParserImpl {
     ast::VariableList params;
     /// Function return type
     const ast::Type* return_type = nullptr;
-    /// Function return type decorations
-    ast::DecorationList return_type_decorations;
+    /// Function return type attributes
+    ast::AttributeList return_type_attributes;
   };
 
   /// VarDeclInfo contains the parsed information for variable declaration.
@@ -387,15 +387,15 @@ class ParserImpl {
   /// @return true on parse success, otherwise an error.
   Expect<bool> expect_global_decl();
   /// Parses a `global_variable_decl` grammar element with the initial
-  /// `variable_decoration_list*` provided as `decos`
+  /// `variable_attribute_list*` provided as `attrs`
   /// @returns the variable parsed or nullptr
-  /// @param decos the list of decorations for the variable declaration.
-  Maybe<const ast::Variable*> global_variable_decl(ast::DecorationList& decos);
+  /// @param attrs the list of attributes for the variable declaration.
+  Maybe<const ast::Variable*> global_variable_decl(ast::AttributeList& attrs);
   /// Parses a `global_constant_decl` grammar element with the initial
-  /// `variable_decoration_list*` provided as `decos`
+  /// `variable_attribute_list*` provided as `attrs`
   /// @returns the const object or nullptr
-  /// @param decos the list of decorations for the constant declaration.
-  Maybe<const ast::Variable*> global_constant_decl(ast::DecorationList& decos);
+  /// @param attrs the list of attributes for the constant declaration.
+  Maybe<const ast::Variable*> global_constant_decl(ast::AttributeList& attrs);
   /// Parses a `variable_decl` grammar element
   /// @param allow_inferred if true, do not fail if variable decl does not
   /// specify type
@@ -420,33 +420,33 @@ class ParserImpl {
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<const ast::Type*> type_decl();
   /// Parses a `type_decl` grammar element with the given pre-parsed
-  /// decorations.
-  /// @param decos the list of decorations for the type.
+  /// attributes.
+  /// @param attrs the list of attributes for the type.
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<const ast::Type*> type_decl(ast::DecorationList& decos);
+  Maybe<const ast::Type*> type_decl(ast::AttributeList& attrs);
   /// Parses a `storage_class` grammar element, erroring on parse failure.
   /// @param use a description of what was being parsed if an error was raised.
   /// @returns the storage class or StorageClass::kNone if none matched
   Expect<ast::StorageClass> expect_storage_class(std::string_view use);
   /// Parses a `struct_decl` grammar element with the initial
-  /// `struct_decoration_decl*` provided as `decos`.
+  /// `struct_attribute_decl*` provided as `attrs`.
   /// @returns the struct type or nullptr on error
-  /// @param decos the list of decorations for the struct declaration.
-  Maybe<const ast::Struct*> struct_decl(ast::DecorationList& decos);
+  /// @param attrs the list of attributes for the struct declaration.
+  Maybe<const ast::Struct*> struct_decl(ast::AttributeList& attrs);
   /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members
   Expect<ast::StructMemberList> expect_struct_body_decl();
   /// Parses a `struct_member` grammar element with the initial
-  /// `struct_member_decoration_decl+` provided as `decos`, erroring on parse
+  /// `struct_member_attribute_decl+` provided as `attrs`, erroring on parse
   /// failure.
-  /// @param decos the list of decorations for the struct member.
+  /// @param attrs the list of attributes for the struct member.
   /// @returns the struct member or nullptr
-  Expect<ast::StructMember*> expect_struct_member(ast::DecorationList& decos);
+  Expect<ast::StructMember*> expect_struct_member(ast::AttributeList& attrs);
   /// Parses a `function_decl` grammar element with the initial
-  /// `function_decoration_decl*` provided as `decos`.
-  /// @param decos the list of decorations for the function declaration.
+  /// `function_attribute_decl*` provided as `attrs`.
+  /// @param attrs the list of attributes for the function declaration.
   /// @returns the parsed function, nullptr otherwise
-  Maybe<const ast::Function*> function_decl(ast::DecorationList& decos);
+  Maybe<const ast::Function*> function_decl(ast::AttributeList& attrs);
   /// Parses a `texture_sampler_types` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<const ast::Type*> texture_sampler_types();
@@ -670,28 +670,28 @@ class ParserImpl {
   /// Parses a `assignment_stmt` grammar element
   /// @returns the parsed assignment or nullptr
   Maybe<const ast::AssignmentStatement*> assignment_stmt();
-  /// Parses one or more decoration lists.
-  /// @return the parsed decoration list, or an empty list on error.
-  Maybe<ast::DecorationList> decoration_list();
-  /// Parses a list of decorations between `ATTR_LEFT` and `ATTR_RIGHT`
+  /// Parses one or more attribute lists.
+  /// @return the parsed attribute list, or an empty list on error.
+  Maybe<ast::AttributeList> attribute_list();
+  /// Parses a list of attributes between `ATTR_LEFT` and `ATTR_RIGHT`
   /// brackets.
-  /// @param decos the list to append newly parsed decorations to.
-  /// @return true if any decorations were be parsed, otherwise false.
-  Maybe<bool> decoration_bracketed_list(ast::DecorationList& decos);
-  /// Parses a single decoration of the following types:
-  /// * `struct_decoration`
-  /// * `struct_member_decoration`
-  /// * `array_decoration`
-  /// * `variable_decoration`
-  /// * `global_const_decoration`
-  /// * `function_decoration`
-  /// @return the parsed decoration, or nullptr.
-  Maybe<const ast::Decoration*> decoration();
-  /// Parses a single decoration, reporting an error if the next token does not
-  /// represent a decoration.
-  /// @see #decoration for the full list of decorations this method parses.
-  /// @return the parsed decoration, or nullptr on error.
-  Expect<const ast::Decoration*> expect_decoration();
+  /// @param attrs the list to append newly parsed attributes to.
+  /// @return true if any attributes were be parsed, otherwise false.
+  Maybe<bool> attribute_bracketed_list(ast::AttributeList& attrs);
+  /// Parses a single attribute of the following types:
+  /// * `struct_attribute`
+  /// * `struct_member_attribute`
+  /// * `array_attribute`
+  /// * `variable_attribute`
+  /// * `global_const_attribute`
+  /// * `function_attribute`
+  /// @return the parsed attribute, or nullptr.
+  Maybe<const ast::Attribute*> attribute();
+  /// Parses a single attribute, reporting an error if the next token does not
+  /// represent a attribute.
+  /// @see #attribute for the full list of attributes this method parses.
+  /// @return the parsed attribute, or nullptr on error.
+  Expect<const ast::Attribute*> expect_attribute();
 
  private:
   /// ReturnType resolves to the return type for the function or lambda F.
@@ -843,15 +843,15 @@ class ParserImpl {
   template <typename F, typename T = ReturnType<F>>
   T without_error(F&& func);
 
-  /// Reports an error if the decoration list `list` is not empty.
-  /// Used to ensure that all decorations are consumed.
-  bool expect_decorations_consumed(ast::DecorationList& list);
+  /// Reports an error if the attribute list `list` is not empty.
+  /// Used to ensure that all attributes are consumed.
+  bool expect_attributes_consumed(ast::AttributeList& list);
 
   Expect<const ast::Type*> expect_type_decl_pointer(Token t);
   Expect<const ast::Type*> expect_type_decl_atomic(Token t);
   Expect<const ast::Type*> expect_type_decl_vector(Token t);
   Expect<const ast::Type*> expect_type_decl_array(Token t,
-                                                  ast::DecorationList decos);
+                                                  ast::AttributeList attrs);
   Expect<const ast::Type*> expect_type_decl_matrix(Token t);
 
   Expect<const ast::Type*> expect_type(std::string_view use);

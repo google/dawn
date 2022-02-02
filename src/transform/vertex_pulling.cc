@@ -265,9 +265,9 @@ struct State {
       ctx.dst->Global(
           GetVertexBufferName(i), ctx.dst->ty.Of(struct_type),
           ast::StorageClass::kStorage, ast::Access::kRead,
-          ast::DecorationList{
-              ctx.dst->create<ast::BindingDecoration>(i),
-              ctx.dst->create<ast::GroupDecoration>(cfg.pulling_group),
+          ast::AttributeList{
+              ctx.dst->create<ast::BindingAttribute>(i),
+              ctx.dst->create<ast::GroupAttribute>(cfg.pulling_group),
           });
     }
   }
@@ -723,7 +723,7 @@ struct State {
   void ProcessNonStructParameter(const ast::Function* func,
                                  const ast::Variable* param) {
     if (auto* location =
-            ast::GetDecoration<ast::LocationDecoration>(param->decorations)) {
+            ast::GetAttribute<ast::LocationAttribute>(param->attributes)) {
       // Create a function-scope variable to replace the parameter.
       auto func_var_sym = ctx.Clone(param->symbol);
       auto* func_var_type = ctx.Clone(param->type);
@@ -734,8 +734,8 @@ struct State {
       info.expr = [this, func_var]() { return ctx.dst->Expr(func_var); };
       info.type = ctx.src->Sem().Get(param)->Type();
       location_info[location->value] = info;
-    } else if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-                   param->decorations)) {
+    } else if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(
+                   param->attributes)) {
       // Check for existing vertex_index and instance_index builtins.
       if (builtin->builtin == ast::Builtin::kVertexIndex) {
         vertex_index_expr = [this, param]() {
@@ -776,16 +776,16 @@ struct State {
         return ctx.dst->MemberAccessor(param_sym, member_sym);
       };
 
-      if (auto* location = ast::GetDecoration<ast::LocationDecoration>(
-              member->decorations)) {
+      if (auto* location =
+              ast::GetAttribute<ast::LocationAttribute>(member->attributes)) {
         // Capture mapping from location to struct member.
         LocationInfo info;
         info.expr = member_expr;
         info.type = ctx.src->Sem().Get(member)->Type();
         location_info[location->value] = info;
         has_locations = true;
-      } else if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
-                     member->decorations)) {
+      } else if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(
+                     member->attributes)) {
         // Check for existing vertex_index and instance_index builtins.
         if (builtin->builtin == ast::Builtin::kVertexIndex) {
           vertex_index_expr = member_expr;
@@ -815,9 +815,9 @@ struct State {
       for (auto* member : members_to_clone) {
         auto member_sym = ctx.Clone(member->symbol);
         auto* member_type = ctx.Clone(member->type);
-        auto member_decos = ctx.Clone(member->decorations);
+        auto member_attrs = ctx.Clone(member->attributes);
         new_members.push_back(
-            ctx.dst->Member(member_sym, member_type, std::move(member_decos)));
+            ctx.dst->Member(member_sym, member_type, std::move(member_attrs)));
       }
       auto* new_struct = ctx.dst->Structure(ctx.dst->Sym(), new_members);
 
@@ -889,11 +889,11 @@ struct State {
     auto func_sym = ctx.Clone(func->symbol);
     auto* ret_type = ctx.Clone(func->return_type);
     auto* body = ctx.Clone(func->body);
-    auto decos = ctx.Clone(func->decorations);
-    auto ret_decos = ctx.Clone(func->return_type_decorations);
+    auto attrs = ctx.Clone(func->attributes);
+    auto ret_attrs = ctx.Clone(func->return_type_attributes);
     auto* new_func = ctx.dst->create<ast::Function>(
         func->source, func_sym, new_function_parameters, ret_type, body,
-        std::move(decos), std::move(ret_decos));
+        std::move(attrs), std::move(ret_attrs));
     ctx.Replace(func, new_func);
   }
 };

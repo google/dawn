@@ -19,7 +19,7 @@
 #include <tuple>
 #include <vector>
 
-#include "src/ast/interpolate_decoration.h"
+#include "src/ast/interpolate_attribute.h"
 #include "src/ast/pipeline_stage.h"
 
 namespace tint {
@@ -56,13 +56,27 @@ enum class InterpolationSampling {
 
 /// Reflection data about an entry point input or output.
 struct StageVariable {
+  /// Constructor
+  StageVariable();
+  /// Copy constructor
+  StageVariable(const StageVariable&);
+  /// Destructor
+  ~StageVariable();
+
   /// Name of the variable in the shader.
   std::string name;
-  /// Is Location Decoration present
-  bool has_location_decoration = false;
-  /// Value of Location Decoration, only valid if |has_location_decoration| is
+  /// Is location attribute present
+  bool has_location_attribute = false;
+  /// Value of the location attribute, only valid if #has_location_attribute is
   /// true.
-  uint32_t location_decoration;
+  uint32_t location_attribute;
+  /// Is Location attribute present
+  /// [DEPRECATED]: Use #has_location_attribute
+  bool& has_location_decoration = has_location_attribute;
+  /// Value of Location Decoration, only valid if #has_location_decoration is
+  /// true.
+  /// [DEPRECATED]: Use #location_attribute
+  uint32_t& location_decoration = location_attribute;
   /// Scalar type that the variable is composed of.
   ComponentType component_type = ComponentType::kUnknown;
   /// How the scalars are composed for the variable.

@@ -25,14 +25,14 @@ StructMember::StructMember(ProgramID pid,
                            const Source& src,
                            const Symbol& sym,
                            const ast::Type* ty,
-                           DecorationList decos)
-    : Base(pid, src), symbol(sym), type(ty), decorations(std::move(decos)) {
+                           AttributeList attrs)
+    : Base(pid, src), symbol(sym), type(ty), attributes(std::move(attrs)) {
   TINT_ASSERT(AST, type);
   TINT_ASSERT(AST, symbol.IsValid());
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
-  for (auto* deco : decorations) {
-    TINT_ASSERT(AST, deco);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
+  for (auto* attr : attributes) {
+    TINT_ASSERT(AST, attr);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
   }
 }
 
@@ -45,8 +45,8 @@ const StructMember* StructMember::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source);
   auto sym = ctx->Clone(symbol);
   auto* ty = ctx->Clone(type);
-  auto decos = ctx->Clone(decorations);
-  return ctx->dst->create<StructMember>(src, sym, ty, decos);
+  auto attrs = ctx->Clone(attributes);
+  return ctx->dst->create<StructMember>(src, sym, ty, attrs);
 }
 
 }  // namespace ast

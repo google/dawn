@@ -158,19 +158,19 @@ class Inspector {
   /// Otherwise, add the variable unless it is a builtin.
   /// @param name the name of the variable being added
   /// @param type the type of the variable
-  /// @param decorations the variable decorations
+  /// @param attributes the variable attributes
   /// @param variables the list to add the variables to
   void AddEntryPointInOutVariables(std::string name,
                                    const sem::Type* type,
-                                   const ast::DecorationList& decorations,
+                                   const ast::AttributeList& attributes,
                                    std::vector<StageVariable>& variables) const;
 
   /// Recursively determine if the type contains builtin.
-  /// If `type` is a struct, recurse into members to check for the decoration.
-  /// Otherwise, check `decorations` for the decoration.
+  /// If `type` is a struct, recurse into members to check for the attribute.
+  /// Otherwise, check `attributes` for the attribute.
   bool ContainsBuiltin(ast::Builtin builtin,
                        const sem::Type* type,
-                       const ast::DecorationList& decorations) const;
+                       const ast::AttributeList& attributes) const;
 
   /// Gathers all the texture resource bindings of the given type for the given
   /// entry point.

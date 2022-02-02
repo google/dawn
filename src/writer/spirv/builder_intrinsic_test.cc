@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "src/ast/call_statement.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/utils/string.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -677,15 +677,15 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   auto* t = ty.depth_texture(ast::TextureDimension::k2d);
 
   auto* tex = Global("texture", t,
-                     ast::DecorationList{
-                         create<ast::BindingDecoration>(0),
-                         create<ast::GroupDecoration>(0),
+                     ast::AttributeList{
+                         create<ast::BindingAttribute>(0),
+                         create<ast::GroupAttribute>(0),
                      });
 
   auto* sampler = Global("sampler", s,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(1),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(1),
+                             create<ast::GroupAttribute>(0),
                          });
 
   auto* expr1 = Call("textureSampleCompare", "texture", "sampler",
@@ -1702,11 +1702,11 @@ OpFunctionEnd
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
   auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
@@ -1714,7 +1714,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
        ast::StatementList{
            CallStmt(expr),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -1751,11 +1751,11 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
                           Member("z", ty.f32()),
                           Member(4, "a", ty.array<f32>(4)),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
   auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
@@ -1763,7 +1763,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
        ast::StatementList{
            CallStmt(expr),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -1796,11 +1796,11 @@ OpReturn
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets) {
   auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   auto* p = Const("p", nullptr, AddressOf("b"));
@@ -1813,7 +1813,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets) {
            Decl(p2),
            CallStmt(expr),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -1857,11 +1857,11 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
   //   arrayLength(&*p3);
   // }
   auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   auto* p = Const("p", nullptr, AddressOf(Deref(AddressOf("b"))));
@@ -1876,7 +1876,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
            Decl(p3),
            CallStmt(expr),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -1924,11 +1924,11 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicLoad) {
                           Member("u", ty.atomic<u32>()),
                           Member("i", ty.atomic<i32>()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", {}, ty.void_(),
@@ -1938,7 +1938,7 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicLoad) {
            Decl(Const("i", ty.i32(),
                       Call("atomicLoad", AddressOf(MemberAccessor("b", "i"))))),
        },
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -1992,11 +1992,11 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicStore) {
                           Member("u", ty.atomic<u32>()),
                           Member("i", ty.atomic<i32>()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", {}, ty.void_(),
@@ -2008,7 +2008,7 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicStore) {
            CallStmt(
                Call("atomicStore", AddressOf(MemberAccessor("b", "i")), "i")),
        },
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -2069,11 +2069,11 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_i32, Test) {
                       {
                           Member("v", ty.atomic<i32>()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", {}, ty.void_(),
@@ -2083,7 +2083,7 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_i32, Test) {
                       Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
                            "v"))),
        },
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -2147,11 +2147,11 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_u32, Test) {
                       {
                           Member("v", ty.atomic<u32>()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", {}, ty.void_(),
@@ -2161,7 +2161,7 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_u32, Test) {
                       Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
                            "v"))),
        },
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -2226,11 +2226,11 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicExchange) {
                           Member("u", ty.atomic<u32>()),
                           Member("i", ty.atomic<i32>()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", {}, ty.void_(),
@@ -2244,7 +2244,7 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicExchange) {
                       Call("atomicExchange",
                            AddressOf(MemberAccessor("b", "i")), "i"))),
        },
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -2306,11 +2306,11 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicCompareExchangeWeak) {
                           Member("u", ty.atomic<u32>()),
                           Member("i", ty.atomic<i32>()),
                       },
-                      {create<ast::StructBlockDecoration>()});
+                      {create<ast::StructBlockAttribute>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(2),
+         ast::AttributeList{
+             create<ast::BindingAttribute>(1),
+             create<ast::GroupAttribute>(2),
          });
 
   Func("a_func", {}, ty.void_(),
@@ -2322,7 +2322,7 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicCompareExchangeWeak) {
                       Call("atomicCompareExchangeWeak",
                            AddressOf(MemberAccessor("b", "i")), 10, 20))),
        },
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -2493,7 +2493,7 @@ TEST_F(IntrinsicBuilderTest, Call_WorkgroupBarrier) {
        ast::StatementList{
            CallStmt(Call("workgroupBarrier")),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
        });
@@ -2527,7 +2527,7 @@ TEST_F(IntrinsicBuilderTest, Call_StorageBarrier) {
        ast::StatementList{
            CallStmt(Call("storageBarrier")),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(1),
        });

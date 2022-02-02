@@ -16,10 +16,10 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/builtin.h"
-#include "src/ast/builtin_decoration.h"
-#include "src/ast/location_decoration.h"
+#include "src/ast/builtin_attribute.h"
+#include "src/ast/location_attribute.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
+#include "src/ast/stage_attribute.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/variable.h"
 #include "src/program.h"
@@ -49,7 +49,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
   auto* col = Var("col", ty.f32(), ast::StorageClass::kNone, mul);
   Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
        ast::StatementList{WrapInStatement(col)},
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -122,10 +122,10 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
            If(cond, Block(Return(0.5f))),
            Return(1.0f),
        },
-       ast::DecorationList{
+       ast::AttributeList{
            Stage(ast::PipelineStage::kFragment),
        },
-       ast::DecorationList{Location(0)});
+       ast::AttributeList{Location(0)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -201,9 +201,9 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
   auto* interface = Structure(
       "Interface",
       {
-          Member("value", ty.f32(), ast::DecorationList{Location(1u)}),
+          Member("value", ty.f32(), ast::AttributeList{Location(1u)}),
           Member("pos", ty.vec4<f32>(),
-                 ast::DecorationList{Builtin(ast::Builtin::kPosition)}),
+                 ast::AttributeList{Builtin(ast::Builtin::kPosition)}),
       });
 
   auto* vert_retval =

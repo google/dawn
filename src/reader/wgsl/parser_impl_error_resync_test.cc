@@ -55,7 +55,7 @@ test.wgsl:3:6 error: expected ')' for function declaration
 fn x(.) {}
      ^
 
-test.wgsl:4:2 error: expected decoration
+test.wgsl:4:2 error: expected attribute
 @_ fn -> {}
  ^
 
@@ -126,7 +126,7 @@ test.wgsl:5:10 error: expected ':' for struct member
     blah blah blah;
          ^^^^
 
-test.wgsl:7:6 error: expected decoration
+test.wgsl:7:6 error: expected attribute
     @- x : i32;
      ^
 )");

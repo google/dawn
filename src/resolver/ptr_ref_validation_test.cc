@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/reference_type.h"
@@ -148,12 +148,12 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
   auto* buf = Structure("S", {Member("inner", ty.Of(inner))},
-                        {create<ast::StructBlockDecoration>()});
+                        {create<ast::StructBlockAttribute>()});
   auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::Access::kReadWrite,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(0),
-                             create<ast::GroupDecoration>(0),
+                         ast::AttributeList{
+                             create<ast::BindingAttribute>(0),
+                             create<ast::GroupAttribute>(0),
                          });
 
   auto* expr =

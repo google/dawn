@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, FunctionHeader_TrailingComma) {
   EXPECT_TRUE(f->return_type->Is<ast::Void>());
 }
 
-TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
+TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType) {
   auto p = parser("fn main() -> @location(1) f32");
   auto f = p->function_header();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -55,8 +55,8 @@ TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
   EXPECT_EQ(f->name, "main");
   EXPECT_EQ(f->params.size(), 0u);
   EXPECT_TRUE(f->return_type->Is<ast::F32>());
-  ASSERT_EQ(f->return_type_decorations.size(), 1u);
-  auto* loc = f->return_type_decorations[0]->As<ast::LocationDecoration>();
+  ASSERT_EQ(f->return_type_attributes.size(), 1u);
+  auto* loc = f->return_type_attributes[0]->As<ast::LocationAttribute>();
   ASSERT_TRUE(loc != nullptr);
   EXPECT_EQ(loc->value, 1u);
 }
@@ -71,11 +71,11 @@ TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {
   EXPECT_EQ(f->name, "main");
   EXPECT_EQ(f->params.size(), 0u);
   EXPECT_TRUE(f->return_type->Is<ast::F32>());
-  ASSERT_EQ(f->return_type_decorations.size(), 1u);
-  EXPECT_TRUE(f->return_type_decorations[0]->Is<ast::InvariantDecoration>());
+  ASSERT_EQ(f->return_type_attributes.size(), 1u);
+  EXPECT_TRUE(f->return_type_attributes[0]->Is<ast::InvariantAttribute>());
 }
 
-TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType_WithArrayStride) {
+TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType_WithArrayStride) {
   auto p = parser("fn main() -> @location(1) @stride(16) array<f32, 4>");
   auto f = p->function_header();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -84,14 +84,14 @@ TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType_WithArrayStride) {
 
   EXPECT_EQ(f->name, "main");
   EXPECT_EQ(f->params.size(), 0u);
-  ASSERT_EQ(f->return_type_decorations.size(), 1u);
-  auto* loc = f->return_type_decorations[0]->As<ast::LocationDecoration>();
+  ASSERT_EQ(f->return_type_attributes.size(), 1u);
+  auto* loc = f->return_type_attributes[0]->As<ast::LocationAttribute>();
   ASSERT_TRUE(loc != nullptr);
   EXPECT_EQ(loc->value, 1u);
 
   auto* array_type = f->return_type->As<ast::Array>();
-  ASSERT_EQ(array_type->decorations.size(), 1u);
-  auto* stride = array_type->decorations[0]->As<ast::StrideDecoration>();
+  ASSERT_EQ(array_type->attributes.size(), 1u);
+  auto* stride = array_type->attributes[0]->As<ast::StrideAttribute>();
   ASSERT_TRUE(stride != nullptr);
   EXPECT_EQ(stride->stride, 16u);
 }

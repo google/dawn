@@ -24,18 +24,18 @@
 #include "src/ast/external_texture.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/invariant_decoration.h"
+#include "src/ast/invariant_attribute.h"
 #include "src/ast/loop_statement.h"
-#include "src/ast/override_decoration.h"
+#include "src/ast/override_attribute.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
+#include "src/ast/stage_attribute.h"
+#include "src/ast/struct_block_attribute.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_name.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_attribute.h"
 #include "src/reader/wgsl/lexer.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
@@ -110,27 +110,27 @@ ast::Builtin ident_to_builtin(std::string_view str) {
   return ast::Builtin::kNone;
 }
 
-const char kBindingDecoration[] = "binding";
-const char kBlockDecoration[] = "block";
-const char kBuiltinDecoration[] = "builtin";
-const char kGroupDecoration[] = "group";
-const char kInterpolateDecoration[] = "interpolate";
-const char kInvariantDecoration[] = "invariant";
-const char kLocationDecoration[] = "location";
-const char kOverrideDecoration[] = "override";
-const char kSizeDecoration[] = "size";
-const char kAlignDecoration[] = "align";
-const char kStageDecoration[] = "stage";
-const char kStrideDecoration[] = "stride";
-const char kWorkgroupSizeDecoration[] = "workgroup_size";
+const char kBindingAttribute[] = "binding";
+const char kBlockAttribute[] = "block";
+const char kBuiltinAttribute[] = "builtin";
+const char kGroupAttribute[] = "group";
+const char kInterpolateAttribute[] = "interpolate";
+const char kInvariantAttribute[] = "invariant";
+const char kLocationAttribute[] = "location";
+const char kOverrideAttribute[] = "override";
+const char kSizeAttribute[] = "size";
+const char kAlignAttribute[] = "align";
+const char kStageAttribute[] = "stage";
+const char kStrideAttribute[] = "stride";
+const char kWorkgroupSizeAttribute[] = "workgroup_size";
 
-bool is_decoration(Token t) {
-  return t == kAlignDecoration || t == kBindingDecoration ||
-         t == kBlockDecoration || t == kBuiltinDecoration ||
-         t == kGroupDecoration || t == kInterpolateDecoration ||
-         t == kLocationDecoration || t == kOverrideDecoration ||
-         t == kSizeDecoration || t == kStageDecoration ||
-         t == kStrideDecoration || t == kWorkgroupSizeDecoration;
+bool is_attribute(Token t) {
+  return t == kAlignAttribute || t == kBindingAttribute ||
+         t == kBlockAttribute || t == kBuiltinAttribute ||
+         t == kGroupAttribute || t == kInterpolateAttribute ||
+         t == kLocationAttribute || t == kOverrideAttribute ||
+         t == kSizeAttribute || t == kStageAttribute || t == kStrideAttribute ||
+         t == kWorkgroupSizeAttribute;
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
@@ -225,12 +225,12 @@ ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
                                            ast::VariableList p,
                                            const ast::Type* ret_ty,
-                                           ast::DecorationList ret_decos)
+                                           ast::AttributeList ret_attrs)
     : source(src),
       name(n),
       params(p),
       return_type(ret_ty),
-      return_type_decorations(ret_decos) {}
+      return_type_attributes(ret_attrs) {}
 
 ParserImpl::FunctionHeader::~FunctionHeader() = default;
 
@@ -351,14 +351,14 @@ Expect<bool> ParserImpl::expect_global_decl() {
 
   bool errored = false;
 
-  auto decos = decoration_list();
-  if (decos.errored)
+  auto attrs = attribute_list();
+  if (attrs.errored)
     errored = true;
   if (!continue_parsing())
     return Failure::kErrored;
 
   auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<bool> {
-    auto gv = global_variable_decl(decos.value);
+    auto gv = global_variable_decl(attrs.value);
     if (gv.errored)
       return Failure::kErrored;
     if (gv.matched) {
@@ -369,7 +369,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       return true;
     }
 
-    auto gc = global_constant_decl(decos.value);
+    auto gc = global_constant_decl(attrs.value);
     if (gc.errored)
       return Failure::kErrored;
 
@@ -393,7 +393,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       return true;
     }
 
-    auto str = struct_decl(decos.value);
+    auto str = struct_decl(attrs.value);
     if (str.errored)
       return Failure::kErrored;
 
@@ -409,10 +409,10 @@ Expect<bool> ParserImpl::expect_global_decl() {
     errored = true;
   }
   if (decl.matched) {
-    return expect_decorations_consumed(decos.value);
+    return expect_attributes_consumed(attrs.value);
   }
 
-  auto func = function_decl(decos.value);
+  auto func = function_decl(attrs.value);
   if (func.errored) {
     errored = true;
   }
@@ -427,9 +427,9 @@ Expect<bool> ParserImpl::expect_global_decl() {
 
   // Invalid syntax found - try and determine the best error message
 
-  // We have decorations parsed, but nothing to consume them?
-  if (decos.value.size() > 0) {
-    return add_error(next(), "expected declaration after decorations");
+  // We have attributes parsed, but nothing to consume them?
+  if (attrs.value.size() > 0) {
+    return add_error(next(), "expected declaration after attributes");
   }
 
   // We have a statement outside of a function?
@@ -460,10 +460,10 @@ Expect<bool> ParserImpl::expect_global_decl() {
 }
 
 // global_variable_decl
-//  : variable_decoration_list* variable_decl
-//  | variable_decoration_list* variable_decl EQUAL const_expr
+//  : variable_attribute_list* variable_decl
+//  | variable_attribute_list* variable_decl EQUAL const_expr
 Maybe<const ast::Variable*> ParserImpl::global_variable_decl(
-    ast::DecorationList& decos) {
+    ast::AttributeList& attrs) {
   auto decl = variable_decl();
   if (decl.errored)
     return Failure::kErrored;
@@ -486,7 +486,7 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(
       decl->type,                               // type
       false,                                    // is_const
       constructor,                              // constructor
-      std::move(decos));                        // decorations
+      std::move(attrs));                        // attributes
 }
 
 // global_constant_decl
@@ -494,7 +494,7 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(
 // global_const_initializer
 //  : EQUAL const_expr
 Maybe<const ast::Variable*> ParserImpl::global_constant_decl(
-    ast::DecorationList& decos) {
+    ast::AttributeList& attrs) {
   if (!match(Token::Type::kLet)) {
     return Failure::kNoMatch;
   }
@@ -522,7 +522,7 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(
       decl->type,                               // type
       true,                                     // is_const
       initializer,                              // constructor
-      std::move(decos));                        // decorations
+      std::move(attrs));                        // attributes
 }
 
 // variable_decl
@@ -807,7 +807,7 @@ Expect<ast::TexelFormat> ParserImpl::expect_texel_format(std::string_view use) {
 }
 
 // variable_ident_decl
-//   : IDENT COLON variable_decoration_list* type_decl
+//   : IDENT COLON variable_attribute_list* type_decl
 Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
     std::string_view use,
     bool allow_inferred) {
@@ -822,18 +822,18 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (!expect(use, Token::Type::kColon))
     return Failure::kErrored;
 
-  auto decos = decoration_list();
-  if (decos.errored)
+  auto attrs = attribute_list();
+  if (attrs.errored)
     return Failure::kErrored;
 
   auto t = peek();
-  auto type = type_decl(decos.value);
+  auto type = type_decl(attrs.value);
   if (type.errored)
     return Failure::kErrored;
   if (!type.matched)
     return add_error(t.source(), "invalid type", use);
 
-  if (!expect_decorations_consumed(decos.value))
+  if (!expect_attributes_consumed(attrs.value))
     return Failure::kErrored;
 
   return TypedIdentifier{type.value, ident.value, ident.source};
@@ -922,9 +922,9 @@ Maybe<const ast::Alias*> ParserImpl::type_alias() {
 //   | VEC3 LESS_THAN type_decl GREATER_THAN
 //   | VEC4 LESS_THAN type_decl GREATER_THAN
 //   | PTR LESS_THAN storage_class, type_decl (COMMA access_mode)? GREATER_THAN
-//   | array_decoration_list* ARRAY LESS_THAN type_decl COMMA
+//   | array_attribute_list* ARRAY LESS_THAN type_decl COMMA
 //          INT_LITERAL GREATER_THAN
-//   | array_decoration_list* ARRAY LESS_THAN type_decl
+//   | array_attribute_list* ARRAY LESS_THAN type_decl
 //          GREATER_THAN
 //   | MAT2x2 LESS_THAN type_decl GREATER_THAN
 //   | MAT2x3 LESS_THAN type_decl GREATER_THAN
@@ -937,15 +937,15 @@ Maybe<const ast::Alias*> ParserImpl::type_alias() {
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
 //   | texture_sampler_types
 Maybe<const ast::Type*> ParserImpl::type_decl() {
-  auto decos = decoration_list();
-  if (decos.errored)
+  auto attrs = attribute_list();
+  if (attrs.errored)
     return Failure::kErrored;
 
-  auto type = type_decl(decos.value);
+  auto type = type_decl(attrs.value);
   if (type.errored) {
     return Failure::kErrored;
   }
-  if (!expect_decorations_consumed(decos.value)) {
+  if (!expect_attributes_consumed(attrs.value)) {
     return Failure::kErrored;
   }
   if (!type.matched) {
@@ -955,7 +955,7 @@ Maybe<const ast::Type*> ParserImpl::type_decl() {
   return type;
 }
 
-Maybe<const ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
+Maybe<const ast::Type*> ParserImpl::type_decl(ast::AttributeList& attrs) {
   auto t = peek();
   Source source;
   if (match(Token::Type::kIdentifier, &source)) {
@@ -989,7 +989,7 @@ Maybe<const ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   }
 
   if (match(Token::Type::kArray, &source)) {
-    return expect_type_decl_array(t, std::move(decos));
+    return expect_type_decl_array(t, std::move(attrs));
   }
 
   if (t.IsMatrix()) {
@@ -1090,7 +1090,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {
 
 Expect<const ast::Type*> ParserImpl::expect_type_decl_array(
     Token t,
-    ast::DecorationList decos) {
+    ast::AttributeList attrs) {
   const char* use = "array declaration";
 
   const ast::Expression* size = nullptr;
@@ -1119,7 +1119,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_array(
   }
 
   return builder_.ty.array(make_source_range_from(t.source()), subtype.value,
-                           size, std::move(decos));
+                           size, std::move(attrs));
 }
 
 Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
@@ -1181,8 +1181,8 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 }
 
 // struct_decl
-//   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-Maybe<const ast::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
+//   : struct_attribute_decl* STRUCT IDENT struct_body_decl
+Maybe<const ast::Struct*> ParserImpl::struct_decl(ast::AttributeList& attrs) {
   auto t = peek();
   auto source = t.source();
 
@@ -1199,7 +1199,7 @@ Maybe<const ast::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
 
   auto sym = builder_.Symbols().Register(name.value);
   return create<ast::Struct>(source, sym, std::move(body.value),
-                             std::move(decos));
+                             std::move(attrs));
 }
 
 // struct_body_decl
@@ -1215,14 +1215,14 @@ Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
                !peek_is(Token::Type::kEOF)) {
           auto member = sync(Token::Type::kSemicolon,
                              [&]() -> Expect<ast::StructMember*> {
-                               auto decos = decoration_list();
-                               if (decos.errored) {
+                               auto attrs = attribute_list();
+                               if (attrs.errored) {
                                  errored = true;
                                }
                                if (!synchronized_) {
                                  return Failure::kErrored;
                                }
-                               return expect_struct_member(decos.value);
+                               return expect_struct_member(attrs.value);
                              });
 
           if (member.errored) {
@@ -1240,9 +1240,9 @@ Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
 }
 
 // struct_member
-//   : struct_member_decoration_decl+ variable_ident_decl SEMICOLON
+//   : struct_member_attribute_decl+ variable_ident_decl SEMICOLON
 Expect<ast::StructMember*> ParserImpl::expect_struct_member(
-    ast::DecorationList& decos) {
+    ast::AttributeList& attrs) {
   auto decl = expect_variable_ident_decl("struct member");
   if (decl.errored)
     return Failure::kErrored;
@@ -1252,13 +1252,13 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member(
 
   return create<ast::StructMember>(decl->source,
                                    builder_.Symbols().Register(decl->name),
-                                   decl->type, std::move(decos));
+                                   decl->type, std::move(attrs));
 }
 
 // function_decl
 //   : function_header body_stmt
 Maybe<const ast::Function*> ParserImpl::function_decl(
-    ast::DecorationList& decos) {
+    ast::AttributeList& attrs) {
   auto header = function_header();
   if (header.errored) {
     if (sync_to(Token::Type::kBraceLeft, /* consume: */ false)) {
@@ -1286,7 +1286,7 @@ Maybe<const ast::Function*> ParserImpl::function_decl(
 
   return create<ast::Function>(
       header->source, builder_.Symbols().Register(header->name), header->params,
-      header->return_type, body.value, decos, header->return_type_decorations);
+      header->return_type, body.value, attrs, header->return_type_attributes);
 }
 
 // function_header
@@ -1320,28 +1320,28 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
   }
 
   const ast::Type* return_type = nullptr;
-  ast::DecorationList return_decorations;
+  ast::AttributeList return_attributes;
 
   if (match(Token::Type::kArrow)) {
-    auto decos = decoration_list();
-    if (decos.errored) {
+    auto attrs = attribute_list();
+    if (attrs.errored) {
       return Failure::kErrored;
     }
-    return_decorations = decos.value;
+    return_attributes = attrs.value;
 
-    // Apply stride decorations to the type node instead of the function.
-    ast::DecorationList type_decorations;
-    auto itr = std::find_if(
-        return_decorations.begin(), return_decorations.end(),
-        [](auto* deco) { return Is<ast::StrideDecoration>(deco); });
-    if (itr != return_decorations.end()) {
-      type_decorations.emplace_back(*itr);
-      return_decorations.erase(itr);
+    // Apply stride attributes to the type node instead of the function.
+    ast::AttributeList type_attributes;
+    auto itr =
+        std::find_if(return_attributes.begin(), return_attributes.end(),
+                     [](auto* attr) { return Is<ast::StrideAttribute>(attr); });
+    if (itr != return_attributes.end()) {
+      type_attributes.emplace_back(*itr);
+      return_attributes.erase(itr);
     }
 
     auto tok = peek();
 
-    auto type = type_decl(type_decorations);
+    auto type = type_decl(type_attributes);
     if (type.errored) {
       errored = true;
     } else if (!type.matched) {
@@ -1358,7 +1358,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
   }
 
   return FunctionHeader{source, name.value, std::move(params.value),
-                        return_type, std::move(return_decorations)};
+                        return_type, std::move(return_attributes)};
 }
 
 // param_list
@@ -1387,9 +1387,9 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
 }
 
 // param
-//   : decoration_list* variable_ident_decl
+//   : attribute_list* variable_ident_decl
 Expect<ast::Variable*> ParserImpl::expect_param() {
-  auto decos = decoration_list();
+  auto attrs = attribute_list();
 
   auto decl = expect_variable_ident_decl("parameter");
   if (decl.errored)
@@ -1403,7 +1403,7 @@ Expect<ast::Variable*> ParserImpl::expect_param() {
                             decl->type,                // type
                             true,                      // is_const
                             nullptr,                   // constructor
-                            std::move(decos.value));   // decorations
+                            std::move(attrs.value));   // attributes
   // Formal parameters are treated like a const declaration where the
   // initializer value is provided by the call's argument.  The key point is
   // that it's not updatable after initially set.  This is unlike C or GLSL
@@ -1430,7 +1430,7 @@ Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
     next();  // Consume the peek
     return {ast::PipelineStage::kCompute, t.source()};
   }
-  return add_error(peek(), "invalid value for stage decoration");
+  return add_error(peek(), "invalid value for stage attribute");
 }
 
 Expect<ast::Builtin> ParserImpl::expect_builtin() {
@@ -1440,7 +1440,7 @@ Expect<ast::Builtin> ParserImpl::expect_builtin() {
 
   ast::Builtin builtin = ident_to_builtin(ident.value);
   if (builtin == ast::Builtin::kNone)
-    return add_error(ident.source, "invalid value for builtin decoration");
+    return add_error(ident.source, "invalid value for builtin attribute");
 
   return {builtin, ident.source};
 }
@@ -1661,7 +1661,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
         decl->type,                               // type
         true,                                     // is_const
         constructor.value,                        // constructor
-        ast::DecorationList{});                   // decorations
+        ast::AttributeList{});                    // attributes
 
     return create<ast::VariableDeclStatement>(decl->source, var);
   }
@@ -1686,12 +1686,12 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   auto* var =
       create<ast::Variable>(decl->source,                             // source
                             builder_.Symbols().Register(decl->name),  // symbol
-                            decl->storage_class,     // storage class
-                            decl->access,            // access control
-                            decl->type,              // type
-                            false,                   // is_const
-                            constructor,             // constructor
-                            ast::DecorationList{});  // decorations
+                            decl->storage_class,    // storage class
+                            decl->access,           // access control
+                            decl->type,             // type
+                            false,                  // is_const
+                            constructor,            // constructor
+                            ast::AttributeList{});  // attributes
 
   return create<ast::VariableDeclStatement>(var->source, var);
 }
@@ -2809,20 +2809,20 @@ Expect<const ast::Expression*> ParserImpl::expect_const_expr() {
   return add_error(peek(), "unable to parse const_expr");
 }
 
-Maybe<ast::DecorationList> ParserImpl::decoration_list() {
+Maybe<ast::AttributeList> ParserImpl::attribute_list() {
   bool errored = false;
   bool matched = false;
-  ast::DecorationList decos;
+  ast::AttributeList attrs;
 
   while (continue_parsing()) {
     if (match(Token::Type::kAttr)) {
-      if (auto deco = expect_decoration(); deco.errored) {
+      if (auto attr = expect_attribute(); attr.errored) {
         errored = true;
       } else {
-        decos.emplace_back(deco.value);
+        attrs.emplace_back(attr.value);
       }
-    } else {  // [DEPRECATED] - old [[decoration]] style
-      auto list = decoration_bracketed_list(decos);
+    } else {  // [DEPRECATED] - old [[attribute]] style
+      auto list = attribute_bracketed_list(attrs);
       if (list.errored) {
         errored = true;
       }
@@ -2840,11 +2840,11 @@ Maybe<ast::DecorationList> ParserImpl::decoration_list() {
   if (!matched)
     return Failure::kNoMatch;
 
-  return decos;
+  return attrs;
 }
 
-Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
-  const char* use = "decoration list";
+Maybe<bool> ParserImpl::attribute_bracketed_list(ast::AttributeList& attrs) {
+  const char* use = "attribute list";
 
   Source source;
   if (!match(Token::Type::kAttrLeft, &source)) {
@@ -2852,28 +2852,28 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   }
 
   deprecated(source,
-             "[[decoration]] style decorations have been replaced with "
-             "@decoration style");
+             "[[attribute]] style attributes have been replaced with "
+             "@attribute style");
 
   if (match(Token::Type::kAttrRight, &source))
-    return add_error(source, "empty decoration list");
+    return add_error(source, "empty attribute list");
 
   return sync(Token::Type::kAttrRight, [&]() -> Expect<bool> {
     bool errored = false;
 
     while (continue_parsing()) {
-      auto deco = expect_decoration();
-      if (deco.errored) {
+      auto attr = expect_attribute();
+      if (attr.errored) {
         errored = true;
       }
-      decos.emplace_back(deco.value);
+      attrs.emplace_back(attr.value);
 
       if (match(Token::Type::kComma)) {
         continue;
       }
 
-      if (is_decoration(peek())) {
-        // We have two decorations in a bracket without a separating comma.
+      if (is_attribute(peek())) {
+        // We have two attributes in a bracket without a separating comma.
         // e.g. @location(1) group(2)
         //                    ^^^ expected comma
         expect(use, Token::Type::kComma);
@@ -2895,59 +2895,59 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   });
 }
 
-Expect<const ast::Decoration*> ParserImpl::expect_decoration() {
+Expect<const ast::Attribute*> ParserImpl::expect_attribute() {
   auto t = peek();
-  auto deco = decoration();
-  if (deco.errored)
+  auto attr = attribute();
+  if (attr.errored)
     return Failure::kErrored;
-  if (deco.matched)
-    return deco.value;
-  return add_error(t, "expected decoration");
+  if (attr.matched)
+    return attr.value;
+  return add_error(t, "expected attribute");
 }
 
-Maybe<const ast::Decoration*> ParserImpl::decoration() {
-  using Result = Maybe<const ast::Decoration*>;
+Maybe<const ast::Attribute*> ParserImpl::attribute() {
+  using Result = Maybe<const ast::Attribute*>;
   auto t = next();
 
   if (!t.IsIdentifier()) {
     return Failure::kNoMatch;
   }
 
-  if (t == kLocationDecoration) {
-    const char* use = "location decoration";
+  if (t == kLocationAttribute) {
+    const char* use = "location attribute";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::LocationDecoration>(t.source(), val.value);
+      return create<ast::LocationAttribute>(t.source(), val.value);
     });
   }
 
-  if (t == kBindingDecoration) {
-    const char* use = "binding decoration";
+  if (t == kBindingAttribute) {
+    const char* use = "binding attribute";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::BindingDecoration>(t.source(), val.value);
+      return create<ast::BindingAttribute>(t.source(), val.value);
     });
   }
 
-  if (t == kGroupDecoration) {
-    const char* use = "group decoration";
+  if (t == kGroupAttribute) {
+    const char* use = "group attribute";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::GroupDecoration>(t.source(), val.value);
+      return create<ast::GroupAttribute>(t.source(), val.value);
     });
   }
 
-  if (t == kInterpolateDecoration) {
-    return expect_paren_block("interpolate decoration", [&]() -> Result {
+  if (t == kInterpolateAttribute) {
+    return expect_paren_block("interpolate attribute", [&]() -> Result {
       ast::InterpolationType type;
       ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone;
 
@@ -2975,26 +2975,26 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
         }
       }
 
-      return create<ast::InterpolateDecoration>(t.source(), type, sampling);
+      return create<ast::InterpolateAttribute>(t.source(), type, sampling);
     });
   }
 
-  if (t == kInvariantDecoration) {
-    return create<ast::InvariantDecoration>(t.source());
+  if (t == kInvariantAttribute) {
+    return create<ast::InvariantAttribute>(t.source());
   }
 
-  if (t == kBuiltinDecoration) {
-    return expect_paren_block("builtin decoration", [&]() -> Result {
+  if (t == kBuiltinAttribute) {
+    return expect_paren_block("builtin attribute", [&]() -> Result {
       auto builtin = expect_builtin();
       if (builtin.errored)
         return Failure::kErrored;
 
-      return create<ast::BuiltinDecoration>(t.source(), builtin.value);
+      return create<ast::BuiltinAttribute>(t.source(), builtin.value);
     });
   }
 
-  if (t == kWorkgroupSizeDecoration) {
-    return expect_paren_block("workgroup_size decoration", [&]() -> Result {
+  if (t == kWorkgroupSizeAttribute) {
+    return expect_paren_block("workgroup_size attribute", [&]() -> Result {
       const ast::Expression* x = nullptr;
       const ast::Expression* y = nullptr;
       const ast::Expression* z = nullptr;
@@ -3027,27 +3027,27 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
         }
       }
 
-      return create<ast::WorkgroupDecoration>(t.source(), x, y, z);
+      return create<ast::WorkgroupAttribute>(t.source(), x, y, z);
     });
   }
 
-  if (t == kStageDecoration) {
-    return expect_paren_block("stage decoration", [&]() -> Result {
+  if (t == kStageAttribute) {
+    return expect_paren_block("stage attribute", [&]() -> Result {
       auto stage = expect_pipeline_stage();
       if (stage.errored)
         return Failure::kErrored;
 
-      return create<ast::StageDecoration>(t.source(), stage.value);
+      return create<ast::StageAttribute>(t.source(), stage.value);
     });
   }
 
-  if (t == kBlockDecoration) {
+  if (t == kBlockAttribute) {
     deprecated(t.source(), "[[block]] attributes have been removed from WGSL");
-    return create<ast::StructBlockDecoration>(t.source());
+    return create<ast::StructBlockAttribute>(t.source());
   }
 
-  if (t == kStrideDecoration) {
-    const char* use = "stride decoration";
+  if (t == kStrideAttribute) {
+    const char* use = "stride attribute";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_nonzero_positive_sint(use);
       if (val.errored)
@@ -3055,34 +3055,34 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
       deprecated(t.source(),
                  "the @stride attribute is deprecated; use a larger type if "
                  "necessary");
-      return create<ast::StrideDecoration>(t.source(), val.value);
+      return create<ast::StrideAttribute>(t.source(), val.value);
     });
   }
 
-  if (t == kSizeDecoration) {
-    const char* use = "size decoration";
+  if (t == kSizeAttribute) {
+    const char* use = "size attribute";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::StructMemberSizeDecoration>(t.source(), val.value);
+      return create<ast::StructMemberSizeAttribute>(t.source(), val.value);
     });
   }
 
-  if (t == kAlignDecoration) {
-    const char* use = "align decoration";
+  if (t == kAlignAttribute) {
+    const char* use = "align attribute";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::StructMemberAlignDecoration>(t.source(), val.value);
+      return create<ast::StructMemberAlignAttribute>(t.source(), val.value);
     });
   }
 
-  if (t == kOverrideDecoration) {
-    const char* use = "override decoration";
+  if (t == kOverrideAttribute) {
+    const char* use = "override attribute";
 
     if (peek_is(Token::Type::kParenLeft)) {
       // @override(x)
@@ -3091,22 +3091,22 @@ Maybe<const ast::Decoration*> ParserImpl::decoration() {
         if (val.errored)
           return Failure::kErrored;
 
-        return create<ast::OverrideDecoration>(t.source(), val.value);
+        return create<ast::OverrideAttribute>(t.source(), val.value);
       });
     } else {
       // [[override]]
-      return create<ast::OverrideDecoration>(t.source());
+      return create<ast::OverrideAttribute>(t.source());
     }
   }
 
   return Failure::kNoMatch;
 }
 
-bool ParserImpl::expect_decorations_consumed(ast::DecorationList& in) {
+bool ParserImpl::expect_attributes_consumed(ast::AttributeList& in) {
   if (in.empty()) {
     return true;
   }
-  add_error(in[0]->source, "unexpected decorations");
+  add_error(in[0]->source, "unexpected attributes");
   return false;
 }
 

@@ -22,7 +22,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/disable_validation_decoration.h"
+#include "src/ast/disable_validation_attribute.h"
 #include "src/ast/type_name.h"
 #include "src/ast/unary_op.h"
 #include "src/block_allocator.h"
@@ -191,7 +191,7 @@ bool IntrinsicDataTypeFor(const sem::Type* ty,
   return false;
 }
 
-/// @returns a DecomposeMemoryAccess::Intrinsic decoration that can be applied
+/// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
 /// to a stub function to load the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(
     ProgramBuilder* builder,
@@ -206,7 +206,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(
       type);
 }
 
-/// @returns a DecomposeMemoryAccess::Intrinsic decoration that can be applied
+/// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
 /// to a stub function to store the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(
     ProgramBuilder* builder,
@@ -221,7 +221,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(
       storage_class, type);
 }
 
-/// @returns a DecomposeMemoryAccess::Intrinsic decoration that can be applied
+/// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
 /// to a stub function for the atomic op and the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
                                                      sem::IntrinsicType ity,
@@ -458,7 +458,7 @@ struct DecomposeMemoryAccess::State {
               b.create<ast::Variable>(b.Sym("buffer"), storage_class,
                                       var_user->Variable()->Access(),
                                       buf_ast_ty, true, nullptr,
-                                      ast::DecorationList{disable_validation}),
+                                      ast::AttributeList{disable_validation}),
               b.Param("offset", b.ty.u32()),
           };
 
@@ -469,11 +469,11 @@ struct DecomposeMemoryAccess::State {
             auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
             auto* func = b.create<ast::Function>(
                 name, params, el_ast_ty, nullptr,
-                ast::DecorationList{
+                ast::AttributeList{
                     intrinsic,
                     b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
                 },
-                ast::DecorationList{});
+                ast::AttributeList{});
             b.AST().AddFunction(func);
           } else if (auto* arr_ty = el_ty->As<sem::Array>()) {
             // fn load_func(buf : buf_ty, offset : u32) -> array<T, N> {
@@ -557,7 +557,7 @@ struct DecomposeMemoryAccess::State {
               b.create<ast::Variable>(b.Sym("buffer"), storage_class,
                                       var_user->Variable()->Access(),
                                       buf_ast_ty, true, nullptr,
-                                      ast::DecorationList{disable_validation}),
+                                      ast::AttributeList{disable_validation}),
               b.Param("offset", b.ty.u32()),
               b.Param("value", el_ast_ty),
           };
@@ -568,11 +568,11 @@ struct DecomposeMemoryAccess::State {
                   IntrinsicStoreFor(ctx.dst, storage_class, el_ty)) {
             auto* func = b.create<ast::Function>(
                 name, params, b.ty.void_(), nullptr,
-                ast::DecorationList{
+                ast::AttributeList{
                     intrinsic,
                     b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
                 },
-                ast::DecorationList{});
+                ast::AttributeList{});
             b.AST().AddFunction(func);
           } else {
             ast::StatementList body;
@@ -657,7 +657,7 @@ struct DecomposeMemoryAccess::State {
           b.create<ast::Variable>(b.Sym("buffer"), ast::StorageClass::kStorage,
                                   var_user->Variable()->Access(), buf_ast_ty,
                                   true, nullptr,
-                                  ast::DecorationList{disable_validation}),
+                                  ast::AttributeList{disable_validation}),
           b.Param("offset", b.ty.u32()),
       };
 
@@ -678,11 +678,11 @@ struct DecomposeMemoryAccess::State {
       auto* ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());
       auto* func = b.create<ast::Function>(
           b.Sym(), params, ret_ty, nullptr,
-          ast::DecorationList{
+          ast::AttributeList{
               atomic,
               b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
           },
-          ast::DecorationList{});
+          ast::AttributeList{});
 
       b.AST().AddFunction(func);
       return func->symbol;
