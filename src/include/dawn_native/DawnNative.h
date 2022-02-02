@@ -136,7 +136,7 @@ namespace dawn::native {
     // for this instance.
     class DAWN_NATIVE_EXPORT Instance {
       public:
-        Instance();
+        explicit Instance(const WGPUInstanceDescriptor* desc = nullptr);
         ~Instance();
 
         Instance(const Instance& other) = delete;

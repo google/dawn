@@ -187,7 +187,8 @@ namespace dawn::native {
 
     // Instance
 
-    Instance::Instance() : mImpl(InstanceBase::Create()) {
+    Instance::Instance(const WGPUInstanceDescriptor* desc)
+        : mImpl(InstanceBase::Create(reinterpret_cast<const InstanceDescriptor*>(desc))) {
     }
 
     Instance::~Instance() {

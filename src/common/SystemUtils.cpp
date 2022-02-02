@@ -88,93 +88,119 @@ bool SetEnvironmentVar(const char* variableName, const char* value) {
 #endif
 
 #if defined(DAWN_PLATFORM_WINDOWS)
-std::string GetExecutablePath() {
+std::optional<std::string> GetHModulePath(HMODULE module) {
     std::array<char, MAX_PATH> executableFileBuf;
     DWORD executablePathLen = GetModuleFileNameA(nullptr, executableFileBuf.data(),
                                                  static_cast<DWORD>(executableFileBuf.size()));
-    return executablePathLen > 0 ? std::string(executableFileBuf.data()) : "";
+    if (executablePathLen == 0) {
+        return {};
+    }
+    return executableFileBuf.data();
+}
+std::optional<std::string> GetExecutablePath() {
+    return GetHModulePath(nullptr);
 }
 #elif defined(DAWN_PLATFORM_LINUX)
-std::string GetExecutablePath() {
+std::optional<std::string> GetExecutablePath() {
     std::array<char, PATH_MAX> path;
     ssize_t result = readlink("/proc/self/exe", path.data(), PATH_MAX - 1);
     if (result < 0 || static_cast<size_t>(result) >= PATH_MAX - 1) {
-        return "";
+        return {};
     }
 
     path[result] = '\0';
     return path.data();
 }
 #elif defined(DAWN_PLATFORM_MACOS) || defined(DAWN_PLATFORM_IOS)
-std::string GetExecutablePath() {
+std::optional<std::string> GetExecutablePath() {
     uint32_t size = 0;
     _NSGetExecutablePath(nullptr, &size);
 
     std::vector<char> buffer(size + 1);
     if (_NSGetExecutablePath(buffer.data(), &size) != 0) {
-        return "";
+        return {};
     }
 
     buffer[size] = '\0';
     return buffer.data();
 }
 #elif defined(DAWN_PLATFORM_FUCHSIA)
-std::string GetExecutablePath() {
+std::optional<std::string> GetExecutablePath() {
     // TODO: Implement on Fuchsia
-    return "";
+    return {};
 }
 #elif defined(DAWN_PLATFORM_EMSCRIPTEN)
-std::string GetExecutablePath() {
-    UNREACHABLE();
-    return "";
+std::optional<std::string> GetExecutablePath() {
+    return {};
 }
 #else
 #    error "Implement GetExecutablePath for your platform."
 #endif
 
-std::string GetExecutableDirectory() {
-    std::string exePath = GetExecutablePath();
-    size_t lastPathSepLoc = exePath.find_last_of(GetPathSeparator());
-    return lastPathSepLoc != std::string::npos ? exePath.substr(0, lastPathSepLoc + 1) : "";
+std::optional<std::string> GetExecutableDirectory() {
+    std::optional<std::string> exePath = GetExecutablePath();
+    if (!exePath) {
+        return {};
+    }
+    size_t lastPathSepLoc = exePath->find_last_of(GetPathSeparator());
+    if (lastPathSepLoc == std::string::npos) {
+        return {};
+    }
+    return exePath->substr(0, lastPathSepLoc + 1);
 }
 
 #if defined(DAWN_PLATFORM_LINUX) || defined(DAWN_PLATFORM_MACOS) || defined(DAWN_PLATFORM_IOS)
-std::string GetModulePath() {
+std::optional<std::string> GetModulePath() {
     static int placeholderSymbol = 0;
     Dl_info dlInfo;
     if (dladdr(&placeholderSymbol, &dlInfo) == 0) {
-        return "";
+        return {};
     }
 
     std::array<char, PATH_MAX> absolutePath;
     if (realpath(dlInfo.dli_fname, absolutePath.data()) == NULL) {
-        return "";
+        return {};
     }
     return absolutePath.data();
 }
 #elif defined(DAWN_PLATFORM_WINDOWS)
-std::string GetModulePath() {
-    UNREACHABLE();
-    return "";
+std::optional<std::string> GetModulePath() {
+    static int placeholderSymbol = 0;
+    HMODULE module = nullptr;
+// GetModuleHandleEx is unavailable on UWP
+#    if defined(DAWN_IS_WINUWP)
+    return {};
+#    else
+    if (!GetModuleHandleExA(
+            GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            reinterpret_cast<LPCSTR>(&placeholderSymbol), &module)) {
+        return {};
+    }
+#    endif
+    return GetHModulePath(module);
 }
 #elif defined(DAWN_PLATFORM_FUCHSIA)
-std::string GetModulePath() {
-    UNREACHABLE();
-    return "";
+std::optional<std::string> GetModulePath() {
+    return {};
 }
 #elif defined(DAWN_PLATFORM_EMSCRIPTEN)
-std::string GetModulePath() {
-    UNREACHABLE();
-    return "";
+std::optional<std::string> GetModulePath() {
+    return {};
 }
 #else
 #    error "Implement GetModulePath for your platform."
 #endif
 
-std::string GetModuleDirectory() {
-    std::string modPath = GetModulePath();
-    size_t lastPathSepLoc = modPath.find_last_of(GetPathSeparator());
-    return lastPathSepLoc != std::string::npos ? modPath.substr(0, lastPathSepLoc + 1) : "";
+std::optional<std::string> GetModuleDirectory() {
+    std::optional<std::string> modPath = GetModulePath();
+    if (!modPath) {
+        return {};
+    }
+    size_t lastPathSepLoc = modPath->find_last_of(GetPathSeparator());
+    if (lastPathSepLoc == std::string::npos) {
+        return {};
+    }
+    return modPath->substr(0, lastPathSepLoc + 1);
 }
 
 // ScopedEnvironmentVar

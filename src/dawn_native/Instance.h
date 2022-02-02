@@ -76,6 +76,8 @@ namespace dawn::native {
         void SetPlatform(dawn::platform::Platform* platform);
         dawn::platform::Platform* GetPlatform();
 
+        const std::vector<std::string>& GetRuntimeSearchPaths() const;
+
         // Get backend-independent libraries that need to be loaded dynamically.
         const XlibXcbFunctions* GetOrCreateXlibXcbFunctions();
 
@@ -89,7 +91,7 @@ namespace dawn::native {
         InstanceBase(const InstanceBase& other) = delete;
         InstanceBase& operator=(const InstanceBase& other) = delete;
 
-        bool Initialize(const InstanceDescriptor* descriptor);
+        MaybeError Initialize(const InstanceDescriptor* descriptor);
 
         // Lazily creates connections to all backends that have been compiled.
         void EnsureBackendConnection(wgpu::BackendType backendType);
@@ -98,6 +100,8 @@ namespace dawn::native {
 
         ResultOrError<Ref<AdapterBase>> RequestAdapterInternal(
             const RequestAdapterOptions* options);
+
+        std::vector<std::string> mRuntimeSearchPaths;
 
         BackendsBitset mBackendsConnected;
 

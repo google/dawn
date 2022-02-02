@@ -40,10 +40,12 @@ TEST(SystemUtilsTests, SetEnvironmentVar) {
 
 // Tests for GetExecutableDirectory
 TEST(SystemUtilsTests, GetExecutableDirectory) {
+    auto dir = GetExecutableDirectory();
     // Test returned value is non-empty string
-    EXPECT_NE(GetExecutableDirectory(), "");
-    // Test last charecter in path
-    EXPECT_EQ(GetExecutableDirectory().back(), *GetPathSeparator());
+    EXPECT_NE(dir, std::optional{std::string("")});
+    ASSERT_NE(dir, std::nullopt);
+    // Test last character in path
+    EXPECT_EQ(dir->back(), *GetPathSeparator());
 }
 
 // Tests for ScopedEnvironmentVar

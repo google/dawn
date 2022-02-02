@@ -17,6 +17,8 @@
 #include "common/Assert.h"
 #include "common/GPUInfo.h"
 #include "common/Log.h"
+#include "common/SystemUtils.h"
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Surface.h"
 #include "dawn_native/ValidationUtils_autogen.h"
@@ -96,15 +98,36 @@ namespace dawn::native {
     // static
     InstanceBase* InstanceBase::Create(const InstanceDescriptor* descriptor) {
         Ref<InstanceBase> instance = AcquireRef(new InstanceBase);
-        if (!instance->Initialize(descriptor)) {
+        static constexpr InstanceDescriptor kDefaultDesc = {};
+        if (descriptor == nullptr) {
+            descriptor = &kDefaultDesc;
+        }
+        if (instance->ConsumedError(instance->Initialize(descriptor))) {
             return nullptr;
         }
         return instance.Detach();
     }
 
     // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
-    bool InstanceBase::Initialize(const InstanceDescriptor*) {
-        return true;
+    MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
+        DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::DawnInstanceDescriptor));
+        const DawnInstanceDescriptor* dawnDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &dawnDesc);
+        if (dawnDesc != nullptr) {
+            for (uint32_t i = 0; i < dawnDesc->additionalRuntimeSearchPathsCount; ++i) {
+                mRuntimeSearchPaths.push_back(dawnDesc->additionalRuntimeSearchPaths[i]);
+            }
+        }
+        // Default paths to search are next to the shared library, next to the executable, and
+        // no path (just libvulkan.so).
+        if (auto p = GetModuleDirectory()) {
+            mRuntimeSearchPaths.push_back(std::move(*p));
+        }
+        if (auto p = GetExecutableDirectory()) {
+            mRuntimeSearchPaths.push_back(std::move(*p));
+        }
+        mRuntimeSearchPaths.push_back("");
+        return {};
     }
 
     void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
@@ -384,6 +407,10 @@ namespace dawn::native {
             mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
         }
         return mDefaultPlatform.get();
+    }
+
+    const std::vector<std::string>& InstanceBase::GetRuntimeSearchPaths() const {
+        return mRuntimeSearchPaths;
     }
 
     const XlibXcbFunctions* InstanceBase::GetOrCreateXlibXcbFunctions() {

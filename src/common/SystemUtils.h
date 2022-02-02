@@ -17,6 +17,7 @@
 
 #include "common/Platform.h"
 
+#include <optional>
 #include <string>
 
 const char* GetPathSeparator();
@@ -25,8 +26,11 @@ const char* GetPathSeparator();
 std::pair<std::string, bool> GetEnvironmentVar(const char* variableName);
 bool SetEnvironmentVar(const char* variableName, const char* value);
 // Directories are always returned with a trailing path separator.
-std::string GetExecutableDirectory();
-std::string GetModuleDirectory();
+// May return std::nullopt if the path is too long, there is no current
+// module (statically linked into executable), or the function is not
+// implemented on the platform.
+std::optional<std::string> GetExecutableDirectory();
+std::optional<std::string> GetModuleDirectory();
 
 #ifdef DAWN_PLATFORM_MACOS
 void GetMacOSVersion(int32_t* majorVersion, int32_t* minorVersion = nullptr);

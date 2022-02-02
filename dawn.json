@@ -1410,6 +1410,15 @@
         "extensible": "in",
         "members": []
     },
+    "dawn instance descriptor": {
+        "tags": ["dawn", "native"],
+        "category": "structure",
+        "chained": "in",
+        "members": [
+            {"name": "additional runtime search paths count", "type": "uint32_t", "default": 0},
+            {"name": "additional runtime search paths", "type": "char", "annotation": "const*const*", "length": "additional runtime search paths count"}
+        ]
+    },
     "vertex attribute": {
         "category": "structure",
         "extensible": false,
@@ -2378,7 +2387,8 @@
             {"value": 1000, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]},
             {"value": 1001, "name": "primitive depth clamping state", "tags": ["dawn", "emscripten"]},
             {"value": 1002, "name": "dawn toggles device descriptor", "tags": ["dawn", "native"]},
-            {"value": 1003, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]}
+            {"value": 1003, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
+            {"value": 1004, "name": "dawn instance descriptor", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

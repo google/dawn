@@ -172,55 +172,43 @@ namespace dawn::native::vulkan {
         ScopedEnvironmentVar vkICDFilenames;
         ScopedEnvironmentVar vkLayerPath;
 
-#if defined(DAWN_ENABLE_VULKAN_LOADER)
-        // If enabled, we use our own built Vulkan loader by specifying an absolute path to the
-        // shared library. Note that when we are currently getting the absolute path for the custom
-        // loader by getting the path to the dawn native library and traversing relative from there.
-        // This has implications for dawn tests because some of them are linking statically to
-        // dawn_native which means the "module" is actually the test as well. If the directory
-        // location of the tests change w.r.t the shared lib then this may break. Essentially we are
-        // assuming that our custom built Vulkan loader will always be in the same directory as the
-        // shared dawn native library and all test binaries that link statically.
-        const std::string resolvedVulkanLibPath = GetModuleDirectory() + kVulkanLibName;
-#else
-        const std::string resolvedVulkanLibPath = kVulkanLibName;
-#endif  // defined(DAWN_ENABLE_VULKAN_LOADER)
+        const std::vector<std::string>& searchPaths = instance->GetRuntimeSearchPaths();
+
+        auto CommaSeparatedResolvedSearchPaths = [&](const char* name) {
+            std::string list;
+            bool first = true;
+            for (const std::string& path : searchPaths) {
+                if (!first) {
+                    list += ", ";
+                }
+                first = false;
+                list += (path + name);
+            }
+            return list;
+        };
+
+        auto LoadVulkan = [&](const char* libName) -> MaybeError {
+            for (const std::string& path : searchPaths) {
+                std::string resolvedPath = path + libName;
+                if (mVulkanLib.Open(resolvedPath)) {
+                    return {};
+                }
+            }
+            return DAWN_FORMAT_INTERNAL_ERROR("Couldn't load Vulkan. Searched %s.",
+                                              CommaSeparatedResolvedSearchPaths(libName));
+        };
 
         switch (icd) {
             case ICD::None: {
-                if (!mVulkanLib.Open(resolvedVulkanLibPath)) {
-                    return DAWN_FORMAT_INTERNAL_ERROR("Couldn't load %s.", resolvedVulkanLibPath);
-                }
+                DAWN_TRY(LoadVulkan(kVulkanLibName));
+                // Succesfully loaded driver; break.
                 break;
             }
             case ICD::SwiftShader: {
 #if defined(DAWN_ENABLE_SWIFTSHADER)
-                // First try to load the system Vulkan driver, if that fails, try to load with
-                // Swiftshader. Note: The system driver could potentially be Swiftshader if it was
-                // installed.
-#    if defined(DAWN_SWIFTSHADER_VK_ICD_JSON)
-                if (mVulkanLib.Open(resolvedVulkanLibPath)) {
-                    std::string fullSwiftshaderICDPath =
-                        GetExecutableDirectory() + DAWN_SWIFTSHADER_VK_ICD_JSON;
-                    if (!vkICDFilenames.Set("VK_ICD_FILENAMES", fullSwiftshaderICDPath.c_str())) {
-                        return DAWN_FORMAT_INTERNAL_ERROR("Couldn't set VK_ICD_FILENAMES to %s.",
-                                                          fullSwiftshaderICDPath);
-                    }
-                    // Succesfully loaded driver and set VK_ICD_FILENAMES.
-                    break;
-                } else
-#    endif  // defined(DAWN_SWIFTSHADER_VK_ICD_JSON)
-            // Fallback to loading SwiftShader directly.
-                    if (mVulkanLib.Open(kSwiftshaderLibName)) {
-                    // Succesfully loaded SwiftShader.
-                    break;
-                }
-                return DAWN_FORMAT_INTERNAL_ERROR(
-                    "Failed to load SwiftShader. DAWN_SWIFTSHADER_VK_ICD_JSON was not defined and "
-                    "could not load %s.",
-                    kSwiftshaderLibName);
+                DAWN_TRY(LoadVulkan(kSwiftshaderLibName));
+                break;
 #endif  // defined(DAWN_ENABLE_SWIFTSHADER)
-
                 // ICD::SwiftShader should not be passed if SwiftShader is not enabled.
                 UNREACHABLE();
             }
@@ -228,7 +216,8 @@ namespace dawn::native::vulkan {
 
         if (instance->IsBackendValidationEnabled()) {
 #if defined(DAWN_ENABLE_VULKAN_VALIDATION_LAYERS)
-            std::string vkDataDir = GetExecutableDirectory() + DAWN_VK_DATA_DIR;
+            auto execDir = GetExecutableDirectory();
+            std::string vkDataDir = execDir.value_or("") + DAWN_VK_DATA_DIR;
             if (!vkLayerPath.Set("VK_LAYER_PATH", vkDataDir.c_str())) {
                 return DAWN_INTERNAL_ERROR("Couldn't set VK_LAYER_PATH");
             }
