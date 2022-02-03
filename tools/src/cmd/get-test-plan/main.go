@@ -127,6 +127,10 @@ if file extension is 'tsv' the output format will be a tab separated file
 if file extension is 'json' the output format will be json
 if omitted, a human readable version of the rules is written to stdout`)
 
+	testNameFilter := flag.String("test-name-filter", "",
+		`if provided will be used to filter reported rules based on if their name
+contains the provided string`)
+
 	flag.Parse()
 
 	args := flag.Args()
@@ -155,7 +159,7 @@ if omitted, a human readable version of the rules is written to stdout`)
 		}
 	}
 
-	txt, tsv := concatRules(rules)
+	txt, tsv := concatRules(rules, *testNameFilter)
 	// if no output then write rules to stdout
 	if *output == "" {
 		fmt.Println(txt)
@@ -241,13 +245,20 @@ func parseSection(in string) ([]int, error) {
 	return out, nil
 }
 
-// concatRules concatnate rule slice to and makes two string output
-// txt is a human readable string
-// tsv is a tab saparated string
-func concatRules(rules []rule) (string, string) {
+// concatRules concatenate rules slice to make two string outputs;
+//   txt, a human-readable string
+//   tsv, a tab separated string
+// If testNameFilter is a non-empty string, then only rules whose TestName
+// contains the string are included
+func concatRules(rules []rule, testNameFilter string) (string, string) {
 	txtLines := []string{}
 	tsvLines := []string{"Number\tUniqueId\tSection\tURL\tDescription\tProposed Test Name\tkeyword"}
+
 	for _, r := range rules {
+		if testNameFilter != "" && !strings.Contains(r.TestName, testNameFilter) {
+			continue
+		}
+
 		txtLines = append(txtLines, strings.Join([]string{
 			"Rule Number " + strconv.Itoa(r.Number) + ":",
 			"Unique Id: " + r.Sha,
