@@ -136,6 +136,15 @@ class Inspector {
       const std::string& entry_point);
 
   /// @param entry_point name of the entry point to get information about.
+  /// @param placeholder the sampler binding point to use for texture-only
+  /// access (e.g., textureLoad)
+  /// @returns vector of all of the sampler/texture sampling pairs that are used
+  /// by that entry point.
+  std::vector<sem::SamplerTexturePair> GetSamplerTextureUses(
+      const std::string& entry_point,
+      const sem::BindingPoint& placeholder);
+
+  /// @param entry_point name of the entry point to get information about.
   /// @returns the total size in bytes of all Workgroup storage-class storage
   /// referenced transitively by the entry point.
   uint32_t GetWorkgroupStorageSize(const std::string& entry_point);

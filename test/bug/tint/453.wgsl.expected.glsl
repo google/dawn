@@ -1,15 +1,15 @@
 #version 310 es
 precision mediump float;
 
+layout(r32ui) uniform highp writeonly uimage2D Dst;
 uniform highp usampler2D Src_1;
-layout(r32ui) uniform highp writeonly uimage2D Dst_1;
 void tint_symbol() {
   uvec4 srcValue = uvec4(0u, 0u, 0u, 0u);
   uvec4 x_22 = texelFetch(Src_1, ivec2(0, 0), 0);
   srcValue = x_22;
   uint x_24 = srcValue.x;
   uint x_25 = (x_24 + 1u);
-  imageStore(Dst_1, ivec2(0, 0), srcValue.xxxx);
+  imageStore(Dst, ivec2(0, 0), srcValue.xxxx);
   return;
 }
 

@@ -1400,12 +1400,14 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     auto* texture = args[texture_index]->As<sem::VariableUser>()->Variable();
-    int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
-    const sem::Variable* sampler =
-        sampler_index != -1
-            ? args[sampler_index]->As<sem::VariableUser>()->Variable()
-            : nullptr;
-    current_function_->AddTextureSamplerPair(texture, sampler);
+    if (!texture->Type()->UnwrapRef()->Is<sem::StorageTexture>()) {
+      int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
+      const sem::Variable* sampler =
+          sampler_index != -1
+              ? args[sampler_index]->As<sem::VariableUser>()->Variable()
+              : nullptr;
+      current_function_->AddTextureSamplerPair(texture, sampler);
+    }
   }
 
   if (!ValidateBuiltinCall(call)) {

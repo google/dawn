@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeShadow x_20_1;
+uniform highp samplerCube x_20_1;
 void main_1() {
   float f1 = 1.0f;
   vec2 vf12 = vec2(1.0f, 2.0f);

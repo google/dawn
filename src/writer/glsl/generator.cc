@@ -41,7 +41,8 @@ Result Generate(const Program* program,
   data.Add<transform::BindingRemapper::Remappings>(options.binding_points,
                                                    options.access_controls,
                                                    options.allow_collisions);
-  data.Add<transform::CombineSamplers::BindingInfo>(options.binding_map);
+  data.Add<transform::CombineSamplers::BindingInfo>(
+      options.binding_map, options.placeholder_binding_point);
   data.Add<transform::Glsl::Config>(entry_point);
   transform::Glsl sanitizer;
   auto output = sanitizer.Run(program, data);

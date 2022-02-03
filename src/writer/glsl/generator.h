@@ -55,6 +55,9 @@ struct Options {
   /// CombineSamplers transform
   BindingMap binding_map;
 
+  /// The binding point to use for placeholder samplers.
+  sem::BindingPoint placeholder_binding_point;
+
   /// A map of old binding point to new binding point for the BindingRemapper
   /// transform
   std::unordered_map<sem::BindingPoint, sem::BindingPoint> binding_points;

@@ -30,7 +30,8 @@ TEST_F(CombineSamplersTest, EmptyModule) {
   auto* expect = "";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -57,7 +58,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -92,7 +94,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -126,7 +129,8 @@ fn main() -> vec4<f32> {
   pair.sampler_binding_point.group = 2;
   pair.sampler_binding_point.binding = 3;
   map[pair] = "fuzzy";
-  data.Add<CombineSamplers::BindingInfo>(map);
+  sem::BindingPoint placeholder{1024, 0};
+  data.Add<CombineSamplers::BindingInfo>(map, placeholder);
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -160,7 +164,8 @@ fn main() -> vec4<f32> {
   pair.sampler_binding_point.group = 1;
   pair.sampler_binding_point.binding = 0;
   map[pair] = "fuzzy";
-  data.Add<CombineSamplers::BindingInfo>(map);
+  sem::BindingPoint placeholder{1024, 0};
+  data.Add<CombineSamplers::BindingInfo>(map, placeholder);
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -200,7 +205,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -243,7 +249,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -286,7 +293,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -349,7 +357,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -396,7 +405,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -443,7 +453,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -482,7 +493,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -521,7 +533,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -544,15 +557,67 @@ fn f(t_1 : texture_2d<f32>, coords : vec2<i32>) -> vec4<f32> {
   return textureLoad(t_1, coords, 0);
 }
 
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex_1 : texture_2d<f32>;
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var fred : texture_2d<f32>;
 
 fn main() -> vec4<f32> {
-  return f(tex_1, vec2<i32>(1, 2));
+  return f(fred, vec2<i32>(1, 2));
 }
 )";
 
+  sem::BindingPoint placeholder{1024, 0};
+  sem::SamplerTexturePair pair;
+  pair.texture_binding_point.group = 0;
+  pair.texture_binding_point.binding = 0;
+  pair.sampler_binding_point.group = placeholder.group;
+  pair.sampler_binding_point.binding = placeholder.binding;
+  CombineSamplers::BindingMap map;
+  map[pair] = "fred";
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(map, placeholder);
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CombineSamplersTest, TextureWithAndWithoutSampler) {
+  auto* src = R"(
+@group(0) @binding(0) var tex : texture_2d<f32>;
+@group(0) @binding(1) var samp : sampler;
+
+fn main() -> vec4<f32> {
+  return textureLoad(tex, vec2<i32>(), 0) +
+         textureSample(tex, samp, vec2<f32>());
+}
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var fred : texture_2d<f32>;
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var barney : texture_2d<f32>;
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn main() -> vec4<f32> {
+  return (textureLoad(fred, vec2<i32>(), 0) + textureSample(barney, placeholder_sampler, vec2<f32>()));
+}
+)";
+
+  sem::BindingPoint placeholder{1024, 0};
+  sem::BindingPoint tex{0, 0};
+  sem::BindingPoint samp{0, 1};
+  sem::SamplerTexturePair pair, placeholder_pair;
+  pair.texture_binding_point.group = tex.group;
+  pair.texture_binding_point.binding = tex.binding;
+  pair.sampler_binding_point.group = samp.group;
+  pair.sampler_binding_point.binding = samp.binding;
+  placeholder_pair.texture_binding_point.group = tex.group;
+  placeholder_pair.texture_binding_point.binding = tex.binding;
+  placeholder_pair.sampler_binding_point.group = placeholder.group;
+  placeholder_pair.sampler_binding_point.binding = placeholder.binding;
+  CombineSamplers::BindingMap map;
+  map[pair] = "barney";
+  map[placeholder_pair] = "fred";
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(map, placeholder);
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -579,7 +644,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -614,7 +680,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -645,7 +712,8 @@ fn main() -> vec4<f32> {
 )";
 
   DataMap data;
-  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
   auto got = Run<CombineSamplers>(src, data);
 
   EXPECT_EQ(expect, str(got));

@@ -1,9 +1,9 @@
 #version 310 es
 precision mediump float;
 
-layout(r32i) uniform highp writeonly iimage3D arg_0_1;
+layout(r32i) uniform highp writeonly iimage3D arg_0;
 void textureDimensions_2f289f() {
-  ivec3 res = imageSize(arg_0_1);
+  ivec3 res = imageSize(arg_0);
 }
 
 vec4 vertex_main() {
@@ -21,9 +21,9 @@ void main() {
 #version 310 es
 precision mediump float;
 
-layout(r32i) uniform highp writeonly iimage3D arg_0_1;
+layout(r32i) uniform highp writeonly iimage3D arg_0;
 void textureDimensions_2f289f() {
-  ivec3 res = imageSize(arg_0_1);
+  ivec3 res = imageSize(arg_0);
 }
 
 void fragment_main() {
@@ -37,9 +37,9 @@ void main() {
 #version 310 es
 precision mediump float;
 
-layout(r32i) uniform highp writeonly iimage3D arg_0_1;
+layout(r32i) uniform highp writeonly iimage3D arg_0;
 void textureDimensions_2f289f() {
-  ivec3 res = imageSize(arg_0_1);
+  ivec3 res = imageSize(arg_0);
 }
 
 void compute_main() {

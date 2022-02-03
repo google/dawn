@@ -252,17 +252,17 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kLoadMultisampled2dI32:
       return R"(texelFetch(tint_symbol_2, ivec2(1, 2), 3);)";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
-      return R"(texelFetch(tint_symbol_2, ivec2(1, 2), 3).x;)";
+      return R"(texelFetch(tint_symbol_2, ivec2(1, 2), 3);)";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
-      return R"(texelFetch(tint_symbol_2, ivec3(1, 2, 3), 4).x;)";
+      return R"(texelFetch(tint_symbol_2, ivec3(1, 2, 3), 4);)";
     case ValidTextureOverload::kStoreWO1dRgba32float:
-      return R"(imageStore(tint_symbol_2, 1, vec4(2.0f, 3.0f, 4.0f, 5.0f));)";
+      return R"(imageStore(tint_symbol, 1, vec4(2.0f, 3.0f, 4.0f, 5.0f));)";
     case ValidTextureOverload::kStoreWO2dRgba32float:
-      return R"(imageStore(tint_symbol_2, ivec2(1, 2), vec4(3.0f, 4.0f, 5.0f, 6.0f));)";
+      return R"(imageStore(tint_symbol, ivec2(1, 2), vec4(3.0f, 4.0f, 5.0f, 6.0f));)";
     case ValidTextureOverload::kStoreWO2dArrayRgba32float:
-      return R"(imageStore(tint_symbol_2, ivec3(1, 2, 3), vec4(4.0f, 5.0f, 6.0f, 7.0f));)";
+      return R"(imageStore(tint_symbol, ivec3(1, 2, 3), vec4(4.0f, 5.0f, 6.0f, 7.0f));)";
     case ValidTextureOverload::kStoreWO3dRgba32float:
-      return R"(imageStore(tint_symbol_2, ivec3(1, 2, 3), vec4(4.0f, 5.0f, 6.0f, 7.0f));)";
+      return R"(imageStore(tint_symbol, ivec3(1, 2, 3), vec4(4.0f, 5.0f, 6.0f, 7.0f));)";
   }
   return "<unmatched texture overload>";
 }  // NOLINT - Ignore the length of this function

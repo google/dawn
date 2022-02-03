@@ -3,9 +3,9 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-layout(rg32f) uniform highp writeonly image3D arg_0_1;
+layout(rg32f) uniform highp writeonly image3D arg_0;
 void textureStore_ee6acc() {
-  imageStore(arg_0_1, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 vec4 vertex_main() {
@@ -30,9 +30,9 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(rg32f) uniform highp writeonly image3D arg_0_1;
+layout(rg32f) uniform highp writeonly image3D arg_0;
 void textureStore_ee6acc() {
-  imageStore(arg_0_1, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 void fragment_main() {
@@ -53,9 +53,9 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(rg32f) uniform highp writeonly image3D arg_0_1;
+layout(rg32f) uniform highp writeonly image3D arg_0;
 void textureStore_ee6acc() {
-  imageStore(arg_0_1, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  imageStore(arg_0, ivec3(0, 0, 0), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 void compute_main() {

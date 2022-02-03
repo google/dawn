@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArrayShadow arg_0_1;
+uniform highp samplerCubeArray arg_0_1;
 void textureNumLevels_2c3575() {
   int res = textureQueryLevels(arg_0_1);;
 }
@@ -21,7 +21,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
+ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -30,7 +30,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArrayShadow arg_0_1;
+uniform highp samplerCubeArray arg_0_1;
 void textureNumLevels_2c3575() {
   int res = textureQueryLevels(arg_0_1);;
 }
@@ -44,7 +44,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
+ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
@@ -53,7 +53,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-uniform highp samplerCubeArrayShadow arg_0_1;
+uniform highp samplerCubeArray arg_0_1;
 void textureNumLevels_2c3575() {
   int res = textureQueryLevels(arg_0_1);;
 }
@@ -68,7 +68,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
+ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
 ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

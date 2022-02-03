@@ -75,7 +75,8 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   if (auto* binding_info = inputs.Get<CombineSamplers::BindingInfo>()) {
     data.Add<CombineSamplers::BindingInfo>(*binding_info);
   } else {
-    data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap());
+    data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                           sem::BindingPoint());
   }
   manager.Add<BindingRemapper>();
   if (auto* remappings = inputs.Get<BindingRemapper::Remappings>()) {

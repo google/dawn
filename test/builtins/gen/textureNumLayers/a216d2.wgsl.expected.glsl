@@ -3,9 +3,9 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-layout(rgba8i) uniform highp writeonly iimage2DArray arg_0_1;
+layout(rgba8i) uniform highp writeonly iimage2DArray arg_0;
 void textureNumLayers_a216d2() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureQueryLevels(arg_0);;
 }
 
 vec4 vertex_main() {
@@ -31,9 +31,9 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(rgba8i) uniform highp writeonly iimage2DArray arg_0_1;
+layout(rgba8i) uniform highp writeonly iimage2DArray arg_0;
 void textureNumLayers_a216d2() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureQueryLevels(arg_0);;
 }
 
 void fragment_main() {
@@ -55,9 +55,9 @@ ERROR: 3 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(rgba8i) uniform highp writeonly iimage2DArray arg_0_1;
+layout(rgba8i) uniform highp writeonly iimage2DArray arg_0;
 void textureNumLayers_a216d2() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureQueryLevels(arg_0);;
 }
 
 void compute_main() {

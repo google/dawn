@@ -321,9 +321,9 @@ layout(binding = 4) buffer Buffer_1 {
 layout(binding = 5) buffer Buffer_2 {
   float weights[];
 } buf_out;
-layout(rgba8) uniform highp writeonly image2D tex_out_1;
+layout(rgba8) uniform highp writeonly image2D tex_out;
 void export_level(uvec3 coord) {
-  if (all(lessThan(coord.xy, uvec2(imageSize(tex_out_1))))) {
+  if (all(lessThan(coord.xy, uvec2(imageSize(tex_out))))) {
     uint dst_offset = (coord.x + (coord.y * ubo.width));
     uint src_offset = ((coord.x * 2u) + ((coord.y * 2u) * ubo.width));
     float a_1 = buf_in.weights[(src_offset + 0u)];
@@ -333,7 +333,7 @@ void export_level(uvec3 coord) {
     float sum = dot(vec4(a_1, b, c, d), vec4(1.0f));
     buf_out.weights[dst_offset] = (sum / 4.0f);
     vec4 probabilities = (vec4(a_1, (a_1 + b), ((a_1 + b) + c), sum) / max(sum, 0.0001f));
-    imageStore(tex_out_1, ivec2(coord.xy), probabilities);
+    imageStore(tex_out, ivec2(coord.xy), probabilities);
   }
 }
 

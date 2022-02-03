@@ -107,7 +107,7 @@ struct ShadowProperties {
 layout(binding = 7) buffer LightShadows_1 {
   ShadowProperties properties[];
 } shadow;
-uniform highp sampler2DShadow shadowTexture_1;
+uniform highp sampler2D shadowTexture_1;
 uniform highp sampler2DShadow shadowTexture_shadowSampler;
 
 float dirLightVisibility(vec3 worldPos) {

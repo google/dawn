@@ -1,9 +1,9 @@
 #version 310 es
 precision mediump float;
 
-layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0_1;
+layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0;
 void textureDimensions_5e295d() {
-  ivec2 res = imageSize(arg_0_1).xy;
+  ivec2 res = imageSize(arg_0).xy;
 }
 
 vec4 vertex_main() {
@@ -21,9 +21,9 @@ void main() {
 #version 310 es
 precision mediump float;
 
-layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0_1;
+layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0;
 void textureDimensions_5e295d() {
-  ivec2 res = imageSize(arg_0_1).xy;
+  ivec2 res = imageSize(arg_0).xy;
 }
 
 void fragment_main() {
@@ -37,9 +37,9 @@ void main() {
 #version 310 es
 precision mediump float;
 
-layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0_1;
+layout(rgba16ui) uniform highp writeonly uimage2DArray arg_0;
 void textureDimensions_5e295d() {
-  ivec2 res = imageSize(arg_0_1).xy;
+  ivec2 res = imageSize(arg_0).xy;
 }
 
 void compute_main() {

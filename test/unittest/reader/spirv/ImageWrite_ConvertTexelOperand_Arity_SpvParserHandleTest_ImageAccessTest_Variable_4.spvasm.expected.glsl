@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-layout(rg32f) uniform highp writeonly image2D x_20_1;
+layout(rg32f) uniform highp writeonly image2D x_20;
 void main_1() {
   float f1 = 1.0f;
   vec2 vf12 = vec2(1.0f, 2.0f);
@@ -18,7 +18,7 @@ void main_1() {
   uvec3 vu123 = uvec3(1u, 2u, 3u);
   uvec4 vu1234 = uvec4(1u, 2u, 3u, 4u);
   ivec2 offsets2d = ivec2(3, 4);
-  imageStore(x_20_1, vi12, vec4(vf12, 0.0f, 0.0f));
+  imageStore(x_20, vi12, vec4(vf12, 0.0f, 0.0f));
   return;
 }
 

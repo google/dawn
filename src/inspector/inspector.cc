@@ -535,6 +535,29 @@ std::vector<sem::SamplerTexturePair> Inspector::GetSamplerTextureUses(
   return it->second;
 }
 
+std::vector<sem::SamplerTexturePair> Inspector::GetSamplerTextureUses(
+    const std::string& entry_point,
+    const sem::BindingPoint& placeholder) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+  auto* func_sem = program_->Sem().Get(func);
+
+  std::vector<sem::SamplerTexturePair> new_pairs;
+  for (auto pair : func_sem->TextureSamplerPairs()) {
+    auto* texture = pair.first->As<sem::GlobalVariable>();
+    auto* sampler =
+        pair.second ? pair.second->As<sem::GlobalVariable>() : nullptr;
+    SamplerTexturePair new_pair;
+    new_pair.sampler_binding_point =
+        sampler ? sampler->BindingPoint() : placeholder;
+    new_pair.texture_binding_point = texture->BindingPoint();
+    new_pairs.push_back(new_pair);
+  }
+  return new_pairs;
+}
+
 uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
   auto* func = FindEntryPointByName(entry_point);
   if (!func) {

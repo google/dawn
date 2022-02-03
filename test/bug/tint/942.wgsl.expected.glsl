@@ -11,6 +11,7 @@ layout(binding = 1) uniform Params_1 {
   uint blockDim;
 } params;
 
+layout(rgba8) uniform highp writeonly image2D outputTex;
 struct Flip {
   uint value;
 };
@@ -22,7 +23,6 @@ layout(binding = 3) uniform Flip_1 {
 shared vec3 tile[4][256];
 uniform highp sampler2D inputTex_1;
 uniform highp sampler2D inputTex_samp;
-layout(rgba8) uniform highp writeonly image2D outputTex_1;
 
 void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocation_index) {
   {
@@ -75,7 +75,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
                 acc = (acc + ((1.0f / float(params.filterDim)) * tile[r][i]));
               }
             }
-            imageStore(outputTex_1, writeIndex, vec4(acc, 1.0f));
+            imageStore(outputTex, writeIndex, vec4(acc, 1.0f));
           }
         }
       }
