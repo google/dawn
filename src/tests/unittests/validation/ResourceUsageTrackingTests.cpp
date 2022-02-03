@@ -917,6 +917,8 @@ namespace {
         // the same pass
         {
             passDescriptor.cDepthStencilAttachmentInfo.depthReadOnly = true;
+            passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+            passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
 
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);

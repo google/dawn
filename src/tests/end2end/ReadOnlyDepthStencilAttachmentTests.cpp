@@ -169,11 +169,11 @@ class ReadOnlyDepthStencilAttachmentTests
         // Set both aspects to readonly. We have to do this if the format has both aspects, or
         // it doesn't impact anything if the format has only one aspect.
         passDescriptor.cDepthStencilAttachmentInfo.depthReadOnly = true;
-        passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
-        passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+        passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+        passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
         passDescriptor.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-        passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-        passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
 
         // Create a render pass with readonly depth/stencil attachment. The attachment has already
         // been initialized. The pipeline in this render pass will sample from the attachment.

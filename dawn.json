@@ -1449,8 +1449,9 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "clear"},
-            {"value": 1, "name": "load"}
+            {"value": 0, "name": "undefined", "valid": false, "jsrepr": "undefined"},
+            {"value": 1, "name": "clear"},
+            {"value": 2, "name": "load"}
         ]
     },
     "map mode": {
@@ -1464,8 +1465,9 @@
     "store op": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "store"},
-            {"value": 1, "name": "discard"}
+            {"value": 0, "name": "undefined", "valid": false, "jsrepr": "undefined"},
+            {"value": 1, "name": "store"},
+            {"value": 2, "name": "discard"}
         ]
     },
     "origin 3D": {
@@ -1802,12 +1804,12 @@
         "category": "structure",
         "members": [
             {"name": "view", "type": "texture view"},
-            {"name": "depth load op", "type": "load op"},
-            {"name": "depth store op", "type": "store op"},
-            {"name": "clear depth", "type": "float"},
+            {"name": "depth load op", "type": "load op", "default": "undefined"},
+            {"name": "depth store op", "type": "store op", "default": "undefined"},
+            {"name": "clear depth", "type": "float", "default": "0"},
             {"name": "depth read only", "type": "bool", "default": "false"},
-            {"name": "stencil load op", "type": "load op"},
-            {"name": "stencil store op", "type": "store op"},
+            {"name": "stencil load op", "type": "load op", "default": "undefined"},
+            {"name": "stencil store op", "type": "store op", "default": "undefined"},
             {"name": "clear stencil", "type": "uint32_t", "default": "0"},
             {"name": "stencil read only", "type": "bool", "default": "false"}
         ]

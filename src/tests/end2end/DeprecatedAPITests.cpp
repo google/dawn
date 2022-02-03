@@ -34,6 +34,45 @@ class DeprecationTests : public DawnTest {
     }
 };
 
+// Test that setting attachment rather than view for render pass color and depth/stencil attachments
+// is deprecated.
+TEST_P(DeprecationTests, ReadOnlyDepthStencilStoreLoadOpsAttachment) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass;
+
+    // Check that setting load/store ops with read only depth/stencil attachments gives a warning.
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size = {1, 1, 1};
+    descriptor.sampleCount = 1;
+    descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture depthStencil = device.CreateTexture(&descriptor);
+
+    wgpu::RenderPassDepthStencilAttachment* depthAttachment =
+        &renderPass.renderPassInfo.cDepthStencilAttachmentInfo;
+    renderPass.renderPassInfo.depthStencilAttachment = depthAttachment;
+    depthAttachment->view = depthStencil.CreateView();
+    depthAttachment->depthReadOnly = true;
+    depthAttachment->stencilReadOnly = true;
+
+    depthAttachment->depthLoadOp = wgpu::LoadOp::Load;
+    depthAttachment->depthStoreOp = wgpu::StoreOp::Store;
+
+    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+
+    depthAttachment->depthLoadOp = wgpu::LoadOp::Undefined;
+    depthAttachment->depthStoreOp = wgpu::StoreOp::Undefined;
+    depthAttachment->stencilLoadOp = wgpu::LoadOp::Load;
+    depthAttachment->stencilStoreOp = wgpu::StoreOp::Store;
+
+    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+
+    pass.EndPass();
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

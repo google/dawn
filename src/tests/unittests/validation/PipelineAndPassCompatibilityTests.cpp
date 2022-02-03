@@ -65,14 +65,15 @@ namespace {
             utils::ComboRenderPassDescriptor passDescriptor({}, depthStencilTexture.CreateView());
             if (depthReadOnly) {
                 passDescriptor.cDepthStencilAttachmentInfo.depthReadOnly = true;
-                passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
-                passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+                passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+                passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
             }
 
             if (stencilReadOnly) {
                 passDescriptor.cDepthStencilAttachmentInfo.stencilReadOnly = true;
-                passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-                passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+                passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+                passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp =
+                    wgpu::StoreOp::Undefined;
             }
 
             return passDescriptor;

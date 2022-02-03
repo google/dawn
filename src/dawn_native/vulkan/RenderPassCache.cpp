@@ -29,6 +29,9 @@ namespace dawn::native::vulkan {
                     return VK_ATTACHMENT_LOAD_OP_LOAD;
                 case wgpu::LoadOp::Clear:
                     return VK_ATTACHMENT_LOAD_OP_CLEAR;
+                case wgpu::LoadOp::Undefined:
+                    UNREACHABLE();
+                    break;
             }
             UNREACHABLE();
         }
@@ -41,6 +44,9 @@ namespace dawn::native::vulkan {
                     return VK_ATTACHMENT_STORE_OP_STORE;
                 case wgpu::StoreOp::Discard:
                     return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+                case wgpu::StoreOp::Undefined:
+                    UNREACHABLE();
+                    break;
             }
             UNREACHABLE();
         }

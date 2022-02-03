@@ -139,6 +139,10 @@ namespace dawn::native {
                 case wgpu::StoreOp::Discard:
                     view->GetTexture()->SetIsSubresourceContentInitialized(false, range);
                     break;
+
+                case wgpu::StoreOp::Undefined:
+                    UNREACHABLE();
+                    break;
             }
         }
 
