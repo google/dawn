@@ -467,8 +467,8 @@ TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContEmpty_NoExit) {
   EXPECT_EQ(r()->error(), "12:34 error: loop does not exit");
 }
 
-TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContBreak) {
-  auto* stmt = Loop(Block(), Block(Break()));
+TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContIfTrueBreak) {
+  auto* stmt = Loop(Block(), Block(If(true, Block(Break()))));
   WrapInFunction(stmt);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();

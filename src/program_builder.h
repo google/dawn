@@ -2073,6 +2073,24 @@ class ProgramBuilder {
 
   /// Creates a ast::IfStatement with input condition, body, and optional
   /// variadic else statements
+  /// @param source the source information for the if statement
+  /// @param condition the if statement condition expression
+  /// @param body the if statement body
+  /// @param elseStatements optional variadic else statements
+  /// @returns the if statement pointer
+  template <typename CONDITION, typename... ELSE_STATEMENTS>
+  const ast::IfStatement* If(const Source& source,
+                             CONDITION&& condition,
+                             const ast::BlockStatement* body,
+                             ELSE_STATEMENTS&&... elseStatements) {
+    return create<ast::IfStatement>(
+        source, Expr(std::forward<CONDITION>(condition)), body,
+        ast::ElseStatementList{
+            std::forward<ELSE_STATEMENTS>(elseStatements)...});
+  }
+
+  /// Creates a ast::IfStatement with input condition, body, and optional
+  /// variadic else statements
   /// @param condition the if statement condition expression
   /// @param body the if statement body
   /// @param elseStatements optional variadic else statements

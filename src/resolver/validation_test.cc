@@ -1043,6 +1043,166 @@ TEST_F(ResolverValidationTest, Stmt_BreakInSwitch) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverValidationTest, Stmt_BreakInIfTrueInContinuing) {
+  auto* cont = Block(                           // continuing {
+      If(true, Block(                           //   if(true) {
+                   Break(Source{{12, 34}}))));  //     break;
+                                                //   }
+                                                // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInIfElseInContinuing) {
+  auto* cont = Block(                      // continuing {
+      If(true, Block(),                    //   if(true) {
+         Else(Block(                       //   } else {
+             Break(Source{{12, 34}})))));  //     break;
+                                           //   }
+                                           // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInContinuing) {
+  auto* cont = Block(                   // continuing {
+      Block(Break(Source{{12, 34}})));  //   break;
+                                        // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: break statement in a continuing block must be the single "
+      "statement of an if statement's true or false block, and that if "
+      "statement must be the last statement of the continuing block\n"
+      "12:34 note: break statement is not directly in if statement block");
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInIfInIfInContinuing) {
+  auto* cont = Block(                                      // continuing {
+      If(true, Block(                                      //   if(true) {
+                   If(Source{{56, 78}}, true,              //     if(true) {
+                      Block(Break(Source{{12, 34}}))))));  //       break;
+                                                           //     }
+                                                           //   }
+                                                           // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: break statement in a continuing block must be the single "
+      "statement of an if statement's true or false block, and that if "
+      "statement must be the last statement of the continuing block\n"
+      "56:78 note: if statement containing break statement is not directly in "
+      "continuing block");
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInIfTrueMultipleStmtsInContinuing) {
+  auto* cont = Block(                             // continuing {
+      If(true, Block(Source{{56, 78}},            //   if(true) {
+                     Assign(Phony(), 1),          //     _ = 1;
+                     Break(Source{{12, 34}}))));  //     break;
+                                                  //   }
+                                                  // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: break statement in a continuing block must be the single "
+      "statement of an if statement's true or false block, and that if "
+      "statement must be the last statement of the continuing block\n"
+      "56:78 note: if statement block contains multiple statements");
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInIfElseMultipleStmtsInContinuing) {
+  auto* cont = Block(                             // continuing {
+      If(true, Block(),                           //   if(true) {
+         Else(Block(Source{{56, 78}},             //   } else {
+                    Assign(Phony(), 1),           //     _ = 1;
+                    Break(Source{{12, 34}})))));  //     break;
+                                                  //   }
+                                                  // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: break statement in a continuing block must be the single "
+      "statement of an if statement's true or false block, and that if "
+      "statement must be the last statement of the continuing block\n"
+      "56:78 note: if statement block contains multiple statements");
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInIfElseIfInContinuing) {
+  auto* cont = Block(                             // continuing {
+      If(true, Block(),                           //   if(true) {
+         Else(Expr(Source{{56, 78}}, true),       //   } else if (true) {
+              Block(Break(Source{{12, 34}})))));  //     break;
+                                                  //   }
+                                                  // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: break statement in a continuing block must be the single "
+      "statement of an if statement's true or false block, and that if "
+      "statement must be the last statement of the continuing block\n"
+      "56:78 note: else has condition");
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInIfNonEmptyElseInContinuing) {
+  auto* cont = Block(                        // continuing {
+      If(true,                               //   if(true) {
+         Block(Break(Source{{12, 34}})),     //     break;
+         Else(Block(Source{{56, 78}},        //   } else {
+                    Assign(Phony(), 1)))));  //     _ = 1;
+                                             //   }
+                                             // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: break statement in a continuing block must be the single "
+      "statement of an if statement's true or false block, and that if "
+      "statement must be the last statement of the continuing block\n"
+      "56:78 note: non-empty false block");
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInIfElseNonEmptyTrueInContinuing) {
+  auto* cont = Block(                                  // continuing {
+      If(true,                                         //   if(true) {
+         Block(Source{{56, 78}}, Assign(Phony(), 1)),  //     _ = 1;
+         Else(Block(                                   //   } else {
+             Break(Source{{12, 34}})))));              //     break;
+                                                       //   }
+                                                       // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: break statement in a continuing block must be the single "
+      "statement of an if statement's true or false block, and that if "
+      "statement must be the last statement of the continuing block\n"
+      "56:78 note: non-empty true block");
+}
+
+TEST_F(ResolverValidationTest, Stmt_BreakInIfInContinuingNotLast) {
+  auto* cont = Block(                      // continuing {
+      If(Source{{56, 78}}, true,           //   if(true) {
+         Block(Break(Source{{12, 34}}))),  //     break;
+                                           //   }
+      Assign(Phony(), 1));                 //   _ = 1;
+                                           // }
+  WrapInFunction(Loop(Block(), cont));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: break statement in a continuing block must be the single "
+      "statement of an if statement's true or false block, and that if "
+      "statement must be the last statement of the continuing block\n"
+      "56:78 note: if statement containing break statement is not the last "
+      "statement of the continuing block");
+}
+
 TEST_F(ResolverValidationTest, Stmt_BreakNotInLoopOrSwitch) {
   WrapInFunction(Break(Source{{12, 34}}));
   EXPECT_FALSE(r()->Resolve());

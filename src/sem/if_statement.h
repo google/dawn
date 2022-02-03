@@ -67,7 +67,7 @@ class ElseStatement : public Castable<ElseStatement, CompoundStatement> {
   /// @param parent the owning statement
   /// @param function the owning function
   ElseStatement(const ast::ElseStatement* declaration,
-                const CompoundStatement* parent,
+                const IfStatement* parent,
                 const sem::Function* function);
 
   /// Destructor
@@ -75,6 +75,11 @@ class ElseStatement : public Castable<ElseStatement, CompoundStatement> {
 
   /// @returns the else-statement condition expression
   const Expression* Condition() const { return condition_; }
+
+  /// @return the statement that encloses this statement
+  const IfStatement* Parent() const {
+    return static_cast<const IfStatement*>(Statement::Parent());
+  }
 
   /// Sets the else-statement condition expression
   /// @param condition the else condition expression

@@ -965,7 +965,8 @@ sem::IfStatement* Resolver::IfStatement(const ast::IfStatement* stmt) {
 
 sem::ElseStatement* Resolver::ElseStatement(const ast::ElseStatement* stmt) {
   auto* sem = builder_->create<sem::ElseStatement>(
-      stmt, current_compound_statement_, current_function_);
+      stmt, current_compound_statement_->As<sem::IfStatement>(),
+      current_function_);
   return StatementScope(stmt, sem, [&] {
     if (auto* cond_expr = stmt->condition) {
       auto* cond = Expression(cond_expr);

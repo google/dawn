@@ -1263,6 +1263,64 @@ bool Resolver::ValidateBreakStatement(const sem::Statement* stmt) {
              stmt->Declaration()->source);
     return false;
   }
+  if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ true)) {
+    auto fail = [&](const char* note_msg, const Source& note_src) {
+      constexpr const char* kErrorMsg =
+          "break statement in a continuing block must be the single statement "
+          "of an if statement's true or false block, and that if statement "
+          "must be the last statement of the continuing block";
+      AddError(kErrorMsg, stmt->Declaration()->source);
+      AddNote(note_msg, note_src);
+      return false;
+    };
+
+    if (auto* block = stmt->Parent()->As<sem::BlockStatement>()) {
+      auto* block_parent = block->Parent();
+      auto* if_stmt = block_parent->As<sem::IfStatement>();
+      auto* el_stmt = block_parent->As<sem::ElseStatement>();
+      if (el_stmt) {
+        if_stmt = el_stmt->Parent();
+      }
+      if (!if_stmt) {
+        return fail("break statement is not directly in if statement block",
+                    stmt->Declaration()->source);
+      }
+      if (block->Declaration()->statements.size() != 1) {
+        return fail("if statement block contains multiple statements",
+                    block->Declaration()->source);
+      }
+      for (auto* el : if_stmt->Declaration()->else_statements) {
+        if (el->condition) {
+          return fail("else has condition", el->condition->source);
+        }
+        bool el_contains_break = el_stmt && el == el_stmt->Declaration();
+        if (el_contains_break) {
+          if (auto* true_block = if_stmt->Declaration()->body;
+              !true_block->Empty()) {
+            return fail("non-empty true block", true_block->source);
+          }
+        } else {
+          if (!el->body->Empty()) {
+            return fail("non-empty false block", el->body->source);
+          }
+        }
+      }
+      if (if_stmt->Parent()->Declaration() != continuing) {
+        return fail(
+            "if statement containing break statement is not directly in "
+            "continuing block",
+            if_stmt->Declaration()->source);
+      }
+      if (auto* cont_block = continuing->As<ast::BlockStatement>()) {
+        if (if_stmt->Declaration() != cont_block->Last()) {
+          return fail(
+              "if statement containing break statement is not the last "
+              "statement of the continuing block",
+              if_stmt->Declaration()->source);
+        }
+      }
+    }
+  }
   return true;
 }
 

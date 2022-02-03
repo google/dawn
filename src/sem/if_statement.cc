@@ -34,7 +34,7 @@ const ast::IfStatement* IfStatement::Declaration() const {
 }
 
 ElseStatement::ElseStatement(const ast::ElseStatement* declaration,
-                             const CompoundStatement* parent,
+                             const IfStatement* parent,
                              const sem::Function* function)
     : Base(declaration, parent, function) {}
 
