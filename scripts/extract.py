@@ -110,7 +110,7 @@ def main(args):
     if os.path.exists(stamp_path):
         with open(stamp_path) as f:
             if f.read().strip() == digest:
-                print "Already up-to-date."
+                print("Already up-to-date.")
                 return 0
 
     if archive.endswith('.zip'):
@@ -124,10 +124,10 @@ def main(args):
 
     try:
         if os.path.exists(output):
-            print "Removing %s" % (output, )
+            print("Removing %s" % (output, ))
             shutil.rmtree(output)
 
-        print "Extracting %s to %s" % (archive, output)
+        print("Extracting %s to %s" % (archive, output))
         prefix = None
         num_extracted = 0
         for entry in entries:
@@ -167,14 +167,14 @@ def main(args):
             # Print every 100 files, so bots do not time out on large archives.
             num_extracted += 1
             if num_extracted % 100 == 0:
-                print "Extracted %d files..." % (num_extracted, )
+                print("Extracted %d files..." % (num_extracted, ))
     finally:
         entries.close()
 
     with open(stamp_path, 'w') as f:
         f.write(digest)
 
-    print "Done. Extracted %d files." % (num_extracted, )
+    print("Done. Extracted %d files." % (num_extracted, ))
     return 0
 
 
