@@ -213,37 +213,13 @@ set(CMAKE_CXX_STANDARD "17")
 add_subdirectory(third_party)
 add_subdirectory(generator)
 add_subdirectory(src/dawn)
-add_subdirectory(src/dawn/common)
-add_subdirectory(src/dawn/platform)
-add_subdirectory(src/dawn/native)
-add_subdirectory(src/dawn/wire)
-# TODO(dawn:269): Remove once the implementation-based swapchains are removed.
-add_subdirectory(src/dawn/utils)
+
+################################################################################
+# Samples
+################################################################################
 
 if (DAWN_BUILD_SAMPLES)
     #TODO(dawn:269): Add this once implementation-based swapchains are removed.
-    #add_subdirectory(src/dawn/utils)
+    #add_subdirectory(src/utils)
     add_subdirectory(samples/dawn)
-endif()
-
-if (DAWN_BUILD_NODE_BINDINGS)
-    set(NODE_BINDING_DEPS
-        ${NODE_ADDON_API_DIR}
-        ${NODE_API_HEADERS_DIR}
-        ${WEBGPU_IDL_PATH}
-    )
-    foreach(DEP ${NODE_BINDING_DEPS})
-        if (NOT EXISTS ${DEP})
-            message(FATAL_ERROR
-                "DAWN_BUILD_NODE_BINDINGS requires missing dependency '${DEP}'\n"
-                "Please follow the 'Fetch dependencies' instructions at:\n"
-                "./src/dawn/node/README.md"
-            )
-        endif()
-    endforeach()
-    if (NOT CMAKE_POSITION_INDEPENDENT_CODE)
-        message(FATAL_ERROR "DAWN_BUILD_NODE_BINDINGS requires building with DAWN_ENABLE_PIC")
-    endif()
-
-    add_subdirectory(src/dawn/node)
 endif()
