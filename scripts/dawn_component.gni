@@ -23,8 +23,8 @@ import("dawn_overrides_with_defaults.gni")
 # Template that produces static and shared versions of the same library as well
 # as a target similar to Chromium's component targets.
 #  - The shared version exports symbols and has dependent import the symbols
-#    as libname.so. If the target name matches the package directory name, then
-#    the shared library target will be named 'shared', otherwise
+#    as libdawn_${name}.so. If the target name matches the package directory
+#    name, then the shared library target will be named 'shared', otherwise
 #    '${target_name}_shared'.
 #  - The static library doesn't export symbols nor make dependents import them.
 #    If the target name matches the package directory name, then the static
@@ -81,7 +81,7 @@ template("dawn_component") {
 
   shared_library("${prefix}shared") {
     # The "tool" for creating shared libraries will automatically add the "lib" prefix
-    output_name = name
+    output_name = "dawn_${name}"
 
     # Copy all variables except "configs", which has a default value
     forward_variables_from(invoker, "*", [ "configs" ])
@@ -119,7 +119,7 @@ template("dawn_component") {
   }
 
   static_library("${prefix}static") {
-    output_name = name + "_static"
+    output_name = "dawn_${name}_static"
 
     complete_static_lib = dawn_complete_static_libs
 
