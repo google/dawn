@@ -21,6 +21,7 @@ namespace tint {
 
 // Forward declarations
 namespace ast {
+class Array;
 class CallExpression;
 class Expression;
 class ElseStatement;
@@ -60,6 +61,7 @@ class Variable;
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
   //! @cond Doxygen_Suppress
+  Array* operator()(ast::Array*);
   Call* operator()(ast::CallExpression*);
   Expression* operator()(ast::Expression*);
   ElseStatement* operator()(ast::ElseStatement*);

@@ -1,24 +1,26 @@
 #version 310 es
 precision mediump float;
 
-struct tint_padded_array_element {
+struct strided_arr {
   vec2 el;
 };
 
 struct SSBO {
-  tint_padded_array_element m[2];
+  strided_arr m[2];
 };
 
 layout(binding = 0) buffer SSBO_1 {
-  tint_padded_array_element m[2];
+  strided_arr m[2];
 } ssbo;
-mat2 arr_to_mat2x2_stride_16(tint_padded_array_element arr[2]) {
+mat2 arr_to_mat2x2_stride_16(strided_arr arr[2]) {
   return mat2(arr[0u].el, arr[1u].el);
 }
 
-tint_padded_array_element[2] mat2x2_stride_16_to_arr(mat2 mat) {
-  tint_padded_array_element tint_symbol[2] = tint_padded_array_element[2](tint_padded_array_element(mat[0u]), tint_padded_array_element(mat[1u]));
-  return tint_symbol;
+strided_arr[2] mat2x2_stride_16_to_arr(mat2 mat) {
+  strided_arr tint_symbol = strided_arr(mat[0u]);
+  strided_arr tint_symbol_1 = strided_arr(mat[1u]);
+  strided_arr tint_symbol_2[2] = strided_arr[2](tint_symbol, tint_symbol_1);
+  return tint_symbol_2;
 }
 
 void f_1() {

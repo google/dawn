@@ -14,15 +14,15 @@ struct Uniforms {
   outShapeStrides : vec2<i32>;
 }
 
-type RTArr = @stride(4) array<f32>;
+type RTArr = array<f32>;
 
-type RTArr_1 = @stride(4) array<f32>;
+type RTArr_1 = array<f32>;
 
 struct ssbOut {
   result : RTArr_1;
 }
 
-type RTArr_2 = @stride(4) array<f32>;
+type RTArr_2 = array<f32>;
 
 struct ssbA {
   A : RTArr_1;

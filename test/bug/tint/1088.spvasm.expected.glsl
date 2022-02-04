@@ -5,7 +5,7 @@ layout(location = 0) in vec3 position_param_1;
 layout(location = 2) in vec2 uv_param_1;
 layout(location = 1) in vec3 normal_param_1;
 layout(location = 0) out vec2 vUV_1_1;
-struct tint_padded_array_element {
+struct strided_arr {
   float el;
 };
 
@@ -13,7 +13,7 @@ struct LeftOver {
   mat4 worldViewProjection;
   float time;
   mat4 test2[2];
-  tint_padded_array_element test[4];
+  strided_arr test[4];
 };
 
 vec3 position = vec3(0.0f, 0.0f, 0.0f);
@@ -21,7 +21,7 @@ layout(binding = 2) uniform LeftOver_1 {
   mat4 worldViewProjection;
   float time;
   mat4 test2[2];
-  tint_padded_array_element test[4];
+  strided_arr test[4];
 } x_14;
 
 vec2 vUV = vec2(0.0f, 0.0f);

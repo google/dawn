@@ -1,4 +1,4 @@
-type Arr = @stride(4) array<i32, 6u>;
+type Arr = array<i32, 6u>;
 
 struct sspp962805860buildInformationS {
   footprint : vec4<f32>;

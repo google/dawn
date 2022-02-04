@@ -4,12 +4,12 @@ using namespace metal;
 struct tint_array_wrapper {
   /* 0x0000 */ float4x4 arr[2];
 };
-struct tint_padded_array_element {
+struct strided_arr {
   /* 0x0000 */ float el;
   /* 0x0004 */ int8_t tint_pad[12];
 };
 struct tint_array_wrapper_1 {
-  /* 0x0000 */ tint_padded_array_element arr[4];
+  /* 0x0000 */ strided_arr arr[4];
 };
 struct LeftOver {
   /* 0x0000 */ float4x4 worldViewProjection;

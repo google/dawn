@@ -1,6 +1,6 @@
-type RTArr = @stride(4) array<f32>;
+type RTArr = array<f32>;
 
-type RTArr_1 = @stride(4) array<f32>;
+type RTArr_1 = array<f32>;
 
 struct ssbOut {
   result : RTArr_1;

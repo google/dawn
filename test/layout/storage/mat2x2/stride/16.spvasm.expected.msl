@@ -1,12 +1,12 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_padded_array_element {
+struct strided_arr {
   /* 0x0000 */ float2 el;
   /* 0x0008 */ int8_t tint_pad[8];
 };
 struct tint_array_wrapper {
-  /* 0x0000 */ tint_padded_array_element arr[2];
+  /* 0x0000 */ strided_arr arr[2];
 };
 struct SSBO {
   /* 0x0000 */ tint_array_wrapper m;
@@ -17,18 +17,20 @@ float2x2 arr_to_mat2x2_stride_16(tint_array_wrapper arr) {
 }
 
 tint_array_wrapper mat2x2_stride_16_to_arr(float2x2 mat) {
-  tint_array_wrapper const tint_symbol = {.arr={{.el=mat[0u]}, {.el=mat[1u]}}};
-  return tint_symbol;
+  strided_arr const tint_symbol = {.el=mat[0u]};
+  strided_arr const tint_symbol_1 = {.el=mat[1u]};
+  tint_array_wrapper const tint_symbol_2 = {.arr={tint_symbol, tint_symbol_1}};
+  return tint_symbol_2;
 }
 
-void f_1(device SSBO* const tint_symbol_1) {
-  float2x2 const x_15 = arr_to_mat2x2_stride_16((*(tint_symbol_1)).m);
-  (*(tint_symbol_1)).m = mat2x2_stride_16_to_arr(x_15);
+void f_1(device SSBO* const tint_symbol_3) {
+  float2x2 const x_15 = arr_to_mat2x2_stride_16((*(tint_symbol_3)).m);
+  (*(tint_symbol_3)).m = mat2x2_stride_16_to_arr(x_15);
   return;
 }
 
-kernel void f(device SSBO* tint_symbol_2 [[buffer(0)]]) {
-  f_1(tint_symbol_2);
+kernel void f(device SSBO* tint_symbol_4 [[buffer(0)]]) {
+  f_1(tint_symbol_4);
   return;
 }
 

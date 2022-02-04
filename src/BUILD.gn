@@ -441,6 +441,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/combine_samplers.h",
     "transform/decompose_memory_access.cc",
     "transform/decompose_memory_access.h",
+    "transform/decompose_strided_array.cc",
+    "transform/decompose_strided_array.h",
     "transform/decompose_strided_matrix.cc",
     "transform/decompose_strided_matrix.h",
     "transform/external_texture_transform.cc",

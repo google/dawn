@@ -1,6 +1,11 @@
-type Arr = @stride(64) array<mat4x4<f32>, 2u>;
+type Arr = array<mat4x4<f32>, 2u>;
 
-type Arr_1 = @stride(16) array<f32, 4u>;
+struct strided_arr {
+  @size(16)
+  el : f32;
+}
+
+type Arr_1 = array<strided_arr, 4u>;
 
 struct LeftOver {
   worldViewProjection : mat4x4<f32>;
@@ -31,7 +36,7 @@ fn main_1() {
   let x_21 : vec4<f32> = q;
   p = vec3<f32>(x_21.x, x_21.y, x_21.z);
   let x_27 : f32 = p.x;
-  let x_41 : f32 = x_14.test[0];
+  let x_41 : f32 = x_14.test[0].el;
   let x_45 : f32 = position.y;
   let x_49 : f32 = x_14.time;
   p.x = (x_27 + sin(((x_41 * x_45) + x_49)));

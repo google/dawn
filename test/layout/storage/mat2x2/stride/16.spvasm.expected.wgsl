@@ -1,15 +1,20 @@
+struct strided_arr {
+  @size(16)
+  el : vec2<f32>;
+}
+
 struct SSBO {
-  m : @stride(16) array<vec2<f32>, 2u>;
+  m : array<strided_arr, 2u>;
 }
 
 @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
 
-fn arr_to_mat2x2_stride_16(arr : @stride(16) array<vec2<f32>, 2u>) -> mat2x2<f32> {
-  return mat2x2<f32>(arr[0u], arr[1u]);
+fn arr_to_mat2x2_stride_16(arr : array<strided_arr, 2u>) -> mat2x2<f32> {
+  return mat2x2<f32>(arr[0u].el, arr[1u].el);
 }
 
-fn mat2x2_stride_16_to_arr(mat : mat2x2<f32>) -> @stride(16) array<vec2<f32>, 2u> {
-  return @stride(16) array<vec2<f32>, 2u>(mat[0u], mat[1u]);
+fn mat2x2_stride_16_to_arr(mat : mat2x2<f32>) -> array<strided_arr, 2u> {
+  return array<strided_arr, 2u>(strided_arr(mat[0u]), strided_arr(mat[1u]));
 }
 
 fn f_1() {

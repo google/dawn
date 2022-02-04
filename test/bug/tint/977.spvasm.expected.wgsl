@@ -1,12 +1,12 @@
-type RTArr = @stride(4) array<f32>;
+type RTArr = array<f32>;
 
-type RTArr_1 = @stride(4) array<f32>;
+type RTArr_1 = array<f32>;
 
 struct ResultMatrix {
   numbers : RTArr_1;
 }
 
-type RTArr_2 = @stride(4) array<f32>;
+type RTArr_2 = array<f32>;
 
 struct FirstMatrix {
   numbers : RTArr_1;

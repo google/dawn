@@ -309,6 +309,8 @@ set(TINT_LIB_SRCS
   transform/canonicalize_entry_point_io.h
   transform/decompose_memory_access.cc
   transform/decompose_memory_access.h
+  transform/decompose_strided_array.cc
+  transform/decompose_strided_array.h
   transform/decompose_strided_matrix.cc
   transform/decompose_strided_matrix.h
   transform/external_texture_transform.cc
@@ -984,6 +986,7 @@ if(TINT_BUILD_TESTS)
       transform/canonicalize_entry_point_io_test.cc
       transform/combine_samplers_test.cc
       transform/decompose_memory_access_test.cc
+      transform/decompose_strided_array_test.cc
       transform/decompose_strided_matrix_test.cc
       transform/external_texture_transform_test.cc
       transform/first_index_offset_test.cc
