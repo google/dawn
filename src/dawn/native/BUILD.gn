@@ -137,19 +137,19 @@ if (dawn_enable_opengl) {
 # Public dawn native headers so they can be publicly visible for
 # dependencies of dawn native
 source_set("headers") {
-  public_deps = [ "${dawn_root}/src/dawn:cpp_headers" ]
-  all_dependent_configs = [ "${dawn_root}/src/dawn/common:public_include_dirs" ]
+  public_deps = [ "${dawn_root}/include/dawn:cpp_headers" ]
+  all_dependent_configs = [ "${dawn_root}/include/dawn:public" ]
   sources = [
-    "${dawn_root}/src/include/dawn/native/DawnNative.h",
-    "${dawn_root}/src/include/dawn/native/dawn_native_export.h",
+    "${dawn_root}/include/dawn/native/DawnNative.h",
+    "${dawn_root}/include/dawn/native/dawn_native_export.h",
 
     # Include all backend's public headers so that dependencies can include
     # them even when the backends are disabled.
-    "${dawn_root}/src/include/dawn/native/D3D12Backend.h",
-    "${dawn_root}/src/include/dawn/native/MetalBackend.h",
-    "${dawn_root}/src/include/dawn/native/NullBackend.h",
-    "${dawn_root}/src/include/dawn/native/OpenGLBackend.h",
-    "${dawn_root}/src/include/dawn/native/VulkanBackend.h",
+    "${dawn_root}/include/dawn/native/D3D12Backend.h",
+    "${dawn_root}/include/dawn/native/MetalBackend.h",
+    "${dawn_root}/include/dawn/native/NullBackend.h",
+    "${dawn_root}/include/dawn/native/OpenGLBackend.h",
+    "${dawn_root}/include/dawn/native/VulkanBackend.h",
   ]
 }
 

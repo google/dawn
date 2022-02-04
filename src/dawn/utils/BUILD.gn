@@ -134,7 +134,7 @@ static_library("utils") {
     }
   }
 
-  public_deps = [ "${dawn_root}/src/dawn:cpp_headers" ]
+  public_deps = [ "${dawn_root}/include/dawn:cpp_headers" ]
 }
 
 ###############################################################################
@@ -151,7 +151,7 @@ if (dawn_standalone) {
       "BackendBinding.h",
     ]
 
-    public_deps = [ "${dawn_root}/src/dawn:headers" ]
+    public_deps = [ "${dawn_root}/include/dawn:headers" ]
 
     deps = [
       ":glfw",

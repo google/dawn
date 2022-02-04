@@ -22,8 +22,8 @@ dawn_component("platform") {
   configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   sources = [
-    "${dawn_root}/src/include/dawn/platform/DawnPlatform.h",
-    "${dawn_root}/src/include/dawn/platform/dawn_platform_export.h",
+    "${dawn_root}/include/dawn/platform/DawnPlatform.h",
+    "${dawn_root}/include/dawn/platform/dawn_platform_export.h",
     "DawnPlatform.cpp",
     "WorkerThread.cpp",
     "WorkerThread.h",
@@ -36,6 +36,6 @@ dawn_component("platform") {
 
   public_deps = [
     # DawnPlatform.h has #include <dawn/webgpu.h>
-    "${dawn_root}/src/dawn:headers",
+    "${dawn_root}/include/dawn:headers",
   ]
 }

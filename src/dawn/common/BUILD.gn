@@ -35,13 +35,6 @@ if (build_with_chromium) {
 # Common dawn configs
 ###############################################################################
 
-config("public_include_dirs") {
-  include_dirs = [
-    "${target_gen_dir}/../../../src/include",
-    "${dawn_root}/src/include",
-  ]
-}
-
 config("internal_config") {
   include_dirs = [
     "${target_gen_dir}/../../../src",
@@ -237,8 +230,8 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
 
     public_configs = [ ":internal_config" ]
     deps = [
-      "${dawn_root}/src/dawn:cpp_headers",
-      "${dawn_root}/src/dawn:headers",
+      "${dawn_root}/include/dawn:cpp_headers",
+      "${dawn_root}/include/dawn:headers",
     ]
 
     if (is_win) {

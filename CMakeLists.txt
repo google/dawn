@@ -38,7 +38,7 @@ endif()
 set(DAWN_BUILD_GEN_DIR "${Dawn_BINARY_DIR}/gen")
 set(DAWN_GENERATOR_DIR "${Dawn_SOURCE_DIR}/generator")
 set(DAWN_SRC_DIR "${Dawn_SOURCE_DIR}/src")
-set(DAWN_INCLUDE_DIR "${DAWN_SRC_DIR}/include")
+set(DAWN_INCLUDE_DIR "${Dawn_SOURCE_DIR}/include")
 set(DAWN_TEMPLATE_DIR "${DAWN_GENERATOR_DIR}/templates")
 
 set(DAWN_DUMMY_FILE "${DAWN_SRC_DIR}/Dummy.cpp")
@@ -160,8 +160,8 @@ endif()
 # The public config contains only the include paths for the Dawn headers.
 add_library(dawn_public_config INTERFACE)
 target_include_directories(dawn_public_config INTERFACE
-    "${DAWN_SRC_DIR}/include"
-    "${DAWN_BUILD_GEN_DIR}/src/include"
+    "${DAWN_INCLUDE_DIR}"
+    "${DAWN_BUILD_GEN_DIR}/include"
 )
 
 # The internal config conatins additional path but includes the dawn_public_config include paths
