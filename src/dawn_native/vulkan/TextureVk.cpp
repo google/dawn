@@ -38,6 +38,8 @@ namespace dawn::native::vulkan {
         // Contrary to image types, image view types include arrayness and cubemapness
         VkImageViewType VulkanImageViewType(wgpu::TextureViewDimension dimension) {
             switch (dimension) {
+                case wgpu::TextureViewDimension::e1D:
+                    return VK_IMAGE_VIEW_TYPE_1D;
                 case wgpu::TextureViewDimension::e2D:
                     return VK_IMAGE_VIEW_TYPE_2D;
                 case wgpu::TextureViewDimension::e2DArray:
@@ -49,11 +51,9 @@ namespace dawn::native::vulkan {
                 case wgpu::TextureViewDimension::e3D:
                     return VK_IMAGE_VIEW_TYPE_3D;
 
-                case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
-                    break;
+                    UNREACHABLE();
             }
-            UNREACHABLE();
         }
 
         // Computes which vulkan access type could be required for the given Dawn usage.

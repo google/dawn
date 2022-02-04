@@ -47,7 +47,6 @@ namespace dawn::native {
             return {};
         }
 
-        // TODO(crbug.com/dawn/814): Implement for 1D texture.
         bool IsTextureViewDimensionCompatibleWithTextureDimension(
             wgpu::TextureViewDimension textureViewDimension,
             wgpu::TextureDimension textureDimension) {
@@ -62,13 +61,13 @@ namespace dawn::native {
                     return textureDimension == wgpu::TextureDimension::e3D;
 
                 case wgpu::TextureViewDimension::e1D:
+                    return textureDimension == wgpu::TextureDimension::e1D;
+
                 case wgpu::TextureViewDimension::Undefined:
-                    break;
+                    UNREACHABLE();
             }
-            UNREACHABLE();
         }
 
-        // TODO(crbug.com/dawn/814): Implement for 1D texture.
         bool IsArrayLayerValidForTextureViewDimension(
             wgpu::TextureViewDimension textureViewDimension,
             uint32_t textureViewArrayLayer) {
@@ -82,12 +81,12 @@ namespace dawn::native {
                     return textureViewArrayLayer == 6u;
                 case wgpu::TextureViewDimension::CubeArray:
                     return textureViewArrayLayer % 6 == 0;
-
                 case wgpu::TextureViewDimension::e1D:
+                    return textureViewArrayLayer == 1u;
+
                 case wgpu::TextureViewDimension::Undefined:
-                    break;
+                    UNREACHABLE();
             }
-            UNREACHABLE();
         }
 
         MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
@@ -159,15 +158,14 @@ namespace dawn::native {
                         texture->GetSize().height);
                     break;
 
+                case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::e2D:
                 case wgpu::TextureViewDimension::e2DArray:
                 case wgpu::TextureViewDimension::e3D:
                     break;
 
-                case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
-                    break;
             }
 
             return {};
@@ -362,12 +360,9 @@ namespace dawn::native {
         ASSERT(!texture->IsError());
 
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
-        DAWN_INVALID_IF(descriptor->dimension == wgpu::TextureViewDimension::e1D,
-                        "1D texture views aren't supported (yet).");
-
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
-
         DAWN_TRY(ValidateTextureAspect(descriptor->aspect));
+
         DAWN_INVALID_IF(
             SelectFormatAspects(texture->GetFormat(), descriptor->aspect) == Aspect::None,
             "Texture format (%s) does not have the texture view's selected aspect (%s).",

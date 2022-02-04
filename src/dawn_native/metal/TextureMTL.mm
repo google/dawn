@@ -66,6 +66,8 @@ namespace dawn::native::metal {
         MTLTextureType MetalTextureViewType(wgpu::TextureViewDimension dimension,
                                             unsigned int sampleCount) {
             switch (dimension) {
+                case wgpu::TextureViewDimension::e1D:
+                    return MTLTextureType1D;
                 case wgpu::TextureViewDimension::e2D:
                     return (sampleCount > 1) ? MTLTextureType2DMultisample : MTLTextureType2D;
                 case wgpu::TextureViewDimension::e2DArray:
@@ -77,7 +79,6 @@ namespace dawn::native::metal {
                 case wgpu::TextureViewDimension::e3D:
                     return MTLTextureType3D;
 
-                case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
             }

@@ -718,3 +718,71 @@ DAWN_INSTANTIATE_TEST(TextureView3DTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+class TextureView1DTest : public DawnTest {};
+
+// Test that it is possible to create a 1D texture view and sample from it.
+TEST_P(TextureView1DTest, Sampling) {
+    // Create a 1D texture and fill it with some data.
+    wgpu::TextureDescriptor texDesc;
+    texDesc.dimension = wgpu::TextureDimension::e1D;
+    texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    texDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
+    texDesc.size = {4, 1, 1};
+    wgpu::Texture tex = device.CreateTexture(&texDesc);
+
+    std::array<RGBA8, 4> data = {RGBA8::kGreen, RGBA8::kRed, RGBA8::kBlue, RGBA8::kWhite};
+    wgpu::ImageCopyTexture target = utils::CreateImageCopyTexture(tex, 0, {});
+    wgpu::TextureDataLayout layout = utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
+    queue.WriteTexture(&target, &data, sizeof(data), &layout, &texDesc.size);
+
+    // Create a pipeline that will sample from the 1D texture and output to an attachment.
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @stage(vertex)
+        fn vs(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
+            var pos = array<vec4<f32>, 3>(
+                vec4<f32>( 0.,  2., 0., 1.),
+                vec4<f32>(-3., -1., 0., 1.),
+                vec4<f32>( 3., -1., 0., 1.));
+            return pos[VertexIndex];
+        }
+
+        @group(0) @binding(0) var tex : texture_1d<f32>;
+        @group(0) @binding(1) var samp : sampler;
+        @stage(fragment)
+        fn fs(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
+            return textureSample(tex, samp, pos.x / 4.0);
+        }
+    )");
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.vertex.entryPoint = "vs";
+    pDesc.cFragment.module = module;
+    pDesc.cFragment.entryPoint = "fs";
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Do the sample + rendering.
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                              {{0, tex.CreateView()}, {1, device.CreateSampler()}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, 4, 1);
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.Draw(3);
+    pass.EndPass();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Check texels got sampled correctly.
+    EXPECT_PIXEL_RGBA8_EQ(data[0], rp.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(data[1], rp.color, 1, 0);
+    EXPECT_PIXEL_RGBA8_EQ(data[2], rp.color, 2, 0);
+    EXPECT_PIXEL_RGBA8_EQ(data[3], rp.color, 3, 0);
+}
+
+DAWN_INSTANTIATE_TEST(TextureView1DTest, D3D12Backend(), MetalBackend(), VulkanBackend());

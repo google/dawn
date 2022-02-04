@@ -18,6 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
+#include "utils/TestUtils.h"
 #include "utils/TextureUtils.h"
 #include "utils/WGPUHelpers.h"
 
@@ -168,6 +169,9 @@ class StorageTextureTests : public DawnTest {
         ostream << "@group(0) @binding(" << binding << ") "
                 << "var storageImage" << binding << " : ";
         switch (dimension) {
+            case wgpu::TextureViewDimension::e1D:
+                ostream << "texture_storage_1d";
+                break;
             case wgpu::TextureViewDimension::e2D:
                 ostream << "texture_storage_2d";
                 break;
@@ -295,56 +299,6 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         return "";
     }
 
-    std::string CommonReadOnlyTestCode(
-        wgpu::TextureFormat format,
-        wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::e2D) {
-        std::string componentFmt = utils::GetWGSLColorTextureComponentType(format);
-        auto texelType = "vec4<" + componentFmt + ">";
-        std::string sliceCount;
-        std::string textureLoad;
-        switch (dimension) {
-            case wgpu::TextureViewDimension::e2D:
-                sliceCount = "1";
-                textureLoad = "textureLoad(storageImage0, vec2<i32>(x, y))";
-                break;
-            case wgpu::TextureViewDimension::e2DArray:
-                sliceCount = "textureNumLayers(storageImage0)";
-                textureLoad = "textureLoad(storageImage0, vec2<i32>(x, y), i32(slice))";
-                break;
-            case wgpu::TextureViewDimension::e3D:
-                sliceCount = "textureDimensions(storageImage0).z";
-                textureLoad = "textureLoad(storageImage0, vec3<i32>(x, y, slice))";
-                break;
-            default:
-                UNREACHABLE();
-                break;
-        }
-
-        std::ostringstream ostream;
-        ostream << GetImageDeclaration(format, "read", dimension, 0) << "\n"
-                << GetComparisonFunction(format) << "\n";
-        ostream << "fn doTest() -> bool {\n";
-        ostream << "  var size : vec2<i32> = textureDimensions(storageImage0).xy;\n";
-        ostream << "  let sliceCount : i32 = " << sliceCount << ";\n";
-        ostream << "  for (var slice : i32 = 0; slice < sliceCount; slice = slice + 1) {\n";
-        ostream << "    for (var y : i32 = 0; y < size.y; y = y + 1) {\n";
-        ostream << "      for (var x : i32 = 0; x < size.x; x = x + 1) {\n";
-        ostream << "        var value : i32 = " << kComputeExpectedValue << ";\n";
-        ostream << "        var expected : " << texelType << " = " << GetExpectedPixelValue(format)
-                << ";\n";
-        ostream << "        var pixel : " << texelType << " = " << textureLoad << ";\n";
-        ostream << "        if (!IsEqualTo(pixel, expected)) {\n";
-        ostream << "          return false;\n";
-        ostream << "        }\n";
-        ostream << "      }\n";
-        ostream << "    }\n";
-        ostream << "  }\n";
-        ostream << "  return true;\n";
-        ostream << "}\n";
-
-        return ostream.str();
-    }
-
     std::string CommonWriteOnlyTestCode(
         const char* stage,
         wgpu::TextureFormat format,
@@ -353,7 +307,13 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         auto texelType = "vec4<" + componentFmt + ">";
         std::string sliceCount;
         std::string textureStore;
+        std::string textureSize = "textureDimensions(storageImage0).xy";
         switch (dimension) {
+            case wgpu::TextureViewDimension::e1D:
+                sliceCount = "1";
+                textureStore = "textureStore(storageImage0, x, expected)";
+                textureSize = "vec2<i32>(textureDimensions(storageImage0), 1)";
+                break;
             case wgpu::TextureViewDimension::e2D:
                 sliceCount = "1";
                 textureStore = "textureStore(storageImage0, vec2<i32>(x, y), expected)";
@@ -381,7 +341,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
             ostream << "-> @location(0) vec4<f32> ";
         }
         ostream << "{\n";
-        ostream << "  let size : vec2<i32> = textureDimensions(storageImage0).xy;\n";
+        ostream << "  let size : vec2<i32> = " << textureSize << ";\n";
         ostream << "  let sliceCount : i32 = " << sliceCount << ";\n";
         ostream << "  for (var slice : i32 = 0; slice < sliceCount; slice = slice + 1) {\n";
         ostream << "    for (var y : i32 = 0; y < size.y; y = y + 1) {\n";
@@ -398,53 +358,6 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         }
         ostream << "}\n";
 
-        return ostream.str();
-    }
-
-    std::string CommonReadWriteTestCode(
-        wgpu::TextureFormat format,
-        wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::e2D) {
-        std::string sliceCount;
-        std::string textureStore;
-        switch (dimension) {
-            case wgpu::TextureViewDimension::e2D:
-                sliceCount = "1";
-                textureStore =
-                    "textureStore(storageImage0, texcoord, "
-                    "textureLoad(storageImage1, texcoord))";
-                break;
-            case wgpu::TextureViewDimension::e2DArray:
-                sliceCount = "textureNumLayers(storageImage0)";
-                textureStore =
-                    "textureStore(storageImage0, texcoord, slice, "
-                    "textureLoad(storageImage1, texcoord, slice))";
-                break;
-            case wgpu::TextureViewDimension::e3D:
-                sliceCount = "textureDimensions(storageImage0).z";
-                textureStore =
-                    "textureStore(storageImage0, vec3<i32>(texcoord, slice), "
-                    "textureLoad(storageImage1, vec3<i32>(texcoord, slice)))";
-                break;
-            default:
-                UNREACHABLE();
-                break;
-        }
-
-        std::ostringstream ostream;
-        ostream << GetImageDeclaration(format, "write", dimension, 0) << "\n";
-        ostream << GetImageDeclaration(format, "read", dimension, 1) << "\n";
-        ostream << "@stage(compute) @workgroup_size(1) fn main() {\n";
-        ostream << "  let size : vec2<i32> = textureDimensions(storageImage0).xy;\n";
-        ostream << "  let sliceCount : i32 = " << sliceCount << ";\n";
-        ostream << "  for (var slice : i32 = 0; slice < sliceCount; slice = slice + 1) {\n";
-        ostream << "    for (var y : i32 = 0; y < size.y; y = y + 1) {\n";
-        ostream << "      for (var x : i32 = 0; x < size.x; x = x + 1) {\n";
-        ostream << "        var texcoord : vec2<i32> = vec2<i32>(x, y);\n";
-        ostream << "        " << textureStore << ";\n";
-        ostream << "      }\n";
-        ostream << "    }\n";
-        ostream << "  }\n";
-        ostream << "}\n";
         return ostream.str();
     }
 
@@ -467,26 +380,14 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
     wgpu::Texture CreateTexture(wgpu::TextureFormat format,
                                 wgpu::TextureUsage usage,
-                                uint32_t width = kWidth,
-                                uint32_t height = kHeight,
-                                uint32_t sliceCount = 1,
+                                const wgpu::Extent3D& size,
                                 wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
         wgpu::TextureDescriptor descriptor;
-        descriptor.size = {width, height, sliceCount};
+        descriptor.size = size;
         descriptor.dimension = dimension;
         descriptor.format = format;
         descriptor.usage = usage;
         return device.CreateTexture(&descriptor);
-    }
-
-    wgpu::Buffer CreateEmptyBufferForTextureCopy(uint32_t texelSize, uint32_t sliceCount = 1) {
-        ASSERT(kWidth * texelSize <= kTextureBytesPerRowAlignment);
-        const size_t uploadBufferSize =
-            kTextureBytesPerRowAlignment * (kHeight * sliceCount - 1) + kWidth * texelSize;
-        wgpu::BufferDescriptor descriptor;
-        descriptor.size = uploadBufferSize;
-        descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-        return device.CreateBuffer(&descriptor);
     }
 
     wgpu::Texture CreateTextureWithTestData(
@@ -520,8 +421,8 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
                                         wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
         wgpu::Texture outputTexture = CreateTexture(
-            format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopyDst, kWidth,
-            kHeight, sliceCount, utils::ViewDimensionToTextureDimension(dimension));
+            format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopyDst,
+            {kWidth, kHeight, sliceCount}, utils::ViewDimensionToTextureDimension(dimension));
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -568,9 +469,9 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
             device, pipeline.GetBindGroupLayout(0), {{0, readonlyStorageTexture.CreateView()}});
 
         // Clear the render attachment to red at the beginning of the render pass.
-        wgpu::Texture outputTexture =
-            CreateTexture(kRenderAttachmentFormat,
-                          wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
+        wgpu::Texture outputTexture = CreateTexture(
+            kRenderAttachmentFormat,
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, {1, 1});
         utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
         renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
         renderPassDescriptor.cColorAttachments[0].clearColor = {1.f, 0.f, 0.f, 1.f};
@@ -634,9 +535,9 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        wgpu::Texture dummyOutputTexture =
-            CreateTexture(kRenderAttachmentFormat,
-                          wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
+        wgpu::Texture dummyOutputTexture = CreateTexture(
+            kRenderAttachmentFormat,
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, {1, 1});
         utils::ComboRenderPassDescriptor renderPassDescriptor({dummyOutputTexture.CreateView()});
         wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPassEncoder.SetBindGroup(0, bindGroup);
@@ -695,40 +596,45 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
     void CheckOutputStorageTexture(wgpu::Texture writeonlyStorageTexture,
                                    wgpu::TextureFormat format,
-                                   uint32_t sliceCount = 1) {
-        const uint32_t texelSize = utils::GetTexelBlockSizeInBytes(format);
-        const std::vector<uint8_t>& expectedData = GetExpectedData(format, sliceCount);
-        CheckOutputStorageTexture(writeonlyStorageTexture, texelSize, expectedData);
+                                   const wgpu::Extent3D& size) {
+        const std::vector<uint8_t>& expectedData = GetExpectedData(format, size.depthOrArrayLayers);
+        CheckOutputStorageTexture(writeonlyStorageTexture, format, size, expectedData);
     }
 
     void CheckOutputStorageTexture(wgpu::Texture writeonlyStorageTexture,
-                                   uint32_t texelSize,
+                                   wgpu::TextureFormat format,
+                                   const wgpu::Extent3D& size,
                                    const std::vector<uint8_t>& expectedData) {
         // Copy the content from the write-only storage texture to the result buffer.
-        const uint32_t sliceCount =
-            static_cast<uint32_t>(expectedData.size() / texelSize / (kWidth * kHeight));
-        wgpu::Buffer resultBuffer = CreateEmptyBufferForTextureCopy(texelSize, sliceCount);
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size =
+            utils::RequiredBytesInCopy(kTextureBytesPerRowAlignment, size.height, size, format);
+        descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer resultBuffer = device.CreateBuffer(&descriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-
-        const wgpu::Extent3D copyExtent = {kWidth, kHeight, sliceCount};
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(writeonlyStorageTexture, 0, {0, 0, 0});
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(resultBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copyExtent);
+        {
+            wgpu::ImageCopyTexture imageCopyTexture =
+                utils::CreateImageCopyTexture(writeonlyStorageTexture, 0, {0, 0, 0});
+            wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+                resultBuffer, 0, kTextureBytesPerRowAlignment, size.height);
+            encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &size);
+        }
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
 
         // Check if the contents in the result buffer are what we expect.
-        for (size_t slice = 0; slice < sliceCount; ++slice) {
-            for (size_t y = 0; y < kHeight; ++y) {
+        uint32_t texelSize = utils::GetTexelBlockSizeInBytes(format);
+        ASSERT(size.width * texelSize <= kTextureBytesPerRowAlignment);
+
+        for (size_t z = 0; z < size.depthOrArrayLayers; ++z) {
+            for (size_t y = 0; y < size.height; ++y) {
                 const size_t resultBufferOffset =
-                    kTextureBytesPerRowAlignment * (kHeight * slice + y);
-                const size_t expectedDataOffset = texelSize * kWidth * (kHeight * slice + y);
+                    kTextureBytesPerRowAlignment * (size.height * z + y);
+                const size_t expectedDataOffset = texelSize * size.width * (size.height * z + y);
                 EXPECT_BUFFER_U32_RANGE_EQ(
                     reinterpret_cast<const uint32_t*>(expectedData.data() + expectedDataOffset),
-                    resultBuffer, resultBufferOffset, kWidth);
+                    resultBuffer, resultBufferOffset, texelSize);
             }
         }
     }
@@ -769,14 +675,15 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 
         // Prepare the write-only storage texture.
         wgpu::Texture writeonlyStorageTexture =
-            CreateTexture(format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
+            CreateTexture(format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+                          {kWidth, kHeight});
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader = CommonWriteOnlyTestCode("compute", format);
         WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str());
 
         // Verify the pixel data in the write-only storage texture is expected.
-        CheckOutputStorageTexture(writeonlyStorageTexture, format);
+        CheckOutputStorageTexture(writeonlyStorageTexture, format, {kWidth, kHeight});
     }
 }
 
@@ -807,7 +714,8 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 
         // Prepare the write-only storage texture.
         wgpu::Texture writeonlyStorageTexture =
-            CreateTexture(format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
+            CreateTexture(format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+                          {kWidth, kHeight});
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string fragmentShader = CommonWriteOnlyTestCode("fragment", format);
@@ -815,7 +723,7 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
                                             fragmentShader.c_str());
 
         // Verify the pixel data in the write-only storage texture is expected.
-        CheckOutputStorageTexture(writeonlyStorageTexture, format);
+        CheckOutputStorageTexture(writeonlyStorageTexture, format, {kWidth, kHeight});
     }
 }
 
@@ -837,7 +745,7 @@ TEST_P(StorageTextureTests, Writeonly2DArrayOr3DStorageTexture) {
     for (wgpu::TextureViewDimension dimension : dimensions) {
         wgpu::Texture writeonlyStorageTexture = CreateTexture(
             kTextureFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
-            kWidth, kHeight, kSliceCount, utils::ViewDimensionToTextureDimension(dimension));
+            {kWidth, kHeight, kSliceCount}, utils::ViewDimensionToTextureDimension(dimension));
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader =
@@ -846,8 +754,31 @@ TEST_P(StorageTextureTests, Writeonly2DArrayOr3DStorageTexture) {
                                              dimension);
 
         // Verify the pixel data in the write-only storage texture is expected.
-        CheckOutputStorageTexture(writeonlyStorageTexture, kTextureFormat, kSliceCount);
+        CheckOutputStorageTexture(writeonlyStorageTexture, kTextureFormat,
+                                  {kWidth, kHeight, kSliceCount});
     }
+}
+
+// Verify 1D write-only storage textures work correctly.
+TEST_P(StorageTextureTests, Writeonly1DStorageTexture) {
+    // TODO(crbug.com/dawn/547): implement 1D storage texture on OpenGL and OpenGLES.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
+
+    // Prepare the write-only storage texture.
+    wgpu::Texture writeonlyStorageTexture = CreateTexture(
+        kTextureFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+        {kWidth, 1, 1}, wgpu::TextureDimension::e1D);
+
+    // Write the expected pixel values into the write-only storage texture.
+    const std::string computeShader =
+        CommonWriteOnlyTestCode("compute", kTextureFormat, wgpu::TextureViewDimension::e1D);
+    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str(),
+                                         wgpu::TextureViewDimension::e1D);
+
+    // Verify the pixel data in the write-only storage texture is expected.
+    CheckOutputStorageTexture(writeonlyStorageTexture, kTextureFormat, {kWidth, 1, 1});
 }
 
 // Test that multiple dispatches to increment values by ping-ponging between a sampled texture and
@@ -858,10 +789,10 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
         CreateTexture(kTextureFormat,
                       wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding |
                           wgpu::TextureUsage::CopySrc,
-                      1u, 1u);
+                      {1u, 1u});
     wgpu::Texture storageTexture2 = CreateTexture(
-        kTextureFormat, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding, 1u,
-        1u);
+        kTextureFormat, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding,
+        {1u, 1u});
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 @group(0) @binding(0) var Src : texture_2d<u32>;
 @group(0) @binding(1) var Dst : texture_storage_2d<r32uint, write>;
@@ -980,28 +911,28 @@ fn doTest() -> bool {
 // storage texture in a render pass.
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderPass) {
     // Prepare the write-only storage texture.
-    constexpr uint32_t kTexelSizeR32Uint = 4u;
-    wgpu::Texture writeonlyStorageTexture =
-        CreateTexture(wgpu::TextureFormat::R32Uint,
-                      wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
+    wgpu::Texture writeonlyStorageTexture = CreateTexture(
+        wgpu::TextureFormat::R32Uint,
+        wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc, {kWidth, kHeight});
 
     WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
                                         kCommonWriteOnlyZeroInitTestCodeFragment);
-    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint, GetExpectedData());
+    CheckOutputStorageTexture(writeonlyStorageTexture, wgpu::TextureFormat::R32Uint,
+                              {kWidth, kHeight}, GetExpectedData());
 }
 
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
 // texture in a compute pass.
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInComputePass) {
     // Prepare the write-only storage texture.
-    constexpr uint32_t kTexelSizeR32Uint = 4u;
-    wgpu::Texture writeonlyStorageTexture =
-        CreateTexture(wgpu::TextureFormat::R32Uint,
-                      wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
+    wgpu::Texture writeonlyStorageTexture = CreateTexture(
+        wgpu::TextureFormat::R32Uint,
+        wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc, {kWidth, kHeight});
 
     WriteIntoStorageTextureInComputePass(writeonlyStorageTexture,
                                          kCommonWriteOnlyZeroInitTestCodeCompute);
-    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint, GetExpectedData());
+    CheckOutputStorageTexture(writeonlyStorageTexture, wgpu::TextureFormat::R32Uint,
+                              {kWidth, kHeight}, GetExpectedData());
 }
 
 DAWN_INSTANTIATE_TEST(StorageTextureZeroInitTests,

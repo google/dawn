@@ -1264,7 +1264,6 @@ namespace dawn::native::d3d12 {
         // D3D12_SRV_DIMENSION_TEXTURE2DMS.
         // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_srv
         // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array_srv
-        // TODO(crbug.com/dawn/814): support 1D textures.
         if (GetTexture()->IsMultisampledTexture()) {
             switch (descriptor->dimension) {
                 case wgpu::TextureViewDimension::e2DArray:
@@ -1280,6 +1279,13 @@ namespace dawn::native::d3d12 {
             }
         } else {
             switch (descriptor->dimension) {
+                case wgpu::TextureViewDimension::e1D:
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
+                    mSrvDesc.Texture1D.MipLevels = descriptor->mipLevelCount;
+                    mSrvDesc.Texture1D.MostDetailedMip = descriptor->baseMipLevel;
+                    mSrvDesc.Texture1D.ResourceMinLODClamp = 0;
+                    break;
+
                 case wgpu::TextureViewDimension::e2D:
                 case wgpu::TextureViewDimension::e2DArray:
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
@@ -1310,7 +1316,6 @@ namespace dawn::native::d3d12 {
                     mSrvDesc.Texture3D.ResourceMinLODClamp = 0;
                     break;
 
-                case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
             }
@@ -1345,6 +1350,10 @@ namespace dawn::native::d3d12 {
 
         ASSERT(!GetTexture()->IsMultisampledTexture());
         switch (GetDimension()) {
+            case wgpu::TextureViewDimension::e1D:
+                uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;
+                uavDesc.Texture1D.MipSlice = GetBaseMipLevel();
+                break;
             case wgpu::TextureViewDimension::e2D:
             case wgpu::TextureViewDimension::e2DArray:
                 uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
@@ -1359,8 +1368,6 @@ namespace dawn::native::d3d12 {
                 uavDesc.Texture3D.WSize = GetTexture()->GetDepth() >> GetBaseMipLevel();
                 uavDesc.Texture3D.MipSlice = GetBaseMipLevel();
                 break;
-            // TODO(crbug.com/dawn/814): support 1D textures.
-            case wgpu::TextureViewDimension::e1D:
             // Cube and Cubemap can't be used as storage texture. So there is no need to create UAV
             // descriptor for them.
             case wgpu::TextureViewDimension::Cube:
