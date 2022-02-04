@@ -17,29 +17,29 @@
 #include "dawn/common/Platform.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
+#include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
-#include "dawn_native/DawnNative.h"
 #include "tests/MockCallback.h"
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
-#    include "dawn_native/VulkanBackend.h"
+#    include "dawn/native/VulkanBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
-#    include "dawn_native/D3D12Backend.h"
+#    include "dawn/native/D3D12Backend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-#    include "dawn_native/MetalBackend.h"
+#    include "dawn/native/MetalBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-#    include "dawn_native/MetalBackend.h"
+#    include "dawn/native/MetalBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL) || defined(DAWN_ENABLE_BACKEND_OPENGLES)
 #    include "GLFW/glfw3.h"
-#    include "dawn_native/OpenGLBackend.h"
+#    include "dawn/native/OpenGLBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_DESKTOP_GL) || defined(DAWN_ENABLE_BACKEND_OPENGLES)
 
 #include <gtest/gtest.h>

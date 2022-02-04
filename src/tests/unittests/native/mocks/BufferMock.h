@@ -15,8 +15,8 @@
 #ifndef TESTS_UNITTESTS_NATIVE_MOCKS_BUFFER_MOCK_H_
 #define TESTS_UNITTESTS_NATIVE_MOCKS_BUFFER_MOCK_H_
 
-#include "dawn_native/Buffer.h"
-#include "dawn_native/Device.h"
+#include "dawn/native/Buffer.h"
+#include "dawn/native/Device.h"
 
 #include <gmock/gmock.h>
 

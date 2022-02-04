@@ -14,7 +14,7 @@
 
 #include "dawn/common/Constants.h"
 
-#include "dawn_native/ShaderModule.h"
+#include "dawn/native/ShaderModule.h"
 
 #include "tests/unittests/validation/ValidationTest.h"
 

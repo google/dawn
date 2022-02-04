@@ -15,8 +15,8 @@
 #ifndef UTILS_BACKENDBINDING_H_
 #define UTILS_BACKENDBINDING_H_
 
+#include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
-#include "dawn_native/DawnNative.h"
 
 struct GLFWwindow;
 

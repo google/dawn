@@ -15,8 +15,8 @@
 #ifndef TESTS_UNITTESTS_NATIVE_MOCKS_COMPUTEPIPELINE_MOCK_H_
 #define TESTS_UNITTESTS_NATIVE_MOCKS_COMPUTEPIPELINE_MOCK_H_
 
-#include "dawn_native/ComputePipeline.h"
-#include "dawn_native/Device.h"
+#include "dawn/native/ComputePipeline.h"
+#include "dawn/native/Device.h"
 
 #include <gmock/gmock.h>
 

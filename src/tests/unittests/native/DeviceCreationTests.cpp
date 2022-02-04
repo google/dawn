@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "dawn/dawn_proc.h"
+#include "dawn/native/DawnNative.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn_native/DawnNative.h"
 #include "tests/MockCallback.h"
 
 #include <gtest/gtest.h>

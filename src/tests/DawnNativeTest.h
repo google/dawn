@@ -17,9 +17,9 @@
 
 #include <gtest/gtest.h>
 
+#include "dawn/native/DawnNative.h"
+#include "dawn/native/ErrorData.h"
 #include "dawn/webgpu_cpp.h"
-#include "dawn_native/DawnNative.h"
-#include "dawn_native/ErrorData.h"
 
 namespace dawn::native {
 

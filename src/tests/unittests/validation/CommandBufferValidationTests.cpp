@@ -14,7 +14,7 @@
 
 #include <gmock/gmock.h>
 
-#include "dawn_native/CommandEncoder.h"
+#include "dawn/native/CommandEncoder.h"
 
 #include "tests/unittests/validation/ValidationTest.h"
 

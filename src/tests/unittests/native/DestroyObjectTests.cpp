@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
+#include "dawn/native/Toggles.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn_native/Toggles.h"
 #include "mocks/BindGroupLayoutMock.h"
 #include "mocks/BindGroupMock.h"
 #include "mocks/BufferMock.h"

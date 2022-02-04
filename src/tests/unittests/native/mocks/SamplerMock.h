@@ -15,8 +15,8 @@
 #ifndef TESTS_UNITTESTS_NATIVE_MOCKS_SAMPLER_MOCK_H_
 #define TESTS_UNITTESTS_NATIVE_MOCKS_SAMPLER_MOCK_H_
 
-#include "dawn_native/Device.h"
-#include "dawn_native/Sampler.h"
+#include "dawn/native/Device.h"
+#include "dawn/native/Sampler.h"
 
 #include <gmock/gmock.h>
 

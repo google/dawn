@@ -181,7 +181,7 @@ namespace wgpu::binding {
         interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
 
         std::vector<wgpu::FeatureName> requiredFeatures;
-        // See src/dawn_native/Features.cpp for enum <-> string mappings.
+        // See src/dawn/native/Features.cpp for enum <-> string mappings.
         for (auto required : descriptor.requiredFeatures) {
             switch (required) {
                 case interop::GPUFeatureName::kTextureCompressionBc:

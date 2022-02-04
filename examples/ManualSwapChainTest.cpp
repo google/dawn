@@ -59,8 +59,8 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 #include <dawn/dawn_proc.h>
+#include <dawn/native/DawnNative.h>
 #include <dawn/webgpu_cpp.h>
-#include <dawn_native/DawnNative.h>
 #include "GLFW/glfw3.h"
 
 #include <memory>

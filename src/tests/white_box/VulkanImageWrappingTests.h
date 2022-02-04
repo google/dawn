@@ -20,8 +20,8 @@
 #include "dawn/common/vulkan_platform.h"
 
 #include "dawn/common/NonCopyable.h"
+#include "dawn/native/VulkanBackend.h"
 #include "dawn/webgpu_cpp.h"
-#include "dawn_native/VulkanBackend.h"
 
 #include <memory>
 #include <vector>

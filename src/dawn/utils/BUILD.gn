@@ -89,8 +89,8 @@ static_library("utils") {
   deps = [
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native:headers",
     "${dawn_root}/src/dawn/wire",
-    "${dawn_root}/src/dawn_native:dawn_native_headers",
     "${dawn_spirv_tools_dir}:spvtools_opt",
   ]
   libs = []
@@ -156,7 +156,7 @@ if (dawn_standalone) {
     deps = [
       ":glfw",
       "${dawn_root}/src/dawn/common",
-      "${dawn_root}/src/dawn_native",
+      "${dawn_root}/src/dawn/native",
     ]
     libs = []
     frameworks = []

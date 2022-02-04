@@ -15,10 +15,10 @@ This repository contains the implementation of Dawn, which is itself composed of
 - [`src`](../src):
   - [`dawn`](../src/dawn): root directory for Dawn code
       - [`common`](../src/dawn/common): helper code that is allowed to be used by Dawn's core libraries, `dawn_native` and `dawn_wire`. Also allowed for use in all other Dawn targets.
+      - [`native`](../src/dawn/native): code for the implementation of WebGPU on top of graphics APIs. Files in this folder are the "frontend" while subdirectories are "backends".
       - [`wire`](../src/dawn/wire): code for an implementation of WebGPU as a client-server architecture.
       - [`utils`](../src/dawn/utils): helper code to use Dawn used by tests and samples but disallowed for `dawn_native` and `dawn_wire`.
       - [`platform`](../src/dawn/platform): definition of interfaces for dependency injection in `dawn_native` or `dawn_wire`.
-  - [`dawn_native`](../src/dawn_native): code for the implementation of WebGPU on top of graphics APIs. Files in this folder are the "frontend" while subdirectories are "backends".
       - `<backend>`: code for the implementation of the backend on a specific graphics API, for example `d3d12`, `metal` or `vulkan`.
   - [`fuzzers`](../src/dawn/fuzzers): various fuzzers for Dawn that are running in [Clusterfuzz](https://google.github.io/clusterfuzz/).
   - [`include`](../src/include): public headers with subdirectories for each library. Note that some headers are auto-generated and not present directly in the directory.

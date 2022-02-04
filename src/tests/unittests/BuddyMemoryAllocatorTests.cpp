@@ -14,9 +14,9 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/BuddyMemoryAllocator.h"
-#include "dawn_native/PooledResourceMemoryAllocator.h"
-#include "dawn_native/ResourceHeapAllocator.h"
+#include "dawn/native/BuddyMemoryAllocator.h"
+#include "dawn/native/PooledResourceMemoryAllocator.h"
+#include "dawn/native/ResourceHeapAllocator.h"
 
 #include <set>
 #include <vector>

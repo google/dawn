@@ -14,7 +14,7 @@
 
 #include "tests/DawnTest.h"
 
-#include "dawn_native/dawn_platform.h"
+#include "dawn/native/dawn_platform.h"
 
 class InternalResourceUsageTests : public DawnTest {
   protected:

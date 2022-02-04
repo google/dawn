@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/SubresourceStorage.h"
+#include "dawn/native/SubresourceStorage.h"
 
 #include "dawn/common/Log.h"
 

@@ -14,7 +14,7 @@
 
 #include "tests/DawnTest.h"
 
-#include "dawn_native/metal/DeviceMTL.h"
+#include "dawn/native/metal/DeviceMTL.h"
 
 using namespace dawn::native::metal;
 

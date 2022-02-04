@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/Limits.h"
+#include "dawn/native/Limits.h"
 
 // Test |GetDefaultLimits| returns the default.
 TEST(Limits, GetDefaultLimits) {

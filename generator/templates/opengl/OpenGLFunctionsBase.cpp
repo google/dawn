@@ -12,7 +12,7 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "dawn_native/opengl/OpenGLFunctionsBase_autogen.h"
+#include "dawn/native/opengl/OpenGLFunctionsBase_autogen.h"
 
 namespace dawn::native::opengl {
 

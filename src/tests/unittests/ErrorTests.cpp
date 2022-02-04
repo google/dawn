@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/Error.h"
-#include "dawn_native/ErrorData.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/ErrorData.h"
 
 using namespace dawn::native;
 

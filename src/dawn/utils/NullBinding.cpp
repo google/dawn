@@ -15,7 +15,7 @@
 #include "dawn/utils/BackendBinding.h"
 
 #include "dawn/common/Assert.h"
-#include "dawn_native/NullBackend.h"
+#include "dawn/native/NullBackend.h"
 
 #include <memory>
 

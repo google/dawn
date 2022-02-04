@@ -16,7 +16,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/SwapChainUtils.h"
-#include "dawn_native/MetalBackend.h"
+#include "dawn/native/MetalBackend.h"
 
 #define GLFW_EXPOSE_NATIVE_COCOA
 #include "GLFW/glfw3.h"

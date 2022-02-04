@@ -17,7 +17,7 @@
 #include "absl/strings/str_cat.h"
 #include "dawn/common/Assert.h"
 #include "dawn/dawn_proc.h"
-#include "dawn_native/ErrorData.h"
+#include "dawn/native/ErrorData.h"
 
 namespace dawn::native {
 

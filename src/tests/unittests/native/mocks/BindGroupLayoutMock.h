@@ -15,8 +15,8 @@
 #ifndef TESTS_UNITTESTS_NATIVE_MOCKS_BINDGROUPLAYOUT_MOCK_H_
 #define TESTS_UNITTESTS_NATIVE_MOCKS_BINDGROUPLAYOUT_MOCK_H_
 
-#include "dawn_native/BindGroupLayout.h"
-#include "dawn_native/Device.h"
+#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/Device.h"
 
 #include <gmock/gmock.h>
 

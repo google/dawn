@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/RingBufferAllocator.h"
+#include "dawn/native/RingBufferAllocator.h"
 
 using namespace dawn::native;
 

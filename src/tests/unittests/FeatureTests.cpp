@@ -14,9 +14,9 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/Features.h"
-#include "dawn_native/Instance.h"
-#include "dawn_native/null/DeviceNull.h"
+#include "dawn/native/Features.h"
+#include "dawn/native/Instance.h"
+#include "dawn/native/null/DeviceNull.h"
 
 class FeatureTests : public testing::Test {
   public:

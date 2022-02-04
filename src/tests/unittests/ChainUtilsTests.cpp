@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/ChainUtils_autogen.h"
-#include "dawn_native/dawn_platform.h"
+#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/dawn_platform.h"
 
 // Checks that we cannot find any structs in an empty chain
 TEST(ChainUtilsTests, FindEmptyChain) {

@@ -15,8 +15,8 @@
 #ifndef TESTS_UNITTESTS_NATIVE_MOCKS_SWAPCHAIN_MOCK_H_
 #define TESTS_UNITTESTS_NATIVE_MOCKS_SWAPCHAIN_MOCK_H_
 
-#include "dawn_native/Device.h"
-#include "dawn_native/SwapChain.h"
+#include "dawn/native/Device.h"
+#include "dawn/native/SwapChain.h"
 
 #include <gmock/gmock.h>
 

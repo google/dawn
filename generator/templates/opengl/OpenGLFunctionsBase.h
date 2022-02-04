@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_OPENGL_OPENGLFUNCTIONSBASE_H_
 #define DAWNNATIVE_OPENGL_OPENGLFUNCTIONSBASE_H_
 
-#include "dawn_native/Error.h"
-#include "dawn_native/opengl/opengl_platform.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
     using GetProcAddress = void* (*) (const char*);

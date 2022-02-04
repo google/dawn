@@ -16,10 +16,10 @@
 
 #include "dawn/common/Math.h"
 #include "dawn/common/vulkan_platform.h"
-#include "dawn_native/ErrorData.h"
-#include "dawn_native/VulkanBackend.h"
-#include "dawn_native/vulkan/DeviceVk.h"
-#include "dawn_native/vulkan/VulkanError.h"
+#include "dawn/native/ErrorData.h"
+#include "dawn/native/VulkanBackend.h"
+#include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/VulkanError.h"
 
 namespace {
 

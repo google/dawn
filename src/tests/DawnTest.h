@@ -19,11 +19,11 @@
 #include "dawn/common/Platform.h"
 #include "dawn/common/Preprocessor.h"
 #include "dawn/dawn_proc_table.h"
+#include "dawn/native/DawnNative.h"
 #include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn/webgpu_cpp_print.h"
-#include "dawn_native/DawnNative.h"
 #include "tests/ParamGenerator.h"
 #include "tests/ToggleParser.h"
 

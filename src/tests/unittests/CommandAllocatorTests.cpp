@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/CommandAllocator.h"
+#include "dawn/native/CommandAllocator.h"
 
 #include <limits>
 

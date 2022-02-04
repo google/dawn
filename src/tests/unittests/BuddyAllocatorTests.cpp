@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "dawn_native/BuddyAllocator.h"
+#include "dawn/native/BuddyAllocator.h"
 
 using namespace dawn::native;
 

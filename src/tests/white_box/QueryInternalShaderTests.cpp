@@ -14,10 +14,10 @@
 
 #include "tests/DawnTest.h"
 
+#include "dawn/native/Buffer.h"
+#include "dawn/native/CommandEncoder.h"
+#include "dawn/native/QueryHelper.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn_native/Buffer.h"
-#include "dawn_native/CommandEncoder.h"
-#include "dawn_native/QueryHelper.h"
 
 namespace {
 

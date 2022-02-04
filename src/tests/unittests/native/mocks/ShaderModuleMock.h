@@ -15,9 +15,9 @@
 #ifndef TESTS_UNITTESTS_NATIVE_MOCKS_SHADERMODULE_MOCK_H_
 #define TESTS_UNITTESTS_NATIVE_MOCKS_SHADERMODULE_MOCK_H_
 
-#include "dawn_native/Device.h"
-#include "dawn_native/Error.h"
-#include "dawn_native/ShaderModule.h"
+#include "dawn/native/Device.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/ShaderModule.h"
 
 #include <memory>
 

@@ -14,8 +14,8 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "dawn_native/Device.h"
-#include "dawn_native/dawn_platform.h"
+#include "dawn/native/Device.h"
+#include "dawn/native/dawn_platform.h"
 
 using ::testing::HasSubstr;
 

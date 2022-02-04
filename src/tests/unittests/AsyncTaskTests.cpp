@@ -21,8 +21,8 @@
 #include <mutex>
 
 #include "dawn/common/NonCopyable.h"
+#include "dawn/native/AsyncTask.h"
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn_native/AsyncTask.h"
 
 namespace {
 

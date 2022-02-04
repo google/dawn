@@ -15,9 +15,9 @@
 #include "tests/white_box/VulkanImageWrappingTests.h"
 
 #include "dawn/common/Math.h"
+#include "dawn/native/vulkan/AdapterVk.h"
+#include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn_native/vulkan/AdapterVk.h"
-#include "dawn_native/vulkan/DeviceVk.h"
 #include "tests/DawnTest.h"
 
 namespace dawn::native { namespace vulkan {

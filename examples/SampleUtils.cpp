@@ -26,7 +26,7 @@
 
 #include <dawn/dawn_proc.h>
 #include <dawn/dawn_wsi.h>
-#include <dawn_native/DawnNative.h>
+#include <dawn/native/DawnNative.h>
 #include "GLFW/glfw3.h"
 
 #include <algorithm>

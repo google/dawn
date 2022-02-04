@@ -15,7 +15,7 @@
 #include "VideoViewsTests.h"
 
 #include "dawn/common/Assert.h"
-#include "dawn_native/VulkanBackend.h"
+#include "dawn/native/VulkanBackend.h"
 
 #include <fcntl.h>
 #include <gbm.h>

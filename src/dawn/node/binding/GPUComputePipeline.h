@@ -15,8 +15,8 @@
 #ifndef DAWN_NODE_BINDING_GPUPIPELINE_H_
 #define DAWN_NODE_BINDING_GPUPIPELINE_H_
 
+#include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
-#include "dawn_native/DawnNative.h"
 #include "napi.h"
 #include "src/dawn/node/interop/WebGPU.h"
 

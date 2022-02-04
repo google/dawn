@@ -133,13 +133,13 @@ source_set("dawn_native_mocks_sources") {
 
   deps = [
     ":gmock_and_gtest",
+    "${dawn_root}/src/dawn/native:sources",
+    "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",
-    "${dawn_root}/src/dawn_native:dawn_native_sources",
-    "${dawn_root}/src/dawn_native:static",
   ]
 
   # Add internal dawn_native config for internal unittests.
-  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
+  configs += [ "${dawn_root}/src/dawn/native:internal" ]
 
   sources = [
     "unittests/native/mocks/BindGroupLayoutMock.h",
@@ -169,14 +169,14 @@ test("dawn_unittests") {
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native:sources",
+    "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
-    "${dawn_root}/src/dawn_native:dawn_native_sources",
-    "${dawn_root}/src/dawn_native:static",
   ]
 
   # Add internal dawn_native config for internal unittests.
-  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
+  configs += [ "${dawn_root}/src/dawn/native:internal" ]
 
   sources = get_target_outputs(":mock_webgpu_gen")
   sources += [
@@ -328,9 +328,9 @@ source_set("dawn_end2end_tests_sources") {
     "${dawn_root}/src/dawn/common",
 
     # Statically linked because the end2end white_box tests use Dawn internals.
+    "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
-    "${dawn_root}/src/dawn_native:static",
   ]
 
   sources = [
@@ -466,7 +466,7 @@ source_set("dawn_end2end_tests_sources") {
 }
 
 source_set("dawn_white_box_tests_sources") {
-  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
+  configs += [ "${dawn_root}/src/dawn/native:internal" ]
   testonly = true
 
   deps = [
@@ -474,12 +474,12 @@ source_set("dawn_white_box_tests_sources") {
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn/common",
-    "${dawn_root}/src/dawn_native:dawn_native_sources",
+    "${dawn_root}/src/dawn/native:sources",
 
     # Statically linked because the end2end white_box tests use Dawn internals.
+    "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
-    "${dawn_root}/src/dawn_native:static",
   ]
 
   sources = [
@@ -551,9 +551,9 @@ test("dawn_end2end_tests") {
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
-    "${dawn_root}/src/dawn_native:static",
   ]
 
   sources = [
@@ -592,9 +592,9 @@ test("dawn_perf_tests") {
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
-    "${dawn_root}/src/dawn_native",
     "${dawn_root}/src/dawn_platform",
   ]
 

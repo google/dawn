@@ -18,7 +18,7 @@
 #include "dawn/common/Platform.h"
 #include "dawn/common/SwapChainUtils.h"
 #include "dawn/dawn_wsi.h"
-#include "dawn_native/OpenGLBackend.h"
+#include "dawn/native/OpenGLBackend.h"
 
 #include <cstdio>
 #include "GLFW/glfw3.h"

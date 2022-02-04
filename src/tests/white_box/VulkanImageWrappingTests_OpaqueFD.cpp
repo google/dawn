@@ -14,9 +14,9 @@
 
 #include "tests/white_box/VulkanImageWrappingTests.h"
 
-#include "dawn_native/vulkan/DeviceVk.h"
-#include "dawn_native/vulkan/FencedDeleter.h"
-#include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
+#include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 
 #include <gtest/gtest.h>
 #include <unistd.h>

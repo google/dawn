@@ -19,7 +19,7 @@
 #include "GLFW/glfw3.h"
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-#    include "dawn_native/OpenGLBackend.h"
+#    include "dawn/native/OpenGLBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 
 namespace utils {

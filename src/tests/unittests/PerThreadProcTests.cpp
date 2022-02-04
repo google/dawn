@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "dawn/dawn_thread_dispatch_proc.h"
+#include "dawn/native/DawnNative.h"
+#include "dawn/native/Instance.h"
+#include "dawn/native/null/DeviceNull.h"
 #include "dawn/webgpu_cpp.h"
-#include "dawn_native/DawnNative.h"
-#include "dawn_native/Instance.h"
-#include "dawn_native/null/DeviceNull.h"
 
 #include <gtest/gtest.h>
 #include <atomic>

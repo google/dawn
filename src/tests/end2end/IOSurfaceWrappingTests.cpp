@@ -14,9 +14,9 @@
 
 #include "tests/DawnTest.h"
 
+#include "dawn/native/MetalBackend.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn_native/MetalBackend.h"
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreVideo/CVPixelBuffer.h>

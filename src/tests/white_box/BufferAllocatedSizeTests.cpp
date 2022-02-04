@@ -15,7 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "dawn/common/Math.h"
-#include "dawn_native/DawnNative.h"
+#include "dawn/native/DawnNative.h"
 
 #include <algorithm>
 
