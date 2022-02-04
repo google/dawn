@@ -4,16 +4,16 @@ SKIP: FAILED
 precision mediump float;
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
-struct tint_padded_array_element {
+struct strided_arr {
   float el;
 };
 
 struct buf0 {
-  tint_padded_array_element x_GLF_uniform_float_values[1];
+  strided_arr x_GLF_uniform_float_values[1];
 };
 
 layout(binding = 0) uniform buf0_1 {
-  tint_padded_array_element x_GLF_uniform_float_values[1];
+  strided_arr x_GLF_uniform_float_values[1];
 } x_6;
 
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

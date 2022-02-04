@@ -299,7 +299,7 @@ struct Data {
   mat2x3 b;
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   int a;
   mat2x3 b;
 } data;
@@ -347,7 +347,7 @@ struct Data {
   mat4x3 a;
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   float z;
   mat4x3 a;
 } data;
@@ -393,7 +393,7 @@ struct Data {
   int a[5];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   float z;
   int a[5];
 } data;
@@ -440,7 +440,7 @@ struct Data {
   int a[5];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   float z;
   int a[5];
 } data;
@@ -484,7 +484,7 @@ struct Data {
   int a[5];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   float z;
   int a[5];
 } data;
@@ -543,7 +543,7 @@ struct Data {
   Inner c[4];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   Inner c[4];
 } data;
 void tint_symbol() {
@@ -604,7 +604,7 @@ struct Data {
   Inner c[4];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   Inner c[4];
 } data;
 void tint_symbol() {
@@ -665,7 +665,7 @@ struct Data {
   Inner c[4];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   Inner c[4];
 } data;
 void tint_symbol() {
@@ -726,7 +726,7 @@ struct Data {
   Inner c[4];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   Inner c[4];
 } data;
 void tint_symbol() {
@@ -783,7 +783,7 @@ struct Data {
   Inner c[4];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   Inner c[4];
 } data;
 void tint_symbol() {
@@ -844,7 +844,7 @@ struct Data {
   Inner c[4];
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   Inner c[4];
 } data;
 void tint_symbol() {

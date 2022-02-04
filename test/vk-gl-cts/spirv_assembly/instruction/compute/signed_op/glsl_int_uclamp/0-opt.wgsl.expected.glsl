@@ -12,16 +12,16 @@ struct S {
 };
 
 uvec3 x_3 = uvec3(0u, 0u, 0u);
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   int field0[];
 } x_6;
-layout(binding = 1) buffer S_2 {
+layout(binding = 1, std430) buffer S_2 {
   int field0[];
 } x_7;
-layout(binding = 2) buffer S_3 {
+layout(binding = 2, std430) buffer S_3 {
   int field0[];
 } x_8;
-layout(binding = 3) buffer S_4 {
+layout(binding = 3, std430) buffer S_4 {
   int field0[];
 } x_9;
 void main_1() {

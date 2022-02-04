@@ -7,7 +7,7 @@ struct S {
   float f;
 };
 
-layout(binding = 0) buffer arr_block_1 {
+layout(binding = 0, std430) buffer arr_block_1 {
   S inner[];
 } arr;
 void tint_symbol() {

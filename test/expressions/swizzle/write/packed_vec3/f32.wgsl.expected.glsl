@@ -9,7 +9,7 @@ struct S {
   vec3 v;
 };
 
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   vec3 v;
 } U;
 void f() {

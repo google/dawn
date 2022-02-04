@@ -14,12 +14,12 @@ struct buf1 {
   uint one;
 };
 
-struct tint_padded_array_element {
+struct strided_arr {
   int el;
 };
 
 struct buf0 {
-  tint_padded_array_element x_GLF_uniform_int_values[1];
+  strided_arr x_GLF_uniform_int_values[1];
 };
 
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -29,7 +29,7 @@ layout(binding = 1) uniform buf1_1 {
 
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 layout(binding = 0) uniform buf0_1 {
-  tint_padded_array_element x_GLF_uniform_int_values[1];
+  strided_arr x_GLF_uniform_int_values[1];
 } x_10;
 
 float func_() {

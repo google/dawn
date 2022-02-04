@@ -19,10 +19,10 @@ struct Uniforms {
   int size;
 };
 
-layout(binding = 0) buffer ssbOut_1 {
+layout(binding = 0, std430) buffer ssbOut_1 {
   float result[];
 } x_16;
-layout(binding = 1) buffer ssbA_1 {
+layout(binding = 1, std430) buffer ssbA_1 {
   float A[];
 } x_20;
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);

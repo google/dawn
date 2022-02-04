@@ -8,7 +8,7 @@ struct S {
   uint field1[];
 };
 
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   uint field0;
   uint field1[];
 } myvar;

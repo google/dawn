@@ -5,7 +5,7 @@ struct Constants {
   int level;
 };
 
-layout(binding = 3) buffer Result_1 {
+layout(binding = 3, std430) buffer Result_1 {
   float values[];
 } result;
 uniform highp sampler2DArray myTexture_1;

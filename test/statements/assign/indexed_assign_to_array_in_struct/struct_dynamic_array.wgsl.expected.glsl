@@ -13,7 +13,7 @@ layout(binding = 4) uniform Uniforms_1 {
   uint i;
 } uniforms;
 
-layout(binding = 0) buffer OuterS_1 {
+layout(binding = 0, std430) buffer OuterS_1 {
   InnerS a1[];
 } s1;
 void tint_symbol() {

@@ -1,7 +1,7 @@
 #version 310 es
 precision mediump float;
 
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   int arr[];
 } s;
 void tint_symbol() {

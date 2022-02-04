@@ -5,28 +5,28 @@ struct S {
   float a;
 };
 
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   float a;
 } b0;
-layout(binding = 0) buffer S_2 {
+layout(binding = 0, std430) buffer S_2 {
   float a;
 } b1;
-layout(binding = 0) buffer S_3 {
+layout(binding = 0, std430) buffer S_3 {
   float a;
 } b2;
-layout(binding = 0) buffer S_4 {
+layout(binding = 0, std430) buffer S_4 {
   float a;
 } b3;
-layout(binding = 0) buffer S_5 {
+layout(binding = 0, std430) buffer S_5 {
   float a;
 } b4;
-layout(binding = 0) buffer S_6 {
+layout(binding = 0, std430) buffer S_6 {
   float a;
 } b5;
-layout(binding = 0) buffer S_7 {
+layout(binding = 0, std430) buffer S_7 {
   float a;
 } b6;
-layout(binding = 0) buffer S_8 {
+layout(binding = 0, std430) buffer S_8 {
   float a;
 } b7;
 layout(binding = 1) uniform S_9 {

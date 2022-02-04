@@ -468,7 +468,7 @@ struct Data {
   float b;
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -523,7 +523,7 @@ struct Data {
   float b;
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -574,7 +574,7 @@ struct Data {
   float b;
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -626,7 +626,7 @@ struct Data {
   float b;
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   int a;
   float b;
 } coord;
@@ -733,7 +733,7 @@ struct S {
   float x;
 };
 
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   float x;
 } coord;
 float sub_func(float param) {
@@ -980,7 +980,7 @@ struct Data {
   float d;
 };
 
-layout(binding = 0) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_1 {
   float d;
 } data;
 void a() {

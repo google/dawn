@@ -19,7 +19,7 @@ layout(binding = 4) uniform Uniforms_1 {
   uint j;
 } uniforms;
 
-layout(binding = 0) buffer OuterS_1 {
+layout(binding = 0, std430) buffer OuterS_1 {
   S1 a1[];
 } s;
 void tint_symbol() {

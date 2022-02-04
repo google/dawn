@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   int a[];
 } G;
 void tint_symbol() {

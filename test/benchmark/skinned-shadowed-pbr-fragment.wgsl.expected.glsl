@@ -57,7 +57,7 @@ struct ClusterLightGroup {
   uint indices[1769472];
 };
 
-layout(binding = 1) buffer ClusterLightGroup_1 {
+layout(binding = 1, std430) buffer ClusterLightGroup_1 {
   uint offset;
   ClusterLights lights[27648];
   uint indices[1769472];
@@ -69,7 +69,7 @@ struct Light {
   float intensity;
 };
 
-layout(binding = 2) buffer GlobalLights_1 {
+layout(binding = 2, std430) buffer GlobalLights_1 {
   vec3 ambient;
   vec3 dirColor;
   float dirIntensity;
@@ -94,7 +94,7 @@ uint getClusterIndex(vec4 fragCoord) {
   return ((tile.x + (tile.y * tileCount.x)) + ((tile.z * tileCount.x) * tileCount.y));
 }
 
-layout(binding = 6) buffer LightShadowTable_1 {
+layout(binding = 6, std430) buffer LightShadowTable_1 {
   int light[];
 } lightShadowTable;
 vec2 shadowSampleOffsets[16] = vec2[16](vec2(-1.5f, -1.5f), vec2(-1.5f, -0.5f), vec2(-1.5f, 0.5f), vec2(-1.5f, 1.5f), vec2(-0.5f, -1.5f), vec2(-0.5f, -0.5f), vec2(-0.5f, 0.5f), vec2(-0.5f, 1.5f), vec2(0.5f, -1.5f), vec2(0.5f, -0.5f), vec2(0.5f, 0.5f), vec2(0.5f, 1.5f), vec2(1.5f, -1.5f), vec2(1.5f, -0.5f), vec2(1.5f, 0.5f), vec2(1.5f, 1.5f));
@@ -104,7 +104,7 @@ struct ShadowProperties {
   mat4 viewProj;
 };
 
-layout(binding = 7) buffer LightShadows_1 {
+layout(binding = 7, std430) buffer LightShadows_1 {
   ShadowProperties properties[];
 } shadow;
 uniform highp sampler2D shadowTexture_1;

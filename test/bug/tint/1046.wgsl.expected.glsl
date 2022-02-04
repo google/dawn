@@ -26,7 +26,7 @@ layout(binding = 0) uniform Uniforms_1 {
   vec4 color;
 } uniforms;
 
-layout(binding = 1) buffer PointLights_1 {
+layout(binding = 1, std430) buffer PointLights_1 {
   PointLight values[];
 } pointLights;
 struct FragmentInput {

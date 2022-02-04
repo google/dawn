@@ -34,19 +34,19 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMax;
 } uniforms;
 
-layout(binding = 10) buffer U32s_1 {
+layout(binding = 10, std430) buffer U32s_1 {
   uint values[];
 } indices;
-layout(binding = 11) buffer F32s_1 {
+layout(binding = 11, std430) buffer F32s_1 {
   float values[];
 } positions;
-layout(binding = 20) buffer AU32s_1 {
+layout(binding = 20, std430) buffer AU32s_1 {
   uint values[];
 } counters;
-layout(binding = 21) buffer AI32s_1 {
+layout(binding = 21, std430) buffer AI32s_1 {
   int values[];
 } LUT;
-layout(binding = 50) buffer Dbg_1 {
+layout(binding = 50, std430) buffer Dbg_1 {
   uint offsetCounter;
   uint pad0;
   uint pad1;
@@ -156,19 +156,19 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMax;
 } uniforms;
 
-layout(binding = 10) buffer U32s_1 {
+layout(binding = 10, std430) buffer U32s_1 {
   uint values[];
 } indices;
-layout(binding = 11) buffer F32s_1 {
+layout(binding = 11, std430) buffer F32s_1 {
   float values[];
 } positions;
-layout(binding = 20) buffer AU32s_1 {
+layout(binding = 20, std430) buffer AU32s_1 {
   uint values[];
 } counters;
-layout(binding = 21) buffer AI32s_1 {
+layout(binding = 21, std430) buffer AI32s_1 {
   int values[];
 } LUT;
-layout(binding = 50) buffer Dbg_1 {
+layout(binding = 50, std430) buffer Dbg_1 {
   uint offsetCounter;
   uint pad0;
   uint pad1;
@@ -247,19 +247,19 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMax;
 } uniforms;
 
-layout(binding = 10) buffer U32s_1 {
+layout(binding = 10, std430) buffer U32s_1 {
   uint values[];
 } indices;
-layout(binding = 11) buffer F32s_1 {
+layout(binding = 11, std430) buffer F32s_1 {
   float values[];
 } positions;
-layout(binding = 20) buffer AU32s_1 {
+layout(binding = 20, std430) buffer AU32s_1 {
   uint values[];
 } counters;
-layout(binding = 21) buffer AI32s_1 {
+layout(binding = 21, std430) buffer AI32s_1 {
   int values[];
 } LUT;
-layout(binding = 50) buffer Dbg_1 {
+layout(binding = 50, std430) buffer Dbg_1 {
   uint offsetCounter;
   uint pad0;
   uint pad1;

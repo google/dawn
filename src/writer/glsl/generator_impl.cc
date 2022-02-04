@@ -1752,7 +1752,7 @@ bool GeneratorImpl::EmitStorageVariable(const sem::Variable* var) {
     return false;
   }
   ast::VariableBindingPoint bp = decl->BindingPoint();
-  line() << "layout(binding = " << bp.binding->value << ") buffer "
+  line() << "layout(binding = " << bp.binding->value << ", std430) buffer "
          << UniqueIdentifier(StructName(str)) << " {";
   EmitStructMembers(current_buffer_, str);
   auto name = builder_.Symbols().NameFor(decl->symbol);

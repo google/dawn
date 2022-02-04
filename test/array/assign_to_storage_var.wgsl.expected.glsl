@@ -19,13 +19,13 @@ layout(binding = 0) uniform S_1 {
   ivec4 arr[4];
 } src_uniform;
 
-layout(binding = 1) buffer S_2 {
+layout(binding = 1, std430) buffer S_2 {
   ivec4 arr[4];
 } src_storage;
-layout(binding = 2) buffer S_3 {
+layout(binding = 2, std430) buffer S_3 {
   ivec4 arr[4];
 } dst;
-layout(binding = 3) buffer S_nested_1 {
+layout(binding = 3, std430) buffer S_nested_1 {
   int arr[4][3][2];
 } dst_nested;
 ivec4[4] ret_arr() {

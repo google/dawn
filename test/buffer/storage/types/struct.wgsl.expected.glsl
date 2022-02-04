@@ -11,10 +11,10 @@ struct S {
   Inner inner;
 };
 
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   Inner inner;
 } tint_symbol;
-layout(binding = 1) buffer S_2 {
+layout(binding = 1, std430) buffer S_2 {
   Inner inner;
 } tint_symbol_1;
 void tint_symbol_2() {
@@ -27,7 +27,7 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:19: 'assign' :  cannot convert from 'layout( binding=0 column_major shared) buffer block{layout( column_major shared) buffer structure{ global mediump float f} inner}' to 'layout( binding=1 column_major shared) buffer block{layout( column_major shared) buffer structure{ global mediump float f} inner}'
+ERROR: 0:19: 'assign' :  cannot convert from 'layout( binding=0 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global mediump float f} inner}' to 'layout( binding=1 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global mediump float f} inner}'
 ERROR: 0:19: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 

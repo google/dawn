@@ -2,7 +2,7 @@
 precision mediump float;
 
 const uint width = 128u;
-layout(binding = 1) buffer Result_1 {
+layout(binding = 1, std430) buffer Result_1 {
   float values[];
 } result;
 uniform highp sampler2D tex_1;

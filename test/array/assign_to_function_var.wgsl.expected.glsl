@@ -15,7 +15,7 @@ layout(binding = 0) uniform S_1 {
   ivec4 arr[4];
 } src_uniform;
 
-layout(binding = 1) buffer S_2 {
+layout(binding = 1, std430) buffer S_2 {
   ivec4 arr[4];
 } src_storage;
 ivec4[4] ret_arr() {

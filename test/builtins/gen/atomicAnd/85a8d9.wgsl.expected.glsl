@@ -5,7 +5,7 @@ struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0) buffer SB_RW_1 {
+layout(binding = 0, std430) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
 void atomicAnd_85a8d9() {
@@ -27,7 +27,7 @@ struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0) buffer SB_RW_1 {
+layout(binding = 0, std430) buffer SB_RW_1 {
   uint arg_0;
 } sb_rw;
 void atomicAnd_85a8d9() {

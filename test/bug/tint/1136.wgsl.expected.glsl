@@ -9,7 +9,7 @@ struct Buffer {
   uint data;
 };
 
-layout(binding = 0) buffer Buffer_1 {
+layout(binding = 0, std430) buffer Buffer_1 {
   uint data;
 } tint_symbol;
 void tint_symbol_1() {

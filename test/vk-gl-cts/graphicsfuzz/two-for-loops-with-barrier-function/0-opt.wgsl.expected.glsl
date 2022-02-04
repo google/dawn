@@ -20,7 +20,7 @@ layout(binding = 1) uniform buf0_1 {
   vec2 injectionSwitch;
 } x_9;
 
-layout(binding = 0) buffer doesNotMatter_1 {
+layout(binding = 0, std430) buffer doesNotMatter_1 {
   uint x_compute_data[];
 } x_12;
 void main_1() {

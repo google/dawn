@@ -12,7 +12,7 @@ struct S {
 vec4 x_2 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 int x_3 = 0;
 int x_4 = 0;
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   int field0[];
 } x_5;
 void main_1() {

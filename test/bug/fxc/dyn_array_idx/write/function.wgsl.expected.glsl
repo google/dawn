@@ -17,7 +17,7 @@ struct Result {
   int tint_symbol;
 };
 
-layout(binding = 1) buffer Result_1 {
+layout(binding = 1, std430) buffer Result_1 {
   int tint_symbol;
 } result;
 void f() {

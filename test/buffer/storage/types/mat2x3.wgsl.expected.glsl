@@ -5,10 +5,10 @@ struct tint_symbol_block {
   mat2x3 inner;
 };
 
-layout(binding = 0) buffer tint_symbol_block_1 {
+layout(binding = 0, std430) buffer tint_symbol_block_1 {
   mat2x3 inner;
 } tint_symbol;
-layout(binding = 1) buffer tint_symbol_block_2 {
+layout(binding = 1, std430) buffer tint_symbol_block_2 {
   mat2x3 inner;
 } tint_symbol_1;
 void tint_symbol_2() {

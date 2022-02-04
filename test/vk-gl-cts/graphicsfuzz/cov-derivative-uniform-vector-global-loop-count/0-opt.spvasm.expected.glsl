@@ -4,20 +4,20 @@ SKIP: FAILED
 precision mediump float;
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
-struct tint_padded_array_element {
+struct strided_arr {
   float el;
 };
 
 struct buf1 {
-  tint_padded_array_element x_GLF_uniform_float_values[2];
+  strided_arr x_GLF_uniform_float_values[2];
 };
 
-struct tint_padded_array_element_1 {
+struct strided_arr_1 {
   int el;
 };
 
 struct buf0 {
-  tint_padded_array_element_1 x_GLF_uniform_int_values[3];
+  strided_arr_1 x_GLF_uniform_int_values[3];
 };
 
 struct buf2 {
@@ -26,11 +26,11 @@ struct buf2 {
 
 int x_GLF_global_loop_count = 0;
 layout(binding = 1) uniform buf1_1 {
-  tint_padded_array_element x_GLF_uniform_float_values[2];
+  strided_arr x_GLF_uniform_float_values[2];
 } x_7;
 
 layout(binding = 0) uniform buf0_1 {
-  tint_padded_array_element_1 x_GLF_uniform_int_values[3];
+  strided_arr_1 x_GLF_uniform_int_values[3];
 } x_10;
 
 layout(binding = 2) uniform buf2_1 {

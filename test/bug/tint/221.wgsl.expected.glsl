@@ -6,7 +6,7 @@ struct Buf {
   uint data[50];
 };
 
-layout(binding = 0) buffer Buf_1 {
+layout(binding = 0, std430) buffer Buf_1 {
   uint count;
   uint data[50];
 } b;

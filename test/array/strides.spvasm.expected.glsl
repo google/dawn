@@ -13,7 +13,7 @@ struct S {
   strided_arr_1 a[4];
 };
 
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   strided_arr_1 a[4];
 } s;
 void f_1() {

@@ -165,7 +165,7 @@ layout(binding = 0) uniform SimulationParams_1 {
   vec4 seed;
 } sim_params;
 
-layout(binding = 1) buffer Particles_1 {
+layout(binding = 1, std430) buffer Particles_1 {
   Particle particles[];
 } data;
 struct UBO {
@@ -257,10 +257,10 @@ layout(binding = 3) uniform UBO_1 {
   uint width;
 } ubo;
 
-layout(binding = 4) buffer Buffer_1 {
+layout(binding = 4, std430) buffer Buffer_1 {
   float weights[];
 } buf_in;
-layout(binding = 5) buffer Buffer_2 {
+layout(binding = 5, std430) buffer Buffer_2 {
   float weights[];
 } buf_out;
 uniform highp sampler2D tex_in_1;
@@ -315,10 +315,10 @@ layout(binding = 3) uniform UBO_1 {
   uint width;
 } ubo;
 
-layout(binding = 4) buffer Buffer_1 {
+layout(binding = 4, std430) buffer Buffer_1 {
   float weights[];
 } buf_in;
-layout(binding = 5) buffer Buffer_2 {
+layout(binding = 5, std430) buffer Buffer_2 {
   float weights[];
 } buf_out;
 layout(rgba8) uniform highp writeonly image2D tex_out;

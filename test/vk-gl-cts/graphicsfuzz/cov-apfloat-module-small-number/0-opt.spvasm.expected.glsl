@@ -5,25 +5,25 @@ warning: use of deprecated builtin
 precision mediump float;
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
-struct tint_padded_array_element {
+struct strided_arr {
   int el;
 };
 
 struct buf1 {
-  tint_padded_array_element x_GLF_uniform_int_values[2];
+  strided_arr x_GLF_uniform_int_values[2];
 };
 
-struct tint_padded_array_element_1 {
+struct strided_arr_1 {
   float el;
 };
 
 struct buf0 {
-  tint_padded_array_element_1 x_GLF_uniform_float_values[1];
+  strided_arr_1 x_GLF_uniform_float_values[1];
 };
 
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 layout(binding = 1) uniform buf1_1 {
-  tint_padded_array_element x_GLF_uniform_int_values[2];
+  strided_arr x_GLF_uniform_int_values[2];
 } x_8;
 
 void main_1() {
@@ -92,7 +92,7 @@ void main() {
 }
 Error parsing GLSL shader:
 ERROR: 0:43: '|' :  wrong operand types: no operation '|' exists that takes a left-hand operand of type ' global bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:43: '' : compilation terminated
+ERROR: 0:43: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

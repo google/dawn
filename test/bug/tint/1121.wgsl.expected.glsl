@@ -7,7 +7,7 @@ struct LightData {
   float radius;
 };
 
-layout(binding = 0) buffer LightsBuffer_1 {
+layout(binding = 0, std430) buffer LightsBuffer_1 {
   LightData lights[];
 } lightsBuffer;
 struct TileLightIdData {
@@ -19,7 +19,7 @@ struct Tiles {
   TileLightIdData data[4];
 };
 
-layout(binding = 0) buffer Tiles_1 {
+layout(binding = 0, std430) buffer Tiles_1 {
   TileLightIdData data[4];
 } tileLightId;
 struct Config {

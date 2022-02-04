@@ -5,7 +5,7 @@ struct SSBO {
   mat2 m;
 };
 
-layout(binding = 0) buffer SSBO_1 {
+layout(binding = 0, std430) buffer SSBO_1 {
   mat2 m;
 } ssbo;
 void f() {

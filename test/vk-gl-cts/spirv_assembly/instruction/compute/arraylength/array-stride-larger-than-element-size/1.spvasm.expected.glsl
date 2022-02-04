@@ -11,10 +11,10 @@ struct Buf0 {
   uint values[];
 };
 
-layout(binding = 1) buffer Buf1_1 {
+layout(binding = 1, std430) buffer Buf1_1 {
   int result;
 } x_4;
-layout(binding = 0) buffer Buf0_1 {
+layout(binding = 0, std430) buffer Buf0_1 {
   uint values[];
 } x_7;
 void main_1() {

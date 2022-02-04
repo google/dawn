@@ -28,7 +28,7 @@ layout(binding = 2) uniform buf2_1 {
   vec2 resolution;
 } x_13;
 
-layout(binding = 0) buffer doesNotMatter_1 {
+layout(binding = 0, std430) buffer doesNotMatter_1 {
   int x_compute_data[];
 } x_15;
 void main_1() {

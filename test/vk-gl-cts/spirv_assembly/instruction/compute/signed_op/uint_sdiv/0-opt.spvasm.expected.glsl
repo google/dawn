@@ -8,13 +8,13 @@ struct S {
 };
 
 uvec3 x_2 = uvec3(0u, 0u, 0u);
-layout(binding = 0) buffer S_1 {
+layout(binding = 0, std430) buffer S_1 {
   uint field0[];
 } x_5;
-layout(binding = 1) buffer S_2 {
+layout(binding = 1, std430) buffer S_2 {
   uint field0[];
 } x_6;
-layout(binding = 2) buffer S_3 {
+layout(binding = 2, std430) buffer S_3 {
   uint field0[];
 } x_7;
 void main_1() {

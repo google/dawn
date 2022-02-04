@@ -3,7 +3,7 @@ SKIP: FAILED
 #version 310 es
 precision mediump float;
 
-layout(binding = 1) buffer SB_RO_1 {
+layout(binding = 1, std430) buffer SB_RO_1 {
   float arg_0[];
 } sb_ro;
 void arrayLength_a0f5ca() {
@@ -35,7 +35,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(binding = 1) buffer SB_RO_1 {
+layout(binding = 1, std430) buffer SB_RO_1 {
   float arg_0[];
 } sb_ro;
 void arrayLength_a0f5ca() {
@@ -63,7 +63,7 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 precision mediump float;
 
-layout(binding = 1) buffer SB_RO_1 {
+layout(binding = 1, std430) buffer SB_RO_1 {
   float arg_0[];
 } sb_ro;
 void arrayLength_a0f5ca() {

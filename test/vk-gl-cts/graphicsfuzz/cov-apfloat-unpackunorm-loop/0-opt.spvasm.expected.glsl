@@ -11,16 +11,16 @@ vec4 tint_unpack4x8unorm(uint param_0) {
 
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
-struct tint_padded_array_element {
+struct strided_arr {
   int el;
 };
 
 struct buf0 {
-  tint_padded_array_element x_GLF_uniform_int_values[3];
+  strided_arr x_GLF_uniform_int_values[3];
 };
 
 layout(binding = 0) uniform buf0_1 {
-  tint_padded_array_element x_GLF_uniform_int_values[3];
+  strided_arr x_GLF_uniform_int_values[3];
 } x_6;
 
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);

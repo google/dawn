@@ -31,8 +31,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier
-ERROR: 0:5: '' : compilation terminated
+ERROR: 0:5: 'uint4' : undeclared identifier 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -60,8 +60,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier
-ERROR: 0:5: '' : compilation terminated
+ERROR: 0:5: 'uint4' : undeclared identifier 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -90,8 +90,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier
-ERROR: 0:5: '' : compilation terminated
+ERROR: 0:5: 'uint4' : undeclared identifier 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

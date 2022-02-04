@@ -13,14 +13,14 @@ struct Result {
   uint value;
 };
 
-layout(binding = 1) buffer Result_1 {
+layout(binding = 1, std430) buffer Result_1 {
   uint value;
 } result;
 struct TestData {
   int data[3];
 };
 
-layout(binding = 0) buffer TestData_1 {
+layout(binding = 0, std430) buffer TestData_1 {
   int data[3];
 } s;
 int runTest() {

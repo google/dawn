@@ -9,7 +9,7 @@ struct SSBO {
   strided_arr m[2];
 };
 
-layout(binding = 0) buffer SSBO_1 {
+layout(binding = 0, std430) buffer SSBO_1 {
   strided_arr m[2];
 } ssbo;
 mat2 arr_to_mat2x2_stride_16(strided_arr arr[2]) {
