@@ -130,14 +130,13 @@ struct TypeInfo {
       return true;
     }
 
-    return type->Is(&Of<std::remove_const_t<TO>>());
+    return type->Is(&Of<std::remove_cv_t<TO>>());
   }
 
   /// @returns the static TypeInfo for the type T
   template <typename T>
   static const TypeInfo& Of() {
-    using NO_CV = typename std::remove_cv<T>::type;
-    return detail::TypeInfoOf<NO_CV>::info;
+    return detail::TypeInfoOf<std::remove_cv_t<T>>::info;
   }
 
   /// @returns a compile-time hashcode for the type `T`.
@@ -148,6 +147,9 @@ struct TypeInfo {
   static constexpr HashCode HashCodeOf() {
     static_assert(traits::IsTypeOrDerived<T, CastableBase>::value,
                   "T is not Castable");
+    static_assert(
+        std::is_same_v<T, std::remove_cv_t<T>>,
+        "Strip const / volatile decorations before calling HashCodeOf");
     /// Use the compiler's "pretty" function name, which includes the template
     /// type, to obtain a unique hash value.
 #ifdef _MSC_VER
@@ -180,7 +182,7 @@ struct TypeInfo {
     if constexpr (kCount == 0) {
       return 0;
     } else if constexpr (kCount == 1) {
-      return HashCodeOf<std::tuple_element_t<0, TUPLE>>();
+      return HashCodeOf<std::remove_cv_t<std::tuple_element_t<0, TUPLE>>>();
     } else {
       constexpr auto kMid = kCount / 2;
       return CombinedHashCodeOfTuple<traits::SliceTuple<0, kMid, TUPLE>>() |
@@ -472,8 +474,8 @@ namespace detail {
 /// @note does not handle the Default case
 /// @see Switch().
 template <typename FN>
-using SwitchCaseType = std::remove_const_t<std::remove_pointer_t<
-    traits::ParameterType<std::remove_reference_t<FN>, 0>>>;
+using SwitchCaseType = std::remove_pointer_t<
+    traits::ParameterType<std::remove_reference_t<FN>, 0>>;
 
 /// Evaluates to true if the function `FN` has the signature of a Default case
 /// in a Switch().
@@ -530,7 +532,8 @@ inline bool NonDefaultCases(T* object,
     // Attempt to dynamically cast the object to the handler type. If that
     // succeeds, call the case handler with the cast object.
     using CaseType = SwitchCaseType<CaseFunc>;
-    if (auto* ptr = As<CaseType>(object)) {
+    if (type->Is(&TypeInfo::Of<CaseType>())) {
+      auto* ptr = static_cast<CaseType*>(object);
       if constexpr (kHasReturnType) {
         *result = std::get<0>(cases)(ptr);
       } else {
