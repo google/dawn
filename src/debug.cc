@@ -16,6 +16,8 @@
 
 #include <memory>
 
+#include "src/utils/debugger.h"
+
 namespace tint {
 namespace {
 
@@ -41,6 +43,8 @@ InternalCompilerError::~InternalCompilerError() {
   if (ice_reporter) {
     ice_reporter(diagnostics_);
   }
+
+  debugger::Break();
 }
 
 }  // namespace tint

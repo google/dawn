@@ -48,6 +48,8 @@ add_library(tint_diagnostic_utils
   diagnostic/formatter.h
   diagnostic/printer.cc
   diagnostic/printer.h
+  utils/debugger.cc
+  utils/debugger.h
 )
 tint_default_compile_options(tint_diagnostic_utils)
 
