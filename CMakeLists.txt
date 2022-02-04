@@ -380,6 +380,7 @@ function(tint_default_compile_options TARGET)
         -Wno-shorten-64-to-32
         -Wno-shadow-field-in-constructor
         -Wno-reserved-id-macro
+        -Wno-language-extension-token
       )
     endif()
   endif()

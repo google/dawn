@@ -828,13 +828,13 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
     glslang::InitializeProcess();
   }
 
-  auto generate = [&](const tint::Program* program,
+  auto generate = [&](const tint::Program* prg,
                       const std::string entry_point_name) -> bool {
     tint::writer::glsl::Options gen_options;
     auto result =
-        tint::writer::glsl::Generate(program, gen_options, entry_point_name);
+        tint::writer::glsl::Generate(prg, gen_options, entry_point_name);
     if (!result.success) {
-      PrintWGSL(std::cerr, *program);
+      PrintWGSL(std::cerr, *prg);
       std::cerr << "Failed to generate: " << result.error << std::endl;
       return false;
     }
