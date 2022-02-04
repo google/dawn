@@ -78,7 +78,7 @@ set(ENABLE_OPENGLES OFF)
 set(ENABLE_DESKTOP_GL OFF)
 set(ENABLE_VULKAN OFF)
 set(USE_X11 OFF)
-set(BUILD_EXAMPLE OFF)
+set(BUILD_SAMPLES OFF)
 if (WIN32)
     set(ENABLE_D3D12 ON)
     if (NOT WINDOWS_STORE)
@@ -102,7 +102,7 @@ endif()
 
 # Current examples are depend on GLFW
 if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
-    set(BUILD_EXAMPLE ON)
+    set(BUILD_SAMPLES ON)
 endif()
 
 option_if_not_defined(DAWN_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
@@ -114,7 +114,7 @@ option_if_not_defined(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backe
 option_if_not_defined(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
 option_if_not_defined(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
 
-option_if_not_defined(DAWN_BUILD_EXAMPLES "Enables building Dawn's exmaples" ${BUILD_EXAMPLE})
+option_if_not_defined(DAWN_BUILD_SAMPLES "Enables building Dawn's samples" ${BUILD_SAMPLES})
 option_if_not_defined(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
 
 option_if_not_defined(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
@@ -220,10 +220,10 @@ add_subdirectory(src/dawn/wire)
 # TODO(dawn:269): Remove once the implementation-based swapchains are removed.
 add_subdirectory(src/dawn/utils)
 
-if (DAWN_BUILD_EXAMPLES)
+if (DAWN_BUILD_SAMPLES)
     #TODO(dawn:269): Add this once implementation-based swapchains are removed.
     #add_subdirectory(src/dawn/utils)
-    add_subdirectory(examples)
+    add_subdirectory(samples/dawn)
 endif()
 
 if (DAWN_BUILD_NODE_BINDINGS)

@@ -85,7 +85,7 @@ config("internal_config") {
   # Only internal Dawn targets can use this config, this means only targets in
   # this BUILD.gn file and related subdirs.
   visibility = [
-    "${dawn_root}/examples/*",
+    "${dawn_root}/samples/dawn/*",
     "${dawn_root}/src/*",
     "${dawn_root}/src/dawn/*",
   ]

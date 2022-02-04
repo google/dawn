@@ -22,7 +22,7 @@ group("all") {
     "src/tests:dawn_tests",
   ]
   if (dawn_standalone) {
-    deps += [ "examples:dawn_samples" ]
+    deps += [ "samples/dawn:samples" ]
   }
 }
 
