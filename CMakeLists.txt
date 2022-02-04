@@ -237,7 +237,7 @@ if (DAWN_BUILD_NODE_BINDINGS)
             message(FATAL_ERROR
                 "DAWN_BUILD_NODE_BINDINGS requires missing dependency '${DEP}'\n"
                 "Please follow the 'Fetch dependencies' instructions at:\n"
-                "./src/dawn_node/README.md"
+                "./src/dawn/node/README.md"
             )
         endif()
     endforeach()
@@ -245,5 +245,5 @@ if (DAWN_BUILD_NODE_BINDINGS)
         message(FATAL_ERROR "DAWN_BUILD_NODE_BINDINGS requires building with DAWN_ENABLE_PIC")
     endif()
 
-    add_subdirectory(src/dawn_node)
+    add_subdirectory(src/dawn/node)
 endif()

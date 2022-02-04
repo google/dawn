@@ -97,4 +97,4 @@ Desktop.ini
 $RECYCLE.BIN/
 
 ### Dawn node tools binaries
-src/dawn_node/tools/bin/
+src/dawn/node/tools/bin/
