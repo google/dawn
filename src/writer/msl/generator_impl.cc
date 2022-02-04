@@ -885,6 +885,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     return true;
   };
 
+  // MSL requires that `lod` is a constant 0 for 1D textures.
+  bool level_is_constant_zero =
+      texture_type->dim() == ast::TextureDimension::k1d;
+
   switch (builtin->Type()) {
     case sem::BuiltinType::kTextureDimensions: {
       std::vector<const char*> dims;
@@ -912,9 +916,13 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
           return false;
         }
         out << ".get_" << name << "(";
-        if (auto* level = arg(Usage::kLevel)) {
-          if (!EmitExpression(out, level->Declaration())) {
-            return false;
+        if (level_is_constant_zero) {
+          out << "0";
+        } else {
+          if (auto* level = arg(Usage::kLevel)) {
+            if (!EmitExpression(out, level->Declaration())) {
+              return false;
+            }
           }
         }
         out << ")";
@@ -1061,8 +1069,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     if (lod_param_is_named) {
       out << "level(";
     }
-    if (!EmitExpression(out, level->Declaration())) {
-      return false;
+    if (level_is_constant_zero) {
+      out << "0";
+    } else {
+      if (!EmitExpression(out, level->Declaration())) {
+        return false;
+      }
     }
     if (lod_param_is_named) {
       out << ")";

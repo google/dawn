@@ -27,7 +27,7 @@ std::string expected_texture_overload(
   switch (overload) {
     case ValidTextureOverload::kDimensions1d:
     case ValidTextureOverload::kDimensionsStorageWO1d:
-      return R"(int(texture.get_width()))";
+      return R"(int(texture.get_width(0)))";
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensions2dArray:
     case ValidTextureOverload::kDimensionsCube:
@@ -225,11 +225,11 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
       return R"(texture.sample_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4, 5.0f))";
     case ValidTextureOverload::kLoad1dLevelF32:
-      return R"(texture.read(uint(1), 3))";
+      return R"(texture.read(uint(1), 0))";
     case ValidTextureOverload::kLoad1dLevelU32:
-      return R"(texture.read(uint(1), 3))";
+      return R"(texture.read(uint(1), 0))";
     case ValidTextureOverload::kLoad1dLevelI32:
-      return R"(texture.read(uint(1), 3))";
+      return R"(texture.read(uint(1), 0))";
     case ValidTextureOverload::kLoad2dLevelF32:
       return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoad2dLevelU32:
