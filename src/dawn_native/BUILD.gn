@@ -770,7 +770,7 @@ dawn_component("webgpu_dawn") {
 
   sources = get_target_outputs(":webgpu_dawn_native_proc_gen")
   deps = [
-    ":dawn_native_static",
+    ":static",
     ":webgpu_dawn_native_proc_gen",
   ]
 }
