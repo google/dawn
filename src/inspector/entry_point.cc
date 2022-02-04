@@ -18,7 +18,17 @@ namespace tint {
 namespace inspector {
 
 StageVariable::StageVariable() = default;
-StageVariable::StageVariable(const StageVariable&) = default;
+StageVariable::StageVariable(const StageVariable& other)
+    : name(other.name),
+      has_location_attribute(other.has_location_attribute),
+      location_attribute(other.location_attribute),
+      has_location_decoration(has_location_attribute),
+      location_decoration(location_attribute),
+      component_type(other.component_type),
+      composition_type(other.composition_type),
+      interpolation_type(other.interpolation_type),
+      interpolation_sampling(other.interpolation_sampling) {}
+
 StageVariable::~StageVariable() = default;
 
 EntryPoint::EntryPoint() = default;

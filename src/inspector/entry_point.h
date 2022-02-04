@@ -59,7 +59,8 @@ struct StageVariable {
   /// Constructor
   StageVariable();
   /// Copy constructor
-  StageVariable(const StageVariable&);
+  /// @param other the StageVariable to copy
+  StageVariable(const StageVariable& other);
   /// Destructor
   ~StageVariable();
 
