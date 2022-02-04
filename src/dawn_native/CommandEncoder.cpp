@@ -16,6 +16,8 @@
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Math.h"
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/ChainUtils_autogen.h"
@@ -33,8 +35,6 @@
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/ValidationUtils_autogen.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <cmath>
 #include <map>

@@ -214,7 +214,7 @@ add_subdirectory(third_party)
 add_subdirectory(generator)
 add_subdirectory(src/dawn)
 add_subdirectory(src/dawn/common)
-add_subdirectory(src/dawn_platform)
+add_subdirectory(src/dawn/platform)
 add_subdirectory(src/dawn_native)
 add_subdirectory(src/dawn/wire)
 # TODO(dawn:269): Remove once the implementation-based swapchains are removed.

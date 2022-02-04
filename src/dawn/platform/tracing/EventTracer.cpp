@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_platform/tracing/EventTracer.h"
+#include "dawn/platform/tracing/EventTracer.h"
 #include "dawn/common/Assert.h"
-#include "dawn_platform/DawnPlatform.h"
+#include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::platform::tracing {
 

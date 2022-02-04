@@ -15,12 +15,12 @@
 #include "dawn_native/DawnNative.h"
 
 #include "dawn/common/Log.h"
+#include "dawn/platform/DawnPlatform.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/Texture.h"
-#include "dawn_platform/DawnPlatform.h"
 
 // Contains the entry-points into dawn_native
 

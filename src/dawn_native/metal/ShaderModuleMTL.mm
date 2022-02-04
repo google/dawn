@@ -14,13 +14,13 @@
 
 #include "dawn_native/metal/ShaderModuleMTL.h"
 
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 #include "dawn_native/metal/RenderPipelineMTL.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <tint/tint.h>
 

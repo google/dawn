@@ -179,7 +179,7 @@ source_set("dawn_native_sources") {
   # dawn_native target
   public_deps = [
     ":dawn_abseil",
-    "${dawn_root}/src/dawn_platform",
+    "${dawn_root}/src/dawn/platform",
   ]
 
   sources = get_target_outputs(":dawn_native_utils_gen")

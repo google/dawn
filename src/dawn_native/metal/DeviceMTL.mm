@@ -16,6 +16,8 @@
 
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Platform.h"
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Commands.h"
@@ -35,8 +37,6 @@
 #include "dawn_native/metal/SwapChainMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
 #include "dawn_native/metal/UtilsMetal.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <type_traits>
 

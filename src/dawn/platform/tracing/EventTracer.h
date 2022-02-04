@@ -15,7 +15,7 @@
 #ifndef DAWNPLATFORM_TRACING_EVENTTRACER_H_
 #define DAWNPLATFORM_TRACING_EVENTTRACER_H_
 
-#include "dawn_platform/dawn_platform_export.h"
+#include "dawn/platform/dawn_platform_export.h"
 
 #include <cstdint>
 

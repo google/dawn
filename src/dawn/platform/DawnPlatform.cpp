@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/WorkerThread.h"
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/WorkerThread.h"
 
 #include "dawn/common/Assert.h"
 

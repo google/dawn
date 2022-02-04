@@ -14,11 +14,11 @@
 
 #include "dawn_native/vulkan/QuerySetVk.h"
 
+#include "dawn/platform/DawnPlatform.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
-#include "dawn_platform/DawnPlatform.h"
 
 namespace dawn::native::vulkan {
 

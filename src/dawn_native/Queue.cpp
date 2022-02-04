@@ -15,6 +15,8 @@
 #include "dawn_native/Queue.h"
 
 #include "dawn/common/Constants.h"
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandEncoder.h"
@@ -29,8 +31,6 @@
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Texture.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <cstring>
 

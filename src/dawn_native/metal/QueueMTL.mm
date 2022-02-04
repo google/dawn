@@ -15,14 +15,14 @@
 #include "dawn_native/metal/QueueMTL.h"
 
 #include "dawn/common/Math.h"
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/metal/CommandBufferMTL.h"
 #include "dawn_native/metal/DeviceMTL.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn::native::metal {
 

@@ -16,7 +16,7 @@
 #define COMMON_WORKERTHREAD_H_
 
 #include "dawn/common/NonCopyable.h"
-#include "dawn_platform/DawnPlatform.h"
+#include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::platform {
 

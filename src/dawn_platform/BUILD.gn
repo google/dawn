@@ -1,4 +1,4 @@
-# Copyright 2020 The Dawn Authors
+# Copyright 2022 The Dawn Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,30 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../scripts/dawn_overrides_with_defaults.gni")
-
-import("${dawn_root}/scripts/dawn_component.gni")
-
-dawn_component("dawn_platform") {
-  DEFINE_PREFIX = "DAWN_PLATFORM"
-
-  configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
-
-  sources = [
-    "${dawn_root}/src/include/dawn_platform/DawnPlatform.h",
-    "${dawn_root}/src/include/dawn_platform/dawn_platform_export.h",
-    "DawnPlatform.cpp",
-    "WorkerThread.cpp",
-    "WorkerThread.h",
-    "tracing/EventTracer.cpp",
-    "tracing/EventTracer.h",
-    "tracing/TraceEvent.h",
-  ]
-
-  deps = [ "${dawn_root}/src/dawn/common" ]
-
-  public_deps = [
-    # DawnPlatform.h has #include <dawn/webgpu.h>
-    "${dawn_root}/src/dawn:dawn_headers",
-  ]
+################################################################################
+# Build target aliases
+# TODO(crbug.com/dawn/1275) - remove these
+################################################################################
+group("dawn_platform") {
+  public_deps = [ "../dawn/platform" ]
 }

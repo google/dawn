@@ -16,14 +16,14 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Platform.h"
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/SpirvValidation.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
 #include "dawn_native/opengl/SpirvUtils.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <spirv_glsl.hpp>
 

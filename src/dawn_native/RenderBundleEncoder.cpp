@@ -14,6 +14,8 @@
 
 #include "dawn_native/RenderBundleEncoder.h"
 
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
@@ -21,8 +23,6 @@
 #include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/ValidationUtils_autogen.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn::native {
 

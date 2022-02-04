@@ -18,11 +18,11 @@
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
+#include "dawn/platform/DawnPlatform.h"
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Surface.h"
 #include "dawn_native/ValidationUtils_autogen.h"
-#include "dawn_platform/DawnPlatform.h"
 
 // For SwiftShader fallback
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)

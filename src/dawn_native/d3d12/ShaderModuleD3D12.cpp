@@ -18,6 +18,8 @@
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/WindowsUtils.h"
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
@@ -26,8 +28,6 @@
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <d3dcompiler.h>
 

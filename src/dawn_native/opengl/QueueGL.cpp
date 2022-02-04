@@ -14,12 +14,12 @@
 
 #include "dawn_native/opengl/QueueGL.h"
 
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/CommandBufferGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/TextureGL.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn::native::opengl {
 

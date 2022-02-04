@@ -15,8 +15,8 @@
 #include "dawn_native/PersistentCache.h"
 
 #include "dawn/common/Assert.h"
+#include "dawn/platform/DawnPlatform.h"
 #include "dawn_native/Device.h"
-#include "dawn_platform/DawnPlatform.h"
 
 namespace dawn::native {
 

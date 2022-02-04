@@ -14,6 +14,8 @@
 
 #include "dawn_native/vulkan/ShaderModuleVk.h"
 
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn_native/SpirvValidation.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
@@ -22,8 +24,6 @@
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
-#include "dawn_platform/DawnPlatform.h"
-#include "dawn_platform/tracing/TraceEvent.h"
 
 #include <tint/tint.h>
 #include <spirv-tools/libspirv.hpp>

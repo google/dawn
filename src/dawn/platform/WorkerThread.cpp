@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_platform/WorkerThread.h"
+#include "dawn/platform/WorkerThread.h"
 
 #include <condition_variable>
 #include <functional>
