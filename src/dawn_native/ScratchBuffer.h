@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_SCRATCHBUFFER_H_
 #define DAWNNATIVE_SCRATCHBUFFER_H_
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/Buffer.h"
 
 #include <cstdint>

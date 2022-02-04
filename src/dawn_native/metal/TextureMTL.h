@@ -17,7 +17,7 @@
 
 #include "dawn_native/Texture.h"
 
-#include "common/NSRef.h"
+#include "dawn/common/NSRef.h"
 #include "dawn_native/DawnNative.h"
 
 #include <IOSurface/IOSurfaceRef.h>

@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/Math.h"
 #include "dawn/EnumClassBitmasks.h"
+#include "dawn/common/Math.h"
 
 #include <cmath>
 #include "dawn/webgpu_cpp.h"

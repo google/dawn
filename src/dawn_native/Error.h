@@ -16,7 +16,7 @@
 #define DAWNNATIVE_ERROR_H_
 
 #include "absl/strings/str_format.h"
-#include "common/Result.h"
+#include "dawn/common/Result.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/webgpu_absl_format.h"
 
@@ -24,12 +24,7 @@
 
 namespace dawn::native {
 
-    enum class InternalErrorType : uint32_t {
-        Validation,
-        DeviceLost,
-        Internal,
-        OutOfMemory
-    };
+    enum class InternalErrorType : uint32_t { Validation, DeviceLost, Internal, OutOfMemory };
 
     // MaybeError and ResultOrError are meant to be used as return value for function that are not
     // expected to, but might fail. The handling of error is potentially much slower than successes.

@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_METAL_BINDGROUPMTL_H_
 #define DAWNNATIVE_METAL_BINDGROUPMTL_H_
 
-#include "common/PlacementAllocated.h"
+#include "dawn/common/PlacementAllocated.h"
 #include "dawn_native/BindGroup.h"
 
 namespace dawn::native::metal {

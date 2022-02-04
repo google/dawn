@@ -14,9 +14,9 @@
 
 #include "dawn_native/BindGroup.h"
 
-#include "common/Assert.h"
-#include "common/Math.h"
-#include "common/ityp_bitset.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Math.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/ChainUtils_autogen.h"

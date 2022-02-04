@@ -14,7 +14,7 @@
 
 #include "dawn_native/Device.h"
 
-#include "common/Log.h"
+#include "dawn/common/Log.h"
 #include "dawn_native/Adapter.h"
 #include "dawn_native/AsyncTask.h"
 #include "dawn_native/AttachmentState.h"

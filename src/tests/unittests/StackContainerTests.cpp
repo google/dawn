@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/RefCounted.h"
-#include "common/StackContainer.h"
+#include "dawn/common/RefCounted.h"
+#include "dawn/common/StackContainer.h"
 
 #include <algorithm>
 #include <cstddef>

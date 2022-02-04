@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_SAMPLERHEAPCACHE_H_
 #define DAWNNATIVE_D3D12_SAMPLERHEAPCACHE_H_
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"

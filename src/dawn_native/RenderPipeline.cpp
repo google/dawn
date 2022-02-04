@@ -14,7 +14,7 @@
 
 #include "dawn_native/RenderPipeline.h"
 
-#include "common/BitSetIterator.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
@@ -237,7 +237,7 @@ namespace dawn::native {
         MaybeError ValidatePrimitiveState(const DeviceBase* device,
                                           const PrimitiveState* descriptor) {
             DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
-                wgpu::SType::PrimitiveDepthClampingState));
+                                         wgpu::SType::PrimitiveDepthClampingState));
             const PrimitiveDepthClampingState* clampInfo = nullptr;
             FindInChain(descriptor->nextInChain, &clampInfo);
             if (clampInfo && !device->IsFeatureEnabled(Feature::DepthClamping)) {

@@ -14,8 +14,8 @@
 
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
 
-#include "common/Assert.h"
-#include "common/Log.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Log.h"
 #include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"

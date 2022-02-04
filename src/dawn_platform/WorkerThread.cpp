@@ -18,7 +18,7 @@
 #include <functional>
 #include <thread>
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 
 namespace {
 

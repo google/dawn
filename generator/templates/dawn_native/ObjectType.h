@@ -17,7 +17,7 @@
 #ifndef {{DIR}}_OBJECTTPYE_AUTOGEN_H_
 #define {{DIR}}_OBJECTTPYE_AUTOGEN_H_
 
-#include "common/ityp_array.h"
+#include "dawn/common/ityp_array.h"
 
 #include <cstdint>
 

@@ -14,9 +14,9 @@
 
 #include "dawn_native/opengl/TextureGL.h"
 
-#include "common/Assert.h"
-#include "common/Constants.h"
-#include "common/Math.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/CommandBufferGL.h"

@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_ENUMMASKITERATOR_H_
 #define DAWNNATIVE_ENUMMASKITERATOR_H_
 
-#include "common/BitSetIterator.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn_native/EnumClassBitmasks.h"
 
 namespace dawn::native {

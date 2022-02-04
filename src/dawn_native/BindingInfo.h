@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_BINDINGINFO_H_
 #define DAWNNATIVE_BINDINGINFO_H_
 
-#include "common/Constants.h"
-#include "common/ityp_array.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/ityp_array.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/IntegerTypes.h"

@@ -211,9 +211,9 @@ set(CMAKE_CXX_STANDARD "17")
 ################################################################################
 
 add_subdirectory(third_party)
-add_subdirectory(src/common)
 add_subdirectory(generator)
 add_subdirectory(src/dawn)
+add_subdirectory(src/dawn/common)
 add_subdirectory(src/dawn_platform)
 add_subdirectory(src/dawn_native)
 add_subdirectory(src/dawn_wire)

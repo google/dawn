@@ -14,7 +14,7 @@
 
 #include "dawn_native/EncodingContext.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "common/Alloc.h"
-#include "common/Assert.h"
+#include "dawn/common/Alloc.h"
+#include "dawn/common/Assert.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/client/Client.h"
 

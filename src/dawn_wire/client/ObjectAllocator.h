@@ -15,8 +15,8 @@
 #ifndef DAWNWIRE_CLIENT_OBJECTALLOCATOR_H_
 #define DAWNWIRE_CLIENT_OBJECTALLOCATOR_H_
 
-#include "common/Assert.h"
-#include "common/Compiler.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Compiler.h"
 #include "dawn_wire/WireCmd_autogen.h"
 
 #include <limits>

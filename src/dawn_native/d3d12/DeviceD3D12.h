@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_DEVICED3D12_H_
 #define DAWNNATIVE_D3D12_DEVICED3D12_H_
 
-#include "common/SerialQueue.h"
+#include "dawn/common/SerialQueue.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/D3D12Info.h"

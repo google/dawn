@@ -21,7 +21,7 @@
 #include <initializer_list>
 #include <vector>
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/Error.h"
 
 namespace dawn::native::utils {

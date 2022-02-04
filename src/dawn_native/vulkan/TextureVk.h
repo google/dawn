@@ -17,7 +17,7 @@
 
 #include "dawn_native/Texture.h"
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/PassResourceUsage.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
 #include "dawn_native/vulkan/ExternalHandle.h"
@@ -156,12 +156,7 @@ namespace dawn::native::vulkan {
         ResourceMemoryAllocation mMemoryAllocation;
         VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;
 
-        enum class ExternalState {
-            InternalOnly,
-            PendingAcquire,
-            Acquired,
-            Released
-        };
+        enum class ExternalState { InternalOnly, PendingAcquire, Acquired, Released };
         ExternalState mExternalState = ExternalState::InternalOnly;
         ExternalState mLastExternalState = ExternalState::InternalOnly;
 

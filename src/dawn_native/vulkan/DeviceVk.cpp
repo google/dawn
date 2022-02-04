@@ -14,7 +14,7 @@
 
 #include "dawn_native/vulkan/DeviceVk.h"
 
-#include "common/Platform.h"
+#include "dawn/common/Platform.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Error.h"

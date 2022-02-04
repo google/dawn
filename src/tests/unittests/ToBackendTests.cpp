@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/ToBackend.h"
 
 #include <type_traits>

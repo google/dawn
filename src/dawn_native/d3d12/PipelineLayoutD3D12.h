@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_D3D12_PIPELINELAYOUTD3D12_H_
 #define DAWNNATIVE_D3D12_PIPELINELAYOUTD3D12_H_
 
-#include "common/Constants.h"
-#include "common/ityp_array.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/ityp_array.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/d3d12/d3d12_platform.h"

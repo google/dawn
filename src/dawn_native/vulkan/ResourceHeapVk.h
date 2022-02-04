@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_VULKAN_RESOURCEHEAPVK_H_
 #define DAWNNATIVE_VULKAN_RESOURCEHEAPVK_H_
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/ResourceHeap.h"
 
 namespace dawn::native::vulkan {

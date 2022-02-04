@@ -65,7 +65,7 @@ group("dawn_abseil") {
 }
 
 config("dawn_native_internal") {
-  configs = [ "${dawn_root}/src/common:dawn_internal" ]
+  configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   # Suppress warnings that Metal isn't in the deployment target of Chrome:
   # initialization of the Metal backend is behind a IsMetalSupported check so
@@ -138,7 +138,7 @@ if (dawn_enable_opengl) {
 # dependencies of dawn_native
 source_set("dawn_native_headers") {
   public_deps = [ "${dawn_root}/src/dawn:dawncpp_headers" ]
-  all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
+  all_dependent_configs = [ "${dawn_root}/src/dawn/common:public_include_dirs" ]
   sources = [
     "${dawn_root}/src/include/dawn_native/DawnNative.h",
     "${dawn_root}/src/include/dawn_native/dawn_native_export.h",
@@ -160,7 +160,7 @@ source_set("dawn_native_sources") {
   deps = [
     ":dawn_native_headers",
     ":dawn_native_utils_gen",
-    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn/common",
     "${dawn_spirv_tools_dir}:spvtools_opt",
     "${dawn_spirv_tools_dir}:spvtools_val",
     "${dawn_tint_dir}/src:libtint",
@@ -711,7 +711,7 @@ dawn_component("dawn_native") {
 
   deps = [
     ":dawn_native_sources",
-    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn/common",
   ]
   sources = [ "DawnNative.cpp" ]
   configs = [ ":dawn_native_internal" ]

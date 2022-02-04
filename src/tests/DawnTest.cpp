@@ -14,12 +14,12 @@
 
 #include "tests/DawnTest.h"
 
-#include "common/Assert.h"
-#include "common/GPUInfo.h"
-#include "common/Log.h"
-#include "common/Math.h"
-#include "common/Platform.h"
-#include "common/SystemUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/GPUInfo.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/Math.h"
+#include "dawn/common/Platform.h"
+#include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"

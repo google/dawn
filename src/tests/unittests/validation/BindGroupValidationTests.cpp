@@ -14,8 +14,8 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "common/Assert.h"
-#include "common/Constants.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Constants.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 

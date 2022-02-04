@@ -14,10 +14,10 @@
 
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 
-#include "common/Assert.h"
-#include "common/BitSetIterator.h"
-#include "common/Log.h"
-#include "common/WindowsUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/WindowsUtils.h"
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"

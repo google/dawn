@@ -14,7 +14,7 @@
 
 #include "dawn_native/Surface.h"
 
-#include "common/Platform.h"
+#include "dawn/common/Platform.h"
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/SwapChain.h"
@@ -25,7 +25,7 @@
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #if defined(DAWN_USE_X11)
-#    include "common/xlib_with_undefs.h"
+#    include "dawn/common/xlib_with_undefs.h"
 #endif  // defined(DAWN_USE_X11)
 
 namespace dawn::native {

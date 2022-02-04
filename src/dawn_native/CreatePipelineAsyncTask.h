@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_CREATEPIPELINEASYNCTASK_H_
 #define DAWNNATIVE_CREATEPIPELINEASYNCTASK_H_
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn/webgpu.h"
 #include "dawn_native/CallbackTaskManager.h"
 #include "dawn_native/Error.h"

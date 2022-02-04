@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "common/ityp_bitset.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 

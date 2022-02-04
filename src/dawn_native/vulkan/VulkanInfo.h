@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_VULKAN_VULKANINFO_H_
 #define DAWNNATIVE_VULKAN_VULKANINFO_H_
 
-#include "common/ityp_array.h"
-#include "common/vulkan_platform.h"
+#include "dawn/common/ityp_array.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/vulkan/VulkanExtensions.h"
 

@@ -14,7 +14,7 @@
 
 #include <gmock/gmock.h>
 
-#include "common/RefBase.h"
+#include "dawn/common/RefBase.h"
 
 namespace {
     using Id = uint32_t;

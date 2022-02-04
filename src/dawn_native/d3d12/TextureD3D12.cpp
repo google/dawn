@@ -14,8 +14,8 @@
 
 #include "dawn_native/d3d12/TextureD3D12.h"
 
-#include "common/Constants.h"
-#include "common/Math.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Error.h"

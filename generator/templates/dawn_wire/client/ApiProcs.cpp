@@ -12,7 +12,7 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "common/Log.h"
+#include "dawn/common/Log.h"
 #include "dawn_wire/client/ApiObjects.h"
 #include "dawn_wire/client/Client.h"
 

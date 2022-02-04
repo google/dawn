@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "dawn_platform/tracing/EventTracer.h"
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_platform/DawnPlatform.h"
 
 namespace dawn::platform::tracing {

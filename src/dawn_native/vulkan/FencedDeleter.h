@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_VULKAN_FENCEDDELETER_H_
 #define DAWNNATIVE_VULKAN_FENCEDDELETER_H_
 
-#include "common/SerialQueue.h"
-#include "common/vulkan_platform.h"
+#include "dawn/common/SerialQueue.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/IntegerTypes.h"
 
 namespace dawn::native::vulkan {

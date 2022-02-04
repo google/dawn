@@ -14,7 +14,7 @@
 
 #include "dawn_native/BindGroupLayout.h"
 
-#include "common/BitSetIterator.h"
+#include "dawn/common/BitSetIterator.h"
 
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Device.h"

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "common/Log.h"
-#include "common/Platform.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/Platform.h"
 #include "dawn/dawn_proc.h"
 #include "dawn_native/DawnNative.h"
 #include "tests/DawnTest.h"
@@ -25,13 +25,13 @@
 
 // Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.
 #if defined(DAWN_PLATFORM_WINDOWS)
-#    include "common/windows_with_undefs.h"
+#    include "dawn/common/windows_with_undefs.h"
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #include "GLFW/glfw3.h"
 
 #if defined(DAWN_USE_X11)
-#    include "common/xlib_with_undefs.h"
+#    include "dawn/common/xlib_with_undefs.h"
 #endif  // defined(DAWN_USE_X11)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)

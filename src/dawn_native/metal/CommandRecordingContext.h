@@ -14,8 +14,8 @@
 #ifndef DAWNNATIVE_METAL_COMMANDRECORDINGCONTEXT_H_
 #define DAWNNATIVE_METAL_COMMANDRECORDINGCONTEXT_H_
 
-#include "common/NSRef.h"
-#include "common/NonCopyable.h"
+#include "dawn/common/NSRef.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn_native/Error.h"
 
 #import <Metal/Metal.h>

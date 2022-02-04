@@ -14,7 +14,7 @@
 
 #include "dawn_wire/ChunkedCommandHandler.h"
 
-#include "common/Alloc.h"
+#include "dawn/common/Alloc.h"
 
 #include <algorithm>
 #include <cstring>

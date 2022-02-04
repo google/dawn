@@ -17,7 +17,7 @@
 
 #include "dawn_native/ComputePipeline.h"
 
-#include "common/NSRef.h"
+#include "dawn/common/NSRef.h"
 
 #import <Metal/Metal.h>
 

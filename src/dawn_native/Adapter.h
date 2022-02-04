@@ -17,8 +17,8 @@
 
 #include "dawn_native/DawnNative.h"
 
-#include "common/RefCounted.h"
-#include "common/ityp_span.h"
+#include "dawn/common/RefCounted.h"
+#include "dawn/common/ityp_span.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Features.h"
 #include "dawn_native/Limits.h"

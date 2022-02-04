@@ -14,8 +14,8 @@
 
 #include "dawn_native/vulkan/VulkanExtensions.h"
 
-#include "common/Assert.h"
-#include "common/vulkan_platform.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/vulkan_platform.h"
 
 #include <array>
 #include <limits>

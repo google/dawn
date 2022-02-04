@@ -14,9 +14,9 @@
 
 #include "dawn_native/PipelineLayout.h"
 
-#include "common/Assert.h"
-#include "common/BitSetIterator.h"
-#include "common/ityp_stack_vec.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/BitSetIterator.h"
+#include "dawn/common/ityp_stack_vec.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"

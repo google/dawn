@@ -14,8 +14,8 @@
 
 #include "dawn_native/d3d12/SamplerHeapCacheD3D12.h"
 
-#include "common/Assert.h"
-#include "common/HashUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/HashUtils.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"

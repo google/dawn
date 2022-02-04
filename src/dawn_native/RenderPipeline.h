@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_RENDERPIPELINE_H_
 #define DAWNNATIVE_RENDERPIPELINE_H_
 
-#include "common/TypedInteger.h"
+#include "dawn/common/TypedInteger.h"
 #include "dawn_native/AttachmentState.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/IntegerTypes.h"

@@ -75,9 +75,9 @@ static_library("dawn_wire_server_fuzzer_common") {
     "DawnWireServerFuzzer.h",
   ]
   public_deps = [
-    "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire:dawn_wire_static",
     "${dawn_root}/src/utils:dawn_utils",
@@ -89,7 +89,7 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
 
   deps = [ ":dawn_wire_server_fuzzer_common" ]
 
-  additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
+  additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
 }
 
 if (is_win) {
@@ -98,7 +98,7 @@ if (is_win) {
 
     deps = [ ":dawn_wire_server_fuzzer_common" ]
 
-    additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
+    additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
   }
 }
 
@@ -107,7 +107,7 @@ dawn_fuzzer_test("dawn_wire_server_and_vulkan_backend_fuzzer") {
 
   deps = [ ":dawn_wire_server_fuzzer_common" ]
 
-  additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
+  additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
 }
 
 # A group target to build all the fuzzers

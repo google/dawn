@@ -14,7 +14,7 @@
 
 #include "dawn_native/metal/BufferMTL.h"
 
-#include "common/Math.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/metal/CommandRecordingContext.h"
 #include "dawn_native/metal/DeviceMTL.h"

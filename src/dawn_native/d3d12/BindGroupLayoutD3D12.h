@@ -17,8 +17,8 @@
 
 #include "dawn_native/BindGroupLayout.h"
 
-#include "common/SlabAllocator.h"
-#include "common/ityp_stack_vec.h"
+#include "dawn/common/SlabAllocator.h"
+#include "dawn/common/ityp_stack_vec.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn::native::d3d12 {

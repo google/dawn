@@ -17,7 +17,7 @@
 
 #include "dawn_native/d3d12/d3d12_platform.h"
 
-#include "common/SerialQueue.h"
+#include "dawn/common/SerialQueue.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/IntegerTypes.h"
 

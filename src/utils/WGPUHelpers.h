@@ -21,7 +21,7 @@
 #include <initializer_list>
 #include <vector>
 
-#include "common/Constants.h"
+#include "dawn/common/Constants.h"
 #include "utils/TextureUtils.h"
 
 namespace utils {

@@ -15,9 +15,9 @@
 #ifndef DAWNNATIVE_COMMAND_ALLOCATOR_H_
 #define DAWNNATIVE_COMMAND_ALLOCATOR_H_
 
-#include "common/Assert.h"
-#include "common/Math.h"
-#include "common/NonCopyable.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Math.h"
+#include "dawn/common/NonCopyable.h"
 
 #include <cstddef>
 #include <cstdint>

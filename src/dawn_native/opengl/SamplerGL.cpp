@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/SamplerGL.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/UtilsGL.h"
 

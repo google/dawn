@@ -14,7 +14,7 @@
 
 #include "dawn_native/RenderPassEncoder.h"
 
-#include "common/Constants.h"
+#include "dawn/common/Constants.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"

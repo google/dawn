@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_POOLEDRESOURCEMEMORYALLOCATOR_H_
 #define DAWNNATIVE_POOLEDRESOURCEMEMORYALLOCATOR_H_
 
-#include "common/SerialQueue.h"
+#include "dawn/common/SerialQueue.h"
 #include "dawn_native/ResourceHeapAllocator.h"
 
 #include <deque>

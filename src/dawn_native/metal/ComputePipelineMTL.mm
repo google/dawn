@@ -14,7 +14,7 @@
 
 #include "dawn_native/metal/ComputePipelineMTL.h"
 
-#include "common/Math.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/ShaderModuleMTL.h"

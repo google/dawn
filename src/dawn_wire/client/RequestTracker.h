@@ -15,8 +15,8 @@
 #ifndef DAWNWIRE_CLIENT_REQUESTTRACKER_H_
 #define DAWNWIRE_CLIENT_REQUESTTRACKER_H_
 
-#include "common/Assert.h"
-#include "common/NonCopyable.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/NonCopyable.h"
 
 #include <cstdint>
 #include <map>

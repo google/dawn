@@ -15,8 +15,8 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
-#include "common/Assert.h"
-#include "common/SystemUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/SystemUtils.h"
 
 using ::testing::_;
 using ::testing::Pair;

@@ -15,7 +15,7 @@
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/WorkerThread.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 
 namespace dawn::platform {
 

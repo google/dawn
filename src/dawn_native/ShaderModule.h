@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_SHADERMODULE_H_
 #define DAWNNATIVE_SHADERMODULE_H_
 
-#include "common/Constants.h"
-#include "common/ityp_array.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/ityp_array.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/CompilationMessages.h"

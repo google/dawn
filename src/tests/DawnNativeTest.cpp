@@ -15,7 +15,7 @@
 #include "tests/DawnNativeTest.h"
 
 #include "absl/strings/str_cat.h"
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn/dawn_proc.h"
 #include "dawn_native/ErrorData.h"
 

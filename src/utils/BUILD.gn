@@ -50,7 +50,7 @@ if (dawn_supports_glfw_for_windowing) {
       "Glfw3Fuchsia.cpp",
     ]
     public_configs = [ ":dawn_glfw_public_config" ]
-    deps = [ "${dawn_root}/src/common" ]
+    deps = [ "${dawn_root}/src/dawn/common" ]
   }
 } else {
   # Just skip GLFW on other systems
@@ -63,7 +63,7 @@ if (dawn_supports_glfw_for_windowing) {
 ###############################################################################
 
 static_library("dawn_utils") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   sources = [
     "ComboRenderBundleEncoderDescriptor.cpp",
@@ -87,8 +87,8 @@ static_library("dawn_utils") {
     "WireHelper.h",
   ]
   deps = [
-    "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn_native:dawn_native_headers",
     "${dawn_root}/src/dawn_wire",
     "${dawn_spirv_tools_dir}:spvtools_opt",
@@ -144,7 +144,7 @@ static_library("dawn_utils") {
 if (dawn_standalone) {
   # Library to handle the interaction of Dawn with GLFW windows in samples
   static_library("dawn_bindings") {
-    configs += [ "${dawn_root}/src/common:dawn_internal" ]
+    configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
     sources = [
       "BackendBinding.cpp",
@@ -155,7 +155,7 @@ if (dawn_standalone) {
 
     deps = [
       ":dawn_glfw",
-      "${dawn_root}/src/common",
+      "${dawn_root}/src/dawn/common",
       "${dawn_root}/src/dawn_native",
     ]
     libs = []

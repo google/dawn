@@ -14,7 +14,7 @@
 
 #include "tests/DawnTest.h"
 
-#include "common/DynamicLib.h"
+#include "dawn/common/DynamicLib.h"
 #include "dawn_native/OpenGLBackend.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "utils/ComboRenderPipelineDescriptor.h"

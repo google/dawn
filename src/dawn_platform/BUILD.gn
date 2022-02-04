@@ -19,7 +19,7 @@ import("${dawn_root}/scripts/dawn_component.gni")
 dawn_component("dawn_platform") {
   DEFINE_PREFIX = "DAWN_PLATFORM"
 
-  configs = [ "${dawn_root}/src/common:dawn_internal" ]
+  configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   sources = [
     "${dawn_root}/src/include/dawn_platform/DawnPlatform.h",
@@ -32,7 +32,7 @@ dawn_component("dawn_platform") {
     "tracing/TraceEvent.h",
   ]
 
-  deps = [ "${dawn_root}/src/common" ]
+  deps = [ "${dawn_root}/src/dawn/common" ]
 
   public_deps = [
     # DawnPlatform.h has #include <dawn/webgpu.h>

@@ -15,10 +15,10 @@
 #ifndef DAWNNATIVE_XLIBXCBFUNCTIONS_H_
 #define DAWNNATIVE_XLIBXCBFUNCTIONS_H_
 
-#include "common/DynamicLib.h"
+#include "dawn/common/DynamicLib.h"
 #include "dawn_native/Error.h"
 
-#include "common/xlib_with_undefs.h"
+#include "dawn/common/xlib_with_undefs.h"
 
 class DynamicLib;
 

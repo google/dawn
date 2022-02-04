@@ -14,7 +14,7 @@
 
 #include "dawn_native/CompilationMessages.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/dawn_platform.h"
 
 #include <tint/tint.h>

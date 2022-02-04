@@ -14,7 +14,7 @@
 
 #include "utils/BackendBinding.h"
 
-#include "common/Compiler.h"
+#include "dawn/common/Compiler.h"
 
 #include "GLFW/glfw3.h"
 

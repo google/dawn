@@ -14,7 +14,7 @@
 
 #include "dawn_native/CommandValidation.h"
 
-#include "common/BitSetIterator.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBufferStateTracker.h"

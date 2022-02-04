@@ -16,7 +16,7 @@
 
 #include "dawn_native/SubresourceStorage.h"
 
-#include "common/Log.h"
+#include "dawn/common/Log.h"
 
 using namespace dawn::native;
 

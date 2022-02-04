@@ -30,7 +30,7 @@ dawn_json_generator("dawn_headers_gen") {
 }
 
 source_set("dawn_headers") {
-  all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
+  all_dependent_configs = [ "${dawn_root}/src/dawn/common:public_include_dirs" ]
   public_deps = [ ":dawn_headers_gen" ]
 
   sources = get_target_outputs(":dawn_headers_gen")

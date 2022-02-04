@@ -14,7 +14,7 @@
 
 #include "dawn_native/Subresource.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/Format.h"
 
 namespace dawn::native {

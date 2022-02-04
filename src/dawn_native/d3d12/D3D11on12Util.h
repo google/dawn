@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D11ON12UTIL_H_
 #define DAWNNATIVE_D3D11ON12UTIL_H_
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 

@@ -17,8 +17,8 @@
 
 #include "dawn_native/Buffer.h"
 
-#include "common/SerialQueue.h"
-#include "common/vulkan_platform.h"
+#include "dawn/common/SerialQueue.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
 
 namespace dawn::native::vulkan {

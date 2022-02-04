@@ -14,7 +14,7 @@
 
 #include "tests/unittests/wire/WireTest.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_wire/WireClient.h"
 #include "tests/MockCallback.h"
 

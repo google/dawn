@@ -17,7 +17,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "common/Platform.h"
+#include "dawn/common/Platform.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/opengl/Forward.h"
@@ -28,7 +28,7 @@
 
 // Remove windows.h macros after glad's include of windows.h
 #if defined(DAWN_PLATFORM_WINDOWS)
-#    include "common/windows_with_undefs.h"
+#    include "dawn/common/windows_with_undefs.h"
 #endif
 
 typedef void* EGLImage;

@@ -15,7 +15,7 @@
 #ifndef DAWNWIRE_WIRERESULT_H_
 #define DAWNWIRE_WIRERESULT_H_
 
-#include "common/Compiler.h"
+#include "dawn/common/Compiler.h"
 
 namespace dawn::wire {
 

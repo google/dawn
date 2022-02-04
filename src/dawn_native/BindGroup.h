@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_BINDGROUP_H_
 #define DAWNNATIVE_BINDGROUP_H_
 
-#include "common/Constants.h"
-#include "common/Math.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"

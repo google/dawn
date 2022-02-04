@@ -17,8 +17,8 @@
 
 #include "dawn_native/BindGroupLayout.h"
 
-#include "common/SlabAllocator.h"
-#include "common/vulkan_platform.h"
+#include "dawn/common/SlabAllocator.h"
+#include "dawn/common/vulkan_platform.h"
 
 #include <vector>
 

@@ -14,9 +14,9 @@
 
 #include "dawn_native/metal/TextureMTL.h"
 
-#include "common/Constants.h"
-#include "common/Math.h"
-#include "common/Platform.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/Math.h"
+#include "dawn/common/Platform.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/metal/DeviceMTL.h"

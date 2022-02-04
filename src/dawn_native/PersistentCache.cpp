@@ -14,7 +14,7 @@
 
 #include "dawn_native/PersistentCache.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/Device.h"
 #include "dawn_platform/DawnPlatform.h"
 

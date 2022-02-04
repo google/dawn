@@ -17,9 +17,9 @@
 
 #include "dawn_native/BackendConnection.h"
 
-#include "common/DynamicLib.h"
-#include "common/RefCounted.h"
-#include "common/ityp_array.h"
+#include "dawn/common/DynamicLib.h"
+#include "dawn/common/RefCounted.h"
+#include "dawn/common/ityp_array.h"
 #include "dawn_native/vulkan/VulkanFunctions.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 

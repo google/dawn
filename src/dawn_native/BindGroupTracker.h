@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_BINDGROUPTRACKER_H_
 #define DAWNNATIVE_BINDGROUPTRACKER_H_
 
-#include "common/Constants.h"
+#include "dawn/common/Constants.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/PipelineLayout.h"

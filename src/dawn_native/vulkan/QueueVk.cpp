@@ -14,7 +14,7 @@
 
 #include "dawn_native/vulkan/QueueVk.h"
 
-#include "common/Math.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"

@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/UtilsGL.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 
 namespace dawn::native::opengl {
 

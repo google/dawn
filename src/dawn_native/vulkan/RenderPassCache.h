@@ -15,10 +15,10 @@
 #ifndef DAWNNATIVE_VULKAN_RENDERPASSCACHE_H_
 #define DAWNNATIVE_VULKAN_RENDERPASSCACHE_H_
 
-#include "common/Constants.h"
-#include "common/ityp_array.h"
-#include "common/ityp_bitset.h"
-#include "common/vulkan_platform.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_bitset.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/IntegerTypes.h"
 #include "dawn_native/dawn_platform.h"

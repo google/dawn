@@ -17,7 +17,7 @@
 
 #include "dawn_native/RenderPipeline.h"
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 
 namespace dawn::native::vulkan {

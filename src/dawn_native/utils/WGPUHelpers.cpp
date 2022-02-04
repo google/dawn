@@ -14,8 +14,8 @@
 
 #include "dawn_native/utils/WGPUHelpers.h"
 
-#include "common/Assert.h"
-#include "common/Constants.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Constants.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"

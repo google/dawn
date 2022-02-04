@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_METAL_BUFFERMTL_H_
 #define DAWNNATIVE_METAL_BUFFERMTL_H_
 
-#include "common/NSRef.h"
-#include "common/SerialQueue.h"
+#include "dawn/common/NSRef.h"
+#include "dawn/common/SerialQueue.h"
 #include "dawn_native/Buffer.h"
 
 #import <Metal/Metal.h>

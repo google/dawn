@@ -18,7 +18,7 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Error.h"
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 
 namespace dawn::native {
     struct BeginRenderPassCmd;

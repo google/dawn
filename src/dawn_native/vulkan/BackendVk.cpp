@@ -14,9 +14,9 @@
 
 #include "dawn_native/vulkan/BackendVk.h"
 
-#include "common/BitSetIterator.h"
-#include "common/Log.h"
-#include "common/SystemUtils.h"
+#include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/SystemUtils.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/AdapterVk.h"
@@ -209,7 +209,7 @@ namespace dawn::native::vulkan {
                 DAWN_TRY(LoadVulkan(kSwiftshaderLibName));
                 break;
 #endif  // defined(DAWN_ENABLE_SWIFTSHADER)
-                // ICD::SwiftShader should not be passed if SwiftShader is not enabled.
+        // ICD::SwiftShader should not be passed if SwiftShader is not enabled.
                 UNREACHABLE();
             }
         }

@@ -17,7 +17,7 @@
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/ShaderModule.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 
 namespace dawn::native::metal {
 

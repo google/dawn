@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_OBJECT_CONTENT_HASHER_H_
 #define DAWNNATIVE_OBJECT_CONTENT_HASHER_H_
 
-#include "common/HashUtils.h"
+#include "dawn/common/HashUtils.h"
 
 #include <string>
 #include <vector>

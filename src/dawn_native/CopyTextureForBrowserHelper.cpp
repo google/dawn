@@ -14,7 +14,7 @@
 
 #include "dawn_native/CopyTextureForBrowserHelper.h"
 
-#include "common/Log.h"
+#include "dawn/common/Log.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"

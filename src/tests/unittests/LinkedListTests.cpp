@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "common/LinkedList.h"
+#include "dawn/common/LinkedList.h"
 
 #include <list>
 

@@ -15,7 +15,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "common/PlacementAllocated.h"
+#include "dawn/common/PlacementAllocated.h"
 
 using namespace testing;
 

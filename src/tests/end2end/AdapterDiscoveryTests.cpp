@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "common/GPUInfo.h"
-#include "common/Log.h"
-#include "common/Platform.h"
-#include "common/SystemUtils.h"
+#include "dawn/common/GPUInfo.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/Platform.h"
+#include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"

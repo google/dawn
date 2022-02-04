@@ -14,8 +14,8 @@
 
 #include "dawn_native/CommandBufferStateTracker.h"
 
-#include "common/Assert.h"
-#include "common/BitSetIterator.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/ComputePassEncoder.h"
 #include "dawn_native/ComputePipeline.h"

@@ -17,7 +17,7 @@
 
 #include "dawn_native/Sampler.h"
 
-#include "common/NSRef.h"
+#include "dawn/common/NSRef.h"
 
 #import <Metal/Metal.h>
 

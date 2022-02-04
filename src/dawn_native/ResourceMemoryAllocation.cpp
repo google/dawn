@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "dawn_native/ResourceMemoryAllocation.h"
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 
 namespace dawn::native {
 

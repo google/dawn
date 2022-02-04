@@ -14,7 +14,7 @@
 
 #include "dawn_native/d3d12/PlatformFunctions.h"
 
-#include "common/DynamicLib.h"
+#include "dawn/common/DynamicLib.h"
 
 #include <comdef.h>
 #include <array>

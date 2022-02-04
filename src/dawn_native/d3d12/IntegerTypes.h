@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_D3D12_INTEGERTYPES_H_
 #define DAWNNATIVE_D3D12_INTEGERTYPES_H_
 
-#include "common/Constants.h"
-#include "common/TypedInteger.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/TypedInteger.h"
 
 #include <cstdint>
 

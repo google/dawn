@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_TINTUTILS_H_
 #define DAWNNATIVE_TINTUTILS_H_
 
-#include "common/NonCopyable.h"
+#include "dawn/common/NonCopyable.h"
 
 namespace dawn::native {
 

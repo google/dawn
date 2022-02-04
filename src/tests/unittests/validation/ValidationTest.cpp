@@ -14,8 +14,8 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "common/Assert.h"
-#include "common/SystemUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/webgpu.h"
 #include "dawn_native/NullBackend.h"

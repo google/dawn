@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_STAGINGBUFFERVK_H_
 #define DAWNNATIVE_STAGINGBUFFERVK_H_
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
 #include "dawn_native/StagingBuffer.h"
 

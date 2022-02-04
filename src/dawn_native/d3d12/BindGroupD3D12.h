@@ -15,9 +15,9 @@
 #ifndef DAWNNATIVE_D3D12_BINDGROUPD3D12_H_
 #define DAWNNATIVE_D3D12_BINDGROUPD3D12_H_
 
-#include "common/PlacementAllocated.h"
-#include "common/ityp_span.h"
-#include "common/ityp_stack_vec.h"
+#include "dawn/common/PlacementAllocated.h"
+#include "dawn/common/ityp_span.h"
+#include "dawn/common/ityp_stack_vec.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"

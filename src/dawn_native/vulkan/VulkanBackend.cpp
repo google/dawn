@@ -17,11 +17,11 @@
 
 // Include vulkan_platform.h before VulkanBackend.h includes vulkan.h so that we use our version
 // of the non-dispatchable handles.
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 
 #include "dawn_native/VulkanBackend.h"
 
-#include "common/SwapChainUtils.h"
+#include "dawn/common/SwapChainUtils.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/NativeSwapChainImplVk.h"
 #include "dawn_native/vulkan/TextureVk.h"

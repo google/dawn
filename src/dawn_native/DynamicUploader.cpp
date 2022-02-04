@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "dawn_native/DynamicUploader.h"
-#include "common/Math.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/Device.h"
 
 namespace dawn::native {

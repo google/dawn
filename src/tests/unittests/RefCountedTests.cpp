@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 
 class RCTest : public RefCounted {
   public:

@@ -15,9 +15,9 @@
 #ifndef DAWNNATIVE_PERSTAGE_H_
 #define DAWNNATIVE_PERSTAGE_H_
 
-#include "common/Assert.h"
-#include "common/BitSetIterator.h"
-#include "common/Constants.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Constants.h"
 #include "dawn_native/Error.h"
 
 #include "dawn_native/dawn_platform.h"

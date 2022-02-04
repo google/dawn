@@ -14,8 +14,8 @@
 
 #include "dawn_native/Buffer.h"
 
-#include "common/Alloc.h"
-#include "common/Assert.h"
+#include "dawn/common/Alloc.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"

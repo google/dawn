@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_VULKAN_VULKANEXTENSIONS_H_
 #define DAWNNATIVE_VULKAN_VULKANEXTENSIONS_H_
 
-#include "common/ityp_bitset.h"
+#include "dawn/common/ityp_bitset.h"
 
 #include <unordered_map>
 

@@ -14,7 +14,7 @@
 
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 

@@ -18,8 +18,8 @@
 #include <dawn/webgpu.h>
 #include <dawn_wire/Wire.h>
 
-#include "common/LinkedList.h"
-#include "common/NonCopyable.h"
+#include "dawn/common/LinkedList.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn_wire/ChunkedCommandSerializer.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireCmd_autogen.h"

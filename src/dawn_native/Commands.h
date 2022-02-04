@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_COMMANDS_H_
 #define DAWNNATIVE_COMMANDS_H_
 
-#include "common/Constants.h"
+#include "dawn/common/Constants.h"
 
 #include "dawn_native/AttachmentState.h"
 #include "dawn_native/BindingInfo.h"

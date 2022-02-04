@@ -14,7 +14,7 @@
 
 #include "dawn_native/d3d12/NativeSwapChainImplD3D12.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 

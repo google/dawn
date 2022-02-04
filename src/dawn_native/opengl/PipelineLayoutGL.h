@@ -17,8 +17,8 @@
 
 #include "dawn_native/PipelineLayout.h"
 
-#include "common/ityp_array.h"
-#include "common/ityp_vector.h"
+#include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_vector.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/opengl/opengl_platform.h"
 

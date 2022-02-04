@@ -14,7 +14,7 @@
 
 #include "dawn_native/vulkan/UtilsVulkan.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/Pipeline.h"

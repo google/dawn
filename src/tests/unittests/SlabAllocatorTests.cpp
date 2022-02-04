@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/Math.h"
-#include "common/SlabAllocator.h"
+#include "dawn/common/Math.h"
+#include "dawn/common/SlabAllocator.h"
 
 namespace {
 

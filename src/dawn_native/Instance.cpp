@@ -14,10 +14,10 @@
 
 #include "dawn_native/Instance.h"
 
-#include "common/Assert.h"
-#include "common/GPUInfo.h"
-#include "common/Log.h"
-#include "common/SystemUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/GPUInfo.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/SystemUtils.h"
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Surface.h"
@@ -309,7 +309,7 @@ namespace dawn::native {
             case wgpu::BackendType::Vulkan:
                 Register(vulkan::Connect(this), wgpu::BackendType::Vulkan);
                 break;
-#endif      // defined(DAWN_ENABLE_BACKEND_VULKAN)
+#endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
 #if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
             case wgpu::BackendType::OpenGL:

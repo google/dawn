@@ -160,15 +160,15 @@ source_set("dawn_native_mocks_sources") {
 }
 
 test("dawn_unittests") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   deps = [
     ":dawn_native_mocks_sources",
     ":gmock_and_gtest",
     ":mock_webgpu_gen",
-    "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn_native:dawn_native_sources",
     "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
@@ -318,14 +318,14 @@ test("dawn_unittests") {
 ###############################################################################
 
 source_set("dawn_end2end_tests_sources") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
   testonly = true
 
   deps = [
     ":gmock_and_gtest",
-    "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn/common",
 
     # Statically linked because the end2end white_box tests use Dawn internals.
     "${dawn_root}/src/dawn_native:dawn_native_static",
@@ -471,9 +471,9 @@ source_set("dawn_white_box_tests_sources") {
 
   deps = [
     ":gmock_and_gtest",
-    "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn_native:dawn_native_sources",
 
     # Statically linked because the end2end white_box tests use Dawn internals.
@@ -542,15 +542,15 @@ source_set("dawn_white_box_tests_sources") {
 }
 
 test("dawn_end2end_tests") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   deps = [
     ":dawn_end2end_tests_sources",
     ":dawn_white_box_tests_sources",
     ":gmock_and_gtest",
-    "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
     "${dawn_root}/src/utils:dawn_utils",
@@ -585,13 +585,13 @@ test("dawn_end2end_tests") {
 ###############################################################################
 
 test("dawn_perf_tests") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   deps = [
     ":gmock_and_gtest",
-    "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn_native",
     "${dawn_root}/src/dawn_platform",
     "${dawn_root}/src/dawn_wire",

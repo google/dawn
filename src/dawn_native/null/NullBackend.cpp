@@ -17,7 +17,7 @@
 
 #include "dawn_native/NullBackend.h"
 
-#include "common/SwapChainUtils.h"
+#include "dawn/common/SwapChainUtils.h"
 #include "dawn_native/null/DeviceNull.h"
 
 namespace dawn::native::null {

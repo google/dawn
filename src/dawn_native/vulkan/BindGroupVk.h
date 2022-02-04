@@ -17,8 +17,8 @@
 
 #include "dawn_native/BindGroup.h"
 
-#include "common/PlacementAllocated.h"
-#include "common/vulkan_platform.h"
+#include "dawn/common/PlacementAllocated.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/DescriptorSetAllocation.h"
 

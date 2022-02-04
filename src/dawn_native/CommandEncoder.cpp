@@ -14,8 +14,8 @@
 
 #include "dawn_native/CommandEncoder.h"
 
-#include "common/BitSetIterator.h"
-#include "common/Math.h"
+#include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/ChainUtils_autogen.h"

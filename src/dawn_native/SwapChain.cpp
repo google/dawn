@@ -14,7 +14,7 @@
 
 #include "dawn_native/SwapChain.h"
 
-#include "common/Constants.h"
+#include "dawn/common/Constants.h"
 #include "dawn_native/Adapter.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectType_autogen.h"

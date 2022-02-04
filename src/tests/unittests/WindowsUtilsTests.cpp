@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "common/WindowsUtils.h"
+#include "dawn/common/WindowsUtils.h"
 
 TEST(WindowsUtilsTests, WCharToUTF8) {
     // Test the empty string

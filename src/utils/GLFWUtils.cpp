@@ -15,7 +15,7 @@
 #include "utils/GLFWUtils.h"
 
 #include "GLFW/glfw3.h"
-#include "common/Platform.h"
+#include "dawn/common/Platform.h"
 
 #include <cstdlib>
 

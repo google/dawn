@@ -15,13 +15,13 @@
 #ifndef DAWNNATIVE_SURFACE_H_
 #define DAWNNATIVE_SURFACE_H_
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 
 #include "dawn_native/dawn_platform.h"
 
-#include "common/Platform.h"
+#include "dawn/common/Platform.h"
 
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    include "dawn_native/d3d12/d3d12_platform.h"

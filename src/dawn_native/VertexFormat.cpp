@@ -14,7 +14,7 @@
 
 #include "dawn_native/VertexFormat.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 
 #include <array>
 

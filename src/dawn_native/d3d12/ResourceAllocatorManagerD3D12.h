@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_RESOURCEALLOCATORMANAGERD3D12_H_
 #define DAWNNATIVE_D3D12_RESOURCEALLOCATORMANAGERD3D12_H_
 
-#include "common/SerialQueue.h"
+#include "dawn/common/SerialQueue.h"
 #include "dawn_native/BuddyMemoryAllocator.h"
 #include "dawn_native/IntegerTypes.h"
 #include "dawn_native/PooledResourceMemoryAllocator.h"

@@ -15,8 +15,8 @@
 #ifndef DAWNWIRE_CHUNKEDCOMMANDSERIALIZER_H_
 #define DAWNWIRE_CHUNKEDCOMMANDSERIALIZER_H_
 
-#include "common/Alloc.h"
-#include "common/Compiler.h"
+#include "dawn/common/Alloc.h"
+#include "dawn/common/Compiler.h"
 #include "dawn_wire/Wire.h"
 #include "dawn_wire/WireCmd_autogen.h"
 

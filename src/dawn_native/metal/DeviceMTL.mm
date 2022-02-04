@@ -14,8 +14,8 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
-#include "common/GPUInfo.h"
-#include "common/Platform.h"
+#include "dawn/common/GPUInfo.h"
+#include "dawn/common/Platform.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Commands.h"

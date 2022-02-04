@@ -14,7 +14,7 @@
 
 #include "dawn_native/AttachmentState.h"
 
-#include "common/BitSetIterator.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/Texture.h"

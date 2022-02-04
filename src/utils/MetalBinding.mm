@@ -14,8 +14,8 @@
 
 #include "utils/BackendBinding.h"
 
-#include "common/Assert.h"
-#include "common/SwapChainUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/SwapChainUtils.h"
 #include "dawn_native/MetalBackend.h"
 
 #define GLFW_EXPOSE_NATIVE_COCOA

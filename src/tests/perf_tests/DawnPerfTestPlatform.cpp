@@ -16,8 +16,8 @@
 
 #include <algorithm>
 
-#include "common/Assert.h"
-#include "common/HashUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/HashUtils.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 #include "tests/perf_tests/DawnPerfTest.h"
 #include "utils/Timer.h"

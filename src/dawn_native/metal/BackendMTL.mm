@@ -14,11 +14,11 @@
 
 #include "dawn_native/metal/BackendMTL.h"
 
-#include "common/CoreFoundationRef.h"
-#include "common/GPUInfo.h"
-#include "common/NSRef.h"
-#include "common/Platform.h"
-#include "common/SystemUtils.h"
+#include "dawn/common/CoreFoundationRef.h"
+#include "dawn/common/GPUInfo.h"
+#include "dawn/common/NSRef.h"
+#include "dawn/common/Platform.h"
+#include "dawn/common/SystemUtils.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/MetalBackend.h"
 #include "dawn_native/metal/BufferMTL.h"
@@ -26,7 +26,7 @@
 
 #if defined(DAWN_PLATFORM_MACOS)
 #    import <IOKit/IOKitLib.h>
-#    include "common/IOKitRef.h"
+#    include "dawn/common/IOKitRef.h"
 #endif
 
 #include <vector>

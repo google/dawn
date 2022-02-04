@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_SUBRESOURCESTORAGE_H_
 #define DAWNNATIVE_SUBRESOURCESTORAGE_H_
 
-#include "common/Assert.h"
-#include "common/TypeTraits.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/TypeTraits.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Subresource.h"
 

@@ -14,9 +14,9 @@
 
 #include "utils/BackendBinding.h"
 
-#include "common/Assert.h"
-#include "common/Platform.h"
-#include "common/SwapChainUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Platform.h"
+#include "dawn/common/SwapChainUtils.h"
 #include "dawn/dawn_wsi.h"
 #include "dawn_native/OpenGLBackend.h"
 

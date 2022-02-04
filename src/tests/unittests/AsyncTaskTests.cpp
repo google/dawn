@@ -20,7 +20,7 @@
 #include <memory>
 #include <mutex>
 
-#include "common/NonCopyable.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn_native/AsyncTask.h"
 #include "dawn_platform/DawnPlatform.h"
 

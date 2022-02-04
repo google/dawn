@@ -14,7 +14,7 @@
 
 #include "tests/DawnTest.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 

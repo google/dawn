@@ -14,10 +14,10 @@
 
 #include "SampleUtils.h"
 
-#include "common/Assert.h"
-#include "common/Log.h"
-#include "common/Platform.h"
-#include "common/SystemUtils.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/Platform.h"
+#include "dawn/common/SystemUtils.h"
 #include "utils/BackendBinding.h"
 #include "utils/GLFWUtils.h"
 #include "utils/TerribleCommandBuffer.h"

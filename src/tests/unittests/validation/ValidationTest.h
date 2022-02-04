@@ -15,7 +15,7 @@
 #ifndef TESTS_UNITTESTS_VALIDATIONTEST_H_
 #define TESTS_UNITTESTS_VALIDATIONTEST_H_
 
-#include "common/Log.h"
+#include "dawn/common/Log.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 

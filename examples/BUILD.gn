@@ -33,16 +33,16 @@ static_library("dawn_sample_utils") {
 
   # Export all of these as public deps so that `gn check` allows includes
   public_deps = [
-    "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn_native",
     "${dawn_root}/src/dawn_wire",
     "${dawn_root}/src/utils:dawn_bindings",
     "${dawn_root}/src/utils:dawn_glfw",
     "${dawn_root}/src/utils:dawn_utils",
   ]
-  public_configs = [ "${dawn_root}/src/common:dawn_internal" ]
+  public_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
 }
 
 # Template for samples to avoid listing dawn_sample_utils as a dep every time

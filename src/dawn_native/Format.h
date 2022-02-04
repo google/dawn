@@ -17,7 +17,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "common/ityp_bitset.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn_native/EnumClassBitmasks.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Subresource.h"

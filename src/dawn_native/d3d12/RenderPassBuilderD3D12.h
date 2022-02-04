@@ -15,9 +15,9 @@
 #ifndef DAWNNATIVE_D3D12_RENDERPASSBUILDERD3D12_H_
 #define DAWNNATIVE_D3D12_RENDERPASSBUILDERD3D12_H_
 
-#include "common/Constants.h"
-#include "common/ityp_array.h"
-#include "common/ityp_span.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_span.h"
 #include "dawn_native/IntegerTypes.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 #include "dawn_native/dawn_platform.h"

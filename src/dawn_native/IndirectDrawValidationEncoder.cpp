@@ -14,8 +14,8 @@
 
 #include "dawn_native/IndirectDrawValidationEncoder.h"
 
-#include "common/Constants.h"
-#include "common/Math.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/CommandEncoder.h"

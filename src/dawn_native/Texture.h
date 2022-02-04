@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_TEXTURE_H_
 #define DAWNNATIVE_TEXTURE_H_
 
-#include "common/ityp_array.h"
-#include "common/ityp_bitset.h"
+#include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"

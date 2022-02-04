@@ -17,7 +17,7 @@
 
 #include <dawn/webgpu_cpp.h>
 
-#include "common/Constants.h"
+#include "dawn/common/Constants.h"
 
 #include <array>
 

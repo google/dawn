@@ -14,7 +14,7 @@
 
 #include "dawn_native/vulkan/SwapChainVk.h"
 
-#include "common/Compiler.h"
+#include "dawn/common/Compiler.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/Surface.h"
 #include "dawn_native/vulkan/AdapterVk.h"

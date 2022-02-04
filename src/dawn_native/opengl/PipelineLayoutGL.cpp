@@ -14,7 +14,7 @@
 
 #include "dawn_native/opengl/PipelineLayoutGL.h"
 
-#include "common/BitSetIterator.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/opengl/DeviceGL.h"
 

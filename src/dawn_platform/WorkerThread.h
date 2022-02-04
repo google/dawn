@@ -15,7 +15,7 @@
 #ifndef COMMON_WORKERTHREAD_H_
 #define COMMON_WORKERTHREAD_H_
 
-#include "common/NonCopyable.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn_platform/DawnPlatform.h"
 
 namespace dawn::platform {

@@ -17,8 +17,8 @@
 
 #include "dawn_native/Adapter.h"
 
-#include "common/RefCounted.h"
-#include "common/vulkan_platform.h"
+#include "dawn/common/RefCounted.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
 namespace dawn::native::vulkan {

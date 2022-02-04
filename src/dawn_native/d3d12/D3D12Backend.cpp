@@ -17,9 +17,9 @@
 
 #include "dawn_native/D3D12Backend.h"
 
-#include "common/Log.h"
-#include "common/Math.h"
-#include "common/SwapChainUtils.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/Math.h"
+#include "dawn/common/SwapChainUtils.h"
 #include "dawn_native/d3d12/D3D11on12Util.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/NativeSwapChainImplD3D12.h"

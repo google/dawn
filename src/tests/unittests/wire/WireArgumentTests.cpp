@@ -14,7 +14,7 @@
 
 #include "tests/unittests/wire/WireTest.h"
 
-#include "common/Constants.h"
+#include "dawn/common/Constants.h"
 
 #include <array>
 

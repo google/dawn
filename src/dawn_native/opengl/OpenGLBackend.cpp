@@ -17,7 +17,7 @@
 
 #include "dawn_native/OpenGLBackend.h"
 
-#include "common/SwapChainUtils.h"
+#include "dawn/common/SwapChainUtils.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/NativeSwapChainImplGL.h"
 

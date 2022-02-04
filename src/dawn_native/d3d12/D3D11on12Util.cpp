@@ -17,8 +17,8 @@
 
 #include "dawn_native/d3d12/D3D11on12Util.h"
 
-#include "common/HashUtils.h"
-#include "common/Log.h"
+#include "dawn/common/HashUtils.h"
+#include "dawn/common/Log.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 

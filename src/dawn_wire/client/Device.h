@@ -17,7 +17,7 @@
 
 #include <dawn/webgpu.h>
 
-#include "common/LinkedList.h"
+#include "dawn/common/LinkedList.h"
 #include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/client/ApiObjects_autogen.h"
 #include "dawn_wire/client/LimitsAndFeatures.h"

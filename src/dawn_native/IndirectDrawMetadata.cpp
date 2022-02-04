@@ -14,8 +14,8 @@
 
 #include "dawn_native/IndirectDrawMetadata.h"
 
-#include "common/Constants.h"
-#include "common/RefCounted.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/IndirectDrawValidationEncoder.h"
 #include "dawn_native/Limits.h"
 #include "dawn_native/RenderBundle.h"

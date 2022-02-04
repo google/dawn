@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_METAL_PIPELINELAYOUTMTL_H_
 #define DAWNNATIVE_METAL_PIPELINELAYOUTMTL_H_
 
-#include "common/ityp_stack_vec.h"
+#include "dawn/common/ityp_stack_vec.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/PipelineLayout.h"
 

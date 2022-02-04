@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_VULKAN_EXTERNALMEMORY_SERVICE_H_
 #define DAWNNATIVE_VULKAN_EXTERNALMEMORY_SERVICE_H_
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/ExternalHandle.h"

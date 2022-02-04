@@ -15,9 +15,9 @@
 #ifndef TESTS_DAWNTEST_H_
 #define TESTS_DAWNTEST_H_
 
-#include "common/Log.h"
-#include "common/Platform.h"
-#include "common/Preprocessor.h"
+#include "dawn/common/Log.h"
+#include "dawn/common/Platform.h"
+#include "dawn/common/Preprocessor.h"
 #include "dawn/dawn_proc_table.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn/webgpu_cpp_print.h"
@@ -675,7 +675,7 @@ using DawnTest = DawnTestWithParams<>;
 // Instantiate the test once for each backend provided in the first param list.
 // The test will be parameterized over the following param lists.
 // Use it like this:
-//     DAWN_INSTANTIATE_TEST_P(MyTestFixture, {MetalBackend(), OpenGLBackend()}, {A, B, C}, {1, 2, 3})
+//     DAWN_INSTANTIATE_TEST_P(MyTestFixture, {MetalBackend(), OpenGLBackend()}, {A, B}, {1, 2})
 // MyTestFixture must extend DawnTestWithParams<Param> where Param is a struct that extends
 // AdapterTestParam, and whose constructor looks like:
 //     Param(AdapterTestParam, ABorC, 12or3, ..., otherParams... )

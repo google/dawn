@@ -14,8 +14,8 @@
 
 #include "utils/PlatformDebugLogger.h"
 
-#include "common/Assert.h"
-#include "common/windows_with_undefs.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/windows_with_undefs.h"
 
 #include <array>
 #include <thread>

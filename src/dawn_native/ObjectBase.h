@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_OBJECTBASE_H_
 #define DAWNNATIVE_OBJECTBASE_H_
 
-#include "common/LinkedList.h"
-#include "common/RefCounted.h"
+#include "dawn/common/LinkedList.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/Forward.h"
 
 #include <string>

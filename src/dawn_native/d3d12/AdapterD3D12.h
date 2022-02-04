@@ -17,7 +17,7 @@
 
 #include "dawn_native/Adapter.h"
 
-#include "common/GPUInfo.h"
+#include "dawn/common/GPUInfo.h"
 #include "dawn_native/d3d12/D3D12Info.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 

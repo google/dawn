@@ -14,7 +14,7 @@
 
 #include "VideoViewsTests.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/D3D12Backend.h"
 
 #include <d3d11.h>

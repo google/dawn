@@ -17,7 +17,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "common/NonCopyable.h"
+#include "dawn/common/NonCopyable.h"
 
 #include <string>
 #include <vector>

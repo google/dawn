@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_INSTANCE_H_
 #define DAWNNATIVE_INSTANCE_H_
 
-#include "common/RefCounted.h"
-#include "common/ityp_bitset.h"
+#include "dawn/common/RefCounted.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn_native/Adapter.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Features.h"

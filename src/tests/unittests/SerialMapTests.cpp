@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/SerialMap.h"
-#include "common/TypedInteger.h"
+#include "dawn/common/SerialMap.h"
+#include "dawn/common/TypedInteger.h"
 
 using TestSerialMap = SerialMap<uint64_t, int>;
 

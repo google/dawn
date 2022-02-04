@@ -14,7 +14,7 @@
 
 #include "dawn_native/Limits.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 
 #include <array>
 

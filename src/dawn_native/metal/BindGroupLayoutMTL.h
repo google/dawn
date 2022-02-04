@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_METAL_BINDGROUPLAYOUTMTL_H_
 #define DAWNNATIVE_METAL_BINDGROUPLAYOUTMTL_H_
 
-#include "common/SlabAllocator.h"
+#include "dawn/common/SlabAllocator.h"
 #include "dawn_native/BindGroupLayout.h"
 
 namespace dawn::native::metal {

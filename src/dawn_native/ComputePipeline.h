@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_COMPUTEPIPELINE_H_
 #define DAWNNATIVE_COMPUTEPIPELINE_H_
 
-#include "common/NonCopyable.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/Pipeline.h"
 

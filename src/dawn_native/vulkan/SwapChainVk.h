@@ -17,7 +17,7 @@
 
 #include "dawn_native/SwapChain.h"
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 
 #include <vector>
 

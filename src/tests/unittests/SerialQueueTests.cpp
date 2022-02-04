@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/SerialQueue.h"
-#include "common/TypedInteger.h"
+#include "dawn/common/SerialQueue.h"
+#include "dawn/common/TypedInteger.h"
 
 using TestSerialQueue = SerialQueue<uint64_t, int>;
 

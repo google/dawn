@@ -15,8 +15,8 @@
 #include "dawn_native/ShaderModule.h"
 
 #include "absl/strings/str_format.h"
-#include "common/Constants.h"
-#include "common/HashUtils.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/HashUtils.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/CompilationMessages.h"

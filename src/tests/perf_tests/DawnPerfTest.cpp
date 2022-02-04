@@ -18,8 +18,8 @@
 #include <fstream>
 #include <limits>
 
-#include "common/Assert.h"
-#include "common/Log.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Log.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 #include "tests/perf_tests/DawnPerfTestPlatform.h"
 #include "utils/Timer.h"

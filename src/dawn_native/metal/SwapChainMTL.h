@@ -17,7 +17,7 @@
 
 #include "dawn_native/SwapChain.h"
 
-#include "common/NSRef.h"
+#include "dawn/common/NSRef.h"
 
 @class CAMetalLayer;
 @protocol CAMetalDrawable;

@@ -17,7 +17,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "common/SerialQueue.h"
+#include "dawn/common/SerialQueue.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/vulkan/CommandRecordingContext.h"

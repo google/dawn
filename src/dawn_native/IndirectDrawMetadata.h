@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_INDIRECTDRAWMETADATA_H_
 #define DAWNNATIVE_INDIRECTDRAWMETADATA_H_
 
-#include "common/NonCopyable.h"
-#include "common/RefCounted.h"
+#include "dawn/common/NonCopyable.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/Commands.h"

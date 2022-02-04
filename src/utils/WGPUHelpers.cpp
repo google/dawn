@@ -14,8 +14,8 @@
 
 #include "utils/WGPUHelpers.h"
 
-#include "common/Constants.h"
-#include "common/Log.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/Log.h"
 
 #include "spirv-tools/optimizer.hpp"
 

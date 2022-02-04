@@ -17,7 +17,7 @@
 
 #include "dawn_native/ShaderModule.h"
 
-#include "common/NSRef.h"
+#include "dawn/common/NSRef.h"
 #include "dawn_native/Error.h"
 
 #import <Metal/Metal.h>

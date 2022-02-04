@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "common/Platform.h"
+#include "dawn/common/Platform.h"
 
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    include <Windows.h>

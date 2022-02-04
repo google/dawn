@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/TypedInteger.h"
-#include "common/ityp_bitset.h"
+#include "dawn/common/TypedInteger.h"
+#include "dawn/common/ityp_bitset.h"
 
 #include <set>
 

@@ -20,7 +20,7 @@
 #include <mutex>
 #include <unordered_map>
 
-#include "common/RefCounted.h"
+#include "dawn/common/RefCounted.h"
 
 namespace dawn::platform {
     class WaitableEvent;

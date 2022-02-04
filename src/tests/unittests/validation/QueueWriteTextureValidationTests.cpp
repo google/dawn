@@ -14,7 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "common/Math.h"
+#include "dawn/common/Math.h"
 #include "utils/TestUtils.h"
 #include "utils/TextureUtils.h"
 #include "utils/WGPUHelpers.h"

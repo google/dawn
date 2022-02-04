@@ -51,8 +51,8 @@
 //    - TODO can't be tested yet: check cycling the same window over multiple devices.
 //    - TODO can't be tested yet: check cycling the same window over multiple formats.
 
-#include "common/Assert.h"
-#include "common/Log.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Log.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/GLFWUtils.h"
 #include "utils/ScopedAutoreleasePool.h"

@@ -14,7 +14,7 @@
 
 #include "tests/white_box/VulkanImageWrappingTests.h"
 
-#include "common/Math.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "tests/DawnTest.h"

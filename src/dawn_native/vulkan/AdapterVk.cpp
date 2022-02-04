@@ -18,7 +18,7 @@
 #include "dawn_native/vulkan/BackendVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 
-#include "common/GPUInfo.h"
+#include "dawn/common/GPUInfo.h"
 
 namespace dawn::native::vulkan {
 

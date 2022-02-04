@@ -14,7 +14,7 @@
 
 #include "dawn_native/DawnNative.h"
 
-#include "common/Log.h"
+#include "dawn/common/Log.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/Device.h"

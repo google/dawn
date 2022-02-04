@@ -20,8 +20,8 @@
 // the first header to do so for sanity reasons (e.g. undefining weird
 // macros on Windows and Linux).
 // clang-format off
-#include "common/vulkan_platform.h"
-#include "common/Assert.h"
+#include "dawn/common/vulkan_platform.h"
+#include "dawn/common/Assert.h"
 #include <GLFW/glfw3.h>
 // clang-format on
 

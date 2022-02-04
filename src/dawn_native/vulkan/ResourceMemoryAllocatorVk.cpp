@@ -14,7 +14,7 @@
 
 #include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 
-#include "common/Math.h"
+#include "dawn/common/Math.h"
 #include "dawn_native/BuddyMemoryAllocator.h"
 #include "dawn_native/ResourceHeapAllocator.h"
 #include "dawn_native/vulkan/DeviceVk.h"

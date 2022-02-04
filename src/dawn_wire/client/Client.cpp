@@ -14,7 +14,7 @@
 
 #include "dawn_wire/client/Client.h"
 
-#include "common/Compiler.h"
+#include "dawn/common/Compiler.h"
 #include "dawn_wire/client/Device.h"
 
 namespace dawn::wire::client {

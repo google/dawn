@@ -15,9 +15,9 @@
 #ifndef DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H
 #define DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H
 
-#include "common/Constants.h"
-#include "common/ityp_array.h"
-#include "common/ityp_bitset.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"

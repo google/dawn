@@ -14,8 +14,8 @@
 
 #include "dawn_native/vulkan/BindGroupVk.h"
 
-#include "common/BitSetIterator.h"
-#include "common/ityp_stack_vec.h"
+#include "dawn/common/BitSetIterator.h"
+#include "dawn/common/ityp_stack_vec.h"
 #include "dawn_native/ExternalTexture.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/BufferVk.h"

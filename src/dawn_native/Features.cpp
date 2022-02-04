@@ -14,8 +14,8 @@
 
 #include <array>
 
-#include "common/Assert.h"
-#include "common/BitSetIterator.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn_native/Features.h"
 
 namespace dawn::native {

@@ -17,8 +17,8 @@
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
-#include "common/Assert.h"
-#include "common/BitSetIterator.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/BitSetIterator.h"
 
 namespace dawn::native::d3d12 {
 

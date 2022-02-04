@@ -17,7 +17,7 @@
 
 #include "dawn_native/QuerySet.h"
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 
 namespace dawn::native::vulkan {
 

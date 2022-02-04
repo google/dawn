@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "common/GPUInfo.h"
+#include "dawn/common/GPUInfo.h"
 
 namespace {
     const PCIVendorID vendorID = 0x8086;

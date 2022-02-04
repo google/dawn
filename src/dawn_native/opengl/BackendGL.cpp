@@ -14,8 +14,8 @@
 
 #include "dawn_native/opengl/BackendGL.h"
 
-#include "common/GPUInfo.h"
-#include "common/Log.h"
+#include "dawn/common/GPUInfo.h"
+#include "dawn/common/Log.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/OpenGLBackend.h"
 #include "dawn_native/opengl/DeviceGL.h"

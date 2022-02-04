@@ -15,7 +15,7 @@
 #ifndef UTILS_SCOPEDAUTORELEASEPOOL_H_
 #define UTILS_SCOPEDAUTORELEASEPOOL_H_
 
-#include "common/Compiler.h"
+#include "dawn/common/Compiler.h"
 
 #include <cstddef>
 
@@ -49,7 +49,7 @@ namespace utils {
         ScopedAutoreleasePool(const ScopedAutoreleasePool&) = delete;
         ScopedAutoreleasePool& operator=(const ScopedAutoreleasePool&) = delete;
 
-        ScopedAutoreleasePool(ScopedAutoreleasePool&&);
+        ScopedAutoreleasePool(ScopedAutoreleasePool &&);
         ScopedAutoreleasePool& operator=(ScopedAutoreleasePool&&);
 
       private:

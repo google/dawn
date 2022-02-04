@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/TypedInteger.h"
-#include "common/UnderlyingType.h"
+#include "dawn/common/TypedInteger.h"
+#include "dawn/common/UnderlyingType.h"
 
 class TypedIntegerTest : public testing::Test {
   protected:

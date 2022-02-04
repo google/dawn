@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "common/TypedInteger.h"
-#include "common/ityp_vector.h"
+#include "dawn/common/TypedInteger.h"
+#include "dawn/common/ityp_vector.h"
 
 class ITypVectorTest : public testing::Test {
   protected:

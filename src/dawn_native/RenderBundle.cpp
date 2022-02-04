@@ -14,7 +14,7 @@
 
 #include "dawn_native/RenderBundle.h"
 
-#include "common/BitSetIterator.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectType_autogen.h"

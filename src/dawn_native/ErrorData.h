@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_ERRORDATA_H_
 #define DAWNNATIVE_ERRORDATA_H_
 
-#include "common/Compiler.h"
+#include "dawn/common/Compiler.h"
 
 #include <cstdint>
 #include <memory>

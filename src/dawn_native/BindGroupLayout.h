@@ -15,11 +15,11 @@
 #ifndef DAWNNATIVE_BINDGROUPLAYOUT_H_
 #define DAWNNATIVE_BINDGROUPLAYOUT_H_
 
-#include "common/Constants.h"
-#include "common/Math.h"
-#include "common/SlabAllocator.h"
-#include "common/ityp_span.h"
-#include "common/ityp_vector.h"
+#include "dawn/common/Constants.h"
+#include "dawn/common/Math.h"
+#include "dawn/common/SlabAllocator.h"
+#include "dawn/common/ityp_span.h"
+#include "dawn/common/ityp_vector.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"

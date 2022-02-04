@@ -14,7 +14,7 @@
 
 #include "DawnWireServerFuzzer.h"
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_native/DawnNative.h"
 #include "testing/libfuzzer/libfuzzer_exports.h"
 

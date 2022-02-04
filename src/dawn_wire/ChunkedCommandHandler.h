@@ -15,7 +15,7 @@
 #ifndef DAWNWIRE_CHUNKEDCOMMANDHANDLER_H_
 #define DAWNWIRE_CHUNKEDCOMMANDHANDLER_H_
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 #include "dawn_wire/Wire.h"
 #include "dawn_wire/WireCmd_autogen.h"
 

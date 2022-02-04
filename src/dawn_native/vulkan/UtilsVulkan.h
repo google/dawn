@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_VULKAN_UTILSVULKAN_H_
 #define DAWNNATIVE_VULKAN_UTILSVULKAN_H_
 
-#include "common/vulkan_platform.h"
+#include "dawn/common/vulkan_platform.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/dawn_platform.h"
 

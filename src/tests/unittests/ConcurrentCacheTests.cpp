@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "common/ConcurrentCache.h"
+#include "dawn/common/ConcurrentCache.h"
 #include "dawn_native/AsyncTask.h"
 #include "dawn_platform/DawnPlatform.h"
 #include "utils/SystemUtils.h"

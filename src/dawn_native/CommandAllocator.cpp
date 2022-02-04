@@ -14,8 +14,8 @@
 
 #include "dawn_native/CommandAllocator.h"
 
-#include "common/Assert.h"
-#include "common/Math.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Math.h"
 
 #include <algorithm>
 #include <climits>

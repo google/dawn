@@ -14,8 +14,8 @@
 
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 
-#include "common/BitSetIterator.h"
-#include "common/ityp_vector.h"
+#include "dawn/common/BitSetIterator.h"
+#include "dawn/common/ityp_vector.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
 #include "dawn_native/vulkan/DescriptorSetAllocator.h"
 #include "dawn_native/vulkan/DeviceVk.h"

@@ -14,8 +14,8 @@
 
 #include "dawn_native/opengl/ShaderModuleGL.h"
 
-#include "common/Assert.h"
-#include "common/Platform.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Platform.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/SpirvValidation.h"
 #include "dawn_native/TintUtils.h"

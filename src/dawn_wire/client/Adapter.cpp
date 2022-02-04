@@ -14,7 +14,7 @@
 
 #include "dawn_wire/client/Adapter.h"
 
-#include "common/Log.h"
+#include "dawn/common/Log.h"
 #include "dawn_wire/client/Client.h"
 
 namespace dawn::wire::client {

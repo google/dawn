@@ -19,7 +19,7 @@
 
 #include <dawn/webgpu_cpp.h>
 
-#include "common/Assert.h"
+#include "dawn/common/Assert.h"
 
 namespace utils {
     // TODO(dawn:666): Add Stencil8 format when it's implemented.

@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_OPENGL_BINDGROUPLAYOUTGL_H_
 #define DAWNNATIVE_OPENGL_BINDGROUPLAYOUTGL_H_
 
-#include "common/SlabAllocator.h"
+#include "dawn/common/SlabAllocator.h"
 #include "dawn_native/BindGroupLayout.h"
 
 namespace dawn::native::opengl {

@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_RENDERBUNDLE_H_
 #define DAWNNATIVE_RENDERBUNDLE_H_
 
-#include "common/Constants.h"
+#include "dawn/common/Constants.h"
 #include "dawn_native/AttachmentState.h"
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/Error.h"

@@ -14,8 +14,8 @@
 
 #include "dawn_wire/WireCmd_autogen.h"
 
-#include "common/Assert.h"
-#include "common/Log.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/Log.h"
 #include "dawn_wire/BufferConsumer_impl.h"
 #include "dawn_wire/Wire.h"
 
