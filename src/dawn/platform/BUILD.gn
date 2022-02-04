@@ -36,6 +36,6 @@ dawn_component("platform") {
 
   public_deps = [
     # DawnPlatform.h has #include <dawn/webgpu.h>
-    "${dawn_root}/src/dawn:dawn_headers",
+    "${dawn_root}/src/dawn:headers",
   ]
 }

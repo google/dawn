@@ -17,7 +17,7 @@
 ###############################################################################
 
 DawnJSONGenerator(
-    TARGET "dawn_headers"
+    TARGET "headers"
     PRINT_NAME "Dawn headers"
     RESULT_VARIABLE "DAWN_HEADERS_GEN_SOURCES"
 )
@@ -42,7 +42,7 @@ target_link_libraries(dawn_headers INTERFACE dawn_public_config)
 ###############################################################################
 
 DawnJSONGenerator(
-    TARGET "dawncpp_headers"
+    TARGET "cpp_headers"
     PRINT_NAME "Dawn C++ headers"
     RESULT_VARIABLE "DAWNCPP_HEADERS_GEN_SOURCES"
 )
@@ -61,7 +61,7 @@ target_link_libraries(dawncpp_headers INTERFACE dawn_headers)
 ###############################################################################
 
 DawnJSONGenerator(
-    TARGET "dawncpp"
+    TARGET "cpp"
     PRINT_NAME "Dawn C++ wrapper"
     RESULT_VARIABLE "DAWNCPP_GEN_SOURCES"
 )
@@ -75,7 +75,7 @@ target_link_libraries(dawncpp PUBLIC dawncpp_headers)
 ###############################################################################
 
 DawnJSONGenerator(
-    TARGET "dawn_proc"
+    TARGET "proc"
     PRINT_NAME "Dawn C++ wrapper"
     RESULT_VARIABLE "DAWNPROC_GEN_SOURCES"
 )

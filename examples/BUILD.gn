@@ -33,8 +33,8 @@ static_library("dawn_sample_utils") {
 
   # Export all of these as public deps so that `gn check` allows includes
   public_deps = [
-    "${dawn_root}/src/dawn:dawn_proc",
-    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native",
     "${dawn_root}/src/dawn/utils",

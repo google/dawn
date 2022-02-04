@@ -75,8 +75,8 @@ static_library("dawn_wire_server_fuzzer_common") {
     "DawnWireServerFuzzer.h",
   ]
   public_deps = [
-    "${dawn_root}/src/dawn:dawn_proc",
-    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",

@@ -20,7 +20,7 @@ import("${dawn_root}/scripts/dawn_component.gni")
 # Public dawn wire headers so they can be publically visible for dependencies of
 # dawn/wire
 source_set("headers") {
-  public_deps = [ "${dawn_root}/src/dawn:dawn_headers" ]
+  public_deps = [ "${dawn_root}/src/dawn:headers" ]
   all_dependent_configs = [ "${dawn_root}/src/dawn/common:public_include_dirs" ]
   sources = [
     "${dawn_root}/src/include/dawn/wire/Wire.h",

@@ -87,7 +87,7 @@ static_library("utils") {
     "WireHelper.h",
   ]
   deps = [
-    "${dawn_root}/src/dawn:dawn_proc",
+    "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:headers",
     "${dawn_root}/src/dawn/wire",
@@ -134,7 +134,7 @@ static_library("utils") {
     }
   }
 
-  public_deps = [ "${dawn_root}/src/dawn:dawncpp_headers" ]
+  public_deps = [ "${dawn_root}/src/dawn:cpp_headers" ]
 }
 
 ###############################################################################
@@ -151,7 +151,7 @@ if (dawn_standalone) {
       "BackendBinding.h",
     ]
 
-    public_deps = [ "${dawn_root}/src/dawn:dawn_headers" ]
+    public_deps = [ "${dawn_root}/src/dawn:headers" ]
 
     deps = [
       ":glfw",
