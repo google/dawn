@@ -252,6 +252,151 @@ TEST(Castable, As) {
   ASSERT_EQ(gecko->As<Reptile>(), static_cast<Reptile*>(gecko.get()));
 }
 
+TEST(Castable, SwitchNoDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    bool frog_matched_amphibian = false;
+    Switch(
+        frog.get(),  //
+        [&](Reptile*) { FAIL() << "frog is not reptile"; },
+        [&](Mammal*) { FAIL() << "frog is not mammal"; },
+        [&](Amphibian* amphibian) {
+          EXPECT_EQ(amphibian, frog.get());
+          frog_matched_amphibian = true;
+        });
+    EXPECT_TRUE(frog_matched_amphibian);
+  }
+  {
+    bool bear_matched_mammal = false;
+    Switch(
+        bear.get(),  //
+        [&](Reptile*) { FAIL() << "bear is not reptile"; },
+        [&](Amphibian*) { FAIL() << "bear is not amphibian"; },
+        [&](Mammal* mammal) {
+          EXPECT_EQ(mammal, bear.get());
+          bear_matched_mammal = true;
+        });
+    EXPECT_TRUE(bear_matched_mammal);
+  }
+  {
+    bool gecko_matched_reptile = false;
+    Switch(
+        gecko.get(),  //
+        [&](Mammal*) { FAIL() << "gecko is not mammal"; },
+        [&](Amphibian*) { FAIL() << "gecko is not amphibian"; },
+        [&](Reptile* reptile) {
+          EXPECT_EQ(reptile, gecko.get());
+          gecko_matched_reptile = true;
+        });
+    EXPECT_TRUE(gecko_matched_reptile);
+  }
+}
+
+TEST(Castable, SwitchWithUnusedDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    bool frog_matched_amphibian = false;
+    Switch(
+        frog.get(),  //
+        [&](Reptile*) { FAIL() << "frog is not reptile"; },
+        [&](Mammal*) { FAIL() << "frog is not mammal"; },
+        [&](Amphibian* amphibian) {
+          EXPECT_EQ(amphibian, frog.get());
+          frog_matched_amphibian = true;
+        },
+        [&](Default) { FAIL() << "default should not have been selected"; });
+    EXPECT_TRUE(frog_matched_amphibian);
+  }
+  {
+    bool bear_matched_mammal = false;
+    Switch(
+        bear.get(),  //
+        [&](Reptile*) { FAIL() << "bear is not reptile"; },
+        [&](Amphibian*) { FAIL() << "bear is not amphibian"; },
+        [&](Mammal* mammal) {
+          EXPECT_EQ(mammal, bear.get());
+          bear_matched_mammal = true;
+        },
+        [&](Default) { FAIL() << "default should not have been selected"; });
+    EXPECT_TRUE(bear_matched_mammal);
+  }
+  {
+    bool gecko_matched_reptile = false;
+    Switch(
+        gecko.get(),  //
+        [&](Mammal*) { FAIL() << "gecko is not mammal"; },
+        [&](Amphibian*) { FAIL() << "gecko is not amphibian"; },
+        [&](Reptile* reptile) {
+          EXPECT_EQ(reptile, gecko.get());
+          gecko_matched_reptile = true;
+        },
+        [&](Default) { FAIL() << "default should not have been selected"; });
+    EXPECT_TRUE(gecko_matched_reptile);
+  }
+}
+
+TEST(Castable, SwitchDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    bool frog_matched_default = false;
+    Switch(
+        frog.get(),  //
+        [&](Reptile*) { FAIL() << "frog is not reptile"; },
+        [&](Mammal*) { FAIL() << "frog is not mammal"; },
+        [&](Default) { frog_matched_default = true; });
+    EXPECT_TRUE(frog_matched_default);
+  }
+  {
+    bool bear_matched_default = false;
+    Switch(
+        bear.get(),  //
+        [&](Reptile*) { FAIL() << "bear is not reptile"; },
+        [&](Amphibian*) { FAIL() << "bear is not amphibian"; },
+        [&](Default) { bear_matched_default = true; });
+    EXPECT_TRUE(bear_matched_default);
+  }
+  {
+    bool gecko_matched_default = false;
+    Switch(
+        gecko.get(),  //
+        [&](Mammal*) { FAIL() << "gecko is not mammal"; },
+        [&](Amphibian*) { FAIL() << "gecko is not amphibian"; },
+        [&](Default) { gecko_matched_default = true; });
+    EXPECT_TRUE(gecko_matched_default);
+  }
+}
+TEST(Castable, SwitchMatchFirst) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  {
+    bool frog_matched_animal = false;
+    Switch(
+        frog.get(),
+        [&](Animal* animal) {
+          EXPECT_EQ(animal, frog.get());
+          frog_matched_animal = true;
+        },
+        [&](Amphibian*) { FAIL() << "animal should have been matched first"; });
+    EXPECT_TRUE(frog_matched_animal);
+  }
+  {
+    bool frog_matched_amphibian = false;
+    Switch(
+        frog.get(),
+        [&](Amphibian* amphibain) {
+          EXPECT_EQ(amphibain, frog.get());
+          frog_matched_amphibian = true;
+        },
+        [&](Animal*) { FAIL() << "amphibian should have been matched first"; });
+    EXPECT_TRUE(frog_matched_amphibian);
+  }
+}
+
 }  // namespace
 
 TINT_INSTANTIATE_TYPEINFO(Animal);

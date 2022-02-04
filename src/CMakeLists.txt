@@ -1160,6 +1160,7 @@ if(TINT_BUILD_BENCHMARKS)
   endif()
 
   set(TINT_BENCHMARK_SRC
+    "castable_bench.cc"
     "bench/benchmark.cc"
     "reader/wgsl/parser_bench.cc"
   )

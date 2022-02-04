@@ -35,16 +35,15 @@ Module::Module(ProgramID pid,
       continue;
     }
 
-    if (auto* ty = decl->As<ast::TypeDecl>()) {
-      type_decls_.push_back(ty);
-    } else if (auto* func = decl->As<Function>()) {
-      functions_.push_back(func);
-    } else if (auto* var = decl->As<Variable>()) {
-      global_variables_.push_back(var);
-    } else {
-      diag::List diagnostics;
-      TINT_ICE(AST, diagnostics) << "Unknown global declaration type";
-    }
+    Switch(
+        decl,  //
+        [&](const ast::TypeDecl* type) { type_decls_.push_back(type); },
+        [&](const Function* func) { functions_.push_back(func); },
+        [&](const Variable* var) { global_variables_.push_back(var); },
+        [&](Default) {
+          diag::List diagnostics;
+          TINT_ICE(AST, diagnostics) << "Unknown global declaration type";
+        });
   }
 }
 
@@ -101,19 +100,24 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
           << "src global declaration was nullptr";
       continue;
     }
-    if (auto* type = decl->As<ast::TypeDecl>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
-      type_decls_.push_back(type);
-    } else if (auto* func = decl->As<Function>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
-      functions_.push_back(func);
-    } else if (auto* var = decl->As<Variable>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
-      global_variables_.push_back(var);
-    } else {
-      TINT_ICE(AST, ctx->dst->Diagnostics())
-          << "Unknown global declaration type";
-    }
+    Switch(
+        decl,
+        [&](const ast::TypeDecl* type) {
+          TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
+          type_decls_.push_back(type);
+        },
+        [&](const Function* func) {
+          TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
+          functions_.push_back(func);
+        },
+        [&](const Variable* var) {
+          TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
+          global_variables_.push_back(var);
+        },
+        [&](Default) {
+          TINT_ICE(AST, ctx->dst->Diagnostics())
+              << "Unknown global declaration type";
+        });
   }
 }
 

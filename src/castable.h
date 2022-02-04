@@ -453,6 +453,105 @@ class Castable : public BASE {
   }
 };
 
+/// Default can be used as the default case for a Switch(), when all previous
+/// cases failed to match.
+///
+/// Example:
+/// ```
+/// Switch(object,
+///     [&](TypeA*) { /* ... */ },
+///     [&](TypeB*) { /* ... */ },
+///     [&](Default) { /* If not TypeA or TypeB */ });
+/// ```
+struct Default {};
+
+/// Switch is used to dispatch one of the provided callback case handler
+/// functions based on the type of `object` and the parameter type of the case
+/// handlers. Switch will sequentially check the type of `object` against each
+/// of the switch case handler functions, and will invoke the first case handler
+/// function which has a parameter type that matches the object type. When a
+/// case handler is matched, it will be called with the single argument of
+/// `object` cast to the case handler's parameter type. Switch will invoke at
+/// most one case handler. Each of the case functions must have the signature
+/// `R(T*)` or `R(const T*)`, where `T` is the type matched by that case and `R`
+/// is the return type, consistent across all case handlers.
+///
+/// An optional default case function with the signature `R(Default)` can be
+/// used as the last case. This default case will be called if all previous
+/// cases failed to match.
+///
+/// Example:
+/// ```
+/// Switch(object,
+///     [&](TypeA*) { /* ... */ },
+///     [&](TypeB*) { /* ... */ });
+///
+/// Switch(object,
+///     [&](TypeA*) { /* ... */ },
+///     [&](TypeB*) { /* ... */ },
+///     [&](Default) { /* Called if object is not TypeA or TypeB */ });
+/// ```
+///
+/// @param object the object who's type is used to
+/// @param first_case the first switch case
+/// @param other_cases additional switch cases (optional)
+/// @return the value returned by the called case. If no cases matched, then the
+/// zero value for the consistent case type.
+template <typename T, typename FIRST_CASE, typename... OTHER_CASES>
+traits::ReturnType<FIRST_CASE>  //
+Switch(T* object, FIRST_CASE&& first_case, OTHER_CASES&&... other_cases) {
+  using ReturnType = traits::ReturnType<FIRST_CASE>;
+  using CaseType = std::remove_pointer_t<traits::ParameterType<FIRST_CASE, 0>>;
+  static constexpr bool kHasReturnType = !std::is_same_v<ReturnType, void>;
+  static_assert(traits::SignatureOfT<FIRST_CASE>::parameter_count == 1,
+                "Switch case must have a single parameter");
+  if constexpr (std::is_same_v<CaseType, Default>) {
+    // Default case. Must be last.
+    (void)object;  // 'object' is not used by the Default case.
+    static_assert(sizeof...(other_cases) == 0,
+                  "Switch Default case must come last");
+    if constexpr (kHasReturnType) {
+      return first_case({});
+    } else {
+      first_case({});
+      return;
+    }
+  } else {
+    // Regular case.
+    static_assert(traits::IsTypeOrDerived<CaseType, CastableBase>::value,
+                  "Switch case parameter is not a Castable pointer");
+    // Does the case match?
+    if (auto* ptr = As<CaseType>(object)) {
+      if constexpr (kHasReturnType) {
+        return first_case(ptr);
+      } else {
+        first_case(ptr);
+        return;
+      }
+    }
+    // Case did not match. Got any more cases to try?
+    if constexpr (sizeof...(other_cases) > 0) {
+      // Try the next cases...
+      if constexpr (kHasReturnType) {
+        auto res = Switch(object, std::forward<OTHER_CASES>(other_cases)...);
+        static_assert(std::is_same_v<decltype(res), ReturnType>,
+                      "Switch case types do not have consistent return type");
+        return res;
+      } else {
+        Switch(object, std::forward<OTHER_CASES>(other_cases)...);
+        return;
+      }
+    } else {
+      // That was the last case. No cases matched.
+      if constexpr (kHasReturnType) {
+        return {};
+      } else {
+        return;
+      }
+    }
+  }
+}
+
 }  // namespace tint
 
 TINT_CASTABLE_POP_DISABLE_WARNINGS();

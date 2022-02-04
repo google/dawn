@@ -953,7 +953,7 @@ const ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
 
 bool FunctionEmitter::EmitPipelineInput(std::string var_name,
                                         const Type* var_type,
-                                        ast::AttributeList* decos,
+                                        ast::AttributeList* attrs,
                                         std::vector<int> index_prefix,
                                         const Type* tip_type,
                                         const Type* forced_param_type,
@@ -966,105 +966,121 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
   }
 
   // Recursively flatten matrices, arrays, and structures.
-  if (auto* matrix_type = tip_type->As<Matrix>()) {
-    index_prefix.push_back(0);
-    const auto num_columns = static_cast<int>(matrix_type->columns);
-    const Type* vec_ty = ty_.Vector(matrix_type->type, matrix_type->rows);
-    for (int col = 0; col < num_columns; col++) {
-      index_prefix.back() = col;
-      if (!EmitPipelineInput(var_name, var_type, decos, index_prefix, vec_ty,
-                             forced_param_type, params, statements)) {
-        return false;
-      }
-    }
-    return success();
-  } else if (auto* array_type = tip_type->As<Array>()) {
-    if (array_type->size == 0) {
-      return Fail() << "runtime-size array not allowed on pipeline IO";
-    }
-    index_prefix.push_back(0);
-    const Type* elem_ty = array_type->type;
-    for (int i = 0; i < static_cast<int>(array_type->size); i++) {
-      index_prefix.back() = i;
-      if (!EmitPipelineInput(var_name, var_type, decos, index_prefix, elem_ty,
-                             forced_param_type, params, statements)) {
-        return false;
-      }
-    }
-    return success();
-  } else if (auto* struct_type = tip_type->As<Struct>()) {
-    const auto& members = struct_type->members;
-    index_prefix.push_back(0);
-    for (int i = 0; i < static_cast<int>(members.size()); ++i) {
-      index_prefix.back() = i;
-      ast::AttributeList member_decos(*decos);
-      if (!parser_impl_.ConvertPipelineDecorations(
-              struct_type,
-              parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
-              &member_decos)) {
-        return false;
-      }
-      if (!EmitPipelineInput(var_name, var_type, &member_decos, index_prefix,
-                             members[i], forced_param_type, params,
-                             statements)) {
-        return false;
-      }
-      // Copy the location as updated by nested expansion of the member.
-      parser_impl_.SetLocation(decos, GetLocation(member_decos));
-    }
-    return success();
-  }
+  return Switch(
+      tip_type,
+      [&](const Matrix* matrix_type) -> bool {
+        index_prefix.push_back(0);
+        const auto num_columns = static_cast<int>(matrix_type->columns);
+        const Type* vec_ty = ty_.Vector(matrix_type->type, matrix_type->rows);
+        for (int col = 0; col < num_columns; col++) {
+          index_prefix.back() = col;
+          if (!EmitPipelineInput(var_name, var_type, attrs, index_prefix,
+                                 vec_ty, forced_param_type, params,
+                                 statements)) {
+            return false;
+          }
+        }
+        return success();
+      },
+      [&](const Array* array_type) -> bool {
+        if (array_type->size == 0) {
+          return Fail() << "runtime-size array not allowed on pipeline IO";
+        }
+        index_prefix.push_back(0);
+        const Type* elem_ty = array_type->type;
+        for (int i = 0; i < static_cast<int>(array_type->size); i++) {
+          index_prefix.back() = i;
+          if (!EmitPipelineInput(var_name, var_type, attrs, index_prefix,
+                                 elem_ty, forced_param_type, params,
+                                 statements)) {
+            return false;
+          }
+        }
+        return success();
+      },
+      [&](const Struct* struct_type) -> bool {
+        const auto& members = struct_type->members;
+        index_prefix.push_back(0);
+        for (int i = 0; i < static_cast<int>(members.size()); ++i) {
+          index_prefix.back() = i;
+          ast::AttributeList member_attrs(*attrs);
+          if (!parser_impl_.ConvertPipelineDecorations(
+                  struct_type,
+                  parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
+                  &member_attrs)) {
+            return false;
+          }
+          if (!EmitPipelineInput(var_name, var_type, &member_attrs,
+                                 index_prefix, members[i], forced_param_type,
+                                 params, statements)) {
+            return false;
+          }
+          // Copy the location as updated by nested expansion of the member.
+          parser_impl_.SetLocation(attrs, GetLocation(member_attrs));
+        }
+        return success();
+      },
+      [&](Default) {
+        const bool is_builtin =
+            ast::HasAttribute<ast::BuiltinAttribute>(*attrs);
 
-  const bool is_builtin = ast::HasAttribute<ast::BuiltinAttribute>(*decos);
+        const Type* param_type = is_builtin ? forced_param_type : tip_type;
 
-  const Type* param_type = is_builtin ? forced_param_type : tip_type;
+        const auto param_name = namer_.MakeDerivedName(var_name + "_param");
+        // Create the parameter.
+        // TODO(dneto): Note: If the parameter has non-location decorations,
+        // then those decoration AST nodes will be reused between multiple
+        // elements of a matrix, array, or structure.  Normally that's
+        // disallowed but currently the SPIR-V reader will make duplicates when
+        // the entire AST is cloned at the top level of the SPIR-V reader flow.
+        // Consider rewriting this to avoid this node-sharing.
+        params->push_back(
+            builder_.Param(param_name, param_type->Build(builder_), *attrs));
 
-  const auto param_name = namer_.MakeDerivedName(var_name + "_param");
-  // Create the parameter.
-  // TODO(dneto): Note: If the parameter has non-location decorations,
-  // then those decoration AST nodes will be reused between multiple elements
-  // of a matrix, array, or structure.  Normally that's disallowed but currently
-  // the SPIR-V reader will make duplicates when the entire AST is cloned
-  // at the top level of the SPIR-V reader flow.  Consider rewriting this
-  // to avoid this node-sharing.
-  params->push_back(
-      builder_.Param(param_name, param_type->Build(builder_), *decos));
+        // Add a body statement to copy the parameter to the corresponding
+        // private variable.
+        const ast::Expression* param_value = builder_.Expr(param_name);
+        const ast::Expression* store_dest = builder_.Expr(var_name);
 
-  // Add a body statement to copy the parameter to the corresponding private
-  // variable.
-  const ast::Expression* param_value = builder_.Expr(param_name);
-  const ast::Expression* store_dest = builder_.Expr(var_name);
+        // Index into the LHS as needed.
+        auto* current_type =
+            var_type->UnwrapAlias()->UnwrapRef()->UnwrapAlias();
+        for (auto index : index_prefix) {
+          Switch(
+              current_type,
+              [&](const Matrix* matrix_type) {
+                store_dest =
+                    builder_.IndexAccessor(store_dest, builder_.Expr(index));
+                current_type = ty_.Vector(matrix_type->type, matrix_type->rows);
+              },
+              [&](const Array* array_type) {
+                store_dest =
+                    builder_.IndexAccessor(store_dest, builder_.Expr(index));
+                current_type = array_type->type->UnwrapAlias();
+              },
+              [&](const Struct* struct_type) {
+                store_dest = builder_.MemberAccessor(
+                    store_dest, builder_.Expr(parser_impl_.GetMemberName(
+                                    *struct_type, index)));
+                current_type = struct_type->members[index];
+              });
+        }
 
-  // Index into the LHS as needed.
-  auto* current_type = var_type->UnwrapAlias()->UnwrapRef()->UnwrapAlias();
-  for (auto index : index_prefix) {
-    if (auto* matrix_type = current_type->As<Matrix>()) {
-      store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(index));
-      current_type = ty_.Vector(matrix_type->type, matrix_type->rows);
-    } else if (auto* array_type = current_type->As<Array>()) {
-      store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(index));
-      current_type = array_type->type->UnwrapAlias();
-    } else if (auto* struct_type = current_type->As<Struct>()) {
-      store_dest = builder_.MemberAccessor(
-          store_dest,
-          builder_.Expr(parser_impl_.GetMemberName(*struct_type, index)));
-      current_type = struct_type->members[index];
-    }
-  }
+        if (is_builtin && (tip_type != forced_param_type)) {
+          // The parameter will have the WGSL type, but we need bitcast to
+          // the variable store type.
+          param_value = create<ast::BitcastExpression>(
+              tip_type->Build(builder_), param_value);
+        }
 
-  if (is_builtin && (tip_type != forced_param_type)) {
-    // The parameter will have the WGSL type, but we need bitcast to
-    // the variable store type.
-    param_value =
-        create<ast::BitcastExpression>(tip_type->Build(builder_), param_value);
-  }
+        statements->push_back(builder_.Assign(store_dest, param_value));
 
-  statements->push_back(builder_.Assign(store_dest, param_value));
+        // Increment the location attribute, in case more parameters will
+        // follow.
+        IncrementLocation(attrs);
 
-  // Increment the location attribute, in case more parameters will follow.
-  IncrementLocation(decos);
-
-  return success();
+        return success();
+      });
 }
 
 void FunctionEmitter::IncrementLocation(ast::AttributeList* attributes) {
@@ -1102,106 +1118,120 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
   }
 
   // Recursively flatten matrices, arrays, and structures.
-  if (auto* matrix_type = tip_type->As<Matrix>()) {
-    index_prefix.push_back(0);
-    const auto num_columns = static_cast<int>(matrix_type->columns);
-    const Type* vec_ty = ty_.Vector(matrix_type->type, matrix_type->rows);
-    for (int col = 0; col < num_columns; col++) {
-      index_prefix.back() = col;
-      if (!EmitPipelineOutput(var_name, var_type, decos, index_prefix, vec_ty,
-                              forced_member_type, return_members,
-                              return_exprs)) {
-        return false;
-      }
-    }
-    return success();
-  } else if (auto* array_type = tip_type->As<Array>()) {
-    if (array_type->size == 0) {
-      return Fail() << "runtime-size array not allowed on pipeline IO";
-    }
-    index_prefix.push_back(0);
-    const Type* elem_ty = array_type->type;
-    for (int i = 0; i < static_cast<int>(array_type->size); i++) {
-      index_prefix.back() = i;
-      if (!EmitPipelineOutput(var_name, var_type, decos, index_prefix, elem_ty,
-                              forced_member_type, return_members,
-                              return_exprs)) {
-        return false;
-      }
-    }
-    return success();
-  } else if (auto* struct_type = tip_type->As<Struct>()) {
-    const auto& members = struct_type->members;
-    index_prefix.push_back(0);
-    for (int i = 0; i < static_cast<int>(members.size()); ++i) {
-      index_prefix.back() = i;
-      ast::AttributeList member_decos(*decos);
-      if (!parser_impl_.ConvertPipelineDecorations(
-              struct_type,
-              parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
-              &member_decos)) {
-        return false;
-      }
-      if (!EmitPipelineOutput(var_name, var_type, &member_decos, index_prefix,
-                              members[i], forced_member_type, return_members,
-                              return_exprs)) {
-        return false;
-      }
-      // Copy the location as updated by nested expansion of the member.
-      parser_impl_.SetLocation(decos, GetLocation(member_decos));
-    }
-    return success();
-  }
+  return Switch(
+      tip_type,
+      [&](const Matrix* matrix_type) -> bool {
+        index_prefix.push_back(0);
+        const auto num_columns = static_cast<int>(matrix_type->columns);
+        const Type* vec_ty = ty_.Vector(matrix_type->type, matrix_type->rows);
+        for (int col = 0; col < num_columns; col++) {
+          index_prefix.back() = col;
+          if (!EmitPipelineOutput(var_name, var_type, decos, index_prefix,
+                                  vec_ty, forced_member_type, return_members,
+                                  return_exprs)) {
+            return false;
+          }
+        }
+        return success();
+      },
+      [&](const Array* array_type) -> bool {
+        if (array_type->size == 0) {
+          return Fail() << "runtime-size array not allowed on pipeline IO";
+        }
+        index_prefix.push_back(0);
+        const Type* elem_ty = array_type->type;
+        for (int i = 0; i < static_cast<int>(array_type->size); i++) {
+          index_prefix.back() = i;
+          if (!EmitPipelineOutput(var_name, var_type, decos, index_prefix,
+                                  elem_ty, forced_member_type, return_members,
+                                  return_exprs)) {
+            return false;
+          }
+        }
+        return success();
+      },
+      [&](const Struct* struct_type) -> bool {
+        const auto& members = struct_type->members;
+        index_prefix.push_back(0);
+        for (int i = 0; i < static_cast<int>(members.size()); ++i) {
+          index_prefix.back() = i;
+          ast::AttributeList member_attrs(*decos);
+          if (!parser_impl_.ConvertPipelineDecorations(
+                  struct_type,
+                  parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
+                  &member_attrs)) {
+            return false;
+          }
+          if (!EmitPipelineOutput(var_name, var_type, &member_attrs,
+                                  index_prefix, members[i], forced_member_type,
+                                  return_members, return_exprs)) {
+            return false;
+          }
+          // Copy the location as updated by nested expansion of the member.
+          parser_impl_.SetLocation(decos, GetLocation(member_attrs));
+        }
+        return success();
+      },
+      [&](Default) {
+        const bool is_builtin =
+            ast::HasAttribute<ast::BuiltinAttribute>(*decos);
 
-  const bool is_builtin = ast::HasAttribute<ast::BuiltinAttribute>(*decos);
+        const Type* member_type = is_builtin ? forced_member_type : tip_type;
+        // Derive the member name directly from the variable name.  They can't
+        // collide.
+        const auto member_name = namer_.MakeDerivedName(var_name);
+        // Create the member.
+        // TODO(dneto): Note: If the parameter has non-location decorations,
+        // then those decoration AST nodes  will be reused between multiple
+        // elements of a matrix, array, or structure.  Normally that's
+        // disallowed but currently the SPIR-V reader will make duplicates when
+        // the entire AST is cloned at the top level of the SPIR-V reader flow.
+        // Consider rewriting this to avoid this node-sharing.
+        return_members->push_back(
+            builder_.Member(member_name, member_type->Build(builder_), *decos));
 
-  const Type* member_type = is_builtin ? forced_member_type : tip_type;
-  // Derive the member name directly from the variable name.  They can't
-  // collide.
-  const auto member_name = namer_.MakeDerivedName(var_name);
-  // Create the member.
-  // TODO(dneto): Note: If the parameter has non-location decorations,
-  // then those decoration AST nodes  will be reused between multiple elements
-  // of a matrix, array, or structure.  Normally that's disallowed but currently
-  // the SPIR-V reader will make duplicates when the entire AST is cloned
-  // at the top level of the SPIR-V reader flow.  Consider rewriting this
-  // to avoid this node-sharing.
-  return_members->push_back(
-      builder_.Member(member_name, member_type->Build(builder_), *decos));
+        // Create an expression to evaluate the part of the variable indexed by
+        // the index_prefix.
+        const ast::Expression* load_source = builder_.Expr(var_name);
 
-  // Create an expression to evaluate the part of the variable indexed by
-  // the index_prefix.
-  const ast::Expression* load_source = builder_.Expr(var_name);
+        // Index into the variable as needed to pick out the flattened member.
+        auto* current_type =
+            var_type->UnwrapAlias()->UnwrapRef()->UnwrapAlias();
+        for (auto index : index_prefix) {
+          Switch(
+              current_type,
+              [&](const Matrix* matrix_type) {
+                load_source =
+                    builder_.IndexAccessor(load_source, builder_.Expr(index));
+                current_type = ty_.Vector(matrix_type->type, matrix_type->rows);
+              },
+              [&](const Array* array_type) {
+                load_source =
+                    builder_.IndexAccessor(load_source, builder_.Expr(index));
+                current_type = array_type->type->UnwrapAlias();
+              },
+              [&](const Struct* struct_type) {
+                load_source = builder_.MemberAccessor(
+                    load_source, builder_.Expr(parser_impl_.GetMemberName(
+                                     *struct_type, index)));
+                current_type = struct_type->members[index];
+              });
+        }
 
-  // Index into the variable as needed to pick out the flattened member.
-  auto* current_type = var_type->UnwrapAlias()->UnwrapRef()->UnwrapAlias();
-  for (auto index : index_prefix) {
-    if (auto* matrix_type = current_type->As<Matrix>()) {
-      load_source = builder_.IndexAccessor(load_source, builder_.Expr(index));
-      current_type = ty_.Vector(matrix_type->type, matrix_type->rows);
-    } else if (auto* array_type = current_type->As<Array>()) {
-      load_source = builder_.IndexAccessor(load_source, builder_.Expr(index));
-      current_type = array_type->type->UnwrapAlias();
-    } else if (auto* struct_type = current_type->As<Struct>()) {
-      load_source = builder_.MemberAccessor(
-          load_source,
-          builder_.Expr(parser_impl_.GetMemberName(*struct_type, index)));
-      current_type = struct_type->members[index];
-    }
-  }
+        if (is_builtin && (tip_type != forced_member_type)) {
+          // The member will have the WGSL type, but we need bitcast to
+          // the variable store type.
+          load_source = create<ast::BitcastExpression>(
+              forced_member_type->Build(builder_), load_source);
+        }
+        return_exprs->push_back(load_source);
 
-  if (is_builtin && (tip_type != forced_member_type)) {
-    // The member will have the WGSL type, but we need bitcast to
-    // the variable store type.
-    load_source = create<ast::BitcastExpression>(
-        forced_member_type->Build(builder_), load_source);
-  }
-  return_exprs->push_back(load_source);
+        // Increment the location attribute, in case more parameters will
+        // follow.
+        IncrementLocation(decos);
 
-  // Increment the location attribute, in case more parameters will follow.
-  IncrementLocation(decos);
-
-  return success();
+        return success();
+      });
 }
 
 bool FunctionEmitter::EmitEntryPointAsWrapper() {

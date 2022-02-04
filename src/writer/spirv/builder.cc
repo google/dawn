@@ -560,33 +560,37 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
 }
 
 uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
-  if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
-    return GenerateAccessorExpression(a);
-  }
-  if (auto* b = expr->As<ast::BinaryExpression>()) {
-    return GenerateBinaryExpression(b);
-  }
-  if (auto* b = expr->As<ast::BitcastExpression>()) {
-    return GenerateBitcastExpression(b);
-  }
-  if (auto* c = expr->As<ast::CallExpression>()) {
-    return GenerateCallExpression(c);
-  }
-  if (auto* i = expr->As<ast::IdentifierExpression>()) {
-    return GenerateIdentifierExpression(i);
-  }
-  if (auto* l = expr->As<ast::LiteralExpression>()) {
-    return GenerateLiteralIfNeeded(nullptr, l);
-  }
-  if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
-    return GenerateAccessorExpression(m);
-  }
-  if (auto* u = expr->As<ast::UnaryOpExpression>()) {
-    return GenerateUnaryOpExpression(u);
-  }
-
-  error_ = "unknown expression type: " + std::string(expr->TypeInfo().name);
-  return 0;
+  return Switch(
+      expr,
+      [&](const ast::IndexAccessorExpression* a) {  //
+        return GenerateAccessorExpression(a);
+      },
+      [&](const ast::BinaryExpression* b) {  //
+        return GenerateBinaryExpression(b);
+      },
+      [&](const ast::BitcastExpression* b) {  //
+        return GenerateBitcastExpression(b);
+      },
+      [&](const ast::CallExpression* c) {  //
+        return GenerateCallExpression(c);
+      },
+      [&](const ast::IdentifierExpression* i) {  //
+        return GenerateIdentifierExpression(i);
+      },
+      [&](const ast::LiteralExpression* l) {  //
+        return GenerateLiteralIfNeeded(nullptr, l);
+      },
+      [&](const ast::MemberAccessorExpression* m) {  //
+        return GenerateAccessorExpression(m);
+      },
+      [&](const ast::UnaryOpExpression* u) {  //
+        return GenerateUnaryOpExpression(u);
+      },
+      [&](Default) -> uint32_t {
+        error_ =
+            "unknown expression type: " + std::string(expr->TypeInfo().name);
+        return 0;
+      });
 }
 
 bool Builder::GenerateFunction(const ast::Function* func_ast) {
@@ -861,33 +865,56 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
   push_type(spv::Op::OpVariable, std::move(ops));
 
   for (auto* attr : var->attributes) {
-    if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
-      push_annot(spv::Op::OpDecorate,
-                 {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
-                  Operand::Int(
-                      ConvertBuiltin(builtin->builtin, sem->StorageClass()))});
-    } else if (auto* location = attr->As<ast::LocationAttribute>()) {
-      push_annot(spv::Op::OpDecorate,
-                 {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
-                  Operand::Int(location->value)});
-    } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
-      AddInterpolationDecorations(var_id, interpolate->type,
-                                  interpolate->sampling);
-    } else if (attr->Is<ast::InvariantAttribute>()) {
-      push_annot(spv::Op::OpDecorate,
-                 {Operand::Int(var_id), Operand::Int(SpvDecorationInvariant)});
-    } else if (auto* binding = attr->As<ast::BindingAttribute>()) {
-      push_annot(spv::Op::OpDecorate,
-                 {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
-                  Operand::Int(binding->value)});
-    } else if (auto* group = attr->As<ast::GroupAttribute>()) {
-      push_annot(spv::Op::OpDecorate, {Operand::Int(var_id),
-                                       Operand::Int(SpvDecorationDescriptorSet),
-                                       Operand::Int(group->value)});
-    } else if (attr->Is<ast::OverrideAttribute>()) {
-      // Spec constants are handled elsewhere
-    } else if (!attr->Is<ast::InternalAttribute>()) {
-      error_ = "unknown attribute";
+    bool ok = Switch(
+        attr,
+        [&](const ast::BuiltinAttribute* builtin) {
+          push_annot(spv::Op::OpDecorate,
+                     {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
+                      Operand::Int(ConvertBuiltin(builtin->builtin,
+                                                  sem->StorageClass()))});
+          return true;
+        },
+        [&](const ast::LocationAttribute* location) {
+          push_annot(spv::Op::OpDecorate,
+                     {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
+                      Operand::Int(location->value)});
+          return true;
+        },
+        [&](const ast::InterpolateAttribute* interpolate) {
+          AddInterpolationDecorations(var_id, interpolate->type,
+                                      interpolate->sampling);
+          return true;
+        },
+        [&](const ast::InvariantAttribute*) {
+          push_annot(
+              spv::Op::OpDecorate,
+              {Operand::Int(var_id), Operand::Int(SpvDecorationInvariant)});
+          return true;
+        },
+        [&](const ast::BindingAttribute* binding) {
+          push_annot(spv::Op::OpDecorate,
+                     {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
+                      Operand::Int(binding->value)});
+          return true;
+        },
+        [&](const ast::GroupAttribute* group) {
+          push_annot(
+              spv::Op::OpDecorate,
+              {Operand::Int(var_id), Operand::Int(SpvDecorationDescriptorSet),
+               Operand::Int(group->value)});
+          return true;
+        },
+        [&](const ast::OverrideAttribute*) {
+          return true;  // Spec constants are handled elsewhere
+        },
+        [&](const ast::InternalAttribute*) {
+          return true;  // ignored
+        },
+        [&](Default) {
+          error_ = "unknown attribute";
+          return false;
+        });
+    if (!ok) {
       return false;
     }
   }
@@ -1123,19 +1150,21 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
   // promoted to storage with the VarForDynamicIndex transform.
 
   for (auto* accessor : accessors) {
-    if (auto* array = accessor->As<ast::IndexAccessorExpression>()) {
-      if (!GenerateIndexAccessor(array, &info)) {
-        return 0;
-      }
-    } else if (auto* member = accessor->As<ast::MemberAccessorExpression>()) {
-      if (!GenerateMemberAccessor(member, &info)) {
-        return 0;
-      }
-
-    } else {
-      error_ =
-          "invalid accessor in list: " + std::string(accessor->TypeInfo().name);
-      return 0;
+    bool ok = Switch(
+        accessor,
+        [&](const ast::IndexAccessorExpression* array) {
+          return GenerateIndexAccessor(array, &info);
+        },
+        [&](const ast::MemberAccessorExpression* member) {
+          return GenerateMemberAccessor(member, &info);
+        },
+        [&](Default) {
+          error_ = "invalid accessor in list: " +
+                   std::string(accessor->TypeInfo().name);
+          return false;
+        });
+    if (!ok) {
+      return false;
     }
   }
 
@@ -1653,21 +1682,28 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
     constant.constant_id = global->ConstantId();
   }
 
-  if (auto* l = lit->As<ast::BoolLiteralExpression>()) {
-    constant.kind = ScalarConstant::Kind::kBool;
-    constant.value.b = l->value;
-  } else if (auto* sl = lit->As<ast::SintLiteralExpression>()) {
-    constant.kind = ScalarConstant::Kind::kI32;
-    constant.value.i32 = sl->value;
-  } else if (auto* ul = lit->As<ast::UintLiteralExpression>()) {
-    constant.kind = ScalarConstant::Kind::kU32;
-    constant.value.u32 = ul->value;
-  } else if (auto* fl = lit->As<ast::FloatLiteralExpression>()) {
-    constant.kind = ScalarConstant::Kind::kF32;
-    constant.value.f32 = fl->value;
-  } else {
-    error_ = "unknown literal type";
-    return 0;
+  Switch(
+      lit,
+      [&](const ast::BoolLiteralExpression* l) {
+        constant.kind = ScalarConstant::Kind::kBool;
+        constant.value.b = l->value;
+      },
+      [&](const ast::SintLiteralExpression* sl) {
+        constant.kind = ScalarConstant::Kind::kI32;
+        constant.value.i32 = sl->value;
+      },
+      [&](const ast::UintLiteralExpression* ul) {
+        constant.kind = ScalarConstant::Kind::kU32;
+        constant.value.u32 = ul->value;
+      },
+      [&](const ast::FloatLiteralExpression* fl) {
+        constant.kind = ScalarConstant::Kind::kF32;
+        constant.value.f32 = fl->value;
+      },
+      [&](Default) { error_ = "unknown literal type"; });
+
+  if (!error_.empty()) {
+    return false;
   }
 
   return GenerateConstantIfNeeded(constant);
@@ -2209,19 +2245,25 @@ bool Builder::GenerateBlockStatementWithoutScoping(
 uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
   auto* call = builder_.Sem().Get(expr);
   auto* target = call->Target();
-
-  if (auto* func = target->As<sem::Function>()) {
-    return GenerateFunctionCall(call, func);
-  }
-  if (auto* builtin = target->As<sem::Builtin>()) {
-    return GenerateBuiltinCall(call, builtin);
-  }
-  if (target->IsAnyOf<sem::TypeConversion, sem::TypeConstructor>()) {
-    return GenerateTypeConstructorOrConversion(call, nullptr);
-  }
-  TINT_ICE(Writer, builder_.Diagnostics())
-      << "unhandled call target: " << target->TypeInfo().name;
-  return false;
+  return Switch(
+      target,
+      [&](const sem::Function* func) {
+        return GenerateFunctionCall(call, func);
+      },
+      [&](const sem::Builtin* builtin) {
+        return GenerateBuiltinCall(call, builtin);
+      },
+      [&](const sem::TypeConversion*) {
+        return GenerateTypeConstructorOrConversion(call, nullptr);
+      },
+      [&](const sem::TypeConstructor*) {
+        return GenerateTypeConstructorOrConversion(call, nullptr);
+      },
+      [&](Default) -> uint32_t {
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "unhandled call target: " << target->TypeInfo().name;
+        return 0;
+      });
 }
 
 uint32_t Builder::GenerateFunctionCall(const sem::Call* call,
@@ -3790,46 +3832,49 @@ bool Builder::GenerateLoopStatement(const ast::LoopStatement* stmt) {
 }
 
 bool Builder::GenerateStatement(const ast::Statement* stmt) {
-  if (auto* a = stmt->As<ast::AssignmentStatement>()) {
-    return GenerateAssignStatement(a);
-  }
-  if (auto* b = stmt->As<ast::BlockStatement>()) {
-    return GenerateBlockStatement(b);
-  }
-  if (auto* b = stmt->As<ast::BreakStatement>()) {
-    return GenerateBreakStatement(b);
-  }
-  if (auto* c = stmt->As<ast::CallStatement>()) {
-    return GenerateCallExpression(c->expr) != 0;
-  }
-  if (auto* c = stmt->As<ast::ContinueStatement>()) {
-    return GenerateContinueStatement(c);
-  }
-  if (auto* d = stmt->As<ast::DiscardStatement>()) {
-    return GenerateDiscardStatement(d);
-  }
-  if (stmt->Is<ast::FallthroughStatement>()) {
-    // Do nothing here, the fallthrough gets handled by the switch code.
-    return true;
-  }
-  if (auto* i = stmt->As<ast::IfStatement>()) {
-    return GenerateIfStatement(i);
-  }
-  if (auto* l = stmt->As<ast::LoopStatement>()) {
-    return GenerateLoopStatement(l);
-  }
-  if (auto* r = stmt->As<ast::ReturnStatement>()) {
-    return GenerateReturnStatement(r);
-  }
-  if (auto* s = stmt->As<ast::SwitchStatement>()) {
-    return GenerateSwitchStatement(s);
-  }
-  if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-    return GenerateVariableDeclStatement(v);
-  }
-
-  error_ = "Unknown statement: " + std::string(stmt->TypeInfo().name);
-  return false;
+  return Switch(
+      stmt,
+      [&](const ast::AssignmentStatement* a) {
+        return GenerateAssignStatement(a);
+      },
+      [&](const ast::BlockStatement* b) {  //
+        return GenerateBlockStatement(b);
+      },
+      [&](const ast::BreakStatement* b) {  //
+        return GenerateBreakStatement(b);
+      },
+      [&](const ast::CallStatement* c) {
+        return GenerateCallExpression(c->expr) != 0;
+      },
+      [&](const ast::ContinueStatement* c) {
+        return GenerateContinueStatement(c);
+      },
+      [&](const ast::DiscardStatement* d) {
+        return GenerateDiscardStatement(d);
+      },
+      [&](const ast::FallthroughStatement*) {
+        // Do nothing here, the fallthrough gets handled by the switch code.
+        return true;
+      },
+      [&](const ast::IfStatement* i) {  //
+        return GenerateIfStatement(i);
+      },
+      [&](const ast::LoopStatement* l) {  //
+        return GenerateLoopStatement(l);
+      },
+      [&](const ast::ReturnStatement* r) {  //
+        return GenerateReturnStatement(r);
+      },
+      [&](const ast::SwitchStatement* s) {  //
+        return GenerateSwitchStatement(s);
+      },
+      [&](const ast::VariableDeclStatement* v) {
+        return GenerateVariableDeclStatement(v);
+      },
+      [&](Default) {
+        error_ = "Unknown statement: " + std::string(stmt->TypeInfo().name);
+        return false;
+      });
 }
 
 bool Builder::GenerateVariableDeclStatement(
@@ -3872,78 +3917,91 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
   return utils::GetOrCreate(type_name_to_id_, type_name, [&]() -> uint32_t {
     auto result = result_op();
     auto id = result.to_i();
-    if (auto* arr = type->As<sem::Array>()) {
-      if (!GenerateArrayType(arr, result)) {
-        return 0;
-      }
-    } else if (type->Is<sem::Bool>()) {
-      push_type(spv::Op::OpTypeBool, {result});
-    } else if (type->Is<sem::F32>()) {
-      push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
-    } else if (type->Is<sem::I32>()) {
-      push_type(spv::Op::OpTypeInt,
-                {result, Operand::Int(32), Operand::Int(1)});
-    } else if (auto* mat = type->As<sem::Matrix>()) {
-      if (!GenerateMatrixType(mat, result)) {
-        return 0;
-      }
-    } else if (auto* ptr = type->As<sem::Pointer>()) {
-      if (!GeneratePointerType(ptr, result)) {
-        return 0;
-      }
-    } else if (auto* ref = type->As<sem::Reference>()) {
-      if (!GenerateReferenceType(ref, result)) {
-        return 0;
-      }
-    } else if (auto* str = type->As<sem::Struct>()) {
-      if (!GenerateStructType(str, result)) {
-        return 0;
-      }
-    } else if (type->Is<sem::U32>()) {
-      push_type(spv::Op::OpTypeInt,
-                {result, Operand::Int(32), Operand::Int(0)});
-    } else if (auto* vec = type->As<sem::Vector>()) {
-      if (!GenerateVectorType(vec, result)) {
-        return 0;
-      }
-    } else if (type->Is<sem::Void>()) {
-      push_type(spv::Op::OpTypeVoid, {result});
-    } else if (auto* tex = type->As<sem::Texture>()) {
-      if (!GenerateTextureType(tex, result)) {
-        return 0;
-      }
+    bool ok = Switch(
+        type,
+        [&](const sem::Array* arr) {  //
+          return GenerateArrayType(arr, result);
+        },
+        [&](const sem::Bool*) {
+          push_type(spv::Op::OpTypeBool, {result});
+          return true;
+        },
+        [&](const sem::F32*) {
+          push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
+          return true;
+        },
+        [&](const sem::I32*) {
+          push_type(spv::Op::OpTypeInt,
+                    {result, Operand::Int(32), Operand::Int(1)});
+          return true;
+        },
+        [&](const sem::Matrix* mat) {  //
+          return GenerateMatrixType(mat, result);
+        },
+        [&](const sem::Pointer* ptr) {  //
+          return GeneratePointerType(ptr, result);
+        },
+        [&](const sem::Reference* ref) {  //
+          return GenerateReferenceType(ref, result);
+        },
+        [&](const sem::Struct* str) {  //
+          return GenerateStructType(str, result);
+        },
+        [&](const sem::U32*) {
+          push_type(spv::Op::OpTypeInt,
+                    {result, Operand::Int(32), Operand::Int(0)});
+          return true;
+        },
+        [&](const sem::Vector* vec) {  //
+          return GenerateVectorType(vec, result);
+        },
+        [&](const sem::Void*) {
+          push_type(spv::Op::OpTypeVoid, {result});
+          return true;
+        },
+        [&](const sem::StorageTexture* tex) {
+          if (!GenerateTextureType(tex, result)) {
+            return false;
+          }
 
-      if (auto* st = tex->As<sem::StorageTexture>()) {
-        // Register all three access types of StorageTexture names. In SPIR-V,
-        // we must output a single type, while the variable is annotated with
-        // the access type. Doing this ensures we de-dupe.
-        type_name_to_id_[builder_
-                             .create<sem::StorageTexture>(
-                                 st->dim(), st->texel_format(),
-                                 ast::Access::kRead, st->type())
-                             ->type_name()] = id;
-        type_name_to_id_[builder_
-                             .create<sem::StorageTexture>(
-                                 st->dim(), st->texel_format(),
-                                 ast::Access::kWrite, st->type())
-                             ->type_name()] = id;
-        type_name_to_id_[builder_
-                             .create<sem::StorageTexture>(
-                                 st->dim(), st->texel_format(),
-                                 ast::Access::kReadWrite, st->type())
-                             ->type_name()] = id;
-      }
+          // Register all three access types of StorageTexture names. In
+          // SPIR-V, we must output a single type, while the variable is
+          // annotated with the access type. Doing this ensures we de-dupe.
+          type_name_to_id_[builder_
+                               .create<sem::StorageTexture>(
+                                   tex->dim(), tex->texel_format(),
+                                   ast::Access::kRead, tex->type())
+                               ->type_name()] = id;
+          type_name_to_id_[builder_
+                               .create<sem::StorageTexture>(
+                                   tex->dim(), tex->texel_format(),
+                                   ast::Access::kWrite, tex->type())
+                               ->type_name()] = id;
+          type_name_to_id_[builder_
+                               .create<sem::StorageTexture>(
+                                   tex->dim(), tex->texel_format(),
+                                   ast::Access::kReadWrite, tex->type())
+                               ->type_name()] = id;
+          return true;
+        },
+        [&](const sem::Texture* tex) {
+          return GenerateTextureType(tex, result);
+        },
+        [&](const sem::Sampler*) {
+          push_type(spv::Op::OpTypeSampler, {result});
 
-    } else if (type->Is<sem::Sampler>()) {
-      push_type(spv::Op::OpTypeSampler, {result});
+          // Register both of the sampler type names. In SPIR-V they're the same
+          // sampler type, so we need to match that when we do the dedup check.
+          type_name_to_id_["__sampler_sampler"] = id;
+          type_name_to_id_["__sampler_comparison"] = id;
+          return true;
+        },
+        [&](Default) {
+          error_ = "unable to convert type: " + type->type_name();
+          return false;
+        });
 
-      // Register both of the sampler type names. In SPIR-V they're the same
-      // sampler type, so we need to match that when we do the dedup check.
-      type_name_to_id_["__sampler_sampler"] = id;
-      type_name_to_id_["__sampler_comparison"] = id;
-
-    } else {
-      error_ = "unable to convert type: " + type->type_name();
+    if (!ok) {
       return 0;
     }
 
@@ -3995,22 +4053,31 @@ bool Builder::GenerateTextureType(const sem::Texture* texture,
   }
 
   if (dim == ast::TextureDimension::kCubeArray) {
-    if (texture->Is<sem::SampledTexture>() ||
-        texture->Is<sem::DepthTexture>()) {
+    if (texture->IsAnyOf<sem::SampledTexture, sem::DepthTexture>()) {
       push_capability(SpvCapabilitySampledCubeArray);
     }
   }
 
-  uint32_t type_id = 0u;
-  if (texture->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
-    type_id = GenerateTypeIfNeeded(builder_.create<sem::F32>());
-  } else if (auto* s = texture->As<sem::SampledTexture>()) {
-    type_id = GenerateTypeIfNeeded(s->type());
-  } else if (auto* ms = texture->As<sem::MultisampledTexture>()) {
-    type_id = GenerateTypeIfNeeded(ms->type());
-  } else if (auto* st = texture->As<sem::StorageTexture>()) {
-    type_id = GenerateTypeIfNeeded(st->type());
-  }
+  uint32_t type_id = Switch(
+      texture,
+      [&](const sem::DepthTexture*) {
+        return GenerateTypeIfNeeded(builder_.create<sem::F32>());
+      },
+      [&](const sem::DepthMultisampledTexture*) {
+        return GenerateTypeIfNeeded(builder_.create<sem::F32>());
+      },
+      [&](const sem::SampledTexture* t) {
+        return GenerateTypeIfNeeded(t->type());
+      },
+      [&](const sem::MultisampledTexture* t) {
+        return GenerateTypeIfNeeded(t->type());
+      },
+      [&](const sem::StorageTexture* t) {
+        return GenerateTypeIfNeeded(t->type());
+      },
+      [&](Default) -> uint32_t {  //
+        return 0u;
+      });
   if (type_id == 0u) {
     return false;
   }

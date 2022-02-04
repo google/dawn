@@ -101,30 +101,47 @@ bool TraverseExpressions(const ast::Expression* root,
       }
     }
 
-    if (auto* idx = expr->As<IndexAccessorExpression>()) {
-      push_pair(idx->object, idx->index);
-    } else if (auto* bin_op = expr->As<BinaryExpression>()) {
-      push_pair(bin_op->lhs, bin_op->rhs);
-    } else if (auto* bitcast = expr->As<BitcastExpression>()) {
-      to_visit.push_back(bitcast->expr);
-    } else if (auto* call = expr->As<CallExpression>()) {
-      // TODO(crbug.com/tint/1257): Resolver breaks if we actually include the
-      // function name in the traversal.
-      // to_visit.push_back(call->func);
-      push_list(call->args);
-    } else if (auto* member = expr->As<MemberAccessorExpression>()) {
-      // TODO(crbug.com/tint/1257): Resolver breaks if we actually include the
-      // member name in the traversal.
-      // push_pair(member->structure, member->member);
-      to_visit.push_back(member->structure);
-    } else if (auto* unary = expr->As<UnaryOpExpression>()) {
-      to_visit.push_back(unary->expr);
-    } else if (expr->IsAnyOf<LiteralExpression, IdentifierExpression,
-                             PhonyExpression>()) {
-      // Leaf expression
-    } else {
-      TINT_ICE(AST, diags) << "unhandled expression type: "
-                           << expr->TypeInfo().name;
+    bool ok = Switch(
+        expr,
+        [&](const IndexAccessorExpression* idx) {
+          push_pair(idx->object, idx->index);
+          return true;
+        },
+        [&](const BinaryExpression* bin_op) {
+          push_pair(bin_op->lhs, bin_op->rhs);
+          return true;
+        },
+        [&](const BitcastExpression* bitcast) {
+          to_visit.push_back(bitcast->expr);
+          return true;
+        },
+        [&](const CallExpression* call) {
+          // TODO(crbug.com/tint/1257): Resolver breaks if we actually include
+          // the function name in the traversal. to_visit.push_back(call->func);
+          push_list(call->args);
+          return true;
+        },
+        [&](const MemberAccessorExpression* member) {
+          // TODO(crbug.com/tint/1257): Resolver breaks if we actually include
+          // the member name in the traversal. push_pair(member->structure,
+          // member->member);
+          to_visit.push_back(member->structure);
+          return true;
+        },
+        [&](const UnaryOpExpression* unary) {
+          to_visit.push_back(unary->expr);
+          return true;
+        },
+        [&](Default) {
+          if (expr->IsAnyOf<LiteralExpression, IdentifierExpression,
+                            PhonyExpression>()) {
+            return true;  // Leaf expression
+          }
+          TINT_ICE(AST, diags)
+              << "unhandled expression type: " << expr->TypeInfo().name;
+          return false;
+        });
+    if (!ok) {
       return false;
     }
   }
