@@ -79,8 +79,8 @@ static_library("dawn_wire_server_fuzzer_common") {
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/wire:static",
     "${dawn_root}/src/dawn_native:static",
-    "${dawn_root}/src/dawn_wire:static",
   ]
 }
 

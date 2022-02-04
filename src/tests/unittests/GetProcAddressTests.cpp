@@ -16,9 +16,9 @@
 
 #include "dawn/dawn_proc.h"
 #include "dawn/utils/TerribleCommandBuffer.h"
+#include "dawn/wire/WireClient.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/null/DeviceNull.h"
-#include "dawn_wire/WireClient.h"
 
 namespace {
 

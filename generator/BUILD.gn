@@ -22,7 +22,7 @@ import("dawn_generator.gni")
 _stale_dirs = [
   "dawn",
   "dawn_native",
-  "dawn_wire",
+  "dawn/wire",
   "mock",
   "src",
 ]

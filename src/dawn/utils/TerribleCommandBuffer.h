@@ -15,7 +15,7 @@
 #ifndef UTILS_TERRIBLE_COMMAND_BUFFER_H_
 #define UTILS_TERRIBLE_COMMAND_BUFFER_H_
 
-#include "dawn_wire/Wire.h"
+#include "dawn/wire/Wire.h"
 
 namespace utils {
 

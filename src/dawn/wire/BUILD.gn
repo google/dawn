@@ -1,0 +1,111 @@
+# Copyright 2019 The Dawn Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../../scripts/dawn_overrides_with_defaults.gni")
+
+import("${dawn_root}/generator/dawn_generator.gni")
+import("${dawn_root}/scripts/dawn_component.gni")
+
+# Public dawn wire headers so they can be publically visible for dependencies of
+# dawn/wire
+source_set("headers") {
+  public_deps = [ "${dawn_root}/src/dawn:dawn_headers" ]
+  all_dependent_configs = [ "${dawn_root}/src/dawn/common:public_include_dirs" ]
+  sources = [
+    "${dawn_root}/src/include/dawn/wire/Wire.h",
+    "${dawn_root}/src/include/dawn/wire/WireClient.h",
+    "${dawn_root}/src/include/dawn/wire/WireServer.h",
+    "${dawn_root}/src/include/dawn/wire/dawn_wire_export.h",
+  ]
+}
+
+dawn_json_generator("gen") {
+  target = "wire"
+  outputs = [
+    "src/dawn/wire/ObjectType_autogen.h",
+    "src/dawn/wire/WireCmd_autogen.h",
+    "src/dawn/wire/WireCmd_autogen.cpp",
+    "src/dawn/wire/client/ApiObjects_autogen.h",
+    "src/dawn/wire/client/ApiProcs_autogen.cpp",
+    "src/dawn/wire/client/ClientBase_autogen.h",
+    "src/dawn/wire/client/ClientHandlers_autogen.cpp",
+    "src/dawn/wire/client/ClientPrototypes_autogen.inc",
+    "src/dawn/wire/server/ServerBase_autogen.h",
+    "src/dawn/wire/server/ServerDoers_autogen.cpp",
+    "src/dawn/wire/server/ServerHandlers_autogen.cpp",
+    "src/dawn/wire/server/ServerPrototypes_autogen.inc",
+  ]
+}
+
+dawn_component("wire") {
+  DEFINE_PREFIX = "DAWN_WIRE"
+
+  deps = [
+    ":gen",
+    "${dawn_root}/src/dawn/common",
+  ]
+
+  configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
+  sources = get_target_outputs(":gen")
+  sources += [
+    "BufferConsumer.h",
+    "BufferConsumer_impl.h",
+    "ChunkedCommandHandler.cpp",
+    "ChunkedCommandHandler.h",
+    "ChunkedCommandSerializer.cpp",
+    "ChunkedCommandSerializer.h",
+    "SupportedFeatures.cpp",
+    "SupportedFeatures.h",
+    "Wire.cpp",
+    "WireClient.cpp",
+    "WireDeserializeAllocator.cpp",
+    "WireDeserializeAllocator.h",
+    "WireResult.h",
+    "WireServer.cpp",
+    "client/Adapter.cpp",
+    "client/Adapter.h",
+    "client/ApiObjects.h",
+    "client/Buffer.cpp",
+    "client/Buffer.h",
+    "client/Client.cpp",
+    "client/Client.h",
+    "client/ClientDoers.cpp",
+    "client/ClientInlineMemoryTransferService.cpp",
+    "client/Device.cpp",
+    "client/Device.h",
+    "client/Instance.cpp",
+    "client/Instance.h",
+    "client/LimitsAndFeatures.cpp",
+    "client/LimitsAndFeatures.h",
+    "client/ObjectAllocator.h",
+    "client/Queue.cpp",
+    "client/Queue.h",
+    "client/RequestTracker.h",
+    "client/ShaderModule.cpp",
+    "client/ShaderModule.h",
+    "server/ObjectStorage.h",
+    "server/Server.cpp",
+    "server/Server.h",
+    "server/ServerAdapter.cpp",
+    "server/ServerBuffer.cpp",
+    "server/ServerDevice.cpp",
+    "server/ServerInlineMemoryTransferService.cpp",
+    "server/ServerInstance.cpp",
+    "server/ServerQueue.cpp",
+    "server/ServerShaderModule.cpp",
+  ]
+
+  # Make headers publicly visible
+  public_deps = [ ":headers" ]
+}

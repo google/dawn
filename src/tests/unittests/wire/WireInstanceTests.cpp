@@ -15,8 +15,8 @@
 #include "tests/MockCallback.h"
 #include "tests/unittests/wire/WireTest.h"
 
-#include "dawn_wire/WireClient.h"
-#include "dawn_wire/WireServer.h"
+#include "dawn/wire/WireClient.h"
+#include "dawn/wire/WireServer.h"
 
 #include <webgpu/webgpu_cpp.h>
 #include <unordered_set>

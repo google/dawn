@@ -71,6 +71,9 @@ class Name:
     def namespace_case(self):
         return '::'.join(self.chunks)
 
+    def Dirs(self):
+        return '/'.join(self.chunks)
+
     def js_enum_case(self):
         result = self.chunks[0].lower()
         for chunk in self.chunks[1:]:
@@ -761,7 +764,7 @@ class MultiGeneratorFromDawnJSON(Generator):
     def add_commandline_arguments(self, parser):
         allowed_targets = [
             'dawn_headers', 'dawncpp_headers', 'dawncpp', 'dawn_proc',
-            'mock_api', 'dawn_wire', "dawn_native_utils"
+            'mock_api', 'wire', "dawn_native_utils"
         ]
 
         parser.add_argument('--dawn-json',
@@ -942,7 +945,7 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/' + native_dir + '/ObjectType_autogen.cpp',
                            frontend_params))
 
-        if 'dawn_wire' in targets:
+        if 'wire' in targets:
             params_dawn_wire = parse_json(loaded_json,
                                           enabled_tags=['dawn', 'deprecated'],
                                           disabled_tags=['native'])
@@ -957,51 +960,51 @@ class MultiGeneratorFromDawnJSON(Generator):
                 }, additional_params
             ]
             renders.append(
-                FileRender('dawn_wire/ObjectType.h',
-                           'src/dawn_wire/ObjectType_autogen.h', wire_params))
+                FileRender('dawn/wire/ObjectType.h',
+                           'src/dawn/wire/ObjectType_autogen.h', wire_params))
             renders.append(
-                FileRender('dawn_wire/WireCmd.h',
-                           'src/dawn_wire/WireCmd_autogen.h', wire_params))
+                FileRender('dawn/wire/WireCmd.h',
+                           'src/dawn/wire/WireCmd_autogen.h', wire_params))
             renders.append(
-                FileRender('dawn_wire/WireCmd.cpp',
-                           'src/dawn_wire/WireCmd_autogen.cpp', wire_params))
+                FileRender('dawn/wire/WireCmd.cpp',
+                           'src/dawn/wire/WireCmd_autogen.cpp', wire_params))
             renders.append(
-                FileRender('dawn_wire/client/ApiObjects.h',
-                           'src/dawn_wire/client/ApiObjects_autogen.h',
+                FileRender('dawn/wire/client/ApiObjects.h',
+                           'src/dawn/wire/client/ApiObjects_autogen.h',
                            wire_params))
             renders.append(
-                FileRender('dawn_wire/client/ApiProcs.cpp',
-                           'src/dawn_wire/client/ApiProcs_autogen.cpp',
+                FileRender('dawn/wire/client/ApiProcs.cpp',
+                           'src/dawn/wire/client/ApiProcs_autogen.cpp',
                            wire_params))
             renders.append(
-                FileRender('dawn_wire/client/ClientBase.h',
-                           'src/dawn_wire/client/ClientBase_autogen.h',
+                FileRender('dawn/wire/client/ClientBase.h',
+                           'src/dawn/wire/client/ClientBase_autogen.h',
                            wire_params))
             renders.append(
-                FileRender('dawn_wire/client/ClientHandlers.cpp',
-                           'src/dawn_wire/client/ClientHandlers_autogen.cpp',
+                FileRender('dawn/wire/client/ClientHandlers.cpp',
+                           'src/dawn/wire/client/ClientHandlers_autogen.cpp',
                            wire_params))
             renders.append(
                 FileRender(
-                    'dawn_wire/client/ClientPrototypes.inc',
-                    'src/dawn_wire/client/ClientPrototypes_autogen.inc',
+                    'dawn/wire/client/ClientPrototypes.inc',
+                    'src/dawn/wire/client/ClientPrototypes_autogen.inc',
                     wire_params))
             renders.append(
-                FileRender('dawn_wire/server/ServerBase.h',
-                           'src/dawn_wire/server/ServerBase_autogen.h',
+                FileRender('dawn/wire/server/ServerBase.h',
+                           'src/dawn/wire/server/ServerBase_autogen.h',
                            wire_params))
             renders.append(
-                FileRender('dawn_wire/server/ServerDoers.cpp',
-                           'src/dawn_wire/server/ServerDoers_autogen.cpp',
+                FileRender('dawn/wire/server/ServerDoers.cpp',
+                           'src/dawn/wire/server/ServerDoers_autogen.cpp',
                            wire_params))
             renders.append(
-                FileRender('dawn_wire/server/ServerHandlers.cpp',
-                           'src/dawn_wire/server/ServerHandlers_autogen.cpp',
+                FileRender('dawn/wire/server/ServerHandlers.cpp',
+                           'src/dawn/wire/server/ServerHandlers_autogen.cpp',
                            wire_params))
             renders.append(
                 FileRender(
-                    'dawn_wire/server/ServerPrototypes.inc',
-                    'src/dawn_wire/server/ServerPrototypes_autogen.inc',
+                    'dawn/wire/server/ServerPrototypes.inc',
+                    'src/dawn/wire/server/ServerPrototypes_autogen.inc',
                     wire_params))
 
         return renders

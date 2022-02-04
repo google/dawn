@@ -14,8 +14,8 @@
 
 #include "tests/unittests/wire/WireTest.h"
 
-#include "dawn_wire/WireClient.h"
-#include "dawn_wire/WireServer.h"
+#include "dawn/wire/WireClient.h"
+#include "dawn/wire/WireServer.h"
 
 using namespace testing;
 using namespace dawn::wire;

@@ -14,8 +14,8 @@
 
 #include "tests/unittests/wire/WireTest.h"
 
-#include "dawn_wire/client/ClientMemoryTransferService_mock.h"
-#include "dawn_wire/server/ServerMemoryTransferService_mock.h"
+#include "dawn/wire/client/ClientMemoryTransferService_mock.h"
+#include "dawn/wire/server/ServerMemoryTransferService_mock.h"
 
 using namespace testing;
 using namespace dawn::wire;
@@ -25,10 +25,7 @@ namespace {
     // Mock class to add expectations on the wire calling callbacks
     class MockBufferMapCallback {
       public:
-        MOCK_METHOD(void,
-                    Call,
-                    (WGPUBufferMapAsyncStatus status,
-                     void* userdata));
+        MOCK_METHOD(void, Call, (WGPUBufferMapAsyncStatus status, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferMapCallback>> mockBufferMapCallback;
@@ -679,7 +676,6 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
         .WillOnce(InvokeWithoutArgs(
             [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
-
 
     FlushClient();
 

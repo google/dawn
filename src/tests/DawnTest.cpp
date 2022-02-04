@@ -28,8 +28,8 @@
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "dawn/utils/WireHelper.h"
-#include "dawn_wire/WireClient.h"
-#include "dawn_wire/WireServer.h"
+#include "dawn/wire/WireClient.h"
+#include "dawn/wire/WireServer.h"
 
 #include <algorithm>
 #include <fstream>

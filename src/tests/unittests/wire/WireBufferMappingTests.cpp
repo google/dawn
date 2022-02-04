@@ -14,7 +14,7 @@
 
 #include "tests/unittests/wire/WireTest.h"
 
-#include "dawn_wire/WireClient.h"
+#include "dawn/wire/WireClient.h"
 
 using namespace testing;
 using namespace dawn::wire;
@@ -24,10 +24,7 @@ namespace {
     // Mock class to add expectations on the wire calling callbacks
     class MockBufferMapCallback {
       public:
-        MOCK_METHOD(void,
-                    Call,
-                    (WGPUBufferMapAsyncStatus status,
-                     void* userdata));
+        MOCK_METHOD(void, Call, (WGPUBufferMapAsyncStatus status, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferMapCallback>> mockBufferMapCallback;
@@ -216,8 +213,7 @@ TEST_F(WireBufferMappingReadTests, UnmapCalledTooEarlyForReadButServerSideError)
     FlushClient();
 
     // The callback should be called with the server-side error and not the UnmappedBeforeCallback.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _))
-        .Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _)).Times(1);
 
     FlushServer();
 }
@@ -267,8 +263,7 @@ TEST_F(WireBufferMappingReadTests, DestroyCalledTooEarlyForReadButServerSideErro
     FlushClient();
 
     // The callback should be called with the server-side error and not the DestroyedBeforCallback..
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _))
-        .Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _)).Times(1);
 
     FlushServer();
 }

@@ -20,8 +20,8 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/webgpu_cpp.h"
+#include "dawn/wire/WireServer.h"
 #include "dawn_native/DawnNative.h"
-#include "dawn_wire/WireServer.h"
 
 #include <fstream>
 #include <vector>
