@@ -124,16 +124,20 @@ constexpr auto Range() {
 namespace detail {
 
 /// @returns the tuple `t` swizzled by `INDICES`
-template <class TUPLE, std::size_t... INDICES>
-constexpr auto Swizzle(TUPLE&& t, std::index_sequence<INDICES...>) {
-  return std::make_tuple(std::get<INDICES>(std::forward<TUPLE>(t))...);
+template <typename TUPLE, std::size_t... INDICES>
+constexpr auto Swizzle(TUPLE&& t, std::index_sequence<INDICES...>)
+    -> std::tuple<
+        std::tuple_element_t<INDICES, std::remove_reference_t<TUPLE>>...> {
+  return {std::forward<
+      std::tuple_element_t<INDICES, std::remove_reference_t<TUPLE>>>(
+      std::get<INDICES>(std::forward<TUPLE>(t)))...};
 }
 
 /// @returns a nullptr of the tuple type `TUPLE` swizzled by `INDICES`.
 /// @note: This function is intended to be used in a `decltype()` expression,
 /// and returns a pointer-to-tuple as the tuple may hold non-constructable
 /// types.
-template <class TUPLE, std::size_t... INDICES>
+template <typename TUPLE, std::size_t... INDICES>
 constexpr auto* SwizzlePtrTy(std::index_sequence<INDICES...>) {
   using Swizzled = std::tuple<std::tuple_element_t<INDICES, TUPLE>...>;
   return static_cast<Swizzled*>(nullptr);

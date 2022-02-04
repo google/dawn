@@ -465,6 +465,131 @@ class Castable : public BASE {
 /// ```
 struct Default {};
 
+namespace detail {
+
+/// Evaluates to the Switch case type being matched by the switch case function
+/// `FN`.
+/// @note does not handle the Default case
+/// @see Switch().
+template <typename FN>
+using SwitchCaseType = std::remove_const_t<std::remove_pointer_t<
+    traits::ParameterType<std::remove_reference_t<FN>, 0>>>;
+
+/// Evaluates to true if the function `FN` has the signature of a Default case
+/// in a Switch().
+/// @see Switch().
+template <typename FN>
+inline constexpr bool IsDefaultCase =
+    std::is_same_v<traits::ParameterType<std::remove_reference_t<FN>, 0>,
+                   Default>;
+
+/// Searches the list of Switch cases for a Default case, returning the index of
+/// the Default case. If the a Default case is not found in the tuple, then -1
+/// is returned.
+template <typename TUPLE, std::size_t START_IDX = 0>
+constexpr int IndexOfDefaultCase() {
+  if constexpr (START_IDX < std::tuple_size_v<TUPLE>) {
+    return IsDefaultCase<std::tuple_element_t<START_IDX, TUPLE>>
+               ? static_cast<int>(START_IDX)
+               : IndexOfDefaultCase<TUPLE, START_IDX + 1>();
+  } else {
+    return -1;
+  }
+}
+
+/// The implementation of Switch() for non-Default cases.
+/// Switch splits the cases into two a low and high block of cases, and quickly
+/// rules out blocks that cannot match by comparing the TypeInfo::HashCode of
+/// the object and the cases in the block. If a block of cases may match the
+/// given object's type, then that block is split into two, and the process
+/// recurses. When NonDefaultCases() is called with a single case, then As<>
+/// will be used to dynamically cast to the case type and if the cast succeeds,
+/// then the case handler is called.
+/// @returns true if a case handler was found, otherwise false.
+template <typename T, typename RETURN_TYPE, typename... CASES>
+inline bool NonDefaultCases(T* object,
+                            const TypeInfo* type,
+                            RETURN_TYPE* result,
+                            std::tuple<CASES...>&& cases) {
+  using Cases = std::tuple<CASES...>;
+
+  (void)result;  // Not always used, avoid warning.
+
+  static constexpr bool kHasReturnType = !std::is_same_v<RETURN_TYPE, void>;
+  static constexpr size_t kNumCases = sizeof...(CASES);
+
+  if constexpr (kNumCases == 0) {
+    // No cases. Nothing to do.
+    return false;
+  } else if constexpr (kNumCases == 1) {  // NOLINT: cpplint doesn't understand
+                                          // `else if constexpr`
+    // Single case.
+    using CaseFunc = std::tuple_element_t<0, Cases>;
+    static_assert(!IsDefaultCase<CaseFunc>,
+                  "NonDefaultCases called with a Default case");
+    // Attempt to dynamically cast the object to the handler type. If that
+    // succeeds, call the case handler with the cast object.
+    using CaseType = SwitchCaseType<CaseFunc>;
+    if (auto* ptr = As<CaseType>(object)) {
+      if constexpr (kHasReturnType) {
+        *result = std::get<0>(cases)(ptr);
+      } else {
+        std::get<0>(cases)(ptr);
+      }
+      return true;
+    }
+    return false;
+  } else {
+    // Multiple cases.
+    // Check the hashcode bits to see if there's any possibility of a case
+    // matching in these cases. If there isn't, we can skip all these cases.
+    if (type->full_hashcode &
+        TypeInfo::CombinedHashCodeOf<SwitchCaseType<CASES>...>()) {
+      // There's a possibility. We need to scan further.
+      // Split the cases into two, and recurse.
+      constexpr size_t kMid = kNumCases / 2;
+      return NonDefaultCases(object, type, result,
+                             traits::Slice<0, kMid>(cases)) ||
+             NonDefaultCases(object, type, result,
+                             traits::Slice<kMid, kNumCases - kMid>(cases));
+    } else {
+      return false;
+    }
+  }
+}
+
+/// The implementation of Switch() for all cases.
+/// @see NonDefaultCases
+template <typename T, typename RETURN_TYPE, typename... CASES>
+inline void SwitchCases(T* object,
+                        const TypeInfo* type,
+                        RETURN_TYPE* result,
+                        std::tuple<CASES...>&& cases) {
+  using Cases = std::tuple<CASES...>;
+  static constexpr int kDefaultIndex = detail::IndexOfDefaultCase<Cases>();
+  static_assert(kDefaultIndex == -1 || std::tuple_size_v<Cases> - 1,
+                "Default case must be last in Switch()");
+  static constexpr bool kHasDefaultCase = kDefaultIndex >= 0;
+  static constexpr bool kHasReturnType = !std::is_same_v<RETURN_TYPE, void>;
+
+  if constexpr (kHasDefaultCase) {
+    // Evaluate non-default cases.
+    if (!detail::NonDefaultCases<T>(object, type, result,
+                                    traits::Slice<0, kDefaultIndex>(cases))) {
+      // Nothing matched. Evaluate default case.
+      if constexpr (kHasReturnType) {
+        *result = std::get<kDefaultIndex>(cases)({});
+      } else {
+        std::get<kDefaultIndex>(cases)({});
+      }
+    }
+  } else {
+    detail::NonDefaultCases<T>(object, type, result, std::move(cases));
+  }
+}
+
+}  // namespace detail
+
 /// Switch is used to dispatch one of the provided callback case handler
 /// functions based on the type of `object` and the parameter type of the case
 /// handlers. Switch will sequentially check the type of `object` against each
@@ -493,62 +618,26 @@ struct Default {};
 /// ```
 ///
 /// @param object the object who's type is used to
-/// @param first_case the first switch case
-/// @param other_cases additional switch cases (optional)
+/// @param cases the switch cases
 /// @return the value returned by the called case. If no cases matched, then the
 /// zero value for the consistent case type.
-template <typename T, typename FIRST_CASE, typename... OTHER_CASES>
-traits::ReturnType<FIRST_CASE>  //
-Switch(T* object, FIRST_CASE&& first_case, OTHER_CASES&&... other_cases) {
-  using ReturnType = traits::ReturnType<FIRST_CASE>;
-  using CaseType = std::remove_pointer_t<traits::ParameterType<FIRST_CASE, 0>>;
+template <typename T, typename... CASES>
+inline auto Switch(T* object, CASES&&... cases) {
+  using Cases = std::tuple<CASES...>;
+  using ReturnType = traits::ReturnType<std::tuple_element_t<0, Cases>>;
   static constexpr bool kHasReturnType = !std::is_same_v<ReturnType, void>;
-  static_assert(traits::SignatureOfT<FIRST_CASE>::parameter_count == 1,
-                "Switch case must have a single parameter");
-  if constexpr (std::is_same_v<CaseType, Default>) {
-    // Default case. Must be last.
-    (void)object;  // 'object' is not used by the Default case.
-    static_assert(sizeof...(other_cases) == 0,
-                  "Switch Default case must come last");
-    if constexpr (kHasReturnType) {
-      return first_case({});
-    } else {
-      first_case({});
-      return;
-    }
+
+  auto& type = object->TypeInfo();
+
+  if constexpr (kHasReturnType) {
+    ReturnType res = {};
+    detail::SwitchCases(object, &type, &res,
+                        std::forward_as_tuple(std::forward<CASES>(cases)...));
+    return res;
   } else {
-    // Regular case.
-    static_assert(traits::IsTypeOrDerived<CaseType, CastableBase>::value,
-                  "Switch case parameter is not a Castable pointer");
-    // Does the case match?
-    if (auto* ptr = As<CaseType>(object)) {
-      if constexpr (kHasReturnType) {
-        return first_case(ptr);
-      } else {
-        first_case(ptr);
-        return;
-      }
-    }
-    // Case did not match. Got any more cases to try?
-    if constexpr (sizeof...(other_cases) > 0) {
-      // Try the next cases...
-      if constexpr (kHasReturnType) {
-        auto res = Switch(object, std::forward<OTHER_CASES>(other_cases)...);
-        static_assert(std::is_same_v<decltype(res), ReturnType>,
-                      "Switch case types do not have consistent return type");
-        return res;
-      } else {
-        Switch(object, std::forward<OTHER_CASES>(other_cases)...);
-        return;
-      }
-    } else {
-      // That was the last case. No cases matched.
-      if constexpr (kHasReturnType) {
-        return {};
-      } else {
-        return;
-      }
-    }
+    detail::SwitchCases<T, void>(
+        object, &type, nullptr,
+        std::forward_as_tuple(std::forward<CASES>(cases)...));
   }
 }
 
