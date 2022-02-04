@@ -133,9 +133,9 @@ source_set("dawn_native_mocks_sources") {
 
   deps = [
     ":gmock_and_gtest",
+    "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn_native:dawn_native_sources",
     "${dawn_root}/src/dawn_native:dawn_native_static",
-    "${dawn_root}/src/utils:dawn_utils",
   ]
 
   # Add internal dawn_native config for internal unittests.
@@ -169,10 +169,10 @@ test("dawn_unittests") {
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn_native:dawn_native_sources",
     "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
-    "${dawn_root}/src/utils:dawn_utils",
   ]
 
   # Add internal dawn_native config for internal unittests.
@@ -328,9 +328,9 @@ source_set("dawn_end2end_tests_sources") {
     "${dawn_root}/src/dawn/common",
 
     # Statically linked because the end2end white_box tests use Dawn internals.
+    "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
-    "${dawn_root}/src/utils:dawn_utils",
   ]
 
   sources = [
@@ -450,7 +450,7 @@ source_set("dawn_end2end_tests_sources") {
       "end2end/SwapChainValidationTests.cpp",
       "end2end/WindowSurfaceTests.cpp",
     ]
-    deps += [ "${dawn_root}/src/utils:dawn_glfw" ]
+    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
   }
 
   if (dawn_enable_d3d12 || (dawn_enable_vulkan && is_chromeos)) {
@@ -477,9 +477,9 @@ source_set("dawn_white_box_tests_sources") {
     "${dawn_root}/src/dawn_native:dawn_native_sources",
 
     # Statically linked because the end2end white_box tests use Dawn internals.
+    "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
-    "${dawn_root}/src/utils:dawn_utils",
   ]
 
   sources = [
@@ -530,7 +530,7 @@ source_set("dawn_white_box_tests_sources") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ "${dawn_root}/src/utils:dawn_glfw" ]
+    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
   }
 
   if (dawn_enable_opengles) {
@@ -551,9 +551,9 @@ test("dawn_end2end_tests") {
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
-    "${dawn_root}/src/utils:dawn_utils",
   ]
 
   sources = [
@@ -572,7 +572,7 @@ test("dawn_end2end_tests") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ "${dawn_root}/src/utils:dawn_glfw" ]
+    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
   }
 
   if (is_chromeos) {
@@ -592,10 +592,10 @@ test("dawn_perf_tests") {
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn_native",
     "${dawn_root}/src/dawn_platform",
     "${dawn_root}/src/dawn_wire",
-    "${dawn_root}/src/utils:dawn_utils",
   ]
 
   sources = [
@@ -630,6 +630,6 @@ test("dawn_perf_tests") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ "${dawn_root}/src/utils:dawn_glfw" ]
+    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
   }
 }

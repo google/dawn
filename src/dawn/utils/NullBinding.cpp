@@ -12,44 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/BackendBinding.h"
+#include "dawn/utils/BackendBinding.h"
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/Platform.h"
-#include "dawn/common/SwapChainUtils.h"
-#include "dawn/dawn_wsi.h"
-#include "dawn_native/OpenGLBackend.h"
+#include "dawn_native/NullBackend.h"
 
-#include <cstdio>
-#include "GLFW/glfw3.h"
+#include <memory>
 
 namespace utils {
 
-    class OpenGLBinding : public BackendBinding {
+    class NullBinding : public BackendBinding {
       public:
-        OpenGLBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
+        NullBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
         }
 
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                mSwapchainImpl = dawn::native::opengl::CreateNativeSwapChainImpl(
-                    mDevice,
-                    [](void* userdata) { glfwSwapBuffers(static_cast<GLFWwindow*>(userdata)); },
-                    mWindow);
+                mSwapchainImpl = dawn::native::null::CreateNativeSwapChainImpl();
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
-
         WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return dawn::native::opengl::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+            return WGPUTextureFormat_RGBA8Unorm;
         }
 
       private:
         DawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, WGPUDevice device) {
-        return new OpenGLBinding(window, device);
+    BackendBinding* CreateNullBinding(GLFWwindow* window, WGPUDevice device) {
+        return new NullBinding(window, device);
     }
 
 }  // namespace utils

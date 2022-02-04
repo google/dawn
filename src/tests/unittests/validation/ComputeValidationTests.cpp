@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "dawn/common/Constants.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/unittests/validation/ValidationTest.h"
-#include "utils/WGPUHelpers.h"
 
 // TODO(cwallez@chromium.org): Add a regression test for Disptach validation trying to acces the
 // input state.

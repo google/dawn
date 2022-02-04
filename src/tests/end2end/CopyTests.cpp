@@ -17,9 +17,9 @@
 #include <array>
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
-#include "utils/TestUtils.h"
-#include "utils/TextureUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/TestUtils.h"
+#include "dawn/utils/TextureUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 // For MinimumBufferSpec bytesPerRow and rowsPerImage, compute a default from the copy extent.
 constexpr uint32_t kStrideComputeDefault = 0xFFFF'FFFEul;

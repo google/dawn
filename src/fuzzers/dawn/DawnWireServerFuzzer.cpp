@@ -18,10 +18,10 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
+#include "dawn/utils/SystemUtils.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireServer.h"
-#include "utils/SystemUtils.h"
 
 #include <fstream>
 #include <vector>

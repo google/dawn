@@ -14,9 +14,9 @@
 
 #include "tests/DawnTest.h"
 
-#include "utils/ComboRenderBundleEncoderDescriptor.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 constexpr uint32_t kRTSize = 4;
 const RGBA8 kColors[2] = {RGBA8::kGreen, RGBA8::kBlue};

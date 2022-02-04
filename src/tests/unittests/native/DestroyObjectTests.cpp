@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn_native/Toggles.h"
 #include "mocks/BindGroupLayoutMock.h"
 #include "mocks/BindGroupMock.h"
@@ -30,7 +31,6 @@
 #include "mocks/SwapChainMock.h"
 #include "mocks/TextureMock.h"
 #include "tests/DawnNativeTest.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
 
 namespace dawn::native { namespace {
 

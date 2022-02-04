@@ -16,7 +16,7 @@
 
 #include "dawn/common/Constants.h"
 
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #include <cmath>
 

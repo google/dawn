@@ -14,8 +14,8 @@
 
 #include "tests/perf_tests/DawnPerfTest.h"
 
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 struct SubresourceTrackingParams : AdapterTestParam {
     SubresourceTrackingParams(const AdapterTestParam& param,

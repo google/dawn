@@ -15,9 +15,9 @@
 #include "tests/DawnTest.h"
 
 #include "dawn/common/Math.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/TestUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/TestUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #define EXPECT_LAZY_CLEAR(N, statement)                                                        \
     do {                                                                                       \

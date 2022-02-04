@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/ScopedAutoreleasePool.h"
+#include "dawn/utils/ScopedAutoreleasePool.h"
 
 #import <Foundation/Foundation.h>
 

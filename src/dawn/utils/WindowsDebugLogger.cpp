@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/PlatformDebugLogger.h"
+#include "dawn/utils/PlatformDebugLogger.h"
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/windows_with_undefs.h"

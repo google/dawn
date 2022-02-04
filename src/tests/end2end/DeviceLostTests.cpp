@@ -15,9 +15,9 @@
 #include "tests/DawnTest.h"
 
 #include <gmock/gmock.h>
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/MockCallback.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
 
 #include <cstring>
 

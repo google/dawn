@@ -15,6 +15,7 @@ This repository contains the implementation of Dawn, which is itself composed of
 - [`src`](../src):
   - [`dawn`](../src/dawn): root directory for Dawn code
       - [`common`](../src/dawn/common): helper code that is allowed to be used by Dawn's core libraries, `dawn_native` and `dawn_wire`. Also allowed for use in all other Dawn targets.
+      - [`utils`](../src/dawn/utils): helper code to use Dawn used by tests and samples but disallowed for `dawn_native` and `dawn_wire`.
   - [`dawn_native`](../src/dawn_native): code for the implementation of WebGPU on top of graphics APIs. Files in this folder are the "frontend" while subdirectories are "backends".
       - `<backend>`: code for the implementation of the backend on a specific graphics API, for example `d3d12`, `metal` or `vulkan`.
   - [`dawn_platform`](../src/dawn_platform): definition of interfaces for dependency injection in `dawn_native` or `dawn_wire`.
@@ -27,7 +28,6 @@ This repository contains the implementation of Dawn, which is itself composed of
     - [`unittests`](../src/tests/unittests): code unittests of internal classes, but also by extension WebGPU API tests that don't require a GPU to run.
       - [`validation`](../src/tests/unittests/validation): WebGPU validation tests not using the GPU (frontend tests)
     - [`white_box`](../src/tests/white_box): tests using the GPU that need to access the internals of `dawn_native` or `dawn_wire`.
-  - [`utils`](../src/utils): helper code to use Dawn used by tests and samples but disallowed for `dawn_native` and `dawn_wire`.
 - [`third_party`](../third_party): directory where dependencies live as well as their buildfiles.
 
 ## Dawn Native (`dawn_native`)

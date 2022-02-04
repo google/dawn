@@ -16,7 +16,7 @@
 
 #include "dawn/common/Math.h"
 #include "dawn/common/Platform.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 class MaxLimitTests : public DawnTest {
   public:

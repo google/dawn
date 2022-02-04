@@ -14,10 +14,10 @@
 
 #include "SampleUtils.h"
 
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/ScopedAutoreleasePool.h"
-#include "utils/SystemUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/ScopedAutoreleasePool.h"
+#include "dawn/utils/SystemUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #include <vector>
 

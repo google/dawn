@@ -16,7 +16,7 @@
 #    error "GLFWUtils_metal.mm requires the Metal backend to be enabled."
 #endif  // !defined(DAWN_ENABLE_BACKEND_METAL)
 
-#include "utils/GLFWUtils.h"
+#include "dawn/utils/GLFWUtils.h"
 
 #import <QuartzCore/CAMetalLayer.h>
 #include "GLFW/glfw3.h"

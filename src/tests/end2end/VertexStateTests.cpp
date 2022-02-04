@@ -16,8 +16,8 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 using wgpu::VertexFormat;
 using wgpu::VertexStepMode;

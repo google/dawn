@@ -14,8 +14,8 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace {
     class ExternalTextureTest : public ValidationTest {

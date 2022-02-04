@@ -14,7 +14,7 @@
 
 #include "tests/DawnTest.h"
 
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 class DebugMarkerTests : public DawnTest {};
 

@@ -15,8 +15,8 @@
 #include "tests/DawnTest.h"
 
 #include "dawn/common/Math.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace {
     // https://github.com/gpuweb/gpuweb/issues/108

@@ -14,14 +14,14 @@
 
 #include "tests/DawnTest.h"
 
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/Toggles.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
 
 constexpr uint32_t kRTSize = 4;
 

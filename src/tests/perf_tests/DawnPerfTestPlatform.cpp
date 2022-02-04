@@ -18,9 +18,9 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/HashUtils.h"
+#include "dawn/utils/Timer.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 #include "tests/perf_tests/DawnPerfTest.h"
-#include "utils/Timer.h"
 namespace {
 
     struct TraceCategoryInfo {

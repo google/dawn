@@ -14,9 +14,9 @@
 
 #include "SampleUtils.h"
 
-#include "utils/ScopedAutoreleasePool.h"
-#include "utils/SystemUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ScopedAutoreleasePool.h"
+#include "dawn/utils/SystemUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 WGPUDevice device;
 WGPUQueue queue;

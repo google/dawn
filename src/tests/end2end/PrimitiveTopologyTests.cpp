@@ -15,8 +15,8 @@
 #include "tests/DawnTest.h"
 
 #include "dawn/common/Assert.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 // Primitive topology tests work by drawing the following vertices with all the different primitive
 // topology states:

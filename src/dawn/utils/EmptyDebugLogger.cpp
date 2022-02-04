@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn Authors
+// Copyright 2020 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/ScopedAutoreleasePool.h"
-
-#include "dawn/common/Compiler.h"
+#include "dawn/utils/PlatformDebugLogger.h"
 
 namespace utils {
 
-    ScopedAutoreleasePool::ScopedAutoreleasePool() : mPool(nullptr) {
-        DAWN_UNUSED(mPool);
-    }
+    class EmptyDebugLogger : public PlatformDebugLogger {
+      public:
+        EmptyDebugLogger() = default;
+        ~EmptyDebugLogger() override = default;
+    };
 
-    ScopedAutoreleasePool::~ScopedAutoreleasePool() = default;
-
-    ScopedAutoreleasePool::ScopedAutoreleasePool(ScopedAutoreleasePool&& rhs) {
-    }
-
-    ScopedAutoreleasePool& ScopedAutoreleasePool::operator=(ScopedAutoreleasePool&& rhs) {
-        return *this;
+    PlatformDebugLogger* CreatePlatformDebugLogger() {
+        return new EmptyDebugLogger();
     }
 
 }  // namespace utils

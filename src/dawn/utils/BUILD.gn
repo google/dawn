@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../scripts/dawn_overrides_with_defaults.gni")
+import("../../../scripts/dawn_overrides_with_defaults.gni")
 
 import("${dawn_root}/scripts/dawn_features.gni")
 
@@ -24,12 +24,12 @@ import("${dawn_root}/scripts/dawn_features.gni")
 # library that can be linked into the Dawn tests on these platforms. Otherwise,
 # use the real library from third_party/.
 if (dawn_supports_glfw_for_windowing) {
-  group("dawn_glfw") {
+  group("glfw") {
     public_deps = [ "${dawn_root}/third_party/gn/glfw" ]
   }
 } else if (is_fuchsia) {
   # The mock implementation of GLFW on Fuchsia
-  config("dawn_glfw_public_config") {
+  config("glfw_public_config") {
     # Allow inclusion of <GLFW/glfw3.h>
     include_dirs = [ "${dawn_glfw_dir}/include" ]
 
@@ -43,18 +43,18 @@ if (dawn_supports_glfw_for_windowing) {
     ]
   }
 
-  static_library("dawn_glfw") {
+  static_library("glfw") {
     sources = [
       # NOTE: The header below is required to pass "gn check".
       "${dawn_glfw_dir}/include/GLFW/glfw3.h",
       "Glfw3Fuchsia.cpp",
     ]
-    public_configs = [ ":dawn_glfw_public_config" ]
+    public_configs = [ ":glfw_public_config" ]
     deps = [ "${dawn_root}/src/dawn/common" ]
   }
 } else {
   # Just skip GLFW on other systems
-  group("dawn_glfw") {
+  group("glfw") {
   }
 }
 
@@ -62,7 +62,7 @@ if (dawn_supports_glfw_for_windowing) {
 # Utils for tests and samples
 ###############################################################################
 
-static_library("dawn_utils") {
+static_library("utils") {
   configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   sources = [
@@ -126,7 +126,7 @@ static_library("dawn_utils") {
       "GLFWUtils.cpp",
       "GLFWUtils.h",
     ]
-    deps += [ ":dawn_glfw" ]
+    deps += [ ":glfw" ]
 
     if (dawn_enable_metal) {
       sources += [ "GLFWUtils_metal.mm" ]
@@ -143,7 +143,7 @@ static_library("dawn_utils") {
 
 if (dawn_standalone) {
   # Library to handle the interaction of Dawn with GLFW windows in samples
-  static_library("dawn_bindings") {
+  static_library("bindings") {
     configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
     sources = [
@@ -154,7 +154,7 @@ if (dawn_standalone) {
     public_deps = [ "${dawn_root}/src/dawn:dawn_headers" ]
 
     deps = [
-      ":dawn_glfw",
+      ":glfw",
       "${dawn_root}/src/dawn/common",
       "${dawn_root}/src/dawn_native",
     ]

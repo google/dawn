@@ -17,10 +17,10 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
+#include "dawn/utils/WireHelper.h"
 #include "dawn/webgpu.h"
 #include "dawn_native/NullBackend.h"
 #include "tests/ToggleParser.h"
-#include "utils/WireHelper.h"
 
 #include <algorithm>
 

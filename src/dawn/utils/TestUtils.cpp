@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/TestUtils.h"
+#include "dawn/utils/TestUtils.h"
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
-#include "utils/TextureUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/TextureUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #include <vector>
 

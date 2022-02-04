@@ -15,8 +15,8 @@
 #include "tests/DawnTest.h"
 
 #include "dawn/common/Assert.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 constexpr static unsigned int kRTSize = 1;
 

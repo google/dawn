@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/PlatformDebugLogger.h"
+#include "dawn/utils/ObjCUtils.h"
+
+#include <QuartzCore/CALayer.h>
 
 namespace utils {
 
-    class EmptyDebugLogger : public PlatformDebugLogger {
-      public:
-        EmptyDebugLogger() = default;
-        ~EmptyDebugLogger() override = default;
-    };
-
-    PlatformDebugLogger* CreatePlatformDebugLogger() {
-        return new EmptyDebugLogger();
+    void* CreateDummyCALayer() {
+        return [CALayer layer];
     }
 
 }  // namespace utils

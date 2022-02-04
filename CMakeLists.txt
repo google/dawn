@@ -218,11 +218,11 @@ add_subdirectory(src/dawn_platform)
 add_subdirectory(src/dawn_native)
 add_subdirectory(src/dawn_wire)
 # TODO(dawn:269): Remove once the implementation-based swapchains are removed.
-add_subdirectory(src/utils)
+add_subdirectory(src/dawn/utils)
 
 if (DAWN_BUILD_EXAMPLES)
     #TODO(dawn:269): Add this once implementation-based swapchains are removed.
-    #add_subdirectory(src/utils)
+    #add_subdirectory(src/dawn/utils)
     add_subdirectory(examples)
 endif()
 

@@ -18,7 +18,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 using ::testing::HasSubstr;
 

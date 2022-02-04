@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "dawn/common/Constants.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/unittests/validation/ValidationTest.h"
-#include "utils/WGPUHelpers.h"
 
 class ComputePipelineOverridableConstantsValidationTest : public ValidationTest {
   protected:

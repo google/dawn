@@ -15,7 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "dawn/common/Math.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #include <array>
 #include <functional>

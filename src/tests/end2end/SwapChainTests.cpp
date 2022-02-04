@@ -16,8 +16,8 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"
-#include "utils/GLFWUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/GLFWUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #include "GLFW/glfw3.h"
 

@@ -18,9 +18,9 @@
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/RenderPipeline.h"
+#include "dawn_native/utils/WGPUHelpers.h"
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
-#include "utils/WGPUHelpers.h"
 
 namespace dawn::native {
 

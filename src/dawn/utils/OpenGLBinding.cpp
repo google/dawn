@@ -12,44 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/BackendBinding.h"
+#include "dawn/utils/BackendBinding.h"
 
 #include "dawn/common/Assert.h"
-#include "dawn_native/D3D12Backend.h"
+#include "dawn/common/Platform.h"
+#include "dawn/common/SwapChainUtils.h"
+#include "dawn/dawn_wsi.h"
+#include "dawn_native/OpenGLBackend.h"
 
+#include <cstdio>
 #include "GLFW/glfw3.h"
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include "GLFW/glfw3native.h"
-
-#include <memory>
 
 namespace utils {
 
-    class D3D12Binding : public BackendBinding {
+    class OpenGLBinding : public BackendBinding {
       public:
-        D3D12Binding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
+        OpenGLBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
         }
 
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                HWND win32Window = glfwGetWin32Window(mWindow);
-                mSwapchainImpl =
-                    dawn::native::d3d12::CreateNativeSwapChainImpl(mDevice, win32Window);
+                mSwapchainImpl = dawn::native::opengl::CreateNativeSwapChainImpl(
+                    mDevice,
+                    [](void* userdata) { glfwSwapBuffers(static_cast<GLFWwindow*>(userdata)); },
+                    mWindow);
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
         WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
-            ASSERT(mSwapchainImpl.userData != nullptr);
-            return dawn::native::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+            return dawn::native::opengl::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:
         DawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateD3D12Binding(GLFWwindow* window, WGPUDevice device) {
-        return new D3D12Binding(window, device);
+    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, WGPUDevice device) {
+        return new OpenGLBinding(window, device);
     }
 
 }  // namespace utils

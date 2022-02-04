@@ -14,8 +14,8 @@
 
 #include "VideoViewsTests.h"
 
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 VideoViewsTestBackend::PlatformTexture::PlatformTexture(wgpu::Texture&& texture)
     : wgpuTexture(texture) {

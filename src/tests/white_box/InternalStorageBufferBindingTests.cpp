@@ -14,10 +14,10 @@
 
 #include "tests/DawnTest.h"
 
+#include "dawn/utils/WGPUHelpers.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/dawn_platform.h"
-#include "utils/WGPUHelpers.h"
 
 class InternalStorageBufferBindingTests : public DawnTest {
   protected:

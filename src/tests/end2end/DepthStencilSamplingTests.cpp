@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "dawn/common/Assert.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/DawnTest.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
 
 namespace {
     using TextureFormat = wgpu::TextureFormat;

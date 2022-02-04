@@ -15,10 +15,10 @@
 #include "tests/white_box/VulkanImageWrappingTests.h"
 
 #include "dawn/common/Math.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "tests/DawnTest.h"
-#include "utils/WGPUHelpers.h"
 
 namespace dawn::native { namespace vulkan {
 

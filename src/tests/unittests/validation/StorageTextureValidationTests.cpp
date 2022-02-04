@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "dawn/common/Assert.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/TextureUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/unittests/validation/ValidationTest.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/TextureUtils.h"
-#include "utils/WGPUHelpers.h"
 
 class StorageTextureValidationTests : public ValidationTest {
   protected:

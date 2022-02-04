@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "dawn/common/Constants.h"
-#include "utils/TextureUtils.h"
+#include "dawn/utils/TextureUtils.h"
 
 namespace utils {
 

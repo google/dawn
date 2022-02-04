@@ -21,15 +21,15 @@
 #include "dawn/common/Platform.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/PlatformDebugLogger.h"
+#include "dawn/utils/SystemUtils.h"
+#include "dawn/utils/TerribleCommandBuffer.h"
+#include "dawn/utils/TestUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
+#include "dawn/utils/WireHelper.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/PlatformDebugLogger.h"
-#include "utils/SystemUtils.h"
-#include "utils/TerribleCommandBuffer.h"
-#include "utils/TestUtils.h"
-#include "utils/WGPUHelpers.h"
-#include "utils/WireHelper.h"
 
 #include <algorithm>
 #include <fstream>

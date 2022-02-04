@@ -14,7 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #include <cmath>
 
@@ -135,11 +135,7 @@ TEST_F(SetViewportTest, MinDepthEqualOrGreaterThanMaxDepth) {
 
 class SetScissorTest : public ValidationTest {
   protected:
-    void TestScissorCall(bool success,
-                          uint32_t x,
-                          uint32_t y,
-                          uint32_t width,
-                          uint32_t height) {
+    void TestScissorCall(bool success, uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
         utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, kWidth, kHeight);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -182,8 +178,8 @@ TEST_F(SetScissorTest, ScissorContainedInFramebuffer) {
     TestScissorCall(true, 0, 0, kWidth, kHeight);
 
     // Width/height at the limit with 0 x/y is valid.
-    TestScissorCall(true, kWidth, 0,  0, kHeight);
-    TestScissorCall(true, 0, kHeight,  kWidth, 0);
+    TestScissorCall(true, kWidth, 0, 0, kHeight);
+    TestScissorCall(true, 0, kHeight, kWidth, 0);
 }
 
 // Test to check that a scissor larger than the framebuffer is disallowed
@@ -198,7 +194,7 @@ TEST_F(SetScissorTest, ScissorLargerThanFramebuffer) {
     TestScissorCall(false, std::numeric_limits<uint32_t>::max(), 0, kWidth, kHeight);
 
     // x + height is larger than the rendertarget's height.
-    TestScissorCall(false, 0, 2, kWidth , kHeight - 1);
+    TestScissorCall(false, 0, 2, kWidth, kHeight - 1);
     TestScissorCall(false, 0, kHeight, kWidth, 1);
     TestScissorCall(false, 0, std::numeric_limits<uint32_t>::max(), kWidth, kHeight);
 }

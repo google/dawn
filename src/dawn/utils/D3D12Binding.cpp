@@ -12,46 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/BackendBinding.h"
+#include "dawn/utils/BackendBinding.h"
 
 #include "dawn/common/Assert.h"
-#include "dawn_native/VulkanBackend.h"
+#include "dawn_native/D3D12Backend.h"
 
-// Include GLFW after VulkanBackend so that it declares the Vulkan-specific functions
 #include "GLFW/glfw3.h"
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include "GLFW/glfw3native.h"
 
 #include <memory>
 
 namespace utils {
 
-    class VulkanBinding : public BackendBinding {
+    class D3D12Binding : public BackendBinding {
       public:
-        VulkanBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
+        D3D12Binding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
         }
 
         uint64_t GetSwapChainImplementation() override {
             if (mSwapchainImpl.userData == nullptr) {
-                VkSurfaceKHR surface = VK_NULL_HANDLE;
-                if (glfwCreateWindowSurface(dawn::native::vulkan::GetInstance(mDevice), mWindow,
-                                            nullptr, &surface) != VK_SUCCESS) {
-                    ASSERT(false);
-                }
-
-                mSwapchainImpl = dawn::native::vulkan::CreateNativeSwapChainImpl(mDevice, surface);
+                HWND win32Window = glfwGetWin32Window(mWindow);
+                mSwapchainImpl =
+                    dawn::native::d3d12::CreateNativeSwapChainImpl(mDevice, win32Window);
             }
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
+
         WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
             ASSERT(mSwapchainImpl.userData != nullptr);
-            return dawn::native::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+            return dawn::native::d3d12::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
       private:
         DawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateVulkanBinding(GLFWwindow* window, WGPUDevice device) {
-        return new VulkanBinding(window, device);
+    BackendBinding* CreateD3D12Binding(GLFWwindow* window, WGPUDevice device) {
+        return new D3D12Binding(window, device);
     }
 
 }  // namespace utils

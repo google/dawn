@@ -15,9 +15,9 @@
 #include <gtest/gtest.h>
 
 #include "dawn/common/ConcurrentCache.h"
+#include "dawn/utils/SystemUtils.h"
 #include "dawn_native/AsyncTask.h"
 #include "dawn_platform/DawnPlatform.h"
-#include "utils/SystemUtils.h"
 
 namespace {
     class SimpleCachedObject {

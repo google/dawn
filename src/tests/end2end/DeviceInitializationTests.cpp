@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "dawn/dawn_proc.h"
+#include "dawn/utils/SystemUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/DawnTest.h"
-#include "utils/SystemUtils.h"
-#include "utils/WGPUHelpers.h"
 
 class DeviceInitializationTest : public testing::Test {
     void SetUp() override {

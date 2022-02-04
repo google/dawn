@@ -14,9 +14,9 @@
 
 #include "tests/DawnTest.h"
 
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/TextureUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/TextureUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 constexpr static uint32_t kSize = 4;
 

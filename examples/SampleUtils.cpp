@@ -18,9 +18,9 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/Platform.h"
 #include "dawn/common/SystemUtils.h"
-#include "utils/BackendBinding.h"
-#include "utils/GLFWUtils.h"
-#include "utils/TerribleCommandBuffer.h"
+#include "dawn/utils/BackendBinding.h"
+#include "dawn/utils/GLFWUtils.h"
+#include "dawn/utils/TerribleCommandBuffer.h"
 
 #include <dawn/dawn_proc.h>
 #include <dawn/dawn_wsi.h>

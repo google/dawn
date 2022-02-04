@@ -15,7 +15,7 @@
 #include "dawn/common/Math.h"
 #include "tests/DawnTest.h"
 
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 class ShaderFloat16Tests : public DawnTest {
   protected:

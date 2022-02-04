@@ -14,9 +14,9 @@
 
 #include "tests/DawnTest.h"
 
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/TestUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/TestUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 constexpr static uint32_t kRTSize = 4;
 constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;

@@ -14,10 +14,10 @@
 
 #include "tests/DawnNativeTest.h"
 
+#include "dawn/utils/WGPUHelpers.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/ComputePassEncoder.h"
-#include "utils/WGPUHelpers.h"
 
 class CommandBufferEncodingTests : public DawnNativeTest {
   protected:

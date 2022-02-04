@@ -15,9 +15,9 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/Platform.h"
 #include "dawn/dawn_proc.h"
+#include "dawn/utils/GLFWUtils.h"
 #include "dawn_native/DawnNative.h"
 #include "tests/DawnTest.h"
-#include "utils/GLFWUtils.h"
 
 #include <gtest/gtest.h>
 
@@ -35,7 +35,7 @@
 #endif  // defined(DAWN_USE_X11)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-#    include "utils/ObjCUtils.h"
+#    include "dawn/utils/ObjCUtils.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #include "GLFW/glfw3native.h"

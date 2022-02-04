@@ -15,9 +15,9 @@
 #include "tests/DawnTest.h"
 
 #include "dawn/common/Math.h"
-#include "utils/TestUtils.h"
-#include "utils/TextureUtils.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/TestUtils.h"
+#include "dawn/utils/TextureUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 class QueueTests : public DawnTest {};
 

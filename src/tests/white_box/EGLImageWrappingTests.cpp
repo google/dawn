@@ -15,10 +15,10 @@
 #include "tests/DawnTest.h"
 
 #include "dawn/common/DynamicLib.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "dawn_native/OpenGLBackend.h"
 #include "dawn_native/opengl/DeviceGL.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
 
 #include <EGL/egl.h>
 

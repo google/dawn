@@ -14,10 +14,10 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/TextureUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/DawnTest.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/TextureUtils.h"
-#include "utils/WGPUHelpers.h"
 
 constexpr static unsigned int kRTSize = 2;
 

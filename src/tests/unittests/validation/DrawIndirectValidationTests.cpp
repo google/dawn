@@ -14,9 +14,9 @@
 
 #include <initializer_list>
 #include <limits>
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/unittests/validation/ValidationTest.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
 
 class DrawIndirectValidationTest : public ValidationTest {
   protected:

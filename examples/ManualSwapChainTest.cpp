@@ -53,10 +53,10 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/GLFWUtils.h"
-#include "utils/ScopedAutoreleasePool.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/GLFWUtils.h"
+#include "dawn/utils/ScopedAutoreleasePool.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #include <dawn/dawn_proc.h>
 #include <dawn/webgpu_cpp.h>

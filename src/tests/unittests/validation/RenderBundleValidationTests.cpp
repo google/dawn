@@ -16,9 +16,9 @@
 
 #include "dawn/common/Constants.h"
 
-#include "utils/ComboRenderBundleEncoderDescriptor.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
+#include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace {
 

@@ -20,9 +20,9 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
+#include "dawn/utils/Timer.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 #include "tests/perf_tests/DawnPerfTestPlatform.h"
-#include "utils/Timer.h"
 
 namespace {
 

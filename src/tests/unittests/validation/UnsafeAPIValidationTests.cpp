@@ -14,10 +14,10 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "tests/MockCallback.h"
-#include "utils/ComboRenderBundleEncoderDescriptor.h"
-#include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/WGPUHelpers.h"
 
 namespace {
     using testing::HasSubstr;

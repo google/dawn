@@ -15,9 +15,9 @@
 #include "tests/unittests/wire/WireTest.h"
 
 #include "dawn/dawn_proc.h"
+#include "dawn/utils/TerribleCommandBuffer.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
-#include "utils/TerribleCommandBuffer.h"
 
 using namespace testing;
 using namespace dawn::wire;
