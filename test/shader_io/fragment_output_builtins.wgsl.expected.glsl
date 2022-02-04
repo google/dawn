@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -13,6 +11,7 @@ void main() {
   return;
 }
 #version 310 es
+#extension GL_OES_sample_variables : require
 precision mediump float;
 
 uint main2() {
@@ -21,13 +20,6 @@ uint main2() {
 
 void main() {
   uint inner_result = main2();
-  gl_SampleMask[0] = inner_result;
+  gl_SampleMask[0] = int(inner_result);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:10: 'gl_SampleMask' : required extension not requested: GL_OES_sample_variables
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

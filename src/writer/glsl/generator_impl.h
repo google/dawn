@@ -471,6 +471,7 @@ class GeneratorImpl : public TextGenerator {
   std::unordered_map<const sem::Struct*, std::string> structure_builders_;
   std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
   std::unordered_map<const sem::Vector*, std::string> int_dot_funcs_;
+  bool requires_oes_sample_variables = false;
 };
 
 }  // namespace glsl

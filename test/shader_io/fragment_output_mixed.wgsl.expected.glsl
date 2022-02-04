@@ -1,6 +1,5 @@
-SKIP: FAILED
-
 #version 310 es
+#extension GL_OES_sample_variables : require
 precision mediump float;
 
 layout(location = 0) out int loc0_1;
@@ -27,14 +26,7 @@ void main() {
   gl_FragDepth = inner_result.frag_depth;
   loc1_1 = inner_result.loc1;
   loc2_1 = inner_result.loc2;
-  gl_SampleMask[0] = inner_result.sample_mask;
+  gl_SampleMask[0] = int(inner_result.sample_mask);
   loc3_1 = inner_result.loc3;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:28: 'gl_SampleMask' : required extension not requested: GL_OES_sample_variables
-ERROR: 0:28: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

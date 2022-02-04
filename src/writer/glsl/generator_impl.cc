@@ -63,6 +63,16 @@ bool IsRelational(tint::ast::BinaryOp op) {
          op == tint::ast::BinaryOp::kGreaterThanEqual;
 }
 
+bool RequiresOESSampleVariables(tint::ast::Builtin builtin) {
+  switch (builtin) {
+    case tint::ast::Builtin::kSampleIndex:
+    case tint::ast::Builtin::kSampleMask:
+      return true;
+    default:
+      return false;
+  }
+}
+
 }  // namespace
 
 namespace tint {
@@ -125,7 +135,6 @@ GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
   line() << "#version 310 es";
-  line() << "precision mediump float;";
 
   auto helpers_insertion_point = current_buffer_->lines.size();
 
@@ -171,9 +180,26 @@ bool GeneratorImpl::Generate() {
     }
   }
 
+  TextBuffer extensions;
+
+  if (requires_oes_sample_variables) {
+    extensions.Append("#extension GL_OES_sample_variables : require");
+  }
+
+  auto indent = current_buffer_->current_indent;
+
+  if (!extensions.lines.empty()) {
+    current_buffer_->Insert(extensions, helpers_insertion_point, indent);
+    helpers_insertion_point += extensions.lines.size();
+  }
+
+  current_buffer_->Insert("precision mediump float;", helpers_insertion_point++,
+                          indent);
+
   if (!helpers_.lines.empty()) {
-    current_buffer_->Insert("", helpers_insertion_point++, 0);
-    current_buffer_->Insert(helpers_, helpers_insertion_point++, 0);
+    current_buffer_->Insert("", helpers_insertion_point++, indent);
+    current_buffer_->Insert(helpers_, helpers_insertion_point, indent);
+    helpers_insertion_point += helpers_.lines.size();
   }
 
   return true;
@@ -197,8 +223,8 @@ bool GeneratorImpl::EmitIndexAccessor(
 
 bool GeneratorImpl::EmitBitcast(std::ostream& out,
                                 const ast::BitcastExpression* expr) {
-  auto* src_type = TypeOf(expr->expr);
-  auto* dst_type = TypeOf(expr);
+  auto* src_type = TypeOf(expr->expr)->UnwrapRef();
+  auto* dst_type = TypeOf(expr)->UnwrapRef();
 
   if (!dst_type->is_integer_scalar_or_vector() &&
       !dst_type->is_float_scalar_or_vector()) {
@@ -1807,8 +1833,12 @@ bool GeneratorImpl::EmitWorkgroupVariable(const sem::Variable* var) {
 bool GeneratorImpl::EmitIOVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
 
-  // Do not emit builtin (gl_) variables.
-  if (ast::HasAttribute<ast::BuiltinAttribute>(decl->attributes)) {
+  if (auto* b = ast::GetAttribute<ast::BuiltinAttribute>(decl->attributes)) {
+    // Use of gl_SampleID requires the GL_OES_sample_variables extension
+    if (RequiresOESSampleVariables(b->builtin)) {
+      requires_oes_sample_variables = true;
+    }
+    // Do not emit builtin (gl_) variables.
     return true;
   }
 

@@ -1,6 +1,5 @@
-SKIP: FAILED
-
 #version 310 es
+#extension GL_OES_sample_variables : require
 precision mediump float;
 
 void tint_symbol(vec4 position, bool front_facing, uint sample_index, uint sample_mask) {
@@ -11,13 +10,6 @@ void tint_symbol(vec4 position, bool front_facing, uint sample_index, uint sampl
 }
 
 void main() {
-  tint_symbol(gl_FragCoord, gl_FrontFacing, uint(gl_SampleID), uint(gl_SampleMask[0]));
+  tint_symbol(gl_FragCoord, gl_FrontFacing, uint(gl_SampleID), uint(gl_SampleMaskIn[0]));
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:12: 'gl_SampleID' : required extension not requested: GL_OES_sample_variables
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -2321,6 +2321,80 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, GLSLSampleMaskBuiltins) {
+  auto* src = R"(
+@stage(fragment)
+fn fragment_main(@builtin(sample_index) sample_index : u32,
+                 @builtin(sample_mask) mask_in : u32
+                 ) -> @builtin(sample_mask) u32 {
+  return mask_in;
+}
+)";
+
+  auto* expect = R"(
+@builtin(sample_index) @internal(disable_validation__ignore_storage_class) var<in> gl_SampleID : i32;
+
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<in> gl_SampleMaskIn : array<i32, 1>;
+
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> gl_SampleMask : array<i32, 1>;
+
+fn fragment_main(sample_index : u32, mask_in : u32) -> u32 {
+  return mask_in;
+}
+
+@stage(fragment)
+fn main() {
+  let inner_result = fragment_main(bitcast<u32>(gl_SampleID), bitcast<u32>(gl_SampleMaskIn[0]));
+  gl_SampleMask[0] = bitcast<i32>(inner_result);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
+  auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, GLSLVertexInstanceIndexBuiltins) {
+  auto* src = R"(
+@stage(vertex)
+fn vertex_main(@builtin(vertex_index) vertexID : u32,
+               @builtin(instance_index) instanceID : u32
+               ) -> @builtin(position) vec4<f32> {
+  return vec4<f32>(f32(vertexID) + f32(instanceID));
+}
+)";
+
+  auto* expect = R"(
+@builtin(vertex_index) @internal(disable_validation__ignore_storage_class) var<in> gl_VertexID : i32;
+
+@builtin(instance_index) @internal(disable_validation__ignore_storage_class) var<in> gl_InstanceID : i32;
+
+@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> gl_Position : vec4<f32>;
+
+fn vertex_main(vertexID : u32, instanceID : u32) -> vec4<f32> {
+  return vec4<f32>((f32(vertexID) + f32(instanceID)));
+}
+
+@stage(vertex)
+fn main() {
+  let inner_result = vertex_main(bitcast<u32>(gl_VertexID), bitcast<u32>(gl_InstanceID));
+  gl_Position = inner_result;
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0 * gl_Position.z) - gl_Position.w);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
+  auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

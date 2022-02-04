@@ -184,24 +184,23 @@ struct CanonicalizeEntryPointIO::State {
       // corresponding gl_ builtin name
       auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attributes);
       if (cfg.shader_style == ShaderStyle::kGlsl && builtin) {
-        name = GLSLBuiltinToString(builtin->builtin, func_ast->PipelineStage());
+        name = GLSLBuiltinToString(builtin->builtin, func_ast->PipelineStage(),
+                                   ast::StorageClass::kInput);
       }
       auto symbol = ctx.dst->Symbols().New(name);
 
       // Create the global variable and use its value for the shader input.
       const ast::Expression* value = ctx.dst->Expr(symbol);
-      if (HasSampleMask(attributes)) {
-        // Vulkan requires the type of a SampleMask builtin to be an array.
-        // Declare it as array<u32, 1> and then load the first element.
-        ast_type = ctx.dst->ty.array(ast_type, 1);
-        value = ctx.dst->IndexAccessor(value, 0);
-      }
 
-      // In GLSL, if the type doesn't match the type of the builtin,
-      // insert a bitcast
-      if (cfg.shader_style == ShaderStyle::kGlsl && builtin &&
-          GLSLBuiltinNeedsBitcast(builtin->builtin)) {
-        value = ctx.dst->Bitcast(CreateASTTypeFor(ctx, type), value);
+      if (builtin) {
+        if (cfg.shader_style == ShaderStyle::kGlsl) {
+          value = FromGLSLBuiltin(builtin->builtin, value, ast_type);
+        } else if (builtin->builtin == ast::Builtin::kSampleMask) {
+          // Vulkan requires the type of a SampleMask builtin to be an array.
+          // Declare it as array<u32, 1> and then load the first element.
+          ast_type = ctx.dst->ty.array(ast_type, 1);
+          value = ctx.dst->IndexAccessor(value, 0);
+        }
       }
       ctx.dst->Global(symbol, ast_type, ast::StorageClass::kInput,
                       std::move(attributes));
@@ -251,9 +250,12 @@ struct CanonicalizeEntryPointIO::State {
 
     // In GLSL, if it's a builtin, override the name with the
     // corresponding gl_ builtin name
-    auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attributes);
-    if (cfg.shader_style == ShaderStyle::kGlsl && builtin) {
-      name = GLSLBuiltinToString(builtin->builtin, func_ast->PipelineStage());
+    if (cfg.shader_style == ShaderStyle::kGlsl) {
+      if (auto* b = ast::GetAttribute<ast::BuiltinAttribute>(attributes)) {
+        name = GLSLBuiltinToString(b->builtin, func_ast->PipelineStage(),
+                                   ast::StorageClass::kOutput);
+        value = ToGLSLBuiltin(b->builtin, value, type);
+      }
     }
 
     OutputValue output;
@@ -626,9 +628,11 @@ struct CanonicalizeEntryPointIO::State {
   /// Retrieve the gl_ string corresponding to a builtin.
   /// @param builtin the builtin
   /// @param stage the current pipeline stage
+  /// @param storage_class the storage class (input or output)
   /// @returns the gl_ string corresponding to that builtin
   const char* GLSLBuiltinToString(ast::Builtin builtin,
-                                  ast::PipelineStage stage) {
+                                  ast::PipelineStage stage,
+                                  ast::StorageClass storage_class) {
     switch (builtin) {
       case ast::Builtin::kPosition:
         switch (stage) {
@@ -660,26 +664,67 @@ struct CanonicalizeEntryPointIO::State {
       case ast::Builtin::kSampleIndex:
         return "gl_SampleID";
       case ast::Builtin::kSampleMask:
-        return "gl_SampleMask";
+        if (storage_class == ast::StorageClass::kInput) {
+          return "gl_SampleMaskIn";
+        } else {
+          return "gl_SampleMask";
+        }
       default:
         return "";
     }
   }
 
-  /// Check if the GLSL version if a builtin doesn't match the WGSL type
-  /// @param builtin the WGSL builtin to check
-  /// @returns true if the GLSL builtin needs to be cast to the WGSL type
-  bool GLSLBuiltinNeedsBitcast(ast::Builtin builtin) {
+  /// Convert a given GLSL builtin value to the corresponding WGSL value.
+  /// @param builtin the builtin variable
+  /// @param value the value to convert
+  /// @param ast_type (inout) the incoming WGSL and outgoing GLSL types
+  /// @returns an expression representing the GLSL builtin converted to what
+  /// WGSL expects
+  const ast::Expression* FromGLSLBuiltin(ast::Builtin builtin,
+                                         const ast::Expression* value,
+                                         const ast::Type*& ast_type) {
+    switch (builtin) {
+      case ast::Builtin::kVertexIndex:
+      case ast::Builtin::kInstanceIndex:
+      case ast::Builtin::kSampleIndex:
+        // GLSL uses i32 for these, so bitcast to u32.
+        value = ctx.dst->Bitcast(ast_type, value);
+        ast_type = ctx.dst->ty.i32();
+        break;
+      case ast::Builtin::kSampleMask:
+        // gl_SampleMask is an array of i32. Retrieve the first element and
+        // bitcast it to u32.
+        value = ctx.dst->IndexAccessor(value, 0);
+        value = ctx.dst->Bitcast(ast_type, value);
+        ast_type = ctx.dst->ty.array(ctx.dst->ty.i32(), 1);
+        break;
+      default:
+        break;
+    }
+    return value;
+  }
+
+  /// Convert a given WGSL value to the type expected when assigning to a
+  /// GLSL builtin.
+  /// @param builtin the builtin variable
+  /// @param value the value to convert
+  /// @param type (out) the type to which the value was converted
+  /// @returns the converted value which can be assigned to the GLSL builtin
+  const ast::Expression* ToGLSLBuiltin(ast::Builtin builtin,
+                                       const ast::Expression* value,
+                                       const sem::Type*& type) {
     switch (builtin) {
       case ast::Builtin::kVertexIndex:
       case ast::Builtin::kInstanceIndex:
       case ast::Builtin::kSampleIndex:
       case ast::Builtin::kSampleMask:
-        // In GLSL, these are i32, not u32.
-        return true;
+        type = ctx.dst->create<sem::I32>();
+        value = ctx.dst->Bitcast(CreateASTTypeFor(ctx, type), value);
+        break;
       default:
-        return false;
+        break;
     }
+    return value;
   }
 };
 
