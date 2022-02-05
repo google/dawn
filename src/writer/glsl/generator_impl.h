@@ -111,11 +111,8 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a function call expression
   /// @param out the output of the expression stream
   /// @param call the call expression
-  /// @param function the function being called
   /// @returns true if the expression is emitted
-  bool EmitFunctionCall(std::ostream& out,
-                        const sem::Call* call,
-                        const sem::Function* function);
+  bool EmitFunctionCall(std::ostream& out, const sem::Call* call);
   /// Handles generating a builtin call expression
   /// @param out the output of the expression stream
   /// @param call the call expression
@@ -162,6 +159,11 @@ class GeneratorImpl : public TextGenerator {
   bool EmitWorkgroupAtomicCall(std::ostream& out,
                                const ast::CallExpression* expr,
                                const sem::Builtin* builtin);
+  /// Handles generating an array.length() call
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @returns true if the array length expression is emitted
+  bool EmitArrayLength(std::ostream& out, const ast::CallExpression* expr);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param out the output of the expression stream

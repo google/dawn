@@ -13,10 +13,7 @@ layout(binding = 0, std430) buffer S_1 {
   uint rtarr[];
 } myvar;
 void main_1() {
-  uint tint_symbol_2 = 0u;
-  myvar.GetDimensions(tint_symbol_2);
-  uint tint_symbol_3 = ((tint_symbol_2 - 4u) / 4u);
-  uint x_1 = tint_symbol_3;
+  uint x_1 = uint(myvar.rtarr.length());
   return;
 }
 

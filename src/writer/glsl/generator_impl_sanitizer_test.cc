@@ -55,10 +55,7 @@ layout(binding = 1, std430) buffer my_struct_1 {
   float a[];
 } b;
 void a_func() {
-  uint tint_symbol_1 = 0u;
-  b.GetDimensions(tint_symbol_1);
-  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
-  uint len = tint_symbol_2;
+  uint len = uint(b.a.length());
 }
 
 void main() {
@@ -104,10 +101,7 @@ layout(binding = 1, std430) buffer my_struct_1 {
   float a[];
 } b;
 void a_func() {
-  uint tint_symbol_1 = 0u;
-  b.GetDimensions(tint_symbol_1);
-  uint tint_symbol_2 = ((tint_symbol_1 - 4u) / 4u);
-  uint len = tint_symbol_2;
+  uint len = uint(b.a.length());
 }
 
 void main() {
@@ -154,10 +148,7 @@ layout(binding = 1, std430) buffer my_struct_1 {
   float a[];
 } b;
 void a_func() {
-  uint tint_symbol_1 = 0u;
-  b.GetDimensions(tint_symbol_1);
-  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
-  uint len = tint_symbol_2;
+  uint len = uint(b.a.length());
 }
 
 void main() {

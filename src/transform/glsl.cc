@@ -20,7 +20,6 @@
 #include "src/transform/add_empty_entry_point.h"
 #include "src/transform/add_spirv_block_attribute.h"
 #include "src/transform/binding_remapper.h"
-#include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/combine_samplers.h"
 #include "src/transform/decompose_memory_access.h"
@@ -86,7 +85,6 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     BindingRemapper::AccessControls ac;
     data.Add<BindingRemapper::Remappings>(bp, ac, /* mayCollide */ true);
   }
-  manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();
 
   data.Add<PromoteSideEffectsToDecl::Config>(

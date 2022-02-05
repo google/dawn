@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -7,10 +5,7 @@ layout(binding = 1, std430) buffer SB_RO_1 {
   int arg_0[];
 } sb_ro;
 void arrayLength_1588cd() {
-  uint tint_symbol_1 = 0u;
-  sb_ro.GetDimensions(tint_symbol_1);
-  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
-  uint res = tint_symbol_2;
+  uint res = uint(sb_ro.arg_0.length());
 }
 
 vec4 vertex_main() {
@@ -25,13 +20,6 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'GetDimensions' : no such field in structure 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -39,10 +27,7 @@ layout(binding = 1, std430) buffer SB_RO_1 {
   int arg_0[];
 } sb_ro;
 void arrayLength_1588cd() {
-  uint tint_symbol_1 = 0u;
-  sb_ro.GetDimensions(tint_symbol_1);
-  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
-  uint res = tint_symbol_2;
+  uint res = uint(sb_ro.arg_0.length());
 }
 
 void fragment_main() {
@@ -53,13 +38,6 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'GetDimensions' : no such field in structure 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -67,10 +45,7 @@ layout(binding = 1, std430) buffer SB_RO_1 {
   int arg_0[];
 } sb_ro;
 void arrayLength_1588cd() {
-  uint tint_symbol_1 = 0u;
-  sb_ro.GetDimensions(tint_symbol_1);
-  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
-  uint res = tint_symbol_2;
+  uint res = uint(sb_ro.arg_0.length());
 }
 
 void compute_main() {
@@ -82,10 +57,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'GetDimensions' : no such field in structure 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
