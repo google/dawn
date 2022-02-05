@@ -204,7 +204,7 @@ void tint_symbol(uint idx) {
     m98 = mat2(0.0f, 0.0f, 0.0f, 0.0f);
     m99 = mat2(0.0f, 0.0f, 0.0f, 0.0f);
   }
-  memoryBarrierShared();
+  barrier();
   m00[0][0] = 1.0f;
   m01[0][0] = 1.0f;
   m02[0][0] = 1.0f;

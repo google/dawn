@@ -18,7 +18,7 @@ void compute_main(uint local_invocation_index) {
   {
     atomicExchange(arg_0, 0u);
   }
-  memoryBarrierShared();
+  barrier();
   atomicCompareExchangeWeak_b2ab2c();
 }
 

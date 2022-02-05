@@ -28,7 +28,7 @@ void f(uint local_invocation_index) {
       s.data[i] = 0;
     }
   }
-  memoryBarrierShared();
+  barrier();
   s.data[ubo.dynamic_idx] = 1;
   result.tint_symbol = s.data[3];
 }

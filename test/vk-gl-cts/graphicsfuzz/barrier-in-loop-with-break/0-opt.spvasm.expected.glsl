@@ -40,7 +40,7 @@ void main_1() {
           break;
         }
       }
-      memoryBarrierShared();
+      barrier();
     }
   }
   if ((lid == 0)) {

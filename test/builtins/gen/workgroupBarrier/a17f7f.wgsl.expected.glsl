@@ -2,7 +2,7 @@
 precision mediump float;
 
 void workgroupBarrier_a17f7f() {
-  memoryBarrierShared();
+  barrier();
 }
 
 void compute_main() {

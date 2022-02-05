@@ -645,6 +645,8 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Float) {
               HasSubstr("f16tof32(uint2(tint_tmp & 0xffff, tint_tmp >> 16))"));
 }
 
+#endif
+
 TEST_F(GlslGeneratorImplTest_Builtin, StorageBarrier) {
   Func("main", {}, ty.void_(),
        {CallStmt(Call("storageBarrier"))},
@@ -656,9 +658,12 @@ TEST_F(GlslGeneratorImplTest_Builtin, StorageBarrier) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+precision mediump float;
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  DeviceMemoryBarrierWithGroupSync();
+  { barrier(); memoryBarrierBuffer(); };
   return;
 }
 )");
@@ -675,15 +680,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, WorkgroupBarrier) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+precision mediump float;
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  GroupMemoryBarrierWithGroupSync();
+  barrier();
   return;
 }
 )");
 }
-
-#endif
 
 TEST_F(GlslGeneratorImplTest_Builtin, DotI32) {
   Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);

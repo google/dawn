@@ -277,7 +277,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
           }
         }
       }
-      memoryBarrierShared();
+      barrier();
       k = 0;
       {
         for(; (k < 64); k = (k + 1)) {
@@ -309,7 +309,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
           }
         }
       }
-      memoryBarrierShared();
+      barrier();
     }
   }
   innerRow_4 = 0;
@@ -387,7 +387,7 @@ void tint_symbol_2(uvec3 tint_symbol_3, uvec3 tint_symbol_4, uint local_invocati
       mm_Asub[i][i_1] = 0.0f;
     }
   }
-  memoryBarrierShared();
+  barrier();
   tint_symbol = tint_symbol_3;
   tint_symbol_1 = tint_symbol_4;
   main_1();

@@ -10,7 +10,7 @@ void main1(uint local_invocation_index) {
   {
     a = 0;
   }
-  memoryBarrierShared();
+  barrier();
   a = 42;
   uses_a();
 }
@@ -32,7 +32,7 @@ void main2(uint local_invocation_index_1) {
   {
     b = 0;
   }
-  memoryBarrierShared();
+  barrier();
   b = 7;
   uses_b();
 }
@@ -75,7 +75,7 @@ void main3(uint local_invocation_index_2) {
     a = 0;
     b = 0;
   }
-  memoryBarrierShared();
+  barrier();
   outer();
   no_uses();
 }

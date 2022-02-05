@@ -32,7 +32,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
       tile[i_1][i_2] = vec3(0.0f, 0.0f, 0.0f);
     }
   }
-  memoryBarrierShared();
+  barrier();
   uint filterOffset = ((params.filterDim - 1u) / 2u);
   ivec2 dims = textureSize(inputTex_1, 0);
   ivec2 baseIndex = (ivec2(((WorkGroupID.xy * uvec2(params.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)))) - ivec2(int(filterOffset), 0));
@@ -49,7 +49,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
       }
     }
   }
-  memoryBarrierShared();
+  barrier();
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {

@@ -10,7 +10,7 @@ void compute_main(uint local_invocation_index) {
   {
     atomicExchange(arg_0, 0u);
   }
-  memoryBarrierShared();
+  barrier();
   atomicXor_c8e6be();
 }
 

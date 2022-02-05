@@ -12,7 +12,7 @@ void tint_symbol(uint local_invocation_index) {
     S tint_symbol_1 = S(0, 0.0f);
     v = tint_symbol_1;
   }
-  memoryBarrierShared();
+  barrier();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

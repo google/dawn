@@ -41,7 +41,7 @@ void main_1() {
             float x_13 = GLF_live2gl_FragCoord.x;
             if ((int(x_13) < 120)) {
             } else {
-              memoryBarrierShared();
+              barrier();
             }
           }
         }
@@ -66,7 +66,7 @@ void main_1() {
       }
       float x_16 = GLF_live2gl_FragCoord.x;
       GLF_dead3x = x_16;
-      memoryBarrierShared();
+      barrier();
     }
   }
   x_12.x_compute_data[0] = 42u;

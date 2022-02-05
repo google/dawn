@@ -71,7 +71,7 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
       mm_Bsub[i][i_1] = 0.0f;
     }
   }
-  memoryBarrierShared();
+  barrier();
   uint tileRow = (local_id.y * RowPerThread);
   uint tileCol = (local_id.x * ColPerThread);
   uint globalRow = (global_id.y * RowPerThread);
@@ -113,7 +113,7 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
           }
         }
       }
-      memoryBarrierShared();
+      barrier();
       {
         for(uint k = 0u; (k < TileInner); k = (k + 1u)) {
           {
@@ -134,7 +134,7 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
           }
         }
       }
-      memoryBarrierShared();
+      barrier();
     }
   }
   {

@@ -1165,9 +1165,9 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
   // TODO(crbug.com/tint/661): Combine sequential barriers to a single
   // instruction.
   if (builtin->Type() == sem::BuiltinType::kWorkgroupBarrier) {
-    out << "memoryBarrierShared()";
+    out << "barrier()";
   } else if (builtin->Type() == sem::BuiltinType::kStorageBarrier) {
-    out << "memoryBarrierBuffer()";
+    out << "{ barrier(); memoryBarrierBuffer(); }";
   } else {
     TINT_UNREACHABLE(Writer, diagnostics_)
         << "unexpected barrier builtin type " << sem::str(builtin->Type());

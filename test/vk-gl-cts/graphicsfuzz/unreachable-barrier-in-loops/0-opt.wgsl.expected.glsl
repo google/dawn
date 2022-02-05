@@ -74,7 +74,7 @@ void main_1() {
           float x_118 = x_10.injectionSwitch.x;
           float x_120 = x_10.injectionSwitch.y;
           if ((x_118 > x_120)) {
-            memoryBarrierShared();
+            barrier();
           }
         }
       }

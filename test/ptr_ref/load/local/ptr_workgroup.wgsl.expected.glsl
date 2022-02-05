@@ -6,7 +6,7 @@ void tint_symbol(uint local_invocation_index) {
   {
     i = 0;
   }
-  memoryBarrierShared();
+  barrier();
   i = 123;
   int use = (i + 1);
 }

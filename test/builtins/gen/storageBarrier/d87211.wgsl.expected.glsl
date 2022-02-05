@@ -2,7 +2,7 @@
 precision mediump float;
 
 void storageBarrier_d87211() {
-  memoryBarrierBuffer();
+  { barrier(); memoryBarrierBuffer(); };
 }
 
 void compute_main() {
