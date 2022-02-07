@@ -47,5 +47,7 @@ endif()
 
 if(${TINT_BUILD_GLSL_WRITER})
   set(SPIRV-Headers_SOURCE_DIR "${TINT_THIRD_PARTY_DIR}/glslang")
-  add_subdirectory("${TINT_THIRD_PARTY_DIR}/glslang" "${CMAKE_BINARY_DIR}/third_party/glslang" EXCLUDE_FROM_ALL)
+  if(${TINT_BUILD_SAMPLES})
+    add_subdirectory("${TINT_THIRD_PARTY_DIR}/glslang" "${CMAKE_BINARY_DIR}/third_party/glslang" EXCLUDE_FROM_ALL)
+  endif()
 endif()
