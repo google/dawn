@@ -167,6 +167,9 @@ namespace dawn::native {
             const BindGroupLayoutEntry& entry = descriptor->entries[i];
             BindingNumber bindingNumber = BindingNumber(entry.binding);
 
+            DAWN_INVALID_IF(bindingNumber > kMaxBindingNumberTyped,
+                            "Binding number (%u) exceeds the maximum binding number (%u).",
+                            uint32_t(bindingNumber), uint32_t(kMaxBindingNumberTyped));
             DAWN_INVALID_IF(bindingsSet.count(bindingNumber) != 0,
                             "On entries[%u]: binding index (%u) was specified by a previous entry.",
                             i, entry.binding);

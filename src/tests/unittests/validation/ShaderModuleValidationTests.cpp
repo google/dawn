@@ -512,3 +512,26 @@ struct Buf {
     buf.data[1] = c1;
 })"));
 }
+
+// Test that @binding must be less then kMaxBindingNumber
+TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
+    static_assert(kMaxBindingNumber == 65535);
+
+    // kMaxBindingNumber is valid.
+    utils::CreateShaderModule(device, R"(
+        @group(0) @binding(65535) var s : sampler;
+        @stage(fragment) fn main() -> @location(0) u32 {
+            _ = s;
+            return 0u;
+        }
+    )");
+
+    // kMaxBindingNumber + 1 is an error
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @group(0) @binding(65536) var s : sampler;
+        @stage(fragment) fn main() -> @location(0) u32 {
+            _ = s;
+            return 0u;
+        }
+    )"));
+}

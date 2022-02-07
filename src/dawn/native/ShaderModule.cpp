@@ -832,6 +832,10 @@ namespace dawn::native {
                     BindingNumber bindingNumber(resource.binding);
                     BindGroupIndex bindGroupIndex(resource.bind_group);
 
+                    DAWN_INVALID_IF(bindingNumber > kMaxBindingNumberTyped,
+                                    "Binding number (%u) exceeds the maximum binding number (%u).",
+                                    uint32_t(bindingNumber), uint32_t(kMaxBindingNumberTyped));
+
                     const auto& [binding, inserted] = metadata->bindings[bindGroupIndex].emplace(
                         bindingNumber, ShaderBindingInfo{});
                     DAWN_INVALID_IF(

@@ -925,11 +925,15 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutStorageBindingsInVertexShad
 }
 
 // Tests setting that bind group layout bindings numbers may be very large.
-TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryNumberLarge) {
-    // Checks that uint32_t max is valid.
-    utils::MakeBindGroupLayout(device,
-                               {{std::numeric_limits<uint32_t>::max(), wgpu::ShaderStage::Vertex,
-                                 wgpu::BufferBindingType::Uniform}});
+TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryMax) {
+    // Check that up to kMaxBindingNumber is valid.
+    utils::MakeBindGroupLayout(
+        device, {{kMaxBindingNumber, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform}});
+
+    // But after is an error.
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device,
+        {{kMaxBindingNumber + 1, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform}}));
 }
 
 // This test verifies that the BindGroupLayout bindings are correctly validated, even if the

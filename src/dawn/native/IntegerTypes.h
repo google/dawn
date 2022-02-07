@@ -23,13 +23,14 @@
 namespace dawn::native {
     // Binding numbers in the shader and BindGroup/BindGroupLayoutDescriptors
     using BindingNumber = TypedInteger<struct BindingNumberT, uint32_t>;
+    constexpr BindingNumber kMaxBindingNumberTyped = BindingNumber(kMaxBindingNumber);
 
     // Binding numbers get mapped to a packed range of indices
     using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
 
     using BindGroupIndex = TypedInteger<struct BindGroupIndexT, uint32_t>;
 
-    static constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
+    constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
 
     using ColorAttachmentIndex = TypedInteger<struct ColorAttachmentIndexT, uint8_t>;
 

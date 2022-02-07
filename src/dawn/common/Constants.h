@@ -62,4 +62,7 @@ static constexpr uint8_t kSampledTexturesPerExternalTexture = 3u;
 static constexpr uint8_t kSamplersPerExternalTexture = 1u;
 static constexpr uint8_t kUniformsPerExternalTexture = 1u;
 
+// A spec defined constant but that doesn't have a name.
+static constexpr uint32_t kMaxBindingNumber = 65535;
+
 #endif  // COMMON_CONSTANTS_H_
