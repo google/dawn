@@ -288,7 +288,7 @@ class MinBufferSizeTestsBase : public ValidationTest {
             computePassEncoder.SetBindGroup(i, bindGroups[i]);
         }
         computePassEncoder.Dispatch(1);
-        computePassEncoder.EndPass();
+        computePassEncoder.End();
         if (!expectation) {
             ASSERT_DEVICE_ERROR(commandEncoder.Finish());
         } else {
@@ -309,7 +309,7 @@ class MinBufferSizeTestsBase : public ValidationTest {
             renderPassEncoder.SetBindGroup(i, bindGroups[i]);
         }
         renderPassEncoder.Draw(3);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
         if (!expectation) {
             ASSERT_DEVICE_ERROR(commandEncoder.Finish());
         } else {

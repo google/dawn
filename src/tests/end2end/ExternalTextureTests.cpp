@@ -96,7 +96,7 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
         renderPass.cColorAttachments[0].clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -136,7 +136,7 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

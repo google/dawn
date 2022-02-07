@@ -205,7 +205,7 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
             renderPassEncoder.SetVertexBuffer(0, vBuffer, kQuadNumBytes * sampleOffset,
                                               kQuadNumBytes);
             renderPassEncoder.Draw(4);
-            renderPassEncoder.EndPass();
+            renderPassEncoder.End();
 
             wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
             computePassEncoder.SetPipeline(checkSamplePipeline);
@@ -216,7 +216,7 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
                         {1, depthView},
                         {2, outputBuffer, alignedResultSize * sampleOffset, kResultSize}}));
             computePassEncoder.Dispatch(1);
-            computePassEncoder.EndPass();
+            computePassEncoder.End();
         }
     }
 

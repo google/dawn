@@ -161,7 +161,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPassDesc);
         pass.SetPipeline(pipeline);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
@@ -197,7 +197,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         pass.SetPipeline(pipeline);
         pass.SetStencilReference(regionStencil);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
@@ -594,7 +594,7 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
         passDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.7;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
@@ -654,7 +654,7 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
         pass.SetPipeline(pipeline);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);

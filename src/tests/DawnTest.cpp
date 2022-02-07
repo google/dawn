@@ -1231,7 +1231,7 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Dispatch(width, height);
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -1413,7 +1413,7 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
                                                   {{0, depthDataTexture.CreateView()}}));
     }
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);

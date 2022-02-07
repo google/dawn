@@ -486,7 +486,7 @@ void ShaderRobustnessPerf::Step() {
             pass.Dispatch(ceil(float(mDimBOuter) / float(kTileSize)),
                           ceil(float(mDimAOuter) / float(kTileSize)), 1);
         }
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }

@@ -99,7 +99,7 @@ TEST_P(InternalStorageBufferBindingTests, QueryResolveBufferBoundAsInternalStora
     for (uint32_t i = 0; i < kIterations; ++i) {
         pass.Dispatch(kNumValues);
     }
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 

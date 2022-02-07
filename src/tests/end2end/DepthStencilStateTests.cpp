@@ -289,7 +289,7 @@ class DepthStencilStateTest : public DawnTest {
             // Clear the depthStencilView at the beginning
             {
                 pass = encoder.BeginRenderPass(&renderPass);
-                pass.EndPass();
+                pass.End();
             }
         } else {
             pass = encoder.BeginRenderPass(&renderPass);
@@ -336,12 +336,12 @@ class DepthStencilStateTest : public DawnTest {
             pass.Draw(6);
 
             if (isSingleEncoderMultiplePass) {
-                pass.EndPass();
+                pass.End();
             }
         }
 
         if (!isSingleEncoderMultiplePass) {
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

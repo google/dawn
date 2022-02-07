@@ -159,7 +159,7 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeap) {
             pass.Draw(3);
         }
 
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -211,7 +211,7 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
             pass.Draw(3);
         }
 
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -493,7 +493,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
             pass.Draw(3);
         }
 
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -539,7 +539,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
             pass.SetPipeline(renderPipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -581,7 +581,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
                 pass.Draw(3);
             }
 
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -642,7 +642,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOOverflow) {
         pass.SetBindGroup(0, bindGroups[0]);
         pass.Draw(3);
 
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -702,7 +702,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
                 pass.Draw(3);
             }
 
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -723,7 +723,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
             pass.SetBindGroup(0, bindGroups[0]);
             pass.Draw(3);
 
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -767,7 +767,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         auto pass = encoder.BeginRenderPass(&renderPassDesc);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -877,7 +877,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
             pass.Draw(3);
         }
 
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);

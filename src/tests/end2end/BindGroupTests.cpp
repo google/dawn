@@ -35,7 +35,7 @@ class BindGroupTests : public DawnTest {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
         return encoder.Finish();
     }
 
@@ -220,7 +220,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -326,7 +326,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -414,7 +414,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
     pass.SetBindGroup(0, bindGroups[0]);
     pass.SetBindGroup(1, bindGroups[1]);
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -477,7 +477,7 @@ TEST_P(BindGroupTests, MultipleEntryPointsWithMultipleNonZeroGroups) {
         pass.SetPipeline(cp);
         pass.SetBindGroup(0, bindGroup0);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
         cb = encoder.Finish();
         queue.Submit(1, &cb);
     }
@@ -508,7 +508,7 @@ TEST_P(BindGroupTests, MultipleEntryPointsWithMultipleNonZeroGroups) {
         pass.SetBindGroup(1, bindGroup1);
         pass.SetBindGroup(2, bindGroup2);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
         cb = encoder.Finish();
         queue.Submit(1, &cb);
     }
@@ -541,7 +541,7 @@ TEST_P(BindGroupTests, MultipleEntryPointsWithMultipleNonZeroGroups) {
         pass.SetBindGroup(1, bindGroup1);
         pass.SetBindGroup(2, bindGroup2);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
         cb = encoder.Finish();
         queue.Submit(1, &cb);
     }
@@ -582,7 +582,7 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets) {
 
     pass.SetPipeline(pipeline);
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -623,7 +623,7 @@ TEST_P(BindGroupTests, SetBindGroupBeforePipeline) {
     pass.SetPipeline(pipeline);
     pass.Draw(3);
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -684,7 +684,7 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
     pass.SetPipeline(pipeline);
     pass.Draw(3);
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -761,7 +761,7 @@ TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
     pass.SetPipeline(pipeline1);
     pass.Draw(3);
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -867,7 +867,7 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     pass.SetBindGroup(1, storageBindGroup, 1, &dynamicOffset);
 
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -969,7 +969,7 @@ TEST_P(BindGroupTests, DrawThenChangePipelineTwiceAndBindGroup) {
     // bind groups 0 and 1 should still be valid.
     pass.Draw(3);
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1060,7 +1060,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
     computePassEncoder.SetPipeline(pipeline);
     computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
     computePassEncoder.Dispatch(1);
-    computePassEncoder.EndPass();
+    computePassEncoder.End();
 
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
@@ -1142,7 +1142,7 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
         computePassEncoder.SetPipeline(pipeline);
         computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
         computePassEncoder.Dispatch(1);
-        computePassEncoder.EndPass();
+        computePassEncoder.End();
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
@@ -1184,7 +1184,7 @@ TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1219,7 +1219,7 @@ TEST_P(BindGroupTests, DynamicBindingNoneVisibility) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup, 1, &dynamicOffset);
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1279,7 +1279,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
 
             wgpu::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
@@ -1362,7 +1362,7 @@ TEST_P(BindGroupTests, EmptyLayout) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bg);
     pass.Dispatch(1);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1416,7 +1416,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, utils::MakeBindGroup(device, bgl, {{0, storageBuffer}}));
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1561,7 +1561,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     pass.SetPipeline(cp);
     pass.SetBindGroup(0, bg);
     pass.Dispatch(1, 1, 1);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);

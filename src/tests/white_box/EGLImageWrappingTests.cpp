@@ -329,7 +329,7 @@ class EGLImageUsageTests : public EGLImageTestBase {
         // Execute commands to clear the eglImage
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);

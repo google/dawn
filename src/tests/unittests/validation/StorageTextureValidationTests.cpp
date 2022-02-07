@@ -712,7 +712,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureInRenderPass) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPassEncoder.SetBindGroup(0, bindGroupWithStorageTexture);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
         encoder.Finish();
     }
 }
@@ -745,7 +745,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneRender
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPassEncoder.SetBindGroup(0, bindGroup);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
         switch (storageTextureType) {
             case wgpu::StorageTextureAccess::WriteOnly:
                 ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -777,7 +777,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndRenderAttachmentInOneRend
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPassEncoder.SetBindGroup(0, bindGroupWithStorageTexture);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
@@ -804,7 +804,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComput
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
         computePassEncoder.SetBindGroup(0, bindGroup);
-        computePassEncoder.EndPass();
+        computePassEncoder.End();
         encoder.Finish();
     }
 }

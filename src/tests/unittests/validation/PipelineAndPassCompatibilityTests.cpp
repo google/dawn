@@ -94,7 +94,7 @@ namespace {
                         CreatePipeline(kFormat, depthWriteInPipeline, stencilWriteInPipeline);
                     pass.SetPipeline(pipeline);
                     pass.Draw(3);
-                    pass.EndPass();
+                    pass.End();
                     if (depthStencilReadOnlyInPass &&
                         (depthWriteInPipeline || stencilWriteInPipeline)) {
                         ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -163,7 +163,7 @@ namespace {
                         kFormat, depthStencilReadOnlyInPass, depthStencilReadOnlyInPass);
                     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
                     pass.ExecuteBundles(1, &bundle);
-                    pass.EndPass();
+                    pass.End();
                     if (!depthStencilReadOnlyInPass || depthStencilReadOnlyInBundle) {
                         encoder.Finish();
                     } else {

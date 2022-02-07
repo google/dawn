@@ -323,7 +323,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -356,7 +356,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         // Execute commands to clear the ioSurface
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);

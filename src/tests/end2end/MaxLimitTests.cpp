@@ -89,7 +89,7 @@ TEST_P(MaxLimitTests, MaxComputeWorkgroupStorageSize) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Dispatch(1);
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
@@ -223,7 +223,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 

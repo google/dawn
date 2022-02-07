@@ -241,7 +241,7 @@ namespace {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             {
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();
@@ -256,7 +256,7 @@ namespace {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             {
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();
@@ -292,7 +292,7 @@ namespace {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             {
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();
@@ -307,7 +307,7 @@ namespace {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             {
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();
@@ -338,7 +338,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePass);
             {
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();
@@ -353,7 +353,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePass);
             {
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();
@@ -384,7 +384,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePass);
             {
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();
@@ -398,7 +398,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePass);
             {
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();

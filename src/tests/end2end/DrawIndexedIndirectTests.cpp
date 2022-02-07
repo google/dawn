@@ -88,7 +88,7 @@ class DrawIndexedIndirectTest : public DawnTest {
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32, indexOffset);
             pass.DrawIndexedIndirect(indirectBuffer, indirectOffset);
-            pass.EndPass();
+            pass.End();
         }
 
         return encoder.Finish();
@@ -288,7 +288,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
         pass.DrawIndexedIndirect(indirectBuffer, 0);
         pass.DrawIndexedIndirect(indirectBuffer, 20);
         pass.DrawIndexedIndirect(indirectBuffer, 40);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -313,7 +313,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
         pass.SetIndexBuffer(CreateIndexBuffer({0, 1, 2, 0, 3, 1, 0, 2, 1}),
                             wgpu::IndexFormat::Uint32, 0);
         pass.DrawIndexedIndirect(indirectBuffer, 40);
-        pass.EndPass();
+        pass.End();
     }
     commands = encoder.Finish();
 
@@ -332,7 +332,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
         pass.DrawIndexedIndirect(CreateIndirectBuffer({3, 1, 3, 0, 0}), 0);
         pass.DrawIndexedIndirect(CreateIndirectBuffer({10, 1, 0, 0, 0}), 0);
         pass.DrawIndexedIndirect(CreateIndirectBuffer({3, 1, 6, 0, 0}), 0);
-        pass.EndPass();
+        pass.End();
     }
     commands = encoder.Finish();
 
@@ -352,7 +352,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
         pass.DrawIndexedIndirect(CreateIndirectBuffer({10, 1, 0, 0, 0}), 0);
         pass.SetIndexBuffer(CreateIndexBuffer({0, 3, 1}), wgpu::IndexFormat::Uint32, 0);
         pass.DrawIndexedIndirect(CreateIndirectBuffer({3, 1, 3, 0, 0}), 0);
-        pass.EndPass();
+        pass.End();
     }
     commands = encoder.Finish();
 
@@ -491,7 +491,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.ExecuteBundles(bundles.size(), bundles.data());
-        pass.EndPass();
+        pass.End();
     }
     wgpu::CommandBuffer commands = encoder.Finish();
 
@@ -531,7 +531,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
         renderPass.renderPassInfo.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.ExecuteBundles(1, &bundle);
-        pass.EndPass();
+        pass.End();
 
         commands[0] = encoder.Finish();
     }
@@ -552,7 +552,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
         renderPass.renderPassInfo.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.ExecuteBundles(1, &bundle);
-        pass.EndPass();
+        pass.End();
 
         commands[1] = encoder.Finish();
     }
@@ -627,14 +627,14 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
         pass.SetPipeline(computePipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
     };
 
     auto encodeRenderPassToExecuteBundle = [&](wgpu::LoadOp colorLoadOp) {
         renderPass.renderPassInfo.cColorAttachments[0].loadOp = colorLoadOp;
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.ExecuteBundles(1, &bundle);
-        pass.EndPass();
+        pass.End();
     };
 
     encodeComputePassToUpdateFirstIndex(0);

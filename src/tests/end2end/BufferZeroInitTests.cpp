@@ -109,7 +109,7 @@ class BufferZeroInitTest : public DawnTest {
                 {texture.CreateView(&viewDescriptor)});
             renderPassDescriptor.cColorAttachments[0].clearColor = color;
             wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
-            renderPass.EndPass();
+            renderPass.End();
         }
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -190,7 +190,7 @@ class BufferZeroInitTest : public DawnTest {
         computePass.SetBindGroup(0, bindGroup);
         computePass.SetPipeline(pipeline);
         computePass.Dispatch(1u);
-        computePass.EndPass();
+        computePass.End();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
@@ -283,7 +283,7 @@ class BufferZeroInitTest : public DawnTest {
         renderPass.SetVertexBuffer(0, vertexBuffer, vertexBufferOffset, kVertexAttributeSize);
         renderPass.SetPipeline(renderPipeline);
         renderPass.Draw(1);
-        renderPass.EndPass();
+        renderPass.End();
 
         ExpectLazyClearSubmitAndCheckOutputs(encoder, vertexBuffer, vertexBufferSize,
                                              colorAttachment);
@@ -331,7 +331,7 @@ class BufferZeroInitTest : public DawnTest {
         renderPass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16, indexBufferOffset,
                                   sizeof(uint32_t));
         renderPass.DrawIndexed(1);
-        renderPass.EndPass();
+        renderPass.End();
 
         ExpectLazyClearSubmitAndCheckOutputs(encoder, indexBuffer, indexBufferSize,
                                              colorAttachment);
@@ -373,7 +373,7 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(renderPipeline);
         renderPass.DrawIndirect(indirectBuffer, indirectBufferOffset);
-        renderPass.EndPass();
+        renderPass.End();
 
         ExpectLazyClearSubmitAndCheckOutputs(encoder, indirectBuffer, bufferSize, colorAttachment);
     }
@@ -417,7 +417,7 @@ class BufferZeroInitTest : public DawnTest {
         renderPass.SetPipeline(renderPipeline);
         renderPass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
         renderPass.DrawIndexedIndirect(indirectBuffer, indirectBufferOffset);
-        renderPass.EndPass();
+        renderPass.End();
 
         ExpectLazyClearSubmitAndCheckOutputs(encoder, indirectBuffer, bufferSize, colorAttachment);
     }
@@ -458,7 +458,7 @@ class BufferZeroInitTest : public DawnTest {
         computePass.SetBindGroup(0, bindGroup);
         computePass.SetPipeline(pipeline);
         computePass.DispatchIndirect(indirectBuffer, indirectBufferOffset);
-        computePass.EndPass();
+        computePass.End();
 
         ExpectLazyClearSubmitAndCheckOutputs(encoder, indirectBuffer, bufferSize, outputTexture);
     }
@@ -1227,7 +1227,7 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
 
                 renderPass.SetPipeline(renderPipeline);
                 renderPass.DrawIndexed(1);
-                renderPass.EndPass();
+                renderPass.End();
 
                 wgpu::CommandBuffer commandBuffer = encoder.Finish();
 

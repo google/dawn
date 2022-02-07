@@ -68,7 +68,7 @@ TEST_P(RenderAttachmentTest, MoreFragmentOutputsThanAttachments) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
     pass.SetPipeline(pipeline);
     pass.Draw(1);
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 

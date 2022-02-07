@@ -598,7 +598,7 @@ void DrawCallPerf::Step() {
             break;
     }
 
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commandBuffer = commands.Finish();
     queue.Submit(1, &commandBuffer);
 }

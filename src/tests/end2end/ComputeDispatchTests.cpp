@@ -101,7 +101,7 @@ class ComputeDispatchTests : public DawnTest {
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Dispatch(x, y, z);
-            pass.EndPass();
+            pass.End();
 
             commands = encoder.Finish();
         }
@@ -160,7 +160,7 @@ class ComputeDispatchTests : public DawnTest {
             pass.SetPipeline(computePipelineForTest);
             pass.SetBindGroup(0, bindGroup);
             pass.DispatchIndirect(indirectBuffer, indirectOffset);
-            pass.EndPass();
+            pass.End();
 
             commands = encoder.Finish();
         }

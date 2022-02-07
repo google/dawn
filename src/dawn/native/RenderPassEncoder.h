@@ -43,7 +43,8 @@ namespace dawn::native {
 
         ObjectType GetType() const override;
 
-        void APIEndPass();
+        void APIEnd();
+        void APIEndPass();  // TODO(dawn:1286): Remove after deprecation period.
 
         void APISetStencilReference(uint32_t reference);
         void APISetBlendConstant(const Color* color);

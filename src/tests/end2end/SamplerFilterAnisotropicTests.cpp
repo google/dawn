@@ -194,7 +194,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
             pass.SetBindGroup(0, bindGroup);
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.Draw(6);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

@@ -46,7 +46,7 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(1);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

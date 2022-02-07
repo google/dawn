@@ -43,7 +43,7 @@ class ComputeValidationTest : public ValidationTest {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.Dispatch(x, y, z);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 

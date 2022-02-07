@@ -111,7 +111,7 @@ class DrawIndexedTest : public DawnTest {
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.SetIndexBuffer(curIndexBuffer, wgpu::IndexFormat::Uint32, bufferOffset);
             pass.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

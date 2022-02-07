@@ -92,7 +92,7 @@ struct Buf {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }
@@ -457,7 +457,7 @@ struct Buf {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }
@@ -513,7 +513,7 @@ struct Buf {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }
@@ -565,7 +565,7 @@ struct Buf {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }
@@ -661,7 +661,7 @@ struct Buf {
         pass.SetBindGroup(0, bindGroup3);
         pass.Dispatch(1);
 
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }
@@ -725,7 +725,7 @@ fn main(@builtin(vertex_index) VertexIndex : u32)
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.SetPipeline(pipeline);
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 

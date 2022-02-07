@@ -476,7 +476,7 @@ class CopyTextureForBrowserTests : public Parent {
             pass.SetBindGroup(0, bindGroup);
             pass.Dispatch(dstSpec.textureSize.width,
                           dstSpec.textureSize.height);  // Verify dst texture content
-            pass.EndPass();
+            pass.End();
 
             testCommands = encoder.Finish();
         }

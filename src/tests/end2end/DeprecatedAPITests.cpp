@@ -70,7 +70,25 @@ TEST_P(DeprecationTests, ReadOnlyDepthStencilStoreLoadOpsAttachment) {
 
     EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
 
-    pass.EndPass();
+    pass.End();
+}
+
+// Test that endPass() is deprecated for both render and compute passes.
+TEST_P(DeprecationTests, EndPass) {
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    {
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+        EXPECT_DEPRECATION_WARNING(pass.EndPass());
+    }
+
+    {
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+
+        EXPECT_DEPRECATION_WARNING(pass.EndPass());
+    }
 }
 
 DAWN_INSTANTIATE_TEST(DeprecationTests,

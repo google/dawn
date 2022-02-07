@@ -74,7 +74,7 @@ class DrawTest : public DawnTest {
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.Draw(vertexCount, instanceCount, firstIndex, firstInstance);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

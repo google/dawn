@@ -278,7 +278,7 @@ namespace dawn::native { namespace vulkan {
 
             wgpu::CommandEncoder encoder = dawnDevice.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
-            pass.EndPass();
+            pass.End();
 
             wgpu::CommandBuffer commands = encoder.Finish();
 

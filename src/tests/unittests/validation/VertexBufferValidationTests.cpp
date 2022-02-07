@@ -104,7 +104,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());
 
@@ -118,7 +118,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
         pass.Draw(3);
         pass.SetPipeline(pipeline1);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
     encoder.Finish();
 }
@@ -143,14 +143,14 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRenderPasses)
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
     encoder.Finish();
 
@@ -162,13 +162,13 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRenderPasses)
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
@@ -184,7 +184,7 @@ TEST_F(VertexBufferValidationTest, VertexBufferSlotValidation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetVertexBuffer(kMaxVertexBuffers - 1, buffer, 0);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -193,7 +193,7 @@ TEST_F(VertexBufferValidationTest, VertexBufferSlotValidation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetVertexBuffer(kMaxVertexBuffers, buffer, 0);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -233,7 +233,7 @@ TEST_F(VertexBufferValidationTest, VertexBufferOffsetOOBValidation) {
         pass.SetVertexBuffer(0, buffer, 4, wgpu::kWholeSize);
         // Implicit size of zero
         pass.SetVertexBuffer(0, buffer, 256, wgpu::kWholeSize);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -242,7 +242,7 @@ TEST_F(VertexBufferValidationTest, VertexBufferOffsetOOBValidation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetVertexBuffer(0, buffer, 4, 256);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -251,7 +251,7 @@ TEST_F(VertexBufferValidationTest, VertexBufferOffsetOOBValidation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetVertexBuffer(0, buffer, 256 + 4, 0);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -300,7 +300,7 @@ TEST_F(VertexBufferValidationTest, InvalidUsage) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
     // Error case: using the index buffer is an error.
@@ -308,7 +308,7 @@ TEST_F(VertexBufferValidationTest, InvalidUsage) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetVertexBuffer(0, indexBuffer);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -341,7 +341,7 @@ TEST_F(VertexBufferValidationTest, OffsetAlignment) {
         pass.SetVertexBuffer(0, vertexBuffer, 0);
         pass.SetVertexBuffer(0, vertexBuffer, 4);
         pass.SetVertexBuffer(0, vertexBuffer, 12);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -350,7 +350,7 @@ TEST_F(VertexBufferValidationTest, OffsetAlignment) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetVertexBuffer(0, vertexBuffer, 2);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }

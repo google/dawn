@@ -50,7 +50,7 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(1);
-        pass.EndPass();
+        pass.End();
     }
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -120,7 +120,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
         pass.SetPipeline(write1);
         pass.SetBindGroup(0, group);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
@@ -134,7 +134,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
         pass.SetPipeline(write42);
         pass.SetBindGroup(0, group);
         pass.Dispatch(42);
-        pass.EndPass();
+        pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 

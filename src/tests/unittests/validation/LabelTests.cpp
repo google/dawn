@@ -190,7 +190,7 @@ TEST_F(LabelTest, ComputePassEncoder) {
         wgpu::ComputePassEncoder encoder = commandEncoder.BeginComputePass(&descriptor);
         std::string readbackLabel = dawn::native::GetObjectLabelForTesting(encoder.Get());
         ASSERT_TRUE(readbackLabel.empty());
-        encoder.EndPass();
+        encoder.End();
     }
 
     // Test setting a label through API
@@ -199,7 +199,7 @@ TEST_F(LabelTest, ComputePassEncoder) {
         encoder.SetLabel(label.c_str());
         std::string readbackLabel = dawn::native::GetObjectLabelForTesting(encoder.Get());
         ASSERT_EQ(label, readbackLabel);
-        encoder.EndPass();
+        encoder.End();
     }
 
     // Test setting a label through the descriptor.
@@ -208,7 +208,7 @@ TEST_F(LabelTest, ComputePassEncoder) {
         wgpu::ComputePassEncoder encoder = commandEncoder.BeginComputePass(&descriptor);
         std::string readbackLabel = dawn::native::GetObjectLabelForTesting(encoder.Get());
         ASSERT_EQ(label, readbackLabel);
-        encoder.EndPass();
+        encoder.End();
     }
 }
 
@@ -368,7 +368,7 @@ TEST_F(LabelTest, RenderPassEncoder) {
         wgpu::RenderPassEncoder encoder = commandEncoder.BeginRenderPass(&descriptor);
         std::string readbackLabel = dawn::native::GetObjectLabelForTesting(encoder.Get());
         ASSERT_TRUE(readbackLabel.empty());
-        encoder.EndPass();
+        encoder.End();
     }
 
     // Test setting a label through API
@@ -377,7 +377,7 @@ TEST_F(LabelTest, RenderPassEncoder) {
         encoder.SetLabel(label.c_str());
         std::string readbackLabel = dawn::native::GetObjectLabelForTesting(encoder.Get());
         ASSERT_EQ(label, readbackLabel);
-        encoder.EndPass();
+        encoder.End();
     }
 
     // Test setting a label through the descriptor.
@@ -386,7 +386,7 @@ TEST_F(LabelTest, RenderPassEncoder) {
         wgpu::RenderPassEncoder encoder = commandEncoder.BeginRenderPass(&descriptor);
         std::string readbackLabel = dawn::native::GetObjectLabelForTesting(encoder.Get());
         ASSERT_EQ(label, readbackLabel);
-        encoder.EndPass();
+        encoder.End();
     }
 }
 

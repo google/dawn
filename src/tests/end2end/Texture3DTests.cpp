@@ -102,7 +102,7 @@ TEST_P(Texture3DTests, Sampling) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Draw(6);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);

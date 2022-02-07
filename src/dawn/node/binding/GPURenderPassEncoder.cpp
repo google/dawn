@@ -85,6 +85,10 @@ namespace wgpu::binding {
         enc_.ExecuteBundles(bundleCount, bundles);
     }
 
+    void GPURenderPassEncoder::end(Napi::Env) {
+        enc_.End();
+    }
+
     void GPURenderPassEncoder::endPass(Napi::Env) {
         enc_.EndPass();
     }

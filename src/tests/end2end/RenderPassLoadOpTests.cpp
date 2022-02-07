@@ -115,7 +115,7 @@ class RenderPassLoadOpTests : public DawnTest {
         renderPassDescriptor.cColorAttachments[0].clearColor = clearColor;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
-        renderPass.EndPass();
+        renderPass.End();
 
         const uint64_t bufferSize = sizeof(T) * expectedPixelValue.size();
         wgpu::BufferDescriptor bufferDescriptor;
@@ -152,14 +152,14 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     utils::ComboRenderPassDescriptor renderPassClearZero({renderTargetView});
     auto commandsClearZeroEncoder = device.CreateCommandEncoder();
     auto clearZeroPass = commandsClearZeroEncoder.BeginRenderPass(&renderPassClearZero);
-    clearZeroPass.EndPass();
+    clearZeroPass.End();
     auto commandsClearZero = commandsClearZeroEncoder.Finish();
 
     utils::ComboRenderPassDescriptor renderPassClearGreen({renderTargetView});
     renderPassClearGreen.cColorAttachments[0].clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
     auto commandsClearGreenEncoder = device.CreateCommandEncoder();
     auto clearGreenPass = commandsClearGreenEncoder.BeginRenderPass(&renderPassClearGreen);
-    clearGreenPass.EndPass();
+    clearGreenPass.End();
     auto commandsClearGreen = commandsClearGreenEncoder.Finish();
 
     queue.Submit(1, &commandsClearZero);
@@ -176,7 +176,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
         auto encoder = device.CreateCommandEncoder();
         auto pass = encoder.BeginRenderPass(&renderPassLoad);
         blueQuad.Draw(&pass);
-        pass.EndPass();
+        pass.End();
         commandsLoad = encoder.Finish();
     }
 

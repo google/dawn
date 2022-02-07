@@ -142,7 +142,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
     EXPECT_EQ(ToAPI(stateTracker->GetBindGroup(BindGroupIndex(1))), staticBG.Get());
     EXPECT_EQ(stateTracker->GetDynamicOffsets(BindGroupIndex(1)), emptyDynamicOffsets);
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
 

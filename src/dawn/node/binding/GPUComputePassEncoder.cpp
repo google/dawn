@@ -50,6 +50,10 @@ namespace wgpu::binding {
         enc_.DispatchIndirect(*indirectBuffer.As<GPUBuffer>(), indirectOffset);
     }
 
+    void GPUComputePassEncoder::end(Napi::Env) {
+        enc_.End();
+    }
+
     void GPUComputePassEncoder::endPass(Napi::Env) {
         enc_.EndPass();
     }

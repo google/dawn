@@ -219,7 +219,7 @@ class VertexStateTest : public DawnTest {
         }
 
         pass.Draw(triangles * 3, instances);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -474,7 +474,7 @@ TEST_P(VertexStateTest, UnusedVertexSlot) {
     pass.SetPipeline(instancePipeline);
     pass.Draw(3, 4);
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -526,7 +526,7 @@ TEST_P(VertexStateTest, MultiplePipelinesMixedVertexState) {
     pass.SetPipeline(instancePipeline);
     pass.Draw(3, 4);
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -633,7 +633,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     pass.SetPipeline(pipeline);
     pass.SetVertexBuffer(0, vertexBuffer);
     pass.Draw(1);
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
@@ -685,7 +685,7 @@ TEST_P(OptionalVertexStateTest, Basic) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(1);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

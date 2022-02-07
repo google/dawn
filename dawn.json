@@ -812,7 +812,11 @@
                 ]
             },
             {
-                "name": "end pass"
+                "name": "end"
+            },
+            {
+                "name": "end pass",
+                "tags": ["deprecated"]
             },
             {
                 "name": "end pipeline statistics query",
@@ -1978,7 +1982,11 @@
                 ]
             },
             {
-                "name": "end pass"
+                "name": "end"
+            },
+            {
+                "name": "end pass",
+                "tags": ["deprecated"]
             },
             {
                 "name": "end pipeline statistics query",

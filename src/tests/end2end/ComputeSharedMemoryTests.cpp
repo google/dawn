@@ -57,7 +57,7 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }
@@ -179,7 +179,7 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }

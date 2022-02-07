@@ -269,7 +269,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         passDescriptor.cDepthStencilAttachmentInfo.clearDepth = depthValue;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-        pass.EndPass();
+        pass.End();
     }
 
     void UpdateInputStencil(wgpu::CommandEncoder commandEncoder,
@@ -279,7 +279,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         passDescriptor.cDepthStencilAttachmentInfo.clearStencil = stencilValue;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-        pass.EndPass();
+        pass.End();
     }
 
     template <typename T, typename CheckBufferFn>
@@ -327,7 +327,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
                 pass.Draw(1);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = commandEncoder.Finish();
@@ -379,7 +379,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
                 pass.Dispatch(1);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = commandEncoder.Finish();
@@ -531,7 +531,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
                 pass.Draw(1);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = commandEncoder.Finish();
@@ -577,7 +577,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
                 pass.Dispatch(1);
-                pass.EndPass();
+                pass.End();
             }
 
             wgpu::CommandBuffer commands = commandEncoder.Finish();
@@ -661,7 +661,7 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         passDescriptor.cDepthStencilAttachmentInfo.clearStencil = 31;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-        pass.EndPass();
+        pass.End();
 
         // Render into the output textures
         {
@@ -672,7 +672,7 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(1);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();
@@ -712,7 +712,7 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         passDescriptor.cDepthStencilAttachmentInfo.clearStencil = 31;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-        pass.EndPass();
+        pass.End();
 
         // Sample into the output buffers
         {
@@ -720,7 +720,7 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Dispatch(1);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();

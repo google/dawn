@@ -93,7 +93,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
         pass.EndOcclusionQuery();
         pass.BeginOcclusionQuery(1);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -104,7 +104,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassWithoutOcclusion);
         pass.BeginOcclusionQuery(0);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -116,7 +116,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
         renderPass.occlusionQuerySet = occlusionQuerySetOnOther;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
 
         // Clear this out so we don't hold a reference. The query set
@@ -131,7 +131,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.BeginOcclusionQuery(0);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         wgpu::Queue queue = device.GetQueue();
         occlusionQuerySet.Destroy();
@@ -151,7 +151,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidQueryIndex) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.BeginOcclusionQuery(2);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -161,12 +161,12 @@ TEST_F(OcclusionQueryValidationTest, InvalidQueryIndex) {
         wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&renderPass);
         pass0.BeginOcclusionQuery(0);
         pass0.EndOcclusionQuery();
-        pass0.EndPass();
+        pass0.End();
 
         wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass);
         pass1.BeginOcclusionQuery(0);
         pass1.EndOcclusionQuery();
-        pass1.EndPass();
+        pass1.End();
         encoder.Finish();
     }
 
@@ -178,7 +178,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidQueryIndex) {
         pass.EndOcclusionQuery();
         pass.BeginOcclusionQuery(0);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
@@ -196,7 +196,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
         pass.BeginOcclusionQuery(0);
         pass.BeginOcclusionQuery(1);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -208,7 +208,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
         pass.BeginOcclusionQuery(1);
         pass.EndOcclusionQuery();
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -217,7 +217,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
@@ -317,7 +317,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnComputePassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.WriteTimestamp(timestampQuerySet, 0);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -326,7 +326,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnComputePassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.WriteTimestamp(occlusionQuerySet, 0);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -335,7 +335,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnComputePassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.WriteTimestamp(timestampQuerySet, 2);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -344,7 +344,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnComputePassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.WriteTimestamp(timestampQuerySet, 0);
-        pass.EndPass();
+        pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
 
         wgpu::Queue queue = device.GetQueue();
@@ -365,7 +365,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.WriteTimestamp(timestampQuerySet, 0);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -374,7 +374,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.WriteTimestamp(occlusionQuerySet, 0);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -383,7 +383,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.WriteTimestamp(timestampQuerySet, 2);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -394,7 +394,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
         encoder.WriteTimestamp(timestampQuerySet, 0);
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.WriteTimestamp(timestampQuerySet, 0);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -403,10 +403,10 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&renderPass);
         pass0.WriteTimestamp(timestampQuerySet, 0);
-        pass0.EndPass();
+        pass0.End();
         wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass);
         pass1.WriteTimestamp(timestampQuerySet, 0);
-        pass1.EndPass();
+        pass1.End();
         encoder.Finish();
     }
 
@@ -416,7 +416,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.WriteTimestamp(timestampQuerySet, 0);
         pass.WriteTimestamp(timestampQuerySet, 0);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -425,7 +425,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.WriteTimestamp(timestampQuerySet, 0);
-        pass.EndPass();
+        pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
 
         wgpu::Queue queue = device.GetQueue();

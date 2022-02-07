@@ -89,7 +89,7 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
 
     {
@@ -101,7 +101,7 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -154,7 +154,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
         pass.Draw(3);
     }
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);

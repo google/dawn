@@ -71,7 +71,7 @@ class ViewportTest : public DawnTest {
             pass.SetViewport(x, y, width, height, 0.0, 1.0);
         }
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -126,7 +126,7 @@ class ViewportTest : public DawnTest {
             pass.SetViewport(0, 0, 3, 1, minDepth, maxDepth);
         }
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -194,7 +194,7 @@ TEST_P(ViewportTest, EmptyViewport) {
         pass.SetPipeline(pipeline);
         pass.SetViewport(0.0f, 0.0f, width, height, 0.0f, 1.0f);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);

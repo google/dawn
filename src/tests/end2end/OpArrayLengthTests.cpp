@@ -140,7 +140,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     pass.SetBindGroup(0, mBindGroup);
     pass.SetBindGroup(1, resultBindGroup);
     pass.Dispatch(1);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -189,7 +189,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, mBindGroup);
         pass.Draw(1);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -249,7 +249,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, mBindGroup);
         pass.Draw(1);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

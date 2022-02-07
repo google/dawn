@@ -323,7 +323,7 @@ fn main() {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1);
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }

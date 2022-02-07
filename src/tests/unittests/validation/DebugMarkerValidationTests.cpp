@@ -31,7 +31,7 @@ TEST_F(DebugMarkerValidationTest, RenderSuccess) {
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
 
     encoder.Finish();
@@ -48,7 +48,7 @@ TEST_F(DebugMarkerValidationTest, RenderUnbalancedPush) {
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
 
     ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -65,7 +65,7 @@ TEST_F(DebugMarkerValidationTest, RenderUnbalancedPop) {
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
 
     ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -127,7 +127,7 @@ TEST_F(DebugMarkerValidationTest, ComputeSuccess) {
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
 
     encoder.Finish();
@@ -142,7 +142,7 @@ TEST_F(DebugMarkerValidationTest, ComputeUnbalancedPush) {
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
 
     ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -157,7 +157,7 @@ TEST_F(DebugMarkerValidationTest, ComputeUnbalancedPop) {
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
 
     ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -203,7 +203,7 @@ TEST_F(DebugMarkerValidationTest, NestedComputeInCommandEncoder) {
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
     encoder.PopDebugGroup();
     encoder.Finish();
@@ -217,7 +217,7 @@ TEST_F(DebugMarkerValidationTest, NestedComputeInCommandEncoderIndependent) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
@@ -233,7 +233,7 @@ TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoder) {
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
     encoder.PopDebugGroup();
     encoder.Finish();
@@ -249,7 +249,7 @@ TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoderIndependent) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }

@@ -153,7 +153,7 @@ class VertexOnlyRenderPipelineTest : public DawnTest {
         }
 
         auto pass = encoder.BeginRenderPass(&clearPass);
-        pass.EndPass();
+        pass.End();
     }
 
     // Render resource
@@ -194,7 +194,7 @@ TEST_P(VertexOnlyRenderPipelineTest, Stencil) {
             pass.SetVertexBuffer(0, vertexBuffer);
             // Draw the whole line
             pass.Draw(2, 1, 4, 0);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -230,7 +230,7 @@ TEST_P(VertexOnlyRenderPipelineTest, Depth) {
             pass.SetVertexBuffer(0, vertexBuffer);
             // Draw the whole line
             pass.Draw(2, 1, 4, 0);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -271,7 +271,7 @@ TEST_P(VertexOnlyRenderPipelineTest, MultiplePass) {
         pass.SetVertexBuffer(0, vertexBuffer);
         // Draw the middle line
         pass.Draw(2, 1, 0, 0);
-        pass.EndPass();
+        pass.End();
     }
 
     // Use the depth pipeline to set the depth on the right
@@ -282,7 +282,7 @@ TEST_P(VertexOnlyRenderPipelineTest, MultiplePass) {
         pass.SetVertexBuffer(0, vertexBuffer);
         // Draw the right line
         pass.Draw(2, 1, 2, 0);
-        pass.EndPass();
+        pass.End();
     }
 
     // Use the complete pipeline to draw with depth and stencil tests
@@ -293,7 +293,7 @@ TEST_P(VertexOnlyRenderPipelineTest, MultiplePass) {
         pass.SetVertexBuffer(0, vertexBuffer);
         // Draw the full line with depth and stencil tests
         pass.Draw(2, 1, 4, 0);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

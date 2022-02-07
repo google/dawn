@@ -90,7 +90,7 @@ class SwapChainValidationTests : public DawnTest {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
-        pass.EndPass();
+        pass.End();
 
         if (errorAtFinish) {
             ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -264,7 +264,7 @@ TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
     utils::ComboRenderPassDescriptor renderPassDesc({view, secondTexture.CreateView()});
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
 
     queue.Submit(1, &commands);

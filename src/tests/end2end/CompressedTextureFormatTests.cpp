@@ -214,7 +214,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
             pass.SetPipeline(renderPipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

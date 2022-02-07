@@ -37,7 +37,7 @@ namespace {
         wgpu::CommandEncoder TestBeginRenderPass(const wgpu::RenderPassDescriptor* descriptor) {
             wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(descriptor);
-            renderPassEncoder.EndPass();
+            renderPassEncoder.End();
             return commandEncoder;
         }
     };

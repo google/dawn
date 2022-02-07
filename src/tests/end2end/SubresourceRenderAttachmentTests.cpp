@@ -71,7 +71,7 @@ class SubresourceRenderAttachmentTest : public DawnTest {
 
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder passEncoder = commandEncoder.BeginRenderPass(&renderPass);
-        passEncoder.EndPass();
+        passEncoder.End();
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
 

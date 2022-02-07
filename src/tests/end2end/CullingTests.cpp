@@ -82,7 +82,7 @@ class CullingTest : public DawnTest {
         wgpu::RenderPassEncoder renderPass = commandEncoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(CreatePipelineForTest(frontFace, cullMode));
         renderPass.Draw(6);
-        renderPass.EndPass();
+        renderPass.End();
         wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
         queue.Submit(1, &commandBuffer);
 

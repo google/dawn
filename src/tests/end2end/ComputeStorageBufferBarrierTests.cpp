@@ -59,7 +59,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
     for (uint32_t i = 0; i < kIterations; ++i) {
         pass.Dispatch(kNumValues);
     }
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
@@ -124,7 +124,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         pass.SetBindGroup(0, bindGroups[1]);
         pass.Dispatch(kNumValues);
     }
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
@@ -190,7 +190,7 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
         pass.SetBindGroup(0, bindGroups[1]);
         pass.Dispatch(kNumValues);
     }
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
@@ -256,7 +256,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroups[b]);
         pass.Dispatch(kNumValues / 4);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -324,7 +324,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
         pass.SetBindGroup(0, bindGroups[b]);
         pass.Dispatch(kNumValues / 4);
     }
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -400,7 +400,7 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
     pass.SetBindGroup(0, step3Group);
     pass.DispatchIndirect(buf, 0);
 
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 

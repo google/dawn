@@ -108,7 +108,7 @@ namespace dawn::native {
         mCommandEncoder->TrackQueryAvailability(querySet, queryIndex);
     }
 
-    void RenderPassEncoder::APIEndPass() {
+    void RenderPassEncoder::APIEnd() {
         if (mEncodingContext->TryEncode(
                 this,
                 [&](CommandAllocator* allocator) -> MaybeError {
@@ -127,8 +127,13 @@ namespace dawn::native {
                                                               std::move(mIndirectDrawMetadata)));
                     return {};
                 },
-                "encoding %s.EndPass().", this)) {
+                "encoding %s.End().", this)) {
         }
+    }
+
+    void RenderPassEncoder::APIEndPass() {
+        GetDevice()->EmitDeprecationWarning("endPass() has been deprecated. Use end() instead.");
+        APIEnd();
     }
 
     void RenderPassEncoder::APISetStencilReference(uint32_t reference) {

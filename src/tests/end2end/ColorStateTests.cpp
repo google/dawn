@@ -128,7 +128,7 @@ class ColorStateTest : public DawnTest {
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({{triangle.color}})));
             pass.SetBlendConstant(&blendConstant);
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -756,7 +756,7 @@ TEST_P(ColorStateTest, ColorWriteMaskBlendingDisabled) {
             pass.SetPipeline(testPipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({{base}})));
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -891,7 +891,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
             pass.SetBindGroup(0, MakeBindGroupForColors(
                                      std::array<RGBA8, 4>({{color0, color1, color2, color3}})));
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -967,7 +967,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
             pass.SetBindGroup(
                 0, MakeBindGroupForColors(std::array<RGBA8, 1>({{RGBA8(255, 255, 255, 255)}})));
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -990,7 +990,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
             pass.SetBindGroup(
                 0, MakeBindGroupForColors(std::array<RGBA8, 1>({{RGBA8(255, 255, 255, 255)}})));
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -1014,7 +1014,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
             pass.SetBindGroup(
                 0, MakeBindGroupForColors(std::array<RGBA8, 1>({{RGBA8(255, 255, 255, 255)}})));
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
         {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -1026,7 +1026,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
             pass.SetBindGroup(
                 0, MakeBindGroupForColors(std::array<RGBA8, 1>({{RGBA8(255, 255, 255, 255)}})));
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -1082,12 +1082,12 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
 
         // Set a pipeline that will dirty the color write mask
         pass.SetPipeline(testPipeline);
-        pass.EndPass();
+        pass.End();
     }
     {
         // This renderpass' loadOp should clear all channels of the render attachment
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-        pass.EndPass();
+        pass.End();
     }
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);

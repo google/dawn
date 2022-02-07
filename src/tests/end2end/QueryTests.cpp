@@ -164,7 +164,7 @@ class OcclusionQueryTests : public QueryTests {
         pass.BeginOcclusionQuery(0);
         pass.Draw(3);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
 
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -193,7 +193,7 @@ class OcclusionQueryTests : public QueryTests {
         pass.BeginOcclusionQuery(0);
         pass.Draw(3);
         pass.EndOcclusionQuery();
-        pass.EndPass();
+        pass.End();
 
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -281,7 +281,7 @@ TEST_P(OcclusionQueryTests, Rewrite) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.BeginOcclusionQuery(0);
     pass.EndOcclusionQuery();
-    pass.EndPass();
+    pass.End();
 
     // Begin occlusion with same query index with draw call
     wgpu::RenderPassEncoder rewritePass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -289,7 +289,7 @@ TEST_P(OcclusionQueryTests, Rewrite) {
     rewritePass.BeginOcclusionQuery(0);
     rewritePass.Draw(3);
     rewritePass.EndOcclusionQuery();
-    rewritePass.EndPass();
+    rewritePass.End();
 
     encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -346,7 +346,7 @@ TEST_P(OcclusionQueryTests, ResolveSparseQueries) {
     pass.BeginOcclusionQuery(5);
     pass.Draw(3);
     pass.EndOcclusionQuery();
-    pass.EndPass();
+    pass.End();
 
     encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -403,7 +403,7 @@ TEST_P(OcclusionQueryTests, ResolveToBufferWithOffset) {
     pass.BeginOcclusionQuery(0);
     pass.Draw(3);
     pass.EndOcclusionQuery();
-    pass.EndPass();
+    pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
@@ -601,7 +601,7 @@ TEST_P(TimestampQueryTests, TimestampOnRenderPass) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.WriteTimestamp(querySet, 0);
         pass.WriteTimestamp(querySet, 1);
-        pass.EndPass();
+        pass.End();
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -623,7 +623,7 @@ TEST_P(TimestampQueryTests, TimestampOnRenderPass) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.WriteTimestamp(querySet, 0);
         pass.WriteTimestamp(querySet, 1);
-        pass.EndPass();
+        pass.End();
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -645,7 +645,7 @@ TEST_P(TimestampQueryTests, TimestampOnComputePass) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.WriteTimestamp(querySet, 0);
         pass.WriteTimestamp(querySet, 1);
-        pass.EndPass();
+        pass.End();
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -665,7 +665,7 @@ TEST_P(TimestampQueryTests, TimestampOnComputePass) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.WriteTimestamp(querySet, 0);
         pass.WriteTimestamp(querySet, 1);
-        pass.EndPass();
+        pass.End();
 
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -685,7 +685,7 @@ TEST_P(TimestampQueryTests, TimestampOnComputePass) {
         pass.WriteTimestamp(querySet, 1);
         pass.WriteTimestamp(querySet, 0);
         pass.WriteTimestamp(querySet, 1);
-        pass.EndPass();
+        pass.End();
 
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();

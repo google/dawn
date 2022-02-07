@@ -135,7 +135,7 @@ class MultisampledRenderingTest : public DawnTest {
         renderPassEncoder.SetPipeline(pipeline);
         renderPassEncoder.SetBindGroup(0, bindGroup);
         renderPassEncoder.Draw(3);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
     }
 
     void EncodeRenderPassForTest(wgpu::CommandEncoder commandEncoder,
@@ -407,7 +407,7 @@ TEST_P(MultisampledRenderingTest, ResolveInAnotherRenderPass) {
             kTestDepth);
 
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
@@ -484,7 +484,7 @@ TEST_P(MultisampledRenderingTest, ResolveOneMultisampledTextureTwice) {
             kTestDepth);
 
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();

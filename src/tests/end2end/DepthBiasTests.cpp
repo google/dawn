@@ -116,7 +116,7 @@ class DepthBiasTests : public DawnTest {
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPassDesc);
         pass.SetPipeline(pipeline);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);

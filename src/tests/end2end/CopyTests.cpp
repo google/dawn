@@ -1043,7 +1043,7 @@ TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
     renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
     renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
     wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPass);
-    renderPassEncoder.EndPass();
+    renderPassEncoder.End();
 
     constexpr uint32_t kBufferCopyOffset = kTextureBytesPerRowAlignment;
     const uint32_t kBufferSize =

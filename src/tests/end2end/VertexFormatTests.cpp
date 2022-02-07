@@ -400,7 +400,7 @@ class VertexFormatTest : public DawnTest {
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

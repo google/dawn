@@ -108,7 +108,7 @@ TEST_P(RenderBundleTest, Basic) {
 
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.ExecuteBundles(1, &renderBundle);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -149,7 +149,7 @@ TEST_P(RenderBundleTest, MultipleBundles) {
 
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.ExecuteBundles(2, renderBundles);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -184,7 +184,7 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
     pass.Draw(3, 1, 3);
 
     pass.ExecuteBundles(1, &renderBundle);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);

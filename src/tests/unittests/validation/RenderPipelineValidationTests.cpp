@@ -523,7 +523,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(nonMultisampledPipeline);
-        renderPass.EndPass();
+        renderPass.End();
 
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -539,7 +539,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(nonMultisampledPipelineWithDepthStencilOnly);
-        renderPass.EndPass();
+        renderPass.End();
 
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -556,7 +556,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(multisampledPipeline);
-        renderPass.EndPass();
+        renderPass.End();
 
         encoder.Finish();
     }
@@ -572,7 +572,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(multisampledPipelineWithDepthStencilOnly);
-        renderPass.EndPass();
+        renderPass.End();
 
         encoder.Finish();
     }
@@ -590,7 +590,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         wgpu::RenderPassEncoder renderPass =
             encoder.BeginRenderPass(&nonMultisampledRenderPassDescriptor);
         renderPass.SetPipeline(multisampledPipeline);
-        renderPass.EndPass();
+        renderPass.End();
 
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -606,7 +606,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(multisampledPipelineWithDepthStencilOnly);
-        renderPass.EndPass();
+        renderPass.End();
 
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -652,7 +652,7 @@ TEST_F(RenderPipelineValidationTest, VertexOnlyPipelineRequireDepthStencilAttach
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(vertexOnlyPipeline);
-        renderPass.EndPass();
+        renderPass.End();
 
         encoder.Finish();
     }
@@ -664,7 +664,7 @@ TEST_F(RenderPipelineValidationTest, VertexOnlyPipelineRequireDepthStencilAttach
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(vertexOnlyPipeline);
-        renderPass.EndPass();
+        renderPass.End();
 
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -677,7 +677,7 @@ TEST_F(RenderPipelineValidationTest, VertexOnlyPipelineRequireDepthStencilAttach
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(vertexOnlyPipeline);
-        renderPass.EndPass();
+        renderPass.End();
 
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -690,7 +690,7 @@ TEST_F(RenderPipelineValidationTest, VertexOnlyPipelineRequireDepthStencilAttach
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(vertexOnlyPipeline);
-        renderPass.EndPass();
+        renderPass.End();
 
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }

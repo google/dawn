@@ -186,7 +186,7 @@ class TextureViewSamplingTest : public DawnTest {
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -518,7 +518,7 @@ class TextureViewRenderingTest : public DawnTest {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);
             pass.SetPipeline(oneColorPipeline);
             pass.Draw(6);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -773,7 +773,7 @@ TEST_P(TextureView1DTest, Sampling) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bg);
     pass.Draw(3);
-    pass.EndPass();
+    pass.End();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);

@@ -229,7 +229,7 @@ namespace {
                                                   vertexBufferParam.offset, vertexBufferParam.size);
             }
             renderPassEncoder.Draw(vertexCount, instanceCount, firstVertex, firstInstance);
-            renderPassEncoder.EndPass();
+            renderPassEncoder.End();
 
             if (isSuccess) {
                 encoder.Finish();
@@ -261,7 +261,7 @@ namespace {
             }
             renderPassEncoder.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex,
                                           firstInstance);
-            renderPassEncoder.EndPass();
+            renderPassEncoder.End();
 
             if (isSuccess) {
                 encoder.Finish();
@@ -679,7 +679,7 @@ namespace {
                 renderPassEncoder.SetVertexBuffer(0, vertexBuffer3);
                 // It should be ok to draw 12 index
                 renderPassEncoder.DrawIndexed(12, 1, 0, 0, 0);
-                renderPassEncoder.EndPass();
+                renderPassEncoder.End();
 
                 // Expect success
                 encoder.Finish();
@@ -698,7 +698,7 @@ namespace {
                 renderPassEncoder.SetVertexBuffer(0, vertexBuffer3);
                 // It should be index buffer OOB to draw 13 index
                 renderPassEncoder.DrawIndexed(13, 1, 0, 0, 0);
-                renderPassEncoder.EndPass();
+                renderPassEncoder.End();
 
                 // Expect failure
                 ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -717,7 +717,7 @@ namespace {
                 renderPassEncoder.SetVertexBuffer(0, vertexBuffer3);
                 // It should be ok to draw 11 index
                 renderPassEncoder.DrawIndexed(11, 1, 0, 0, 0);
-                renderPassEncoder.EndPass();
+                renderPassEncoder.End();
 
                 // Expect success
                 encoder.Finish();
@@ -736,7 +736,7 @@ namespace {
                 renderPassEncoder.SetVertexBuffer(0, vertexBuffer3);
                 // It should be index buffer OOB to draw 12 index
                 renderPassEncoder.DrawIndexed(12, 1, 0, 0, 0);
-                renderPassEncoder.EndPass();
+                renderPassEncoder.End();
 
                 // Expect failure
                 ASSERT_DEVICE_ERROR(encoder.Finish());

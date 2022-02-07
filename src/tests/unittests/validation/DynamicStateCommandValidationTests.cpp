@@ -32,7 +32,7 @@ class SetViewportTest : public ValidationTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
         pass.SetViewport(x, y, width, height, minDepth, maxDepth);
-        pass.EndPass();
+        pass.End();
 
         if (success) {
             encoder.Finish();
@@ -141,7 +141,7 @@ class SetScissorTest : public ValidationTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
         pass.SetScissorRect(x, y, width, height);
-        pass.EndPass();
+        pass.End();
 
         if (success) {
             encoder.Finish();
@@ -210,7 +210,7 @@ TEST_F(SetBlendConstantTest, Success) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         constexpr wgpu::Color kTransparentBlack{0.0f, 0.0f, 0.0f, 0.0f};
         pass.SetBlendConstant(&kTransparentBlack);
-        pass.EndPass();
+        pass.End();
     }
     encoder.Finish();
 }
@@ -224,7 +224,7 @@ TEST_F(SetBlendConstantTest, AnyValueAllowed) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         constexpr wgpu::Color kAnyColorValue{-1.0f, 42.0f, -0.0f, 0.0f};
         pass.SetBlendConstant(&kAnyColorValue);
-        pass.EndPass();
+        pass.End();
     }
     encoder.Finish();
 }
@@ -239,7 +239,7 @@ TEST_F(SetStencilReferenceTest, Success) {
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetStencilReference(0);
-        pass.EndPass();
+        pass.End();
     }
     encoder.Finish();
 }
@@ -252,7 +252,7 @@ TEST_F(SetStencilReferenceTest, AllBitsAllowed) {
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetStencilReference(0xFFFFFFFF);
-        pass.EndPass();
+        pass.End();
     }
     encoder.Finish();
 }

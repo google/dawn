@@ -188,7 +188,7 @@ TEST_P(DepthStencilLoadOpTests, ClearMip0) {
                           GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.BeginRenderPass(&renderPassDescriptors[0]).EndPass();
+    encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 
@@ -206,7 +206,7 @@ TEST_P(DepthStencilLoadOpTests, ClearMip1) {
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::CopyStencil);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.BeginRenderPass(&renderPassDescriptors[1]).EndPass();
+    encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 
@@ -224,8 +224,8 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
                           GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.BeginRenderPass(&renderPassDescriptors[0]).EndPass();
-    encoder.BeginRenderPass(&renderPassDescriptors[1]).EndPass();
+    encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
+    encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 
@@ -244,8 +244,8 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip1Then0) {
                           GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.BeginRenderPass(&renderPassDescriptors[1]).EndPass();
-    encoder.BeginRenderPass(&renderPassDescriptors[0]).EndPass();
+    encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
+    encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 

@@ -86,7 +86,7 @@ TEST_P(IndexFormatTest, Uint32) {
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(3);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -113,7 +113,7 @@ TEST_P(IndexFormatTest, Uint16) {
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
         pass.DrawIndexed(3);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -145,7 +145,7 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.SetPipeline(pipeline32);
         pass.DrawIndexed(3);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -173,7 +173,7 @@ TEST_P(IndexFormatTest, SetIndexBufferBeforeSetPipeline) {
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.DrawIndexed(3);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -203,7 +203,7 @@ TEST_P(IndexFormatTest, SetIndexBufferDifferentFormats) {
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.DrawIndexed(3);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -218,7 +218,7 @@ TEST_P(IndexFormatTest, SetIndexBufferDifferentFormats) {
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.DrawIndexed(3);
-        pass.EndPass();
+        pass.End();
     }
 
     commands = encoder.Finish();
@@ -280,7 +280,7 @@ TEST_P(TriangleStripPrimitiveRestartTests, Uint32PrimitiveRestart) {
         pass.SetVertexBuffer(0, mVertexBuffer);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(7);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -315,7 +315,7 @@ TEST_P(TriangleStripPrimitiveRestartTests, Uint32WithoutPrimitiveRestart) {
         pass.SetVertexBuffer(0, mVertexBuffer);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(7);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -351,7 +351,7 @@ TEST_P(TriangleStripPrimitiveRestartTests, Uint16PrimitiveRestart) {
         pass.SetVertexBuffer(0, mVertexBuffer);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
         pass.DrawIndexed(7);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -405,7 +405,7 @@ TEST_P(LineStripPrimitiveRestartTests, Uint32PrimitiveRestart) {
         pass.SetVertexBuffer(0, mVertexBuffer);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(5);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -434,7 +434,7 @@ TEST_P(LineStripPrimitiveRestartTests, Uint32WithoutPrimitiveRestart) {
         pass.SetVertexBuffer(0, mVertexBuffer);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(5);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -461,7 +461,7 @@ TEST_P(LineStripPrimitiveRestartTests, Uint16PrimitiveRestart) {
         pass.SetVertexBuffer(0, mVertexBuffer);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
         pass.DrawIndexed(5);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

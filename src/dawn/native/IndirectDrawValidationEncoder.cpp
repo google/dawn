@@ -376,7 +376,7 @@ namespace dawn::native {
                 passEncoder->APIDispatch(numDrawsRoundedUp);
             }
 
-            passEncoder->APIEndPass();
+            passEncoder->APIEnd();
         }
 
         return {};

@@ -80,7 +80,7 @@ class TextureSubresourceTest : public DawnTest {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
         pass.SetPipeline(rp);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
     }
@@ -130,7 +130,7 @@ class TextureSubresourceTest : public DawnTest {
         pass.SetPipeline(rp);
         pass.SetBindGroup(0, bindGroup);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
     }

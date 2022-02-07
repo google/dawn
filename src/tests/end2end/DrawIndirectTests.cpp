@@ -76,7 +76,7 @@ class DrawIndirectTest : public DawnTest {
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.DrawIndirect(indirectBuffer, indirectOffset);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

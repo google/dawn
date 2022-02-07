@@ -330,7 +330,7 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
 
         wgpu::CommandEncoder encoder = wgpuDevice.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         wgpu::Queue queue = wgpuDevice.GetQueue();

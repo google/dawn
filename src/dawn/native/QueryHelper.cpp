@@ -211,7 +211,7 @@ namespace dawn::native {
         pass->APISetBindGroup(0, bindGroup.Get());
         pass->APIDispatch(
             static_cast<uint32_t>((timestamps->GetSize() / sizeof(uint64_t) + 7) / 8));
-        pass->APIEndPass();
+        pass->APIEnd();
 
         return {};
     }

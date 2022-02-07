@@ -244,7 +244,7 @@ class TextureFormatTest : public DawnTest {
         renderPass.SetPipeline(pipeline);
         renderPass.SetBindGroup(0, bindGroup);
         renderPass.Draw(3);
-        renderPass.EndPass();
+        renderPass.End();
 
         {
             wgpu::ImageCopyBuffer bufferView = utils::CreateImageCopyBuffer(readbackBuffer, 0, 256);

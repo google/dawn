@@ -251,7 +251,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetBindGroup(1, unusedBG);
-            pass.EndPass();
+            pass.End();
             wgpu::CommandBuffer commands = encoder.Finish();
 
             if (destroy) {
@@ -277,7 +277,7 @@ namespace {
             pass.SetBindGroup(1, usedBG);
             pass.SetPipeline(pipeline);
             pass.Dispatch(1);
-            pass.EndPass();
+            pass.End();
             wgpu::CommandBuffer commands = encoder.Finish();
 
             if (destroy) {
@@ -321,7 +321,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetBindGroup(2, unusedBG);
-            pass.EndPass();
+            pass.End();
             wgpu::CommandBuffer commands = encoder.Finish();
 
             if (destroy) {
@@ -350,7 +350,7 @@ namespace {
             pass.SetBindGroup(2, usedBG);
             pass.SetPipeline(pipeline);
             pass.Dispatch(1);
-            pass.EndPass();
+            pass.End();
             wgpu::CommandBuffer commands = encoder.Finish();
 
             if (destroy) {

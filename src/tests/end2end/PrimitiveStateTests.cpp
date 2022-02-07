@@ -129,7 +129,7 @@ class DepthClampingTest : public DawnTest {
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(1);
         }
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);

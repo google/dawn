@@ -75,7 +75,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(kInstances);
-        pass.EndPass();
+        pass.End();
 
         commands = encoder.Finish();
     }

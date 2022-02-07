@@ -139,7 +139,7 @@ class SamplerTest : public DawnTest {
             pass.SetPipeline(mPipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

@@ -63,7 +63,7 @@ namespace {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
                 encoder.Finish();
             }
 
@@ -76,7 +76,7 @@ namespace {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
                 ASSERT_DEVICE_ERROR(encoder.Finish());
             }
 
@@ -93,11 +93,11 @@ namespace {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
                 wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPassDesc);
                 pass1.SetBindGroup(0, bindGroup1);
-                pass1.EndPass();
+                pass1.End();
 
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
                 pass.SetBindGroup(0, bindGroup);
-                pass.EndPass();
+                pass.End();
 
                 encoder.Finish();
             }

@@ -188,7 +188,7 @@ TEST_P(VideoViewsTests, NV12SampleYtoR) {
         pass.SetBindGroup(0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
                                                   {{0, sampler}, {1, textureView}}));
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -247,7 +247,7 @@ TEST_P(VideoViewsTests, NV12SampleUVtoRG) {
         pass.SetBindGroup(0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
                                                   {{0, sampler}, {1, textureView}}));
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -317,7 +317,7 @@ TEST_P(VideoViewsTests, NV12SampleYUVtoRGB) {
             0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
                                     {{0, sampler}, {1, lumaTextureView}, {2, chromaTextureView}}));
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

@@ -53,7 +53,7 @@ class CreatePipelineAsyncTest : public DawnTest {
             pass.SetPipeline(currentTask->computePipeline);
 
             pass.Dispatch(1);
-            pass.EndPass();
+            pass.End();
 
             commands = encoder.Finish();
         }
@@ -96,7 +96,7 @@ class CreatePipelineAsyncTest : public DawnTest {
 
             renderPassEncoder.SetPipeline(currentTask->renderPipeline);
             renderPassEncoder.Draw(1);
-            renderPassEncoder.EndPass();
+            renderPassEncoder.End();
             commands = encoder.Finish();
         }
 
@@ -308,7 +308,7 @@ TEST_P(CreatePipelineAsyncTest, ReleaseEntryPointsAfterCreateRenderPipelineAsync
 
         renderPassEncoder.SetPipeline(task.renderPipeline);
         renderPassEncoder.Draw(1);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
         commands = encoder.Finish();
     }
 
@@ -700,7 +700,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithVertexBufferLayouts
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
         pass.Draw(1);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -773,7 +773,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithDepthStencilState) 
         pass.SetStencilReference(1);
 
         pass.Draw(1);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -840,7 +840,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineWithMultisampleState) {
         pass.SetPipeline(task.renderPipeline);
 
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -942,7 +942,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
         pass.SetPipeline(task.renderPipeline);
 
         pass.Draw(1);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

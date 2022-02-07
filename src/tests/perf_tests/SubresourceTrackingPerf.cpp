@@ -129,7 +129,7 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
             pass.SetPipeline(mPipeline);
             pass.SetBindGroup(0, bindgroup);
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();

@@ -85,7 +85,7 @@ class DrawIndirectValidationTest : public ValidationTest {
         } else {
             pass.DrawIndirect(indirectBuffer, indirectOffset);
         }
-        pass.EndPass();
+        pass.End();
 
         ValidateExpectation(encoder, expectation);
     }

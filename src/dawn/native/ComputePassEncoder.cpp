@@ -142,7 +142,7 @@ namespace dawn::native {
         return ObjectType::ComputePassEncoder;
     }
 
-    void ComputePassEncoder::APIEndPass() {
+    void ComputePassEncoder::APIEnd() {
         if (mEncodingContext->TryEncode(
                 this,
                 [&](CommandAllocator* allocator) -> MaybeError {
@@ -154,9 +154,14 @@ namespace dawn::native {
 
                     return {};
                 },
-                "encoding %s.EndPass().", this)) {
+                "encoding %s.End().", this)) {
             mEncodingContext->ExitComputePass(this, mUsageTracker.AcquireResourceUsage());
         }
+    }
+
+    void ComputePassEncoder::APIEndPass() {
+        GetDevice()->EmitDeprecationWarning("endPass() has been deprecated. Use end() instead.");
+        APIEnd();
     }
 
     void ComputePassEncoder::APIDispatch(uint32_t workgroupCountX,

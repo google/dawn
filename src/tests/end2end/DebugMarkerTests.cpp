@@ -31,14 +31,14 @@ TEST_P(DebugMarkerTests, NoFailureWithoutDebugToolAttached) {
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
     {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

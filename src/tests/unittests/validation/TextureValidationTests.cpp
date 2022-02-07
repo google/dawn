@@ -556,7 +556,7 @@ namespace {
         wgpu::CommandEncoder encoder_post_destroy = device.CreateCommandEncoder();
         {
             wgpu::RenderPassEncoder pass = encoder_post_destroy.BeginRenderPass(&renderPass);
-            pass.EndPass();
+            pass.End();
         }
         wgpu::CommandBuffer commands = encoder_post_destroy.Finish();
 
@@ -576,7 +576,7 @@ namespace {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-            pass.EndPass();
+            pass.End();
         }
         wgpu::CommandBuffer commands = encoder.Finish();
 

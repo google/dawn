@@ -137,7 +137,7 @@ TEST_F(RenderBundleValidationTest, Empty) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
     pass.ExecuteBundles(1, &renderBundle);
-    pass.EndPass();
+    pass.End();
     commandEncoder.Finish();
 }
 
@@ -159,7 +159,7 @@ TEST_F(RenderBundleValidationTest, EmptyErrorEncoderProducesErrorBundle) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
     pass.ExecuteBundles(1, &renderBundle);
-    pass.EndPass();
+    pass.End();
     ASSERT_DEVICE_ERROR(commandEncoder.Finish());
 }
 
@@ -170,7 +170,7 @@ TEST_F(RenderBundleValidationTest, ZeroBundles) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
     pass.ExecuteBundles(0, nullptr);
-    pass.EndPass();
+    pass.End();
     commandEncoder.Finish();
 }
 
@@ -193,7 +193,7 @@ TEST_F(RenderBundleValidationTest, SimpleSuccess) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
     pass.ExecuteBundles(1, &renderBundle);
-    pass.EndPass();
+    pass.End();
     commandEncoder.Finish();
 }
 
@@ -279,7 +279,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 
@@ -298,7 +298,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 
@@ -317,7 +317,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 
@@ -336,7 +336,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 }
@@ -363,7 +363,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         pass.SetBindGroup(1, bg1);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -382,7 +382,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -401,7 +401,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -420,7 +420,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -448,7 +448,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetBindGroup(1, bg1);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -464,7 +464,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -480,7 +480,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -496,7 +496,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
         pass.Draw(3);
-        pass.EndPass();
+        pass.End();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -513,7 +513,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.ExecuteBundles(0, nullptr);
         pass.Draw(3);
 
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 }
@@ -547,7 +547,7 @@ TEST_F(RenderBundleValidationTest, MultipleBundles) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
     pass.ExecuteBundles(2, renderBundles);
-    pass.EndPass();
+    pass.End();
     commandEncoder.Finish();
 }
 
@@ -572,7 +572,7 @@ TEST_F(RenderBundleValidationTest, ExecuteMultipleTimes) {
     pass.ExecuteBundles(1, &renderBundle);
     pass.ExecuteBundles(1, &renderBundle);
     pass.ExecuteBundles(1, &renderBundle);
-    pass.EndPass();
+    pass.End();
     commandEncoder.Finish();
 }
 
@@ -725,7 +725,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle0);
         pass.ExecuteBundles(1, &renderBundle1);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 
@@ -743,7 +743,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         pass.Draw(3);
 
         pass.ExecuteBundles(1, &renderBundle1);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 
@@ -762,7 +762,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         pass.SetVertexBuffer(0, vertexStorageBuffer);
         pass.Draw(3);
 
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 }
@@ -948,7 +948,7 @@ TEST_F(RenderBundleValidationTest, RenderPassColorFormatMismatch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         commandEncoder.Finish();
     }
 
@@ -963,7 +963,7 @@ TEST_F(RenderBundleValidationTest, RenderPassColorFormatMismatch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 
@@ -977,7 +977,7 @@ TEST_F(RenderBundleValidationTest, RenderPassColorFormatMismatch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 }
@@ -1014,7 +1014,7 @@ TEST_F(RenderBundleValidationTest, RenderPassDepthStencilFormatMismatch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         commandEncoder.Finish();
     }
 
@@ -1025,7 +1025,7 @@ TEST_F(RenderBundleValidationTest, RenderPassDepthStencilFormatMismatch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 
@@ -1036,7 +1036,7 @@ TEST_F(RenderBundleValidationTest, RenderPassDepthStencilFormatMismatch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 }
@@ -1068,7 +1068,7 @@ TEST_F(RenderBundleValidationTest, RenderPassSampleCountMismatch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         commandEncoder.Finish();
     }
 
@@ -1079,7 +1079,7 @@ TEST_F(RenderBundleValidationTest, RenderPassSampleCountMismatch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 }

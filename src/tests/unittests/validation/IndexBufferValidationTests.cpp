@@ -54,7 +54,7 @@ TEST_F(IndexBufferValidationTest, UndefinedIndexFormat) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
     pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Undefined);
-    pass.EndPass();
+    pass.End();
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
@@ -69,7 +69,7 @@ TEST_F(IndexBufferValidationTest, InvalidIndexFormat) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
     pass.SetIndexBuffer(buffer, static_cast<wgpu::IndexFormat>(404));
-    pass.EndPass();
+    pass.End();
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
@@ -93,7 +93,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
         pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 4, wgpu::kWholeSize);
         // Implicit size of zero
         pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 256, wgpu::kWholeSize);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -102,7 +102,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 4, 256);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -111,7 +111,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 256 + 4, 0);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -238,7 +238,7 @@ TEST_F(IndexBufferValidationTest, InvalidUsage) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
     // Error case: using the copy buffer is an error.
@@ -246,7 +246,7 @@ TEST_F(IndexBufferValidationTest, InvalidUsage) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetIndexBuffer(copyBuffer, wgpu::IndexFormat::Uint32);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -281,7 +281,7 @@ TEST_F(IndexBufferValidationTest, OffsetAlignment) {
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32, 4);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16, 0);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16, 2);
-        pass.EndPass();
+        pass.End();
         encoder.Finish();
     }
 
@@ -290,7 +290,7 @@ TEST_F(IndexBufferValidationTest, OffsetAlignment) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32, 2);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
     // Error case: index buffer offset isn't a multiple of 2 for IndexFormat::Uint16
@@ -298,7 +298,7 @@ TEST_F(IndexBufferValidationTest, OffsetAlignment) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16, 1);
-        pass.EndPass();
+        pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }

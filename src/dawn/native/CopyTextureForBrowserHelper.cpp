@@ -586,7 +586,7 @@ namespace dawn::native {
         passEncoder->APISetViewport(destination->origin.x, destination->origin.y, copySize->width,
                                     copySize->height, 0.0, 1.0);
         passEncoder->APIDraw(3);
-        passEncoder->APIEndPass();
+        passEncoder->APIEnd();
 
         // Finsh encoding.
         // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.

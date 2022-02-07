@@ -57,7 +57,7 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -85,7 +85,7 @@ TEST_P(ScissorTest, PartialRect) {
         pass.SetPipeline(pipeline);
         pass.SetScissorRect(kX, kY, kW, kH);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -110,7 +110,7 @@ TEST_P(ScissorTest, EmptyRect) {
         pass.SetPipeline(pipeline);
         pass.SetScissorRect(1, 1, 0, 0);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -132,14 +132,14 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetScissorRect(1, 1, 1, 1);
-        pass.EndPass();
+        pass.End();
     }
     // RenderPass 2 draw a full quad, it shouldn't be scissored
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

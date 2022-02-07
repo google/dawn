@@ -55,7 +55,7 @@ class ComputeIndirectValidationTest : public ValidationTest {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.DispatchIndirect(indirectBuffer, indirectOffset);
-        pass.EndPass();
+        pass.End();
 
         ValidateExpectation(encoder, expectation);
     }

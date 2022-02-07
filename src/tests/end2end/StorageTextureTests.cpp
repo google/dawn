@@ -480,7 +480,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         renderPassEncoder.SetBindGroup(0, bindGroup);
         renderPassEncoder.SetPipeline(pipeline);
         renderPassEncoder.Draw(1);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -514,7 +514,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         computeEncoder.SetBindGroup(0, bindGroup);
         computeEncoder.SetPipeline(pipeline);
         computeEncoder.Dispatch(1);
-        computeEncoder.EndPass();
+        computeEncoder.End();
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -543,7 +543,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         renderPassEncoder.SetBindGroup(0, bindGroup);
         renderPassEncoder.SetPipeline(pipeline);
         renderPassEncoder.Draw(1);
-        renderPassEncoder.EndPass();
+        renderPassEncoder.End();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
     }
@@ -565,7 +565,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         computePassEncoder.SetBindGroup(0, bindGroup);
         computePassEncoder.SetPipeline(pipeline);
         computePassEncoder.Dispatch(1);
-        computePassEncoder.EndPass();
+        computePassEncoder.End();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
     }
@@ -589,7 +589,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         computePassEncoder.SetBindGroup(0, bindGroup);
         computePassEncoder.SetPipeline(pipeline);
         computePassEncoder.Dispatch(1);
-        computePassEncoder.EndPass();
+        computePassEncoder.End();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
     }
@@ -836,7 +836,7 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     pass.SetBindGroup(0, bindGroupB);
     pass.Dispatch(1);
 
-    pass.EndPass();
+    pass.End();
 
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = sizeof(uint32_t);

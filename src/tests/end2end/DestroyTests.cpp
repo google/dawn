@@ -58,7 +58,7 @@ class DestroyTest : public DawnTest {
              -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.BeginRenderPass(&renderPass.renderPassInfo).EndPass();
+        encoder.BeginRenderPass(&renderPass.renderPassInfo).End();
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
     }
@@ -74,7 +74,7 @@ class DestroyTest : public DawnTest {
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.Draw(3);
-            pass.EndPass();
+            pass.End();
         }
         wgpu::CommandBuffer commands = encoder.Finish();
         return commands;

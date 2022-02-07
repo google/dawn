@@ -38,7 +38,8 @@ namespace dawn::native {
 
         ObjectType GetType() const override;
 
-        void APIEndPass();
+        void APIEnd();
+        void APIEndPass();  // TODO(dawn:1286): Remove after deprecation period.
 
         void APIDispatch(uint32_t workgroupCountX,
                          uint32_t workgroupCountY = 1,

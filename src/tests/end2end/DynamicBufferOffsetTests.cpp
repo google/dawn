@@ -220,7 +220,7 @@ TEST_P(DynamicBufferOffsetTests, BasicRenderPipeline) {
     renderPassEncoder.SetPipeline(pipeline);
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     renderPassEncoder.Draw(3);
-    renderPassEncoder.EndPass();
+    renderPassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -242,7 +242,7 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsRenderPipeline) {
     renderPassEncoder.SetPipeline(pipeline);
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     renderPassEncoder.Draw(3);
-    renderPassEncoder.EndPass();
+    renderPassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -263,7 +263,7 @@ TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
     computePassEncoder.SetPipeline(pipeline);
     computePassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     computePassEncoder.Dispatch(1);
-    computePassEncoder.EndPass();
+    computePassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -283,7 +283,7 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsComputePipeline) {
     computePassEncoder.SetPipeline(pipeline);
     computePassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     computePassEncoder.Dispatch(1);
-    computePassEncoder.EndPass();
+    computePassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -311,7 +311,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
     renderPassEncoder.SetPipeline(testPipeline);
     renderPassEncoder.SetBindGroup(1, mBindGroups[1]);
     renderPassEncoder.Draw(3);
-    renderPassEncoder.EndPass();
+    renderPassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -341,7 +341,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsComputePipeline) {
     computePassEncoder.SetPipeline(testPipeline);
     computePassEncoder.SetBindGroup(1, mBindGroups[1]);
     computePassEncoder.Dispatch(1);
-    computePassEncoder.EndPass();
+    computePassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -369,7 +369,7 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesRenderPipeline
     renderPassEncoder.Draw(3);
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], testOffsets.size(), testOffsets.data());
     renderPassEncoder.Draw(3);
-    renderPassEncoder.EndPass();
+    renderPassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -393,7 +393,7 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesComputePipelin
     computePassEncoder.Dispatch(1);
     computePassEncoder.SetBindGroup(0, mBindGroups[0], testOffsets.size(), testOffsets.data());
     computePassEncoder.Dispatch(1);
-    computePassEncoder.EndPass();
+    computePassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
@@ -563,7 +563,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
     computePassEncoder.SetPipeline(pipeline);
     computePassEncoder.SetBindGroup(0, bindGroup, dynamicOffsets.size(), dynamicOffsets.data());
     computePassEncoder.Dispatch(1);
-    computePassEncoder.EndPass();
+    computePassEncoder.End();
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 

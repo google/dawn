@@ -394,7 +394,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
             pass.Draw(3);
         }
 
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

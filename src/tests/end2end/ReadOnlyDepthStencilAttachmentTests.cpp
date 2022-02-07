@@ -156,7 +156,7 @@ class ReadOnlyDepthStencilAttachmentTests
             passDescriptorInit.cDepthStencilAttachmentInfo.clearStencil = values->stencilInitValue;
         }
         wgpu::RenderPassEncoder passInit = commandEncoder.BeginRenderPass(&passDescriptorInit);
-        passInit.EndPass();
+        passInit.End();
 
         // Note that we can only select one single aspect for texture view used in bind group.
         wgpu::TextureViewDescriptor viewDesc = {};
@@ -198,7 +198,7 @@ class ReadOnlyDepthStencilAttachmentTests
             pass.SetStencilReference(values->stencilRefValue);
         }
         pass.Draw(6);
-        pass.EndPass();
+        pass.End();
 
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);

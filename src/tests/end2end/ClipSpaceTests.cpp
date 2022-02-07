@@ -84,7 +84,7 @@ TEST_P(ClipSpaceTest, ClipSpace) {
     wgpu::RenderPassEncoder renderPass = commandEncoder.BeginRenderPass(&renderPassDescriptor);
     renderPass.SetPipeline(CreatePipelineForTest());
     renderPass.Draw(6);
-    renderPass.EndPass();
+    renderPass.End();
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
     queue.Submit(1, &commandBuffer);
 
