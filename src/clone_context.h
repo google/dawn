@@ -222,6 +222,29 @@ class CloneContext {
     } else {
       for (auto& el : from) {
         to.emplace_back(Clone(el));
+
+        // Clone(el) may have inserted after
+        list_transform_it = list_transforms_.find(&from);
+        if (list_transform_it != list_transforms_.end()) {
+          const auto& transforms = list_transform_it->second;
+
+          auto insert_after_it = transforms.insert_after_.find(el);
+          if (insert_after_it != transforms.insert_after_.end()) {
+            for (auto insert : insert_after_it->second) {
+              to.emplace_back(CheckedCast<T>(insert));
+            }
+          }
+        }
+      }
+
+      // Clone(el)s may have inserted back
+      list_transform_it = list_transforms_.find(&from);
+      if (list_transform_it != list_transforms_.end()) {
+        const auto& transforms = list_transform_it->second;
+
+        for (auto* o : transforms.insert_back_) {
+          to.emplace_back(CheckedCast<T>(o));
+        }
       }
     }
   }
