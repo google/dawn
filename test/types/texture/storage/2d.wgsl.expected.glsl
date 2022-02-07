@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 layout(rgba8) uniform highp writeonly image2D t_rgba8unorm;
 layout(rgba8_snorm) uniform highp writeonly image2D t_rgba8snorm;
@@ -28,8 +27,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:14: 'image load-store format' : not supported with this profile: es
-ERROR: 0:14: '' : compilation terminated 
+ERROR: 0:13: 'image load-store format' : not supported with this profile: es
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

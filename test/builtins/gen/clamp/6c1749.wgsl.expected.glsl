@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void clamp_6c1749() {
   ivec2 res = clamp(ivec2(0, 0), ivec2(0, 0), ivec2(0, 0));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void clamp_6c1749() {
   ivec2 res = clamp(ivec2(0, 0), ivec2(0, 0), ivec2(0, 0));

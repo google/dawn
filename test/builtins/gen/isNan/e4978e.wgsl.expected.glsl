@@ -3,7 +3,6 @@ builtins/gen/isNan/e4978e.wgsl:28:19 warning: use of deprecated builtin
                   ^^^^^
 
 #version 310 es
-precision mediump float;
 
 void isNan_e4978e() {
   bool res = isnan(1.0f);
@@ -37,7 +36,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void isNan_e4978e() {
   bool res = isnan(1.0f);

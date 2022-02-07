@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 uniform highp isampler1D arg_0_1;
 void textureDimensions_423f99() {
@@ -21,8 +20,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'isampler1D' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'isampler1D' : Reserved word. 
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -51,7 +50,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 uniform highp isampler1D arg_0_1;
 void textureDimensions_423f99() {
@@ -68,8 +66,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'isampler1D' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'isampler1D' : Reserved word. 
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

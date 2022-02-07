@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(location = 0) in vec2 a_particlePos_1;
 layout(location = 1) in vec2 a_particleVel_1;
@@ -69,7 +68,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 struct Particle {
   vec2 pos;

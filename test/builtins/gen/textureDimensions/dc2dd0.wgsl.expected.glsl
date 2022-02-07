@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 layout(rgba8ui) uniform highp writeonly uimage1D arg_0;
 void textureDimensions_dc2dd0() {
@@ -21,9 +20,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'uimage1D' : Reserved word. 
-WARNING: 0:4: 'layout' : useless application of layout qualifier 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'uimage1D' : Reserved word. 
+WARNING: 0:3: 'layout' : useless application of layout qualifier 
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -53,7 +52,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 layout(rgba8ui) uniform highp writeonly uimage1D arg_0;
 void textureDimensions_dc2dd0() {
@@ -70,9 +68,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'uimage1D' : Reserved word. 
-WARNING: 0:4: 'layout' : useless application of layout qualifier 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'uimage1D' : Reserved word. 
+WARNING: 0:3: 'layout' : useless application of layout qualifier 
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

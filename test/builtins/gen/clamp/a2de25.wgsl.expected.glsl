@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void clamp_a2de25() {
   uint res = clamp(1u, 1u, 1u);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void clamp_a2de25() {
   uint res = clamp(1u, 1u, 1u);

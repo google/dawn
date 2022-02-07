@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void min_3941e1() {
   ivec4 res = min(ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void min_3941e1() {
   ivec4 res = min(ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));

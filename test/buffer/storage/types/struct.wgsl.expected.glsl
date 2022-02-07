@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 struct Inner {
   float f;
@@ -27,8 +26,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:19: 'assign' :  cannot convert from 'layout( binding=0 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global mediump float f} inner}' to 'layout( binding=1 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global mediump float f} inner}'
-ERROR: 0:19: '' : compilation terminated 
+ERROR: 0:18: 'assign' :  cannot convert from 'layout( binding=0 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global highp float f} inner}' to 'layout( binding=1 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global highp float f} inner}'
+ERROR: 0:18: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

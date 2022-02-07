@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 #ifndef WGSL_SPEC_CONSTANT_1234
 #define WGSL_SPEC_CONSTANT_1234 1

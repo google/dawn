@@ -19,7 +19,6 @@ bug/chromium/1273230.wgsl:12:9 warning: use of deprecated builtin
         ^^^^^^^^
 
 #version 310 es
-precision mediump float;
 
 struct Uniforms {
   uint numTriangles;

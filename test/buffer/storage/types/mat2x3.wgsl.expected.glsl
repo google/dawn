@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct tint_symbol_block {
   mat2x3 inner;

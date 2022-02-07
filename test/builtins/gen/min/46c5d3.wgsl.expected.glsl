@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void min_46c5d3() {
   uint res = min(1u, 1u);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void min_46c5d3() {
   uint res = min(1u, 1u);

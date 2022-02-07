@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void abs_9c80a6() {
   ivec4 res = abs(ivec4(0, 0, 0, 0));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void abs_9c80a6() {
   ivec4 res = abs(ivec4(0, 0, 0, 0));

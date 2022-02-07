@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 vec2 tint_radians(vec2 param_0) {
   return param_0 * 0.017453292519943295474;
@@ -43,7 +42,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 vec2 tint_radians(vec2 param_0) {
   return param_0 * 0.017453292519943295474;

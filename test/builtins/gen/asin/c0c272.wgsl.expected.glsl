@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void asin_c0c272() {
   float res = asin(1.0f);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void asin_c0c272() {
   float res = asin(1.0f);

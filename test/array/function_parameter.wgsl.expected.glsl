@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 float f1(float a[4]) {
   return a[3];

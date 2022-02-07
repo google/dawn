@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void select_c41bd1() {
   bvec4 res = (false ? bvec4(false, false, false, false) : bvec4(false, false, false, false));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void select_c41bd1() {
   bvec4 res = (false ? bvec4(false, false, false, false) : bvec4(false, false, false, false));

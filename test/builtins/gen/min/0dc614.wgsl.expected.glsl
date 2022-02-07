@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void min_0dc614() {
   uvec4 res = min(uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void min_0dc614() {
   uvec4 res = min(uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u));

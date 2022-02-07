@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void func(int value, inout int pointer) {
   pointer = value;

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(location = 1) out float col1_1;
 layout(location = 2) out float col2_1;

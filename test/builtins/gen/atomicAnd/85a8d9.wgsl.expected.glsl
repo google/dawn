@@ -21,7 +21,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 struct SB_RW {
   uint arg_0;

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct u_block {
   vec4 inner;

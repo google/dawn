@@ -5,7 +5,6 @@ builtins/gen/isNormal/b00ab1.wgsl:28:25 warning: use of deprecated builtin
                         ^^^^^^^^
 
 #version 310 es
-precision mediump float;
 
 bvec2 tint_isNormal(vec2 param_0) {
   uint2 exponent = asuint(param_0) & 0x7f80000;
@@ -31,8 +30,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'uint2' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'uint2' : undeclared identifier 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -67,7 +66,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 bvec2 tint_isNormal(vec2 param_0) {
   uint2 exponent = asuint(param_0) & 0x7f80000;
@@ -90,8 +88,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'uint2' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'uint2' : undeclared identifier 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

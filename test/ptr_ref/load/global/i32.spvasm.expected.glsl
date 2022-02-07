@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 int I = 0;
 void main_1() {

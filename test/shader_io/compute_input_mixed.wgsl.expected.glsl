@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct ComputeInputs0 {
   uvec3 local_invocation_id;

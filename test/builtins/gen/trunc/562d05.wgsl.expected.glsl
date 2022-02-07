@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void trunc_562d05() {
   vec3 res = trunc(vec3(0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void trunc_562d05() {
   vec3 res = trunc(vec3(0.0f, 0.0f, 0.0f));

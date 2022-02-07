@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 layout(location = 0) in vec4 position_1;
 layout(location = 1) in vec4 color_1;
@@ -64,8 +63,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:37: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' const float' (or there is no acceptable conversion)
-ERROR: 0:37: '' : compilation terminated 
+ERROR: 0:36: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp highp float' and a right operand of type ' const float' (or there is no acceptable conversion)
+ERROR: 0:36: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

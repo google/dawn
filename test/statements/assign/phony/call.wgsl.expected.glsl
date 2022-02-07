@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 int f(int a, int b, int c) {
   return ((a * b) + c);

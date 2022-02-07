@@ -181,7 +181,7 @@ bool GeneratorImpl::Generate() {
 
   TextBuffer extensions;
 
-  if (requires_oes_sample_variables) {
+  if (requires_oes_sample_variables_) {
     extensions.Append("#extension GL_OES_sample_variables : require");
   }
 
@@ -192,8 +192,10 @@ bool GeneratorImpl::Generate() {
     helpers_insertion_point += extensions.lines.size();
   }
 
-  current_buffer_->Insert("precision mediump float;", helpers_insertion_point++,
-                          indent);
+  if (requires_default_precision_qualifier_) {
+    current_buffer_->Insert("precision mediump float;",
+                            helpers_insertion_point++, indent);
+  }
 
   if (!helpers_.lines.empty()) {
     current_buffer_->Insert("", helpers_insertion_point++, indent);
@@ -1831,7 +1833,7 @@ bool GeneratorImpl::EmitIOVariable(const sem::Variable* var) {
   if (auto* b = ast::GetAttribute<ast::BuiltinAttribute>(decl->attributes)) {
     // Use of gl_SampleID requires the GL_OES_sample_variables extension
     if (RequiresOESSampleVariables(b->builtin)) {
-      requires_oes_sample_variables = true;
+      requires_oes_sample_variables_ = true;
     }
     // Do not emit builtin (gl_) variables.
     return true;
@@ -1905,6 +1907,10 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
 
 bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   auto* func_sem = builder_.Sem().Get(func);
+
+  if (func->PipelineStage() == ast::PipelineStage::kFragment) {
+    requires_default_precision_qualifier_ = true;
+  }
 
   if (func->PipelineStage() == ast::PipelineStage::kCompute) {
     auto out = line();

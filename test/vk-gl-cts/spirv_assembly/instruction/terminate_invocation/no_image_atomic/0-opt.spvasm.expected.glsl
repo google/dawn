@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 layout(location = 0) in vec3 x_2_param_1;
 layout(location = 1) flat in int x_3_param_1;
@@ -38,8 +37,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: '' : vertex input cannot be further qualified 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: '' : vertex input cannot be further qualified 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void mix_315264() {
   vec3 res = mix(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), 1.0f);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void mix_315264() {
   vec3 res = mix(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), 1.0f);

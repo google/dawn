@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 layout(rg32ui) uniform highp writeonly uimage1D arg_0;
 void textureStore_83bcc1() {
@@ -21,8 +20,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'image load-store format' : not supported with this profile: es
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'image load-store format' : not supported with this profile: es
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -51,7 +50,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 layout(rg32ui) uniform highp writeonly uimage1D arg_0;
 void textureStore_83bcc1() {
@@ -68,8 +66,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'image load-store format' : not supported with this profile: es
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'image load-store format' : not supported with this profile: es
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

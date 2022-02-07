@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void max_320815() {
   uvec2 res = max(uvec2(0u, 0u), uvec2(0u, 0u));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void max_320815() {
   uvec2 res = max(uvec2(0u, 0u), uvec2(0u, 0u));

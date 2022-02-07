@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 uint tint_int_dot(uvec2 a, uvec2 b) {
   return a[0]*b[0] + a[1]*b[1];
@@ -41,7 +40,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 uint tint_int_dot(uvec2 a, uvec2 b) {
   return a[0]*b[0] + a[1]*b[1];

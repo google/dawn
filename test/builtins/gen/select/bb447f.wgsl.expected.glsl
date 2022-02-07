@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void select_bb447f() {
   ivec2 res = (false ? ivec2(0, 0) : ivec2(0, 0));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void select_bb447f() {
   ivec2 res = (false ? ivec2(0, 0) : ivec2(0, 0));

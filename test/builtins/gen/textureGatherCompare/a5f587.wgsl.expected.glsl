@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 uniform highp sampler2DShadow arg_0_arg_1;
 
@@ -22,9 +21,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureGatherOffset' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'textureGatherOffset' : no matching overloaded function found 
+ERROR: 0:6: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -55,7 +54,6 @@ ERROR: 3 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 uniform highp sampler2DShadow arg_0_arg_1;
 
@@ -73,9 +71,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureGatherOffset' : no matching overloaded function found 
-ERROR: 0:7: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'textureGatherOffset' : no matching overloaded function found 
+ERROR: 0:6: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct S {
   float a;

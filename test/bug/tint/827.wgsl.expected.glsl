@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 const uint width = 128u;
 layout(binding = 1, std430) buffer Result_1 {

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 vec4 tint_symbol_1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 uniform highp sampler2DMS arg_0_1;
@@ -67,7 +66,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 uniform highp sampler2DMS arg_0_1;
 void textureDimensions_f60bdb() {

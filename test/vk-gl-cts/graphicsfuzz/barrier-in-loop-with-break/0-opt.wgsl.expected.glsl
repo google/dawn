@@ -5,7 +5,6 @@ type RTArr = @stride(4) array<i32>;
               ^^^^^^
 
 #version 310 es
-precision mediump float;
 
 struct doesNotMatter {
   int global_seed;
@@ -64,8 +63,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:6: '' : array size required 
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:5: '' : array size required 
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(binding = 1, std430) buffer data_block_1 {
   int inner[];

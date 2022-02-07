@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void reflect_b61e10() {
   vec2 res = reflect(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void reflect_b61e10() {
   vec2 res = reflect(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void asin_7b6a44() {
   vec2 res = asin(vec2(0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void asin_7b6a44() {
   vec2 res = asin(vec2(0.0f, 0.0f));

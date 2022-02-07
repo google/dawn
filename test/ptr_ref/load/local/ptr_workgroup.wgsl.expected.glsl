@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 shared int i;
 void tint_symbol(uint local_invocation_index) {

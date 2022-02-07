@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 void main_1() {
   uint u1 = 10u;
@@ -22,8 +21,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:9: 'countbits' : no matching overloaded function found 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:8: 'countbits' : no matching overloaded function found 
+ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

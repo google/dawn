@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 bool bool_var1 = bool(1u);
 bool bool_var2 = bool(1);

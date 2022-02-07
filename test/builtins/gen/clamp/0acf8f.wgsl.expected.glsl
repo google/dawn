@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void clamp_0acf8f() {
   vec2 res = clamp(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void clamp_0acf8f() {
   vec2 res = clamp(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));

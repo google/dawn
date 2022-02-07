@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void f() {
   uint r = (1u % 0u);

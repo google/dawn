@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 uniform highp usampler2D arg_0_1;
 void textureLoad_6154d4() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 uniform highp usampler2D arg_0_1;
 void textureLoad_6154d4() {

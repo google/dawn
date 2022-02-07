@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void clamp_bd43ce() {
   uvec4 res = clamp(uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void clamp_bd43ce() {
   uvec4 res = clamp(uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u));

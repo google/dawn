@@ -49,7 +49,6 @@ builtins/repeated_use.wgsl:19:9 warning: use of deprecated builtin
         ^^^^^^^^
 
 #version 310 es
-precision mediump float;
 
 bvec4 tint_isNormal(vec4 param_0) {
   uint4 exponent = asuint(param_0) & 0x7f80000;
@@ -97,8 +96,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'uint4' : undeclared identifier 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

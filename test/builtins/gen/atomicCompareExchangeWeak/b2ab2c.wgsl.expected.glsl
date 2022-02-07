@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 uvec2 tint_atomicCompareExchangeWeak(inout uint param_0, uint param_1, uint param_2) {
   uvec2 result;

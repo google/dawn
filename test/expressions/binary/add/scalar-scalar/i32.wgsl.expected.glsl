@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void f() {
   int r = (1 + 2);

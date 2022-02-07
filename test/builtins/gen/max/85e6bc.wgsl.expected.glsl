@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void max_85e6bc() {
   ivec4 res = max(ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void max_85e6bc() {
   ivec4 res = max(ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));

@@ -5,7 +5,6 @@ type RTArr = @stride(4) array<u32>;
               ^^^^^^
 
 #version 310 es
-precision mediump float;
 
 struct Buf1 {
   int result;
@@ -46,8 +45,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:9: '' : array size required 
-ERROR: 0:10: '' : compilation terminated 
+ERROR: 0:8: '' : array size required 
+ERROR: 0:9: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

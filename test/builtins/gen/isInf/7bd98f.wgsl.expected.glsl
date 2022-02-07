@@ -3,7 +3,6 @@ builtins/gen/isInf/7bd98f.wgsl:28:19 warning: use of deprecated builtin
                   ^^^^^
 
 #version 310 es
-precision mediump float;
 
 void isInf_7bd98f() {
   bool res = isinf(1.0f);
@@ -37,7 +36,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void isInf_7bd98f() {
   bool res = isinf(1.0f);

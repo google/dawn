@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(r32i) uniform highp writeonly iimage3D arg_0;
 void textureStore_eb78b9() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 layout(r32i) uniform highp writeonly iimage3D arg_0;
 void textureStore_eb78b9() {

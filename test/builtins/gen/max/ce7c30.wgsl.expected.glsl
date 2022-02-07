@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void max_ce7c30() {
   int res = max(1, 1);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void max_ce7c30() {
   int res = max(1, 1);

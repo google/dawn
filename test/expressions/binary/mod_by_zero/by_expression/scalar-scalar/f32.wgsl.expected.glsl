@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 void f() {
   float a = 1.0f;
@@ -15,8 +14,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:7: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' temp mediump float' (or there is no acceptable conversion)
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp highp float' and a right operand of type ' temp highp float' (or there is no acceptable conversion)
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

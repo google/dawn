@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {

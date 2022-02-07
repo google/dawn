@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void sinh_445e33() {
   vec4 res = sinh(vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void sinh_445e33() {
   vec4 res = sinh(vec4(0.0f, 0.0f, 0.0f, 0.0f));

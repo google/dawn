@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 void reverseBits_222177() {
   ivec2 res = reversebits(ivec2(0, 0));
@@ -20,9 +19,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'reversebits' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'reversebits' : no matching overloaded function found 
+ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -51,7 +50,6 @@ ERROR: 3 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 void reverseBits_222177() {
   ivec2 res = reversebits(ivec2(0, 0));
@@ -67,9 +65,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'reversebits' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'reversebits' : no matching overloaded function found 
+ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of int'
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

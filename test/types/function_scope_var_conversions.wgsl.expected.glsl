@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void tint_symbol() {
   bool bool_var1 = bool(123u);

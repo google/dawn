@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 vec3 tint_degrees(vec3 param_0) {
   return param_0 * 57.295779513082322865;
@@ -43,7 +42,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 vec3 tint_degrees(vec3 param_0) {
   return param_0 * 57.295779513082322865;

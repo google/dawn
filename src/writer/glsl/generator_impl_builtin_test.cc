@@ -385,7 +385,6 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 float tint_degrees(float param_0) {
   return param_0 * 57.295779513082322865;
@@ -414,7 +413,6 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Vector) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 vec3 tint_degrees(vec3 param_0) {
   return param_0 * 57.295779513082322865;
@@ -443,7 +441,6 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Scalar) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 float tint_radians(float param_0) {
   return param_0 * 0.017453292519943295474;
@@ -472,7 +469,6 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Vector) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 vec3 tint_radians(vec3 param_0) {
   return param_0 * 0.017453292519943295474;
@@ -659,7 +655,6 @@ TEST_F(GlslGeneratorImplTest_Builtin, StorageBarrier) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -681,7 +676,6 @@ TEST_F(GlslGeneratorImplTest_Builtin, WorkgroupBarrier) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -699,7 +693,6 @@ TEST_F(GlslGeneratorImplTest_Builtin, DotI32) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 int tint_int_dot(ivec3 a, ivec3 b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
@@ -726,7 +719,6 @@ TEST_F(GlslGeneratorImplTest_Builtin, DotU32) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 uint tint_int_dot(uvec3 a, uvec3 b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(location = 0) in int loc0_1;
 layout(location = 1) in uint loc1_1;

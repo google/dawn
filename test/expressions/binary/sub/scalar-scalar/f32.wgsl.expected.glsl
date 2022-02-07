@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void f() {
   float r = (1.0f - 2.0f);

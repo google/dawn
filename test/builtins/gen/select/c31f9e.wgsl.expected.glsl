@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void select_c31f9e() {
   bool res = (false ? false : false);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void select_c31f9e() {
   bool res = (false ? false : false);

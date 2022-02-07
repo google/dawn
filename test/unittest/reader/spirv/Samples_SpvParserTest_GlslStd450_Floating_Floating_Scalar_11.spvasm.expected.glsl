@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 void main_1() {
   uint u1 = 10u;
@@ -40,8 +39,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:27: 'frac' : no matching overloaded function found 
-ERROR: 0:27: '' : compilation terminated 
+ERROR: 0:26: 'frac' : no matching overloaded function found 
+ERROR: 0:26: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

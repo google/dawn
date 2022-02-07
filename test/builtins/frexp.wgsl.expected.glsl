@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 struct frexp_result {
   float sig;
@@ -28,8 +27,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:11: 'frexp' : no matching overloaded function found 
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:10: 'frexp' : no matching overloaded function found 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

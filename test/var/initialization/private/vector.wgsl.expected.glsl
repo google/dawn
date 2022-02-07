@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 ivec3 v = ivec3(0, 0, 0);
 void tint_symbol() {

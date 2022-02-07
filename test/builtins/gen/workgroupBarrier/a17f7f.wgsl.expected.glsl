@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void workgroupBarrier_a17f7f() {
   barrier();

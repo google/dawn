@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 void select_bb8aae() {
   vec4 res = (bvec4(false, false, false, false) ? vec4(0.0f, 0.0f, 0.0f, 0.0f) : vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -20,8 +19,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: '' : boolean expression expected 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: '' : boolean expression expected 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -49,7 +48,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 void select_bb8aae() {
   vec4 res = (bvec4(false, false, false, false) ? vec4(0.0f, 0.0f, 0.0f, 0.0f) : vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -65,8 +63,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: '' : boolean expression expected 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: '' : boolean expression expected 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

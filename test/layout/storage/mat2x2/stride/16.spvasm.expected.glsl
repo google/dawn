@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct strided_arr {
   vec2 el;

@@ -5,7 +5,6 @@ builtins/gen/isFinite/f31987.wgsl:28:25 warning: use of deprecated builtin
                         ^^^^^^^^
 
 #version 310 es
-precision mediump float;
 
 void isFinite_f31987() {
   bvec4 res = isfinite(vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -24,9 +23,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'isfinite' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp 4-component vector of bool'
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'isfinite' : no matching overloaded function found 
+ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp 4-component vector of bool'
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -55,7 +54,6 @@ ERROR: 3 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 void isFinite_f31987() {
   bvec4 res = isfinite(vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -71,9 +69,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'isfinite' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp 4-component vector of bool'
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'isfinite' : no matching overloaded function found 
+ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp 4-component vector of bool'
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

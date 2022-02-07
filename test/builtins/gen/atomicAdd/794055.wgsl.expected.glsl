@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 shared int arg_0;
 void atomicAdd_794055() {

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 shared uint arg_0;
 void atomicSub_0d26c2() {

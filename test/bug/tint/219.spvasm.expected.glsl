@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 float x_200(inout vec2 x_201) {
   float x_212 = x_201.x;

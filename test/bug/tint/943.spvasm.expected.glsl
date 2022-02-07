@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 struct Uniforms {
   float NAN;
@@ -399,8 +398,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:13: '' : array size required 
-ERROR: 0:14: '' : compilation terminated 
+ERROR: 0:12: '' : array size required 
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

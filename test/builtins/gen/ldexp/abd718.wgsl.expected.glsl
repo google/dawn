@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void ldexp_abd718() {
   vec2 res = ldexp(vec2(0.0f, 0.0f), ivec2(0, 0));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void ldexp_abd718() {
   vec2 res = ldexp(vec2(0.0f, 0.0f), ivec2(0, 0));

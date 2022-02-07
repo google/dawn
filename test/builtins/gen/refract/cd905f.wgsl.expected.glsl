@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void refract_cd905f() {
   vec2 res = refract(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), 1.0f);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void refract_cd905f() {
   vec2 res = refract(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), 1.0f);

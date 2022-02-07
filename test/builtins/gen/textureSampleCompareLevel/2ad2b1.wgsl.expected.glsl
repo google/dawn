@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 uniform highp sampler2DShadow arg_0_arg_1;
 
@@ -37,7 +36,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 uniform highp sampler2DShadow arg_0_arg_1;
 

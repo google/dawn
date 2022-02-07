@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 struct ResultMatrix {
   float numbers[];
@@ -72,8 +71,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: '' : array size required 
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:4: '' : array size required 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

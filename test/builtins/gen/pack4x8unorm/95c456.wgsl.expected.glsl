@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 uint tint_pack4x8unorm(vec4 param_0) {
   uint4 i = uint4(round(clamp(param_0, 0.0, 1.0) * 255.0));
@@ -26,8 +25,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'uint4' : undeclared identifier 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -61,7 +60,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 uint tint_pack4x8unorm(vec4 param_0) {
   uint4 i = uint4(round(clamp(param_0, 0.0, 1.0) * 255.0));
@@ -83,8 +81,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'uint4' : undeclared identifier 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

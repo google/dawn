@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void f() {
   float a = 4.0f;

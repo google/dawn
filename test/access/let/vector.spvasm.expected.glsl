@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void main_1() {
   float x_11 = vec3(1.0f, 2.0f, 3.0f).y;

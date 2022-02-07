@@ -40,7 +40,6 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(  #version 310 es
-  precision mediump float;
 
   void my_func() {
     return;
@@ -78,7 +77,6 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithParams) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(  #version 310 es
-  precision mediump float;
 
   void my_func(float a, int b) {
     return;
@@ -786,7 +784,6 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -807,7 +804,6 @@ TEST_F(GlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 layout(local_size_x = 2, local_size_y = 4, local_size_z = 6) in;
 void main() {
@@ -831,7 +827,6 @@ TEST_F(GlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 const int width = int(2);
 const int height = int(3);
@@ -858,7 +853,6 @@ TEST_F(GlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 #ifndef WGSL_SPEC_CONSTANT_7
 #define WGSL_SPEC_CONSTANT_7 int(2)
@@ -889,7 +883,6 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 void my_func(float a[5]) {
   return;
@@ -908,7 +901,6 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithArrayReturn) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 float[5] my_func() {
   return float[5](0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -974,7 +966,6 @@ TEST_F(GlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 struct Data {
   float d;

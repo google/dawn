@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(rgba32ui) uniform highp writeonly uimage2DArray arg_0;
 void textureDimensions_398e30() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 layout(rgba32ui) uniform highp writeonly uimage2DArray arg_0;
 void textureDimensions_398e30() {

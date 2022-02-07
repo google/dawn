@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void main_1() {
   uint x_10 = 0u;

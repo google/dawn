@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 vec3 Bad(uint index, vec3 rd) {
   vec3 normal = vec3(0.0f);

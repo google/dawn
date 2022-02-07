@@ -5,7 +5,6 @@ type RTArr = @stride(4) array<i32>;
               ^^^^^^
 
 #version 310 es
-precision mediump float;
 
 struct buf1 {
   vec2 injectionSwitch;
@@ -129,8 +128,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:13: '' : array size required 
-ERROR: 0:14: '' : compilation terminated 
+ERROR: 0:12: '' : array size required 
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

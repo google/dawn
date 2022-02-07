@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 void inverseSqrt_84407e() {
   float res = rsqrt(1.0f);
@@ -20,8 +19,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'rsqrt' : no matching overloaded function found 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'rsqrt' : no matching overloaded function found 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -49,7 +48,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 void inverseSqrt_84407e() {
   float res = rsqrt(1.0f);
@@ -65,8 +63,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'rsqrt' : no matching overloaded function found 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'rsqrt' : no matching overloaded function found 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

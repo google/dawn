@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 struct frexp_result_vec4 {
   vec4 sig;
@@ -33,8 +32,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:10: 'float4' : undeclared identifier 
-ERROR: 0:10: '' : compilation terminated 
+ERROR: 0:9: 'float4' : undeclared identifier 
+ERROR: 0:9: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -75,7 +74,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 struct frexp_result_vec4 {
   vec4 sig;
@@ -104,8 +102,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:10: 'float4' : undeclared identifier 
-ERROR: 0:10: '' : compilation terminated 
+ERROR: 0:9: 'float4' : undeclared identifier 
+ERROR: 0:9: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

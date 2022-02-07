@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void max_44a39d() {
   float res = max(1.0f, 1.0f);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void max_44a39d() {
   float res = max(1.0f, 1.0f);

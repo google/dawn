@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void transpose_d8f8ba() {
   mat4x3 res = transpose(mat3x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void transpose_d8f8ba() {
   mat4x3 res = transpose(mat3x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));

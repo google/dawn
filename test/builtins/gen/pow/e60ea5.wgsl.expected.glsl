@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void pow_e60ea5() {
   vec2 res = pow(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void pow_e60ea5() {
   vec2 res = pow(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));

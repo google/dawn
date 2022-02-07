@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void tint_symbol() {
   vec2 v2f = vec2(0.0f, 0.0f);

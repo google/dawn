@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(r32i) uniform highp writeonly iimage2D arg_0;
 void textureDimensions_c30e75() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 layout(r32i) uniform highp writeonly iimage2D arg_0;
 void textureDimensions_c30e75() {

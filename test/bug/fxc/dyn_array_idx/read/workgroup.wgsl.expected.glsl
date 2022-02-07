@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct UBO {
   int dynamic_idx;

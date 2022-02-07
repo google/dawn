@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void f() {
   vec3 a = vec3(1.0f, 2.0f, 3.0f);

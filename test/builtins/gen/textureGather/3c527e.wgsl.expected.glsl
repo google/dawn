@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 uniform highp usamplerCubeArray arg_1_arg_2;
 
@@ -22,8 +21,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'usamplerCubeArray' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'usamplerCubeArray' : Reserved word. 
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -53,7 +52,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 uniform highp usamplerCubeArray arg_1_arg_2;
 
@@ -71,8 +69,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'usamplerCubeArray' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'usamplerCubeArray' : Reserved word. 
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

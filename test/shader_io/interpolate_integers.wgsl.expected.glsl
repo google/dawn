@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(location = 0) flat out int i_1;
 layout(location = 1) flat out uint u_1;

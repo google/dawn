@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void min_c76fa6() {
   vec4 res = min(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void min_c76fa6() {
   vec4 res = min(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));

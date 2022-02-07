@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 layout(location = 0) in vec3 position_1;
 layout(location = 1) in vec4 color_1;
@@ -121,7 +120,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 vec2 rand_seed = vec2(0.0f, 0.0f);
 float rand() {
@@ -210,14 +208,13 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:6: 'frac' : no matching overloaded function found 
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:5: 'frac' : no matching overloaded function found 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 310 es
-precision mediump float;
 
 struct RenderParams {
   mat4 modelViewProjectionMatrix;
@@ -275,7 +272,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 struct RenderParams {
   mat4 modelViewProjectionMatrix;

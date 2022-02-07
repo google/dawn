@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void atan2_a70d0d() {
   vec3 res = atan(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void atan2_a70d0d() {
   vec3 res = atan(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));

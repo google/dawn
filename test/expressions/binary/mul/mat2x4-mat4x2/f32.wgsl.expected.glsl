@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void f() {
   mat2x4 a = mat2x4(vec4(1.0f, 2.0f, 3.0f, 4.0f), vec4(5.0f, 6.0f, 7.0f, 8.0f));

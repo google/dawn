@@ -3,7 +3,6 @@ builtins/gen/isNan/67ecd3.wgsl:28:25 warning: use of deprecated builtin
                         ^^^^^
 
 #version 310 es
-precision mediump float;
 
 void isNan_67ecd3() {
   bvec2 res = isnan(vec2(0.0f, 0.0f));
@@ -37,7 +36,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void isNan_67ecd3() {
   bvec2 res = isnan(vec2(0.0f, 0.0f));

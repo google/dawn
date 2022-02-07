@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void round_106c0b() {
   vec4 res = round(vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void round_106c0b() {
   vec4 res = round(vec4(0.0f, 0.0f, 0.0f, 0.0f));

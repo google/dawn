@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void select_087ea4() {
   uvec4 res = (false ? uvec4(0u, 0u, 0u, 0u) : uvec4(0u, 0u, 0u, 0u));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void select_087ea4() {
   uvec4 res = (false ? uvec4(0u, 0u, 0u, 0u) : uvec4(0u, 0u, 0u, 0u));

@@ -3,7 +3,6 @@ builtins/gen/isInf/7e81b5.wgsl:28:25 warning: use of deprecated builtin
                         ^^^^^
 
 #version 310 es
-precision mediump float;
 
 void isInf_7e81b5() {
   bvec4 res = isinf(vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -37,7 +36,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void isInf_7e81b5() {
   bvec4 res = isinf(vec4(0.0f, 0.0f, 0.0f, 0.0f));

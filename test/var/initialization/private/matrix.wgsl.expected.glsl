@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 mat2x3 v = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 void tint_symbol() {

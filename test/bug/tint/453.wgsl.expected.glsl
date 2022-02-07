@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(r32ui) uniform highp writeonly uimage2D Dst;
 uniform highp usampler2D Src_1;

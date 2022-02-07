@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void ldexp_db8b49() {
   float res = ldexp(1.0f, 1);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void ldexp_db8b49() {
   float res = ldexp(1.0f, 1);

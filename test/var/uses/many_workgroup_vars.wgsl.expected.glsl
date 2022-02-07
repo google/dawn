@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 shared mat2 m00;
 shared mat2 m01;

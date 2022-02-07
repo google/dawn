@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 #ifndef WGSL_SPEC_CONSTANT_1234
 #error spec constant required for constant id 1234
@@ -16,9 +15,10 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: '#error' : spec constant required for constant id 1234  
-ERROR: 0:6: '' : missing #endif 
-ERROR: 2 compilation errors.  No code generated.
+ERROR: 0:4: '#error' : spec constant required for constant id 1234  
+ERROR: 0:5: '' : missing #endif 
+ERROR: 0:5: '' : compilation terminated 
+ERROR: 3 compilation errors.  No code generated.
 
 
 

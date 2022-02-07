@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 uniform highp sampler3D arg_0_1;
 void textureDimensions_26bdfa() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 uniform highp sampler3D arg_0_1;
 void textureDimensions_26bdfa() {

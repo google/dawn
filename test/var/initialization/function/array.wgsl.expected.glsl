@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void tint_symbol() {
   int v[3] = int[3](0, 0, 0);

@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 struct Inner {
   float f;
@@ -25,8 +24,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:17: '=' :  cannot convert from 'layout( binding=0 column_major shared) uniform block{layout( column_major shared) uniform structure{ global mediump float f} inner}' to ' temp structure{ global structure{ global mediump float f} inner}'
-ERROR: 0:17: '' : compilation terminated 
+ERROR: 0:16: '=' :  cannot convert from 'layout( binding=0 column_major shared) uniform block{layout( column_major shared) uniform structure{ global highp float f} inner}' to ' temp structure{ global structure{ global highp float f} inner}'
+ERROR: 0:16: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

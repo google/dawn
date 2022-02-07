@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 uniform highp usampler2DArray arg_0_1;
 void textureDimensions_267788() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 uniform highp usampler2DArray arg_0_1;
 void textureDimensions_267788() {

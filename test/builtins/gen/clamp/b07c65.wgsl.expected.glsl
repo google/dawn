@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void clamp_b07c65() {
   int res = clamp(1, 1, 1);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void clamp_b07c65() {
   int res = clamp(1, 1, 1);

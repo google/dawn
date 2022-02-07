@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void transpose_31d679() {
   mat2 res = transpose(mat2(0.0f, 0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void transpose_31d679() {
   mat2 res = transpose(mat2(0.0f, 0.0f, 0.0f, 0.0f));

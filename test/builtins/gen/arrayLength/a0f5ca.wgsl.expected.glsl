@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(binding = 1, std430) buffer SB_RO_1 {
   float arg_0[];
@@ -39,7 +38,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 layout(binding = 1, std430) buffer SB_RO_1 {
   float arg_0[];

@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 vec4 tint_symbol() {
   vec3 light = vec3(1.200000048f, 1.0f, 2.0f);

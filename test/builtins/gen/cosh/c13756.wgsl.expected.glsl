@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void cosh_c13756() {
   vec2 res = cosh(vec2(0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void cosh_c13756() {
   vec2 res = cosh(vec2(0.0f, 0.0f));

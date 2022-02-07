@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 const vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));
 vec4 vtx_main(uint VertexIndex) {

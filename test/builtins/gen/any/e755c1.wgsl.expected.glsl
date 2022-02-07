@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void any_e755c1() {
   bool res = any(bvec3(false, false, false));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void any_e755c1() {
   bool res = any(bvec3(false, false, false));

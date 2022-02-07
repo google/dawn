@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void select_3c25ce() {
   bvec3 res = (false ? bvec3(false, false, false) : bvec3(false, false, false));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void select_3c25ce() {
   bvec3 res = (false ? bvec3(false, false, false) : bvec3(false, false, false));

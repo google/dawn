@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void f() {
   ivec3 a = ivec3(1, 2, 3);

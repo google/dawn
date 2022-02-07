@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(location = 0) flat out int loc0_1;
 struct VertexOutput {
@@ -25,7 +24,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 layout(location = 0) flat out int loc0_1;
 struct VertexOutput {

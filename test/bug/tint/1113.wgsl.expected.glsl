@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct Uniforms {
   uint numTriangles;
@@ -121,7 +120,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 struct Uniforms {
   uint numTriangles;
@@ -212,7 +210,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 struct Uniforms {
   uint numTriangles;

@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 vec2 tint_unpack2x16float(uint param_0) {
   uint i = param_0;
@@ -46,8 +45,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:6: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp highp uint' and a right operand of type ' const int' (or there is no acceptable conversion)
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:5: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp highp uint' and a right operand of type ' const int' (or there is no acceptable conversion)
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

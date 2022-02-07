@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void select_99f883() {
   uint res = (false ? 1u : 1u);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void select_99f883() {
   uint res = (false ? 1u : 1u);

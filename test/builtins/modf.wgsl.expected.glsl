@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 struct modf_result {
   float fract;
@@ -28,8 +27,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:12: '{ } style initializers' : not supported with this profile: es
-ERROR: 0:12: '' : compilation terminated 
+ERROR: 0:11: '{ } style initializers' : not supported with this profile: es
+ERROR: 0:11: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

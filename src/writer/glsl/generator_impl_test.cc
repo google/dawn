@@ -29,7 +29,6 @@ TEST_F(GlslGeneratorImplTest, Generate) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 void my_func() {
 }

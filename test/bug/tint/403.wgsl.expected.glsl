@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct vertexUniformBuffer1 {
   mat2 transform1;

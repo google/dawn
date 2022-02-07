@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(r32ui) uniform highp writeonly uimage2DArray arg_0;
 void textureStore_38e8d7() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 layout(r32ui) uniform highp writeonly uimage2DArray arg_0;
 void textureStore_38e8d7() {

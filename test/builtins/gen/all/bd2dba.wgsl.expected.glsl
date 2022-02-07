@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void all_bd2dba() {
   bool res = all(bvec3(false, false, false));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void all_bd2dba() {
   bool res = all(bvec3(false, false, false));

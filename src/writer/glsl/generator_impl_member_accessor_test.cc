@@ -133,7 +133,6 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#version 310 es
-precision mediump float;
 
 struct Data {
   float mem;

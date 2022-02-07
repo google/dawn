@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void storageBarrier_d87211() {
   { barrier(); memoryBarrierBuffer(); };

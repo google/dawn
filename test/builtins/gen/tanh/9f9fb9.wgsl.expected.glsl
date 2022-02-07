@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void tanh_9f9fb9() {
   vec3 res = tanh(vec3(0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void tanh_9f9fb9() {
   vec3 res = tanh(vec3(0.0f, 0.0f, 0.0f));

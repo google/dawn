@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 uint tint_pack2x16snorm(vec2 param_0) {
   int2 i = int2(round(clamp(param_0, -1.0, 1.0) * 32767.0)) & 0xffff;
@@ -46,8 +45,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'int2' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'int2' : undeclared identifier 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

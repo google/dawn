@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void sqrt_20c74e() {
   float res = sqrt(1.0f);
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void sqrt_20c74e() {
   float res = sqrt(1.0f);

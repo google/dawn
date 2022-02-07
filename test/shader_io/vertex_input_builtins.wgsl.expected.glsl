@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 vec4 tint_symbol(uint vertex_index, uint instance_index) {
   uint foo = (vertex_index + instance_index);

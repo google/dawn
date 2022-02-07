@@ -5,7 +5,6 @@ builtins/gen/isNormal/c6e880.wgsl:28:19 warning: use of deprecated builtin
                   ^^^^^^^^
 
 #version 310 es
-precision mediump float;
 
 bool tint_isNormal(float param_0) {
   uint exponent = asuint(param_0) & 0x7f80000;
@@ -31,9 +30,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'asuint' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp highp uint'
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'asuint' : no matching overloaded function found 
+ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp highp uint'
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -69,7 +68,6 @@ ERROR: 3 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 bool tint_isNormal(float param_0) {
   uint exponent = asuint(param_0) & 0x7f80000;
@@ -92,9 +90,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'asuint' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp highp uint'
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: 'asuint' : no matching overloaded function found 
+ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp highp uint'
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

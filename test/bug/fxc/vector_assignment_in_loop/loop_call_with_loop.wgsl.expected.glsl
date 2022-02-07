@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 vec2 v2f = vec2(0.0f, 0.0f);
 ivec3 v3i = ivec3(0, 0, 0);

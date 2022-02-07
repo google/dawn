@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 shared ivec3 v;
 void tint_symbol(uint local_invocation_index) {

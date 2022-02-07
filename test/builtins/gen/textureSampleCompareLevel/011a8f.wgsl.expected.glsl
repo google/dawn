@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
@@ -22,8 +21,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:7: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -53,7 +52,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
@@ -71,8 +69,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:7: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:6: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
+ERROR: 0:6: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

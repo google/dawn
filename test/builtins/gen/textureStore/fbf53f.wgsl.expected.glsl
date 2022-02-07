@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(rgba8i) uniform highp writeonly iimage2DArray arg_0;
 void textureStore_fbf53f() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 layout(rgba8i) uniform highp writeonly iimage2DArray arg_0;
 void textureStore_fbf53f() {

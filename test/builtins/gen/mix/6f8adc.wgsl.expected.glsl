@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void mix_6f8adc() {
   vec2 res = mix(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void mix_6f8adc() {
   vec2 res = mix(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));

@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 vec2 tint_unpack2x16unorm(uint param_0) {
   uint j = param_0;
@@ -47,8 +46,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:6: 'uint2' : undeclared identifier 
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:5: 'uint2' : undeclared identifier 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

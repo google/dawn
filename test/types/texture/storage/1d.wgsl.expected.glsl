@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 layout(rgba8) uniform highp writeonly image1D t_rgba8unorm;
 layout(rgba8_snorm) uniform highp writeonly image1D t_rgba8snorm;
@@ -28,9 +27,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'image1D' : Reserved word. 
-WARNING: 0:4: 'layout' : useless application of layout qualifier 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:3: 'image1D' : Reserved word. 
+WARNING: 0:3: 'layout' : useless application of layout qualifier 
+ERROR: 0:3: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

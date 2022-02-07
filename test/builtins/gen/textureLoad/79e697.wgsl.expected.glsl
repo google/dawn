@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 uniform highp isampler2DArray arg_0_1;
 void textureLoad_79e697() {
@@ -35,7 +34,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 uniform highp isampler2DArray arg_0_1;
 void textureLoad_79e697() {

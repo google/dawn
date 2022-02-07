@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 struct LightData {
   vec4 position;

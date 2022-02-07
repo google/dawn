@@ -3,7 +3,6 @@ builtins/gen/isInf/666f2a.wgsl:28:25 warning: use of deprecated builtin
                         ^^^^^
 
 #version 310 es
-precision mediump float;
 
 void isInf_666f2a() {
   bvec3 res = isinf(vec3(0.0f, 0.0f, 0.0f));
@@ -37,7 +36,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void isInf_666f2a() {
   bvec3 res = isinf(vec3(0.0f, 0.0f, 0.0f));

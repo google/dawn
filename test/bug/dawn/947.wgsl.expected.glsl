@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(location = 0) out vec2 texcoords_1;
 struct Uniforms {

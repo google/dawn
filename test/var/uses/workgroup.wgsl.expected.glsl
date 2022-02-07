@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 shared int a;
 void uses_a() {
@@ -21,7 +20,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 shared int b;
 void uses_b() {
@@ -43,7 +41,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 shared int a;
 shared int b;
@@ -86,7 +83,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void no_uses() {
 }

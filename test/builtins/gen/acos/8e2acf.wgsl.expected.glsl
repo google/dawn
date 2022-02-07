@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void acos_8e2acf() {
   vec4 res = acos(vec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void acos_8e2acf() {
   vec4 res = acos(vec4(0.0f, 0.0f, 0.0f, 0.0f));

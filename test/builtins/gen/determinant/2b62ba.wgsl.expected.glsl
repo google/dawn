@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 void determinant_2b62ba() {
   float res = determinant(mat3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
@@ -33,7 +32,6 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
 
 void determinant_2b62ba() {
   float res = determinant(mat3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));

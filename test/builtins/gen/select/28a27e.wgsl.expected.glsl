@@ -1,7 +1,6 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
 
 void select_28a27e() {
   uvec3 res = (bvec3(false, false, false) ? uvec3(0u, 0u, 0u) : uvec3(0u, 0u, 0u));
@@ -20,8 +19,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: '' : boolean expression expected 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: '' : boolean expression expected 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -49,7 +48,6 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
 
 void select_28a27e() {
   uvec3 res = (bvec3(false, false, false) ? uvec3(0u, 0u, 0u) : uvec3(0u, 0u, 0u));
@@ -65,8 +63,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: '' : boolean expression expected 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:4: '' : boolean expression expected 
+ERROR: 0:4: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

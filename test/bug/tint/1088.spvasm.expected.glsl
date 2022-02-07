@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 layout(location = 0) in vec3 position_param_1;
 layout(location = 2) in vec2 uv_param_1;

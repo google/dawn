@@ -1,5 +1,4 @@
 #version 310 es
-precision mediump float;
 
 float[4] f1() {
   float tint_symbol_1[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
