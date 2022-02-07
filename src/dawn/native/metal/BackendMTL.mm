@@ -193,6 +193,12 @@ namespace dawn::native::metal {
             API_AVAILABLE(macos(10.15), ios(14.0)) {
             // MTLDevice’s counterSets property declares which counter sets it supports. Check
             // whether it's available on the device before requesting a counter set.
+
+            // On some systems, [device counterSets] is null and not an empty array.
+            if ([device counterSets] == nil) {
+                return false;
+            }
+
             id<MTLCounterSet> counterSet = nil;
             for (id<MTLCounterSet> set in [device counterSets]) {
                 if ([set.name caseInsensitiveCompare:counterSetName] == NSOrderedSame) {
