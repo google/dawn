@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/// Copyright 2021 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+-->
+
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="tint::Symbol">
+		<!-- Requires TINT_SYMBOL_STORE_DEBUG_NAME defined to 1 -->
+		<DisplayString Optional="true">{debug_name_,sb}</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::AssignmentStatement">
+		<DisplayString>{*lhs} = {*rhs};</DisplayString>
+		<DisplayString>{AstNodeToString(this)}</DisplayString>
+		<Expand>
+			<Item Name="lhs">*lhs</Item>
+			<Item Name="rhs">*rhs</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="tint::ast::IdentifierExpression">
+		 <!--the ",sb" specifier removes the double quotes on the displayed string --> 
+		<DisplayString>{symbol}</DisplayString>
+		<Expand>
+			<Item Name="symbol">symbol</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="tint::ast::IndexAccessorExpression">
+		<DisplayString>{*object}[{*index}]</DisplayString>
+		<Expand>
+			<Item Name="object">*object</Item>
+			<Item Name="index">*index</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="tint::ast::MemberAccessorExpression">
+		<DisplayString>{*structure}.{*member}</DisplayString>
+		<Expand>
+			<Item Name="structure">*structure</Item>
+			<Item Name="member">*member</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="tint::ast::Variable">
+		<DisplayString Condition="is_const &amp; !!type">let {symbol} : {*type} = {*constructor}</DisplayString>
+		<DisplayString Condition="is_const &amp; !type">let {symbol} = {*constructor}</DisplayString>
+		<DisplayString Condition="!is_const &amp; !type">var {symbol} = {*constructor}</DisplayString>
+		<DisplayString Condition="!is_const &amp; !!type &amp; !constructor">var {symbol} : {*type}</DisplayString>
+		<DisplayString Condition="!is_const &amp; !!type &amp; !!constructor">var {symbol} : {*type} = {*constructor}</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::VariableDeclStatement">
+		<DisplayString>{*variable};</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::UintLiteralExpression">
+		<DisplayString>{value}</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::SintLiteralExpression">
+		<DisplayString>{value}</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::BinaryExpression">
+		<DisplayString>({*lhs} {op,en} {*rhs})</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::CallExpression">
+		<DisplayString Condition="args.size() == 0">{target}()</DisplayString>
+		<DisplayString Condition="args.size() == 1">{target}({*args[0]})</DisplayString>
+		<DisplayString Condition="args.size() == 2">{target}({*args[0]}, {*args[1]})</DisplayString>
+		<DisplayString Condition="args.size() == 3">{target}({*args[0]}, {*args[1]}, {*args[2]})</DisplayString>
+		<DisplayString Condition="args.size() > 3">{target}({*args[0]}, {*args[1]}, {*args[2]}, ...)</DisplayString>
+		<!-- TODO: add more overloads -->
+	</Type>
+
+	<Type Name="tint::ast::CallExpression::Target">
+		<DisplayString Condition ="name != nullptr">{*name}</DisplayString>
+		<DisplayString Condition ="name == nullptr">{*type}</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::Array">
+		<DisplayString Condition="count != nullptr">array&lt;{*type},{*count}&gt;</DisplayString>
+		<DisplayString Condition="count == nullptr">array&lt;{*type}&gt;</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::TypeName">
+		<DisplayString>{name}</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::Bool">
+		<DisplayString>bool</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::I32">
+		<DisplayString>i32</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::U32">
+		<DisplayString>u32</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::F32">
+		<DisplayString>f32</DisplayString>
+	</Type>
+
+</AutoVisualizer>

@@ -537,6 +537,12 @@ if(${TINT_BUILD_HLSL_WRITER})
   )
 endif()
 
+if(MSVC)
+  list(APPEND TINT_LIB_SRCS
+    tint.natvis
+  )
+endif()
+
 ## Tint IO utilities. Used by tint_val.
 add_library(tint_utils_io
   utils/io/command_${TINT_OS_CC_SUFFIX}.cc
