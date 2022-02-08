@@ -30,6 +30,7 @@
 #endif  // TINT_BUILD_SPV_READER
 
 #include "src/utils/io/command.h"
+#include "src/utils/string.h"
 #include "src/val/val.h"
 #include "tint/tint.h"
 
@@ -103,10 +104,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   -o <name>                 -- Output file name.  Use "-" for standard output
   --transform <name list>   -- Runs transforms, name list is comma separated
                                Available transforms:
-                                first_index_offset
-                                fold_trivial_single_use_lets
-                                renamer
-                                robustness
+${transforms}
   --parse-only              -- Stop after parsing the input
   --disable-workgroup-init  -- Disable workgroup memory zero initialization.
   --demangle                -- Preserve original source names. Demangle them.
@@ -909,8 +907,43 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  struct TransformFactory {
+    const char* name;
+    std::function<void(tint::transform::Manager& manager,
+                       tint::transform::DataMap& inputs)>
+        make;
+  };
+  std::vector<TransformFactory> transforms = {
+      {"first_index_offset",
+       [](tint::transform::Manager& m, tint::transform::DataMap& i) {
+         i.Add<tint::transform::FirstIndexOffset::BindingPoint>(0, 0);
+         m.Add<tint::transform::FirstIndexOffset>();
+       }},
+      {"fold_trivial_single_use_lets",
+       [](tint::transform::Manager& m, tint::transform::DataMap&) {
+         m.Add<tint::transform::FoldTrivialSingleUseLets>();
+       }},
+      {"renamer",
+       [](tint::transform::Manager& m, tint::transform::DataMap&) {
+         m.Add<tint::transform::Renamer>();
+       }},
+      {"robustness",
+       [](tint::transform::Manager& m, tint::transform::DataMap&) {
+         m.Add<tint::transform::Robustness>();
+       }},
+  };
+  auto transform_names = [&] {
+    std::stringstream names;
+    for (auto& t : transforms) {
+      names << "   " << t.name << std::endl;
+    }
+    return names.str();
+  };
+
   if (options.show_help) {
-    std::cout << kUsage << std::endl;
+    std::string usage =
+        tint::utils::ReplaceAll(kUsage, "${transforms}", transform_names());
+    std::cout << usage << std::endl;
     return 0;
   }
 
@@ -1043,18 +1076,17 @@ int main(int argc, const char** argv) {
     // be run that needs user input. Should we find a way to support that here
     // maybe through a provided file?
 
-    if (name == "first_index_offset") {
-      transform_inputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(0,
-                                                                            0);
-      transform_manager.Add<tint::transform::FirstIndexOffset>();
-    } else if (name == "fold_trivial_single_use_lets") {
-      transform_manager.Add<tint::transform::FoldTrivialSingleUseLets>();
-    } else if (name == "renamer") {
-      transform_manager.Add<tint::transform::Renamer>();
-    } else if (name == "robustness") {
-      transform_manager.Add<tint::transform::Robustness>();
-    } else {
-      std::cerr << "Unknown transform name: " << name << std::endl;
+    bool found = false;
+    for (auto& t : transforms) {
+      if (t.name == name) {
+        t.make(transform_manager, transform_inputs);
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      std::cerr << "Unknown transform: " << name << std::endl;
+      std::cerr << "Available transforms: " << std::endl << transform_names();
       return 1;
     }
   }
