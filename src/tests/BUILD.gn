@@ -20,10 +20,15 @@ import("${dawn_root}/scripts/dawn_features.gni")
 
 group("dawn_tests") {
   testonly = true
-  deps = [
-    ":dawn_end2end_tests",
-    ":dawn_perf_tests",
-    ":dawn_unittests",
+  public_deps = [
+    ":dawn_end2end_tests_temp_group",
+    ":dawn_perf_tests_temp_group",
+    ":dawn_unittests_temp_group",
+  ]
+  data_deps = [
+    ":dawn_end2end_tests_temp_group",
+    ":dawn_perf_tests_temp_group",
+    ":dawn_unittests_temp_group",
   ]
 }
 
@@ -585,6 +590,123 @@ test("dawn_end2end_tests") {
 ###############################################################################
 
 test("dawn_perf_tests") {
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
+
+  deps = [
+    ":gmock_and_gtest",
+    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/src/dawn:proc",
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native",
+    "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/wire",
+    "${dawn_root}/src/dawn_platform",
+  ]
+
+  sources = [
+    "DawnTest.cpp",
+    "DawnTest.h",
+    "ParamGenerator.h",
+    "ToggleParser.cpp",
+    "ToggleParser.h",
+    "perf_tests/BufferUploadPerf.cpp",
+    "perf_tests/DawnPerfTest.cpp",
+    "perf_tests/DawnPerfTest.h",
+    "perf_tests/DawnPerfTestPlatform.cpp",
+    "perf_tests/DawnPerfTestPlatform.h",
+    "perf_tests/DrawCallPerf.cpp",
+    "perf_tests/ShaderRobustnessPerf.cpp",
+    "perf_tests/SubresourceTrackingPerf.cpp",
+  ]
+
+  libs = []
+
+  # When building inside Chromium, use their gtest main function and the
+  # other perf test scaffolding in order to run in swarming correctly.
+  if (build_with_chromium) {
+    deps += [ ":dawn_perf_tests_main" ]
+    data_deps = [ "//testing:run_perf_test" ]
+  } else {
+    sources += [ "PerfTestsMain.cpp" ]
+  }
+
+  if (dawn_enable_metal) {
+    frameworks = [ "IOSurface.framework" ]
+  }
+
+  if (dawn_enable_opengl) {
+    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
+  }
+}
+
+###############################################################################
+# Temporary Dawn test targets and groups - crbug.com/dawn/1275
+###############################################################################
+# Proxy groups so that we can have Chromium point to the group, while we move
+# the target in Dawn's BUILD.gn files.
+# However, it is not possible to move a target around with a proxy group without
+# breaking swarming tests. We also add temporary executables target that is are
+# duplicates of those in //src/tests that will be used temporarily while we
+# switch targets.
+
+group("dawn_unittests_temp_group") {
+  testonly = true
+  public_deps = [ ":dawn_unittests" ]
+  data_deps = [ ":dawn_unittests" ]
+}
+
+group("dawn_end2end_tests_temp_group") {
+  testonly = true
+  public_deps = [ ":dawn_end2end_tests_temp" ]
+  data_deps = [ ":dawn_end2end_tests_temp" ]
+}
+
+group("dawn_perf_tests_temp_group") {
+  testonly = true
+  public_deps = [ ":dawn_perf_tests_temp" ]
+  data_deps = [ ":dawn_perf_tests_temp" ]
+}
+
+test("dawn_end2end_tests_temp") {
+  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
+
+  deps = [
+    ":dawn_end2end_tests_sources",
+    ":dawn_white_box_tests_sources",
+    ":gmock_and_gtest",
+    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/src/dawn:proc",
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native:static",
+    "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/wire",
+  ]
+
+  sources = [
+    "DawnTest.cpp",
+    "DawnTest.h",
+  ]
+
+  libs = []
+
+  # When building inside Chromium, use their gtest main function because it is
+  # needed to run in swarming correctly.
+  if (build_with_chromium) {
+    deps += [ ":dawn_end2end_tests_main" ]
+  } else {
+    sources += [ "End2EndTestsMain.cpp" ]
+  }
+
+  if (dawn_enable_opengl) {
+    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
+  }
+
+  if (is_chromeos) {
+    libs += [ "gbm" ]
+  }
+}
+
+test("dawn_perf_tests_temp") {
   configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
 
   deps = [
