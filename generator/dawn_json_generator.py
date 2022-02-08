@@ -849,8 +849,8 @@ class MultiGeneratorFromDawnJSON(Generator):
                            [RENDER_PARAMS_BASE, params_upstream]))
 
         if 'emscripten_bits' in targets:
-            params_emscripten = parse_json(
-                loaded_json, enabled_tags=['upstream', 'emscripten'])
+            params_emscripten = parse_json(loaded_json,
+                                           enabled_tags=['emscripten'])
             renders.append(
                 FileRender('api.h', 'emscripten-bits/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_emscripten]))
