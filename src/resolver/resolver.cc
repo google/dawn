@@ -266,12 +266,26 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     if (ty->As<ast::ExternalTexture>()) {
       return builder_->create<sem::ExternalTexture>();
     }
-    if (auto* type = ResolvedSymbol<sem::Type>(ty)) {
-      return type;
-    }
-    TINT_UNREACHABLE(Resolver, diagnostics_)
-        << "Unhandled ast::Type: " << ty->TypeInfo().name;
-    return nullptr;
+    return Switch(
+        ResolvedSymbol(ty),  //
+        [&](sem::Type* type) { return type; },
+        [&](sem::Variable* var) {
+          auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
+          AddError("cannot use variable '" + name + "' as type", ty->source);
+          AddNote("'" + name + "' declared here", var->Declaration()->source);
+          return nullptr;
+        },
+        [&](sem::Function* func) {
+          auto name = builder_->Symbols().NameFor(func->Declaration()->symbol);
+          AddError("cannot use function '" + name + "' as type", ty->source);
+          AddNote("'" + name + "' declared here", func->Declaration()->source);
+          return nullptr;
+        },
+        [&](Default) {
+          TINT_UNREACHABLE(Resolver, diagnostics_)
+              << "Unhandled ast::Type: " << ty->TypeInfo().name;
+          return nullptr;
+        });
   }();
 
   if (s) {
@@ -1347,26 +1361,33 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   Mark(ident);
 
   auto* resolved = ResolvedSymbol(ident);
-  if (auto* ty = As<sem::Type>(resolved)) {
-    return type_ctor_or_conv(ty);
-  }
+  return Switch(
+      resolved,  //
+      [&](sem::Type* type) { return type_ctor_or_conv(type); },
+      [&](sem::Function* func) {
+        return FunctionCall(expr, func, std::move(args), arg_behaviors);
+      },
+      [&](sem::Variable* var) {
+        auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
+        AddError("cannot call variable '" + name + "'", ident->source);
+        AddNote("'" + name + "' declared here", var->Declaration()->source);
+        return nullptr;
+      },
+      [&](Default) -> sem::Call* {
+        auto name = builder_->Symbols().NameFor(ident->symbol);
+        auto builtin_type = sem::ParseBuiltinType(name);
+        if (builtin_type != sem::BuiltinType::kNone) {
+          return BuiltinCall(expr, builtin_type, std::move(args),
+                             std::move(arg_tys));
+        }
 
-  if (auto* fn = As<sem::Function>(resolved)) {
-    return FunctionCall(expr, fn, std::move(args), arg_behaviors);
-  }
-
-  auto name = builder_->Symbols().NameFor(ident->symbol);
-  auto builtin_type = sem::ParseBuiltinType(name);
-  if (builtin_type != sem::BuiltinType::kNone) {
-    return BuiltinCall(expr, builtin_type, std::move(args), std::move(arg_tys));
-  }
-
-  TINT_ICE(Resolver, diagnostics_)
-      << expr->source << " unresolved CallExpression target:\n"
-      << "resolved: " << (resolved ? resolved->TypeInfo().name : "<null>")
-      << "\n"
-      << "name: " << builder_->Symbols().NameFor(ident->symbol);
-  return nullptr;
+        TINT_ICE(Resolver, diagnostics_)
+            << expr->source << " unresolved CallExpression target:\n"
+            << "resolved: " << (resolved ? resolved->TypeInfo().name : "<null>")
+            << "\n"
+            << "name: " << builder_->Symbols().NameFor(ident->symbol);
+        return nullptr;
+      });
 }
 
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,

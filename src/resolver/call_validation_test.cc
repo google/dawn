@@ -252,6 +252,19 @@ TEST_F(ResolverCallValidationTest, LetPointerPrivate) {
             "identifier expression or a function parameter");
 }
 
+TEST_F(ResolverCallValidationTest, CallVariable) {
+  // var v : i32;
+  // fn f() {
+  //   v();
+  // }
+  Global("v", ty.i32(), ast::StorageClass::kPrivate);
+  Func("f", {}, ty.void_(), {CallStmt(Call(Source{{12, 34}}, "v"))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), R"(error: cannot call variable 'v'
+note: 'v' declared here)");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

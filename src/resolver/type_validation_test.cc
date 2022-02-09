@@ -695,6 +695,30 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
             "an array");
 }
 
+TEST_F(ResolverTypeValidationTest, VariableAsType) {
+  // var<private> a : i32;
+  // var<private> b : a;
+  Global("a", ty.i32(), ast::StorageClass::kPrivate);
+  Global("b", ty.type_name("a"), ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(error: cannot use variable 'a' as type
+note: 'a' declared here)");
+}
+
+TEST_F(ResolverTypeValidationTest, FunctionAsType) {
+  // fn f() {}
+  // var<private> v : f;
+  Func("f", {}, ty.void_(), {});
+  Global("v", ty.type_name("f"), ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(error: cannot use function 'f' as type
+note: 'f' declared here)");
+}
+
 namespace GetCanonicalTests {
 struct Params {
   builder::ast_type_func_ptr create_ast_type;
