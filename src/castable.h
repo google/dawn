@@ -565,7 +565,6 @@ inline bool NonDefaultCases(T* object,
 /// @see NonDefaultCases
 template <typename T, typename RETURN_TYPE, typename... CASES>
 inline void SwitchCases(T* object,
-                        const TypeInfo* type,
                         RETURN_TYPE* result,
                         std::tuple<CASES...>&& cases) {
   using Cases = std::tuple<CASES...>;
@@ -575,19 +574,32 @@ inline void SwitchCases(T* object,
   static constexpr bool kHasDefaultCase = kDefaultIndex >= 0;
   static constexpr bool kHasReturnType = !std::is_same_v<RETURN_TYPE, void>;
 
-  if constexpr (kHasDefaultCase) {
-    // Evaluate non-default cases.
-    if (!detail::NonDefaultCases<T>(object, type, result,
-                                    traits::Slice<0, kDefaultIndex>(cases))) {
-      // Nothing matched. Evaluate default case.
+  if (object) {
+    auto* type = &object->TypeInfo();
+    if constexpr (kHasDefaultCase) {
+      // Evaluate non-default cases.
+      if (!detail::NonDefaultCases<T>(object, type, result,
+                                      traits::Slice<0, kDefaultIndex>(cases))) {
+        // Nothing matched. Evaluate default case.
+        if constexpr (kHasReturnType) {
+          *result = std::get<kDefaultIndex>(cases)({});
+        } else {
+          std::get<kDefaultIndex>(cases)({});
+        }
+      }
+    } else {
+      detail::NonDefaultCases<T>(object, type, result, std::move(cases));
+    }
+  } else {
+    // Object is nullptr, so no cases can match
+    if constexpr (kHasDefaultCase) {
+      // Evaluate default case.
       if constexpr (kHasReturnType) {
         *result = std::get<kDefaultIndex>(cases)({});
       } else {
         std::get<kDefaultIndex>(cases)({});
       }
     }
-  } else {
-    detail::NonDefaultCases<T>(object, type, result, std::move(cases));
   }
 }
 
@@ -607,6 +619,10 @@ inline void SwitchCases(T* object,
 /// An optional default case function with the signature `R(Default)` can be
 /// used as the last case. This default case will be called if all previous
 /// cases failed to match.
+///
+/// If `object` is nullptr and a default case is provided, then the default case
+/// will be called. If `object` is nullptr and no default case is provided, then
+/// no cases will be called.
 ///
 /// Example:
 /// ```
@@ -630,17 +646,14 @@ inline auto Switch(T* object, CASES&&... cases) {
   using ReturnType = traits::ReturnType<std::tuple_element_t<0, Cases>>;
   static constexpr bool kHasReturnType = !std::is_same_v<ReturnType, void>;
 
-  auto& type = object->TypeInfo();
-
   if constexpr (kHasReturnType) {
     ReturnType res = {};
-    detail::SwitchCases(object, &type, &res,
+    detail::SwitchCases(object, &res,
                         std::forward_as_tuple(std::forward<CASES>(cases)...));
     return res;
   } else {
     detail::SwitchCases<T, void>(
-        object, &type, nullptr,
-        std::forward_as_tuple(std::forward<CASES>(cases)...));
+        object, nullptr, std::forward_as_tuple(std::forward<CASES>(cases)...));
   }
 }
 

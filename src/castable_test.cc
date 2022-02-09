@@ -371,6 +371,7 @@ TEST(Castable, SwitchDefault) {
     EXPECT_TRUE(gecko_matched_default);
   }
 }
+
 TEST(Castable, SwitchMatchFirst) {
   std::unique_ptr<Animal> frog = std::make_unique<Frog>();
   {
@@ -395,6 +396,25 @@ TEST(Castable, SwitchMatchFirst) {
         [&](Animal*) { FAIL() << "amphibian should have been matched first"; });
     EXPECT_TRUE(frog_matched_amphibian);
   }
+}
+
+TEST(Castable, SwitchNull) {
+  Animal* null = nullptr;
+  Switch(
+      null,  //
+      [&](Amphibian*) { FAIL() << "should not be called"; },
+      [&](Animal*) { FAIL() << "should not be called"; });
+}
+
+TEST(Castable, SwitchNullNoDefault) {
+  Animal* null = nullptr;
+  bool default_called = false;
+  Switch(
+      null,  //
+      [&](Amphibian*) { FAIL() << "should not be called"; },
+      [&](Animal*) { FAIL() << "should not be called"; },
+      [&](Default) { default_called = true; });
+  EXPECT_TRUE(default_called);
 }
 
 }  // namespace
