@@ -34,16 +34,8 @@ Module::Module(ProgramID pid,
     if (decl == nullptr) {
       continue;
     }
-
-    Switch(
-        decl,  //
-        [&](const ast::TypeDecl* type) { type_decls_.push_back(type); },
-        [&](const Function* func) { functions_.push_back(func); },
-        [&](const Variable* var) { global_variables_.push_back(var); },
-        [&](Default) {
-          diag::List diagnostics;
-          TINT_ICE(AST, diagnostics) << "Unknown global declaration type";
-        });
+    diag::List diags;
+    BinGlobalDeclaration(decl, diags);
   }
 }
 
@@ -56,6 +48,33 @@ const ast::TypeDecl* Module::LookupType(Symbol name) const {
     }
   }
   return nullptr;
+}
+
+void Module::AddGlobalDeclaration(const tint::ast::Node* decl) {
+  diag::List diags;
+  BinGlobalDeclaration(decl, diags);
+  global_declarations_.emplace_back(decl);
+}
+
+void Module::BinGlobalDeclaration(const tint::ast::Node* decl,
+                                  diag::List& diags) {
+  Switch(
+      decl,  //
+      [&](const ast::TypeDecl* type) {
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
+        type_decls_.push_back(type);
+      },
+      [&](const Function* func) {
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
+        functions_.push_back(func);
+      },
+      [&](const Variable* var) {
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
+        global_variables_.push_back(var);
+      },
+      [&](Default) {
+        TINT_ICE(AST, diags) << "Unknown global declaration type";
+      });
 }
 
 void Module::AddGlobalVariable(const ast::Variable* var) {
@@ -100,24 +119,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
           << "src global declaration was nullptr";
       continue;
     }
-    Switch(
-        decl,
-        [&](const ast::TypeDecl* type) {
-          TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
-          type_decls_.push_back(type);
-        },
-        [&](const Function* func) {
-          TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
-          functions_.push_back(func);
-        },
-        [&](const Variable* var) {
-          TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
-          global_variables_.push_back(var);
-        },
-        [&](Default) {
-          TINT_ICE(AST, ctx->dst->Diagnostics())
-              << "Unknown global declaration type";
-        });
+    BinGlobalDeclaration(decl, ctx->dst->Diagnostics());
   }
 }
 

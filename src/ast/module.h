@@ -47,7 +47,7 @@ class Module : public Castable<Module, Node> {
   /// Destructor
   ~Module() override;
 
-  /// @returns the ordered global declarations for the translation unit
+  /// @returns the declaration-ordered global declarations for the module
   const std::vector<const Node*>& GlobalDeclarations() const {
     return global_declarations_;
   }
@@ -67,10 +67,14 @@ class Module : public Castable<Module, Node> {
     return false;
   }
 
-  /// @returns the global variables for the translation unit
+  /// Adds a global declaration to the Builder.
+  /// @param decl the declaration to add
+  void AddGlobalDeclaration(const tint::ast::Node* decl);
+
+  /// @returns the global variables for the module
   const VariableList& GlobalVariables() const { return global_variables_; }
 
-  /// @returns the global variables for the translation unit
+  /// @returns the global variables for the module
   VariableList& GlobalVariables() { return global_variables_; }
 
   /// Adds a type declaration to the Builder.
@@ -81,14 +85,14 @@ class Module : public Castable<Module, Node> {
   /// @param name the name of the type to search for
   const TypeDecl* LookupType(Symbol name) const;
 
-  /// @returns the declared types in the translation unit
+  /// @returns the declared types in the module
   const std::vector<const TypeDecl*>& TypeDecls() const { return type_decls_; }
 
   /// Add a function to the Builder
   /// @param func the function to add
   void AddFunction(const Function* func);
 
-  /// @returns the functions declared in the translation unit
+  /// @returns the functions declared in the module
   const FunctionList& Functions() const { return functions_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
@@ -103,6 +107,12 @@ class Module : public Castable<Module, Node> {
   void Copy(CloneContext* ctx, const Module* src);
 
  private:
+  /// Adds `decl` to either:
+  /// * #global_declarations_
+  /// * #type_decls_
+  /// * #functions_
+  void BinGlobalDeclaration(const tint::ast::Node* decl, diag::List& diags);
+
   std::vector<const Node*> global_declarations_;
   std::vector<const TypeDecl*> type_decls_;
   FunctionList functions_;

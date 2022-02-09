@@ -285,6 +285,8 @@ set(TINT_LIB_SRCS
   sem/pipeline_stage_set.h
   sem/node.cc
   sem/node.h
+  sem/module.cc
+  sem/module.h
   sem/sampler_texture_pair.h
   sem/statement.cc
   sem/struct.cc

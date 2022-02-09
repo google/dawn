@@ -60,6 +60,7 @@
 #include "src/sem/if_statement.h"
 #include "src/sem/loop_statement.h"
 #include "src/sem/member_accessor_expression.h"
+#include "src/sem/module.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/pointer_type.h"
 #include "src/sem/reference_type.h"
@@ -98,6 +99,10 @@ bool Resolver::Resolve() {
                               /* allow_out_of_order_decls*/ false)) {
     return false;
   }
+
+  // Create the semantic module
+  builder_->Sem().SetModule(
+      builder_->create<sem::Module>(dependencies_.ordered_globals));
 
   bool result = ResolveInternal();
 

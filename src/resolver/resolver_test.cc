@@ -39,6 +39,7 @@
 #include "src/sem/call.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
+#include "src/sem/module.h"
 #include "src/sem/reference_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/statement.h"
@@ -2161,6 +2162,28 @@ TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
   EXPECT_TRUE(pairs[0].first != nullptr);
   EXPECT_TRUE(pairs[0].second == nullptr);
 }
+
+TEST_F(ResolverTest, ModuleDependencyOrderedDeclarations) {
+  auto* f0 = Func("f0", {}, ty.void_(), {});
+  auto* v0 = Global("v0", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a0 = Alias("a0", ty.i32());
+  auto* s0 = Structure("s0", {Member("m", ty.i32())});
+  auto* f1 = Func("f1", {}, ty.void_(), {});
+  auto* v1 = Global("v1", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a1 = Alias("a1", ty.i32());
+  auto* s1 = Structure("s1", {Member("m", ty.i32())});
+  auto* f2 = Func("f2", {}, ty.void_(), {});
+  auto* v2 = Global("v2", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a2 = Alias("a2", ty.i32());
+  auto* s2 = Structure("s2", {Member("m", ty.i32())});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(Sem().Module(), nullptr);
+  EXPECT_THAT(Sem().Module()->DependencyOrderedDeclarations(),
+              ElementsAre(f0, v0, a0, s0, f1, v1, a1, s1, f2, v2, a2, s2));
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint
