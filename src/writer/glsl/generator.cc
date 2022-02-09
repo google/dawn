@@ -53,7 +53,7 @@ Result Generate(const Program* program,
   }
 
   // Generate the GLSL code.
-  auto impl = std::make_unique<GeneratorImpl>(&output.program);
+  auto impl = std::make_unique<GeneratorImpl>(&output.program, options.version);
   result.success = impl->Generate();
   result.error = impl->error();
   result.glsl = impl->result();

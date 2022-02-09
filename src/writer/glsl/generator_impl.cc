@@ -128,12 +128,20 @@ const char* convert_texel_format_to_glsl(const ast::TexelFormat format) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program, const Version& version)
+    : TextGenerator(program), version_(version) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-  line() << "#version 310 es";
+  {
+    auto out = line();
+    out << "#version " << version_.major_version << version_.minor_version
+        << "0";
+    if (version_.IsES()) {
+      out << " es";
+    }
+  }
 
   auto helpers_insertion_point = current_buffer_->lines.size();
 
@@ -181,7 +189,7 @@ bool GeneratorImpl::Generate() {
 
   TextBuffer extensions;
 
-  if (requires_oes_sample_variables_) {
+  if (version_.IsES() && requires_oes_sample_variables_) {
     extensions.Append("#extension GL_OES_sample_variables : require");
   }
 
@@ -192,7 +200,7 @@ bool GeneratorImpl::Generate() {
     helpers_insertion_point += extensions.lines.size();
   }
 
-  if (requires_default_precision_qualifier_) {
+  if (version_.IsES() && requires_default_precision_qualifier_) {
     current_buffer_->Insert("precision mediump float;",
                             helpers_insertion_point++, indent);
   }
@@ -1729,9 +1737,15 @@ bool GeneratorImpl::EmitUniformVariable(const sem::Variable* var) {
     return false;
   }
   ast::VariableBindingPoint bp = decl->BindingPoint();
-  line() << "layout(binding = " << bp.binding->value << ") uniform "
-         << UniqueIdentifier(StructName(str)) << " {";
-  EmitStructMembers(current_buffer_, str);
+  {
+    auto out = line();
+    out << "layout(binding = " << bp.binding->value;
+    if (version_.IsDesktop()) {
+      out << ", std140";
+    }
+    out << ") uniform " << UniqueIdentifier(StructName(str)) << " {";
+  }
+  EmitStructMembers(current_buffer_, str, /* emit_offsets */ true);
   auto name = builder_.Symbols().NameFor(decl->symbol);
   line() << "} " << name << ";";
   line();
@@ -1751,7 +1765,7 @@ bool GeneratorImpl::EmitStorageVariable(const sem::Variable* var) {
   ast::VariableBindingPoint bp = decl->BindingPoint();
   line() << "layout(binding = " << bp.binding->value << ", std430) buffer "
          << UniqueIdentifier(StructName(str)) << " {";
-  EmitStructMembers(current_buffer_, str);
+  EmitStructMembers(current_buffer_, str, /* emit_offsets */ true);
   auto name = builder_.Symbols().NameFor(decl->symbol);
   line() << "} " << name << ";";
   return true;
@@ -2509,14 +2523,16 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
 bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
   auto storage_class_uses = str->StorageClassUsage();
   line(b) << "struct " << StructName(str) << " {";
-  EmitStructMembers(b, str);
+  EmitStructMembers(b, str, false);
   line(b) << "};";
   line(b);
 
   return true;
 }
 
-bool GeneratorImpl::EmitStructMembers(TextBuffer* b, const sem::Struct* str) {
+bool GeneratorImpl::EmitStructMembers(TextBuffer* b,
+                                      const sem::Struct* str,
+                                      bool emit_offsets) {
   ScopedIndent si(b);
   for (auto* mem : str->Members()) {
     auto name = builder_.Symbols().NameFor(mem->Name());
@@ -2525,6 +2541,10 @@ bool GeneratorImpl::EmitStructMembers(TextBuffer* b, const sem::Struct* str) {
 
     auto out = line(b);
 
+    // Note: offsets are unsupported on GLSL ES.
+    if (emit_offsets && version_.IsDesktop() && mem->Offset() != 0) {
+      out << "layout(offset=" << mem->Offset() << ") ";
+    }
     if (!EmitTypeAndName(out, ty, ast::StorageClass::kNone,
                          ast::Access::kReadWrite, name)) {
       return false;

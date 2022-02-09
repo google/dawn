@@ -525,6 +525,7 @@ if(${TINT_BUILD_GLSL_WRITER})
     writer/glsl/generator.h
     writer/glsl/generator_impl.cc
     writer/glsl/generator_impl.h
+    writer/glsl/version.h
   )
 endif()
 
@@ -1082,10 +1083,12 @@ if(TINT_BUILD_TESTS)
       writer/glsl/generator_impl_module_constant_test.cc
       writer/glsl/generator_impl_return_test.cc
       writer/glsl/generator_impl_sanitizer_test.cc
+      writer/glsl/generator_impl_storage_buffer_test.cc
       writer/glsl/generator_impl_switch_test.cc
       writer/glsl/generator_impl_test.cc
       writer/glsl/generator_impl_type_test.cc
       writer/glsl/generator_impl_unary_op_test.cc
+      writer/glsl/generator_impl_uniform_buffer_test.cc
       writer/glsl/generator_impl_variable_decl_statement_test.cc
       writer/glsl/generator_impl_workgroup_var_test.cc
       writer/glsl/test_helper.h

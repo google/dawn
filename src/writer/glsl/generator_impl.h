@@ -35,6 +35,7 @@
 #include "src/scope_stack.h"
 #include "src/transform/decompose_memory_access.h"
 #include "src/utils/hash.h"
+#include "src/writer/glsl/version.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -55,7 +56,8 @@ class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
   /// @param program the program to generate
-  explicit GeneratorImpl(const Program* program);
+  /// @param version the GLSL version to use
+  GeneratorImpl(const Program* program, const Version& version);
   ~GeneratorImpl();
 
   /// @returns true on successful generation; false otherwise
@@ -388,8 +390,11 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating the members of a structure
   /// @param buffer the text buffer that the struct members will be written to
   /// @param ty the struct to generate
+  /// @param emit_offsets whether offsets should be emitted as offset=
   /// @returns true if the struct members are emitted
-  bool EmitStructMembers(TextBuffer* buffer, const sem::Struct* ty);
+  bool EmitStructMembers(TextBuffer* buffer,
+                         const sem::Struct* ty,
+                         bool emit_offsets);
   /// Handles a unary op expression
   /// @param out the output of the expression stream
   /// @param expr the expression to emit
@@ -475,6 +480,7 @@ class GeneratorImpl : public TextGenerator {
   std::unordered_map<const sem::Vector*, std::string> int_dot_funcs_;
   bool requires_oes_sample_variables_ = false;
   bool requires_default_precision_qualifier_ = false;
+  Version version_;
 };
 
 }  // namespace glsl
