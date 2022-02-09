@@ -290,14 +290,6 @@ namespace dawn::native {
             internalUsageDesc != nullptr && !device->IsFeatureEnabled(Feature::DawnInternalUsages),
             "The dawn-internal-usages feature is not enabled");
 
-        // Support for 1D textures is not complete so they are currently unsafe to use.
-        DAWN_INVALID_IF(
-            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) &&
-                descriptor->dimension == wgpu::TextureDimension::e1D,
-            "Texture with dimension %s are disallowed because they are partially implemented. See "
-            "https://crbug.com/dawn/814",
-            wgpu::TextureDimension::e1D);
-
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
 
