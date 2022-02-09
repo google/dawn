@@ -436,7 +436,7 @@ namespace dawn::native::metal {
         return mStagesRequiringStorageBufferLength;
     }
 
-    MTLVertexDescriptor* RenderPipeline::MakeVertexDesc() {
+    NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() {
         MTLVertexDescriptor* mtlVertexDescriptor = [MTLVertexDescriptor new];
 
         // Vertex buffers are packed after all the buffers for the bind groups.
@@ -491,7 +491,7 @@ namespace dawn::native::metal {
             [attribDesc release];
         }
 
-        return mtlVertexDescriptor;
+        return AcquireNSRef(mtlVertexDescriptor);
     }
 
     void RenderPipeline::InitializeAsync(Ref<RenderPipelineBase> renderPipeline,

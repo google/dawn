@@ -53,7 +53,7 @@ namespace dawn::native::metal {
       private:
         using RenderPipelineBase::RenderPipelineBase;
 
-        MTLVertexDescriptor* MakeVertexDesc();
+        NSRef<MTLVertexDescriptor> MakeVertexDesc();
 
         MTLPrimitiveType mMtlPrimitiveTopology;
         MTLWinding mMtlFrontFace;
