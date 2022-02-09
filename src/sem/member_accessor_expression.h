@@ -41,9 +41,11 @@ class MemberAccessorExpression
   /// @param declaration the AST node
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
+  /// @param has_side_effects whether this expression may have side effects
   MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
                            const sem::Type* type,
-                           const Statement* statement);
+                           const Statement* statement,
+                           bool has_side_effects);
 
   /// Destructor
   ~MemberAccessorExpression() override;
@@ -60,10 +62,12 @@ class StructMemberAccess
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
   /// @param member the structure member
+  /// @param has_side_effects whether this expression may have side effects
   StructMemberAccess(const ast::MemberAccessorExpression* declaration,
                      const sem::Type* type,
                      const Statement* statement,
-                     const StructMember* member);
+                     const StructMember* member,
+                     bool has_side_effects);
 
   /// Destructor
   ~StructMemberAccess() override;

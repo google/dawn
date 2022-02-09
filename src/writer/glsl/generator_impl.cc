@@ -1336,8 +1336,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       auto* f32 = builder_.create<sem::F32>();
       auto* zero = builder_.Expr(0.0f);
       auto* stmt = builder_.Sem().Get(param_coords)->Stmt();
-      auto* sem_zero =
-          builder_.create<sem::Expression>(zero, f32, stmt, sem::Constant{});
+      auto* sem_zero = builder_.create<sem::Expression>(
+          zero, f32, stmt, sem::Constant{}, /* has_side_effects */ false);
       builder_.Sem().Add(zero, sem_zero);
       param_coords = AppendVector(&builder_, param_coords, zero)->Declaration();
     }

@@ -160,6 +160,16 @@ bool Builtin::IsAtomic() const {
   return IsAtomicBuiltin(type_);
 }
 
+bool Builtin::HasSideEffects() const {
+  if (IsAtomic() && type_ != sem::BuiltinType::kAtomicLoad) {
+    return true;
+  }
+  if (type_ == sem::BuiltinType::kTextureStore) {
+    return true;
+  }
+  return false;
+}
+
 }  // namespace sem
 }  // namespace tint
 

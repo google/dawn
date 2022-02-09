@@ -181,7 +181,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct_Empty) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("{}"));
-  EXPECT_THAT(gen.result(), Not(HasSubstr("{{}}")));
+  EXPECT_THAT(gen.result(), testing::Not(HasSubstr("{{}}")));
 }
 
 }  // namespace

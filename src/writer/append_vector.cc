@@ -61,7 +61,8 @@ const sem::Expression* Zero(ProgramBuilder& b,
         << "unsupported vector element type: " << ty->TypeInfo().name;
     return nullptr;
   }
-  auto* sem = b.create<sem::Expression>(expr, ty, stmt, sem::Constant{});
+  auto* sem = b.create<sem::Expression>(expr, ty, stmt, sem::Constant{},
+                                        /* has_side_effects */ false);
   b.Sem().Add(expr, sem);
   return sem;
 }
@@ -140,10 +141,10 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         b->create<sem::Parameter>(nullptr, 0, scalar_sem->Type()->UnwrapRef(),
                                   ast::StorageClass::kNone,
                                   ast::Access::kUndefined));
-    auto* scalar_cast_sem =
-        b->create<sem::Call>(scalar_cast_ast, scalar_cast_target,
-                             std::vector<const sem::Expression*>{scalar_sem},
-                             statement, sem::Constant{});
+    auto* scalar_cast_sem = b->create<sem::Call>(
+        scalar_cast_ast, scalar_cast_target,
+        std::vector<const sem::Expression*>{scalar_sem}, statement,
+        sem::Constant{}, /* has_side_effects */ false);
     b->Sem().Add(scalar_cast_ast, scalar_cast_sem);
     packed.emplace_back(scalar_cast_sem);
   } else {
@@ -165,7 +166,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
                                             ast::Access::kUndefined);
                                       }));
   auto* constructor_sem = b->create<sem::Call>(
-      constructor_ast, constructor_target, packed, statement, sem::Constant{});
+      constructor_ast, constructor_target, packed, statement, sem::Constant{},
+      /* has_side_effects */ false);
   b->Sem().Add(constructor_ast, constructor_sem);
   return constructor_sem;
 }

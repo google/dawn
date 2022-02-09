@@ -78,7 +78,11 @@ Parameter::~Parameter() = default;
 VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
                            Statement* statement,
                            sem::Variable* variable)
-    : Base(declaration, variable->Type(), statement, variable->ConstantValue()),
+    : Base(declaration,
+           variable->Type(),
+           statement,
+           variable->ConstantValue(),
+           /* has_side_effects */ false),
       variable_(variable) {}
 
 }  // namespace sem

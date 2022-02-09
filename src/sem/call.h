@@ -33,11 +33,13 @@ class Call : public Castable<Call, Expression> {
   /// @param arguments the call arguments
   /// @param statement the statement that owns this expression
   /// @param constant the constant value of this expression
+  /// @param has_side_effects whether this expression may have side effects
   Call(const ast::CallExpression* declaration,
        const CallTarget* target,
        std::vector<const sem::Expression*> arguments,
        const Statement* statement,
-       Constant constant);
+       Constant constant,
+       bool has_side_effects);
 
   /// Destructor
   ~Call() override;

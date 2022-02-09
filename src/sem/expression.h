@@ -34,10 +34,12 @@ class Expression : public Castable<Expression, Node> {
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
   /// @param constant the constant value of the expression. May be invalid
+  /// @param has_side_effects true if this expression may have side-effects
   Expression(const ast::Expression* declaration,
              const sem::Type* type,
              const Statement* statement,
-             Constant constant);
+             Constant constant,
+             bool has_side_effects);
 
   /// Destructor
   ~Expression() override;
@@ -60,6 +62,9 @@ class Expression : public Castable<Expression, Node> {
   /// @return the behaviors of this statement
   sem::Behaviors& Behaviors() { return behaviors_; }
 
+  /// @return true of this expression may have side effects
+  bool HasSideEffects() const { return has_side_effects_; }
+
  protected:
   /// The AST expression node for this semantic expression
   const ast::Expression* const declaration_;
@@ -69,6 +74,7 @@ class Expression : public Castable<Expression, Node> {
   const Statement* const statement_;
   const Constant constant_;
   sem::Behaviors behaviors_{sem::Behavior::kNext};
+  const bool has_side_effects_;
 };
 
 }  // namespace sem

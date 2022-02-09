@@ -139,6 +139,10 @@ class Builtin : public Castable<Builtin, CallTarget> {
   /// @returns true if builtin is a atomic builtin
   bool IsAtomic() const;
 
+  /// @returns true if intrinsic may have side-effects (i.e. writes to at least
+  /// one of its inputs)
+  bool HasSideEffects() const;
+
  private:
   const BuiltinType type_;
   const PipelineStageSet supported_stages_;

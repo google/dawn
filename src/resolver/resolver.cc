@@ -1140,7 +1140,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
     } else if (expr->Is<ast::PhonyExpression>()) {
       sem_expr = builder_->create<sem::Expression>(
           expr, builder_->create<sem::Void>(), current_statement_,
-          sem::Constant{});
+          sem::Constant{}, /* has_side_effects */ false);
     } else {
       TINT_ICE(Resolver, diagnostics_)
           << "unhandled expression type: " << expr->TypeInfo().name;
@@ -1193,8 +1193,9 @@ sem::Expression* Resolver::IndexAccessor(
   }
 
   auto val = EvaluateConstantValue(expr, ty);
-  auto* sem =
-      builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+  bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
+  auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_,
+                                                val, has_side_effects);
   sem->Behaviors() = idx->Behaviors() + obj->Behaviors();
   return sem;
 }
@@ -1207,8 +1208,8 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
   }
 
   auto val = EvaluateConstantValue(expr, ty);
-  auto* sem =
-      builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+  auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_,
+                                                val, inner->HasSideEffects());
 
   sem->Behaviors() = inner->Behaviors();
 
@@ -1382,8 +1383,13 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     AddWarning("use of deprecated builtin", expr->source);
   }
 
+  bool has_side_effects = builtin->HasSideEffects() ||
+                          std::any_of(args.begin(), args.end(), [](auto* e) {
+                            return e->HasSideEffects();
+                          });
   auto* call = builder_->create<sem::Call>(expr, builtin, std::move(args),
-                                           current_statement_, sem::Constant{});
+                                           current_statement_, sem::Constant{},
+                                           has_side_effects);
 
   current_function_->AddDirectlyCalledBuiltin(builtin);
 
@@ -1427,8 +1433,12 @@ sem::Call* Resolver::FunctionCall(
   auto sym = expr->target.name->symbol;
   auto name = builder_->Symbols().NameFor(sym);
 
+  // TODO(crbug.com/tint/1420): For now, assume all function calls have side
+  // effects.
+  bool has_side_effects = true;
   auto* call = builder_->create<sem::Call>(expr, target, std::move(args),
-                                           current_statement_, sem::Constant{});
+                                           current_statement_, sem::Constant{},
+                                           has_side_effects);
 
   if (current_function_) {
     // Note: Requires called functions to be resolved first.
@@ -1530,9 +1540,10 @@ sem::Call* Resolver::TypeConversion(const ast::CallExpression* expr,
   }
 
   auto val = EvaluateConstantValue(expr, target);
+  bool has_side_effects = arg->HasSideEffects();
   return builder_->create<sem::Call>(expr, call_target,
                                      std::vector<const sem::Expression*>{arg},
-                                     current_statement_, val);
+                                     current_statement_, val, has_side_effects);
 }
 
 sem::Call* Resolver::TypeConstructor(
@@ -1590,8 +1601,10 @@ sem::Call* Resolver::TypeConstructor(
   }
 
   auto val = EvaluateConstantValue(expr, ty);
+  bool has_side_effects = std::any_of(
+      args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
   return builder_->create<sem::Call>(expr, call_target, std::move(args),
-                                     current_statement_, val);
+                                     current_statement_, val, has_side_effects);
 }
 
 sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
@@ -1601,8 +1614,8 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
   }
 
   auto val = EvaluateConstantValue(literal, ty);
-  return builder_->create<sem::Expression>(literal, ty, current_statement_,
-                                           val);
+  return builder_->create<sem::Expression>(literal, ty, current_statement_, val,
+                                           /* has_side_effects */ false);
 }
 
 sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
@@ -1715,8 +1728,12 @@ sem::Expression* Resolver::MemberAccessor(
                                              ref->Access());
     }
 
+    // Structure may be a side-effecting expression (e.g. function call).
+    auto* sem_structure = Sem(expr->structure);
+    bool has_side_effects = sem_structure && sem_structure->HasSideEffects();
+
     return builder_->create<sem::StructMemberAccess>(
-        expr, ret, current_statement_, member);
+        expr, ret, current_statement_, member, has_side_effects);
   }
 
   if (auto* vec = storage_ty->As<sem::Vector>()) {
@@ -1827,8 +1844,9 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
 
   auto build = [&](const sem::Type* ty) {
     auto val = EvaluateConstantValue(expr, ty);
-    auto* sem =
-        builder_->create<sem::Expression>(expr, ty, current_statement_, val);
+    bool has_side_effects = lhs->HasSideEffects() || rhs->HasSideEffects();
+    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_,
+                                                  val, has_side_effects);
     sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
     return sem;
   };
@@ -2075,8 +2093,8 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
   }
 
   auto val = EvaluateConstantValue(unary, ty);
-  auto* sem =
-      builder_->create<sem::Expression>(unary, ty, current_statement_, val);
+  auto* sem = builder_->create<sem::Expression>(unary, ty, current_statement_,
+                                                val, expr->HasSideEffects());
   sem->Behaviors() = expr->Behaviors();
   return sem;
 }

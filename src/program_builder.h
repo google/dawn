@@ -1540,6 +1540,15 @@ class ProgramBuilder {
                                           Expr(std::forward<EXPR>(expr)));
   }
 
+  /// @param expr the expression to perform a unary not on
+  /// @return an ast::UnaryOpExpression that is the unary not of the input
+  /// expression
+  template <typename EXPR>
+  const ast::UnaryOpExpression* Not(EXPR&& expr) {
+    return create<ast::UnaryOpExpression>(ast::UnaryOp::kNot,
+                                          Expr(std::forward<EXPR>(expr)));
+  }
+
   /// @param source the source information
   /// @param func the function name
   /// @param args the function call arguments

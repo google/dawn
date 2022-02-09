@@ -27,8 +27,9 @@ namespace sem {
 MemberAccessorExpression::MemberAccessorExpression(
     const ast::MemberAccessorExpression* declaration,
     const sem::Type* type,
-    const Statement* statement)
-    : Base(declaration, type, statement, Constant{}) {}
+    const Statement* statement,
+    bool has_side_effects)
+    : Base(declaration, type, statement, Constant{}, has_side_effects) {}
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 
@@ -36,8 +37,9 @@ StructMemberAccess::StructMemberAccess(
     const ast::MemberAccessorExpression* declaration,
     const sem::Type* type,
     const Statement* statement,
-    const StructMember* member)
-    : Base(declaration, type, statement), member_(member) {}
+    const StructMember* member,
+    bool has_side_effects)
+    : Base(declaration, type, statement, has_side_effects), member_(member) {}
 
 StructMemberAccess::~StructMemberAccess() = default;
 
@@ -45,7 +47,8 @@ Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const sem::Type* type,
                  const Statement* statement,
                  std::vector<uint32_t> indices)
-    : Base(declaration, type, statement), indices_(std::move(indices)) {}
+    : Base(declaration, type, statement, /* has_side_effects */ false),
+      indices_(std::move(indices)) {}
 
 Swizzle::~Swizzle() = default;
 
