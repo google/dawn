@@ -4,22 +4,24 @@ using namespace metal;
 struct tint_array_wrapper {
   float arr[4];
 };
-struct tint_array_wrapper_1 {
-  tint_array_wrapper arr[3];
-};
-struct tint_array_wrapper_2 {
-  tint_array_wrapper_1 arr[2];
-};
 
 tint_array_wrapper f1() {
   tint_array_wrapper const tint_symbol_1 = {.arr={}};
   return tint_symbol_1;
 }
 
+struct tint_array_wrapper_1 {
+  tint_array_wrapper arr[3];
+};
+
 tint_array_wrapper_1 f2() {
   tint_array_wrapper_1 const tint_symbol_2 = {.arr={f1(), f1(), f1()}};
   return tint_symbol_2;
 }
+
+struct tint_array_wrapper_2 {
+  tint_array_wrapper_1 arr[2];
+};
 
 tint_array_wrapper_2 f3() {
   tint_array_wrapper_2 const tint_symbol_3 = {.arr={f2(), f2()}};

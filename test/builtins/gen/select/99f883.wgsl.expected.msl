@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void select_99f883() {
   uint res = select(1u, 1u, bool());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   select_99f883();

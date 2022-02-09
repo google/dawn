@@ -4,9 +4,11 @@ using namespace metal;
 struct PointLight {
   float4 position;
 };
+
 struct PointLights {
   PointLight values[1];
 };
+
 struct Uniforms {
   /* 0x0000 */ float4x4 worldView;
   /* 0x0040 */ float4x4 proj;
@@ -15,6 +17,7 @@ struct Uniforms {
   /* 0x0088 */ int8_t tint_pad[8];
   /* 0x0090 */ float4 color;
 };
+
 struct FragmentInput {
   float4 position;
   float4 view_position;
@@ -22,17 +25,9 @@ struct FragmentInput {
   float2 uv;
   float4 color;
 };
+
 struct FragmentOutput {
   float4 color;
-};
-struct tint_symbol_3 {
-  float4 view_position [[user(locn0)]];
-  float4 normal [[user(locn1)]];
-  float2 uv [[user(locn2)]];
-  float4 color [[user(locn3)]];
-};
-struct tint_symbol_4 {
-  float4 color [[color(0)]];
 };
 
 float4 getColor(FragmentInput tint_symbol, const constant Uniforms* const tint_symbol_6, texture2d<float, access::sample> tint_symbol_7, sampler tint_symbol_8) {
@@ -55,6 +50,17 @@ float4 getColor(FragmentInput tint_symbol, const constant Uniforms* const tint_s
   }
   return color;
 }
+
+struct tint_symbol_3 {
+  float4 view_position [[user(locn0)]];
+  float4 normal [[user(locn1)]];
+  float2 uv [[user(locn2)]];
+  float4 color [[user(locn3)]];
+};
+
+struct tint_symbol_4 {
+  float4 color [[color(0)]];
+};
 
 FragmentOutput tint_symbol_1_inner(FragmentInput tint_symbol) {
   FragmentOutput output = {};

@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void refract_cbc1d2() {
   float3 res = refract(float3(), float3(), 1.0f);
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   refract_cbc1d2();

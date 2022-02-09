@@ -4,12 +4,15 @@ using namespace metal;
 struct vertexUniformBuffer1 {
   /* 0x0000 */ float2x2 transform1;
 };
+
 struct vertexUniformBuffer2 {
   /* 0x0000 */ float2x2 transform2;
 };
+
 struct tint_symbol_1 {
   float4 value [[position]];
 };
+
 struct tint_array_wrapper {
   float2 arr[3];
 };

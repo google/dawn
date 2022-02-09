@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void textureNumSamples_2c6f14(texture2d_ms<float, access::read> tint_symbol_1) {
   int res = int(tint_symbol_1.get_num_samples());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner(texture2d_ms<float, access::read> tint_symbol_2) {
   textureNumSamples_2c6f14(tint_symbol_2);

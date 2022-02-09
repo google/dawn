@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void fract_8bc1e9() {
   float4 res = fract(float4());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   fract_8bc1e9();

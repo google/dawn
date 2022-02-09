@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void sign_159665() {
   float3 res = sign(float3());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   sign_159665();

@@ -4,9 +4,11 @@ using namespace metal;
 struct S_inner {
   float a;
 };
+
 struct tint_array_wrapper {
   float arr[4];
 };
+
 struct S {
   bool member_bool;
   int member_i32;

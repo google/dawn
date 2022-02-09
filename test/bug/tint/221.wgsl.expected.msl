@@ -4,6 +4,7 @@ using namespace metal;
 struct tint_array_wrapper {
   /* 0x0000 */ uint arr[50];
 };
+
 struct Buf {
   /* 0x0000 */ uint count;
   /* 0x0004 */ tint_array_wrapper data;

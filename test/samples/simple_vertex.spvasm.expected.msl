@@ -1,17 +1,18 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct main_out {
-  float4 gl_Position;
-};
-struct tint_symbol_1 {
-  float4 gl_Position [[position]];
-};
-
 void main_1(thread float4* const tint_symbol_3) {
   *(tint_symbol_3) = float4(0.0f, 0.0f, 0.0f, 0.0f);
   return;
 }
+
+struct main_out {
+  float4 gl_Position;
+};
+
+struct tint_symbol_1 {
+  float4 gl_Position [[position]];
+};
 
 main_out tint_symbol_inner(thread float4* const tint_symbol_4) {
   main_1(tint_symbol_4);

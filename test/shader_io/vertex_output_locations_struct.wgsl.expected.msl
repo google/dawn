@@ -8,6 +8,7 @@ struct VertexOutputs {
   float4 loc3;
   float4 position;
 };
+
 struct tint_symbol_1 {
   int loc0 [[user(locn0)]] [[flat]];
   uint loc1 [[user(locn1)]] [[flat]];

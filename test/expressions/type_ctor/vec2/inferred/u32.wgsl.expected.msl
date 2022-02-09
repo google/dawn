@@ -2,3 +2,4 @@
 
 using namespace metal;
 constant uint2 v = uint2(0u, 1u);
+

@@ -17,22 +17,28 @@ struct LightData {
   /* 0x0010 */ packed_float3 color;
   /* 0x001c */ float radius;
 };
+
 struct LightsBuffer {
   /* 0x0000 */ LightData lights[1];
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ uint arr[64];
 };
+
 struct TileLightIdData {
   /* 0x0000 */ atomic_uint count;
   /* 0x0004 */ tint_array_wrapper lightId;
 };
+
 struct tint_array_wrapper_1 {
   /* 0x0000 */ TileLightIdData arr[4];
 };
+
 struct Tiles {
   /* 0x0000 */ tint_array_wrapper_1 data;
 };
+
 struct Config {
   /* 0x0000 */ uint numLights;
   /* 0x0004 */ uint numTiles;
@@ -41,6 +47,7 @@ struct Config {
   /* 0x0010 */ uint numTileLightSlot;
   /* 0x0014 */ uint tileSize;
 };
+
 struct Uniforms {
   /* 0x0000 */ float4 min;
   /* 0x0010 */ float4 max;
@@ -48,6 +55,7 @@ struct Uniforms {
   /* 0x0060 */ float4x4 projectionMatrix;
   /* 0x00a0 */ float4 fullScreenSize;
 };
+
 struct tint_array_wrapper_2 {
   float4 arr[6];
 };

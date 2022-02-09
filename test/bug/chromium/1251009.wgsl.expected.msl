@@ -5,16 +5,19 @@ struct VertexInputs0 {
   uint vertex_index;
   int loc0;
 };
+
 struct VertexInputs1 {
   uint loc1;
   float4 loc3;
 };
+
 struct tint_symbol_2 {
   int loc0 [[attribute(0)]];
   uint loc1 [[attribute(1)]];
   uint loc1_1 [[attribute(2)]];
   float4 loc3 [[attribute(3)]];
 };
+
 struct tint_symbol_3 {
   float4 value [[position]];
 };

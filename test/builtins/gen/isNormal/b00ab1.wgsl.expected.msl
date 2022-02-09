@@ -5,13 +5,13 @@ builtins/gen/isNormal/b00ab1.wgsl:28:25 warning: use of deprecated builtin
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void isNormal_b00ab1() {
   bool2 res = isnormal(float2());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   isNormal_b00ab1();

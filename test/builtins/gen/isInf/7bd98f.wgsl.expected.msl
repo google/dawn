@@ -5,13 +5,13 @@ builtins/gen/isInf/7bd98f.wgsl:28:19 warning: use of deprecated builtin
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void isInf_7bd98f() {
   bool res = isinf(1.0f);
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   isInf_7bd98f();

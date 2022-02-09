@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void textureDimensions_cdf473(texture2d_array<int, access::write> tint_symbol_1) {
   int2 res = int2(tint_symbol_1.get_width(), tint_symbol_1.get_height());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner(texture2d_array<int, access::write> tint_symbol_2) {
   textureDimensions_cdf473(tint_symbol_2);

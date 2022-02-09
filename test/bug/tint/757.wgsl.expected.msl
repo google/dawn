@@ -4,6 +4,7 @@ using namespace metal;
 struct Constants {
   int level;
 };
+
 struct Result {
   /* 0x0000 */ float values[1];
 };

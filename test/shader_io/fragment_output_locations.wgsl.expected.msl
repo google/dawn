@@ -4,15 +4,6 @@ using namespace metal;
 struct tint_symbol {
   int value [[color(0)]];
 };
-struct tint_symbol_1 {
-  uint value [[color(1)]];
-};
-struct tint_symbol_2 {
-  float value [[color(2)]];
-};
-struct tint_symbol_3 {
-  float4 value [[color(3)]];
-};
 
 int main0_inner() {
   return 1;
@@ -25,6 +16,10 @@ fragment tint_symbol main0() {
   return wrapper_result;
 }
 
+struct tint_symbol_1 {
+  uint value [[color(1)]];
+};
+
 uint main1_inner() {
   return 1u;
 }
@@ -36,6 +31,10 @@ fragment tint_symbol_1 main1() {
   return wrapper_result_1;
 }
 
+struct tint_symbol_2 {
+  float value [[color(2)]];
+};
+
 float main2_inner() {
   return 1.0f;
 }
@@ -46,6 +45,10 @@ fragment tint_symbol_2 main2() {
   wrapper_result_2.value = inner_result_2;
   return wrapper_result_2;
 }
+
+struct tint_symbol_3 {
+  float4 value [[color(3)]];
+};
 
 float4 main3_inner() {
   return float4(1.0f, 2.0f, 3.0f, 4.0f);

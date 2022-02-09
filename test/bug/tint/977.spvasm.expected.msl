@@ -4,12 +4,15 @@ using namespace metal;
 struct ResultMatrix {
   /* 0x0000 */ float numbers[1];
 };
+
 struct FirstMatrix {
   float numbers[1];
 };
+
 struct SecondMatrix {
   float numbers[1];
 };
+
 struct Uniforms {
   float tint_symbol;
   int sizeA;

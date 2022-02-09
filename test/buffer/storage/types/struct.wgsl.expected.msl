@@ -4,6 +4,7 @@ using namespace metal;
 struct Inner {
   /* 0x0000 */ float f;
 };
+
 struct S {
   /* 0x0000 */ Inner inner;
 };

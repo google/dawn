@@ -4,12 +4,14 @@ using namespace metal;
 struct tint_array_wrapper {
   /* 0x0000 */ int arr[6];
 };
+
 struct sspp962805860buildInformationS {
   /* 0x0000 */ float4 footprint;
   /* 0x0010 */ float4 offset;
   /* 0x0020 */ int essence;
   /* 0x0024 */ tint_array_wrapper orientation;
 };
+
 struct x_B4_BuildInformation {
   /* 0x0000 */ sspp962805860buildInformationS passthru;
 };

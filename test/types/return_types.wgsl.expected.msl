@@ -4,9 +4,6 @@ using namespace metal;
 struct S {
   float a;
 };
-struct tint_array_wrapper {
-  float arr[4];
-};
 
 bool ret_bool() {
   return bool();
@@ -39,6 +36,10 @@ float4 ret_v4f32() {
 float2x3 ret_m2x3() {
   return float2x3();
 }
+
+struct tint_array_wrapper {
+  float arr[4];
+};
 
 tint_array_wrapper ret_arr() {
   tint_array_wrapper const tint_symbol_1 = {.arr={}};

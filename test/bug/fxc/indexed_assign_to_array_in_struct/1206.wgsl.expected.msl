@@ -15,9 +15,11 @@ inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
 struct Simulation {
   /* 0x0000 */ uint i;
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ float3 arr[8];
 };
+
 struct Particle {
   /* 0x0000 */ tint_array_wrapper position;
   /* 0x0080 */ float lifetime;
@@ -26,6 +28,7 @@ struct Particle {
   /* 0x00a0 */ packed_float3 velocity;
   /* 0x00ac */ int8_t tint_pad_1[4];
 };
+
 struct Particles {
   /* 0x0000 */ Particle p[1];
 };

@@ -4,6 +4,7 @@ using namespace metal;
 struct VertexOutputs {
   float4 position;
 };
+
 struct tint_symbol_1 {
   float4 position [[position]];
 };

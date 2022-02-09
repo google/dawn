@@ -4,12 +4,15 @@ using namespace metal;
 struct FragmentInput {
   float2 vUv;
 };
+
 struct FragmentOutput {
   float4 color;
 };
+
 struct tint_symbol_2 {
   float2 vUv [[user(locn2)]];
 };
+
 struct tint_symbol_3 {
   float4 color [[color(0)]];
 };

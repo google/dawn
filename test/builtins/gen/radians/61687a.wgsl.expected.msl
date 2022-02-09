@@ -6,13 +6,13 @@ float2 tint_radians(float2 param_0) {
   return param_0 * 0.017453292519943295474;
 }
 
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void radians_61687a() {
   float2 res = tint_radians(float2());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   radians_61687a();

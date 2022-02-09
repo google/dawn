@@ -25,20 +25,6 @@ struct LeftOver {
   /* 0x0070 */ packed_float3 colorMul;
   /* 0x007c */ int8_t tint_pad_1[4];
 };
-struct main_out {
-  float4 glFragColor_1;
-};
-struct tint_symbol_2 {
-  float3 vPosition_param [[user(locn0)]];
-  float2 vUV_param [[user(locn1)]];
-  float2 tUV_param [[user(locn2)]];
-  float2 stageUnits_1_param [[user(locn3)]];
-  float2 levelUnits_param [[user(locn4)]];
-  float2 tileID_1_param [[user(locn5)]];
-};
-struct tint_symbol_3 {
-  float4 glFragColor_1 [[color(0)]];
-};
 
 float4x4 getFrameData_f1_(thread float* const frameID, const constant LeftOver* const tint_symbol_5, texture2d<float, access::sample> tint_symbol_6, sampler tint_symbol_7) {
   float fX = 0.0f;
@@ -203,6 +189,23 @@ void main_1(thread float2* const tint_symbol_8, const constant LeftOver* const t
   *(tint_symbol_20) = x_318;
   return;
 }
+
+struct main_out {
+  float4 glFragColor_1;
+};
+
+struct tint_symbol_2 {
+  float3 vPosition_param [[user(locn0)]];
+  float2 vUV_param [[user(locn1)]];
+  float2 tUV_param [[user(locn2)]];
+  float2 stageUnits_1_param [[user(locn3)]];
+  float2 levelUnits_param [[user(locn4)]];
+  float2 tileID_1_param [[user(locn5)]];
+};
+
+struct tint_symbol_3 {
+  float4 glFragColor_1 [[color(0)]];
+};
 
 main_out tint_symbol_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_param, float2 stageUnits_1_param, float3 vPosition_param, float2 vUV_param, thread float2* const tint_symbol_21, thread float2* const tint_symbol_22, thread float2* const tint_symbol_23, thread float2* const tint_symbol_24, thread float3* const tint_symbol_25, thread float2* const tint_symbol_26, const constant LeftOver* const tint_symbol_27, texture2d<float, access::sample> tint_symbol_28, sampler tint_symbol_29, texture2d<float, access::sample> tint_symbol_30, texture2d<float, access::sample> tint_symbol_31, sampler tint_symbol_32, thread float* const tint_symbol_33, texture2d<float, access::sample> tint_symbol_34, sampler tint_symbol_35, texture2d<float, access::sample> tint_symbol_36, sampler tint_symbol_37, thread float4* const tint_symbol_38) {
   *(tint_symbol_21) = tUV_param;

@@ -4,12 +4,15 @@ using namespace metal;
 struct UBO {
   /* 0x0000 */ int dynamic_idx;
 };
+
 struct Result {
   /* 0x0000 */ int out;
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ int arr[4];
 };
+
 struct SSBO {
   /* 0x0000 */ tint_array_wrapper data;
 };

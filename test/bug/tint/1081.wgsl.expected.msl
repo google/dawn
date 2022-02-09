@@ -1,19 +1,20 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_2 {
-  int3 x [[user(locn1)]] [[flat]];
-};
-struct tint_symbol_3 {
-  int value [[color(2)]];
-};
-
 int f(int x) {
   if ((x == 10)) {
     discard_fragment();
   }
   return x;
 }
+
+struct tint_symbol_2 {
+  int3 x [[user(locn1)]] [[flat]];
+};
+
+struct tint_symbol_3 {
+  int value [[color(2)]];
+};
 
 int tint_symbol_inner(int3 x) {
   int y = x[0];

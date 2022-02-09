@@ -6,13 +6,13 @@ template<typename T>
 T tint_dot4(vec<T,4> a, vec<T,4> b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
 }
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void dot_ef6b1d() {
   int res = tint_dot4(int4(), int4());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   dot_ef6b1d();

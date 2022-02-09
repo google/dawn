@@ -11,6 +11,7 @@ using namespace metal;
 struct Out {
   float4 pos;
 };
+
 struct tint_symbol_1 {
   float4 pos [[position]] TINT_INVARIANT;
 };

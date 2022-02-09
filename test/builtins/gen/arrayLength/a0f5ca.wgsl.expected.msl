@@ -4,16 +4,18 @@ using namespace metal;
 struct tint_symbol_1 {
   /* 0x0000 */ uint4 buffer_size[1];
 };
+
 struct SB_RO {
   float arg_0[1];
-};
-struct tint_symbol {
-  float4 value [[position]];
 };
 
 void arrayLength_a0f5ca(const constant tint_symbol_1* const tint_symbol_3) {
   uint res = (((*(tint_symbol_3)).buffer_size[0u][0u] - 0u) / 4u);
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner(const constant tint_symbol_1* const tint_symbol_4) {
   arrayLength_a0f5ca(tint_symbol_4);

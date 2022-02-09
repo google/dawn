@@ -7,6 +7,7 @@ struct S {
   float f;
   bool b;
 };
+
 struct tint_array_wrapper {
   S arr[4];
 };

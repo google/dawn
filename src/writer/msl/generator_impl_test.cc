@@ -190,6 +190,7 @@ using namespace metal;
 struct tint_array_wrapper {
   float2x2 arr[4];
 };
+
 struct tint_symbol_3 {
   tint_array_wrapper m;
 };
@@ -240,9 +241,11 @@ struct S1 {
   float2x2 m1;
   float4x4 m2;
 };
+
 struct S2 {
   S1 s;
 };
+
 struct tint_symbol_4 {
   S2 s;
 };
@@ -316,11 +319,13 @@ struct tint_symbol_7 {
   float2x3 m2;
   float2x4 m3;
 };
+
 struct tint_symbol_15 {
   float3x2 m4;
   float3x3 m5;
   float3x4 m6;
 };
+
 struct tint_symbol_23 {
   float4x2 m7;
   float4x3 m8;

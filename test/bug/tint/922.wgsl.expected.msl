@@ -7,47 +7,43 @@ struct Mat4x4_ {
   /* 0x0020 */ float4 mz;
   /* 0x0030 */ float4 mw;
 };
+
 struct Mat4x3_ {
   /* 0x0000 */ float4 mx;
   /* 0x0010 */ float4 my;
   /* 0x0020 */ float4 mz;
 };
+
 struct Mat4x2_ {
   /* 0x0000 */ float4 mx;
   /* 0x0010 */ float4 my;
 };
+
 struct ub_SceneParams {
   /* 0x0000 */ Mat4x4_ u_Projection;
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ Mat4x2_ arr[1];
 };
+
 struct ub_MaterialParams {
   /* 0x0000 */ tint_array_wrapper u_TexMtx;
   /* 0x0020 */ float4 u_Misc0_;
 };
+
 struct tint_array_wrapper_1 {
   /* 0x0000 */ Mat4x3_ arr[32];
 };
+
 struct ub_PacketParams {
   /* 0x0000 */ tint_array_wrapper_1 u_PosMtx;
 };
+
 struct VertexOutput {
   float4 v_Color;
   float2 v_TexCoord;
   float4 member;
-};
-struct tint_symbol_2 {
-  float3 a_Position [[attribute(0)]];
-  float2 a_UV [[attribute(1)]];
-  float4 a_Color [[attribute(2)]];
-  float3 a_Normal [[attribute(3)]];
-  float a_PosMtxIdx [[attribute(4)]];
-};
-struct tint_symbol_3 {
-  float4 v_Color [[user(locn0)]];
-  float2 v_TexCoord [[user(locn1)]];
-  float4 member [[position]];
 };
 
 float3 Mat4x3GetCol0_(Mat4x3_ m) {
@@ -268,6 +264,20 @@ void main1(thread float* const tint_symbol_5, const constant ub_PacketParams* co
     }
   }
 }
+
+struct tint_symbol_2 {
+  float3 a_Position [[attribute(0)]];
+  float2 a_UV [[attribute(1)]];
+  float4 a_Color [[attribute(2)]];
+  float3 a_Normal [[attribute(3)]];
+  float a_PosMtxIdx [[attribute(4)]];
+};
+
+struct tint_symbol_3 {
+  float4 v_Color [[user(locn0)]];
+  float2 v_TexCoord [[user(locn1)]];
+  float4 member [[position]];
+};
 
 VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a_Normal, float a_PosMtxIdx, thread float3* const tint_symbol_16, thread float2* const tint_symbol_17, thread float4* const tint_symbol_18, thread float3* const tint_symbol_19, thread float* const tint_symbol_20, const constant ub_PacketParams* const tint_symbol_21, const constant ub_SceneParams* const tint_symbol_22, thread float4* const tint_symbol_23, thread float4* const tint_symbol_24, const constant ub_MaterialParams* const tint_symbol_25, thread float2* const tint_symbol_26) {
   *(tint_symbol_16) = a_Position;

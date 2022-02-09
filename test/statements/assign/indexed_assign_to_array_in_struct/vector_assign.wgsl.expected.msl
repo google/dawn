@@ -4,9 +4,11 @@ using namespace metal;
 struct Uniforms {
   /* 0x0000 */ uint i;
 };
+
 struct tint_array_wrapper {
   uint arr[8];
 };
+
 struct OuterS {
   tint_array_wrapper a1;
 };

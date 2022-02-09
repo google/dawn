@@ -6,30 +6,9 @@ struct tint_symbol_1 {
   float2 a_particleVel [[attribute(1)]];
   float2 a_pos [[attribute(2)]];
 };
+
 struct tint_symbol_2 {
   float4 value [[position]];
-};
-struct tint_symbol_3 {
-  float4 value [[color(0)]];
-};
-struct Particle {
-  /* 0x0000 */ float2 pos;
-  /* 0x0008 */ float2 vel;
-};
-struct SimParams {
-  /* 0x0000 */ float deltaT;
-  /* 0x0004 */ float rule1Distance;
-  /* 0x0008 */ float rule2Distance;
-  /* 0x000c */ float rule3Distance;
-  /* 0x0010 */ float rule1Scale;
-  /* 0x0014 */ float rule2Scale;
-  /* 0x0018 */ float rule3Scale;
-};
-struct tint_array_wrapper {
-  /* 0x0000 */ Particle arr[5];
-};
-struct Particles {
-  /* 0x0000 */ tint_array_wrapper particles;
 };
 
 float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
@@ -45,6 +24,10 @@ vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
   return wrapper_result;
 }
 
+struct tint_symbol_3 {
+  float4 value [[color(0)]];
+};
+
 float4 frag_main_inner() {
   return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }
@@ -55,6 +38,29 @@ fragment tint_symbol_3 frag_main() {
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;
 }
+
+struct Particle {
+  /* 0x0000 */ float2 pos;
+  /* 0x0008 */ float2 vel;
+};
+
+struct SimParams {
+  /* 0x0000 */ float deltaT;
+  /* 0x0004 */ float rule1Distance;
+  /* 0x0008 */ float rule2Distance;
+  /* 0x000c */ float rule3Distance;
+  /* 0x0010 */ float rule1Scale;
+  /* 0x0014 */ float rule2Scale;
+  /* 0x0018 */ float rule3Scale;
+};
+
+struct tint_array_wrapper {
+  /* 0x0000 */ Particle arr[5];
+};
+
+struct Particles {
+  /* 0x0000 */ tint_array_wrapper particles;
+};
 
 void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_symbol_4, const constant SimParams* const tint_symbol_5, device Particles* const tint_symbol_6) {
   uint index = gl_GlobalInvocationID[0];

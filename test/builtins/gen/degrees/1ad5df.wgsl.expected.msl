@@ -6,13 +6,13 @@ float2 tint_degrees(float2 param_0) {
   return param_0 * 57.295779513082322865;
 }
 
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void degrees_1ad5df() {
   float2 res = tint_degrees(float2());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   degrees_1ad5df();

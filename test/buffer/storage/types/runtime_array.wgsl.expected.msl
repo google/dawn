@@ -4,9 +4,11 @@ using namespace metal;
 struct S {
   /* 0x0000 */ float f;
 };
+
 struct tint_symbol_2 {
   /* 0x0000 */ S arr[1];
 };
+
 struct tint_symbol_4 {
   /* 0x0000 */ S arr[1];
 };

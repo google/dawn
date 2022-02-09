@@ -12,13 +12,13 @@ frexp_result tint_frexp(float param_0) {
   return {sig, exp};
 }
 
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void frexp_eabd40() {
   frexp_result res = tint_frexp(1.0f);
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   frexp_eabd40();

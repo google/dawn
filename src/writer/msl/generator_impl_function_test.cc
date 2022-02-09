@@ -107,6 +107,7 @@ using namespace metal;
 struct tint_symbol_1 {
   float foo [[user(locn0)]];
 };
+
 struct tint_symbol_2 {
   float value [[color(1)]];
 };
@@ -207,14 +208,11 @@ struct Interface {
   float col2;
   float4 pos;
 };
+
 struct tint_symbol {
   float col1 [[user(locn1)]];
   float col2 [[user(locn2)]];
   float4 pos [[position]];
-};
-struct tint_symbol_2 {
-  float col1 [[user(locn1)]];
-  float col2 [[user(locn2)]];
 };
 
 Interface vert_main_inner() {
@@ -230,6 +228,11 @@ vertex tint_symbol vert_main() {
   wrapper_result.pos = inner_result.pos;
   return wrapper_result;
 }
+
+struct tint_symbol_2 {
+  float col1 [[user(locn1)]];
+  float col2 [[user(locn2)]];
+};
 
 void frag_main_inner(Interface colors) {
   float const r = colors.col1;
@@ -285,17 +288,15 @@ using namespace metal;
 struct VertexOutput {
   float4 pos;
 };
-struct tint_symbol {
-  float4 pos [[position]];
-};
-struct tint_symbol_1 {
-  float4 pos [[position]];
-};
 
 VertexOutput foo(float x) {
   VertexOutput const tint_symbol_2 = {.pos=float4(x, x, x, 1.0f)};
   return tint_symbol_2;
 }
+
+struct tint_symbol {
+  float4 pos [[position]];
+};
 
 VertexOutput vert_main1_inner() {
   return foo(0.5f);
@@ -307,6 +308,10 @@ vertex tint_symbol vert_main1() {
   wrapper_result.pos = inner_result.pos;
   return wrapper_result;
 }
+
+struct tint_symbol_1 {
+  float4 pos [[position]];
+};
 
 VertexOutput vert_main2_inner() {
   return foo(0.25f);

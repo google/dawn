@@ -2,6 +2,7 @@
 
 using namespace metal;
 constant bool o [[function_constant(0)]];
+
 kernel void tint_symbol() {
   return;
 }

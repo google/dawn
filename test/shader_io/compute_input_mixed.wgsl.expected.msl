@@ -4,6 +4,7 @@ using namespace metal;
 struct ComputeInputs0 {
   uint3 local_invocation_id;
 };
+
 struct ComputeInputs1 {
   uint3 workgroup_id;
 };

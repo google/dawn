@@ -5,10 +5,12 @@ struct FragmentInputs0 {
   float4 position;
   int loc0;
 };
+
 struct FragmentInputs1 {
   float4 loc3;
   uint sample_mask;
 };
+
 struct tint_symbol_2 {
   int loc0 [[user(locn0)]] [[flat]];
   uint loc1 [[user(locn1)]] [[flat]];

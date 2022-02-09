@@ -4,6 +4,7 @@ using namespace metal;
 struct Uniforms {
   /* 0x0000 */ uint i;
 };
+
 struct OuterS {
   float3 v1;
 };

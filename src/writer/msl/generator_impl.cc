@@ -45,6 +45,7 @@
 #include "src/sem/i32_type.h"
 #include "src/sem/matrix_type.h"
 #include "src/sem/member_accessor_expression.h"
+#include "src/sem/module.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/pointer_type.h"
 #include "src/sem/reference_type.h"
@@ -207,42 +208,44 @@ bool GeneratorImpl::Generate() {
 
   auto helpers_insertion_point = current_buffer_->lines.size();
 
-  for (auto* const type_decl : program_->AST().TypeDecls()) {
-    if (!type_decl->Is<ast::Alias>()) {
-      if (!EmitTypeDecl(TypeOf(type_decl))) {
-        return false;
-      }
+  auto* mod = builder_.Sem().Module();
+  for (auto* decl : mod->DependencyOrderedDeclarations()) {
+    bool ok = Switch(
+        decl,  //
+        [&](const ast::Struct* str) {
+          TINT_DEFER(line());
+          return EmitTypeDecl(TypeOf(str));
+        },
+        [&](const ast::Alias*) {
+          return true;  // folded away by the writer
+        },
+        [&](const ast::Variable* var) {
+          if (var->is_const) {
+            TINT_DEFER(line());
+            return EmitProgramConstVariable(var);
+          }
+          // These are pushed into the entry point by sanitizer transforms.
+          TINT_ICE(Writer, diagnostics_)
+              << "module-scope variables should have been handled by the MSL "
+                 "sanitizer";
+          return false;
+        },
+        [&](const ast::Function* func) {
+          TINT_DEFER(line());
+          if (func->IsEntryPoint()) {
+            return EmitEntryPointFunction(func);
+          }
+          return EmitFunction(func);
+        },
+        [&](Default) {
+          // These are pushed into the entry point by sanitizer transforms.
+          TINT_ICE(Writer, diagnostics_)
+              << "unhandled type: " << decl->TypeInfo().name;
+          return false;
+        });
+    if (!ok) {
+      return false;
     }
-  }
-
-  if (!program_->AST().TypeDecls().empty()) {
-    line();
-  }
-
-  for (auto* var : program_->AST().GlobalVariables()) {
-    if (var->is_const) {
-      if (!EmitProgramConstVariable(var)) {
-        return false;
-      }
-    } else {
-      // These are pushed into the entry point by sanitizer transforms.
-      TINT_ICE(Writer, diagnostics_) << "module-scope variables should have "
-                                        "been handled by the MSL sanitizer";
-      break;
-    }
-  }
-
-  for (auto* func : program_->AST().Functions()) {
-    if (!func->IsEntryPoint()) {
-      if (!EmitFunction(func)) {
-        return false;
-      }
-    } else {
-      if (!EmitEntryPointFunction(func)) {
-        return false;
-      }
-    }
-    line();
   }
 
   if (!invariant_define_name_.empty()) {
@@ -1555,11 +1558,12 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out,
         return true;
       },
       [&](const ast::SintLiteralExpression* l) {
-        // MSL (and C++) parse `-2147483648` as a `long` because it parses unary
-        // minus and `2147483648` as separate tokens, and the latter doesn't
-        // fit into an (32-bit) `int`. WGSL, OTOH, parses this as an `i32`. To
-        // avoid issues with `long` to `int` casts, emit `(2147483647 - 1)`
-        // instead, which ensures the expression type is `int`.
+        // MSL (and C++) parse `-2147483648` as a `long` because it parses
+        // unary minus and `2147483648` as separate tokens, and the latter
+        // doesn't fit into an (32-bit) `int`. WGSL, OTOH, parses this as an
+        // `i32`. To avoid issues with `long` to `int` casts, emit
+        // `(2147483647 - 1)` instead, which ensures the expression type is
+        // `int`.
         const auto int_min = std::numeric_limits<int32_t>::min();
         if (l->ValueAsI32() == int_min) {
           out << "(" << int_min + 1 << " - 1)";
@@ -1741,8 +1745,8 @@ std::string GeneratorImpl::interpolation_to_attribute(
 bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   auto func_name = program_->Symbols().NameFor(func->symbol);
 
-  // Returns the binding index of a variable, requiring that the group attribute
-  // have a value of zero.
+  // Returns the binding index of a variable, requiring that the group
+  // attribute have a value of zero.
   const uint32_t kInvalidBindingIndex = std::numeric_limits<uint32_t>::max();
   auto get_binding_index = [&](const ast::Variable* var) -> uint32_t {
     auto bp = var->BindingPoint();
@@ -1923,14 +1927,14 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     }
   }
 
-  // If the for-loop has a multi-statement conditional and / or continuing, then
-  // we cannot emit this as a regular for-loop in MSL. Instead we need to
+  // If the for-loop has a multi-statement conditional and / or continuing,
+  // then we cannot emit this as a regular for-loop in MSL. Instead we need to
   // generate a `while(true)` loop.
   bool emit_as_loop = cond_pre.lines.size() > 0 || cont_buf.lines.size() > 1;
 
-  // If the for-loop has multi-statement initializer, or is going to be emitted
-  // as a `while(true)` loop, then declare the initializer statement(s) before
-  // the loop in a new block.
+  // If the for-loop has multi-statement initializer, or is going to be
+  // emitted as a `while(true)` loop, then declare the initializer
+  // statement(s) before the loop in a new block.
   bool nest_in_block =
       init_buf.lines.size() > 1 || (stmt->initializer && emit_as_loop);
   if (nest_in_block) {

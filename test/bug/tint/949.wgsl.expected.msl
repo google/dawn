@@ -16,6 +16,7 @@ struct lightingInfo {
   float3 diffuse;
   float3 specular;
 };
+
 struct LeftOver {
   /* 0x0000 */ float4x4 u_World;
   /* 0x0040 */ float4x4 u_ViewProjection;
@@ -28,6 +29,7 @@ struct LeftOver {
   /* 0x00a4 */ uint padding_1;
   /* 0x00a8 */ float2 tangentSpaceParameter0;
 };
+
 struct Light0 {
   /* 0x0000 */ float4 vLightData;
   /* 0x0010 */ float4 vLightDiffuse;
@@ -37,18 +39,6 @@ struct Light0 {
   /* 0x0040 */ float4 shadowsInfo;
   /* 0x0050 */ float2 depthValues;
   /* 0x0058 */ int8_t tint_pad_1[8];
-};
-struct main_out {
-  float4 glFragColor_1;
-};
-struct tint_symbol_2 {
-  float4 v_output1_param [[user(locn0)]];
-  float2 vMainuv_param [[user(locn1)]];
-  float4 v_output2_param [[user(locn2)]];
-  float2 v_uv_param [[user(locn3)]];
-};
-struct tint_symbol_3 {
-  float4 glFragColor_1 [[color(0)]];
 };
 
 float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(thread float3* const normal_1, thread float3* const p, thread float2* const uv, thread float2* const tangentSpaceParams) {
@@ -424,6 +414,21 @@ void main_1(thread float* const tint_symbol_5, thread float3* const tint_symbol_
   *(tint_symbol_18) = float4(x_548[0], x_548[1], x_548[2], 1.0f);
   return;
 }
+
+struct main_out {
+  float4 glFragColor_1;
+};
+
+struct tint_symbol_2 {
+  float4 v_output1_param [[user(locn0)]];
+  float2 vMainuv_param [[user(locn1)]];
+  float4 v_output2_param [[user(locn2)]];
+  float2 v_uv_param [[user(locn3)]];
+};
+
+struct tint_symbol_3 {
+  float4 glFragColor_1 [[color(0)]];
+};
 
 main_out tint_symbol_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontFacing_param, float2 v_uv_param, float4 v_output2_param, thread float2* const tint_symbol_19, thread float4* const tint_symbol_20, thread bool* const tint_symbol_21, thread float2* const tint_symbol_22, thread float4* const tint_symbol_23, thread float* const tint_symbol_24, thread float3* const tint_symbol_25, texture2d<float, access::sample> tint_symbol_26, sampler tint_symbol_27, const constant LeftOver* const tint_symbol_28, texture2d<float, access::sample> tint_symbol_29, sampler tint_symbol_30, const constant Light0* const tint_symbol_31, thread float4* const tint_symbol_32) {
   *(tint_symbol_19) = vMainuv_param;

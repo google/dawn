@@ -5,15 +5,19 @@ struct Uniforms {
   /* 0x0000 */ uint i;
   /* 0x0004 */ uint j;
 };
+
 struct InnerS {
   /* 0x0000 */ int v;
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ InnerS arr[8];
 };
+
 struct S1 {
   /* 0x0000 */ tint_array_wrapper a2;
 };
+
 struct OuterS {
   /* 0x0000 */ S1 a1[1];
 };

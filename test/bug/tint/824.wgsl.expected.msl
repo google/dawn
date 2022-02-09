@@ -5,13 +5,16 @@ struct Output {
   float4 Position;
   float4 color;
 };
+
 struct tint_symbol_1 {
   float4 color [[user(locn0)]];
   float4 Position [[position]];
 };
+
 struct tint_array_wrapper {
   float2 arr[4];
 };
+
 struct tint_array_wrapper_1 {
   float4 arr[4];
 };

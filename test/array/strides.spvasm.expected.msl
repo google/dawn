@@ -5,19 +5,24 @@ struct strided_arr {
   /* 0x0000 */ float el;
   /* 0x0004 */ int8_t tint_pad[4];
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ strided_arr arr[2];
 };
+
 struct tint_array_wrapper_1 {
   /* 0x0000 */ tint_array_wrapper arr[3];
 };
+
 struct strided_arr_1 {
   /* 0x0000 */ tint_array_wrapper_1 el;
   /* 0x0030 */ int8_t tint_pad_1[80];
 };
+
 struct tint_array_wrapper_2 {
   /* 0x0000 */ strided_arr_1 arr[4];
 };
+
 struct S {
   /* 0x0000 */ tint_array_wrapper_2 a;
 };

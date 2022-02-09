@@ -8,6 +8,7 @@ struct Uniforms {
   /* 0x0010 */ uint2 dstCopyOrigin;
   /* 0x0018 */ uint2 copySize;
 };
+
 struct OutputBuf {
   /* 0x0000 */ uint result[1];
 };

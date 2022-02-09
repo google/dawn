@@ -12,13 +12,13 @@ modf_result tint_modf(float param_0) {
   return {fract, whole};
 }
 
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void modf_180fed() {
   modf_result res = tint_modf(1.0f);
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   modf_180fed();

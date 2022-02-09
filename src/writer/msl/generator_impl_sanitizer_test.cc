@@ -57,6 +57,7 @@ using namespace metal;
 struct tint_symbol {
   /* 0x0000 */ uint4 buffer_size[1];
 };
+
 struct my_struct {
   float a[1];
 };
@@ -103,6 +104,7 @@ using namespace metal;
 struct tint_symbol {
   /* 0x0000 */ uint4 buffer_size[1];
 };
+
 struct my_struct {
   float z;
   float a[1];
@@ -152,6 +154,7 @@ using namespace metal;
 struct tint_symbol {
   /* 0x0000 */ uint4 buffer_size[1];
 };
+
 struct my_struct {
   float a[1];
 };
@@ -208,6 +211,7 @@ using namespace metal;
 struct tint_symbol {
   /* 0x0000 */ uint4 buffer_size[2];
 };
+
 struct my_struct {
   float a[1];
 };

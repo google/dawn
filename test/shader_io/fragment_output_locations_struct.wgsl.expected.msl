@@ -7,6 +7,7 @@ struct FragmentOutputs {
   float loc2;
   float4 loc3;
 };
+
 struct tint_symbol_1 {
   int loc0 [[color(0)]];
   uint loc1 [[color(1)]];

@@ -5,13 +5,13 @@ builtins/gen/isNan/4d280d.wgsl:28:25 warning: use of deprecated builtin
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void isNan_4d280d() {
   bool4 res = isnan(float4());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   isNan_4d280d();

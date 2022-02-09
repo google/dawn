@@ -12,6 +12,7 @@ struct Out {
   float linear_centroid;
   float linear_sample;
 };
+
 struct tint_symbol_1 {
   float none [[user(locn0)]];
   float flat [[user(locn1)]] [[flat]];

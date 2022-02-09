@@ -31,6 +31,7 @@
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
+#include "src/sem/module.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/reference_type.h"
 #include "src/sem/sampled_texture_type.h"
@@ -308,9 +309,12 @@ bool Builder::Build() {
     }
   }
 
-  for (auto* func : builder_.AST().Functions()) {
-    if (!GenerateFunction(func)) {
-      return false;
+  auto* mod = builder_.Sem().Module();
+  for (auto* decl : mod->DependencyOrderedDeclarations()) {
+    if (auto* func = decl->As<ast::Function>()) {
+      if (!GenerateFunction(func)) {
+        return false;
+      }
     }
   }
 

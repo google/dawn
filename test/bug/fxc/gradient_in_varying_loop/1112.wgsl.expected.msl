@@ -4,6 +4,7 @@ using namespace metal;
 struct tint_symbol_2 {
   float2 vUV [[user(locn0)]];
 };
+
 struct tint_symbol_3 {
   float4 value [[color(0)]];
 };

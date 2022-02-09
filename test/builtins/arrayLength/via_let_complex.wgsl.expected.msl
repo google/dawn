@@ -4,6 +4,7 @@ using namespace metal;
 struct tint_symbol_1 {
   /* 0x0000 */ uint4 buffer_size[1];
 };
+
 struct S {
   int a[1];
 };

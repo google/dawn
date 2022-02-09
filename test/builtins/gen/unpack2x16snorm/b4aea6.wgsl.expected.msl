@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void unpack2x16snorm_b4aea6() {
   float2 res = unpack_snorm2x16_to_float(1u);
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   unpack2x16snorm_b4aea6();

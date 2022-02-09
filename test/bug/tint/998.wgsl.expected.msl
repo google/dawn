@@ -4,12 +4,15 @@ using namespace metal;
 struct Constants {
   /* 0x0000 */ uint zero;
 };
+
 struct Result {
   uint value;
 };
+
 struct tint_array_wrapper {
   uint arr[3];
 };
+
 struct S {
   tint_array_wrapper data;
 };

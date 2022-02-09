@@ -4,9 +4,11 @@ using namespace metal;
 struct Uniforms {
   /* 0x0000 */ uint i;
 };
+
 struct InnerS {
   /* 0x0000 */ int v;
 };
+
 struct OuterS {
   /* 0x0000 */ InnerS a1[1];
 };

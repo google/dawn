@@ -4,9 +4,11 @@ using namespace metal;
 struct ssbOut {
   /* 0x0000 */ float result[1];
 };
+
 struct ssbA {
   /* 0x0000 */ float A[1];
 };
+
 struct Uniforms {
   /* 0x0000 */ float tint_symbol;
   /* 0x0004 */ int aShape;

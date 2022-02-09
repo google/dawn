@@ -5,9 +5,11 @@ struct strided_arr {
   /* 0x0000 */ float2 el;
   /* 0x0008 */ int8_t tint_pad[8];
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ strided_arr arr[2];
 };
+
 struct SSBO {
   /* 0x0000 */ tint_array_wrapper m;
 };

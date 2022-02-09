@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void textureDimensions_214dd4(texture3d<int, access::write> tint_symbol_1) {
   int3 res = int3(tint_symbol_1.get_width(), tint_symbol_1.get_height(), tint_symbol_1.get_depth());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner(texture3d<int, access::write> tint_symbol_2) {
   textureDimensions_214dd4(tint_symbol_2);

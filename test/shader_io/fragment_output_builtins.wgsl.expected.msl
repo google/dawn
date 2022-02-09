@@ -4,9 +4,6 @@ using namespace metal;
 struct tint_symbol {
   float value [[depth(any)]];
 };
-struct tint_symbol_1 {
-  uint value [[sample_mask]];
-};
 
 float main1_inner() {
   return 1.0f;
@@ -18,6 +15,10 @@ fragment tint_symbol main1() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+struct tint_symbol_1 {
+  uint value [[sample_mask]];
+};
 
 uint main2_inner() {
   return 1u;

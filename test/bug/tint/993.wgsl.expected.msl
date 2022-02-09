@@ -4,12 +4,15 @@ using namespace metal;
 struct Constants {
   /* 0x0000 */ uint zero;
 };
+
 struct Result {
   /* 0x0000 */ uint value;
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ atomic_int arr[3];
 };
+
 struct TestData {
   /* 0x0000 */ tint_array_wrapper data;
 };

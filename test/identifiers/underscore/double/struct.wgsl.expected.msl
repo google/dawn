@@ -4,6 +4,7 @@ using namespace metal;
 struct a {
   int b;
 };
+
 struct a__ {
   int b__;
 };

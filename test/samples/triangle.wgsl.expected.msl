@@ -4,14 +4,13 @@ using namespace metal;
 struct tint_array_wrapper {
   float2 arr[3];
 };
+
+constant tint_array_wrapper pos = {.arr={float2(0.0f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, -0.5f)}};
+
 struct tint_symbol {
   float4 value [[position]];
 };
-struct tint_symbol_1 {
-  float4 value [[color(0)]];
-};
 
-constant tint_array_wrapper pos = {.arr={float2(0.0f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, -0.5f)}};
 float4 vtx_main_inner(uint VertexIndex) {
   return float4(pos.arr[VertexIndex], 0.0f, 1.0f);
 }
@@ -22,6 +21,10 @@ vertex tint_symbol vtx_main(uint VertexIndex [[vertex_id]]) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
+struct tint_symbol_1 {
+  float4 value [[color(0)]];
+};
 
 float4 frag_main_inner() {
   return float4(1.0f, 0.0f, 0.0f, 1.0f);

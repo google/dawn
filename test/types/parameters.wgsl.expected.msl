@@ -4,6 +4,7 @@ using namespace metal;
 struct S {
   float a;
 };
+
 struct tint_array_wrapper {
   float arr[4];
 };

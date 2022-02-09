@@ -15,9 +15,11 @@ inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
 struct Inner {
   /* 0x0000 */ int x;
 };
+
 struct tint_array_wrapper {
   /* 0x0000 */ Inner arr[4];
 };
+
 struct S {
   /* 0x0000 */ packed_int3 a;
   /* 0x000c */ int b;

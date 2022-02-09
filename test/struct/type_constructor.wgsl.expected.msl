@@ -7,21 +7,26 @@ struct S1 {
   int c;
   int d;
 };
+
 struct S2 {
   int e;
   S1 f;
 };
+
 struct S3 {
   int g;
   S1 h;
   S2 i;
 };
+
 struct tint_array_wrapper {
   int arr[2];
 };
+
 struct T {
   tint_array_wrapper a;
 };
+
 struct tint_array_wrapper_1 {
   T arr[2];
 };

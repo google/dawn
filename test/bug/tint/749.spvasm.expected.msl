@@ -4,17 +4,13 @@ using namespace metal;
 struct tint_array_wrapper {
   int arr[10];
 };
+
 struct QuicksortObject {
   tint_array_wrapper numbers;
 };
+
 struct buf0 {
   /* 0x0000 */ float2 resolution;
-};
-struct main_out {
-  float4 x_GLF_color_1;
-};
-struct tint_symbol_1 {
-  float4 x_GLF_color_1 [[color(0)]];
 };
 
 void swap_i1_i1_(thread int* const i, thread int* const j, thread QuicksortObject* const tint_symbol_81) {
@@ -1546,6 +1542,14 @@ void main_1(thread QuicksortObject* const tint_symbol_84, thread float4* const t
   color[0] = x_931;
   return;
 }
+
+struct main_out {
+  float4 x_GLF_color_1;
+};
+
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
 
 main_out tint_symbol_inner(float4 gl_FragCoord_param, thread float4* const tint_symbol_88, thread QuicksortObject* const tint_symbol_89, const constant buf0* const tint_symbol_90, thread float4* const tint_symbol_91) {
   *(tint_symbol_88) = gl_FragCoord_param;

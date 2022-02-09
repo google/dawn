@@ -6,27 +6,11 @@ struct Uniforms {
   /* 0x0004 */ uint dimInner;
   /* 0x0008 */ uint dimBOuter;
 };
+
 struct Matrix {
   /* 0x0000 */ float numbers[1];
 };
-struct tint_array_wrapper_1 {
-  float arr[64];
-};
-struct tint_array_wrapper {
-  tint_array_wrapper_1 arr[64];
-};
-struct tint_array_wrapper_2 {
-  float arr[16];
-};
-struct tint_array_wrapper_3 {
-  float arr[4];
-};
 
-constant uint RowPerThread = 4u;
-constant uint ColPerThread = 4u;
-constant uint TileAOuter = 64u;
-constant uint TileBOuter = 64u;
-constant uint TileInner = 64u;
 float mm_readA(uint row, uint col, const constant Uniforms* const tint_symbol_1, const device Matrix* const tint_symbol_2) {
   if (((row < (*(tint_symbol_1)).dimAOuter) && (col < (*(tint_symbol_1)).dimInner))) {
     float const result = (*(tint_symbol_2)).numbers[((row * (*(tint_symbol_1)).dimInner) + col)];
@@ -49,6 +33,32 @@ void mm_write(uint row, uint col, float value, const constant Uniforms* const ti
     (*(tint_symbol_6)).numbers[index] = value;
   }
 }
+
+constant uint RowPerThread = 4u;
+
+constant uint ColPerThread = 4u;
+
+constant uint TileAOuter = 64u;
+
+constant uint TileBOuter = 64u;
+
+constant uint TileInner = 64u;
+
+struct tint_array_wrapper_1 {
+  float arr[64];
+};
+
+struct tint_array_wrapper {
+  tint_array_wrapper_1 arr[64];
+};
+
+struct tint_array_wrapper_2 {
+  float arr[16];
+};
+
+struct tint_array_wrapper_3 {
+  float arr[4];
+};
 
 void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_index, threadgroup tint_array_wrapper* const tint_symbol_7, threadgroup tint_array_wrapper* const tint_symbol_8, const constant Uniforms* const tint_symbol_9, const device Matrix* const tint_symbol_10, const device Matrix* const tint_symbol_11, device Matrix* const tint_symbol_12) {
   for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {

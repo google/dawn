@@ -7,6 +7,7 @@ struct Uniforms {
   /* 0x0008 */ uint isRGB10A2Unorm;
   /* 0x000c */ uint channelCount;
 };
+
 struct OutputBuf {
   /* 0x0000 */ uint result[1];
 };

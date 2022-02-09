@@ -5,12 +5,15 @@ struct Params {
   /* 0x0000 */ uint filterDim;
   /* 0x0004 */ uint blockDim;
 };
+
 struct Flip {
   /* 0x0000 */ uint value;
 };
+
 struct tint_array_wrapper_1 {
   float3 arr[256];
 };
+
 struct tint_array_wrapper {
   tint_array_wrapper_1 arr[4];
 };

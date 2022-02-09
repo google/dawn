@@ -4,12 +4,15 @@ using namespace metal;
 struct tint_array_wrapper {
   int arr[4];
 };
+
 struct tint_array_wrapper_2 {
   tint_array_wrapper arr[3];
 };
+
 struct tint_array_wrapper_1 {
   tint_array_wrapper_2 arr[2];
 };
+
 struct tint_array_wrapper_3 {
   tint_array_wrapper arr[2];
 };

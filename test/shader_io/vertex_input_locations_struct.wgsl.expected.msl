@@ -7,12 +7,14 @@ struct VertexInputs {
   float loc2;
   float4 loc3;
 };
+
 struct tint_symbol_2 {
   int loc0 [[attribute(0)]];
   uint loc1 [[attribute(1)]];
   float loc2 [[attribute(2)]];
   float4 loc3 [[attribute(3)]];
 };
+
 struct tint_symbol_3 {
   float4 value [[position]];
 };

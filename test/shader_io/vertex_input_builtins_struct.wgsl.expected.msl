@@ -5,6 +5,7 @@ struct VertexInputs {
   uint vertex_index;
   uint instance_index;
 };
+
 struct tint_symbol_1 {
   float4 value [[position]];
 };

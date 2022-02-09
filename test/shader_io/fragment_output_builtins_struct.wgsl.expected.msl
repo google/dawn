@@ -5,6 +5,7 @@ struct FragmentOutputs {
   float frag_depth;
   uint sample_mask;
 };
+
 struct tint_symbol_1 {
   float frag_depth [[depth(any)]];
   uint sample_mask [[sample_mask]];

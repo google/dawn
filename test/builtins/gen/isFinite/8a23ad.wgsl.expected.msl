@@ -5,13 +5,13 @@ builtins/gen/isFinite/8a23ad.wgsl:28:25 warning: use of deprecated builtin
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void isFinite_8a23ad() {
   bool3 res = isfinite(float3());
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner() {
   isFinite_8a23ad();

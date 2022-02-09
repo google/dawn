@@ -12,29 +12,33 @@ struct Uniforms {
   /* 0x003c */ int8_t tint_pad_3[4];
   /* 0x0040 */ int2 outShapeStrides;
 };
+
 struct ssbOut {
   /* 0x0000 */ float result[1];
 };
+
 struct ssbA {
   /* 0x0000 */ float A[1];
 };
+
 struct ssbB {
   /* 0x0000 */ float B[1];
 };
+
 struct tint_array_wrapper_1 {
   float arr[64];
 };
+
 struct tint_array_wrapper {
   tint_array_wrapper_1 arr[64];
 };
+
 struct tint_array_wrapper_3 {
   float arr[1];
 };
+
 struct tint_array_wrapper_2 {
   tint_array_wrapper_3 arr[64];
-};
-struct tint_array_wrapper_4 {
-  tint_array_wrapper_3 arr[1];
 };
 
 bool coordsInBounds_vi2_vi2_(thread int2* const coord, thread int2* const shape) {
@@ -167,6 +171,10 @@ void mm_write_i1_i1_f1_(thread int* const row_2, thread int* const col_2, thread
   setOutput_i1_i1_i1_f1_(&(param_14), &(param_15), &(param_16), &(param_17), tint_symbol_17, tint_symbol_18);
   return;
 }
+
+struct tint_array_wrapper_4 {
+  tint_array_wrapper_3 arr[1];
+};
 
 void mm_matMul_i1_i1_i1_(thread int* const dimAOuter, thread int* const dimInner, thread int* const dimBOuter, thread uint3* const tint_symbol_19, thread uint3* const tint_symbol_20, const constant Uniforms* const tint_symbol_21, thread int* const tint_symbol_22, thread int* const tint_symbol_23, thread int* const tint_symbol_24, const device ssbA* const tint_symbol_25, threadgroup tint_array_wrapper* const tint_symbol_26, thread int* const tint_symbol_27, const device ssbB* const tint_symbol_28, threadgroup tint_array_wrapper_2* const tint_symbol_29, device ssbOut* const tint_symbol_30) {
   int tileRow = 0;

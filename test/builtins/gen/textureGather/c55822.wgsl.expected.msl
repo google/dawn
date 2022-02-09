@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol {
-  float4 value [[position]];
-};
-
 void textureGather_c55822(texturecube_array<int, access::sample> tint_symbol_1, sampler tint_symbol_2) {
   int4 res = tint_symbol_1.gather(tint_symbol_2, float3(), 1, component::y);
 }
+
+struct tint_symbol {
+  float4 value [[position]];
+};
 
 float4 vertex_main_inner(texturecube_array<int, access::sample> tint_symbol_3, sampler tint_symbol_4) {
   textureGather_c55822(tint_symbol_3, tint_symbol_4);

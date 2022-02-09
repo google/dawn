@@ -22,6 +22,7 @@ struct Uniforms {
   /* 0x0020 */ packed_float3 bbMax;
   /* 0x002c */ int8_t tint_pad_1[4];
 };
+
 struct Dbg {
   /* 0x0000 */ atomic_uint offsetCounter;
   /* 0x0004 */ uint pad0;
@@ -36,18 +37,23 @@ struct Dbg {
   /* 0x0028 */ float value_f32_2;
   /* 0x002c */ float value_f32_3;
 };
+
 struct F32s {
   /* 0x0000 */ float values[1];
 };
+
 struct U32s {
   /* 0x0000 */ uint values[1];
 };
+
 struct I32s {
   int values[1];
 };
+
 struct AU32s {
   /* 0x0000 */ atomic_uint values[1];
 };
+
 struct AI32s {
   /* 0x0000 */ atomic_int values[1];
 };
