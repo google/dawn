@@ -19,8 +19,9 @@ group("all") {
   deps = [
     "src/dawn/fuzzers",
     "src/dawn/native:webgpu_dawn",
+    "src/dawn/tests",
     "src/fuzzers/dawn:dawn_fuzzers",
-    "src/tests:dawn_tests",
+    "src/tests",  # TODO(crbug.com/dawn/1275) - remove
   ]
   if (dawn_standalone) {
     deps += [ "samples/dawn:samples" ]

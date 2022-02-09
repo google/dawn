@@ -86,8 +86,8 @@ config("internal_config") {
   # this BUILD.gn file and related subdirs.
   visibility = [
     "${dawn_root}/samples/dawn/*",
-    "${dawn_root}/src/*",
     "${dawn_root}/src/dawn/*",
+    "${dawn_root}/src/tests/*",  # TODO(crbug.com/dawn/1275) - remove this
   ]
 
   cflags = []

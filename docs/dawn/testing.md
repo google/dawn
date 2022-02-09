@@ -19,7 +19,7 @@ A Chromium checkout is required for the highest optimization flags. It is possib
  - Step: A group of Iterations run together. The number of `iterationsPerStep` is provided to the constructor of `DawnPerfTestBase`.
  - Trial: A group of Steps run consecutively. `kNumTrials` are run for each test. A Step in a Trial is run repetitively for approximately `kCalibrationRunTimeSeconds`. Metrics are accumlated per-trial and reported as the total time divided by `numSteps * iterationsPerStep`. `maxStepsInFlight` is passed to the `DawnPerfTestsBase` constructor to limit the number of Steps pipelined.
 
-(See [`//src/tests/perf_tests/DawnPerfTest.h`](https://cs.chromium.org/chromium/src/third_party/dawn/src/tests/perf_tests/DawnPerfTest.h) for the values of the constants).
+(See [`//src/dawn/tests/perf_tests/DawnPerfTest.h`](https://cs.chromium.org/chromium/src/third_party/dawn/src/dawn/tests/perf_tests/DawnPerfTest.h) for the values of the constants).
 
 ### Metrics
 

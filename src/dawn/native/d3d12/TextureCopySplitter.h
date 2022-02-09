@@ -60,7 +60,7 @@ namespace dawn::native::d3d12 {
     // counterparts. These arguments should strictly conform to particular invariants. Otherwise,
     // D3D12 driver may report validation errors when we call CopyTextureRegion. Some important
     // invariants are listed below. For more details
-    // of these invariants, see src/tests/unittests/d3d12/CopySplitTests.cpp.
+    // of these invariants, see src/dawn/tests/unittests/d3d12/CopySplitTests.cpp.
     //   - Inside each copy region: 1) its buffer offset plus copy size should be less than its
     //     buffer size, 2) its buffer offset on y-axis should be less than copy format's
     //     blockInfo.height, 3) its buffer offset on z-axis should be 0.
