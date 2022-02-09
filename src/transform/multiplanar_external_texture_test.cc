@@ -149,8 +149,6 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 )";
 
   auto* expect = R"(
-@group(0) @binding(0) var s : sampler;
-
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -162,6 +160,8 @@ struct ExternalTextureParams {
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
 
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
+
+@group(0) @binding(0) var s : sampler;
 
 @group(0) @binding(1) var ext_tex : texture_2d<f32>;
 
@@ -259,8 +259,6 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 )";
 
   auto* expect = R"(
-@group(0) @binding(0) var s : sampler;
-
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -272,6 +270,8 @@ struct ExternalTextureParams {
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
 
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
+
+@group(0) @binding(0) var s : sampler;
 
 @group(0) @binding(1) var ext_tex : texture_2d<f32>;
 
@@ -332,8 +332,6 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 )";
 
   auto* expect = R"(
-@group(0) @binding(0) var s : sampler;
-
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -346,23 +344,25 @@ struct ExternalTextureParams {
 
 @group(0) @binding(5) var<uniform> ext_tex_params : ExternalTextureParams;
 
-@group(0) @binding(1) var ext_tex : texture_2d<f32>;
-
 @group(0) @binding(6) var ext_tex_plane_1_1 : texture_2d<f32>;
 
 @group(0) @binding(7) var<uniform> ext_tex_params_1 : ExternalTextureParams;
-
-@group(0) @binding(2) var ext_tex_1 : texture_2d<f32>;
 
 @group(0) @binding(8) var ext_tex_plane_1_2 : texture_2d<f32>;
 
 @group(0) @binding(9) var<uniform> ext_tex_params_2 : ExternalTextureParams;
 
-@group(0) @binding(3) var ext_tex_2 : texture_2d<f32>;
-
 @group(1) @binding(1) var ext_tex_plane_1_3 : texture_2d<f32>;
 
 @group(1) @binding(2) var<uniform> ext_tex_params_3 : ExternalTextureParams;
+
+@group(0) @binding(0) var s : sampler;
+
+@group(0) @binding(1) var ext_tex : texture_2d<f32>;
+
+@group(0) @binding(2) var ext_tex_1 : texture_2d<f32>;
+
+@group(0) @binding(3) var ext_tex_2 : texture_2d<f32>;
 
 @group(1) @binding(0) var ext_tex_3 : texture_2d<f32>;
 
@@ -424,6 +424,10 @@ struct ExternalTextureParams {
   ub : f32;
 }
 
+@group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
+
+@group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
+
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {
     return textureSampleLevel(plane0, smp, coord, 0.0);
@@ -438,13 +442,9 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   return vec4<f32>(r, g, b, 1.0);
 }
 
-fn f(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
+  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
-
-@group(0) @binding(2) var ext_tex_plane_1_1 : texture_2d<f32>;
-
-@group(0) @binding(3) var<uniform> ext_tex_params_1 : ExternalTextureParams;
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 
@@ -452,7 +452,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : Ex
 
 @stage(fragment)
 fn main() {
-  f(ext_tex, ext_tex_plane_1_1, ext_tex_params_1, smp);
+  f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
   DataMap data;
@@ -490,6 +490,10 @@ struct ExternalTextureParams {
   ub : f32;
 }
 
+@group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
+
+@group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
+
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {
     return textureSampleLevel(plane0, smp, coord, 0.0);
@@ -504,13 +508,9 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   return vec4<f32>(r, g, b, 1.0);
 }
 
-fn f(s : sampler, t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) {
-  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+fn f(s : sampler, t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams) {
+  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
-
-@group(0) @binding(2) var ext_tex_plane_1_1 : texture_2d<f32>;
-
-@group(0) @binding(3) var<uniform> ext_tex_params_1 : ExternalTextureParams;
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 
@@ -518,7 +518,7 @@ fn f(s : sampler, t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_te
 
 @stage(fragment)
 fn main() {
-  f(smp, ext_tex, ext_tex_plane_1_1, ext_tex_params_1);
+  f(smp, ext_tex, ext_tex_plane_1, ext_tex_params);
 }
 )";
   DataMap data;
@@ -558,6 +558,14 @@ struct ExternalTextureParams {
   ub : f32;
 }
 
+@group(0) @binding(3) var ext_tex_plane_1 : texture_2d<f32>;
+
+@group(0) @binding(4) var<uniform> ext_tex_params : ExternalTextureParams;
+
+@group(0) @binding(5) var ext_tex_plane_1_1 : texture_2d<f32>;
+
+@group(0) @binding(6) var<uniform> ext_tex_params_1 : ExternalTextureParams;
+
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {
     return textureSampleLevel(plane0, smp, coord, 0.0);
@@ -572,28 +580,20 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   return vec4<f32>(r, g, b, 1.0);
 }
 
-fn f(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams, s : sampler, t2 : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams) {
-  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
-  textureSampleExternal(t2, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
+fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 : ExternalTextureParams, s : sampler, t2 : texture_2d<f32>, ext_tex_plane_1_3 : texture_2d<f32>, ext_tex_params_3 : ExternalTextureParams) {
+  textureSampleExternal(t, ext_tex_plane_1_2, s, vec2<f32>(1.0, 2.0), ext_tex_params_2);
+  textureSampleExternal(t2, ext_tex_plane_1_3, s, vec2<f32>(1.0, 2.0), ext_tex_params_3);
 }
-
-@group(0) @binding(3) var ext_tex_plane_1_2 : texture_2d<f32>;
-
-@group(0) @binding(4) var<uniform> ext_tex_params_2 : ExternalTextureParams;
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 
 @group(0) @binding(1) var smp : sampler;
 
-@group(0) @binding(5) var ext_tex_plane_1_3 : texture_2d<f32>;
-
-@group(0) @binding(6) var<uniform> ext_tex_params_3 : ExternalTextureParams;
-
 @group(0) @binding(2) var ext_tex2 : texture_2d<f32>;
 
 @stage(fragment)
 fn main() {
-  f(ext_tex, ext_tex_plane_1_2, ext_tex_params_2, smp, ext_tex2, ext_tex_plane_1_3, ext_tex_params_3);
+  f(ext_tex, ext_tex_plane_1, ext_tex_params, smp, ext_tex2, ext_tex_plane_1_1, ext_tex_params_1);
 }
 )";
   DataMap data;
@@ -636,6 +636,10 @@ struct ExternalTextureParams {
   ub : f32;
 }
 
+@group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
+
+@group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
+
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {
     return textureSampleLevel(plane0, smp, coord, 0.0);
@@ -650,17 +654,13 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   return vec4<f32>(r, g, b, 1.0);
 }
 
-fn nested(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+fn nested(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
+  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
 
-fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
-  nested(t, ext_tex_plane_1_1, ext_tex_params_1, s);
+fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 : ExternalTextureParams, s : sampler) {
+  nested(t, ext_tex_plane_1_2, ext_tex_params_2, s);
 }
-
-@group(0) @binding(2) var ext_tex_plane_1_2 : texture_2d<f32>;
-
-@group(0) @binding(3) var<uniform> ext_tex_params_2 : ExternalTextureParams;
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 
@@ -668,7 +668,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 
 @stage(fragment)
 fn main() {
-  f(ext_tex, ext_tex_plane_1_2, ext_tex_params_2, smp);
+  f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
   DataMap data;
@@ -730,8 +730,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-type ET = texture_external;
-
 struct ExternalTextureParams {
   numPlanes : u32;
   vr : f32;
@@ -739,6 +737,12 @@ struct ExternalTextureParams {
   vg : f32;
   ub : f32;
 }
+
+@group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
+
+@group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
+
+type ET = texture_external;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
   if ((params.numPlanes == 1u)) {
@@ -754,13 +758,9 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   return vec4<f32>(r, g, b, 1.0);
 }
 
-fn f(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams, s : sampler) {
-  textureSampleExternal(t, ext_tex_plane_1, s, vec2<f32>(1.0, 2.0), ext_tex_params);
+fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
+  textureSampleExternal(t, ext_tex_plane_1_1, s, vec2<f32>(1.0, 2.0), ext_tex_params_1);
 }
-
-@group(0) @binding(2) var ext_tex_plane_1_1 : texture_2d<f32>;
-
-@group(0) @binding(3) var<uniform> ext_tex_params_1 : ExternalTextureParams;
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 
@@ -768,7 +768,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : Ex
 
 @stage(fragment)
 fn main() {
-  f(ext_tex, ext_tex_plane_1_1, ext_tex_params_1, smp);
+  f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
   DataMap data;
