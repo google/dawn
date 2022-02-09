@@ -24,6 +24,11 @@
 //*
 //*
 {% include 'BSD_LICENSE' %}
+{% if 'dawn' in enabled_tags %}
+    #ifdef __EMSCRIPTEN__
+    #error "Do not include this header. Emscripten already provides headers needed for {{metadata.api}}."
+    #endif
+{% endif %}
 #ifndef {{metadata.api.upper()}}_H_
 #define {{metadata.api.upper()}}_H_
 
