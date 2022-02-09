@@ -51,6 +51,8 @@ class CommonFuzzer {
 
   void SetDumpInput(bool enabled) { dump_input_ = enabled; }
 
+  void SetEnforceValidity(bool enabled) { enforce_validity = enabled; }
+
   int Run(const uint8_t* data, size_t size);
 
   const tint::diag::List& Diagnostics() const { return diagnostics_; }
@@ -90,6 +92,7 @@ class CommonFuzzer {
   transform::DataMap* transform_inputs_ = nullptr;
   bool dump_input_ = false;
   tint::diag::List diagnostics_;
+  bool enforce_validity = false;
 
   std::vector<uint32_t> generated_spirv_;
   std::string generated_wgsl_;

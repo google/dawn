@@ -39,22 +39,25 @@ run it with -help=1 to check out libfuzzer parameters.
   -tint_help
                        Show this message. Note that there is also a -help=1
                        parameter that will display libfuzzer's help message.
+
+  -tint_enforce_validity=
+                       If `true`, the fuzzer will enforce that Tint does not
+                       generate invalid shaders. Currently `false` by default
+                       since options provided by the fuzzer are not guaranteed
+                       to be correct.
+                       See https://bugs.chromium.org/p/tint/issues/detail?id=1356
 )";
 
-bool HasPrefix(const char* str, const char* prefix) {
-  return strncmp(str, prefix, strlen(prefix)) == 0;
-}
-
-[[noreturn]] void InvalidParam(const char* param) {
+[[noreturn]] void InvalidParam(const std::string& param) {
   std::cout << "Invalid value for " << param << std::endl;
   std::cout << kHelpMessage << std::endl;
   exit(1);
 }
 
-bool ParseBool(const char* value, bool* out) {
-  if (!strcmp(value, "true")) {
+bool ParseBool(const std::string& value, bool* out) {
+  if (value.compare("true") == 0) {
     *out = true;
-  } else if (!strcmp(value, "false")) {
+  } else if (value.compare("false") == 0) {
     *out = false;
   } else {
     return false;
@@ -69,16 +72,22 @@ CliParams ParseCliParams(int* argc, char** argv) {
   auto help = false;
 
   for (int i = *argc - 1; i > 0; --i) {
-    auto param = argv[i];
+    std::string param(argv[i]);
     auto recognized_parameter = true;
 
-    if (HasPrefix(param, "-tint_dump_input=")) {
-      if (!ParseBool(param + sizeof("-tint_dump_input=") - 1,
+    if (std::string::npos != param.find("-tint_dump_input=")) {
+      if (!ParseBool(param.substr(std::string("-tint_dump_input=").length()),
                      &cli_params.dump_input)) {
         InvalidParam(param);
       }
-    } else if (!strcmp(param, "-tint_help")) {
+    } else if (std::string::npos != param.find("-tint_help")) {
       help = true;
+    } else if (std::string::npos != param.find("-tint_enforce_validity=")) {
+      if (!ParseBool(
+              param.substr(std::string("-tint_enforce_validity=").length()),
+              &cli_params.enforce_validity)) {
+        InvalidParam(param);
+      }
     } else {
       recognized_parameter = false;
     }

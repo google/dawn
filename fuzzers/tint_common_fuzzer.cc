@@ -57,15 +57,27 @@ namespace {
   FATAL_ERROR(diagnostics, "");
 }
 
-// Wrapping this in a macro so it can be a one-liner in the code, but not
-// introducing another level in the stack trace. This will help with de-duping
+// Wrapping in a macro, so it can be a one-liner in the code, but not
+// introduce another level in the stack trace. This will help with de-duping
 // ClusterFuzz issues.
-#define CHECK_INSPECTOR(inspector)                           \
-  do {                                                       \
-    if (inspector.has_error()) {                             \
-      FATAL_ERROR(program->Diagnostics(),                    \
-                  "Inspector failed: " + inspector.error()); \
-    }                                                        \
+#define CHECK_INSPECTOR(program, inspector)                    \
+  do {                                                         \
+    if ((inspector).has_error()) {                             \
+      if (!enforce_validity) {                                 \
+        return;                                                \
+      }                                                        \
+      FATAL_ERROR((program)->Diagnostics(),                    \
+                  "Inspector failed: " + (inspector).error()); \
+    }                                                          \
+  } while (false)
+
+// Wrapping in a macro to make code more readable and help with issue de-duping.
+#define VALIDITY_ERROR(diags, msg_string) \
+  do {                                    \
+    if (!enforce_validity) {              \
+      return 0;                           \
+    }                                     \
+    FATAL_ERROR(diags, msg_string);       \
   } while (false)
 
 bool SPIRVToolsValidationCheck(const tint::Program& program,
@@ -192,6 +204,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif  // TINT_BUILD_SPV_READER
 
   RunInspector(&program);
+  diagnostics_ = program.Diagnostics();
 
   if (transform_manager_) {
     auto out = transform_manager_->Run(&program, *transform_inputs_);
@@ -201,9 +214,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       for (const auto& diag : out.program.Diagnostics()) {
         if (diag.severity > diag::Severity::Error ||
             diag.system != diag::System::Transform) {
-          FATAL_ERROR(out.program.Diagnostics(),
-                      "Fuzzing detected valid input program being transformed "
-                      "into an invalid output program");
+          VALIDITY_ERROR(program.Diagnostics(),
+                         "Fuzzing detected valid input program being "
+                         "transformed into an invalid output program");
         }
       }
     }
@@ -218,8 +231,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::wgsl::Generate(&program, options_wgsl_);
       generated_wgsl_ = std::move(result.wgsl);
       if (!result.success) {
-        FATAL_ERROR(program.Diagnostics(),
-                    "WGSL writer errored on validated input:\n" + result.error);
+        VALIDITY_ERROR(
+            program.Diagnostics(),
+            "WGSL writer errored on validated input:\n" + result.error);
       }
 #endif  // TINT_BUILD_WGSL_WRITER
       break;
@@ -229,13 +243,14 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::spirv::Generate(&program, options_spirv_);
       generated_spirv_ = std::move(result.spirv);
       if (!result.success) {
-        FATAL_ERROR(
+        VALIDITY_ERROR(
             program.Diagnostics(),
             "SPIR-V writer errored on validated input:\n" + result.error);
       }
+
       if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {
-        FATAL_ERROR(program.Diagnostics(),
-                    "Fuzzing detected invalid spirv being emitted by Tint");
+        VALIDITY_ERROR(program.Diagnostics(),
+                       "Fuzzing detected invalid spirv being emitted by Tint");
       }
 
 #endif  // TINT_BUILD_SPV_WRITER
@@ -246,8 +261,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::hlsl::Generate(&program, options_hlsl_);
       generated_hlsl_ = std::move(result.hlsl);
       if (!result.success) {
-        FATAL_ERROR(program.Diagnostics(),
-                    "HLSL writer errored on validated input:\n" + result.error);
+        VALIDITY_ERROR(
+            program.Diagnostics(),
+            "HLSL writer errored on validated input:\n" + result.error);
       }
 #endif  // TINT_BUILD_HLSL_WRITER
       break;
@@ -257,8 +273,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       auto result = writer::msl::Generate(&program, options_msl_);
       generated_msl_ = std::move(result.msl);
       if (!result.success) {
-        FATAL_ERROR(program.Diagnostics(),
-                    "MSL writer errored on validated input:\n" + result.error);
+        VALIDITY_ERROR(
+            program.Diagnostics(),
+            "MSL writer errored on validated input:\n" + result.error);
       }
 #endif  // TINT_BUILD_MSL_WRITER
       break;
@@ -270,64 +287,65 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
 void CommonFuzzer::RunInspector(Program* program) {
   inspector::Inspector inspector(program);
+  diagnostics_ = program->Diagnostics();
 
   auto entry_points = inspector.GetEntryPoints();
-  CHECK_INSPECTOR(inspector);
+  CHECK_INSPECTOR(program, inspector);
 
   auto constant_ids = inspector.GetConstantIDs();
-  CHECK_INSPECTOR(inspector);
+  CHECK_INSPECTOR(program, inspector);
 
   auto constant_name_to_id = inspector.GetConstantNameToIdMap();
-  CHECK_INSPECTOR(inspector);
+  CHECK_INSPECTOR(program, inspector);
 
   for (auto& ep : entry_points) {
     inspector.GetRemappedNameForEntryPoint(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetStorageSize(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetUniformBufferResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetStorageBufferResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetReadOnlyStorageBufferResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetSamplerResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetComparisonSamplerResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetSampledTextureResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetMultisampledTextureResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetWriteOnlyStorageTextureResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetDepthTextureResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetDepthMultisampledTextureResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetExternalTextureResourceBindings(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetSamplerTextureUses(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
 
     inspector.GetWorkgroupStorageSize(ep.name);
-    CHECK_INSPECTOR(inspector);
+    CHECK_INSPECTOR(program, inspector);
   }
 }
 

@@ -28,6 +28,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
                                            OutputFormat::kMSL);
   fuzzer.SetOptionsMsl(options);
   fuzzer.SetDumpInput(GetCliParams().dump_input);
+  fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
+
   return fuzzer.Run(data, size);
 }
 

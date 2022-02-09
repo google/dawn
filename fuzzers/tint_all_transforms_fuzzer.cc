@@ -28,6 +28,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
     fuzzer.SetTransformManager(tb.manager(), tb.data_map());
     fuzzer.SetDumpInput(GetCliParams().dump_input);
+    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
     fuzzer.Run(data, size);
   }
@@ -40,6 +41,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
     fuzzer.SetTransformManager(tb.manager(), tb.data_map());
     fuzzer.SetDumpInput(GetCliParams().dump_input);
+    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
     fuzzer.Run(data, size);
   }
@@ -53,6 +55,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kMSL);
     fuzzer.SetTransformManager(tb.manager(), tb.data_map());
     fuzzer.SetDumpInput(GetCliParams().dump_input);
+    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
     fuzzer.Run(data, size);
   }
@@ -65,6 +68,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
     fuzzer.SetTransformManager(tb.manager(), tb.data_map());
     fuzzer.SetDumpInput(GetCliParams().dump_input);
+    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
     fuzzer.Run(data, size);
   }

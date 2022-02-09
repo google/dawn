@@ -24,6 +24,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::fuzzers::ReaderWriterFuzzer fuzzer(InputFormat::kWGSL,
                                            OutputFormat::kWGSL);
   fuzzer.SetDumpInput(GetCliParams().dump_input);
+  fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
+
   return fuzzer.Run(data, size);
 }
 

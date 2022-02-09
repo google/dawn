@@ -24,6 +24,7 @@ namespace fuzzers {
 /// help message
 struct CliParams {
   bool dump_input = false;
+  bool enforce_validity = false;
 };
 
 /// @brief Parses CLI parameters.
