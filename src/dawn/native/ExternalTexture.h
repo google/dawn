@@ -43,13 +43,12 @@ namespace dawn::native {
             DeviceBase* device,
             const ExternalTextureDescriptor* descriptor);
 
+        BufferBase* GetParamsBuffer() const;
         const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& GetTextureViews() const;
+        ObjectType GetType() const override;
 
         MaybeError ValidateCanUseInSubmitNow() const;
-        MaybeError Initialize(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
         static ExternalTextureBase* MakeError(DeviceBase* device);
-
-        ObjectType GetType() const override;
 
         void APIDestroy();
 
@@ -61,9 +60,11 @@ namespace dawn::native {
         ~ExternalTextureBase() override;
 
       private:
-        enum class ExternalTextureState { Alive, Destroyed };
         ExternalTextureBase(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
+
+        enum class ExternalTextureState { Alive, Destroyed };
         ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+        MaybeError Initialize(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
 
         Ref<TextureBase> mDummyTexture;
         Ref<BufferBase> mParamsBuffer;

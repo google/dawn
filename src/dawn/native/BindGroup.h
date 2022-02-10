@@ -51,7 +51,7 @@ namespace dawn::native {
         SamplerBase* GetBindingAsSampler(BindingIndex bindingIndex) const;
         TextureViewBase* GetBindingAsTextureView(BindingIndex bindingIndex);
         const ityp::span<uint32_t, uint64_t>& GetUnverifiedBufferSizes() const;
-        ExternalTextureBase* GetBindingAsExternalTexture(BindingIndex bindingIndex);
+        const std::vector<Ref<ExternalTextureBase>>& GetBoundExternalTextures() const;
 
       protected:
         // To save memory, the size of a bind group is dynamically determined and the bind group is
@@ -85,6 +85,10 @@ namespace dawn::native {
 
         Ref<BindGroupLayoutBase> mLayout;
         BindGroupLayoutBase::BindingDataPointers mBindingData;
+
+        // TODO:(dawn:1293): Store external textures in
+        // BindGroupLayoutBase::BindingDataPointers::bindings
+        std::vector<Ref<ExternalTextureBase>> mBoundExternalTextures;
     };
 
 }  // namespace dawn::native

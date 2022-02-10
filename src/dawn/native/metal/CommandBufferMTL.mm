@@ -517,28 +517,8 @@ namespace dawn::native::metal {
                             break;
                         }
 
-                        case BindingInfoType::ExternalTexture: {
-                            const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& views =
-                                group->GetBindingAsExternalTexture(bindingIndex)->GetTextureViews();
-
-                            ASSERT(views[2].Get() == nullptr);
-
-                            TextureView* textureView = ToBackend(views[0].Get());
-
-                            if (hasVertStage) {
-                                [render setVertexTexture:textureView->GetMTLTexture()
-                                                 atIndex:vertIndex];
-                            }
-                            if (hasFragStage) {
-                                [render setFragmentTexture:textureView->GetMTLTexture()
-                                                   atIndex:fragIndex];
-                            }
-                            if (hasComputeStage) {
-                                [compute setTexture:textureView->GetMTLTexture()
-                                            atIndex:computeIndex];
-                            }
-                            break;
-                        }
+                        case BindingInfoType::ExternalTexture:
+                            UNREACHABLE();
                     }
                 }
             }

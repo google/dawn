@@ -41,6 +41,7 @@ namespace tint {
 
     namespace transform {
         class DataMap;
+        class Manager;
         class Transform;
         class VertexPulling;
     }  // namespace transform
@@ -281,6 +282,10 @@ namespace dawn::native {
         void DestroyImpl() override;
 
         MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
+
+        static void AddExternalTextureTransform(const PipelineLayoutBase* layout,
+                                                tint::transform::Manager* transformManager,
+                                                tint::transform::DataMap* transformInputs);
 
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);

@@ -15,6 +15,7 @@
 #include "dawn/native/ShaderModule.h"
 
 #include "absl/strings/str_format.h"
+#include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/HashUtils.h"
 #include "dawn/native/BindGroupLayout.h"
@@ -444,6 +445,26 @@ namespace dawn::native {
             const ShaderBindingInfo& shaderInfo) {
             const BindGroupLayoutBase::BindingMap& layoutBindings = layout->GetBindingMap();
 
+            // An external texture binding found in the shader will later be expanded into multiple
+            // bindings at compile time. This expansion will have already happened in the bgl - so
+            // the shader and bgl will always mismatch at this point. Expansion info is contained in
+            // the bgl object, so we can still verify the bgl used to have an external texture in
+            // the slot corresponding to the shader reflection.
+            if (shaderInfo.bindingType == BindingInfoType::ExternalTexture) {
+                // If an external texture binding used to exist in the bgl, it will be found as a
+                // key in the ExternalTextureBindingExpansions map.
+                ExternalTextureBindingExpansionMap expansions =
+                    layout->GetExternalTextureBindingExpansionMap();
+                std::map<BindingNumber, dawn_native::ExternalTextureBindingExpansion>::iterator it =
+                    expansions.find(bindingNumber);
+                // TODO(dawn:563): Provide info about the binding types.
+                DAWN_INVALID_IF(it == expansions.end(),
+                                "Binding type in the shader (texture_external) doesn't match the "
+                                "type in the layout.");
+
+                return {};
+            }
+
             const auto& bindingIt = layoutBindings.find(bindingNumber);
             DAWN_INVALID_IF(bindingIt == layoutBindings.end(), "Binding doesn't exist in %s.",
                             layout);
@@ -452,9 +473,16 @@ namespace dawn::native {
             const BindingInfo& layoutInfo = layout->GetBindingInfo(bindingIndex);
 
             // TODO(dawn:563): Provide info about the binding types.
-            DAWN_INVALID_IF(layoutInfo.bindingType != shaderInfo.bindingType,
-                            "Binding type (buffer vs. texture vs. sampler) doesn't match the type "
-                            "in the layout.");
+            DAWN_INVALID_IF(
+                layoutInfo.bindingType != shaderInfo.bindingType,
+                "Binding type (buffer vs. texture vs. sampler vs. external) doesn't match the type "
+                "in the layout.");
+
+            ExternalTextureBindingExpansionMap expansions =
+                layout->GetExternalTextureBindingExpansionMap();
+            DAWN_INVALID_IF(expansions.find(bindingNumber) != expansions.end(),
+                            "Binding type (buffer vs. texture vs. sampler vs. external) doesn't "
+                            "match the type in the layout.");
 
             // TODO(dawn:563): Provide info about the visibility.
             DAWN_INVALID_IF(
@@ -509,11 +537,6 @@ namespace dawn::native {
                     break;
                 }
 
-                case BindingInfoType::ExternalTexture: {
-                    // Nothing to validate! (yet?)
-                    break;
-                }
-
                 case BindingInfoType::Buffer: {
                     // Binding mismatch between shader and bind group is invalid. For example, a
                     // writable binding in the shader with a readonly storage buffer in the bind
@@ -551,6 +574,11 @@ namespace dawn::native {
                         shaderInfo.sampler.isComparison,
                         layoutInfo.sampler.type == wgpu::SamplerBindingType::Comparison);
                     break;
+
+                case BindingInfoType::ExternalTexture: {
+                    UNREACHABLE();
+                    break;
+                }
             }
 
             return {};
@@ -1262,6 +1290,30 @@ namespace dawn::native {
 
     OwnedCompilationMessages* ShaderModuleBase::GetCompilationMessages() const {
         return mCompilationMessages.get();
+    }
+
+    // static
+    void ShaderModuleBase::AddExternalTextureTransform(const PipelineLayoutBase* layout,
+                                                       tint::transform::Manager* transformManager,
+                                                       tint::transform::DataMap* transformInputs) {
+        tint::transform::MultiplanarExternalTexture::BindingsMap newBindingsMap;
+        for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+            const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(i);
+
+            for (const auto& expansion : bgl->GetExternalTextureBindingExpansionMap()) {
+                newBindingsMap[{static_cast<uint32_t>(i),
+                                static_cast<uint32_t>(expansion.second.plane0)}] = {
+                    {static_cast<uint32_t>(i), static_cast<uint32_t>(expansion.second.plane1)},
+                    {static_cast<uint32_t>(i), static_cast<uint32_t>(expansion.second.params)}};
+            }
+        }
+        tint::transform::Manager m;
+
+        if (!newBindingsMap.empty()) {
+            transformManager->Add<tint::transform::MultiplanarExternalTexture>();
+            transformInputs->Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
+                newBindingsMap);
+        }
     }
 
     MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult) {

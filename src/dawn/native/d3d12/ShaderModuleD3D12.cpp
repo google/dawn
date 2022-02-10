@@ -753,7 +753,7 @@ namespace dawn::native::d3d12 {
 
     ResultOrError<CompiledShader> ShaderModule::Compile(const ProgrammableStage& programmableStage,
                                                         SingleShaderStage stage,
-                                                        PipelineLayout* layout,
+                                                        const PipelineLayout* layout,
                                                         uint32_t compileFlags) {
         TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleD3D12::Compile");
         ASSERT(!IsError());
@@ -767,19 +767,24 @@ namespace dawn::native::d3d12 {
         tint::transform::Manager transformManager;
         tint::transform::DataMap transformInputs;
 
-        const tint::Program* program;
+        const tint::Program* program = GetTintProgram();
         tint::Program programAsValue;
+
+        AddExternalTextureTransform(layout, &transformManager, &transformInputs);
+
         if (stage == SingleShaderStage::Vertex) {
             transformManager.Add<tint::transform::FirstIndexOffset>();
             transformInputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(
                 layout->GetFirstIndexOffsetShaderRegister(),
                 layout->GetFirstIndexOffsetRegisterSpace());
+        }
 
-            tint::transform::DataMap transformOutputs;
-            DAWN_TRY_ASSIGN(programAsValue,
-                            RunTransforms(&transformManager, GetTintProgram(), transformInputs,
-                                          &transformOutputs, nullptr));
+        tint::transform::DataMap transformOutputs;
+        DAWN_TRY_ASSIGN(programAsValue, RunTransforms(&transformManager, program, transformInputs,
+                                                      &transformOutputs, nullptr));
+        program = &programAsValue;
 
+        if (stage == SingleShaderStage::Vertex) {
             if (auto* data = transformOutputs.Get<tint::transform::FirstIndexOffset::Data>()) {
                 // TODO(dawn:549): Consider adding this information to the pipeline cache once we
                 // can store more than the shader blob in it.
@@ -793,10 +798,6 @@ namespace dawn::native::d3d12 {
                         data->first_instance_offset;
                 }
             }
-
-            program = &programAsValue;
-        } else {
-            program = GetTintProgram();
         }
 
         ShaderCompilationRequest request;

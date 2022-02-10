@@ -97,6 +97,8 @@ namespace dawn::native::metal {
         transformManager.Add<tint::transform::SingleEntryPoint>();
         transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
 
+        AddExternalTextureTransform(layout, &transformManager, &transformInputs);
+
         if (stage == SingleShaderStage::Vertex &&
             GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
             transformManager.Add<tint::transform::VertexPulling>();

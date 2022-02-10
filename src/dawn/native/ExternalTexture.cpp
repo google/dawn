@@ -219,6 +219,10 @@ namespace dawn::native {
         return new ExternalTextureBase(device, ObjectBase::kError);
     }
 
+    BufferBase* ExternalTextureBase::GetParamsBuffer() const {
+        return mParamsBuffer.Get();
+    }
+
     ObjectType ExternalTextureBase::GetType() const {
         return ObjectType::ExternalTexture;
     }

@@ -165,6 +165,35 @@ namespace dawn::native::vulkan {
                                                          /* mayCollide */ false);
         transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
 
+        // Transform external textures into the binding locations specified in the bgl
+        // TODO(dawn:1082): Replace this block with ShaderModuleBase::AddExternalTextureTransform.
+        tint::transform::MultiplanarExternalTexture::BindingsMap newBindingsMap;
+        for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+            BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(i);
+
+            ExternalTextureBindingExpansionMap expansions =
+                bgl->GetExternalTextureBindingExpansionMap();
+
+            std::map<BindingNumber, dawn_native::ExternalTextureBindingExpansion>::iterator it =
+                expansions.begin();
+
+            while (it != expansions.end()) {
+                newBindingsMap[{static_cast<uint32_t>(i),
+                                static_cast<uint32_t>(bgl->GetBindingIndex(it->second.plane0))}] = {
+                    {static_cast<uint32_t>(i),
+                     static_cast<uint32_t>(bgl->GetBindingIndex(it->second.plane1))},
+                    {static_cast<uint32_t>(i),
+                     static_cast<uint32_t>(bgl->GetBindingIndex(it->second.params))}};
+                it++;
+            }
+        }
+
+        if (!newBindingsMap.empty()) {
+            transformManager.Add<tint::transform::MultiplanarExternalTexture>();
+            transformInputs.Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
+                newBindingsMap);
+        }
+
         tint::Program program;
         {
             TRACE_EVENT0(GetDevice()->GetPlatform(), General, "RunTransforms");

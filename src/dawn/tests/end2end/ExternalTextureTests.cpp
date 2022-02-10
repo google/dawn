@@ -61,9 +61,13 @@ TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
 }
 
 TEST_P(ExternalTextureTests, SampleExternalTexture) {
-    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+    // TODO(crbug.com/dawn/1263): SPIR-V has an issue compiling the output from Tint's external
+    // texture transform. Re-enable this test for OpenGL when the switch to Tint is complete.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    const wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         @stage(vertex) fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
-            var positions : array<vec4<f32>, 3> = array<vec4<f32>, 3>(
+            var positions = array<vec4<f32>, 3>(
                 vec4<f32>(-1.0, 1.0, 0.0, 1.0),
                 vec4<f32>(-1.0, -1.0, 0.0, 1.0),
                 vec4<f32>(1.0, 1.0, 0.0, 1.0)
@@ -102,6 +106,13 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
         queue.Submit(1, &commands);
     }
 
+    // Pipeline Creation
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.cTargets[0].format = kFormat;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
     // Create an ExternalTextureDescriptor from the texture view
     wgpu::ExternalTextureDescriptor externalDesc;
     externalDesc.plane0 = externalView;
@@ -112,19 +123,8 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     // Create a sampler and bind group
     wgpu::Sampler sampler = device.CreateSampler();
 
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
-                 {1, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, externalTexture}});
-
-    // Pipeline Creation
-    utils::ComboRenderPipelineDescriptor descriptor;
-    descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-    descriptor.vertex.module = vsModule;
-    descriptor.cFragment.module = fsModule;
-    descriptor.cTargets[0].format = kFormat;
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, sampler}, {1, externalTexture}});
 
     // Run the shader, which should sample from the external texture and draw a triangle into the
     // upper left corner of the render texture.
@@ -143,6 +143,114 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderTexture, 0, 0);
+}
+
+TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
+    // TODO(crbug.com/dawn/1263): SPIR-V has an issue compiling the output from Tint's external
+    // texture transform. Re-enable this test for OpenGL when the switch to Tint is complete.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    const wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        @stage(vertex) fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
+            var positions = array<vec4<f32>, 3>(
+                vec4<f32>(-1.0, 1.0, 0.0, 1.0),
+                vec4<f32>(-1.0, -1.0, 0.0, 1.0),
+                vec4<f32>(1.0, 1.0, 0.0, 1.0)
+            );
+            return positions[VertexIndex];
+        })");
+
+    const wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var s : sampler;
+        @group(0) @binding(1) var t : texture_external;
+
+        @stage(fragment) fn main(@builtin(position) FragCoord : vec4<f32>)
+                                 -> @location(0) vec4<f32> {
+            return textureSampleLevel(t, s, FragCoord.xy / vec2<f32>(4.0, 4.0));
+        })");
+
+    wgpu::Texture sampledTexturePlane0 =
+        Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R8Unorm,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+    wgpu::Texture sampledTexturePlane1 =
+        Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::RG8Unorm,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+
+    wgpu::Texture renderTexture =
+        Create2DTexture(device, kWidth, kHeight, kFormat,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+
+    // Create a texture view for the external texture
+    wgpu::TextureView externalViewPlane0 = sampledTexturePlane0.CreateView();
+    wgpu::TextureView externalViewPlane1 = sampledTexturePlane1.CreateView();
+
+    struct ConversionExpectation {
+        double y;
+        double u;
+        double v;
+        RGBA8 rgba;
+    };
+
+    std::array<ConversionExpectation, 4> expectations = {{{0.0f, 0.5f, 0.5f, RGBA8::kBlack},
+                                                          {0.298f, 0.329f, 1.0f, RGBA8::kRed},
+                                                          {0.584f, -0.168f, -0.823f, RGBA8::kGreen},
+                                                          {0.113f, 1.0f, 0.419f, RGBA8::kBlue}}};
+
+    for (ConversionExpectation expectation : expectations) {
+        // Initialize the texture planes with YUV data
+        {
+            utils::ComboRenderPassDescriptor renderPass({externalViewPlane0, externalViewPlane1},
+                                                        nullptr);
+            renderPass.cColorAttachments[0].clearColor = {expectation.y, 0.0f, 0.0f, 0.0f};
+            renderPass.cColorAttachments[1].clearColor = {expectation.u, expectation.v, 0.0f, 0.0f};
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.End();
+
+            wgpu::CommandBuffer commands = encoder.Finish();
+            queue.Submit(1, &commands);
+        }
+
+        // Pipeline Creation
+        utils::ComboRenderPipelineDescriptor descriptor;
+        // descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].format = kFormat;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+        // Create an ExternalTextureDescriptor from the texture views
+        wgpu::ExternalTextureDescriptor externalDesc;
+        externalDesc.plane0 = externalViewPlane0;
+        externalDesc.plane1 = externalViewPlane1;
+
+        // Import the external texture
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+        // Create a sampler and bind group
+        wgpu::Sampler sampler = device.CreateSampler();
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, sampler}, {1, externalTexture}});
+
+        // Run the shader, which should sample from the external texture and draw a triangle into
+        // the upper left corner of the render texture.
+        wgpu::TextureView renderView = renderTexture.CreateView();
+        utils::ComboRenderPassDescriptor renderPass({renderView}, nullptr);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        {
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.Draw(3);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(expectation.rgba, renderTexture, 0, 0);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(ExternalTextureTests,

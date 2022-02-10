@@ -268,15 +268,18 @@ namespace dawn::native::opengl {
                                                              const PipelineLayout* layout,
                                                              bool* needsDummySampler) const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
-        tint::transform::SingleEntryPoint singleEntryPointTransform;
+        tint::transform::Manager transformManager;
+        transformManager.append(std::make_unique<tint::transform::SingleEntryPoint>());
 
         tint::transform::DataMap transformInputs;
         transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
 
+        AddExternalTextureTransform(layout, &transformManager, &transformInputs);
+
         tint::Program program;
         {
             TRACE_EVENT0(GetDevice()->GetPlatform(), General, "RunTransforms");
-            DAWN_TRY_ASSIGN(program, RunTransforms(&singleEntryPointTransform, GetTintProgram(),
+            DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(),
                                                    transformInputs, nullptr, nullptr));
         }
 

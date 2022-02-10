@@ -240,12 +240,10 @@ namespace dawn::native {
             return {};
         }
 
-        MaybeError ValidateExternalTextureBinding(const DeviceBase* device,
-                                                  const BindGroupEntry& entry,
-                                                  const BindingInfo& bindingInfo) {
-            const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
-            FindInChain(entry.nextInChain, &externalTextureBindingEntry);
-
+        MaybeError ValidateExternalTextureBinding(
+            const DeviceBase* device,
+            const BindGroupEntry& entry,
+            const ExternalTextureBindingEntry* externalTextureBindingEntry) {
             DAWN_INVALID_IF(externalTextureBindingEntry == nullptr,
                             "Binding entry external texture not set.");
 
@@ -270,7 +268,7 @@ namespace dawn::native {
         DAWN_TRY(device->ValidateObject(descriptor->layout));
 
         DAWN_INVALID_IF(
-            BindingIndex(descriptor->entryCount) != descriptor->layout->GetBindingCount(),
+            descriptor->entryCount != descriptor->layout->GetUnexpandedBindingCount(),
             "Number of entries (%u) did not match the number of entries (%u) specified in %s",
             descriptor->entryCount, static_cast<uint32_t>(descriptor->layout->GetBindingCount()),
             descriptor->layout);
@@ -296,6 +294,21 @@ namespace dawn::native {
 
             bindingsSet.set(bindingIndex);
 
+            // Below this block we validate entries based on the bind group layout, in which
+            // external textures have been expanded into their underlying contents. For this reason
+            // we must identify external texture binding entries by checking the bind group entry
+            // itself.
+            // TODO:(dawn:1293): Store external textures in
+            // BindGroupLayoutBase::BindingDataPointers::bindings so checking external textures can
+            // be moved in the switch below.
+            const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
+            FindInChain(entry.nextInChain, &externalTextureBindingEntry);
+            if (externalTextureBindingEntry != nullptr) {
+                DAWN_TRY(
+                    ValidateExternalTextureBinding(device, entry, externalTextureBindingEntry));
+                continue;
+            }
+
             const BindingInfo& bindingInfo = descriptor->layout->GetBindingInfo(bindingIndex);
 
             // Perform binding-type specific validation.
@@ -314,8 +327,7 @@ namespace dawn::native {
                                      "validating entries[%u] as a Sampler", i);
                     break;
                 case BindingInfoType::ExternalTexture:
-                    DAWN_TRY_CONTEXT(ValidateExternalTextureBinding(device, entry, bindingInfo),
-                                     "validating entries[%u] as an ExternalTexture", i);
+                    UNREACHABLE();
                     break;
             }
         }
@@ -325,7 +337,7 @@ namespace dawn::native {
         //  - Each binding must be set at most once
         //
         // We don't validate the equality because it wouldn't be possible to cover it with a test.
-        ASSERT(bindingsSet.count() == bindingMap.size());
+        ASSERT(bindingsSet.count() == descriptor->layout->GetUnexpandedBindingCount());
 
         return {};
     }  // anonymous namespace
@@ -377,11 +389,45 @@ namespace dawn::native {
                 continue;
             }
 
+            // Here we unpack external texture bindings into multiple additional bindings for the
+            // external texture's contents. New binding locations previously determined in the bind
+            // group layout are created in this bind group and filled with the external texture's
+            // underlying resources.
             const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
             FindInChain(entry.nextInChain, &externalTextureBindingEntry);
             if (externalTextureBindingEntry != nullptr) {
-                ASSERT(mBindingData.bindings[bindingIndex] == nullptr);
-                mBindingData.bindings[bindingIndex] = externalTextureBindingEntry->externalTexture;
+                mBoundExternalTextures.push_back(externalTextureBindingEntry->externalTexture);
+
+                ExternalTextureBindingExpansionMap expansions =
+                    mLayout->GetExternalTextureBindingExpansionMap();
+                ExternalTextureBindingExpansionMap::iterator it =
+                    expansions.find(BindingNumber(entry.binding));
+
+                ASSERT(it != expansions.end());
+
+                BindingIndex plane0BindingIndex =
+                    descriptor->layout->GetBindingIndex(it->second.plane0);
+                BindingIndex plane1BindingIndex =
+                    descriptor->layout->GetBindingIndex(it->second.plane1);
+                BindingIndex paramsBindingIndex =
+                    descriptor->layout->GetBindingIndex(it->second.params);
+
+                ASSERT(mBindingData.bindings[plane0BindingIndex] == nullptr);
+
+                mBindingData.bindings[plane0BindingIndex] =
+                    externalTextureBindingEntry->externalTexture->GetTextureViews()[0];
+
+                ASSERT(mBindingData.bindings[plane1BindingIndex] == nullptr);
+                mBindingData.bindings[plane1BindingIndex] =
+                    externalTextureBindingEntry->externalTexture->GetTextureViews()[1];
+
+                ASSERT(mBindingData.bindings[paramsBindingIndex] == nullptr);
+                mBindingData.bindings[paramsBindingIndex] =
+                    externalTextureBindingEntry->externalTexture->GetParamsBuffer();
+                mBindingData.bufferData[paramsBindingIndex].offset = 0;
+                mBindingData.bufferData[paramsBindingIndex].size =
+                    sizeof(dawn_native::ExternalTextureParams);
+
                 continue;
             }
         }
@@ -475,12 +521,8 @@ namespace dawn::native {
         return static_cast<TextureViewBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 
-    ExternalTextureBase* BindGroupBase::GetBindingAsExternalTexture(BindingIndex bindingIndex) {
-        ASSERT(!IsError());
-        ASSERT(bindingIndex < mLayout->GetBindingCount());
-        ASSERT(mLayout->GetBindingInfo(bindingIndex).bindingType ==
-               BindingInfoType::ExternalTexture);
-        return static_cast<ExternalTextureBase*>(mBindingData.bindings[bindingIndex].Get());
+    const std::vector<Ref<ExternalTextureBase>>& BindGroupBase::GetBoundExternalTextures() const {
+        return mBoundExternalTextures;
     }
 
 }  // namespace dawn::native

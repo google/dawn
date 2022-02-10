@@ -55,7 +55,7 @@ namespace dawn::native::d3d12 {
 
         ResultOrError<CompiledShader> Compile(const ProgrammableStage& programmableStage,
                                               SingleShaderStage stage,
-                                              PipelineLayout* layout,
+                                              const PipelineLayout* layout,
                                               uint32_t compileFlags);
 
       private:

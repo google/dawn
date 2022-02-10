@@ -124,23 +124,17 @@ namespace dawn::native {
                     break;
                 }
 
-                case BindingInfoType::ExternalTexture: {
-                    ExternalTextureBase* externalTexture =
-                        group->GetBindingAsExternalTexture(bindingIndex);
-
-                    const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& textureViews =
-                        externalTexture->GetTextureViews();
-
-                    ASSERT(textureViews[2].Get() == nullptr);
-
-                    mExternalTextureUsages.insert(externalTexture);
-                    TextureViewUsedAs(textureViews[0].Get(), wgpu::TextureUsage::TextureBinding);
+                case BindingInfoType::ExternalTexture:
+                    UNREACHABLE();
                     break;
-                }
 
                 case BindingInfoType::Sampler:
                     break;
             }
+        }
+
+        for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
+            mExternalTextureUsages.insert(externalTexture.Get());
         }
     }
 
@@ -196,23 +190,16 @@ namespace dawn::native {
                     break;
                 }
 
-                case BindingInfoType::ExternalTexture: {
-                    ExternalTextureBase* externalTexture =
-                        group->GetBindingAsExternalTexture(index);
-                    const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& textureViews =
-                        externalTexture->GetTextureViews();
-
-                    ASSERT(textureViews[2].Get() == nullptr);
-
-                    mUsage.referencedExternalTextures.insert(externalTexture);
-                    mUsage.referencedTextures.insert(textureViews[0].Get()->GetTexture());
-                    break;
-                }
-
+                case BindingInfoType::ExternalTexture:
+                    UNREACHABLE();
                 case BindingInfoType::StorageTexture:
                 case BindingInfoType::Sampler:
                     break;
             }
+        }
+
+        for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
+            mUsage.referencedExternalTextures.insert(externalTexture.Get());
         }
     }
 
