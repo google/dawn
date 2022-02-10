@@ -269,137 +269,84 @@ namespace dawn::native::opengl {
                                                              bool* needsDummySampler) const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
         tint::transform::Manager transformManager;
-        transformManager.append(std::make_unique<tint::transform::SingleEntryPoint>());
-
         tint::transform::DataMap transformInputs;
-        transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
 
         AddExternalTextureTransform(layout, &transformManager, &transformInputs);
 
         tint::Program program;
-        {
-            TRACE_EVENT0(GetDevice()->GetPlatform(), General, "RunTransforms");
-            DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(),
-                                                   transformInputs, nullptr, nullptr));
-        }
-
-        tint::writer::spirv::Options tintOptions;
-        tintOptions.disable_workgroup_init =
-            GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-        std::vector<uint32_t> spirv;
-        {
-            TRACE_EVENT0(GetDevice()->GetPlatform(), General, "tint::writer::spirv::Generate");
-            auto result = tint::writer::spirv::Generate(&program, tintOptions);
-            DAWN_INVALID_IF(!result.success, "An error occured while generating SPIR-V: %s.",
-                            result.error);
-
-            spirv = std::move(result.spirv);
-        }
-
-        DAWN_TRY(
-            ValidateSpirv(GetDevice(), spirv, GetDevice()->IsToggleEnabled(Toggle::DumpShaders)));
-
-        // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
-        // be updated.
-        spirv_cross::CompilerGLSL::Options options;
-
-        // The range of Z-coordinate in the clipping volume of OpenGL is [-w, w], while it is
-        // [0, w] in D3D12, Metal and Vulkan, so we should normalize it in shaders in all
-        // backends. See the documentation of
-        // spirv_cross::CompilerGLSL::Options::vertex::fixup_clipspace for more details.
-        options.vertex.flip_vert_y = true;
-        options.vertex.fixup_clipspace = true;
-
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,
+                                               nullptr, nullptr));
         const OpenGLVersion& version = ToBackend(GetDevice())->gl.GetVersion();
-        if (version.IsDesktop()) {
-            // The computation of GLSL version below only works for 3.3 and above.
-            ASSERT(version.IsAtLeast(3, 3));
-        }
-        options.es = version.IsES();
-        options.version = version.GetMajor() * 100 + version.GetMinor() * 10;
 
-        spirv_cross::CompilerGLSL compiler(std::move(spirv));
-        compiler.set_common_options(options);
-        compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
+        tint::writer::glsl::Options tintOptions;
+        using Version = tint::writer::glsl::Version;
+        tintOptions.version =
+            Version(version.IsDesktop() ? Version::Standard::kDesktop : Version::Standard::kES,
+                    version.GetMajor(), version.GetMinor());
 
-        // Analyzes all OpImageFetch opcodes and checks if there are instances where
-        // said instruction is used without a combined image sampler.
-        // GLSL does not support texelFetch without a sampler.
-        // To workaround this, we must inject a dummy sampler which can be used to form a sampler2D
-        // at the call-site of texelFetch as necessary.
-        spirv_cross::VariableID dummySamplerId = compiler.build_dummy_sampler_for_combined_images();
+        using tint::transform::BindingPoint;
+        // When textures are accessed without a sampler (e.g., textureLoad()),
+        // GetSamplerTextureUses() will return this sentinel value.
+        BindingPoint placeholderBindingPoint{static_cast<uint32_t>(kMaxBindGroupsTyped), 0};
 
-        // Extract bindings names so that it can be used to get its location in program.
-        // Now translate the separate sampler / textures into combined ones and store their info. We
-        // need to do this before removing the set and binding decorations.
-        compiler.build_combined_image_samplers();
-
-        for (const auto& combined : compiler.get_combined_image_samplers()) {
+        tint::inspector::Inspector inspector(&program);
+        // Find all the sampler/texture pairs for this entry point, and create
+        // CombinedSamplers for them. CombinedSampler records the binding points
+        // of the original texture and sampler, and generates a unique name. The
+        // corresponding uniforms will be retrieved by these generated names
+        // in PipelineGL. Any texture-only references will have
+        // "useDummySampler" set to true, and only the texture binding point
+        // will be used in naming them. In addition, Dawn will bind a
+        // non-filtering sampler for them (see PipelineGL).
+        auto uses = inspector.GetSamplerTextureUses(entryPointName, placeholderBindingPoint);
+        for (const auto& use : uses) {
             combinedSamplers->emplace_back();
 
             CombinedSampler* info = &combinedSamplers->back();
-            if (combined.sampler_id == dummySamplerId) {
-                *needsDummySampler = true;
+            if (use.sampler_binding_point == placeholderBindingPoint) {
                 info->useDummySampler = true;
-                info->samplerLocation = {};
+                *needsDummySampler = true;
             } else {
                 info->useDummySampler = false;
-                info->samplerLocation.group = BindGroupIndex(
-                    compiler.get_decoration(combined.sampler_id, spv::DecorationDescriptorSet));
-                info->samplerLocation.binding = BindingNumber(
-                    compiler.get_decoration(combined.sampler_id, spv::DecorationBinding));
             }
-            info->textureLocation.group = BindGroupIndex(
-                compiler.get_decoration(combined.image_id, spv::DecorationDescriptorSet));
-            info->textureLocation.binding =
-                BindingNumber(compiler.get_decoration(combined.image_id, spv::DecorationBinding));
-            compiler.set_name(combined.combined_id, info->GetName());
+            info->samplerLocation.group = BindGroupIndex(use.sampler_binding_point.group);
+            info->samplerLocation.binding = BindingNumber(use.sampler_binding_point.binding);
+            info->textureLocation.group = BindGroupIndex(use.texture_binding_point.group);
+            info->textureLocation.binding = BindingNumber(use.texture_binding_point.binding);
+            tintOptions.binding_map[use] = info->GetName();
+        }
+        if (*needsDummySampler) {
+            tintOptions.placeholder_binding_point = placeholderBindingPoint;
         }
 
-        const BindingInfoArray& bindingInfo = *(mGLBindings.at(entryPointName));
-
-        // Change binding names to be "dawn_binding_<group>_<binding>".
-        // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which
-        // isn't supported on OSX's OpenGL.
-        const PipelineLayout::BindingIndexInfo& indices = layout->GetBindingIndexInfo();
-
-        // Modify the decoration of variables so that SPIRV-Cross outputs only
-        //  layout(binding=<index>) for interface variables.
-        //
-        // Tint is used for the reflection of bindings for the implicit pipeline layout and
-        // pipeline/layout validation, but bindingInfo is set to mGLEntryPoints which is the
-        // SPIRV-Cross reflection. Tint reflects bindings used more precisely than SPIRV-Cross so
-        // some bindings in bindingInfo might not exist in the layout and querying the layout for
-        // them would cause an ASSERT. That's why we defensively check that bindings are in the
-        // layout before modifying them. This slight hack is ok because in the long term we will use
-        // Tint to produce GLSL.
+        // Since (non-Vulkan) GLSL does not support descriptor sets, generate a
+        // mapping from the original group/binding pair to a binding-only
+        // value. This mapping will be used by Tint to remap all global
+        // variables to the 1D space.
         for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            for (const auto& it : bindingInfo[group]) {
-                const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(group);
+            const BindGroupLayoutBase::BindingMap& bindingMap =
+                layout->GetBindGroupLayout(group)->GetBindingMap();
+            for (const auto& it : bindingMap) {
                 BindingNumber bindingNumber = it.first;
-                const auto& info = it.second;
-
-                if (!bgl->HasBinding(bindingNumber)) {
+                BindingIndex bindingIndex = it.second;
+                const BindingInfo& bindingInfo =
+                    layout->GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
+                if (!(bindingInfo.visibility & StageBit(stage))) {
                     continue;
                 }
 
-                // Remove the name of the base type. This works around an issue where if the SPIRV
-                // has two uniform/storage interface variables that point to the same base type,
-                // then SPIRV-Cross would emit two bindings with type names that conflict:
-                //
-                //   layout(binding=0) uniform Buf {...} binding0;
-                //   layout(binding=1) uniform Buf {...} binding1;
-                compiler.set_name(info.base_type_id, "");
-
-                BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);
-
-                compiler.unset_decoration(info.id, spv::DecorationDescriptorSet);
-                compiler.set_decoration(info.id, spv::DecorationBinding,
-                                        indices[group][bindingIndex]);
+                uint32_t shaderIndex = layout->GetBindingIndexInfo()[group][bindingIndex];
+                BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
+                                             static_cast<uint32_t>(bindingNumber)};
+                BindingPoint dstBindingPoint{0, shaderIndex};
+                tintOptions.binding_points.emplace(srcBindingPoint, dstBindingPoint);
             }
+            tintOptions.allow_collisions = true;
         }
-
-        std::string glsl = compiler.compile();
+        auto result = tint::writer::glsl::Generate(&program, tintOptions, entryPointName);
+        DAWN_INVALID_IF(!result.success, "An error occured while generating GLSL: %s.",
+                        result.error);
+        std::string glsl = std::move(result.glsl);
 
         if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
             std::ostringstream dumpedMsg;

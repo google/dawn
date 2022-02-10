@@ -120,6 +120,10 @@ TEST_P(DrawIndexedIndirectTest, Uint32) {
     // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 
@@ -146,6 +150,10 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
     // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because @builtin(vertex_index)
     // doesn't take into account BaseVertex, which breaks programmable vertex pulling.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
+
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
@@ -176,6 +184,10 @@ TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
     // doesn't take into account BaseVertex, which breaks programmable vertex pulling.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 
@@ -193,6 +205,10 @@ TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
 TEST_P(DrawIndexedIndirectTest, BasicValidation) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
@@ -216,6 +232,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithOffsets) {
     // TODO(crbug.com/dawn/161): The GL/GLES backend doesn't support indirect index buffer offsets
     // yet.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
@@ -245,6 +265,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultiplePasses) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
@@ -268,6 +292,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultiplePasses) {
 TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
@@ -365,6 +393,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitInOrder) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
@@ -399,6 +431,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitAtOnce) {
     // older than 27.20.100.8587, which bots are actively using.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
 
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
@@ -422,6 +458,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitAtOnce) {
 TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitOutOfOrder) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
@@ -452,6 +492,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitOutOfOrder) {
 TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
@@ -503,6 +547,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
 TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
@@ -571,6 +619,10 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
     // TODO(crbug.com/dawn/1124): Fails on Intel+Vulkan+Windows for drivers
     // older than 27.20.100.8587, which bots are actively using.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
+
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));

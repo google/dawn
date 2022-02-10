@@ -97,6 +97,10 @@ TEST_P(OpArrayLengthTest, Compute) {
     // Nvidia OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && (IsOpenGL() || IsOpenGLES()));
 
+    // TODO(crbug.com/dawn/1292): Some Intel drivers don't seem to like the
+    // (spurious but harmless) offset=64 that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL());
+
     // Create a buffer to hold the result sizes and create a bindgroup for it.
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
@@ -154,6 +158,10 @@ TEST_P(OpArrayLengthTest, Fragment) {
     // Nvidia OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && (IsOpenGL() || IsOpenGLES()));
 
+    // TODO(crbug.com/dawn/1292): Some Intel drivers don't seem to like the
+    // (spurious but harmless) offset=64 that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL());
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
     // Create the pipeline that computes the length of the buffers and writes it to the only render
@@ -205,6 +213,10 @@ TEST_P(OpArrayLengthTest, Vertex) {
     // Nvidia OpenGL. Also failing on all GLES (NV, Intel, SwANGLE).
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsOpenGL());
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+
+    // TODO(crbug.com/dawn/1292): Some Intel drivers don't seem to like the
+    // (spurious but harmless) offset=64 that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 

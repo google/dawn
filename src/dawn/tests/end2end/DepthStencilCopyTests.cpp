@@ -444,6 +444,10 @@ TEST_P(DepthCopyTests, FromDepthAspect) {
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm &&
                              (IsOpenGL() || IsOpenGLES()));
 
+    // TODO(crbug.com/dawn/1291): These tests are failing on NVidia GLES
+    // when using Tint/GLSL.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsNvidia());
+
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -482,6 +486,10 @@ TEST_P(DepthCopyTests, FromNonZeroMipDepthAspect) {
     // Invalid format and type combination in glReadPixels
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm &&
                              (IsOpenGL() || IsOpenGLES()));
+
+    // TODO(crbug.com/dawn/1291): These tests are failing on NVidia GLES
+    // when using Tint/GLSL.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsNvidia());
 
     wgpu::Texture depthTexture = CreateDepthTexture(
         9, 9, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 2);
