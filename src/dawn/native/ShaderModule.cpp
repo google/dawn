@@ -1307,7 +1307,6 @@ namespace dawn::native {
                     {static_cast<uint32_t>(i), static_cast<uint32_t>(expansion.second.params)}};
             }
         }
-        tint::transform::Manager m;
 
         if (!newBindingsMap.empty()) {
             transformManager->Add<tint::transform::MultiplanarExternalTexture>();
