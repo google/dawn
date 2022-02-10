@@ -26,7 +26,7 @@ void uses_b() {
   b = (b * 2);
 }
 
-void main2(uint local_invocation_index_1) {
+void main2(uint local_invocation_index) {
   {
     b = 0;
   }
@@ -67,7 +67,7 @@ void outer() {
   no_uses();
 }
 
-void main3(uint local_invocation_index_2) {
+void main3(uint local_invocation_index) {
   {
     a = 0;
     b = 0;

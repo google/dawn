@@ -30,6 +30,7 @@
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_side_effects_to_decl.h"
 #include "src/transform/remove_phonies.h"
+#include "src/transform/renamer.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/single_entry_point.h"
 #include "src/transform/unshadow.h"
@@ -50,6 +51,12 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
 
   auto* cfg = inputs.Get<Config>();
 
+  if (cfg && !cfg->entry_point.empty()) {
+    manager.Add<SingleEntryPoint>();
+    data.Add<SingleEntryPoint::Config>(cfg->entry_point);
+  }
+  manager.Add<Renamer>();
+  data.Add<Renamer::Config>(Renamer::Target::kGlslKeywords);
   manager.Add<Unshadow>();
 
   // Attempt to convert `loop`s into for-loops. This is to try and massage the
@@ -61,10 +68,6 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
     // ZeroInitWorkgroupMemory may inject new builtin parameters.
     manager.Add<ZeroInitWorkgroupMemory>();
-  }
-  if (cfg && !cfg->entry_point.empty()) {
-    manager.Add<SingleEntryPoint>();
-    data.Add<SingleEntryPoint::Config>(cfg->entry_point);
   }
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<SimplifyPointers>();

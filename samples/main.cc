@@ -1109,9 +1109,6 @@ int main(int argc, const char** argv) {
     }
 #if TINT_BUILD_GLSL_WRITER
     case Format::kGlsl: {
-      transform_inputs.Add<tint::transform::Renamer::Config>(
-          tint::transform::Renamer::Target::kGlslKeywords);
-      transform_manager.Add<tint::transform::Renamer>();
       break;
     }
 #endif  // TINT_BUILD_GLSL_WRITER

@@ -22,7 +22,6 @@
 #include "gtest/gtest.h"
 #include "src/transform/glsl.h"
 #include "src/transform/manager.h"
-#include "src/transform/renamer.h"
 #include "src/writer/glsl/generator_impl.h"
 
 namespace tint {
@@ -81,9 +80,6 @@ class TestHelperBase : public BODY, public ProgramBuilder {
 
     transform::Manager transform_manager;
     transform::DataMap transform_data;
-    transform_data.Add<transform::Renamer::Config>(
-        transform::Renamer::Target::kGlslKeywords);
-    transform_manager.Add<tint::transform::Renamer>();
     transform_manager.Add<tint::transform::Glsl>();
     auto result = transform_manager.Run(program.get(), transform_data);
     [&]() {

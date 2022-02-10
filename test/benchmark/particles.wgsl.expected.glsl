@@ -58,8 +58,8 @@ VertexOutput vs_main(VertexInput tint_symbol) {
 }
 
 void main() {
-  VertexInput tint_symbol_3 = VertexInput(position_1, color_1, quad_pos_1);
-  VertexOutput inner_result = vs_main(tint_symbol_3);
+  VertexInput tint_symbol_2 = VertexInput(position_1, color_1, quad_pos_1);
+  VertexOutput inner_result = vs_main(tint_symbol_2);
   gl_Position = inner_result.position;
   color_2 = inner_result.color;
   quad_pos_2 = inner_result.quad_pos;
@@ -72,7 +72,7 @@ precision mediump float;
 
 layout(location = 0) in vec4 color_1;
 layout(location = 1) in vec2 quad_pos_1;
-layout(location = 0) out vec4 value_1;
+layout(location = 0) out vec4 value;
 struct RenderParams {
   mat4 modelViewProjectionMatrix;
   vec3 right;
@@ -114,9 +114,9 @@ vec4 fs_main(VertexOutput tint_symbol) {
 }
 
 void main() {
-  VertexOutput tint_symbol_3 = VertexOutput(gl_FragCoord, color_1, quad_pos_1);
-  vec4 inner_result = fs_main(tint_symbol_3);
-  value_1 = inner_result;
+  VertexOutput tint_symbol_1 = VertexOutput(gl_FragCoord, color_1, quad_pos_1);
+  vec4 inner_result = fs_main(tint_symbol_1);
+  value = inner_result;
   return;
 }
 #version 310 es
@@ -170,7 +170,7 @@ struct UBO {
   uint width;
 };
 
-uniform highp sampler2D tint_symbol_2_1;
+uniform highp sampler2D tint_symbol_1;
 void simulate(uvec3 GlobalInvocationID) {
   rand_seed = ((sim_params.seed.xy + vec2(GlobalInvocationID.xy)) * sim_params.seed.zw);
   uint idx = GlobalInvocationID.x;
@@ -182,8 +182,8 @@ void simulate(uvec3 GlobalInvocationID) {
   if ((particle.lifetime < 0.0f)) {
     ivec2 coord = ivec2(0, 0);
     {
-      for(int level = (textureQueryLevels(tint_symbol_2_1); - 1); (level > 0); level = (level - 1)) {
-        vec4 probabilites = texelFetch(tint_symbol_2_1, coord, level);
+      for(int level = (textureQueryLevels(tint_symbol_1); - 1); (level > 0); level = (level - 1)) {
+        vec4 probabilites = texelFetch(tint_symbol_1, coord, level);
         vec4 value = vec4(rand());
         bvec4 mask = (greaterThanEqual(value, vec4(0.0f, probabilites.xyz)) & lessThan(value, probabilites));
         coord = (coord * 2);
@@ -191,9 +191,9 @@ void simulate(uvec3 GlobalInvocationID) {
         coord.y = (coord.y + (any(mask.zw) ? 1 : 0));
       }
     }
-    vec2 uv = (vec2(coord) / vec2(textureSize(tint_symbol_2_1, 0)));
+    vec2 uv = (vec2(coord) / vec2(textureSize(tint_symbol_1, 0)));
     particle.position = vec3((((uv - 0.5f) * 3.0f) * vec2(1.0f, -1.0f)), 0.0f);
-    particle.color = texelFetch(tint_symbol_2_1, coord, 0);
+    particle.color = texelFetch(tint_symbol_1, coord, 0);
     particle.velocity.x = ((rand() - 0.5f) * 0.100000001f);
     particle.velocity.y = ((rand() - 0.5f) * 0.100000001f);
     particle.velocity.z = (rand() * 0.300000012f);
@@ -322,13 +322,13 @@ void export_level(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(imageSize(tex_out))))) {
     uint dst_offset = (coord.x + (coord.y * ubo.width));
     uint src_offset = ((coord.x * 2u) + ((coord.y * 2u) * ubo.width));
-    float a_1 = buf_in.weights[(src_offset + 0u)];
+    float a = buf_in.weights[(src_offset + 0u)];
     float b = buf_in.weights[(src_offset + 1u)];
     float c = buf_in.weights[((src_offset + 0u) + ubo.width)];
     float d = buf_in.weights[((src_offset + 1u) + ubo.width)];
-    float sum = dot(vec4(a_1, b, c, d), vec4(1.0f));
+    float sum = dot(vec4(a, b, c, d), vec4(1.0f));
     buf_out.weights[dst_offset] = (sum / 4.0f);
-    vec4 probabilities = (vec4(a_1, (a_1 + b), ((a_1 + b) + c), sum) / max(sum, 0.0001f));
+    vec4 probabilities = (vec4(a, (a + b), ((a + b) + c), sum) / max(sum, 0.0001f));
     imageStore(tex_out, ivec2(coord.xy), probabilities);
   }
 }
