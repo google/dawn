@@ -37,6 +37,9 @@ namespace dawn::native::d3d12 {
         static constexpr uint32_t kDynamicStorageBufferLengthsRegisterSpace = kMaxBindGroups + 2;
         static constexpr uint32_t kDynamicStorageBufferLengthsBaseRegister = 0;
 
+        static constexpr uint32_t kInvalidDynamicStorageBufferLengthsParameterIndex =
+            std::numeric_limits<uint32_t>::max();
+
         D3D12_SHADER_VISIBILITY ShaderVisibilityType(wgpu::ShaderStage visibility) {
             ASSERT(visibility != wgpu::ShaderStage::None);
 
@@ -224,18 +227,23 @@ namespace dawn::native::d3d12 {
         ASSERT(dynamicStorageBufferLengthsShaderRegisterOffset <=
                kMaxDynamicStorageBuffersPerPipelineLayout);
 
-        D3D12_ROOT_PARAMETER dynamicStorageBufferLengthConstants{};
-        dynamicStorageBufferLengthConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        dynamicStorageBufferLengthConstants.ParameterType =
-            D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-        dynamicStorageBufferLengthConstants.Constants.Num32BitValues =
-            dynamicStorageBufferLengthsShaderRegisterOffset;
-        dynamicStorageBufferLengthConstants.Constants.RegisterSpace =
-            kDynamicStorageBufferLengthsRegisterSpace;
-        dynamicStorageBufferLengthConstants.Constants.ShaderRegister =
-            kDynamicStorageBufferLengthsBaseRegister;
-        mDynamicStorageBufferLengthsParameterIndex = rootParameters.size();
-        rootParameters.emplace_back(dynamicStorageBufferLengthConstants);
+        if (dynamicStorageBufferLengthsShaderRegisterOffset > 0) {
+            D3D12_ROOT_PARAMETER dynamicStorageBufferLengthConstants{};
+            dynamicStorageBufferLengthConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            dynamicStorageBufferLengthConstants.ParameterType =
+                D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+            dynamicStorageBufferLengthConstants.Constants.Num32BitValues =
+                dynamicStorageBufferLengthsShaderRegisterOffset;
+            dynamicStorageBufferLengthConstants.Constants.RegisterSpace =
+                kDynamicStorageBufferLengthsRegisterSpace;
+            dynamicStorageBufferLengthConstants.Constants.ShaderRegister =
+                kDynamicStorageBufferLengthsBaseRegister;
+            mDynamicStorageBufferLengthsParameterIndex = rootParameters.size();
+            rootParameters.emplace_back(dynamicStorageBufferLengthConstants);
+        } else {
+            mDynamicStorageBufferLengthsParameterIndex =
+                kInvalidDynamicStorageBufferLengthsParameterIndex;
+        }
 
         D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor;
         rootSignatureDescriptor.NumParameters = rootParameters.size();
@@ -330,6 +338,8 @@ namespace dawn::native::d3d12 {
     }
 
     uint32_t PipelineLayout::GetDynamicStorageBufferLengthsParameterIndex() const {
+        ASSERT(mDynamicStorageBufferLengthsParameterIndex !=
+               kInvalidDynamicStorageBufferLengthsParameterIndex);
         return mDynamicStorageBufferLengthsParameterIndex;
     }
 
