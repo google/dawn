@@ -64,7 +64,7 @@
 #include "src/transform/manager.h"
 #include "src/transform/module_scope_var_to_entry_point_param.h"
 #include "src/transform/pad_array_elements.h"
-#include "src/transform/promote_side_effects_to_decl.h"
+#include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/remove_phonies.h"
 #include "src/transform/simplify_pointers.h"
 #include "src/transform/unshadow.h"
@@ -163,10 +163,7 @@ SanitizedResult Sanitize(
   }
   manager.Add<transform::CanonicalizeEntryPointIO>();
   manager.Add<transform::ExternalTextureTransform>();
-
-  data.Add<transform::PromoteSideEffectsToDecl::Config>(
-      /* type_ctor_to_let */ true, /* dynamic_index_to_var */ false);
-  manager.Add<transform::PromoteSideEffectsToDecl>();
+  manager.Add<transform::PromoteInitializersToConstVar>();
 
   manager.Add<transform::VectorizeScalarMatrixConstructors>();
   manager.Add<transform::WrapArraysInStructs>();

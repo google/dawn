@@ -28,6 +28,37 @@
 namespace tint {
 namespace transform {
 
+/// @param program the program to get an output WGSL string from
+/// @returns the output program as a WGSL string, or an error string if the
+/// program is not valid.
+inline std::string str(const Program& program) {
+  diag::Formatter::Style style;
+  style.print_newline_at_end = false;
+
+  if (!program.IsValid()) {
+    return diag::Formatter(style).format(program.Diagnostics());
+  }
+
+  writer::wgsl::Options options;
+  auto result = writer::wgsl::Generate(&program, options);
+  if (!result.success) {
+    return "WGSL writer failed:\n" + result.error;
+  }
+
+  auto res = result.wgsl;
+  if (res.empty()) {
+    return res;
+  }
+  // The WGSL sometimes has two trailing newlines. Strip them
+  while (res.back() == '\n') {
+    res.pop_back();
+  }
+  if (res.empty()) {
+    return res;
+  }
+  return "\n" + res + "\n";
+}
+
 /// Helper class for testing transforms
 template <typename BASE>
 class TransformTestBase : public BASE {
@@ -104,31 +135,7 @@ class TransformTestBase : public BASE {
   /// @returns the output program as a WGSL string, or an error string if the
   /// program is not valid.
   std::string str(const Output& output) {
-    diag::Formatter::Style style;
-    style.print_newline_at_end = false;
-
-    if (!output.program.IsValid()) {
-      return diag::Formatter(style).format(output.program.Diagnostics());
-    }
-
-    writer::wgsl::Options options;
-    auto result = writer::wgsl::Generate(&output.program, options);
-    if (!result.success) {
-      return "WGSL writer failed:\n" + result.error;
-    }
-
-    auto res = result.wgsl;
-    if (res.empty()) {
-      return res;
-    }
-    // The WGSL sometimes has two trailing newlines. Strip them
-    while (res.back() == '\n') {
-      res.pop_back();
-    }
-    if (res.empty()) {
-      return res;
-    }
-    return "\n" + res + "\n";
+    return transform::str(output.program);
   }
 
  private:
