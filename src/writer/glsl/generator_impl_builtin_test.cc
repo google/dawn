@@ -415,7 +415,6 @@ void main() {
 )"));
 }
 
-#if 0
 TEST_F(GlslGeneratorImplTest_Builtin, IsNormal_Scalar) {
   auto* val = Var("val", ty.f32());
   auto* call = Call("isNormal", val);
@@ -424,10 +423,23 @@ TEST_F(GlslGeneratorImplTest_Builtin, IsNormal_Scalar) {
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr(R"(
-  uint tint_isnormal_exponent = asuint(val) & 0x7f80000;
-  uint tint_isnormal_clamped = clamp(tint_isnormal_exponent, 0x0080000, 0x7f00000);
-  (tint_isnormal_clamped == tint_isnormal_exponent);
+  EXPECT_THAT(gen.result(), HasSubstr(R"(ion 310 es
+
+bool tint_isNormal(float param_0) {
+  uint exponent = floatBitsToUint(param_0) & 0x7f80000u;
+  uint clamped = clamp(exponent, 0x0080000u, 0x7f00000u);
+  return clamped == exponent;
+}
+
+
+void test_function() {
+  float val = 0.0f;
+  bool tint_symbol = tint_isNormal(val);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
 )"));
 }
 
@@ -439,13 +451,25 @@ TEST_F(GlslGeneratorImplTest_Builtin, IsNormal_Vector) {
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr(R"(
-  uvec3 tint_isnormal_exponent = asuint(val) & 0x7f80000;
-  uvec3 tint_isnormal_clamped = clamp(tint_isnormal_exponent, 0x0080000, 0x7f00000);
-  (tint_isnormal_clamped == tint_isnormal_exponent);
+  EXPECT_THAT(gen.result(), HasSubstr(R"( 310 es
+
+bvec3 tint_isNormal(vec3 param_0) {
+  uvec3 exponent = floatBitsToUint(param_0) & 0x7f80000u;
+  uvec3 clamped = clamp(exponent, 0x0080000u, 0x7f00000u);
+  return equal(clamped, exponent);
+}
+
+
+void test_function() {
+  vec3 val = vec3(0.0f, 0.0f, 0.0f);
+  bvec3 tint_symbol = tint_isNormal(val);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
 )"));
 }
-#endif
 
 TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar) {
   auto* val = Var("val", ty.f32());

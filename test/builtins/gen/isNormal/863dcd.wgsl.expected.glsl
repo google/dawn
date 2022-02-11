@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 builtins/gen/isNormal/863dcd.wgsl:28:25 warning: use of deprecated builtin
   var res: vec4<bool> = isNormal(vec4<f32>());
                         ^^^^^^^^
@@ -7,9 +5,9 @@ builtins/gen/isNormal/863dcd.wgsl:28:25 warning: use of deprecated builtin
 #version 310 es
 
 bvec4 tint_isNormal(vec4 param_0) {
-  uint4 exponent = asuint(param_0) & 0x7f80000;
-  uint4 clamped = clamp(exponent, 0x0080000, 0x7f00000);
-  return clamped == exponent;
+  uvec4 exponent = floatBitsToUint(param_0) & 0x7f80000u;
+  uvec4 clamped = clamp(exponent, 0x0080000u, 0x7f00000u);
+  return equal(clamped, exponent);
 }
 
 
@@ -29,20 +27,13 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'uint4' : undeclared identifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 bvec4 tint_isNormal(vec4 param_0) {
-  uint4 exponent = asuint(param_0) & 0x7f80000;
-  uint4 clamped = clamp(exponent, 0x0080000, 0x7f00000);
-  return clamped == exponent;
+  uvec4 exponent = floatBitsToUint(param_0) & 0x7f80000u;
+  uvec4 clamped = clamp(exponent, 0x0080000u, 0x7f00000u);
+  return equal(clamped, exponent);
 }
 
 
@@ -58,19 +49,12 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 bvec4 tint_isNormal(vec4 param_0) {
-  uint4 exponent = asuint(param_0) & 0x7f80000;
-  uint4 clamped = clamp(exponent, 0x0080000, 0x7f00000);
-  return clamped == exponent;
+  uvec4 exponent = floatBitsToUint(param_0) & 0x7f80000u;
+  uvec4 clamped = clamp(exponent, 0x0080000u, 0x7f00000u);
+  return equal(clamped, exponent);
 }
 
 
@@ -87,10 +71,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'uint4' : undeclared identifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

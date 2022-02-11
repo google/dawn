@@ -970,21 +970,27 @@ bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
         auto* input_ty = builtin->Parameters()[0]->Type();
 
-        std::string width;
+        std::string vec_type;
         if (auto* vec = input_ty->As<sem::Vector>()) {
-          width = std::to_string(vec->Width());
+          vec_type = "uvec" + std::to_string(vec->Width());
+        } else {
+          vec_type = "uint";
         }
 
-        constexpr auto* kExponentMask = "0x7f80000";
-        constexpr auto* kMinNormalExponent = "0x0080000";
-        constexpr auto* kMaxNormalExponent = "0x7f00000";
+        constexpr auto* kExponentMask = "0x7f80000u";
+        constexpr auto* kMinNormalExponent = "0x0080000u";
+        constexpr auto* kMaxNormalExponent = "0x7f00000u";
 
-        line(b) << "uint" << width << " exponent = asuint(" << params[0]
+        line(b) << vec_type << " exponent = floatBitsToUint(" << params[0]
                 << ") & " << kExponentMask << ";";
-        line(b) << "uint" << width << " clamped = "
+        line(b) << vec_type << " clamped = "
                 << "clamp(exponent, " << kMinNormalExponent << ", "
                 << kMaxNormalExponent << ");";
-        line(b) << "return clamped == exponent;";
+        if (input_ty->Is<sem::Vector>()) {
+          line(b) << "return equal(clamped, exponent);";
+        } else {
+          line(b) << "return clamped == exponent;";
+        }
         return true;
       });
 }
