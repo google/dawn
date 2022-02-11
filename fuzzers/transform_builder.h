@@ -21,6 +21,7 @@
 #include "include/tint/tint.h"
 
 #include "fuzzers/data_builder.h"
+#include "fuzzers/shuffle_transform.h"
 
 namespace tint {
 namespace fuzzers {
@@ -80,6 +81,16 @@ class TransformBuilder {
   /// @tparam T - A fuzzer transform
   template <typename T>
   struct AddTransformImpl;
+
+  /// Implementation of AddTransform for ShuffleTransform
+  template <>
+  struct AddTransformImpl<ShuffleTransform> {
+    /// Add instance of ShuffleTransform to TransformBuilder
+    /// @param tb - TransformBuilder to add transform to
+    static void impl(TransformBuilder* tb) {
+      tb->manager()->Add<ShuffleTransform>(tb->builder_.build<size_t>());
+    }
+  };
 
   /// Implementation of AddTransform for transform::Robustness
   template <>

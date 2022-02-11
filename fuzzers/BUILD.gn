@@ -73,6 +73,8 @@ if (build_with_chromium) {
       "random_generator.h",
       "random_generator_engine.cc",
       "random_generator_engine.h",
+      "shuffle_transform.cc",
+      "shuffle_transform.h",
       "tint_common_fuzzer.cc",
       "tint_common_fuzzer.h",
       "tint_reader_writer_fuzzer.h",

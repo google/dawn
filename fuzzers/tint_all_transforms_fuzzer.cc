@@ -23,6 +23,7 @@ namespace fuzzers {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   {
     TransformBuilder tb(data, size);
+    tb.AddTransform<ShuffleTransform>();
     tb.AddPlatformIndependentPasses();
 
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
@@ -36,6 +37,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 #if TINT_BUILD_HLSL_WRITER
   {
     TransformBuilder tb(data, size);
+    tb.AddTransform<ShuffleTransform>();
     tb.AddPlatformIndependentPasses();
 
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
@@ -50,6 +52,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 #if TINT_BUILD_MSL_WRITER
   {
     TransformBuilder tb(data, size);
+    tb.AddTransform<ShuffleTransform>();
     tb.AddPlatformIndependentPasses();
 
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kMSL);
@@ -63,6 +66,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 #if TINT_BUILD_SPV_WRITER
   {
     TransformBuilder tb(data, size);
+    tb.AddTransform<ShuffleTransform>();
     tb.AddPlatformIndependentPasses();
 
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
