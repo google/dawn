@@ -40,14 +40,11 @@ struct DependencyGraph {
   /// @param symbols the symbol table
   /// @param diagnostics the diagnostic list to populate with errors / warnings
   /// @param output the resulting DependencyGraph
-  /// @param allow_out_of_order_decls if true, then out-of-order declarations
-  /// are not considered an error
   /// @returns true on success, false on error
   static bool Build(const ast::Module& module,
                     const SymbolTable& symbols,
                     diag::List& diagnostics,
-                    DependencyGraph& output,
-                    bool allow_out_of_order_decls);
+                    DependencyGraph& output);
 
   /// All globals in dependency-sorted order.
   std::vector<const ast::Node*> ordered_globals;

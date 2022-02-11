@@ -112,6 +112,26 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(FoldTrivialSingleUseLetsTest, NoFold_NonTrivialLet_OutOfOrder) {
+  auto* src = R"(
+fn f() {
+  let x = 1;
+  let y = function_with_posssible_side_effect();
+  _ = (x + y);
+}
+
+fn function_with_posssible_side_effect() -> i32 {
+  return 1;
+}
+)";
+
+  auto* expect = src;
+
+  auto got = Run<FoldTrivialSingleUseLets>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(FoldTrivialSingleUseLetsTest, NoFold_UseInSubBlock) {
   auto* src = R"(
 fn f() {

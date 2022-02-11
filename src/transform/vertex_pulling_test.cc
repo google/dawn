@@ -426,6 +426,86 @@ fn main(tint_symbol_1 : tint_symbol) -> @builtin(position) vec4<f32> {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(VertexPullingTest,
+       ExistingVertexIndexAndInstanceIndex_Struct_OutOfOrder) {
+  auto* src = R"(
+@stage(vertex)
+fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
+  return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
+}
+
+struct Inputs {
+  @location(0) var_a : f32;
+  @location(1) var_b : f32;
+  @builtin(vertex_index) custom_vertex_index : u32;
+  @builtin(instance_index) custom_instance_index : u32;
+};
+)";
+
+  auto* expect = R"(
+struct TintVertexData {
+  tint_vertex_data : @stride(4) array<u32>;
+}
+
+@binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
+
+@binding(1) @group(4) var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
+
+struct tint_symbol {
+  @builtin(vertex_index)
+  custom_vertex_index : u32;
+  @builtin(instance_index)
+  custom_instance_index : u32;
+}
+
+@stage(vertex)
+fn main(tint_symbol_1 : tint_symbol) -> @builtin(position) vec4<f32> {
+  var inputs : Inputs;
+  inputs.custom_vertex_index = tint_symbol_1.custom_vertex_index;
+  inputs.custom_instance_index = tint_symbol_1.custom_instance_index;
+  {
+    let buffer_array_base_0 = inputs.custom_vertex_index;
+    inputs.var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[buffer_array_base_0]);
+    let buffer_array_base_1 = inputs.custom_instance_index;
+    inputs.var_b = bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[buffer_array_base_1]);
+  }
+  return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
+}
+
+struct Inputs {
+  @location(0)
+  var_a : f32;
+  @location(1)
+  var_b : f32;
+  @builtin(vertex_index)
+  custom_vertex_index : u32;
+  @builtin(instance_index)
+  custom_instance_index : u32;
+}
+)";
+
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {{
+      {
+          4,
+          VertexStepMode::kVertex,
+          {{VertexFormat::kFloat32, 0, 0}},
+      },
+      {
+          4,
+          VertexStepMode::kInstance,
+          {{VertexFormat::kFloat32, 0, 1}},
+      },
+  }};
+  cfg.entry_point_name = "main";
+
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex_SeparateStruct) {
   auto* src = R"(
 struct Inputs {
@@ -477,6 +557,83 @@ fn main(indices : Indices) -> @builtin(position) vec4<f32> {
     inputs.var_b = bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[buffer_array_base_1]);
   }
   return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
+}
+)";
+
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {{
+      {
+          4,
+          VertexStepMode::kVertex,
+          {{VertexFormat::kFloat32, 0, 0}},
+      },
+      {
+          4,
+          VertexStepMode::kInstance,
+          {{VertexFormat::kFloat32, 0, 1}},
+      },
+  }};
+  cfg.entry_point_name = "main";
+
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(VertexPullingTest,
+       ExistingVertexIndexAndInstanceIndex_SeparateStruct_OutOfOrder) {
+  auto* src = R"(
+@stage(vertex)
+fn main(inputs : Inputs, indices : Indices) -> @builtin(position) vec4<f32> {
+  return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
+}
+
+struct Inputs {
+  @location(0) var_a : f32;
+  @location(1) var_b : f32;
+};
+
+struct Indices {
+  @builtin(vertex_index) custom_vertex_index : u32;
+  @builtin(instance_index) custom_instance_index : u32;
+};
+)";
+
+  auto* expect = R"(
+struct TintVertexData {
+  tint_vertex_data : @stride(4) array<u32>;
+}
+
+@binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
+
+@binding(1) @group(4) var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
+
+@stage(vertex)
+fn main(indices : Indices) -> @builtin(position) vec4<f32> {
+  var inputs : Inputs;
+  {
+    let buffer_array_base_0 = indices.custom_vertex_index;
+    inputs.var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[buffer_array_base_0]);
+    let buffer_array_base_1 = indices.custom_instance_index;
+    inputs.var_b = bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[buffer_array_base_1]);
+  }
+  return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
+}
+
+struct Inputs {
+  @location(0)
+  var_a : f32;
+  @location(1)
+  var_b : f32;
+}
+
+struct Indices {
+  @builtin(vertex_index)
+  custom_vertex_index : u32;
+  @builtin(instance_index)
+  custom_instance_index : u32;
 }
 )";
 

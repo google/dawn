@@ -65,6 +65,34 @@ fn main() -> vec4<f32> {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CombineSamplersTest, SimplePair_OutOfOrder) {
+  auto* src = R"(
+fn main() -> vec4<f32> {
+  return textureSample(t, s, vec2<f32>(1.0, 2.0));
+}
+
+@group(0) @binding(0) var t : texture_2d<f32>;
+
+@group(0) @binding(1) var s : sampler;
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_s : texture_2d<f32>;
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn main() -> vec4<f32> {
+  return textureSample(t_s, placeholder_sampler, vec2<f32>(1.0, 2.0));
+}
+)";
+
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(CombineSamplersTest, SimplePairInAFunction) {
   auto* src = R"(
 @group(0) @binding(0) var t : texture_2d<f32>;
@@ -90,6 +118,42 @@ fn sample(t_s : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
 
 fn main() -> vec4<f32> {
   return sample(t_s_1, vec2<f32>(1.0, 2.0));
+}
+)";
+
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CombineSamplersTest, SimplePairInAFunction_OutOfOrder) {
+  auto* src = R"(
+fn main() -> vec4<f32> {
+  return sample(t, s, vec2<f32>(1.0, 2.0));
+}
+
+fn sample(t : texture_2d<f32>, s : sampler, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(t, s, coords);
+}
+
+@group(0) @binding(1) var s : sampler;
+
+@group(0) @binding(0) var t : texture_2d<f32>;
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_s : texture_2d<f32>;
+
+fn main() -> vec4<f32> {
+  return sample(t_s, vec2<f32>(1.0, 2.0));
+}
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn sample(t_s_1 : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(t_s_1, placeholder_sampler, coords);
 }
 )";
 
@@ -212,6 +276,45 @@ fn main() -> vec4<f32> {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CombineSamplersTest, AliasedTypes_OutOfOrder) {
+  auto* src = R"(
+fn main() -> vec4<f32> {
+  return sample(t, s, vec2<f32>(1.0, 2.0));
+}
+
+fn sample(t : Tex2d, s : sampler, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(t, s, coords);
+}
+
+@group(0) @binding(0) var t : Tex2d;
+@group(0) @binding(1) var s : sampler;
+
+type Tex2d = texture_2d<f32>;
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_s : texture_2d<f32>;
+
+fn main() -> vec4<f32> {
+  return sample(t_s, vec2<f32>(1.0, 2.0));
+}
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn sample(t_s_1 : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(t_s_1, placeholder_sampler, coords);
+}
+
+type Tex2d = texture_2d<f32>;
+)";
+
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(CombineSamplersTest, SimplePairInTwoFunctions) {
   auto* src = R"(
 @group(0) @binding(0) var t : texture_2d<f32>;
@@ -245,6 +348,49 @@ fn f(t_s_1 : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
 
 fn main() -> vec4<f32> {
   return f(t_s_2, vec2<f32>(1.0, 2.0));
+}
+)";
+
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CombineSamplersTest, SimplePairInTwoFunctions_OutOfOrder) {
+  auto* src = R"(
+fn main() -> vec4<f32> {
+  return f(t, s, vec2<f32>(1.0, 2.0));
+}
+
+fn f(t : texture_2d<f32>, s : sampler, coords : vec2<f32>) -> vec4<f32> {
+  return g(t, s, coords);
+}
+
+fn g(t : texture_2d<f32>, s : sampler, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(t, s, coords);
+}
+
+@group(0) @binding(1) var s : sampler;
+@group(0) @binding(0) var t : texture_2d<f32>;
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_s : texture_2d<f32>;
+
+fn main() -> vec4<f32> {
+  return f(t_s, vec2<f32>(1.0, 2.0));
+}
+
+fn f(t_s_1 : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
+  return g(t_s_1, coords);
+}
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn g(t_s_2 : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(t_s_2, placeholder_sampler, coords);
 }
 )";
 
@@ -500,6 +646,44 @@ fn main() -> vec4<f32> {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CombineSamplersTest, GlobalTextureLocalSampler_OutOfOrder) {
+  auto* src = R"(
+fn main() -> vec4<f32> {
+  return f(samp1, samp2, vec2<f32>(1.0, 2.0));
+}
+
+fn f(s1 : sampler, s2 : sampler, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(tex, s1, coords) + textureSample(tex, s2, coords);
+}
+
+@group(0) @binding(1) var samp1 : sampler;
+@group(0) @binding(2) var samp2 : sampler;
+@group(0) @binding(0) var tex : texture_2d<f32>;
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex_samp1 : texture_2d<f32>;
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex_samp2 : texture_2d<f32>;
+
+fn main() -> vec4<f32> {
+  return f(tex_samp1, tex_samp2, vec2<f32>(1.0, 2.0));
+}
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn f(tex_s1 : texture_2d<f32>, tex_s2 : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
+  return (textureSample(tex_s1, placeholder_sampler, coords) + textureSample(tex_s2, placeholder_sampler, coords));
+}
+)";
+
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(CombineSamplersTest, LocalTextureGlobalSampler) {
   auto* src = R"(
 @group(0) @binding(0) var tex1 : texture_2d<f32>;
@@ -529,6 +713,44 @@ fn f(t1_samp : texture_2d<f32>, t2_samp : texture_2d<f32>, coords : vec2<f32>) -
 
 fn main() -> vec4<f32> {
   return f(tex1_samp, tex2_samp, vec2<f32>(1.0, 2.0));
+}
+)";
+
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CombineSamplersTest, LocalTextureGlobalSampler_OutOfOrder) {
+  auto* src = R"(
+fn main() -> vec4<f32> {
+  return f(tex1, tex2, vec2<f32>(1.0, 2.0));
+}
+
+fn f(t1 : texture_2d<f32>, t2 : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(t1, samp, coords) + textureSample(t2, samp, coords);
+}
+
+@group(0) @binding(2) var samp : sampler;
+@group(0) @binding(0) var tex1 : texture_2d<f32>;
+@group(0) @binding(1) var tex2 : texture_2d<f32>;
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex1_samp : texture_2d<f32>;
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex2_samp : texture_2d<f32>;
+
+fn main() -> vec4<f32> {
+  return f(tex1_samp, tex2_samp, vec2<f32>(1.0, 2.0));
+}
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn f(t1_samp : texture_2d<f32>, t2_samp : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
+  return (textureSample(t1_samp, placeholder_sampler, coords) + textureSample(t2_samp, placeholder_sampler, coords));
 }
 )";
 
@@ -687,6 +909,41 @@ fn main() -> vec4<f32> {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CombineSamplersTest, TextureSampleCompareInAFunction_OutOfOrder) {
+  auto* src = R"(
+fn main() -> vec4<f32> {
+  return vec4<f32>(f(tex, samp, vec2<f32>(1.0, 2.0)));
+}
+
+fn f(t : texture_depth_2d, s : sampler_comparison, coords : vec2<f32>) -> f32 {
+  return textureSampleCompare(t, s, coords, 5.0f);
+}
+
+@group(0) @binding(0) var tex : texture_depth_2d;
+@group(0) @binding(1) var samp : sampler_comparison;
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex_samp : texture_depth_2d;
+
+fn main() -> vec4<f32> {
+  return vec4<f32>(f(tex_samp, vec2<f32>(1.0, 2.0)));
+}
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_comparison_sampler : sampler_comparison;
+
+fn f(t_s : texture_depth_2d, coords : vec2<f32>) -> f32 {
+  return textureSampleCompare(t_s, placeholder_comparison_sampler, coords, 5.0);
+}
+)";
+
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(CombineSamplersTest, BindingPointCollision) {
   auto* src = R"(
 @group(1) @binding(0) var tex : texture_2d<f32>;
@@ -709,6 +966,37 @@ fn main() -> vec4<f32> {
 fn main() -> vec4<f32> {
   return textureSample(tex_samp, placeholder_sampler, gcoords);
 }
+)";
+
+  DataMap data;
+  data.Add<CombineSamplers::BindingInfo>(CombineSamplers::BindingMap(),
+                                         sem::BindingPoint());
+  auto got = Run<CombineSamplers>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CombineSamplersTest, BindingPointCollision_OutOfOrder) {
+  auto* src = R"(
+fn main() -> vec4<f32> {
+  return textureSample(tex, samp, gcoords);
+}
+
+@group(1) @binding(1) var samp : sampler;
+@group(0) @binding(0) var<uniform> gcoords : vec2<f32>;
+@group(1) @binding(0) var tex : texture_2d<f32>;
+
+)";
+  auto* expect = R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex_samp : texture_2d<f32>;
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn main() -> vec4<f32> {
+  return textureSample(tex_samp, placeholder_sampler, gcoords);
+}
+
+@internal(disable_validation__binding_point_collision) @group(0) @binding(0) var<uniform> gcoords : vec2<f32>;
 )";
 
   DataMap data;

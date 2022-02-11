@@ -29,13 +29,10 @@ using ::testing::ElementsAre;
 template <typename T>
 class ResolverDependencyGraphTestWithParam : public ResolverTestWithParam<T> {
  public:
-  bool allow_out_of_order_decls = true;
-
   DependencyGraph Build(std::string expected_error = "") {
     DependencyGraph graph;
     auto result = DependencyGraph::Build(this->AST(), this->Symbols(),
-                                         this->Diagnostics(), graph,
-                                         allow_out_of_order_decls);
+                                         this->Diagnostics(), graph);
     if (expected_error.empty()) {
       EXPECT_TRUE(result) << this->Diagnostics().str();
     } else {
@@ -659,13 +656,7 @@ void SymbolTestHelper::Build() {
 ////////////////////////////////////////////////////////////////////////////////
 namespace used_before_decl_tests {
 
-class ResolverDependencyGraphUsedBeforeDeclTest
-    : public ResolverDependencyGraphTest {
- public:
-  ResolverDependencyGraphUsedBeforeDeclTest() {
-    allow_out_of_order_decls = false;
-  }
-};
+using ResolverDependencyGraphUsedBeforeDeclTest = ResolverDependencyGraphTest;
 
 TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, FuncCall) {
   // fn A() { B(); }
@@ -674,8 +665,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, FuncCall) {
   Func("A", {}, ty.void_(), {CallStmt(Call(Expr(Source{{12, 34}}, "B")))});
   Func(Source{{56, 78}}, "B", {}, ty.void_(), {Return()});
 
-  Build(R"(12:34 error: function 'B' used before it has been declared
-56:78 note: function 'B' declared here)");
+  Build();
 }
 
 TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeConstructed) {
@@ -688,8 +678,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeConstructed) {
        {Block(Ignore(Construct(ty.type_name(Source{{12, 34}}, "T"))))});
   Alias(Source{{56, 78}}, "T", ty.i32());
 
-  Build(R"(12:34 error: alias 'T' used before it has been declared
-56:78 note: alias 'T' declared here)");
+  Build();
 }
 
 TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedByLocal) {
@@ -702,8 +691,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedByLocal) {
        {Block(Decl(Var("v", ty.type_name(Source{{12, 34}}, "T"))))});
   Alias(Source{{56, 78}}, "T", ty.i32());
 
-  Build(R"(12:34 error: alias 'T' used before it has been declared
-56:78 note: alias 'T' declared here)");
+  Build();
 }
 
 TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedByParam) {
@@ -713,8 +701,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedByParam) {
   Func("F", {Param("p", ty.type_name(Source{{12, 34}}, "T"))}, ty.void_(), {});
   Alias(Source{{56, 78}}, "T", ty.i32());
 
-  Build(R"(12:34 error: alias 'T' used before it has been declared
-56:78 note: alias 'T' declared here)");
+  Build();
 }
 
 TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedAsReturnType) {
@@ -724,8 +711,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedAsReturnType) {
   Func("F", {}, ty.type_name(Source{{12, 34}}, "T"), {});
   Alias(Source{{56, 78}}, "T", ty.i32());
 
-  Build(R"(12:34 error: alias 'T' used before it has been declared
-56:78 note: alias 'T' declared here)");
+  Build();
 }
 
 TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeByStructMember) {
@@ -735,8 +721,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeByStructMember) {
   Structure("S", {Member("m", ty.type_name(Source{{12, 34}}, "T"))});
   Alias(Source{{56, 78}}, "T", ty.i32());
 
-  Build(R"(12:34 error: alias 'T' used before it has been declared
-56:78 note: alias 'T' declared here)");
+  Build();
 }
 
 TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, VarUsed) {
@@ -751,10 +736,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, VarUsed) {
   Global(Source{{56, 78}}, "G", ty.f32(), ast::StorageClass::kPrivate,
          Expr(2.1f));
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            R"(12:34 error: var 'G' used before it has been declared
-56:78 note: var 'G' declared here)");
+  Build();
 }
 
 }  // namespace used_before_decl_tests

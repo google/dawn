@@ -101,7 +101,7 @@ void CalculateArrayLength::Run(CloneContext& ctx,
       auto* type = CreateASTTypeFor(ctx, buffer_type);
       auto* disable_validation = ctx.dst->Disable(
           ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
-      auto* func = ctx.dst->create<ast::Function>(
+      ctx.dst->AST().AddFunction(ctx.dst->create<ast::Function>(
           name,
           ast::VariableList{
               // Note: The buffer parameter requires the kStorage StorageClass
@@ -118,20 +118,8 @@ void CalculateArrayLength::Run(CloneContext& ctx,
           ast::AttributeList{
               ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID()),
           },
-          ast::AttributeList{});
-      // Insert the intrinsic function after the structure or array structure
-      // element type. TODO(crbug.com/tint/1266): Once we allow out-of-order
-      // declarations, this can be simplified.
-      auto* insert_after = buffer_type;
-      while (auto* arr = insert_after->As<sem::Array>()) {
-        insert_after = arr->ElemType();
-      }
-      if (auto* str = insert_after->As<sem::Struct>()) {
-        ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), str->Declaration(),
-                        func);
-      } else {
-        ctx.InsertFront(ctx.src->AST().GlobalDeclarations(), func);
-      }
+          ast::AttributeList{}));
+
       return name;
     });
   };

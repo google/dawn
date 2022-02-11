@@ -91,6 +91,38 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PromoteInitializersToConstVarTest, BasicStruct_OutOfOrder) {
+  auto* src = R"(
+fn f() {
+  var x = S(1, 2.0, vec3<f32>()).b;
+}
+
+struct S {
+  a : i32;
+  b : f32;
+  c : vec3<f32>;
+};
+)";
+
+  auto* expect = R"(
+fn f() {
+  let tint_symbol = S(1, 2.0, vec3<f32>());
+  var x = tint_symbol.b;
+}
+
+struct S {
+  a : i32;
+  b : f32;
+  c : vec3<f32>;
+}
+)";
+
+  DataMap data;
+  auto got = Run<PromoteInitializersToConstVar>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PromoteInitializersToConstVarTest, ArrayInForLoopInit) {
   auto* src = R"(
 fn f() {
@@ -146,6 +178,44 @@ fn f() {
   for(var x = tint_symbol.b; ; ) {
     break;
   }
+}
+)";
+
+  DataMap data;
+  auto got = Run<PromoteInitializersToConstVar>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteInitializersToConstVarTest, StructInForLoopInit_OutOfOrder) {
+  auto* src = R"(
+fn f() {
+  var insert_after = 1;
+  for(var x = S(1, 2.0, vec3<f32>()).b; ; ) {
+    break;
+  }
+}
+
+struct S {
+  a : i32;
+  b : f32;
+  c : vec3<f32>;
+};
+)";
+
+  auto* expect = R"(
+fn f() {
+  var insert_after = 1;
+  let tint_symbol = S(1, 2.0, vec3<f32>());
+  for(var x = tint_symbol.b; ; ) {
+    break;
+  }
+}
+
+struct S {
+  a : i32;
+  b : f32;
+  c : vec3<f32>;
 }
 )";
 
@@ -460,6 +530,46 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PromoteInitializersToConstVarTest, Mixed_OutOfOrder) {
+  auto* src = R"(
+fn f() {
+  var x = S2(array<S1, 3u>(S1(1), S1(2), S1(3))).a[1].a;
+}
+
+struct S2 {
+  a : array<S1, 3u>;
+};
+
+struct S1 {
+  a : i32;
+};
+)";
+
+  auto* expect = R"(
+fn f() {
+  let tint_symbol = S1(1);
+  let tint_symbol_1 = S1(2);
+  let tint_symbol_2 = S1(3);
+  let tint_symbol_3 = array<S1, 3u>(tint_symbol, tint_symbol_1, tint_symbol_2);
+  let tint_symbol_4 = S2(tint_symbol_3);
+  var x = tint_symbol_4.a[1].a;
+}
+
+struct S2 {
+  a : array<S1, 3u>;
+}
+
+struct S1 {
+  a : i32;
+}
+)";
+
+  DataMap data;
+  auto got = Run<PromoteInitializersToConstVar>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PromoteInitializersToConstVarTest, NoChangeOnVarDecl) {
   auto* src = R"(
 struct S {
@@ -476,6 +586,32 @@ fn f() {
 let module_arr : array<f32, 4u> = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
 
 let module_str : S = S(1, 2.0, 3);
+)";
+
+  auto* expect = src;
+
+  DataMap data;
+  auto got = Run<PromoteInitializersToConstVar>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteInitializersToConstVarTest, NoChangeOnVarDecl_OutOfOrder) {
+  auto* src = R"(
+fn f() {
+  var local_arr = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
+  var local_str = S(1, 2.0, 3);
+}
+
+let module_str : S = S(1, 2.0, 3);
+
+struct S {
+  a : i32;
+  b : f32;
+  c : i32;
+}
+
+let module_arr : array<f32, 4u> = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
 )";
 
   auto* expect = src;

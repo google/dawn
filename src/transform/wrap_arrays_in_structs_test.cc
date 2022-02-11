@@ -172,6 +172,48 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(WrapArraysInStructsTest, ArrayAlias_OutOfOrder) {
+  auto* src = R"(
+fn f() {
+  var arr : Array;
+  arr = Array();
+  arr = Array(Inner(1, 2), Inner(3, 4));
+  let vals : Array = Array(Inner(1, 2), Inner(3, 4));
+  arr = vals;
+  let x = arr[3];
+}
+
+type Array = array<Inner, 2>;
+type Inner = array<i32, 2>;
+)";
+  auto* expect = R"(
+struct tint_array_wrapper_1 {
+  arr : array<i32, 2u>;
+}
+
+struct tint_array_wrapper {
+  arr : array<tint_array_wrapper_1, 2u>;
+}
+
+fn f() {
+  var arr : tint_array_wrapper;
+  arr = tint_array_wrapper(array<tint_array_wrapper_1, 2u>());
+  arr = tint_array_wrapper(array<tint_array_wrapper_1, 2u>(tint_array_wrapper_1(array<i32, 2u>(1, 2)), tint_array_wrapper_1(array<i32, 2u>(3, 4))));
+  let vals : tint_array_wrapper = tint_array_wrapper(array<tint_array_wrapper_1, 2u>(tint_array_wrapper_1(array<i32, 2u>(1, 2)), tint_array_wrapper_1(array<i32, 2u>(3, 4))));
+  arr = vals;
+  let x = arr.arr[3];
+}
+
+type Array = tint_array_wrapper;
+
+type Inner = tint_array_wrapper_1;
+)";
+
+  auto got = Run<WrapArraysInStructs>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(WrapArraysInStructsTest, ArraysInStruct) {
   auto* src = R"(
 struct S {
@@ -319,6 +361,57 @@ struct tint_array_wrapper_2 {
 fn f2() {
   var v : tint_array_wrapper_2;
 }
+)";
+
+  auto got = Run<WrapArraysInStructs>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(WrapArraysInStructsTest, DeclarationOrder_OutOfOrder) {
+  auto* src = R"(
+fn f2() {
+  var v : array<i32, 3>;
+}
+
+type T3 = i32;
+
+fn f1(a : array<i32, 2>) {
+}
+
+type T2 = i32;
+
+type T1 = array<i32, 1>;
+
+type T0 = i32;
+)";
+  auto* expect = R"(
+struct tint_array_wrapper {
+  arr : array<i32, 3u>;
+}
+
+fn f2() {
+  var v : tint_array_wrapper;
+}
+
+type T3 = i32;
+
+struct tint_array_wrapper_1 {
+  arr : array<i32, 2u>;
+}
+
+fn f1(a : tint_array_wrapper_1) {
+}
+
+type T2 = i32;
+
+struct tint_array_wrapper_2 {
+  arr : array<i32, 1u>;
+}
+
+type T1 = tint_array_wrapper_2;
+
+type T0 = i32;
 )";
 
   auto got = Run<WrapArraysInStructs>(src);

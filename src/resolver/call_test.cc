@@ -101,6 +101,18 @@ TEST_F(ResolverCallTest, Valid) {
   EXPECT_EQ(call->Target(), Sem().Get(func));
 }
 
+TEST_F(ResolverCallTest, OutOfOrder) {
+  auto* call_expr = Call("b");
+  Func("a", {}, ty.void_(), {CallStmt(call_expr)});
+  auto* b = Func("b", {}, ty.void_(), {});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* call = Sem().Get(call_expr);
+  EXPECT_NE(call, nullptr);
+  EXPECT_EQ(call->Target(), Sem().Get(b));
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

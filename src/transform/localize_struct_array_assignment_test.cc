@@ -90,6 +90,64 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(LocalizeStructArrayAssignmentTest, StructArray_OutOfOrder) {
+  auto* src = R"(
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s1 : OuterS;
+  s1.a1[uniforms.i] = v;
+}
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+struct OuterS {
+  a1 : array<InnerS, 8>;
+};
+
+struct InnerS {
+  v : i32;
+};
+
+@block struct Uniforms {
+  i : u32;
+};
+)";
+
+  auto* expect = R"(
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s1 : OuterS;
+  {
+    let tint_symbol = &(s1.a1);
+    var tint_symbol_1 = *(tint_symbol);
+    tint_symbol_1[uniforms.i] = v;
+    *(tint_symbol) = tint_symbol_1;
+  }
+}
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+struct OuterS {
+  a1 : array<InnerS, 8>;
+}
+
+struct InnerS {
+  v : i32;
+}
+
+@block
+struct Uniforms {
+  i : u32;
+}
+)";
+
+  auto got =
+      Run<Unshadow, SimplifyPointers, LocalizeStructArrayAssignment>(src);
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(LocalizeStructArrayAssignmentTest, StructStructArray) {
   auto* src = R"(
 @block struct Uniforms {
@@ -148,6 +206,72 @@ fn main() {
     tint_symbol_1[uniforms.i] = v;
     *(tint_symbol) = tint_symbol_1;
   }
+}
+)";
+
+  auto got =
+      Run<Unshadow, SimplifyPointers, LocalizeStructArrayAssignment>(src);
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(LocalizeStructArrayAssignmentTest, StructStructArray_OutOfOrder) {
+  auto* src = R"(
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s1 : OuterS;
+  s1.s2.a[uniforms.i] = v;
+}
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+struct OuterS {
+  s2 : S1;
+};
+
+struct S1 {
+  a : array<InnerS, 8>;
+};
+
+struct InnerS {
+  v : i32;
+};
+
+@block struct Uniforms {
+  i : u32;
+};
+)";
+
+  auto* expect = R"(
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s1 : OuterS;
+  {
+    let tint_symbol = &(s1.s2.a);
+    var tint_symbol_1 = *(tint_symbol);
+    tint_symbol_1[uniforms.i] = v;
+    *(tint_symbol) = tint_symbol_1;
+  }
+}
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+struct OuterS {
+  s2 : S1;
+}
+
+struct S1 {
+  a : array<InnerS, 8>;
+}
+
+struct InnerS {
+  v : i32;
+}
+
+@block
+struct Uniforms {
+  i : u32;
 }
 )";
 
@@ -437,6 +561,91 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(LocalizeStructArrayAssignmentTest,
+       IndexingWithSideEffectFunc_OutOfOrder) {
+  auto* src = R"(
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s : OuterS;
+  s.a1[getNextIndex()].a2[uniforms.j] = v;
+}
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+@block struct Uniforms {
+  i : u32;
+  j : u32;
+};
+
+var<private> nextIndex : u32;
+fn getNextIndex() -> u32 {
+  nextIndex = nextIndex + 1u;
+  return nextIndex;
+}
+
+struct OuterS {
+  a1 : array<S1, 8>;
+};
+
+struct S1 {
+  a2 : array<InnerS, 8>;
+};
+
+struct InnerS {
+  v : i32;
+};
+)";
+
+  auto* expect = R"(
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var v : InnerS;
+  var s : OuterS;
+  {
+    let tint_symbol = &(s.a1);
+    var tint_symbol_1 = *(tint_symbol);
+    let tint_symbol_2 = &(tint_symbol_1[getNextIndex()].a2);
+    var tint_symbol_3 = *(tint_symbol_2);
+    tint_symbol_3[uniforms.j] = v;
+    *(tint_symbol_2) = tint_symbol_3;
+    *(tint_symbol) = tint_symbol_1;
+  }
+}
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+@block
+struct Uniforms {
+  i : u32;
+  j : u32;
+}
+
+var<private> nextIndex : u32;
+
+fn getNextIndex() -> u32 {
+  nextIndex = (nextIndex + 1u);
+  return nextIndex;
+}
+
+struct OuterS {
+  a1 : array<S1, 8>;
+}
+
+struct S1 {
+  a2 : array<InnerS, 8>;
+}
+
+struct InnerS {
+  v : i32;
+}
+)";
+
+  auto got =
+      Run<Unshadow, SimplifyPointers, LocalizeStructArrayAssignment>(src);
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerArg) {
   auto* src = R"(
 @block struct Uniforms {
@@ -492,6 +701,71 @@ fn f(p : ptr<function, OuterS>) {
 fn main() {
   var s1 : OuterS;
   f(&(s1));
+}
+)";
+
+  auto got =
+      Run<Unshadow, SimplifyPointers, LocalizeStructArrayAssignment>(src);
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerArg_OutOfOrder) {
+  auto* src = R"(
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var s1 : OuterS;
+  f(&s1);
+}
+
+fn f(p : ptr<function, OuterS>) {
+  var v : InnerS;
+  (*p).a1[uniforms.i] = v;
+}
+
+struct InnerS {
+  v : i32;
+};
+struct OuterS {
+  a1 : array<InnerS, 8>;
+};
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+@block struct Uniforms {
+  i : u32;
+};
+)";
+
+  auto* expect = R"(
+@stage(compute) @workgroup_size(1)
+fn main() {
+  var s1 : OuterS;
+  f(&(s1));
+}
+
+fn f(p : ptr<function, OuterS>) {
+  var v : InnerS;
+  {
+    let tint_symbol = &((*(p)).a1);
+    var tint_symbol_1 = *(tint_symbol);
+    tint_symbol_1[uniforms.i] = v;
+    *(tint_symbol) = tint_symbol_1;
+  }
+}
+
+struct InnerS {
+  v : i32;
+}
+
+struct OuterS {
+  a1 : array<InnerS, 8>;
+}
+
+@group(1) @binding(4) var<uniform> uniforms : Uniforms;
+
+@block
+struct Uniforms {
+  i : u32;
 }
 )";
 

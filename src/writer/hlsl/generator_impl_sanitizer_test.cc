@@ -181,7 +181,6 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
   auto* expect = R"(cbuffer cbuffer_tint_symbol_1 : register(b4, space3) {
   uint4 tint_symbol_1[2];
 };
-
 ByteAddressBuffer b : register(t1, space2);
 ByteAddressBuffer c : register(t2, space2);
 

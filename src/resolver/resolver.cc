@@ -95,8 +95,7 @@ bool Resolver::Resolve() {
   }
 
   if (!DependencyGraph::Build(builder_->AST(), builder_->Symbols(),
-                              builder_->Diagnostics(), dependencies_,
-                              /* allow_out_of_order_decls*/ false)) {
+                              builder_->Diagnostics(), dependencies_)) {
     return false;
   }
 
@@ -118,9 +117,8 @@ bool Resolver::Resolve() {
 bool Resolver::ResolveInternal() {
   Mark(&builder_->AST());
 
-  // Process everything else in the order they appear in the module. This is
-  // necessary for validation of use-before-declaration.
-  for (auto* decl : builder_->AST().GlobalDeclarations()) {
+  // Process all module-scope declarations in dependency order.
+  for (auto* decl : dependencies_.ordered_globals) {
     if (auto* td = decl->As<ast::TypeDecl>()) {
       Mark(td);
       if (!TypeDecl(td)) {

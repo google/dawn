@@ -50,6 +50,34 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(ExternalTextureTransformTest, SampleLevelSinglePlane_OutOfOrder) {
+  auto* src = R"(
+@stage(fragment)
+fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
+  return textureSampleLevel(t, s, (coord.xy / vec2<f32>(4.0, 4.0)));
+}
+
+@group(0) @binding(1) var t : texture_external;
+
+@group(0) @binding(0) var s : sampler;
+)";
+
+  auto* expect = R"(
+@stage(fragment)
+fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
+  return textureSampleLevel(t, s, (coord.xy / vec2<f32>(4.0, 4.0)), 0.0);
+}
+
+@group(0) @binding(1) var t : texture_2d<f32>;
+
+@group(0) @binding(0) var s : sampler;
+)";
+
+  auto got = Run<ExternalTextureTransform>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(ExternalTextureTransformTest, LoadSinglePlane) {
   auto* src = R"(
 @group(0) @binding(0) var t : texture_external;
@@ -67,6 +95,30 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   return textureLoad(t, vec2<i32>(1, 1), 0);
 }
+)";
+
+  auto got = Run<ExternalTextureTransform>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExternalTextureTransformTest, LoadSinglePlane_OutOfOrder) {
+  auto* src = R"(
+@stage(fragment)
+fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
+  return textureLoad(t, vec2<i32>(1, 1));
+}
+
+@group(0) @binding(0) var t : texture_external;
+)";
+
+  auto* expect = R"(
+@stage(fragment)
+fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
+  return textureLoad(t, vec2<i32>(1, 1), 0);
+}
+
+@group(0) @binding(0) var t : texture_2d<f32>;
 )";
 
   auto got = Run<ExternalTextureTransform>(src);
@@ -95,6 +147,34 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   dim = textureDimensions(t);
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
+)";
+
+  auto got = Run<ExternalTextureTransform>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExternalTextureTransformTest, DimensionsSinglePlane_OutOfOrder) {
+  auto* src = R"(
+@stage(fragment)
+fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
+  var dim : vec2<i32>;
+  dim = textureDimensions(t);
+  return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+}
+
+@group(0) @binding(0) var t : texture_external;
+)";
+
+  auto* expect = R"(
+@stage(fragment)
+fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
+  var dim : vec2<i32>;
+  dim = textureDimensions(t);
+  return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+}
+
+@group(0) @binding(0) var t : texture_2d<f32>;
 )";
 
   auto got = Run<ExternalTextureTransform>(src);

@@ -474,7 +474,7 @@ struct DependencyAnalysis {
   /// Performs global dependency analysis on the module, emitting any errors to
   /// #diagnostics.
   /// @returns true if analysis found no errors, otherwise false.
-  bool Run(const ast::Module& module, bool allow_out_of_order_decls) {
+  bool Run(const ast::Module& module) {
     // Collect all the named globals from the AST module
     GatherGlobals(module);
 
@@ -486,11 +486,6 @@ struct DependencyAnalysis {
 
     // Dump the dependency graph if TINT_DUMP_DEPENDENCY_GRAPH is non-zero
     DumpDependencyGraph();
-
-    if (!allow_out_of_order_decls) {
-      // Prevent out-of-order declarations.
-      ErrorOnOutOfOrderDeclarations();
-    }
 
     graph_.ordered_globals = std::move(sorted_);
 
@@ -668,36 +663,6 @@ struct DependencyAnalysis {
     return {};
   }
 
-  // TODO(crbug.com/tint/1266): Errors if there are any uses of globals before
-  // their declaration. Out-of-order declarations was added to the WGSL
-  // specification with https://github.com/gpuweb/gpuweb/pull/2244, but Mozilla
-  // have objections to this change so this feature is currently disabled via
-  // this function.
-  void ErrorOnOutOfOrderDeclarations() {
-    if (diagnostics_.contains_errors()) {
-      // Might have already errored about cyclic dependencies. No need to report
-      // out-of-order errors as well.
-      return;
-    }
-    std::unordered_set<const Global*> seen;
-    for (auto* global : declaration_order_) {
-      for (auto* dep : global->deps) {
-        if (!seen.count(dep)) {
-          auto info = DepInfoFor(global, dep);
-          auto name = NameOf(dep->node);
-          AddError(diagnostics_,
-                   KindOf(dep->node) + " '" + name +
-                       "' used before it has been declared",
-                   info.source);
-          AddNote(diagnostics_,
-                  KindOf(dep->node) + " '" + name + "' declared here",
-                  dep->node->source);
-        }
-      }
-      seen.emplace(global);
-    }
-  }
-
   /// CyclicDependencyFound() emits an error diagnostic for a cyclic dependency.
   /// @param root is the global that starts the cyclic dependency, which must be
   /// found in `stack`.
@@ -789,10 +754,9 @@ DependencyGraph::~DependencyGraph() = default;
 bool DependencyGraph::Build(const ast::Module& module,
                             const SymbolTable& symbols,
                             diag::List& diagnostics,
-                            DependencyGraph& output,
-                            bool allow_out_of_order_decls) {
+                            DependencyGraph& output) {
   DependencyAnalysis da{symbols, diagnostics, output};
-  return da.Run(module, allow_out_of_order_decls);
+  return da.Run(module);
 }
 
 }  // namespace resolver

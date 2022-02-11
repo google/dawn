@@ -548,6 +548,68 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(AddSpirvBlockAttributeTest,
+       Aliases_Nested_OuterBuffer_InnerBuffer_OutOfOrder) {
+  auto* src = R"(
+@stage(fragment)
+fn main() {
+  let f0 = u0.i.f;
+  let f1 = u1.f;
+}
+
+@group(0) @binding(1)
+var<uniform> u1 : MyInner;
+
+type MyInner = Inner;
+
+@group(0) @binding(0)
+var<uniform> u0 : MyOuter;
+
+type MyOuter = Outer;
+
+struct Outer {
+  i : MyInner;
+};
+
+struct Inner {
+  f : f32;
+};
+)";
+  auto* expect = R"(
+@stage(fragment)
+fn main() {
+  let f0 = u0.i.f;
+  let f1 = u1.inner.f;
+}
+
+@internal(spirv_block)
+struct u1_block {
+  inner : Inner;
+}
+
+@group(0) @binding(1) var<uniform> u1 : u1_block;
+
+type MyInner = Inner;
+
+@group(0) @binding(0) var<uniform> u0 : MyOuter;
+
+type MyOuter = Outer;
+
+@internal(spirv_block)
+struct Outer {
+  i : MyInner;
+}
+
+struct Inner {
+  f : f32;
+}
+)";
+
+  auto got = Run<AddSpirvBlockAttribute>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

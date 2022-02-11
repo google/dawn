@@ -154,10 +154,8 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
       buffer_size_ubo = ctx.dst->Global(
           ctx.dst->Sym(), ctx.dst->ty.Of(buffer_size_struct),
           ast::StorageClass::kUniform,
-          ast::AttributeList{
-              ctx.dst->create<ast::GroupAttribute>(cfg->ubo_binding.group),
-              ctx.dst->create<ast::BindingAttribute>(
-                  cfg->ubo_binding.binding)});
+          ast::AttributeList{ctx.dst->GroupAndBinding(
+              cfg->ubo_binding.group, cfg->ubo_binding.binding)});
     }
     return buffer_size_ubo;
   };
