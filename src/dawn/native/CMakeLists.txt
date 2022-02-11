@@ -192,13 +192,6 @@ target_link_libraries(dawn_native
             absl_str_format_internal
 )
 
-if (DAWN_REQUIRES_SPIRV_CROSS)
-    target_link_libraries(dawn_native PRIVATE spirv-cross-core)
-    if (DAWN_ENABLE_OPENGL)
-        target_link_libraries(dawn_native PRIVATE spirv-cross-glsl)
-    endif()
-endif()
-
 target_include_directories(dawn_native PRIVATE ${DAWN_ABSEIL_DIR})
 
 if (DAWN_USE_X11)
@@ -434,8 +427,6 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/SamplerGL.h"
         "opengl/ShaderModuleGL.cpp"
         "opengl/ShaderModuleGL.h"
-        "opengl/SpirvUtils.cpp"
-        "opengl/SpirvUtils.h"
         "opengl/SwapChainGL.cpp"
         "opengl/SwapChainGL.h"
         "opengl/TextureGL.cpp"

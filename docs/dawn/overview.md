@@ -34,7 +34,7 @@ This repository contains the implementation of Dawn, which is itself composed of
 
 The largest library in Dawn is `dawn_native` which implements the WebGPU API by translating to native graphics APIs such as D3D12, Metal or Vulkan. It is composed of a frontend that does all the state-tracking and validation, and backends that do the actual translation to the native graphics APIs.
 
-`dawn_native` hosts the [spirv-val](https://github.com/KhronosGroup/SPIRV-Tools) for validation of SPIR-V shaders and uses [SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross) shader translator to convert SPIR-V shaders to an equivalent shader for use in the native graphics API (HLSL for D3D12, MSL for Metal or Vulkan SPIR-V for Vulkan).
+`dawn_native` hosts the [spirv-val](https://github.com/KhronosGroup/SPIRV-Tools) for validation of SPIR-V shaders and uses [Tint](https://dawn.googlesource.com/tint/) shader translator to convert WGSL shaders to an equivalent shader for use in the native graphics API (HLSL for D3D12, MSL for Metal or Vulkan SPIR-V for Vulkan).
 
 ## Dawn Wire (`dawn_wire`)
 

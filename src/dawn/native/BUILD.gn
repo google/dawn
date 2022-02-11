@@ -165,9 +165,6 @@ source_set("sources") {
     "${dawn_spirv_tools_dir}:spvtools_val",
     "${dawn_tint_dir}/src:libtint",
   ]
-  if (dawn_use_spirv_cross) {
-    deps += [ "${dawn_root}/third_party/gn/spirv_cross:spirv_cross" ]
-  }
   defines = []
   libs = []
   data_deps = []
@@ -561,8 +558,6 @@ source_set("sources") {
       "opengl/SamplerGL.h",
       "opengl/ShaderModuleGL.cpp",
       "opengl/ShaderModuleGL.h",
-      "opengl/SpirvUtils.cpp",
-      "opengl/SpirvUtils.h",
       "opengl/SwapChainGL.cpp",
       "opengl/SwapChainGL.h",
       "opengl/TextureGL.cpp",

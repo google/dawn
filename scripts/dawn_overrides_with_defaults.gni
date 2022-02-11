@@ -45,10 +45,6 @@ if (!defined(dawn_googletest_dir)) {
   dawn_googletest_dir = "//third_party/googletest"
 }
 
-if (!defined(dawn_spirv_cross_dir)) {
-  dawn_spirv_cross_dir = "//third_party/vulkan-deps/spirv-cross/src"
-}
-
 if (!defined(dawn_spirv_tools_dir)) {
   dawn_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
 }

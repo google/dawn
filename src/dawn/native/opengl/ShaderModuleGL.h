@@ -63,11 +63,6 @@ namespace dawn::native::opengl {
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
-        static ResultOrError<BindingInfoArrayTable> ReflectShaderUsingSPIRVCross(
-            DeviceBase* device,
-            const std::vector<uint32_t>& spirv);
-
-        BindingInfoArrayTable mGLBindings;
     };
 
 }  // namespace dawn::native::opengl

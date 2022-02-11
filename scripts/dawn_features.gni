@@ -71,13 +71,6 @@ declare_args() {
   dawn_enable_vulkan = is_linux || is_chromeos || (is_win && !dawn_is_winuwp) ||
                        is_fuchsia || is_android || dawn_use_swiftshader
 
-  # Enable use of reflection compiler in spirv-cross. This is needed
-  # if performing reflection on systems that the platform language
-  # shader is SPIR-V, since there isn't an instance of the
-  # GLSL/HLSL/MSL compiler. This implicitly pulls in the GLSL
-  # compiler, since it is a sub-class of it.
-  dawn_enable_cross_reflection = false
-
   # Enables error injection for faking failures to native API calls
   dawn_enable_error_injection =
       is_debug || (build_with_chromium && use_fuzzing_engine)
@@ -103,7 +96,3 @@ dawn_supports_glfw_for_windowing =
 
 # Much of the GL backend code is shared, so define a convenience var.
 dawn_enable_opengl = dawn_enable_opengles || dawn_enable_desktop_gl
-
-# The GL backends are the last to use SPIRV-Cross, so only compile it in
-# if they are enabled.
-dawn_use_spirv_cross = dawn_enable_opengl

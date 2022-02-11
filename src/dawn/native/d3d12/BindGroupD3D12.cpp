@@ -81,7 +81,7 @@ namespace dawn::native::d3d12 {
                         }
                         case wgpu::BufferBindingType::Storage:
                         case kInternalStorageBufferBinding: {
-                            // Since SPIRV-Cross outputs HLSL shaders with RWByteAddressBuffer,
+                            // Since Tint outputs HLSL shaders with RWByteAddressBuffer,
                             // we must use D3D12_BUFFER_UAV_FLAG_RAW when making the
                             // UNORDERED_ACCESS_VIEW_DESC. Using D3D12_BUFFER_UAV_FLAG_RAW requires
                             // that we use DXGI_FORMAT_R32_TYPELESS as the format of the view.
@@ -104,7 +104,7 @@ namespace dawn::native::d3d12 {
                             break;
                         }
                         case wgpu::BufferBindingType::ReadOnlyStorage: {
-                            // Like StorageBuffer, SPIRV-Cross outputs HLSL shaders for readonly
+                            // Like StorageBuffer, Tint outputs HLSL shaders for readonly
                             // storage buffer with ByteAddressBuffer. So we must use
                             // D3D12_BUFFER_SRV_FLAG_RAW when making the SRV descriptor. And it has
                             // similar requirement for format, element size, etc.

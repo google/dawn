@@ -127,7 +127,6 @@ set(ABSL_PROPAGATE_CXX_STD ON)
 set_if_not_defined(DAWN_ABSEIL_DIR "${DAWN_THIRD_PARTY_DIR}/abseil-cpp" "Directory in which to find Abseil")
 set_if_not_defined(DAWN_GLFW_DIR "${DAWN_THIRD_PARTY_DIR}/glfw" "Directory in which to find GLFW")
 set_if_not_defined(DAWN_JINJA2_DIR "${DAWN_THIRD_PARTY_DIR}/jinja2" "Directory in which to find Jinja2")
-set_if_not_defined(DAWN_SPIRV_CROSS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-cross/src" "Directory in which to find SPIRV-Cross")
 set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-headers/src" "Directory in which to find SPIRV-Headers")
 set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-tools/src" "Directory in which to find SPIRV-Tools")
 set_if_not_defined(DAWN_TINT_DIR "${DAWN_THIRD_PARTY_DIR}/tint" "Directory in which to find Tint")
@@ -141,12 +140,6 @@ set_if_not_defined(GO_EXECUTABLE "go" "Golang executable for running the IDL gen
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
 if (${DAWN_ENABLE_DESKTOP_GL} OR ${DAWN_ENABLE_OPENGLES})
     set(DAWN_ENABLE_OPENGL ON)
-endif()
-
-# OpenGL backend requires SPIRV-Cross
-set(DAWN_REQUIRES_SPIRV_CROSS OFF)
-if (DAWN_ENABLE_OPENGL)
-    set(DAWN_REQUIRES_SPIRV_CROSS ON)
 endif()
 
 if(DAWN_ENABLE_PIC)

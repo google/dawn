@@ -14,25 +14,14 @@
 
 #include "dawn/native/opengl/ShaderModuleGL.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Platform.h"
 #include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/SpirvValidation.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/native/opengl/PipelineLayoutGL.h"
-#include "dawn/native/opengl/SpirvUtils.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
-#include <spirv_glsl.hpp>
-
-// Tint include must be after spirv_glsl.hpp, because spirv-cross has its own
-// version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
-// is at 3 while spirv-headers is at 4.
-#undef SPV_REVISION
 #include <tint/tint.h>
-#include <spirv-tools/libspirv.hpp>
 
 #include <sstream>
 
@@ -68,151 +57,6 @@ namespace dawn::native::opengl {
         return o.str();
     }
 
-    ResultOrError<std::unique_ptr<BindingInfoArray>> ExtractSpirvInfo(
-        const DeviceBase* device,
-        const spirv_cross::Compiler& compiler,
-        const std::string& entryPointName,
-        SingleShaderStage stage) {
-        const auto& resources = compiler.get_shader_resources();
-
-        // Fill in bindingInfo with the SPIRV bindings
-        auto ExtractResourcesBinding =
-            [](const DeviceBase* device,
-               const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
-               const spirv_cross::Compiler& compiler, BindingInfoType bindingType,
-               BindingInfoArray* bindings, bool isStorageBuffer = false) -> MaybeError {
-            for (const auto& resource : resources) {
-                DAWN_INVALID_IF(
-                    !compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding),
-                    "No Binding decoration set for resource");
-
-                DAWN_INVALID_IF(
-                    !compiler.get_decoration_bitset(resource.id).get(spv::DecorationDescriptorSet),
-                    "No Descriptor Decoration set for resource");
-
-                BindingNumber bindingNumber(
-                    compiler.get_decoration(resource.id, spv::DecorationBinding));
-                BindGroupIndex bindGroupIndex(
-                    compiler.get_decoration(resource.id, spv::DecorationDescriptorSet));
-
-                DAWN_INVALID_IF(bindGroupIndex >= kMaxBindGroupsTyped,
-                                "Bind group index over limits in the SPIRV");
-
-                const auto& [entry, inserted] =
-                    (*bindings)[bindGroupIndex].emplace(bindingNumber, ShaderBindingInfo{});
-                DAWN_INVALID_IF(!inserted, "Shader has duplicate bindings");
-
-                ShaderBindingInfo* info = &entry->second;
-                info->id = resource.id;
-                info->base_type_id = resource.base_type_id;
-                info->bindingType = bindingType;
-
-                switch (bindingType) {
-                    case BindingInfoType::Texture: {
-                        spirv_cross::SPIRType::ImageType imageType =
-                            compiler.get_type(info->base_type_id).image;
-                        spirv_cross::SPIRType::BaseType textureComponentType =
-                            compiler.get_type(imageType.type).basetype;
-
-                        info->texture.viewDimension =
-                            SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
-                        info->texture.multisampled = imageType.ms;
-                        info->texture.compatibleSampleTypes =
-                            SpirvBaseTypeToSampleTypeBit(textureComponentType);
-
-                        if (imageType.depth) {
-                            DAWN_INVALID_IF(
-                                (info->texture.compatibleSampleTypes & SampleTypeBit::Float) == 0,
-                                "Depth textures must have a float type");
-                            info->texture.compatibleSampleTypes = SampleTypeBit::Depth;
-                        }
-
-                        DAWN_INVALID_IF(imageType.ms && imageType.arrayed,
-                                        "Multisampled array textures aren't supported");
-                        break;
-                    }
-                    case BindingInfoType::Buffer: {
-                        // Determine buffer size, with a minimum of 1 element in the runtime
-                        // array
-                        spirv_cross::SPIRType type = compiler.get_type(info->base_type_id);
-                        info->buffer.minBindingSize =
-                            compiler.get_declared_struct_size_runtime_array(type, 1);
-
-                        // Differentiate between readonly storage bindings and writable ones
-                        // based on the NonWritable decoration.
-                        // TODO(dawn:527): Could isStorageBuffer be determined by calling
-                        // compiler.get_storage_class(resource.id)?
-                        if (isStorageBuffer) {
-                            spirv_cross::Bitset flags =
-                                compiler.get_buffer_block_flags(resource.id);
-                            if (flags.get(spv::DecorationNonWritable)) {
-                                info->buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
-                            } else {
-                                info->buffer.type = wgpu::BufferBindingType::Storage;
-                            }
-                        } else {
-                            info->buffer.type = wgpu::BufferBindingType::Uniform;
-                        }
-                        break;
-                    }
-                    case BindingInfoType::StorageTexture: {
-                        spirv_cross::Bitset flags = compiler.get_decoration_bitset(resource.id);
-                        DAWN_INVALID_IF(!flags.get(spv::DecorationNonReadable),
-                                        "Read-write storage textures are not supported.");
-                        info->storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
-
-                        spirv_cross::SPIRType::ImageType imageType =
-                            compiler.get_type(info->base_type_id).image;
-                        wgpu::TextureFormat storageTextureFormat =
-                            SpirvImageFormatToTextureFormat(imageType.format);
-                        DAWN_INVALID_IF(storageTextureFormat == wgpu::TextureFormat::Undefined,
-                                        "Invalid image format declaration on storage image.");
-
-                        const Format& format = device->GetValidInternalFormat(storageTextureFormat);
-                        DAWN_INVALID_IF(!format.supportsStorageUsage,
-                                        "The storage texture format (%s) is not supported.",
-                                        storageTextureFormat);
-
-                        DAWN_INVALID_IF(imageType.ms,
-                                        "Multisampled storage textures aren't supported.");
-
-                        DAWN_INVALID_IF(imageType.depth,
-                                        "Depth storage textures aren't supported.");
-
-                        info->storageTexture.format = storageTextureFormat;
-                        info->storageTexture.viewDimension =
-                            SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
-                        break;
-                    }
-                    case BindingInfoType::Sampler: {
-                        info->sampler.isComparison = false;
-                        break;
-                    }
-                    case BindingInfoType::ExternalTexture: {
-                        return DAWN_FORMAT_VALIDATION_ERROR("External textures are not supported.");
-                    }
-                }
-            }
-            return {};
-        };
-
-        std::unique_ptr<BindingInfoArray> resultBindings = std::make_unique<BindingInfoArray>();
-        BindingInfoArray* bindings = resultBindings.get();
-        DAWN_TRY(ExtractResourcesBinding(device, resources.uniform_buffers, compiler,
-                                         BindingInfoType::Buffer, bindings));
-        DAWN_TRY(ExtractResourcesBinding(device, resources.separate_images, compiler,
-                                         BindingInfoType::Texture, bindings));
-        DAWN_TRY(ExtractResourcesBinding(device, resources.separate_samplers, compiler,
-                                         BindingInfoType::Sampler, bindings));
-        DAWN_TRY(ExtractResourcesBinding(device, resources.storage_buffers, compiler,
-                                         BindingInfoType::Buffer, bindings, true));
-        // ReadonlyStorageTexture is used as a tag to do general storage texture handling.
-        DAWN_TRY(ExtractResourcesBinding(device, resources.storage_images, compiler,
-                                         BindingInfoType::StorageTexture, resultBindings.get()));
-
-        return {std::move(resultBindings)};
-    }
-
     // static
     ResultOrError<Ref<ShaderModule>> ShaderModule::Create(Device* device,
                                                           const ShaderModuleDescriptor* descriptor,
@@ -226,38 +70,10 @@ namespace dawn::native::opengl {
         : ShaderModuleBase(device, descriptor) {
     }
 
-    // static
-    ResultOrError<BindingInfoArrayTable> ShaderModule::ReflectShaderUsingSPIRVCross(
-        DeviceBase* device,
-        const std::vector<uint32_t>& spirv) {
-        BindingInfoArrayTable result;
-        spirv_cross::Compiler compiler(spirv);
-        for (const spirv_cross::EntryPoint& entryPoint : compiler.get_entry_points_and_stages()) {
-            ASSERT(result.count(entryPoint.name) == 0);
-
-            SingleShaderStage stage = ExecutionModelToShaderStage(entryPoint.execution_model);
-            compiler.set_entry_point(entryPoint.name, entryPoint.execution_model);
-
-            std::unique_ptr<BindingInfoArray> bindings;
-            DAWN_TRY_ASSIGN(bindings, ExtractSpirvInfo(device, compiler, entryPoint.name, stage));
-            result[entryPoint.name] = std::move(bindings);
-        }
-        return std::move(result);
-    }
-
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
         ScopedTintICEHandler scopedICEHandler(GetDevice());
 
         DAWN_TRY(InitializeBase(parseResult));
-        // Tint currently does not support emitting GLSL, so when provided a Tint program need to
-        // generate SPIRV and SPIRV-Cross reflection data to be used in this backend.
-        tint::writer::spirv::Options options;
-        options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-        auto result = tint::writer::spirv::Generate(GetTintProgram(), options);
-        DAWN_INVALID_IF(!result.success, "An error occured while generating SPIR-V: %s.",
-                        result.error);
-
-        DAWN_TRY_ASSIGN(mGLBindings, ReflectShaderUsingSPIRVCross(GetDevice(), result.spirv));
 
         return {};
     }
