@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct frexp_result_vec4 {
@@ -8,9 +6,8 @@ struct frexp_result_vec4 {
 };
 
 frexp_result_vec4 tint_frexp(vec4 param_0) {
-  float4 exp;
-  float4 sig = frexp(param_0, exp);
-  frexp_result_vec4 result = {sig, int4(exp)};
+  frexp_result_vec4 result;
+  result.sig = frexp(param_0, result.exp);
   return result;
 }
 
@@ -31,13 +28,6 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'float4' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -47,9 +37,8 @@ struct frexp_result_vec4 {
 };
 
 frexp_result_vec4 tint_frexp(vec4 param_0) {
-  float4 exp;
-  float4 sig = frexp(param_0, exp);
-  frexp_result_vec4 result = {sig, int4(exp)};
+  frexp_result_vec4 result;
+  result.sig = frexp(param_0, result.exp);
   return result;
 }
 
@@ -66,13 +55,6 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:10: 'float4' : undeclared identifier 
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 struct frexp_result_vec4 {
@@ -81,9 +63,8 @@ struct frexp_result_vec4 {
 };
 
 frexp_result_vec4 tint_frexp(vec4 param_0) {
-  float4 exp;
-  float4 sig = frexp(param_0, exp);
-  frexp_result_vec4 result = {sig, int4(exp)};
+  frexp_result_vec4 result;
+  result.sig = frexp(param_0, result.exp);
   return result;
 }
 
@@ -101,10 +82,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'float4' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -865,14 +865,6 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
     return CallBuiltinHelper(
         out, expr, builtin,
         [&](TextBuffer* b, const std::vector<std::string>& params) {
-          auto* ty = builtin->Parameters()[0]->Type();
-          auto in = params[0];
-
-          std::string width;
-          if (auto* vec = ty->As<sem::Vector>()) {
-            width = std::to_string(vec->Width());
-          }
-
           // Emit the builtin return type unique to this overload. This does not
           // exist in the AST, so it will not be generated in Generate().
           if (!EmitStructType(&helpers_,
@@ -880,16 +872,15 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
             return false;
           }
 
-          line(b) << "float" << width << " whole;";
-          line(b) << "float" << width << " fract = modf(" << in << ", whole);";
           {
             auto l = line(b);
             if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
                           ast::Access::kUndefined, "")) {
               return false;
             }
-            l << " result = {fract, whole};";
+            l << " result;";
           }
+          line(b) << "result.fract = modf(" << params[0] << ", result.whole);";
           line(b) << "return result;";
           return true;
         });
@@ -915,14 +906,6 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
     return CallBuiltinHelper(
         out, expr, builtin,
         [&](TextBuffer* b, const std::vector<std::string>& params) {
-          auto* ty = builtin->Parameters()[0]->Type();
-          auto in = params[0];
-
-          std::string width;
-          if (auto* vec = ty->As<sem::Vector>()) {
-            width = std::to_string(vec->Width());
-          }
-
           // Emit the builtin return type unique to this overload. This does not
           // exist in the AST, so it will not be generated in Generate().
           if (!EmitStructType(&helpers_,
@@ -930,16 +913,15 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
             return false;
           }
 
-          line(b) << "float" << width << " exp;";
-          line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
           {
             auto l = line(b);
             if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
                           ast::Access::kUndefined, "")) {
               return false;
             }
-            l << " result = {sig, int" << width << "(exp)};";
+            l << " result;";
           }
+          line(b) << "result.sig = frexp(" << params[0] << ", result.exp);";
           line(b) << "return result;";
           return true;
         });

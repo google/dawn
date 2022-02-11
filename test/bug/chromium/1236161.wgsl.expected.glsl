@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct modf_result {
@@ -8,9 +6,8 @@ struct modf_result {
 };
 
 modf_result tint_modf(float param_0) {
-  float whole;
-  float fract = modf(param_0, whole);
-  modf_result result = {fract, whole};
+  modf_result result;
+  result.fract = modf(param_0, result.whole);
   return result;
 }
 
@@ -22,11 +19,4 @@ void unused_entry_point() {
 void tint_symbol() {
   float tint_symbol_1 = tint_modf(1.0f).whole;
 }
-
-Error parsing GLSL shader:
-ERROR: 0:11: '{ } style initializers' : not supported with this profile: es
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
 

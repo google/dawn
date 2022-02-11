@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct modf_result_vec2 {
@@ -8,9 +6,8 @@ struct modf_result_vec2 {
 };
 
 modf_result_vec2 tint_modf(vec2 param_0) {
-  float2 whole;
-  float2 fract = modf(param_0, whole);
-  modf_result_vec2 result = {fract, whole};
+  modf_result_vec2 result;
+  result.fract = modf(param_0, result.whole);
   return result;
 }
 
@@ -31,13 +28,6 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'float2' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
@@ -47,9 +37,8 @@ struct modf_result_vec2 {
 };
 
 modf_result_vec2 tint_modf(vec2 param_0) {
-  float2 whole;
-  float2 fract = modf(param_0, whole);
-  modf_result_vec2 result = {fract, whole};
+  modf_result_vec2 result;
+  result.fract = modf(param_0, result.whole);
   return result;
 }
 
@@ -66,13 +55,6 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:10: 'float2' : undeclared identifier 
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 struct modf_result_vec2 {
@@ -81,9 +63,8 @@ struct modf_result_vec2 {
 };
 
 modf_result_vec2 tint_modf(vec2 param_0) {
-  float2 whole;
-  float2 fract = modf(param_0, whole);
-  modf_result_vec2 result = {fract, whole};
+  modf_result_vec2 result;
+  result.fract = modf(param_0, result.whole);
   return result;
 }
 
@@ -101,10 +82,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'float2' : undeclared identifier 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

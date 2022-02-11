@@ -290,61 +290,132 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Vector) {
   EXPECT_EQ(out.str(), "(bvec2(true, false) ? ivec2(3, 4) : ivec2(1, 2))");
 }
 
-#if 0
 TEST_F(GlslGeneratorImplTest_Builtin, Modf_Scalar) {
-  auto* res = Var("res", ty.f32());
-  auto* call = Call("modf", 1.0f, AddressOf(res));
-  WrapInFunction(res, call);
+  auto* call = Call("modf", 1.0f);
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("modf(1.0f, res)"));
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct modf_result {
+  float fract;
+  float whole;
+};
+
+modf_result tint_modf(float param_0) {
+  modf_result result;
+  result.fract = modf(param_0, result.whole);
+  return result;
+}
+
+
+void test_function() {
+  tint_modf(1.0f);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Modf_Vector) {
-  auto* res = Var("res", ty.vec3<f32>());
-  auto* call = Call("modf", vec3<f32>(), AddressOf(res));
-  WrapInFunction(res, call);
+  auto* call = Call("modf", vec3<f32>());
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("modf(vec3(0.0f, 0.0f, 0.0f), res)"));
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct modf_result_vec3 {
+  vec3 fract;
+  vec3 whole;
+};
+
+modf_result_vec3 tint_modf(vec3 param_0) {
+  modf_result_vec3 result;
+  result.fract = modf(param_0, result.whole);
+  return result;
+}
+
+
+void test_function() {
+  tint_modf(vec3(0.0f, 0.0f, 0.0f));
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Scalar_i32) {
-  auto* exp = Var("exp", ty.i32());
-  auto* call = Call("frexp", 1.0f, AddressOf(exp));
-  WrapInFunction(exp, call);
+  auto* call = Call("frexp", 1.0f);
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr(R"(
-  float tint_tmp;
-  float tint_tmp_1 = frexp(1.0f, tint_tmp);
-  exp = int(tint_tmp);
-  tint_tmp_1;
+  float sig;
+  int exp;
+};
+
+frexp_result tint_frexp(float param_0) {
+  frexp_result result;
+  result.sig = frexp(param_0, result.exp);
+  return result;
+}
+
+
+void test_function() {
+  tint_frexp(1.0f);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 )"));
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Vector_i32) {
-  auto* res = Var("res", ty.vec3<i32>());
-  auto* call = Call("frexp", vec3<f32>(), AddressOf(res));
-  WrapInFunction(res, call);
+  auto* call = Call("frexp", vec3<f32>());
+  WrapInFunction(CallStmt(call));
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr(R"(
-  vec3 tint_tmp;
-  vec3 tint_tmp_1 = frexp(vec3(0.0f, 0.0f, 0.0f), tint_tmp);
-  res = ivec3(tint_tmp);
-  tint_tmp_1;
+
+struct frexp_result_vec3 {
+  vec3 sig;
+  ivec3 exp;
+};
+
+frexp_result_vec3 tint_frexp(vec3 param_0) {
+  frexp_result_vec3 result;
+  result.sig = frexp(param_0, result.exp);
+  return result;
+}
+
+
+void test_function() {
+  tint_frexp(vec3(0.0f, 0.0f, 0.0f));
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
 )"));
 }
 
+#if 0
 TEST_F(GlslGeneratorImplTest_Builtin, IsNormal_Scalar) {
   auto* val = Var("val", ty.f32());
   auto* call = Call("isNormal", val);
