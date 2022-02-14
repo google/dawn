@@ -219,6 +219,7 @@ class Resolver {
   sem::ElseStatement* ElseStatement(const ast::ElseStatement*);
   sem::Statement* FallthroughStatement(const ast::FallthroughStatement*);
   sem::ForLoopStatement* ForLoopStatement(const ast::ForLoopStatement*);
+  sem::GlobalVariable* GlobalVariable(const ast::Variable*);
   sem::Statement* Parameter(const ast::Variable*);
   sem::IfStatement* IfStatement(const ast::IfStatement*);
   sem::LoopStatement* LoopStatement(const ast::LoopStatement*);
@@ -227,8 +228,6 @@ class Resolver {
   sem::SwitchStatement* SwitchStatement(const ast::SwitchStatement* s);
   sem::Statement* VariableDeclStatement(const ast::VariableDeclStatement*);
   bool Statements(const ast::StatementList&);
-
-  bool GlobalVariable(const ast::Variable*);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
