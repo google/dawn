@@ -656,4 +656,15 @@ namespace dawn::native {
         }
     }
 
+    std::string BindGroupLayoutBase::EntriesToString() const {
+        std::string entries = " [";
+        const BindGroupLayoutBase::BindingMap& bindingMap = GetBindingMap();
+        for (const auto [bindingNumber, bindingIndex] : bindingMap) {
+            const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
+            entries += absl::StrFormat("%s, ", bindingInfo);
+        }
+        entries += "]";
+        return entries;
+    }
+
 }  // namespace dawn::native

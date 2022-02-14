@@ -269,9 +269,10 @@ namespace dawn::native {
 
         DAWN_INVALID_IF(
             descriptor->entryCount != descriptor->layout->GetUnexpandedBindingCount(),
-            "Number of entries (%u) did not match the number of entries (%u) specified in %s",
+            "Number of entries (%u) did not match the number of entries (%u) specified in %s."
+            "\nExpected layout: %s",
             descriptor->entryCount, static_cast<uint32_t>(descriptor->layout->GetBindingCount()),
-            descriptor->layout);
+            descriptor->layout, descriptor->layout->EntriesToString());
 
         const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
         ASSERT(bindingMap.size() <= kMaxBindingsPerPipelineLayout);
@@ -282,8 +283,9 @@ namespace dawn::native {
 
             const auto& it = bindingMap.find(BindingNumber(entry.binding));
             DAWN_INVALID_IF(it == bindingMap.end(),
-                            "In entries[%u], binding index %u not present in the bind group layout",
-                            i, entry.binding);
+                            "In entries[%u], binding index %u not present in the bind group layout."
+                            "\nExpected layout: %s",
+                            i, entry.binding, descriptor->layout->EntriesToString());
 
             BindingIndex bindingIndex = it->second;
             ASSERT(bindingIndex < descriptor->layout->GetBindingCount());
@@ -315,16 +317,22 @@ namespace dawn::native {
             switch (bindingInfo.bindingType) {
                 case BindingInfoType::Buffer:
                     DAWN_TRY_CONTEXT(ValidateBufferBinding(device, entry, bindingInfo),
-                                     "validating entries[%u] as a Buffer", i);
+                                     "validating entries[%u] as a Buffer."
+                                     "\nExpected entry layout: %s",
+                                     i, bindingInfo);
                     break;
                 case BindingInfoType::Texture:
                 case BindingInfoType::StorageTexture:
                     DAWN_TRY_CONTEXT(ValidateTextureBinding(device, entry, bindingInfo),
-                                     "validating entries[%u] as a Texture", i);
+                                     "validating entries[%u] as a Texture."
+                                     "\nExpected entry layout: %s",
+                                     i, bindingInfo);
                     break;
                 case BindingInfoType::Sampler:
                     DAWN_TRY_CONTEXT(ValidateSamplerBinding(device, entry, bindingInfo),
-                                     "validating entries[%u] as a Sampler", i);
+                                     "validating entries[%u] as a Sampler."
+                                     "\nExpected entry layout: %s",
+                                     i, bindingInfo);
                     break;
                 case BindingInfoType::ExternalTexture:
                     UNREACHABLE();

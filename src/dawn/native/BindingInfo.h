@@ -68,6 +68,11 @@ namespace dawn::native {
         StorageTextureBindingLayout storageTexture;
     };
 
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        const BindingInfo& value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s);
+
     struct BindingSlot {
         BindGroupIndex group;
         BindingNumber binding;

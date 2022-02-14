@@ -130,6 +130,9 @@ namespace dawn::native {
 
         bool IsStorageBufferBinding(BindingIndex bindingIndex) const;
 
+        // Returns a detailed string representation of the layout entries for use in error messages.
+        std::string EntriesToString() const;
+
       protected:
         // Constructor used only for mocking and testing.
         BindGroupLayoutBase(DeviceBase* device);

@@ -44,6 +44,51 @@ namespace dawn::native {
         return {true};
     }
 
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        const BindingInfo& value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s) {
+        s->Append(absl::StrFormat("{\n  binding: %u\n  visibility: %s\n  %s: {\n",
+                                  static_cast<uint32_t>(value.binding), value.visibility,
+                                  value.bindingType));
+
+        switch (value.bindingType) {
+            case BindingInfoType::Buffer:
+                s->Append(absl::StrFormat("    type: %s\n", value.buffer.type));
+                if (value.buffer.hasDynamicOffset) {
+                    s->Append("    hasDynamicOffset: true\n");
+                }
+                if (value.buffer.minBindingSize != 0) {
+                    s->Append(
+                        absl::StrFormat("    minBindingSize: %u\n", value.buffer.minBindingSize));
+                }
+                break;
+            case BindingInfoType::Sampler:
+                s->Append(absl::StrFormat("    type: %s\n", value.sampler.type));
+                break;
+            case BindingInfoType::Texture:
+                s->Append(absl::StrFormat("    sampleType: %s\n", value.texture.sampleType));
+                s->Append(absl::StrFormat("    viewDimension: %s\n", value.texture.viewDimension));
+                if (value.texture.multisampled) {
+                    s->Append("    multisampled: true\n");
+                } else {
+                    s->Append("    multisampled: false\n");
+                }
+                break;
+            case BindingInfoType::StorageTexture:
+                s->Append(absl::StrFormat("    access: %s\n", value.storageTexture.access));
+                s->Append(absl::StrFormat("    format: %s\n", value.storageTexture.format));
+                s->Append(
+                    absl::StrFormat("    viewDimension: %s\n", value.storageTexture.viewDimension));
+                break;
+            case BindingInfoType::ExternalTexture:
+                break;
+        }
+
+        s->Append("  }\n}");
+        return {true};
+    }
+
     void IncrementBindingCounts(BindingCounts* bindingCounts, const BindGroupLayoutEntry& entry) {
         bindingCounts->totalCount += 1;
 
