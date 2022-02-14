@@ -8,6 +8,10 @@
 * The `ignore()` intrinsic has been removed. Use phoney-assignment instead: `ignore(expr);` -> `_ = expr;`.
 * `break` statements in `continuing` blocks are now correctly validated.
 
+### New Features
+
+* Module-scope declarations can now be declared in any order. [tint:1266](crbug.com/tint/1266)
+
 ## Changes for M99
 
 ### Breaking changes
