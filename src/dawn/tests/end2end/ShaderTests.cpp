@@ -400,17 +400,17 @@ TEST_P(ShaderTests, OverridableConstants) {
     wgpu::Buffer buffer = CreateBuffer(kCount);
 
     std::string shader = R"(
-@override let c0: bool;              // type: bool
-@override let c1: bool = false;      // default override
-@override let c2: f32;               // type: float32
-@override let c3: f32 = 0.0;         // default override
-@override let c4: f32 = 4.0;         // default
-@override let c5: i32;               // type: int32
-@override let c6: i32 = 0;           // default override
-@override let c7: i32 = 7;           // default
-@override let c8: u32;               // type: uint32
-@override let c9: u32 = 0u;          // default override
-@override let c10: u32 = 10u;        // default
+override c0: bool;              // type: bool
+override c1: bool = false;      // default override
+override c2: f32;               // type: float32
+override c3: f32 = 0.0;         // default override
+override c4: f32 = 4.0;         // default
+override c5: i32;               // type: int32
+override c6: i32 = 0;           // default override
+override c7: i32 = 7;           // default
+override c8: u32;               // type: uint32
+override c9: u32 = 0u;          // default override
+override c10: u32 = 10u;        // default
 
 struct Buf {
     data : array<u32, 11>;
@@ -477,10 +477,10 @@ TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
     wgpu::Buffer buffer = CreateBuffer(kCount);
 
     std::string shader = R"(
-@override(1001) let c1: u32;            // some big numeric id
-@override(1) let c2: u32 = 0u;          // id == 1 might collide with some generated constant id
-@override(1003) let c3: u32 = 3u;       // default
-@override(1004) let c4: u32;            // default unspecified
+@id(1001) override c1: u32;            // some big numeric id
+@id(1) override c2: u32 = 0u;          // id == 1 might collide with some generated constant id
+@id(1003) override c3: u32 = 3u;       // default
+@id(1004) override c4: u32;            // default unspecified
 
 struct Buf {
     data : array<u32, 4>;
@@ -536,8 +536,8 @@ TEST_P(ShaderTests, OverridableConstantsPrecision) {
     wgpu::Buffer buffer = CreateBuffer(kCount);
 
     std::string shader = R"(
-@override(1001) let c1: f32;
-@override(1002) let c2: f32;
+@id(1001) override c1: f32;
+@id(1002) override c2: f32;
 
 struct Buf {
     data : array<f32, 2>;
@@ -590,8 +590,8 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
     wgpu::Buffer buffer3 = CreateBuffer(kCount);
 
     std::string shader = R"(
-@override(1001) let c1: u32;
-@override(1002) let c2: u32;
+@id(1001) override c1: u32;
+@id(1002) override c2: u32;
 
 struct Buf {
     data : array<u32, 1>;
@@ -681,8 +681,8 @@ TEST_P(ShaderTests, OverridableConstantsRenderPipeline) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-@override(1111) let xright: f32;
-@override(2222) let ytop: f32;
+@id(1111) override xright: f32;
+@id(2222) override ytop: f32;
 @stage(vertex)
 fn main(@builtin(vertex_index) VertexIndex : u32)
      -> @builtin(position) vec4<f32> {
@@ -695,7 +695,7 @@ fn main(@builtin(vertex_index) VertexIndex : u32)
 })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-@override(1000) let intensity: f32 = 0.0;
+@id(1000) override intensity: f32 = 0.0;
 @stage(fragment) fn main()
     -> @location(0) vec4<f32> {
     return vec4<f32>(intensity, intensity, intensity, 1.0);

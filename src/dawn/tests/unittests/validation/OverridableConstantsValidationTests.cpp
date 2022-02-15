@@ -20,17 +20,17 @@ class ComputePipelineOverridableConstantsValidationTest : public ValidationTest 
   protected:
     void SetUpShadersWithDefaultValueConstants() {
         computeModule = utils::CreateShaderModule(device, R"(
-@override let c0: bool = true;      // type: bool
-@override let c1: bool = false;      // default override
-@override let c2: f32 = 0.0;         // type: float32
-@override let c3: f32 = 0.0;         // default override
-@override let c4: f32 = 4.0;         // default
-@override let c5: i32 = 0;           // type: int32
-@override let c6: i32 = 0;           // default override
-@override let c7: i32 = 7;           // default
-@override let c8: u32 = 0u;          // type: uint32
-@override let c9: u32 = 0u;          // default override
-@override(1000) let c10: u32 = 10u;  // default
+override c0: bool = true;      // type: bool
+override c1: bool = false;      // default override
+override c2: f32 = 0.0;         // type: float32
+override c3: f32 = 0.0;         // default override
+override c4: f32 = 4.0;         // default
+override c5: i32 = 0;           // type: int32
+override c6: i32 = 0;           // default override
+override c7: i32 = 7;           // default
+override c8: u32 = 0u;          // type: uint32
+override c9: u32 = 0u;          // default override
+@id(1000) override c10: u32 = 10u;  // default
 
 @stage(compute) @workgroup_size(1) fn main() {
     // make sure the overridable constants are not optimized out
@@ -50,17 +50,17 @@ class ComputePipelineOverridableConstantsValidationTest : public ValidationTest 
 
     void SetUpShadersWithUninitializedConstants() {
         computeModule = utils::CreateShaderModule(device, R"(
-@override let c0: bool;              // type: bool
-@override let c1: bool = false;      // default override
-@override let c2: f32;               // type: float32
-@override let c3: f32 = 0.0;         // default override
-@override let c4: f32 = 4.0;         // default
-@override let c5: i32;               // type: int32
-@override let c6: i32 = 0;           // default override
-@override let c7: i32 = 7;           // default
-@override let c8: u32;               // type: uint32
-@override let c9: u32 = 0u;          // default override
-@override(1000) let c10: u32 = 10u;  // default
+override c0: bool;              // type: bool
+override c1: bool = false;      // default override
+override c2: f32;               // type: float32
+override c3: f32 = 0.0;         // default override
+override c4: f32 = 4.0;         // default
+override c5: i32;               // type: int32
+override c6: i32 = 0;           // default override
+override c7: i32 = 7;           // default
+override c8: u32;               // type: uint32
+override c9: u32 = 0u;          // default override
+@id(1000) override c10: u32 = 10u;  // default
 
 @stage(compute) @workgroup_size(1) fn main() {
     // make sure the overridable constants are not optimized out

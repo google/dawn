@@ -497,8 +497,8 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
 // Test that numeric ID must be unique
 TEST_F(ShaderModuleValidationTest, OverridableConstantsNumericIDConflicts) {
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-@override(1234) let c0: u32;
-@override(1234) let c1: u32;
+@id(1234) override c0: u32;
+@id(1234) override c1: u32;
 
 struct Buf {
     data : array<u32, 2>;

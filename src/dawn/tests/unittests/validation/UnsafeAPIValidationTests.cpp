@@ -61,8 +61,8 @@ TEST_F(UnsafeAPIValidationTest, PipelineOverridableConstants) {
     // Error case: shader with overridable constant with default value
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-@override(1000) let c0: u32 = 1u;
-@override(1000) let c1: u32;
+@id(1000) override c0: u32 = 1u;
+@id(1000) override c1: u32;
 
 @stage(compute) @workgroup_size(1) fn main() {
     _ = c0;
