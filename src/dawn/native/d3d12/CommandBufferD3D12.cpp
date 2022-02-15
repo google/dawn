@@ -390,6 +390,12 @@ namespace dawn::native::d3d12 {
             ASSERT(descriptorHeaps[0] != nullptr);
             ASSERT(descriptorHeaps[1] != nullptr);
             commandList->SetDescriptorHeaps(descriptorHeaps.size(), descriptorHeaps.data());
+
+            // Descriptor table state is undefined at the beginning of a command list and after
+            // descriptor heaps are changed on a command list. Invalidate the root sampler tables to
+            // reset the root descriptor table for samplers, otherwise the shader cannot access the
+            // descriptor heaps.
+            mBoundRootSamplerTables = {};
         }
 
       private:
