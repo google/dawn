@@ -20,6 +20,8 @@
 #include "src/sem/block_statement.h"
 #include "src/sem/for_loop_statement.h"
 #include "src/sem/if_statement.h"
+#include "src/sem/reference_type.h"
+#include "src/sem/variable.h"
 #include "src/utils/reverse.h"
 
 namespace tint::transform {
@@ -265,10 +267,22 @@ class HoistToDeclBefore::State {
                          const ast::Expression* expr,
                          bool as_const,
                          const char* decl_name = "") {
-    // Construct the let/var that holds the hoisted expr
     auto name = b.Symbols().New(decl_name);
-    auto* v = as_const ? b.Const(name, nullptr, ctx.Clone(expr))
-                       : b.Var(name, nullptr, ctx.Clone(expr));
+
+    auto* sem_expr = ctx.src->Sem().Get(expr);
+    bool is_ref =
+        sem_expr &&
+        !sem_expr->Is<sem::VariableUser>()  // Don't need to take a ref to a var
+        && sem_expr->Type()->Is<sem::Reference>();
+
+    auto* expr_clone = ctx.Clone(expr);
+    if (is_ref) {
+      expr_clone = b.AddressOf(expr_clone);
+    }
+
+    // Construct the let/var that holds the hoisted expr
+    auto* v = as_const ? b.Const(name, nullptr, expr_clone)
+                       : b.Var(name, nullptr, expr_clone);
     auto* decl = b.Decl(v);
 
     if (!InsertBefore(before_expr, decl)) {
@@ -276,7 +290,11 @@ class HoistToDeclBefore::State {
     }
 
     // Replace the initializer expression with a reference to the let
-    ctx.Replace(expr, b.Expr(name));
+    const ast::Expression* new_expr = b.Expr(name);
+    if (is_ref) {
+      new_expr = b.Deref(new_expr);
+    }
+    ctx.Replace(expr, new_expr);
     return true;
   }
 

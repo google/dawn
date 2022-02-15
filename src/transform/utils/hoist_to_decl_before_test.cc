@@ -217,5 +217,76 @@ fn f() {
   EXPECT_EQ(expect, str(cloned));
 }
 
+TEST_F(HoistToDeclBeforeTest, Array1D) {
+  // fn f() {
+  //     var a : array<i32, 10>;
+  //     var b = a[0];
+  // }
+  ProgramBuilder b;
+  auto* var1 = b.Decl(b.Var("a", b.ty.array<ProgramBuilder::i32, 10>()));
+  auto* expr = b.IndexAccessor("a", 0);
+  auto* var2 = b.Decl(b.Var("b", nullptr, expr));
+  b.Func("f", {}, b.ty.void_(), {var1, var2});
+
+  Program original(std::move(b));
+  ProgramBuilder cloned_b;
+  CloneContext ctx(&cloned_b, &original);
+
+  HoistToDeclBefore hoistToDeclBefore(ctx);
+  auto* sem_expr = ctx.src->Sem().Get(expr);
+  hoistToDeclBefore.Add(sem_expr, expr, true);
+  hoistToDeclBefore.Apply();
+
+  ctx.Clone();
+  Program cloned(std::move(cloned_b));
+
+  auto* expect = R"(
+fn f() {
+  var a : array<i32, 10>;
+  let tint_symbol = &(a[0]);
+  var b = *(tint_symbol);
+}
+)";
+
+  EXPECT_EQ(expect, str(cloned));
+}
+
+TEST_F(HoistToDeclBeforeTest, Array2D) {
+  // fn f() {
+  //     var a : array<array<i32, 10>, 10>;
+  //     var b = a[0][0];
+  // }
+  ProgramBuilder b;
+
+  auto* var1 =
+      b.Decl(b.Var("a", b.ty.array(b.ty.array<ProgramBuilder::i32, 10>(), 10)));
+  auto* expr = b.IndexAccessor(b.IndexAccessor("a", 0), 0);
+  auto* var2 = b.Decl(b.Var("b", nullptr, expr));
+  b.Func("f", {}, b.ty.void_(), {var1, var2});
+
+  Program original(std::move(b));
+  ProgramBuilder cloned_b;
+  CloneContext ctx(&cloned_b, &original);
+  std::cout << str(original) << std::endl;
+
+  HoistToDeclBefore hoistToDeclBefore(ctx);
+  auto* sem_expr = ctx.src->Sem().Get(expr);
+  hoistToDeclBefore.Add(sem_expr, expr, true);
+  hoistToDeclBefore.Apply();
+
+  ctx.Clone();
+  Program cloned(std::move(cloned_b));
+
+  auto* expect = R"(
+fn f() {
+  var a : array<array<i32, 10>, 10>;
+  let tint_symbol = &(a[0][0]);
+  var b = *(tint_symbol);
+}
+)";
+
+  EXPECT_EQ(expect, str(cloned));
+}
+
 }  // namespace
 }  // namespace tint::transform
