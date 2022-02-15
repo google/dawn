@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 
 void select_28a27e() {
-  uvec3 res = (bvec3(false, false, false) ? uvec3(0u, 0u, 0u) : uvec3(0u, 0u, 0u));
+  uvec3 res = mix(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u), bvec3(false, false, false));
 }
 
 vec4 vertex_main() {
@@ -18,18 +16,11 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: '' : boolean expression expected 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 void select_28a27e() {
-  uvec3 res = (bvec3(false, false, false) ? uvec3(0u, 0u, 0u) : uvec3(0u, 0u, 0u));
+  uvec3 res = mix(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u), bvec3(false, false, false));
 }
 
 void fragment_main() {
@@ -40,17 +31,10 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: '' : boolean expression expected 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 void select_28a27e() {
-  uvec3 res = (bvec3(false, false, false) ? uvec3(0u, 0u, 0u) : uvec3(0u, 0u, 0u));
+  uvec3 res = mix(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u), bvec3(false, false, false));
 }
 
 void compute_main() {
@@ -62,10 +46,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: '' : boolean expression expected 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

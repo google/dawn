@@ -287,7 +287,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Vector) {
   gen.increment_indent();
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_EQ(out.str(), "(bvec2(true, false) ? ivec2(3, 4) : ivec2(1, 2))");
+  EXPECT_EQ(out.str(), "mix(ivec2(1, 2), ivec2(3, 4), bvec2(true, false))");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Modf_Scalar) {
