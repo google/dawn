@@ -58,13 +58,13 @@ declare_args() {
 
   # Enables the compilation of Dawn's OpenGL backend
   # (best effort, non-conformant)
-  dawn_enable_desktop_gl = !build_with_chromium && (is_linux && !is_chromeos)
+  dawn_enable_desktop_gl = is_linux && !is_chromeos
 
   # Enables the compilation of Dawn's OpenGLES backend
   # (WebGPU/Compat subset)
   # Disables OpenGLES when compiling for UWP, since UWP only supports d3d
-  dawn_enable_opengles = !build_with_chromium && ((is_linux && !is_chromeos) ||
-                                                  (is_win && !dawn_is_winuwp))
+  dawn_enable_opengles =
+      (is_linux && !is_chromeos) || (is_win && !dawn_is_winuwp)
 
   # Enables the compilation of Dawn's Vulkan backend
   # Disables vulkan when compiling for UWP, since UWP only supports d3d
