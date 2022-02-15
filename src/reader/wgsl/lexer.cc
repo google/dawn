@@ -996,6 +996,8 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     return {Token::Type::kMat4x3, source, "mat4x3"};
   if (str == "mat4x4")
     return {Token::Type::kMat4x4, source, "mat4x4"};
+  if (str == "override")
+    return {Token::Type::kOverride, source, "override"};
   if (str == "private")
     return {Token::Type::kPrivate, source, "private"};
   if (str == "ptr")

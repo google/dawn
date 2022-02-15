@@ -15,7 +15,6 @@
 #include "gtest/gtest.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/disable_validation_attribute.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/stage_attribute.h"
 #include "src/ast/struct_block_attribute.h"
 #include "src/ast/workgroup_attribute.h"

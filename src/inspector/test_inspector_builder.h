@@ -22,7 +22,7 @@
 
 #include "src/ast/call_statement.h"
 #include "src/ast/disable_validation_attribute.h"
-#include "src/ast/override_attribute.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/stage_attribute.h"
 #include "src/ast/struct_block_attribute.h"
 #include "src/ast/workgroup_attribute.h"
@@ -109,10 +109,7 @@ class InspectorBuilder : public ProgramBuilder {
       uint32_t id,
       const ast::Type* type,
       const ast::Expression* constructor) {
-    return GlobalConst(name, type, constructor,
-                       ast::AttributeList{
-                           Override(id),
-                       });
+    return Override(name, type, constructor, {Id(id)});
   }
 
   /// Add a pipeline constant to the global variables, without a specific ID.
@@ -125,10 +122,7 @@ class InspectorBuilder : public ProgramBuilder {
       std::string name,
       const ast::Type* type,
       const ast::Expression* constructor) {
-    return GlobalConst(name, type, constructor,
-                       ast::AttributeList{
-                           Override(),
-                       });
+    return Override(name, type, constructor);
   }
 
   /// Generates a function that references module-scoped, plain-typed constant

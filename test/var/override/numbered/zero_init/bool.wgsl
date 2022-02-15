@@ -1,4 +1,4 @@
-@override(1234) let o : bool = bool();
+@id(1234) override o : bool = bool();
 
 @stage(compute) @workgroup_size(1)
 fn main() {

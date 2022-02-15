@@ -132,17 +132,17 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
-  GlobalConst("a", ty.f32(), nullptr, {Override()});
-  GlobalConst("b", ty.f32(), nullptr, {Override(7u)});
+  Override("a", ty.f32(), nullptr);
+  Override("b", ty.f32(), nullptr, {Id(7u)});
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  @override let a : f32;
+  EXPECT_EQ(gen.result(), R"(  override a : f32;
 
-  @override(7) let b : f32;
+  @id(7) override b : f32;
 )");
 }
 

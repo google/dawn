@@ -25,9 +25,9 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/float_literal_expression.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_attribute.h"
 #include "src/ast/struct_block_attribute.h"
@@ -1011,14 +1011,14 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts_NestedInitializer) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
-  // @override(0) let width = 16;
-  // @override(1) let height = 8;
-  // @override(2) let depth = 2;
+  // @id(0) override width = 16;
+  // @id(1) override height = 8;
+  // @id(2) override depth = 2;
   // @stage(compute) @workgroup_size(width, height, depth)
   // fn main() {}
-  auto* width = GlobalConst("width", ty.i32(), Expr(16), {Override(0)});
-  auto* height = GlobalConst("height", ty.i32(), Expr(8), {Override(1)});
-  auto* depth = GlobalConst("depth", ty.i32(), Expr(2), {Override(2)});
+  auto* width = Override("width", ty.i32(), Expr(16), {Id(0)});
+  auto* height = Override("height", ty.i32(), Expr(8), {Id(1)});
+  auto* depth = Override("depth", ty.i32(), Expr(2), {Id(2)});
   auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
                     {Stage(ast::PipelineStage::kCompute),
                      WorkgroupSize("width", "height", "depth")});
@@ -1037,14 +1037,14 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
-  // @override(0) let width : i32;
-  // @override(1) let height : i32;
-  // @override(2) let depth : i32;
+  // @id(0) override width : i32;
+  // @id(1) override height : i32;
+  // @id(2) override depth : i32;
   // @stage(compute) @workgroup_size(width, height, depth)
   // fn main() {}
-  auto* width = GlobalConst("width", ty.i32(), nullptr, {Override(0)});
-  auto* height = GlobalConst("height", ty.i32(), nullptr, {Override(1)});
-  auto* depth = GlobalConst("depth", ty.i32(), nullptr, {Override(2)});
+  auto* width = Override("width", ty.i32(), nullptr, {Id(0)});
+  auto* height = Override("height", ty.i32(), nullptr, {Id(1)});
+  auto* depth = Override("depth", ty.i32(), nullptr, {Id(2)});
   auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
                     {Stage(ast::PipelineStage::kCompute),
                      WorkgroupSize("width", "height", "depth")});
@@ -1063,11 +1063,11 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
-  // @override(1) let height = 2;
+  // @id(1) override height = 2;
   // let depth = 3;
   // @stage(compute) @workgroup_size(8, height, depth)
   // fn main() {}
-  auto* height = GlobalConst("height", ty.i32(), Expr(2), {Override(0)});
+  auto* height = Override("height", ty.i32(), Expr(2), {Id(0)});
   GlobalConst("depth", ty.i32(), Expr(3));
   auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
                     {Stage(ast::PipelineStage::kCompute),

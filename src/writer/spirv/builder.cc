@@ -20,8 +20,8 @@
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/internal_attribute.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/traverse_expressions.h"
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
@@ -770,9 +770,8 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
 
   if (var->is_const) {
     if (!var->constructor) {
-      // Constants must have an initializer unless they have an override
-      // attribute.
-      if (!ast::HasAttribute<ast::OverrideAttribute>(var->attributes)) {
+      // Constants must have an initializer unless they are overridable.
+      if (!var->is_overridable) {
         error_ = "missing constructor for constant";
         return false;
       }
@@ -905,7 +904,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
                Operand::Int(group->value)});
           return true;
         },
-        [&](const ast::OverrideAttribute*) {
+        [&](const ast::IdAttribute*) {
           return true;  // Spec constants are handled elsewhere
         },
         [&](const ast::InternalAttribute*) {

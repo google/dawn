@@ -1655,7 +1655,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@override(12) let myconst : bool = true;"))
+  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : bool = true;"))
       << module_str;
 }
 
@@ -1671,8 +1671,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("@override(12) let myconst : bool = false;"))
+  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : bool = false;"))
       << module_str;
 }
 
@@ -1688,7 +1687,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@override(12) let myconst : u32 = 42u;"))
+  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : u32 = 42u;"))
       << module_str;
 }
 
@@ -1704,7 +1703,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@override(12) let myconst : i32 = 42;"))
+  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : i32 = 42;"))
       << module_str;
 }
 
@@ -1720,7 +1719,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@override(12) let myconst : f32 = 2.5;"))
+  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : f32 = 2.5;"))
       << module_str;
 }
 
@@ -1737,7 +1736,8 @@ TEST_F(SpvModuleScopeVarParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("let myconst : f32 = 2.5;")) << module_str;
+  EXPECT_THAT(module_str, HasSubstr("override myconst : f32 = 2.5;"))
+      << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {

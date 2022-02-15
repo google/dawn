@@ -142,7 +142,7 @@ void BindingRemapper::Run(CloneContext& ctx,
         const ast::Type* inner_ty = CreateASTTypeFor(ctx, ty);
         auto* new_var = ctx.dst->create<ast::Variable>(
             ctx.Clone(var->source), ctx.Clone(var->symbol),
-            var->declared_storage_class, ac, inner_ty, var->is_const,
+            var->declared_storage_class, ac, inner_ty, false, false,
             ctx.Clone(var->constructor), ctx.Clone(var->attributes));
         ctx.Replace(var, new_var);
       }

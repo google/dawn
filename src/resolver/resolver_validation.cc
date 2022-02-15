@@ -30,12 +30,12 @@
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/for_loop_statement.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/internal_attribute.h"
 #include "src/ast/interpolate_attribute.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
@@ -411,25 +411,23 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) {
 
   for (auto* attr : decl->attributes) {
     if (decl->is_const) {
-      if (auto* override_attr = attr->As<ast::OverrideAttribute>()) {
-        if (override_attr->has_value) {
-          uint32_t id = override_attr->value;
-          auto it = constant_ids_.find(id);
-          if (it != constant_ids_.end() && it->second != var) {
-            AddError("pipeline constant IDs must be unique", attr->source);
-            AddNote("a pipeline constant with an ID of " + std::to_string(id) +
-                        " was previously declared "
-                        "here:",
-                    ast::GetAttribute<ast::OverrideAttribute>(
-                        it->second->Declaration()->attributes)
-                        ->source);
-            return false;
-          }
-          if (id > 65535) {
-            AddError("pipeline constant IDs must be between 0 and 65535",
-                     attr->source);
-            return false;
-          }
+      if (auto* id_attr = attr->As<ast::IdAttribute>()) {
+        uint32_t id = id_attr->value;
+        auto it = constant_ids_.find(id);
+        if (it != constant_ids_.end() && it->second != var) {
+          AddError("pipeline constant IDs must be unique", attr->source);
+          AddNote("a pipeline constant with an ID of " + std::to_string(id) +
+                      " was previously declared "
+                      "here:",
+                  ast::GetAttribute<ast::IdAttribute>(
+                      it->second->Declaration()->attributes)
+                      ->source);
+          return false;
+        }
+        if (id > 65535) {
+          AddError("pipeline constant IDs must be between 0 and 65535",
+                   attr->source);
+          return false;
         }
       } else {
         AddError("attribute is not valid for constants", attr->source);

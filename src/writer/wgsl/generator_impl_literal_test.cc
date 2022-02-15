@@ -14,7 +14,6 @@
 
 #include <cstring>
 
-#include "src/ast/override_attribute.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {

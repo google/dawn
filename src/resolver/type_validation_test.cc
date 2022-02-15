@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/override_attribute.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_attribute.h"
 #include "src/ast/struct_block_attribute.h"
@@ -79,9 +79,8 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
 }
 
 TEST_F(ResolverTypeValidationTest, GlobalConstantNoConstructor_Pass) {
-  // @override(0) let a :i32;
-  GlobalConst(Source{{12, 34}}, "a", ty.i32(), nullptr,
-              ast::AttributeList{create<ast::OverrideAttribute>(0)});
+  // @id(0) override a :i32;
+  Override(Source{{12, 34}}, "a", ty.i32(), nullptr, ast::AttributeList{Id(0)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -98,7 +97,7 @@ TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
   AST().AddGlobalVariable(create<ast::Variable>(
       Source{{12, 34}}, Symbols().Register("global_var"),
       ast::StorageClass::kPrivate, ast::Access::kUndefined, ty.f32(), true,
-      Expr(1.23f), ast::AttributeList{}));
+      false, Expr(1.23f), ast::AttributeList{}));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -346,9 +345,9 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_OverridableConstant) {
-  // [[override]] let size = 10;
+  // override size = 10;
   // var<private> a : array<f32, size>;
-  GlobalConst("size", nullptr, Expr(10), {Override()});
+  Override("size", nullptr, Expr(10));
   Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
          ast::StorageClass::kPrivate);
   EXPECT_FALSE(r()->Resolve());

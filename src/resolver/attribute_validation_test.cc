@@ -55,10 +55,10 @@ enum class AttributeKind {
   kBinding,
   kBuiltin,
   kGroup,
+  kId,
   kInterpolate,
   kInvariant,
   kLocation,
-  kOverride,
   kOffset,
   kSize,
   kStage,
@@ -98,6 +98,8 @@ static ast::AttributeList createAttributes(const Source& source,
       return {builder.Builtin(source, ast::Builtin::kPosition)};
     case AttributeKind::kGroup:
       return {builder.create<ast::GroupAttribute>(source, 1u)};
+    case AttributeKind::kId:
+      return {builder.create<ast::IdAttribute>(source, 0u)};
     case AttributeKind::kInterpolate:
       return {builder.Interpolate(source, ast::InterpolationType::kLinear,
                                   ast::InterpolationSampling::kCenter)};
@@ -105,8 +107,6 @@ static ast::AttributeList createAttributes(const Source& source,
       return {builder.Invariant(source)};
     case AttributeKind::kLocation:
       return {builder.Location(source, 1)};
-    case AttributeKind::kOverride:
-      return {builder.create<ast::OverrideAttribute>(source, 0u)};
     case AttributeKind::kOffset:
       return {builder.create<ast::StructMemberOffsetAttribute>(source, 4u)};
     case AttributeKind::kSize:
@@ -152,10 +152,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, false},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -187,10 +187,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, false},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -236,10 +236,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, false},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -275,10 +275,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, true},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     // kInterpolate tested separately (requires [[location]])
                     TestParams{AttributeKind::kInvariant, true},
                     TestParams{AttributeKind::kLocation, true},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -325,10 +325,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, true},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, true},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -373,10 +373,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, false},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -423,10 +423,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, true},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -469,10 +469,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, true},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     // kInterpolate tested separately (requires [[location]])
                     TestParams{AttributeKind::kInvariant, true},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -560,10 +560,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, false},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -617,10 +617,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, true},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     // kInterpolate tested separately (requires [[location]])
                     // kInvariant tested separately (requires position builtin)
                     TestParams{AttributeKind::kLocation, true},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, true},
                     TestParams{AttributeKind::kSize, true},
                     TestParams{AttributeKind::kStage, false},
@@ -701,10 +701,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, false},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -745,10 +745,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, false},
                     TestParams{AttributeKind::kInterpolate, false},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, false},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -810,10 +810,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBinding, false},
                     TestParams{AttributeKind::kBuiltin, false},
                     TestParams{AttributeKind::kGroup, false},
+                    TestParams{AttributeKind::kId, true},
                     TestParams{AttributeKind::kInterpolate, false},
                     TestParams{AttributeKind::kInvariant, false},
                     TestParams{AttributeKind::kLocation, false},
-                    TestParams{AttributeKind::kOverride, true},
                     TestParams{AttributeKind::kOffset, false},
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
@@ -825,15 +825,15 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(ConstantAttributeTest, DuplicateAttribute) {
   GlobalConst("a", ty.f32(), Expr(1.23f),
               ast::AttributeList{
-                  create<ast::OverrideAttribute>(Source{{12, 34}}),
-                  create<ast::OverrideAttribute>(Source{{56, 78}}, 1),
+                  create<ast::IdAttribute>(Source{{12, 34}}, 0),
+                  create<ast::IdAttribute>(Source{{56, 78}}, 1),
               });
 
   WrapInFunction();
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            R"(56:78 error: duplicate override attribute
+            R"(56:78 error: duplicate id attribute
 12:34 note: first attribute declared here)");
 }
 

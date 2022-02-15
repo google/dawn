@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/override_attribute.h"
+#include "src/ast/invariant_attribute.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
@@ -21,14 +21,14 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AttributeDecl_Parses) {
-  auto p = parser("@override");
+  auto p = parser("@invariant");
   auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(attrs.errored);
   EXPECT_TRUE(attrs.matched);
   ASSERT_EQ(attrs.value.size(), 1u);
-  auto* override_attr = attrs.value[0]->As<ast::Attribute>();
-  EXPECT_TRUE(override_attr->Is<ast::OverrideAttribute>());
+  auto* invariant = attrs.value[0]->As<ast::Attribute>();
+  EXPECT_TRUE(invariant->Is<ast::InvariantAttribute>());
 }
 
 TEST_F(ParserImplTest, AttributeDecl_MissingParenLeft) {
@@ -73,19 +73,19 @@ TEST_F(ParserImplTest, AttributeDecl_Invalidattribute) {
 
 // TODO(crbug.com/tint/1382): Remove
 TEST_F(ParserImplTest, DEPRECATED_attributeDecl_Parses) {
-  auto p = parser("[[override]]");
+  auto p = parser("[[invariant]]");
   auto attrs = p->attribute_list();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(attrs.errored);
   EXPECT_TRUE(attrs.matched);
   ASSERT_EQ(attrs.value.size(), 1u);
-  auto* override_attr = attrs.value[0]->As<ast::Attribute>();
-  EXPECT_TRUE(override_attr->Is<ast::OverrideAttribute>());
+  auto* invariant_attr = attrs.value[0]->As<ast::Attribute>();
+  EXPECT_TRUE(invariant_attr->Is<ast::InvariantAttribute>());
 }
 
 // TODO(crbug.com/tint/1382): Remove
 TEST_F(ParserImplTest, DEPRECATED_attributeDecl_MissingAttrRight) {
-  auto p = parser("[[override");
+  auto p = parser("[[invariant");
   auto attrs = p->attribute_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(attrs.errored);
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, DEPRECATED_attributeDecl_MissingAttrRight) {
   EXPECT_EQ(
       p->error(),
       R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:11: expected ']]' for attribute list)");
+1:12: expected ']]' for attribute list)");
 }
 
 // TODO(crbug.com/tint/1382): Remove

@@ -22,8 +22,8 @@
 #include "source/opt/build_module.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/disable_validation_attribute.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/interpolate_attribute.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/type_name.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/spirv/function.h"
@@ -1395,14 +1395,14 @@ bool ParserImpl::EmitScalarSpecConstants() {
                              "between 0 and 65535: ID %"
                           << inst.result_id() << " has SpecId " << id;
           }
-          auto* cid = create<ast::OverrideAttribute>(Source{}, id);
+          auto* cid = create<ast::IdAttribute>(Source{}, id);
           spec_id_decos.push_back(cid);
           break;
         }
       }
       auto* ast_var =
           MakeVariable(inst.result_id(), ast::StorageClass::kNone, ast_type,
-                       true, ast_expr, std::move(spec_id_decos));
+                       true, true, ast_expr, std::move(spec_id_decos));
       if (ast_var) {
         builder_.AST().AddGlobalVariable(ast_var);
         scalar_spec_constants_.insert(inst.result_id());
@@ -1526,7 +1526,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     }
     auto* ast_var =
         MakeVariable(var.result_id(), ast_storage_class, ast_store_type, false,
-                     ast_constructor, ast::AttributeList{});
+                     false, ast_constructor, ast::AttributeList{});
     // TODO(dneto): initializers (a.k.a. constructor expression)
     if (ast_var) {
       builder_.AST().AddGlobalVariable(ast_var);
@@ -1561,7 +1561,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     auto* ast_var = MakeVariable(
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
-        ConvertType(builtin_position_.position_member_type_id), false,
+        ConvertType(builtin_position_.position_member_type_id), false, false,
         ast_constructor, {});
 
     builder_.AST().AddGlobalVariable(ast_var);
@@ -1598,6 +1598,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                                         ast::StorageClass sc,
                                         const Type* storage_type,
                                         bool is_const,
+                                        bool is_overridable,
                                         const ast::Expression* constructor,
                                         ast::AttributeList decorations) {
   if (storage_type == nullptr) {
@@ -1630,12 +1631,12 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
   std::string name = namer_.Name(id);
 
   // Note: we're constructing the variable here with the *storage* type,
-  // regardless of whether this is a `let` or `var` declaration.
+  // regardless of whether this is a `let`, `override`, or `var` declaration.
   // `var` declarations will have a resolved type of ref<storage>, but at the
-  // AST level both `var` and `let` are declared with the same type.
+  // AST level all three are declared with the same type.
   return create<ast::Variable>(Source{}, builder_.Symbols().Register(name), sc,
                                access, storage_type->Build(builder_), is_const,
-                               constructor, decorations);
+                               is_overridable, constructor, decorations);
 }
 
 bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,

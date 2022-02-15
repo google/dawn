@@ -49,7 +49,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
-  auto* a = GlobalConst("a", ty.f32(), Expr(1.f), {Override(7u)});
+  auto* a = Override("a", ty.f32(), Expr(1.f), {Id(7u)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -57,7 +57,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
-  auto* a = GlobalConst("a", ty.f32(), Expr(1.f), {Override()});
+  auto* a = Override("a", ty.f32(), Expr(1.f));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -66,12 +66,12 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
   std::vector<ast::Variable*> variables;
-  auto* a = GlobalConst("a", ty.f32(), Expr(1.f), {Override()});
-  auto* b = GlobalConst("b", ty.f32(), Expr(1.f), {Override()});
-  auto* c = GlobalConst("c", ty.f32(), Expr(1.f), {Override(2u)});
-  auto* d = GlobalConst("d", ty.f32(), Expr(1.f), {Override(4u)});
-  auto* e = GlobalConst("e", ty.f32(), Expr(1.f), {Override()});
-  auto* f = GlobalConst("f", ty.f32(), Expr(1.f), {Override(1u)});
+  auto* a = Override("a", ty.f32(), Expr(1.f));
+  auto* b = Override("b", ty.f32(), Expr(1.f));
+  auto* c = Override("c", ty.f32(), Expr(1.f), {Id(2u)});
+  auto* d = Override("d", ty.f32(), Expr(1.f), {Id(4u)});
+  auto* e = Override("e", ty.f32(), Expr(1.f));
+  auto* f = Override("f", ty.f32(), Expr(1.f), {Id(1u)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -85,8 +85,8 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, DuplicateIds) {
-  GlobalConst("a", ty.f32(), Expr(1.f), {Override(Source{{12, 34}}, 7u)});
-  GlobalConst("b", ty.f32(), Expr(1.f), {Override(Source{{56, 78}}, 7u)});
+  Override("a", ty.f32(), Expr(1.f), {Id(Source{{12, 34}}, 7u)});
+  Override("b", ty.f32(), Expr(1.f), {Id(Source{{56, 78}}, 7u)});
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -95,7 +95,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, DuplicateIds) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, IdTooLarge) {
-  GlobalConst("a", ty.f32(), Expr(1.f), {Override(Source{{12, 34}}, 65536u)});
+  Override("a", ty.f32(), Expr(1.f), {Id(Source{{12, 34}}, 65536u)});
 
   EXPECT_FALSE(r()->Resolve());
 

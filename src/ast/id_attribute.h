@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_OVERRIDE_ATTRIBUTE_H_
-#define SRC_AST_OVERRIDE_ATTRIBUTE_H_
+#ifndef SRC_AST_ID_ATTRIBUTE_H_
+#define SRC_AST_ID_ATTRIBUTE_H_
 
 #include <string>
 
@@ -22,19 +22,15 @@
 namespace tint {
 namespace ast {
 
-/// An override attribute
-class OverrideAttribute : public Castable<OverrideAttribute, Attribute> {
+/// An id attribute for pipeline-overridable constants
+class IdAttribute : public Castable<IdAttribute, Attribute> {
  public:
-  /// Create an override attribute with no specified id.
+  /// Create an id attribute.
   /// @param pid the identifier of the program that owns this node
   /// @param src the source of this node
-  OverrideAttribute(ProgramID pid, const Source& src);
-  /// Create an override attribute with a specific id value.
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param val the override value
-  OverrideAttribute(ProgramID pid, const Source& src, uint32_t val);
-  ~OverrideAttribute() override;
+  /// @param val the numeric id value
+  IdAttribute(ProgramID pid, const Source& src, uint32_t val);
+  ~IdAttribute() override;
 
   /// @returns the WGSL name for the attribute
   std::string Name() const override;
@@ -43,16 +39,13 @@ class OverrideAttribute : public Castable<OverrideAttribute, Attribute> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  const OverrideAttribute* Clone(CloneContext* ctx) const override;
+  const IdAttribute* Clone(CloneContext* ctx) const override;
 
-  /// True if an override id was specified
-  const bool has_value;
-
-  /// The override id value
+  /// The id value
   const uint32_t value;
 };
 
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_OVERRIDE_ATTRIBUTE_H_
+#endif  // SRC_AST_ID_ATTRIBUTE_H_

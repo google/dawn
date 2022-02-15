@@ -28,13 +28,13 @@
 #include "src/ast/f32.h"
 #include "src/ast/float_literal_expression.h"
 #include "src/ast/i32.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/internal_attribute.h"
 #include "src/ast/interpolate_attribute.h"
 #include "src/ast/invariant_attribute.h"
 #include "src/ast/matrix.h"
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/pointer.h"
 #include "src/ast/sampled_texture.h"
 #include "src/ast/sint_literal_expression.h"
@@ -646,7 +646,9 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* var) {
     out << " ";
   }
 
-  if (var->is_const) {
+  if (var->is_overridable) {
+    out << "override";
+  } else if (var->is_const) {
     out << "let";
   } else {
     out << "var";
@@ -747,11 +749,8 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
           out << "invariant";
           return true;
         },
-        [&](const ast::OverrideAttribute* override_deco) {
-          out << "override";
-          if (override_deco->has_value) {
-            out << "(" << override_deco->value << ")";
-          }
+        [&](const ast::IdAttribute* override_deco) {
+          out << "id(" << override_deco->value << ")";
           return true;
         },
         [&](const ast::StructMemberSizeAttribute* size) {

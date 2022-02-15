@@ -1201,7 +1201,7 @@ INSTANTIATE_TEST_SUITE_P(
         "operator",
         "or",
         "or_eq",
-        "override",
+        // "override", // Also used in WGSL
         // "private",  // Also used in WGSL
         "protected",
         "public",

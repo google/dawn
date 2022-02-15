@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/override_attribute.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/stage_attribute.h"
 #include "src/ast/struct_block_attribute.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -150,10 +150,10 @@ OpDecorate %1 DescriptorSet 3
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool) {
-  auto* v = GlobalConst("var", ty.bool_(), Expr(true),
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(1200),
-                        });
+  auto* v = Override("var", ty.bool_(), Expr(true),
+                     ast::AttributeList{
+                         Id(1200),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -168,10 +168,10 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool_ZeroValue) {
-  auto* v = GlobalConst("var", ty.bool_(), Construct<bool>(),
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(1200),
-                        });
+  auto* v = Override("var", ty.bool_(), Construct<bool>(),
+                     ast::AttributeList{
+                         Id(1200),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -186,10 +186,10 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_ZeroValue) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
-  auto* v = GlobalConst("var", ty.bool_(), nullptr,
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(1200),
-                        });
+  auto* v = Override("var", ty.bool_(), nullptr,
+                     ast::AttributeList{
+                         Id(1200),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -204,10 +204,10 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
-  auto* v = GlobalConst("var", ty.f32(), Expr(2.f),
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(0),
-                        });
+  auto* v = Override("var", ty.f32(), Expr(2.f),
+                     ast::AttributeList{
+                         Id(0),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -222,10 +222,10 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_ZeroValue) {
-  auto* v = GlobalConst("var", ty.f32(), Construct<f32>(),
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(0),
-                        });
+  auto* v = Override("var", ty.f32(), Construct<f32>(),
+                     ast::AttributeList{
+                         Id(0),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -240,10 +240,10 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_ZeroValue) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
-  auto* v = GlobalConst("var", ty.f32(), nullptr,
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(0),
-                        });
+  auto* v = Override("var", ty.f32(), nullptr,
+                     ast::AttributeList{
+                         Id(0),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -258,10 +258,10 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
-  auto* v = GlobalConst("var", ty.i32(), nullptr,
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(0),
-                        });
+  auto* v = Override("var", ty.i32(), nullptr,
+                     ast::AttributeList{
+                         Id(0),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -276,10 +276,10 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
-  auto* v = GlobalConst("var", ty.u32(), nullptr,
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(0),
-                        });
+  auto* v = Override("var", ty.u32(), nullptr,
+                     ast::AttributeList{
+                         Id(0),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -294,14 +294,11 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_NoId) {
-  auto* var_a = GlobalConst("a", ty.bool_(), Expr(true),
-                            ast::AttributeList{
-                                create<ast::OverrideAttribute>(0),
-                            });
-  auto* var_b = GlobalConst("b", ty.bool_(), Expr(false),
-                            ast::AttributeList{
-                                create<ast::OverrideAttribute>(),
-                            });
+  auto* var_a = Override("a", ty.bool_(), Expr(true),
+                         ast::AttributeList{
+                             Id(0),
+                         });
+  auto* var_b = Override("b", ty.bool_(), Expr(false));
 
   spirv::Builder& b = Build();
 

@@ -506,7 +506,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@override(1) let X : i32;
+@id(1) override X : i32;
 
 @stage(compute) @workgroup_size(2, 3, X)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
@@ -528,7 +528,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@override(1) let X : i32;
+@id(1) override X : i32;
 
 @stage(compute) @workgroup_size(2, 3, X)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
@@ -576,7 +576,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@override(1) let X : u32;
+@id(1) override X : u32;
 
 @stage(compute) @workgroup_size(5u, X, 10u)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
@@ -599,7 +599,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@override(1) let X : u32;
+@id(1) override X : u32;
 
 @stage(compute) @workgroup_size(5u, X, 10u)
 fn f(@builtin(local_invocation_index) local_idx : u32) {

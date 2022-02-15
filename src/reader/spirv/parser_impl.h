@@ -421,6 +421,7 @@ class ParserImpl : Reader {
   /// @param sc the storage class, which cannot be ast::StorageClass::kNone
   /// @param storage_type the storage type of the variable
   /// @param is_const if true, the variable is const
+  /// @param is_overridable if true, the variable is pipeline-overridable
   /// @param constructor the variable constructor
   /// @param decorations the variable decorations
   /// @returns a new Variable node, or null in the ignorable variable case and
@@ -429,6 +430,7 @@ class ParserImpl : Reader {
                               ast::StorageClass sc,
                               const Type* storage_type,
                               bool is_const,
+                              bool is_overridable,
                               const ast::Expression* constructor,
                               ast::AttributeList decorations);
 

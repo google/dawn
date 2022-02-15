@@ -187,6 +187,8 @@ class Token {
     kMat4x3,
     /// A 'mat4x4'
     kMat4x4,
+    /// A 'override'
+    kOverride,
     /// A 'private'
     kPrivate,
     /// A 'ptr'

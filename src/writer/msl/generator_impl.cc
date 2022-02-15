@@ -27,9 +27,9 @@
 #include "src/ast/disable_validation_attribute.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal_expression.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/interpolate_attribute.h"
 #include "src/ast/module.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/sint_literal_expression.h"
 #include "src/ast/uint_literal_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -2823,7 +2823,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
 
 bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   for (auto* d : var->attributes) {
-    if (!d->Is<ast::OverrideAttribute>()) {
+    if (!d->Is<ast::IdAttribute>()) {
       diagnostics_.add_error(diag::System::Writer,
                              "Decorated const values not valid");
       return false;

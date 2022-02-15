@@ -1440,8 +1440,8 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
         auto* type = parser_impl_.ConvertType(param->type_id());
         if (type != nullptr) {
           auto* ast_param = parser_impl_.MakeVariable(
-              param->result_id(), ast::StorageClass::kNone, type, true, nullptr,
-              ast::AttributeList{});
+              param->result_id(), ast::StorageClass::kNone, type, true, false,
+              nullptr, ast::AttributeList{});
           // Parameters are treated as const declarations.
           ast_params.emplace_back(ast_param);
           // The value is accessible by name.
@@ -2542,7 +2542,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
     }
     auto* var = parser_impl_.MakeVariable(
         inst.result_id(), ast::StorageClass::kNone, var_store_type, false,
-        constructor, ast::AttributeList{});
+        false, constructor, ast::AttributeList{});
     auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
     AddStatement(var_decl_stmt);
     auto* var_type = ty_.Reference(var_store_type, ast::StorageClass::kNone);
@@ -3444,9 +3444,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     auto* storage_type =
         RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
     AddStatement(create<ast::VariableDeclStatement>(
-        Source{},
-        parser_impl_.MakeVariable(id, ast::StorageClass::kNone, storage_type,
-                                  false, nullptr, ast::AttributeList{})));
+        Source{}, parser_impl_.MakeVariable(id, ast::StorageClass::kNone,
+                                            storage_type, false, false, nullptr,
+                                            ast::AttributeList{})));
     auto* type = ty_.Reference(storage_type, ast::StorageClass::kNone);
     identifier_types_.emplace(id, type);
   }
@@ -3518,8 +3518,8 @@ bool FunctionEmitter::EmitConstDefinition(
 
   expr = AddressOfIfNeeded(expr, &inst);
   auto* ast_const = parser_impl_.MakeVariable(
-      inst.result_id(), ast::StorageClass::kNone, expr.type, true, expr.expr,
-      ast::AttributeList{});
+      inst.result_id(), ast::StorageClass::kNone, expr.type, true, false,
+      expr.expr, ast::AttributeList{});
   if (!ast_const) {
     return false;
   }

@@ -24,9 +24,9 @@
 
 #include "src/ast/call_statement.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/internal_attribute.h"
 #include "src/ast/interpolate_attribute.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/debug.h"
 #include "src/sem/array.h"
@@ -3898,7 +3898,7 @@ bool GeneratorImpl::EmitVariable(const ast::Variable* var) {
 
 bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   for (auto* d : var->attributes) {
-    if (!d->Is<ast::OverrideAttribute>()) {
+    if (!d->Is<ast::IdAttribute>()) {
       diagnostics_.add_error(diag::System::Writer,
                              "Decorated const values not valid");
       return false;

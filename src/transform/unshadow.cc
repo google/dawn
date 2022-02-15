@@ -57,7 +57,7 @@ struct Unshadow::State {
       auto attributes = ctx.Clone(decl->attributes);
       return ctx.dst->create<ast::Variable>(
           source, symbol, decl->declared_storage_class, decl->declared_access,
-          type, decl->is_const, constructor, attributes);
+          type, decl->is_const, decl->is_overridable, constructor, attributes);
     };
 
     ctx.ReplaceAll([&](const ast::Variable* var) -> const ast::Variable* {

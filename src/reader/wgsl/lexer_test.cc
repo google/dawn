@@ -750,6 +750,7 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"mat4x2", Token::Type::kMat4x2},
         TokenData{"mat4x3", Token::Type::kMat4x3},
         TokenData{"mat4x4", Token::Type::kMat4x4},
+        TokenData{"override", Token::Type::kOverride},
         TokenData{"private", Token::Type::kPrivate},
         TokenData{"ptr", Token::Type::kPtr},
         TokenData{"return", Token::Type::kReturn},

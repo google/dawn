@@ -745,9 +745,9 @@ void main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
-  GlobalConst("width", ty.i32(), Construct(ty.i32(), 2), {Override(7u)});
-  GlobalConst("height", ty.i32(), Construct(ty.i32(), 3), {Override(8u)});
-  GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4), {Override(9u)});
+  Override("width", ty.i32(), Construct(ty.i32(), 2), {Id(7u)});
+  Override("height", ty.i32(), Construct(ty.i32(), 3), {Id(8u)});
+  Override("depth", ty.i32(), Construct(ty.i32(), 4), {Id(9u)});
   Func("main", ast::VariableList{}, ty.void_(), {},
        {
            Stage(ast::PipelineStage::kCompute),

@@ -457,7 +457,7 @@ struct DecomposeMemoryAccess::State {
               // array.
               b.create<ast::Variable>(b.Sym("buffer"), storage_class,
                                       var_user->Variable()->Access(),
-                                      buf_ast_ty, true, nullptr,
+                                      buf_ast_ty, true, false, nullptr,
                                       ast::AttributeList{disable_validation}),
               b.Param("offset", b.ty.u32()),
           };
@@ -556,7 +556,7 @@ struct DecomposeMemoryAccess::State {
 
               b.create<ast::Variable>(b.Sym("buffer"), storage_class,
                                       var_user->Variable()->Access(),
-                                      buf_ast_ty, true, nullptr,
+                                      buf_ast_ty, true, false, nullptr,
                                       ast::AttributeList{disable_validation}),
               b.Param("offset", b.ty.u32()),
               b.Param("value", el_ast_ty),
@@ -656,7 +656,7 @@ struct DecomposeMemoryAccess::State {
           // order for HLSL to emit this as a ByteAddressBuffer.
           b.create<ast::Variable>(b.Sym("buffer"), ast::StorageClass::kStorage,
                                   var_user->Variable()->Access(), buf_ast_ty,
-                                  true, nullptr,
+                                  true, false, nullptr,
                                   ast::AttributeList{disable_validation}),
           b.Param("offset", b.ty.u32()),
       };

@@ -404,9 +404,9 @@ class DependencyScanner {
     }
     if (attr->IsAnyOf<
             ast::BindingAttribute, ast::BuiltinAttribute, ast::GroupAttribute,
-            ast::InternalAttribute, ast::InterpolateAttribute,
+            ast::IdAttribute, ast::InternalAttribute, ast::InterpolateAttribute,
             ast::InvariantAttribute, ast::LocationAttribute,
-            ast::OverrideAttribute, ast::StageAttribute, ast::StrideAttribute,
+            ast::StageAttribute, ast::StrideAttribute,
             ast::StructBlockAttribute, ast::StructMemberAlignAttribute,
             ast::StructMemberOffsetAttribute,
             ast::StructMemberSizeAttribute>()) {

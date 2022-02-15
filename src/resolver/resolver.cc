@@ -32,12 +32,12 @@
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/for_loop_statement.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/internal_attribute.h"
 #include "src/ast/interpolate_attribute.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
@@ -333,8 +333,8 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
 
       storage_ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
     }
-  } else if (var->is_const && kind != VariableKind::kParameter &&
-             !ast::HasAttribute<ast::OverrideAttribute>(var->attributes)) {
+  } else if (var->is_const && !var->is_overridable &&
+             kind != VariableKind::kParameter) {
     AddError("let declaration must have an initializer", var->source);
     return nullptr;
   } else if (!var->type) {
@@ -426,19 +426,16 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
         binding_point = {bp.group->value, bp.binding->value};
       }
 
-      auto* override =
-          ast::GetAttribute<ast::OverrideAttribute>(var->attributes);
-      bool has_const_val = rhs && var->is_const && !override;
-
+      bool has_const_val = rhs && var->is_const && !var->is_overridable;
       auto* global = builder_->create<sem::GlobalVariable>(
           var, var_ty, storage_class, access,
           has_const_val ? rhs->ConstantValue() : sem::Constant{},
           binding_point);
 
-      if (override) {
+      if (var->is_overridable) {
         global->SetIsOverridable();
-        if (override->has_value) {
-          global->SetConstantId(static_cast<uint16_t>(override->value));
+        if (auto* id = ast::GetAttribute<ast::IdAttribute>(var->attributes)) {
+          global->SetConstantId(static_cast<uint16_t>(id->value));
         }
       }
 
@@ -492,18 +489,13 @@ void Resolver::AllocateOverridableConstantIds() {
   // unused constant, the allocation may change on the next Resolver pass.
   for (auto* decl : builder_->AST().GlobalDeclarations()) {
     auto* var = decl->As<ast::Variable>();
-    if (!var) {
-      continue;
-    }
-    auto* override_attr =
-        ast::GetAttribute<ast::OverrideAttribute>(var->attributes);
-    if (!override_attr) {
+    if (!var || !var->is_overridable) {
       continue;
     }
 
     uint16_t constant_id;
-    if (override_attr->has_value) {
-      constant_id = static_cast<uint16_t>(override_attr->value);
+    if (auto* id_attr = ast::GetAttribute<ast::IdAttribute>(var->attributes)) {
+      constant_id = static_cast<uint16_t>(id_attr->value);
     } else {
       // No ID was specified, so allocate the next available ID.
       constant_id = next_constant_id;
@@ -551,11 +543,9 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* var) {
   for (auto* attr : var->attributes) {
     Mark(attr);
 
-    if (auto* override_attr = attr->As<ast::OverrideAttribute>()) {
+    if (auto* id_attr = attr->As<ast::IdAttribute>()) {
       // Track the constant IDs that are specified in the shader.
-      if (override_attr->has_value) {
-        constant_ids_.emplace(override_attr->value, sem);
-      }
+      constant_ids_.emplace(id_attr->value, sem);
     }
   }
 
@@ -791,8 +781,8 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         AddError(kErrBadType, expr->source);
         return false;
       }
-      // Capture the constant if an [[override]] attribute is present.
-      if (ast::HasAttribute<ast::OverrideAttribute>(decl->attributes)) {
+      // Capture the constant if it is pipeline-overridable.
+      if (decl->is_overridable) {
         ws[i].overridable_const = decl;
       }
 
@@ -2275,15 +2265,13 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 
     if (auto* ident = count_expr->As<ast::IdentifierExpression>()) {
       // Make sure the identifier is a non-overridable module-scope constant.
-      auto* var = ResolvedSymbol<sem::Variable>(ident);
-      if (!var || !var->Is<sem::GlobalVariable>() ||
-          !var->Declaration()->is_const) {
+      auto* var = ResolvedSymbol<sem::GlobalVariable>(ident);
+      if (!var || !var->Declaration()->is_const) {
         AddError("array size identifier must be a module-scope constant",
                  size_source);
         return nullptr;
       }
-      if (ast::HasAttribute<ast::OverrideAttribute>(
-              var->Declaration()->attributes)) {
+      if (var->IsOverridable()) {
         AddError("array size expression must not be pipeline-overridable",
                  size_source);
         return nullptr;

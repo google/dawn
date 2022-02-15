@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/id_attribute.h"
+
 #include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using LocationAttributeTest = TestHelper;
+using IdAttributeTest = TestHelper;
 
-TEST_F(LocationAttributeTest, Creation) {
-  auto* d = create<LocationAttribute>(2);
-  EXPECT_EQ(2u, d->value);
+TEST_F(IdAttributeTest, Creation) {
+  auto* d = create<IdAttribute>(12);
+  EXPECT_EQ(12u, d->value);
 }
 
 }  // namespace

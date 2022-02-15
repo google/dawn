@@ -43,6 +43,7 @@
 #include "src/ast/float_literal_expression.h"
 #include "src/ast/for_loop_statement.h"
 #include "src/ast/i32.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/index_accessor_expression.h"
 #include "src/ast/interpolate_attribute.h"
@@ -52,7 +53,6 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/phony_expression.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
@@ -1333,7 +1333,8 @@ class ProgramBuilder {
                            OPTIONAL&&... optional) {
     VarOptionals opts(std::forward<OPTIONAL>(optional)...);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)), opts.storage,
-                                 opts.access, type, false, opts.constructor,
+                                 opts.access, type, false /* is_const */,
+                                 false /* is_overridable */, opts.constructor,
                                  std::move(opts.attributes));
   }
 
@@ -1355,9 +1356,10 @@ class ProgramBuilder {
                            const ast::Type* type,
                            OPTIONAL&&... optional) {
     VarOptionals opts(std::forward<OPTIONAL>(optional)...);
-    return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
-                                 opts.storage, opts.access, type, false,
-                                 opts.constructor, std::move(opts.attributes));
+    return create<ast::Variable>(
+        source, Sym(std::forward<NAME>(name)), opts.storage, opts.access, type,
+        false /* is_const */, false /* is_overridable */, opts.constructor,
+        std::move(opts.attributes));
   }
 
   /// @param name the variable name
@@ -1372,7 +1374,8 @@ class ProgramBuilder {
                              ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-        ast::Access::kUndefined, type, true, constructor, attributes);
+        ast::Access::kUndefined, type, true /* is_const */,
+        false /* is_overridable */, constructor, attributes);
   }
 
   /// @param source the variable source
@@ -1389,7 +1392,8 @@ class ProgramBuilder {
                              ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-        ast::Access::kUndefined, type, true, constructor, attributes);
+        ast::Access::kUndefined, type, true /* is_const */,
+        false /* is_overridable */, constructor, attributes);
   }
 
   /// @param name the parameter name
@@ -1402,7 +1406,8 @@ class ProgramBuilder {
                              ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-        ast::Access::kUndefined, type, true, nullptr, attributes);
+        ast::Access::kUndefined, type, true /* is_const */,
+        false /* is_overridable */, nullptr, attributes);
   }
 
   /// @param source the parameter source
@@ -1417,7 +1422,8 @@ class ProgramBuilder {
                              ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-        ast::Access::kUndefined, type, true, nullptr, attributes);
+        ast::Access::kUndefined, type, true /* is_const */,
+        false /* is_overridable */, nullptr, attributes);
   }
 
   /// @param name the variable name
@@ -1502,6 +1508,47 @@ class ProgramBuilder {
                                    ast::AttributeList attributes = {}) {
     auto* var = Const(source, std::forward<NAME>(name), type, constructor,
                       std::move(attributes));
+    AST().AddGlobalVariable(var);
+    return var;
+  }
+
+  /// @param name the variable name
+  /// @param type the variable type
+  /// @param constructor optional constructor expression
+  /// @param attributes optional variable attributes
+  /// @returns an overridable const `ast::Variable` which is automatically
+  /// registered as a global variable with the ast::Module.
+  template <typename NAME>
+  const ast::Variable* Override(NAME&& name,
+                                const ast::Type* type,
+                                const ast::Expression* constructor,
+                                ast::AttributeList attributes = {}) {
+    auto* var = create<ast::Variable>(
+        source_, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
+        ast::Access::kUndefined, type, true /* is_const */,
+        true /* is_overridable */, constructor, std::move(attributes));
+    AST().AddGlobalVariable(var);
+    return var;
+  }
+
+  /// @param source the variable source
+  /// @param name the variable name
+  /// @param type the variable type
+  /// @param constructor constructor expression
+  /// @param attributes optional variable attributes
+  /// @returns a const `ast::Variable` constructed by calling Var() with the
+  /// arguments of `args`, which is automatically registered as a global
+  /// variable with the ast::Module.
+  template <typename NAME>
+  const ast::Variable* Override(const Source& source,
+                                NAME&& name,
+                                const ast::Type* type,
+                                const ast::Expression* constructor,
+                                ast::AttributeList attributes = {}) {
+    auto* var = create<ast::Variable>(
+        source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
+        ast::Access::kUndefined, type, true /* is_const */,
+        true /* is_overridable */, constructor, std::move(attributes));
     AST().AddGlobalVariable(var);
     return var;
   }
@@ -2382,31 +2429,18 @@ class ProgramBuilder {
     return create<ast::LocationAttribute>(source_, location);
   }
 
-  /// Creates an ast::OverrideAttribute with a specific constant ID
+  /// Creates an ast::IdAttribute
   /// @param source the source information
   /// @param id the id value
   /// @returns the override attribute pointer
-  const ast::OverrideAttribute* Override(const Source& source, uint32_t id) {
-    return create<ast::OverrideAttribute>(source, id);
+  const ast::IdAttribute* Id(const Source& source, uint32_t id) {
+    return create<ast::IdAttribute>(source, id);
   }
 
-  /// Creates an ast::OverrideAttribute with a specific constant ID
+  /// Creates an ast::IdAttribute with a constant ID
   /// @param id the optional id value
   /// @returns the override attribute pointer
-  const ast::OverrideAttribute* Override(uint32_t id) {
-    return Override(source_, id);
-  }
-
-  /// Creates an ast::OverrideAttribute without a constant ID
-  /// @param source the source information
-  /// @returns the override attribute pointer
-  const ast::OverrideAttribute* Override(const Source& source) {
-    return create<ast::OverrideAttribute>(source);
-  }
-
-  /// Creates an ast::OverrideAttribute without a constant ID
-  /// @returns the override attribute pointer
-  const ast::OverrideAttribute* Override() { return Override(source_); }
+  const ast::IdAttribute* Id(uint32_t id) { return Id(source_, id); }
 
   /// Creates an ast::StageAttribute
   /// @param source the source information

@@ -1056,7 +1056,7 @@ var<private> a : mat3x2<f32>;
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(RobustnessTest, DISABLED_Vector_Constant_Id_Clamps) {
-  // @override(1300) let idx : i32;
+  // @id(1300) override idx : i32;
   // var a : vec3<f32>
   // var b : f32 = a[idx]
   //
@@ -1065,7 +1065,7 @@ TEST_F(RobustnessTest, DISABLED_Vector_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(RobustnessTest, DISABLED_Array_Constant_Id_Clamps) {
-  // @override(1300) let idx : i32;
+  // @id(1300) override idx : i32;
   // var a : array<f32, 4>
   // var b : f32 = a[idx]
   //
@@ -1074,7 +1074,7 @@ TEST_F(RobustnessTest, DISABLED_Array_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(RobustnessTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
-  // @override(1300) let idx : i32;
+  // @id(1300) override idx : i32;
   // var a : mat3x2<f32>
   // var b : f32 = a[idx][1]
   //
@@ -1083,7 +1083,7 @@ TEST_F(RobustnessTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(RobustnessTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
-  // @override(1300) let idx : i32;
+  // @id(1300) override idx : i32;
   // var a : mat3x2<f32>
   // var b : f32 = a[1][idx]
   //

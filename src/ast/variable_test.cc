@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest-spi.h"
-#include "src/ast/override_attribute.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -96,13 +96,13 @@ TEST_F(VariableTest, WithAttributes) {
                   AttributeList{
                       create<LocationAttribute>(1),
                       create<BuiltinAttribute>(Builtin::kPosition),
-                      create<OverrideAttribute>(1200),
+                      create<IdAttribute>(1200),
                   });
 
   auto& attributes = var->attributes;
   EXPECT_TRUE(ast::HasAttribute<ast::LocationAttribute>(attributes));
   EXPECT_TRUE(ast::HasAttribute<ast::BuiltinAttribute>(attributes));
-  EXPECT_TRUE(ast::HasAttribute<ast::OverrideAttribute>(attributes));
+  EXPECT_TRUE(ast::HasAttribute<ast::IdAttribute>(attributes));
 
   auto* location = ast::GetAttribute<ast::LocationAttribute>(attributes);
   ASSERT_NE(nullptr, location);

@@ -14,7 +14,6 @@
 
 #include "src/ast/variable.h"
 
-#include "src/ast/override_attribute.h"
 #include "src/program_builder.h"
 #include "src/sem/variable.h"
 
@@ -30,17 +29,20 @@ Variable::Variable(ProgramID pid,
                    Access da,
                    const ast::Type* ty,
                    bool constant,
+                   bool overridable,
                    const Expression* ctor,
                    AttributeList attrs)
     : Base(pid, src),
       symbol(sym),
       type(ty),
       is_const(constant),
+      is_overridable(overridable),
       constructor(ctor),
       attributes(std::move(attrs)),
       declared_storage_class(dsc),
       declared_access(da) {
   TINT_ASSERT(AST, symbol.IsValid());
+  TINT_ASSERT(AST, is_overridable ? is_const : true);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, constructor, program_id);
 }
@@ -69,7 +71,8 @@ const Variable* Variable::Clone(CloneContext* ctx) const {
   auto* ctor = ctx->Clone(constructor);
   auto attrs = ctx->Clone(attributes);
   return ctx->dst->create<Variable>(src, sym, declared_storage_class,
-                                    declared_access, ty, is_const, ctor, attrs);
+                                    declared_access, ty, is_const,
+                                    is_overridable, ctor, attrs);
 }
 
 }  // namespace ast

@@ -54,24 +54,24 @@ fn f() { return 1 & >; }
 }
 
 TEST_F(ParserImplErrorTest, AliasDeclInvalidAttribute) {
-  EXPECT("@override type e=u32;",
+  EXPECT("@invariant type e=u32;",
          R"(test.wgsl:1:2 error: unexpected attributes
-@override type e=u32;
- ^^^^^^^^
+@invariant type e=u32;
+ ^^^^^^^^^
 )");
 }
 
 // TODO(crbug.com/tint/1382): Remove
 TEST_F(ParserImplErrorTest, DEPRECATED_AliasDeclInvalidAttribute) {
   EXPECT(
-      "[[override]]type e=u32;",
+      "[[invariant]]type e=u32;",
       R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-[[override]]type e=u32;
+[[invariant]]type e=u32;
 ^^
 
 test.wgsl:1:3 error: unexpected attributes
-[[override]]type e=u32;
-  ^^^^^^^^
+[[invariant]]type e=u32;
+  ^^^^^^^^^
 )");
 }
 

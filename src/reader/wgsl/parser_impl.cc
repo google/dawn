@@ -23,10 +23,10 @@
 #include "src/ast/discard_statement.h"
 #include "src/ast/external_texture.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/invariant_attribute.h"
 #include "src/ast/loop_statement.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_attribute.h"
 #include "src/ast/struct_block_attribute.h"
@@ -114,10 +114,10 @@ const char kBindingAttribute[] = "binding";
 const char kBlockAttribute[] = "block";
 const char kBuiltinAttribute[] = "builtin";
 const char kGroupAttribute[] = "group";
+const char kIdAttribute[] = "id";
 const char kInterpolateAttribute[] = "interpolate";
 const char kInvariantAttribute[] = "invariant";
 const char kLocationAttribute[] = "location";
-const char kOverrideAttribute[] = "override";
 const char kSizeAttribute[] = "size";
 const char kAlignAttribute[] = "align";
 const char kStageAttribute[] = "stage";
@@ -127,8 +127,8 @@ const char kWorkgroupSizeAttribute[] = "workgroup_size";
 bool is_attribute(Token t) {
   return t == kAlignAttribute || t == kBindingAttribute ||
          t == kBlockAttribute || t == kBuiltinAttribute ||
-         t == kGroupAttribute || t == kInterpolateAttribute ||
-         t == kLocationAttribute || t == kOverrideAttribute ||
+         t == kGroupAttribute || t == kIdAttribute ||
+         t == kInterpolateAttribute || t == kLocationAttribute ||
          t == kSizeAttribute || t == kStageAttribute || t == kStrideAttribute ||
          t == kWorkgroupSizeAttribute;
 }
@@ -485,21 +485,28 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(
       decl->access,                             // access control
       decl->type,                               // type
       false,                                    // is_const
+      false,                                    // is_overridable
       constructor,                              // constructor
       std::move(attrs));                        // attributes
 }
 
-// global_constant_decl
-//  : attribute_list* LET variable_ident_decl global_const_initializer?
+// global_constant_decl :
+//  | LET (ident | variable_ident_decl) global_const_initializer
+//  | attribute* override (ident | variable_ident_decl) (equal expression)?
 // global_const_initializer
 //  : EQUAL const_expr
 Maybe<const ast::Variable*> ParserImpl::global_constant_decl(
     ast::AttributeList& attrs) {
-  if (!match(Token::Type::kLet)) {
+  bool is_overridable = false;
+  const char* use = nullptr;
+  if (match(Token::Type::kLet)) {
+    use = "let declaration";
+  } else if (match(Token::Type::kOverride)) {
+    use = "override declaration";
+    is_overridable = true;
+  } else {
     return Failure::kNoMatch;
   }
-
-  const char* use = "let declaration";
 
   auto decl = expect_variable_ident_decl(use, /* allow_inferred = */ true);
   if (decl.errored)
@@ -521,6 +528,7 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(
       ast::Access::kUndefined,                  // access control
       decl->type,                               // type
       true,                                     // is_const
+      is_overridable,                           // is_overridable
       initializer,                              // constructor
       std::move(attrs));                        // attributes
 }
@@ -1402,6 +1410,7 @@ Expect<ast::Variable*> ParserImpl::expect_param() {
                             ast::Access::kUndefined,   // access control
                             decl->type,                // type
                             true,                      // is_const
+                            false,                     // is_overridable
                             nullptr,                   // constructor
                             std::move(attrs.value));   // attributes
   // Formal parameters are treated like a const declaration where the
@@ -1660,6 +1669,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
         ast::Access::kUndefined,                  // access control
         decl->type,                               // type
         true,                                     // is_const
+        false,                                    // is_overridable
         constructor.value,                        // constructor
         ast::AttributeList{});                    // attributes
 
@@ -1690,6 +1700,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
                             decl->access,           // access control
                             decl->type,             // type
                             false,                  // is_const
+                            false,                  // is_overridable
                             constructor,            // constructor
                             ast::AttributeList{});  // attributes
 
@@ -3081,22 +3092,15 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
     });
   }
 
-  if (t == kOverrideAttribute) {
-    const char* use = "override attribute";
+  if (t == kIdAttribute) {
+    const char* use = "id attribute";
+    return expect_paren_block(use, [&]() -> Result {
+      auto val = expect_positive_sint(use);
+      if (val.errored)
+        return Failure::kErrored;
 
-    if (peek_is(Token::Type::kParenLeft)) {
-      // @override(x)
-      return expect_paren_block(use, [&]() -> Result {
-        auto val = expect_positive_sint(use);
-        if (val.errored)
-          return Failure::kErrored;
-
-        return create<ast::OverrideAttribute>(t.source(), val.value);
-      });
-    } else {
-      // [[override]]
-      return create<ast::OverrideAttribute>(t.source());
-    }
+      return create<ast::IdAttribute>(t.source(), val.value);
+    });
   }
 
   return Failure::kNoMatch;

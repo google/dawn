@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/override_attribute.h"
+#include "src/ast/id_attribute.h"
 
-#include "src/ast/test_helper.h"
+#include <string>
+
+#include "src/program_builder.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::ast::IdAttribute);
 
 namespace tint {
 namespace ast {
-namespace {
 
-using OverrideAttributeTest = TestHelper;
+IdAttribute::IdAttribute(ProgramID pid, const Source& src, uint32_t val)
+    : Base(pid, src), value(val) {}
 
-TEST_F(OverrideAttributeTest, Creation_WithValue) {
-  auto* d = create<OverrideAttribute>(12);
-  EXPECT_TRUE(d->has_value);
-  EXPECT_EQ(12u, d->value);
+IdAttribute::~IdAttribute() = default;
+
+std::string IdAttribute::Name() const {
+  return "id";
 }
 
-TEST_F(OverrideAttributeTest, Creation_WithoutValue) {
-  auto* d = create<OverrideAttribute>();
-  EXPECT_FALSE(d->has_value);
+const IdAttribute* IdAttribute::Clone(CloneContext* ctx) const {
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source);
+  return ctx->dst->create<IdAttribute>(src, value);
 }
 
-}  // namespace
 }  // namespace ast
 }  // namespace tint

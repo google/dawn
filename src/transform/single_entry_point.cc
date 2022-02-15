@@ -77,19 +77,15 @@ void SingleEntryPoint::Run(CloneContext& ctx,
       ctx.dst->AST().AddTypeDecl(ctx.Clone(ty));
     } else if (auto* var = decl->As<ast::Variable>()) {
       if (referenced_vars.count(var)) {
-        if (var->is_const) {
-          if (auto* attr =
-                  ast::GetAttribute<ast::OverrideAttribute>(var->attributes)) {
-            // It is an overridable constant
-            if (!attr->has_value) {
-              // If the attribute doesn't have numeric ID specified explicitly
-              // Make their ids explicitly assigned in the attribute so that
-              // they won't be affected by other stripped away constants
-              auto* global = sem.Get(var)->As<sem::GlobalVariable>();
-              const auto* new_deco =
-                  ctx.dst->Override(attr->source, global->ConstantId());
-              ctx.Replace(attr, new_deco);
-            }
+        if (var->is_overridable) {
+          // It is an overridable constant
+          if (!ast::HasAttribute<ast::IdAttribute>(var->attributes)) {
+            // If the constant doesn't already have an @id() attribute, add one
+            // so that its allocated ID so that it won't be affected by other
+            // stripped away constants
+            auto* global = sem.Get(var)->As<sem::GlobalVariable>();
+            const auto* id = ctx.dst->Id(global->ConstantId());
+            ctx.InsertFront(var->attributes, id);
           }
         }
         ctx.dst->AST().AddGlobalVariable(ctx.Clone(var));

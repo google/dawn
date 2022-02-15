@@ -123,6 +123,8 @@ set(TINT_LIB_SRCS
   ast/group_attribute.h
   ast/i32.cc
   ast/i32.h
+  ast/id_attribute.cc
+  ast/id_attribute.h
   ast/identifier_expression.cc
   ast/identifier_expression.h
   ast/if_statement.cc
@@ -151,8 +153,6 @@ set(TINT_LIB_SRCS
   ast/multisampled_texture.h
   ast/node.cc
   ast/node.h
-  ast/override_attribute.cc
-  ast/override_attribute.h
   ast/phony_expression.cc
   ast/phony_expression.h
   ast/pipeline_stage.cc
@@ -659,6 +659,7 @@ if(TINT_BUILD_TESTS)
     ast/function_test.cc
     ast/group_attribute_test.cc
     ast/i32_test.cc
+    ast/id_attribute_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
     ast/index_accessor_expression_test.cc
@@ -672,7 +673,6 @@ if(TINT_BUILD_TESTS)
     ast/module_clone_test.cc
     ast/module_test.cc
     ast/multisampled_texture_test.cc
-    ast/override_attribute_test.cc
     ast/phony_expression_test.cc
     ast/pointer_test.cc
     ast/return_statement_test.cc

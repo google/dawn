@@ -11,6 +11,7 @@
 ### New Features
 
 * Module-scope declarations can now be declared in any order. [tint:1266](crbug.com/tint/1266)
+* The `override` keyword and `@id()` attribute for pipeline-overridable constants are now supported, replacing the `@override` attribute. [tint:1403](crbug.com/tint/1403)
 
 ## Changes for M99
 

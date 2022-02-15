@@ -20,10 +20,10 @@
 #include "src/ast/bool_literal_expression.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/float_literal_expression.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/interpolate_attribute.h"
 #include "src/ast/location_attribute.h"
 #include "src/ast/module.h"
-#include "src/ast/override_attribute.h"
 #include "src/ast/sint_literal_expression.h"
 #include "src/ast/uint_literal_expression.h"
 #include "src/sem/array.h"
@@ -213,10 +213,9 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
         overridable_constant.is_initialized =
             global->Declaration()->constructor;
-        auto* override_attr = ast::GetAttribute<ast::OverrideAttribute>(
-            global->Declaration()->attributes);
         overridable_constant.is_numeric_id_specified =
-            override_attr ? override_attr->has_value : false;
+            ast::HasAttribute<ast::IdAttribute>(
+                global->Declaration()->attributes);
 
         entry_point.overridable_constants.push_back(overridable_constant);
       }

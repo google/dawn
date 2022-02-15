@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/override_attribute.h"
+#include "src/ast/id_attribute.h"
 #include "src/writer/glsl/test_helper.h"
 
 namespace tint {
@@ -33,10 +33,10 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
 }
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
-  auto* var = GlobalConst("pos", ty.f32(), Expr(3.0f),
-                          ast::AttributeList{
-                              create<ast::OverrideAttribute>(23),
-                          });
+  auto* var = Override("pos", ty.f32(), Expr(3.0f),
+                       ast::AttributeList{
+                           Id(23),
+                       });
 
   GeneratorImpl& gen = Build();
 
@@ -49,10 +49,10 @@ const float pos = WGSL_SPEC_CONSTANT_23;
 }
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
-  auto* var = GlobalConst("pos", ty.f32(), nullptr,
-                          ast::AttributeList{
-                              create<ast::OverrideAttribute>(23),
-                          });
+  auto* var = Override("pos", ty.f32(), nullptr,
+                       ast::AttributeList{
+                           Id(23),
+                       });
 
   GeneratorImpl& gen = Build();
 
@@ -65,14 +65,11 @@ const float pos = WGSL_SPEC_CONSTANT_23;
 }
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoId) {
-  auto* a = GlobalConst("a", ty.f32(), Expr(3.0f),
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(0),
-                        });
-  auto* b = GlobalConst("b", ty.f32(), Expr(2.0f),
-                        ast::AttributeList{
-                            create<ast::OverrideAttribute>(),
-                        });
+  auto* a = Override("a", ty.f32(), Expr(3.0f),
+                     ast::AttributeList{
+                         Id(0),
+                     });
+  auto* b = Override("b", ty.f32(), Expr(2.0f));
 
   GeneratorImpl& gen = Build();
 

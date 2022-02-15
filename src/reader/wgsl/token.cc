@@ -177,6 +177,8 @@ std::string_view Token::TypeToName(Type type) {
       return "mat4x3";
     case Token::Type::kMat4x4:
       return "mat4x4";
+    case Token::Type::kOverride:
+      return "override";
     case Token::Type::kPrivate:
       return "private";
     case Token::Type::kPtr:

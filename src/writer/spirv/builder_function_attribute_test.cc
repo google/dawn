@@ -155,9 +155,9 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
-  GlobalConst("width", ty.i32(), Construct(ty.i32(), 2), {Override(7u)});
-  GlobalConst("height", ty.i32(), Construct(ty.i32(), 3), {Override(8u)});
-  GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4), {Override(9u)});
+  Override("width", ty.i32(), Construct(ty.i32(), 2), {Id(7u)});
+  Override("height", ty.i32(), Construct(ty.i32(), 3), {Id(8u)});
+  Override("depth", ty.i32(), Construct(ty.i32(), 4), {Id(9u)});
   auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                     ast::AttributeList{
                         WorkgroupSize("width", "height", "depth"),
@@ -185,7 +185,7 @@ OpDecorate %3 BuiltIn WorkgroupSize
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
-  GlobalConst("height", ty.i32(), Construct(ty.i32(), 2), {Override(7u)});
+  Override("height", ty.i32(), Construct(ty.i32(), 2), {Id(7u)});
   GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3));
   auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                     ast::AttributeList{

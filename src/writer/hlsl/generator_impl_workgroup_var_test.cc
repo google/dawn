@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/ast/override_attribute.h"
+#include "src/ast/id_attribute.h"
 #include "src/ast/stage_attribute.h"
 #include "src/writer/hlsl/test_helper.h"
 

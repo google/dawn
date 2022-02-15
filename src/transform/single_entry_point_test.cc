@@ -258,10 +258,10 @@ fn main() {
 
 TEST_F(SingleEntryPointTest, OverridableConstants) {
   auto* src = R"(
-@override(1001) let c1 : u32 = 1u;
-[[override]] let c2 : u32 = 1u;
-@override(0) let c3 : u32 = 1u;
-@override(9999) let c4 : u32 = 1u;
+@id(1001) override c1 : u32 = 1u;
+          override c2 : u32 = 1u;
+@id(0)    override c3 : u32 = 1u;
+@id(9999) override c4 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
 fn comp_main1() {
@@ -292,7 +292,7 @@ fn comp_main5() {
   {
     SingleEntryPoint::Config cfg("comp_main1");
     auto* expect = R"(
-@override(1001) let c1 : u32 = 1u;
+@id(1001) override c1 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
 fn comp_main1() {
@@ -310,7 +310,7 @@ fn comp_main1() {
     // The decorator is replaced with the one with explicit id
     // And should not be affected by other constants stripped away
     auto* expect = R"(
-@override(1) let c2 : u32 = 1u;
+@id(1) override c2 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
 fn comp_main2() {
@@ -326,7 +326,7 @@ fn comp_main2() {
   {
     SingleEntryPoint::Config cfg("comp_main3");
     auto* expect = R"(
-@override(0) let c3 : u32 = 1u;
+@id(0) override c3 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
 fn comp_main3() {
@@ -342,7 +342,7 @@ fn comp_main3() {
   {
     SingleEntryPoint::Config cfg("comp_main4");
     auto* expect = R"(
-@override(9999) let c4 : u32 = 1u;
+@id(9999) override c4 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
 fn comp_main4() {
