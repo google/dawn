@@ -185,7 +185,7 @@ void simulate(uvec3 GlobalInvocationID) {
       for(int level = (textureQueryLevels(tint_symbol_1); - 1); (level > 0); level = (level - 1)) {
         vec4 probabilites = texelFetch(tint_symbol_1, coord, level);
         vec4 value = vec4(rand());
-        bvec4 mask = (greaterThanEqual(value, vec4(0.0f, probabilites.xyz)) & lessThan(value, probabilites));
+        bvec4 mask = bvec4(uvec4(greaterThanEqual(value, vec4(0.0f, probabilites.xyz))) & uvec4(lessThan(value, probabilites)));
         coord = (coord * 2);
         coord.x = (coord.x + (any(mask.yw) ? 1 : 0));
         coord.y = (coord.y + (any(mask.zw) ? 1 : 0));

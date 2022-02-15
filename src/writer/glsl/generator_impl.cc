@@ -324,6 +324,54 @@ bool GeneratorImpl::EmitVectorRelational(std::ostream& out,
   return true;
 }
 
+bool GeneratorImpl::EmitBitwiseBoolOp(std::ostream& out,
+                                      const ast::BinaryExpression* expr) {
+  auto* bool_type = TypeOf(expr->lhs)->UnwrapRef();
+  auto* uint_type = BoolTypeToUint(bool_type);
+
+  // Cast result to bool scalar or vector type.
+  if (!EmitType(out, bool_type, ast::StorageClass::kNone,
+                ast::Access::kReadWrite, "")) {
+    return false;
+  }
+  ScopedParen outerCastParen(out);
+  // Cast LHS to uint scalar or vector type.
+  if (!EmitType(out, uint_type, ast::StorageClass::kNone,
+                ast::Access::kReadWrite, "")) {
+    return false;
+  }
+  {
+    ScopedParen innerCastParen(out);
+    // Emit LHS.
+    if (!EmitExpression(out, expr->lhs)) {
+      return false;
+    }
+  }
+  // Emit operator.
+  if (expr->op == ast::BinaryOp::kAnd) {
+    out << " & ";
+  } else if (expr->op == ast::BinaryOp::kOr) {
+    out << " | ";
+  } else {
+    TINT_ICE(Writer, diagnostics_)
+        << "unexpected binary op: " << FriendlyName(expr->op);
+    return false;
+  }
+  // Cast RHS to uint scalar or vector type.
+  if (!EmitType(out, uint_type, ast::StorageClass::kNone,
+                ast::Access::kReadWrite, "")) {
+    return false;
+  }
+  {
+    ScopedParen innerCastParen(out);
+    // Emit RHS.
+    if (!EmitExpression(out, expr->rhs)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitBinary(std::ostream& out,
                                const ast::BinaryExpression* expr) {
   if (IsRelational(expr->op) && !TypeOf(expr->lhs)->UnwrapRef()->is_scalar()) {
@@ -362,6 +410,10 @@ bool GeneratorImpl::EmitBinary(std::ostream& out,
 
     out << "(" << name << ")";
     return true;
+  }
+  if ((expr->op == ast::BinaryOp::kAnd || expr->op == ast::BinaryOp::kOr) &&
+      TypeOf(expr->lhs)->UnwrapRef()->is_bool_scalar_or_vector()) {
+    return EmitBitwiseBoolOp(out, expr);
   }
 
   out << "(";
@@ -2735,6 +2787,17 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
     }
   }
   return true;
+}
+
+sem::Type* GeneratorImpl::BoolTypeToUint(const sem::Type* type) {
+  auto* u32 = builder_.create<sem::U32>();
+  if (type->Is<sem::Bool>()) {
+    return u32;
+  } else if (auto* vec = type->As<sem::Vector>()) {
+    return builder_.create<sem::Vector>(u32, vec->Width());
+  } else {
+    return nullptr;
+  }
 }
 
 }  // namespace glsl

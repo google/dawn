@@ -73,6 +73,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitAssign(const ast::AssignmentStatement* stmt);
+  /// Handles emission of bitwise operators (&|) on bool scalars and vectors
+  /// @param out the output of the expression stream
+  /// @param expr the binary expression
+  /// @returns true if the expression was emitted, false otherwise
+  bool EmitBitwiseBoolOp(std::ostream& out, const ast::BinaryExpression* expr);
   /// Handles generating a binary expression
   /// @param out the output of the expression stream
   /// @param expr the binary expression
@@ -469,6 +474,11 @@ class GeneratorImpl : public TextGenerator {
                          const ast::CallExpression* call,
                          const sem::Builtin* builtin,
                          F&& build);
+
+  /// Create a uint type corresponding to the given bool or bool vector type.
+  /// @param type the bool or bool vector type to convert
+  /// @returns the corresponding uint type
+  sem::Type* BoolTypeToUint(const sem::Type* type);
 
   TextBuffer helpers_;  // Helper functions emitted at the top of the output
   std::function<bool()> emit_continuing_;

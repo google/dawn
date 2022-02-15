@@ -21,7 +21,7 @@ void main_1() {
   a = ddx(cos(x_33));
   float x_37 = x_8.two;
   b = mix(2.0f, x_37, a);
-  if (((b >= 1.899999976f) & (b <= 2.099999905f))) {
+  if (bool(uint((b >= 1.899999976f)) & uint((b <= 2.099999905f)))) {
     x_GLF_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
