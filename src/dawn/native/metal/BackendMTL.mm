@@ -16,6 +16,7 @@
 
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/GPUInfo.h"
+#include "dawn/common/Log.h"
 #include "dawn/common/NSRef.h"
 #include "dawn/common/Platform.h"
 #include "dawn/common/SystemUtils.h"
@@ -187,20 +188,29 @@ namespace dawn::native::metal {
                    isDrawBoundarySupported;
         }
 
+        // This method has seen hard-to-debug crashes. See crbug.com/dawn/1102.
+        // For now, it is written defensively, with many potentially unnecessary guards until
+        // we narrow down the cause of the problem.
         DAWN_NOINLINE bool IsGPUCounterSupported(id<MTLDevice> device,
                                                  MTLCommonCounterSet counterSetName,
                                                  std::vector<MTLCommonCounter> counterNames)
             API_AVAILABLE(macos(10.15), ios(14.0)) {
-            // MTLDevice’s counterSets property declares which counter sets it supports. Check
-            // whether it's available on the device before requesting a counter set.
-
-            // On some systems, [device counterSets] is null and not an empty array.
-            if ([device counterSets] == nil) {
+            NSPRef<id<MTLCounterSet>> counterSet = nil;
+            if (![device respondsToSelector:@selector(counterSets)]) {
+                dawn::ErrorLog() << "MTLDevice does not respond to selector: counterSets.";
                 return false;
             }
-
-            id<MTLCounterSet> counterSet = nil;
-            for (id<MTLCounterSet> set in [device counterSets]) {
+            NSArray<id<MTLCounterSet>>* counterSets = device.counterSets;
+            if (counterSets == nil) {
+                // On some systems, [device counterSets] may be null and not an empty array.
+                return false;
+            }
+            // MTLDevice’s counterSets property declares which counter sets it supports. Check
+            // whether it's available on the device before requesting a counter set.
+            // Note: Don't do for..in loop to avoid potentially crashy interaction with
+            // NSFastEnumeration.
+            for (NSUInteger i = 0; i < counterSets.count; ++i) {
+                id<MTLCounterSet> set = [counterSets objectAtIndex:i];
                 if ([set.name caseInsensitiveCompare:counterSetName] == NSOrderedSame) {
                     counterSet = set;
                     break;
@@ -212,12 +222,25 @@ namespace dawn::native::metal {
                 return false;
             }
 
+            if (![*counterSet respondsToSelector:@selector(counters)]) {
+                dawn::ErrorLog() << "MTLCounterSet does not respond to selector: counters.";
+                return false;
+            }
+            NSArray<id<MTLCounter>>* countersInSet = (*counterSet).counters;
+            if (countersInSet == nil) {
+                // On some systems, [MTLCounterSet counters] may be null and not an empty array.
+                return false;
+            }
+
             // A GPU might support a counter set, but only support a subset of the counters in that
             // set, check if the counter set supports all specific counters we need. Return false
             // if there is a counter unsupported.
             for (MTLCommonCounter counterName : counterNames) {
                 bool found = false;
-                for (id<MTLCounter> counter in [counterSet counters]) {
+                // Note: Don't do for..in loop to avoid potentially crashy interaction with
+                // NSFastEnumeration.
+                for (NSUInteger i = 0; i < countersInSet.count; ++i) {
+                    id<MTLCounter> counter = [countersInSet objectAtIndex:i];
                     if ([counter.name caseInsensitiveCompare:counterName] == NSOrderedSame) {
                         found = true;
                         break;
