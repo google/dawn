@@ -1526,7 +1526,7 @@
     "predefined color space": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined"},
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "srgb"}
         ]
     },
