@@ -4,7 +4,7 @@ SKIP: FAILED
 
 uniform highp samplerCubeArray arg_0_1;
 void textureNumLayers_778bd1() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureSize(arg_0_1, 0).z;
 }
 
 vec4 vertex_main() {
@@ -31,7 +31,7 @@ precision mediump float;
 
 uniform highp samplerCubeArray arg_0_1;
 void textureNumLayers_778bd1() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureSize(arg_0_1, 0).z;
 }
 
 void fragment_main() {
@@ -53,7 +53,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 uniform highp samplerCubeArray arg_0_1;
 void textureNumLayers_778bd1() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureSize(arg_0_1, 0).z;
 }
 
 void compute_main() {

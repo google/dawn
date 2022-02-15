@@ -1,10 +1,8 @@
-SKIP: FAILED
-
 #version 310 es
 
 layout(r32f) uniform highp writeonly image2DArray arg_0;
 void textureNumLayers_d5b228() {
-  int res = textureQueryLevels(arg_0);;
+  int res = imageSize(arg_0).z;
 }
 
 vec4 vertex_main() {
@@ -19,20 +17,12 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 layout(r32f) uniform highp writeonly image2DArray arg_0;
 void textureNumLayers_d5b228() {
-  int res = textureQueryLevels(arg_0);;
+  int res = imageSize(arg_0).z;
 }
 
 void fragment_main() {
@@ -43,19 +33,11 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:6: '=' :  cannot convert from ' const float' to ' temp mediump int'
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(r32f) uniform highp writeonly image2DArray arg_0;
 void textureNumLayers_d5b228() {
-  int res = textureQueryLevels(arg_0);;
+  int res = imageSize(arg_0).z;
 }
 
 void compute_main() {
@@ -67,11 +49,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-

@@ -4,7 +4,7 @@ SKIP: FAILED
 
 layout(rg32ui) uniform highp writeonly uimage2DArray arg_0;
 void textureNumLayers_fcec98() {
-  int res = textureQueryLevels(arg_0);;
+  int res = imageSize(arg_0).z;
 }
 
 vec4 vertex_main() {
@@ -31,7 +31,7 @@ precision mediump float;
 
 layout(rg32ui) uniform highp writeonly uimage2DArray arg_0;
 void textureNumLayers_fcec98() {
-  int res = textureQueryLevels(arg_0);;
+  int res = imageSize(arg_0).z;
 }
 
 void fragment_main() {
@@ -53,7 +53,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 layout(rg32ui) uniform highp writeonly uimage2DArray arg_0;
 void textureNumLayers_fcec98() {
-  int res = textureQueryLevels(arg_0);;
+  int res = imageSize(arg_0).z;
 }
 
 void compute_main() {

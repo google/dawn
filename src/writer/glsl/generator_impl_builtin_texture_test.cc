@@ -103,7 +103,9 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kNumLayersDepth2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
     case ValidTextureOverload::kNumLayersDepthCubeArray:
+      return {"textureSize"};
     case ValidTextureOverload::kNumLayersStorageWO2dArray:
+      return {"imageSize"};
     case ValidTextureOverload::kNumLevels2d:
     case ValidTextureOverload::kNumLevelsCube:
     case ValidTextureOverload::kNumLevelsDepth2d:

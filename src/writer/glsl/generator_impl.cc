@@ -1279,8 +1279,34 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       }
       return true;
     }
-    // TODO(senorblanco): determine if this works for array textures
-    case sem::BuiltinType::kTextureNumLayers:
+    case sem::BuiltinType::kTextureNumLayers: {
+      if (texture_type->Is<sem::StorageTexture>()) {
+        out << "imageSize(";
+      } else {
+        out << "textureSize(";
+      }
+      // textureSize() on sampler2dArray returns the array size in the
+      // final component, so return it
+      if (!EmitExpression(out, texture)) {
+        return false;
+      }
+      // The LOD parameter is mandatory on textureSize() for non-multisampled
+      // textures.
+      if (!texture_type->Is<sem::StorageTexture>() &&
+          !texture_type->Is<sem::MultisampledTexture>() &&
+          !texture_type->Is<sem::DepthMultisampledTexture>()) {
+        out << ", ";
+        if (auto* level_arg = arg(Usage::kLevel)) {
+          if (!EmitExpression(out, level_arg)) {
+            return false;
+          }
+        } else {
+          out << "0";
+        }
+      }
+      out << ").z";
+      return true;
+    }
     case sem::BuiltinType::kTextureNumLevels: {
       out << "textureQueryLevels(";
       if (!EmitExpression(out, texture)) {
