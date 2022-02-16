@@ -407,6 +407,12 @@ namespace dawn::native::vulkan {
 
         InstanceBase* instance = GetInstance();
         for (ICD icd : kICDs) {
+#if defined(DAWN_PLATFORM_MACOS)
+            // On Mac, we don't expect non-Swiftshader Vulkan to be available.
+            if (icd == ICD::None) {
+                continue;
+            }
+#endif  // defined(DAWN_PLATFORM_MACOS)
             if (options->forceSwiftShader && icd != ICD::SwiftShader) {
                 continue;
             }
