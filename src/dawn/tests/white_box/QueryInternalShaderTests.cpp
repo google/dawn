@@ -58,7 +58,7 @@ namespace {
                                << "Expected data[" << i << "] to be 0, actual " << actual[i]
                                << std::endl;
                     }
-                    return testing::AssertionSuccess();
+                    continue;
                 }
 
                 float errorRate =
@@ -143,7 +143,7 @@ class QueryInternalShaderTests : public DawnTest {
         std::vector<uint64_t> timestampValues(size / sizeof(uint64_t), 1u);
         uint32_t start = destinationOffset / sizeof(uint64_t);
         for (uint32_t i = 0; i < queryCount; i++) {
-            timestampValues[start + i] = querySetValues[firstQuery + 1];
+            timestampValues[start + i] = querySetValues[firstQuery + i];
         }
         // Write sentinel values and orignal timestamps to timestamps buffer
         queue.WriteBuffer(timestampsBuffer, 0, timestampValues.data(), size);
@@ -196,7 +196,7 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
         1,
         7,
         // A gpu frequency on Intel D3D12 (ticks/second)
-        83.33,
+        83.333,
         1042,
         65535,
     };
