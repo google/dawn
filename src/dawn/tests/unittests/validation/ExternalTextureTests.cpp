@@ -456,4 +456,30 @@ namespace {
             ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
         }
     }
+
+    // Ensure that bind group validation catches external textures mimatched from the BGL.
+    TEST_F(ExternalTextureTest, BindGroupDoesNotMatchLayout) {
+        wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
+        wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+        wgpu::ExternalTextureDescriptor externalDesc;
+        externalDesc.plane0 = texture.CreateView();
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+        // Control case should succeed.
+        {
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+            utils::MakeBindGroup(device, bgl, {{0, externalTexture}});
+        }
+
+        // Bind group creation should fail when an external texture is not present in the
+        // corresponding slot of the bind group layout.
+        {
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
+            ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, externalTexture}}));
+        }
+    }
+
 }  // namespace

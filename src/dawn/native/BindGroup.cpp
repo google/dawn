@@ -243,13 +243,19 @@ namespace dawn::native {
         MaybeError ValidateExternalTextureBinding(
             const DeviceBase* device,
             const BindGroupEntry& entry,
-            const ExternalTextureBindingEntry* externalTextureBindingEntry) {
+            const ExternalTextureBindingEntry* externalTextureBindingEntry,
+            const ExternalTextureBindingExpansionMap& expansions) {
             DAWN_INVALID_IF(externalTextureBindingEntry == nullptr,
                             "Binding entry external texture not set.");
 
             DAWN_INVALID_IF(
                 entry.sampler != nullptr || entry.textureView != nullptr || entry.buffer != nullptr,
                 "Expected only external texture to be set for binding entry.");
+
+            DAWN_INVALID_IF(
+                expansions.find(BindingNumber(entry.binding)) == expansions.end(),
+                "External texture binding entry %u is not present in the bind group layout.",
+                entry.binding);
 
             DAWN_TRY(ValidateSingleSType(externalTextureBindingEntry->nextInChain,
                                          wgpu::SType::ExternalTextureBindingEntry));
@@ -306,8 +312,9 @@ namespace dawn::native {
             const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
             FindInChain(entry.nextInChain, &externalTextureBindingEntry);
             if (externalTextureBindingEntry != nullptr) {
-                DAWN_TRY(
-                    ValidateExternalTextureBinding(device, entry, externalTextureBindingEntry));
+                DAWN_TRY(ValidateExternalTextureBinding(
+                    device, entry, externalTextureBindingEntry,
+                    descriptor->layout->GetExternalTextureBindingExpansionMap()));
                 continue;
             }
 
