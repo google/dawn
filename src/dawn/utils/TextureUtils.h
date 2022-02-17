@@ -119,6 +119,29 @@ namespace utils {
         wgpu::TextureFormat::ASTC12x12Unorm,
         wgpu::TextureFormat::ASTC12x12UnormSrgb};
 
+    static constexpr std::array<wgpu::TextureFormat, 40> kFormatsInCoreSpec = {
+        wgpu::TextureFormat::R8Unorm,        wgpu::TextureFormat::R8Snorm,
+        wgpu::TextureFormat::R8Uint,         wgpu::TextureFormat::R8Sint,
+        wgpu::TextureFormat::R16Uint,        wgpu::TextureFormat::R16Sint,
+        wgpu::TextureFormat::R16Float,       wgpu::TextureFormat::RG8Unorm,
+        wgpu::TextureFormat::RG8Snorm,       wgpu::TextureFormat::RG8Uint,
+        wgpu::TextureFormat::RG8Sint,        wgpu::TextureFormat::R32Float,
+        wgpu::TextureFormat::R32Uint,        wgpu::TextureFormat::R32Sint,
+        wgpu::TextureFormat::RG16Uint,       wgpu::TextureFormat::RG16Sint,
+        wgpu::TextureFormat::RG16Float,      wgpu::TextureFormat::RGBA8Unorm,
+        wgpu::TextureFormat::RGBA8UnormSrgb, wgpu::TextureFormat::RGBA8Snorm,
+        wgpu::TextureFormat::RGBA8Uint,      wgpu::TextureFormat::RGBA8Sint,
+        wgpu::TextureFormat::BGRA8Unorm,     wgpu::TextureFormat::BGRA8UnormSrgb,
+        wgpu::TextureFormat::RGB10A2Unorm,   wgpu::TextureFormat::RG11B10Ufloat,
+        wgpu::TextureFormat::RGB9E5Ufloat,   wgpu::TextureFormat::RG32Float,
+        wgpu::TextureFormat::RG32Uint,       wgpu::TextureFormat::RG32Sint,
+        wgpu::TextureFormat::RGBA16Uint,     wgpu::TextureFormat::RGBA16Sint,
+        wgpu::TextureFormat::RGBA16Float,    wgpu::TextureFormat::RGBA32Float,
+        wgpu::TextureFormat::RGBA32Uint,     wgpu::TextureFormat::RGBA32Sint,
+        wgpu::TextureFormat::Depth16Unorm,   wgpu::TextureFormat::Depth32Float,
+        wgpu::TextureFormat::Depth24Plus,    wgpu::TextureFormat::Depth24PlusStencil8,
+    };
+
     static constexpr std::array<wgpu::TextureFormat, 14> kBCFormats = {
         wgpu::TextureFormat::BC1RGBAUnorm,  wgpu::TextureFormat::BC1RGBAUnormSrgb,
         wgpu::TextureFormat::BC2RGBAUnorm,  wgpu::TextureFormat::BC2RGBAUnormSrgb,
@@ -207,6 +230,8 @@ namespace utils {
     bool IsASTCTextureFormat(wgpu::TextureFormat textureFormat);
 
     bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat);
+
+    bool TextureFormatSupportsMultisampling(wgpu::TextureFormat textureFormat);
 
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);
     uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat);

@@ -112,10 +112,7 @@ namespace dawn::native {
                                 "The depthOrArrayLayers (%u) of a multisampled texture is not 1.",
                                 descriptor->size.depthOrArrayLayers);
 
-                // If a format can support multisample, it must be renderable. Because Vulkan
-                // requires that if the format is not color-renderable or depth/stencil renderable,
-                // sampleCount must be 1.
-                DAWN_INVALID_IF(!format->isRenderable,
+                DAWN_INVALID_IF(!format->supportsMultisample,
                                 "The texture format (%s) does not support multisampling.",
                                 format->format);
 

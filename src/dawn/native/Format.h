@@ -91,6 +91,7 @@ namespace dawn::native {
         // A format can be known but not supported because it is part of a disabled extension.
         bool isSupported;
         bool supportsStorageUsage;
+        bool supportsMultisample;
         Aspect aspects;
         // Only used for renderable color formats, number of color channels.
         uint8_t componentCount;

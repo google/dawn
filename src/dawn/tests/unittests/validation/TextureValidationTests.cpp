@@ -144,15 +144,19 @@ namespace {
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
             descriptor.sampleCount = 4;
+            descriptor.usage = wgpu::TextureUsage::TextureBinding;
 
-            for (wgpu::TextureFormat format : kNonRenderableColorFormats) {
-                // If a format can support multisample, it must be renderable.
+            for (wgpu::TextureFormat format : utils::kFormatsInCoreSpec) {
                 descriptor.format = format;
-                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+                if (utils::TextureFormatSupportsMultisampling(format)) {
+                    device.CreateTexture(&descriptor);
+                } else {
+                    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+                }
             }
         }
 
-        // Currently we do not support multisampled 2D textures with depth>1.
+        // Currently we do not support multisampled 2D textures with depth > 1.
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
             descriptor.sampleCount = 4;

@@ -130,6 +130,29 @@ namespace utils {
         }
     }
 
+    bool TextureFormatSupportsMultisampling(wgpu::TextureFormat textureFormat) {
+        if (IsBCTextureFormat(textureFormat) || IsETC2TextureFormat(textureFormat) ||
+            IsASTCTextureFormat(textureFormat)) {
+            return false;
+        }
+
+        switch (textureFormat) {
+            case wgpu::TextureFormat::R32Uint:
+            case wgpu::TextureFormat::R32Sint:
+            case wgpu::TextureFormat::RG32Uint:
+            case wgpu::TextureFormat::RG32Sint:
+            case wgpu::TextureFormat::RG32Float:
+            case wgpu::TextureFormat::RGBA32Uint:
+            case wgpu::TextureFormat::RGBA32Sint:
+            case wgpu::TextureFormat::RGBA32Float:
+            case wgpu::TextureFormat::RGB9E5Ufloat:
+                return false;
+
+            default:
+                return true;
+        }
+    }
+
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
         switch (textureFormat) {
             case wgpu::TextureFormat::R8Unorm:
