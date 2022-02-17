@@ -23,17 +23,26 @@
 namespace tint {
 namespace fuzzers {
 
+/// Wrapper around the common fuzzing class for tint_*_reader_*_writter fuzzers
 class ReaderWriterFuzzer : public CommonFuzzer {
  public:
-  explicit ReaderWriterFuzzer(InputFormat input, OutputFormat output)
+  /// Constructor
+  /// Pass through to the CommonFuzzer constructor
+  ReaderWriterFuzzer(InputFormat input, OutputFormat output)
       : CommonFuzzer(input, output) {}
+
+  /// Destructor
   ~ReaderWriterFuzzer() {}
 
+  /// Pass through to the CommonFuzzer setter, but records if it has been
+  /// invoked.
   void SetTransformManager(transform::Manager* tm, transform::DataMap* inputs) {
     tm_set_ = true;
     CommonFuzzer::SetTransformManager(tm, inputs);
   }
 
+  /// Pass through to the CommonFuzzer implementation, but will setup a
+  /// robustness transform, if no other transforms have been set.
   int Run(const uint8_t* data, size_t size) {
     if (!tm_set_) {
       tb_ = std::make_unique<TransformBuilder>(data, size);

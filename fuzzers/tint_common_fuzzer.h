@@ -29,58 +29,100 @@
 namespace tint {
 namespace fuzzers {
 
+// TODO(crbug.com/tint/1356): Add using shader reflection to generate options
+//                            that are potentially valid for Generate*Options
+//                            functions.
+/// Generates random set of options for SPIRV generation
 void GenerateSpirvOptions(DataBuilder* b, writer::spirv::Options* options);
+
+/// Generates random set of options for WGSL generation
 void GenerateWgslOptions(DataBuilder* b, writer::wgsl::Options* options);
+
+/// Generates random set of options for HLSL generation
 void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options);
+
+/// Generates random set of options for MSL generation
 void GenerateMslOptions(DataBuilder* b, writer::msl::Options* options);
 
+/// Shader language the fuzzer is reading
 enum class InputFormat { kWGSL, kSpv };
 
+/// Shader language the fuzzer is emitting
 enum class OutputFormat { kWGSL, kSpv, kHLSL, kMSL };
 
+/// Generic runner for reading and emitting shaders using Tint, used by most
+/// fuzzers to share common code.
 class CommonFuzzer {
  public:
-  explicit CommonFuzzer(InputFormat input, OutputFormat output);
+  /// Constructor
+  /// @param input shader language being read
+  /// @param output shader language being emitted
+  CommonFuzzer(InputFormat input, OutputFormat output);
+
+  /// Destructor
   ~CommonFuzzer();
 
+  /// Setter for the transform manager and the data map to be used
   void SetTransformManager(transform::Manager* tm, transform::DataMap* inputs) {
     assert((!tm || inputs) && "DataMap must be !nullptr if Manager !nullptr");
     transform_manager_ = tm;
     transform_inputs_ = inputs;
   }
 
+  /// Controls if the input shader for run should be outputted to the log
   void SetDumpInput(bool enabled) { dump_input_ = enabled; }
 
+  /// Controls if the shader being valid after parsing is being enforced.
+  /// If false, invalidation of the shader will cause an early exit, but not
+  /// throw an error.
+  /// If true invalidation will throw an error that is caught by libFuzzer and
+  /// will generate a crash report.
   void SetEnforceValidity(bool enabled) { enforce_validity = enabled; }
 
+  /// Convert given shader from input to output format.
+  /// Will also apply provided transforms and run the inspector over the result.
+  /// @param data buffer of data that will interpreted as a byte array or string
+  ///             depending on the shader input format.
+  /// @param size number of elements in buffer
+  /// @returns 0, this is what libFuzzer expects
   int Run(const uint8_t* data, size_t size);
 
+  /// Diagnostic messages generated while Run() is executed.
   const tint::diag::List& Diagnostics() const { return diagnostics_; }
 
+  /// Are there any errors in the diagnostic messages?
   bool HasErrors() const { return diagnostics_.contains_errors(); }
 
+  /// Generated SPIR-V binary, if SPIR-V was emitted.
   const std::vector<uint32_t>& GetGeneratedSpirv() const {
     return generated_spirv_;
   }
 
+  /// Generated WGSL string, if WGSL was emitted.
   const std::string& GetGeneratedWgsl() const { return generated_wgsl_; }
 
+  /// Generated HLSL string, if HLSL was emitted.
   const std::string& GetGeneratedHlsl() const { return generated_hlsl_; }
 
+  /// Generated MSL string, if HLSL was emitted.
   const std::string& GetGeneratedMsl() const { return generated_msl_; }
 
+  /// Setter for SPIR-V emission options
   void SetOptionsSpirv(const writer::spirv::Options& options) {
     options_spirv_ = options;
   }
 
+  /// Setter for WGSL emission options
   void SetOptionsWgsl(const writer::wgsl::Options& options) {
     options_wgsl_ = options;
   }
 
+  /// Setter for HLSL emission options
   void SetOptionsHlsl(const writer::hlsl::Options& options) {
     options_hlsl_ = options;
   }
 
+  /// Setter for MSL emission options
   void SetOptionsMsl(const writer::msl::Options& options) {
     options_msl_ = options;
   }
@@ -109,7 +151,7 @@ class CommonFuzzer {
   std::unique_ptr<Source::File> file_;
 #endif  // TINT_BUILD_WGSL_READER
 
-  // Run series of reflection operations to exercise the Inspector API.
+  /// Runs a series of reflection operations to exercise the Inspector API.
   void RunInspector(Program* program);
 };
 
