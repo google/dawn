@@ -623,7 +623,24 @@ bool GenerateWgsl(const tint::Program* program, const Options& options) {
     return false;
   }
 
-  return WriteFile(options.output_file, "w", result.wgsl);
+  if (!WriteFile(options.output_file, "w", result.wgsl)) {
+    return false;
+  }
+
+  if (options.validate) {
+    // Attempt to re-parse the output program with Tint's WGSL reader.
+    auto source = std::make_unique<tint::Source::File>(options.input_filename,
+                                                       result.wgsl);
+    auto reparsed_program = tint::reader::wgsl::Parse(source.get());
+    if (!reparsed_program.IsValid()) {
+      auto diag_printer = tint::diag::Printer::create(stderr, true);
+      tint::diag::Formatter diag_formatter;
+      diag_formatter.format(reparsed_program.Diagnostics(), diag_printer.get());
+      return false;
+    }
+  }
+
+  return true;
 #else
   (void)program;
   (void)options;
