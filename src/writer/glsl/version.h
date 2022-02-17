@@ -15,6 +15,8 @@
 #ifndef SRC_WRITER_GLSL_VERSION_H_
 #define SRC_WRITER_GLSL_VERSION_H_
 
+#include <cstdint>
+
 namespace tint::writer::glsl {
 
 /// A structure representing the version of GLSL to be generated.
