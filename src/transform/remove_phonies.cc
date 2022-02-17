@@ -121,8 +121,8 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         }
 
         // Phony assignment with multiple side effects.
-        // Generate a call to a dummy function with the side effects as
-        // arguments.
+        // Generate a call to a placeholder function with the side
+        // effects as arguments.
         ctx.Replace(stmt, [&, side_effects] {
           SinkSignature sig;
           for (auto* arg : side_effects) {

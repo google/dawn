@@ -145,7 +145,16 @@ def CheckChange(input_api, output_api):
     results += input_api.canned_checks.CheckChangeLintsClean(input_api,
                                                              output_api,
                                                              lint_filters="")
-    results += CheckNonInclusiveLanguage(input_api, output_api)
+
+    def NonInclusiveFileFilter(file):
+        filter_list = [
+            "docs/tint/spirv-input-output-variables.md",  # External URL
+            "test/tint/samples/compute_boids.wgsl ",  # External URL
+        ]
+        return file in filter_list
+
+    results += CheckNonInclusiveLanguage(input_api, output_api,
+                                         NonInclusiveFileFilter)
 
     return results
 

@@ -144,13 +144,13 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
   std::vector<uint32_t> binary(size / sizeof(uint32_t));
   std::memcpy(binary.data(), data, size);
 
-  MutatorCache dummy_cache(1);
+  MutatorCache placeholder_cache(1);
   auto* mutator_cache = context->mutator_cache.get();
   if (!mutator_cache) {
     // Use a placeholder cache if the user has decided not to use a real cache.
     // The placeholder cache will be destroyed when we return from this function
     // but it will save us from writing all the `if (mutator_cache)` below.
-    mutator_cache = &dummy_cache;
+    mutator_cache = &placeholder_cache;
   }
 
   if (!mutator_cache->Get(binary)) {
