@@ -267,7 +267,6 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
   Program original(std::move(b));
   ProgramBuilder cloned_b;
   CloneContext ctx(&cloned_b, &original);
-  std::cout << str(original) << std::endl;
 
   HoistToDeclBefore hoistToDeclBefore(ctx);
   auto* sem_expr = ctx.src->Sem().Get(expr);
