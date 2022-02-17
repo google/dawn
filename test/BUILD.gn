@@ -301,6 +301,12 @@ tint_unittests_source_set("tint_unittests_sem_src") {
   ]
 }
 
+tint_unittests_source_set("tint_unittests_text_src") {
+  sources = [
+    "../src/text/unicode_test.cc",
+  ]
+}
+
 tint_unittests_source_set("tint_unittests_transform_src") {
   sources = [
     "../src/transform/add_empty_entry_point_test.cc",
@@ -736,6 +742,7 @@ source_set("tint_unittests_src") {
     ":tint_unittests_inspector_src",
     ":tint_unittests_resolver_src",
     ":tint_unittests_sem_src",
+    ":tint_unittests_text_src",
     ":tint_unittests_transform_src",
     ":tint_unittests_utils_src",
     ":tint_unittests_writer_src",

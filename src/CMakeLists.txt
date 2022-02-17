@@ -296,6 +296,8 @@ set(TINT_LIB_SRCS
   symbol_table.h
   symbol.cc
   symbol.h
+  text/unicode.cc
+  text/unicode.h
   traits.h
   transform/add_empty_entry_point.cc
   transform/add_empty_entry_point.h
@@ -773,6 +775,7 @@ if(TINT_BUILD_TESTS)
     symbol_table_test.cc
     symbol_test.cc
     test_main.cc
+    text/unicode_test.cc
     traits_test.cc
     transform/transform_test.cc
     utils/crc32_test.cc

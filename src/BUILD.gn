@@ -425,6 +425,8 @@ libtint_source_set("libtint_core_all_src") {
     "symbol.h",
     "symbol_table.cc",
     "symbol_table.h",
+    "text/unicode.cc",
+    "text/unicode.h",
     "traits.h",
     "transform/add_empty_entry_point.cc",
     "transform/add_empty_entry_point.h",
