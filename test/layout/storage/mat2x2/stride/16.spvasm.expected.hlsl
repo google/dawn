@@ -9,9 +9,9 @@ float2x2 arr_to_mat2x2_stride_16(strided_arr arr[2]) {
 }
 
 typedef strided_arr mat2x2_stride_16_to_arr_ret[2];
-mat2x2_stride_16_to_arr_ret mat2x2_stride_16_to_arr(float2x2 mat) {
-  const strided_arr tint_symbol_6 = {mat[0u]};
-  const strided_arr tint_symbol_7 = {mat[1u]};
+mat2x2_stride_16_to_arr_ret mat2x2_stride_16_to_arr(float2x2 m) {
+  const strided_arr tint_symbol_6 = {m[0u]};
+  const strided_arr tint_symbol_7 = {m[1u]};
   const strided_arr tint_symbol_8[2] = {tint_symbol_6, tint_symbol_7};
   return tint_symbol_8;
 }

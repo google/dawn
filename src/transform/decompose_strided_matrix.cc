@@ -179,7 +179,7 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx,
         auto matrix = [&] { return CreateASTTypeFor(ctx, info.matrix); };
         auto array = [&] { return info.array(ctx.dst); };
 
-        auto mat = ctx.dst->Sym("mat");
+        auto mat = ctx.dst->Sym("m");
         ast::ExpressionList columns(info.matrix->columns());
         for (uint32_t i = 0; i < static_cast<uint32_t>(columns.size()); i++) {
           columns[i] = ctx.dst->IndexAccessor(mat, i);

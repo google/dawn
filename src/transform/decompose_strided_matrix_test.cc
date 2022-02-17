@@ -394,8 +394,8 @@ struct S {
 
 @group(0) @binding(0) var<storage, read_write> s : S;
 
-fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> @stride(32) array<vec2<f32>, 2u> {
-  return @stride(32) array<vec2<f32>, 2u>(mat[0u], mat[1u]);
+fn mat2x2_stride_32_to_arr(m : mat2x2<f32>) -> @stride(32) array<vec2<f32>, 2u> {
+  return @stride(32) array<vec2<f32>, 2u>(m[0u], m[1u]);
 }
 
 @stage(compute) @workgroup_size(1)
@@ -531,8 +531,8 @@ fn arr_to_mat2x2_stride_32(arr : @stride(32) array<vec2<f32>, 2u>) -> mat2x2<f32
   return mat2x2<f32>(arr[0u], arr[1u]);
 }
 
-fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> @stride(32) array<vec2<f32>, 2u> {
-  return @stride(32) array<vec2<f32>, 2u>(mat[0u], mat[1u]);
+fn mat2x2_stride_32_to_arr(m : mat2x2<f32>) -> @stride(32) array<vec2<f32>, 2u> {
+  return @stride(32) array<vec2<f32>, 2u>(m[0u], m[1u]);
 }
 
 @stage(compute) @workgroup_size(1)

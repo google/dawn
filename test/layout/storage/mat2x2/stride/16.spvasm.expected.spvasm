@@ -15,7 +15,7 @@
                OpName %arr_to_mat2x2_stride_16 "arr_to_mat2x2_stride_16"
                OpName %arr "arr"
                OpName %mat2x2_stride_16_to_arr "mat2x2_stride_16_to_arr"
-               OpName %mat "mat"
+               OpName %m "m"
                OpName %f_1 "f_1"
                OpName %f "f"
                OpDecorate %SSBO Block
@@ -52,11 +52,11 @@
                OpReturnValue %21
                OpFunctionEnd
 %mat2x2_stride_16_to_arr = OpFunction %_arr_strided_arr_uint_2 None %22
-        %mat = OpFunctionParameter %mat2v2float
+          %m = OpFunctionParameter %mat2v2float
          %25 = OpLabel
-         %26 = OpCompositeExtract %v2float %mat 0
+         %26 = OpCompositeExtract %v2float %m 0
          %27 = OpCompositeConstruct %strided_arr %26
-         %28 = OpCompositeExtract %v2float %mat 1
+         %28 = OpCompositeExtract %v2float %m 1
          %29 = OpCompositeConstruct %strided_arr %28
          %30 = OpCompositeConstruct %_arr_strided_arr_uint_2 %27 %29
                OpReturnValue %30

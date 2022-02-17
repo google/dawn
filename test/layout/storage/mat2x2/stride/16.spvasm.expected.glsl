@@ -15,9 +15,9 @@ mat2 arr_to_mat2x2_stride_16(strided_arr arr[2]) {
   return mat2(arr[0u].el, arr[1u].el);
 }
 
-strided_arr[2] mat2x2_stride_16_to_arr(mat2 mat) {
-  strided_arr tint_symbol = strided_arr(mat[0u]);
-  strided_arr tint_symbol_1 = strided_arr(mat[1u]);
+strided_arr[2] mat2x2_stride_16_to_arr(mat2 m) {
+  strided_arr tint_symbol = strided_arr(m[0u]);
+  strided_arr tint_symbol_1 = strided_arr(m[1u]);
   strided_arr tint_symbol_2[2] = strided_arr[2](tint_symbol, tint_symbol_1);
   return tint_symbol_2;
 }

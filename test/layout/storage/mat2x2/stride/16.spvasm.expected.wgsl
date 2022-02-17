@@ -13,8 +13,8 @@ fn arr_to_mat2x2_stride_16(arr : array<strided_arr, 2u>) -> mat2x2<f32> {
   return mat2x2<f32>(arr[0u].el, arr[1u].el);
 }
 
-fn mat2x2_stride_16_to_arr(mat : mat2x2<f32>) -> array<strided_arr, 2u> {
-  return array<strided_arr, 2u>(strided_arr(mat[0u]), strided_arr(mat[1u]));
+fn mat2x2_stride_16_to_arr(m : mat2x2<f32>) -> array<strided_arr, 2u> {
+  return array<strided_arr, 2u>(strided_arr(m[0u]), strided_arr(m[1u]));
 }
 
 fn f_1() {

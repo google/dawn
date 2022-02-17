@@ -18,9 +18,9 @@ float2x2 arr_to_mat2x2_stride_16(tint_array_wrapper arr) {
   return float2x2(arr.arr[0u].el, arr.arr[1u].el);
 }
 
-tint_array_wrapper mat2x2_stride_16_to_arr(float2x2 mat) {
-  strided_arr const tint_symbol = {.el=mat[0u]};
-  strided_arr const tint_symbol_1 = {.el=mat[1u]};
+tint_array_wrapper mat2x2_stride_16_to_arr(float2x2 m) {
+  strided_arr const tint_symbol = {.el=m[0u]};
+  strided_arr const tint_symbol_1 = {.el=m[1u]};
   tint_array_wrapper const tint_symbol_2 = {.arr={tint_symbol, tint_symbol_1}};
   return tint_symbol_2;
 }
