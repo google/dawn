@@ -201,19 +201,31 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
       auto& line = src.file->content.lines[line_num - 1];
       auto line_len = line.size();
 
+      bool is_ascii = true;
       for (auto c : line) {
         if (c == '\t') {
           state.repeat(' ', style_.tab_width);
         } else {
           state << c;
         }
+        if (c & 0x80) {
+          is_ascii = false;
+        }
       }
 
       state.newline();
+
+      // If the line contains non-ascii characters, then we cannot assume that
+      // a single utf8 code unit represents a single glyph, so don't attempt to
+      // draw squiggles.
+      if (!is_ascii) {
+        continue;
+      }
+
       state.set_style({Color::kCyan, false});
 
       // Count the number of glyphs in the line span.
-      // start and end use 1-based indexing .
+      // start and end use 1-based indexing.
       auto num_glyphs = [&](size_t start, size_t end) {
         size_t count = 0;
         start = (start > 0) ? (start - 1) : 0;
