@@ -35,10 +35,11 @@ fi
 docker run --rm -i \
   --privileged \
   --volume "${ROOT_DIR}:${ROOT_DIR}" \
-  --volume "${TMP_DIR}:/src" \
+  --volume "${TMP_DIR}/kokoro/tint:/tint" \
   --volume "${KOKORO_ARTIFACTS_DIR}:/mnt/artifacts" \
   --workdir "${ROOT_DIR}" \
-  --env SRC_DIR="/src/tint" \
+  --env SRC_DIR="/tint/src" \
+  --env BUILD_DIR="/tint/build" \
   --env BUILD_TYPE=$BUILD_TYPE \
   --env BUILD_SYSTEM=$BUILD_SYSTEM \
   --env BUILD_SANITIZER=$BUILD_SANITIZER \

@@ -14,6 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This is the bash script invoked inside a docker container.
+# The script expects that the CWD points to a clean checkout of Tint.
+# As `gclient sync` will litter the tint checkout with fetched tools and
+# projects, this script will first clone the pristine tint checkout to
+# ${SRC_DIR}. This allows developers to locally run this script without having
+# to worry about their local tint copy being touched.
+#
+# This script expects the following environment variables to be set on entry:
+#
+# SRC_DIR         - Path to where the local Tint copy will be made. See above.
+# BUILD_DIR       - Path to where Tint will be built.
+# BUILD_TYPE      - Either: 'Debug' or 'Release'
+# BUILD_SYSTEM    - Must be 'cmake'
+# BUILD_SANITIZER - Either: '', 'asan', or 'ubstan'
+# BUILD_TOOLCHAIN - Either: 'clang' or 'gcc'
+
 set -e # Fail on any error.
 
 function show_cmds { set -x; }
@@ -62,9 +78,11 @@ using depot_tools
 using go-1.14.4      # Speeds up ./tools/lint
 using doxygen-1.8.18
 
-status "Cloning to clean source directory at '${SRC_DIR}'"
-
+status "Creating source directory '${SRC_DIR}' and build directory '${BUILD_DIR}'"
 mkdir -p ${SRC_DIR}
+mkdir -p ${BUILD_DIR}
+
+status "Cloning to source directory '${SRC_DIR}'"
 cd ${SRC_DIR}
 git clone ${CLONE_SRC_DIR} .
 
@@ -78,9 +96,6 @@ status "Linting"
 status "Configuring build system"
 if [ "$BUILD_SYSTEM" == "cmake" ]; then
     using cmake-3.17.2
-
-    BUILD_DIR=/tmp/tint-build
-    mkdir -p ${BUILD_DIR}
 
     COMMON_CMAKE_FLAGS=""
     COMMON_CMAKE_FLAGS+=" -DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
@@ -117,7 +132,7 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
         cmake --build . --target tint-docs
     hide_cmds
 
-    status "Building tint"
+    status "Building tint in '${BUILD_DIR}'"
     show_cmds
         cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS}
         cmake --build . -- --jobs=$(nproc)
