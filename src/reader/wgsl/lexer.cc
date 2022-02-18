@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "src/debug.h"
+#include "src/text/unicode.h"
 
 namespace tint {
 namespace reader {
@@ -113,16 +114,8 @@ bool Lexer::is_null() const {
   return (pos_ < len_) && (file_->content.data[pos_] == 0);
 }
 
-bool Lexer::is_alpha(char ch) const {
-  return std::isalpha(ch);
-}
-
 bool Lexer::is_digit(char ch) const {
   return std::isdigit(ch);
-}
-
-bool Lexer::is_alphanum_underscore(char ch) const {
-  return is_alpha(ch) || is_digit(ch) || ch == '_';
 }
 
 bool Lexer::is_hex(char ch) const {
@@ -733,31 +726,52 @@ Token Lexer::try_integer() {
 }
 
 Token Lexer::try_ident() {
-  // Must begin with an a-zA-Z_
-  if (!(is_alpha(file_->content.data[pos_]) ||
-        file_->content.data[pos_] == '_')) {
-    return {};
-  }
-
   auto source = begin_source();
+  auto start = pos_;
 
-  auto s = pos_;
-  while (!is_eof() && is_alphanum_underscore(file_->content.data[pos_])) {
-    pos_++;
-    location_.column++;
+  // This below assumes that the size of a single std::string element is 1 byte.
+  static_assert(sizeof(file_->content.data[0]) == sizeof(uint8_t),
+                "tint::reader::wgsl requires the size of a std::string element "
+                "to be a single byte");
+
+  // Must begin with an XID_Source unicode character, or underscore
+  {
+    auto* utf8 = reinterpret_cast<const uint8_t*>(&file_->content.data[pos_]);
+    auto [code_point, n] =
+        text::utf8::Decode(utf8, file_->content.data.size() - pos_);
+    if (code_point != text::CodePoint('_') && !code_point.IsXIDStart()) {
+      return {};
+    }
+    // Consume start codepoint
+    pos_ += n;
+    location_.column += n;
   }
 
-  if (file_->content.data[s] == '_') {
+  while (!is_eof()) {
+    // Must continue with an XID_Continue unicode character
+    auto* utf8 = reinterpret_cast<const uint8_t*>(&file_->content.data[pos_]);
+    auto [code_point, n] =
+        text::utf8::Decode(utf8, file_->content.data.size() - pos_);
+    if (!code_point.IsXIDContinue()) {
+      break;
+    }
+
+    // Consume continuing codepoint
+    pos_ += n;
+    location_.column += n;
+  }
+
+  if (file_->content.data[start] == '_') {
     // Check for an underscore on its own (special token), or a
     // double-underscore (not allowed).
-    if ((pos_ == s + 1) || (file_->content.data[s + 1] == '_')) {
-      location_.column -= (pos_ - s);
-      pos_ = s;
+    if ((pos_ == start + 1) || (file_->content.data[start + 1] == '_')) {
+      location_.column -= (pos_ - start);
+      pos_ = start;
       return {};
     }
   }
 
-  auto str = file_->content.data_view.substr(s, pos_ - s);
+  auto str = file_->content.data_view.substr(start, pos_ - start);
   end_source(source);
 
   auto t = check_keyword(source, str);

@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 13u}}));
 }
 
-TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
+TEST_F(ParserImplTest, TypeDecl_Parses_Ident) {
   auto p = parser("type a = B");
 
   auto t = p->type_alias();
@@ -47,6 +47,25 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   EXPECT_EQ(p->builder().Symbols().NameFor(alias->name), "a");
   EXPECT_TRUE(alias->type->Is<ast::TypeName>());
   EXPECT_EQ(alias->source.range, (Source::Range{{1u, 1u}, {1u, 11u}}));
+}
+
+TEST_F(ParserImplTest, TypeDecl_Unicode_Parses_Ident) {
+  const std::string ident =  // "𝓶𝔂_𝓽𝔂𝓹𝓮"
+      "\xf0\x9d\x93\xb6\xf0\x9d\x94\x82\x5f\xf0\x9d\x93\xbd\xf0\x9d\x94\x82\xf0"
+      "\x9d\x93\xb9\xf0\x9d\x93\xae";
+
+  auto p = parser("type " + ident + " = i32");
+
+  auto t = p->type_alias();
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(t.errored);
+  EXPECT_TRUE(t.matched);
+  ASSERT_NE(t.value, nullptr);
+  ASSERT_TRUE(t.value->Is<ast::Alias>());
+  auto* alias = t.value->As<ast::Alias>();
+  EXPECT_EQ(p->builder().Symbols().NameFor(alias->name), ident);
+  EXPECT_TRUE(alias->type->Is<ast::I32>());
+  EXPECT_EQ(alias->source.range, (Source::Range{{1u, 1u}, {1u, 37u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {

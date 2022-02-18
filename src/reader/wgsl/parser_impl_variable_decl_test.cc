@@ -18,7 +18,6 @@ namespace tint {
 namespace reader {
 namespace wgsl {
 namespace {
-
 TEST_F(ParserImplTest, VariableDecl_Parses) {
   auto p = parser("var my_var : f32");
   auto v = p->variable_decl();
@@ -31,6 +30,25 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
 
   EXPECT_EQ(v->source.range, (Source::Range{{1u, 5u}, {1u, 11u}}));
   EXPECT_EQ(v->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
+}
+
+TEST_F(ParserImplTest, VariableDecl_Unicode_Parses) {
+  const std::string ident =  // "𝖎𝖉𝖊𝖓𝖙𝖎𝖋𝖎𝖊𝖗123"
+      "\xf0\x9d\x96\x8e\xf0\x9d\x96\x89\xf0\x9d\x96\x8a\xf0\x9d\x96\x93"
+      "\xf0\x9d\x96\x99\xf0\x9d\x96\x8e\xf0\x9d\x96\x8b\xf0\x9d\x96\x8e"
+      "\xf0\x9d\x96\x8a\xf0\x9d\x96\x97\x31\x32\x33";
+
+  auto p = parser("var " + ident + " : f32");
+  auto v = p->variable_decl();
+  EXPECT_FALSE(p->has_error());
+  EXPECT_TRUE(v.matched);
+  EXPECT_FALSE(v.errored);
+  EXPECT_EQ(v->name, ident);
+  EXPECT_NE(v->type, nullptr);
+  EXPECT_TRUE(v->type->Is<ast::F32>());
+
+  EXPECT_EQ(v->source.range, (Source::Range{{1u, 5u}, {1u, 48u}}));
+  EXPECT_EQ(v->type->source.range, (Source::Range{{1u, 51u}, {1u, 54u}}));
 }
 
 TEST_F(ParserImplTest, VariableDecl_Inferred_Parses) {

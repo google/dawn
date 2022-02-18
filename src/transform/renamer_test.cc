@@ -23,6 +23,11 @@ namespace tint {
 namespace transform {
 namespace {
 
+constexpr const char kUnicodeIdentifier[] =  // "𝖎𝖉𝖊𝖓𝖙𝖎𝖋𝖎𝖊𝖗123"
+    "\xf0\x9d\x96\x8e\xf0\x9d\x96\x89\xf0\x9d\x96\x8a\xf0\x9d\x96\x93"
+    "\xf0\x9d\x96\x99\xf0\x9d\x96\x8e\xf0\x9d\x96\x8b\xf0\x9d\x96\x8e"
+    "\xf0\x9d\x96\x8a\xf0\x9d\x96\x97\x31\x32\x33";
+
 using ::testing::ContainerEq;
 
 using RenamerTest = TransformTest;
@@ -184,6 +189,25 @@ fn tint_symbol() {
   EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
+TEST_F(RenamerTest, PreserveUnicode) {
+  auto src = R"(
+@stage(fragment)
+fn frag_main() {
+  var )" + std::string(kUnicodeIdentifier) +
+             R"( : i32;
+}
+)";
+
+  auto expect = src;
+
+  DataMap inputs;
+  inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
+                              /* preserve_unicode */ true);
+  auto got = Run<Renamer>(src, inputs);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(RenamerTest, AttemptSymbolCollision) {
   auto* src = R"(
 @stage(vertex)
@@ -244,7 +268,8 @@ fn frag_main() {
 )";
 
   DataMap inputs;
-  inputs.Add<Renamer::Config>(Renamer::Target::kGlslKeywords);
+  inputs.Add<Renamer::Config>(Renamer::Target::kGlslKeywords,
+                              /* preserve_unicode */ false);
   auto got = Run<Renamer>(src, inputs);
 
   EXPECT_EQ(expect, str(got));
@@ -269,7 +294,8 @@ fn frag_main() {
 )";
 
   DataMap inputs;
-  inputs.Add<Renamer::Config>(Renamer::Target::kHlslKeywords);
+  inputs.Add<Renamer::Config>(Renamer::Target::kHlslKeywords,
+                              /* preserve_unicode */ false);
   auto got = Run<Renamer>(src, inputs);
 
   EXPECT_EQ(expect, str(got));
@@ -294,7 +320,8 @@ fn frag_main() {
 )";
 
   DataMap inputs;
-  inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords);
+  inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
+                              /* preserve_unicode */ false);
   auto got = Run<Renamer>(src, inputs);
 
   EXPECT_EQ(expect, str(got));
@@ -528,7 +555,8 @@ INSTANTIATE_TEST_SUITE_P(RenamerTestGlsl,
                                          //    "void",       // WGSL keyword
                                          "volatile",
                                          //    "while",      // WGSL keyword
-                                         "writeonly"));
+                                         "writeonly",
+                                         kUnicodeIdentifier));
 
 INSTANTIATE_TEST_SUITE_P(RenamerTestHlsl,
                          RenamerTestHlsl,
@@ -1142,8 +1170,9 @@ INSTANTIATE_TEST_SUITE_P(RenamerTestHlsl,
                                          "vertexshader",
                                          "virtual",
                                          // "void",  // WGSL keyword
-                                         "volatile"));
-//                                          "while"  // WGSL reserved keyword
+                                         "volatile",
+                                         // "while"  // WGSL reserved keyword
+                                         kUnicodeIdentifier));
 
 INSTANTIATE_TEST_SUITE_P(
     RenamerTestMsl,
@@ -1425,7 +1454,9 @@ INSTANTIATE_TEST_SUITE_P(
         "M_2_PI_H",
         "M_2_SQRTPI_H",
         "M_SQRT2_H",
-        "M_SQRT1_2_H"));
+        "M_SQRT1_2_H",
+        // "while"  // WGSL reserved keyword
+        kUnicodeIdentifier));
 
 }  // namespace
 }  // namespace transform

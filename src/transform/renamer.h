@@ -20,8 +20,7 @@
 
 #include "src/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// Renamer is a Transform that renames all the symbols in a program.
 class Renamer : public Castable<Renamer, Transform> {
@@ -63,7 +62,9 @@ class Renamer : public Castable<Renamer, Transform> {
   struct Config : public Castable<Config, transform::Data> {
     /// Constructor
     /// @param tgt the targets to rename
-    explicit Config(Target tgt);
+    /// @param keep_unicode if false, symbols with non-ascii code-points are
+    /// renamed
+    explicit Config(Target tgt, bool keep_unicode = false);
 
     /// Copy constructor
     Config(const Config&);
@@ -73,6 +74,9 @@ class Renamer : public Castable<Renamer, Transform> {
 
     /// The targets to rename
     Target const target = Target::kAll;
+
+    /// If false, symbols with non-ascii code-points are renamed.
+    bool preserve_unicode = false;
   };
 
   /// Constructor using a the configuration provided in the input Data
@@ -88,7 +92,6 @@ class Renamer : public Castable<Renamer, Transform> {
   Output Run(const Program* program, const DataMap& data = {}) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TRANSFORM_RENAMER_H_

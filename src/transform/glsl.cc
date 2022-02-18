@@ -56,7 +56,8 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     data.Add<SingleEntryPoint::Config>(cfg->entry_point);
   }
   manager.Add<Renamer>();
-  data.Add<Renamer::Config>(Renamer::Target::kGlslKeywords);
+  data.Add<Renamer::Config>(Renamer::Target::kGlslKeywords,
+                            /* preserve_unicode */ false);
   manager.Add<Unshadow>();
 
   // Attempt to convert `loop`s into for-loops. This is to try and massage the

@@ -315,8 +315,8 @@ INSTANTIATE_TEST_SUITE_P(
                     "2.5E+ 123",
                     "2.5E- 123"));
 
-using IdentifierTest = testing::TestWithParam<const char*>;
-TEST_P(IdentifierTest, Parse) {
+using AsciiIdentifierTest = testing::TestWithParam<const char*>;
+TEST_P(AsciiIdentifierTest, Parse) {
   Source::File file("", GetParam());
   Lexer l(&file);
 
@@ -329,7 +329,7 @@ TEST_P(IdentifierTest, Parse) {
   EXPECT_EQ(t.to_str(), GetParam());
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
-                         IdentifierTest,
+                         AsciiIdentifierTest,
                          testing::Values("a",
                                          "test",
                                          "test01",
@@ -341,6 +341,57 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          "abcdefghijklmnopqrstuvwxyz",
                                          "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
                                          "alldigits_0123456789"));
+
+struct UnicodeCase {
+  const char* utf8;
+  size_t code_units;
+};
+
+using UnicodeIdentifierTest = testing::TestWithParam<UnicodeCase>;
+TEST_P(UnicodeIdentifierTest, Parse) {
+  Source::File file("", GetParam().utf8);
+  Lexer l(&file);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.IsIdentifier());
+  EXPECT_EQ(t.source().range.begin.line, 1u);
+  EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + GetParam().code_units);
+  EXPECT_EQ(t.to_str(), GetParam().utf8);
+}
+INSTANTIATE_TEST_SUITE_P(
+    LexerTest,
+    UnicodeIdentifierTest,
+    testing::ValuesIn({
+        UnicodeCase{// "𝐢𝐝𝐞𝐧𝐭𝐢𝐟𝐢𝐞𝐫"
+                    "\xf0\x9d\x90\xa2\xf0\x9d\x90\x9d\xf0\x9d\x90\x9e\xf0\x9d"
+                    "\x90\xa7\xf0\x9d\x90\xad\xf0\x9d\x90\xa2\xf0\x9d\x90\x9f"
+                    "\xf0\x9d\x90\xa2\xf0\x9d\x90\x9e\xf0\x9d\x90\xab",
+                    40},
+        UnicodeCase{// "𝑖𝑑𝑒𝑛𝑡𝑖𝑓𝑖𝑒𝑟"
+                    "\xf0\x9d\x91\x96\xf0\x9d\x91\x91\xf0\x9d\x91\x92\xf0\x9d"
+                    "\x91\x9b\xf0\x9d\x91\xa1\xf0\x9d\x91\x96\xf0\x9d\x91\x93"
+                    "\xf0\x9d\x91\x96\xf0\x9d\x91\x92\xf0\x9d\x91\x9f",
+                    40},
+        UnicodeCase{
+            // "ｉｄｅｎｔｉｆｉｅｒ"
+            "\xef\xbd\x89\xef\xbd\x84\xef\xbd\x85\xef\xbd\x8e\xef\xbd\x94\xef"
+            "\xbd\x89\xef\xbd\x86\xef\xbd\x89\xef\xbd\x85\xef\xbd\x92",
+            30},
+        UnicodeCase{// "𝕚𝕕𝕖𝕟𝕥𝕚𝕗𝕚𝕖𝕣𝟙𝟚𝟛"
+                    "\xf0\x9d\x95\x9a\xf0\x9d\x95\x95\xf0\x9d\x95\x96\xf0\x9d"
+                    "\x95\x9f\xf0\x9d\x95\xa5\xf0\x9d\x95\x9a\xf0\x9d\x95\x97"
+                    "\xf0\x9d\x95\x9a\xf0\x9d\x95\x96\xf0\x9d\x95\xa3\xf0\x9d"
+                    "\x9f\x99\xf0\x9d\x9f\x9a\xf0\x9d\x9f\x9b",
+                    52},
+        UnicodeCase{
+            // "𝖎𝖉𝖊𝖓𝖙𝖎𝖋𝖎𝖊𝖗123"
+            "\xf0\x9d\x96\x8e\xf0\x9d\x96\x89\xf0\x9d\x96\x8a\xf0\x9d\x96\x93"
+            "\xf0\x9d\x96\x99\xf0\x9d\x96\x8e\xf0\x9d\x96\x8b\xf0\x9d\x96\x8e"
+            "\xf0\x9d\x96\x8a\xf0\x9d\x96\x97\x31\x32\x33",
+            43},
+    }));
 
 TEST_F(LexerTest, IdentifierTest_SingleUnderscoreDoesNotMatch) {
   Source::File file("", "_");

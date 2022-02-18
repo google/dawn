@@ -27,7 +27,7 @@ namespace tint {
 /// Source describes a range of characters within a source file.
 class Source {
  public:
-  /// FileContent describes the content of a source file.
+  /// FileContent describes the content of a source file encoded using utf-8.
   class FileContent {
    public:
     /// Constructs the FileContent with the given file content.
@@ -78,7 +78,8 @@ class Source {
    public:
     /// the 1-based line number. 0 represents no line information.
     size_t line = 0;
-    /// the 1-based column number. 0 represents no column information.
+    /// the 1-based column number in utf8-code units (bytes).
+    /// 0 represents no column information.
     size_t column = 0;
 
     /// Returns true of `this` location is lexicographically less than `rhs`

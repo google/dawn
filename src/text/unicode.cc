@@ -427,7 +427,9 @@ std::ostream& operator<<(std::ostream& out, CodePoint code_point) {
   return out << "'U+" << std::hex << code_point.value << "'";
 }
 
-std::pair<CodePoint, size_t> utf8::Decode(const uint8_t* ptr, size_t len) {
+namespace utf8 {
+
+std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len) {
   if (len < 1) {
     return {};
   }
@@ -489,5 +491,16 @@ std::pair<CodePoint, size_t> utf8::Decode(const uint8_t* ptr, size_t len) {
   }
   return {c, n};
 }
+
+bool IsASCII(std::string_view str) {
+  for (auto c : str) {
+    if (c & 0x80) {
+      return false;
+    }
+  }
+  return true;
+}
+
+}  // namespace utf8
 
 }  // namespace tint::text

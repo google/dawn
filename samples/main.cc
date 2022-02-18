@@ -1119,7 +1119,8 @@ int main(int argc, const char** argv) {
     case Format::kMsl: {
 #if TINT_BUILD_MSL_WRITER
       transform_inputs.Add<tint::transform::Renamer::Config>(
-          tint::transform::Renamer::Target::kMslKeywords);
+          tint::transform::Renamer::Target::kMslKeywords,
+          /* preserve_unicode */ false);
       transform_manager.Add<tint::transform::Renamer>();
 #endif  // TINT_BUILD_MSL_WRITER
       break;
@@ -1132,7 +1133,8 @@ int main(int argc, const char** argv) {
     case Format::kHlsl: {
 #if TINT_BUILD_HLSL_WRITER
       transform_inputs.Add<tint::transform::Renamer::Config>(
-          tint::transform::Renamer::Target::kHlslKeywords);
+          tint::transform::Renamer::Target::kHlslKeywords,
+          /* preserve_unicode */ false);
       transform_manager.Add<tint::transform::Renamer>();
 #endif  // TINT_BUILD_HLSL_WRITER
       break;

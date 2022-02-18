@@ -76,25 +76,18 @@ class Lexer {
   /// it is not null.
   bool is_null() const;
   /// @param ch a character
-  /// @returns true if 'ch' is an alphabetic character
-  bool is_alpha(char ch) const;
-  /// @param ch a character
   /// @returns true if 'ch' is a decimal digit
   bool is_digit(char ch) const;
   /// @param ch a character
   /// @returns true if 'ch' is a hexadecimal digit
   bool is_hex(char ch) const;
-  /// @param ch a character
-  /// @returns true if 'ch' is a digit, an alphabetic character,
-  /// or an underscore.
-  bool is_alphanum_underscore(char ch) const;
   bool matches(size_t pos, std::string_view substr);
 
   /// The source file content
   Source::File const* const file_;
   /// The length of the input
   uint32_t len_ = 0;
-  /// The current position within the input
+  /// The current position in utf-8 code units (bytes) within the input
   uint32_t pos_ = 0;
   /// The current location within the input
   Source::Location location_;

@@ -69,6 +69,10 @@ namespace utf8 {
 ///          If the next code point cannot be decoded then returns [0,0].
 std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len);
 
+/// @returns true if all the utf-8 code points in the string are ASCII
+/// (code-points 0x00..0x7f).
+bool IsASCII(std::string_view);
+
 }  // namespace utf8
 
 }  // namespace tint::text

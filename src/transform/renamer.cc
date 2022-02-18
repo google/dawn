@@ -21,13 +21,13 @@
 #include "src/program_builder.h"
 #include "src/sem/call.h"
 #include "src/sem/member_accessor_expression.h"
+#include "src/text/unicode.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Data);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Config);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 namespace {
 
@@ -1245,7 +1245,7 @@ Renamer::Data::Data(Remappings&& r) : remappings(std::move(r)) {}
 Renamer::Data::Data(const Data&) = default;
 Renamer::Data::~Data() = default;
 
-Renamer::Config::Config(Target t) : target(t) {}
+Renamer::Config::Config(Target t, bool pu) : target(t), preserve_unicode(pu) {}
 Renamer::Config::Config(const Config&) = default;
 Renamer::Config::~Config() = default;
 
@@ -1293,48 +1293,52 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) const {
   Data::Remappings remappings;
 
   Target target = Target::kAll;
+  bool preserve_unicode = false;
 
   if (auto* cfg = inputs.Get<Config>()) {
     target = cfg->target;
+    preserve_unicode = cfg->preserve_unicode;
   }
 
   ctx.ReplaceAll([&](Symbol sym_in) {
     auto name_in = ctx.src->Symbols().NameFor(sym_in);
-    switch (target) {
-      case Target::kAll:
-        // Always rename.
-        break;
-      case Target::kGlslKeywords:
-        if (!std::binary_search(
-                kReservedKeywordsGLSL,
-                kReservedKeywordsGLSL +
-                    sizeof(kReservedKeywordsGLSL) / sizeof(const char*),
-                name_in) &&
-            name_in.compare(0, 3, "gl_")) {
-          // No match, just reuse the original name.
-          return ctx.dst->Symbols().New(name_in);
-        }
-        break;
-      case Target::kHlslKeywords:
-        if (!std::binary_search(
-                kReservedKeywordsHLSL,
-                kReservedKeywordsHLSL +
-                    sizeof(kReservedKeywordsHLSL) / sizeof(const char*),
-                name_in)) {
-          // No match, just reuse the original name.
-          return ctx.dst->Symbols().New(name_in);
-        }
-        break;
-      case Target::kMslKeywords:
-        if (!std::binary_search(
-                kReservedKeywordsMSL,
-                kReservedKeywordsMSL +
-                    sizeof(kReservedKeywordsMSL) / sizeof(const char*),
-                name_in)) {
-          // No match, just reuse the original name.
-          return ctx.dst->Symbols().New(name_in);
-        }
-        break;
+    if (preserve_unicode || text::utf8::IsASCII(name_in)) {
+      switch (target) {
+        case Target::kAll:
+          // Always rename.
+          break;
+        case Target::kGlslKeywords:
+          if (!std::binary_search(
+                  kReservedKeywordsGLSL,
+                  kReservedKeywordsGLSL +
+                      sizeof(kReservedKeywordsGLSL) / sizeof(const char*),
+                  name_in) &&
+              name_in.compare(0, 3, "gl_")) {
+            // No match, just reuse the original name.
+            return ctx.dst->Symbols().New(name_in);
+          }
+          break;
+        case Target::kHlslKeywords:
+          if (!std::binary_search(
+                  kReservedKeywordsHLSL,
+                  kReservedKeywordsHLSL +
+                      sizeof(kReservedKeywordsHLSL) / sizeof(const char*),
+                  name_in)) {
+            // No match, just reuse the original name.
+            return ctx.dst->Symbols().New(name_in);
+          }
+          break;
+        case Target::kMslKeywords:
+          if (!std::binary_search(
+                  kReservedKeywordsMSL,
+                  kReservedKeywordsMSL +
+                      sizeof(kReservedKeywordsMSL) / sizeof(const char*),
+                  name_in)) {
+            // No match, just reuse the original name.
+            return ctx.dst->Symbols().New(name_in);
+          }
+          break;
+      }
     }
 
     auto sym_out = ctx.dst->Sym();
@@ -1359,5 +1363,4 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) const {
                 std::make_unique<Data>(std::move(remappings)));
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

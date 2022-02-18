@@ -14,6 +14,7 @@
 
 #include "src/ast/struct_block_attribute.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/utils/string.h"
 
 namespace tint {
 namespace reader {
@@ -40,6 +41,46 @@ struct S {
   ASSERT_EQ(s->members.size(), 2u);
   EXPECT_EQ(s->members[0]->symbol, p->builder().Symbols().Register("a"));
   EXPECT_EQ(s->members[1]->symbol, p->builder().Symbols().Register("b"));
+}
+
+TEST_F(ParserImplTest, StructDecl_Unicode_Parses) {
+  const std::string struct_ident =  // "𝓼𝓽𝓻𝓾𝓬𝓽𝓾𝓻𝓮"
+      "\xf0\x9d\x93\xbc\xf0\x9d\x93\xbd\xf0\x9d\x93\xbb\xf0\x9d\x93\xbe\xf0\x9d"
+      "\x93\xac\xf0\x9d\x93\xbd\xf0\x9d\x93\xbe\xf0\x9d\x93\xbb\xf0\x9d\x93"
+      "\xae";
+  const std::string member_a_ident =  // "𝕞𝕖𝕞𝕓𝕖𝕣_𝕒"
+      "\xf0\x9d\x95\x9e\xf0\x9d\x95\x96\xf0\x9d\x95\x9e\xf0\x9d\x95\x93\xf0\x9d"
+      "\x95\x96\xf0\x9d\x95\xa3\x5f\xf0\x9d\x95\x92";
+  const std::string member_b_ident =  // "𝔪𝔢𝔪𝔟𝔢𝔯_𝔟"
+      "\xf0\x9d\x94\xaa\xf0\x9d\x94\xa2\xf0\x9d\x94\xaa\xf0\x9d\x94\x9f\xf0\x9d"
+      "\x94\xa2\xf0\x9d\x94\xaf\x5f\xf0\x9d\x94\x9f";
+
+  std::string src = R"(
+struct $struct {
+  $member_a : i32;
+  $member_b : f32;
+})";
+  src = utils::ReplaceAll(src, "$struct", struct_ident);
+  src = utils::ReplaceAll(src, "$member_a", member_a_ident);
+  src = utils::ReplaceAll(src, "$member_b", member_b_ident);
+
+  auto p = parser(src);
+  auto attrs = p->attribute_list();
+  EXPECT_FALSE(attrs.errored);
+  EXPECT_FALSE(attrs.matched);
+  ASSERT_EQ(attrs.value.size(), 0u);
+
+  auto s = p->struct_decl(attrs.value);
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(s.errored);
+  EXPECT_TRUE(s.matched);
+  ASSERT_NE(s.value, nullptr);
+  ASSERT_EQ(s->name, p->builder().Symbols().Register(struct_ident));
+  ASSERT_EQ(s->members.size(), 2u);
+  EXPECT_EQ(s->members[0]->symbol,
+            p->builder().Symbols().Register(member_a_ident));
+  EXPECT_EQ(s->members[1]->symbol,
+            p->builder().Symbols().Register(member_b_ident));
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithAttribute) {
