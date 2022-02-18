@@ -48,11 +48,22 @@ namespace tint {
 // Forward declaration
 class CastableBase;
 
+/// Ignore is used as a special type used for skipping over types for trait
+/// helper functions.
+class Ignore {};
+
 namespace detail {
 template <typename T>
 struct TypeInfoOf;
 
 }  // namespace detail
+
+/// True if all template types that are not Ignore derive from CastableBase
+template <typename... TYPES>
+static constexpr bool IsCastable =
+    ((traits::IsTypeOrDerived<TYPES, CastableBase> ||
+      std::is_same_v<TYPES, Ignore>)&&...) &&
+    !(std::is_same_v<TYPES, Ignore> && ...);
 
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
 #define TINT_INSTANTIATE_TYPEINFO(CLASS)                      \
@@ -145,8 +156,7 @@ struct TypeInfo {
   /// multiple hashcodes are bitwise-or'd together.
   template <typename T>
   static constexpr HashCode HashCodeOf() {
-    static_assert(traits::IsTypeOrDerived<T, CastableBase>::value,
-                  "T is not Castable");
+    static_assert(IsCastable<T>, "T is not Castable");
     static_assert(
         std::is_same_v<T, std::remove_cv_t<T>>,
         "Strip const / volatile decorations before calling HashCodeOf");
@@ -454,6 +464,68 @@ class Castable : public BASE {
     return tint::As<const TO, FLAGS>(this);
   }
 };
+
+namespace detail {
+/// <code>typename CastableCommonBaseImpl<TYPES>::type</code> resolves to the
+/// common base class for all of TYPES.
+template <typename... TYPES>
+struct CastableCommonBaseImpl {};
+
+/// Alias to typename CastableCommonBaseImpl<TYPES>::type
+template <typename... TYPES>
+using CastableCommonBase =
+    typename detail::CastableCommonBaseImpl<TYPES...>::type;
+
+/// CastableCommonBaseImpl template specialization for a single type
+template <typename T>
+struct CastableCommonBaseImpl<T> {
+  /// Common base class of a single type is itself
+  using type = T;
+};
+
+/// CastableCommonBaseImpl A <-> CastableBase specialization
+template <typename A>
+struct CastableCommonBaseImpl<A, CastableBase> {
+  /// Common base class for A and CastableBase is CastableBase
+  using type = CastableBase;
+};
+
+/// CastableCommonBaseImpl T <-> Ignore specialization
+template <typename T>
+struct CastableCommonBaseImpl<T, Ignore> {
+  /// Resolves to T as the other type is ignored
+  using type = T;
+};
+
+/// CastableCommonBaseImpl Ignore <-> T specialization
+template <typename T>
+struct CastableCommonBaseImpl<Ignore, T> {
+  /// Resolves to T as the other type is ignored
+  using type = T;
+};
+
+/// CastableCommonBaseImpl A <-> B specialization
+template <typename A, typename B>
+struct CastableCommonBaseImpl<A, B> {
+  /// The common base class for A, B and OTHERS
+  using type = std::conditional_t<traits::IsTypeOrDerived<A, B>,
+                                  B,  // A derives from B
+                                  CastableCommonBase<A, typename B::TrueBase>>;
+};
+
+/// CastableCommonBaseImpl 3+ types specialization
+template <typename A, typename B, typename... OTHERS>
+struct CastableCommonBaseImpl<A, B, OTHERS...> {
+  /// The common base class for A, B and OTHERS
+  using type = CastableCommonBase<CastableCommonBase<A, B>, OTHERS...>;
+};
+
+}  // namespace detail
+
+/// Resolves to the common most derived type that each of the types in `TYPES`
+/// derives from.
+template <typename... TYPES>
+using CastableCommonBase = detail::CastableCommonBase<TYPES...>;
 
 /// Default can be used as the default case for a Switch(), when all previous
 /// cases failed to match.

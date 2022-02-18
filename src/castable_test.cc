@@ -22,34 +22,15 @@
 namespace tint {
 namespace {
 
-struct Animal : public tint::Castable<Animal> {
-  explicit Animal(std::string n) : name(n) {}
-  const std::string name;
-};
-
-struct Amphibian : public tint::Castable<Amphibian, Animal> {
-  explicit Amphibian(std::string n) : Base(n) {}
-};
-
-struct Mammal : public tint::Castable<Mammal, Animal> {
-  explicit Mammal(std::string n) : Base(n) {}
-};
-
-struct Reptile : public tint::Castable<Reptile, Animal> {
-  explicit Reptile(std::string n) : Base(n) {}
-};
-
-struct Frog : public tint::Castable<Frog, Amphibian> {
-  Frog() : Base("Frog") {}
-};
-
-struct Bear : public tint::Castable<Bear, Mammal> {
-  Bear() : Base("Bear") {}
-};
-
-struct Gecko : public tint::Castable<Gecko, Reptile> {
-  Gecko() : Base("Gecko") {}
-};
+struct Animal : public tint::Castable<Animal> {};
+struct Amphibian : public tint::Castable<Amphibian, Animal> {};
+struct Mammal : public tint::Castable<Mammal, Animal> {};
+struct Reptile : public tint::Castable<Reptile, Animal> {};
+struct Frog : public tint::Castable<Frog, Amphibian> {};
+struct Bear : public tint::Castable<Bear, Mammal> {};
+struct Lizard : public tint::Castable<Lizard, Reptile> {};
+struct Gecko : public tint::Castable<Gecko, Lizard> {};
+struct Iguana : public tint::Castable<Iguana, Lizard> {};
 
 TEST(CastableBase, Is) {
   std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
@@ -417,6 +398,65 @@ TEST(Castable, SwitchNullNoDefault) {
   EXPECT_TRUE(default_called);
 }
 
+// IsCastable static tests
+static_assert(IsCastable<CastableBase>);
+static_assert(IsCastable<Animal>);
+static_assert(IsCastable<Ignore, Frog, Bear>);
+static_assert(IsCastable<Mammal, Ignore, Amphibian, Gecko>);
+static_assert(!IsCastable<Mammal, int, Amphibian, Ignore, Gecko>);
+static_assert(!IsCastable<bool>);
+static_assert(!IsCastable<int, float>);
+static_assert(!IsCastable<Ignore>);
+
+// CastableCommonBase static tests
+static_assert(std::is_same_v<Animal, CastableCommonBase<Animal>>);
+static_assert(std::is_same_v<Amphibian, CastableCommonBase<Amphibian>>);
+static_assert(std::is_same_v<Mammal, CastableCommonBase<Mammal>>);
+static_assert(std::is_same_v<Reptile, CastableCommonBase<Reptile>>);
+static_assert(std::is_same_v<Frog, CastableCommonBase<Frog>>);
+static_assert(std::is_same_v<Bear, CastableCommonBase<Bear>>);
+static_assert(std::is_same_v<Lizard, CastableCommonBase<Lizard>>);
+static_assert(std::is_same_v<Gecko, CastableCommonBase<Gecko>>);
+static_assert(std::is_same_v<Iguana, CastableCommonBase<Iguana>>);
+
+static_assert(std::is_same_v<Animal, CastableCommonBase<Animal, Animal>>);
+static_assert(
+    std::is_same_v<Amphibian, CastableCommonBase<Amphibian, Amphibian>>);
+static_assert(std::is_same_v<Mammal, CastableCommonBase<Mammal, Mammal>>);
+static_assert(std::is_same_v<Reptile, CastableCommonBase<Reptile, Reptile>>);
+static_assert(std::is_same_v<Frog, CastableCommonBase<Frog, Frog>>);
+static_assert(std::is_same_v<Bear, CastableCommonBase<Bear, Bear>>);
+static_assert(std::is_same_v<Lizard, CastableCommonBase<Lizard, Lizard>>);
+static_assert(std::is_same_v<Gecko, CastableCommonBase<Gecko, Gecko>>);
+static_assert(std::is_same_v<Iguana, CastableCommonBase<Iguana, Iguana>>);
+
+static_assert(
+    std::is_same_v<CastableBase, CastableCommonBase<CastableBase, Animal>>);
+static_assert(
+    std::is_same_v<CastableBase, CastableCommonBase<Animal, CastableBase>>);
+static_assert(std::is_same_v<Amphibian, CastableCommonBase<Amphibian, Frog>>);
+static_assert(std::is_same_v<Amphibian, CastableCommonBase<Frog, Amphibian>>);
+static_assert(std::is_same_v<Animal, CastableCommonBase<Reptile, Frog>>);
+static_assert(std::is_same_v<Animal, CastableCommonBase<Frog, Reptile>>);
+static_assert(std::is_same_v<Animal, CastableCommonBase<Bear, Frog>>);
+static_assert(std::is_same_v<Animal, CastableCommonBase<Frog, Bear>>);
+static_assert(std::is_same_v<Lizard, CastableCommonBase<Gecko, Iguana>>);
+
+static_assert(std::is_same_v<Animal, CastableCommonBase<Bear, Frog, Iguana>>);
+static_assert(
+    std::is_same_v<Lizard, CastableCommonBase<Lizard, Gecko, Iguana>>);
+static_assert(
+    std::is_same_v<Lizard, CastableCommonBase<Gecko, Iguana, Lizard>>);
+static_assert(
+    std::is_same_v<Lizard, CastableCommonBase<Gecko, Lizard, Iguana>>);
+static_assert(std::is_same_v<Animal, CastableCommonBase<Frog, Gecko, Iguana>>);
+static_assert(std::is_same_v<Animal, CastableCommonBase<Gecko, Iguana, Frog>>);
+static_assert(std::is_same_v<Animal, CastableCommonBase<Gecko, Frog, Iguana>>);
+
+static_assert(
+    std::is_same_v<CastableBase,
+                   CastableCommonBase<Bear, Frog, Iguana, CastableBase>>);
+
 }  // namespace
 
 TINT_INSTANTIATE_TYPEINFO(Animal);
@@ -425,6 +465,7 @@ TINT_INSTANTIATE_TYPEINFO(Mammal);
 TINT_INSTANTIATE_TYPEINFO(Reptile);
 TINT_INSTANTIATE_TYPEINFO(Frog);
 TINT_INSTANTIATE_TYPEINFO(Bear);
+TINT_INSTANTIATE_TYPEINFO(Lizard);
 TINT_INSTANTIATE_TYPEINFO(Gecko);
 
 }  // namespace tint

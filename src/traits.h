@@ -86,13 +86,12 @@ using ParameterType = typename SignatureOfT<F>::template parameter<N>;
 template <typename F>
 using ReturnType = typename SignatureOfT<F>::ret;
 
-/// `IsTypeOrDerived<T, BASE>::value` is true iff `T` is of type `BASE`, or
-/// derives from `BASE`.
+/// IsTypeOrDerived<T, BASE> is true iff `T` is of type `BASE`, or derives from
+/// `BASE`.
 template <typename T, typename BASE>
-using IsTypeOrDerived =
-    std::integral_constant<bool,
-                           std::is_base_of<BASE, Decay<T>>::value ||
-                               std::is_same<BASE, Decay<T>>::value>;
+static constexpr bool IsTypeOrDerived =
+    std::is_base_of<BASE, Decay<T>>::value ||
+    std::is_same<BASE, Decay<T>>::value;
 
 /// If `CONDITION` is true then EnableIf resolves to type T, otherwise an
 /// invalid type.
@@ -102,12 +101,12 @@ using EnableIf = typename std::enable_if<CONDITION, T>::type;
 /// If `T` is of type `BASE`, or derives from `BASE`, then EnableIfIsType
 /// resolves to type `T`, otherwise an invalid type.
 template <typename T, typename BASE>
-using EnableIfIsType = EnableIf<IsTypeOrDerived<T, BASE>::value, T>;
+using EnableIfIsType = EnableIf<IsTypeOrDerived<T, BASE>, T>;
 
 /// If `T` is not of type `BASE`, or does not derive from `BASE`, then
 /// EnableIfIsNotType resolves to type `T`, otherwise an invalid type.
 template <typename T, typename BASE>
-using EnableIfIsNotType = EnableIf<!IsTypeOrDerived<T, BASE>::value, T>;
+using EnableIfIsNotType = EnableIf<!IsTypeOrDerived<T, BASE>, T>;
 
 /// @returns the std::index_sequence with all the indices shifted by OFFSET.
 template <std::size_t OFFSET, std::size_t... INDICES>

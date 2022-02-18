@@ -58,10 +58,10 @@ inline ProgramID ProgramIDOf(const Cloneable*) {
 
 /// CloneContext holds the state used while cloning AST nodes.
 class CloneContext {
-  /// ParamTypeIsPtrOf<F, T>::value is true iff the first parameter of
+  /// ParamTypeIsPtrOf<F, T> is true iff the first parameter of
   /// F is a pointer of (or derives from) type T.
   template <typename F, typename T>
-  using ParamTypeIsPtrOf = traits::IsTypeOrDerived<
+  static constexpr bool ParamTypeIsPtrOf = traits::IsTypeOrDerived<
       typename std::remove_pointer<traits::ParameterType<F, 0>>::type,
       T>;
 
@@ -295,8 +295,8 @@ class CloneContext {
   ///        `T* (T*)`, where `T` derives from Cloneable
   /// @returns this CloneContext so calls can be chained
   template <typename F>
-  traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>::value, CloneContext>&
-  ReplaceAll(F&& replacer) {
+  traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>, CloneContext>& ReplaceAll(
+      F&& replacer) {
     using TPtr = traits::ParameterType<F, 0>;
     using T = typename std::remove_pointer<TPtr>::type;
     for (auto& transform : transforms_) {

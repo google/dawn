@@ -331,8 +331,8 @@ class ProgramBuilder {
   /// @returns the node pointer
   template <typename T, typename ARG0, typename... ARGS>
   traits::EnableIf</* T is ast::Node and ARG0 is not Source */
-                   traits::IsTypeOrDerived<T, ast::Node>::value &&
-                       !traits::IsTypeOrDerived<ARG0, Source>::value,
+                   traits::IsTypeOrDerived<T, ast::Node> &&
+                       !traits::IsTypeOrDerived<ARG0, Source>,
                    T>*
   create(ARG0&& arg0, ARGS&&... args) {
     AssertNotMoved();
@@ -346,8 +346,8 @@ class ProgramBuilder {
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  traits::EnableIf<traits::IsTypeOrDerived<T, sem::Node>::value &&
-                       !traits::IsTypeOrDerived<T, sem::Type>::value,
+  traits::EnableIf<traits::IsTypeOrDerived<T, sem::Node> &&
+                       !traits::IsTypeOrDerived<T, sem::Type>,
                    T>*
   create(ARGS&&... args) {
     AssertNotMoved();
