@@ -222,8 +222,7 @@ namespace dawn::native {
         static_assert(sizeof(Uniform) == 176);
 
         // TODO(crbug.com/dawn/856): Expand copyTextureForBrowser to support any
-        // non-depth, non-stencil, non-compressed texture format pair copy. Now this API
-        // supports CopyImageBitmapToTexture normal format pairs.
+        // non-depth, non-stencil, non-compressed texture format pair copy.
         MaybeError ValidateCopyTextureFormatConversion(const wgpu::TextureFormat srcFormat,
                                                        const wgpu::TextureFormat dstFormat) {
             switch (srcFormat) {
@@ -255,6 +254,12 @@ namespace dawn::native {
                         "Destination texture format (%s) is not supported.", dstFormat);
             }
 
+            return {};
+        }
+
+        MaybeError ValidateTextureState(const TextureBase* texture) {
+            DAWN_INVALID_IF(texture->GetTextureState() == TextureBase::TextureState::Destroyed,
+                            "Destroyed texture %s used in CopyTextureForBrowser().", texture);
             return {};
         }
 
@@ -326,6 +331,9 @@ namespace dawn::native {
                                              const CopyTextureForBrowserOptions* options) {
         DAWN_TRY(device->ValidateObject(source->texture));
         DAWN_TRY(device->ValidateObject(destination->texture));
+
+        DAWN_TRY(ValidateTextureState(source->texture));
+        DAWN_TRY(ValidateTextureState(destination->texture));
 
         DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
                          "validating the ImageCopyTexture for the source");

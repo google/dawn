@@ -157,6 +157,38 @@ TEST_F(CopyTextureForBrowserTest, IncorrectUsage) {
                               noCopyDstUsageSource, 0, {0, 0, 0}, {16, 16, 1});
 }
 
+// Test source or destination texture is destroyed.
+TEST_F(CopyTextureForBrowserTest, DestroyedTexture) {
+    wgpu::Texture source =
+        Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding);
+    wgpu::Texture destination =
+        Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm,
+                        wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment);
+
+    wgpu::CopyTextureForBrowserOptions options = {};
+
+    // Valid src and dst textures.
+    {
+        TestCopyTextureForBrowser(utils::Expectation::Success, source, 0, {0, 0, 0}, destination, 0,
+                                  {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::All, options);
+    }
+
+    // Destroyed src texture.
+    {
+        source.Destroy();
+        TestCopyTextureForBrowser(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, 0,
+                                  {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::All, options);
+    }
+
+    // Destroyed dst texture.
+    {
+        destination.Destroy();
+        TestCopyTextureForBrowser(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, 0,
+                                  {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::All, options);
+    }
+}
+
 // Test non-zero value origin in source and OOB copy rects.
 TEST_F(CopyTextureForBrowserTest, OutOfBounds) {
     wgpu::Texture source =
