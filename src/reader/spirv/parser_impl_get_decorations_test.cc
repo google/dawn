@@ -198,6 +198,68 @@ TEST_F(SpvParserGetDecorationsTest,
   EXPECT_TRUE(p->error().empty());
 }
 
+TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_Restrict) {
+  // RestrictPointer applies to a memory object declaration. Use a variable.
+  auto p = parser(test::Assemble(R"(
+    OpDecorate %10 Restrict
+    %float = OpTypeFloat 32
+    %ptr = OpTypePointer Workgroup %float
+    %10 = OpVariable %ptr Workgroup
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  auto decorations = p->GetDecorationsFor(10);
+  EXPECT_TRUE(decorations.empty());
+  EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
+}
+
+TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_Restrict) {
+  // Restrict applies to a memory object declaration.
+  // But OpMemberDecorate can only be applied to a structure type.
+  // Test the reader's ability to be resilient to more than what SPIR-V allows.
+  auto p = parser(test::Assemble(R"(
+    OpMemberDecorate %10 0 Restrict
+    %float = OpTypeFloat 32
+    %10 = OpTypeStruct %float
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  auto decorations = p->GetDecorationsForMember(10, 0);
+  EXPECT_TRUE(decorations.empty());
+  EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
+}
+
+TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_RestrictPointer) {
+  // RestrictPointer applies to a memory object declaration. Use a variable.
+  auto p = parser(test::Assemble(R"(
+    OpDecorate %10 RestrictPointer
+    %float = OpTypeFloat 32
+    %ptr = OpTypePointer Workgroup %float
+    %10 = OpVariable %ptr Workgroup
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  auto decorations = p->GetDecorationsFor(10);
+  EXPECT_TRUE(decorations.empty());
+  EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
+}
+
+TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_RestrictPointer) {
+  // RestrictPointer applies to a memory object declaration.
+  // But OpMemberDecorate can only be applied to a structure type.
+  // Test the reader's ability to be resilient to more than what SPIR-V allows.
+  auto p = parser(test::Assemble(R"(
+    OpMemberDecorate %10 0 RestrictPointer
+    %float = OpTypeFloat 32
+    %10 = OpTypeStruct %float
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  auto decorations = p->GetDecorationsFor(10);
+  EXPECT_TRUE(decorations.empty());
+  EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

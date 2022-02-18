@@ -221,6 +221,8 @@ class ParserImpl : Reader {
   /// Gets the list of unique decorations for a SPIR-V result ID.  Returns an
   /// empty vector if the ID is not a result ID, or if no decorations target
   /// that ID. The internal representation must have already been built.
+  /// Ignores decorations that have no effect in graphics APIs, e.g. Restrict
+  /// and RestrictPointer.
   /// @param id SPIR-V ID
   /// @returns the list of decorations on the given ID
   DecorationList GetDecorationsFor(uint32_t id) const;
@@ -228,6 +230,8 @@ class ParserImpl : Reader {
   /// an empty list if the `id` is not the ID of a struct, or if the member
   /// index is out of range, or if the target member has no decorations. The
   /// internal representation must have already been built.
+  /// Ignores decorations that have no effect in graphics APIs, e.g. Restrict
+  /// and RestrictPointer.
   /// @param id SPIR-V ID of a struct
   /// @param member_index the member within the struct
   /// @returns the list of decorations on the member

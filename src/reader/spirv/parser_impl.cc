@@ -396,11 +396,19 @@ DecorationList ParserImpl::GetDecorationsFor(uint32_t id) const {
     // Example: OpDecorate %struct_id Block
     // Example: OpDecorate %array_ty ArrayStride 16
     auto decoration_kind = inst->GetSingleWordInOperand(1);
-    if (visited.emplace(decoration_kind).second) {
-      std::vector<uint32_t> inst_as_words;
-      inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
-      Decoration d(inst_as_words.begin() + 2, inst_as_words.end());
-      result.push_back(d);
+    switch (decoration_kind) {
+      // Restrict and RestrictPointer have no effect in graphics APIs.
+      case SpvDecorationRestrict:
+      case SpvDecorationRestrictPointer:
+        break;
+      default:
+        if (visited.emplace(decoration_kind).second) {
+          std::vector<uint32_t> inst_as_words;
+          inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
+          Decoration d(inst_as_words.begin() + 2, inst_as_words.end());
+          result.push_back(d);
+        }
+        break;
     }
   }
   return result;
@@ -419,11 +427,18 @@ DecorationList ParserImpl::GetDecorationsForMember(
       continue;
     }
     auto decoration_kind = inst->GetSingleWordInOperand(2);
-    if (visited.emplace(decoration_kind).second) {
-      std::vector<uint32_t> inst_as_words;
-      inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
-      Decoration d(inst_as_words.begin() + 3, inst_as_words.end());
-      result.push_back(d);
+    switch (decoration_kind) {
+      // Restrict and RestrictPointer have no effect in graphics APIs.
+      case SpvDecorationRestrict:
+      case SpvDecorationRestrictPointer:
+        break;
+      default:
+        if (visited.emplace(decoration_kind).second) {
+          std::vector<uint32_t> inst_as_words;
+          inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
+          Decoration d(inst_as_words.begin() + 3, inst_as_words.end());
+          result.push_back(d);
+        }
     }
   }
   return result;
