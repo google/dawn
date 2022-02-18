@@ -265,6 +265,24 @@ TEST_F(ResolverCallValidationTest, CallVariable) {
 note: 'v' declared here)");
 }
 
+TEST_F(ResolverCallValidationTest, CallVariableShadowsFunction) {
+  // fn x() {}
+  // fn f() {
+  //   var x : i32;
+  //   x();
+  // }
+  Func("x", {}, ty.void_(), {});
+  Func("f", {}, ty.void_(),
+       {
+           Decl(Var(Source{{56, 78}}, "x", ty.i32())),
+           CallStmt(Call(Source{{12, 34}}, "x")),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), R"(error: cannot call variable 'x'
+56:78 note: 'x' declared here)");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

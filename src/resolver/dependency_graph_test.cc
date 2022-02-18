@@ -993,9 +993,9 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Mixed_RecursiveDependencies) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            R"(3:1 error: cyclic dependency found: 'S' -> 'A' -> 'S'
-3:10 note: struct 'S' references alias 'A' here
+            R"(2:1 error: cyclic dependency found: 'A' -> 'S' -> 'A'
 2:10 note: alias 'A' references struct 'S' here
+3:10 note: struct 'S' references alias 'A' here
 4:1 error: cyclic dependency found: 'Z' -> 'L' -> 'Z'
 4:10 note: var 'Z' references let 'L' here
 5:10 note: let 'L' references var 'Z' here)");

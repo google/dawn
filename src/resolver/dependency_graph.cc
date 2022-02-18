@@ -173,6 +173,16 @@ class DependencyScanner {
   /// Traverses the function, performing symbol resolution and determining
   /// global dependencies.
   void TraverseFunction(const ast::Function* func) {
+    // Perform symbol resolution on all the parameter types before registering
+    // the parameters themselves. This allows the case of declaring a parameter
+    // with the same identifier as its type.
+    for (auto* param : func->params) {
+      TraverseType(param->type);
+    }
+    // Resolve the return type
+    TraverseType(func->return_type);
+
+    // Push the scope stack for the parameters and function body.
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
 
@@ -181,12 +191,10 @@ class DependencyScanner {
         graph_.shadows.emplace(param, shadows);
       }
       Declare(param->symbol, param);
-      TraverseType(param->type);
     }
     if (func->body) {
       TraverseStatements(func->body->statements);
     }
-    TraverseType(func->return_type);
   }
 
   /// Traverses the statements, performing symbol resolution and determining
@@ -295,38 +303,15 @@ class DependencyScanner {
     ast::TraverseExpressions(
         root, diagnostics_, [&](const ast::Expression* expr) {
           if (auto* ident = expr->As<ast::IdentifierExpression>()) {
-            auto* node = scope_stack_.Get(ident->symbol);
-            if (node == nullptr) {
-              if (!IsBuiltin(ident->symbol)) {
-                UnknownSymbol(ident->symbol, ident->source, "identifier");
-              }
-              return ast::TraverseAction::Descend;
-            }
-            auto global_it = globals_.find(ident->symbol);
-            if (global_it != globals_.end() &&
-                node == global_it->second->node) {
-              AddGlobalDependency(ident, ident->symbol, "identifier",
-                                  "references");
-            } else {
-              graph_.resolved_symbols.emplace(ident, node);
-            }
+            AddDependency(ident, ident->symbol, "identifier", "references");
           }
           if (auto* call = expr->As<ast::CallExpression>()) {
             if (call->target.name) {
-              if (!IsBuiltin(call->target.name->symbol)) {
-                AddGlobalDependency(call->target.name,
-                                    call->target.name->symbol, "function",
-                                    "calls");
-                graph_.resolved_symbols.emplace(
-                    call,
-                    utils::Lookup(graph_.resolved_symbols, call->target.name));
-              }
+              AddDependency(call->target.name, call->target.name->symbol,
+                            "function", "calls");
             }
             if (call->target.type) {
               TraverseType(call->target.type);
-              graph_.resolved_symbols.emplace(
-                  call,
-                  utils::Lookup(graph_.resolved_symbols, call->target.type));
             }
           }
           if (auto* cast = expr->As<ast::BitcastExpression>()) {
@@ -360,7 +345,7 @@ class DependencyScanner {
       return;
     }
     if (auto* tn = ty->As<ast::TypeName>()) {
-      AddGlobalDependency(tn, tn->name, "type", "references");
+      AddDependency(tn, tn->name, "type", "references");
       return;
     }
     if (auto* vec = ty->As<ast::Vector>()) {
@@ -416,24 +401,31 @@ class DependencyScanner {
     UnhandledNode(diagnostics_, attr);
   }
 
-  /// Adds the dependency to the currently processed global
-  void AddGlobalDependency(const ast::Node* from,
-                           Symbol to,
-                           const char* use,
-                           const char* action) {
-    auto global_it = globals_.find(to);
-    if (global_it != globals_.end()) {
-      auto* global = global_it->second;
+  /// Adds the dependency from `from` to `to`, erroring if `to` cannot be
+  /// resolved.
+  void AddDependency(const ast::Node* from,
+                     Symbol to,
+                     const char* use,
+                     const char* action) {
+    auto* resolved = scope_stack_.Get(to);
+    if (!resolved) {
+      if (!IsBuiltin(to)) {
+        UnknownSymbol(to, from->source, use);
+        return;
+      }
+    }
+
+    if (auto* global = utils::Lookup(globals_, to);
+        global && global->node == resolved) {
       if (dependency_edges_
               .emplace(DependencyEdge{current_global_, global},
                        DependencyInfo{from->source, action})
               .second) {
         current_global_->deps.emplace_back(global);
       }
-      graph_.resolved_symbols.emplace(from, global->node);
-    } else {
-      UnknownSymbol(to, from->source, use);
     }
+
+    graph_.resolved_symbols.emplace(from, resolved);
   }
 
   /// @returns true if `name` is the name of a builtin function

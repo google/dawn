@@ -29,9 +29,9 @@ namespace utils {
 /// @return the map item value, or `if_missing` if the map does not contain the
 /// given key
 template <typename K, typename V, typename H, typename C, typename KV = K>
-V Lookup(std::unordered_map<K, V, H, C>& map,
+V Lookup(const std::unordered_map<K, V, H, C>& map,
          const KV& key,
-         const KV& if_missing = {}) {
+         const V& if_missing = {}) {
   auto it = map.find(key);
   return it != map.end() ? it->second : if_missing;
 }

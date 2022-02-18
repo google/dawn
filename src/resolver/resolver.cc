@@ -268,8 +268,9 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
         return builder_->create<sem::ExternalTexture>();
       },
       [&](Default) -> sem::Type* {
+        auto* resolved = ResolvedSymbol(ty);
         return Switch(
-            ResolvedSymbol(ty),  //
+            resolved,  //
             [&](sem::Type* type) { return type; },
             [&](sem::Variable* var) {
               auto name =
@@ -291,7 +292,10 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
             },
             [&](Default) {
               TINT_UNREACHABLE(Resolver, diagnostics_)
-                  << "Unhandled ast::Type: " << ty->TypeInfo().name;
+                  << "Unhandled resolved type '"
+                  << (resolved ? resolved->TypeInfo().name : "<null>")
+                  << "' resolved from ast::Type '" << ty->TypeInfo().name
+                  << "'";
               return nullptr;
             });
       });
