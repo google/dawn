@@ -14,6 +14,8 @@
 
 #include "src/utils/debugger.h"
 
+#ifdef TINT_ENABLE_BREAK_IN_DEBUGGER
+
 #ifdef _MSC_VER
 #include <Windows.h>
 #elif defined(__linux__)
@@ -23,7 +25,7 @@
 #endif
 
 #ifdef _MSC_VER
-
+#define TINT_DEBUGGER_BREAK_DEFINED
 void tint::debugger::Break() {
   if (::IsDebuggerPresent()) {
     ::DebugBreak();
@@ -32,6 +34,7 @@ void tint::debugger::Break() {
 
 #elif defined(__linux__)
 
+#define TINT_DEBUGGER_BREAK_DEFINED
 void tint::debugger::Break() {
   // A process is being traced (debugged) if "/proc/self/status" contains a
   // line with "TracerPid: <non-zero-digit>...".
@@ -51,9 +54,10 @@ void tint::debugger::Break() {
     raise(SIGTRAP);
   }
 }
+#endif  // platform
 
-#else
+#endif  // TINT_ENABLE_BREAK_IN_DEBUGGER
 
+#ifndef TINT_DEBUGGER_BREAK_DEFINED
 void tint::debugger::Break() {}
-
 #endif

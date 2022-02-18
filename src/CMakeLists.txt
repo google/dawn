@@ -53,6 +53,11 @@ add_library(tint_diagnostic_utils
 )
 tint_default_compile_options(tint_diagnostic_utils)
 
+if (TINT_ENABLE_BREAK_IN_DEBUGGER)
+  set_source_files_properties(utils/debugger.cc
+    PROPERTIES COMPILE_DEFINITIONS "TINT_ENABLE_BREAK_IN_DEBUGGER=1" )
+endif()
+
 set(TINT_LIB_SRCS
   ../include/tint/tint.h
   ast/access.cc

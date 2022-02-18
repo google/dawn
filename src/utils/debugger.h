@@ -16,8 +16,12 @@
 #define SRC_UTILS_DEBUGGER_H_
 
 namespace tint::debugger {
-/// If debugger is attached, will break into it at the call site.
+
+/// If debugger is attached and the `TINT_ENABLE_BREAK_IN_DEBUGGER` preprocessor
+/// macro is defined for `debugger.cc`, calling `Break()` will cause the
+/// debugger to break at the call site.
 void Break();
+
 }  // namespace tint::debugger
 
 #endif  // SRC_UTILS_DEBUGGER_H_

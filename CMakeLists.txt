@@ -92,6 +92,8 @@ option_if_not_defined(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option_if_not_defined(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
 option_if_not_defined(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
 
+option_if_not_defined(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
+
 option_if_not_defined(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
 
 option_if_not_defined(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
