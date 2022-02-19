@@ -112,7 +112,7 @@ class RenderPassLoadOpTests : public DawnTest {
         wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
         utils::ComboRenderPassDescriptor renderPassDescriptor({texture.CreateView()});
-        renderPassDescriptor.cColorAttachments[0].clearColor = clearColor;
+        renderPassDescriptor.cColorAttachments[0].clearValue = clearColor;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.End();
@@ -156,7 +156,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     auto commandsClearZero = commandsClearZeroEncoder.Finish();
 
     utils::ComboRenderPassDescriptor renderPassClearGreen({renderTargetView});
-    renderPassClearGreen.cColorAttachments[0].clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+    renderPassClearGreen.cColorAttachments[0].clearValue = {0.0f, 1.0f, 0.0f, 1.0f};
     auto commandsClearGreenEncoder = device.CreateCommandEncoder();
     auto clearGreenPass = commandsClearGreenEncoder.BeginRenderPass(&renderPassClearGreen);
     clearGreenPass.End();

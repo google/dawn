@@ -70,7 +70,7 @@ class SwapChainTests : public DawnTest {
     void ClearTexture(wgpu::TextureView view, wgpu::Color color) {
         utils::ComboRenderPassDescriptor desc({view});
         desc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-        desc.cColorAttachments[0].clearColor = color;
+        desc.cColorAttachments[0].clearValue = color;
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&desc);

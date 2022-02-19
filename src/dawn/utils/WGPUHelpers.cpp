@@ -89,11 +89,11 @@ namespace utils {
         for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
             cColorAttachments[i].loadOp = wgpu::LoadOp::Clear;
             cColorAttachments[i].storeOp = wgpu::StoreOp::Store;
-            cColorAttachments[i].clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+            cColorAttachments[i].clearValue = {0.0f, 0.0f, 0.0f, 0.0f};
         }
 
-        cDepthStencilAttachmentInfo.clearDepth = 1.0f;
-        cDepthStencilAttachmentInfo.clearStencil = 0;
+        cDepthStencilAttachmentInfo.depthClearValue = 1.0f;
+        cDepthStencilAttachmentInfo.stencilClearValue = 0;
         cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
         cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
         cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;

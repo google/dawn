@@ -350,7 +350,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         wgpu::TextureView ioSurfaceView = ioSurfaceTexture.CreateView();
 
         utils::ComboRenderPassDescriptor renderPassDescriptor({ioSurfaceView}, {});
-        renderPassDescriptor.cColorAttachments[0].clearColor = {1 / 255.0f, 2 / 255.0f, 3 / 255.0f,
+        renderPassDescriptor.cColorAttachments[0].clearValue = {1 / 255.0f, 2 / 255.0f, 3 / 255.0f,
                                                                 4 / 255.0f};
 
         // Execute commands to clear the ioSurface

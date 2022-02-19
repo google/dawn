@@ -577,7 +577,7 @@ namespace dawn::native {
         colorAttachmentDesc.view = dstView.Get();
         colorAttachmentDesc.loadOp = wgpu::LoadOp::Load;
         colorAttachmentDesc.storeOp = wgpu::StoreOp::Store;
-        colorAttachmentDesc.clearColor = {0.0, 0.0, 0.0, 1.0};
+        colorAttachmentDesc.clearValue = {0.0, 0.0, 0.0, 1.0};
 
         // Create render pass.
         RenderPassDescriptor renderPassDesc;

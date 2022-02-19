@@ -273,7 +273,7 @@ namespace dawn::native { namespace vulkan {
 
             // Submit a clear operation
             utils::ComboRenderPassDescriptor renderPassDescriptor({wrappedView}, {});
-            renderPassDescriptor.cColorAttachments[0].clearColor = clearColor;
+            renderPassDescriptor.cColorAttachments[0].clearValue = clearColor;
             renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
 
             wgpu::CommandEncoder encoder = dawnDevice.CreateCommandEncoder();

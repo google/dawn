@@ -46,7 +46,7 @@ class SubresourceRenderAttachmentTest : public DawnTest {
             switch (type) {
                 case Type::Color: {
                     utils::ComboRenderPassDescriptor renderPass({renderTargetView});
-                    renderPass.cColorAttachments[0].clearColor = {
+                    renderPass.cColorAttachments[0].clearValue = {
                         static_cast<float>(expectedColor.r) / 255.f,
                         static_cast<float>(expectedColor.g) / 255.f,
                         static_cast<float>(expectedColor.b) / 255.f,
@@ -56,12 +56,12 @@ class SubresourceRenderAttachmentTest : public DawnTest {
                 }
                 case Type::Depth: {
                     utils::ComboRenderPassDescriptor renderPass({}, renderTargetView);
-                    renderPass.cDepthStencilAttachmentInfo.clearDepth = expectedDepth;
+                    renderPass.cDepthStencilAttachmentInfo.depthClearValue = expectedDepth;
                     return renderPass;
                 }
                 case Type::Stencil: {
                     utils::ComboRenderPassDescriptor renderPass({}, renderTargetView);
-                    renderPass.cDepthStencilAttachmentInfo.clearStencil = expectedStencil;
+                    renderPass.cDepthStencilAttachmentInfo.stencilClearValue = expectedStencil;
                     return renderPass;
                 }
                 default:

@@ -75,7 +75,7 @@ class CullingTest : public DawnTest {
         wgpu::Texture colorTexture = Create2DTextureForTest(wgpu::TextureFormat::RGBA8Unorm);
 
         utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
-        renderPassDescriptor.cColorAttachments[0].clearColor = {0.0, 0.0, 1.0, 1.0};
+        renderPassDescriptor.cColorAttachments[0].clearValue = {0.0, 0.0, 1.0, 1.0};
         renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
 
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();

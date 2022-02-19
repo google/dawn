@@ -144,12 +144,12 @@ class VertexOnlyRenderPipelineTest : public DawnTest {
         utils::ComboRenderPassDescriptor clearPass =
             utils::ComboRenderPassDescriptor({renderTargetColor.CreateView()}, depthStencilView);
         clearPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
-        clearPass.cDepthStencilAttachmentInfo.clearDepth = 0.0f;
+        clearPass.cDepthStencilAttachmentInfo.depthClearValue = 0.0f;
         clearPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
-        clearPass.cDepthStencilAttachmentInfo.clearStencil = 0x0;
+        clearPass.cDepthStencilAttachmentInfo.stencilClearValue = 0x0;
         for (auto& t : clearPass.cColorAttachments) {
             t.loadOp = wgpu::LoadOp::Clear;
-            t.clearColor = {0.0, 0.0, 0.0, 0.0};
+            t.clearValue = {0.0, 0.0, 0.0, 0.0};
         }
 
         auto pass = encoder.BeginRenderPass(&clearPass);

@@ -150,7 +150,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         viewDesc.mipLevelCount = 1;
 
         utils::ComboRenderPassDescriptor renderPassDesc({}, texture.CreateView(&viewDesc));
-        renderPassDesc.cDepthStencilAttachmentInfo.clearDepth = clearDepth;
+        renderPassDesc.cDepthStencilAttachmentInfo.depthClearValue = clearDepth;
 
         utils::ComboRenderPipelineDescriptor renderPipelineDesc;
         PopulatePipelineDescriptorWriteDepth(&renderPipelineDesc, GetParam().mTextureFormat,
@@ -181,8 +181,8 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         viewDesc.mipLevelCount = 1;
 
         utils::ComboRenderPassDescriptor renderPassDesc({}, texture.CreateView(&viewDesc));
-        renderPassDesc.cDepthStencilAttachmentInfo.clearDepth = clearDepth;
-        renderPassDesc.cDepthStencilAttachmentInfo.clearStencil = clearStencil;
+        renderPassDesc.cDepthStencilAttachmentInfo.depthClearValue = clearDepth;
+        renderPassDesc.cDepthStencilAttachmentInfo.stencilClearValue = clearStencil;
 
         utils::ComboRenderPipelineDescriptor renderPipelineDesc;
         PopulatePipelineDescriptorWriteDepth(&renderPipelineDesc, GetParam().mTextureFormat,
@@ -599,7 +599,7 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
 
         // Clear depth to 0.7, so we can check that the stencil copy doesn't mutate the depth.
         utils::ComboRenderPassDescriptor passDescriptor({}, depthStencilTexture.CreateView());
-        passDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.7;
+        passDescriptor.cDepthStencilAttachmentInfo.depthClearValue = 0.7;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
         pass.End();

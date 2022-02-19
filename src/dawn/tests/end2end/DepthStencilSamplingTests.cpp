@@ -266,7 +266,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                           wgpu::Texture texture,
                           float depthValue) {
         utils::ComboRenderPassDescriptor passDescriptor({}, texture.CreateView());
-        passDescriptor.cDepthStencilAttachmentInfo.clearDepth = depthValue;
+        passDescriptor.cDepthStencilAttachmentInfo.depthClearValue = depthValue;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
         pass.End();
@@ -276,7 +276,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                             wgpu::Texture texture,
                             uint8_t stencilValue) {
         utils::ComboRenderPassDescriptor passDescriptor({}, texture.CreateView());
-        passDescriptor.cDepthStencilAttachmentInfo.clearStencil = stencilValue;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue = stencilValue;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
         pass.End();
@@ -657,8 +657,8 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
 
         // Initialize both depth and stencil aspects.
         utils::ComboRenderPassDescriptor passDescriptor({}, inputTexture.CreateView());
-        passDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.43f;
-        passDescriptor.cDepthStencilAttachmentInfo.clearStencil = 31;
+        passDescriptor.cDepthStencilAttachmentInfo.depthClearValue = 0.43f;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue = 31;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
         pass.End();
@@ -679,13 +679,13 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         queue.Submit(1, &commands);
 
         float expectedDepth = 0.0f;
-        memcpy(&expectedDepth, &passDescriptor.cDepthStencilAttachmentInfo.clearDepth,
+        memcpy(&expectedDepth, &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
                sizeof(float));
         EXPECT_BUFFER(depthOutput, 0, sizeof(float),
                       new ::detail::ExpectEq<float>(expectedDepth, tolerance));
 
         uint8_t expectedStencil = 0;
-        memcpy(&expectedStencil, &passDescriptor.cDepthStencilAttachmentInfo.clearStencil,
+        memcpy(&expectedStencil, &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
                sizeof(uint8_t));
         EXPECT_BUFFER_U32_EQ(expectedStencil, stencilOutput, 0);
     }
@@ -708,8 +708,8 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         // Initialize both depth and stencil aspects.
         utils::ComboRenderPassDescriptor passDescriptor({}, inputTexture.CreateView());
-        passDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.43f;
-        passDescriptor.cDepthStencilAttachmentInfo.clearStencil = 31;
+        passDescriptor.cDepthStencilAttachmentInfo.depthClearValue = 0.43f;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue = 31;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
         pass.End();
@@ -727,13 +727,13 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         queue.Submit(1, &commands);
 
         float expectedDepth = 0.0f;
-        memcpy(&expectedDepth, &passDescriptor.cDepthStencilAttachmentInfo.clearDepth,
+        memcpy(&expectedDepth, &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
                sizeof(float));
         EXPECT_BUFFER(depthOutput, 0, sizeof(float),
                       new ::detail::ExpectEq<float>(expectedDepth, tolerance));
 
         uint8_t expectedStencil = 0;
-        memcpy(&expectedStencil, &passDescriptor.cDepthStencilAttachmentInfo.clearStencil,
+        memcpy(&expectedStencil, &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
                sizeof(uint8_t));
         EXPECT_BUFFER_U32_EQ(expectedStencil, stencilOutput, 0);
     }

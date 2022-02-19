@@ -97,7 +97,7 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     // Initialize texture with green to ensure it is sampled from later.
     {
         utils::ComboRenderPassDescriptor renderPass({externalView}, nullptr);
-        renderPass.cColorAttachments[0].clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+        renderPass.cColorAttachments[0].clearValue = {0.0f, 1.0f, 0.0f, 1.0f};
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.End();
@@ -201,8 +201,8 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
         {
             utils::ComboRenderPassDescriptor renderPass({externalViewPlane0, externalViewPlane1},
                                                         nullptr);
-            renderPass.cColorAttachments[0].clearColor = {expectation.y, 0.0f, 0.0f, 0.0f};
-            renderPass.cColorAttachments[1].clearColor = {expectation.u, expectation.v, 0.0f, 0.0f};
+            renderPass.cColorAttachments[0].clearValue = {expectation.y, 0.0f, 0.0f, 0.0f};
+            renderPass.cColorAttachments[1].clearValue = {expectation.u, expectation.v, 0.0f, 0.0f};
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             pass.End();

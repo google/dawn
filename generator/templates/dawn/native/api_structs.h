@@ -24,6 +24,7 @@
 {% set native_namespace = namespace_name.namespace_case() %}
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
 #include "{{native_dir}}/Forward.h"
+#include <cmath>
 
 namespace {{native_namespace}} {
 
@@ -35,6 +36,8 @@ namespace {{native_namespace}} {
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
         {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
     {%- elif member.type.category == "native" and member.default_value != None -%}
+        {{" "}}= {{member.default_value}}
+    {%- elif member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- else -%}
         {{assert(member.default_value == None)}}

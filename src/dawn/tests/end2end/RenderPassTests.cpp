@@ -84,7 +84,7 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
         // In the first render pass we clear renderTarget1 to red and draw a blue triangle in the
         // bottom left of renderTarget1.
         utils::ComboRenderPassDescriptor renderPass({renderTarget1.CreateView()});
-        renderPass.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
+        renderPass.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
@@ -96,7 +96,7 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
         // In the second render pass we clear renderTarget2 to green and draw a blue triangle in the
         // bottom left of renderTarget2.
         utils::ComboRenderPassDescriptor renderPass({renderTarget2.CreateView()});
-        renderPass.cColorAttachments[0].clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+        renderPass.cColorAttachments[0].clearValue = {0.0f, 1.0f, 0.0f, 1.0f};
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
@@ -124,7 +124,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     wgpu::TextureView renderTargetView = renderTarget.CreateView();
 
     utils::ComboRenderPassDescriptor renderPass({renderTargetView});
-    renderPass.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
+    renderPass.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
     renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
     renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Store;
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);

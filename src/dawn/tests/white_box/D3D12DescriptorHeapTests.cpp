@@ -759,7 +759,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
 
         utils::ComboRenderPassDescriptor renderPassDesc({textureView});
         renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-        renderPassDesc.cColorAttachments[0].clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+        renderPassDesc.cColorAttachments[0].clearValue = {0.0f, 1.0f, 0.0f, 1.0f};
         renderPass.renderPassInfo.cColorAttachments[0].view = textureView;
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

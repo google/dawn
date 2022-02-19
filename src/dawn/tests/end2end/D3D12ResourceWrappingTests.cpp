@@ -326,7 +326,7 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
 
         // Submit a clear operation
         utils::ComboRenderPassDescriptor renderPassDescriptor({wrappedView}, {});
-        renderPassDescriptor.cColorAttachments[0].clearColor = clearColor;
+        renderPassDescriptor.cColorAttachments[0].clearValue = clearColor;
 
         wgpu::CommandEncoder encoder = wgpuDevice.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);

@@ -495,7 +495,7 @@ class TextureViewRenderingTest : public DawnTest {
 
         // Clear textureView with Red(255, 0, 0, 255) and render Green(0, 255, 0, 255) into it
         utils::ComboRenderPassDescriptor renderPassInfo({textureView});
-        renderPassInfo.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
+        renderPassInfo.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
 
         const char* oneColorFragmentShader = R"(
             @stage(fragment) fn main(@location(0) texCoord : vec2<f32>) ->

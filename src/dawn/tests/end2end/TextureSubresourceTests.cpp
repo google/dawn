@@ -76,7 +76,7 @@ class TextureSubresourceTest : public DawnTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         utils::ComboRenderPassDescriptor renderPassDesc({view});
-        renderPassDesc.cColorAttachments[0].clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+        renderPassDesc.cColorAttachments[0].clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
         pass.SetPipeline(rp);
         pass.Draw(3);
@@ -125,7 +125,7 @@ class TextureSubresourceTest : public DawnTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         utils::ComboRenderPassDescriptor renderPassDesc({renderView});
-        renderPassDesc.cColorAttachments[0].clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+        renderPassDesc.cColorAttachments[0].clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
         pass.SetPipeline(rp);
         pass.SetBindGroup(0, bindGroup);

@@ -23,6 +23,7 @@
 
 #include "dawn/{{api}}.h"
 #include "dawn/EnumClassBitmasks.h"
+#include <cmath>
 
 namespace {{metadata.namespace}} {
 
@@ -152,6 +153,8 @@ namespace {{metadata.namespace}} {
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
         {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
     {%- elif member.type.category == "native" and member.default_value != None -%}
+        {{" "}}= {{member.default_value}}
+    {%- elif member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- else -%}
         {{assert(member.default_value == None)}}

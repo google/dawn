@@ -268,7 +268,7 @@ ValidationTest::DummyRenderPass::DummyRenderPass(const wgpu::Device& device)
     wgpu::TextureView view = attachment.CreateView();
     mColorAttachment.view = view;
     mColorAttachment.resolveTarget = nullptr;
-    mColorAttachment.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+    mColorAttachment.clearValue = {0.0f, 0.0f, 0.0f, 0.0f};
     mColorAttachment.loadOp = wgpu::LoadOp::Clear;
     mColorAttachment.storeOp = wgpu::StoreOp::Store;
 

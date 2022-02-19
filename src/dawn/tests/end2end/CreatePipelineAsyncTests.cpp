@@ -80,7 +80,7 @@ class CreatePipelineAsyncTest : public DawnTest {
 
         utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
         renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-        renderPassDescriptor.cColorAttachments[0].clearColor = {1.f, 0.f, 0.f, 1.f};
+        renderPassDescriptor.cColorAttachments[0].clearValue = {1.f, 0.f, 0.f, 1.f};
 
         wgpu::CommandBuffer commands;
         {
@@ -293,7 +293,7 @@ TEST_P(CreatePipelineAsyncTest, ReleaseEntryPointsAfterCreateRenderPipelineAsync
 
     utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
     renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-    renderPassDescriptor.cColorAttachments[0].clearColor = {1.f, 0.f, 0.f, 1.f};
+    renderPassDescriptor.cColorAttachments[0].clearValue = {1.f, 0.f, 0.f, 1.f};
 
     wgpu::CommandBuffer commands;
     {
@@ -728,9 +728,9 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithDepthStencilState) 
     // to 0.
     utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthStencilView);
     renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-    renderPass.cColorAttachments[0].clearColor = {0.0, 1.0, 0.0, 1.0};
+    renderPass.cColorAttachments[0].clearValue = {0.0, 1.0, 0.0, 1.0};
     renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
-    renderPass.cDepthStencilAttachmentInfo.clearStencil = 0u;
+    renderPass.cDepthStencilAttachmentInfo.stencilClearValue = 0u;
 
     wgpu::RenderPipeline pipeline;
     {
@@ -801,7 +801,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineWithMultisampleState) {
     // (1, 0, 0, 1).
     utils::ComboRenderPassDescriptor renderPass({renderTargetView});
     renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-    renderPass.cColorAttachments[0].clearColor = {1.0, 0.0, 0.0, 1.0};
+    renderPass.cColorAttachments[0].clearValue = {1.0, 0.0, 0.0, 1.0};
     renderPass.cColorAttachments[0].resolveTarget = resolveTargetView;
 
     wgpu::RenderPipeline pipeline;
@@ -873,9 +873,9 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
     // Prepare two color attachments
     utils::ComboRenderPassDescriptor renderPass({renderTargetViews[0], renderTargetViews[1]});
     renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-    renderPass.cColorAttachments[0].clearColor = {0.2, 0.0, 0.0, 0.2};
+    renderPass.cColorAttachments[0].clearValue = {0.2, 0.0, 0.0, 0.2};
     renderPass.cColorAttachments[1].loadOp = wgpu::LoadOp::Clear;
-    renderPass.cColorAttachments[1].clearColor = {0.0, 0.2, 0.0, 0.2};
+    renderPass.cColorAttachments[1].clearValue = {0.0, 0.2, 0.0, 0.2};
 
     {
         utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
@@ -949,8 +949,8 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
     queue.Submit(1, &commands);
 
     // When the blend states are all set correctly, the color of renderTargets[0] should be
-    // (0.6, 0, 0, 0.6) = colorAttachment0.clearColor + (0.4, 0.0, 0.0, 0.4), and the color of
-    // renderTargets[1] should be (0.8, 0, 0, 0.8) = (1, 0, 0, 1) - colorAttachment1.clearColor.
+    // (0.6, 0, 0, 0.6) = colorAttachment0.clearValue + (0.4, 0.0, 0.0, 0.4), and the color of
+    // renderTargets[1] should be (0.8, 0, 0, 0.8) = (1, 0, 0, 1) - colorAttachment1.clearValue.
     RGBA8 expected0 = {153, 0, 0, 153};
     RGBA8 expected1 = {0, 204, 0, 204};
     EXPECT_PIXEL_RGBA8_EQ(expected0, renderTargets[0], 0, 0);

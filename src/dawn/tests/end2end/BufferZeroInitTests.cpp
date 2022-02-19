@@ -107,7 +107,7 @@ class BufferZeroInitTest : public DawnTest {
 
             utils::ComboRenderPassDescriptor renderPassDescriptor(
                 {texture.CreateView(&viewDescriptor)});
-            renderPassDescriptor.cColorAttachments[0].clearColor = color;
+            renderPassDescriptor.cColorAttachments[0].clearValue = color;
             wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
             renderPass.End();
         }

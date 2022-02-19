@@ -163,12 +163,12 @@ class MultisampledRenderingTest : public DawnTest {
         uint32_t i = 0;
         for (const wgpu::TextureView& resolveTargetView : resolveTargetViews) {
             renderPass.cColorAttachments[i].loadOp = colorLoadOp;
-            renderPass.cColorAttachments[i].clearColor = kClearColor;
+            renderPass.cColorAttachments[i].clearValue = kClearColor;
             renderPass.cColorAttachments[i].resolveTarget = resolveTargetView;
             ++i;
         }
 
-        renderPass.cDepthStencilAttachmentInfo.clearDepth = kClearDepth;
+        renderPass.cDepthStencilAttachmentInfo.depthClearValue = kClearDepth;
         renderPass.cDepthStencilAttachmentInfo.depthLoadOp = depthStencilLoadOp;
 
         if (hasDepthStencilAttachment) {
