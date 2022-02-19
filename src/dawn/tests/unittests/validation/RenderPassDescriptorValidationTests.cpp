@@ -676,6 +676,30 @@ namespace {
         }
     }
 
+    // Tests the texture format of the resolve target must support being used as resolve target.
+    TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetFormat) {
+        for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
+            if (!utils::TextureFormatSupportsMultisampling(format) ||
+                !utils::TextureFormatSupportsRendering(format)) {
+                continue;
+            }
+
+            wgpu::Texture colorTexture =
+                CreateTexture(device, wgpu::TextureDimension::e2D, format, kSize, kSize,
+                              kArrayLayers, kLevelCount, kSampleCount);
+            wgpu::Texture resolveTarget = CreateTexture(device, wgpu::TextureDimension::e2D, format,
+                                                        kSize, kSize, kArrayLayers, kLevelCount, 1);
+
+            utils::ComboRenderPassDescriptor renderPass({colorTexture.CreateView()});
+            renderPass.cColorAttachments[0].resolveTarget = resolveTarget.CreateView();
+            if (utils::TextureFormatSupportsResolveTarget(format)) {
+                AssertBeginRenderPassSuccess(&renderPass);
+            } else {
+                AssertBeginRenderPassError(&renderPass);
+            }
+        }
+    }
+
     // Tests on the sample count of depth stencil attachment.
     TEST_F(MultisampledRenderPassDescriptorValidationTest, DepthStencilAttachmentSampleCount) {
         constexpr wgpu::TextureFormat kDepthStencilFormat =

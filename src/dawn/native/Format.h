@@ -92,6 +92,7 @@ namespace dawn::native {
         bool isSupported;
         bool supportsStorageUsage;
         bool supportsMultisample;
+        bool supportsResolveTarget;
         Aspect aspects;
         // Only used for renderable color formats, number of color channels.
         uint8_t componentCount;

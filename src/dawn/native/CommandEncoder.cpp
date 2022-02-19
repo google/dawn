@@ -214,6 +214,10 @@ namespace dawn::native {
                 "The resolve target %s format (%s) does not match the color attachment %s format "
                 "(%s).",
                 resolveTarget, resolveTargetFormat, attachment, attachment->GetFormat().format);
+            DAWN_INVALID_IF(
+                !resolveTarget->GetFormat().supportsResolveTarget,
+                "The resolve target %s format (%s) does not support being used as resolve target.",
+                resolveTarget, resolveTargetFormat);
 
             return {};
         }

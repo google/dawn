@@ -232,6 +232,8 @@ namespace utils {
     bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat);
 
     bool TextureFormatSupportsMultisampling(wgpu::TextureFormat textureFormat);
+    bool TextureFormatSupportsResolveTarget(wgpu::TextureFormat textureFormat);
+    bool TextureFormatSupportsRendering(wgpu::TextureFormat textureFormat);
 
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);
     uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat);
