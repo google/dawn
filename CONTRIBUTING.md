@@ -20,7 +20,7 @@ again.
 All submissions, including submissions by project members, require review. We
 use [Dawn's Gerrit](https://dawn-review.googlesource.com/) for this purpose.
 
-Submissions should follow the [Tint style guide](docs/style_guide.md).
+Submissions should follow the [Tint style guide](docs/tint/style_guide.md).
 
 ## Pushing to Gerrit
 

@@ -15,5 +15,5 @@
 
 find src -name "*.h"  -exec clang-format -i {} \;
 find src -name "*.cc"  -exec clang-format -i {} \;
-find samples -name "*.h"  -exec clang-format -i {} \;
-find samples -name "*.cc"  -exec clang-format -i {} \;
+find src/tint/cmd -name "*.h"  -exec clang-format -i {} \;
+find src/tint/cmd -name "*.cc"  -exec clang-format -i {} \;

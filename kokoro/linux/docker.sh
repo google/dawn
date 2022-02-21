@@ -157,9 +157,9 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
         hide_cmds
     fi
 
-    status "Testing test/test-all.sh"
+    status "Testing test/tint/test-all.sh"
     show_cmds
-        ${SRC_DIR}/test/test-all.sh "${BUILD_DIR}/tint" --verbose
+        ${SRC_DIR}/test/tint/test-all.sh "${BUILD_DIR}/tint" --verbose
     hide_cmds
 
     status "Checking _other.cc files also build"

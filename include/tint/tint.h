@@ -18,51 +18,51 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
-#include "src/ast/pipeline_stage.h"
-#include "src/demangler.h"
-#include "src/diagnostic/printer.h"
-#include "src/inspector/inspector.h"
-#include "src/reader/reader.h"
-#include "src/sem/type_manager.h"
-#include "src/transform/binding_remapper.h"
-#include "src/transform/first_index_offset.h"
-#include "src/transform/fold_trivial_single_use_lets.h"
-#include "src/transform/manager.h"
-#include "src/transform/multiplanar_external_texture.h"
-#include "src/transform/renamer.h"
-#include "src/transform/robustness.h"
-#include "src/transform/single_entry_point.h"
-#include "src/transform/vertex_pulling.h"
-#include "src/writer/writer.h"
+#include "src/tint/ast/pipeline_stage.h"
+#include "src/tint/demangler.h"
+#include "src/tint/diagnostic/printer.h"
+#include "src/tint/inspector/inspector.h"
+#include "src/tint/reader/reader.h"
+#include "src/tint/sem/type_manager.h"
+#include "src/tint/transform/binding_remapper.h"
+#include "src/tint/transform/first_index_offset.h"
+#include "src/tint/transform/fold_trivial_single_use_lets.h"
+#include "src/tint/transform/manager.h"
+#include "src/tint/transform/multiplanar_external_texture.h"
+#include "src/tint/transform/renamer.h"
+#include "src/tint/transform/robustness.h"
+#include "src/tint/transform/single_entry_point.h"
+#include "src/tint/transform/vertex_pulling.h"
+#include "src/tint/writer/writer.h"
 
 #if TINT_BUILD_SPV_READER
-#include "src/reader/spirv/parser.h"
+#include "src/tint/reader/spirv/parser.h"
 #endif  // TINT_BUILD_SPV_READER
 
 #if TINT_BUILD_WGSL_READER
-#include "src/reader/wgsl/parser.h"
+#include "src/tint/reader/wgsl/parser.h"
 #endif  // TINT_BUILD_WGSL_READER
 
 #if TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
-#include "src/writer/spirv/generator.h"
+#include "src/tint/writer/spirv/generator.h"
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
-#include "src/writer/wgsl/generator.h"
+#include "src/tint/writer/wgsl/generator.h"
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
-#include "src/writer/msl/generator.h"
+#include "src/tint/writer/msl/generator.h"
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
-#include "src/writer/hlsl/generator.h"
+#include "src/tint/writer/hlsl/generator.h"
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_GLSL_WRITER
-#include "src/transform/glsl.h"
-#include "src/writer/glsl/generator.h"
+#include "src/tint/transform/glsl.h"
+#include "src/tint/writer/glsl/generator.h"
 #endif  // TINT_BUILD_GLSL_WRITER
 
 #endif  // INCLUDE_TINT_TINT_H_

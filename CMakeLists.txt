@@ -389,13 +389,13 @@ function(tint_default_compile_options TARGET)
 endfunction()
 
 add_subdirectory(third_party)
-add_subdirectory(src)
+add_subdirectory(src/tint)
 if (TINT_BUILD_SAMPLES)
-  add_subdirectory(samples)
+  add_subdirectory(src/tint/cmd)
 endif()
 
 if (TINT_BUILD_FUZZERS)
-  add_subdirectory(fuzzers)
+  add_subdirectory(src/tint/fuzzers)
 endif()
 
 add_custom_target(tint-lint

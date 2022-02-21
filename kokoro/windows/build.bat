@@ -139,7 +139,7 @@ call :status "Running tint_unittests"
 tint_unittests.exe || goto :error
 @echo off
 
-call :status "Testing test/test-all.sh"
+call :status "Testing test/tint/test-all.sh"
 @echo on
 cd /d %SRC_DIR% || goto :error
 rem Run tests with DXC and Metal validation
@@ -148,13 +148,13 @@ set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%PATH%
 where metal.exe
 set PATH=%DXC_PATH%;%OLD_PATH%
 where dxc.exe dxil.dll
-call git bash -- ./test/test-all.sh ../tint-build/tint.exe --verbose || goto :error
+call git bash -- ./test/tint/test-all.sh ../tint-build/tint.exe --verbose || goto :error
 @echo on
 set PATH=%OLD_PATH%
 rem Run again to test with FXC validation
 set PATH=%D3DCOMPILER_PATH%;%OLD_PATH%
 where d3dcompiler_47.dll
-call git bash -- ./test/test-all.sh ../tint-build/tint.exe --verbose --format hlsl --fxc || goto :error
+call git bash -- ./test/tint/test-all.sh ../tint-build/tint.exe --verbose --format hlsl --fxc || goto :error
 @echo on
 set PATH=%OLD_PATH%
 @echo off
