@@ -20,6 +20,7 @@
 #include "src/tint/transform/add_empty_entry_point.h"
 #include "src/tint/transform/add_spirv_block_attribute.h"
 #include "src/tint/transform/binding_remapper.h"
+#include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/combine_samplers.h"
 #include "src/tint/transform/decompose_memory_access.h"
@@ -50,6 +51,13 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   DataMap data;
 
   auto* cfg = inputs.Get<Config>();
+
+  {  // Builtin polyfills
+    BuiltinPolyfill::Builtins polyfills;
+    polyfills.count_leading_zeros = true;
+    data.Add<BuiltinPolyfill::Config>(polyfills);
+    manager.Add<BuiltinPolyfill>();
+  }
 
   if (cfg && !cfg->entry_point.empty()) {
     manager.Add<SingleEntryPoint>();

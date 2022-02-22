@@ -1345,6 +1345,9 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         out += "abs";
       }
       break;
+    case sem::BuiltinType::kCountLeadingZeros:
+      out += "clz";
+      break;
     case sem::BuiltinType::kCountOneBits:
       out += "popcount";
       break;

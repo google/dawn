@@ -310,6 +310,7 @@ tint_unittests_source_set("tint_unittests_transform_src") {
     "../../src/tint/transform/add_empty_entry_point_test.cc",
     "../../src/tint/transform/add_spirv_block_attribute_test.cc",
     "../../src/tint/transform/array_length_from_uniform_test.cc",
+    "../../src/tint/transform/builtin_polyfill_test.cc",
     "../../src/tint/transform/binding_remapper_test.cc",
     "../../src/tint/transform/calculate_array_length_test.cc",
     "../../src/tint/transform/canonicalize_entry_point_io_test.cc",

@@ -1751,6 +1751,46 @@ class ProgramBuilder {
                                          Expr(std::forward<RHS>(rhs)));
   }
 
+  /// @param lhs the left hand argument to the greater than operation
+  /// @param rhs the right hand argument to the greater than operation
+  /// @returns a `ast::BinaryExpression` of `lhs` > `rhs`
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* GreaterThan(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the greater than or equal operation
+  /// @param rhs the right hand argument to the greater than or equal operation
+  /// @returns a `ast::BinaryExpression` of `lhs` >= `rhs`
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* GreaterThanEqual(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThanEqual,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the less than operation
+  /// @param rhs the right hand argument to the less than operation
+  /// @returns a `ast::BinaryExpression` of `lhs` < `rhs`
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* LessThan(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kLessThan,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the less than or equal operation
+  /// @param rhs the right hand argument to the less than or equal operation
+  /// @returns a `ast::BinaryExpression` of `lhs` <= `rhs`
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* LessThanEqual(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kLessThanEqual,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
   /// @param lhs the left hand argument to the equal expression
   /// @param rhs the right hand argument to the equal expression
   /// @returns a `ast::BinaryExpression` comparing `lhs` equal to `rhs`

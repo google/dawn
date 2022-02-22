@@ -436,6 +436,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/array_length_from_uniform.h",
     "transform/binding_remapper.cc",
     "transform/binding_remapper.h",
+    "transform/builtin_polyfill.cc",
+    "transform/builtin_polyfill.h",
     "transform/calculate_array_length.cc",
     "transform/calculate_array_length.h",
     "transform/canonicalize_entry_point_io.cc",

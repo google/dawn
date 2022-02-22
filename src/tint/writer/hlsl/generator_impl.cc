@@ -48,6 +48,7 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/add_empty_entry_point.h"
 #include "src/tint/transform/array_length_from_uniform.h"
+#include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/calculate_array_length.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/decompose_memory_access.h"
@@ -139,6 +140,13 @@ SanitizedResult Sanitize(
     const ArrayLengthFromUniformOptions& array_length_from_uniform) {
   transform::Manager manager;
   transform::DataMap data;
+
+  {  // Builtin polyfills
+    transform::BuiltinPolyfill::Builtins polyfills;
+    polyfills.count_leading_zeros = true;
+    data.Add<transform::BuiltinPolyfill::Config>(polyfills);
+    manager.Add<transform::BuiltinPolyfill>();
+  }
 
   // Build the config for the internal ArrayLengthFromUniform transform.
   transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(

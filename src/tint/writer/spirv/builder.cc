@@ -43,6 +43,7 @@
 #include "src/tint/sem/vector_type.h"
 #include "src/tint/transform/add_empty_entry_point.h"
 #include "src/tint/transform/add_spirv_block_attribute.h"
+#include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/external_texture_transform.h"
 #include "src/tint/transform/fold_constants.h"
@@ -257,6 +258,13 @@ SanitizedResult Sanitize(const Program* in,
                          bool disable_workgroup_init) {
   transform::Manager manager;
   transform::DataMap data;
+
+  {  // Builtin polyfills
+    transform::BuiltinPolyfill::Builtins polyfills;
+    polyfills.count_leading_zeros = true;
+    data.Add<transform::BuiltinPolyfill::Config>(polyfills);
+    manager.Add<transform::BuiltinPolyfill>();
+  }
 
   manager.Add<transform::Unshadow>();
   if (!disable_workgroup_init) {

@@ -312,6 +312,8 @@ set(TINT_LIB_SRCS
   transform/array_length_from_uniform.h
   transform/binding_remapper.cc
   transform/binding_remapper.h
+  transform/builtin_polyfill.cc
+  transform/builtin_polyfill.h
   transform/calculate_array_length.cc
   transform/calculate_array_length.h
   transform/combine_samplers.cc
@@ -1006,6 +1008,7 @@ if(TINT_BUILD_TESTS)
       transform/add_spirv_block_attribute_test.cc
       transform/array_length_from_uniform_test.cc
       transform/binding_remapper_test.cc
+      transform/builtin_polyfill_test.cc
       transform/calculate_array_length_test.cc
       transform/canonicalize_entry_point_io_test.cc
       transform/combine_samplers_test.cc
