@@ -108,6 +108,80 @@ struct BuiltinPolyfill::State {
     return name;
   }
 
+  /// Builds the polyfill function for the `countTrailingZeros` builtin
+  /// @param ty the parameter and return type for the function
+  /// @return the polyfill function name
+  Symbol countTrailingZeros(const sem::Type* ty) {
+    auto name = b.Symbols().New("tint_count_trailing_zeros");
+    uint32_t width = 1;
+    if (auto* v = ty->As<sem::Vector>()) {
+      width = v->Width();
+    }
+
+    // Returns either u32 or vecN<u32>
+    auto U = [&]() -> const ast::Type* {
+      if (width == 1) {
+        return b.ty.u32();
+      }
+      return b.ty.vec<ProgramBuilder::u32>(width);
+    };
+    auto V = [&](uint32_t value) -> const ast::Expression* {
+      if (width == 1) {
+        return b.Expr(value);
+      }
+      return b.Construct(b.ty.vec<ProgramBuilder::u32>(width), value);
+    };
+    auto B = [&](const ast::Expression* value) -> const ast::Expression* {
+      if (width == 1) {
+        return b.Construct<bool>(value);
+      }
+      return b.Construct(b.ty.vec<bool>(width), value);
+    };
+    b.Func(
+        name, {b.Param("v", T(ty))}, T(ty),
+        {
+            // var x = U(v);
+            b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
+            // let b16 = select(16, 0, bool(x & 0x0000ffff));
+            b.Decl(b.Const(
+                "b16", nullptr,
+                b.Call("select", V(16), V(0), B(b.And("x", V(0x0000ffff)))))),
+            // x = x >> b16;
+            b.Assign("x", b.Shr("x", "b16")),
+            // let b8  = select(8,  0, bool(x & 0x000000ff));
+            b.Decl(b.Const(
+                "b8", nullptr,
+                b.Call("select", V(8), V(0), B(b.And("x", V(0x000000ff)))))),
+            // x = x >> b8;
+            b.Assign("x", b.Shr("x", "b8")),
+            // let b4  = select(4,  0, bool(x & 0x0000000f));
+            b.Decl(b.Const(
+                "b4", nullptr,
+                b.Call("select", V(4), V(0), B(b.And("x", V(0x0000000f)))))),
+            // x = x >> b4;
+            b.Assign("x", b.Shr("x", "b4")),
+            // let b2  = select(2,  0, bool(x & 0x00000003));
+            b.Decl(b.Const(
+                "b2", nullptr,
+                b.Call("select", V(2), V(0), B(b.And("x", V(0x00000003)))))),
+            // x = x >> b2;
+            b.Assign("x", b.Shr("x", "b2")),
+            // let b1  = select(1,  0, bool(x & 0x00000001));
+            b.Decl(b.Const(
+                "b1", nullptr,
+                b.Call("select", V(1), V(0), B(b.And("x", V(0x00000001)))))),
+            // let is_zero  = select(0, 1, x == 0);
+            b.Decl(b.Const("is_zero", nullptr,
+                           b.Call("select", V(0), V(1), b.Equal("x", V(0))))),
+            // return R((b16 | b8 | b4 | b2 | b1) + zero);
+            b.Return(b.Construct(
+                T(ty),
+                b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
+                      "is_zero"))),
+        });
+    return name;
+  }
+
  private:
   const ast::Type* T(const sem::Type* ty) { return CreateASTTypeFor(ctx, ty); }
 };
@@ -127,6 +201,11 @@ bool BuiltinPolyfill::ShouldRun(const Program* program,
           switch (builtin->Type()) {
             case sem::BuiltinType::kCountLeadingZeros:
               if (builtins.count_leading_zeros) {
+                return true;
+              }
+              break;
+            case sem::BuiltinType::kCountTrailingZeros:
+              if (builtins.count_trailing_zeros) {
                 return true;
               }
               break;
@@ -163,6 +242,13 @@ void BuiltinPolyfill::Run(CloneContext& ctx,
                 if (builtins.count_leading_zeros) {
                   polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
                     return s.countLeadingZeros(builtin->ReturnType());
+                  });
+                }
+                break;
+              case sem::BuiltinType::kCountTrailingZeros:
+                if (builtins.count_trailing_zeros) {
+                  polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
+                    return s.countTrailingZeros(builtin->ReturnType());
                   });
                 }
                 break;

@@ -55,6 +55,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   {  // Builtin polyfills
     BuiltinPolyfill::Builtins polyfills;
     polyfills.count_leading_zeros = true;
+    polyfills.count_trailing_zeros = true;
     data.Add<BuiltinPolyfill::Config>(polyfills);
     manager.Add<BuiltinPolyfill>();
   }

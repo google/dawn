@@ -262,6 +262,7 @@ SanitizedResult Sanitize(const Program* in,
   {  // Builtin polyfills
     transform::BuiltinPolyfill::Builtins polyfills;
     polyfills.count_leading_zeros = true;
+    polyfills.count_trailing_zeros = true;
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);
     manager.Add<transform::BuiltinPolyfill>();
   }

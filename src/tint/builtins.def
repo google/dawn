@@ -290,6 +290,8 @@ fn countLeadingZeros<T: iu32>(T) -> T
 fn countLeadingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn countOneBits<T: iu32>(T) -> T
 fn countOneBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+fn countTrailingZeros<T: iu32>(T) -> T
+fn countTrailingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn cross(vec3<f32>, vec3<f32>) -> vec3<f32>
 fn degrees(f32) -> f32
 fn degrees<N: num>(vec<N, f32>) -> vec<N, f32>

@@ -72,6 +72,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
   if (name == "countOneBits") {
     return BuiltinType::kCountOneBits;
   }
+  if (name == "countTrailingZeros") {
+    return BuiltinType::kCountTrailingZeros;
+  }
   if (name == "cross") {
     return BuiltinType::kCross;
   }
@@ -374,6 +377,8 @@ const char* str(BuiltinType i) {
       return "countLeadingZeros";
     case BuiltinType::kCountOneBits:
       return "countOneBits";
+    case BuiltinType::kCountTrailingZeros:
+      return "countTrailingZeros";
     case BuiltinType::kCross:
       return "cross";
     case BuiltinType::kDegrees:

@@ -126,6 +126,7 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
       }
     case BuiltinType::kCountLeadingZeros:
     case BuiltinType::kCountOneBits:
+    case BuiltinType::kCountTrailingZeros:
     case BuiltinType::kReverseBits:
       return builder->Call(str.str(), "u2");
     case BuiltinType::kMax:
@@ -215,6 +216,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kCosh, ParamType::kF32, "cosh"},
         BuiltinData{BuiltinType::kCountLeadingZeros, ParamType::kU32, "clz"},
         BuiltinData{BuiltinType::kCountOneBits, ParamType::kU32, "popcount"},
+        BuiltinData{BuiltinType::kCountTrailingZeros, ParamType::kU32, "ctz"},
         BuiltinData{BuiltinType::kCross, ParamType::kF32, "cross"},
         BuiltinData{BuiltinType::kDeterminant, ParamType::kF32, "determinant"},
         BuiltinData{BuiltinType::kDistance, ParamType::kF32, "distance"},

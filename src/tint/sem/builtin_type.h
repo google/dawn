@@ -48,6 +48,7 @@ enum class BuiltinType {
   kCosh,
   kCountLeadingZeros,
   kCountOneBits,
+  kCountTrailingZeros,
   kCross,
   kDegrees,
   kDeterminant,

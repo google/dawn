@@ -32,6 +32,8 @@ class BuiltinPolyfill : public Castable<BuiltinPolyfill, Transform> {
   struct Builtins {
     /// Should `countLeadingZeros()` be polyfilled?
     bool count_leading_zeros = false;
+    /// Should `countTrailingZeros()` be polyfilled?
+    bool count_trailing_zeros = false;
   };
 
   /// Config is consumed by the BuiltinPolyfill transform.

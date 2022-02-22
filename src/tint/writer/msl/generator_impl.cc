@@ -1351,6 +1351,9 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kCountOneBits:
       out += "popcount";
       break;
+    case sem::BuiltinType::kCountTrailingZeros:
+      out += "ctz";
+      break;
     case sem::BuiltinType::kDpdx:
     case sem::BuiltinType::kDpdxCoarse:
     case sem::BuiltinType::kDpdxFine:
