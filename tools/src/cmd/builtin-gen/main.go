@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// builtin-gen parses the <tint>/src/builtins.def file, then scans the
+// builtin-gen parses the <tint>/src/tint/builtins.def file, then scans the
 // project directory for '<file>.tmpl' files, to produce '<file>' source code
 // files.
 package main
@@ -32,7 +32,7 @@ import (
 	"dawn.googlesource.com/tint/tools/src/glob"
 )
 
-const defProjectRelPath = "src/builtins.def"
+const defProjectRelPath = "src/tint/builtins.def"
 
 func main() {
 	if err := run(); err != nil {
@@ -45,7 +45,7 @@ func showUsage() {
 	fmt.Println(`
 builtin-gen generates the builtin table for the Tint compiler
 
-builtin-gen parses the <tint>/src/builtins.def file, then scans the project
+builtin-gen parses the <tint>/src/tint/builtins.def file, then scans the project
 directory for '<file>.tmpl' files, to produce '<file>' source code files.
 
 usage:

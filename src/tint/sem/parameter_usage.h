@@ -17,7 +17,7 @@
 // using the template:
 //   src/tint/sem/parameter_usage.h.tmpl
 // and the builtin defintion file:
-//   src/builtins.def
+//   src/tint/builtins.def
 //
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
