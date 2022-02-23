@@ -349,6 +349,160 @@ fn f() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// firstLeadingBit
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillFirstLeadingBit() {
+  BuiltinPolyfill::Builtins builtins;
+  builtins.first_leading_bit = true;
+  DataMap data;
+  data.Add<BuiltinPolyfill::Config>(builtins);
+  return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunFirstLeadingBit) {
+  auto* src = R"(
+fn f() {
+  firstLeadingBit(0xf);
+}
+)";
+
+  EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+  EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillFirstLeadingBit()));
+}
+
+TEST_F(BuiltinPolyfillTest, FirstLeadingBit_i32) {
+  auto* src = R"(
+fn f() {
+  let r : i32 = firstLeadingBit(15);
+}
+)";
+
+  auto* expect = R"(
+fn tint_first_leading_bit(v : i32) -> i32 {
+  var x = select(u32(v), u32(~(v)), (v < 0));
+  let b16 = select(0u, 16u, bool((x & 4294901760u)));
+  x = (x >> b16);
+  let b8 = select(0u, 8u, bool((x & 65280u)));
+  x = (x >> b8);
+  let b4 = select(0u, 4u, bool((x & 240u)));
+  x = (x >> b4);
+  let b2 = select(0u, 2u, bool((x & 12u)));
+  x = (x >> b2);
+  let b1 = select(0u, 1u, bool((x & 2u)));
+  let is_zero = select(0u, 4294967295u, (x == 0u));
+  return i32((((((b16 | b8) | b4) | b2) | b1) | is_zero));
+}
+
+fn f() {
+  let r : i32 = tint_first_leading_bit(15);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillFirstLeadingBit());
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, FirstLeadingBit_u32) {
+  auto* src = R"(
+fn f() {
+  let r : u32 = firstLeadingBit(15u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_first_leading_bit(v : u32) -> u32 {
+  var x = v;
+  let b16 = select(0u, 16u, bool((x & 4294901760u)));
+  x = (x >> b16);
+  let b8 = select(0u, 8u, bool((x & 65280u)));
+  x = (x >> b8);
+  let b4 = select(0u, 4u, bool((x & 240u)));
+  x = (x >> b4);
+  let b2 = select(0u, 2u, bool((x & 12u)));
+  x = (x >> b2);
+  let b1 = select(0u, 1u, bool((x & 2u)));
+  let is_zero = select(0u, 4294967295u, (x == 0u));
+  return u32((((((b16 | b8) | b4) | b2) | b1) | is_zero));
+}
+
+fn f() {
+  let r : u32 = tint_first_leading_bit(15u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillFirstLeadingBit());
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, FirstLeadingBit_vec3_i32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<i32> = firstLeadingBit(vec3<i32>(15));
+}
+)";
+
+  auto* expect = R"(
+fn tint_first_leading_bit(v : vec3<i32>) -> vec3<i32> {
+  var x = select(vec3<u32>(v), vec3<u32>(~(v)), (v < vec3<i32>(0)));
+  let b16 = select(vec3<u32>(0u), vec3<u32>(16u), vec3<bool>((x & vec3<u32>(4294901760u))));
+  x = (x >> b16);
+  let b8 = select(vec3<u32>(0u), vec3<u32>(8u), vec3<bool>((x & vec3<u32>(65280u))));
+  x = (x >> b8);
+  let b4 = select(vec3<u32>(0u), vec3<u32>(4u), vec3<bool>((x & vec3<u32>(240u))));
+  x = (x >> b4);
+  let b2 = select(vec3<u32>(0u), vec3<u32>(2u), vec3<bool>((x & vec3<u32>(12u))));
+  x = (x >> b2);
+  let b1 = select(vec3<u32>(0u), vec3<u32>(1u), vec3<bool>((x & vec3<u32>(2u))));
+  let is_zero = select(vec3<u32>(0u), vec3<u32>(4294967295u), (x == vec3<u32>(0u)));
+  return vec3<i32>((((((b16 | b8) | b4) | b2) | b1) | is_zero));
+}
+
+fn f() {
+  let r : vec3<i32> = tint_first_leading_bit(vec3<i32>(15));
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillFirstLeadingBit());
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, FirstLeadingBit_vec3_u32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<u32> = firstLeadingBit(vec3<u32>(15u));
+}
+)";
+
+  auto* expect = R"(
+fn tint_first_leading_bit(v : vec3<u32>) -> vec3<u32> {
+  var x = v;
+  let b16 = select(vec3<u32>(0u), vec3<u32>(16u), vec3<bool>((x & vec3<u32>(4294901760u))));
+  x = (x >> b16);
+  let b8 = select(vec3<u32>(0u), vec3<u32>(8u), vec3<bool>((x & vec3<u32>(65280u))));
+  x = (x >> b8);
+  let b4 = select(vec3<u32>(0u), vec3<u32>(4u), vec3<bool>((x & vec3<u32>(240u))));
+  x = (x >> b4);
+  let b2 = select(vec3<u32>(0u), vec3<u32>(2u), vec3<bool>((x & vec3<u32>(12u))));
+  x = (x >> b2);
+  let b1 = select(vec3<u32>(0u), vec3<u32>(1u), vec3<bool>((x & vec3<u32>(2u))));
+  let is_zero = select(vec3<u32>(0u), vec3<u32>(4294967295u), (x == vec3<u32>(0u)));
+  return vec3<u32>((((((b16 | b8) | b4) | b2) | b1) | is_zero));
+}
+
+fn f() {
+  let r : vec3<u32> = tint_first_leading_bit(vec3<u32>(15u));
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillFirstLeadingBit());
+
+  EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // firstTrailingBit
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillFirstTrailingBit() {

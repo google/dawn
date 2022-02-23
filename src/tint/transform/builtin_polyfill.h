@@ -34,6 +34,8 @@ class BuiltinPolyfill : public Castable<BuiltinPolyfill, Transform> {
     bool count_leading_zeros = false;
     /// Should `countTrailingZeros()` be polyfilled?
     bool count_trailing_zeros = false;
+    /// Should `firstLeadingBit()` be polyfilled?
+    bool first_leading_bit = false;
     /// Should `firstTrailingBit()` be polyfilled?
     bool first_trailing_bit = false;
   };

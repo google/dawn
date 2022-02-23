@@ -130,6 +130,7 @@ SanitizedResult Sanitize(
 
   {  // Builtin polyfills
     transform::BuiltinPolyfill::Builtins polyfills;
+    polyfills.first_leading_bit = true;
     polyfills.first_trailing_bit = true;
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);
     manager.Add<transform::BuiltinPolyfill>();

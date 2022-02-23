@@ -55,10 +55,7 @@ struct BuiltinPolyfill::State {
       return b.ty.vec<ProgramBuilder::u32>(width);
     };
     auto V = [&](uint32_t value) -> const ast::Expression* {
-      if (width == 1) {
-        return b.Expr(value);
-      }
-      return b.Construct(b.ty.vec<ProgramBuilder::u32>(width), value);
+      return ScalarOrVector(width, value);
     };
     b.Func(
         name, {b.Param("v", T(ty))}, T(ty),
@@ -120,10 +117,7 @@ struct BuiltinPolyfill::State {
       return b.ty.vec<ProgramBuilder::u32>(width);
     };
     auto V = [&](uint32_t value) -> const ast::Expression* {
-      if (width == 1) {
-        return b.Expr(value);
-      }
-      return b.Construct(b.ty.vec<ProgramBuilder::u32>(width), value);
+      return ScalarOrVector(width, value);
     };
     auto B = [&](const ast::Expression* value) -> const ast::Expression* {
       if (width == 1) {
@@ -176,6 +170,87 @@ struct BuiltinPolyfill::State {
     return name;
   }
 
+  /// Builds the polyfill function for the `firstLeadingBit` builtin
+  /// @param ty the parameter and return type for the function
+  /// @return the polyfill function name
+  Symbol firstLeadingBit(const sem::Type* ty) {
+    auto name = b.Symbols().New("tint_first_leading_bit");
+    uint32_t width = WidthOf(ty);
+
+    // Returns either u32 or vecN<u32>
+    auto U = [&]() -> const ast::Type* {
+      if (width == 1) {
+        return b.ty.u32();
+      }
+      return b.ty.vec<ProgramBuilder::u32>(width);
+    };
+    auto V = [&](uint32_t value) -> const ast::Expression* {
+      return ScalarOrVector(width, value);
+    };
+    auto B = [&](const ast::Expression* value) -> const ast::Expression* {
+      if (width == 1) {
+        return b.Construct<bool>(value);
+      }
+      return b.Construct(b.ty.vec<bool>(width), value);
+    };
+
+    const ast::Expression* x = nullptr;
+    if (ty->is_unsigned_scalar_or_vector()) {
+      x = b.Expr("v");
+    } else {
+      // If ty is signed, then the value is inverted if the sign is negative
+      x = b.Call("select",                             //
+                 b.Construct(U(), "v"),                //
+                 b.Construct(U(), b.Complement("v")),  //
+                 b.LessThan("v", ScalarOrVector(width, 0)));
+    }
+
+    b.Func(name, {b.Param("v", T(ty))}, T(ty),
+           {
+               // var x = v;                          (unsigned)
+               // var x = select(U(v), ~U(v), v < 0); (signed)
+               b.Decl(b.Var("x", nullptr, x)),
+               // let b16 = select(0, 16, bool(x & 0xffff0000));
+               b.Decl(b.Const("b16", nullptr,
+                              b.Call("select", V(0), V(16),
+                                     B(b.And("x", V(0xffff0000)))))),
+               // x = x >> b16;
+               b.Assign("x", b.Shr("x", "b16")),
+               // let b8  = select(0, 8,  bool(x & 0x0000ff00));
+               b.Decl(b.Const(
+                   "b8", nullptr,
+                   b.Call("select", V(0), V(8), B(b.And("x", V(0x0000ff00)))))),
+               // x = x >> b8;
+               b.Assign("x", b.Shr("x", "b8")),
+               // let b4  = select(0, 4,  bool(x & 0x000000f0));
+               b.Decl(b.Const(
+                   "b4", nullptr,
+                   b.Call("select", V(0), V(4), B(b.And("x", V(0x000000f0)))))),
+               // x = x >> b4;
+               b.Assign("x", b.Shr("x", "b4")),
+               // let b2  = select(0, 2,  bool(x & 0x0000000c));
+               b.Decl(b.Const(
+                   "b2", nullptr,
+                   b.Call("select", V(0), V(2), B(b.And("x", V(0x0000000c)))))),
+               // x = x >> b2;
+               b.Assign("x", b.Shr("x", "b2")),
+               // let b1  = select(0, 1,  bool(x & 0x00000002));
+               b.Decl(b.Const(
+                   "b1", nullptr,
+                   b.Call("select", V(0), V(1), B(b.And("x", V(0x00000002)))))),
+               // let is_zero  = select(0, 0xffffffff, x == 0);
+               b.Decl(b.Const("is_zero", nullptr,
+                              b.Call("select", V(0), V(0xffffffff),
+                                     b.Equal("x", V(0))))),
+               // return R(b16 | b8 | b4 | b2 | b1 | zero);
+               b.Return(b.Construct(
+                   T(ty),
+                   b.Or(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
+                        "is_zero"))),
+           });
+    return name;
+  }
+
   /// Builds the polyfill function for the `firstTrailingBit` builtin
   /// @param ty the parameter and return type for the function
   /// @return the polyfill function name
@@ -191,10 +266,7 @@ struct BuiltinPolyfill::State {
       return b.ty.vec<ProgramBuilder::u32>(width);
     };
     auto V = [&](uint32_t value) -> const ast::Expression* {
-      if (width == 1) {
-        return b.Expr(value);
-      }
-      return b.Construct(b.ty.vec<ProgramBuilder::u32>(width), value);
+      return ScalarOrVector(width, value);
     };
     auto B = [&](const ast::Expression* value) -> const ast::Expression* {
       if (width == 1) {
@@ -257,6 +329,13 @@ struct BuiltinPolyfill::State {
     }
     return 1;
   }
+  template <typename T>
+  const ast::Expression* ScalarOrVector(uint32_t width, T value) const {
+    if (width == 1) {
+      return b.Expr(value);
+    }
+    return b.Construct(b.ty.vec<T>(width), value);
+  }
 };
 
 BuiltinPolyfill::BuiltinPolyfill() = default;
@@ -279,6 +358,11 @@ bool BuiltinPolyfill::ShouldRun(const Program* program,
               break;
             case sem::BuiltinType::kCountTrailingZeros:
               if (builtins.count_trailing_zeros) {
+                return true;
+              }
+              break;
+            case sem::BuiltinType::kFirstLeadingBit:
+              if (builtins.first_leading_bit) {
                 return true;
               }
               break;
@@ -327,6 +411,13 @@ void BuiltinPolyfill::Run(CloneContext& ctx,
                 if (builtins.count_trailing_zeros) {
                   polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
                     return s.countTrailingZeros(builtin->ReturnType());
+                  });
+                }
+                break;
+              case sem::BuiltinType::kFirstLeadingBit:
+                if (builtins.first_leading_bit) {
+                  polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
+                    return s.firstLeadingBit(builtin->ReturnType());
                   });
                 }
                 break;

@@ -63,6 +63,7 @@ enum class BuiltinType {
   kExp,
   kExp2,
   kFaceForward,
+  kFirstLeadingBit,
   kFirstTrailingBit,
   kFloor,
   kFma,

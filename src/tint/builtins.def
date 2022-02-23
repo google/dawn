@@ -316,6 +316,8 @@ fn exp<N: num>(vec<N, f32>) -> vec<N, f32>
 fn exp2(f32) -> f32
 fn exp2<N: num>(vec<N, f32>) -> vec<N, f32>
 fn faceForward<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn firstLeadingBit<T: iu32>(T) -> T
+fn firstLeadingBit<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn firstTrailingBit<T: iu32>(T) -> T
 fn firstTrailingBit<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn floor(f32) -> f32
