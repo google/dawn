@@ -1140,7 +1140,8 @@ namespace dawn::native {
                 cmd->destinationOffset = destinationOffset;
 
                 // Encode internal compute pipeline for timestamp query
-                if (querySet->GetQueryType() == wgpu::QueryType::Timestamp) {
+                if (querySet->GetQueryType() == wgpu::QueryType::Timestamp &&
+                    !GetDevice()->IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
                     DAWN_TRY(EncodeTimestampsToNanosecondsConversion(
                         this, querySet, firstQuery, queryCount, destination, destinationOffset));
                 }

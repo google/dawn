@@ -84,6 +84,13 @@ constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
 
 class QueryInternalShaderTests : public DawnTest {
   protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_timestamp_query_conversion"));
+    }
+
     // Original timestamp values in query set for testing
     const std::vector<uint64_t> querySetValues = {
         kSentinelValue,  // garbage data which is not written at beginning
@@ -189,8 +196,6 @@ class QueryInternalShaderTests : public DawnTest {
 TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
     // TODO(crbug.com/dawn/741): Test output is wrong with D3D12 + WARP.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
-
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     constexpr std::array<float, 5> kPeriodsToTest = {
         1,

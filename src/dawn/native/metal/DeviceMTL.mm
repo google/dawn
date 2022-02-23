@@ -134,7 +134,8 @@ namespace dawn::native::metal {
 
         DAWN_TRY(mCommandContext.PrepareNextCommandBuffer(*mCommandQueue));
 
-        if (IsFeatureEnabled(Feature::TimestampQuery)) {
+        if (IsFeatureEnabled(Feature::TimestampQuery) &&
+            !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
             // Make a best guess of timestamp period based on device vendor info, and converge it to
             // an accurate value by the following calculations.
             mTimestampPeriod = gpu_info::IsIntel(GetAdapter()->GetVendorId()) ? 83.333f : 1.0f;

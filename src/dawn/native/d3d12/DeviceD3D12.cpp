@@ -78,7 +78,8 @@ namespace dawn::native::d3d12 {
             CheckHRESULT(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)),
                          "D3D12 create command queue"));
 
-        if (IsFeatureEnabled(Feature::TimestampQuery)) {
+        if (IsFeatureEnabled(Feature::TimestampQuery) &&
+            !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
             // Get GPU timestamp counter frequency (in ticks/second). This fails if the specified
             // command queue doesn't support timestamps. D3D12_COMMAND_LIST_TYPE_DIRECT queues
             // always support timestamps except where there are bugs in Windows container and vGPU

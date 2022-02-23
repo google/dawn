@@ -237,6 +237,10 @@ namespace dawn::native {
               "command queue, and the information includes system time, CPU timestamp, GPU "
               "timestamp, and their frequency.",
               "https://crbug.com/dawn/1264"}},
+            {Toggle::DisableTimestampQueryConversion,
+             {"disable_timestamp_query_conversion",
+              "Resolve timestamp queries into ticks instead of nanoseconds.",
+              "https://crbug.com/dawn/1305"}},
 
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
