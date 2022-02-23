@@ -143,8 +143,11 @@ SanitizedResult Sanitize(
 
   {  // Builtin polyfills
     transform::BuiltinPolyfill::Builtins polyfills;
+    // TODO(crbug.com/tint/1449): Some of these can map to HLSL's `firstbitlow`
+    // and `firstbithigh`.
     polyfills.count_leading_zeros = true;
     polyfills.count_trailing_zeros = true;
+    polyfills.first_trailing_bit = true;
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);
     manager.Add<transform::BuiltinPolyfill>();
   }

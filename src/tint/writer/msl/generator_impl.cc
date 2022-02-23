@@ -59,6 +59,7 @@
 #include "src/tint/sem/vector_type.h"
 #include "src/tint/sem/void_type.h"
 #include "src/tint/transform/array_length_from_uniform.h"
+#include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/external_texture_transform.h"
 #include "src/tint/transform/manager.h"
@@ -126,6 +127,13 @@ SanitizedResult Sanitize(
     const ArrayLengthFromUniformOptions& array_length_from_uniform) {
   transform::Manager manager;
   transform::DataMap data;
+
+  {  // Builtin polyfills
+    transform::BuiltinPolyfill::Builtins polyfills;
+    polyfills.first_trailing_bit = true;
+    data.Add<transform::BuiltinPolyfill::Config>(polyfills);
+    manager.Add<transform::BuiltinPolyfill>();
+  }
 
   // Build the config for the internal ArrayLengthFromUniform transform.
   transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(

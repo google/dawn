@@ -1,0 +1,142 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 100
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %tint_first_trailing_bit "tint_first_trailing_bit"
+               OpName %v "v"
+               OpName %x "x"
+               OpName %firstTrailingBit_110f2c "firstTrailingBit_110f2c"
+               OpName %res "res"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpName %vertex_main "vertex_main"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+       %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+          %9 = OpTypeFunction %v4uint %v4uint
+%_ptr_Function_v4uint = OpTypePointer Function %v4uint
+         %18 = OpConstantNull %v4uint
+       %bool = OpTypeBool
+     %v4bool = OpTypeVector %bool 4
+ %uint_65535 = OpConstant %uint 65535
+         %25 = OpConstantComposite %v4uint %uint_65535 %uint_65535 %uint_65535 %uint_65535
+     %uint_0 = OpConstant %uint 0
+         %28 = OpConstantComposite %v4uint %uint_0 %uint_0 %uint_0 %uint_0
+    %uint_16 = OpConstant %uint 16
+         %30 = OpConstantComposite %v4uint %uint_16 %uint_16 %uint_16 %uint_16
+   %uint_255 = OpConstant %uint 255
+         %37 = OpConstantComposite %v4uint %uint_255 %uint_255 %uint_255 %uint_255
+     %uint_8 = OpConstant %uint 8
+         %40 = OpConstantComposite %v4uint %uint_8 %uint_8 %uint_8 %uint_8
+    %uint_15 = OpConstant %uint 15
+         %47 = OpConstantComposite %v4uint %uint_15 %uint_15 %uint_15 %uint_15
+     %uint_4 = OpConstant %uint 4
+         %50 = OpConstantComposite %v4uint %uint_4 %uint_4 %uint_4 %uint_4
+     %uint_3 = OpConstant %uint 3
+         %57 = OpConstantComposite %v4uint %uint_3 %uint_3 %uint_3 %uint_3
+     %uint_2 = OpConstant %uint 2
+         %60 = OpConstantComposite %v4uint %uint_2 %uint_2 %uint_2 %uint_2
+     %uint_1 = OpConstant %uint 1
+         %67 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
+%uint_4294967295 = OpConstant %uint 4294967295
+         %73 = OpConstantComposite %v4uint %uint_4294967295 %uint_4294967295 %uint_4294967295 %uint_4294967295
+       %void = OpTypeVoid
+         %80 = OpTypeFunction %void
+         %86 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
+%tint_first_trailing_bit = OpFunction %v4uint None %9
+          %v = OpFunctionParameter %v4uint
+         %14 = OpLabel
+          %x = OpVariable %_ptr_Function_v4uint Function %18
+               OpStore %x %v
+         %23 = OpLoad %v4uint %x
+         %26 = OpBitwiseAnd %v4uint %23 %25
+         %20 = OpINotEqual %v4bool %26 %18
+         %19 = OpSelect %v4uint %20 %28 %30
+         %31 = OpLoad %v4uint %x
+         %32 = OpShiftRightLogical %v4uint %31 %19
+               OpStore %x %32
+         %35 = OpLoad %v4uint %x
+         %38 = OpBitwiseAnd %v4uint %35 %37
+         %34 = OpINotEqual %v4bool %38 %18
+         %33 = OpSelect %v4uint %34 %28 %40
+         %41 = OpLoad %v4uint %x
+         %42 = OpShiftRightLogical %v4uint %41 %33
+               OpStore %x %42
+         %45 = OpLoad %v4uint %x
+         %48 = OpBitwiseAnd %v4uint %45 %47
+         %44 = OpINotEqual %v4bool %48 %18
+         %43 = OpSelect %v4uint %44 %28 %50
+         %51 = OpLoad %v4uint %x
+         %52 = OpShiftRightLogical %v4uint %51 %43
+               OpStore %x %52
+         %55 = OpLoad %v4uint %x
+         %58 = OpBitwiseAnd %v4uint %55 %57
+         %54 = OpINotEqual %v4bool %58 %18
+         %53 = OpSelect %v4uint %54 %28 %60
+         %61 = OpLoad %v4uint %x
+         %62 = OpShiftRightLogical %v4uint %61 %53
+               OpStore %x %62
+         %65 = OpLoad %v4uint %x
+         %68 = OpBitwiseAnd %v4uint %65 %67
+         %64 = OpINotEqual %v4bool %68 %18
+         %63 = OpSelect %v4uint %64 %28 %67
+         %70 = OpLoad %v4uint %x
+         %71 = OpIEqual %v4bool %70 %28
+         %69 = OpSelect %v4uint %71 %73 %28
+         %75 = OpBitwiseOr %v4uint %19 %33
+         %76 = OpBitwiseOr %v4uint %75 %43
+         %77 = OpBitwiseOr %v4uint %76 %53
+         %78 = OpBitwiseOr %v4uint %77 %63
+         %79 = OpBitwiseOr %v4uint %78 %69
+               OpReturnValue %79
+               OpFunctionEnd
+%firstTrailingBit_110f2c = OpFunction %void None %80
+         %83 = OpLabel
+        %res = OpVariable %_ptr_Function_v4uint Function %18
+         %84 = OpFunctionCall %v4uint %tint_first_trailing_bit %18
+               OpStore %res %84
+               OpReturn
+               OpFunctionEnd
+%vertex_main_inner = OpFunction %v4float None %86
+         %88 = OpLabel
+         %89 = OpFunctionCall %void %firstTrailingBit_110f2c
+               OpReturnValue %5
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %80
+         %91 = OpLabel
+         %92 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %92
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %80
+         %95 = OpLabel
+         %96 = OpFunctionCall %void %firstTrailingBit_110f2c
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %80
+         %98 = OpLabel
+         %99 = OpFunctionCall %void %firstTrailingBit_110f2c
+               OpReturn
+               OpFunctionEnd

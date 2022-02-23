@@ -117,6 +117,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
   if (name == "faceForward") {
     return BuiltinType::kFaceForward;
   }
+  if (name == "firstTrailingBit") {
+    return BuiltinType::kFirstTrailingBit;
+  }
   if (name == "floor") {
     return BuiltinType::kFloor;
   }
@@ -407,6 +410,8 @@ const char* str(BuiltinType i) {
       return "exp2";
     case BuiltinType::kFaceForward:
       return "faceForward";
+    case BuiltinType::kFirstTrailingBit:
+      return "firstTrailingBit";
     case BuiltinType::kFloor:
       return "floor";
     case BuiltinType::kFma:
