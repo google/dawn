@@ -147,6 +147,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
   if (name == "fwidthFine") {
     return BuiltinType::kFwidthFine;
   }
+  if (name == "insertBits") {
+    return BuiltinType::kInsertBits;
+  }
   if (name == "inverseSqrt") {
     return BuiltinType::kInverseSqrt;
   }
@@ -436,6 +439,8 @@ const char* str(BuiltinType i) {
       return "fwidthCoarse";
     case BuiltinType::kFwidthFine:
       return "fwidthFine";
+    case BuiltinType::kInsertBits:
+      return "insertBits";
     case BuiltinType::kInverseSqrt:
       return "inverseSqrt";
     case BuiltinType::kIsFinite:

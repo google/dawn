@@ -1760,6 +1760,16 @@ class ProgramBuilder {
                                          Expr(std::forward<RHS>(rhs)));
   }
 
+  /// @param lhs the left hand argument to the xor operation
+  /// @param rhs the right hand argument to the xor operation
+  /// @returns a `ast::BinaryExpression` bitwise xor-ing `lhs` and `rhs`
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* Xor(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kXor,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
   /// @param lhs the left hand argument to the greater than operation
   /// @param rhs the right hand argument to the greater than operation
   /// @returns a `ast::BinaryExpression` of `lhs` > `rhs`

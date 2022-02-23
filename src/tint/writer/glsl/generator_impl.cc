@@ -607,6 +607,9 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
   if (builtin->Type() == sem::BuiltinType::kExtractBits) {
     return EmitExtractBits(out, expr);
   }
+  if (builtin->Type() == sem::BuiltinType::kInsertBits) {
+    return EmitInsertBits(out, expr);
+  }
   if (builtin->IsDataPacking()) {
     return EmitDataPackingCall(out, expr, builtin);
   }
@@ -828,6 +831,28 @@ bool GeneratorImpl::EmitExtractBits(std::ostream& out,
   }
   out << "), int(";
   if (!EmitExpression(out, expr->args[2])) {
+    return false;
+  }
+  out << "))";
+  return true;
+}
+
+bool GeneratorImpl::EmitInsertBits(std::ostream& out,
+                                   const ast::CallExpression* expr) {
+  out << "bitfieldInsert(";
+  if (!EmitExpression(out, expr->args[0])) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, expr->args[1])) {
+    return false;
+  }
+  out << ", int(";
+  if (!EmitExpression(out, expr->args[2])) {
+    return false;
+  }
+  out << "), int(";
+  if (!EmitExpression(out, expr->args[3])) {
     return false;
   }
   out << "))";

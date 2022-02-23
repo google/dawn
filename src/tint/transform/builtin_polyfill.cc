@@ -55,7 +55,7 @@ struct BuiltinPolyfill::State {
       if (width == 1) {
         return b.ty.u32();
       }
-      return b.ty.vec<ProgramBuilder::u32>(width);
+      return b.ty.vec<u32>(width);
     };
     auto V = [&](uint32_t value) -> const ast::Expression* {
       return ScalarOrVector(width, value);
@@ -117,7 +117,7 @@ struct BuiltinPolyfill::State {
       if (width == 1) {
         return b.ty.u32();
       }
-      return b.ty.vec<ProgramBuilder::u32>(width);
+      return b.ty.vec<u32>(width);
     };
     auto V = [&](uint32_t value) -> const ast::Expression* {
       return ScalarOrVector(width, value);
@@ -187,7 +187,7 @@ struct BuiltinPolyfill::State {
       if (width == 1) {
         return value;
       }
-      return b.Construct(b.ty.vec<ProgramBuilder::u32>(width), value);
+      return b.Construct(b.ty.vec<u32>(width), value);
     };
 
     ast::StatementList body = {
@@ -236,7 +236,7 @@ struct BuiltinPolyfill::State {
       if (width == 1) {
         return b.ty.u32();
       }
-      return b.ty.vec<ProgramBuilder::u32>(width);
+      return b.ty.vec<u32>(width);
     };
     auto V = [&](uint32_t value) -> const ast::Expression* {
       return ScalarOrVector(width, value);
@@ -317,7 +317,7 @@ struct BuiltinPolyfill::State {
       if (width == 1) {
         return b.ty.u32();
       }
-      return b.ty.vec<ProgramBuilder::u32>(width);
+      return b.ty.vec<u32>(width);
     };
     auto V = [&](uint32_t value) -> const ast::Expression* {
       return ScalarOrVector(width, value);
@@ -373,16 +373,90 @@ struct BuiltinPolyfill::State {
     return name;
   }
 
+  /// Builds the polyfill function for the `insertBits` builtin
+  /// @param ty the parameter and return type for the function
+  /// @return the polyfill function name
+  Symbol insertBits(const sem::Type* ty) {
+    auto name = b.Symbols().New("tint_insert_bits");
+    uint32_t width = WidthOf(ty);
+
+    constexpr uint32_t W = 32u;  // 32-bit
+
+    auto V = [&](auto value) -> const ast::Expression* {
+      const ast::Expression* expr = b.Expr(value);
+      if (!ty->is_unsigned_scalar_or_vector()) {
+        expr = b.Construct<i32>(expr);
+      }
+      if (ty->Is<sem::Vector>()) {
+        expr = b.Construct(T(ty), expr);
+      }
+      return expr;
+    };
+    auto U = [&](auto value) -> const ast::Expression* {
+      if (width == 1) {
+        return b.Expr(value);
+      }
+      return b.vec(b.ty.u32(), width, value);
+    };
+
+    ast::StatementList body = {
+        b.Decl(b.Const("s", nullptr, b.Call("min", "offset", W))),
+        b.Decl(b.Const("e", nullptr, b.Call("min", W, b.Add("s", "count")))),
+    };
+
+    switch (polyfill.insert_bits) {
+      case Level::kFull:
+        // let mask = ((1 << s) - 1) ^ ((1 << e) - 1)
+        body.emplace_back(b.Decl(b.Const(
+            "mask", nullptr,
+            b.Xor(b.Sub(b.Shl(1u, "s"), 1u), b.Sub(b.Shl(1u, "e"), 1u)))));
+        // return ((n << s) & mask) | (v & ~mask)
+        body.emplace_back(b.Return(b.Or(b.And(b.Shl("n", U("s")), V("mask")),
+                                        b.And("v", V(b.Complement("mask"))))));
+        break;
+      case Level::kClampParameters:
+        body.emplace_back(
+            b.Return(b.Call("insertBits", "v", "n", "s", b.Sub("e", "s"))));
+        break;
+      default:
+        TINT_ICE(Transform, b.Diagnostics())
+            << "unhandled polyfill level: "
+            << static_cast<int>(polyfill.insert_bits);
+        return {};
+    }
+
+    b.Func(name,
+           {
+               b.Param("v", T(ty)),
+               b.Param("n", T(ty)),
+               b.Param("offset", b.ty.u32()),
+               b.Param("count", b.ty.u32()),
+           },
+           T(ty), body);
+
+    return name;
+  }
+
  private:
+  /// Aliases
+  using u32 = ProgramBuilder::u32;
+  using i32 = ProgramBuilder::i32;
+
+  /// @returns the AST type for the given sem type
   const ast::Type* T(const sem::Type* ty) const {
     return CreateASTTypeFor(ctx, ty);
   }
+
+  /// @returns 1 if `ty` is not a vector, otherwise the vector width
   uint32_t WidthOf(const sem::Type* ty) const {
     if (auto* v = ty->As<sem::Vector>()) {
       return v->Width();
     }
     return 1;
   }
+
+  /// @returns a scalar or vector with the given width, with each element with
+  /// the given value.
   template <typename T>
   const ast::Expression* ScalarOrVector(uint32_t width, T value) const {
     if (width == 1) {
@@ -427,6 +501,11 @@ bool BuiltinPolyfill::ShouldRun(const Program* program,
               break;
             case sem::BuiltinType::kFirstTrailingBit:
               if (builtins.first_trailing_bit) {
+                return true;
+              }
+              break;
+            case sem::BuiltinType::kInsertBits:
+              if (builtins.insert_bits != Level::kNone) {
                 return true;
               }
               break;
@@ -491,6 +570,13 @@ void BuiltinPolyfill::Run(CloneContext& ctx,
                 if (builtins.first_trailing_bit) {
                   polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
                     return s.firstTrailingBit(builtin->ReturnType());
+                  });
+                }
+                break;
+              case sem::BuiltinType::kInsertBits:
+                if (builtins.insert_bits != Level::kNone) {
+                  polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
+                    return s.insertBits(builtin->ReturnType());
                   });
                 }
                 break;

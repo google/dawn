@@ -73,6 +73,7 @@ enum class BuiltinType {
   kFwidth,
   kFwidthCoarse,
   kFwidthFine,
+  kInsertBits,
   kInverseSqrt,
   kIsFinite,
   kIsInf,

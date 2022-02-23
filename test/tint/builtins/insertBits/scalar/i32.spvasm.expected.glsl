@@ -1,0 +1,26 @@
+#version 310 es
+
+int tint_insert_bits(int v, int n, uint offset, uint count) {
+  uint s = min(offset, 32u);
+  uint e = min(32u, (s + count));
+  return bitfieldInsert(v, n, int(s), int((e - s)));
+}
+
+void f_1() {
+  int v = 0;
+  int n = 0;
+  uint offset_1 = 0u;
+  uint count = 0u;
+  int x_15 = tint_insert_bits(v, n, offset_1, count);
+  return;
+}
+
+void f() {
+  f_1();
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  f();
+  return;
+}

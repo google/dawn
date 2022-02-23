@@ -59,6 +59,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     polyfills.extract_bits = BuiltinPolyfill::Level::kClampParameters;
     polyfills.first_leading_bit = true;
     polyfills.first_trailing_bit = true;
+    polyfills.insert_bits = BuiltinPolyfill::Level::kClampParameters;
     data.Add<BuiltinPolyfill::Config>(polyfills);
     manager.Add<BuiltinPolyfill>();
   }

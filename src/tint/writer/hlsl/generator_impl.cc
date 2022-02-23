@@ -150,6 +150,7 @@ SanitizedResult Sanitize(
     polyfills.extract_bits = transform::BuiltinPolyfill::Level::kFull;
     polyfills.first_leading_bit = true;
     polyfills.first_trailing_bit = true;
+    polyfills.insert_bits = transform::BuiltinPolyfill::Level::kFull;
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);
     manager.Add<transform::BuiltinPolyfill>();
   }

@@ -443,6 +443,11 @@ sem::BuiltinType GetBuiltin(SpvOp opcode) {
   switch (opcode) {
     case SpvOpBitCount:
       return sem::BuiltinType::kCountOneBits;
+    case SpvOpBitFieldInsert:
+      return sem::BuiltinType::kInsertBits;
+    case SpvOpBitFieldSExtract:
+    case SpvOpBitFieldUExtract:
+      return sem::BuiltinType::kExtractBits;
     case SpvOpBitReverse:
       return sem::BuiltinType::kReverseBits;
     case SpvOpDot:
@@ -463,9 +468,6 @@ sem::BuiltinType GetBuiltin(SpvOp opcode) {
       return sem::BuiltinType::kDpdxCoarse;
     case SpvOpDPdyCoarse:
       return sem::BuiltinType::kDpdyCoarse;
-    case SpvOpBitFieldSExtract:
-    case SpvOpBitFieldUExtract:
-      return sem::BuiltinType::kExtractBits;
     case SpvOpFwidthCoarse:
       return sem::BuiltinType::kFwidthCoarse;
     default:

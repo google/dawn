@@ -50,6 +50,8 @@ class BuiltinPolyfill : public Castable<BuiltinPolyfill, Transform> {
     bool first_leading_bit = false;
     /// Should `firstTrailingBit()` be polyfilled?
     bool first_trailing_bit = false;
+    /// Should `insertBits()` be polyfilled?
+    Level insert_bits = Level::kNone;
   };
 
   /// Config is consumed by the BuiltinPolyfill transform.

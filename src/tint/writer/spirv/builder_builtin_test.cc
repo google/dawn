@@ -2708,6 +2708,176 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(BuiltinBuilderTest, Call_InsertBits_i32) {
+  auto* v = Var("v", ty.i32());
+  auto* n = Var("n", ty.i32());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("insertBits", v, n, offset, count);
+  auto* func = WrapInFunction(v, n, offset, count, call);
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "v"
+OpName %9 "n"
+OpName %10 "offset"
+OpName %14 "count"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpTypePointer Function %7
+%8 = OpConstantNull %7
+%12 = OpTypeInt 32 0
+%11 = OpTypePointer Function %12
+%13 = OpConstantNull %12
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %8
+%9 = OpVariable %6 Function %8
+%10 = OpVariable %11 Function %13
+%14 = OpVariable %11 Function %13
+%16 = OpLoad %7 %5
+%17 = OpLoad %7 %9
+%18 = OpLoad %12 %10
+%19 = OpLoad %12 %14
+%15 = OpBitFieldInsert %7 %16 %17 %18 %19
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuiltinBuilderTest, Call_InsertBits_u32) {
+  auto* v = Var("v", ty.u32());
+  auto* n = Var("n", ty.u32());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("insertBits", v, n, offset, count);
+  auto* func = WrapInFunction(v, n, offset, count, call);
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "v"
+OpName %9 "n"
+OpName %10 "offset"
+OpName %11 "count"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 0
+%6 = OpTypePointer Function %7
+%8 = OpConstantNull %7
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %8
+%9 = OpVariable %6 Function %8
+%10 = OpVariable %6 Function %8
+%11 = OpVariable %6 Function %8
+%13 = OpLoad %7 %5
+%14 = OpLoad %7 %9
+%15 = OpLoad %7 %10
+%16 = OpLoad %7 %11
+%12 = OpBitFieldInsert %7 %13 %14 %15 %16
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_i32) {
+  auto* v = Var("v", ty.vec3<i32>());
+  auto* n = Var("n", ty.vec3<i32>());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("insertBits", v, n, offset, count);
+  auto* func = WrapInFunction(v, n, offset, count, call);
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "v"
+OpName %10 "n"
+OpName %11 "offset"
+OpName %15 "count"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%8 = OpTypeInt 32 1
+%7 = OpTypeVector %8 3
+%6 = OpTypePointer Function %7
+%9 = OpConstantNull %7
+%13 = OpTypeInt 32 0
+%12 = OpTypePointer Function %13
+%14 = OpConstantNull %13
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %9
+%10 = OpVariable %6 Function %9
+%11 = OpVariable %12 Function %14
+%15 = OpVariable %12 Function %14
+%17 = OpLoad %7 %5
+%18 = OpLoad %7 %10
+%19 = OpLoad %13 %11
+%20 = OpLoad %13 %15
+%16 = OpBitFieldInsert %7 %17 %18 %19 %20
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_u32) {
+  auto* v = Var("v", ty.vec3<u32>());
+  auto* n = Var("n", ty.vec3<u32>());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("insertBits", v, n, offset, count);
+  auto* func = WrapInFunction(v, n, offset, count, call);
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "v"
+OpName %10 "n"
+OpName %11 "offset"
+OpName %14 "count"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%8 = OpTypeInt 32 0
+%7 = OpTypeVector %8 3
+%6 = OpTypePointer Function %7
+%9 = OpConstantNull %7
+%12 = OpTypePointer Function %8
+%13 = OpConstantNull %8
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %9
+%10 = OpVariable %6 Function %9
+%11 = OpVariable %12 Function %13
+%14 = OpVariable %12 Function %13
+%16 = OpLoad %7 %5
+%17 = OpLoad %7 %10
+%18 = OpLoad %8 %11
+%19 = OpLoad %8 %14
+%15 = OpBitFieldInsert %7 %16 %17 %18 %19
+OpReturn
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

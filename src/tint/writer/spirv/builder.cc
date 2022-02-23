@@ -267,6 +267,7 @@ SanitizedResult Sanitize(const Program* in,
         transform::BuiltinPolyfill::Level::kClampParameters;
     polyfills.first_leading_bit = true;
     polyfills.first_trailing_bit = true;
+    polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);
     manager.Add<transform::BuiltinPolyfill>();
   }
@@ -2519,6 +2520,9 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call,
       break;
     case BuiltinType::kFwidthFine:
       op = spv::Op::OpFwidthFine;
+      break;
+    case BuiltinType::kInsertBits:
+      op = spv::Op::OpBitFieldInsert;
       break;
     case BuiltinType::kIsInf:
       op = spv::Op::OpIsInf;

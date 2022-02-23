@@ -889,6 +889,233 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// insertBits
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillInsertBits(Level level) {
+  BuiltinPolyfill::Builtins builtins;
+  builtins.insert_bits = level;
+  DataMap data;
+  data.Add<BuiltinPolyfill::Config>(builtins);
+  return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunInsertBits) {
+  auto* src = R"(
+fn f() {
+  insertBits(1234, 5678, 5u, 6u);
+}
+)";
+
+  EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+  EXPECT_FALSE(
+      ShouldRun<BuiltinPolyfill>(src, polyfillInsertBits(Level::kNone)));
+  EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(
+      src, polyfillInsertBits(Level::kClampParameters)));
+  EXPECT_TRUE(
+      ShouldRun<BuiltinPolyfill>(src, polyfillInsertBits(Level::kFull)));
+}
+
+TEST_F(BuiltinPolyfillTest, InsertBits_Full_i32) {
+  auto* src = R"(
+fn f() {
+  let r : i32 = insertBits(1234, 5678, 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_insert_bits(v : i32, n : i32, offset : u32, count : u32) -> i32 {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  let mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
+  return (((n << s) & i32(mask)) | (v & i32(~(mask))));
+}
+
+fn f() {
+  let r : i32 = tint_insert_bits(1234, 5678, 5u, 6u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kFull));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, InsertBits_Full_u32) {
+  auto* src = R"(
+fn f() {
+  let r : u32 = insertBits(1234u, 5678u, 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_insert_bits(v : u32, n : u32, offset : u32, count : u32) -> u32 {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  let mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
+  return (((n << s) & mask) | (v & ~(mask)));
+}
+
+fn f() {
+  let r : u32 = tint_insert_bits(1234u, 5678u, 5u, 6u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kFull));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, InsertBits_Full_vec3_i32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<i32> = insertBits(vec3<i32>(1234), vec3<i32>(5678), 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_insert_bits(v : vec3<i32>, n : vec3<i32>, offset : u32, count : u32) -> vec3<i32> {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  let mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
+  return (((n << vec3<u32>(s)) & vec3<i32>(i32(mask))) | (v & vec3<i32>(i32(~(mask)))));
+}
+
+fn f() {
+  let r : vec3<i32> = tint_insert_bits(vec3<i32>(1234), vec3<i32>(5678), 5u, 6u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kFull));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, InsertBits_Full_vec3_u32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<u32> = insertBits(vec3<u32>(1234u), vec3<u32>(5678u), 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_insert_bits(v : vec3<u32>, n : vec3<u32>, offset : u32, count : u32) -> vec3<u32> {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  let mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
+  return (((n << vec3<u32>(s)) & vec3<u32>(mask)) | (v & vec3<u32>(~(mask))));
+}
+
+fn f() {
+  let r : vec3<u32> = tint_insert_bits(vec3<u32>(1234u), vec3<u32>(5678u), 5u, 6u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kFull));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, InsertBits_Clamp_i32) {
+  auto* src = R"(
+fn f() {
+  let r : i32 = insertBits(1234, 5678, 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_insert_bits(v : i32, n : i32, offset : u32, count : u32) -> i32 {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  return insertBits(v, n, s, (e - s));
+}
+
+fn f() {
+  let r : i32 = tint_insert_bits(1234, 5678, 5u, 6u);
+}
+)";
+
+  auto got =
+      Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kClampParameters));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, InsertBits_Clamp_u32) {
+  auto* src = R"(
+fn f() {
+  let r : u32 = insertBits(1234u, 5678u, 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_insert_bits(v : u32, n : u32, offset : u32, count : u32) -> u32 {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  return insertBits(v, n, s, (e - s));
+}
+
+fn f() {
+  let r : u32 = tint_insert_bits(1234u, 5678u, 5u, 6u);
+}
+)";
+
+  auto got =
+      Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kClampParameters));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, InsertBits_Clamp_vec3_i32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<i32> = insertBits(vec3<i32>(1234), vec3<i32>(5678), 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_insert_bits(v : vec3<i32>, n : vec3<i32>, offset : u32, count : u32) -> vec3<i32> {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  return insertBits(v, n, s, (e - s));
+}
+
+fn f() {
+  let r : vec3<i32> = tint_insert_bits(vec3<i32>(1234), vec3<i32>(5678), 5u, 6u);
+}
+)";
+
+  auto got =
+      Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kClampParameters));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, InsertBits_Clamp_vec3_u32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<u32> = insertBits(vec3<u32>(1234u), vec3<u32>(5678u), 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_insert_bits(v : vec3<u32>, n : vec3<u32>, offset : u32, count : u32) -> vec3<u32> {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  return insertBits(v, n, s, (e - s));
+}
+
+fn f() {
+  let r : vec3<u32> = tint_insert_bits(vec3<u32>(1234u), vec3<u32>(5678u), 5u, 6u);
+}
+)";
+
+  auto got =
+      Run<BuiltinPolyfill>(src, polyfillInsertBits(Level::kClampParameters));
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

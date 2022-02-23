@@ -131,6 +131,8 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
       return builder->Call(str.str(), "u2");
     case BuiltinType::kExtractBits:
       return builder->Call(str.str(), "u2", "u1", "u1");
+    case BuiltinType::kInsertBits:
+      return builder->Call(str.str(), "u2", "u2", "u1", "u1");
     case BuiltinType::kMax:
     case BuiltinType::kMin:
       if (type == ParamType::kF32) {
@@ -239,6 +241,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kFwidth, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthCoarse, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthFine, ParamType::kF32, "fwidth"},
+        BuiltinData{BuiltinType::kInsertBits, ParamType::kU32, "insert_bits"},
         BuiltinData{BuiltinType::kInverseSqrt, ParamType::kF32, "rsqrt"},
         BuiltinData{BuiltinType::kIsFinite, ParamType::kF32, "isfinite"},
         BuiltinData{BuiltinType::kIsInf, ParamType::kF32, "isinf"},

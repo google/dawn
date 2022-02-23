@@ -1,0 +1,27 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int tint_insert_bits(int v, int n, uint offset, uint count) {
+  uint const s = min(offset, 32u);
+  uint const e = min(32u, (s + count));
+  return insert_bits(v, n, s, (e - s));
+}
+
+void f_1() {
+  int v = 0;
+  int n = 0;
+  uint offset_1 = 0u;
+  uint count = 0u;
+  int const x_17 = v;
+  int const x_18 = n;
+  uint const x_19 = offset_1;
+  uint const x_20 = count;
+  int const x_15 = tint_insert_bits(x_17, x_18, x_19, x_20);
+  return;
+}
+
+kernel void f() {
+  f_1();
+  return;
+}
+
