@@ -20,7 +20,6 @@
 #include "gtest/gtest.h"
 
 namespace tint {
-namespace {
 
 struct Animal : public tint::Castable<Animal> {};
 struct Amphibian : public tint::Castable<Amphibian, Animal> {};
@@ -31,6 +30,8 @@ struct Bear : public tint::Castable<Bear, Mammal> {};
 struct Lizard : public tint::Castable<Lizard, Reptile> {};
 struct Gecko : public tint::Castable<Gecko, Lizard> {};
 struct Iguana : public tint::Castable<Iguana, Lizard> {};
+
+namespace {
 
 TEST(CastableBase, Is) {
   std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
