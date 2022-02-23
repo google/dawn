@@ -129,6 +129,8 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
     case BuiltinType::kCountTrailingZeros:
     case BuiltinType::kReverseBits:
       return builder->Call(str.str(), "u2");
+    case BuiltinType::kExtractBits:
+      return builder->Call(str.str(), "u2", "u1", "u1");
     case BuiltinType::kMax:
     case BuiltinType::kMin:
       if (type == ParamType::kF32) {
@@ -229,6 +231,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kDpdyFine, ParamType::kF32, "dfdy"},
         BuiltinData{BuiltinType::kExp, ParamType::kF32, "exp"},
         BuiltinData{BuiltinType::kExp2, ParamType::kF32, "exp2"},
+        BuiltinData{BuiltinType::kExtractBits, ParamType::kU32, "extract_bits"},
         BuiltinData{BuiltinType::kFaceForward, ParamType::kF32, "faceforward"},
         BuiltinData{BuiltinType::kFloor, ParamType::kF32, "floor"},
         BuiltinData{BuiltinType::kFma, ParamType::kF32, "fma"},

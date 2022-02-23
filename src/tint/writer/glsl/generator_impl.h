@@ -171,6 +171,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the call expression
   /// @returns true if the array length expression is emitted
   bool EmitArrayLength(std::ostream& out, const ast::CallExpression* expr);
+  /// Handles generating a call to `bitfieldExtract`
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @returns true if the expression is emitted
+  bool EmitExtractBits(std::ostream& out, const ast::CallExpression* expr);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param out the output of the expression stream

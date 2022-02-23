@@ -2554,6 +2554,160 @@ OpReturn
   Validate(b);
 }
 
+TEST_F(BuiltinBuilderTest, Call_ExtractBits_i32) {
+  auto* v = Var("v", ty.i32());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("extractBits", v, offset, count);
+  auto* func = WrapInFunction(v, offset, count, call);
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "v"
+OpName %9 "offset"
+OpName %13 "count"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpTypePointer Function %7
+%8 = OpConstantNull %7
+%11 = OpTypeInt 32 0
+%10 = OpTypePointer Function %11
+%12 = OpConstantNull %11
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %8
+%9 = OpVariable %10 Function %12
+%13 = OpVariable %10 Function %12
+%15 = OpLoad %7 %5
+%16 = OpLoad %11 %9
+%17 = OpLoad %11 %13
+%14 = OpBitFieldSExtract %7 %15 %16 %17
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuiltinBuilderTest, Call_ExtractBits_u32) {
+  auto* v = Var("v", ty.u32());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("extractBits", v, offset, count);
+  auto* func = WrapInFunction(v, offset, count, call);
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "v"
+OpName %9 "offset"
+OpName %10 "count"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 0
+%6 = OpTypePointer Function %7
+%8 = OpConstantNull %7
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %8
+%9 = OpVariable %6 Function %8
+%10 = OpVariable %6 Function %8
+%12 = OpLoad %7 %5
+%13 = OpLoad %7 %9
+%14 = OpLoad %7 %10
+%11 = OpBitFieldUExtract %7 %12 %13 %14
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_i32) {
+  auto* v = Var("v", ty.vec3<i32>());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("extractBits", v, offset, count);
+  auto* func = WrapInFunction(v, offset, count, call);
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "v"
+OpName %10 "offset"
+OpName %14 "count"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%8 = OpTypeInt 32 1
+%7 = OpTypeVector %8 3
+%6 = OpTypePointer Function %7
+%9 = OpConstantNull %7
+%12 = OpTypeInt 32 0
+%11 = OpTypePointer Function %12
+%13 = OpConstantNull %12
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %9
+%10 = OpVariable %11 Function %13
+%14 = OpVariable %11 Function %13
+%16 = OpLoad %7 %5
+%17 = OpLoad %12 %10
+%18 = OpLoad %12 %14
+%15 = OpBitFieldSExtract %7 %16 %17 %18
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_u32) {
+  auto* v = Var("v", ty.vec3<u32>());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("extractBits", v, offset, count);
+  auto* func = WrapInFunction(v, offset, count, call);
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "v"
+OpName %10 "offset"
+OpName %13 "count"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%8 = OpTypeInt 32 0
+%7 = OpTypeVector %8 3
+%6 = OpTypePointer Function %7
+%9 = OpConstantNull %7
+%11 = OpTypePointer Function %8
+%12 = OpConstantNull %8
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %9
+%10 = OpVariable %11 Function %12
+%13 = OpVariable %11 Function %12
+%15 = OpLoad %7 %5
+%16 = OpLoad %8 %10
+%17 = OpLoad %8 %13
+%14 = OpBitFieldUExtract %7 %15 %16 %17
+OpReturn
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

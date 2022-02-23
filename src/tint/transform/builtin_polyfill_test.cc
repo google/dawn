@@ -22,6 +22,8 @@ namespace tint {
 namespace transform {
 namespace {
 
+using Level = BuiltinPolyfill::Level;
+
 using BuiltinPolyfillTest = TransformTest;
 
 TEST_F(BuiltinPolyfillTest, ShouldRunEmptyModule) {
@@ -344,6 +346,237 @@ fn f() {
 )";
 
   auto got = Run<BuiltinPolyfill>(src, polyfillCountTrailingZeros());
+
+  EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// extractBits
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillExtractBits(Level level) {
+  BuiltinPolyfill::Builtins builtins;
+  builtins.extract_bits = level;
+  DataMap data;
+  data.Add<BuiltinPolyfill::Config>(builtins);
+  return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunExtractBits) {
+  auto* src = R"(
+fn f() {
+  extractBits(1234, 5u, 6u);
+}
+)";
+
+  EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+  EXPECT_FALSE(
+      ShouldRun<BuiltinPolyfill>(src, polyfillExtractBits(Level::kNone)));
+  EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(
+      src, polyfillExtractBits(Level::kClampParameters)));
+  EXPECT_TRUE(
+      ShouldRun<BuiltinPolyfill>(src, polyfillExtractBits(Level::kFull)));
+}
+
+TEST_F(BuiltinPolyfillTest, ExtractBits_Full_i32) {
+  auto* src = R"(
+fn f() {
+  let r : i32 = extractBits(1234, 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_extract_bits(v : i32, offset : u32, count : u32) -> i32 {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  let shl = (32u - e);
+  let shr = (shl + s);
+  return ((v << shl) >> shr);
+}
+
+fn f() {
+  let r : i32 = tint_extract_bits(1234, 5u, 6u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kFull));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ExtractBits_Full_u32) {
+  auto* src = R"(
+fn f() {
+  let r : u32 = extractBits(1234u, 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_extract_bits(v : u32, offset : u32, count : u32) -> u32 {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  let shl = (32u - e);
+  let shr = (shl + s);
+  return ((v << shl) >> shr);
+}
+
+fn f() {
+  let r : u32 = tint_extract_bits(1234u, 5u, 6u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kFull));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ExtractBits_Full_vec3_i32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<i32> = extractBits(vec3<i32>(1234), 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_extract_bits(v : vec3<i32>, offset : u32, count : u32) -> vec3<i32> {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  let shl = (32u - e);
+  let shr = (shl + s);
+  return ((v << vec3<u32>(shl)) >> vec3<u32>(shr));
+}
+
+fn f() {
+  let r : vec3<i32> = tint_extract_bits(vec3<i32>(1234), 5u, 6u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kFull));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ExtractBits_Full_vec3_u32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<u32> = extractBits(vec3<u32>(1234u), 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_extract_bits(v : vec3<u32>, offset : u32, count : u32) -> vec3<u32> {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  let shl = (32u - e);
+  let shr = (shl + s);
+  return ((v << vec3<u32>(shl)) >> vec3<u32>(shr));
+}
+
+fn f() {
+  let r : vec3<u32> = tint_extract_bits(vec3<u32>(1234u), 5u, 6u);
+}
+)";
+
+  auto got = Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kFull));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ExtractBits_Clamp_i32) {
+  auto* src = R"(
+fn f() {
+  let r : i32 = extractBits(1234, 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_extract_bits(v : i32, offset : u32, count : u32) -> i32 {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  return extractBits(v, s, (e - s));
+}
+
+fn f() {
+  let r : i32 = tint_extract_bits(1234, 5u, 6u);
+}
+)";
+
+  auto got =
+      Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kClampParameters));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ExtractBits_Clamp_u32) {
+  auto* src = R"(
+fn f() {
+  let r : u32 = extractBits(1234u, 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_extract_bits(v : u32, offset : u32, count : u32) -> u32 {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  return extractBits(v, s, (e - s));
+}
+
+fn f() {
+  let r : u32 = tint_extract_bits(1234u, 5u, 6u);
+}
+)";
+
+  auto got =
+      Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kClampParameters));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ExtractBits_Clamp_vec3_i32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<i32> = extractBits(vec3<i32>(1234), 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_extract_bits(v : vec3<i32>, offset : u32, count : u32) -> vec3<i32> {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  return extractBits(v, s, (e - s));
+}
+
+fn f() {
+  let r : vec3<i32> = tint_extract_bits(vec3<i32>(1234), 5u, 6u);
+}
+)";
+
+  auto got =
+      Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kClampParameters));
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ExtractBits_Clamp_vec3_u32) {
+  auto* src = R"(
+fn f() {
+  let r : vec3<u32> = extractBits(vec3<u32>(1234u), 5u, 6u);
+}
+)";
+
+  auto* expect = R"(
+fn tint_extract_bits(v : vec3<u32>, offset : u32, count : u32) -> vec3<u32> {
+  let s = min(offset, 32u);
+  let e = min(32u, (s + count));
+  return extractBits(v, s, (e - s));
+}
+
+fn f() {
+  let r : vec3<u32> = tint_extract_bits(vec3<u32>(1234u), 5u, 6u);
+}
+)";
+
+  auto got =
+      Run<BuiltinPolyfill>(src, polyfillExtractBits(Level::kClampParameters));
 
   EXPECT_EQ(expect, str(got));
 }

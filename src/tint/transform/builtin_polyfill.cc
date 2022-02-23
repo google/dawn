@@ -31,10 +31,13 @@ namespace transform {
 struct BuiltinPolyfill::State {
   /// Constructor
   /// @param c the CloneContext
-  explicit State(CloneContext& c) : ctx(c) {}
+  /// @param p the builtins to polyfill
+  State(CloneContext& c, Builtins p) : ctx(c), polyfill(p) {}
 
   /// The clone context
   CloneContext& ctx;
+  /// The builtins to polyfill
+  Builtins polyfill;
   /// The destination program builder
   ProgramBuilder& b = *ctx.dst;
   /// The source clone context
@@ -167,6 +170,57 @@ struct BuiltinPolyfill::State {
                 b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
                       "is_zero"))),
         });
+    return name;
+  }
+
+  /// Builds the polyfill function for the `extractBits` builtin
+  /// @param ty the parameter and return type for the function
+  /// @return the polyfill function name
+  Symbol extractBits(const sem::Type* ty) {
+    auto name = b.Symbols().New("tint_extract_bits");
+    uint32_t width = WidthOf(ty);
+
+    constexpr uint32_t W = 32u;  // 32-bit
+
+    auto vecN_u32 =
+        [&](const ast::Expression* value) -> const ast::Expression* {
+      if (width == 1) {
+        return value;
+      }
+      return b.Construct(b.ty.vec<ProgramBuilder::u32>(width), value);
+    };
+
+    ast::StatementList body = {
+        b.Decl(b.Const("s", nullptr, b.Call("min", "offset", W))),
+        b.Decl(b.Const("e", nullptr, b.Call("min", W, b.Add("s", "count")))),
+    };
+
+    switch (polyfill.extract_bits) {
+      case Level::kFull:
+        body.emplace_back(b.Decl(b.Const("shl", nullptr, b.Sub(W, "e"))));
+        body.emplace_back(b.Decl(b.Const("shr", nullptr, b.Add("shl", "s"))));
+        body.emplace_back(b.Return(b.Shr(b.Shl("v", vecN_u32(b.Expr("shl"))),
+                                         vecN_u32(b.Expr("shr")))));
+        break;
+      case Level::kClampParameters:
+        body.emplace_back(
+            b.Return(b.Call("extractBits", "v", "s", b.Sub("e", "s"))));
+        break;
+      default:
+        TINT_ICE(Transform, b.Diagnostics())
+            << "unhandled polyfill level: "
+            << static_cast<int>(polyfill.extract_bits);
+        return {};
+    }
+
+    b.Func(name,
+           {
+               b.Param("v", T(ty)),
+               b.Param("offset", b.ty.u32()),
+               b.Param("count", b.ty.u32()),
+           },
+           T(ty), body);
+
     return name;
   }
 
@@ -361,6 +415,11 @@ bool BuiltinPolyfill::ShouldRun(const Program* program,
                 return true;
               }
               break;
+            case sem::BuiltinType::kExtractBits:
+              if (builtins.extract_bits != Level::kNone) {
+                return true;
+              }
+              break;
             case sem::BuiltinType::kFirstLeadingBit:
               if (builtins.first_leading_bit) {
                 return true;
@@ -395,7 +454,7 @@ void BuiltinPolyfill::Run(CloneContext& ctx,
   ctx.ReplaceAll(
       [&](const ast::CallExpression* expr) -> const ast::CallExpression* {
         auto builtins = cfg->builtins;
-        State s{ctx};
+        State s{ctx, builtins};
         if (auto* call = s.sem.Get<sem::Call>(expr)) {
           if (auto* builtin = call->Target()->As<sem::Builtin>()) {
             Symbol polyfill;
@@ -411,6 +470,13 @@ void BuiltinPolyfill::Run(CloneContext& ctx,
                 if (builtins.count_trailing_zeros) {
                   polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
                     return s.countTrailingZeros(builtin->ReturnType());
+                  });
+                }
+                break;
+              case sem::BuiltinType::kExtractBits:
+                if (builtins.extract_bits != Level::kNone) {
+                  polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
+                    return s.extractBits(builtin->ReturnType());
                   });
                 }
                 break;

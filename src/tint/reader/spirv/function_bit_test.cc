@@ -901,9 +901,79 @@ TEST_F(SpvUnaryBitTest, BitReverse_IntVector_IntVector) {
       << body;
 }
 
+TEST_F(SpvUnaryBitTest, ExtractBits_Int) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitFieldSExtract %v2int %int_30 %uint_10 %uint_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body,
+              HasSubstr("let x_1 : vec2<i32> = extractBits(30, 10u, 20u);"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, ExtractBits_IntVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitFieldSExtract %v2int %v2int_30_40 %uint_10 %uint_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          "let x_1 : vec2<i32> = extractBits(vec2<i32>(30, 40), 10u, 20u);"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, ExtractBits_Uint) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitFieldUExtract %v2uint %uint_20 %uint_10 %uint_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body,
+              HasSubstr("let x_1 : vec2<u32> = extractBits(20u, 10u, 20u);"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, ExtractBits_UintVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitFieldUExtract %v2uint %v2uint_10_20 %uint_10 %uint_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          "let x_1 : vec2<u32> = extractBits(vec2<u32>(10u, 20u), 10u, 20u);"))
+      << body;
+}
+
 // TODO(dneto): OpBitFieldInsert
-// TODO(dneto): OpBitFieldSExtract
-// TODO(dneto): OpBitFieldUExtract
 
 }  // namespace
 }  // namespace spirv

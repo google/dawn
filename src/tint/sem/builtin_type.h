@@ -62,6 +62,7 @@ enum class BuiltinType {
   kDpdyFine,
   kExp,
   kExp2,
+  kExtractBits,
   kFaceForward,
   kFirstLeadingBit,
   kFirstTrailingBit,

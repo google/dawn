@@ -263,6 +263,8 @@ SanitizedResult Sanitize(const Program* in,
     transform::BuiltinPolyfill::Builtins polyfills;
     polyfills.count_leading_zeros = true;
     polyfills.count_trailing_zeros = true;
+    polyfills.extract_bits =
+        transform::BuiltinPolyfill::Level::kClampParameters;
     polyfills.first_leading_bit = true;
     polyfills.first_trailing_bit = true;
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);
@@ -2503,6 +2505,11 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call,
       break;
     case BuiltinType::kDpdyFine:
       op = spv::Op::OpDPdyFine;
+      break;
+    case BuiltinType::kExtractBits:
+      op = builtin->Parameters()[0]->Type()->is_unsigned_scalar_or_vector()
+               ? spv::Op::OpBitFieldUExtract
+               : spv::Op::OpBitFieldSExtract;
       break;
     case BuiltinType::kFwidth:
       op = spv::Op::OpFwidth;

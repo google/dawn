@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int2 tint_extract_bits(int2 v, uint offset, uint count) {
+  uint const s = min(offset, 32u);
+  uint const e = min(32u, (s + count));
+  return extract_bits(v, s, (e - s));
+}
+
+void extractBits_a99a8d() {
+  int2 res = tint_extract_bits(int2(), 1u, 1u);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  extractBits_a99a8d();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  extractBits_a99a8d();
+  return;
+}
+
+kernel void compute_main() {
+  extractBits_a99a8d();
+  return;
+}
+

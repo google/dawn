@@ -147,6 +147,7 @@ SanitizedResult Sanitize(
     // and `firstbithigh`.
     polyfills.count_leading_zeros = true;
     polyfills.count_trailing_zeros = true;
+    polyfills.extract_bits = transform::BuiltinPolyfill::Level::kFull;
     polyfills.first_leading_bit = true;
     polyfills.first_trailing_bit = true;
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);

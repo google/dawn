@@ -463,6 +463,9 @@ sem::BuiltinType GetBuiltin(SpvOp opcode) {
       return sem::BuiltinType::kDpdxCoarse;
     case SpvOpDPdyCoarse:
       return sem::BuiltinType::kDpdyCoarse;
+    case SpvOpBitFieldSExtract:
+    case SpvOpBitFieldUExtract:
+      return sem::BuiltinType::kExtractBits;
     case SpvOpFwidthCoarse:
       return sem::BuiltinType::kFwidthCoarse;
     default:

@@ -28,12 +28,24 @@ class BuiltinPolyfill : public Castable<BuiltinPolyfill, Transform> {
   /// Destructor
   ~BuiltinPolyfill() override;
 
+  /// Enumerator of polyfill levels
+  enum class Level {
+    /// No polyfill needed, supported by the backend.
+    kNone,
+    /// Clamp the parameters to the inner implementation.
+    kClampParameters,
+    /// Polyfill the entire function
+    kFull,
+  };
+
   /// Specifies the builtins that should be polyfilled by the transform.
   struct Builtins {
     /// Should `countLeadingZeros()` be polyfilled?
     bool count_leading_zeros = false;
     /// Should `countTrailingZeros()` be polyfilled?
     bool count_trailing_zeros = false;
+    /// What level should `extractBits()` be polyfilled?
+    Level extract_bits = Level::kNone;
     /// Should `firstLeadingBit()` be polyfilled?
     bool first_leading_bit = false;
     /// Should `firstTrailingBit()` be polyfilled?

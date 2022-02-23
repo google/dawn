@@ -583,6 +583,38 @@ void main() {
 )");
 }
 
+TEST_F(GlslGeneratorImplTest_Builtin, ExtractBits) {
+  auto* v = Var("v", ty.vec3<u32>());
+  auto* offset = Var("offset", ty.u32());
+  auto* count = Var("count", ty.u32());
+  auto* call = Call("extractBits", v, offset, count);
+  WrapInFunction(v, offset, count, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+uvec3 tint_extract_bits(uvec3 v, uint offset, uint count) {
+  uint s = min(offset, 32u);
+  uint e = min(32u, (s + count));
+  return bitfieldExtract(v, int(s), int((e - s)));
+}
+
+void test_function() {
+  uvec3 v = uvec3(0u, 0u, 0u);
+  uint offset = 0u;
+  uint count = 0u;
+  uvec3 tint_symbol = tint_extract_bits(v, offset, count);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
 #if 0
 TEST_F(GlslGeneratorImplTest_Builtin, Pack4x8Snorm) {
   auto* call = Call("pack4x8snorm", "p1");

@@ -114,6 +114,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
   if (name == "exp2") {
     return BuiltinType::kExp2;
   }
+  if (name == "extractBits") {
+    return BuiltinType::kExtractBits;
+  }
   if (name == "faceForward") {
     return BuiltinType::kFaceForward;
   }
@@ -411,6 +414,8 @@ const char* str(BuiltinType i) {
       return "exp";
     case BuiltinType::kExp2:
       return "exp2";
+    case BuiltinType::kExtractBits:
+      return "extractBits";
     case BuiltinType::kFaceForward:
       return "faceForward";
     case BuiltinType::kFirstLeadingBit:

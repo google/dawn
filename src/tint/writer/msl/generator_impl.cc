@@ -130,6 +130,8 @@ SanitizedResult Sanitize(
 
   {  // Builtin polyfills
     transform::BuiltinPolyfill::Builtins polyfills;
+    polyfills.extract_bits =
+        transform::BuiltinPolyfill::Level::kClampParameters;
     polyfills.first_leading_bit = true;
     polyfills.first_trailing_bit = true;
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);
@@ -1372,6 +1374,9 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kDpdyCoarse:
     case sem::BuiltinType::kDpdyFine:
       out += "dfdy";
+      break;
+    case sem::BuiltinType::kExtractBits:
+      out += "extract_bits";
       break;
     case sem::BuiltinType::kFwidth:
     case sem::BuiltinType::kFwidthCoarse:
