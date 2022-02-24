@@ -257,12 +257,6 @@ namespace dawn::native {
             return {};
         }
 
-        MaybeError ValidateTextureState(const TextureBase* texture) {
-            DAWN_INVALID_IF(texture->GetTextureState() == TextureBase::TextureState::Destroyed,
-                            "Destroyed texture %s used in CopyTextureForBrowser().", texture);
-            return {};
-        }
-
         RenderPipelineBase* GetCachedPipeline(InternalPipelineStore* store,
                                               wgpu::TextureFormat dstFormat) {
             auto pipeline = store->copyTextureForBrowserPipelines.find(dstFormat);
@@ -332,8 +326,11 @@ namespace dawn::native {
         DAWN_TRY(device->ValidateObject(source->texture));
         DAWN_TRY(device->ValidateObject(destination->texture));
 
-        DAWN_TRY(ValidateTextureState(source->texture));
-        DAWN_TRY(ValidateTextureState(destination->texture));
+        DAWN_INVALID_IF(source->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
+                        "Source texture %s is destroyed.", source->texture);
+
+        DAWN_INVALID_IF(source->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
+                        "Destination texture %s is destroyed.", destination->texture);
 
         DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
                          "validating the ImageCopyTexture for the source");
