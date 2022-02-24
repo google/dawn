@@ -146,6 +146,10 @@ namespace utils {
             case wgpu::TextureFormat::RGBA32Sint:
             case wgpu::TextureFormat::RGBA32Float:
             case wgpu::TextureFormat::RGB9E5Ufloat:
+            case wgpu::TextureFormat::R8Snorm:
+            case wgpu::TextureFormat::RG8Snorm:
+            case wgpu::TextureFormat::RGBA8Snorm:
+            case wgpu::TextureFormat::RG11B10Ufloat:
                 return false;
 
             default:
