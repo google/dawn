@@ -239,6 +239,7 @@ dawn_test("dawn_unittests") {
     "unittests/ToBackendTests.cpp",
     "unittests/TypedIntegerTests.cpp",
     "unittests/native/CommandBufferEncodingTests.cpp",
+    "unittests/native/CreatePipelineAsyncTaskTests.cpp",
     "unittests/native/DestroyObjectTests.cpp",
     "unittests/native/DeviceCreationTests.cpp",
     "unittests/validation/BindGroupValidationTests.cpp",

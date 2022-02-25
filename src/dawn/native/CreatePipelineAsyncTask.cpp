@@ -114,11 +114,13 @@ namespace dawn::native {
 
     void CreateComputePipelineAsyncTask::Run() {
         const char* eventLabel = utils::GetLabelForTrace(mComputePipeline->GetLabel().c_str());
-        TRACE_EVENT_FLOW_END1(mComputePipeline->GetDevice()->GetPlatform(), General,
+
+        DeviceBase* device = mComputePipeline->GetDevice();
+        TRACE_EVENT_FLOW_END1(device->GetPlatform(), General,
                               "CreateComputePipelineAsyncTask::RunAsync", this, "label",
                               eventLabel);
-        TRACE_EVENT1(mComputePipeline->GetDevice()->GetPlatform(), General,
-                     "CreateComputePipelineAsyncTask::Run", "label", eventLabel);
+        TRACE_EVENT1(device->GetPlatform(), General, "CreateComputePipelineAsyncTask::Run", "label",
+                     eventLabel);
 
         MaybeError maybeError = mComputePipeline->Initialize();
         std::string errorMessage;
@@ -127,8 +129,8 @@ namespace dawn::native {
             errorMessage = maybeError.AcquireError()->GetMessage();
         }
 
-        mComputePipeline->GetDevice()->AddComputePipelineAsyncCallbackTask(
-            mComputePipeline, errorMessage, mCallback, mUserdata);
+        device->AddComputePipelineAsyncCallbackTask(mComputePipeline, errorMessage, mCallback,
+                                                    mUserdata);
     }
 
     void CreateComputePipelineAsyncTask::RunAsync(
@@ -164,10 +166,12 @@ namespace dawn::native {
 
     void CreateRenderPipelineAsyncTask::Run() {
         const char* eventLabel = utils::GetLabelForTrace(mRenderPipeline->GetLabel().c_str());
-        TRACE_EVENT_FLOW_END1(mRenderPipeline->GetDevice()->GetPlatform(), General,
+
+        DeviceBase* device = mRenderPipeline->GetDevice();
+        TRACE_EVENT_FLOW_END1(device->GetPlatform(), General,
                               "CreateRenderPipelineAsyncTask::RunAsync", this, "label", eventLabel);
-        TRACE_EVENT1(mRenderPipeline->GetDevice()->GetPlatform(), General,
-                     "CreateRenderPipelineAsyncTask::Run", "label", eventLabel);
+        TRACE_EVENT1(device->GetPlatform(), General, "CreateRenderPipelineAsyncTask::Run", "label",
+                     eventLabel);
 
         MaybeError maybeError = mRenderPipeline->Initialize();
         std::string errorMessage;
@@ -176,8 +180,8 @@ namespace dawn::native {
             errorMessage = maybeError.AcquireError()->GetMessage();
         }
 
-        mRenderPipeline->GetDevice()->AddRenderPipelineAsyncCallbackTask(
-            mRenderPipeline, errorMessage, mCallback, mUserdata);
+        device->AddRenderPipelineAsyncCallbackTask(mRenderPipeline, errorMessage, mCallback,
+                                                   mUserdata);
     }
 
     void CreateRenderPipelineAsyncTask::RunAsync(
