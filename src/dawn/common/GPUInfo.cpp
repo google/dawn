@@ -63,6 +63,9 @@ namespace gpu_info {
     bool IsIntel(PCIVendorID vendorId) {
         return vendorId == kVendorID_Intel;
     }
+    bool IsMesa(PCIVendorID vendorId) {
+        return vendorId == kVendorID_Mesa;
+    }
     bool IsNvidia(PCIVendorID vendorId) {
         return vendorId == kVendorID_Nvidia;
     }

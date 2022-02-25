@@ -285,10 +285,10 @@ namespace dawn::native::vulkan {
 
         // Only check maxFragmentCombinedOutputResources on mobile GPUs. Desktop GPUs drivers seem
         // to put incorrect values for this limit with things like 8 or 16 when they can do bindless
-        // storage buffers.
+        // storage buffers. Mesa llvmpipe driver also puts 8 here.
         uint32_t vendorId = mDeviceInfo.properties.vendorID;
         if (!gpu_info::IsAMD(vendorId) && !gpu_info::IsIntel(vendorId) &&
-            !gpu_info::IsNvidia(vendorId)) {
+            !gpu_info::IsMesa(vendorId) && !gpu_info::IsNvidia(vendorId)) {
             if (vkLimits.maxFragmentCombinedOutputResources <
                 kMaxColorAttachments + baseLimits.v1.maxStorageTexturesPerShaderStage +
                     baseLimits.v1.maxStorageBuffersPerShaderStage) {
