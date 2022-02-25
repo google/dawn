@@ -380,6 +380,321 @@ TEST(Castable, SwitchMatchFirst) {
   }
 }
 
+TEST(Castable, SwitchReturnValueWithDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    const char* result = Switch(
+        frog.get(),                              //
+        [](Mammal*) { return "mammal"; },        //
+        [](Amphibian*) { return "amphibian"; },  //
+        [](Default) { return "unknown"; });
+    static_assert(std::is_same_v<decltype(result), const char*>);
+    EXPECT_EQ(std::string(result), "amphibian");
+  }
+  {
+    const char* result = Switch(
+        bear.get(),                              //
+        [](Mammal*) { return "mammal"; },        //
+        [](Amphibian*) { return "amphibian"; },  //
+        [](Default) { return "unknown"; });
+    static_assert(std::is_same_v<decltype(result), const char*>);
+    EXPECT_EQ(std::string(result), "mammal");
+  }
+  {
+    const char* result = Switch(
+        gecko.get(),                             //
+        [](Mammal*) { return "mammal"; },        //
+        [](Amphibian*) { return "amphibian"; },  //
+        [](Default) { return "unknown"; });
+    static_assert(std::is_same_v<decltype(result), const char*>);
+    EXPECT_EQ(std::string(result), "unknown");
+  }
+}
+
+TEST(Castable, SwitchReturnValueWithoutDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    const char* result = Switch(
+        frog.get(),                        //
+        [](Mammal*) { return "mammal"; },  //
+        [](Amphibian*) { return "amphibian"; });
+    static_assert(std::is_same_v<decltype(result), const char*>);
+    EXPECT_EQ(std::string(result), "amphibian");
+  }
+  {
+    const char* result = Switch(
+        bear.get(),                        //
+        [](Mammal*) { return "mammal"; },  //
+        [](Amphibian*) { return "amphibian"; });
+    static_assert(std::is_same_v<decltype(result), const char*>);
+    EXPECT_EQ(std::string(result), "mammal");
+  }
+  {
+    auto* result = Switch(
+        gecko.get(),                       //
+        [](Mammal*) { return "mammal"; },  //
+        [](Amphibian*) { return "amphibian"; });
+    static_assert(std::is_same_v<decltype(result), const char*>);
+    EXPECT_EQ(result, nullptr);
+  }
+}
+
+TEST(Castable, SwitchInferPODReturnTypeWithDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    auto result = Switch(
+        frog.get(),                       //
+        [](Mammal*) { return 1; },        //
+        [](Amphibian*) { return 2.0f; },  //
+        [](Default) { return 3.0; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 2.0);
+  }
+  {
+    auto result = Switch(
+        bear.get(),                       //
+        [](Mammal*) { return 1.0; },      //
+        [](Amphibian*) { return 2.0f; },  //
+        [](Default) { return 3; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 1.0);
+  }
+  {
+    auto result = Switch(
+        gecko.get(),                   //
+        [](Mammal*) { return 1.0f; },  //
+        [](Amphibian*) { return 2; },  //
+        [](Default) { return 3.0; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 3.0);
+  }
+}
+
+TEST(Castable, SwitchInferPODReturnTypeWithoutDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    auto result = Switch(
+        frog.get(),                 //
+        [](Mammal*) { return 1; },  //
+        [](Amphibian*) { return 2.0f; });
+    static_assert(std::is_same_v<decltype(result), float>);
+    EXPECT_EQ(result, 2.0f);
+  }
+  {
+    auto result = Switch(
+        bear.get(),                    //
+        [](Mammal*) { return 1.0f; },  //
+        [](Amphibian*) { return 2; });
+    static_assert(std::is_same_v<decltype(result), float>);
+    EXPECT_EQ(result, 1.0f);
+  }
+  {
+    auto result = Switch(
+        gecko.get(),                  //
+        [](Mammal*) { return 1.0; },  //
+        [](Amphibian*) { return 2.0f; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 0.0);
+  }
+}
+
+TEST(Castable, SwitchInferCastableReturnTypeWithDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    auto* result = Switch(
+        frog.get(),                          //
+        [](Mammal* p) { return p; },         //
+        [](Amphibian*) { return nullptr; },  //
+        [](Default) { return nullptr; });
+    static_assert(std::is_same_v<decltype(result), Mammal*>);
+    EXPECT_EQ(result, nullptr);
+  }
+  {
+    auto* result = Switch(
+        bear.get(),                   //
+        [](Mammal* p) { return p; },  //
+        [](Amphibian* p) { return const_cast<const Amphibian*>(p); },
+        [](Default) { return nullptr; });
+    static_assert(std::is_same_v<decltype(result), const Animal*>);
+    EXPECT_EQ(result, bear.get());
+  }
+  {
+    auto* result = Switch(
+        gecko.get(),                     //
+        [](Mammal* p) { return p; },     //
+        [](Amphibian* p) { return p; },  //
+        [](Default) -> CastableBase* { return nullptr; });
+    static_assert(std::is_same_v<decltype(result), CastableBase*>);
+    EXPECT_EQ(result, nullptr);
+  }
+}
+
+TEST(Castable, SwitchInferCastableReturnTypeWithoutDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    auto* result = Switch(
+        frog.get(),                   //
+        [](Mammal* p) { return p; },  //
+        [](Amphibian*) { return nullptr; });
+    static_assert(std::is_same_v<decltype(result), Mammal*>);
+    EXPECT_EQ(result, nullptr);
+  }
+  {
+    auto* result = Switch(
+        bear.get(),                                                     //
+        [](Mammal* p) { return p; },                                    //
+        [](Amphibian* p) { return const_cast<const Amphibian*>(p); });  //
+    static_assert(std::is_same_v<decltype(result), const Animal*>);
+    EXPECT_EQ(result, bear.get());
+  }
+  {
+    auto* result = Switch(
+        gecko.get(),                  //
+        [](Mammal* p) { return p; },  //
+        [](Amphibian* p) { return p; });
+    static_assert(std::is_same_v<decltype(result), Animal*>);
+    EXPECT_EQ(result, nullptr);
+  }
+}
+
+TEST(Castable, SwitchExplicitPODReturnTypeWithDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    auto result = Switch<double>(
+        frog.get(),                       //
+        [](Mammal*) { return 1; },        //
+        [](Amphibian*) { return 2.0f; },  //
+        [](Default) { return 3.0; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 2.0f);
+  }
+  {
+    auto result = Switch<double>(
+        bear.get(),                    //
+        [](Mammal*) { return 1; },     //
+        [](Amphibian*) { return 2; },  //
+        [](Default) { return 3; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 1.0f);
+  }
+  {
+    auto result = Switch<double>(
+        gecko.get(),                      //
+        [](Mammal*) { return 1.0f; },     //
+        [](Amphibian*) { return 2.0f; },  //
+        [](Default) { return 3.0f; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 3.0f);
+  }
+}
+
+TEST(Castable, SwitchExplicitPODReturnTypeWithoutDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    auto result = Switch<double>(
+        frog.get(),                 //
+        [](Mammal*) { return 1; },  //
+        [](Amphibian*) { return 2.0f; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 2.0f);
+  }
+  {
+    auto result = Switch<double>(
+        bear.get(),                    //
+        [](Mammal*) { return 1.0f; },  //
+        [](Amphibian*) { return 2; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 1.0f);
+  }
+  {
+    auto result = Switch<double>(
+        gecko.get(),                  //
+        [](Mammal*) { return 1.0; },  //
+        [](Amphibian*) { return 2.0f; });
+    static_assert(std::is_same_v<decltype(result), double>);
+    EXPECT_EQ(result, 0.0);
+  }
+}
+
+TEST(Castable, SwitchExplicitCastableReturnTypeWithDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    auto* result = Switch<Animal>(
+        frog.get(),                          //
+        [](Mammal* p) { return p; },         //
+        [](Amphibian*) { return nullptr; },  //
+        [](Default) { return nullptr; });
+    static_assert(std::is_same_v<decltype(result), Animal*>);
+    EXPECT_EQ(result, nullptr);
+  }
+  {
+    auto* result = Switch<CastableBase>(
+        bear.get(),                   //
+        [](Mammal* p) { return p; },  //
+        [](Amphibian* p) { return const_cast<const Amphibian*>(p); },
+        [](Default) { return nullptr; });
+    static_assert(std::is_same_v<decltype(result), const CastableBase*>);
+    EXPECT_EQ(result, bear.get());
+  }
+  {
+    auto* result = Switch<const Animal>(
+        gecko.get(),                     //
+        [](Mammal* p) { return p; },     //
+        [](Amphibian* p) { return p; },  //
+        [](Default) { return nullptr; });
+    static_assert(std::is_same_v<decltype(result), const Animal*>);
+    EXPECT_EQ(result, nullptr);
+  }
+}
+
+TEST(Castable, SwitchExplicitCastableReturnTypeWithoutDefault) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+  std::unique_ptr<Animal> bear = std::make_unique<Bear>();
+  std::unique_ptr<Animal> gecko = std::make_unique<Gecko>();
+  {
+    auto* result = Switch<Animal>(
+        frog.get(),                   //
+        [](Mammal* p) { return p; },  //
+        [](Amphibian*) { return nullptr; });
+    static_assert(std::is_same_v<decltype(result), Animal*>);
+    EXPECT_EQ(result, nullptr);
+  }
+  {
+    auto* result = Switch<CastableBase>(
+        bear.get(),                                                     //
+        [](Mammal* p) { return p; },                                    //
+        [](Amphibian* p) { return const_cast<const Amphibian*>(p); });  //
+    static_assert(std::is_same_v<decltype(result), const CastableBase*>);
+    EXPECT_EQ(result, bear.get());
+  }
+  {
+    auto* result = Switch<const Animal*>(
+        gecko.get(),                  //
+        [](Mammal* p) { return p; },  //
+        [](Amphibian* p) { return p; });
+    static_assert(std::is_same_v<decltype(result), const Animal*>);
+    EXPECT_EQ(result, nullptr);
+  }
+}
+
 TEST(Castable, SwitchNull) {
   Animal* null = nullptr;
   Switch(

@@ -607,7 +607,7 @@ inline bool NonDefaultCases(T* object,
     if (type->Is(&TypeInfo::Of<CaseType>())) {
       auto* ptr = static_cast<CaseType*>(object);
       if constexpr (kHasReturnType) {
-        *result = std::get<0>(cases)(ptr);
+        *result = static_cast<RETURN_TYPE>(std::get<0>(cases)(ptr));
       } else {
         std::get<0>(cases)(ptr);
       }
@@ -654,7 +654,8 @@ inline void SwitchCases(T* object,
                                       traits::Slice<0, kDefaultIndex>(cases))) {
         // Nothing matched. Evaluate default case.
         if constexpr (kHasReturnType) {
-          *result = std::get<kDefaultIndex>(cases)({});
+          *result =
+              static_cast<RETURN_TYPE>(std::get<kDefaultIndex>(cases)({}));
         } else {
           std::get<kDefaultIndex>(cases)({});
         }
@@ -667,13 +668,88 @@ inline void SwitchCases(T* object,
     if constexpr (kHasDefaultCase) {
       // Evaluate default case.
       if constexpr (kHasReturnType) {
-        *result = std::get<kDefaultIndex>(cases)({});
+        *result = static_cast<RETURN_TYPE>(std::get<kDefaultIndex>(cases)({}));
       } else {
         std::get<kDefaultIndex>(cases)({});
       }
     }
   }
 }
+
+/// Resolves to T if T is not nullptr_t, otherwise resolves to Ignore.
+template <typename T>
+using NullptrToIgnore =
+    std::conditional_t<std::is_same_v<T, std::nullptr_t>, Ignore, T>;
+
+/// Resolves to `const TYPE` if any of `CASE_RETURN_TYPES` are const or
+/// pointer-to-const, otherwise resolves to TYPE.
+template <typename TYPE, typename... CASE_RETURN_TYPES>
+using PropagateReturnConst = std::conditional_t<
+    // Are any of the pointer-stripped types const?
+    (std::is_const_v<std::remove_pointer_t<CASE_RETURN_TYPES>> || ...),
+    const TYPE,  // Yes: Apply const to TYPE
+    TYPE>;       // No:  Passthrough
+
+/// SwitchReturnTypeImpl is the implementation of SwitchReturnType
+template <bool IS_CASTABLE,
+          typename REQUESTED_TYPE,
+          typename... CASE_RETURN_TYPES>
+struct SwitchReturnTypeImpl;
+
+/// SwitchReturnTypeImpl specialization for non-castable case types and an
+/// explicitly specified return type.
+template <typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
+struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false,
+                            REQUESTED_TYPE,
+                            CASE_RETURN_TYPES...> {
+  /// Resolves to `REQUESTED_TYPE`
+  using type = REQUESTED_TYPE;
+};
+
+/// SwitchReturnTypeImpl specialization for non-castable case types and an
+/// inferred return type.
+template <typename... CASE_RETURN_TYPES>
+struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false,
+                            Infer,
+                            CASE_RETURN_TYPES...> {
+  /// Resolves to the common type for all the cases return types.
+  using type = std::common_type_t<CASE_RETURN_TYPES...>;
+};
+
+/// SwitchReturnTypeImpl specialization for castable case types and an
+/// explicitly specified return type.
+template <typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
+struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true,
+                            REQUESTED_TYPE,
+                            CASE_RETURN_TYPES...> {
+ public:
+  /// Resolves to `const REQUESTED_TYPE*` or `REQUESTED_TYPE*`
+  using type = PropagateReturnConst<std::remove_pointer_t<REQUESTED_TYPE>,
+                                    CASE_RETURN_TYPES...>*;
+};
+
+/// SwitchReturnTypeImpl specialization for castable case types and an infered
+/// return type.
+template <typename... CASE_RETURN_TYPES>
+struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, Infer, CASE_RETURN_TYPES...> {
+ private:
+  using InferredType = CastableCommonBase<
+      detail::NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>;
+
+ public:
+  /// `const T*` or `T*`, where T is the common base type for all the castable
+  /// case types.
+  using type = PropagateReturnConst<InferredType, CASE_RETURN_TYPES...>*;
+};
+
+/// Resolves to the return type for a Switch() with the requested return type
+/// `REQUESTED_TYPE` and case statement return types. If `REQUESTED_TYPE` is
+/// Infer then the return type will be inferred from the case return types.
+template <typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
+using SwitchReturnType = typename SwitchReturnTypeImpl<
+    IsCastable<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>,
+    REQUESTED_TYPE,
+    CASE_RETURN_TYPES...>::type;
 
 }  // namespace detail
 
@@ -712,10 +788,12 @@ inline void SwitchCases(T* object,
 /// @param cases the switch cases
 /// @return the value returned by the called case. If no cases matched, then the
 /// zero value for the consistent case type.
-template <typename T, typename... CASES>
+template <typename RETURN_TYPE = detail::Infer,
+          typename T = CastableBase,
+          typename... CASES>
 inline auto Switch(T* object, CASES&&... cases) {
-  using Cases = std::tuple<CASES...>;
-  using ReturnType = traits::ReturnType<std::tuple_element_t<0, Cases>>;
+  using ReturnType =
+      detail::SwitchReturnType<RETURN_TYPE, traits::ReturnType<CASES>...>;
   static constexpr bool kHasReturnType = !std::is_same_v<ReturnType, void>;
 
   if constexpr (kHasReturnType) {
