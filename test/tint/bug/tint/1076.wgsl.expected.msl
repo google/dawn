@@ -20,13 +20,13 @@ FragIn tint_symbol_inner(FragIn in, float b) {
   if ((in.mask == 0u)) {
     return in;
   }
-  FragIn const tint_symbol_4 = {.a=b, .mask=1u};
-  return tint_symbol_4;
+  FragIn const tint_symbol_5 = {.a=b, .mask=1u};
+  return tint_symbol_5;
 }
 
 fragment tint_symbol_3 tint_symbol(uint mask [[sample_mask]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  FragIn const tint_symbol_5 = {.a=tint_symbol_1.a, .mask=mask};
-  FragIn const inner_result = tint_symbol_inner(tint_symbol_5, tint_symbol_1.b);
+  FragIn const tint_symbol_4 = {.a=tint_symbol_1.a, .mask=mask};
+  FragIn const inner_result = tint_symbol_inner(tint_symbol_4, tint_symbol_1.b);
   tint_symbol_3 wrapper_result = {};
   wrapper_result.a = inner_result.a;
   wrapper_result.mask = inner_result.mask;

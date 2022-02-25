@@ -52,7 +52,6 @@
 #include "src/tint/transform/calculate_array_length.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/decompose_memory_access.h"
-#include "src/tint/transform/external_texture_transform.h"
 #include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/localize_struct_array_assignment.h"
 #include "src/tint/transform/loop_to_for_loop.h"
@@ -206,7 +205,6 @@ SanitizedResult Sanitize(
   // DecomposeMemoryAccess special-cases the arrayLength() intrinsic, which
   // will be transformed by CalculateArrayLength
   manager.Add<transform::CalculateArrayLength>();
-  manager.Add<transform::ExternalTextureTransform>();
   manager.Add<transform::PromoteInitializersToConstVar>();
 
   manager.Add<transform::PadArrayElements>();
@@ -3645,6 +3643,12 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return true;
       },
       [&](const sem::Texture* tex) {
+        if (tex->Is<sem::ExternalTexture>()) {
+          TINT_ICE(Writer, diagnostics_)
+              << "Multiplanar external texture transform was not run.";
+          return false;
+        }
+
         auto* storage = tex->As<sem::StorageTexture>();
         auto* ms = tex->As<sem::MultisampledTexture>();
         auto* depth_ms = tex->As<sem::DepthMultisampledTexture>();

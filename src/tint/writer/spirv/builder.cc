@@ -45,7 +45,6 @@
 #include "src/tint/transform/add_spirv_block_attribute.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
-#include "src/tint/transform/external_texture_transform.h"
 #include "src/tint/transform/fold_constants.h"
 #include "src/tint/transform/for_loop_to_loop.h"
 #include "src/tint/transform/manager.h"
@@ -279,7 +278,6 @@ SanitizedResult Sanitize(const Program* in,
   manager.Add<transform::RemoveUnreachableStatements>();
   manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
   manager.Add<transform::FoldConstants>();
-  manager.Add<transform::ExternalTextureTransform>();
   manager.Add<transform::VectorizeScalarMatrixConstructors>();
   manager.Add<transform::ForLoopToLoop>();  // Must come after
                                             // ZeroInitWorkgroupMemory
@@ -4033,6 +4031,12 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
 
 bool Builder::GenerateTextureType(const sem::Texture* texture,
                                   const Operand& result) {
+  if (texture->Is<sem::ExternalTexture>()) {
+    TINT_ICE(Writer, builder_.Diagnostics())
+        << "Multiplanar external texture transform was not run.";
+    return false;
+  }
+
   uint32_t array_literal = 0u;
   const auto dim = texture->dim();
   if (dim == ast::TextureDimension::k2dArray ||

@@ -24,7 +24,6 @@
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/combine_samplers.h"
 #include "src/tint/transform/decompose_memory_access.h"
-#include "src/tint/transform/external_texture_transform.h"
 #include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/loop_to_for_loop.h"
 #include "src/tint/transform/manager.h"
@@ -102,7 +101,6 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     BindingRemapper::AccessControls ac;
     data.Add<BindingRemapper::Remappings>(bp, ac, /* mayCollide */ true);
   }
-  manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
 
   manager.Add<PadArrayElements>();

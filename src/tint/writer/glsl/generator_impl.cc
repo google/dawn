@@ -2552,6 +2552,12 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (auto* str = type->As<sem::Struct>()) {
     out << StructName(str);
   } else if (auto* tex = type->As<sem::Texture>()) {
+    if (tex->Is<sem::ExternalTexture>()) {
+      TINT_ICE(Writer, diagnostics_)
+          << "Multiplanar external texture transform was not run.";
+      return false;
+    }
+
     auto* storage = tex->As<sem::StorageTexture>();
     auto* ms = tex->As<sem::MultisampledTexture>();
     auto* depth_ms = tex->As<sem::DepthMultisampledTexture>();

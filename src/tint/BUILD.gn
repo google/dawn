@@ -450,8 +450,6 @@ libtint_source_set("libtint_core_all_src") {
     "transform/decompose_strided_array.h",
     "transform/decompose_strided_matrix.cc",
     "transform/decompose_strided_matrix.h",
-    "transform/external_texture_transform.cc",
-    "transform/external_texture_transform.h",
     "transform/first_index_offset.cc",
     "transform/first_index_offset.h",
     "transform/fold_constants.cc",

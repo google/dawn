@@ -61,7 +61,6 @@
 #include "src/tint/transform/array_length_from_uniform.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
-#include "src/tint/transform/external_texture_transform.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/module_scope_var_to_entry_point_param.h"
 #include "src/tint/transform/pad_array_elements.h"
@@ -174,7 +173,6 @@ SanitizedResult Sanitize(
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }
   manager.Add<transform::CanonicalizeEntryPointIO>();
-  manager.Add<transform::ExternalTextureTransform>();
   manager.Add<transform::PromoteInitializersToConstVar>();
 
   manager.Add<transform::VectorizeScalarMatrixConstructors>();
@@ -2366,6 +2364,12 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return true;
       },
       [&](const sem::Texture* tex) {
+        if (tex->Is<sem::ExternalTexture>()) {
+          TINT_ICE(Writer, diagnostics_)
+              << "Multiplanar external texture transform was not run.";
+          return false;
+        }
+
         if (tex->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
           out << "depth";
         } else {
