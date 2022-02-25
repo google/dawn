@@ -575,31 +575,29 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
 uint32_t Builder::GenerateExpression(const ast::Expression* expr) {
   return Switch(
       expr,
-      [&](const ast::IndexAccessorExpression* a) {  //
+      [&](const ast::IndexAccessorExpression* a) {
         return GenerateAccessorExpression(a);
       },
-      [&](const ast::BinaryExpression* b) {  //
+      [&](const ast::BinaryExpression* b) {
         return GenerateBinaryExpression(b);
       },
-      [&](const ast::BitcastExpression* b) {  //
+      [&](const ast::BitcastExpression* b) {
         return GenerateBitcastExpression(b);
       },
-      [&](const ast::CallExpression* c) {  //
-        return GenerateCallExpression(c);
-      },
-      [&](const ast::IdentifierExpression* i) {  //
+      [&](const ast::CallExpression* c) { return GenerateCallExpression(c); },
+      [&](const ast::IdentifierExpression* i) {
         return GenerateIdentifierExpression(i);
       },
-      [&](const ast::LiteralExpression* l) {  //
+      [&](const ast::LiteralExpression* l) {
         return GenerateLiteralIfNeeded(nullptr, l);
       },
-      [&](const ast::MemberAccessorExpression* m) {  //
+      [&](const ast::MemberAccessorExpression* m) {
         return GenerateAccessorExpression(m);
       },
-      [&](const ast::UnaryOpExpression* u) {  //
+      [&](const ast::UnaryOpExpression* u) {
         return GenerateUnaryOpExpression(u);
       },
-      [&](Default) -> uint32_t {
+      [&](Default) {
         error_ =
             "unknown expression type: " + std::string(expr->TypeInfo().name);
         return 0;
@@ -2271,7 +2269,7 @@ uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
       [&](const sem::TypeConstructor*) {
         return GenerateTypeConstructorOrConversion(call, nullptr);
       },
-      [&](Default) -> uint32_t {
+      [&](Default) {
         TINT_ICE(Writer, builder_.Diagnostics())
             << "unhandled call target: " << target->TypeInfo().name;
         return 0;
@@ -4101,7 +4099,7 @@ bool Builder::GenerateTextureType(const sem::Texture* texture,
       [&](const sem::StorageTexture* t) {
         return GenerateTypeIfNeeded(t->type());
       },
-      [&](Default) -> uint32_t {  //
+      [&](Default)  {
         return 0u;
       });
   if (type_id == 0u) {

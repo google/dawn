@@ -1125,7 +1125,7 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
   // Recursively flatten matrices, arrays, and structures.
   return Switch(
       tip_type,
-      [&](const Matrix* matrix_type) -> bool {
+      [&](const Matrix* matrix_type) {
         index_prefix.push_back(0);
         const auto num_columns = static_cast<int>(matrix_type->columns);
         const Type* vec_ty = ty_.Vector(matrix_type->type, matrix_type->rows);
