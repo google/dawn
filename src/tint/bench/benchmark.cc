@@ -70,7 +70,7 @@ bool FindBenchmarkInputDir() {
   // working directory.
   auto path = std::filesystem::current_path();
   while (std::filesystem::is_directory(path)) {
-    auto test = path / "test" / "benchmark";
+    auto test = path / "test" / "tint" / "benchmark";
     if (std::filesystem::is_directory(test)) {
       kInputFileDir = test;
       return true;
