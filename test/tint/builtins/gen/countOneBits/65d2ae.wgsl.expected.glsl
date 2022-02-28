@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 
 void countOneBits_65d2ae() {
-  ivec3 res = countbits(ivec3(0, 0, 0));
+  ivec3 res = ivec3(bitCount(ivec3(0, 0, 0)));
 }
 
 vec4 vertex_main() {
@@ -18,19 +16,11 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'countbits' : no matching overloaded function found 
-ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp highp 3-component vector of int'
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 void countOneBits_65d2ae() {
-  ivec3 res = countbits(ivec3(0, 0, 0));
+  ivec3 res = ivec3(bitCount(ivec3(0, 0, 0)));
 }
 
 void fragment_main() {
@@ -41,18 +31,10 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'countbits' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp mediump 3-component vector of int'
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 void countOneBits_65d2ae() {
-  ivec3 res = countbits(ivec3(0, 0, 0));
+  ivec3 res = ivec3(bitCount(ivec3(0, 0, 0)));
 }
 
 void compute_main() {
@@ -64,11 +46,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'countbits' : no matching overloaded function found 
-ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp highp 3-component vector of int'
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-

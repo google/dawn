@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 void main_1() {
@@ -7,7 +5,7 @@ void main_1() {
   int i1 = 30;
   uvec2 v2u1 = uvec2(10u, 20u);
   ivec2 v2i1 = ivec2(30, 40);
-  uvec2 x_1 = uvec2(countbits(v2i1));
+  uvec2 x_1 = uvec2(ivec2(bitCount(v2i1)));
   return;
 }
 
@@ -20,10 +18,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:8: 'countbits' : no matching overloaded function found 
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

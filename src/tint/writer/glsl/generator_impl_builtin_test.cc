@@ -198,7 +198,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kClamp, ParamType::kU32, "clamp"},
         BuiltinData{BuiltinType::kCos, ParamType::kF32, "cos"},
         BuiltinData{BuiltinType::kCosh, ParamType::kF32, "cosh"},
-        BuiltinData{BuiltinType::kCountOneBits, ParamType::kU32, "countbits"},
+        BuiltinData{BuiltinType::kCountOneBits, ParamType::kU32, "bitCount"},
         BuiltinData{BuiltinType::kCross, ParamType::kF32, "cross"},
         BuiltinData{BuiltinType::kDeterminant, ParamType::kF32, "determinant"},
         BuiltinData{BuiltinType::kDistance, ParamType::kF32, "distance"},
