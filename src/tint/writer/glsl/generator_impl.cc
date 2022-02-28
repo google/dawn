@@ -610,6 +610,9 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
   if (builtin->Type() == sem::BuiltinType::kInsertBits) {
     return EmitInsertBits(out, expr);
   }
+  if (builtin->Type() == sem::BuiltinType::kFma && version_.IsES()) {
+    return EmitEmulatedFMA(out, expr);
+  }
   if (builtin->IsDataPacking()) {
     return EmitDataPackingCall(out, expr, builtin);
   }
@@ -853,6 +856,24 @@ bool GeneratorImpl::EmitInsertBits(std::ostream& out,
   }
   out << "), int(";
   if (!EmitExpression(out, expr->args[3])) {
+    return false;
+  }
+  out << "))";
+  return true;
+}
+
+bool GeneratorImpl::EmitEmulatedFMA(std::ostream& out,
+                                    const ast::CallExpression* expr) {
+  out << "((";
+  if (!EmitExpression(out, expr->args[0])) {
+    return false;
+  }
+  out << ") * (";
+  if (!EmitExpression(out, expr->args[1])) {
+    return false;
+  }
+  out << ") + (";
+  if (!EmitExpression(out, expr->args[2])) {
     return false;
   }
   out << "))";
@@ -1619,7 +1640,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kFract:
       return "fract";
     case sem::BuiltinType::kFma:
-      return "mad";
+      return "fma";
     case sem::BuiltinType::kFwidth:
     case sem::BuiltinType::kFwidthCoarse:
     case sem::BuiltinType::kFwidthFine:

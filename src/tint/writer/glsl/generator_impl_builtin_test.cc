@@ -213,7 +213,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kExp2, ParamType::kF32, "exp2"},
         BuiltinData{BuiltinType::kFaceForward, ParamType::kF32, "faceforward"},
         BuiltinData{BuiltinType::kFloor, ParamType::kF32, "floor"},
-        BuiltinData{BuiltinType::kFma, ParamType::kF32, "mad"},
+        BuiltinData{BuiltinType::kFma, ParamType::kF32, "fma"},
         BuiltinData{BuiltinType::kFract, ParamType::kF32, "fract"},
         BuiltinData{BuiltinType::kFwidth, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthCoarse, ParamType::kF32, "fwidth"},
@@ -871,6 +871,23 @@ void main() {
   return;
 }
 )");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, FMA) {
+  auto* call = Call("fma", "a", "b", "c");
+
+  Global("a", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  Global("b", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  Global("c", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+
+  WrapInFunction(CallStmt(call));
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "((a) * (b) + (c))");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, DotU32) {

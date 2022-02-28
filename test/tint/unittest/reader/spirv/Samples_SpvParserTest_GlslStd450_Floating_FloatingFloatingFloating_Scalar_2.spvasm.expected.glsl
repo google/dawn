@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 void main_1() {
@@ -25,7 +23,7 @@ void main_1() {
   vec3 v3f2 = vec3(60.0f, 70.0f, 50.0f);
   vec4 v4f1 = vec4(50.0f, 50.0f, 50.0f, 50.0f);
   vec4 v4f2 = v4f1;
-  float x_1 = mad(f1, f2, f3);
+  float x_1 = ((f1) * (f2) + (f3));
   return;
 }
 
@@ -38,10 +36,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:26: 'mad' : no matching overloaded function found 
-ERROR: 0:26: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

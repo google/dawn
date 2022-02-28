@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 benchmark/skinned-shadowed-pbr-fragment.wgsl:51:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
   lights : @stride(32) array<Light>;
             ^^^^^^
@@ -79,7 +77,7 @@ layout(binding = 2, std430) buffer GlobalLights_1 {
 } globalLights;
 const uvec3 tileCount = uvec3(32u, 18u, 48u);
 float linearDepth(float depthSample) {
-  return ((camera.zFar * camera.zNear) / mad(depthSample, (camera.zNear - camera.zFar), camera.zFar));
+  return ((camera.zFar * camera.zNear) / ((depthSample) * ((camera.zNear - camera.zFar)) + (camera.zFar)));
 }
 
 uvec3 getTile(vec4 fragCoord) {
@@ -370,10 +368,3 @@ void main() {
   emissive_1 = inner_result.emissive;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:76: 'mad' : no matching overloaded function found 
-ERROR: 0:76: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

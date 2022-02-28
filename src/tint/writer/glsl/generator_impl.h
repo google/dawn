@@ -181,6 +181,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the call expression
   /// @returns true if the expression is emitted
   bool EmitInsertBits(std::ostream& out, const ast::CallExpression* expr);
+  /// Emulates 'fma' on GLSL ES, where it is unsupported.
+  /// @param out the output of the expression stream
+  /// @param expr the fma() expression
+  /// @returns true if the expression is emitted
+  bool EmitEmulatedFMA(std::ostream& out, const ast::CallExpression* expr);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param out the output of the expression stream
