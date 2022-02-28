@@ -1,6 +1,9 @@
-SKIP: FAILED
-
 #version 310 es
+
+float tint_float_modulo(float lhs, float rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
 
 layout(location = 0) in vec4 position_1;
 layout(location = 1) in vec4 color_1;
@@ -35,7 +38,7 @@ struct VertexOutput {
 };
 
 VertexOutput vert_main(vec4 position, vec4 color) {
-  float fade = ((uniforms.scalarOffset + ((time.value * uniforms.scalar) / 10.0f)) % 1.0f);
+  float fade = tint_float_modulo((uniforms.scalarOffset + ((time.value * uniforms.scalar) / 10.0f)), 1.0f);
   if ((fade < 0.5f)) {
     fade = (fade * 2.0f);
   } else {
@@ -62,13 +65,6 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:36: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp highp float' and a right operand of type ' const float' (or there is no acceptable conversion)
-ERROR: 0:36: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 

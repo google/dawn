@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-apfloat-mod-zero/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<i32, 3>;
             ^^^^^^
@@ -10,6 +8,11 @@ type Arr_1 = @stride(16) array<f32, 1>;
 
 #version 310 es
 precision mediump float;
+
+float tint_float_modulo(float lhs, float rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
@@ -41,7 +44,7 @@ void main_1() {
   float undefined = 0.0f;
   bool x_51 = false;
   bool x_52_phi = false;
-  undefined = (5.0f % 0.0f);
+  undefined = tint_float_modulo(5.0f, 0.0f);
   int x_10 = x_6.x_GLF_uniform_int_values[0].el;
   int x_11 = x_6.x_GLF_uniform_int_values[0].el;
   int x_12 = x_6.x_GLF_uniform_int_values[1].el;
@@ -82,10 +85,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:34: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' const float' and a right operand of type ' const float' (or there is no acceptable conversion)
-ERROR: 0:34: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -372,6 +372,66 @@ bool GeneratorImpl::EmitBitwiseBoolOp(std::ostream& out,
   return true;
 }
 
+bool GeneratorImpl::EmitFloatModulo(std::ostream& out,
+                                    const ast::BinaryExpression* expr) {
+  std::string fn;
+  auto* ret_ty = TypeOf(expr)->UnwrapRef();
+  fn = utils::GetOrCreate(float_modulo_funcs_, ret_ty, [&]() -> std::string {
+    TextBuffer b;
+    TINT_DEFER(helpers_.Append(b));
+
+    auto fn_name = UniqueIdentifier("tint_float_modulo");
+    std::vector<std::string> parameter_names;
+    {
+      auto decl = line(&b);
+      if (!EmitTypeAndName(decl, ret_ty, ast::StorageClass::kNone,
+                           ast::Access::kUndefined, fn_name)) {
+        return "";
+      }
+      {
+        ScopedParen sp(decl);
+        const auto* ty = TypeOf(expr->lhs)->UnwrapRef();
+        if (!EmitTypeAndName(decl, ty, ast::StorageClass::kNone,
+                             ast::Access::kUndefined, "lhs")) {
+          return "";
+        }
+        decl << ", ";
+        ty = TypeOf(expr->rhs)->UnwrapRef();
+        if (!EmitTypeAndName(decl, ty, ast::StorageClass::kNone,
+                             ast::Access::kUndefined, "rhs")) {
+          return "";
+        }
+      }
+      decl << " {";
+    }
+    {
+      ScopedIndent si(&b);
+      line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
+    }
+    line(&b) << "}";
+    line(&b);
+    return fn_name;
+  });
+
+  if (fn.empty()) {
+    return false;
+  }
+
+  // Call the helper
+  out << fn;
+  {
+    ScopedParen sp(out);
+    if (!EmitExpression(out, expr->lhs)) {
+      return false;
+    }
+    out << ", ";
+    if (!EmitExpression(out, expr->rhs)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitBinary(std::ostream& out,
                                const ast::BinaryExpression* expr) {
   if (IsRelational(expr->op) && !TypeOf(expr->lhs)->UnwrapRef()->is_scalar()) {
@@ -414,6 +474,12 @@ bool GeneratorImpl::EmitBinary(std::ostream& out,
   if ((expr->op == ast::BinaryOp::kAnd || expr->op == ast::BinaryOp::kOr) &&
       TypeOf(expr->lhs)->UnwrapRef()->is_bool_scalar_or_vector()) {
     return EmitBitwiseBoolOp(out, expr);
+  }
+
+  if (expr->op == ast::BinaryOp::kModulo &&
+      (TypeOf(expr->lhs)->UnwrapRef()->is_float_scalar_or_vector() ||
+       TypeOf(expr->rhs)->UnwrapRef()->is_float_scalar_or_vector())) {
+    return EmitFloatModulo(out, expr);
   }
 
   out << "(";

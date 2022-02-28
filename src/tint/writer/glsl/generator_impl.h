@@ -82,6 +82,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output of the expression stream
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
+  bool EmitFloatModulo(std::ostream& out, const ast::BinaryExpression* expr);
+  /// Handles generating the modulo operator on float vector operands
+  /// @param out the output of the expression stream
+  /// @param expr the binary expression
+  /// @returns true if the expression was emitted, false otherwise
   bool EmitBinary(std::ostream& out, const ast::BinaryExpression* expr);
   /// Handles generating a bitcast expression
   /// @param out the output of the expression stream
@@ -503,6 +508,7 @@ class GeneratorImpl : public TextGenerator {
   std::unordered_map<const sem::Struct*, std::string> structure_builders_;
   std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
   std::unordered_map<const sem::Vector*, std::string> int_dot_funcs_;
+  std::unordered_map<const sem::Type*, std::string> float_modulo_funcs_;
   bool requires_oes_sample_variables_ = false;
   bool requires_default_precision_qualifier_ = false;
   Version version_;

@@ -1,7 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
+
+float tint_float_modulo(float lhs, float rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct buf0 {
@@ -26,7 +29,7 @@ float compute_value_f1_f1_(inout float limit, inout float thirty_two) {
       } else {
         int x_147 = i;
         float x_149 = thirty_two;
-        if (((float(x_147) % round(x_149)) <= 0.01f)) {
+        if ((tint_float_modulo(float(x_147), round(x_149)) <= 0.01f)) {
           result = (result + 100.0f);
         }
       }
@@ -102,10 +105,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:27: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp float' and a right operand of type ' global mediump float' (or there is no acceptable conversion)
-ERROR: 0:27: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

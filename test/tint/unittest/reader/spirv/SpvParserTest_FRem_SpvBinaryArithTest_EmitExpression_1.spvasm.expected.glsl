@@ -1,10 +1,13 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
+vec2 tint_float_modulo(vec2 lhs, vec2 rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
+
 void main_1() {
-  vec2 x_1 = (vec2(50.0f, 60.0f) % vec2(60.0f, 50.0f));
+  vec2 x_1 = tint_float_modulo(vec2(50.0f, 60.0f), vec2(60.0f, 50.0f));
   return;
 }
 
@@ -16,10 +19,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' const 2-component vector of float' and a right operand of type ' const 2-component vector of float' (or there is no acceptable conversion)
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

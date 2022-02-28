@@ -40,7 +40,8 @@ TEST_P(GlslBinaryTest, Emit_f32) {
   if (params.op == ast::BinaryOp::kAnd || params.op == ast::BinaryOp::kOr ||
       params.op == ast::BinaryOp::kXor ||
       params.op == ast::BinaryOp::kShiftLeft ||
-      params.op == ast::BinaryOp::kShiftRight) {
+      params.op == ast::BinaryOp::kShiftRight ||
+      params.op == ast::BinaryOp::kModulo) {
     return;
   }
 
@@ -258,6 +259,36 @@ if (tint_tmp) {
   tint_tmp = b;
 }
 )");
+}
+
+TEST_F(GlslGeneratorImplTest_Binary, ModF32) {
+  Global("a", ty.f32(), ast::StorageClass::kPrivate);
+  Global("b", ty.f32(), ast::StorageClass::kPrivate);
+
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr("a"),
+                                             Expr("b"));
+  WrapInFunction(expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
+}
+
+TEST_F(GlslGeneratorImplTest_Binary, ModVec3F32) {
+  Global("a", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  Global("b", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr("a"),
+                                             Expr("b"));
+  WrapInFunction(expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Logical_Multi) {

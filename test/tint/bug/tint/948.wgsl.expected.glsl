@@ -1,7 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
+
+float tint_float_modulo(float lhs, float rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
 
 layout(location = 2) in vec2 tUV_param_1;
 layout(location = 5) in vec2 tileID_1_param_1;
@@ -119,7 +122,7 @@ void main_1() {
       if ((x_174 > 0.0f)) {
         float x_181 = x_20.time;
         float x_184 = animationData.z;
-        mt = ((x_181 * x_184) % 1.0f);
+        mt = tint_float_modulo((x_181 * x_184), 1.0f);
         f = 0.0f;
         {
           for(; (f < 8.0f); f = (f + 1.0f)) {
@@ -199,10 +202,3 @@ void main() {
   glFragColor_1_1 = inner_result.glFragColor_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:120: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' const float' (or there is no acceptable conversion)
-ERROR: 0:120: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -1,11 +1,14 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-mod-uint-bits-float/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<f32, 3>;
             ^^^^^^
 
 #version 310 es
 precision mediump float;
+
+float tint_float_modulo(float lhs, float rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
@@ -23,7 +26,7 @@ layout(binding = 0) uniform buf0_1 {
 
 void main_1() {
   float a = 0.0f;
-  a = (uintBitsToFloat(1u) % 1.0f);
+  a = tint_float_modulo(uintBitsToFloat(1u), 1.0f);
   float x_29 = x_6.x_GLF_uniform_float_values[1].el;
   x_GLF_color = vec4(x_29, x_29, x_29, x_29);
   float x_31 = a;
@@ -53,10 +56,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:20: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' global highp float' and a right operand of type ' const float' (or there is no acceptable conversion)
-ERROR: 0:20: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
