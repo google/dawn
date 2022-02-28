@@ -253,22 +253,6 @@ class GeneratorImpl : public TextGenerator {
   bool EmitRadiansCall(std::ostream& out,
                        const ast::CallExpression* expr,
                        const sem::Builtin* builtin);
-  /// Handles generating a call to data packing builtin
-  /// @param out the output of the expression stream
-  /// @param expr the call expression
-  /// @param builtin the semantic information for the texture builtin
-  /// @returns true if the call expression is emitted
-  bool EmitDataPackingCall(std::ostream& out,
-                           const ast::CallExpression* expr,
-                           const sem::Builtin* builtin);
-  /// Handles generating a call to data unpacking builtin
-  /// @param out the output of the expression stream
-  /// @param expr the call expression
-  /// @param builtin the semantic information for the texture builtin
-  /// @returns true if the call expression is emitted
-  bool EmitDataUnpackingCall(std::ostream& out,
-                             const ast::CallExpression* expr,
-                             const sem::Builtin* builtin);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully

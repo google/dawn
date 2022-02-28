@@ -1,13 +1,4 @@
-SKIP: FAILED
-
 #version 310 es
-
-vec4 tint_unpack4x8snorm(uint param_0) {
-  int j = int(param_0);
-  int4 i = int4(j << 24, j << 16, j << 8, j) >> 24;
-  return clamp(float4(i) / 127.0, -1.0, 1.0);
-}
-
 
 void main_1() {
   uint u1 = 10u;
@@ -32,7 +23,7 @@ void main_1() {
   vec3 v3f2 = vec3(60.0f, 70.0f, 50.0f);
   vec4 v4f1 = vec4(50.0f, 50.0f, 50.0f, 50.0f);
   vec4 v4f2 = v4f1;
-  vec4 x_1 = tint_unpack4x8snorm(u1);
+  vec4 x_1 = unpackSnorm4x8(u1);
   return;
 }
 
@@ -45,10 +36,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'int4' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

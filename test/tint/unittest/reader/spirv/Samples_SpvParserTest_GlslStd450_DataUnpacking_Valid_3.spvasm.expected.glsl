@@ -1,13 +1,4 @@
-SKIP: FAILED
-
 #version 310 es
-
-vec2 tint_unpack2x16unorm(uint param_0) {
-  uint j = param_0;
-  uint2 i = uint2(j & 0xffff, j >> 16);
-  return float2(i) / 65535.0;
-}
-
 
 void main_1() {
   uint u1 = 10u;
@@ -32,7 +23,7 @@ void main_1() {
   vec3 v3f2 = vec3(60.0f, 70.0f, 50.0f);
   vec4 v4f1 = vec4(50.0f, 50.0f, 50.0f, 50.0f);
   vec4 v4f2 = v4f1;
-  vec2 x_1 = tint_unpack2x16unorm(u1);
+  vec2 x_1 = unpackUnorm2x16(u1);
   return;
 }
 
@@ -45,10 +36,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'uint2' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

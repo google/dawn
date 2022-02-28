@@ -679,12 +679,6 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
   if (builtin->Type() == sem::BuiltinType::kFma && version_.IsES()) {
     return EmitEmulatedFMA(out, expr);
   }
-  if (builtin->IsDataPacking()) {
-    return EmitDataPackingCall(out, expr, builtin);
-  }
-  if (builtin->IsDataUnpacking()) {
-    return EmitDataUnpackingCall(out, expr, builtin);
-  }
   if (builtin->IsBarrier()) {
     return EmitBarrierCall(out, builtin);
   }
@@ -1222,142 +1216,6 @@ bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
       });
 }
 
-bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
-                                        const ast::CallExpression* expr,
-                                        const sem::Builtin* builtin) {
-  return CallBuiltinHelper(
-      out, expr, builtin,
-      [&](TextBuffer* b, const std::vector<std::string>& params) {
-        uint32_t dims = 2;
-        bool is_signed = false;
-        uint32_t scale = 65535;
-        if (builtin->Type() == sem::BuiltinType::kPack4x8snorm ||
-            builtin->Type() == sem::BuiltinType::kPack4x8unorm) {
-          dims = 4;
-          scale = 255;
-        }
-        if (builtin->Type() == sem::BuiltinType::kPack4x8snorm ||
-            builtin->Type() == sem::BuiltinType::kPack2x16snorm) {
-          is_signed = true;
-          scale = (scale - 1) / 2;
-        }
-        switch (builtin->Type()) {
-          case sem::BuiltinType::kPack4x8snorm:
-          case sem::BuiltinType::kPack4x8unorm:
-          case sem::BuiltinType::kPack2x16snorm:
-          case sem::BuiltinType::kPack2x16unorm: {
-            {
-              auto l = line(b);
-              l << (is_signed ? "" : "u") << "int" << dims
-                << " i = " << (is_signed ? "" : "u") << "int" << dims
-                << "(round(clamp(" << params[0] << ", "
-                << (is_signed ? "-1.0" : "0.0") << ", 1.0) * " << scale
-                << ".0))";
-              if (is_signed) {
-                l << " & " << (dims == 4 ? "0xff" : "0xffff");
-              }
-              l << ";";
-            }
-            {
-              auto l = line(b);
-              l << "return ";
-              if (is_signed) {
-                l << "asuint";
-              }
-              l << "(i.x | i.y << " << (32 / dims);
-              if (dims == 4) {
-                l << " | i.z << 16 | i.w << 24";
-              }
-              l << ");";
-            }
-            break;
-          }
-          case sem::BuiltinType::kPack2x16float: {
-            line(b) << "uint2 i = f32tof16(" << params[0] << ");";
-            line(b) << "return i.x | (i.y << 16);";
-            break;
-          }
-          default:
-            diagnostics_.add_error(
-                diag::System::Writer,
-                "Internal error: unhandled data packing builtin");
-            return false;
-        }
-
-        return true;
-      });
-}
-
-bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
-                                          const ast::CallExpression* expr,
-                                          const sem::Builtin* builtin) {
-  return CallBuiltinHelper(
-      out, expr, builtin,
-      [&](TextBuffer* b, const std::vector<std::string>& params) {
-        uint32_t dims = 2;
-        bool is_signed = false;
-        uint32_t scale = 65535;
-        if (builtin->Type() == sem::BuiltinType::kUnpack4x8snorm ||
-            builtin->Type() == sem::BuiltinType::kUnpack4x8unorm) {
-          dims = 4;
-          scale = 255;
-        }
-        if (builtin->Type() == sem::BuiltinType::kUnpack4x8snorm ||
-            builtin->Type() == sem::BuiltinType::kUnpack2x16snorm) {
-          is_signed = true;
-          scale = (scale - 1) / 2;
-        }
-        switch (builtin->Type()) {
-          case sem::BuiltinType::kUnpack4x8snorm:
-          case sem::BuiltinType::kUnpack2x16snorm: {
-            line(b) << "int j = int(" << params[0] << ");";
-            {  // Perform sign extension on the converted values.
-              auto l = line(b);
-              l << "int" << dims << " i = int" << dims << "(";
-              if (dims == 2) {
-                l << "j << 16, j) >> 16";
-              } else {
-                l << "j << 24, j << 16, j << 8, j) >> 24";
-              }
-              l << ";";
-            }
-            line(b) << "return clamp(float" << dims << "(i) / " << scale
-                    << ".0, " << (is_signed ? "-1.0" : "0.0") << ", 1.0);";
-            break;
-          }
-          case sem::BuiltinType::kUnpack4x8unorm:
-          case sem::BuiltinType::kUnpack2x16unorm: {
-            line(b) << "uint j = " << params[0] << ";";
-            {
-              auto l = line(b);
-              l << "uint" << dims << " i = uint" << dims << "(";
-              l << "j & " << (dims == 2 ? "0xffff" : "0xff") << ", ";
-              if (dims == 4) {
-                l << "(j >> " << (32 / dims)
-                  << ") & 0xff, (j >> 16) & 0xff, j >> 24";
-              } else {
-                l << "j >> " << (32 / dims);
-              }
-              l << ");";
-            }
-            line(b) << "return float" << dims << "(i) / " << scale << ".0;";
-            break;
-          }
-          case sem::BuiltinType::kUnpack2x16float:
-            line(b) << "uint i = " << params[0] << ";";
-            line(b) << "return f16tof32(uint2(i & 0xffff, i >> 16));";
-            break;
-          default:
-            diagnostics_.add_error(
-                diag::System::Writer,
-                "Internal error: unhandled data packing builtin");
-            return false;
-        }
-
-        return true;
-      });
-}
-
 bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
                                     const sem::Builtin* builtin) {
   // TODO(crbug.com/tint/661): Combine sequential barriers to a single
@@ -1721,10 +1579,30 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
       return "isnan";
     case sem::BuiltinType::kMix:
       return "mix";
+    case sem::BuiltinType::kPack2x16float:
+      return "packHalf2x16";
+    case sem::BuiltinType::kPack2x16snorm:
+      return "packSnorm2x16";
+    case sem::BuiltinType::kPack2x16unorm:
+      return "packUnorm2x16";
+    case sem::BuiltinType::kPack4x8snorm:
+      return "packSnorm4x8";
+    case sem::BuiltinType::kPack4x8unorm:
+      return "packUnorm4x8";
     case sem::BuiltinType::kReverseBits:
       return "bitfieldReverse";
     case sem::BuiltinType::kSmoothStep:
       return "smoothstep";
+    case sem::BuiltinType::kUnpack2x16float:
+      return "unpackHalf2x16";
+    case sem::BuiltinType::kUnpack2x16snorm:
+      return "unpackSnorm2x16";
+    case sem::BuiltinType::kUnpack2x16unorm:
+      return "unpackUnorm2x16";
+    case sem::BuiltinType::kUnpack4x8snorm:
+      return "unpackSnorm4x8";
+    case sem::BuiltinType::kUnpack4x8unorm:
+      return "unpackUnorm4x8";
     default:
       diagnostics_.add_error(
           diag::System::Writer,

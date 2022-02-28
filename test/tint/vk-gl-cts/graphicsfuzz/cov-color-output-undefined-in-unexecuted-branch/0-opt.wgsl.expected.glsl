@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-color-output-undefined-in-unexecuted-branch/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<f32, 3>;
             ^^^^^^
@@ -14,13 +12,6 @@ type Arr_2 = @stride(16) array<u32, 1>;
 
 #version 310 es
 precision mediump float;
-
-vec4 tint_unpack4x8snorm(uint param_0) {
-  int j = int(param_0);
-  int4 i = int4(j << 24, j << 16, j << 8, j) >> 24;
-  return clamp(float4(i) / 127.0, -1.0, 1.0);
-}
-
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
@@ -118,7 +109,7 @@ void main_1() {
     x_GLF_color = vec4(x_64, x_66, x_68, x_70);
   } else {
     uint x_73 = x_16.x_GLF_uniform_uint_values[0].el;
-    x_GLF_color = tint_unpack4x8snorm(x_73);
+    x_GLF_color = unpackSnorm4x8(x_73);
   }
   int x_76 = x_12.x_GLF_uniform_int_values[2].el;
   a_1 = x_76;
@@ -160,10 +151,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:6: 'int4' : undeclared identifier 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

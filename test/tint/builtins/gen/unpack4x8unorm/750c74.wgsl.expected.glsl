@@ -1,16 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 
-vec4 tint_unpack4x8unorm(uint param_0) {
-  uint j = param_0;
-  uint4 i = uint4(j & 0xff, (j >> 8) & 0xff, (j >> 16) & 0xff, j >> 24);
-  return float4(i) / 255.0;
-}
-
-
 void unpack4x8unorm_750c74() {
-  vec4 res = tint_unpack4x8unorm(1u);
+  vec4 res = unpackUnorm4x8(1u);
 }
 
 vec4 vertex_main() {
@@ -25,25 +16,11 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
-vec4 tint_unpack4x8unorm(uint param_0) {
-  uint j = param_0;
-  uint4 i = uint4(j & 0xff, (j >> 8) & 0xff, (j >> 16) & 0xff, j >> 24);
-  return float4(i) / 255.0;
-}
-
-
 void unpack4x8unorm_750c74() {
-  vec4 res = tint_unpack4x8unorm(1u);
+  vec4 res = unpackUnorm4x8(1u);
 }
 
 void fragment_main() {
@@ -54,24 +31,10 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:6: 'uint4' : undeclared identifier 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-vec4 tint_unpack4x8unorm(uint param_0) {
-  uint j = param_0;
-  uint4 i = uint4(j & 0xff, (j >> 8) & 0xff, (j >> 16) & 0xff, j >> 24);
-  return float4(i) / 255.0;
-}
-
-
 void unpack4x8unorm_750c74() {
-  vec4 res = tint_unpack4x8unorm(1u);
+  vec4 res = unpackUnorm4x8(1u);
 }
 
 void compute_main() {
@@ -83,10 +46,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

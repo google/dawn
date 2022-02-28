@@ -1,12 +1,4 @@
-SKIP: FAILED
-
 #version 310 es
-
-uint tint_pack2x16snorm(vec2 param_0) {
-  int2 i = int2(round(clamp(param_0, -1.0, 1.0) * 32767.0)) & 0xffff;
-  return asuint(i.x | i.y << 16);
-}
-
 
 void main_1() {
   uint u1 = 10u;
@@ -31,7 +23,7 @@ void main_1() {
   vec3 v3f2 = vec3(60.0f, 70.0f, 50.0f);
   vec4 v4f1 = vec4(50.0f, 50.0f, 50.0f, 50.0f);
   vec4 v4f2 = v4f1;
-  uint x_1 = tint_pack2x16snorm(v2f1);
+  uint x_1 = packSnorm2x16(v2f1);
   return;
 }
 
@@ -44,10 +36,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'int2' : undeclared identifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

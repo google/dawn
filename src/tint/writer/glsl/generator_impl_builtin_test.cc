@@ -652,20 +652,22 @@ void main() {
 )");
 }
 
-#if 0
 TEST_F(GlslGeneratorImplTest_Builtin, Pack4x8Snorm) {
   auto* call = Call("pack4x8snorm", "p1");
   Global("p1", ty.vec4<f32>(), ast::StorageClass::kPrivate);
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("ivec4 tint_tmp = ivec4(round(clamp(p1, "
-                                      "-1.0, 1.0) * 127.0)) & 0xff;"));
-  EXPECT_THAT(out.str(), HasSubstr("asuint(tint_tmp.x | tint_tmp.y << 8 | "
-                                   "tint_tmp.z << 16 | tint_tmp.w << 24)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec4 p1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  packSnorm4x8(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Pack4x8Unorm) {
@@ -674,13 +676,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack4x8Unorm) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uvec4 tint_tmp = uvec4(round(clamp(p1, "
-                                      "0.0, 1.0) * 255.0));"));
-  EXPECT_THAT(out.str(), HasSubstr("(tint_tmp.x | tint_tmp.y << 8 | "
-                                   "tint_tmp.z << 16 | tint_tmp.w << 24)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec4 p1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  packUnorm4x8(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Snorm) {
@@ -689,12 +694,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Snorm) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("int2 tint_tmp = int2(round(clamp(p1, "
-                                      "-1.0, 1.0) * 32767.0)) & 0xffff;"));
-  EXPECT_THAT(out.str(), HasSubstr("asuint(tint_tmp.x | tint_tmp.y << 16)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec2 p1 = vec2(0.0f, 0.0f);
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  packSnorm2x16(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Unorm) {
@@ -703,12 +712,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Unorm) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uint2 tint_tmp = uint2(round(clamp(p1, "
-                                      "0.0, 1.0) * 65535.0));"));
-  EXPECT_THAT(out.str(), HasSubstr("(tint_tmp.x | tint_tmp.y << 16)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec2 p1 = vec2(0.0f, 0.0f);
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  packUnorm2x16(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Float) {
@@ -717,11 +730,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Float) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uint2 tint_tmp = f32tof16(p1);"));
-  EXPECT_THAT(out.str(), HasSubstr("(tint_tmp.x | tint_tmp.y << 16)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec2 p1 = vec2(0.0f, 0.0f);
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  packHalf2x16(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Unpack4x8Snorm) {
@@ -730,15 +748,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack4x8Snorm) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("int tint_tmp_1 = int(p1);"));
-  EXPECT_THAT(gen.result(),
-              HasSubstr("ivec4 tint_tmp = ivec4(tint_tmp_1 << 24, tint_tmp_1 "
-                        "<< 16, tint_tmp_1 << 8, tint_tmp_1) >> 24;"));
-  EXPECT_THAT(out.str(),
-              HasSubstr("clamp(float4(tint_tmp) / 127.0, -1.0, 1.0)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+uint p1 = 0u;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  unpackSnorm4x8(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Unpack4x8Unorm) {
@@ -747,15 +766,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack4x8Unorm) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uint tint_tmp_1 = p1;"));
-  EXPECT_THAT(
-      gen.result(),
-      HasSubstr("uvec4 tint_tmp = uvec4(tint_tmp_1 & 0xff, (tint_tmp_1 >> "
-                "8) & 0xff, (tint_tmp_1 >> 16) & 0xff, tint_tmp_1 >> 24);"));
-  EXPECT_THAT(out.str(), HasSubstr("float4(tint_tmp) / 255.0"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+uint p1 = 0u;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  unpackUnorm4x8(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Snorm) {
@@ -764,15 +784,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Snorm) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("int tint_tmp_1 = int(p1);"));
-  EXPECT_THAT(
-      gen.result(),
-      HasSubstr("int2 tint_tmp = int2(tint_tmp_1 << 16, tint_tmp_1) >> 16;"));
-  EXPECT_THAT(out.str(),
-              HasSubstr("clamp(float2(tint_tmp) / 32767.0, -1.0, 1.0)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+uint p1 = 0u;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  unpackSnorm2x16(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Unorm) {
@@ -781,14 +802,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Unorm) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uint tint_tmp_1 = p1;"));
-  EXPECT_THAT(gen.result(),
-              HasSubstr("uint2 tint_tmp = uint2(tint_tmp_1 & 0xffff, "
-                        "tint_tmp_1 >> 16);"));
-  EXPECT_THAT(out.str(), HasSubstr("float2(tint_tmp) / 65535.0"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
+
+uint p1 = 0u;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  unpackUnorm2x16(p1);
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Float) {
@@ -797,15 +820,17 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Float) {
   WrapInFunction(CallStmt(call));
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uint tint_tmp = p1;"));
-  EXPECT_THAT(out.str(),
-              HasSubstr("f16tof32(uint2(tint_tmp & 0xffff, tint_tmp >> 16))"));
-}
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#version 310 es
 
-#endif
+uint p1 = 0u;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  unpackHalf2x16(p1);
+  return;
+}
+)");
+}
 
 TEST_F(GlslGeneratorImplTest_Builtin, StorageBarrier) {
   Func("main", {}, ty.void_(), {CallStmt(Call("storageBarrier"))},

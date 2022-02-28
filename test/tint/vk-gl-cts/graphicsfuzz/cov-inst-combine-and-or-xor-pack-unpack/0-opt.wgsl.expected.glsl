@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-inst-combine-and-or-xor-pack-unpack/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<f32, 2>;
             ^^^^^^
@@ -10,18 +8,6 @@ type Arr_1 = @stride(16) array<i32, 4>;
 
 #version 310 es
 precision mediump float;
-
-uint tint_pack4x8unorm(vec4 param_0) {
-  uint4 i = uint4(round(clamp(param_0, 0.0, 1.0) * 255.0));
-  return (i.x | i.y << 8 | i.z << 16 | i.w << 24);
-}
-
-vec4 tint_unpack4x8snorm(uint param_0) {
-  int j = int(param_0);
-  int4 i = int4(j << 24, j << 16, j << 8, j) >> 24;
-  return clamp(float4(i) / 127.0, -1.0, 1.0);
-}
-
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
@@ -60,8 +46,8 @@ void main_1() {
   bool x_98_phi = false;
   bool x_110_phi = false;
   float x_36 = x_6.x_GLF_uniform_float_values[0].el;
-  a = tint_pack4x8unorm(vec4(x_36, x_36, x_36, x_36));
-  v1 = tint_unpack4x8snorm(a);
+  a = packUnorm4x8(vec4(x_36, x_36, x_36, x_36));
+  v1 = unpackSnorm4x8(a);
   float x_42 = x_6.x_GLF_uniform_float_values[0].el;
   float x_45 = x_6.x_GLF_uniform_float_values[1].el;
   float x_48 = x_6.x_GLF_uniform_float_values[0].el;
@@ -134,10 +120,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'uint4' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

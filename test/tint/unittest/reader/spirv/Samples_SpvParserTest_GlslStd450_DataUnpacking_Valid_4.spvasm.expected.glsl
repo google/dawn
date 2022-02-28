@@ -1,12 +1,4 @@
-SKIP: FAILED
-
 #version 310 es
-
-vec2 tint_unpack2x16float(uint param_0) {
-  uint i = param_0;
-  return f16tof32(uint2(i & 0xffff, i >> 16));
-}
-
 
 void main_1() {
   uint u1 = 10u;
@@ -31,7 +23,7 @@ void main_1() {
   vec3 v3f2 = vec3(60.0f, 70.0f, 50.0f);
   vec4 v4f1 = vec4(50.0f, 50.0f, 50.0f, 50.0f);
   vec4 v4f2 = v4f1;
-  vec2 x_1 = tint_unpack2x16float(u1);
+  vec2 x_1 = unpackHalf2x16(u1);
   return;
 }
 
@@ -44,10 +36,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp highp uint' and a right operand of type ' const int' (or there is no acceptable conversion)
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

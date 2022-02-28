@@ -1,19 +1,5 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
-
-uint tint_pack2x16unorm(vec2 param_0) {
-  uint2 i = uint2(round(clamp(param_0, 0.0, 1.0) * 65535.0));
-  return (i.x | i.y << 16);
-}
-
-vec4 tint_unpack4x8snorm(uint param_0) {
-  int j = int(param_0);
-  int4 i = int4(j << 24, j << 16, j << 8, j) >> 24;
-  return clamp(float4(i) / 127.0, -1.0, 1.0);
-}
-
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct strided_arr {
@@ -53,8 +39,8 @@ void main_1() {
   bool x_110_phi = false;
   float x_41 = x_6.x_GLF_uniform_float_values[0].el;
   float x_43 = x_6.x_GLF_uniform_float_values[1].el;
-  a = tint_pack2x16unorm(vec2(x_41, x_43));
-  v1 = tint_unpack4x8snorm(a);
+  a = packUnorm2x16(vec2(x_41, x_43));
+  v1 = unpackSnorm4x8(a);
   E = 0.01f;
   int x_49 = x_10.x_GLF_uniform_int_values[2].el;
   float x_51 = v1[x_49];
@@ -118,10 +104,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'uint2' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

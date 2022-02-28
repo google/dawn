@@ -1,18 +1,9 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-apfloat-unpackunorm-loop/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<i32, 3>;
             ^^^^^^
 
 #version 310 es
 precision mediump float;
-
-vec4 tint_unpack4x8unorm(uint param_0) {
-  uint j = param_0;
-  uint4 i = uint4(j & 0xff, (j >> 8) & 0xff, (j >> 16) & 0xff, j >> 24);
-  return float4(i) / 255.0;
-}
-
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
@@ -40,7 +31,7 @@ void main_1() {
     } else {
       break;
     }
-    v = tint_unpack4x8unorm(100u);
+    v = unpackUnorm4x8(100u);
     float x_42 = v.x;
     if ((int(x_42) > i)) {
       int x_49 = x_6.x_GLF_uniform_int_values[1].el;
@@ -75,10 +66,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:6: 'uint4' : undeclared identifier 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

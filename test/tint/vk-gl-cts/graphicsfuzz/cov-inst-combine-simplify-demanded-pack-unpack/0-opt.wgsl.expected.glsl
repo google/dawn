@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-inst-combine-simplify-demanded-pack-unpack/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<i32, 4>;
             ^^^^^^
@@ -10,18 +8,6 @@ type Arr_1 = @stride(16) array<f32, 3>;
 
 #version 310 es
 precision mediump float;
-
-uint tint_pack2x16float(vec2 param_0) {
-  uint2 i = f32tof16(param_0);
-  return i.x | (i.y << 16);
-}
-
-vec4 tint_unpack4x8snorm(uint param_0) {
-  int j = int(param_0);
-  int4 i = int4(j << 24, j << 16, j << 8, j) >> 24;
-  return clamp(float4(i) / 127.0, -1.0, 1.0);
-}
-
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
 struct tint_padded_array_element {
@@ -59,8 +45,8 @@ void main_1() {
   bool x_70_phi = false;
   bool x_86_phi = false;
   bool x_102_phi = false;
-  a = tint_pack2x16float(vec2(1.0f, 1.0f));
-  v1 = tint_unpack4x8snorm(a);
+  a = packHalf2x16(vec2(1.0f, 1.0f));
+  v1 = unpackSnorm4x8(a);
   E = 0.01f;
   int x_43 = x_8.x_GLF_uniform_int_values[1].el;
   float x_45 = v1[x_43];
@@ -125,10 +111,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'uint2' : undeclared identifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
