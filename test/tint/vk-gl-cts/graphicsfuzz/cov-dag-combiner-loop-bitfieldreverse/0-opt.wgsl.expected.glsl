@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-dag-combiner-loop-bitfieldreverse/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<i32, 4>;
             ^^^^^^
@@ -32,7 +30,7 @@ void main_1() {
     int x_36 = (i + 1);
     i = x_36;
     int x_39 = x_6.x_GLF_uniform_int_values[2].el;
-    if ((reversebits(x_36) <= x_39)) {
+    if ((bitfieldReverse(x_36) <= x_39)) {
     } else {
       break;
     }
@@ -69,10 +67,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:29: 'reversebits' : no matching overloaded function found 
-ERROR: 0:29: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

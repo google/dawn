@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -23,7 +21,7 @@ void main_1() {
   int x_28_phi = 0;
   int x_31_phi = 0;
   int x_42_phi = 0;
-  int x_24 = min(1, reversebits(1));
+  int x_24 = min(1, bitfieldReverse(1));
   int x_26 = x_5.x_GLF_uniform_int_values[3].el;
   x_28_phi = x_26;
   x_31_phi = 1;
@@ -79,10 +77,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:24: 'reversebits' : no matching overloaded function found 
-ERROR: 0:24: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

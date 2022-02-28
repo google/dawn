@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-C:\src\tint2\src\writer\glsl\generator_impl.cc:2510 internal compiler error: Multiplanar external texture transform was not run.
+../../src/tint/writer/glsl/generator_impl.cc:2576 internal compiler error: Multiplanar external texture transform was not run.
 
 
 ********************************************************************

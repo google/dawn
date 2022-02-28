@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 vk-gl-cts/graphicsfuzz/cov-bitcount/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<f32, 1>;
             ^^^^^^
@@ -45,7 +47,7 @@ int f1_() {
   if ((x_65 > x_67)) {
     a = (a + 1);
   }
-  i = int(bitCount(a));
+  i = countbits(a);
   int x_75 = i;
   int x_77 = x_11.x_GLF_uniform_int_values[0].el;
   if ((x_75 < x_77)) {
@@ -91,3 +93,11 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
+Error parsing GLSL shader:
+ERROR: 0:40: 'countbits' : no matching overloaded function found 
+ERROR: 0:40: 'assign' :  cannot convert from ' const float' to ' temp mediump int'
+ERROR: 0:40: '' : compilation terminated 
+ERROR: 3 compilation errors.  No code generated.
+
+
+
