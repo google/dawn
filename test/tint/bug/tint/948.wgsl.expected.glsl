@@ -79,7 +79,7 @@ void main_1() {
   float alpha = 0.0f;
   vec3 mixed = vec3(0.0f, 0.0f, 0.0f);
   color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-  tileUV = frac(tUV);
+  tileUV = fract(tUV);
   float x_91 = tileUV.y;
   tileUV.y = (1.0f - x_91);
   tileID = floor(tUV);
@@ -200,10 +200,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:80: 'frac' : no matching overloaded function found 
-ERROR: 0:80: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
-ERROR: 0:80: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 0:120: '%' :  wrong operand types: no operation '%' exists that takes a left-hand operand of type ' temp mediump float' and a right operand of type ' const float' (or there is no acceptable conversion)
+ERROR: 0:120: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
 
 
 

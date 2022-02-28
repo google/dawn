@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-trunc-fract-always-zero/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<f32, 2>;
             ^^^^^^
@@ -42,7 +40,7 @@ void main_1() {
   float f = 0.0f;
   float x_35 = tint_symbol.y;
   float x_37 = x_7.x_GLF_uniform_float_values[1].el;
-  f = frac(trunc(((x_35 < x_37) ? 0.100000001f : 1.0f)));
+  f = fract(trunc(((x_35 < x_37) ? 0.100000001f : 1.0f)));
   float x_42 = f;
   float x_44 = x_7.x_GLF_uniform_float_values[0].el;
   if ((x_42 == x_44)) {
@@ -75,10 +73,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:35: 'frac' : no matching overloaded function found 
-ERROR: 0:35: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -214,7 +214,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kFaceForward, ParamType::kF32, "faceforward"},
         BuiltinData{BuiltinType::kFloor, ParamType::kF32, "floor"},
         BuiltinData{BuiltinType::kFma, ParamType::kF32, "mad"},
-        BuiltinData{BuiltinType::kFract, ParamType::kF32, "frac"},
+        BuiltinData{BuiltinType::kFract, ParamType::kF32, "fract"},
         BuiltinData{BuiltinType::kFwidth, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthCoarse, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthFine, ParamType::kF32, "fwidth"},

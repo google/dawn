@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -11,7 +9,7 @@ void main_1() {
   a = vec2(1.0f, 1.0f);
   float x_25 = a.x;
   a.x = (x_25 + 0.5f);
-  b = frac(a);
+  b = fract(a);
   float x_31 = b.x;
   if ((x_31 == 0.5f)) {
     x_GLF_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -36,11 +34,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:12: 'frac' : no matching overloaded function found 
-ERROR: 0:12: 'assign' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-

@@ -1617,7 +1617,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kFaceForward:
       return "faceforward";
     case sem::BuiltinType::kFract:
-      return "frac";
+      return "fract";
     case sem::BuiltinType::kFma:
       return "mad";
     case sem::BuiltinType::kFwidth:

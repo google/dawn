@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 
 void fract_fa5c71() {
-  float res = frac(1.0f);
+  float res = fract(1.0f);
 }
 
 vec4 vertex_main() {
@@ -18,18 +16,11 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'frac' : no matching overloaded function found 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 void fract_fa5c71() {
-  float res = frac(1.0f);
+  float res = fract(1.0f);
 }
 
 void fragment_main() {
@@ -40,17 +31,10 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'frac' : no matching overloaded function found 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 void fract_fa5c71() {
-  float res = frac(1.0f);
+  float res = fract(1.0f);
 }
 
 void compute_main() {
@@ -62,10 +46,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'frac' : no matching overloaded function found 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

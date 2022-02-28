@@ -123,8 +123,8 @@ void main() {
 
 vec2 rand_seed = vec2(0.0f, 0.0f);
 float rand() {
-  rand_seed.x = frac((cos(dot(rand_seed, vec2(23.140779495f, 232.616897583f))) * 136.816802979f));
-  rand_seed.y = frac((cos(dot(rand_seed, vec2(54.478565216f, 345.841522217f))) * 534.764526367f));
+  rand_seed.x = fract((cos(dot(rand_seed, vec2(23.140779495f, 232.616897583f))) * 136.816802979f));
+  rand_seed.y = fract((cos(dot(rand_seed, vec2(54.478565216f, 345.841522217f))) * 534.764526367f));
   return rand_seed.y;
 }
 
@@ -208,8 +208,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'frac' : no matching overloaded function found 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:64: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:64: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

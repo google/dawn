@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -34,7 +32,7 @@ void main_1() {
   float f = 0.0f;
   float x_35 = tint_symbol.y;
   float x_37 = x_7.x_GLF_uniform_float_values[1].el;
-  f = frac(trunc(((x_35 < x_37) ? 0.100000001f : 1.0f)));
+  f = fract(trunc(((x_35 < x_37) ? 0.100000001f : 1.0f)));
   float x_42 = f;
   float x_44 = x_7.x_GLF_uniform_float_values[0].el;
   if ((x_42 == x_44)) {
@@ -67,10 +65,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:35: 'frac' : no matching overloaded function found 
-ERROR: 0:35: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
