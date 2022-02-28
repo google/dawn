@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -18,7 +16,7 @@ void main_1() {
   float a = 0.0f;
   float b = 0.0f;
   float x_33 = tint_symbol.x;
-  a = ddx(cos(x_33));
+  a = dFdx(cos(x_33));
   float x_37 = x_8.two;
   b = mix(2.0f, x_37, a);
   if (bool(uint((b >= 1.899999976f)) & uint((b <= 2.099999905f)))) {
@@ -45,10 +43,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:19: 'ddx' : no matching overloaded function found 
-ERROR: 0:19: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -76,13 +76,13 @@ mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout v
   vec3 bitangent = vec3(0.0f, 0.0f, 0.0f);
   float invmax = 0.0f;
   vec3 x_133 = p;
-  dp1 = ddx(x_133);
+  dp1 = dFdx(x_133);
   vec3 x_136 = p;
-  dp2 = ddy(x_136);
+  dp2 = dFdy(x_136);
   vec2 x_139 = uv;
-  duv1 = ddx(x_139);
+  duv1 = dFdx(x_139);
   vec2 x_142 = uv;
-  duv2 = ddy(x_142);
+  duv2 = dFdy(x_142);
   vec3 x_145 = dp2;
   vec3 x_146 = normal_1;
   dp2perp = cross(x_145, x_146);
@@ -375,10 +375,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:77: 'ddx' : no matching overloaded function found 
-ERROR: 0:77: 'assign' :  cannot convert from ' const float' to ' temp mediump 3-component vector of float'
-ERROR: 0:77: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 0:103: 'rsqrt' : no matching overloaded function found 
+ERROR: 0:103: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
 
 
 

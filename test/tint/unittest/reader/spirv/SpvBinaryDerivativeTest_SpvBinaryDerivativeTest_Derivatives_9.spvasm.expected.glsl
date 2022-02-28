@@ -1,10 +1,8 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 void main_1() {
-  float x_2 = ddx_fine(50.0f);
+  float x_2 = dFdx(50.0f);
   return;
 }
 
@@ -16,10 +14,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'ddx_fine' : no matching overloaded function found 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

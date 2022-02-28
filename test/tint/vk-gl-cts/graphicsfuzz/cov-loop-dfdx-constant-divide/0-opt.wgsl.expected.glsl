@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-loop-dfdx-constant-divide/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<f32, 2>;
             ^^^^^^
@@ -62,9 +60,9 @@ void main_1() {
     if ((x_51 == x_53)) {
       float x_57 = a;
       float x_60 = x_6.x_GLF_uniform_float_values[1].el;
-      b = (ddx(x_57) + x_60);
+      b = (dFdx(x_57) + x_60);
     }
-    c = ddx(a);
+    c = dFdx(a);
     a = (c / b);
     {
       i = (i + 1);
@@ -101,10 +99,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:55: 'ddx' : no matching overloaded function found 
-ERROR: 0:55: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

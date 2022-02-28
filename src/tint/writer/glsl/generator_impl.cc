@@ -1591,17 +1591,29 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kCountOneBits:
       return "countbits";
     case sem::BuiltinType::kDpdx:
-      return "ddx";
+      return "dFdx";
     case sem::BuiltinType::kDpdxCoarse:
-      return "ddx_coarse";
+      if (version_.IsES()) {
+        return "dFdx";
+      }
+      return "dFdxCoarse";
     case sem::BuiltinType::kDpdxFine:
-      return "ddx_fine";
+      if (version_.IsES()) {
+        return "dFdx";
+      }
+      return "dFdxFine";
     case sem::BuiltinType::kDpdy:
-      return "ddy";
+      return "dFdy";
     case sem::BuiltinType::kDpdyCoarse:
-      return "ddy_coarse";
+      if (version_.IsES()) {
+        return "dFdy";
+      }
+      return "dFdyCoarse";
     case sem::BuiltinType::kDpdyFine:
-      return "ddy_fine";
+      if (version_.IsES()) {
+        return "dFdy";
+      }
+      return "dFdyFine";
     case sem::BuiltinType::kFaceForward:
       return "faceforward";
     case sem::BuiltinType::kFract:

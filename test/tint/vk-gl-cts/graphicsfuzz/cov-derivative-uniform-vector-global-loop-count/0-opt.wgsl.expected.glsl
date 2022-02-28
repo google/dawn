@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-derivative-uniform-vector-global-loop-count/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<f32, 2>;
             ^^^^^^
@@ -63,7 +61,7 @@ void main_1() {
     }
     x_GLF_global_loop_count = (x_GLF_global_loop_count + 1);
     vec2 x_57 = x_12.injectionSwitch;
-    f = (f + ddx(x_57).y);
+    f = (f + dFdx(x_57).y);
     {
       r = (r + 1);
     }
@@ -108,10 +106,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:56: 'ddx' : no matching overloaded function found 
-ERROR: 0:56: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

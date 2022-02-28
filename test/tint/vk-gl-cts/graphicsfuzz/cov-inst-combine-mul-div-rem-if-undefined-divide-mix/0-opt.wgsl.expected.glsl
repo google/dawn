@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/cov-inst-combine-mul-div-rem-if-undefined-divide-mix/0-opt.wgsl:1:13 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type Arr = @stride(16) array<i32, 2>;
             ^^^^^^
@@ -40,7 +38,7 @@ layout(binding = 1) uniform buf1_1 {
 
 float f1_f1_(inout float a) {
   float x_100 = a;
-  return ddx(x_100);
+  return dFdx(x_100);
 }
 
 void main_1() {
@@ -98,10 +96,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:33: 'ddx' : no matching overloaded function found 
-ERROR: 0:33: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
