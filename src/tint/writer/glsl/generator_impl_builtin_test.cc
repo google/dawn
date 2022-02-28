@@ -218,7 +218,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kFwidth, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthCoarse, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthFine, ParamType::kF32, "fwidth"},
-        BuiltinData{BuiltinType::kInverseSqrt, ParamType::kF32, "rsqrt"},
+        BuiltinData{BuiltinType::kInverseSqrt, ParamType::kF32, "inversesqrt"},
         BuiltinData{BuiltinType::kIsFinite, ParamType::kF32, "isfinite"},
         BuiltinData{BuiltinType::kIsInf, ParamType::kF32, "isinf"},
         BuiltinData{BuiltinType::kIsNan, ParamType::kF32, "isnan"},

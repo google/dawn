@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 
 void inverseSqrt_8f2bd2() {
-  vec2 res = rsqrt(vec2(0.0f, 0.0f));
+  vec2 res = inversesqrt(vec2(0.0f, 0.0f));
 }
 
 vec4 vertex_main() {
@@ -18,19 +16,11 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'rsqrt' : no matching overloaded function found 
-ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of float'
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 void inverseSqrt_8f2bd2() {
-  vec2 res = rsqrt(vec2(0.0f, 0.0f));
+  vec2 res = inversesqrt(vec2(0.0f, 0.0f));
 }
 
 void fragment_main() {
@@ -41,18 +31,10 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: 'rsqrt' : no matching overloaded function found 
-ERROR: 0:5: '=' :  cannot convert from ' const float' to ' temp mediump 2-component vector of float'
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 void inverseSqrt_8f2bd2() {
-  vec2 res = rsqrt(vec2(0.0f, 0.0f));
+  vec2 res = inversesqrt(vec2(0.0f, 0.0f));
 }
 
 void compute_main() {
@@ -64,11 +46,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'rsqrt' : no matching overloaded function found 
-ERROR: 0:4: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of float'
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-

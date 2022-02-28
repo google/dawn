@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -102,7 +100,7 @@ mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout v
   tangent = (tangent * x_173);
   float x_177 = tangentSpaceParams.y;
   bitangent = (bitangent * x_177);
-  invmax = rsqrt(max(dot(tangent, tangent), dot(bitangent, bitangent)));
+  invmax = inversesqrt(max(dot(tangent, tangent), dot(bitangent, bitangent)));
   vec3 x_191 = (tangent * invmax);
   vec3 x_194 = (bitangent * invmax);
   vec3 x_195 = normal_1;
@@ -374,10 +372,3 @@ void main() {
   glFragColor_1_1 = inner_result.glFragColor_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:103: 'rsqrt' : no matching overloaded function found 
-ERROR: 0:103: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

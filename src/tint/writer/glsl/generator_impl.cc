@@ -1625,7 +1625,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kFwidthFine:
       return "fwidth";
     case sem::BuiltinType::kInverseSqrt:
-      return "rsqrt";
+      return "inversesqrt";
     case sem::BuiltinType::kIsFinite:
       return "isfinite";
     case sem::BuiltinType::kIsInf:

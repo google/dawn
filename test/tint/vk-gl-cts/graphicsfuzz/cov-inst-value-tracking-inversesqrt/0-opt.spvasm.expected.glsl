@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
@@ -19,7 +17,7 @@ layout(binding = 0) uniform buf0_1 {
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   float x_23 = x_5.x_GLF_uniform_float_values[1].el;
-  if ((rsqrt(x_23) < -1.0f)) {
+  if ((inversesqrt(x_23) < -1.0f)) {
     float x_30 = x_5.x_GLF_uniform_float_values[0].el;
     x_GLF_color = vec4(x_30, x_30, x_30, x_30);
   } else {
@@ -47,10 +45,3 @@ void main() {
   x_GLF_color_1_1 = inner_result.x_GLF_color_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:20: 'rsqrt' : no matching overloaded function found 
-ERROR: 0:20: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
