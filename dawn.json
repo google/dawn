@@ -167,6 +167,14 @@
             {"name": "force disabled toggles", "type": "char", "annotation": "const*const*", "length": "force disabled toggles count"}
         ]
     },
+    "dawn cache device descriptor" : {
+        "tags": ["dawn", "native"],
+        "category": "structure",
+        "chained": "in",
+        "members": [
+            {"name": "isolation key", "type": "char", "annotation": "const*", "length": "strlen", "default": "\"\""}
+        ]
+    },
     "address mode": {
         "category": "enum",
         "values": [
@@ -2401,7 +2409,8 @@
             {"value": 1001, "name": "primitive depth clamping state", "tags": ["dawn", "emscripten"]},
             {"value": 1002, "name": "dawn toggles device descriptor", "tags": ["dawn", "native"]},
             {"value": 1003, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
-            {"value": 1004, "name": "dawn instance descriptor", "tags": ["dawn", "native"]}
+            {"value": 1004, "name": "dawn instance descriptor", "tags": ["dawn", "native"]},
+            {"value": 1005, "name": "dawn cache device descriptor", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

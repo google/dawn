@@ -6,6 +6,8 @@ when the WebGPU implementation is `dawn_native`.
 Additional functionality:
  - `wgpu::DawnTogglesDeviceDescriptor` may be chained on `wgpu::DeviceDescriptor` on device creation to enable Dawn-specific toggles on the device.
 
+ - `wgpu::DawnCacheDeviceDescriptor` may be chained on `wgpu::DeviceDescriptor` on device creation to enable cache options such as isolation keys.
+
  - Synchronous `adapter.CreateDevice(const wgpu::DeviceDescriptor*)` may be called.
 
 Notes:

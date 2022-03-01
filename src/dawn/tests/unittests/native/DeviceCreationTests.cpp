@@ -14,6 +14,8 @@
 
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
+#include "dawn/native/Device.h"
+#include "dawn/native/dawn_platform.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -24,7 +26,7 @@ namespace {
 
     using namespace testing;
 
-    class DeviceCreationTest : public testing::Test {
+    class DeviceCreationTest : public Test {
       protected:
         void SetUp() override {
             dawnProcSetProcs(&dawn::native::GetProcs());
@@ -81,6 +83,45 @@ namespace {
 
         auto toggles = dawn::native::GetTogglesUsed(device.Get());
         EXPECT_THAT(toggles, testing::Contains(testing::StrEq(toggle)));
+    }
+
+    TEST_F(DeviceCreationTest, CreateDeviceWithCacheSuccess) {
+        // Default device descriptor should have an empty cache isolation key.
+        {
+            wgpu::DeviceDescriptor desc = {};
+            wgpu::Device device = adapter.CreateDevice(&desc);
+            EXPECT_NE(device, nullptr);
+
+            EXPECT_THAT(dawn::native::FromAPI(device.Get())->GetCacheIsolationKey(),
+                        testing::StrEq(""));
+        }
+        // Device descriptor with empty cache descriptor should have an empty cache isolation key.
+        {
+            wgpu::DeviceDescriptor desc = {};
+            wgpu::DawnCacheDeviceDescriptor cacheDesc = {};
+            desc.nextInChain = &cacheDesc;
+
+            wgpu::Device device = adapter.CreateDevice(&desc);
+            EXPECT_NE(device, nullptr);
+
+            EXPECT_THAT(dawn::native::FromAPI(device.Get())->GetCacheIsolationKey(),
+                        testing::StrEq(""));
+        }
+        // Specified cache isolation key should be retained.
+        {
+            wgpu::DeviceDescriptor desc = {};
+            wgpu::DawnCacheDeviceDescriptor cacheDesc = {};
+            desc.nextInChain = &cacheDesc;
+
+            const char* isolationKey = "isolation key";
+            cacheDesc.isolationKey = isolationKey;
+
+            wgpu::Device device = adapter.CreateDevice(&desc);
+            EXPECT_NE(device, nullptr);
+
+            EXPECT_THAT(dawn::native::FromAPI(device.Get())->GetCacheIsolationKey(),
+                        testing::StrEq(isolationKey));
+        }
     }
 
     // Test successful call to RequestDevice with descriptor

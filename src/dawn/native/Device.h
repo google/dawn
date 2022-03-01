@@ -366,6 +366,7 @@ namespace dawn::native {
 
         PipelineCompatibilityToken GetNextPipelineCompatibilityToken();
 
+        const std::string& GetCacheIsolationKey() const;
         const std::string& GetLabel() const;
         void APISetLabel(const char* label);
         void APIDestroy();
@@ -540,6 +541,7 @@ namespace dawn::native {
         std::unique_ptr<CallbackTaskManager> mCallbackTaskManager;
         std::unique_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
         std::string mLabel;
+        std::string mCacheIsolationKey = "";
     };
 
 }  // namespace dawn::native

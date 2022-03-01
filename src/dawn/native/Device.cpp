@@ -184,6 +184,12 @@ namespace dawn::native {
         }
         ApplyFeatures(descriptor);
 
+        const DawnCacheDeviceDescriptor* cacheDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &cacheDesc);
+        if (cacheDesc != nullptr) {
+            mCacheIsolationKey = cacheDesc->isolationKey;
+        }
+
         if (descriptor->requiredLimits != nullptr) {
             mLimits.v1 = ReifyDefaultLimits(descriptor->requiredLimits->limits);
         } else {
@@ -1736,6 +1742,10 @@ namespace dawn::native {
 
     PipelineCompatibilityToken DeviceBase::GetNextPipelineCompatibilityToken() {
         return PipelineCompatibilityToken(mNextPipelineCompatibilityToken++);
+    }
+
+    const std::string& DeviceBase::GetCacheIsolationKey() const {
+        return mCacheIsolationKey;
     }
 
     const std::string& DeviceBase::GetLabel() const {
