@@ -204,6 +204,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
+  bool EmitCountOneBitsCall(std::ostream& out, const ast::CallExpression* expr);
+  /// Handles generating a call to the `countOneBits()` builtin
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @returns true if the call expression is emitted
   bool EmitSelectCall(std::ostream& out, const ast::CallExpression* expr);
   /// Handles generating a call to the `dot()` builtin
   /// @param out the output of the expression stream

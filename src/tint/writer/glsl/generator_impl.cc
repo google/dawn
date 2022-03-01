@@ -646,6 +646,9 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
   if (builtin->IsTexture()) {
     return EmitTextureCall(out, call, builtin);
   }
+  if (builtin->Type() == sem::BuiltinType::kCountOneBits) {
+    return EmitCountOneBitsCall(out, expr);
+  }
   if (builtin->Type() == sem::BuiltinType::kSelect) {
     return EmitSelectCall(out, expr);
   }
@@ -934,6 +937,23 @@ bool GeneratorImpl::EmitEmulatedFMA(std::ostream& out,
   }
   out << ") + (";
   if (!EmitExpression(out, expr->args[2])) {
+    return false;
+  }
+  out << "))";
+  return true;
+}
+
+bool GeneratorImpl::EmitCountOneBitsCall(std::ostream& out,
+                                         const ast::CallExpression* expr) {
+  // GLSL's bitCount returns an integer type, so cast it to the appropriate
+  // unsigned type.
+  if (!EmitType(out, TypeOf(expr)->UnwrapRef(), ast::StorageClass::kNone,
+                ast::Access::kReadWrite, "")) {
+    return false;
+  }
+  out << "(bitCount(";
+
+  if (!EmitExpression(out, expr->args[0])) {
     return false;
   }
   out << "))";
@@ -1534,7 +1554,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kAtan2:
       return "atan";
     case sem::BuiltinType::kCountOneBits:
-      return "countbits";
+      return "bitCount";
     case sem::BuiltinType::kDpdx:
       return "dFdx";
     case sem::BuiltinType::kDpdxCoarse:
