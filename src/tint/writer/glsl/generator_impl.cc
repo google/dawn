@@ -1357,6 +1357,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   }
 
   uint32_t glsl_ret_width = 4u;
+  bool append_depth_ref_to_coords = true;
   bool is_depth = texture_type->Is<sem::DepthTexture>();
 
   switch (builtin->Type()) {
@@ -1376,6 +1377,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     case sem::BuiltinType::kTextureGather:
     case sem::BuiltinType::kTextureGatherCompare:
       out << "textureGather";
+      append_depth_ref_to_coords = false;
       break;
     case sem::BuiltinType::kTextureSampleGrad:
       out << "textureGrad";
@@ -1421,17 +1423,19 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     param_coords =
         AppendVector(&builder_, param_coords, array_index)->Declaration();
   }
-  bool is_cube_array = texture_type->dim() == ast::TextureDimension::kCubeArray;
 
   // GLSL requires Dref to be appended to the coordinates, *unless* it's
   // samplerCubeArrayShadow, in which case it will be handled as a separate
-  // parameter [1].
-  if (is_depth && !is_cube_array) {
+  // parameter.
+  if (texture_type->dim() == ast::TextureDimension::kCubeArray) {
+    append_depth_ref_to_coords = false;
+  }
+
+  if (is_depth && append_depth_ref_to_coords) {
     if (auto* depth_ref = arg(Usage::kDepthRef)) {
       param_coords =
           AppendVector(&builder_, param_coords, depth_ref)->Declaration();
-    } else if (builtin->Type() == sem::BuiltinType::kTextureSample ||
-               builtin->Type() == sem::BuiltinType::kTextureSampleLevel) {
+    } else {
       // Sampling a depth texture in GLSL always requires a depth reference, so
       // append zero here.
       auto* f32 = builder_.create<sem::F32>();
@@ -1471,17 +1475,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     out << ", 0.0";
   }
 
-  for (auto usage : {Usage::kOffset, Usage::kComponent, Usage::kBias}) {
-    if (auto* e = arg(usage)) {
-      out << ", ";
-      if (!EmitExpression(out, e)) {
-        return false;
-      }
-    }
-  }
-
   // [1] samplerCubeArrayShadow requires a separate depthRef parameter
-  if (is_depth && is_cube_array) {
+  if (is_depth && !append_depth_ref_to_coords) {
     if (auto* e = arg(Usage::kDepthRef)) {
       out << ", ";
       if (!EmitExpression(out, e)) {
@@ -1489,6 +1484,15 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       }
     } else if (builtin->Type() == sem::BuiltinType::kTextureSample) {
       out << ", 0.0f";
+    }
+  }
+
+  for (auto usage : {Usage::kOffset, Usage::kComponent, Usage::kBias}) {
+    if (auto* e = arg(usage)) {
+      out << ", ";
+      if (!EmitExpression(out, e)) {
+        return false;
+      }
     }
   }
 
