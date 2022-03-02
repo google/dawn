@@ -1303,9 +1303,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         }
       }
       out << ")";
-      // textureSize() on sampler2dArray returns the array size in the
+      // textureSize() on array samplers returns the array size in the
       // final component, so strip it out.
-      if (texture_type->dim() == ast::TextureDimension::k2dArray) {
+      if (texture_type->dim() == ast::TextureDimension::k2dArray ||
+          texture_type->dim() == ast::TextureDimension::kCubeArray) {
         out << ".xy";
       }
       return true;

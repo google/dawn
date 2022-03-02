@@ -4,7 +4,7 @@ SKIP: FAILED
 
 uniform highp usamplerCubeArray arg_0_1;
 void textureDimensions_d83c45() {
-  ivec2 res = textureSize(arg_0_1, 0);
+  ivec2 res = textureSize(arg_0_1, 0).xy;
 }
 
 vec4 vertex_main() {
@@ -31,7 +31,7 @@ precision mediump float;
 
 uniform highp usamplerCubeArray arg_0_1;
 void textureDimensions_d83c45() {
-  ivec2 res = textureSize(arg_0_1, 0);
+  ivec2 res = textureSize(arg_0_1, 0).xy;
 }
 
 void fragment_main() {
@@ -53,7 +53,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 uniform highp usamplerCubeArray arg_0_1;
 void textureDimensions_d83c45() {
-  ivec2 res = textureSize(arg_0_1, 0);
+  ivec2 res = textureSize(arg_0_1, 0).xy;
 }
 
 void compute_main() {
