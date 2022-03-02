@@ -689,6 +689,12 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
     // GLSL does not support abs() on unsigned arguments. However, it's a no-op.
     return EmitExpression(out, expr->args[0]);
   }
+  if ((builtin->Type() == sem::BuiltinType::kAny ||
+       builtin->Type() == sem::BuiltinType::kAll) &&
+      TypeOf(expr->args[0])->UnwrapRef()->is_scalar()) {
+    // GLSL does not support any() or all() on scalar arguments. It's a no-op.
+    return EmitExpression(out, expr->args[0]);
+  }
   if (builtin->IsBarrier()) {
     return EmitBarrierCall(out, builtin);
   }
