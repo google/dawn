@@ -1,14 +1,8 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
 
 layout(location = 0) flat in int x_3_param_1;
 layout(location = 0) out int x_4_1_1;
-struct S {
-  int field0[];
-};
-
 vec4 x_2 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 int x_3 = 0;
 int x_4 = 0;
@@ -43,10 +37,3 @@ void main() {
   x_4_1_1 = inner_result.x_4_1;
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:7: '' : array size required 
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

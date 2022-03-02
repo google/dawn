@@ -1,13 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct buf0 {
   vec2 injectionSwitch;
-};
-
-struct doesNotMatter {
-  uint x_compute_data[];
 };
 
 vec4 GLF_live2gl_FragCoord = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -77,10 +71,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:8: '' : array size required 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

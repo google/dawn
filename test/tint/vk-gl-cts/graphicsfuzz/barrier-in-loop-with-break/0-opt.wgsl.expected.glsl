@@ -1,15 +1,8 @@
-SKIP: FAILED
-
 vk-gl-cts/graphicsfuzz/barrier-in-loop-with-break/0-opt.wgsl:1:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type RTArr = @stride(4) array<i32>;
               ^^^^^^
 
 #version 310 es
-
-struct doesNotMatter {
-  int global_seed;
-  int data[];
-};
 
 struct buf1 {
   vec2 injectionSwitch;
@@ -62,10 +55,3 @@ void main() {
   tint_symbol_1(gl_LocalInvocationID);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: '' : array size required 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

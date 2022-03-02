@@ -1,10 +1,4 @@
-SKIP: FAILED
-
 #version 310 es
-
-struct doesNotMatter {
-  float x_compute_data[];
-};
 
 layout(binding = 0, std430) buffer doesNotMatter_1 {
   float x_compute_data[];
@@ -66,10 +60,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: '' : array size required 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

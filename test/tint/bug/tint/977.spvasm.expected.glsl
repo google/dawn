@@ -1,18 +1,4 @@
-SKIP: FAILED
-
 #version 310 es
-
-struct ResultMatrix {
-  float numbers[];
-};
-
-struct FirstMatrix {
-  float numbers[];
-};
-
-struct SecondMatrix {
-  float numbers[];
-};
 
 struct Uniforms {
   float NAN;
@@ -70,10 +56,3 @@ void main() {
   tint_symbol_1(gl_GlobalInvocationID);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: '' : array size required 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

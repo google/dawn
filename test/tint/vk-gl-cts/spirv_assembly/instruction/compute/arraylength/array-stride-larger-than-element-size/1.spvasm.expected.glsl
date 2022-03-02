@@ -1,13 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct Buf1 {
   int result;
-};
-
-struct Buf0 {
-  uint values[];
 };
 
 layout(binding = 1, std430) buffer Buf1_1 {
@@ -40,10 +34,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:8: '' : array size required 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

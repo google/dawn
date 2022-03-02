@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct buf1 {
@@ -8,10 +6,6 @@ struct buf1 {
 
 struct buf2 {
   vec2 resolution;
-};
-
-struct doesNotMatter {
-  int x_compute_data[];
 };
 
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
@@ -123,10 +117,3 @@ void main() {
   tint_symbol_1(gl_GlobalInvocationID);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:12: '' : array size required 
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

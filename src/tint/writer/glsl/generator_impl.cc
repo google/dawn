@@ -164,11 +164,13 @@ bool GeneratorImpl::Generate() {
       // elsewhere.
       // TODO(crbug.com/tint/1339): We could also avoid emitting any other
       // struct that is only used as a buffer store type.
-      TINT_ASSERT(Writer, str->members.size() > 0);
-      auto* last_member = str->members[str->members.size() - 1];
-      auto* arr = last_member->type->As<ast::Array>();
-      if (!arr || !arr->IsRuntimeArray()) {
-        if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
+      const sem::Struct* sem_str = builder_.Sem().Get(str);
+      const auto& members = sem_str->Members();
+      TINT_ASSERT(Writer, members.size() > 0);
+      auto* last_member = members[members.size() - 1];
+      auto* arr = last_member->Type()->As<sem::Array>();
+      if (!arr || !arr->IsRuntimeSized()) {
+        if (!EmitStructType(current_buffer_, sem_str)) {
           return false;
         }
       }

@@ -1,14 +1,8 @@
-SKIP: FAILED
-
 vk-gl-cts/spirv_assembly/instruction/compute/signed_int_compare/uint_slessthanequal/0.wgsl:1:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type RTArr = @stride(4) array<u32>;
               ^^^^^^
 
 #version 310 es
-
-struct S {
-  uint field0[];
-};
 
 uvec3 x_2 = uvec3(0u, 0u, 0u);
 layout(binding = 0, std430) buffer S_1 {
@@ -38,10 +32,3 @@ void main() {
   tint_symbol(gl_GlobalInvocationID);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: '' : array size required 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

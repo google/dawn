@@ -1,10 +1,4 @@
-SKIP: FAILED
-
 #version 310 es
-
-struct S {
-  uint field0[];
-};
 
 uvec3 x_2 = uvec3(0u, 0u, 0u);
 layout(binding = 0, std430) buffer S_1 {
@@ -34,10 +28,3 @@ void main() {
   tint_symbol(gl_GlobalInvocationID);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: '' : array size required 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -1,12 +1,5 @@
-SKIP: FAILED
-
 #version 310 es
 precision mediump float;
-
-struct S {
-  uint field0;
-  uint field1[];
-};
 
 layout(binding = 0, std430) buffer S_1 {
   uint field0;
@@ -25,10 +18,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:6: '' : array size required 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

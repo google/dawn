@@ -1,11 +1,4 @@
-SKIP: FAILED
-
 #version 310 es
-
-struct doesNotMatter {
-  int global_seed;
-  int data[];
-};
 
 struct buf1 {
   vec2 injectionSwitch;
@@ -58,10 +51,3 @@ void main() {
   tint_symbol_1(gl_LocalInvocationID);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:5: '' : array size required 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

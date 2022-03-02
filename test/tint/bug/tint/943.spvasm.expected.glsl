@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct Uniforms {
@@ -8,18 +6,6 @@ struct Uniforms {
   ivec3 bShape;
   ivec3 outShape;
   ivec2 outShapeStrides;
-};
-
-struct ssbOut {
-  float result[];
-};
-
-struct ssbA {
-  float A[];
-};
-
-struct ssbB {
-  float B[];
 };
 
 int dimAOuter_1 = 0;
@@ -397,10 +383,3 @@ void main() {
   tint_symbol_2(gl_LocalInvocationID, gl_GlobalInvocationID, gl_LocalInvocationIndex);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:12: '' : array size required 
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

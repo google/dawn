@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 vk-gl-cts/spirv_assembly/instruction/compute/arraylength/array-stride-larger-than-element-size/1.wgsl:5:15 warning: use of deprecated language feature: the @stride attribute is deprecated; use a larger type if necessary
 type RTArr = @stride(4) array<u32>;
               ^^^^^^
@@ -8,10 +6,6 @@ type RTArr = @stride(4) array<u32>;
 
 struct Buf1 {
   int result;
-};
-
-struct Buf0 {
-  uint values[];
 };
 
 layout(binding = 1, std430) buffer Buf1_1 {
@@ -44,10 +38,3 @@ void main() {
   tint_symbol();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:8: '' : array size required 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
