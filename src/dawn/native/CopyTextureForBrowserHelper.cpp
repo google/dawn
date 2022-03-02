@@ -329,8 +329,9 @@ namespace dawn::native {
         DAWN_INVALID_IF(source->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
                         "Source texture %s is destroyed.", source->texture);
 
-        DAWN_INVALID_IF(source->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
-                        "Destination texture %s is destroyed.", destination->texture);
+        DAWN_INVALID_IF(
+            destination->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
+            "Destination texture %s is destroyed.", destination->texture);
 
         DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
                          "validating the ImageCopyTexture for the source");
