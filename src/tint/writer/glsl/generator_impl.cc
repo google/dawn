@@ -1369,6 +1369,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       break;
     case sem::BuiltinType::kTextureSampleLevel:
       out << "textureLod";
+      if (is_depth) {
+        glsl_ret_width = 1u;
+      }
       break;
     case sem::BuiltinType::kTextureGather:
     case sem::BuiltinType::kTextureGatherCompare:
@@ -1427,7 +1430,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     if (auto* depth_ref = arg(Usage::kDepthRef)) {
       param_coords =
           AppendVector(&builder_, param_coords, depth_ref)->Declaration();
-    } else if (builtin->Type() == sem::BuiltinType::kTextureSample) {
+    } else if (builtin->Type() == sem::BuiltinType::kTextureSample ||
+               builtin->Type() == sem::BuiltinType::kTextureSampleLevel) {
       // Sampling a depth texture in GLSL always requires a depth reference, so
       // append zero here.
       auto* f32 = builder_.create<sem::F32>();
@@ -1448,7 +1452,15 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                      Usage::kSampleIndex, Usage::kValue}) {
     if (auto* e = arg(usage)) {
       out << ", ";
-      if (!EmitExpression(out, e)) {
+      if (usage == Usage::kLevel && is_depth) {
+        // WGSL's textureSampleLevel() "level" param is i32 for depth textures,
+        // whereas GLSL's textureLod() "lod" param is always float, so cast it.
+        out << "float(";
+        if (!EmitExpression(out, e)) {
+          return false;
+        }
+        out << ")";
+      } else if (!EmitExpression(out, e)) {
         return false;
       }
     }

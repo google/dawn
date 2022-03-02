@@ -1,11 +1,9 @@
-SKIP: FAILED
-
 #version 310 es
 
 uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_47daa4() {
-  float res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0, ivec2(0, 0)).x;
+  float res = textureLodOffset(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), float(0), ivec2(0, 0));
 }
 
 vec4 vertex_main() {
@@ -20,20 +18,13 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:6: 'textureLodOffset' : no matching overloaded function found 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision mediump float;
 
 uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_47daa4() {
-  float res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0, ivec2(0, 0)).x;
+  float res = textureLodOffset(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), float(0), ivec2(0, 0));
 }
 
 void fragment_main() {
@@ -44,19 +35,12 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:7: 'textureLodOffset' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_47daa4() {
-  float res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 0, ivec2(0, 0)).x;
+  float res = textureLodOffset(arg_0_arg_1, vec3(0.0f, 0.0f, 0.0f), float(0), ivec2(0, 0));
 }
 
 void compute_main() {
@@ -68,10 +52,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:6: 'textureLodOffset' : no matching overloaded function found 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
