@@ -1265,6 +1265,16 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
   return true;
 }
 
+const ast::Expression* GeneratorImpl::CreateF32Zero(
+    const sem::Statement* stmt) {
+  auto* zero = builder_.Expr(0.0f);
+  auto* f32 = builder_.create<sem::F32>();
+  auto* sem_zero = builder_.create<sem::Expression>(
+      zero, f32, stmt, sem::Constant{}, /* has_side_effects */ false);
+  builder_.Sem().Add(zero, sem_zero);
+  return zero;
+}
+
 bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                                     const sem::Call* call,
                                     const sem::Builtin* builtin) {
@@ -1446,20 +1456,14 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   }
 
   if (is_depth && append_depth_ref_to_coords) {
-    if (auto* depth_ref = arg(Usage::kDepthRef)) {
-      param_coords =
-          AppendVector(&builder_, param_coords, depth_ref)->Declaration();
-    } else {
+    auto* depth_ref = arg(Usage::kDepthRef);
+    if (!depth_ref) {
       // Sampling a depth texture in GLSL always requires a depth reference, so
       // append zero here.
-      auto* f32 = builder_.create<sem::F32>();
-      auto* zero = builder_.Expr(0.0f);
-      auto* stmt = builder_.Sem().Get(param_coords)->Stmt();
-      auto* sem_zero = builder_.create<sem::Expression>(
-          zero, f32, stmt, sem::Constant{}, /* has_side_effects */ false);
-      builder_.Sem().Add(zero, sem_zero);
-      param_coords = AppendVector(&builder_, param_coords, zero)->Declaration();
+      depth_ref = CreateF32Zero(builder_.Sem().Get(param_coords)->Stmt());
     }
+    param_coords =
+        AppendVector(&builder_, param_coords, depth_ref)->Declaration();
   }
 
   if (!EmitExpression(out, param_coords)) {

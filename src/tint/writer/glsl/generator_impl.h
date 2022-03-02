@@ -191,6 +191,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the fma() expression
   /// @returns true if the expression is emitted
   bool EmitEmulatedFMA(std::ostream& out, const ast::CallExpression* expr);
+  /// Create a float literal zero AST node, and associated semantic nodes.
+  /// @param stmt the statement which will own the semantic expression node
+  /// @returns an AST expression representing 0.0f
+  const ast::Expression* CreateF32Zero(const sem::Statement* stmt);
+
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param out the output of the expression stream
