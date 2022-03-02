@@ -1343,7 +1343,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       if (!EmitExpression(out, texture)) {
         return false;
       }
-      out << ");";
+      out << ")";
       return true;
     }
     case sem::BuiltinType::kTextureNumSamples: {
@@ -1351,7 +1351,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       if (!EmitExpression(out, texture)) {
         return false;
       }
-      out << ");";
+      out << ")";
       return true;
     }
     default:

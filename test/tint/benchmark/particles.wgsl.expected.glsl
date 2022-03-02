@@ -182,7 +182,7 @@ void simulate(uvec3 GlobalInvocationID) {
   if ((particle.lifetime < 0.0f)) {
     ivec2 coord = ivec2(0, 0);
     {
-      for(int level = (textureQueryLevels(tint_symbol_1); - 1); (level > 0); level = (level - 1)) {
+      for(int level = (textureQueryLevels(tint_symbol_1) - 1); (level > 0); level = (level - 1)) {
         vec4 probabilites = texelFetch(tint_symbol_1, coord, level);
         vec4 value = vec4(rand());
         bvec4 mask = bvec4(uvec4(greaterThanEqual(value, vec4(0.0f, probabilites.xyz))) & uvec4(lessThan(value, probabilites)));

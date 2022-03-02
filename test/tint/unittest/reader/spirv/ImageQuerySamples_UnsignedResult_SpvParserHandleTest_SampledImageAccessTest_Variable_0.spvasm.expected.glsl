@@ -22,7 +22,7 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  uint x_99 = uint(textureSamples(x_20_1););
+  uint x_99 = uint(textureSamples(x_20_1));
   return;
 }
 

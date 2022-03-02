@@ -18,7 +18,7 @@ void main_1() {
   vec2 vf12 = vec2(1.0f, 2.0f);
   vec3 vf123 = vec3(1.0f, 2.0f, 3.0f);
   vec4 vf1234 = vec4(1.0f, 2.0f, 3.0f, 4.0f);
-  uint x_71 = uint(textureSamples(x_20_1););
+  uint x_71 = uint(textureSamples(x_20_1));
   uint x_1000 = 0u;
   return;
 }

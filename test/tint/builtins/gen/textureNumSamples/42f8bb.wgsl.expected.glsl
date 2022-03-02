@@ -4,7 +4,7 @@ SKIP: FAILED
 
 uniform highp usampler2DMS arg_0_1;
 void textureNumSamples_42f8bb() {
-  int res = textureSamples(arg_0_1);;
+  int res = textureSamples(arg_0_1);
 }
 
 vec4 vertex_main() {
@@ -32,7 +32,7 @@ precision mediump float;
 
 uniform highp usampler2DMS arg_0_1;
 void textureNumSamples_42f8bb() {
-  int res = textureSamples(arg_0_1);;
+  int res = textureSamples(arg_0_1);
 }
 
 void fragment_main() {
@@ -55,7 +55,7 @@ ERROR: 3 compilation errors.  No code generated.
 
 uniform highp usampler2DMS arg_0_1;
 void textureNumSamples_42f8bb() {
-  int res = textureSamples(arg_0_1);;
+  int res = textureSamples(arg_0_1);
 }
 
 void compute_main() {

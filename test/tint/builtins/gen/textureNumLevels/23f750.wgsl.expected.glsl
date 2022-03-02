@@ -4,7 +4,7 @@ SKIP: FAILED
 
 uniform highp isampler2D arg_0_1;
 void textureNumLevels_23f750() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureQueryLevels(arg_0_1);
 }
 
 vec4 vertex_main() {
@@ -32,7 +32,7 @@ precision mediump float;
 
 uniform highp isampler2D arg_0_1;
 void textureNumLevels_23f750() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureQueryLevels(arg_0_1);
 }
 
 void fragment_main() {
@@ -55,7 +55,7 @@ ERROR: 3 compilation errors.  No code generated.
 
 uniform highp isampler2D arg_0_1;
 void textureNumLevels_23f750() {
-  int res = textureQueryLevels(arg_0_1);;
+  int res = textureQueryLevels(arg_0_1);
 }
 
 void compute_main() {
