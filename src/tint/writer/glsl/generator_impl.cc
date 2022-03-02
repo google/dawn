@@ -2717,7 +2717,11 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& out,
       out << "~";
       break;
     case ast::UnaryOp::kNot:
-      out << "!";
+      if (TypeOf(expr)->UnwrapRef()->is_scalar()) {
+        out << "!";
+      } else {
+        out << "not";
+      }
       break;
     case ast::UnaryOp::kNegation:
       out << "-";
