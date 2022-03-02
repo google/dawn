@@ -684,6 +684,11 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
   if (builtin->Type() == sem::BuiltinType::kFma && version_.IsES()) {
     return EmitEmulatedFMA(out, expr);
   }
+  if (builtin->Type() == sem::BuiltinType::kAbs &&
+      TypeOf(expr->args[0])->UnwrapRef()->is_unsigned_scalar_or_vector()) {
+    // GLSL does not support abs() on unsigned arguments. However, it's a no-op.
+    return EmitExpression(out, expr->args[0]);
+  }
   if (builtin->IsBarrier()) {
     return EmitBarrierCall(out, builtin);
   }
