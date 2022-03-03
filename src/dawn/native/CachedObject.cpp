@@ -15,6 +15,7 @@
 #include "dawn/native/CachedObject.h"
 
 #include "dawn/common/Assert.h"
+#include "dawn/native/Device.h"
 
 namespace dawn::native {
 
@@ -39,6 +40,28 @@ namespace dawn::native {
         ASSERT(!mIsContentHashInitialized);
         mContentHash = contentHash;
         mIsContentHashInitialized = true;
+    }
+
+    const std::string& CachedObject::GetCacheKey() const {
+        ASSERT(mIsCacheKeyBaseInitialized);
+        return mCacheKeyBase;
+    }
+
+    std::string CachedObject::GetCacheKey(DeviceBase* device) const {
+        ASSERT(mIsCacheKeyBaseInitialized);
+        // TODO(dawn:549) Prepend/append with device/adapter information.
+        return mCacheKeyBase;
+    }
+
+    void CachedObject::SetCacheKey(const std::string& cacheKey) {
+        ASSERT(!mIsContentHashInitialized);
+        mCacheKeyBase = cacheKey;
+        mIsCacheKeyBaseInitialized = true;
+    }
+
+    std::string CachedObject::ComputeCacheKeyBase() const {
+        // This implementation should never be called. Only overrides should be called.
+        UNREACHABLE();
     }
 
 }  // namespace dawn::native
