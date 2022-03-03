@@ -28,11 +28,11 @@ namespace wgpu::binding {
         query_set_.Destroy();
     }
 
-    std::optional<std::string> GPUQuerySet::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUQuerySet::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUQuerySet::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUQuerySet::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

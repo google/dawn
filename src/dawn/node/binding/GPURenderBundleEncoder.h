@@ -74,8 +74,8 @@ namespace wgpu::binding {
         void drawIndexedIndirect(Napi::Env,
                                  interop::Interface<interop::GPUBuffer> indirectBuffer,
                                  interop::GPUSize64 indirectOffset) override;
-        std::optional<std::string> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::optional<std::string> value) override;
+        std::variant<std::string, interop::UndefinedType>getLabel(Napi::Env) override;
+        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType>value) override;
 
       private:
         wgpu::RenderBundleEncoder enc_;

@@ -44,7 +44,8 @@ namespace wgpu::binding {
             DeviceLostInfo(interop::GPUDeviceLostReason reason, std::string message)
                 : reason_(reason), message_(message) {
             }
-            std::variant<interop::GPUDeviceLostReason> getReason(Napi::Env env) override {
+            std::variant<interop::GPUDeviceLostReason, interop::UndefinedType> getReason(
+                Napi::Env env) override {
                 return reason_;
             }
             std::string getMessage(Napi::Env) override {
@@ -488,11 +489,11 @@ namespace wgpu::binding {
         return promise;
     }
 
-    std::optional<std::string> GPUDevice::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUDevice::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     };
 
-    void GPUDevice::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUDevice::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     };
 

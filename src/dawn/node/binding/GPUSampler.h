@@ -32,8 +32,8 @@ namespace wgpu::binding {
         }
 
         // interop::GPUSampler interface compliance
-        std::optional<std::string> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::optional<std::string> value) override;
+        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
       private:
         wgpu::Sampler sampler_;

@@ -25,11 +25,12 @@ namespace wgpu::binding {
     GPUCommandBuffer::GPUCommandBuffer(wgpu::CommandBuffer cmd_buf) : cmd_buf_(std::move(cmd_buf)) {
     }
 
-    std::optional<std::string> GPUCommandBuffer::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUCommandBuffer::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUCommandBuffer::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUCommandBuffer::setLabel(Napi::Env,
+                                    std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

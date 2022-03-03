@@ -158,11 +158,11 @@ namespace wgpu::binding {
         state_ = State::Destroyed;
     }
 
-    std::optional<std::string> GPUBuffer::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUBuffer::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUBuffer::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUBuffer::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

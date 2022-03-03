@@ -34,11 +34,12 @@ namespace wgpu::binding {
             env, pipeline_.GetBindGroupLayout(index));
     }
 
-    std::optional<std::string> GPUComputePipeline::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUComputePipeline::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUComputePipeline::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUComputePipeline::setLabel(Napi::Env,
+                                      std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

@@ -62,6 +62,10 @@ namespace wgpu::interop {
     using Float64Array = Napi::TypedArrayOf<double>;
     using DataView = Napi::TypedArray;
 
+    // Datatype used for undefined values.
+    struct UndefinedType {};
+    static constexpr UndefinedType Undefined;
+
     template <typename T>
     using FrozenArray = std::vector<T>;
 
@@ -437,6 +441,13 @@ namespace wgpu::interop {
       public:
         static Result FromJS(Napi::Env, Napi::Value, double&);
         static Napi::Value ToJS(Napi::Env, double);
+    };
+
+    template <>
+    class Converter<UndefinedType> {
+      public:
+        static Result FromJS(Napi::Env, Napi::Value, UndefinedType&);
+        static Napi::Value ToJS(Napi::Env, UndefinedType);
     };
 
     template <typename T>

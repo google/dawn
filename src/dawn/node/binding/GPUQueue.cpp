@@ -121,11 +121,11 @@ namespace wgpu::binding {
         UNIMPLEMENTED();
     }
 
-    std::optional<std::string> GPUQueue::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUQueue::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUQueue::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUQueue::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

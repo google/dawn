@@ -114,11 +114,12 @@ namespace wgpu::binding {
         return promise;
     }
 
-    std::optional<std::string> GPUShaderModule::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUShaderModule::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUShaderModule::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUShaderModule::setLabel(Napi::Env,
+                                   std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

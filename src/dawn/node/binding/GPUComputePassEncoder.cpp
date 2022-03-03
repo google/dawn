@@ -54,10 +54,6 @@ namespace wgpu::binding {
         enc_.End();
     }
 
-    void GPUComputePassEncoder::endPass(Napi::Env) {
-        enc_.EndPass();
-    }
-
     void GPUComputePassEncoder::setBindGroup(
         Napi::Env env,
         interop::GPUIndex32 index,
@@ -104,11 +100,12 @@ namespace wgpu::binding {
         enc_.InsertDebugMarker(markerLabel.c_str());
     }
 
-    std::optional<std::string> GPUComputePassEncoder::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUComputePassEncoder::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUComputePassEncoder::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUComputePassEncoder::setLabel(Napi::Env,
+                                         std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

@@ -89,10 +89,6 @@ namespace wgpu::binding {
         enc_.End();
     }
 
-    void GPURenderPassEncoder::endPass(Napi::Env) {
-        enc_.EndPass();
-    }
-
     void GPURenderPassEncoder::setBindGroup(
         Napi::Env env,
         interop::GPUIndex32 index,
@@ -231,11 +227,12 @@ namespace wgpu::binding {
         enc_.DrawIndexedIndirect(b, o);
     }
 
-    std::optional<std::string> GPURenderPassEncoder::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPURenderPassEncoder::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPURenderPassEncoder::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPURenderPassEncoder::setLabel(Napi::Env,
+                                        std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

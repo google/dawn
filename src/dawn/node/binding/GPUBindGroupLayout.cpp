@@ -25,11 +25,12 @@ namespace wgpu::binding {
         : layout_(std::move(layout)) {
     }
 
-    std::optional<std::string> GPUBindGroupLayout::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUBindGroupLayout::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUBindGroupLayout::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUBindGroupLayout::setLabel(Napi::Env,
+                                      std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

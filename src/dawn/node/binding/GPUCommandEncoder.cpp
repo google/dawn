@@ -204,11 +204,12 @@ namespace wgpu::binding {
         return interop::GPUCommandBuffer::Create<GPUCommandBuffer>(env, enc_.Finish(&desc));
     }
 
-    std::optional<std::string> GPUCommandEncoder::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUCommandEncoder::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUCommandEncoder::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUCommandEncoder::setLabel(Napi::Env,
+                                     std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

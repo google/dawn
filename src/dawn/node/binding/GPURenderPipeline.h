@@ -36,8 +36,8 @@ namespace wgpu::binding {
         // interop::GPURenderPipeline interface compliance
         interop::Interface<interop::GPUBindGroupLayout> getBindGroupLayout(Napi::Env,
                                                                            uint32_t index) override;
-        std::optional<std::string> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::optional<std::string> value) override;
+        std::variant<std::string, interop::UndefinedType>getLabel(Napi::Env) override;
+        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType>value) override;
 
       private:
         wgpu::RenderPipeline pipeline_;

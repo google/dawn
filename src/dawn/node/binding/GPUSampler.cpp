@@ -25,11 +25,11 @@ namespace wgpu::binding {
     GPUSampler::GPUSampler(wgpu::Sampler sampler) : sampler_(std::move(sampler)) {
     }
 
-    std::optional<std::string> GPUSampler::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUSampler::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUSampler::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUSampler::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

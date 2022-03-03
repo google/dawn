@@ -37,8 +37,8 @@ namespace wgpu::binding {
             Napi::Env,
             interop::GPUTextureViewDescriptor descriptor) override;
         void destroy(Napi::Env) override;
-        std::optional<std::string> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::optional<std::string> value) override;
+        std::variant<std::string, interop::UndefinedType>getLabel(Napi::Env) override;
+        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType>value) override;
 
       private:
         wgpu::Texture texture_;

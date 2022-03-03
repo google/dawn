@@ -24,11 +24,12 @@ namespace wgpu::binding {
     GPUPipelineLayout::GPUPipelineLayout(wgpu::PipelineLayout layout) : layout_(std::move(layout)) {
     }
 
-    std::optional<std::string> GPUPipelineLayout::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUPipelineLayout::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUPipelineLayout::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUPipelineLayout::setLabel(Napi::Env,
+                                     std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

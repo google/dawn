@@ -118,8 +118,10 @@ See:
 */ -}}
 {{- define "VariantTypeList" -}}
 {{-   range $i, $ty := $}}
-{{-     if not (IsUndefinedType $ty)}}
-{{-       if $i }}, {{end}}
+{{-     if $i }}, {{end}}
+{{-     if IsUndefinedType $ty -}}
+          UndefinedType
+{{-     else}}
 {{-       template "Type" $ty}}
 {{-     end}}
 {{-   end}}

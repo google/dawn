@@ -53,11 +53,11 @@ namespace wgpu::binding {
         texture_.Destroy();
     }
 
-    std::optional<std::string> GPUTexture::getLabel(Napi::Env) {
+    std::variant<std::string, interop::UndefinedType> GPUTexture::getLabel(Napi::Env) {
         UNIMPLEMENTED();
     }
 
-    void GPUTexture::setLabel(Napi::Env, std::optional<std::string> value) {
+    void GPUTexture::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
     }
 

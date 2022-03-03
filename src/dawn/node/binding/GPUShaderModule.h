@@ -37,8 +37,8 @@ namespace wgpu::binding {
         // interop::GPUShaderModule interface compliance
         interop::Promise<interop::Interface<interop::GPUCompilationInfo>> compilationInfo(
             Napi::Env) override;
-        std::optional<std::string> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::optional<std::string> value) override;
+        std::variant<std::string, interop::UndefinedType>getLabel(Napi::Env) override;
+        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType>value) override;
 
       private:
         wgpu::ShaderModule shader_;

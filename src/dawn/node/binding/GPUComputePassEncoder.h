@@ -44,7 +44,6 @@ namespace wgpu::binding {
                               interop::Interface<interop::GPUBuffer> indirectBuffer,
                               interop::GPUSize64 indirectOffset) override;
         void end(Napi::Env) override;
-        void endPass(Napi::Env) override;  // TODO(dawn:1286): Remove after deprecation period.
         void setBindGroup(Napi::Env,
                           interop::GPUIndex32 index,
                           interop::Interface<interop::GPUBindGroup> bindGroup,
@@ -58,8 +57,8 @@ namespace wgpu::binding {
         void pushDebugGroup(Napi::Env, std::string groupLabel) override;
         void popDebugGroup(Napi::Env) override;
         void insertDebugMarker(Napi::Env, std::string markerLabel) override;
-        std::optional<std::string> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::optional<std::string> value) override;
+        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
       private:
         wgpu::ComputePassEncoder enc_;

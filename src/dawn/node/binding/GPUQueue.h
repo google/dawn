@@ -48,8 +48,8 @@ namespace wgpu::binding {
                                         interop::GPUImageCopyExternalImage source,
                                         interop::GPUImageCopyTextureTagged destination,
                                         interop::GPUExtent3D copySize) override;
-        std::optional<std::string> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::optional<std::string> value) override;
+        std::variant<std::string, interop::UndefinedType>getLabel(Napi::Env) override;
+        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType>value) override;
 
       private:
         wgpu::Queue queue_;

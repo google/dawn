@@ -157,4 +157,14 @@ namespace wgpu::interop {
         return Napi::Value::From(env, value);
     }
 
+    Result Converter<UndefinedType>::FromJS(Napi::Env, Napi::Value value, UndefinedType&) {
+        if (value.IsUndefined()) {
+            return Success;
+        }
+        return Error("value is undefined");
+    }
+    Napi::Value Converter<UndefinedType>::ToJS(Napi::Env env, UndefinedType) {
+        return env.Undefined();
+    }
+
 }  // namespace wgpu::interop
