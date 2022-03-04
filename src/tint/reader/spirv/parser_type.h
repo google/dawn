@@ -24,8 +24,8 @@
 #include "src/tint/ast/storage_class.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/texture.h"
-#include "src/tint/block_allocator.h"
 #include "src/tint/castable.h"
+#include "src/tint/utils/block_allocator.h"
 
 // Forward declarations
 namespace tint {

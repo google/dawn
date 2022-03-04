@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_BLOCK_ALLOCATOR_H_
-#define SRC_TINT_BLOCK_ALLOCATOR_H_
+#ifndef SRC_TINT_UTILS_BLOCK_ALLOCATOR_H_
+#define SRC_TINT_UTILS_BLOCK_ALLOCATOR_H_
 
 #include <array>
 #include <utility>
 
 #include "src/tint/utils/math.h"
 
-namespace tint {
+namespace tint::utils {
 
 /// A container and allocator of objects of (or deriving from) the template
 /// type `T`. Objects are allocated by calling Create(), and are owned by the
@@ -289,6 +289,6 @@ class BlockAllocator {
   } pointers_;
 };
 
-}  // namespace tint
+}  // namespace tint::utils
 
-#endif  // SRC_TINT_BLOCK_ALLOCATOR_H_
+#endif  // SRC_TINT_UTILS_BLOCK_ALLOCATOR_H_

@@ -701,7 +701,6 @@ tint_unittests_source_set("tint_unittests_glsl_writer_src") {
 
 tint_unittests_source_set("tint_unittests_core_src") {
   sources = [
-    "../../src/tint/block_allocator_test.cc",
     "../../src/tint/builtin_table_test.cc",
     "../../src/tint/castable_test.cc",
     "../../src/tint/clone_context_test.cc",
@@ -714,6 +713,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../../src/tint/symbol_table_test.cc",
     "../../src/tint/symbol_test.cc",
     "../../src/tint/traits_test.cc",
+    "../../src/tint/utils/block_allocator_test.cc",
   ]
 
   deps = [ ":tint_unittests_ast_src" ]

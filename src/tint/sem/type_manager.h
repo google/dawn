@@ -19,8 +19,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/block_allocator.h"
 #include "src/tint/sem/type.h"
+#include "src/tint/utils/block_allocator.h"
 
 namespace tint {
 namespace sem {
@@ -29,7 +29,7 @@ namespace sem {
 class Manager {
  public:
   /// Iterator is the type returned by begin() and end()
-  using Iterator = BlockAllocator<sem::Type>::ConstIterator;
+  using Iterator = utils::BlockAllocator<sem::Type>::ConstIterator;
 
   /// Constructor
   Manager();
@@ -91,7 +91,7 @@ class Manager {
 
  private:
   std::unordered_map<std::string, sem::Type*> by_name_;
-  BlockAllocator<sem::Type> types_;
+  utils::BlockAllocator<sem::Type> types_;
 };
 
 }  // namespace sem

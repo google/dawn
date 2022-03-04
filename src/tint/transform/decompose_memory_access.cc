@@ -25,7 +25,6 @@
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/unary_op.h"
-#include "src/tint/block_allocator.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/atomic_type.h"
@@ -35,6 +34,7 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 
@@ -315,7 +315,7 @@ struct DecomposeMemoryAccess::State {
   /// List of storage or uniform buffer writes
   std::vector<Store> stores;
   /// Allocations for offsets
-  BlockAllocator<Offset> offsets_;
+  utils::BlockAllocator<Offset> offsets_;
 
   /// Constructor
   /// @param context the CloneContext

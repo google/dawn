@@ -225,7 +225,6 @@ set(TINT_LIB_SRCS
   ast/void.h
   ast/workgroup_attribute.cc
   ast/workgroup_attribute.h
-  block_allocator.h
   builtin_table.cc
   builtin_table.h
   builtin_table.inl
@@ -428,6 +427,7 @@ set(TINT_LIB_SRCS
   sem/vector_type.h
   sem/void_type.cc
   sem/void_type.h
+  utils/block_allocator.h
   utils/crc32.h
   utils/enum_set.h
   utils/hash.h
@@ -705,7 +705,6 @@ if(TINT_BUILD_TESTS)
     ast/variable_test.cc
     ast/vector_test.cc
     ast/workgroup_attribute_test.cc
-    block_allocator_test.cc
     builtin_table_test.cc
     castable_test.cc
     clone_context_test.cc
@@ -783,6 +782,7 @@ if(TINT_BUILD_TESTS)
     text/unicode_test.cc
     traits_test.cc
     transform/transform_test.cc
+    utils/block_allocator_test.cc
     utils/crc32_test.cc
     utils/defer_test.cc
     utils/enum_set_test.cc

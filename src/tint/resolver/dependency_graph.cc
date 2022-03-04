@@ -702,7 +702,7 @@ struct DependencyAnalysis {
   DependencyGraph& graph_;
 
   /// Allocator of Globals
-  BlockAllocator<Global> allocator_;
+  utils::BlockAllocator<Global> allocator_;
 
   /// Global map, keyed by name. Populated by GatherGlobals().
   GlobalMap globals_;

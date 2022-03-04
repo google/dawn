@@ -27,7 +27,7 @@ struct Allocator {
   }
 
  private:
-  BlockAllocator<Cloneable> alloc;
+  utils::BlockAllocator<Cloneable> alloc;
 };
 
 struct Node : public Castable<Node, Cloneable> {

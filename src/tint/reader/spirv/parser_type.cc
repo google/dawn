@@ -268,7 +268,7 @@ const ast::Type* Struct::Build(ProgramBuilder& b) const {
 /// The PIMPL state of the Types object.
 struct TypeManager::State {
   /// The allocator of types
-  BlockAllocator<Type> allocator_;
+  utils::BlockAllocator<Type> allocator_;
   /// The lazily-created Void type
   spirv::Void const* void_ = nullptr;
   /// The lazily-created Bool type

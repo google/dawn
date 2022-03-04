@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/block_allocator.h"
+#include "src/tint/utils/block_allocator.h"
 
 #include "gtest/gtest.h"
 
-namespace tint {
+namespace tint::utils {
 namespace {
 
 struct LifetimeCounter {
@@ -144,4 +144,4 @@ TEST_F(BlockAllocatorTest, ObjectOrder) {
 }
 
 }  // namespace
-}  // namespace tint
+}  // namespace tint::utils
