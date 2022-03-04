@@ -91,7 +91,10 @@ class Builder {
 
   /// Constructor
   /// @param program the program
-  explicit Builder(const Program* program);
+  /// @param zero_initialize_workgroup_memory `true` to initialize all the
+  /// variables in the Workgroup storage class with OpConstantNull
+  Builder(const Program* program,
+          bool zero_initialize_workgroup_memory = false);
   ~Builder();
 
   /// Generates the SPIR-V instructions for the given program
@@ -624,6 +627,7 @@ class Builder {
   std::vector<uint32_t> continue_stack_;
   std::unordered_set<uint32_t> capability_set_;
   bool has_overridable_workgroup_size_ = false;
+  bool zero_initialize_workgroup_memory_ = false;
 
   struct ContinuingInfo {
     ContinuingInfo(const ast::Statement* last_statement,

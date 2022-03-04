@@ -300,8 +300,10 @@ Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
 
 Builder::AccessorInfo::~AccessorInfo() {}
 
-Builder::Builder(const Program* program)
-    : builder_(ProgramBuilder::Wrap(program)), scope_stack_({}) {}
+Builder::Builder(const Program* program, bool zero_initialize_workgroup_memory)
+    : builder_(ProgramBuilder::Wrap(program)),
+      scope_stack_({}),
+      zero_initialize_workgroup_memory_(zero_initialize_workgroup_memory) {}
 
 Builder::~Builder() = default;
 
@@ -861,8 +863,13 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
     if (!type->Is<sem::Sampler>()) {
       // If we don't have a constructor and we're an Output or Private
       // variable, then WGSL requires that we zero-initialize.
+      // If we're a Workgroup variable, and the
+      // VK_KHR_zero_initialize_workgroup_memory extension is enabled, we should
+      // also zero-initialize.
       if (sem->StorageClass() == ast::StorageClass::kPrivate ||
-          sem->StorageClass() == ast::StorageClass::kOutput) {
+          sem->StorageClass() == ast::StorageClass::kOutput ||
+          (zero_initialize_workgroup_memory_ &&
+           sem->StorageClass() == ast::StorageClass::kWorkgroup)) {
         init_id = GenerateConstantNullIfNeeded(type);
         if (init_id == 0) {
           return 0;

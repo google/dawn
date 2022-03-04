@@ -28,8 +28,11 @@ Result Generate(const Program* program, const Options& options) {
   Result result;
 
   // Sanitize the program.
+  bool disable_workgroup_init_in_sanitizer =
+      options.disable_workgroup_init ||
+      options.use_zero_initialize_workgroup_memory_extension;
   auto sanitized_result = Sanitize(program, options.emit_vertex_point_size,
-                                   options.disable_workgroup_init);
+                                   disable_workgroup_init_in_sanitizer);
   if (!sanitized_result.program.IsValid()) {
     result.success = false;
     result.error = sanitized_result.program.Diagnostics().str();
@@ -37,7 +40,11 @@ Result Generate(const Program* program, const Options& options) {
   }
 
   // Generate the SPIR-V code.
-  auto builder = std::make_unique<Builder>(&sanitized_result.program);
+  bool zero_initialize_workgroup_memory =
+      !options.disable_workgroup_init &&
+      options.use_zero_initialize_workgroup_memory_extension;
+  auto builder = std::make_unique<Builder>(&sanitized_result.program,
+                                           zero_initialize_workgroup_memory);
   auto writer = std::make_unique<BinaryWriter>();
   if (!builder->Build()) {
     result.success = false;

@@ -622,6 +622,51 @@ OpDecorate %5 DescriptorSet 0
 )");
 }
 
+TEST_F(BuilderTest, GlobalVar_WorkgroupWithZeroInit) {
+  auto* type_scalar = ty.i32();
+  auto* var_scalar = Global("a", type_scalar, ast::StorageClass::kWorkgroup);
+
+  auto* type_array = ty.array<f32, 16>();
+  auto* var_array = Global("b", type_array, ast::StorageClass::kWorkgroup);
+
+  auto* type_struct = Structure("C",
+                                {
+                                    Member("a", ty.i32()),
+                                    Member("b", ty.i32()),
+                                },
+                                {create<ast::StructBlockAttribute>()});
+  auto* var_struct =
+      Global("c", ty.Of(type_struct), ast::StorageClass::kWorkgroup);
+
+  program = std::make_unique<Program>(std::move(*this));
+
+  constexpr bool kZeroInitializeWorkgroupMemory = true;
+  std::unique_ptr<spirv::Builder> b = std::make_unique<spirv::Builder>(
+      program.get(), kZeroInitializeWorkgroupMemory);
+
+  EXPECT_TRUE(b->GenerateGlobalVariable(var_scalar)) << b->error();
+  EXPECT_TRUE(b->GenerateGlobalVariable(var_array)) << b->error();
+  EXPECT_TRUE(b->GenerateGlobalVariable(var_struct)) << b->error();
+  ASSERT_FALSE(b->has_error()) << b->error();
+
+  EXPECT_EQ(DumpInstructions(b->types()), R"(%3 = OpTypeInt 32 1
+%2 = OpTypePointer Workgroup %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Workgroup %4
+%8 = OpTypeFloat 32
+%9 = OpTypeInt 32 0
+%10 = OpConstant %9 16
+%7 = OpTypeArray %8 %10
+%6 = OpTypePointer Workgroup %7
+%11 = OpConstantNull %7
+%5 = OpVariable %6 Workgroup %11
+%14 = OpTypeStruct %3 %3
+%13 = OpTypePointer Workgroup %14
+%15 = OpConstantNull %14
+%12 = OpVariable %13 Workgroup %15
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer
