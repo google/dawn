@@ -22,9 +22,7 @@ namespace {
 
 using BuilderTest = TestHelper;
 
-// TODO(amaiorano): Disabled because Resolver now emits "redeclared identifier
-// 'var'".
-TEST_F(BuilderTest, DISABLED_Block) {
+TEST_F(BuilderTest, Block) {
   // Note, this test uses shadow variables which aren't allowed in WGSL but
   // serves to prove the block code is pushing new scopes as needed.
   auto* inner = Block(Decl(Var("var", ty.f32(), ast::StorageClass::kNone)),

@@ -670,8 +670,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 )");
 }
 
-// TODO(dsinclair): How to translate @block
-TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithAttribute) {
+TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
   auto* s = Structure("S",
                       {
                           Member("a", ty.i32()),
@@ -687,12 +686,14 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithAttribute) {
 
   GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(s), "")) << gen.error();
-  EXPECT_EQ(out.str(), R"(struct {
+  TextGenerator::TextBuffer buf;
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
+  EXPECT_EQ(buf.String(), R"(struct S {
   /* 0x0000 */ int a;
   /* 0x0004 */ float b;
-})");
+};
+)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_U32) {

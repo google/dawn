@@ -192,17 +192,16 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
                                       "vec3(7.0f, 8.0f, 9.0f))"));
 }
 
-// TODO(bclayton): Zero-init arrays
-TEST_F(GlslGeneratorImplTest_Constructor,
-       DISABLED_EmitConstructor_Type_Array_Empty) {
+TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array_Empty) {
   WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3)));
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(),
-              HasSubstr("{vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f),"
-                        " vec3(0.0f, 0.0f, 0.0f)}"));
+  EXPECT_THAT(
+      gen.result(),
+      HasSubstr("vec3[3](vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f),"
+                " vec3(0.0f, 0.0f, 0.0f))"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {

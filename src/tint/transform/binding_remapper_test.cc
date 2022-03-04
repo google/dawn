@@ -178,66 +178,6 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
-// TODO(crbug.com/676): Possibly enable if the spec allows for access
-// attributes in type aliases. If not, just remove.
-TEST_F(BindingRemapperTest, DISABLED_RemapAccessControlsWithAliases) {
-  auto* src = R"(
-struct S {
-  a : f32;
-};
-
-type, read ReadOnlyS = S;
-
-type, write WriteOnlyS = S;
-
-type A = S;
-
-@group(2) @binding(1) var<storage> a : ReadOnlyS;
-
-@group(3) @binding(2) var<storage> b : WriteOnlyS;
-
-@group(4) @binding(3) var<storage> c : A;
-
-@stage(compute) @workgroup_size(1)
-fn f() {
-}
-)";
-
-  auto* expect = R"(
-struct S {
-  a : f32;
-};
-
-type, read ReadOnlyS = S;
-
-type, write WriteOnlyS = S;
-
-type A = S;
-
-@group(2) @binding(1) var<storage, write> a : S;
-
-@group(3) @binding(2) var<storage> b : WriteOnlyS;
-
-@group(4) @binding(3) var<storage, write> c : S;
-
-@stage(compute) @workgroup_size(1)
-fn f() {
-}
-)";
-
-  DataMap data;
-  data.Add<BindingRemapper::Remappings>(
-      BindingRemapper::BindingPoints{},
-      BindingRemapper::AccessControls{
-          {{2, 1}, ast::Access::kWrite},  // Modify access control
-          // Keep @group(3) @binding(2) as is
-          {{4, 3}, ast::Access::kRead},  // Add access control
-      });
-  auto got = Run<BindingRemapper>(src, data);
-
-  EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(BindingRemapperTest, RemapAll) {
   auto* src = R"(
 struct S {

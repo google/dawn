@@ -219,17 +219,13 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
                         " float3(7.0f, 8.0f, 9.0f)}"));
 }
 
-// TODO(bclayton): Zero-init arrays
-TEST_F(HlslGeneratorImplTest_Constructor,
-       DISABLED_EmitConstructor_Type_Array_Empty) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array_Empty) {
   WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3)));
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(),
-              HasSubstr("{float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f),"
-                        " float3(0.0f, 0.0f, 0.0f)}"));
+  EXPECT_THAT(gen.result(), HasSubstr("(float3[3])0"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {

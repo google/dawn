@@ -58,21 +58,6 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
   EXPECT_EQ(out.str(), "bool ary[5][4]");
 }
 
-// TODO(dsinclair): Is this possible? What order should it output in?
-TEST_F(GlslGeneratorImplTest_Type,
-       DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 0);
-  Global("G", arr, ast::StorageClass::kPrivate);
-
-  GeneratorImpl& gen = Build();
-
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
-                           ast::Access::kReadWrite, "ary"))
-      << gen.error();
-  EXPECT_EQ(out.str(), "bool ary[5][4][1]");
-}
-
 TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
   auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 6);
   Global("G", arr, ast::StorageClass::kPrivate);
@@ -147,21 +132,6 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix) {
                            ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(out.str(), "mat2x3");
-}
-
-// TODO(dsinclair): How to annotate as workgroup?
-TEST_F(GlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
-  auto* f32 = create<sem::F32>();
-  auto* p = create<sem::Pointer>(f32, ast::StorageClass::kWorkgroup,
-                                 ast::Access::kReadWrite);
-
-  GeneratorImpl& gen = Build();
-
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitType(out, p, ast::StorageClass::kNone,
-                           ast::Access::kReadWrite, ""))
-      << gen.error();
-  EXPECT_EQ(out.str(), "float*");
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl) {
