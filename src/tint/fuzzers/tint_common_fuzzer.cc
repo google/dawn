@@ -299,9 +299,6 @@ void CommonFuzzer::RunInspector(Program* program) {
   CHECK_INSPECTOR(program, inspector);
 
   for (auto& ep : entry_points) {
-    inspector.GetRemappedNameForEntryPoint(ep.name);
-    CHECK_INSPECTOR(program, inspector);
-
     inspector.GetStorageSize(ep.name);
     CHECK_INSPECTOR(program, inspector);
 

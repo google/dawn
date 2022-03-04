@@ -63,8 +63,6 @@ class InspectorGetEntryPointInterpolateTest
     : public InspectorBuilder,
       public testing::TestWithParam<
           InspectorGetEntryPointInterpolateTestParams> {};
-class InspectorGetRemappedNameForEntryPointTest : public InspectorBuilder,
-                                                  public testing::Test {};
 class InspectorGetConstantIDsTest : public InspectorBuilder,
                                     public testing::Test {};
 class InspectorGetConstantNameToIdMapTest : public InspectorBuilder,
@@ -1023,75 +1021,6 @@ INSTANTIATE_TEST_SUITE_P(
         InspectorGetEntryPointInterpolateTestParams{
             ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone,
             InterpolationType::kFlat, InterpolationSampling::kNone}));
-
-// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
-// through
-TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {
-  Inspector& inspector = Build();
-
-  auto result = inspector.GetRemappedNameForEntryPoint("foo");
-  ASSERT_TRUE(inspector.has_error());
-
-  EXPECT_EQ("", result);
-}
-
-// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
-// through
-TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoEntryPoints) {
-  Inspector& inspector = Build();
-
-  auto result = inspector.GetRemappedNameForEntryPoint("foo");
-  ASSERT_TRUE(inspector.has_error());
-
-  EXPECT_EQ("", result);
-}
-
-// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
-// through
-TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
-  MakeEmptyBodyFunction("foo", ast::AttributeList{
-                                   Stage(ast::PipelineStage::kVertex),
-                               });
-
-  // TODO(dsinclair): Update to run the namer transform when
-  // available.
-
-  Inspector& inspector = Build();
-
-  auto result = inspector.GetRemappedNameForEntryPoint("foo");
-  ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
-  EXPECT_EQ("foo", result);
-}
-
-// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
-// through
-TEST_F(InspectorGetRemappedNameForEntryPointTest,
-       DISABLED_MultipleEntryPoints) {
-  MakeEmptyBodyFunction("foo", ast::AttributeList{
-                                   Stage(ast::PipelineStage::kVertex),
-                               });
-
-  // TODO(dsinclair): Update to run the namer transform when
-  // available.
-
-  MakeEmptyBodyFunction("bar",
-                        ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                                           WorkgroupSize(1)});
-
-  Inspector& inspector = Build();
-
-  {
-    auto result = inspector.GetRemappedNameForEntryPoint("foo");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-    EXPECT_EQ("foo", result);
-  }
-  {
-    auto result = inspector.GetRemappedNameForEntryPoint("bar");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-    EXPECT_EQ("bar", result);
-  }
-}
 
 TEST_F(InspectorGetConstantIDsTest, Bool) {
   AddOverridableConstantWithID("foo", 1, ty.bool_(), nullptr);
