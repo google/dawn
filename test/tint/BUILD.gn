@@ -361,6 +361,7 @@ tint_unittests_source_set("tint_unittests_utils_src") {
     "../../src/tint/utils/scoped_assignment_test.cc",
     "../../src/tint/utils/string_test.cc",
     "../../src/tint/utils/transform_test.cc",
+    "../../src/tint/utils/unique_allocator_test.cc",
     "../../src/tint/utils/unique_vector_test.cc",
   ]
 }
