@@ -1034,9 +1034,6 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
   if (builtin->Type() == sem::BuiltinType::kFrexp) {
     return EmitFrexpCall(out, expr, builtin);
   }
-  if (builtin->Type() == sem::BuiltinType::kIsNormal) {
-    return EmitIsNormalCall(out, expr, builtin);
-  }
   if (builtin->Type() == sem::BuiltinType::kDegrees) {
     return EmitDegreesCall(out, expr, builtin);
   }
@@ -1922,34 +1919,6 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
       });
 }
 
-bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
-                                     const ast::CallExpression* expr,
-                                     const sem::Builtin* builtin) {
-  // HLSL doesn't have a isNormal builtin, we need to emulate
-  return CallBuiltinHelper(
-      out, expr, builtin,
-      [&](TextBuffer* b, const std::vector<std::string>& params) {
-        auto* input_ty = builtin->Parameters()[0]->Type();
-
-        std::string width;
-        if (auto* vec = input_ty->As<sem::Vector>()) {
-          width = std::to_string(vec->Width());
-        }
-
-        constexpr auto* kExponentMask = "0x7f80000";
-        constexpr auto* kMinNormalExponent = "0x0080000";
-        constexpr auto* kMaxNormalExponent = "0x7f00000";
-
-        line(b) << "uint" << width << " exponent = asuint(" << params[0]
-                << ") & " << kExponentMask << ";";
-        line(b) << "uint" << width << " clamped = "
-                << "clamp(exponent, " << kMinNormalExponent << ", "
-                << kMaxNormalExponent << ");";
-        line(b) << "return clamped == exponent;";
-        return true;
-      });
-}
-
 bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
                                     const ast::CallExpression* expr,
                                     const sem::Builtin* builtin) {
@@ -2571,12 +2540,6 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
       return "fwidth";
     case sem::BuiltinType::kInverseSqrt:
       return "rsqrt";
-    case sem::BuiltinType::kIsFinite:
-      return "isfinite";
-    case sem::BuiltinType::kIsInf:
-      return "isinf";
-    case sem::BuiltinType::kIsNan:
-      return "isnan";
     case sem::BuiltinType::kMix:
       return "lerp";
     case sem::BuiltinType::kReverseBits:

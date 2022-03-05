@@ -1,32 +1,7 @@
-bug/chromium/1273230.wgsl:4:7 warning: use of deprecated builtin
-  _ = isNormal(4.);
-      ^^^^^^^^
-
-bug/chromium/1273230.wgsl:7:3 warning: use of deprecated builtin
-  isNormal(vec4<f32>());
-  ^^^^^^^^
-
-bug/chromium/1273230.wgsl:10:6 warning: use of deprecated builtin
-     isNormal(0.);
-     ^^^^^^^^
-
-bug/chromium/1273230.wgsl:11:9 warning: use of deprecated builtin
-    _ = isNormal(4.);
-        ^^^^^^^^
-
-bug/chromium/1273230.wgsl:12:9 warning: use of deprecated builtin
-    _ = isNormal(2.);
-        ^^^^^^^^
-
 fn marg8uintin() {
   _ = 0;
-  _ = isNormal(4.0);
   _ = vec4<f32>(2.0);
-  isNormal(vec4<f32>());
   _ = vec4<f32>(2.0);
-  isNormal(0.0);
-  _ = isNormal(4.0);
-  _ = isNormal(2.0);
 }
 
 struct Uniforms {

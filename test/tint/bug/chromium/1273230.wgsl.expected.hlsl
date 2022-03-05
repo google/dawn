@@ -1,35 +1,3 @@
-bug/chromium/1273230.wgsl:4:7 warning: use of deprecated builtin
-  _ = isNormal(4.);
-      ^^^^^^^^
-
-bug/chromium/1273230.wgsl:7:3 warning: use of deprecated builtin
-  isNormal(vec4<f32>());
-  ^^^^^^^^
-
-bug/chromium/1273230.wgsl:10:6 warning: use of deprecated builtin
-     isNormal(0.);
-     ^^^^^^^^
-
-bug/chromium/1273230.wgsl:11:9 warning: use of deprecated builtin
-    _ = isNormal(4.);
-        ^^^^^^^^
-
-bug/chromium/1273230.wgsl:12:9 warning: use of deprecated builtin
-    _ = isNormal(2.);
-        ^^^^^^^^
-
-bool tint_isNormal(float param_0) {
-  uint exponent = asuint(param_0) & 0x7f80000;
-  uint clamped = clamp(exponent, 0x0080000, 0x7f00000);
-  return clamped == exponent;
-}
-
-bool4 tint_isNormal_1(float4 param_0) {
-  uint4 exponent = asuint(param_0) & 0x7f80000;
-  uint4 clamped = clamp(exponent, 0x0080000, 0x7f00000);
-  return clamped == exponent;
-}
-
 uint value_or_one_if_zero_uint(uint value) {
   return value == 0u ? 1u : value;
 }
@@ -53,11 +21,6 @@ int atomicAdd_1(RWByteAddressBuffer buffer, uint offset, int value) {
 }
 
 void marg8uintin() {
-  tint_isNormal(4.0f);
-  tint_isNormal_1(float4(0.0f, 0.0f, 0.0f, 0.0f));
-  tint_isNormal(0.0f);
-  tint_isNormal(4.0f);
-  tint_isNormal(2.0f);
 }
 
 cbuffer cbuffer_uniforms : register(b0, space0) {

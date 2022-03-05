@@ -84,10 +84,6 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
     case BuiltinType::kFwidthCoarse:
     case BuiltinType::kFwidthFine:
     case BuiltinType::kInverseSqrt:
-    case BuiltinType::kIsFinite:
-    case BuiltinType::kIsInf:
-    case BuiltinType::kIsNan:
-    case BuiltinType::kIsNormal:
     case BuiltinType::kLength:
     case BuiltinType::kLog:
     case BuiltinType::kLog2:
@@ -219,9 +215,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kFwidthCoarse, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthFine, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kInverseSqrt, ParamType::kF32, "inversesqrt"},
-        BuiltinData{BuiltinType::kIsFinite, ParamType::kF32, "isfinite"},
-        BuiltinData{BuiltinType::kIsInf, ParamType::kF32, "isinf"},
-        BuiltinData{BuiltinType::kIsNan, ParamType::kF32, "isnan"},
         BuiltinData{BuiltinType::kLdexp, ParamType::kF32, "ldexp"},
         BuiltinData{BuiltinType::kLength, ParamType::kF32, "length"},
         BuiltinData{BuiltinType::kLog, ParamType::kF32, "log"},
@@ -247,10 +240,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kTanh, ParamType::kF32, "tanh"},
         BuiltinData{BuiltinType::kTranspose, ParamType::kF32, "transpose"},
         BuiltinData{BuiltinType::kTrunc, ParamType::kF32, "trunc"}));
-
-TEST_F(GlslGeneratorImplTest_Builtin, DISABLED_Builtin_IsNormal) {
-  FAIL();
-}
 
 TEST_F(GlslGeneratorImplTest_Builtin, Builtin_Call) {
   auto* call = Call("dot", "param1", "param2");
@@ -413,62 +402,6 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
   return;
-)"));
-}
-
-TEST_F(GlslGeneratorImplTest_Builtin, IsNormal_Scalar) {
-  auto* val = Var("val", ty.f32());
-  auto* call = Call("isNormal", val);
-  WrapInFunction(val, call);
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr(R"(ion 310 es
-
-bool tint_isNormal(float param_0) {
-  uint exponent = floatBitsToUint(param_0) & 0x7f80000u;
-  uint clamped = clamp(exponent, 0x0080000u, 0x7f00000u);
-  return clamped == exponent;
-}
-
-
-void test_function() {
-  float val = 0.0f;
-  bool tint_symbol = tint_isNormal(val);
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  test_function();
-)"));
-}
-
-TEST_F(GlslGeneratorImplTest_Builtin, IsNormal_Vector) {
-  auto* val = Var("val", ty.vec3<f32>());
-  auto* call = Call("isNormal", val);
-  WrapInFunction(val, call);
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr(R"( 310 es
-
-bvec3 tint_isNormal(vec3 param_0) {
-  uvec3 exponent = floatBitsToUint(param_0) & 0x7f80000u;
-  uvec3 clamped = clamp(exponent, 0x0080000u, 0x7f00000u);
-  return equal(clamped, exponent);
-}
-
-
-void test_function() {
-  vec3 val = vec3(0.0f, 0.0f, 0.0f);
-  bvec3 tint_symbol = tint_isNormal(val);
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  test_function();
 )"));
 }
 

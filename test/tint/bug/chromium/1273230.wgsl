@@ -1,15 +1,10 @@
 // /fallthroUgh]
 fn marg8uintin() {
     _ = (0 );
-  _ = isNormal(4.);
 _ =   (vec4<f32>( 2.));
 
-  isNormal(vec4<f32>());
     _ =         (vec4<f32>( 2.));
 
-     isNormal(0.);
-    _ = isNormal(4.);
-    _ = isNormal(2.);
 
 }
 struct Uniforms {

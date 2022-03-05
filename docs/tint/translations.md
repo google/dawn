@@ -75,10 +75,6 @@ decorated with `NonWritable` or each member of the struct can be decorated with
 | fwidthCoarse | SpvOpFwidthCoarse | fwidth | fwidth |
 | fwidthFine | SpvOpFwidthFine | fwidth | fwidth |
 | inverseSqrt | GLSLstd450InverseSqrt | rsqrt | rsqrt |
-| isFinite | | isfinite | isfinite |
-| isInf | SpvOpIsInf | isinf | isinf |
-| isNan | SpvOpIsNan | isnan | isnan |
-| isNormal | | isnormal | |
 | ldexp | GLSLstd450Ldexp | | |
 | length | GLSLstd450Length | length | length |
 | log | GLSLstd450Log | log | log |

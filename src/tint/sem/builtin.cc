@@ -46,11 +46,6 @@ bool IsDerivativeBuiltin(BuiltinType i) {
          IsFineDerivativeBuiltin(i);
 }
 
-bool IsFloatClassificationBuiltin(BuiltinType i) {
-  return i == BuiltinType::kIsFinite || i == BuiltinType::kIsInf ||
-         i == BuiltinType::kIsNan || i == BuiltinType::kIsNormal;
-}
-
 bool IsTextureBuiltin(BuiltinType i) {
   return IsImageQueryBuiltin(i) || i == BuiltinType::kTextureLoad ||
          i == BuiltinType::kTextureGather ||
@@ -130,10 +125,6 @@ bool Builtin::IsFineDerivative() const {
 
 bool Builtin::IsDerivative() const {
   return IsDerivativeBuiltin(type_);
-}
-
-bool Builtin::IsFloatClassification() const {
-  return IsFloatClassificationBuiltin(type_);
 }
 
 bool Builtin::IsTexture() const {

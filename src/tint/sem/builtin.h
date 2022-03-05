@@ -41,11 +41,6 @@ bool IsFineDerivativeBuiltin(BuiltinType i);
 /// @returns true if the given `i` is a derivative builtin
 bool IsDerivativeBuiltin(BuiltinType i);
 
-/// Determines if the given `i` is a float classification builtin
-/// @param i the builtin type
-/// @returns true if the given `i` is a float builtin
-bool IsFloatClassificationBuiltin(BuiltinType i);
-
 /// Determines if the given `i` is a texture operation builtin
 /// @param i the builtin type
 /// @returns true if the given `i` is a texture operation builtin
@@ -117,9 +112,6 @@ class Builtin : public Castable<Builtin, CallTarget> {
 
   /// @returns true if builtin is a derivative builtin
   bool IsDerivative() const;
-
-  /// @returns true if builtin is a float builtin
-  bool IsFloatClassification() const;
 
   /// @returns true if builtin is a texture operation builtin
   bool IsTexture() const;

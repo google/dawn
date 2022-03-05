@@ -241,14 +241,6 @@ class GeneratorImpl : public TextGenerator {
   bool EmitFrexpCall(std::ostream& out,
                      const ast::CallExpression* expr,
                      const sem::Builtin* builtin);
-  /// Handles generating a call to the `isNormal()` builtin
-  /// @param out the output of the expression stream
-  /// @param expr the call expression
-  /// @param builtin the semantic information for the builtin
-  /// @returns true if the call expression is emitted
-  bool EmitIsNormalCall(std::ostream& out,
-                        const ast::CallExpression* expr,
-                        const sem::Builtin* builtin);
   /// Handles generating a call to the `degrees()` builtin
   /// @param out the output of the expression stream
   /// @param expr the call expression

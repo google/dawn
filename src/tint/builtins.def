@@ -340,14 +340,6 @@ fn insertBits<T: iu32>(T, T, u32, u32) -> T
 fn insertBits<N: num, T: iu32>(vec<N, T>, vec<N, T>, u32, u32) -> vec<N, T>
 fn inverseSqrt(f32) -> f32
 fn inverseSqrt<N: num>(vec<N, f32>) -> vec<N, f32>
-[[deprecated]] fn isFinite(f32) -> bool
-[[deprecated]] fn isFinite<N: num>(vec<N, f32>) -> vec<N, bool>
-[[deprecated]] fn isInf(f32) -> bool
-[[deprecated]] fn isInf<N: num>(vec<N, f32>) -> vec<N, bool>
-[[deprecated]] fn isNan(f32) -> bool
-[[deprecated]] fn isNan<N: num>(vec<N, f32>) -> vec<N, bool>
-[[deprecated]] fn isNormal(f32) -> bool
-[[deprecated]] fn isNormal<N: num>(vec<N, f32>) -> vec<N, bool>
 fn ldexp(f32, i32) -> f32
 fn ldexp<N: num>(vec<N, f32>, vec<N, i32>) -> vec<N, f32>
 fn length(f32) -> f32

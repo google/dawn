@@ -153,18 +153,6 @@ BuiltinType ParseBuiltinType(const std::string& name) {
   if (name == "inverseSqrt") {
     return BuiltinType::kInverseSqrt;
   }
-  if (name == "isFinite") {
-    return BuiltinType::kIsFinite;
-  }
-  if (name == "isInf") {
-    return BuiltinType::kIsInf;
-  }
-  if (name == "isNan") {
-    return BuiltinType::kIsNan;
-  }
-  if (name == "isNormal") {
-    return BuiltinType::kIsNormal;
-  }
   if (name == "ldexp") {
     return BuiltinType::kLdexp;
   }
@@ -443,14 +431,6 @@ const char* str(BuiltinType i) {
       return "insertBits";
     case BuiltinType::kInverseSqrt:
       return "inverseSqrt";
-    case BuiltinType::kIsFinite:
-      return "isFinite";
-    case BuiltinType::kIsInf:
-      return "isInf";
-    case BuiltinType::kIsNan:
-      return "isNan";
-    case BuiltinType::kIsNormal:
-      return "isNormal";
     case BuiltinType::kLdexp:
       return "ldexp";
     case BuiltinType::kLength:

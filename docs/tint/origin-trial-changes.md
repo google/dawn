@@ -6,6 +6,10 @@
 
 * Tint now supports unicode identifiers. [tint:1437](crbug.com/tint/1437)
 
+### Breaking changes
+
+* The `isNan()`, `isInf()`, `isFinite()`, and `isNormal()` builtins have been removed. [tint:1312](https://crbug.com/tint/1312)
+
 ## Changes for M100
 
 ### Breaking changes

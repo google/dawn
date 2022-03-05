@@ -80,10 +80,6 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
     case BuiltinType::kFwidthCoarse:
     case BuiltinType::kFwidthFine:
     case BuiltinType::kInverseSqrt:
-    case BuiltinType::kIsFinite:
-    case BuiltinType::kIsInf:
-    case BuiltinType::kIsNan:
-    case BuiltinType::kIsNormal:
     case BuiltinType::kLength:
     case BuiltinType::kLog:
     case BuiltinType::kLog2:
@@ -243,10 +239,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kFwidthFine, ParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kInsertBits, ParamType::kU32, "insert_bits"},
         BuiltinData{BuiltinType::kInverseSqrt, ParamType::kF32, "rsqrt"},
-        BuiltinData{BuiltinType::kIsFinite, ParamType::kF32, "isfinite"},
-        BuiltinData{BuiltinType::kIsInf, ParamType::kF32, "isinf"},
-        BuiltinData{BuiltinType::kIsNan, ParamType::kF32, "isnan"},
-        BuiltinData{BuiltinType::kIsNormal, ParamType::kF32, "isnormal"},
         BuiltinData{BuiltinType::kLdexp, ParamType::kF32, "ldexp"},
         BuiltinData{BuiltinType::kLength, ParamType::kF32, "length"},
         BuiltinData{BuiltinType::kLog, ParamType::kF32, "log"},

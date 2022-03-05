@@ -1,67 +1,36 @@
-builtins/repeated_use.wgsl:5:9 warning: use of deprecated builtin
-    _ = isNormal(vec4<f32>());
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:6:9 warning: use of deprecated builtin
-    _ = isNormal(vec4<f32>(1.));
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:7:9 warning: use of deprecated builtin
-    _ = isNormal(vec4<f32>(1., 2., 3., 4.));
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:9:9 warning: use of deprecated builtin
-    _ = isNormal(vec3<f32>());
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:10:9 warning: use of deprecated builtin
-    _ = isNormal(vec3<f32>(1.));
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:11:9 warning: use of deprecated builtin
-    _ = isNormal(vec3<f32>(1., 2., 3.));
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:13:9 warning: use of deprecated builtin
-    _ = isNormal(vec2<f32>());
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:14:9 warning: use of deprecated builtin
-    _ = isNormal(vec2<f32>(1.));
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:15:9 warning: use of deprecated builtin
-    _ = isNormal(vec2<f32>(1., 2.));
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:17:9 warning: use of deprecated builtin
-    _ = isNormal(1.);
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:18:9 warning: use of deprecated builtin
-    _ = isNormal(2.);
-        ^^^^^^^^
-
-builtins/repeated_use.wgsl:19:9 warning: use of deprecated builtin
-    _ = isNormal(3.);
-        ^^^^^^^^
-
 #include <metal_stdlib>
 
 using namespace metal;
+
+float4 tint_degrees(float4 param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+float3 tint_degrees_1(float3 param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+float2 tint_degrees_2(float2 param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
+float tint_degrees_3(float param_0) {
+  return param_0 * 57.295779513082322865;
+}
+
 kernel void tint_symbol() {
-  isnormal(float4());
-  isnormal(float4(1.0f));
-  isnormal(float4(1.0f, 2.0f, 3.0f, 4.0f));
-  isnormal(float3());
-  isnormal(float3(1.0f));
-  isnormal(float3(1.0f, 2.0f, 3.0f));
-  isnormal(float2());
-  isnormal(float2(1.0f));
-  isnormal(float2(1.0f, 2.0f));
-  isnormal(1.0f);
-  isnormal(2.0f);
-  isnormal(3.0f);
+  tint_degrees(float4());
+  tint_degrees(float4(1.0f));
+  tint_degrees(float4(1.0f, 2.0f, 3.0f, 4.0f));
+  tint_degrees_1(float3());
+  tint_degrees_1(float3(1.0f));
+  tint_degrees_1(float3(1.0f, 2.0f, 3.0f));
+  tint_degrees_2(float2());
+  tint_degrees_2(float2(1.0f));
+  tint_degrees_2(float2(1.0f, 2.0f));
+  tint_degrees_3(1.0f);
+  tint_degrees_3(2.0f);
+  tint_degrees_3(3.0f);
   return;
 }
 

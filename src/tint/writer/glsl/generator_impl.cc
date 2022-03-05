@@ -663,9 +663,6 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
   if (builtin->Type() == sem::BuiltinType::kFrexp) {
     return EmitFrexpCall(out, expr, builtin);
   }
-  if (builtin->Type() == sem::BuiltinType::kIsNormal) {
-    return EmitIsNormalCall(out, expr, builtin);
-  }
   if (builtin->Type() == sem::BuiltinType::kDegrees) {
     return EmitDegreesCall(out, expr, builtin);
   }
@@ -1191,40 +1188,6 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
       });
 }
 
-bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
-                                     const ast::CallExpression* expr,
-                                     const sem::Builtin* builtin) {
-  // GLSL doesn't have a isNormal builtin, we need to emulate
-  return CallBuiltinHelper(
-      out, expr, builtin,
-      [&](TextBuffer* b, const std::vector<std::string>& params) {
-        auto* input_ty = builtin->Parameters()[0]->Type();
-
-        std::string vec_type;
-        if (auto* vec = input_ty->As<sem::Vector>()) {
-          vec_type = "uvec" + std::to_string(vec->Width());
-        } else {
-          vec_type = "uint";
-        }
-
-        constexpr auto* kExponentMask = "0x7f80000u";
-        constexpr auto* kMinNormalExponent = "0x0080000u";
-        constexpr auto* kMaxNormalExponent = "0x7f00000u";
-
-        line(b) << vec_type << " exponent = floatBitsToUint(" << params[0]
-                << ") & " << kExponentMask << ";";
-        line(b) << vec_type << " clamped = "
-                << "clamp(exponent, " << kMinNormalExponent << ", "
-                << kMaxNormalExponent << ");";
-        if (input_ty->Is<sem::Vector>()) {
-          line(b) << "return equal(clamped, exponent);";
-        } else {
-          line(b) << "return clamped == exponent;";
-        }
-        return true;
-      });
-}
-
 bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
                                     const ast::CallExpression* expr,
                                     const sem::Builtin* builtin) {
@@ -1625,12 +1588,6 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
       return "fwidth";
     case sem::BuiltinType::kInverseSqrt:
       return "inversesqrt";
-    case sem::BuiltinType::kIsFinite:
-      return "isfinite";
-    case sem::BuiltinType::kIsInf:
-      return "isinf";
-    case sem::BuiltinType::kIsNan:
-      return "isnan";
     case sem::BuiltinType::kMix:
       return "mix";
     case sem::BuiltinType::kPack2x16float:

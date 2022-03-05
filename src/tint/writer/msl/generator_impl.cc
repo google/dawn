@@ -1385,18 +1385,6 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kFwidthFine:
       out += "fwidth";
       break;
-    case sem::BuiltinType::kIsFinite:
-      out += "isfinite";
-      break;
-    case sem::BuiltinType::kIsInf:
-      out += "isinf";
-      break;
-    case sem::BuiltinType::kIsNan:
-      out += "isnan";
-      break;
-    case sem::BuiltinType::kIsNormal:
-      out += "isnormal";
-      break;
     case sem::BuiltinType::kMax:
       if (builtin->ReturnType()->is_float_scalar_or_vector()) {
         out += "fmax";
