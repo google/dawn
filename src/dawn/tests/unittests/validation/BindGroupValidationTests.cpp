@@ -2096,7 +2096,7 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
     }
 };
 
-// Test that it is valid to pass a writable storage buffer in the pipeline layout when the shader
+// Test that it is invalid to pass a writable storage buffer in the pipeline layout when the shader
 // uses the binding as a readonly storage buffer.
 TEST_F(BindGroupLayoutCompatibilityTest, RWStorageInBGLWithROStorageInShader) {
     // Set up the bind group layout.
@@ -2107,9 +2107,9 @@ TEST_F(BindGroupLayoutCompatibilityTest, RWStorageInBGLWithROStorageInShader) {
         device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
                   wgpu::BufferBindingType::Storage}});
 
-    CreateRenderPipeline({bgl0, bgl1});
+    ASSERT_DEVICE_ERROR(CreateRenderPipeline({bgl0, bgl1}));
 
-    CreateComputePipeline({bgl0, bgl1});
+    ASSERT_DEVICE_ERROR(CreateComputePipeline({bgl0, bgl1}));
 }
 
 // Test that it is invalid to pass a readonly storage buffer in the pipeline layout when the shader
@@ -2349,7 +2349,8 @@ TEST_F(BindingsValidationTest, BindGroupsWithMoreBindingsThanPipelineLayout) {
     for (uint32_t i = 0; i < kBindingNum + 1; ++i) {
         bgl[i] = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
-                      wgpu::BufferBindingType::Storage}});
+                      i == 1 ? wgpu::BufferBindingType::ReadOnlyStorage
+                             : wgpu::BufferBindingType::Storage}});
         buffer[i] = CreateBuffer(mBufferSize, wgpu::BufferUsage::Storage);
         bg[i] = utils::MakeBindGroup(device, bgl[i], {{0, buffer[i]}});
     }
@@ -2390,7 +2391,8 @@ TEST_F(BindingsValidationTest, BindGroupsWithLessBindingsThanPipelineLayout) {
     for (uint32_t i = 0; i < kBindingNum; ++i) {
         bgl[i] = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
-                      wgpu::BufferBindingType::Storage}});
+                      i == 1 ? wgpu::BufferBindingType::ReadOnlyStorage
+                             : wgpu::BufferBindingType::Storage}});
         buffer[i] = CreateBuffer(mBufferSize, wgpu::BufferUsage::Storage);
         bg[i] = utils::MakeBindGroup(device, bgl[i], {{0, buffer[i]}});
     }

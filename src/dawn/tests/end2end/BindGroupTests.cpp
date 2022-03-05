@@ -76,7 +76,7 @@ class BindGroupTests : public DawnTest {
                     fs << "\n@group(" << i << ") @binding(0) var<uniform> buffer" << i
                        << " : Buffer" << i << ";";
                     break;
-                case wgpu::BufferBindingType::Storage:
+                case wgpu::BufferBindingType::ReadOnlyStorage:
                     fs << "\n@group(" << i << ") @binding(0) var<storage, read> buffer" << i
                        << " : Buffer" << i << ";";
                     break;
@@ -709,11 +709,11 @@ TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
 
     // Create a bind group layout which uses a single dynamic storage buffer.
     wgpu::BindGroupLayout storageLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage, true}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::ReadOnlyStorage, true}});
 
     // Create a pipeline which uses the uniform buffer and storage buffer bind groups.
     wgpu::RenderPipeline pipeline0 = MakeTestPipeline(
-        renderPass, {wgpu::BufferBindingType::Uniform, wgpu::BufferBindingType::Storage},
+        renderPass, {wgpu::BufferBindingType::Uniform, wgpu::BufferBindingType::ReadOnlyStorage},
         {uniformLayout, storageLayout});
 
     // Create a pipeline which uses the uniform buffer bind group twice.
@@ -787,21 +787,21 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
 
     // Create a bind group layout which uses a single dynamic storage buffer.
     wgpu::BindGroupLayout storageLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage, true}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::ReadOnlyStorage, true}});
 
     // Create a pipeline with pipeline layout (uniform, uniform, storage).
     wgpu::RenderPipeline pipeline0 =
         MakeTestPipeline(renderPass,
                          {wgpu::BufferBindingType::Uniform, wgpu::BufferBindingType::Uniform,
-                          wgpu::BufferBindingType::Storage},
+                          wgpu::BufferBindingType::ReadOnlyStorage},
                          {uniformLayout, uniformLayout, storageLayout});
 
     // Create a pipeline with pipeline layout (uniform, storage, storage).
-    wgpu::RenderPipeline pipeline1 =
-        MakeTestPipeline(renderPass,
-                         {wgpu::BufferBindingType::Uniform, wgpu::BufferBindingType::Storage,
-                          wgpu::BufferBindingType::Storage},
-                         {uniformLayout, storageLayout, storageLayout});
+    wgpu::RenderPipeline pipeline1 = MakeTestPipeline(
+        renderPass,
+        {wgpu::BufferBindingType::Uniform, wgpu::BufferBindingType::ReadOnlyStorage,
+         wgpu::BufferBindingType::ReadOnlyStorage},
+        {uniformLayout, storageLayout, storageLayout});
 
     // Prepare color data.
     // The first draw will use { color0, color1, color2 }.
@@ -1400,7 +1400,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
     pipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::ReadOnlyStorage}});
 
     pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 

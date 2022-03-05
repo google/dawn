@@ -540,13 +540,10 @@ namespace dawn::native {
                 case BindingInfoType::Buffer: {
                     // Binding mismatch between shader and bind group is invalid. For example, a
                     // writable binding in the shader with a readonly storage buffer in the bind
-                    // group layout is invalid. However, a readonly binding in the shader with a
-                    // writable storage buffer in the bind group layout is valid, a storage
+                    // group layout is invalid. For internal usage with internal shaders, a storage
                     // binding in the shader with an internal storage buffer in the bind group
                     // layout is also valid.
                     bool validBindingConversion =
-                        (layoutInfo.buffer.type == wgpu::BufferBindingType::Storage &&
-                         shaderInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage) ||
                         (layoutInfo.buffer.type == kInternalStorageBufferBinding &&
                          shaderInfo.buffer.type == wgpu::BufferBindingType::Storage);
 
