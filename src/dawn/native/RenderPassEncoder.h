@@ -31,7 +31,7 @@ namespace dawn::native {
                           EncodingContext* encodingContext,
                           RenderPassResourceUsageTracker usageTracker,
                           Ref<AttachmentState> attachmentState,
-                          QuerySetBase* occlusionQuerySet,
+                          std::vector<TimestampWrite> timestampWritesAtEnd,
                           uint32_t renderTargetWidth,
                           uint32_t renderTargetHeight,
                           bool depthReadOnly,
@@ -84,6 +84,8 @@ namespace dawn::native {
         Ref<QuerySetBase> mOcclusionQuerySet;
         uint32_t mCurrentOcclusionQueryIndex = 0;
         bool mOcclusionQueryActive = false;
+
+        std::vector<TimestampWrite> mTimestampWritesAtEnd;
     };
 
 }  // namespace dawn::native

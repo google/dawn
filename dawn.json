@@ -750,8 +750,8 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "timestamp write count", "type": "uint32_t", "default": 0, "tags": ["upstream"]},
-            {"name": "timestamp writes", "type": "compute pass timestamp write", "annotation": "const*", "length": "timestamp write count", "tags": ["upstream"]}
+            {"name": "timestamp write count", "type": "uint32_t", "default": 0},
+            {"name": "timestamp writes", "type": "compute pass timestamp write", "annotation": "const*", "length": "timestamp write count"}
         ]
     },
     "compute pass encoder": {
@@ -843,7 +843,6 @@
     },
     "compute pass timestamp location": {
         "category": "enum",
-        "tags": ["upstream"],
         "values": [
             {"value": 0, "name": "beginning"},
             {"value": 1, "name": "end"}
@@ -851,7 +850,6 @@
     },
     "compute pass timestamp write": {
         "category": "structure",
-        "tags": ["upstream"],
         "members": [
             {"name": "query set", "type": "query set"},
             {"name": "query index", "type": "uint32_t"},
@@ -1839,8 +1837,8 @@
             {"name": "color attachments", "type": "render pass color attachment", "annotation": "const*", "length": "color attachment count"},
             {"name": "depth stencil attachment", "type": "render pass depth stencil attachment", "annotation": "const*", "optional": true},
             {"name": "occlusion query set", "type": "query set", "optional": true},
-            {"name": "timestamp write count", "type": "uint32_t", "default": 0, "tags": ["upstream"]},
-            {"name": "timestamp writes", "type": "render pass timestamp write", "annotation": "const*", "length": "timestamp write count", "tags": ["upstream"]}
+            {"name": "timestamp write count", "type": "uint32_t", "default": 0},
+            {"name": "timestamp writes", "type": "render pass timestamp write", "annotation": "const*", "length": "timestamp write count"}
         ]
     },
     "render pass encoder": {
@@ -2016,7 +2014,6 @@
     },
     "render pass timestamp location": {
         "category": "enum",
-        "tags": ["upstream"],
         "values": [
             {"value": 0, "name": "beginning"},
             {"value": 1, "name": "end"}
@@ -2024,7 +2021,6 @@
     },
     "render pass timestamp write": {
         "category": "structure",
-        "tags": ["upstream"],
         "members": [
             {"name": "query set", "type": "query set"},
             {"name": "query index", "type": "uint32_t"},

@@ -54,7 +54,7 @@ namespace dawn::native {
                                          EncodingContext* encodingContext,
                                          RenderPassResourceUsageTracker usageTracker,
                                          Ref<AttachmentState> attachmentState,
-                                         QuerySetBase* occlusionQuerySet,
+                                         std::vector<TimestampWrite> timestampWritesAtEnd,
                                          uint32_t renderTargetWidth,
                                          uint32_t renderTargetHeight,
                                          bool depthReadOnly,
@@ -68,7 +68,8 @@ namespace dawn::native {
           mCommandEncoder(commandEncoder),
           mRenderTargetWidth(renderTargetWidth),
           mRenderTargetHeight(renderTargetHeight),
-          mOcclusionQuerySet(occlusionQuerySet) {
+          mOcclusionQuerySet(descriptor->occlusionQuerySet),
+          mTimestampWritesAtEnd(std::move(timestampWritesAtEnd)) {
         mUsageTracker = std::move(usageTracker);
         TrackInDevice();
     }
@@ -121,7 +122,12 @@ namespace dawn::native {
                             this, mCurrentOcclusionQueryIndex, mOcclusionQuerySet.Get());
                     }
 
-                    allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
+                    EndRenderPassCmd* cmd =
+                        allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
+                    // The query availability has already been updated at the beginning of render
+                    // pass, and no need to do update here.
+                    cmd->timestampWrites = std::move(mTimestampWritesAtEnd);
+
                     DAWN_TRY(mEncodingContext->ExitRenderPass(this, std::move(mUsageTracker),
                                                               mCommandEncoder.Get(),
                                                               std::move(mIndirectDrawMetadata)));
@@ -375,8 +381,7 @@ namespace dawn::native {
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
                 if (IsValidationEnabled()) {
-                    DAWN_TRY(GetDevice()->ValidateObject(querySet));
-                    DAWN_TRY(ValidateTimestampQuery(querySet, queryIndex));
+                    DAWN_TRY(ValidateTimestampQuery(GetDevice(), querySet, queryIndex));
                     DAWN_TRY_CONTEXT(
                         ValidateQueryIndexOverwrite(querySet, queryIndex,
                                                     mUsageTracker.GetQueryAvailabilityMap()),

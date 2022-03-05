@@ -62,7 +62,11 @@ namespace dawn::native {
         return {};
     }
 
-    MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex) {
+    MaybeError ValidateTimestampQuery(const DeviceBase* device,
+                                      const QuerySetBase* querySet,
+                                      uint32_t queryIndex) {
+        DAWN_TRY(device->ValidateObject(querySet));
+
         DAWN_INVALID_IF(querySet->GetQueryType() != wgpu::QueryType::Timestamp,
                         "The type of %s is not %s.", querySet, wgpu::QueryType::Timestamp);
 

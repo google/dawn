@@ -238,6 +238,28 @@ class TimestampQueryValidationTest : public QuerySetValidationTest {
 
         return adapter.CreateDevice(&descriptor);
     }
+
+    void EncodeRenderPassWithTimestampWrites(
+        wgpu::CommandEncoder encoder,
+        const std::vector<wgpu::RenderPassTimestampWrite>& timestampWrites) {
+        DummyRenderPass renderPass(device);
+        renderPass.timestampWriteCount = timestampWrites.size();
+        renderPass.timestampWrites = timestampWrites.data();
+
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.End();
+    }
+
+    void EncodeComputePassWithTimestampWrites(
+        wgpu::CommandEncoder encoder,
+        const std::vector<wgpu::ComputePassTimestampWrite>& timestampWrites) {
+        wgpu::ComputePassDescriptor descriptor;
+        descriptor.timestampWriteCount = timestampWrites.size();
+        descriptor.timestampWrites = timestampWrites.data();
+
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&descriptor);
+        pass.End();
+    }
 };
 
 // Test creating query set with only the timestamp feature enabled.
@@ -265,7 +287,7 @@ TEST_F(TimestampQueryValidationTest, UnnecessaryPipelineStatistics) {
 }
 
 // Test query set with type of timestamp is set to the occlusionQuerySet of RenderPassDescriptor.
-TEST_F(TimestampQueryValidationTest, BeginRenderPassWithTimestampQuerySet) {
+TEST_F(TimestampQueryValidationTest, SetOcclusionQueryWithTimestampQuerySet) {
     // Fail to begin render pass if the type of occlusionQuerySet is not Occlusion
     wgpu::QuerySet querySet = CreateQuerySet(device, wgpu::QueryType::Timestamp, 1);
     DummyRenderPass renderPass(device);
@@ -274,6 +296,187 @@ TEST_F(TimestampQueryValidationTest, BeginRenderPassWithTimestampQuerySet) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPass);
     ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Test timestampWrites in compute pass descriptor
+TEST_F(TimestampQueryValidationTest, TimestampWritesOnComputePass) {
+    wgpu::QuerySet querySet = CreateQuerySet(device, wgpu::QueryType::Timestamp, 2);
+
+    // Success
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
+                      {querySet, 1, wgpu::ComputePassTimestampLocation::End}});
+        encoder.Finish();
+    }
+
+    // Fail to write timestamps to other type of query set
+    {
+        wgpu::QuerySet occlusionQuerySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, 1);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{occlusionQuerySet, 0, wgpu::ComputePassTimestampLocation::Beginning}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Fail to write timestamps to a query set created from another device
+    {
+        wgpu::Device otherDevice = RegisterDevice(adapter.CreateDevice());
+        wgpu::QuerySet querySetFromOtherDevice =
+            CreateQuerySet(otherDevice, wgpu::QueryType::Timestamp, 2);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
+                      {querySetFromOtherDevice, 1, wgpu::ComputePassTimestampLocation::End}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Fail to write timestamps to the query index which exceeds the number of queries in query set
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 2, wgpu::ComputePassTimestampLocation::Beginning}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Success to write timestamps to the same query index twice on same compute pass
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
+                      {querySet, 0, wgpu::ComputePassTimestampLocation::End}});
+        encoder.Finish();
+    }
+
+    // Success to write timestamps at same location of compute pass
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
+                      {querySet, 1, wgpu::ComputePassTimestampLocation::Beginning}});
+        encoder.Finish();
+    }
+
+    // Fail to write timestamps at invalid location of compute pass
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 0, static_cast<wgpu::ComputePassTimestampLocation>(0xFFFFFFFF)}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Fail to write timestamps to a destroyed query set
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
+                      {querySet, 1, wgpu::ComputePassTimestampLocation::End}});
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        wgpu::Queue queue = device.GetQueue();
+        querySet.Destroy();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+    }
+}
+
+// Test timestampWrites in render pass descriptor
+TEST_F(TimestampQueryValidationTest, TimestampWritesOnRenderPass) {
+    wgpu::QuerySet querySet = CreateQuerySet(device, wgpu::QueryType::Timestamp, 2);
+
+    // Success
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
+                      {querySet, 1, wgpu::RenderPassTimestampLocation::End}});
+        encoder.Finish();
+    }
+
+    // Fail to write timestamps to other type of query set
+    {
+        wgpu::QuerySet occlusionQuerySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, 1);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{occlusionQuerySet, 0, wgpu::RenderPassTimestampLocation::Beginning}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Fail to write timestamps to a query set created from another device
+    {
+        wgpu::Device otherDevice = RegisterDevice(adapter.CreateDevice());
+        wgpu::QuerySet querySetFromOtherDevice =
+            CreateQuerySet(otherDevice, wgpu::QueryType::Timestamp, 2);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
+                      {querySetFromOtherDevice, 1, wgpu::RenderPassTimestampLocation::End}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Fail to write timestamps to the query index which exceeds the number of queries in query set
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 2, wgpu::RenderPassTimestampLocation::Beginning}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Success to write timestamps to the same query index twice on different render pass
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
+                      {querySet, 1, wgpu::RenderPassTimestampLocation::End}});
+        // Encodee other render pass
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
+                      {querySet, 1, wgpu::RenderPassTimestampLocation::End}});
+        encoder.Finish();
+    }
+
+    // Fail to write timestamps to the same query index twice on same render pass
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
+                      {querySet, 0, wgpu::RenderPassTimestampLocation::End}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Success to write timestamps at same location of render pass
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
+                      {querySet, 1, wgpu::RenderPassTimestampLocation::Beginning}});
+        encoder.Finish();
+    }
+
+    // Fail to write timestamps at invalid location of render pass
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 0, static_cast<wgpu::RenderPassTimestampLocation>(0xFFFFFFFF)}});
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Fail to write timestamps to a destroyed query set
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeRenderPassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
+                      {querySet, 1, wgpu::RenderPassTimestampLocation::End}});
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        wgpu::Queue queue = device.GetQueue();
+        querySet.Destroy();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+    }
 }
 
 // Test write timestamp on command encoder

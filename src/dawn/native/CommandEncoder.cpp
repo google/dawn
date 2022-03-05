@@ -36,9 +36,6 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
-#include <cmath>
-#include <map>
-
 namespace dawn::native {
 
     namespace {
@@ -416,6 +413,38 @@ namespace dawn::native {
                     descriptor->occlusionQuerySet->GetQueryType(), wgpu::QueryType::Occlusion);
             }
 
+            if (descriptor->timestampWriteCount > 0) {
+                DAWN_ASSERT(descriptor->timestampWrites != nullptr);
+
+                // Record the query set and query index used on render passes for validating query
+                // index overwrite. The TrackQueryAvailability of
+                // RenderPassResourceUsageTracker is not used here because the timestampWrites are
+                // not validated and encoded one by one, but encoded together after passing the
+                // validation.
+                QueryAvailabilityMap usedQueries;
+                for (uint32_t i = 0; i < descriptor->timestampWriteCount; ++i) {
+                    QuerySetBase* querySet = descriptor->timestampWrites[i].querySet;
+                    DAWN_ASSERT(querySet != nullptr);
+                    uint32_t queryIndex = descriptor->timestampWrites[i].queryIndex;
+                    DAWN_TRY_CONTEXT(ValidateTimestampQuery(device, querySet, queryIndex),
+                                     "validating querySet and queryIndex of timestampWrites[%u].",
+                                     i);
+                    DAWN_TRY_CONTEXT(ValidateRenderPassTimestampLocation(
+                                         descriptor->timestampWrites[i].location),
+                                     "validating location of timestampWrites[%u].", i);
+
+                    auto checkIt = usedQueries.find(querySet);
+                    DAWN_INVALID_IF(checkIt != usedQueries.end() && checkIt->second[queryIndex],
+                                    "Query index %u of %s is written to twice in a render pass.",
+                                    queryIndex, querySet);
+
+                    // Gets the iterator for that querySet or create a new vector of bool set to
+                    // false if the querySet wasn't registered.
+                    auto addIt = usedQueries.emplace(querySet, querySet->GetQueryCount()).first;
+                    addIt->second[queryIndex] = true;
+                }
+            }
+
             DAWN_INVALID_IF(descriptor->colorAttachmentCount == 0 &&
                                 descriptor->depthStencilAttachment == nullptr,
                             "Render pass has no attachments.");
@@ -425,6 +454,25 @@ namespace dawn::native {
 
         MaybeError ValidateComputePassDescriptor(const DeviceBase* device,
                                                  const ComputePassDescriptor* descriptor) {
+            if (descriptor == nullptr) {
+                return {};
+            }
+
+            if (descriptor->timestampWriteCount > 0) {
+                DAWN_ASSERT(descriptor->timestampWrites != nullptr);
+
+                for (uint32_t i = 0; i < descriptor->timestampWriteCount; ++i) {
+                    DAWN_ASSERT(descriptor->timestampWrites[i].querySet != nullptr);
+                    DAWN_TRY_CONTEXT(
+                        ValidateTimestampQuery(device, descriptor->timestampWrites[i].querySet,
+                                               descriptor->timestampWrites[i].queryIndex),
+                        "validating querySet and queryIndex of timestampWrites[%u].", i);
+                    DAWN_TRY_CONTEXT(ValidateComputePassTimestampLocation(
+                                         descriptor->timestampWrites[i].location),
+                                     "validating location of timestampWrites[%u].", i);
+                }
+            }
+
             return {};
         }
 
@@ -606,12 +654,40 @@ namespace dawn::native {
         const ComputePassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
+        std::vector<TimestampWrite> timestampWritesAtBeginning;
+        std::vector<TimestampWrite> timestampWritesAtEnd;
         bool success = mEncodingContext.TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
                 DAWN_TRY(ValidateComputePassDescriptor(device, descriptor));
 
-                allocator->Allocate<BeginComputePassCmd>(Command::BeginComputePass);
+                BeginComputePassCmd* cmd =
+                    allocator->Allocate<BeginComputePassCmd>(Command::BeginComputePass);
+
+                if (descriptor == nullptr) {
+                    return {};
+                }
+
+                // Split the timestampWrites used in BeginComputePassCmd and EndComputePassCmd
+                for (uint32_t i = 0; i < descriptor->timestampWriteCount; i++) {
+                    QuerySetBase* querySet = descriptor->timestampWrites[i].querySet;
+                    uint32_t queryIndex = descriptor->timestampWrites[i].queryIndex;
+
+                    switch (descriptor->timestampWrites[i].location) {
+                        case wgpu::ComputePassTimestampLocation::Beginning:
+                            timestampWritesAtBeginning.push_back({querySet, queryIndex});
+                            break;
+                        case wgpu::ComputePassTimestampLocation::End:
+                            timestampWritesAtEnd.push_back({querySet, queryIndex});
+                            break;
+                        default:
+                            break;
+                    }
+
+                    TrackQueryAvailability(querySet, queryIndex);
+                }
+
+                cmd->timestampWrites = std::move(timestampWritesAtBeginning);
 
                 return {};
             },
@@ -623,8 +699,8 @@ namespace dawn::native {
                 descriptor = &defaultDescriptor;
             }
 
-            ComputePassEncoder* passEncoder =
-                new ComputePassEncoder(device, descriptor, this, &mEncodingContext);
+            ComputePassEncoder* passEncoder = new ComputePassEncoder(
+                device, descriptor, this, &mEncodingContext, std::move(timestampWritesAtEnd));
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }
@@ -642,6 +718,8 @@ namespace dawn::native {
         bool depthReadOnly = false;
         bool stencilReadOnly = false;
         Ref<AttachmentState> attachmentState;
+        std::vector<TimestampWrite> timestampWritesAtBeginning;
+        std::vector<TimestampWrite> timestampWritesAtEnd;
         bool success = mEncodingContext.TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
@@ -658,6 +736,28 @@ namespace dawn::native {
 
                 cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
                 attachmentState = cmd->attachmentState;
+
+                // Split the timestampWrites used in BeginRenderPassCmd and EndRenderPassCmd
+                for (uint32_t i = 0; i < descriptor->timestampWriteCount; i++) {
+                    QuerySetBase* querySet = descriptor->timestampWrites[i].querySet;
+                    uint32_t queryIndex = descriptor->timestampWrites[i].queryIndex;
+
+                    switch (descriptor->timestampWrites[i].location) {
+                        case wgpu::RenderPassTimestampLocation::Beginning:
+                            timestampWritesAtBeginning.push_back({querySet, queryIndex});
+                            break;
+                        case wgpu::RenderPassTimestampLocation::End:
+                            timestampWritesAtEnd.push_back({querySet, queryIndex});
+                            break;
+                        default:
+                            break;
+                    }
+
+                    TrackQueryAvailability(querySet, queryIndex);
+                    // Track the query availability with true on render pass again for rewrite
+                    // validation and query reset on Vulkan
+                    usageTracker.TrackQueryAvailability(querySet, queryIndex);
+                }
 
                 for (ColorAttachmentIndex index :
                      IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
@@ -747,6 +847,8 @@ namespace dawn::native {
 
                 cmd->occlusionQuerySet = descriptor->occlusionQuerySet;
 
+                cmd->timestampWrites = std::move(timestampWritesAtBeginning);
+
                 return {};
             },
             "encoding %s.BeginRenderPass(%s).", this, descriptor);
@@ -754,7 +856,7 @@ namespace dawn::native {
         if (success) {
             RenderPassEncoder* passEncoder = new RenderPassEncoder(
                 device, descriptor, this, &mEncodingContext, std::move(usageTracker),
-                std::move(attachmentState), descriptor->occlusionQuerySet, width, height,
+                std::move(attachmentState), std::move(timestampWritesAtEnd), width, height,
                 depthReadOnly, stencilReadOnly);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
@@ -1183,8 +1285,7 @@ namespace dawn::native {
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
                 if (GetDevice()->IsValidationEnabled()) {
-                    DAWN_TRY(GetDevice()->ValidateObject(querySet));
-                    DAWN_TRY(ValidateTimestampQuery(querySet, queryIndex));
+                    DAWN_TRY(ValidateTimestampQuery(GetDevice(), querySet, queryIndex));
                 }
 
                 TrackQueryAvailability(querySet, queryIndex);

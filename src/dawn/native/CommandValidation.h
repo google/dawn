@@ -29,7 +29,9 @@ namespace dawn::native {
 
     MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& usage);
 
-    MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex);
+    MaybeError ValidateTimestampQuery(const DeviceBase* device,
+                                      const QuerySetBase* querySet,
+                                      uint32_t queryIndex);
 
     MaybeError ValidateWriteBuffer(const DeviceBase* device,
                                    const BufferBase* buffer,

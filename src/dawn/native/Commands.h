@@ -68,7 +68,14 @@ namespace dawn::native {
         WriteTimestamp,
     };
 
-    struct BeginComputePassCmd {};
+    struct TimestampWrite {
+        Ref<QuerySetBase> querySet;
+        uint32_t queryIndex;
+    };
+
+    struct BeginComputePassCmd {
+        std::vector<TimestampWrite> timestampWrites;
+    };
 
     struct BeginOcclusionQueryCmd {
         Ref<QuerySetBase> querySet;
@@ -106,6 +113,7 @@ namespace dawn::native {
         uint32_t height;
 
         Ref<QuerySetBase> occlusionQuerySet;
+        std::vector<TimestampWrite> timestampWrites;
     };
 
     struct BufferCopy {
@@ -184,14 +192,18 @@ namespace dawn::native {
         uint64_t indirectOffset;
     };
 
-    struct EndComputePassCmd {};
+    struct EndComputePassCmd {
+        std::vector<TimestampWrite> timestampWrites;
+    };
 
     struct EndOcclusionQueryCmd {
         Ref<QuerySetBase> querySet;
         uint32_t queryIndex;
     };
 
-    struct EndRenderPassCmd {};
+    struct EndRenderPassCmd {
+        std::vector<TimestampWrite> timestampWrites;
+    };
 
     struct ExecuteBundlesCmd {
         uint32_t count;
