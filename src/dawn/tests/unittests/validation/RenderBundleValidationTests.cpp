@@ -635,12 +635,35 @@ TEST_F(RenderBundleValidationTest, ColorFormatsCountOutOfBounds) {
     }
 }
 
-// Test that render bundle color formats cannot be set to undefined.
-TEST_F(RenderBundleValidationTest, ColorFormatUndefined) {
-    utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
-    desc.cColorFormats[0] = wgpu::TextureFormat::Undefined;
-    ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
+// Test that render bundle sparse color formats.
+TEST_F(RenderBundleValidationTest, SparseColorFormats) {
+    // Sparse color formats is valid.
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.colorFormatsCount = 2;
+        desc.cColorFormats[0] = wgpu::TextureFormat::Undefined;
+        desc.cColorFormats[1] = wgpu::TextureFormat::RGBA8Unorm;
+        device.CreateRenderBundleEncoder(&desc);
+    }
+
+    // When all color formats are undefined, depth stencil format must not be undefined.
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.colorFormatsCount = 1;
+        desc.cColorFormats[0] = wgpu::TextureFormat::Undefined;
+        desc.depthStencilFormat = wgpu::TextureFormat::Undefined;
+        ASSERT_DEVICE_ERROR(
+            device.CreateRenderBundleEncoder(&desc),
+            testing::HasSubstr(
+                "No color or depthStencil attachments specified. At least one is required."));
+    }
+    {
+        utils::ComboRenderBundleEncoderDescriptor desc = {};
+        desc.colorFormatsCount = 1;
+        desc.cColorFormats[0] = wgpu::TextureFormat::Undefined;
+        desc.depthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
+        device.CreateRenderBundleEncoder(&desc);
+    }
 }
 
 // Test that the render bundle depth stencil format cannot be set to undefined.

@@ -457,8 +457,21 @@ namespace dawn::native::vulkan {
         if (GetStageMask() & wgpu::ShaderStage::Fragment) {
             // Initialize the "blend state info" that will be chained in the "create info" from the
             // data pre-computed in the ColorState
+            for (auto& blend : colorBlendAttachments) {
+                blend.blendEnable = VK_FALSE;
+                blend.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+                blend.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+                blend.colorBlendOp = VK_BLEND_OP_ADD;
+                blend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+                blend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+                blend.alphaBlendOp = VK_BLEND_OP_ADD;
+                blend.colorWriteMask = 0;
+            }
+
             const auto& fragmentOutputsWritten =
                 GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputsWritten;
+            ColorAttachmentIndex highestColorAttachmentIndexPlusOne =
+                GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
             for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
                 const ColorTargetState* target = GetColorTargetState(i);
                 colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputsWritten[i]);
@@ -470,7 +483,7 @@ namespace dawn::native::vulkan {
             // LogicOp isn't supported so we disable it.
             colorBlend.logicOpEnable = VK_FALSE;
             colorBlend.logicOp = VK_LOGIC_OP_CLEAR;
-            colorBlend.attachmentCount = static_cast<uint32_t>(GetColorAttachmentsMask().count());
+            colorBlend.attachmentCount = static_cast<uint8_t>(highestColorAttachmentIndexPlusOne);
             colorBlend.pAttachments = colorBlendAttachments.data();
             // The blend constant is always dynamic so we fill in a dummy value
             colorBlend.blendConstants[0] = 0.0f;

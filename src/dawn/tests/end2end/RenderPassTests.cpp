@@ -159,7 +159,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kBlue, renderTarget, 2, kRTSize - 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kBlue, renderTarget, 1, kRTSize - 1);
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderTarget, kRTSize - 1, 1);
 }
 

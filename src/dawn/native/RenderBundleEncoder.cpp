@@ -66,13 +66,14 @@ namespace dawn::native {
             "Color formats count (%u) exceeds maximum number of color attachements (%u).",
             descriptor->colorFormatsCount, kMaxColorAttachments);
 
-        DAWN_INVALID_IF(descriptor->colorFormatsCount == 0 &&
-                            descriptor->depthStencilFormat == wgpu::TextureFormat::Undefined,
-                        "No color or depth/stencil attachment formats specified.");
-
+        bool allColorFormatsUndefined = true;
         for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
-            DAWN_TRY_CONTEXT(ValidateColorAttachmentFormat(device, descriptor->colorFormats[i]),
-                             "validating colorFormats[%u]", i);
+            wgpu::TextureFormat format = descriptor->colorFormats[i];
+            if (format != wgpu::TextureFormat::Undefined) {
+                DAWN_TRY_CONTEXT(ValidateColorAttachmentFormat(device, format),
+                                 "validating colorFormats[%u]", i);
+                allColorFormatsUndefined = false;
+            }
         }
 
         if (descriptor->depthStencilFormat != wgpu::TextureFormat::Undefined) {
@@ -80,6 +81,10 @@ namespace dawn::native {
                                  device, descriptor->depthStencilFormat, descriptor->depthReadOnly,
                                  descriptor->stencilReadOnly),
                              "validating depthStencilFormat");
+        } else {
+            DAWN_INVALID_IF(
+                allColorFormatsUndefined,
+                "No color or depthStencil attachments specified. At least one is required.");
         }
 
         return {};

@@ -1095,6 +1095,69 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     EXPECT_PIXEL_RGBA8_EQ(expected, renderPass.color, kRTSize / 2, kRTSize / 2);
 }
 
+TEST_P(ColorStateTest, SparseAttachmentsDifferentColorMask) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_indexed_draw_buffers"));
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        struct Outputs {
+            @location(1) o1 : vec4<f32>;
+            @location(3) o3 : vec4<f32>;
+        }
+
+        @stage(fragment) fn main() -> Outputs {
+            return Outputs(vec4<f32>(1.0), vec4<f32>(0.0, 1.0, 1.0, 1.0));
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pipelineDesc;
+    pipelineDesc.vertex.module = vsModule;
+    pipelineDesc.cFragment.module = fsModule;
+    pipelineDesc.cFragment.targetCount = 4;
+    pipelineDesc.cTargets[0].format = wgpu::TextureFormat::Undefined;
+    pipelineDesc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+    pipelineDesc.cTargets[1].format = wgpu::TextureFormat::RGBA8Unorm;
+    pipelineDesc.cTargets[2].format = wgpu::TextureFormat::Undefined;
+    pipelineDesc.cTargets[2].writeMask = wgpu::ColorWriteMask::None;
+    pipelineDesc.cTargets[3].format = wgpu::TextureFormat::RGBA8Unorm;
+    pipelineDesc.cTargets[3].writeMask = wgpu::ColorWriteMask::Green | wgpu::ColorWriteMask::Alpha;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+
+    wgpu::TextureDescriptor texDesc;
+    texDesc.dimension = wgpu::TextureDimension::e2D;
+    texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    texDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    texDesc.size = {1, 1};
+    wgpu::Texture attachment1 = device.CreateTexture(&texDesc);
+    wgpu::Texture attachment3 = device.CreateTexture(&texDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassColorAttachment colorAttachments[4]{};
+        colorAttachments[0].view = nullptr;
+        colorAttachments[1].view = attachment1.CreateView();
+        colorAttachments[1].loadOp = wgpu::LoadOp::Load;
+        colorAttachments[1].storeOp = wgpu::StoreOp::Store;
+        colorAttachments[2].view = nullptr;
+        colorAttachments[3].view = attachment3.CreateView();
+        colorAttachments[3].loadOp = wgpu::LoadOp::Load;
+        colorAttachments[3].storeOp = wgpu::StoreOp::Store;
+
+        wgpu::RenderPassDescriptor rpDesc;
+        rpDesc.colorAttachmentCount = 4;
+        rpDesc.colorAttachments = colorAttachments;
+
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+        pass.SetPipeline(pipeline);
+        pass.Draw(3);
+        pass.End();
+    }
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kWhite, attachment1, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, attachment3, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST(ColorStateTest,
                       D3D12Backend(),
                       MetalBackend(),

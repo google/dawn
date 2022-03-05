@@ -246,6 +246,9 @@ namespace dawn::native::vulkan {
                      IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                     auto& attachmentInfo = renderPass->colorAttachments[i];
                     TextureView* view = ToBackend(attachmentInfo.view.Get());
+                    if (view == nullptr) {
+                        continue;
+                    }
 
                     attachments[attachmentCount] = view->GetHandle();
 

@@ -227,6 +227,9 @@ namespace dawn::native {
             uint32_t* sampleCount,
             UsageValidationMode usageValidationMode) {
             TextureViewBase* attachment = colorAttachment.view;
+            if (attachment == nullptr) {
+                return {};
+            }
             DAWN_TRY(device->ValidateObject(attachment));
             DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(),
                                       wgpu::TextureUsage::RenderAttachment, usageValidationMode));
@@ -390,11 +393,15 @@ namespace dawn::native {
                 "Color attachment count (%u) exceeds the maximum number of color attachments (%u).",
                 descriptor->colorAttachmentCount, kMaxColorAttachments);
 
+            bool isAllColorAttachmentNull = true;
             for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
                 DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(
                                      device, descriptor->colorAttachments[i], width, height,
                                      sampleCount, usageValidationMode),
                                  "validating colorAttachments[%u].", i);
+                if (descriptor->colorAttachments[i].view) {
+                    isAllColorAttachmentNull = false;
+                }
             }
 
             if (descriptor->depthStencilAttachment != nullptr) {
@@ -402,6 +409,10 @@ namespace dawn::native {
                                      device, descriptor->depthStencilAttachment, width, height,
                                      sampleCount, usageValidationMode),
                                  "validating depthStencilAttachment.");
+            } else {
+                DAWN_INVALID_IF(
+                    isAllColorAttachmentNull,
+                    "No color or depthStencil attachments specified. At least one is required.");
             }
 
             if (descriptor->occlusionQuerySet != nullptr) {

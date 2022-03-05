@@ -1802,7 +1802,7 @@
     "render pass color attachment": {
         "category": "structure",
         "members": [
-            {"name": "view", "type": "texture view"},
+            {"name": "view", "type": "texture view", "optional": true},
             {"name": "resolve target", "type": "texture view", "optional": true},
             {"name": "load op", "type": "load op"},
             {"name": "store op", "type": "store op"},

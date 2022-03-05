@@ -37,7 +37,9 @@ namespace dawn::native::d3d12 {
       public:
         RenderPassBuilder(bool hasUAV);
 
-        ColorAttachmentIndex GetColorAttachmentCount() const;
+        // Returns the highest color attachment index + 1. If there is no color attachment, returns
+        // 0. Range: [0, kMaxColorAttachments + 1)
+        ColorAttachmentIndex GetHighestColorAttachmentIndexPlusOne() const;
 
         // Returns descriptors that are fed directly to BeginRenderPass, or are used as parameter
         // storage if D3D12 render pass API is unavailable.
@@ -75,11 +77,12 @@ namespace dawn::native::d3d12 {
         void SetStencilNoAccess();
 
         void SetRenderTargetView(ColorAttachmentIndex attachmentIndex,
-                                 D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor);
+                                 D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
+                                 bool isNullRTV);
         void SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor);
 
       private:
-        ColorAttachmentIndex mColorAttachmentCount{uint8_t(0)};
+        ColorAttachmentIndex mHighestColorAttachmentIndexPlusOne{uint8_t(0)};
         bool mHasDepth = false;
         D3D12_RENDER_PASS_FLAGS mRenderPassFlags = D3D12_RENDER_PASS_FLAG_NONE;
         D3D12_RENDER_PASS_DEPTH_STENCIL_DESC mRenderPassDepthStencilDesc;

@@ -1197,43 +1197,68 @@ namespace dawn::native::d3d12 {
                                               RenderPassBuilder* renderPassBuilder) {
         Device* device = ToBackend(GetDevice());
 
-        for (ColorAttachmentIndex i :
-             IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-            RenderPassColorAttachmentInfo& attachmentInfo = renderPass->colorAttachments[i];
-            TextureView* view = ToBackend(attachmentInfo.view.Get());
+        CPUDescriptorHeapAllocation nullRTVAllocation;
+        D3D12_CPU_DESCRIPTOR_HANDLE nullRTV;
 
-            // Set view attachment.
-            CPUDescriptorHeapAllocation rtvAllocation;
-            DAWN_TRY_ASSIGN(
-                rtvAllocation,
-                device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
+        const auto& colorAttachmentsMaskBitSet =
+            renderPass->attachmentState->GetColorAttachmentsMask();
+        for (ColorAttachmentIndex i(uint8_t(0)); i < ColorAttachmentIndex(kMaxColorAttachments);
+             i++) {
+            if (colorAttachmentsMaskBitSet.test(i)) {
+                RenderPassColorAttachmentInfo& attachmentInfo = renderPass->colorAttachments[i];
+                TextureView* view = ToBackend(attachmentInfo.view.Get());
 
-            const D3D12_RENDER_TARGET_VIEW_DESC viewDesc = view->GetRTVDescriptor();
-            const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor = rtvAllocation.GetBaseDescriptor();
+                // Set view attachment.
+                CPUDescriptorHeapAllocation rtvAllocation;
+                DAWN_TRY_ASSIGN(
+                    rtvAllocation,
+                    device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
 
-            device->GetD3D12Device()->CreateRenderTargetView(
-                ToBackend(view->GetTexture())->GetD3D12Resource(), &viewDesc, baseDescriptor);
+                const D3D12_RENDER_TARGET_VIEW_DESC viewDesc = view->GetRTVDescriptor();
+                const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor =
+                    rtvAllocation.GetBaseDescriptor();
 
-            renderPassBuilder->SetRenderTargetView(i, baseDescriptor);
+                device->GetD3D12Device()->CreateRenderTargetView(
+                    ToBackend(view->GetTexture())->GetD3D12Resource(), &viewDesc, baseDescriptor);
 
-            // Set color load operation.
-            renderPassBuilder->SetRenderTargetBeginningAccess(
-                i, attachmentInfo.loadOp, attachmentInfo.clearColor, view->GetD3D12Format());
+                renderPassBuilder->SetRenderTargetView(i, baseDescriptor, false);
 
-            // Set color store operation.
-            if (attachmentInfo.resolveTarget != nullptr) {
-                TextureView* resolveDestinationView = ToBackend(attachmentInfo.resolveTarget.Get());
-                Texture* resolveDestinationTexture =
-                    ToBackend(resolveDestinationView->GetTexture());
+                // Set color load operation.
+                renderPassBuilder->SetRenderTargetBeginningAccess(
+                    i, attachmentInfo.loadOp, attachmentInfo.clearColor, view->GetD3D12Format());
 
-                resolveDestinationTexture->TrackUsageAndTransitionNow(
-                    commandContext, D3D12_RESOURCE_STATE_RESOLVE_DEST,
-                    resolveDestinationView->GetSubresourceRange());
+                // Set color store operation.
+                if (attachmentInfo.resolveTarget != nullptr) {
+                    TextureView* resolveDestinationView =
+                        ToBackend(attachmentInfo.resolveTarget.Get());
+                    Texture* resolveDestinationTexture =
+                        ToBackend(resolveDestinationView->GetTexture());
 
-                renderPassBuilder->SetRenderTargetEndingAccessResolve(i, attachmentInfo.storeOp,
-                                                                      view, resolveDestinationView);
+                    resolveDestinationTexture->TrackUsageAndTransitionNow(
+                        commandContext, D3D12_RESOURCE_STATE_RESOLVE_DEST,
+                        resolveDestinationView->GetSubresourceRange());
+
+                    renderPassBuilder->SetRenderTargetEndingAccessResolve(
+                        i, attachmentInfo.storeOp, view, resolveDestinationView);
+                } else {
+                    renderPassBuilder->SetRenderTargetEndingAccess(i, attachmentInfo.storeOp);
+                }
             } else {
-                renderPassBuilder->SetRenderTargetEndingAccess(i, attachmentInfo.storeOp);
+                if (!nullRTVAllocation.IsValid()) {
+                    DAWN_TRY_ASSIGN(
+                        nullRTVAllocation,
+                        device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
+                    nullRTV = nullRTVAllocation.GetBaseDescriptor();
+                    D3D12_RENDER_TARGET_VIEW_DESC nullRTVDesc;
+                    nullRTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                    nullRTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+                    nullRTVDesc.Texture2D.MipSlice = 0;
+                    nullRTVDesc.Texture2D.PlaneSlice = 0;
+                    device->GetD3D12Device()->CreateRenderTargetView(nullptr, &nullRTVDesc,
+                                                                     nullRTV);
+                }
+
+                renderPassBuilder->SetRenderTargetView(i, nullRTV, true);
             }
         }
 
@@ -1290,15 +1315,14 @@ namespace dawn::native::d3d12 {
 
         // Clear framebuffer attachments as needed.
         {
-            for (ColorAttachmentIndex i(uint8_t(0));
-                 i < renderPassBuilder->GetColorAttachmentCount(); i++) {
+            for (const auto& attachment :
+                 renderPassBuilder->GetRenderPassRenderTargetDescriptors()) {
                 // Load op - color
-                if (renderPassBuilder->GetRenderPassRenderTargetDescriptors()[i]
-                        .BeginningAccess.Type == D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR) {
+                if (attachment.cpuDescriptor.ptr != 0 &&
+                    attachment.BeginningAccess.Type ==
+                        D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR) {
                     commandList->ClearRenderTargetView(
-                        renderPassBuilder->GetRenderPassRenderTargetDescriptors()[i].cpuDescriptor,
-                        renderPassBuilder->GetRenderPassRenderTargetDescriptors()[i]
-                            .BeginningAccess.Clear.ClearValue.Color,
+                        attachment.cpuDescriptor, attachment.BeginningAccess.Clear.ClearValue.Color,
                         0, nullptr);
                 }
             }
@@ -1333,7 +1357,7 @@ namespace dawn::native::d3d12 {
         }
 
         commandList->OMSetRenderTargets(
-            static_cast<uint8_t>(renderPassBuilder->GetColorAttachmentCount()),
+            static_cast<uint8_t>(renderPassBuilder->GetHighestColorAttachmentIndexPlusOne()),
             renderPassBuilder->GetRenderTargetViews(), FALSE,
             renderPassBuilder->HasDepth()
                 ? &renderPassBuilder->GetRenderPassDepthStencilDescriptor()->cpuDescriptor
@@ -1358,7 +1382,7 @@ namespace dawn::native::d3d12 {
         // beginning and ending access operations.
         if (useRenderPass) {
             commandContext->GetCommandList4()->BeginRenderPass(
-                static_cast<uint8_t>(renderPassBuilder.GetColorAttachmentCount()),
+                static_cast<uint8_t>(renderPassBuilder.GetHighestColorAttachmentIndexPlusOne()),
                 renderPassBuilder.GetRenderPassRenderTargetDescriptors().data(),
                 renderPassBuilder.HasDepth()
                     ? renderPassBuilder.GetRenderPassDepthStencilDescriptor()

@@ -430,11 +430,22 @@ namespace dawn::native {
                 descriptor->module->GetEntryPoint(descriptor->entryPoint);
             for (ColorAttachmentIndex i(uint8_t(0));
                  i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->targetCount)); ++i) {
-                DAWN_TRY_CONTEXT(
-                    ValidateColorTargetState(device, &descriptor->targets[static_cast<uint8_t>(i)],
-                                             fragmentMetadata.fragmentOutputsWritten[i],
-                                             fragmentMetadata.fragmentOutputVariables[i]),
-                    "validating targets[%u].", static_cast<uint8_t>(i));
+                const ColorTargetState* target = &descriptor->targets[static_cast<uint8_t>(i)];
+                if (target->format != wgpu::TextureFormat::Undefined) {
+                    DAWN_TRY_CONTEXT(ValidateColorTargetState(
+                                         device, target, fragmentMetadata.fragmentOutputsWritten[i],
+                                         fragmentMetadata.fragmentOutputVariables[i]),
+                                     "validating targets[%u].", static_cast<uint8_t>(i));
+                } else {
+                    DAWN_INVALID_IF(
+                        target->blend,
+                        "Color target[%u] blend state is set when the format is undefined.",
+                        static_cast<uint8_t>(i));
+                    DAWN_INVALID_IF(
+                        target->writeMask != wgpu::ColorWriteMask::None,
+                        "Color target[%u] write mask is set to (%s) when the format is undefined.",
+                        static_cast<uint8_t>(i), target->writeMask);
+                }
             }
 
             return {};

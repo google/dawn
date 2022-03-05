@@ -116,19 +116,24 @@ namespace dawn::native::d3d12 {
     }
 
     void RenderPassBuilder::SetRenderTargetView(ColorAttachmentIndex attachmentIndex,
-                                                D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor) {
-        ASSERT(mColorAttachmentCount < kMaxColorAttachmentsTyped);
+                                                D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
+                                                bool isNullRTV) {
         mRenderTargetViews[attachmentIndex] = baseDescriptor;
         mRenderPassRenderTargetDescriptors[attachmentIndex].cpuDescriptor = baseDescriptor;
-        mColorAttachmentCount++;
+        if (!isNullRTV) {
+            mHighestColorAttachmentIndexPlusOne =
+                std::max(mHighestColorAttachmentIndexPlusOne,
+                         ColorAttachmentIndex{
+                             static_cast<uint8_t>(static_cast<uint8_t>(attachmentIndex) + 1u)});
+        }
     }
 
     void RenderPassBuilder::SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor) {
         mRenderPassDepthStencilDesc.cpuDescriptor = baseDescriptor;
     }
 
-    ColorAttachmentIndex RenderPassBuilder::GetColorAttachmentCount() const {
-        return mColorAttachmentCount;
+    ColorAttachmentIndex RenderPassBuilder::GetHighestColorAttachmentIndexPlusOne() const {
+        return mHighestColorAttachmentIndexPlusOne;
     }
 
     bool RenderPassBuilder::HasDepth() const {
@@ -137,7 +142,7 @@ namespace dawn::native::d3d12 {
 
     ityp::span<ColorAttachmentIndex, const D3D12_RENDER_PASS_RENDER_TARGET_DESC>
     RenderPassBuilder::GetRenderPassRenderTargetDescriptors() const {
-        return {mRenderPassRenderTargetDescriptors.data(), mColorAttachmentCount};
+        return {mRenderPassRenderTargetDescriptors.data(), mHighestColorAttachmentIndexPlusOne};
     }
 
     const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC*

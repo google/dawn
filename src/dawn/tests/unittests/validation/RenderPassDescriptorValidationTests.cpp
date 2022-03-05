@@ -130,6 +130,62 @@ namespace {
         }
     }
 
+    // Test sparse color attachment validations
+    TEST_F(RenderPassDescriptorValidationTest, SparseColorAttachment) {
+        // Having sparse color attachment is valid.
+        {
+            std::array<wgpu::RenderPassColorAttachment, 2> colorAttachments;
+            colorAttachments[0].view = nullptr;
+
+            colorAttachments[1].view =
+                Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+            colorAttachments[1].loadOp = wgpu::LoadOp::Load;
+            colorAttachments[1].storeOp = wgpu::StoreOp::Store;
+
+            wgpu::RenderPassDescriptor renderPass;
+            renderPass.colorAttachmentCount = colorAttachments.size();
+            renderPass.colorAttachments = colorAttachments.data();
+            renderPass.depthStencilAttachment = nullptr;
+            AssertBeginRenderPassSuccess(&renderPass);
+        }
+
+        // When all color attachments are null
+        {
+            std::array<wgpu::RenderPassColorAttachment, 2> colorAttachments;
+            colorAttachments[0].view = nullptr;
+            colorAttachments[1].view = nullptr;
+
+            // Control case: depth stencil attachment is not null is valid.
+            {
+                wgpu::TextureView depthStencilView =
+                    Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8);
+                wgpu::RenderPassDepthStencilAttachment depthStencilAttachment;
+                depthStencilAttachment.view = depthStencilView;
+                depthStencilAttachment.depthClearValue = 1.0f;
+                depthStencilAttachment.stencilClearValue = 0;
+                depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Clear;
+                depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
+                depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Clear;
+                depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
+
+                wgpu::RenderPassDescriptor renderPass;
+                renderPass.colorAttachmentCount = colorAttachments.size();
+                renderPass.colorAttachments = colorAttachments.data();
+                renderPass.depthStencilAttachment = &depthStencilAttachment;
+                AssertBeginRenderPassSuccess(&renderPass);
+            }
+
+            // Error case: depth stencil attachment being null is invalid.
+            {
+                wgpu::RenderPassDescriptor renderPass;
+                renderPass.colorAttachmentCount = colorAttachments.size();
+                renderPass.colorAttachments = colorAttachments.data();
+                renderPass.depthStencilAttachment = nullptr;
+                AssertBeginRenderPassError(&renderPass);
+            }
+        }
+    }
+
     // Check that the render pass color attachment must have the RenderAttachment usage.
     TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentInvalidUsage) {
         // Control case: using a texture with RenderAttachment is valid.

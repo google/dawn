@@ -27,8 +27,11 @@ namespace dawn::native {
         ASSERT(descriptor->colorFormatsCount <= kMaxColorAttachments);
         for (ColorAttachmentIndex i(uint8_t(0));
              i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorFormatsCount)); ++i) {
-            mColorAttachmentsSet.set(i);
-            mColorFormats[i] = descriptor->colorFormats[static_cast<uint8_t>(i)];
+            wgpu::TextureFormat format = descriptor->colorFormats[static_cast<uint8_t>(i)];
+            if (format != wgpu::TextureFormat::Undefined) {
+                mColorAttachmentsSet.set(i);
+                mColorFormats[i] = format;
+            }
         }
         mDepthStencilFormat = descriptor->depthStencilFormat;
     }
@@ -40,8 +43,12 @@ namespace dawn::native {
             for (ColorAttachmentIndex i(uint8_t(0));
                  i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->fragment->targetCount));
                  ++i) {
-                mColorAttachmentsSet.set(i);
-                mColorFormats[i] = descriptor->fragment->targets[static_cast<uint8_t>(i)].format;
+                wgpu::TextureFormat format =
+                    descriptor->fragment->targets[static_cast<uint8_t>(i)].format;
+                if (format != wgpu::TextureFormat::Undefined) {
+                    mColorAttachmentsSet.set(i);
+                    mColorFormats[i] = format;
+                }
             }
         }
         if (descriptor->depthStencil != nullptr) {
@@ -55,6 +62,9 @@ namespace dawn::native {
              ++i) {
             TextureViewBase* attachment =
                 descriptor->colorAttachments[static_cast<uint8_t>(i)].view;
+            if (attachment == nullptr) {
+                continue;
+            }
             mColorAttachmentsSet.set(i);
             mColorFormats[i] = attachment->GetFormat().format;
             if (mSampleCount == 0) {
