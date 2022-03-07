@@ -34,37 +34,49 @@ class UniqueAllocator {
   /// @return a pointer to an instance of `T` with the provided arguments.
   ///         If an existing instance of `T` has been constructed, then the same
   ///         pointer is returned.
-  template <typename... ARGS>
-  T* Get(ARGS&&... args) {
+  template <typename TYPE = T, typename... ARGS>
+  TYPE* Get(ARGS&&... args) {
     // Create a temporary T instance on the stack so that we can hash it, and
     // use it for equality lookup for the std::unordered_set. If the item is not
     // found in the set, then we create the persisted instance with the
     // allocator.
-    T key{args...};
+    TYPE key{args...};
     auto hash = HASH{}(key);
     auto it = items.find(Entry{hash, &key});
     if (it != items.end()) {
-      return it->ptr;
+      return static_cast<TYPE*>(it->ptr);
     }
-    auto* ptr = allocator.Create(std::forward<ARGS>(args)...);
+    auto* ptr = allocator.template Create<TYPE>(std::forward<ARGS>(args)...);
     items.emplace_hint(it, Entry{hash, ptr});
     return ptr;
   }
 
- private:
+ protected:
+  /// Entry is used as the entry to the unordered_set
   struct Entry {
+    /// The pre-calculated hash of the entry
     size_t hash;
+    /// Tge pointer to the unique object
     T* ptr;
   };
-  struct Hasher {
-    size_t operator()(Entry e) const { return e.hash; }
-  };
+  /// Comparator is the hashing and equality function used by the unordered_set
   struct Comparator {
+    /// Hashing function
+    /// @param e the entry
+    /// @returns the hash of the entry
+    size_t operator()(Entry e) const { return e.hash; }
+
+    /// Equality function
+    /// @param a the first entry to compare
+    /// @param b the second entry to compare
+    /// @returns true if the two entries are equal
     bool operator()(Entry a, Entry b) const { return EQUAL{}(*a.ptr, *b.ptr); }
   };
 
+  /// The block allocator used to allocate the unique objects
   BlockAllocator<T> allocator;
-  std::unordered_set<Entry, Hasher, Comparator> items;
+  /// The unordered_set of unique item entries
+  std::unordered_set<Entry, Comparator, Comparator> items;
 };
 
 }  // namespace tint::utils

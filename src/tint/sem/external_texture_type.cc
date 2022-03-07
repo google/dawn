@@ -27,6 +27,14 @@ ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 
 ExternalTexture::~ExternalTexture() = default;
 
+size_t ExternalTexture::Hash() const {
+  return TypeInfo::Of<ExternalTexture>().full_hashcode;
+}
+
+bool ExternalTexture::Equals(const sem::Type& other) const {
+  return other.Is<ExternalTexture>();
+}
+
 std::string ExternalTexture::type_name() const {
   return "__external_texture";
 }

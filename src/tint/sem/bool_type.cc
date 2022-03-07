@@ -27,6 +27,14 @@ Bool::Bool(Bool&&) = default;
 
 Bool::~Bool() = default;
 
+size_t Bool::Hash() const {
+  return TypeInfo::Of<Bool>().full_hashcode;
+}
+
+bool Bool::Equals(const Type& other) const {
+  return other.Is<Bool>();
+}
+
 std::string Bool::type_name() const {
   return "__bool";
 }

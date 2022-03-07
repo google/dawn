@@ -43,6 +43,13 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   StorageTexture(StorageTexture&&);
   ~StorageTexture() override;
 
+  /// @returns a hash of the type.
+  size_t Hash() const override;
+
+  /// @param other the other type to compare against
+  /// @returns true if the this type is equal to the given type
+  bool Equals(const Type& other) const override;
+
   /// @returns the storage subtype
   Type* type() const { return subtype_; }
 

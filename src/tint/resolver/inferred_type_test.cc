@@ -142,7 +142,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
 TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
   auto* type = ty.array(ty.u32(), 10);
   auto* expected_type =
-      create<sem::Array>(create<sem::U32>(), 10, 4, 4 * 10, 4, 4);
+      create<sem::Array>(create<sem::U32>(), 10u, 4u, 4u * 10u, 4u, 4u);
 
   auto* ctor_expr = Construct(type);
   auto* var = Var("a", nullptr, ast::StorageClass::kFunction, ctor_expr);
@@ -159,8 +159,8 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
   auto* expected_type = create<sem::Struct>(
       str, str->name,
       sem::StructMemberList{create<sem::StructMember>(
-          member, member->symbol, create<sem::I32>(), 0, 0, 0, 4)},
-      0, 4, 4);
+          member, member->symbol, create<sem::I32>(), 0u, 0u, 0u, 4u)},
+      0u, 4u, 4u);
 
   auto* ctor_expr = Construct(ty.Of(str));
 

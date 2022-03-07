@@ -15,6 +15,7 @@
 #include "src/tint/sem/depth_texture_type.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::DepthTexture);
 
@@ -38,6 +39,17 @@ DepthTexture::DepthTexture(ast::TextureDimension dim) : Base(dim) {
 DepthTexture::DepthTexture(DepthTexture&&) = default;
 
 DepthTexture::~DepthTexture() = default;
+
+size_t DepthTexture::Hash() const {
+  return utils::Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim());
+}
+
+bool DepthTexture::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<DepthTexture>()) {
+    return o->dim() == dim();
+  }
+  return false;
+}
 
 std::string DepthTexture::type_name() const {
   std::ostringstream out;

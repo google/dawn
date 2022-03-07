@@ -36,6 +36,13 @@ class Matrix : public Castable<Matrix, Type> {
   Matrix(Matrix&&);
   ~Matrix() override;
 
+  /// @returns a hash of the type.
+  size_t Hash() const override;
+
+  /// @param other the other type to compare against
+  /// @returns true if the this type is equal to the given type
+  bool Equals(const Type& other) const override;
+
   /// @returns the type of the matrix
   const Type* type() const { return subtype_; }
   /// @returns the number of rows in the matrix

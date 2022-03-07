@@ -15,6 +15,7 @@
 #include "src/tint/sem/storage_texture_type.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StorageTexture);
 
@@ -30,6 +31,19 @@ StorageTexture::StorageTexture(ast::TextureDimension dim,
 StorageTexture::StorageTexture(StorageTexture&&) = default;
 
 StorageTexture::~StorageTexture() = default;
+
+size_t StorageTexture::Hash() const {
+  return utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim(),
+                     texel_format_, access_);
+}
+
+bool StorageTexture::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<StorageTexture>()) {
+    return o->dim() == dim() && o->texel_format_ == texel_format_ &&
+           o->access_ == access_;
+  }
+  return false;
+}
 
 std::string StorageTexture::type_name() const {
   std::ostringstream out;

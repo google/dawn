@@ -33,6 +33,13 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   SampledTexture(SampledTexture&&);
   ~SampledTexture() override;
 
+  /// @returns a hash of the type.
+  size_t Hash() const override;
+
+  /// @param other the other type to compare against
+  /// @returns true if the this type is equal to the given type
+  bool Equals(const Type& other) const override;
+
   /// @returns the subtype of the sampled texture
   Type* type() const { return const_cast<Type*>(type_); }
 

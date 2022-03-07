@@ -16,6 +16,7 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/vector_type.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Matrix);
 
@@ -36,6 +37,19 @@ Matrix::Matrix(const Vector* column_type, uint32_t columns)
 Matrix::Matrix(Matrix&&) = default;
 
 Matrix::~Matrix() = default;
+
+size_t Matrix::Hash() const {
+  return utils::Hash(TypeInfo::Of<Vector>().full_hashcode, rows_, columns_,
+                     column_type_);
+}
+
+bool Matrix::Equals(const Type& other) const {
+  if (auto* v = other.As<Matrix>()) {
+    return v->rows_ == rows_ && v->columns_ == columns_ &&
+           v->column_type_ == column_type_;
+  }
+  return false;
+}
 
 std::string Matrix::type_name() const {
   return "__mat_" + std::to_string(rows_) + "_" + std::to_string(columns_) +

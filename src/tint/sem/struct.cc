@@ -21,6 +21,7 @@
 
 #include "src/tint/ast/struct_member.h"
 #include "src/tint/symbol_table.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
@@ -50,6 +51,17 @@ Struct::Struct(const ast::Struct* declaration,
 }
 
 Struct::~Struct() = default;
+
+size_t Struct::Hash() const {
+  return utils::Hash(TypeInfo::Of<Struct>().full_hashcode, name_);
+}
+
+bool Struct::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<Struct>()) {
+    return o->name_ == name_;
+  }
+  return false;
+}
 
 const StructMember* Struct::FindMember(Symbol name) const {
   for (auto* member : members_) {

@@ -126,7 +126,7 @@ using i32 = ProgramBuilder::i32;
 using u32 = ProgramBuilder::u32;
 using f32 = ProgramBuilder::f32;
 
-template <int N, typename T>
+template <uint32_t N, typename T>
 struct vec {};
 
 template <typename T>
@@ -138,7 +138,7 @@ using vec3 = vec<3, T>;
 template <typename T>
 using vec4 = vec<4, T>;
 
-template <int N, int M, typename T>
+template <uint32_t N, uint32_t M, typename T>
 struct mat {};
 
 template <typename T>
@@ -156,7 +156,7 @@ using mat3x3 = mat<3, 3, T>;
 template <typename T>
 using mat4x4 = mat<4, 4, T>;
 
-template <int N, typename T>
+template <uint32_t N, typename T>
 struct array {};
 
 template <typename TO, int ID = 0>
@@ -271,7 +271,7 @@ struct DataType<f32> {
 };
 
 /// Helper for building vector types and expressions
-template <int N, typename T>
+template <uint32_t N, typename T>
 struct DataType<vec<N, T>> {
   /// true as vectors are a composite type
   static constexpr bool is_composite = true;
@@ -300,7 +300,7 @@ struct DataType<vec<N, T>> {
   static inline ast::ExpressionList ExprArgs(ProgramBuilder& b,
                                              int elem_value) {
     ast::ExpressionList args;
-    for (int i = 0; i < N; i++) {
+    for (uint32_t i = 0; i < N; i++) {
       args.emplace_back(DataType<T>::Expr(b, elem_value));
     }
     return args;
@@ -308,7 +308,7 @@ struct DataType<vec<N, T>> {
 };
 
 /// Helper for building matrix types and expressions
-template <int N, int M, typename T>
+template <uint32_t N, uint32_t M, typename T>
 struct DataType<mat<N, M, T>> {
   /// true as matrices are a composite type
   static constexpr bool is_composite = true;
@@ -338,7 +338,7 @@ struct DataType<mat<N, M, T>> {
   static inline ast::ExpressionList ExprArgs(ProgramBuilder& b,
                                              int elem_value) {
     ast::ExpressionList args;
-    for (int i = 0; i < N; i++) {
+    for (uint32_t i = 0; i < N; i++) {
       args.emplace_back(DataType<vec<M, T>>::Expr(b, elem_value));
     }
     return args;
@@ -421,7 +421,7 @@ struct DataType<ptr<T>> {
 };
 
 /// Helper for building array types and expressions
-template <int N, typename T>
+template <uint32_t N, typename T>
 struct DataType<array<N, T>> {
   /// true as arrays are a composite type
   static constexpr bool is_composite = true;
@@ -457,7 +457,7 @@ struct DataType<array<N, T>> {
   static inline ast::ExpressionList ExprArgs(ProgramBuilder& b,
                                              int elem_value) {
     ast::ExpressionList args;
-    for (int i = 0; i < N; i++) {
+    for (uint32_t i = 0; i < N; i++) {
       args.emplace_back(DataType<T>::Expr(b, elem_value));
     }
     return args;

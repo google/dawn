@@ -516,7 +516,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
       has_overridable_workgroup_size_ = true;
 
       auto* vec3_u32 =
-          builder_.create<sem::Vector>(builder_.create<sem::U32>(), 3);
+          builder_.create<sem::Vector>(builder_.create<sem::U32>(), 3u);
       uint32_t vec3_u32_type_id = GenerateTypeIfNeeded(vec3_u32);
       if (vec3_u32_type_id == 0) {
         return 0;
@@ -2712,7 +2712,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     if (texture_type
             ->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
       auto* f32 = builder_.create<sem::F32>();
-      auto* spirv_result_type = builder_.create<sem::Vector>(f32, 4);
+      auto* spirv_result_type = builder_.create<sem::Vector>(f32, 4u);
       auto spirv_result = result_op();
       post_emission = [=] {
         return push_function_inst(
@@ -3996,9 +3996,7 @@ bool Builder::GenerateTextureType(const sem::Texture* texture,
       [&](const sem::StorageTexture* t) {
         return GenerateTypeIfNeeded(t->type());
       },
-      [&](Default)  {
-        return 0u;
-      });
+      [&](Default) { return 0u; });
   if (type_id == 0u) {
     return false;
   }

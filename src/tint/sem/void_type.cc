@@ -27,6 +27,14 @@ Void::Void(Void&&) = default;
 
 Void::~Void() = default;
 
+size_t Void::Hash() const {
+  return TypeInfo::Of<Void>().full_hashcode;
+}
+
+bool Void::Equals(const Type& other) const {
+  return other.Is<Void>();
+}
+
 std::string Void::type_name() const {
   return "__void";
 }

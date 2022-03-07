@@ -15,6 +15,7 @@
 #include "src/tint/sem/multisampled_texture_type.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::MultisampledTexture);
 
@@ -30,6 +31,18 @@ MultisampledTexture::MultisampledTexture(ast::TextureDimension dim,
 MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;
 
 MultisampledTexture::~MultisampledTexture() = default;
+
+size_t MultisampledTexture::Hash() const {
+  return utils::Hash(TypeInfo::Of<MultisampledTexture>().full_hashcode, dim(),
+                     type_);
+}
+
+bool MultisampledTexture::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<MultisampledTexture>()) {
+    return o->dim() == dim() && o->type_ == type_;
+  }
+  return false;
+}
 
 std::string MultisampledTexture::type_name() const {
   std::ostringstream out;

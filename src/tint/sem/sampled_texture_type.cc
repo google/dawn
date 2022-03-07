@@ -15,6 +15,7 @@
 #include "src/tint/sem/sampled_texture_type.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::SampledTexture);
 
@@ -29,6 +30,18 @@ SampledTexture::SampledTexture(ast::TextureDimension dim, const Type* type)
 SampledTexture::SampledTexture(SampledTexture&&) = default;
 
 SampledTexture::~SampledTexture() = default;
+
+size_t SampledTexture::Hash() const {
+  return utils::Hash(TypeInfo::Of<SampledTexture>().full_hashcode, dim(),
+                     type_);
+}
+
+bool SampledTexture::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<SampledTexture>()) {
+    return o->dim() == dim() && o->type_ == type_;
+  }
+  return false;
+}
 
 std::string SampledTexture::type_name() const {
   std::ostringstream out;

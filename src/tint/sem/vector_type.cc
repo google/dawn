@@ -15,6 +15,7 @@
 #include "src/tint/sem/vector_type.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Vector);
 
@@ -30,6 +31,17 @@ Vector::Vector(Type const* subtype, uint32_t width)
 Vector::Vector(Vector&&) = default;
 
 Vector::~Vector() = default;
+
+size_t Vector::Hash() const {
+  return utils::Hash(TypeInfo::Of<Vector>().full_hashcode, width_, subtype_);
+}
+
+bool Vector::Equals(const Type& other) const {
+  if (auto* v = other.As<Vector>()) {
+    return v->width_ == width_ && v->subtype_ == subtype_;
+  }
+  return false;
+}
 
 std::string Vector::type_name() const {
   return "__vec_" + std::to_string(width_) + subtype_->type_name();

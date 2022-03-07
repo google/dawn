@@ -16,6 +16,7 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/reference_type.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Atomic);
 
@@ -24,6 +25,17 @@ namespace sem {
 
 Atomic::Atomic(const sem::Type* subtype) : subtype_(subtype) {
   TINT_ASSERT(AST, !subtype->Is<Reference>());
+}
+
+size_t Atomic::Hash() const {
+  return utils::Hash(TypeInfo::Of<Atomic>().full_hashcode, subtype_);
+}
+
+bool Atomic::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<Atomic>()) {
+    return o->subtype_ == subtype_;
+  }
+  return false;
 }
 
 std::string Atomic::type_name() const {

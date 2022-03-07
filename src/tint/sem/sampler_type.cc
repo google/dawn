@@ -15,6 +15,7 @@
 #include "src/tint/sem/sampler_type.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Sampler);
 
@@ -26,6 +27,17 @@ Sampler::Sampler(ast::SamplerKind kind) : kind_(kind) {}
 Sampler::Sampler(Sampler&&) = default;
 
 Sampler::~Sampler() = default;
+
+size_t Sampler::Hash() const {
+  return utils::Hash(TypeInfo::Of<Sampler>().full_hashcode, kind_);
+}
+
+bool Sampler::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<Sampler>()) {
+    return o->kind_ == kind_;
+  }
+  return false;
+}
 
 std::string Sampler::type_name() const {
   return std::string("__sampler_") +

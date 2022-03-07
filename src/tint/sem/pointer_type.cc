@@ -16,6 +16,7 @@
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/reference_type.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Pointer);
 
@@ -28,6 +29,19 @@ Pointer::Pointer(const Type* subtype,
     : subtype_(subtype), storage_class_(storage_class), access_(access) {
   TINT_ASSERT(Semantic, !subtype->Is<Reference>());
   TINT_ASSERT(Semantic, access != ast::Access::kUndefined);
+}
+
+size_t Pointer::Hash() const {
+  return utils::Hash(TypeInfo::Of<Pointer>().full_hashcode, storage_class_,
+                     subtype_, access_);
+}
+
+bool Pointer::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<Pointer>()) {
+    return o->storage_class_ == storage_class_ && o->subtype_ == subtype_ &&
+           o->access_ == access_;
+  }
+  return false;
 }
 
 std::string Pointer::type_name() const {

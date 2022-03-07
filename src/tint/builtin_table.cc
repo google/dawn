@@ -47,6 +47,11 @@ class Any : public Castable<Any, sem::Type> {
  public:
   Any() = default;
   ~Any() override = default;
+
+  // Stub implementations for sem::Type conformance.
+  size_t Hash() const override { return 0; }
+  bool Equals(const sem::Type&) const override { return false; }
+
   std::string type_name() const override { return "<any>"; }
   std::string FriendlyName(const SymbolTable&) const override {
     return "<any>";
@@ -429,11 +434,11 @@ bool match_array(const sem::Type* ty, const sem::Type*& T) {
 
 const sem::Array* build_array(MatchState& state, const sem::Type* el) {
   return state.builder.create<sem::Array>(el,
-                                          /* count */ 0,
-                                          /* align */ 0,
-                                          /* size */ 0,
-                                          /* stride */ 0,
-                                          /* stride_implicit */ 0);
+                                          /* count */ 0u,
+                                          /* align */ 0u,
+                                          /* size */ 0u,
+                                          /* stride */ 0u,
+                                          /* stride_implicit */ 0u);
 }
 
 bool match_ptr(const sem::Type* ty, Number& S, const sem::Type*& T, Number& A) {

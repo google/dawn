@@ -17,6 +17,7 @@
 #include <string>
 
 #include "src/tint/debug.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 
@@ -38,6 +39,21 @@ Array::Array(const Type* element,
       constructible_(count > 0  // Runtime-sized arrays are not constructible
                      && element->IsConstructible()) {
   TINT_ASSERT(Semantic, element_);
+}
+
+size_t Array::Hash() const {
+  return utils::Hash(TypeInfo::Of<Array>().full_hashcode, count_, align_, size_,
+                     stride_);
+}
+
+bool Array::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<Array>()) {
+    // Note: implicit_stride is not part of the type_name string as this is
+    // derived from the element type
+    return o->element_ == element_ && o->count_ == count_ &&
+           o->align_ == align_ && o->size_ == size_ && o->stride_ == stride_;
+  }
+  return false;
 }
 
 bool Array::IsConstructible() const {

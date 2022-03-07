@@ -15,6 +15,7 @@
 #include "src/tint/sem/depth_multisampled_texture_type.h"
 
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::DepthMultisampledTexture);
 
@@ -37,6 +38,18 @@ DepthMultisampledTexture::DepthMultisampledTexture(DepthMultisampledTexture&&) =
     default;
 
 DepthMultisampledTexture::~DepthMultisampledTexture() = default;
+
+size_t DepthMultisampledTexture::Hash() const {
+  return utils::Hash(TypeInfo::Of<DepthMultisampledTexture>().full_hashcode,
+                     dim());
+}
+
+bool DepthMultisampledTexture::Equals(const sem::Type& other) const {
+  if (auto* o = other.As<DepthMultisampledTexture>()) {
+    return o->dim() == dim();
+  }
+  return false;
+}
 
 std::string DepthMultisampledTexture::type_name() const {
   std::ostringstream out;

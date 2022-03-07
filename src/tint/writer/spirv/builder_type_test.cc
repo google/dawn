@@ -208,8 +208,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
 
 TEST_F(BuilderTest_Type, GenerateMatrix) {
   auto* f32 = create<sem::F32>();
-  auto* vec3 = create<sem::Vector>(f32, 3);
-  auto* mat2x3 = create<sem::Matrix>(vec3, 2);
+  auto* vec3 = create<sem::Vector>(f32, 3u);
+  auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
 
   spirv::Builder& b = Build();
 
@@ -226,8 +226,8 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
   auto* i32 = create<sem::I32>();
-  auto* col = create<sem::Vector>(i32, 4);
-  auto* mat = create<sem::Matrix>(col, 3);
+  auto* col = create<sem::Vector>(i32, 4u);
+  auto* mat = create<sem::Matrix>(col, 3u);
 
   spirv::Builder& b = Build();
 
@@ -469,7 +469,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
 }
 
 TEST_F(BuilderTest_Type, GenerateVector) {
-  auto* vec = create<sem::Vector>(create<sem::F32>(), 3);
+  auto* vec = create<sem::Vector>(create<sem::F32>(), 3u);
 
   spirv::Builder& b = Build();
 
@@ -485,7 +485,7 @@ TEST_F(BuilderTest_Type, GenerateVector) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
   auto* i32 = create<sem::I32>();
-  auto* vec = create<sem::Vector>(i32, 3);
+  auto* vec = create<sem::Vector>(i32, 3u);
 
   spirv::Builder& b = Build();
 

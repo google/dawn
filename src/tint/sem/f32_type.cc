@@ -27,6 +27,14 @@ F32::F32(F32&&) = default;
 
 F32::~F32() = default;
 
+size_t F32::Hash() const {
+  return TypeInfo::Of<F32>().full_hashcode;
+}
+
+bool F32::Equals(const Type& other) const {
+  return other.Is<F32>();
+}
+
 std::string F32::type_name() const {
   return "__f32";
 }

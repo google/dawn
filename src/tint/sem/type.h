@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_SEM_TYPE_H_
 #define SRC_TINT_SEM_TYPE_H_
 
+#include <functional>
 #include <string>
 
 #include "src/tint/sem/node.h"
@@ -37,6 +38,13 @@ class Type : public Castable<Type, Node> {
   Type(Type&&);
   ~Type() override;
 
+  /// @returns a hash of the type.
+  virtual size_t Hash() const = 0;
+
+  /// @returns true if the this type is equal to the given type
+  virtual bool Equals(const Type&) const = 0;
+
+  /// [DEPRECATED]
   /// @returns the name for this type. The type name is unique over all types.
   virtual std::string type_name() const = 0;
 
@@ -114,5 +122,28 @@ class Type : public Castable<Type, Node> {
 
 }  // namespace sem
 }  // namespace tint
+
+namespace std {
+
+/// std::hash specialization for tint::sem::Type
+template <>
+struct hash<tint::sem::Type> {
+  /// @param type the type to obtain a hash from
+  /// @returns the hash of the semantic type
+  size_t operator()(const tint::sem::Type& type) const { return type.Hash(); }
+};
+
+/// std::equal_to specialization for tint::sem::Type
+template <>
+struct equal_to<tint::sem::Type> {
+  /// @param a the first type to compare
+  /// @param b the second type to compare
+  /// @returns true if the two types are equal
+  bool operator()(const tint::sem::Type& a, const tint::sem::Type& b) const {
+    return a.Equals(b);
+  }
+};
+
+}  // namespace std
 
 #endif  // SRC_TINT_SEM_TYPE_H_

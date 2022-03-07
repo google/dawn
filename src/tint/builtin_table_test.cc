@@ -60,7 +60,7 @@ TEST_F(BuiltinTableTest, MismatchF32) {
 TEST_F(BuiltinTableTest, MatchU32) {
   auto* f32 = create<sem::F32>();
   auto* u32 = create<sem::U32>();
-  auto* vec2_f32 = create<sem::Vector>(f32, 2);
+  auto* vec2_f32 = create<sem::Vector>(f32, 2u);
   auto* result = table->Lookup(BuiltinType::kUnpack2x16float, {u32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
@@ -80,7 +80,7 @@ TEST_F(BuiltinTableTest, MismatchU32) {
 TEST_F(BuiltinTableTest, MatchI32) {
   auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
-  auto* vec4_f32 = create<sem::Vector>(f32, 4);
+  auto* vec4_f32 = create<sem::Vector>(f32, 4u);
   auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k1d, f32);
   auto* result =
       table->Lookup(BuiltinType::kTextureLoad, {tex, i32, i32}, Source{});
@@ -226,7 +226,7 @@ TEST_F(BuiltinTableTest, MismatchPointer) {
 }
 
 TEST_F(BuiltinTableTest, MatchArray) {
-  auto* arr = create<sem::Array>(create<sem::U32>(), 0, 4, 4, 4, 4);
+  auto* arr = create<sem::Array>(create<sem::U32>(), 0u, 4u, 4u, 4u, 4u);
   auto* arr_ptr = create<sem::Pointer>(arr, ast::StorageClass::kStorage,
                                        ast::Access::kReadWrite);
   auto* result = table->Lookup(BuiltinType::kArrayLength, {arr_ptr}, Source{});
@@ -249,8 +249,8 @@ TEST_F(BuiltinTableTest, MismatchArray) {
 
 TEST_F(BuiltinTableTest, MatchSampler) {
   auto* f32 = create<sem::F32>();
-  auto* vec2_f32 = create<sem::Vector>(f32, 2);
-  auto* vec4_f32 = create<sem::Vector>(f32, 4);
+  auto* vec2_f32 = create<sem::Vector>(f32, 2u);
+  auto* vec4_f32 = create<sem::Vector>(f32, 4u);
   auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k2d, f32);
   auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
   auto* result = table->Lookup(BuiltinType::kTextureSample,
@@ -270,7 +270,7 @@ TEST_F(BuiltinTableTest, MatchSampler) {
 
 TEST_F(BuiltinTableTest, MismatchSampler) {
   auto* f32 = create<sem::F32>();
-  auto* vec2_f32 = create<sem::Vector>(f32, 2);
+  auto* vec2_f32 = create<sem::Vector>(f32, 2u);
   auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k2d, f32);
   auto* result = table->Lookup(BuiltinType::kTextureSample,
                                {tex, f32, vec2_f32}, Source{});
@@ -281,8 +281,8 @@ TEST_F(BuiltinTableTest, MismatchSampler) {
 TEST_F(BuiltinTableTest, MatchSampledTexture) {
   auto* i32 = create<sem::I32>();
   auto* f32 = create<sem::F32>();
-  auto* vec2_i32 = create<sem::Vector>(i32, 2);
-  auto* vec4_f32 = create<sem::Vector>(f32, 4);
+  auto* vec2_i32 = create<sem::Vector>(i32, 2u);
+  auto* vec4_f32 = create<sem::Vector>(f32, 4u);
   auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k2d, f32);
   auto* result =
       table->Lookup(BuiltinType::kTextureLoad, {tex, vec2_i32, i32}, Source{});
@@ -302,8 +302,8 @@ TEST_F(BuiltinTableTest, MatchSampledTexture) {
 TEST_F(BuiltinTableTest, MatchMultisampledTexture) {
   auto* i32 = create<sem::I32>();
   auto* f32 = create<sem::F32>();
-  auto* vec2_i32 = create<sem::Vector>(i32, 2);
-  auto* vec4_f32 = create<sem::Vector>(f32, 4);
+  auto* vec2_i32 = create<sem::Vector>(i32, 2u);
+  auto* vec4_f32 = create<sem::Vector>(f32, 4u);
   auto* tex = create<sem::MultisampledTexture>(ast::TextureDimension::k2d, f32);
   auto* result =
       table->Lookup(BuiltinType::kTextureLoad, {tex, vec2_i32, i32}, Source{});
@@ -323,7 +323,7 @@ TEST_F(BuiltinTableTest, MatchMultisampledTexture) {
 TEST_F(BuiltinTableTest, MatchDepthTexture) {
   auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
-  auto* vec2_i32 = create<sem::Vector>(i32, 2);
+  auto* vec2_i32 = create<sem::Vector>(i32, 2u);
   auto* tex = create<sem::DepthTexture>(ast::TextureDimension::k2d);
   auto* result =
       table->Lookup(BuiltinType::kTextureLoad, {tex, vec2_i32, i32}, Source{});
@@ -343,7 +343,7 @@ TEST_F(BuiltinTableTest, MatchDepthTexture) {
 TEST_F(BuiltinTableTest, MatchDepthMultisampledTexture) {
   auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
-  auto* vec2_i32 = create<sem::Vector>(i32, 2);
+  auto* vec2_i32 = create<sem::Vector>(i32, 2u);
   auto* tex = create<sem::DepthMultisampledTexture>(ast::TextureDimension::k2d);
   auto* result =
       table->Lookup(BuiltinType::kTextureLoad, {tex, vec2_i32, i32}, Source{});
@@ -363,8 +363,8 @@ TEST_F(BuiltinTableTest, MatchDepthMultisampledTexture) {
 TEST_F(BuiltinTableTest, MatchExternalTexture) {
   auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
-  auto* vec2_i32 = create<sem::Vector>(i32, 2);
-  auto* vec4_f32 = create<sem::Vector>(f32, 4);
+  auto* vec2_i32 = create<sem::Vector>(i32, 2u);
+  auto* vec4_f32 = create<sem::Vector>(f32, 4u);
   auto* tex = create<sem::ExternalTexture>();
   auto* result =
       table->Lookup(BuiltinType::kTextureLoad, {tex, vec2_i32}, Source{});
@@ -382,8 +382,8 @@ TEST_F(BuiltinTableTest, MatchExternalTexture) {
 TEST_F(BuiltinTableTest, MatchWOStorageTexture) {
   auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
-  auto* vec2_i32 = create<sem::Vector>(i32, 2);
-  auto* vec4_f32 = create<sem::Vector>(f32, 4);
+  auto* vec2_i32 = create<sem::Vector>(i32, 2u);
+  auto* vec4_f32 = create<sem::Vector>(f32, 4u);
   auto* subtype =
       sem::StorageTexture::SubtypeFor(ast::TexelFormat::kR32Float, Types());
   auto* tex = create<sem::StorageTexture>(ast::TextureDimension::k2d,
@@ -408,7 +408,7 @@ TEST_F(BuiltinTableTest, MatchWOStorageTexture) {
 TEST_F(BuiltinTableTest, MismatchTexture) {
   auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
-  auto* vec2_i32 = create<sem::Vector>(i32, 2);
+  auto* vec2_i32 = create<sem::Vector>(i32, 2u);
   auto* result =
       table->Lookup(BuiltinType::kTextureLoad, {f32, vec2_i32}, Source{});
   ASSERT_EQ(result, nullptr);
@@ -452,7 +452,7 @@ TEST_F(BuiltinTableTest, MismatchOpenType) {
 
 TEST_F(BuiltinTableTest, MatchOpenSizeVector) {
   auto* f32 = create<sem::F32>();
-  auto* vec2_f32 = create<sem::Vector>(f32, 2);
+  auto* vec2_f32 = create<sem::Vector>(f32, 2u);
   auto* result = table->Lookup(BuiltinType::kClamp,
                                {vec2_f32, vec2_f32, vec2_f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
@@ -468,7 +468,7 @@ TEST_F(BuiltinTableTest, MatchOpenSizeVector) {
 TEST_F(BuiltinTableTest, MismatchOpenSizeVector) {
   auto* f32 = create<sem::F32>();
   auto* u32 = create<sem::U32>();
-  auto* vec2_f32 = create<sem::Vector>(f32, 2);
+  auto* vec2_f32 = create<sem::Vector>(f32, 2u);
   auto* result =
       table->Lookup(BuiltinType::kClamp, {vec2_f32, u32, vec2_f32}, Source{});
   ASSERT_EQ(result, nullptr);
@@ -477,8 +477,8 @@ TEST_F(BuiltinTableTest, MismatchOpenSizeVector) {
 
 TEST_F(BuiltinTableTest, MatchOpenSizeMatrix) {
   auto* f32 = create<sem::F32>();
-  auto* vec3_f32 = create<sem::Vector>(f32, 3);
-  auto* mat3_f32 = create<sem::Matrix>(vec3_f32, 3);
+  auto* vec3_f32 = create<sem::Vector>(f32, 3u);
+  auto* mat3_f32 = create<sem::Matrix>(vec3_f32, 3u);
   auto* result = table->Lookup(BuiltinType::kDeterminant, {mat3_f32}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
@@ -490,8 +490,8 @@ TEST_F(BuiltinTableTest, MatchOpenSizeMatrix) {
 
 TEST_F(BuiltinTableTest, MismatchOpenSizeMatrix) {
   auto* f32 = create<sem::F32>();
-  auto* vec2_f32 = create<sem::Vector>(f32, 2);
-  auto* mat3x2_f32 = create<sem::Matrix>(vec2_f32, 3);
+  auto* vec2_f32 = create<sem::Vector>(f32, 2u);
+  auto* mat3x2_f32 = create<sem::Matrix>(vec2_f32, 3u);
   auto* result =
       table->Lookup(BuiltinType::kDeterminant, {mat3x2_f32}, Source{});
   ASSERT_EQ(result, nullptr);
@@ -578,7 +578,7 @@ TEST_F(BuiltinTableTest, OverloadOrderByMatchingParameter) {
 
 TEST_F(BuiltinTableTest, SameOverloadReturnsSameBuiltinPointer) {
   auto* f32 = create<sem::F32>();
-  auto* vec2_f32 = create<sem::Vector>(create<sem::F32>(), 2);
+  auto* vec2_f32 = create<sem::Vector>(create<sem::F32>(), 2u);
   auto* bool_ = create<sem::Bool>();
   auto* a = table->Lookup(BuiltinType::kSelect, {f32, f32, bool_}, Source{});
   ASSERT_NE(a, nullptr) << Diagnostics().str();

@@ -33,6 +33,13 @@ class Sampler : public Castable<Sampler, Type> {
   Sampler(Sampler&&);
   ~Sampler() override;
 
+  /// @returns a hash of the type.
+  size_t Hash() const override;
+
+  /// @param other the other type to compare against
+  /// @returns true if the this type is equal to the given type
+  bool Equals(const Type& other) const override;
+
   /// @returns the sampler type
   ast::SamplerKind kind() const { return kind_; }
 

@@ -122,8 +122,8 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_I32) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix) {
   auto* f32 = create<sem::F32>();
-  auto* vec3 = create<sem::Vector>(f32, 3);
-  auto* mat2x3 = create<sem::Matrix>(vec3, 2);
+  auto* vec3 = create<sem::Vector>(f32, 3u);
+  auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
 
   GeneratorImpl& gen = Build();
 
@@ -224,7 +224,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_U32) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector) {
   auto* f32 = create<sem::F32>();
-  auto* vec3 = create<sem::Vector>(f32, 3);
+  auto* vec3 = create<sem::Vector>(f32, 3u);
 
   GeneratorImpl& gen = Build();
 

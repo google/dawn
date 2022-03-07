@@ -30,13 +30,13 @@ TEST_F(VectorTest, Creation) {
 
 TEST_F(VectorTest, TypeName) {
   auto* i32 = create<I32>();
-  auto* v = create<Vector>(i32, 3);
+  auto* v = create<Vector>(i32, 3u);
   EXPECT_EQ(v->type_name(), "__vec_3__i32");
 }
 
 TEST_F(VectorTest, FriendlyName) {
   auto* f32 = create<F32>();
-  auto* v = create<Vector>(f32, 3);
+  auto* v = create<Vector>(f32, 3u);
   EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
 }
 

@@ -32,6 +32,13 @@ class ExternalTexture : public Castable<ExternalTexture, Texture> {
   ExternalTexture(ExternalTexture&&);
   ~ExternalTexture() override;
 
+  /// @returns a hash of the type.
+  size_t Hash() const override;
+
+  /// @param other the other type to compare against
+  /// @returns true if the this type is equal to the given type
+  bool Equals(const Type& other) const override;
+
   /// @returns the name for this type
   std::string type_name() const override;
 

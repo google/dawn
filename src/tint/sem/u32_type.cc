@@ -27,6 +27,14 @@ U32::~U32() = default;
 
 U32::U32(U32&&) = default;
 
+size_t U32::Hash() const {
+  return TypeInfo::Of<U32>().full_hashcode;
+}
+
+bool U32::Equals(const Type& other) const {
+  return other.Is<U32>();
+}
+
 std::string U32::type_name() const {
   return "__u32";
 }

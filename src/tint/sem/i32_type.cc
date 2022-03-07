@@ -27,6 +27,14 @@ I32::I32(I32&&) = default;
 
 I32::~I32() = default;
 
+size_t I32::Hash() const {
+  return TypeInfo::Of<I32>().full_hashcode;
+}
+
+bool I32::Equals(const Type& other) const {
+  return other.Is<I32>();
+}
+
 std::string I32::type_name() const {
   return "__i32";
 }

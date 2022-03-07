@@ -52,6 +52,13 @@ class Array : public Castable<Array, Type> {
         uint32_t stride,
         uint32_t implicit_stride);
 
+  /// @returns a hash of the type.
+  size_t Hash() const override;
+
+  /// @param other the other type to compare against
+  /// @returns true if the this type is equal to the given type
+  bool Equals(const Type& other) const override;
+
   /// @return the array element type
   Type const* ElemType() const { return element_; }
 
