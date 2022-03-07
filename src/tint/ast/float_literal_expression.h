@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A float literal
-class FloatLiteralExpression
+class FloatLiteralExpression final
     : public Castable<FloatLiteralExpression, LiteralExpression> {
  public:
   /// Constructor

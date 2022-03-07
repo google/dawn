@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A stride attribute
-class StrideAttribute : public Castable<StrideAttribute, Attribute> {
+class StrideAttribute final : public Castable<StrideAttribute, Attribute> {
  public:
   /// constructor
   /// @param pid the identifier of the program that owns this node

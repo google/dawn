@@ -27,7 +27,7 @@ namespace sem {
 class Manager;
 
 /// A storage texture type.
-class StorageTexture : public Castable<StorageTexture, Texture> {
+class StorageTexture final : public Castable<StorageTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture

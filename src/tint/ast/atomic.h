@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// An atomic type.
-class Atomic : public Castable<Atomic, Type> {
+class Atomic final : public Castable<Atomic, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

@@ -28,7 +28,7 @@ namespace transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class DecomposeStridedArray
+class DecomposeStridedArray final
     : public Castable<DecomposeStridedArray, Transform> {
  public:
   /// Constructor

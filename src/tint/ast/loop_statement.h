@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// A loop statement
-class LoopStatement : public Castable<LoopStatement, Statement> {
+class LoopStatement final : public Castable<LoopStatement, Statement> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

@@ -27,7 +27,7 @@ namespace ast {
 class Expression;
 
 /// An array type. If size is zero then it is a runtime array.
-class Array : public Castable<Array, Type> {
+class Array final : public Castable<Array, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

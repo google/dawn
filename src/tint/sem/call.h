@@ -25,7 +25,7 @@ namespace sem {
 
 /// Call is the base class for semantic nodes that hold semantic information for
 /// ast::CallExpression nodes.
-class Call : public Castable<Call, Expression> {
+class Call final : public Castable<Call, Expression> {
  public:
   /// Constructor
   /// @param declaration the AST node

@@ -24,7 +24,8 @@ namespace tint {
 namespace ast {
 
 /// The struct block attribute
-class StructBlockAttribute : public Castable<StructBlockAttribute, Attribute> {
+class StructBlockAttribute final
+    : public Castable<StructBlockAttribute, Attribute> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

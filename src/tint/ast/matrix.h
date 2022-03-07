@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A matrix type
-class Matrix : public Castable<Matrix, Type> {
+class Matrix final : public Castable<Matrix, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

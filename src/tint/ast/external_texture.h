@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// An external texture type
-class ExternalTexture : public Castable<ExternalTexture, Texture> {
+class ExternalTexture final : public Castable<ExternalTexture, Texture> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

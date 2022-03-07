@@ -21,7 +21,8 @@ namespace tint {
 namespace ast {
 
 /// An identifier expression
-class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
+class IdentifierExpression final
+    : public Castable<IdentifierExpression, Expression> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

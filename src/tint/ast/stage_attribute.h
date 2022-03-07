@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// A workgroup attribute
-class StageAttribute : public Castable<StageAttribute, Attribute> {
+class StageAttribute final : public Castable<StageAttribute, Attribute> {
  public:
   /// constructor
   /// @param program_id the identifier of the program that owns this node

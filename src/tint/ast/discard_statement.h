@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// A discard statement
-class DiscardStatement : public Castable<DiscardStatement, Statement> {
+class DiscardStatement final : public Castable<DiscardStatement, Statement> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A signed int literal
-class SintLiteralExpression
+class SintLiteralExpression final
     : public Castable<SintLiteralExpression, IntLiteralExpression> {
  public:
   /// Constructor

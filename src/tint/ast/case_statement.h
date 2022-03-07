@@ -27,7 +27,7 @@ namespace ast {
 using CaseSelectorList = std::vector<const IntLiteralExpression*>;
 
 /// A case statement
-class CaseStatement : public Castable<CaseStatement, Statement> {
+class CaseStatement final : public Castable<CaseStatement, Statement> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

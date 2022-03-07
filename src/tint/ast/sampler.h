@@ -36,7 +36,7 @@ enum class SamplerKind {
 std::ostream& operator<<(std::ostream& out, SamplerKind kind);
 
 /// A sampler type.
-class Sampler : public Castable<Sampler, Type> {
+class Sampler final : public Castable<Sampler, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

@@ -23,7 +23,7 @@ namespace tint {
 namespace sem {
 
 /// A sampled texture type.
-class SampledTexture : public Castable<SampledTexture, Texture> {
+class SampledTexture final : public Castable<SampledTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture

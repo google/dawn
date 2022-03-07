@@ -54,7 +54,7 @@ enum class PipelineStageUsage {
 };
 
 /// Struct holds the semantic information for structures.
-class Struct : public Castable<Struct, Type> {
+class Struct final : public Castable<Struct, Type> {
  public:
   /// Constructor
   /// @param declaration the AST structure declaration

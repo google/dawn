@@ -28,7 +28,7 @@ namespace tint {
 namespace sem {
 
 /// Holds semantic information about a loop statement
-class LoopStatement : public Castable<LoopStatement, CompoundStatement> {
+class LoopStatement final : public Castable<LoopStatement, CompoundStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this loop statement
@@ -43,7 +43,7 @@ class LoopStatement : public Castable<LoopStatement, CompoundStatement> {
 };
 
 /// Holds semantic information about a loop continuing block
-class LoopContinuingBlockStatement
+class LoopContinuingBlockStatement final
     : public Castable<LoopContinuingBlockStatement, BlockStatement> {
  public:
   /// Constructor

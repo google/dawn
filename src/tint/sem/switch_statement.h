@@ -29,7 +29,8 @@ namespace tint {
 namespace sem {
 
 /// Holds semantic information about an switch statement
-class SwitchStatement : public Castable<SwitchStatement, CompoundStatement> {
+class SwitchStatement final
+    : public Castable<SwitchStatement, CompoundStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this switch statement
@@ -47,7 +48,7 @@ class SwitchStatement : public Castable<SwitchStatement, CompoundStatement> {
 };
 
 /// Holds semantic information about a switch case statement
-class CaseStatement : public Castable<CaseStatement, CompoundStatement> {
+class CaseStatement final : public Castable<CaseStatement, CompoundStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this case statement

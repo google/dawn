@@ -23,7 +23,8 @@ namespace tint {
 namespace ast {
 
 /// The invariant attribute
-class InvariantAttribute : public Castable<InvariantAttribute, Attribute> {
+class InvariantAttribute final
+    : public Castable<InvariantAttribute, Attribute> {
  public:
   /// constructor
   /// @param pid the identifier of the program that owns this node

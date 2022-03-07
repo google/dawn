@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// A builtin attribute
-class BuiltinAttribute : public Castable<BuiltinAttribute, Attribute> {
+class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
  public:
   /// constructor
   /// @param pid the identifier of the program that owns this node

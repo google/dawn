@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// A struct member size attribute
-class StructMemberSizeAttribute
+class StructMemberSizeAttribute final
     : public Castable<StructMemberSizeAttribute, Attribute> {
  public:
   /// constructor

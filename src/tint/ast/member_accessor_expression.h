@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// A member accessor expression
-class MemberAccessorExpression
+class MemberAccessorExpression final
     : public Castable<MemberAccessorExpression, Expression> {
  public:
   /// Constructor

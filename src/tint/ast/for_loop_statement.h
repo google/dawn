@@ -23,7 +23,7 @@ namespace ast {
 class Expression;
 
 /// A for loop statement
-class ForLoopStatement : public Castable<ForLoopStatement, Statement> {
+class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

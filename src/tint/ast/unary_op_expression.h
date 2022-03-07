@@ -22,7 +22,7 @@ namespace tint {
 namespace ast {
 
 /// A unary op expression
-class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
+class UnaryOpExpression final : public Castable<UnaryOpExpression, Expression> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

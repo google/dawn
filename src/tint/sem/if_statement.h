@@ -32,7 +32,7 @@ namespace tint {
 namespace sem {
 
 /// Holds semantic information about an if statement
-class IfStatement : public Castable<IfStatement, CompoundStatement> {
+class IfStatement final : public Castable<IfStatement, CompoundStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this if statement
@@ -60,7 +60,7 @@ class IfStatement : public Castable<IfStatement, CompoundStatement> {
 };
 
 /// Holds semantic information about an else statement
-class ElseStatement : public Castable<ElseStatement, CompoundStatement> {
+class ElseStatement final : public Castable<ElseStatement, CompoundStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this else statement

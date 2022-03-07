@@ -23,7 +23,7 @@ namespace tint {
 namespace sem {
 
 /// An external texture type
-class ExternalTexture : public Castable<ExternalTexture, Texture> {
+class ExternalTexture final : public Castable<ExternalTexture, Texture> {
  public:
   /// Constructor
   ExternalTexture();

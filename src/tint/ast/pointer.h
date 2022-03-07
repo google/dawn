@@ -25,7 +25,7 @@ namespace tint {
 namespace ast {
 
 /// A pointer type.
-class Pointer : public Castable<Pointer, Type> {
+class Pointer final : public Castable<Pointer, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

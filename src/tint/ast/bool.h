@@ -29,7 +29,7 @@ namespace tint {
 namespace ast {
 
 /// A boolean type
-class Bool : public Castable<Bool, Type> {
+class Bool final : public Castable<Bool, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

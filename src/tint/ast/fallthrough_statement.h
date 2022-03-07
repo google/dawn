@@ -21,7 +21,8 @@ namespace tint {
 namespace ast {
 
 /// An fallthrough statement
-class FallthroughStatement : public Castable<FallthroughStatement, Statement> {
+class FallthroughStatement final
+    : public Castable<FallthroughStatement, Statement> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

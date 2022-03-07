@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A vector type.
-class Vector : public Castable<Vector, Type> {
+class Vector final : public Castable<Vector, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

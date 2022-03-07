@@ -32,7 +32,7 @@ namespace tint {
 namespace sem {
 
 /// Array holds the semantic information for Array nodes.
-class Array : public Castable<Array, Type> {
+class Array final : public Castable<Array, Type> {
  public:
   /// Constructor
   /// @param element the array element type

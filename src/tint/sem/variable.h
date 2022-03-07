@@ -100,7 +100,7 @@ class Variable : public Castable<Variable, Node> {
 };
 
 /// LocalVariable is a function-scope variable
-class LocalVariable : public Castable<LocalVariable, Variable> {
+class LocalVariable final : public Castable<LocalVariable, Variable> {
  public:
   /// Constructor
   /// @param declaration the AST declaration node
@@ -135,7 +135,7 @@ class LocalVariable : public Castable<LocalVariable, Variable> {
 };
 
 /// GlobalVariable is a module-scope variable
-class GlobalVariable : public Castable<GlobalVariable, Variable> {
+class GlobalVariable final : public Castable<GlobalVariable, Variable> {
  public:
   /// Constructor
   /// @param declaration the AST declaration node
@@ -182,7 +182,7 @@ class GlobalVariable : public Castable<GlobalVariable, Variable> {
 };
 
 /// Parameter is a function parameter
-class Parameter : public Castable<Parameter, Variable> {
+class Parameter final : public Castable<Parameter, Variable> {
  public:
   /// Constructor for function parameters
   /// @param declaration the AST declaration node
@@ -232,7 +232,7 @@ using ParameterList = std::vector<const Parameter*>;
 
 /// VariableUser holds the semantic information for an identifier expression
 /// node that resolves to a variable.
-class VariableUser : public Castable<VariableUser, Expression> {
+class VariableUser final : public Castable<VariableUser, Expression> {
  public:
   /// Constructor
   /// @param declaration the AST identifier node

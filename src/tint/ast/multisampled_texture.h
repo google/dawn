@@ -23,7 +23,8 @@ namespace tint {
 namespace ast {
 
 /// A multisampled texture type.
-class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
+class MultisampledTexture final
+    : public Castable<MultisampledTexture, Texture> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

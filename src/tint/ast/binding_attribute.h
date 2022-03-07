@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A binding attribute
-class BindingAttribute : public Castable<BindingAttribute, Attribute> {
+class BindingAttribute final : public Castable<BindingAttribute, Attribute> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

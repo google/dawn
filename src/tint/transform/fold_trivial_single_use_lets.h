@@ -34,7 +34,7 @@ namespace transform {
 ///   single usage.
 /// These rules prevent any hoisting of the let that may affect execution
 /// behaviour.
-class FoldTrivialSingleUseLets
+class FoldTrivialSingleUseLets final
     : public Castable<FoldTrivialSingleUseLets, Transform> {
  public:
   /// Constructor

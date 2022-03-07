@@ -28,7 +28,7 @@ class TypeDecl;
 
 /// Module holds the top-level AST types, functions and global variables used by
 /// a Program.
-class Module : public Castable<Module, Node> {
+class Module final : public Castable<Module, Node> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

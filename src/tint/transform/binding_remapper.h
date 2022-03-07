@@ -29,7 +29,7 @@ using BindingPoint = sem::BindingPoint;
 
 /// BindingRemapper is a transform used to remap resource binding points and
 /// access controls.
-class BindingRemapper : public Castable<BindingRemapper, Transform> {
+class BindingRemapper final : public Castable<BindingRemapper, Transform> {
  public:
   /// BindingPoints is a map of old binding point to new binding point
   using BindingPoints = std::unordered_map<BindingPoint, BindingPoint>;
@@ -39,7 +39,7 @@ class BindingRemapper : public Castable<BindingRemapper, Transform> {
 
   /// Remappings is consumed by the BindingRemapper transform.
   /// Data holds information about shader usage and constant buffer offsets.
-  struct Remappings : public Castable<Data, transform::Data> {
+  struct Remappings final : public Castable<Data, transform::Data> {
     /// Constructor
     /// @param bp a map of new binding points
     /// @param ac a map of new access controls

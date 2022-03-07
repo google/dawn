@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// A struct member align attribute
-class StructMemberAlignAttribute
+class StructMemberAlignAttribute final
     : public Castable<StructMemberAlignAttribute, Attribute> {
  public:
   /// constructor

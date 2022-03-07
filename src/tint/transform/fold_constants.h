@@ -21,7 +21,7 @@ namespace tint {
 namespace transform {
 
 /// FoldConstants transforms the AST by folding constant expressions
-class FoldConstants : public Castable<FoldConstants, Transform> {
+class FoldConstants final : public Castable<FoldConstants, Transform> {
  public:
   /// Constructor
   FoldConstants();

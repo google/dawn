@@ -21,7 +21,7 @@ namespace tint {
 namespace sem {
 
 /// TypeConversion is the CallTarget for a type conversion (cast).
-class TypeConversion : public Castable<TypeConversion, CallTarget> {
+class TypeConversion final : public Castable<TypeConversion, CallTarget> {
  public:
   /// Constructor
   /// @param type the target type of the cast

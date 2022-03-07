@@ -22,7 +22,7 @@ namespace tint {
 namespace ast {
 
 /// A call expression
-class CallStatement : public Castable<CallStatement, Statement> {
+class CallStatement final : public Castable<CallStatement, Statement> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

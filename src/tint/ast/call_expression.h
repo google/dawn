@@ -29,7 +29,7 @@ class IdentifierExpression;
 /// * sem::Builtin
 /// * sem::TypeConstructor
 /// * sem::TypeConversion
-class CallExpression : public Castable<CallExpression, Expression> {
+class CallExpression final : public Castable<CallExpression, Expression> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

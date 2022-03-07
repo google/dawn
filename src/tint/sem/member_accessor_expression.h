@@ -54,7 +54,7 @@ class MemberAccessorExpression
 /// StructMemberAccess holds the semantic information for a
 /// ast::MemberAccessorExpression node that represents an access to a structure
 /// member.
-class StructMemberAccess
+class StructMemberAccess final
     : public Castable<StructMemberAccess, MemberAccessorExpression> {
  public:
   /// Constructor
@@ -81,7 +81,7 @@ class StructMemberAccess
 
 /// Swizzle holds the semantic information for a ast::MemberAccessorExpression
 /// node that represents a vector swizzle.
-class Swizzle : public Castable<Swizzle, MemberAccessorExpression> {
+class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
  public:
   /// Constructor
   /// @param declaration the AST node

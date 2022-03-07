@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A depth texture type.
-class DepthTexture : public Castable<DepthTexture, Texture> {
+class DepthTexture final : public Castable<DepthTexture, Texture> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

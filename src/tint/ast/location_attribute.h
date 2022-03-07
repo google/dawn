@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A location attribute
-class LocationAttribute : public Castable<LocationAttribute, Attribute> {
+class LocationAttribute final : public Castable<LocationAttribute, Attribute> {
  public:
   /// constructor
   /// @param pid the identifier of the program that owns this node

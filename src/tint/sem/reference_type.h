@@ -25,7 +25,7 @@ namespace tint {
 namespace sem {
 
 /// A reference type.
-class Reference : public Castable<Reference, Type> {
+class Reference final : public Castable<Reference, Type> {
  public:
   /// Constructor
   /// @param subtype the pointee type

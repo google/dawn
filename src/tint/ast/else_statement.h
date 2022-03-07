@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// An else statement
-class ElseStatement : public Castable<ElseStatement, Statement> {
+class ElseStatement final : public Castable<ElseStatement, Statement> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

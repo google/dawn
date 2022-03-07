@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// An index accessor expression
-class IndexAccessorExpression
+class IndexAccessorExpression final
     : public Castable<IndexAccessorExpression, Expression> {
  public:
   /// Constructor

@@ -92,7 +92,7 @@ class Type : public Castable<Type> {
 using TypeList = std::vector<const Type*>;
 
 /// `void` type
-struct Void : public Castable<Void, Type> {
+struct Void final : public Castable<Void, Type> {
   /// @param b the ProgramBuilder used to construct the AST types
   /// @returns the constructed ast::Type node for the given type
   const ast::Type* Build(ProgramBuilder& b) const override;
@@ -104,7 +104,7 @@ struct Void : public Castable<Void, Type> {
 };
 
 /// `bool` type
-struct Bool : public Castable<Bool, Type> {
+struct Bool final : public Castable<Bool, Type> {
   /// @param b the ProgramBuilder used to construct the AST types
   /// @returns the constructed ast::Type node for the given type
   const ast::Type* Build(ProgramBuilder& b) const override;
@@ -116,7 +116,7 @@ struct Bool : public Castable<Bool, Type> {
 };
 
 /// `u32` type
-struct U32 : public Castable<U32, Type> {
+struct U32 final : public Castable<U32, Type> {
   /// @param b the ProgramBuilder used to construct the AST types
   /// @returns the constructed ast::Type node for the given type
   const ast::Type* Build(ProgramBuilder& b) const override;
@@ -128,7 +128,7 @@ struct U32 : public Castable<U32, Type> {
 };
 
 /// `f32` type
-struct F32 : public Castable<F32, Type> {
+struct F32 final : public Castable<F32, Type> {
   /// @param b the ProgramBuilder used to construct the AST types
   /// @returns the constructed ast::Type node for the given type
   const ast::Type* Build(ProgramBuilder& b) const override;
@@ -140,7 +140,7 @@ struct F32 : public Castable<F32, Type> {
 };
 
 /// `i32` type
-struct I32 : public Castable<I32, Type> {
+struct I32 final : public Castable<I32, Type> {
   /// @param b the ProgramBuilder used to construct the AST types
   /// @returns the constructed ast::Type node for the given type
   const ast::Type* Build(ProgramBuilder& b) const override;
@@ -152,7 +152,7 @@ struct I32 : public Castable<I32, Type> {
 };
 
 /// `ptr<SC, T>` type
-struct Pointer : public Castable<Pointer, Type> {
+struct Pointer final : public Castable<Pointer, Type> {
   /// Constructor
   /// @param ty the store type
   /// @param sc the pointer storage class
@@ -180,7 +180,7 @@ struct Pointer : public Castable<Pointer, Type> {
 /// `ref<SC, T>` type
 /// Note this has no AST representation, but is used for type tracking in the
 /// reader.
-struct Reference : public Castable<Reference, Type> {
+struct Reference final : public Castable<Reference, Type> {
   /// Constructor
   /// @param ty the referenced type
   /// @param sc the reference storage class
@@ -206,7 +206,7 @@ struct Reference : public Castable<Reference, Type> {
 };
 
 /// `vecN<T>` type
-struct Vector : public Castable<Vector, Type> {
+struct Vector final : public Castable<Vector, Type> {
   /// Constructor
   /// @param ty the element type
   /// @param sz the number of elements in the vector
@@ -232,7 +232,7 @@ struct Vector : public Castable<Vector, Type> {
 };
 
 /// `matNxM<T>` type
-struct Matrix : public Castable<Matrix, Type> {
+struct Matrix final : public Castable<Matrix, Type> {
   /// Constructor
   /// @param ty the matrix element type
   /// @param c the number of columns in the matrix
@@ -261,7 +261,7 @@ struct Matrix : public Castable<Matrix, Type> {
 };
 
 /// `array<T, N>` type
-struct Array : public Castable<Array, Type> {
+struct Array final : public Castable<Array, Type> {
   /// Constructor
   /// @param el the element type
   /// @param sz the number of elements in the array. 0 represents runtime-sized
@@ -291,7 +291,7 @@ struct Array : public Castable<Array, Type> {
 };
 
 /// `sampler` type
-struct Sampler : public Castable<Sampler, Type> {
+struct Sampler final : public Castable<Sampler, Type> {
   /// Constructor
   /// @param k the sampler kind
   explicit Sampler(ast::SamplerKind k);
@@ -328,7 +328,7 @@ struct Texture : public Castable<Texture, Type> {
 };
 
 /// `texture_depth_D` type
-struct DepthTexture : public Castable<DepthTexture, Texture> {
+struct DepthTexture final : public Castable<DepthTexture, Texture> {
   /// Constructor
   /// @param d the texture dimensions
   explicit DepthTexture(ast::TextureDimension d);
@@ -348,7 +348,7 @@ struct DepthTexture : public Castable<DepthTexture, Texture> {
 };
 
 /// `texture_depth_multisampled_D` type
-struct DepthMultisampledTexture
+struct DepthMultisampledTexture final
     : public Castable<DepthMultisampledTexture, Texture> {
   /// Constructor
   /// @param d the texture dimensions
@@ -369,7 +369,8 @@ struct DepthMultisampledTexture
 };
 
 /// `texture_multisampled_D<T>` type
-struct MultisampledTexture : public Castable<MultisampledTexture, Texture> {
+struct MultisampledTexture final
+    : public Castable<MultisampledTexture, Texture> {
   /// Constructor
   /// @param d the texture dimensions
   /// @param t the multisampled texture type
@@ -393,7 +394,7 @@ struct MultisampledTexture : public Castable<MultisampledTexture, Texture> {
 };
 
 /// `texture_D<T>` type
-struct SampledTexture : public Castable<SampledTexture, Texture> {
+struct SampledTexture final : public Castable<SampledTexture, Texture> {
   /// Constructor
   /// @param d the texture dimensions
   /// @param t the sampled texture type
@@ -417,7 +418,7 @@ struct SampledTexture : public Castable<SampledTexture, Texture> {
 };
 
 /// `texture_storage_D<F>` type
-struct StorageTexture : public Castable<StorageTexture, Texture> {
+struct StorageTexture final : public Castable<StorageTexture, Texture> {
   /// Constructor
   /// @param d the texture dimensions
   /// @param f the storage image format
@@ -467,7 +468,7 @@ struct Named : public Castable<Named, Type> {
 };
 
 /// `type T = N` type
-struct Alias : public Castable<Alias, Named> {
+struct Alias final : public Castable<Alias, Named> {
   /// Constructor
   /// @param n the alias name
   /// @param t the aliased type
@@ -486,7 +487,7 @@ struct Alias : public Castable<Alias, Named> {
 };
 
 /// `struct N { ... };` type
-struct Struct : public Castable<Struct, Named> {
+struct Struct final : public Castable<Struct, Named> {
   /// Constructor
   /// @param n the struct name
   /// @param m the member types

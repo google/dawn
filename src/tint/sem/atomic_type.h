@@ -23,7 +23,7 @@ namespace tint {
 namespace sem {
 
 /// A atomic type.
-class Atomic : public Castable<Atomic, Type> {
+class Atomic final : public Castable<Atomic, Type> {
  public:
   /// Constructor
   /// @param subtype the atomic type

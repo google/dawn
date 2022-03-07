@@ -44,7 +44,7 @@ enum class BinaryOp {
 };
 
 /// An binary expression
-class BinaryExpression : public Castable<BinaryExpression, Expression> {
+class BinaryExpression final : public Castable<BinaryExpression, Expression> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

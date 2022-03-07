@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A block statement
-class BlockStatement : public Castable<BlockStatement, Statement> {
+class BlockStatement final : public Castable<BlockStatement, Statement> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

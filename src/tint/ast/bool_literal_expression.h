@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A boolean literal
-class BoolLiteralExpression
+class BoolLiteralExpression final
     : public Castable<BoolLiteralExpression, LiteralExpression> {
  public:
   /// Constructor

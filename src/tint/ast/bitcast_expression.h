@@ -24,7 +24,7 @@ namespace ast {
 class Type;
 
 /// A bitcast expression
-class BitcastExpression : public Castable<BitcastExpression, Expression> {
+class BitcastExpression final : public Castable<BitcastExpression, Expression> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

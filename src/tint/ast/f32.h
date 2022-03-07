@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A float 32 type
-class F32 : public Castable<F32, Type> {
+class F32 final : public Castable<F32, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

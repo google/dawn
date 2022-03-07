@@ -21,7 +21,7 @@ namespace tint {
 namespace sem {
 
 /// TypeConstructor is the CallTarget for a type constructor.
-class TypeConstructor : public Castable<TypeConstructor, CallTarget> {
+class TypeConstructor final : public Castable<TypeConstructor, CallTarget> {
  public:
   /// Constructor
   /// @param type the type that's being constructed

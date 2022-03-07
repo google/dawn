@@ -43,7 +43,7 @@ class NumberMatcher;
 class TypeMatcher;
 
 /// A special type that matches all TypeMatchers
-class Any : public Castable<Any, sem::Type> {
+class Any final : public Castable<Any, sem::Type> {
  public:
   Any() = default;
   ~Any() override = default;

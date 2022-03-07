@@ -22,7 +22,7 @@ namespace tint {
 namespace ast {
 
 /// A variable declaration statement
-class VariableDeclStatement
+class VariableDeclStatement final
     : public Castable<VariableDeclStatement, Statement> {
  public:
   /// Constructor

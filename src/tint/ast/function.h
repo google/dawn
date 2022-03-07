@@ -33,7 +33,7 @@ namespace tint {
 namespace ast {
 
 /// A Function statement.
-class Function : public Castable<Function, Node> {
+class Function final : public Castable<Function, Node> {
  public:
   /// Create a function
   /// @param program_id the identifier of the program that owns this node

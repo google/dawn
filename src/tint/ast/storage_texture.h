@@ -50,7 +50,7 @@ enum class TexelFormat {
 std::ostream& operator<<(std::ostream& out, TexelFormat format);
 
 /// A storage texture type.
-class StorageTexture : public Castable<StorageTexture, Texture> {
+class StorageTexture final : public Castable<StorageTexture, Texture> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

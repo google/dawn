@@ -23,7 +23,8 @@ namespace tint {
 namespace sem {
 
 /// A multisampled texture type.
-class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
+class MultisampledTexture final
+    : public Castable<MultisampledTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture

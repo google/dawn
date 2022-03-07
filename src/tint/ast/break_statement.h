@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// An break statement
-class BreakStatement : public Castable<BreakStatement, Statement> {
+class BreakStatement final : public Castable<BreakStatement, Statement> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

@@ -30,7 +30,8 @@ enum class InterpolationType { kPerspective, kLinear, kFlat };
 enum class InterpolationSampling { kNone = -1, kCenter, kCentroid, kSample };
 
 /// An interpolate attribute
-class InterpolateAttribute : public Castable<InterpolateAttribute, Attribute> {
+class InterpolateAttribute final
+    : public Castable<InterpolateAttribute, Attribute> {
  public:
   /// Create an interpolate attribute.
   /// @param pid the identifier of the program that owns this node

@@ -22,7 +22,8 @@ namespace tint {
 namespace ast {
 
 /// An assignment statement
-class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
+class AssignmentStatement final
+    : public Castable<AssignmentStatement, Statement> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

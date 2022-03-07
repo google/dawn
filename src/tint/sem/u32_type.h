@@ -23,7 +23,7 @@ namespace tint {
 namespace sem {
 
 /// A unsigned int 32 type.
-class U32 : public Castable<U32, Type> {
+class U32 final : public Castable<U32, Type> {
  public:
   /// Constructor
   U32();

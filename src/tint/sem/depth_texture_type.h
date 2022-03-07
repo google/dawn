@@ -23,7 +23,7 @@ namespace tint {
 namespace sem {
 
 /// A depth texture type.
-class DepthTexture : public Castable<DepthTexture, Texture> {
+class DepthTexture final : public Castable<DepthTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture

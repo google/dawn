@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A named type (i.e. struct or alias)
-class TypeName : public Castable<TypeName, Type> {
+class TypeName final : public Castable<TypeName, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

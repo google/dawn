@@ -72,7 +72,7 @@ bool IsBarrierBuiltin(BuiltinType i);
 bool IsAtomicBuiltin(BuiltinType i);
 
 /// Builtin holds the semantic information for a builtin function.
-class Builtin : public Castable<Builtin, CallTarget> {
+class Builtin final : public Castable<Builtin, CallTarget> {
  public:
   /// Constructor
   /// @param type the builtin type

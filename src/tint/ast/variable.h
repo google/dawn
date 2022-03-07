@@ -113,7 +113,7 @@ struct VariableBindingPoint {
 ///     defaulting syntax for a "var" declared inside a function.
 ///   - "let" is always StorageClass::kNone.
 ///   - formal parameter is always StorageClass::kNone.
-class Variable : public Castable<Variable, Node> {
+class Variable final : public Castable<Variable, Node> {
  public:
   /// Create a variable
   /// @param program_id the identifier of the program that owns this node

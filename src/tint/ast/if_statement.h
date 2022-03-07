@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// An if statement
-class IfStatement : public Castable<IfStatement, Statement> {
+class IfStatement final : public Castable<IfStatement, Statement> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

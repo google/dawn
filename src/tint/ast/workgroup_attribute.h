@@ -27,7 +27,8 @@ namespace ast {
 class Expression;
 
 /// A workgroup attribute
-class WorkgroupAttribute : public Castable<WorkgroupAttribute, Attribute> {
+class WorkgroupAttribute final
+    : public Castable<WorkgroupAttribute, Attribute> {
  public:
   /// constructor
   /// @param pid the identifier of the program that owns this node

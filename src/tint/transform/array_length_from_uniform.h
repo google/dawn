@@ -52,7 +52,7 @@ namespace transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class ArrayLengthFromUniform
+class ArrayLengthFromUniform final
     : public Castable<ArrayLengthFromUniform, Transform> {
  public:
   /// Constructor
@@ -61,7 +61,7 @@ class ArrayLengthFromUniform
   ~ArrayLengthFromUniform() override;
 
   /// Configuration options for the ArrayLengthFromUniform transform.
-  struct Config : public Castable<Data, transform::Data> {
+  struct Config final : public Castable<Data, transform::Data> {
     /// Constructor
     /// @param ubo_bp the binding point to use for the generated uniform buffer.
     explicit Config(sem::BindingPoint ubo_bp);
@@ -86,7 +86,7 @@ class ArrayLengthFromUniform
   /// Information produced about what the transform did.
   /// If there were no calls to the arrayLength() builtin, then no Result will
   /// be emitted.
-  struct Result : public Castable<Result, transform::Data> {
+  struct Result final : public Castable<Result, transform::Data> {
     /// Constructor
     /// @param used_size_indices Indices into the UBO that are statically used.
     explicit Result(std::unordered_set<uint32_t> used_size_indices);

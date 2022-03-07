@@ -25,7 +25,7 @@
 namespace tint::sem {
 
 /// The type manager holds all the pointers to the known types.
-class Manager : public utils::UniqueAllocator<Type> {
+class Manager final : public utils::UniqueAllocator<Type> {
  public:
   /// Iterator is the type returned by begin() and end()
   using Iterator = utils::BlockAllocator<Type>::ConstIterator;

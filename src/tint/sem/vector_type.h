@@ -23,7 +23,7 @@ namespace tint {
 namespace sem {
 
 /// A vector type.
-class Vector : public Castable<Vector, Type> {
+class Vector final : public Castable<Vector, Type> {
  public:
   /// Constructor
   /// @param subtype the vector element type

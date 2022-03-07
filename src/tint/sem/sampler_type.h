@@ -24,7 +24,7 @@ namespace tint {
 namespace sem {
 
 /// A sampler type.
-class Sampler : public Castable<Sampler, Type> {
+class Sampler final : public Castable<Sampler, Type> {
  public:
   /// Constructor
   /// @param kind the kind of sampler

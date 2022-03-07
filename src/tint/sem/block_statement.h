@@ -64,7 +64,7 @@ class BlockStatement : public Castable<BlockStatement, CompoundStatement> {
 };
 
 /// The root block statement for a function
-class FunctionBlockStatement
+class FunctionBlockStatement final
     : public Castable<FunctionBlockStatement, BlockStatement> {
  public:
   /// Constructor
@@ -76,7 +76,8 @@ class FunctionBlockStatement
 };
 
 /// Holds semantic information about a loop body block or for-loop body block
-class LoopBlockStatement : public Castable<LoopBlockStatement, BlockStatement> {
+class LoopBlockStatement final
+    : public Castable<LoopBlockStatement, BlockStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this block statement

@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// An continue statement
-class ContinueStatement : public Castable<ContinueStatement, Statement> {
+class ContinueStatement final : public Castable<ContinueStatement, Statement> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

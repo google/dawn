@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A void type
-class Void : public Castable<Void, Type> {
+class Void final : public Castable<Void, Type> {
  public:
   /// Constructor
   /// @param pid the identifier of the program that owns this node

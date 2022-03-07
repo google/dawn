@@ -25,7 +25,7 @@ namespace tint {
 namespace sem {
 
 /// A pointer type.
-class Pointer : public Castable<Pointer, Type> {
+class Pointer final : public Castable<Pointer, Type> {
  public:
   /// Constructor
   /// @param subtype the pointee type

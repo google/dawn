@@ -30,7 +30,8 @@ namespace tint {
 namespace sem {
 
 /// Holds semantic information about a for-loop statement
-class ForLoopStatement : public Castable<ForLoopStatement, CompoundStatement> {
+class ForLoopStatement final
+    : public Castable<ForLoopStatement, CompoundStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this for-loop statement

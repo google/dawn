@@ -28,12 +28,12 @@ namespace transform {
 /// store type of a buffer. If that structure is nested inside another structure
 /// or an array, then it is wrapped inside another structure which gets the
 /// `@internal(spirv_block)` attribute instead.
-class AddSpirvBlockAttribute
+class AddSpirvBlockAttribute final
     : public Castable<AddSpirvBlockAttribute, Transform> {
  public:
   /// SpirvBlockAttribute is an InternalAttribute that is used to decorate a
   // structure that needs a SPIR-V block attribute.
-  class SpirvBlockAttribute
+  class SpirvBlockAttribute final
       : public Castable<SpirvBlockAttribute, ast::InternalAttribute> {
    public:
     /// Constructor

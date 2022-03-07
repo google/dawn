@@ -29,10 +29,10 @@ namespace transform {
 /// Glsl is a transform used to sanitize a Program for use with the Glsl writer.
 /// Passing a non-sanitized Program to the Glsl writer will result in undefined
 /// behavior.
-class Glsl : public Castable<Glsl, Transform> {
+class Glsl final : public Castable<Glsl, Transform> {
  public:
   /// Configuration options for the Glsl sanitizer transform.
-  struct Config : public Castable<Data, transform::Data> {
+  struct Config final : public Castable<Data, transform::Data> {
     /// Constructor
     /// @param entry_point the root entry point function to generate
     /// @param disable_workgroup_init `true` to disable workgroup memory zero

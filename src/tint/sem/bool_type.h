@@ -29,7 +29,7 @@ namespace tint {
 namespace sem {
 
 /// A boolean type
-class Bool : public Castable<Bool, Type> {
+class Bool final : public Castable<Bool, Type> {
  public:
   /// Constructor
   Bool();
