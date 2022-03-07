@@ -1231,7 +1231,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
   struct SymbolUse {
     const ast::Node* decl = nullptr;
     const ast::Node* use = nullptr;
-    std::string where = nullptr;
+    std::string where;
   };
 
   std::vector<SymbolUse> symbol_uses;
