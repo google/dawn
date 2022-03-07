@@ -21,6 +21,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
+#include "src/tint/utils/unique_allocator.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Type);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Void);
@@ -79,6 +80,28 @@ struct ArrayHasher {
   }
 };
 
+struct AliasHasher {
+  size_t operator()(const Alias& t) const { return utils::Hash(t.name); }
+};
+
+struct StructHasher {
+  size_t operator()(const Struct& t) const { return utils::Hash(t.name); }
+};
+
+struct SamplerHasher {
+  size_t operator()(const Sampler& s) const { return utils::Hash(s.kind); }
+};
+
+struct DepthTextureHasher {
+  size_t operator()(const DepthTexture& t) const { return utils::Hash(t.dims); }
+};
+
+struct DepthMultisampledTextureHasher {
+  size_t operator()(const DepthMultisampledTexture& t) const {
+    return utils::Hash(t.dims);
+  }
+};
+
 struct MultisampledTextureHasher {
   size_t operator()(const MultisampledTexture& t) const {
     return utils::Hash(t.dims, t.type);
@@ -116,6 +139,23 @@ static bool operator==(const Matrix& a, const Matrix& b) {
 
 static bool operator==(const Array& a, const Array& b) {
   return a.type == b.type && a.size == b.size && a.stride == b.stride;
+}
+
+static bool operator==(const Named& a, const Named& b) {
+  return a.name == b.name;
+}
+
+static bool operator==(const Sampler& a, const Sampler& b) {
+  return a.kind == b.kind;
+}
+
+static bool operator==(const DepthTexture& a, const DepthTexture& b) {
+  return a.dims == b.dims;
+}
+
+static bool operator==(const DepthMultisampledTexture& a,
+                       const DepthMultisampledTexture& b) {
+  return a.dims == b.dims;
 }
 
 static bool operator==(const MultisampledTexture& a,
@@ -267,7 +307,7 @@ const ast::Type* Struct::Build(ProgramBuilder& b) const {
 
 /// The PIMPL state of the Types object.
 struct TypeManager::State {
-  /// The allocator of types
+  /// The allocator of primitive types
   utils::BlockAllocator<Type> allocator_;
   /// The lazily-created Void type
   spirv::Void const* void_ = nullptr;
@@ -279,48 +319,37 @@ struct TypeManager::State {
   spirv::F32 const* f32_ = nullptr;
   /// The lazily-created I32 type
   spirv::I32 const* i32_ = nullptr;
-  /// Map of Pointer to the returned Pointer type instance
-  std::unordered_map<spirv::Pointer, const spirv::Pointer*, PointerHasher>
-      pointers_;
-  /// Map of Reference to the returned Reference type instance
-  std::unordered_map<spirv::Reference, const spirv::Reference*, ReferenceHasher>
-      references_;
-  /// Map of Vector to the returned Vector type instance
-  std::unordered_map<spirv::Vector, const spirv::Vector*, VectorHasher>
-      vectors_;
-  /// Map of Matrix to the returned Matrix type instance
-  std::unordered_map<spirv::Matrix, const spirv::Matrix*, MatrixHasher>
-      matrices_;
-  /// Map of Array to the returned Array type instance
-  std::unordered_map<spirv::Array, const spirv::Array*, ArrayHasher> arrays_;
-  /// Map of type name to returned Alias instance
-  std::unordered_map<Symbol, const spirv::Alias*> aliases_;
-  /// Map of type name to returned Struct instance
-  std::unordered_map<Symbol, const spirv::Struct*> structs_;
-  /// Map of ast::SamplerKind to returned Sampler instance
-  std::unordered_map<ast::SamplerKind, const spirv::Sampler*> samplers_;
-  /// Map of ast::TextureDimension to returned DepthTexture instance
-  std::unordered_map<ast::TextureDimension, const spirv::DepthTexture*>
+  /// Unique Pointer instances
+  utils::UniqueAllocator<spirv::Pointer, PointerHasher> pointers_;
+  /// Unique Reference instances
+  utils::UniqueAllocator<spirv::Reference, ReferenceHasher> references_;
+  /// Unique Vector instances
+  utils::UniqueAllocator<spirv::Vector, VectorHasher> vectors_;
+  /// Unique Matrix instances
+  utils::UniqueAllocator<spirv::Matrix, MatrixHasher> matrices_;
+  /// Unique Array instances
+  utils::UniqueAllocator<spirv::Array, ArrayHasher> arrays_;
+  /// Unique Alias instances
+  utils::UniqueAllocator<spirv::Alias, AliasHasher> aliases_;
+  /// Unique Struct instances
+  utils::UniqueAllocator<spirv::Struct, StructHasher> structs_;
+  /// Unique Sampler instances
+  utils::UniqueAllocator<spirv::Sampler, SamplerHasher> samplers_;
+  /// Unique DepthTexture instances
+  utils::UniqueAllocator<spirv::DepthTexture, DepthTextureHasher>
       depth_textures_;
-  /// Map of ast::TextureDimension to returned DepthMultisampledTexture instance
-  std::unordered_map<ast::TextureDimension,
-                     const spirv::DepthMultisampledTexture*>
+  /// Unique DepthMultisampledTexture instances
+  utils::UniqueAllocator<spirv::DepthMultisampledTexture,
+                         DepthMultisampledTextureHasher>
       depth_multisampled_textures_;
-  /// Map of MultisampledTexture to the returned MultisampledTexture type
-  /// instance
-  std::unordered_map<spirv::MultisampledTexture,
-                     const spirv::MultisampledTexture*,
-                     MultisampledTextureHasher>
+  /// Unique MultisampledTexture instances
+  utils::UniqueAllocator<spirv::MultisampledTexture, MultisampledTextureHasher>
       multisampled_textures_;
-  /// Map of SampledTexture to the returned SampledTexture type instance
-  std::unordered_map<spirv::SampledTexture,
-                     const spirv::SampledTexture*,
-                     SampledTextureHasher>
+  /// Unique SampledTexture instances
+  utils::UniqueAllocator<spirv::SampledTexture, SampledTextureHasher>
       sampled_textures_;
-  /// Map of StorageTexture to the returned StorageTexture type instance
-  std::unordered_map<spirv::StorageTexture,
-                     const spirv::StorageTexture*,
-                     StorageTextureHasher>
+  /// Unique StorageTexture instances
+  utils::UniqueAllocator<spirv::StorageTexture, StorageTextureHasher>
       storage_textures_;
 };
 
@@ -445,100 +474,69 @@ const spirv::I32* TypeManager::I32() {
 
 const spirv::Pointer* TypeManager::Pointer(const Type* el,
                                            ast::StorageClass sc) {
-  return utils::GetOrCreate(state->pointers_, spirv::Pointer(el, sc), [&] {
-    return state->allocator_.Create<spirv::Pointer>(el, sc);
-  });
+  return state->pointers_.Get(el, sc);
 }
 
 const spirv::Reference* TypeManager::Reference(const Type* el,
                                                ast::StorageClass sc) {
-  return utils::GetOrCreate(state->references_, spirv::Reference(el, sc), [&] {
-    return state->allocator_.Create<spirv::Reference>(el, sc);
-  });
+  return state->references_.Get(el, sc);
 }
 
 const spirv::Vector* TypeManager::Vector(const Type* el, uint32_t size) {
-  return utils::GetOrCreate(state->vectors_, spirv::Vector(el, size), [&] {
-    return state->allocator_.Create<spirv::Vector>(el, size);
-  });
+  return state->vectors_.Get(el, size);
 }
 
 const spirv::Matrix* TypeManager::Matrix(const Type* el,
                                          uint32_t columns,
                                          uint32_t rows) {
-  return utils::GetOrCreate(
-      state->matrices_, spirv::Matrix(el, columns, rows), [&] {
-        return state->allocator_.Create<spirv::Matrix>(el, columns, rows);
-      });
+  return state->matrices_.Get(el, columns, rows);
 }
 
 const spirv::Array* TypeManager::Array(const Type* el,
                                        uint32_t size,
                                        uint32_t stride) {
-  return utils::GetOrCreate(
-      state->arrays_, spirv::Array(el, size, stride),
-      [&] { return state->allocator_.Create<spirv::Array>(el, size, stride); });
+  return state->arrays_.Get(el, size, stride);
 }
 
 const spirv::Alias* TypeManager::Alias(Symbol name, const Type* ty) {
-  return utils::GetOrCreate(state->aliases_, name, [&] {
-    return state->allocator_.Create<spirv::Alias>(name, ty);
-  });
+  return state->aliases_.Get(name, ty);
 }
 
 const spirv::Struct* TypeManager::Struct(Symbol name, TypeList members) {
-  return utils::GetOrCreate(state->structs_, name, [&] {
-    return state->allocator_.Create<spirv::Struct>(name, std::move(members));
-  });
+  return state->structs_.Get(name, std::move(members));
 }
 
 const spirv::Sampler* TypeManager::Sampler(ast::SamplerKind kind) {
-  return utils::GetOrCreate(state->samplers_, kind, [&] {
-    return state->allocator_.Create<spirv::Sampler>(kind);
-  });
+  return state->samplers_.Get(kind);
 }
 
 const spirv::DepthTexture* TypeManager::DepthTexture(
     ast::TextureDimension dims) {
-  return utils::GetOrCreate(state->depth_textures_, dims, [&] {
-    return state->allocator_.Create<spirv::DepthTexture>(dims);
-  });
+  return state->depth_textures_.Get(dims);
 }
 
 const spirv::DepthMultisampledTexture* TypeManager::DepthMultisampledTexture(
     ast::TextureDimension dims) {
-  return utils::GetOrCreate(state->depth_multisampled_textures_, dims, [&] {
-    return state->allocator_.Create<spirv::DepthMultisampledTexture>(dims);
-  });
+  return state->depth_multisampled_textures_.Get(dims);
 }
 
 const spirv::MultisampledTexture* TypeManager::MultisampledTexture(
     ast::TextureDimension dims,
     const Type* ty) {
-  return utils::GetOrCreate(
-      state->multisampled_textures_, spirv::MultisampledTexture(dims, ty), [&] {
-        return state->allocator_.Create<spirv::MultisampledTexture>(dims, ty);
-      });
+  return state->multisampled_textures_.Get(dims, ty);
 }
 
 const spirv::SampledTexture* TypeManager::SampledTexture(
     ast::TextureDimension dims,
     const Type* ty) {
-  return utils::GetOrCreate(
-      state->sampled_textures_, spirv::SampledTexture(dims, ty), [&] {
-        return state->allocator_.Create<spirv::SampledTexture>(dims, ty);
-      });
+  return state->sampled_textures_.Get(dims, ty);
 }
 
 const spirv::StorageTexture* TypeManager::StorageTexture(
     ast::TextureDimension dims,
     ast::TexelFormat fmt,
     ast::Access access) {
-  return utils::GetOrCreate(
-      state->storage_textures_, spirv::StorageTexture(dims, fmt, access), [&] {
-        return state->allocator_.Create<spirv::StorageTexture>(dims, fmt,
-                                                               access);
-      });
+  return state->storage_textures_.Get(dims, fmt, access);
 }
 
 // Debug String() methods for Type classes. Only enabled in debug builds.
