@@ -264,7 +264,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
     default:
       TINT_ICE(Transform, builder->Diagnostics())
           << "invalid IntrinsicType for DecomposeMemoryAccess::Intrinsic: "
-          << ty->type_name();
+          << ty->TypeInfo().name;
       break;
   }
 
@@ -672,7 +672,7 @@ struct DecomposeMemoryAccess::State {
       if (atomic == nullptr) {
         TINT_ICE(Transform, b.Diagnostics())
             << "IntrinsicAtomicFor() returned nullptr for op " << op
-            << " and type " << el_ty->type_name();
+            << " and type " << el_ty->TypeInfo().name;
       }
 
       auto* ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());

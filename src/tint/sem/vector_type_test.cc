@@ -22,16 +22,40 @@ namespace {
 using VectorTest = TestHelper;
 
 TEST_F(VectorTest, Creation) {
-  I32 i32;
-  Vector v{&i32, 2};
-  EXPECT_EQ(v.type(), &i32);
-  EXPECT_EQ(v.Width(), 2u);
+  auto* a = create<Vector>(create<I32>(), 2u);
+  auto* b = create<Vector>(create<I32>(), 2u);
+  auto* c = create<Vector>(create<F32>(), 2u);
+  auto* d = create<Vector>(create<F32>(), 3u);
+
+  EXPECT_EQ(a->type(), create<I32>());
+  EXPECT_EQ(a->Width(), 2u);
+
+  EXPECT_EQ(a, b);
+  EXPECT_NE(a, c);
+  EXPECT_NE(a, d);
 }
 
-TEST_F(VectorTest, TypeName) {
-  auto* i32 = create<I32>();
-  auto* v = create<Vector>(i32, 3u);
-  EXPECT_EQ(v->type_name(), "__vec_3__i32");
+TEST_F(VectorTest, Hash) {
+  auto* a = create<Vector>(create<I32>(), 2u);
+  auto* b = create<Vector>(create<I32>(), 2u);
+  auto* c = create<Vector>(create<F32>(), 2u);
+  auto* d = create<Vector>(create<F32>(), 3u);
+
+  EXPECT_EQ(a->Hash(), b->Hash());
+  EXPECT_NE(a->Hash(), c->Hash());
+  EXPECT_NE(a->Hash(), d->Hash());
+}
+
+TEST_F(VectorTest, Equals) {
+  auto* a = create<Vector>(create<I32>(), 2u);
+  auto* b = create<Vector>(create<I32>(), 2u);
+  auto* c = create<Vector>(create<F32>(), 2u);
+  auto* d = create<Vector>(create<F32>(), 3u);
+
+  EXPECT_TRUE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(*c));
+  EXPECT_FALSE(a->Equals(*d));
+  EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(VectorTest, FriendlyName) {

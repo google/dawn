@@ -55,9 +55,6 @@ class Reference : public Castable<Reference, Type> {
   /// @returns the resolved access control of the reference.
   ast::Access Access() const { return access_; }
 
-  /// @returns the name for this type
-  std::string type_name() const override;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.

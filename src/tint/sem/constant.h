@@ -122,7 +122,7 @@ class Constant {
     }
     diag::List diags;
     TINT_UNREACHABLE(Semantic, diags)
-        << "invalid scalar type " << type_->type_name();
+        << "invalid scalar type " << type_->TypeInfo().name;
     return func(~0);
   }
 

@@ -51,12 +51,6 @@ bool DepthTexture::Equals(const sem::Type& other) const {
   return false;
 }
 
-std::string DepthTexture::type_name() const {
-  std::ostringstream out;
-  out << "__depth_texture_" << dim();
-  return out.str();
-}
-
 std::string DepthTexture::FriendlyName(const SymbolTable&) const {
   std::ostringstream out;
   out << "texture_depth_" << dim();

@@ -72,10 +72,6 @@ const StructMember* Struct::FindMember(Symbol name) const {
   return nullptr;
 }
 
-std::string Struct::type_name() const {
-  return "__struct_" + name_.to_str();
-}
-
 uint32_t Struct::Align() const {
   return align_;
 }

@@ -45,13 +45,6 @@ bool StorageTexture::Equals(const sem::Type& other) const {
   return false;
 }
 
-std::string StorageTexture::type_name() const {
-  std::ostringstream out;
-  out << "__storage_texture_" << dim() << "_" << texel_format_ << "_"
-      << access_;
-  return out.str();
-}
-
 std::string StorageTexture::FriendlyName(const SymbolTable&) const {
   std::ostringstream out;
   out << "texture_storage_" << dim() << "<" << texel_format_ << ", " << access_

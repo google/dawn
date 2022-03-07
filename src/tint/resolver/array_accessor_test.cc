@@ -200,7 +200,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Constant) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(acc), nullptr);
-  EXPECT_TRUE(TypeOf(acc)->Is<sem::F32>()) << TypeOf(acc)->type_name();
+  EXPECT_TRUE(TypeOf(acc)->Is<sem::F32>());
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {

@@ -60,17 +60,6 @@ bool Array::IsConstructible() const {
   return constructible_;
 }
 
-std::string Array::type_name() const {
-  std::string type_name = "__array" + element_->type_name();
-  type_name += "_count_" + std::to_string(count_);
-  type_name += "_align_" + std::to_string(align_);
-  type_name += "_size_" + std::to_string(size_);
-  type_name += "_stride_" + std::to_string(stride_);
-  // Note: implicit_stride is not part of the type_name string as this is
-  // derived from the element type
-  return type_name;
-}
-
 std::string Array::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   if (!IsStrideImplicit()) {

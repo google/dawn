@@ -51,11 +51,6 @@ bool Matrix::Equals(const Type& other) const {
   return false;
 }
 
-std::string Matrix::type_name() const {
-  return "__mat_" + std::to_string(rows_) + "_" + std::to_string(columns_) +
-         subtype_->type_name();
-}
-
 std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   out << "mat" << columns_ << "x" << rows_ << "<"

@@ -1677,7 +1677,8 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(
 
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine conversion type for cast, from: " +
-             from_type->type_name() + " to: " + to_type->type_name();
+             from_type->FriendlyName(builder_.Symbols()) +
+             " to: " + to_type->FriendlyName(builder_.Symbols());
     return 0;
   }
 
@@ -1809,20 +1810,13 @@ uint32_t Builder::GenerateConstantNullIfNeeded(const sem::Type* type) {
     return 0;
   }
 
-  auto name = type->type_name();
+  return utils::GetOrCreate(const_null_to_id_, type, [&] {
+    auto result = result_op();
 
-  auto it = const_null_to_id_.find(name);
-  if (it != const_null_to_id_.end()) {
-    return it->second;
-  }
+    push_type(spv::Op::OpConstantNull, {Operand::Int(type_id), result});
 
-  auto result = result_op();
-  auto result_id = result.to_i();
-
-  push_type(spv::Op::OpConstantNull, {Operand::Int(type_id), result});
-
-  const_null_to_id_[name] = result_id;
-  return result_id;
+    return result.to_i();
+  });
 }
 
 uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const sem::Vector* type,
@@ -2434,8 +2428,8 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call,
 
       auto* type = TypeOf(accessor->structure)->UnwrapRef();
       if (!type->Is<sem::Struct>()) {
-        error_ =
-            "invalid type (" + type->type_name() + ") for runtime array length";
+        error_ = "invalid type (" + type->FriendlyName(builder_.Symbols()) +
+                 ") for runtime array length";
         return 0;
       }
       // Runtime array must be the last member in the structure
@@ -3344,22 +3338,15 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
 uint32_t Builder::GenerateSampledImage(const sem::Type* texture_type,
                                        Operand texture_operand,
                                        Operand sampler_operand) {
-  uint32_t sampled_image_type_id = 0;
-  auto val = texture_type_name_to_sampled_image_type_id_.find(
-      texture_type->type_name());
-  if (val != texture_type_name_to_sampled_image_type_id_.end()) {
-    // The sampled image type is already created.
-    sampled_image_type_id = val->second;
-  } else {
-    // We need to create the sampled image type and cache the result.
-    auto sampled_image_type = result_op();
-    sampled_image_type_id = sampled_image_type.to_i();
-    auto texture_type_id = GenerateTypeIfNeeded(texture_type);
-    push_type(spv::Op::OpTypeSampledImage,
-              {sampled_image_type, Operand::Int(texture_type_id)});
-    texture_type_name_to_sampled_image_type_id_[texture_type->type_name()] =
-        sampled_image_type_id;
-  }
+  uint32_t sampled_image_type_id = utils::GetOrCreate(
+      texture_type_to_sampled_image_type_id_, texture_type, [&] {
+        // We need to create the sampled image type and cache the result.
+        auto sampled_image_type = result_op();
+        auto texture_type_id = GenerateTypeIfNeeded(texture_type);
+        push_type(spv::Op::OpTypeSampledImage,
+                  {sampled_image_type, Operand::Int(texture_type_id)});
+        return sampled_image_type.to_i();
+      });
 
   auto sampled_image = result_op();
   if (!push_function_inst(spv::Op::OpSampledImage,
@@ -3389,7 +3376,7 @@ uint32_t Builder::GenerateBitcastExpression(
   // Bitcast does not allow same types, just emit a CopyObject
   auto* to_type = TypeOf(expr)->UnwrapRef();
   auto* from_type = TypeOf(expr->expr)->UnwrapRef();
-  if (to_type->type_name() == from_type->type_name()) {
+  if (to_type == from_type) {
     if (!push_function_inst(
             spv::Op::OpCopyObject,
             {Operand::Int(result_type_id), result, Operand::Int(val_id)})) {
@@ -3816,20 +3803,15 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
   // definitions in the generated SPIR-V. Note that nested pointers and
   // references are not legal in WGSL, so only considering the top-level type is
   // fine.
-  std::string type_name;
   if (auto* ptr = type->As<sem::Pointer>()) {
-    type_name =
-        sem::Pointer(ptr->StoreType(), ptr->StorageClass(), ast::kReadWrite)
-            .type_name();
+    type = builder_.create<sem::Pointer>(ptr->StoreType(), ptr->StorageClass(),
+                                         ast::kReadWrite);
   } else if (auto* ref = type->As<sem::Reference>()) {
-    type_name =
-        sem::Pointer(ref->StoreType(), ref->StorageClass(), ast::kReadWrite)
-            .type_name();
-  } else {
-    type_name = type->type_name();
+    type = builder_.create<sem::Pointer>(ref->StoreType(), ref->StorageClass(),
+                                         ast::kReadWrite);
   }
 
-  return utils::GetOrCreate(type_name_to_id_, type_name, [&]() -> uint32_t {
+  return utils::GetOrCreate(type_to_id_, type, [&]() -> uint32_t {
     auto result = result_op();
     auto id = result.to_i();
     bool ok = Switch(
@@ -3882,37 +3864,37 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
           // Register all three access types of StorageTexture names. In
           // SPIR-V, we must output a single type, while the variable is
           // annotated with the access type. Doing this ensures we de-dupe.
-          type_name_to_id_[builder_
-                               .create<sem::StorageTexture>(
-                                   tex->dim(), tex->texel_format(),
-                                   ast::Access::kRead, tex->type())
-                               ->type_name()] = id;
-          type_name_to_id_[builder_
-                               .create<sem::StorageTexture>(
-                                   tex->dim(), tex->texel_format(),
-                                   ast::Access::kWrite, tex->type())
-                               ->type_name()] = id;
-          type_name_to_id_[builder_
-                               .create<sem::StorageTexture>(
-                                   tex->dim(), tex->texel_format(),
-                                   ast::Access::kReadWrite, tex->type())
-                               ->type_name()] = id;
+          type_to_id_[builder_.create<sem::StorageTexture>(
+              tex->dim(), tex->texel_format(), ast::Access::kRead,
+              tex->type())] = id;
+          type_to_id_[builder_.create<sem::StorageTexture>(
+              tex->dim(), tex->texel_format(), ast::Access::kWrite,
+              tex->type())] = id;
+          type_to_id_[builder_.create<sem::StorageTexture>(
+              tex->dim(), tex->texel_format(), ast::Access::kReadWrite,
+              tex->type())] = id;
           return true;
         },
         [&](const sem::Texture* tex) {
           return GenerateTextureType(tex, result);
         },
-        [&](const sem::Sampler*) {
+        [&](const sem::Sampler* s) {
           push_type(spv::Op::OpTypeSampler, {result});
 
           // Register both of the sampler type names. In SPIR-V they're the same
           // sampler type, so we need to match that when we do the dedup check.
-          type_name_to_id_["__sampler_sampler"] = id;
-          type_name_to_id_["__sampler_comparison"] = id;
+          if (s->kind() == ast::SamplerKind::kSampler) {
+            type_to_id_[builder_.create<sem::Sampler>(
+                ast::SamplerKind::kComparisonSampler)] = id;
+          } else {
+            type_to_id_[builder_.create<sem::Sampler>(
+                ast::SamplerKind::kSampler)] = id;
+          }
           return true;
         },
         [&](Default) {
-          error_ = "unable to convert type: " + type->type_name();
+          error_ = "unable to convert type: " +
+                   type->FriendlyName(builder_.Symbols());
           return false;
         });
 

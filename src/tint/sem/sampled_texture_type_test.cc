@@ -25,6 +25,43 @@ namespace {
 
 using SampledTextureTest = TestHelper;
 
+TEST_F(SampledTextureTest, Creation) {
+  auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+  auto* b = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+  auto* c = create<SampledTexture>(ast::TextureDimension::k2d, create<F32>());
+  auto* d = create<SampledTexture>(ast::TextureDimension::kCube, create<I32>());
+
+  EXPECT_TRUE(a->type()->Is<F32>());
+  EXPECT_EQ(a->dim(), ast::TextureDimension::kCube);
+
+  EXPECT_EQ(a, b);
+  EXPECT_NE(a, c);
+  EXPECT_NE(a, d);
+}
+
+TEST_F(SampledTextureTest, Hash) {
+  auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+  auto* b = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+  auto* c = create<SampledTexture>(ast::TextureDimension::k2d, create<F32>());
+  auto* d = create<SampledTexture>(ast::TextureDimension::kCube, create<I32>());
+
+  EXPECT_EQ(a->Hash(), b->Hash());
+  EXPECT_NE(a->Hash(), c->Hash());
+  EXPECT_NE(a->Hash(), d->Hash());
+}
+
+TEST_F(SampledTextureTest, Equals) {
+  auto* a = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+  auto* b = create<SampledTexture>(ast::TextureDimension::kCube, create<F32>());
+  auto* c = create<SampledTexture>(ast::TextureDimension::k2d, create<F32>());
+  auto* d = create<SampledTexture>(ast::TextureDimension::kCube, create<I32>());
+
+  EXPECT_TRUE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(*c));
+  EXPECT_FALSE(a->Equals(*d));
+  EXPECT_FALSE(a->Equals(Void{}));
+}
+
 TEST_F(SampledTextureTest, IsTexture) {
   F32 f32;
   SampledTexture s(ast::TextureDimension::kCube, &f32);
@@ -45,12 +82,6 @@ TEST_F(SampledTextureTest, Type) {
   F32 f32;
   SampledTexture s(ast::TextureDimension::k3d, &f32);
   EXPECT_EQ(s.type(), &f32);
-}
-
-TEST_F(SampledTextureTest, TypeName) {
-  F32 f32;
-  SampledTexture s(ast::TextureDimension::k3d, &f32);
-  EXPECT_EQ(s.type_name(), "__sampled_texture_3d__f32");
 }
 
 TEST_F(SampledTextureTest, FriendlyName) {

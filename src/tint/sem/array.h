@@ -96,9 +96,6 @@ class Array : public Castable<Array, Type> {
   /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
   bool IsConstructible() const override;
 
-  /// @returns the name for the type
-  std::string type_name() const override;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.

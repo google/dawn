@@ -43,10 +43,6 @@ bool Vector::Equals(const Type& other) const {
   return false;
 }
 
-std::string Vector::type_name() const {
-  return "__vec_" + std::to_string(width_) + subtype_->type_name();
-}
-
 std::string Vector::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   out << "vec" << width_ << "<" << subtype_->FriendlyName(symbols) << ">";

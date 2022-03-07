@@ -573,7 +573,8 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
 
   if (!type->is_integer_scalar() && !type->is_float_scalar()) {
     diagnostics_.add_error(diag::System::Writer,
-                           "Unable to do bitcast to type " + type->type_name());
+                           "Unable to do bitcast to type " +
+                               type->FriendlyName(builder_.Symbols()));
     return false;
   }
 
@@ -3208,9 +3209,9 @@ bool GeneratorImpl::EmitValue(std::ostream& out,
                         ast::Access::kUndefined, "");
       },
       [&](Default) {
-        diagnostics_.add_error(
-            diag::System::Writer,
-            "Invalid type for value emission: " + type->type_name());
+        diagnostics_.add_error(diag::System::Writer,
+                               "Invalid type for value emission: " +
+                                   type->FriendlyName(builder_.Symbols()));
         return false;
       });
 }

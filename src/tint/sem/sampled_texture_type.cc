@@ -43,12 +43,6 @@ bool SampledTexture::Equals(const sem::Type& other) const {
   return false;
 }
 
-std::string SampledTexture::type_name() const {
-  std::ostringstream out;
-  out << "__sampled_texture_" << dim() << type_->type_name();
-  return out.str();
-}
-
 std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   out << "texture_" << dim() << "<" << type_->FriendlyName(symbols) << ">";

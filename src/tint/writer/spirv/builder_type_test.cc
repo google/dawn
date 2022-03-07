@@ -929,34 +929,35 @@ TEST_F(BuilderTest_Type,
 }
 
 TEST_F(BuilderTest_Type, Sampler) {
-  sem::Sampler sampler(ast::SamplerKind::kSampler);
+  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
 
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(sampler), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");
 }
 
 TEST_F(BuilderTest_Type, ComparisonSampler) {
-  sem::Sampler sampler(ast::SamplerKind::kComparisonSampler);
+  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
 
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(sampler), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");
 }
 
 TEST_F(BuilderTest_Type, Dedup_Sampler_And_ComparisonSampler) {
-  sem::Sampler comp_sampler(ast::SamplerKind::kComparisonSampler);
-  sem::Sampler sampler(ast::SamplerKind::kSampler);
+  auto* comp_sampler =
+      create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
+  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
 
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&comp_sampler), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(comp_sampler), 1u);
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(sampler), 1u);
 
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");

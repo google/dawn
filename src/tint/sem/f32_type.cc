@@ -35,10 +35,6 @@ bool F32::Equals(const Type& other) const {
   return other.Is<F32>();
 }
 
-std::string F32::type_name() const {
-  return "__f32";
-}
-
 std::string F32::FriendlyName(const SymbolTable&) const {
   return "f32";
 }

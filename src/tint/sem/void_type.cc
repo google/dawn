@@ -35,10 +35,6 @@ bool Void::Equals(const Type& other) const {
   return other.Is<Void>();
 }
 
-std::string Void::type_name() const {
-  return "__void";
-}
-
 std::string Void::FriendlyName(const SymbolTable&) const {
   return "void";
 }

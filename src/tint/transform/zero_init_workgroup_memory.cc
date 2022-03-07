@@ -326,7 +326,8 @@ struct ZeroInitWorkgroupMemory::State {
     }
 
     TINT_UNREACHABLE(Transform, b.Diagnostics())
-        << "could not zero workgroup type: " << ty->type_name();
+        << "could not zero workgroup type: "
+        << ty->FriendlyName(ctx.src->Symbols());
   }
 
   /// DeclareArrayIndices returns a list of statements that contain the `let`

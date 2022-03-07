@@ -39,11 +39,6 @@ bool Sampler::Equals(const sem::Type& other) const {
   return false;
 }
 
-std::string Sampler::type_name() const {
-  return std::string("__sampler_") +
-         (kind_ == ast::SamplerKind::kSampler ? "sampler" : "comparison");
-}
-
 std::string Sampler::FriendlyName(const SymbolTable&) const {
   return kind_ == ast::SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }

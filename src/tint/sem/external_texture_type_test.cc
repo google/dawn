@@ -26,6 +26,25 @@ namespace {
 
 using ExternalTextureTest = TestHelper;
 
+TEST_F(ExternalTextureTest, Creation) {
+  auto* a = create<ExternalTexture>();
+  auto* b = create<ExternalTexture>();
+  EXPECT_EQ(a, b);
+}
+
+TEST_F(ExternalTextureTest, Hash) {
+  auto* a = create<ExternalTexture>();
+  auto* b = create<ExternalTexture>();
+  EXPECT_EQ(a->Hash(), b->Hash());
+}
+
+TEST_F(ExternalTextureTest, Equals) {
+  auto* a = create<ExternalTexture>();
+  auto* b = create<ExternalTexture>();
+  EXPECT_TRUE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(Void{}));
+}
+
 TEST_F(ExternalTextureTest, IsTexture) {
   F32 f32;
   ExternalTexture s;
@@ -41,12 +60,6 @@ TEST_F(ExternalTextureTest, Dim) {
   F32 f32;
   ExternalTexture s;
   EXPECT_EQ(s.dim(), ast::TextureDimension::k2d);
-}
-
-TEST_F(ExternalTextureTest, TypeName) {
-  F32 f32;
-  ExternalTexture s;
-  EXPECT_EQ(s.type_name(), "__external_texture");
 }
 
 TEST_F(ExternalTextureTest, FriendlyName) {

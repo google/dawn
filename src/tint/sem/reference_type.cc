@@ -43,12 +43,6 @@ bool Reference::Equals(const sem::Type& other) const {
   return false;
 }
 
-std::string Reference::type_name() const {
-  std::ostringstream out;
-  out << "__ref_" << storage_class_ << subtype_->type_name() << "__" << access_;
-  return out.str();
-}
-
 std::string Reference::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   out << "ref<";

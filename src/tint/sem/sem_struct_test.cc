@@ -36,14 +36,36 @@ TEST_F(StructTest, Creation) {
   EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
 
-TEST_F(StructTest, TypeName) {
-  auto name = Sym("my_struct");
-  auto* impl =
-      create<ast::Struct>(name, ast::StructMemberList{}, ast::AttributeList{});
-  auto* s =
-      create<sem::Struct>(impl, impl->name, StructMemberList{}, 4u /* align */,
-                          4u /* size */, 4u /* size_no_padding */);
-  EXPECT_EQ(s->type_name(), "__struct_$1");
+TEST_F(StructTest, Hash) {
+  auto* a_impl = create<ast::Struct>(Sym("a"), ast::StructMemberList{},
+                                     ast::AttributeList{});
+  auto* a = create<sem::Struct>(a_impl, a_impl->name, StructMemberList{},
+                                4u /* align */, 4u /* size */,
+                                4u /* size_no_padding */);
+  auto* b_impl = create<ast::Struct>(Sym("b"), ast::StructMemberList{},
+                                     ast::AttributeList{});
+  auto* b = create<sem::Struct>(b_impl, b_impl->name, StructMemberList{},
+                                4u /* align */, 4u /* size */,
+                                4u /* size_no_padding */);
+
+  EXPECT_NE(a->Hash(), b->Hash());
+}
+
+TEST_F(StructTest, Equals) {
+  auto* a_impl = create<ast::Struct>(Sym("a"), ast::StructMemberList{},
+                                     ast::AttributeList{});
+  auto* a = create<sem::Struct>(a_impl, a_impl->name, StructMemberList{},
+                                4u /* align */, 4u /* size */,
+                                4u /* size_no_padding */);
+  auto* b_impl = create<ast::Struct>(Sym("b"), ast::StructMemberList{},
+                                     ast::AttributeList{});
+  auto* b = create<sem::Struct>(b_impl, b_impl->name, StructMemberList{},
+                                4u /* align */, 4u /* size */,
+                                4u /* size_no_padding */);
+
+  EXPECT_TRUE(a->Equals(*a));
+  EXPECT_FALSE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(StructTest, FriendlyName) {

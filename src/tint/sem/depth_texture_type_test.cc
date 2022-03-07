@@ -26,6 +26,34 @@ namespace {
 
 using DepthTextureTest = TestHelper;
 
+TEST_F(DepthTextureTest, Creation) {
+  auto* a = create<DepthTexture>(ast::TextureDimension::k2d);
+  auto* b = create<DepthTexture>(ast::TextureDimension::k2d);
+  auto* c = create<DepthTexture>(ast::TextureDimension::k2dArray);
+
+  EXPECT_EQ(a, b);
+  EXPECT_NE(a, c);
+}
+
+TEST_F(DepthTextureTest, Hash) {
+  auto* a = create<DepthTexture>(ast::TextureDimension::k2d);
+  auto* b = create<DepthTexture>(ast::TextureDimension::k2d);
+  auto* c = create<DepthTexture>(ast::TextureDimension::k2dArray);
+
+  EXPECT_EQ(a->Hash(), b->Hash());
+  EXPECT_NE(a->Hash(), c->Hash());
+}
+
+TEST_F(DepthTextureTest, Equals) {
+  auto* a = create<DepthTexture>(ast::TextureDimension::k2d);
+  auto* b = create<DepthTexture>(ast::TextureDimension::k2d);
+  auto* c = create<DepthTexture>(ast::TextureDimension::k2dArray);
+
+  EXPECT_TRUE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(*c));
+  EXPECT_FALSE(a->Equals(Void{}));
+}
+
 TEST_F(DepthTextureTest, IsTexture) {
   DepthTexture d(ast::TextureDimension::kCube);
   Texture* ty = &d;
@@ -38,11 +66,6 @@ TEST_F(DepthTextureTest, IsTexture) {
 TEST_F(DepthTextureTest, Dim) {
   DepthTexture d(ast::TextureDimension::kCube);
   EXPECT_EQ(d.dim(), ast::TextureDimension::kCube);
-}
-
-TEST_F(DepthTextureTest, TypeName) {
-  DepthTexture d(ast::TextureDimension::kCube);
-  EXPECT_EQ(d.type_name(), "__depth_texture_cube");
 }
 
 TEST_F(DepthTextureTest, FriendlyName) {

@@ -44,10 +44,6 @@ class Type : public Castable<Type, Node> {
   /// @returns true if the this type is equal to the given type
   virtual bool Equals(const Type&) const = 0;
 
-  /// [DEPRECATED]
-  /// @returns the name for this type. The type name is unique over all types.
-  virtual std::string type_name() const = 0;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.

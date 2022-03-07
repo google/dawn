@@ -32,7 +32,7 @@ const Type* ElemType(const Type* ty, size_t num_elements) {
     if (num_elements != 1) {
       TINT_ICE(Semantic, diag)
           << "sem::Constant() type <-> num_element mismatch. type: '"
-          << ty->type_name() << "' num_elements: " << num_elements;
+          << ty->TypeInfo().name << "' num_elements: " << num_elements;
     }
     return ty;
   }
@@ -40,7 +40,7 @@ const Type* ElemType(const Type* ty, size_t num_elements) {
     if (num_elements != vec->Width()) {
       TINT_ICE(Semantic, diag)
           << "sem::Constant() type <-> num_element mismatch. type: '"
-          << ty->type_name() << "' num_elements: " << num_elements;
+          << ty->TypeInfo().name << "' num_elements: " << num_elements;
     }
     TINT_ASSERT(Semantic, vec->type()->is_scalar());
     return vec->type();

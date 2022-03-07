@@ -35,10 +35,6 @@ bool ExternalTexture::Equals(const sem::Type& other) const {
   return other.Is<ExternalTexture>();
 }
 
-std::string ExternalTexture::type_name() const {
-  return "__external_texture";
-}
-
 std::string ExternalTexture::FriendlyName(const SymbolTable&) const {
   return "texture_external";
 }

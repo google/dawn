@@ -119,8 +119,8 @@ struct Robustness::State {
     auto* idx_sem = ctx.src->Sem().Get(expr->index);
     auto* idx_ty = idx_sem->Type()->UnwrapRef();
     if (!idx_ty->IsAnyOf<sem::I32, sem::U32>()) {
-      TINT_ICE(Transform, b.Diagnostics())
-          << "index must be u32 or i32, got " << idx_sem->Type()->type_name();
+      TINT_ICE(Transform, b.Diagnostics()) << "index must be u32 or i32, got "
+                                           << idx_sem->Type()->TypeInfo().name;
       return nullptr;
     }
 
@@ -133,10 +133,9 @@ struct Robustness::State {
         idx.u32 = idx_constant.Elements()[0].u32;
         idx.is_signed = false;
       } else {
-        b.Diagnostics().add_error(diag::System::Transform,
-                                  "unsupported constant value for accessor: " +
-                                      idx_constant.Type()->type_name(),
-                                  expr->source);
+        TINT_ICE(Transform, b.Diagnostics())
+            << "unsupported constant value for accessor "
+            << idx_constant.Type()->TypeInfo().name;
         return nullptr;
       }
     } else {

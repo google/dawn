@@ -241,9 +241,9 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
 
   if (!dst_type->is_integer_scalar_or_vector() &&
       !dst_type->is_float_scalar_or_vector()) {
-    diagnostics_.add_error(
-        diag::System::Writer,
-        "Unable to do bitcast to type " + dst_type->type_name());
+    diagnostics_.add_error(diag::System::Writer,
+                           "Unable to do bitcast to type " +
+                               dst_type->FriendlyName(builder_.Symbols()));
     return false;
   }
 
@@ -2217,9 +2217,9 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
     }
     out << ")";
   } else {
-    diagnostics_.add_error(
-        diag::System::Writer,
-        "Invalid type for zero emission: " + type->type_name());
+    diagnostics_.add_error(diag::System::Writer,
+                           "Invalid type for zero emission: " +
+                               type->FriendlyName(builder_.Symbols()));
     return false;
   }
   return true;

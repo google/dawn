@@ -21,9 +21,23 @@ namespace {
 
 using I32Test = TestHelper;
 
-TEST_F(I32Test, TypeName) {
-  I32 i;
-  EXPECT_EQ(i.type_name(), "__i32");
+TEST_F(I32Test, Creation) {
+  auto* a = create<I32>();
+  auto* b = create<I32>();
+  EXPECT_EQ(a, b);
+}
+
+TEST_F(I32Test, Hash) {
+  auto* a = create<I32>();
+  auto* b = create<I32>();
+  EXPECT_EQ(a->Hash(), b->Hash());
+}
+
+TEST_F(I32Test, Equals) {
+  auto* a = create<I32>();
+  auto* b = create<I32>();
+  EXPECT_TRUE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(I32Test, FriendlyName) {

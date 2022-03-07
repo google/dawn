@@ -44,12 +44,6 @@ bool Pointer::Equals(const sem::Type& other) const {
   return false;
 }
 
-std::string Pointer::type_name() const {
-  std::ostringstream out;
-  out << "__ptr_" << storage_class_ << subtype_->type_name() << "__" << access_;
-  return out.str();
-}
-
 std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   out << "ptr<";

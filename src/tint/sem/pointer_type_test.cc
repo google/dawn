@@ -22,17 +22,62 @@ namespace {
 using PointerTest = TestHelper;
 
 TEST_F(PointerTest, Creation) {
-  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+  auto* a = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
                             ast::Access::kReadWrite);
-  EXPECT_TRUE(r->StoreType()->Is<sem::I32>());
-  EXPECT_EQ(r->StorageClass(), ast::StorageClass::kStorage);
-  EXPECT_EQ(r->Access(), ast::Access::kReadWrite);
+  auto* b = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+                            ast::Access::kReadWrite);
+  auto* c = create<Pointer>(create<F32>(), ast::StorageClass::kStorage,
+                            ast::Access::kReadWrite);
+  auto* d = create<Pointer>(create<I32>(), ast::StorageClass::kPrivate,
+                            ast::Access::kReadWrite);
+  auto* e = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+                            ast::Access::kRead);
+
+  EXPECT_TRUE(a->StoreType()->Is<sem::I32>());
+  EXPECT_EQ(a->StorageClass(), ast::StorageClass::kStorage);
+  EXPECT_EQ(a->Access(), ast::Access::kReadWrite);
+
+  EXPECT_EQ(a, b);
+  EXPECT_NE(a, c);
+  EXPECT_NE(a, d);
+  EXPECT_NE(a, e);
 }
 
-TEST_F(PointerTest, TypeName) {
-  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kWorkgroup,
+TEST_F(PointerTest, Hash) {
+  auto* a = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
                             ast::Access::kReadWrite);
-  EXPECT_EQ(r->type_name(), "__ptr_workgroup__i32__read_write");
+  auto* b = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+                            ast::Access::kReadWrite);
+  auto* c = create<Pointer>(create<F32>(), ast::StorageClass::kStorage,
+                            ast::Access::kReadWrite);
+  auto* d = create<Pointer>(create<I32>(), ast::StorageClass::kPrivate,
+                            ast::Access::kReadWrite);
+  auto* e = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+                            ast::Access::kRead);
+
+  EXPECT_EQ(a->Hash(), b->Hash());
+  EXPECT_NE(a->Hash(), c->Hash());
+  EXPECT_NE(a->Hash(), d->Hash());
+  EXPECT_NE(a->Hash(), e->Hash());
+}
+
+TEST_F(PointerTest, Equals) {
+  auto* a = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+                            ast::Access::kReadWrite);
+  auto* b = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+                            ast::Access::kReadWrite);
+  auto* c = create<Pointer>(create<F32>(), ast::StorageClass::kStorage,
+                            ast::Access::kReadWrite);
+  auto* d = create<Pointer>(create<I32>(), ast::StorageClass::kPrivate,
+                            ast::Access::kReadWrite);
+  auto* e = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+                            ast::Access::kRead);
+
+  EXPECT_TRUE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(*c));
+  EXPECT_FALSE(a->Equals(*d));
+  EXPECT_FALSE(a->Equals(*e));
+  EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(PointerTest, FriendlyName) {

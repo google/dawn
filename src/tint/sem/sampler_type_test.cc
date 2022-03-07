@@ -23,24 +23,37 @@ namespace {
 using SamplerTest = TestHelper;
 
 TEST_F(SamplerTest, Creation) {
-  Sampler s{ast::SamplerKind::kSampler};
-  EXPECT_EQ(s.kind(), ast::SamplerKind::kSampler);
+  auto* a = create<Sampler>(ast::SamplerKind::kSampler);
+  auto* b = create<Sampler>(ast::SamplerKind::kSampler);
+  auto* c = create<Sampler>(ast::SamplerKind::kComparisonSampler);
+
+  EXPECT_EQ(a->kind(), ast::SamplerKind::kSampler);
+  EXPECT_EQ(c->kind(), ast::SamplerKind::kComparisonSampler);
+
+  EXPECT_FALSE(a->IsComparison());
+  EXPECT_TRUE(c->IsComparison());
+
+  EXPECT_EQ(a, b);
+  EXPECT_NE(a, c);
 }
 
-TEST_F(SamplerTest, Creation_ComparisonSampler) {
-  Sampler s{ast::SamplerKind::kComparisonSampler};
-  EXPECT_EQ(s.kind(), ast::SamplerKind::kComparisonSampler);
-  EXPECT_TRUE(s.IsComparison());
+TEST_F(SamplerTest, Hash) {
+  auto* a = create<Sampler>(ast::SamplerKind::kSampler);
+  auto* b = create<Sampler>(ast::SamplerKind::kSampler);
+  auto* c = create<Sampler>(ast::SamplerKind::kComparisonSampler);
+
+  EXPECT_EQ(a->Hash(), b->Hash());
+  EXPECT_NE(a->Hash(), c->Hash());
 }
 
-TEST_F(SamplerTest, TypeName_Sampler) {
-  Sampler s{ast::SamplerKind::kSampler};
-  EXPECT_EQ(s.type_name(), "__sampler_sampler");
-}
+TEST_F(SamplerTest, Equals) {
+  auto* a = create<Sampler>(ast::SamplerKind::kSampler);
+  auto* b = create<Sampler>(ast::SamplerKind::kSampler);
+  auto* c = create<Sampler>(ast::SamplerKind::kComparisonSampler);
 
-TEST_F(SamplerTest, TypeName_Comparison) {
-  Sampler s{ast::SamplerKind::kComparisonSampler};
-  EXPECT_EQ(s.type_name(), "__sampler_comparison");
+  EXPECT_TRUE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(*c));
+  EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(SamplerTest, FriendlyNameSampler) {

@@ -281,8 +281,9 @@ bool GeneratorImpl::EmitTypeDecl(const sem::Type* ty) {
       return false;
     }
   } else {
-    diagnostics_.add_error(diag::System::Writer,
-                           "unknown alias type: " + ty->type_name());
+    diagnostics_.add_error(
+        diag::System::Writer,
+        "unknown alias type: " + ty->FriendlyName(builder_.Symbols()));
     return false;
   }
 
@@ -1539,9 +1540,9 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
         return true;
       },
       [&](Default) {
-        diagnostics_.add_error(
-            diag::System::Writer,
-            "Invalid type for zero emission: " + type->type_name());
+        diagnostics_.add_error(diag::System::Writer,
+                               "Invalid type for zero emission: " +
+                                   type->FriendlyName(builder_.Symbols()));
         return false;
       });
 }
@@ -2267,7 +2268,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
           return true;
         }
         TINT_ICE(Writer, diagnostics_)
-            << "unhandled atomic type " << atomic->Type()->type_name();
+            << "unhandled atomic type "
+            << atomic->Type()->FriendlyName(builder_.Symbols());
         return false;
       },
       [&](const sem::Array* ary) {
@@ -2459,9 +2461,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return true;
       },
       [&](Default) {
-        diagnostics_.add_error(
-            diag::System::Writer,
-            "unknown type in EmitType: " + type->type_name());
+        diagnostics_.add_error(diag::System::Writer,
+                               "unknown type in EmitType: " +
+                                   type->FriendlyName(builder_.Symbols()));
         return false;
       });
 }

@@ -51,8 +51,6 @@ class Any : public Castable<Any, sem::Type> {
   // Stub implementations for sem::Type conformance.
   size_t Hash() const override { return 0; }
   bool Equals(const sem::Type&) const override { return false; }
-
-  std::string type_name() const override { return "<any>"; }
   std::string FriendlyName(const SymbolTable&) const override {
     return "<any>";
   }

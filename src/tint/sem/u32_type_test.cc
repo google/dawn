@@ -21,9 +21,23 @@ namespace {
 
 using U32Test = TestHelper;
 
-TEST_F(U32Test, TypeName) {
-  U32 u;
-  EXPECT_EQ(u.type_name(), "__u32");
+TEST_F(U32Test, Creation) {
+  auto* a = create<U32>();
+  auto* b = create<U32>();
+  EXPECT_EQ(a, b);
+}
+
+TEST_F(U32Test, Hash) {
+  auto* a = create<U32>();
+  auto* b = create<U32>();
+  EXPECT_EQ(a->Hash(), b->Hash());
+}
+
+TEST_F(U32Test, Equals) {
+  auto* a = create<U32>();
+  auto* b = create<U32>();
+  EXPECT_TRUE(a->Equals(*b));
+  EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(U32Test, FriendlyName) {

@@ -38,12 +38,6 @@ bool Atomic::Equals(const sem::Type& other) const {
   return false;
 }
 
-std::string Atomic::type_name() const {
-  std::ostringstream out;
-  out << "__atomic" << subtype_->type_name();
-  return out.str();
-}
-
 std::string Atomic::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   out << "atomic<" << subtype_->FriendlyName(symbols) << ">";

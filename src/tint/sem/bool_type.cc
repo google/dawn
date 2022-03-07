@@ -35,10 +35,6 @@ bool Bool::Equals(const Type& other) const {
   return other.Is<Bool>();
 }
 
-std::string Bool::type_name() const {
-  return "__bool";
-}
-
 std::string Bool::FriendlyName(const SymbolTable&) const {
   return "bool";
 }
