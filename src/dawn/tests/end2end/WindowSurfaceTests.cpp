@@ -181,12 +181,12 @@ TEST_F(WindowSurfaceInstanceTests, CorrectSTypeXlib) {
     GLFWwindow* window = CreateWindow();
     std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
         utils::SetupWindowAndGetSurfaceDescriptorForTesting(window);
-    ASSERT_EQ(chainedDescriptor->sType, wgpu::SType::SurfaceDescriptorFromXlibWindow);
+    ASSERT_EQ(chainedDescriptor->sType, wgpu::SType::SurfaceDescriptorFromXlib);
 }
 
 // Test with setting an invalid window
 TEST_F(WindowSurfaceInstanceTests, InvalidXWindow) {
-    wgpu::SurfaceDescriptorFromXlibWindow chainedDescriptor;
+    wgpu::SurfaceDescriptorFromXlib chainedDescriptor;
     chainedDescriptor.display = XOpenDisplay(nullptr);
     // From the "X Window System Protocol" "X Version 11, Release 6.8" page 2 at
     // https://www.x.org/releases/X11R7.5/doc/x11proto/proto.pdf
@@ -203,7 +203,7 @@ TEST_F(WindowSurfaceInstanceTests, InvalidXWindow) {
 
 // Test using Xlib when it is not supported
 TEST_F(WindowSurfaceInstanceTests, XlibSurfacesAreInvalid) {
-    wgpu::SurfaceDescriptorFromXlibWindow chainedDescriptor;
+    wgpu::SurfaceDescriptorFromXlib chainedDescriptor;
     chainedDescriptor.display = nullptr;
     chainedDescriptor.window = 0;
 
