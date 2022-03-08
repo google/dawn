@@ -89,6 +89,9 @@ namespace dawn::native::vulkan {
         ImageFormatList,
         ShaderFloat16Int8,
 
+        // Promoted to 1.3
+        ZeroInitializeWorkgroupMemory,
+
         // External* extensions
         ExternalMemoryFD,
         ExternalMemoryDmaBuf,

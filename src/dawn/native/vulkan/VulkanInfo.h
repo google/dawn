@@ -51,6 +51,8 @@ namespace dawn::native::vulkan {
         VkPhysicalDeviceShaderFloat16Int8FeaturesKHR shaderFloat16Int8Features;
         VkPhysicalDevice16BitStorageFeaturesKHR _16BitStorageFeatures;
         VkPhysicalDeviceSubgroupSizeControlFeaturesEXT subgroupSizeControlFeatures;
+        VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR
+            zeroInitializeWorkgroupMemoryFeatures;
 
         bool HasExt(DeviceExt ext) const;
         DeviceExtSet extensions;

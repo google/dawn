@@ -152,6 +152,7 @@ namespace dawn::native::vulkan {
         uint32_t FindComputeSubgroupSize() const;
         void InitTogglesFromDriver();
         void ApplyDepth24PlusS8Toggle();
+        void ApplyUseZeroInitializeWorkgroupMemoryExtensionToggle();
 
         void DestroyImpl() override;
         MaybeError WaitForIdleForDestruction() override;

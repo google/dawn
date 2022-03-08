@@ -97,6 +97,10 @@ namespace dawn::native::vulkan {
         // the decision if it is not applicable.
         ApplyDepth24PlusS8Toggle();
 
+        // The environment can only request to use VK_KHR_zero_initialize_workgroup_memory when the
+        // extension is available. Override the decision if it is no applicable.
+        ApplyUseZeroInitializeWorkgroupMemoryExtensionToggle();
+
         return DeviceBase::Initialize(Queue::Create(this));
     }
 
@@ -345,6 +349,20 @@ namespace dawn::native::vulkan {
             mComputeSubgroupSize = FindComputeSubgroupSize();
         }
 
+        if (mDeviceInfo.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory)) {
+            ASSERT(usedKnobs.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory));
+
+            usedKnobs.zeroInitializeWorkgroupMemoryFeatures.sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES_KHR;
+
+            // Always allow initializing workgroup memory with OpConstantNull when available.
+            // Note that the driver still won't initialize workgroup memory unless the workgroup
+            // variable is explicitly initialized with OpConstantNull.
+            usedKnobs.zeroInitializeWorkgroupMemoryFeatures.shaderZeroInitializeWorkgroupMemory =
+                VK_TRUE;
+            featuresChain.Add(&usedKnobs.zeroInitializeWorkgroupMemoryFeatures);
+        }
+
         if (mDeviceInfo.features.samplerAnisotropy == VK_TRUE) {
             usedKnobs.features.samplerAnisotropy = VK_TRUE;
         }
@@ -488,6 +506,7 @@ namespace dawn::native::vulkan {
         fn.GetDeviceQueue(mVkDevice, mQueueFamily, 0, &mQueue);
     }
 
+    // Note that this function is called before mDeviceInfo is initialized.
     void Device::InitTogglesFromDriver() {
         // TODO(crbug.com/dawn/857): tighten this workaround when this issue is fixed in both
         // Vulkan SPEC and drivers.
@@ -495,6 +514,10 @@ namespace dawn::native::vulkan {
 
         // By default try to use D32S8 for Depth24PlusStencil8
         SetToggle(Toggle::VulkanUseD32S8, true);
+
+        // By default try to initialize workgroup memory with OpConstantNull according to the Vulkan
+        // extension VK_KHR_zero_initialize_workgroup_memory.
+        SetToggle(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension, true);
     }
 
     void Device::ApplyDepth24PlusS8Toggle() {
@@ -510,6 +533,12 @@ namespace dawn::native::vulkan {
         }
         if (!supportsD32s8) {
             ForceSetToggle(Toggle::VulkanUseD32S8, false);
+        }
+    }
+
+    void Device::ApplyUseZeroInitializeWorkgroupMemoryExtensionToggle() {
+        if (!mDeviceInfo.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory)) {
+            ForceSetToggle(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension, false);
         }
     }
 

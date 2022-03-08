@@ -24,6 +24,7 @@ namespace dawn::native::vulkan {
 
     static constexpr uint32_t VulkanVersion_1_1 = VK_MAKE_VERSION(1, 1, 0);
     static constexpr uint32_t VulkanVersion_1_2 = VK_MAKE_VERSION(1, 2, 0);
+    static constexpr uint32_t VulkanVersion_1_3 = VK_MAKE_VERSION(1, 3, 0);
     static constexpr uint32_t NeverPromoted = std::numeric_limits<uint32_t>::max();
 
     // A static array for InstanceExtInfo that can be indexed with InstanceExts.
@@ -148,6 +149,9 @@ namespace dawn::native::vulkan {
         {DeviceExt::DriverProperties, "VK_KHR_driver_properties", VulkanVersion_1_2},
         {DeviceExt::ImageFormatList, "VK_KHR_image_format_list", VulkanVersion_1_2},
         {DeviceExt::ShaderFloat16Int8, "VK_KHR_shader_float16_int8", VulkanVersion_1_2},
+
+        {DeviceExt::ZeroInitializeWorkgroupMemory, "VK_KHR_zero_initialize_workgroup_memory",
+         VulkanVersion_1_3},
 
         {DeviceExt::ExternalMemoryFD, "VK_KHR_external_memory_fd", NeverPromoted},
         {DeviceExt::ExternalMemoryDmaBuf, "VK_EXT_external_memory_dma_buf", NeverPromoted},
@@ -274,6 +278,10 @@ namespace dawn::native::vulkan {
                     // don't need to check for it as it also requires Vulkan 1.1 in which
                     // VK_KHR_get_physical_device_properties2 was promoted.
                     hasDependencies = icdVersion >= VulkanVersion_1_1;
+                    break;
+
+                case DeviceExt::ZeroInitializeWorkgroupMemory:
+                    hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2);
                     break;
 
                 case DeviceExt::EnumCount:

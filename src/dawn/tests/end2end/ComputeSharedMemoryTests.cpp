@@ -201,4 +201,5 @@ DAWN_INSTANTIATE_TEST(ComputeSharedMemoryTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      VulkanBackend({}, {"use_vulkan_zero_initialize_workgroup_memory_extension"}));
