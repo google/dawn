@@ -1305,7 +1305,7 @@ namespace dawn::native::vulkan {
     }
 
     MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
-        if ((GetTexture()->GetUsage() &
+        if ((GetTexture()->GetInternalUsage() &
              ~(wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst)) == 0) {
             // If the texture view has no other usage than CopySrc and CopyDst, then it can't
             // actually be used as a render pass attachment or sampled/storage texture. The Vulkan
