@@ -964,6 +964,33 @@ TEST_F(BindGroupLayoutValidationTest, DynamicAndTypeCompatibility) {
                 });
 }
 
+// Test that it is invalid to create a BGL with more than one binding type set.
+TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryTooManySet) {
+    wgpu::BindGroupLayoutEntry entry = {};
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.buffer.type = wgpu::BufferBindingType::Uniform;
+    entry.sampler.type = wgpu::SamplerBindingType::Filtering;
+
+    wgpu::BindGroupLayoutDescriptor descriptor;
+    descriptor.entryCount = 1;
+    descriptor.entries = &entry;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
+                        testing::HasSubstr("had more than one of"));
+}
+
+// Test that it is invalid to create a BGL with none one of buffer,
+// sampler, texture, storageTexture, or externalTexture set.
+TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryNoneSet) {
+    wgpu::BindGroupLayoutEntry entry = {};
+
+    wgpu::BindGroupLayoutDescriptor descriptor;
+    descriptor.entryCount = 1;
+    descriptor.entries = &entry;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
+                        testing::HasSubstr("had none of"));
+}
+
 // This test verifies that visibility of bindings in BindGroupLayout can be none
 TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
     utils::MakeBindGroupLayout(device,

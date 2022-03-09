@@ -141,6 +141,10 @@ namespace dawn::native {
                 bindingType = BindingInfoType::ExternalTexture;
             }
 
+            DAWN_INVALID_IF(bindingMemberCount == 0,
+                            "BindGroupLayoutEntry had none of buffer, sampler, texture, "
+                            "storageTexture, or externalTexture set");
+
             DAWN_INVALID_IF(bindingMemberCount != 1,
                             "BindGroupLayoutEntry had more than one of buffer, sampler, texture, "
                             "storageTexture, or externalTexture set");
