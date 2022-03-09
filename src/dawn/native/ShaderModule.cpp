@@ -589,8 +589,8 @@ namespace dawn::native {
             for (const auto& [bindingId, bindingInfo] : entryPoint.bindings[group]) {
                 DAWN_TRY_CONTEXT(ValidateCompatibilityOfSingleBindingWithLayout(
                                      device, layout, entryPoint.stage, bindingId, bindingInfo),
-                                 "validating that the entry-point's declaration for [[group(%u), "
-                                 "binding(%u)]] matches %s",
+                                 "validating that the entry-point's declaration for @group(%u) "
+                                 "@binding(%u) matches %s",
                                  static_cast<uint32_t>(group), static_cast<uint32_t>(bindingId),
                                  layout);
             }

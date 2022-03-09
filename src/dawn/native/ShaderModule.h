@@ -166,7 +166,7 @@ namespace dawn::native {
     // ShaderModuleBase.
     struct EntryPointMetadata {
         // bindings[G][B] is the reflection data for the binding defined with
-        // [[group=G, binding=B]] in WGSL / SPIRV.
+        // @group(G) @binding(B) in WGSL / SPIRV.
         BindingInfoArray bindings;
 
         struct SamplerTexturePair {
