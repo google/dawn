@@ -2335,7 +2335,7 @@
             {"name": "hwnd", "type": "void", "annotation": "*"}
         ]
     },
-    "surface descriptor from xlib": {
+    "surface descriptor from xlib window": {
         "category": "structure",
         "chained": "in",
         "tags": ["native"],
@@ -2406,7 +2406,7 @@
             {"value": 0, "name": "invalid", "valid": false},
             {"value": 1, "name": "surface descriptor from metal layer", "tags": ["native"]},
             {"value": 2, "name": "surface descriptor from windows HWND", "tags": ["native"]},
-            {"value": 3, "name": "surface descriptor from xlib", "tags": ["native"]},
+            {"value": 3, "name": "surface descriptor from xlib window", "tags": ["native"]},
             {"value": 4, "name": "surface descriptor from canvas HTML selector"},
             {"value": 5, "name": "shader module SPIRV descriptor"},
             {"value": 6, "name": "shader module WGSL descriptor"},

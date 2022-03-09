@@ -174,7 +174,7 @@
         "client_side_structures": [
             "SurfaceDescriptorFromMetalLayer",
             "SurfaceDescriptorFromWindowsHWND",
-            "SurfaceDescriptorFromXlib",
+            "SurfaceDescriptorFromXlibWindow",
             "SurfaceDescriptorFromWindowsCoreWindow",
             "SurfaceDescriptorFromWindowsSwapChainPanel"
         ],

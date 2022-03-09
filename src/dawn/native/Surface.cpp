@@ -69,7 +69,7 @@ namespace dawn::native {
                                      wgpu::SType::SurfaceDescriptorFromWindowsHWND,
                                      wgpu::SType::SurfaceDescriptorFromWindowsCoreWindow,
                                      wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel,
-                                     wgpu::SType::SurfaceDescriptorFromXlib));
+                                     wgpu::SType::SurfaceDescriptorFromXlibWindow));
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
         const SurfaceDescriptorFromMetalLayer* metalDesc = nullptr;
@@ -116,7 +116,7 @@ namespace dawn::native {
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #if defined(DAWN_USE_X11)
-        const SurfaceDescriptorFromXlib* xDesc = nullptr;
+        const SurfaceDescriptorFromXlibWindow* xDesc = nullptr;
         FindInChain(descriptor->nextInChain, &xDesc);
         if (xDesc) {
             // Check the validity of the window by calling a getter function on the window that
@@ -146,7 +146,7 @@ namespace dawn::native {
         const SurfaceDescriptorFromWindowsHWND* hwndDesc = nullptr;
         const SurfaceDescriptorFromWindowsCoreWindow* coreWindowDesc = nullptr;
         const SurfaceDescriptorFromWindowsSwapChainPanel* swapChainPanelDesc = nullptr;
-        const SurfaceDescriptorFromXlib* xDesc = nullptr;
+        const SurfaceDescriptorFromXlibWindow* xDesc = nullptr;
         FindInChain(descriptor->nextInChain, &metalDesc);
         FindInChain(descriptor->nextInChain, &hwndDesc);
         FindInChain(descriptor->nextInChain, &coreWindowDesc);

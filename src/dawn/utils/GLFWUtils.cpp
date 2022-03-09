@@ -71,8 +71,8 @@ namespace utils {
 #elif defined(DAWN_USE_X11)
     std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorForTesting(
         GLFWwindow* window) {
-        std::unique_ptr<wgpu::SurfaceDescriptorFromXlib> desc =
-            std::make_unique<wgpu::SurfaceDescriptorFromXlib>();
+        std::unique_ptr<wgpu::SurfaceDescriptorFromXlibWindow> desc =
+            std::make_unique<wgpu::SurfaceDescriptorFromXlibWindow>();
         desc->display = glfwGetX11Display();
         desc->window = glfwGetX11Window(window);
         return std::move(desc);
