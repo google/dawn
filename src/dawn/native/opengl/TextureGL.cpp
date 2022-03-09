@@ -56,8 +56,9 @@ namespace dawn::native::opengl {
                 case wgpu::TextureViewDimension::e2D:
                     return (sampleCount > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
                 case wgpu::TextureViewDimension::e2DArray:
-                    if (arrayLayerCount == 1) {
-                        return (sampleCount > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+                    if (sampleCount > 1) {
+                        ASSERT(arrayLayerCount == 1);
+                        return GL_TEXTURE_2D_MULTISAMPLE;
                     }
                     ASSERT(sampleCount == 1);
                     return GL_TEXTURE_2D_ARRAY;
@@ -93,7 +94,13 @@ namespace dawn::native::opengl {
                 return true;
             }
 
-            if (texture->GetArrayLayers() != textureViewDescriptor->arrayLayerCount) {
+            if (texture->GetArrayLayers() != textureViewDescriptor->arrayLayerCount ||
+                (texture->GetArrayLayers() == 1 &&
+                 texture->GetDimension() == wgpu::TextureDimension::e2D &&
+                 textureViewDescriptor->dimension == wgpu::TextureViewDimension::e2DArray)) {
+                // If the view has a different number of array layers, we need a new view.
+                // And, if the original texture is a 2D texture with one array layer, we need a new
+                // view to view it as a 2D array texture.
                 return true;
             }
 

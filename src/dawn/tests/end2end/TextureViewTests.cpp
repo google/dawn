@@ -119,7 +119,7 @@ class TextureViewSamplingTest : public DawnTest {
         mVSModule = CreateDefaultVertexShaderModule(device);
     }
 
-    void initTexture(uint32_t arrayLayerCount, uint32_t mipLevelCount) {
+    void InitTexture(uint32_t arrayLayerCount, uint32_t mipLevelCount) {
         ASSERT(arrayLayerCount > 0 && mipLevelCount > 0);
 
         const uint32_t textureWidthLevel0 = 1 << mipLevelCount;
@@ -208,7 +208,7 @@ class TextureViewSamplingTest : public DawnTest {
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
-        initTexture(textureArrayLayers, textureMipLevels);
+        InitTexture(textureArrayLayers, textureMipLevels);
 
         wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
         descriptor.dimension = wgpu::TextureViewDimension::e2D;
@@ -246,7 +246,7 @@ class TextureViewSamplingTest : public DawnTest {
         constexpr uint32_t kTextureViewLayerCount = 3;
         ASSERT(textureArrayLayers >= textureViewBaseLayer + kTextureViewLayerCount);
 
-        initTexture(textureArrayLayers, textureMipLevels);
+        InitTexture(textureArrayLayers, textureMipLevels);
 
         wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
         descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
@@ -320,7 +320,7 @@ class TextureViewSamplingTest : public DawnTest {
         // of 2D textures. Find a workaround.
         DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
         constexpr uint32_t kMipLevels = 1u;
-        initTexture(textureArrayLayers, kMipLevels);
+        InitTexture(textureArrayLayers, kMipLevels);
 
         ASSERT_TRUE((textureViewLayerCount == 6) ||
                     (isCubeMapArray && textureViewLayerCount % 6 == 0));
@@ -359,7 +359,7 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
 
     constexpr uint32_t kLayers = 3;
     constexpr uint32_t kMipLevels = 1;
-    initTexture(kLayers, kMipLevels);
+    InitTexture(kLayers, kMipLevels);
 
     wgpu::TextureViewDescriptor descriptor;
     descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
@@ -391,6 +391,35 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOn2DArrayTexture) {
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOn2DArrayTexture) {
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
     Texture2DArrayViewTest(6, 1, 2, 0);
+}
+
+// Test sampling from a 2D array texture view created on a 2D texture with one layer.
+// Regression test for crbug.com/dawn/1309.
+TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnSingleLayer2DTexture) {
+    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+    InitTexture(1 /* array layer count */, 1 /* mip level count */);
+
+    wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
+    descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
+    descriptor.baseArrayLayer = 0;
+    descriptor.arrayLayerCount = 1;
+    descriptor.baseMipLevel = 0;
+    descriptor.mipLevelCount = 1;
+    wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
+
+    const char* fragmentShader = R"(
+        @group(0) @binding(0) var sampler0 : sampler;
+        @group(0) @binding(1) var texture0 : texture_2d_array<f32>;
+
+        @stage(fragment)
+        fn main(@location(0) texCoord : vec2<f32>) -> @location(0) vec4<f32> {
+            return textureSample(texture0, sampler0, texCoord, 0);
+        }
+    )";
+
+    int expected = GenerateTestPixelValue(0, 0);
+    Verify(textureView, fragmentShader, expected);
 }
 
 // Test sampling from a 2D texture view created on a mipmap level of a 2D texture.
