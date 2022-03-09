@@ -29,7 +29,7 @@ namespace wgsl {
 namespace {
 
 bool is_whitespace(char c) {
-  return std::isspace(c);
+  return std::isspace(static_cast<unsigned char>(c));
 }
 
 uint32_t dec_value(char c) {
@@ -115,11 +115,11 @@ bool Lexer::is_null() const {
 }
 
 bool Lexer::is_digit(char ch) const {
-  return std::isdigit(ch);
+  return std::isdigit(static_cast<unsigned char>(ch));
 }
 
 bool Lexer::is_hex(char ch) const {
-  return std::isxdigit(ch);
+  return std::isxdigit(static_cast<unsigned char>(ch));
 }
 
 bool Lexer::matches(size_t pos, std::string_view substr) {
