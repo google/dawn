@@ -414,6 +414,9 @@ namespace {
             wgpu::TextureView renderView =
                 Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth32Float);
             utils::ComboRenderPassDescriptor renderPass({}, renderView);
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+
             AssertBeginRenderPassSuccess(&renderPass);
         }
 
@@ -427,6 +430,9 @@ namespace {
             wgpu::TextureView sampledView = sampledTex.CreateView();
 
             utils::ComboRenderPassDescriptor renderPass({}, sampledView);
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+
             AssertBeginRenderPassError(&renderPass);
         }
     }
@@ -861,6 +867,8 @@ namespace {
             wgpu::TextureView depth =
                 Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24Plus);
             utils::ComboRenderPassDescriptor renderPass({color}, depth);
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
             renderPass.cDepthStencilAttachmentInfo.depthClearValue = NAN;
             AssertBeginRenderPassError(&renderPass);
         }
@@ -870,6 +878,8 @@ namespace {
             wgpu::TextureView depth =
                 Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24Plus);
             utils::ComboRenderPassDescriptor renderPass({color}, depth);
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
             renderPass.cDepthStencilAttachmentInfo.depthClearValue = INFINITY;
             AssertBeginRenderPassSuccess(&renderPass);
         }
@@ -899,7 +909,7 @@ namespace {
         }
 
         // Tests that a pass with mismatched depthReadOnly and stencilReadOnly values passes when
-        // there is no stencil component in the format.
+        // there is no stencil component in the format (deprecated).
         {
             utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilViewNoStencil);
             renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
@@ -908,7 +918,29 @@ namespace {
             renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
             renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
             renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = false;
-            AssertBeginRenderPassSuccess(&renderPass);
+            EXPECT_DEPRECATION_WARNING(AssertBeginRenderPassSuccess(&renderPass));
+        }
+
+        // Tests that a pass with mismatched depthReadOnly and stencilReadOnly values fails when
+        // there there is no stencil component in the format and stencil loadOp/storeOp are passed.
+        {
+            utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilViewNoStencil);
+            renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+            renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = false;
+            AssertBeginRenderPassError(&renderPass);
+
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+            AssertBeginRenderPassError(&renderPass);
+
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = false;
+            AssertBeginRenderPassError(&renderPass);
         }
 
         // Tests that a pass with depthReadOnly=true and stencilReadOnly=true can pass
@@ -1077,6 +1109,9 @@ namespace {
 
             wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
             utils::ComboRenderPassDescriptor renderPass({}, view);
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+
             AssertBeginRenderPassSuccess(&renderPass);
         }
 

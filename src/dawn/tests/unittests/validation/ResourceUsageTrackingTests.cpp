@@ -902,6 +902,8 @@ namespace {
         utils::ComboRenderPassDescriptor passDescriptor({}, view);
         passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
         passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
 
         // It is invalid to use the texture as both sampled and writeable depth/stencil attachment
         // in the same pass

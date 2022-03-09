@@ -138,6 +138,23 @@ namespace utils {
 
         return *this;
     }
+    void ComboRenderPassDescriptor::UnsetDepthStencilLoadStoreOpsForFormat(
+        wgpu::TextureFormat format) {
+        switch (format) {
+            case wgpu::TextureFormat::Depth24Plus:
+            case wgpu::TextureFormat::Depth32Float:
+            case wgpu::TextureFormat::Depth16Unorm:
+                cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+                cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+                break;
+            case wgpu::TextureFormat::Stencil8:
+                cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+                cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
+                break;
+            default:
+                break;
+        }
+    }
 
     BasicRenderPass::BasicRenderPass()
         : width(0),

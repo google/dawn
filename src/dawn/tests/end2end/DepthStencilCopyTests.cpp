@@ -142,6 +142,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
     // The texture will be cleared to the "clear" value, and then bottom left corner will
     // be written with the "region" value.
     void InitializeDepthTextureRegion(wgpu::Texture texture,
+                                      wgpu::TextureFormat depthFormat,
                                       float clearDepth,
                                       float regionDepth,
                                       uint32_t mipLevel = 0) {
@@ -150,6 +151,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         viewDesc.mipLevelCount = 1;
 
         utils::ComboRenderPassDescriptor renderPassDesc({}, texture.CreateView(&viewDesc));
+        renderPassDesc.UnsetDepthStencilLoadStoreOpsForFormat(depthFormat);
         renderPassDesc.cDepthStencilAttachmentInfo.depthClearValue = clearDepth;
 
         utils::ComboRenderPipelineDescriptor renderPipelineDesc;
@@ -455,7 +457,7 @@ TEST_P(DepthCopyTests, FromDepthAspect) {
         kWidth, kHeight, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
 
     constexpr float kInitDepth = 0.2f;
-    InitializeDepthTextureRegion(texture, 0.f, kInitDepth);
+    InitializeDepthTextureRegion(texture, GetParam().mTextureFormat, 0.f, kInitDepth);
 
     // This expectation is the test as it performs the CopyTextureToBuffer.
     if (GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm) {
@@ -495,7 +497,7 @@ TEST_P(DepthCopyTests, FromNonZeroMipDepthAspect) {
         9, 9, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 2);
 
     constexpr float kInitDepth = 0.4f;
-    InitializeDepthTextureRegion(depthTexture, 0.f, kInitDepth, 1);
+    InitializeDepthTextureRegion(depthTexture, GetParam().mTextureFormat, 0.f, kInitDepth, 1);
 
     // This expectation is the test as it performs the CopyTextureToBuffer.
     if (GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm) {

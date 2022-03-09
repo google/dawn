@@ -56,11 +56,13 @@ class SubresourceRenderAttachmentTest : public DawnTest {
                 }
                 case Type::Depth: {
                     utils::ComboRenderPassDescriptor renderPass({}, renderTargetView);
+                    renderPass.UnsetDepthStencilLoadStoreOpsForFormat(format);
                     renderPass.cDepthStencilAttachmentInfo.depthClearValue = expectedDepth;
                     return renderPass;
                 }
                 case Type::Stencil: {
                     utils::ComboRenderPassDescriptor renderPass({}, renderTargetView);
+                    renderPass.UnsetDepthStencilLoadStoreOpsForFormat(format);
                     renderPass.cDepthStencilAttachmentInfo.stencilClearValue = expectedStencil;
                     return renderPass;
                 }

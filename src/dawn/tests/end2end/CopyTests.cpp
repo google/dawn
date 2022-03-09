@@ -1039,6 +1039,7 @@ TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
     // Initialize the depth texture with 0.5f.
     constexpr float kClearDepthValue = 0.5f;
     utils::ComboRenderPassDescriptor renderPass({}, texture.CreateView());
+    renderPass.UnsetDepthStencilLoadStoreOpsForFormat(kFormat);
     renderPass.cDepthStencilAttachmentInfo.depthClearValue = kClearDepthValue;
     renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
     renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;

@@ -92,6 +92,7 @@ class DepthBiasTests : public DawnTest {
         // Create a render pass which clears depth to depthClear
         utils::ComboRenderPassDescriptor renderPassDesc({mRenderTarget.CreateView()},
                                                         mDepthTexture.CreateView());
+        renderPassDesc.UnsetDepthStencilLoadStoreOpsForFormat(depthFormat);
         renderPassDesc.cDepthStencilAttachmentInfo.depthClearValue = depthClear;
 
         // Create a render pipeline to render the quad

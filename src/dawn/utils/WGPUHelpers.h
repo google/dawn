@@ -66,6 +66,8 @@ namespace utils {
         const ComboRenderPassDescriptor& operator=(
             const ComboRenderPassDescriptor& otherRenderPass);
 
+        void UnsetDepthStencilLoadStoreOpsForFormat(wgpu::TextureFormat format);
+
         std::array<wgpu::RenderPassColorAttachment, kMaxColorAttachments> cColorAttachments;
         wgpu::RenderPassDepthStencilAttachment cDepthStencilAttachmentInfo = {};
     };

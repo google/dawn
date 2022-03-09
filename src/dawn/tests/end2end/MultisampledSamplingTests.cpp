@@ -199,6 +199,8 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
 
             utils::ComboRenderPassDescriptor renderPass({colorView}, depthView);
             renderPass.cDepthStencilAttachmentInfo.depthClearValue = 0.f;
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
 
             wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
             renderPassEncoder.SetPipeline(drawPipeline);

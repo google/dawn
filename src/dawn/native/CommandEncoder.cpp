@@ -241,6 +241,10 @@ namespace dawn::native {
 
             DAWN_TRY(ValidateLoadOp(colorAttachment.loadOp));
             DAWN_TRY(ValidateStoreOp(colorAttachment.storeOp));
+            DAWN_INVALID_IF(colorAttachment.loadOp == wgpu::LoadOp::Undefined,
+                            "loadOp must be set.");
+            DAWN_INVALID_IF(colorAttachment.storeOp == wgpu::StoreOp::Undefined,
+                            "storeOp must be set.");
 
             // TODO(dawn:1269): Remove after the deprecation period.
             bool useClearColor = HasDeprecatedColor(colorAttachment);
@@ -303,47 +307,77 @@ namespace dawn::native {
                 "is 'all'.",
                 depthStencilAttachment->depthReadOnly, depthStencilAttachment->stencilReadOnly);
 
-            if (depthStencilAttachment->depthReadOnly) {
+            // Read only, or depth doesn't exist.
+            if (depthStencilAttachment->depthReadOnly ||
+                !IsSubset(Aspect::Depth, attachment->GetAspects())) {
                 if (depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Load &&
                     depthStencilAttachment->depthStoreOp == wgpu::StoreOp::Store) {
                     // TODO(dawn:1269): Remove this branch after the deprecation period.
                     device->EmitDeprecationWarning(
-                        "Setting depthLoadOp and depthStore when "
-                        "depthReadOnly is true is deprecated.");
+                        "Setting depthLoadOp and depthStoreOp when "
+                        "the attachment has no depth aspect or depthReadOnly is true is "
+                        "deprecated.");
                 } else {
                     DAWN_INVALID_IF(depthStencilAttachment->depthLoadOp != wgpu::LoadOp::Undefined,
-                                    "depthLoadOp (%s) must not be set when depthReadOnly is true.",
-                                    depthStencilAttachment->depthLoadOp);
+                                    "depthLoadOp (%s) must not be set if the attachment (%s) has "
+                                    "no depth aspect or depthReadOnly (%u) is true.",
+                                    depthStencilAttachment->depthLoadOp, attachment,
+                                    depthStencilAttachment->depthReadOnly);
                     DAWN_INVALID_IF(
                         depthStencilAttachment->depthStoreOp != wgpu::StoreOp::Undefined,
-                        "depthStoreOp (%s) must not be set when depthReadOnly is true.",
-                        depthStencilAttachment->depthStoreOp);
+                        "depthStoreOp (%s) must not be set if the attachment (%s) has no depth "
+                        "aspect or depthReadOnly (%u) is true.",
+                        depthStencilAttachment->depthStoreOp, attachment,
+                        depthStencilAttachment->depthReadOnly);
                 }
             } else {
                 DAWN_TRY(ValidateLoadOp(depthStencilAttachment->depthLoadOp));
+                DAWN_INVALID_IF(depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Undefined,
+                                "depthLoadOp must be set if the attachment (%s) has a depth aspect "
+                                "and depthReadOnly (%u) is false.",
+                                attachment, depthStencilAttachment->depthReadOnly);
                 DAWN_TRY(ValidateStoreOp(depthStencilAttachment->depthStoreOp));
+                DAWN_INVALID_IF(depthStencilAttachment->depthStoreOp == wgpu::StoreOp::Undefined,
+                                "depthStoreOp must be set if the attachment (%s) has a depth "
+                                "aspect and depthReadOnly (%u) is false.",
+                                attachment, depthStencilAttachment->depthReadOnly);
             }
 
-            if (depthStencilAttachment->stencilReadOnly) {
+            // Read only, or stencil doesn't exist.
+            if (depthStencilAttachment->stencilReadOnly ||
+                !IsSubset(Aspect::Stencil, attachment->GetAspects())) {
                 if (depthStencilAttachment->stencilLoadOp == wgpu::LoadOp::Load &&
                     depthStencilAttachment->stencilStoreOp == wgpu::StoreOp::Store) {
                     // TODO(dawn:1269): Remove this branch after the deprecation period.
                     device->EmitDeprecationWarning(
                         "Setting stencilLoadOp and stencilStoreOp when "
-                        "stencilReadOnly is true is deprecated.");
+                        "the attachment has no stencil aspect or stencilReadOnly is true is "
+                        "deprecated.");
                 } else {
                     DAWN_INVALID_IF(
                         depthStencilAttachment->stencilLoadOp != wgpu::LoadOp::Undefined,
-                        "stencilLoadOp (%s) must not be set when stencilReadOnly is true.",
-                        depthStencilAttachment->stencilLoadOp);
+                        "stencilLoadOp (%s) must not be set if the attachment (%s) has no stencil "
+                        "aspect or stencilReadOnly (%u) is true.",
+                        depthStencilAttachment->stencilLoadOp, attachment,
+                        depthStencilAttachment->stencilReadOnly);
                     DAWN_INVALID_IF(
                         depthStencilAttachment->stencilStoreOp != wgpu::StoreOp::Undefined,
-                        "stencilStoreOp (%s) must not be set when stencilReadOnly is true.",
-                        depthStencilAttachment->stencilStoreOp);
+                        "stencilStoreOp (%s) must not be set if the attachment (%s) has no stencil "
+                        "aspect or stencilReadOnly (%u) is true.",
+                        depthStencilAttachment->stencilStoreOp, attachment,
+                        depthStencilAttachment->stencilReadOnly);
                 }
             } else {
                 DAWN_TRY(ValidateLoadOp(depthStencilAttachment->stencilLoadOp));
+                DAWN_INVALID_IF(depthStencilAttachment->stencilLoadOp == wgpu::LoadOp::Undefined,
+                                "stencilLoadOp must be set if the attachment (%s) has a stencil "
+                                "aspect and stencilReadOnly (%u) is false.",
+                                attachment, depthStencilAttachment->stencilReadOnly);
                 DAWN_TRY(ValidateStoreOp(depthStencilAttachment->stencilStoreOp));
+                DAWN_INVALID_IF(depthStencilAttachment->depthStoreOp == wgpu::StoreOp::Undefined,
+                                "stencilStoreOp must be set if the attachment (%s) has a stencil "
+                                "aspect and stencilReadOnly (%u) is false.",
+                                attachment, depthStencilAttachment->stencilReadOnly);
             }
 
             if (!std::isnan(depthStencilAttachment->clearDepth)) {
@@ -823,7 +857,9 @@ namespace dawn::native {
                     cmd->depthStencilAttachment.stencilReadOnly =
                         descriptor->depthStencilAttachment->stencilReadOnly;
 
-                    if (descriptor->depthStencilAttachment->depthReadOnly) {
+                    if (descriptor->depthStencilAttachment->depthReadOnly ||
+                        !IsSubset(Aspect::Depth,
+                                  descriptor->depthStencilAttachment->view->GetAspects())) {
                         cmd->depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Load;
                         cmd->depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
                     } else {
@@ -833,7 +869,9 @@ namespace dawn::native {
                             descriptor->depthStencilAttachment->depthStoreOp;
                     }
 
-                    if (descriptor->depthStencilAttachment->stencilReadOnly) {
+                    if (descriptor->depthStencilAttachment->stencilReadOnly ||
+                        !IsSubset(Aspect::Stencil,
+                                  descriptor->depthStencilAttachment->view->GetAspects())) {
                         cmd->depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Load;
                         cmd->depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
                     } else {

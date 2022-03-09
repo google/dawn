@@ -85,6 +85,7 @@ namespace {
                 textureViews[mipLevel] = texture.CreateView(&textureViewDesc);
 
                 utils::ComboRenderPassDescriptor renderPassDescriptor({}, textureViews[mipLevel]);
+                renderPassDescriptor.UnsetDepthStencilLoadStoreOpsForFormat(GetParam().mFormat);
                 renderPassDescriptor.cDepthStencilAttachmentInfo.depthClearValue =
                     kDepthValues[mipLevel];
                 renderPassDescriptor.cDepthStencilAttachmentInfo.stencilClearValue =

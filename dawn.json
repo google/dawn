@@ -1456,7 +1456,7 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "undefined", "valid": false, "jsrepr": "undefined"},
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "clear"},
             {"value": 2, "name": "load"}
         ]
@@ -1472,7 +1472,7 @@
     "store op": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "valid": false, "jsrepr": "undefined"},
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "store"},
             {"value": 2, "name": "discard"}
         ]
