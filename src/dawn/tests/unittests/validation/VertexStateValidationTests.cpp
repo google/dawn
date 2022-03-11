@@ -85,7 +85,6 @@ TEST_F(VertexStateTest, NullBufferIsOk) {
 }
 
 // Check validation that pipeline vertex buffers are backed by attributes in the vertex input
-// Check validation that pipeline vertex buffers are backed by attributes in the vertex input
 TEST_F(VertexStateTest, PipelineCompatibility) {
     utils::ComboVertexState state;
     state.vertexBufferCount = 1;

@@ -54,6 +54,9 @@ namespace dawn::native {
         uint64_t arrayStride;
         wgpu::VertexStepMode stepMode;
         uint16_t usedBytesInStride;
+        // As indicated in the spec, the lastStride is max(attribute.offset +
+        // sizeof(attribute.format)) for each attribute in the buffer[slot]
+        uint64_t lastStride;
     };
 
     class RenderPipelineBase : public PipelineBase {

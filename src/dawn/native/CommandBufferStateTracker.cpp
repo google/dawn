@@ -104,17 +104,24 @@ namespace dawn::native {
                                 bufferSize, static_cast<uint8_t>(usedSlotVertex),
                                 vertexBuffer.usedBytesInStride);
             } else {
-                uint64_t requiredSize =
-                    (static_cast<uint64_t>(firstVertex) + vertexCount) * arrayStride;
-                // firstVertex and vertexCount are in uint32_t, and arrayStride must not
-                // be larger than kMaxVertexBufferArrayStride, which is currently 2048. So by
-                // doing checks in uint64_t we avoid overflows.
-                DAWN_INVALID_IF(
-                    requiredSize > bufferSize,
-                    "Vertex range (first: %u, count: %u) requires a larger buffer (%u) than the "
-                    "bound buffer size (%u) of the vertex buffer at slot %u with stride (%u).",
-                    firstVertex, vertexCount, requiredSize, bufferSize,
-                    static_cast<uint8_t>(usedSlotVertex), arrayStride);
+                uint64_t strideCount = static_cast<uint64_t>(firstVertex) + vertexCount;
+                if (strideCount != 0u) {
+                    uint64_t requiredSize =
+                        (strideCount - 1u) * arrayStride + vertexBuffer.lastStride;
+                    // firstVertex and vertexCount are in uint32_t,
+                    // arrayStride must not be larger than kMaxVertexBufferArrayStride, which is
+                    // currently 2048, and vertexBuffer.lastStride = max(attribute.offset +
+                    // sizeof(attribute.format)) with attribute.offset being no larger than
+                    // kMaxVertexBufferArrayStride, so by doing checks in uint64_t we avoid
+                    // overflows.
+                    DAWN_INVALID_IF(
+                        requiredSize > bufferSize,
+                        "Vertex range (first: %u, count: %u) requires a larger buffer (%u) than "
+                        "the "
+                        "bound buffer size (%u) of the vertex buffer at slot %u with stride %u.",
+                        firstVertex, vertexCount, requiredSize, bufferSize,
+                        static_cast<uint8_t>(usedSlotVertex), arrayStride);
+                }
             }
         }
 
@@ -142,17 +149,24 @@ namespace dawn::native {
                                 bufferSize, static_cast<uint8_t>(usedSlotInstance),
                                 vertexBuffer.usedBytesInStride);
             } else {
-                uint64_t requiredSize =
-                    (static_cast<uint64_t>(firstInstance) + instanceCount) * arrayStride;
-                // firstInstance and instanceCount are in uint32_t, and arrayStride must
-                // not be larger than kMaxVertexBufferArrayStride, which is currently 2048.
-                // So by doing checks in uint64_t we avoid overflows.
-                DAWN_INVALID_IF(
-                    requiredSize > bufferSize,
-                    "Instance range (first: %u, count: %u) requires a larger buffer (%u) than the "
-                    "bound buffer size (%u) of the vertex buffer at slot %u with stride (%u).",
-                    firstInstance, instanceCount, requiredSize, bufferSize,
-                    static_cast<uint8_t>(usedSlotInstance), arrayStride);
+                uint64_t strideCount = static_cast<uint64_t>(firstInstance) + instanceCount;
+                if (strideCount != 0u) {
+                    uint64_t requiredSize =
+                        (strideCount - 1u) * arrayStride + vertexBuffer.lastStride;
+                    // firstInstance and instanceCount are in uint32_t,
+                    // arrayStride must not be larger than kMaxVertexBufferArrayStride, which is
+                    // currently 2048, and vertexBuffer.lastStride = max(attribute.offset +
+                    // sizeof(attribute.format)) with attribute.offset being no larger than
+                    // kMaxVertexBufferArrayStride, so by doing checks in uint64_t we avoid
+                    // overflows.
+                    DAWN_INVALID_IF(
+                        requiredSize > bufferSize,
+                        "Instance range (first: %u, count: %u) requires a larger buffer (%u) than "
+                        "the "
+                        "bound buffer size (%u) of the vertex buffer at slot %u with stride %u.",
+                        firstInstance, instanceCount, requiredSize, bufferSize,
+                        static_cast<uint8_t>(usedSlotInstance), arrayStride);
+                }
             }
         }
 

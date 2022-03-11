@@ -25,6 +25,11 @@ class VertexBufferValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
+        // dummy vertex shader module
+        vsModule = utils::CreateShaderModule(device, R"(
+            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+                return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            })");
         fsModule = utils::CreateShaderModule(device, R"(
             @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
@@ -67,6 +72,18 @@ class VertexBufferValidationTest : public ValidationTest {
     }
 
     wgpu::RenderPipeline MakeRenderPipeline(const wgpu::ShaderModule& vsModule,
+                                            const utils::ComboVertexState& state) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+
+        descriptor.vertex.bufferCount = state.vertexBufferCount;
+        descriptor.vertex.buffers = &state.cVertexBuffers[0];
+
+        return device.CreateRenderPipeline(&descriptor);
+    }
+
+    wgpu::RenderPipeline MakeRenderPipeline(const wgpu::ShaderModule& vsModule,
                                             unsigned int bufferCount) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
@@ -83,6 +100,7 @@ class VertexBufferValidationTest : public ValidationTest {
         return device.CreateRenderPipeline(&descriptor);
     }
 
+    wgpu::ShaderModule vsModule;
     wgpu::ShaderModule fsModule;
 };
 
@@ -353,4 +371,476 @@ TEST_F(VertexBufferValidationTest, OffsetAlignment) {
         pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
+}
+
+// Check vertex buffer stride requirements for draw command.
+TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertex) {
+    DummyRenderPass renderPass(device);
+
+    // Create a buffer of size 28, containing 4 float32 elements, array stride size = 8
+    // The last element doesn't have the full stride size
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 28;
+    descriptor.usage = wgpu::BufferUsage::Vertex;
+    wgpu::Buffer vertexBuffer = device.CreateBuffer(&descriptor);
+
+    // Vertex attribute offset is 0
+    wgpu::RenderPipeline pipeline1;
+    {
+        utils::ComboVertexState state;
+        state.vertexBufferCount = 1;
+        state.cVertexBuffers[0].arrayStride = 8;
+        state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Vertex;
+        state.cVertexBuffers[0].attributeCount = 1;
+        state.cAttributes[0].offset = 0;
+
+        pipeline1 = MakeRenderPipeline(vsModule, state);
+    }
+
+    // Vertex attribute offset is 4
+    wgpu::RenderPipeline pipeline2;
+    {
+        utils::ComboVertexState state;
+        state.vertexBufferCount = 1;
+        state.cVertexBuffers[0].arrayStride = 8;
+        state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Vertex;
+        state.cVertexBuffers[0].attributeCount = 1;
+        state.cAttributes[0].offset = 4;
+
+        pipeline2 = MakeRenderPipeline(vsModule, state);
+    }
+
+    // Control case: draw 3 elements, 3 * 8 = 24 <= 28, is valid anyway
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(3);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 3 elements with firstVertex == 1, (2 + 1) * 8 + 4 = 28 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(3, 0, 1, 0);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 3 elements with offset == 4, 4 + 3 * 8 = 24 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(3);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 4 elements, 4 * 8 = 32 > 28
+    // But the last element does not require to have the full stride size
+    // So 3 * 8 + 4 = 28 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(4);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Invalid: draw 4 elements with firstVertex == 1
+    // It requires a buffer with size of (3 + 1) * 8 + 4 = 36 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(4, 0, 1, 0);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // Invalid: draw 4 elements with offset == 4
+    // It requires a buffer with size of 4 + 3 * 8 + 4 = 32 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(4);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // Valid: stride count == 0
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(0);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Invalid: stride count == 4
+    // It requires a buffer with size of 4 + 3 * 8 + 4 = 32 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(0, 0, 4);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Check instance buffer stride requirements with instanced attributes for draw command.
+TEST_F(VertexBufferValidationTest, DrawStrideLimitsInstance) {
+    DummyRenderPass renderPass(device);
+
+    // Create a buffer of size 28, containing 4 float32 elements, array stride size = 8
+    // The last element doesn't have the full stride size
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 28;
+    descriptor.usage = wgpu::BufferUsage::Vertex;
+    wgpu::Buffer vertexBuffer = device.CreateBuffer(&descriptor);
+
+    // Vertex attribute offset is 0
+    wgpu::RenderPipeline pipeline1;
+    {
+        utils::ComboVertexState state;
+        state.vertexBufferCount = 1;
+        state.cVertexBuffers[0].arrayStride = 8;
+        state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Instance;
+        state.cVertexBuffers[0].attributeCount = 1;
+        state.cAttributes[0].offset = 0;
+
+        pipeline1 = MakeRenderPipeline(vsModule, state);
+    }
+
+    // Vertex attribute offset is 4
+    wgpu::RenderPipeline pipeline2;
+    {
+        utils::ComboVertexState state;
+        state.vertexBufferCount = 1;
+        state.cVertexBuffers[0].arrayStride = 8;
+        state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Instance;
+        state.cVertexBuffers[0].attributeCount = 1;
+        state.cAttributes[0].offset = 4;
+
+        pipeline2 = MakeRenderPipeline(vsModule, state);
+    }
+
+    // Control case: draw 3 instances, 3 * 8 = 24 <= 28, is valid anyway
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(1, 3);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 3 instances with firstInstance == 1, (2 + 1) * 8 + 4 = 28 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(1, 3, 0, 1);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 3 instances with offset == 4, 4 + 3 * 8 = 24 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(1, 3);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 4 instances, 4 * 8 = 32 > 28
+    // But the last element does not require to have the full stride size
+    // So 3 * 8 + 4 = 28 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(1, 4);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Invalid: draw 4 instances with firstInstance == 1
+    // It requires a buffer with size of (3 + 1) * 8 + 4 = 36 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(1, 4, 0, 1);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // Invalid: draw 4 instances with offset == 4
+    // It requires a buffer with size of 4 + 3 * 8 + 4 = 32 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(1, 4);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // Valid: stride count == 0
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(1, 0);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Invalid, stride count == 4
+    // It requires a buffer with size of 4 + 3 * 8 + 4 = 32 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(1, 0, 0, 4);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Check vertex buffer stride requirements with instanced attributes for draw indexed command.
+TEST_F(VertexBufferValidationTest, DrawIndexedStrideLimitsInstance) {
+    DummyRenderPass renderPass(device);
+
+    // Create a buffer of size 28, containing 4 float32 elements, array stride size = 8
+    // The last element doesn't have the full stride size
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 28;
+    descriptor.usage = wgpu::BufferUsage::Vertex;
+    wgpu::Buffer vertexBuffer = device.CreateBuffer(&descriptor);
+
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 1, 2});
+
+    // Vertex attribute offset is 0
+    wgpu::RenderPipeline pipeline1;
+    {
+        utils::ComboVertexState state;
+        state.vertexBufferCount = 1;
+        state.cVertexBuffers[0].arrayStride = 8;
+        state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Instance;
+        state.cVertexBuffers[0].attributeCount = 1;
+        state.cAttributes[0].offset = 0;
+
+        pipeline1 = MakeRenderPipeline(vsModule, state);
+    }
+
+    // Vertex attribute offset is 4
+    wgpu::RenderPipeline pipeline2;
+    {
+        utils::ComboVertexState state;
+        state.vertexBufferCount = 1;
+        state.cVertexBuffers[0].arrayStride = 8;
+        state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Instance;
+        state.cVertexBuffers[0].attributeCount = 1;
+        state.cAttributes[0].offset = 4;
+
+        pipeline2 = MakeRenderPipeline(vsModule, state);
+    }
+
+    // Control case: draw 3 instances, 3 * 8 = 24 <= 28, is valid anyway
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.DrawIndexed(3, 3);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 3 instances with firstInstance == 1, (2 + 1) * 8 + 4 = 28 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.Draw(3, 3, 0, 1);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 3 instances with offset == 4, 4 + 3 * 8 = 24 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.Draw(3, 3);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Valid: draw 4 instances, 4 * 8 = 32 > 28
+    // But the last element does not require to have the full stride size
+    // So 3 * 8 + 4 = 28 <= 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.Draw(3, 4);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Invalid: draw 4 instances with firstInstance == 1
+    // It requires a buffer with size of (3 + 1) * 8 + 4 = 36 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.Draw(3, 4, 0, 1);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // Invalid: draw 4 instances with offset == 4
+    // It requires a buffer with size of 4 + 3 * 8 + 4 = 32 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.Draw(3, 4);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // Valid: stride count == 0
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(3, 0);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Invalid, stride count == 4
+    // It requires a buffer with size of 4 + 3 * 8 + 4 = 32 > 28
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.Draw(3, 0, 0, 4);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Check last stride is computed correctly for vertex buffer with multiple attributes.
+TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertexMultipleAttributes) {
+    DummyRenderPass renderPass(device);
+
+    // Create a buffer of size 44, array stride size = 12
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 44;
+    descriptor.usage = wgpu::BufferUsage::Vertex;
+    wgpu::Buffer vertexBuffer = device.CreateBuffer(&descriptor);
+
+    // lastStride = attribute[1].offset + sizeof(attribute[1].format) = 8
+    wgpu::RenderPipeline pipeline1;
+    {
+        utils::ComboVertexState state;
+        state.vertexBufferCount = 1;
+        state.cVertexBuffers[0].arrayStride = 12;
+        state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Vertex;
+        state.cVertexBuffers[0].attributeCount = 2;
+        state.cAttributes[0].format = wgpu::VertexFormat::Float32;
+        state.cAttributes[0].offset = 0;
+        state.cAttributes[0].shaderLocation = 0;
+        state.cAttributes[1].format = wgpu::VertexFormat::Float32;
+        state.cAttributes[1].offset = 4;
+        state.cAttributes[1].shaderLocation = 1;
+
+        pipeline1 = MakeRenderPipeline(vsModule, state);
+    }
+
+    // lastStride = attribute[1].offset + sizeof(attribute[1].format) = 12
+    wgpu::RenderPipeline pipeline2;
+    {
+        utils::ComboVertexState state;
+        state.vertexBufferCount = 1;
+        state.cVertexBuffers[0].arrayStride = 12;
+        state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Vertex;
+        state.cVertexBuffers[0].attributeCount = 2;
+        state.cAttributes[0].format = wgpu::VertexFormat::Float32;
+        state.cAttributes[0].offset = 0;
+        state.cAttributes[0].shaderLocation = 0;
+        state.cAttributes[1].format = wgpu::VertexFormat::Float32x2;
+        state.cAttributes[1].offset = 4;
+        state.cAttributes[1].shaderLocation = 1;
+
+        pipeline2 = MakeRenderPipeline(vsModule, state);
+    }
+
+    // Valid: draw 4 elements, last stride is 8, 3 * 12 + 8 = 44 <= 44
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline1);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(4);
+        pass.End();
+    }
+    encoder.Finish();
+
+    // Invalid: draw 4 elements, last stride is 12, 3 * 12 + 12 = 48 > 44
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline2);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(4);
+        pass.End();
+    }
+    ASSERT_DEVICE_ERROR(encoder.Finish());
 }

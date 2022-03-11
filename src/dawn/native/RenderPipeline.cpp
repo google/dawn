@@ -610,6 +610,7 @@ namespace dawn::native {
             mVertexBufferInfos[typedSlot].arrayStride = buffers[slot].arrayStride;
             mVertexBufferInfos[typedSlot].stepMode = buffers[slot].stepMode;
             mVertexBufferInfos[typedSlot].usedBytesInStride = 0;
+            mVertexBufferInfos[typedSlot].lastStride = 0;
             switch (buffers[slot].stepMode) {
                 case wgpu::VertexStepMode::Vertex:
                     mVertexBufferSlotsUsedAsVertexBuffer.set(typedSlot);
@@ -634,12 +635,16 @@ namespace dawn::native {
                 // maxVertexBufferArrayStride (2048), which is promised by the GPUVertexBufferLayout
                 // validation of creating render pipeline. Therefore, calculating in uint16_t will
                 // cause no overflow.
+                uint32_t formatByteSize =
+                    GetVertexFormatInfo(buffers[slot].attributes[i].format).byteSize;
                 DAWN_ASSERT(buffers[slot].attributes[i].offset <= 2048);
                 uint16_t accessBoundary =
-                    uint16_t(buffers[slot].attributes[i].offset) +
-                    uint16_t(GetVertexFormatInfo(buffers[slot].attributes[i].format).byteSize);
+                    uint16_t(buffers[slot].attributes[i].offset) + uint16_t(formatByteSize);
                 mVertexBufferInfos[typedSlot].usedBytesInStride =
                     std::max(mVertexBufferInfos[typedSlot].usedBytesInStride, accessBoundary);
+                mVertexBufferInfos[typedSlot].lastStride =
+                    std::max(mVertexBufferInfos[typedSlot].lastStride,
+                             mAttributeInfos[location].offset + formatByteSize);
             }
         }
 
