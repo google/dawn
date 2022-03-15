@@ -351,6 +351,8 @@ set(TINT_LIB_SRCS
   transform/pad_array_elements.h
   transform/promote_initializers_to_const_var.cc
   transform/promote_initializers_to_const_var.h
+  transform/promote_side_effects_to_decl.cc
+  transform/promote_side_effects_to_decl.h
   transform/remove_phonies.cc
   transform/remove_phonies.h
   transform/remove_unreachable_statements.cc
@@ -1026,6 +1028,7 @@ if(TINT_BUILD_TESTS)
       transform/num_workgroups_from_uniform_test.cc
       transform/pad_array_elements_test.cc
       transform/promote_initializers_to_const_var_test.cc
+      transform/promote_side_effects_to_decl_test.cc
       transform/remove_phonies_test.cc
       transform/remove_unreachable_statements_test.cc
       transform/renamer_test.cc

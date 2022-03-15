@@ -105,6 +105,8 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
   bool IsBitwise() const;
   /// @returns true if the op is a bit shift operation
   bool IsBitshift() const;
+  /// @returns true if the op is a logical expression
+  bool IsLogical() const;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -162,6 +164,16 @@ inline bool BinaryExpression::IsBitshift() const {
   switch (op) {
     case ast::BinaryOp::kShiftLeft:
     case ast::BinaryOp::kShiftRight:
+      return true;
+    default:
+      return false;
+  }
+}
+
+inline bool BinaryExpression::IsLogical() const {
+  switch (op) {
+    case ast::BinaryOp::kLogicalAnd:
+    case ast::BinaryOp::kLogicalOr:
       return true;
     default:
       return false;
