@@ -23,8 +23,8 @@
 namespace tint::transform {
 
 /// Utility class that can be used to hoist expressions before other
-/// expressions, possibly converting 'for' loops to 'loop's and 'else if to
-// 'else if'.
+/// expressions, possibly converting 'for-loop's to 'loop's and 'else-if's to
+// 'else {if}'s.
 class HoistToDeclBefore {
  public:
   /// Constructor
@@ -45,6 +45,13 @@ class HoistToDeclBefore {
            const ast::Expression* expr,
            bool as_const,
            const char* decl_name = "");
+
+  /// Use to signal that we plan on hoisting a decl before `before_expr`. This
+  /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
+  /// needed.
+  /// @param before_expr expression we would hoist a decl before
+  /// @return true on success
+  bool Prepare(const sem::Expression* before_expr);
 
   /// Applies any scheduled insertions from previous calls to Add() to
   /// CloneContext. Call this once before ctx.Clone().

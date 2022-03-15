@@ -56,29 +56,39 @@ class HoistToDeclBefore::State {
   /// For-loops that need to be decomposed to loops.
   std::unordered_map<const sem::ForLoopStatement*, LoopInfo> loops;
 
-  /// If statements with 'else if's that need to be decomposed to 'else { if
-  /// }'
+  /// If statements with 'else if's that need to be decomposed to 'else {if}'
   std::unordered_map<const sem::IfStatement*, IfInfo> ifs;
 
-  // Inserts `decl` before `sem_expr`, possibly marking a for-loop to be
-  // converted to a loop, or an else-if to an else { if }.
-  bool InsertBefore(const sem::Expression* sem_expr,
+  // Inserts `decl` before `before_expr`, possibly marking a for-loop to be
+  // converted to a loop, or an else-if to an else { if }. If `decl` is nullptr,
+  // for-loop and else-if conversions are marked, but no hoisting takes place.
+  bool InsertBefore(const sem::Expression* before_expr,
                     const ast::VariableDeclStatement* decl) {
-    auto* sem_stmt = sem_expr->Stmt();
+    auto* sem_stmt = before_expr->Stmt();
     auto* stmt = sem_stmt->Declaration();
 
     if (auto* else_if = sem_stmt->As<sem::ElseStatement>()) {
       // Expression used in 'else if' condition.
       // Need to convert 'else if' to 'else { if }'.
       auto& if_info = ifs[else_if->Parent()->As<sem::IfStatement>()];
-      if_info.else_ifs[else_if].cond_decls.push_back(decl);
+
+      // Index the map to convert this else if, even if `decl` is nullptr.
+      auto& decls = if_info.else_ifs[else_if].cond_decls;
+      if (decl) {
+        decls.emplace_back(decl);
+      }
       return true;
     }
 
     if (auto* fl = sem_stmt->As<sem::ForLoopStatement>()) {
       // Expression used in for-loop condition.
       // For-loop needs to be decomposed to a loop.
-      loops[fl].cond_decls.emplace_back(decl);
+
+      // Index the map to convert this for-loop, even if `decl` is nullptr.
+      auto& decls = loops[fl].cond_decls;
+      if (decl) {
+        decls.emplace_back(decl);
+      }
       return true;
     }
 
@@ -86,7 +96,9 @@ class HoistToDeclBefore::State {
     if (auto* block = parent->As<sem::BlockStatement>()) {
       // Expression's statement sits in a block. Simple case.
       // Insert the decl before the parent statement
-      ctx.InsertBefore(block->Declaration()->statements, stmt, decl);
+      if (decl) {
+        ctx.InsertBefore(block->Declaration()->statements, stmt, decl);
+      }
       return true;
     }
 
@@ -95,15 +107,22 @@ class HoistToDeclBefore::State {
       if (fl->Declaration()->initializer == stmt) {
         // Expression used in for-loop initializer.
         // Insert the let above the for-loop.
-        ctx.InsertBefore(fl->Block()->Declaration()->statements,
-                         fl->Declaration(), decl);
+        if (decl) {
+          ctx.InsertBefore(fl->Block()->Declaration()->statements,
+                           fl->Declaration(), decl);
+        }
         return true;
       }
 
       if (fl->Declaration()->continuing == stmt) {
         // Expression used in for-loop continuing.
         // For-loop needs to be decomposed to a loop.
-        loops[fl].cont_decls.emplace_back(decl);
+
+        // Index the map to convert this for-loop, even if `decl` is nullptr.
+        auto& decls = loops[fl].cont_decls;
+        if (decl) {
+          decls.emplace_back(decl);
+        }
         return true;
       }
 
@@ -263,10 +282,10 @@ class HoistToDeclBefore::State {
   /// @param as_const hoist to `let` if true, otherwise to `var`
   /// @param decl_name optional name to use for the variable/constant name
   /// @return true on success
-  bool HoistToDeclBefore(const sem::Expression* before_expr,
-                         const ast::Expression* expr,
-                         bool as_const,
-                         const char* decl_name) {
+  bool Add(const sem::Expression* before_expr,
+           const ast::Expression* expr,
+           bool as_const,
+           const char* decl_name) {
     auto name = b.Symbols().New(decl_name);
 
     // Construct the let/var that holds the hoisted expr
@@ -281,6 +300,15 @@ class HoistToDeclBefore::State {
     // Replace the initializer expression with a reference to the let
     ctx.Replace(expr, b.Expr(name));
     return true;
+  }
+
+  /// Use to signal that we plan on hoisting a decl before `before_expr`. This
+  /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
+  /// needed.
+  /// @param before_expr expression we would hoist a decl before
+  /// @return true on success
+  bool Prepare(const sem::Expression* before_expr) {
+    return InsertBefore(before_expr, nullptr);
   }
 
   /// Applies any scheduled insertions from previous calls to Add() to
@@ -302,7 +330,11 @@ bool HoistToDeclBefore::Add(const sem::Expression* before_expr,
                             const ast::Expression* expr,
                             bool as_const,
                             const char* decl_name) {
-  return state_->HoistToDeclBefore(before_expr, expr, as_const, decl_name);
+  return state_->Add(before_expr, expr, as_const, decl_name);
+}
+
+bool HoistToDeclBefore::Prepare(const sem::Expression* before_expr) {
+  return state_->Prepare(before_expr);
 }
 
 bool HoistToDeclBefore::Apply() {
