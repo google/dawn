@@ -88,10 +88,12 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
   /// @param indices the swizzle indices
+  /// @param has_side_effects whether this expression may have side effects
   Swizzle(const ast::MemberAccessorExpression* declaration,
           const sem::Type* type,
           const Statement* statement,
-          std::vector<uint32_t> indices);
+          std::vector<uint32_t> indices,
+          bool has_side_effects);
 
   /// Destructor
   ~Swizzle() override;

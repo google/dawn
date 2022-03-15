@@ -46,8 +46,9 @@ StructMemberAccess::~StructMemberAccess() = default;
 Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const sem::Type* type,
                  const Statement* statement,
-                 std::vector<uint32_t> indices)
-    : Base(declaration, type, statement, /* has_side_effects */ false),
+                 std::vector<uint32_t> indices,
+                 bool has_side_effects)
+    : Base(declaration, type, statement, has_side_effects),
       indices_(std::move(indices)) {}
 
 Swizzle::~Swizzle() = default;

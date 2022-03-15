@@ -1715,6 +1715,10 @@ sem::Expression* Resolver::MemberAccessor(
   const sem::Type* ret = nullptr;
   std::vector<uint32_t> swizzle;
 
+  // Structure may be a side-effecting expression (e.g. function call).
+  auto* sem_structure = Sem(expr->structure);
+  bool has_side_effects = sem_structure && sem_structure->HasSideEffects();
+
   if (auto* str = storage_ty->As<sem::Struct>()) {
     Mark(expr->member);
     auto symbol = expr->member->symbol;
@@ -1740,10 +1744,6 @@ sem::Expression* Resolver::MemberAccessor(
       ret = builder_->create<sem::Reference>(ret, ref->StorageClass(),
                                              ref->Access());
     }
-
-    // Structure may be a side-effecting expression (e.g. function call).
-    auto* sem_structure = Sem(expr->structure);
-    bool has_side_effects = sem_structure && sem_structure->HasSideEffects();
 
     return builder_->create<sem::StructMemberAccess>(
         expr, ret, current_statement_, member, has_side_effects);
@@ -1819,7 +1819,7 @@ sem::Expression* Resolver::MemberAccessor(
                                           static_cast<uint32_t>(size));
     }
     return builder_->create<sem::Swizzle>(expr, ret, current_statement_,
-                                          std::move(swizzle));
+                                          std::move(swizzle), has_side_effects);
   }
 
   AddError(

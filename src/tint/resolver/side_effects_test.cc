@@ -217,7 +217,7 @@ TEST_F(SideEffectsTest, MemberAccessor_Vector) {
   EXPECT_FALSE(sem->HasSideEffects());
 }
 
-TEST_F(SideEffectsTest, MemberAccessor_VectorSwizzle) {
+TEST_F(SideEffectsTest, MemberAccessor_VectorSwizzleNoSE) {
   auto* var = Decl(Var("a", ty.vec4<f32>()));
   auto* expr = MemberAccessor("a", "xzyw");
   WrapInFunction(var, expr);
@@ -227,6 +227,18 @@ TEST_F(SideEffectsTest, MemberAccessor_VectorSwizzle) {
   EXPECT_TRUE(sem->Is<sem::Swizzle>());
   ASSERT_NE(sem, nullptr);
   EXPECT_FALSE(sem->HasSideEffects());
+}
+
+TEST_F(SideEffectsTest, MemberAccessor_VectorSwizzleSE) {
+  MakeSideEffectFunc("se", [&] { return ty.vec4<f32>(); });
+  auto* expr = MemberAccessor(Call("se"), "xzyw");
+  WrapInFunction(expr);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  auto* sem = Sem().Get(expr);
+  EXPECT_TRUE(sem->Is<sem::Swizzle>());
+  ASSERT_NE(sem, nullptr);
+  EXPECT_TRUE(sem->HasSideEffects());
 }
 
 TEST_F(SideEffectsTest, Binary_NoSE) {
