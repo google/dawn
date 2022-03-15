@@ -18,17 +18,17 @@ groupshared int dst_nested[4][3][2];
 
 typedef int4 ret_arr_ret[4];
 ret_arr_ret ret_arr() {
-  const int4 tint_symbol_5[4] = (int4[4])0;
-  return tint_symbol_5;
-}
-
-S ret_struct_arr() {
-  const S tint_symbol_6 = (S)0;
+  const int4 tint_symbol_6[4] = (int4[4])0;
   return tint_symbol_6;
 }
 
-typedef int4 tint_symbol_1_ret[4];
-tint_symbol_1_ret tint_symbol_1(uint4 buffer[4], uint offset) {
+S ret_struct_arr() {
+  const S tint_symbol_7 = (S)0;
+  return tint_symbol_7;
+}
+
+typedef int4 tint_symbol_2_ret[4];
+tint_symbol_2_ret tint_symbol_2(uint4 buffer[4], uint offset) {
   int4 arr_1[4] = (int4[4])0;
   {
     [loop] for(uint i = 0u; (i < 4u); i = (i + 1u)) {
@@ -39,8 +39,8 @@ tint_symbol_1_ret tint_symbol_1(uint4 buffer[4], uint offset) {
   return arr_1;
 }
 
-typedef int4 tint_symbol_3_ret[4];
-tint_symbol_3_ret tint_symbol_3(RWByteAddressBuffer buffer, uint offset) {
+typedef int4 tint_symbol_4_ret[4];
+tint_symbol_4_ret tint_symbol_4(RWByteAddressBuffer buffer, uint offset) {
   int4 arr_2[4] = (int4[4])0;
   {
     [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
@@ -52,8 +52,8 @@ tint_symbol_3_ret tint_symbol_3(RWByteAddressBuffer buffer, uint offset) {
 
 void foo(int4 src_param[4]) {
   int4 src_function[4] = (int4[4])0;
-  const int4 tint_symbol_7[4] = {int4((1).xxxx), int4((2).xxxx), int4((3).xxxx), int4((3).xxxx)};
-  tint_symbol = tint_symbol_7;
+  const int4 tint_symbol_8[4] = {int4((1).xxxx), int4((2).xxxx), int4((3).xxxx), int4((3).xxxx)};
+  tint_symbol = tint_symbol_8;
   tint_symbol = src_param;
   tint_symbol = ret_arr();
   const int4 src_let[4] = (int4[4])0;
@@ -61,9 +61,10 @@ void foo(int4 src_param[4]) {
   tint_symbol = src_function;
   tint_symbol = src_private;
   tint_symbol = src_workgroup;
-  tint_symbol = ret_struct_arr().arr;
-  tint_symbol = tint_symbol_1(src_uniform, 0u);
-  tint_symbol = tint_symbol_3(src_storage, 0u);
+  const S tint_symbol_1 = ret_struct_arr();
+  tint_symbol = tint_symbol_1.arr;
+  tint_symbol = tint_symbol_2(src_uniform, 0u);
+  tint_symbol = tint_symbol_4(src_storage, 0u);
   int src_nested[4][3][2] = (int[4][3][2])0;
   dst_nested = src_nested;
 }

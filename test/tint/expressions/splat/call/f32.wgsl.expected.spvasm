@@ -40,14 +40,14 @@
          %v2 = OpVariable %_ptr_Function_v2float Function %17
          %v3 = OpVariable %_ptr_Function_v3float Function %23
          %v4 = OpVariable %_ptr_Function_v4float Function %29
-         %13 = OpFunctionCall %float %get_f32
-         %14 = OpCompositeConstruct %v2float %13 %13
+         %12 = OpFunctionCall %float %get_f32
+         %14 = OpCompositeConstruct %v2float %12 %12
                OpStore %v2 %14
-         %19 = OpFunctionCall %float %get_f32
-         %20 = OpCompositeConstruct %v3float %19 %19 %19
+         %18 = OpFunctionCall %float %get_f32
+         %20 = OpCompositeConstruct %v3float %18 %18 %18
                OpStore %v3 %20
-         %25 = OpFunctionCall %float %get_f32
-         %26 = OpCompositeConstruct %v4float %25 %25 %25 %25
+         %24 = OpFunctionCall %float %get_f32
+         %26 = OpCompositeConstruct %v4float %24 %24 %24 %24
                OpStore %v4 %26
                OpReturn
                OpFunctionEnd

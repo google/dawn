@@ -83,7 +83,10 @@ float linearDepth(float depthSample) {
 uvec3 getTile(vec4 fragCoord) {
   float sliceScale = (float(tileCount.z) / log2((camera.zFar / camera.zNear)));
   float sliceBias = -(((float(tileCount.z) * log2(camera.zNear)) / log2((camera.zFar / camera.zNear))));
-  uint zTile = uint(max(((log2(linearDepth(fragCoord.z)) * sliceScale) + sliceBias), 0.0f));
+  float tint_symbol_3 = linearDepth(fragCoord.z);
+  float tint_symbol_4 = log2(tint_symbol_3);
+  float tint_symbol_5 = max(((tint_symbol_4 * sliceScale) + sliceBias), 0.0f);
+  uint zTile = uint(tint_symbol_5);
   return uvec3(uint((fragCoord.x / (camera.outputSize.x / float(tileCount.x)))), uint((fragCoord.y / (camera.outputSize.y / float(tileCount.y)))), zTile);
 }
 
@@ -157,7 +160,9 @@ float pointLightVisibility(uint lightIndex, vec3 worldPos, vec3 pointToLight) {
   if ((shadowIndex == -1)) {
     return 1.0f;
   }
-  shadowIndex = (shadowIndex + getCubeFace((pointToLight * -1.0f)));
+  int tint_symbol_6 = shadowIndex;
+  int tint_symbol_7 = getCubeFace((pointToLight * -1.0f));
+  shadowIndex = (tint_symbol_6 + tint_symbol_7);
   vec4 viewport = shadow.properties[shadowIndex].viewport;
   vec4 lightPos = (shadow.properties[shadowIndex].viewProj * vec4(worldPos, 1.0f));
   vec3 shadowPos = vec3((((lightPos.xy / lightPos.w) * vec2(0.5f, -0.5f)) + vec2(0.5f, 0.5f)), (lightPos.z / lightPos.w));
@@ -312,7 +317,9 @@ vec3 lightRadiance(PuctualLight light, SurfaceInfo surface) {
   vec3 numerator = ((NDF * G) * F);
   float denominator = max(((4.0f * max(dot(surface.normal, surface.v), 0.0f)) * NdotL), 0.001f);
   vec3 specular = (numerator / vec3(denominator));
-  vec3 radiance = ((light.color * light.intensity) * lightAttenuation(light));
+  vec3 tint_symbol_8 = (light.color * light.intensity);
+  float tint_symbol_9 = lightAttenuation(light);
+  vec3 radiance = (tint_symbol_8 * tint_symbol_9);
   return (((((kD * surface.albedo) / vec3(PI)) + specular) * radiance) * NdotL);
 }
 
@@ -333,7 +340,9 @@ FragmentOutput fragmentMain(VertexOutput tint_symbol) {
     light.color = globalLights.dirColor;
     light.intensity = globalLights.dirIntensity;
     float lightVis = dirLightVisibility(tint_symbol.worldPos);
-    Lo = (Lo + (lightRadiance(light, surface) * lightVis));
+    vec3 tint_symbol_10 = Lo;
+    vec3 tint_symbol_11 = lightRadiance(light, surface);
+    Lo = (tint_symbol_10 + (tint_symbol_11 * lightVis));
   }
   uint clusterIndex = getClusterIndex(tint_symbol.position);
   uint lightOffset = clusterLights.lights[clusterIndex].offset;
@@ -348,7 +357,9 @@ FragmentOutput fragmentMain(VertexOutput tint_symbol) {
       light.color = globalLights.lights[i].color;
       light.intensity = globalLights.lights[i].intensity;
       float lightVis = pointLightVisibility(i, tint_symbol.worldPos, light.pointToLight);
-      Lo = (Lo + (lightRadiance(light, surface) * lightVis));
+      vec3 tint_symbol_12 = Lo;
+      vec3 tint_symbol_13 = lightRadiance(light, surface);
+      Lo = (tint_symbol_12 + (tint_symbol_13 * lightVis));
     }
   }
   vec2 ssaoCoord = (tint_symbol.position.xy / vec2(textureSize(ssaoTexture_1, 0).xy));
@@ -362,8 +373,8 @@ FragmentOutput fragmentMain(VertexOutput tint_symbol) {
 }
 
 void main() {
-  VertexOutput tint_symbol_3 = VertexOutput(gl_FragCoord, worldPos_1, view_1, texcoord_1, texcoord2_1, color_1, instanceColor_1, normal_1, tangent_1, bitangent_1);
-  FragmentOutput inner_result = fragmentMain(tint_symbol_3);
+  VertexOutput tint_symbol_14 = VertexOutput(gl_FragCoord, worldPos_1, view_1, texcoord_1, texcoord2_1, color_1, instanceColor_1, normal_1, tangent_1, bitangent_1);
+  FragmentOutput inner_result = fragmentMain(tint_symbol_14);
   color_2 = inner_result.color;
   emissive_1 = inner_result.emissive;
   return;

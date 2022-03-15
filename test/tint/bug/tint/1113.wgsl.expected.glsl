@@ -199,7 +199,8 @@ void main_create_lut(uvec3 GlobalInvocationID) {
   uint numTriangles = atomicOr(counters.values[voxelIndex], 0u);
   int offset = -1;
   if ((numTriangles > 0u)) {
-    offset = int(atomicAdd(dbg.offsetCounter, numTriangles));
+    uint tint_symbol = atomicAdd(dbg.offsetCounter, numTriangles);
+    offset = int(tint_symbol);
   }
   atomicExchange(LUT.values[voxelIndex], offset);
 }

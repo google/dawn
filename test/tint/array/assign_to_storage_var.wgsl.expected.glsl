@@ -28,27 +28,29 @@ layout(binding = 3, std430) buffer S_nested_1 {
   int arr[4][3][2];
 } dst_nested;
 ivec4[4] ret_arr() {
-  ivec4 tint_symbol[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
-  return tint_symbol;
+  ivec4 tint_symbol_2[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
+  return tint_symbol_2;
 }
 
 S ret_struct_arr() {
-  S tint_symbol_1 = S(ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0)));
-  return tint_symbol_1;
+  S tint_symbol_3 = S(ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0)));
+  return tint_symbol_3;
 }
 
 void foo(ivec4 src_param[4]) {
   ivec4 src_function[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
-  ivec4 tint_symbol_2[4] = ivec4[4](ivec4(1), ivec4(2), ivec4(3), ivec4(3));
-  dst.arr = tint_symbol_2;
+  ivec4 tint_symbol_4[4] = ivec4[4](ivec4(1), ivec4(2), ivec4(3), ivec4(3));
+  dst.arr = tint_symbol_4;
   dst.arr = src_param;
-  dst.arr = ret_arr();
+  ivec4 tint_symbol[4] = ret_arr();
+  dst.arr = tint_symbol;
   ivec4 src_let[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
   dst.arr = src_let;
   dst.arr = src_function;
   dst.arr = src_private;
   dst.arr = src_workgroup;
-  dst.arr = ret_struct_arr().arr;
+  S tint_symbol_1 = ret_struct_arr();
+  dst.arr = tint_symbol_1.arr;
   dst.arr = src_uniform.arr;
   dst.arr = src_storage.arr;
   int src_nested[4][3][2] = int[4][3][2](int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)));

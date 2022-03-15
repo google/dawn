@@ -542,11 +542,11 @@
                OpSelectionMerge %321 None
                OpBranchConditional %320 %322 %321
         %322 = OpLabel
-        %326 = OpAccessChain %_ptr_StorageBuffer_uint_0 %dbg %uint_0
-        %327 = OpLoad %uint %numTriangles
-        %324 = OpAtomicIAdd %uint %326 %uint_1 %uint_0 %327
-        %323 = OpBitcast %int %324
-               OpStore %offset %323
+        %325 = OpAccessChain %_ptr_StorageBuffer_uint_0 %dbg %uint_0
+        %326 = OpLoad %uint %numTriangles
+        %323 = OpAtomicIAdd %uint %325 %uint_1 %uint_0 %326
+        %327 = OpBitcast %int %323
+               OpStore %offset %327
                OpBranch %321
         %321 = OpLabel
         %330 = OpLoad %uint %voxelIndex_0

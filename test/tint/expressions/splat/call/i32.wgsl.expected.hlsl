@@ -8,7 +8,10 @@ int get_i32() {
 }
 
 void f() {
-  int2 v2 = int2((get_i32()).xx);
-  int3 v3 = int3((get_i32()).xxx);
-  int4 v4 = int4((get_i32()).xxxx);
+  const int tint_symbol = get_i32();
+  int2 v2 = int2((tint_symbol).xx);
+  const int tint_symbol_1 = get_i32();
+  int3 v3 = int3((tint_symbol_1).xxx);
+  const int tint_symbol_2 = get_i32();
+  int4 v4 = int4((tint_symbol_2).xxxx);
 }

@@ -11,7 +11,8 @@ struct tint_array_wrapper {
 
 fragment void tint_symbol() {
   tint_array_wrapper arr = {.arr={}};
-  int const a_save = foo();
+  int const tint_symbol_1 = foo();
+  int const a_save = tint_symbol_1;
   for(; ; ) {
     float const x = arr.arr[a_save];
     break;

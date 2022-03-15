@@ -106,9 +106,9 @@
                OpStore %44 %51
          %52 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
                OpStore %52 %src_param
-         %53 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
-         %54 = OpFunctionCall %_arr_v4int_uint_4 %ret_arr
-               OpStore %53 %54
+         %53 = OpFunctionCall %_arr_v4int_uint_4 %ret_arr
+         %54 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
+               OpStore %54 %53
          %55 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
                OpStore %55 %8
          %56 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
@@ -120,10 +120,10 @@
          %60 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
          %61 = OpLoad %_arr_v4int_uint_4 %src_workgroup
                OpStore %60 %61
-         %62 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
-         %63 = OpFunctionCall %S %ret_struct_arr
-         %64 = OpCompositeExtract %_arr_v4int_uint_4 %63 0
-               OpStore %62 %64
+         %62 = OpFunctionCall %S %ret_struct_arr
+         %63 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
+         %64 = OpCompositeExtract %_arr_v4int_uint_4 %62 0
+               OpStore %63 %64
          %65 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %dst %uint_0
          %67 = OpAccessChain %_ptr_Uniform__arr_v4int_uint_4 %src_uniform %uint_0
          %68 = OpLoad %_arr_v4int_uint_4 %67

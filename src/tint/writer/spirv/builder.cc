@@ -48,6 +48,7 @@
 #include "src/tint/transform/fold_constants.h"
 #include "src/tint/transform/for_loop_to_loop.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_unreachable_statements.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
@@ -276,6 +277,7 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }
   manager.Add<transform::RemoveUnreachableStatements>();
+  manager.Add<transform::PromoteSideEffectsToDecl>();
   manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
   manager.Add<transform::FoldConstants>();
   manager.Add<transform::VectorizeScalarMatrixConstructors>();

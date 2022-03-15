@@ -19,20 +19,21 @@ float2x2 arr_to_mat2x2_stride_16(tint_array_wrapper arr) {
 }
 
 tint_array_wrapper mat2x2_stride_16_to_arr(float2x2 m) {
-  strided_arr const tint_symbol = {.el=m[0u]};
-  strided_arr const tint_symbol_1 = {.el=m[1u]};
-  tint_array_wrapper const tint_symbol_2 = {.arr={tint_symbol, tint_symbol_1}};
-  return tint_symbol_2;
+  strided_arr const tint_symbol_1 = {.el=m[0u]};
+  strided_arr const tint_symbol_2 = {.el=m[1u]};
+  tint_array_wrapper const tint_symbol_3 = {.arr={tint_symbol_1, tint_symbol_2}};
+  return tint_symbol_3;
 }
 
-void f_1(device SSBO* const tint_symbol_3) {
-  float2x2 const x_15 = arr_to_mat2x2_stride_16((*(tint_symbol_3)).m);
-  (*(tint_symbol_3)).m = mat2x2_stride_16_to_arr(x_15);
+void f_1(device SSBO* const tint_symbol_4) {
+  float2x2 const x_15 = arr_to_mat2x2_stride_16((*(tint_symbol_4)).m);
+  tint_array_wrapper const tint_symbol = mat2x2_stride_16_to_arr(x_15);
+  (*(tint_symbol_4)).m = tint_symbol;
   return;
 }
 
-kernel void f(device SSBO* tint_symbol_4 [[buffer(0)]]) {
-  f_1(tint_symbol_4);
+kernel void f(device SSBO* tint_symbol_5 [[buffer(0)]]) {
+  f_1(tint_symbol_5);
   return;
 }
 

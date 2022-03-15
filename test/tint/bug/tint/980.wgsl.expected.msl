@@ -23,12 +23,13 @@ struct S {
   /* 0x000c */ uint i;
 };
 
-void tint_symbol_inner(uint idx, device S* const tint_symbol_1) {
-  (*(tint_symbol_1)).v = Bad((*(tint_symbol_1)).i, (*(tint_symbol_1)).v);
+void tint_symbol_inner(uint idx, device S* const tint_symbol_2) {
+  float3 const tint_symbol_1 = Bad((*(tint_symbol_2)).i, (*(tint_symbol_2)).v);
+  (*(tint_symbol_2)).v = tint_symbol_1;
 }
 
-kernel void tint_symbol(device S* tint_symbol_2 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
-  tint_symbol_inner(idx, tint_symbol_2);
+kernel void tint_symbol(device S* tint_symbol_3 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
+  tint_symbol_inner(idx, tint_symbol_3);
   return;
 }
 

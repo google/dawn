@@ -57,33 +57,33 @@ void tint_symbol_1(uvec3 GlobalInvocationID) {
     vec4 srcColor = texelFetch(src_1, ivec2(srcTexCoord), 0);
     vec4 dstColor = texelFetch(dst_1, ivec2(dstTexCoord), 0);
     if ((uniforms.channelCount == 2u)) {
-      bool tint_tmp_5 = success;
-      if (tint_tmp_5) {
-        tint_tmp_5 = aboutEqual(dstColor.r, srcColor.r);
+      bool tint_symbol_3 = success;
+      if (tint_symbol_3) {
+        tint_symbol_3 = aboutEqual(dstColor.r, srcColor.r);
       }
-      bool tint_tmp_4 = (tint_tmp_5);
-      if (tint_tmp_4) {
-        tint_tmp_4 = aboutEqual(dstColor.g, srcColor.g);
+      bool tint_symbol_2 = tint_symbol_3;
+      if (tint_symbol_2) {
+        tint_symbol_2 = aboutEqual(dstColor.g, srcColor.g);
       }
-      success = (tint_tmp_4);
+      success = tint_symbol_2;
     } else {
-      bool tint_tmp_9 = success;
-      if (tint_tmp_9) {
-        tint_tmp_9 = aboutEqual(dstColor.r, srcColor.r);
+      bool tint_symbol_7 = success;
+      if (tint_symbol_7) {
+        tint_symbol_7 = aboutEqual(dstColor.r, srcColor.r);
       }
-      bool tint_tmp_8 = (tint_tmp_9);
-      if (tint_tmp_8) {
-        tint_tmp_8 = aboutEqual(dstColor.g, srcColor.g);
+      bool tint_symbol_6 = tint_symbol_7;
+      if (tint_symbol_6) {
+        tint_symbol_6 = aboutEqual(dstColor.g, srcColor.g);
       }
-      bool tint_tmp_7 = (tint_tmp_8);
-      if (tint_tmp_7) {
-        tint_tmp_7 = aboutEqual(dstColor.b, srcColor.b);
+      bool tint_symbol_5 = tint_symbol_6;
+      if (tint_symbol_5) {
+        tint_symbol_5 = aboutEqual(dstColor.b, srcColor.b);
       }
-      bool tint_tmp_6 = (tint_tmp_7);
-      if (tint_tmp_6) {
-        tint_tmp_6 = aboutEqual(dstColor.a, srcColor.a);
+      bool tint_symbol_4 = tint_symbol_5;
+      if (tint_symbol_4) {
+        tint_symbol_4 = aboutEqual(dstColor.a, srcColor.a);
       }
-      success = (tint_tmp_6);
+      success = tint_symbol_4;
     }
   }
   uint outputIndex = ((GlobalInvocationID.y * uint(dstSize.x)) + GlobalInvocationID.x);

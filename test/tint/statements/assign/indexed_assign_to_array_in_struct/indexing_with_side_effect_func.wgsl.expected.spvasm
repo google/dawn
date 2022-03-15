@@ -69,11 +69,11 @@
          %18 = OpLabel
           %v = OpVariable %_ptr_Function_InnerS Function %23
           %s = OpVariable %_ptr_Function_OuterS Function %31
+         %32 = OpLoad %InnerS %v
          %33 = OpFunctionCall %uint %getNextIndex
-         %35 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_1
-         %36 = OpLoad %uint %35
-         %37 = OpAccessChain %_ptr_Function_InnerS %s %uint_0 %33 %uint_0 %36
-         %38 = OpLoad %InnerS %v
-               OpStore %37 %38
+         %36 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_1
+         %37 = OpLoad %uint %36
+         %38 = OpAccessChain %_ptr_Function_InnerS %s %uint_0 %33 %uint_0 %37
+               OpStore %38 %32
                OpReturn
                OpFunctionEnd

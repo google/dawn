@@ -4,11 +4,11 @@ int f(int a, int b, int c) {
   return ((a * b) + c);
 }
 
-void phony_sink(int p0, int p1, int p2) {
-}
-
 void tint_symbol() {
-  phony_sink(f(1, 2, 3), f(4, 5, 6), f(7, f(8, 9, 10), 11));
+  int tint_symbol_1 = f(1, 2, 3);
+  int tint_symbol_2 = f(4, 5, 6);
+  int tint_symbol_3 = f(8, 9, 10);
+  int tint_symbol_4 = f(7, tint_symbol_3, 11);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

@@ -9,8 +9,11 @@ uint get_u32() {
 }
 
 void f() {
-  uvec2 v2 = uvec2(get_u32());
-  uvec3 v3 = uvec3(get_u32());
-  uvec4 v4 = uvec4(get_u32());
+  uint tint_symbol = get_u32();
+  uvec2 v2 = uvec2(tint_symbol);
+  uint tint_symbol_1 = get_u32();
+  uvec3 v3 = uvec3(tint_symbol_1);
+  uint tint_symbol_2 = get_u32();
+  uvec4 v4 = uvec4(tint_symbol_2);
 }
 

@@ -27,7 +27,9 @@ int runTest() {
 }
 
 void tint_symbol() {
-  result.value = uint(runTest());
+  int tint_symbol_1 = runTest();
+  uint tint_symbol_2 = uint(tint_symbol_1);
+  result.value = tint_symbol_2;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

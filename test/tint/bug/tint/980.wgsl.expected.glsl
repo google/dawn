@@ -16,7 +16,8 @@ layout(binding = 0, std430) buffer S_1 {
   uint i;
 } io;
 void tint_symbol(uint idx) {
-  io.v = Bad(io.i, io.v);
+  vec3 tint_symbol_1 = Bad(io.i, io.v);
+  io.v = tint_symbol_1;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

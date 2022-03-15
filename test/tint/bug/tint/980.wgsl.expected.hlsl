@@ -15,7 +15,8 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint idx) {
-  io.Store3(0u, asuint(Bad(io.Load(12u), asfloat(io.Load3(0u)))));
+  const float3 tint_symbol_2 = Bad(io.Load(12u), asfloat(io.Load3(0u)));
+  io.Store3(0u, asuint(tint_symbol_2));
 }
 
 [numthreads(1, 1, 1)]

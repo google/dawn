@@ -65,9 +65,9 @@
                OpFunctionEnd
        %main = OpFunction %void None %28
          %31 = OpLabel
-         %33 = OpAccessChain %_ptr_StorageBuffer_uint %result %uint_0
-         %35 = OpFunctionCall %int %runTest
-         %34 = OpBitcast %uint %35
-               OpStore %33 %34
+         %32 = OpFunctionCall %int %runTest
+         %33 = OpBitcast %uint %32
+         %35 = OpAccessChain %_ptr_StorageBuffer_uint %result %uint_0
+               OpStore %35 %33
                OpReturn
                OpFunctionEnd

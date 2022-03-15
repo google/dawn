@@ -22,10 +22,10 @@
       %int_4 = OpConstant %int 4
       %int_5 = OpConstant %int 5
       %int_6 = OpConstant %int 6
-      %int_7 = OpConstant %int 7
       %int_8 = OpConstant %int 8
       %int_9 = OpConstant %int 9
      %int_10 = OpConstant %int 10
+      %int_7 = OpConstant %int 7
      %int_11 = OpConstant %int 11
           %f = OpFunction %int None %1
           %a = OpFunctionParameter %int
@@ -40,9 +40,9 @@
          %13 = OpLabel
          %14 = OpFunctionCall %int %f %int_1 %int_2 %int_3
          %18 = OpFunctionCall %int %f %int_4 %int_5 %int_6
-         %24 = OpFunctionCall %int %f %int_8 %int_9 %int_10
-         %22 = OpFunctionCall %int %f %int_7 %24 %int_11
-         %29 = OpIMul %int %18 %22
+         %22 = OpFunctionCall %int %f %int_8 %int_9 %int_10
+         %26 = OpFunctionCall %int %f %int_7 %22 %int_11
+         %29 = OpIMul %int %18 %26
          %30 = OpIAdd %int %14 %29
                OpReturn
                OpFunctionEnd

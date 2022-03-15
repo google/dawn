@@ -96,7 +96,8 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
             for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
               uint inputRow = (tileRow + innerRow);
               uint inputCol = (tileColA + innerCol);
-              mm_Asub[inputRow][inputCol] = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol));
+              float tint_symbol_1 = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol));
+              mm_Asub[inputRow][inputCol] = tint_symbol_1;
             }
           }
         }
@@ -107,7 +108,8 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
             for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
               uint inputRow = (tileRowB + innerRow);
               uint inputCol = (tileCol + innerCol);
-              mm_Bsub[innerCol][inputCol] = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol));
+              float tint_symbol_2 = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol));
+              mm_Bsub[innerCol][inputCol] = tint_symbol_2;
             }
           }
         }

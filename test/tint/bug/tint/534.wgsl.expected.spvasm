@@ -169,13 +169,13 @@
          %94 = OpLabel
                OpBranch %84
          %93 = OpLabel
-         %95 = OpLoad %uint %i
-         %96 = OpAccessChain %_ptr_Function_uint %srcColorBits %95
-         %98 = OpLoad %uint %i
-        %100 = OpAccessChain %_ptr_Function_float %srcColor %98
-        %101 = OpLoad %float %100
-         %97 = OpFunctionCall %uint %ConvertToFp16FloatValue %101
-               OpStore %96 %97
+         %96 = OpLoad %uint %i
+         %98 = OpAccessChain %_ptr_Function_float %srcColor %96
+         %99 = OpLoad %float %98
+         %95 = OpFunctionCall %uint %ConvertToFp16FloatValue %99
+        %100 = OpLoad %uint %i
+        %101 = OpAccessChain %_ptr_Function_uint %srcColorBits %100
+               OpStore %101 %95
         %102 = OpLoad %bool %success
                OpSelectionMerge %103 None
                OpBranchConditional %102 %104 %103

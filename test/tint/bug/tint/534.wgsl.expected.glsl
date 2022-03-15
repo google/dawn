@@ -37,7 +37,8 @@ void tint_symbol_1(uvec3 GlobalInvocationID) {
   uvec4 dstColorBits = uvec4(dstColor);
   {
     for(uint i = 0u; (i < uniforms.channelCount); i = (i + 1u)) {
-      srcColorBits[i] = ConvertToFp16FloatValue(srcColor[i]);
+      uint tint_symbol_2 = ConvertToFp16FloatValue(srcColor[i]);
+      srcColorBits[i] = tint_symbol_2;
       bool tint_tmp = success;
       if (tint_tmp) {
         tint_tmp = (srcColorBits[i] == dstColorBits[i]);

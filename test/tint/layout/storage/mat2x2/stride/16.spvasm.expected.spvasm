@@ -66,9 +66,9 @@
          %37 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_uint_2 %ssbo %uint_0
          %38 = OpLoad %_arr_strided_arr_uint_2 %37
          %35 = OpFunctionCall %mat2v2float %arr_to_mat2x2_stride_16 %38
-         %39 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_uint_2 %ssbo %uint_0
-         %40 = OpFunctionCall %_arr_strided_arr_uint_2 %mat2x2_stride_16_to_arr %35
-               OpStore %39 %40
+         %39 = OpFunctionCall %_arr_strided_arr_uint_2 %mat2x2_stride_16_to_arr %35
+         %40 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_uint_2 %ssbo %uint_0
+               OpStore %40 %39
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %31

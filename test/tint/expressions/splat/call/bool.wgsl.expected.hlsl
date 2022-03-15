@@ -8,7 +8,10 @@ bool get_bool() {
 }
 
 void f() {
-  bool2 v2 = bool2((get_bool()).xx);
-  bool3 v3 = bool3((get_bool()).xxx);
-  bool4 v4 = bool4((get_bool()).xxxx);
+  const bool tint_symbol = get_bool();
+  bool2 v2 = bool2((tint_symbol).xx);
+  const bool tint_symbol_1 = get_bool();
+  bool3 v3 = bool3((tint_symbol_1).xxx);
+  const bool tint_symbol_2 = get_bool();
+  bool4 v4 = bool4((tint_symbol_2).xxxx);
 }

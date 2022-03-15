@@ -59,6 +59,7 @@
 #include "src/tint/transform/num_workgroups_from_uniform.h"
 #include "src/tint/transform/pad_array_elements.h"
 #include "src/tint/transform/promote_initializers_to_const_var.h"
+#include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
@@ -186,6 +187,7 @@ SanitizedResult Sanitize(
   // assumes that num_workgroups builtins only appear as struct members and are
   // only accessed directly via member accessors.
   manager.Add<transform::NumWorkgroupsFromUniform>();
+  manager.Add<transform::PromoteSideEffectsToDecl>();
   manager.Add<transform::SimplifyPointers>();
   manager.Add<transform::RemovePhonies>();
   // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as

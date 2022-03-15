@@ -29,6 +29,7 @@
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/pad_array_elements.h"
 #include "src/tint/transform/promote_initializers_to_const_var.h"
+#include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/renamer.h"
 #include "src/tint/transform/simplify_pointers.h"
@@ -83,6 +84,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     manager.Add<ZeroInitWorkgroupMemory>();
   }
   manager.Add<CanonicalizeEntryPointIO>();
+  manager.Add<PromoteSideEffectsToDecl>();
   manager.Add<SimplifyPointers>();
 
   manager.Add<RemovePhonies>();

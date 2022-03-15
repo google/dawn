@@ -18,6 +18,8 @@ int runTest() {
 
 [numthreads(1, 1, 1)]
 void main() {
-  result.Store(0u, asuint(uint(runTest())));
+  const int tint_symbol = runTest();
+  const uint tint_symbol_1 = uint(tint_symbol);
+  result.Store(0u, asuint(tint_symbol_1));
   return;
 }

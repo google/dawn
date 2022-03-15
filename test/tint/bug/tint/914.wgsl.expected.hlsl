@@ -89,7 +89,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
             [loop] for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRow + innerRow);
               const uint inputCol = (tileColA + innerCol);
-              mm_Asub[inputRow][inputCol] = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol));
+              const float tint_symbol_2 = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol));
+              mm_Asub[inputRow][inputCol] = tint_symbol_2;
             }
           }
         }
@@ -100,7 +101,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
             [loop] for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRowB + innerRow);
               const uint inputCol = (tileCol + innerCol);
-              mm_Bsub[innerCol][inputCol] = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol));
+              const float tint_symbol_3 = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol));
+              mm_Bsub[innerCol][inputCol] = tint_symbol_3;
             }
           }
         }

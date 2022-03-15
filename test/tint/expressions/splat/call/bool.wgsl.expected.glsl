@@ -9,8 +9,11 @@ bool get_bool() {
 }
 
 void f() {
-  bvec2 v2 = bvec2(get_bool());
-  bvec3 v3 = bvec3(get_bool());
-  bvec4 v4 = bvec4(get_bool());
+  bool tint_symbol = get_bool();
+  bvec2 v2 = bvec2(tint_symbol);
+  bool tint_symbol_1 = get_bool();
+  bvec3 v3 = bvec3(tint_symbol_1);
+  bool tint_symbol_2 = get_bool();
+  bvec4 v4 = bvec4(tint_symbol_2);
 }
 

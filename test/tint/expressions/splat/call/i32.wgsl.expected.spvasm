@@ -40,14 +40,14 @@
          %v2 = OpVariable %_ptr_Function_v2int Function %17
          %v3 = OpVariable %_ptr_Function_v3int Function %23
          %v4 = OpVariable %_ptr_Function_v4int Function %29
-         %13 = OpFunctionCall %int %get_i32
-         %14 = OpCompositeConstruct %v2int %13 %13
+         %12 = OpFunctionCall %int %get_i32
+         %14 = OpCompositeConstruct %v2int %12 %12
                OpStore %v2 %14
-         %19 = OpFunctionCall %int %get_i32
-         %20 = OpCompositeConstruct %v3int %19 %19 %19
+         %18 = OpFunctionCall %int %get_i32
+         %20 = OpCompositeConstruct %v3int %18 %18 %18
                OpStore %v3 %20
-         %25 = OpFunctionCall %int %get_i32
-         %26 = OpCompositeConstruct %v4int %25 %25 %25 %25
+         %24 = OpFunctionCall %int %get_i32
+         %26 = OpCompositeConstruct %v4int %24 %24 %24 %24
                OpStore %v4 %26
                OpReturn
                OpFunctionEnd

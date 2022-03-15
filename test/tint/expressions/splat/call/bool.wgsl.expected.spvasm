@@ -40,14 +40,14 @@
          %v2 = OpVariable %_ptr_Function_v2bool Function %17
          %v3 = OpVariable %_ptr_Function_v3bool Function %23
          %v4 = OpVariable %_ptr_Function_v4bool Function %29
-         %13 = OpFunctionCall %bool %get_bool
-         %14 = OpCompositeConstruct %v2bool %13 %13
+         %12 = OpFunctionCall %bool %get_bool
+         %14 = OpCompositeConstruct %v2bool %12 %12
                OpStore %v2 %14
-         %19 = OpFunctionCall %bool %get_bool
-         %20 = OpCompositeConstruct %v3bool %19 %19 %19
+         %18 = OpFunctionCall %bool %get_bool
+         %20 = OpCompositeConstruct %v3bool %18 %18 %18
                OpStore %v3 %20
-         %25 = OpFunctionCall %bool %get_bool
-         %26 = OpCompositeConstruct %v4bool %25 %25 %25 %25
+         %24 = OpFunctionCall %bool %get_bool
+         %26 = OpCompositeConstruct %v4bool %24 %24 %24 %24
                OpStore %v4 %26
                OpReturn
                OpFunctionEnd

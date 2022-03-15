@@ -126,7 +126,8 @@ void main_create_lut_inner(uint3 GlobalInvocationID) {
   uint numTriangles = atomicLoad_1(counters, (4u * voxelIndex));
   int offset = -1;
   if ((numTriangles > 0u)) {
-    offset = int(atomicAdd_1(dbg, 0u, numTriangles));
+    const uint tint_symbol_6 = atomicAdd_1(dbg, 0u, numTriangles);
+    offset = int(tint_symbol_6);
   }
   atomicStore_1(LUT, (4u * voxelIndex), offset);
 }

@@ -9,8 +9,11 @@ float get_f32() {
 }
 
 void f() {
-  vec2 v2 = vec2(get_f32());
-  vec3 v3 = vec3(get_f32());
-  vec4 v4 = vec4(get_f32());
+  float tint_symbol = get_f32();
+  vec2 v2 = vec2(tint_symbol);
+  float tint_symbol_1 = get_f32();
+  vec3 v3 = vec3(tint_symbol_1);
+  float tint_symbol_2 = get_f32();
+  vec4 v4 = vec4(tint_symbol_2);
 }
 

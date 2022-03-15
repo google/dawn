@@ -22,30 +22,31 @@ struct tint_array_wrapper_1 {
 };
 
 tint_array_wrapper ret_arr() {
-  tint_array_wrapper const tint_symbol = {.arr={}};
-  return tint_symbol;
-}
-
-S ret_struct_arr() {
-  S const tint_symbol_1 = {};
+  tint_array_wrapper const tint_symbol_1 = {.arr={}};
   return tint_symbol_1;
 }
 
-void foo(tint_array_wrapper src_param, threadgroup tint_array_wrapper* const tint_symbol_3, thread tint_array_wrapper* const tint_symbol_4, threadgroup tint_array_wrapper* const tint_symbol_5, const constant S* const tint_symbol_6, device S* const tint_symbol_7, threadgroup tint_array_wrapper_1* const tint_symbol_8) {
+S ret_struct_arr() {
+  S const tint_symbol_2 = {};
+  return tint_symbol_2;
+}
+
+void foo(tint_array_wrapper src_param, threadgroup tint_array_wrapper* const tint_symbol_4, thread tint_array_wrapper* const tint_symbol_5, threadgroup tint_array_wrapper* const tint_symbol_6, const constant S* const tint_symbol_7, device S* const tint_symbol_8, threadgroup tint_array_wrapper_1* const tint_symbol_9) {
   tint_array_wrapper src_function = {};
-  tint_array_wrapper const tint_symbol_2 = {.arr={int4(1), int4(2), int4(3), int4(3)}};
-  *(tint_symbol_3) = tint_symbol_2;
-  *(tint_symbol_3) = src_param;
-  *(tint_symbol_3) = ret_arr();
+  tint_array_wrapper const tint_symbol_3 = {.arr={int4(1), int4(2), int4(3), int4(3)}};
+  *(tint_symbol_4) = tint_symbol_3;
+  *(tint_symbol_4) = src_param;
+  *(tint_symbol_4) = ret_arr();
   tint_array_wrapper const src_let = {.arr={}};
-  *(tint_symbol_3) = src_let;
-  *(tint_symbol_3) = src_function;
-  *(tint_symbol_3) = *(tint_symbol_4);
-  *(tint_symbol_3) = *(tint_symbol_5);
-  *(tint_symbol_3) = ret_struct_arr().arr;
-  *(tint_symbol_3) = (*(tint_symbol_6)).arr;
-  *(tint_symbol_3) = (*(tint_symbol_7)).arr;
+  *(tint_symbol_4) = src_let;
+  *(tint_symbol_4) = src_function;
+  *(tint_symbol_4) = *(tint_symbol_5);
+  *(tint_symbol_4) = *(tint_symbol_6);
+  S const tint_symbol = ret_struct_arr();
+  *(tint_symbol_4) = tint_symbol.arr;
+  *(tint_symbol_4) = (*(tint_symbol_7)).arr;
+  *(tint_symbol_4) = (*(tint_symbol_8)).arr;
   tint_array_wrapper_1 src_nested = {};
-  *(tint_symbol_8) = src_nested;
+  *(tint_symbol_9) = src_nested;
 }
 

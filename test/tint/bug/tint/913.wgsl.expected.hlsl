@@ -49,33 +49,33 @@ void main_inner(uint3 GlobalInvocationID) {
     const float4 srcColor = src.Load(int3(int2(srcTexCoord), 0));
     const float4 dstColor = tint_symbol.Load(int3(int2(dstTexCoord), 0));
     if ((uniforms[0].y == 2u)) {
-      bool tint_tmp_7 = success;
-      if (tint_tmp_7) {
-        tint_tmp_7 = aboutEqual(dstColor.r, srcColor.r);
+      bool tint_symbol_4 = success;
+      if (tint_symbol_4) {
+        tint_symbol_4 = aboutEqual(dstColor.r, srcColor.r);
       }
-      bool tint_tmp_6 = (tint_tmp_7);
-      if (tint_tmp_6) {
-        tint_tmp_6 = aboutEqual(dstColor.g, srcColor.g);
+      bool tint_symbol_3 = tint_symbol_4;
+      if (tint_symbol_3) {
+        tint_symbol_3 = aboutEqual(dstColor.g, srcColor.g);
       }
-      success = (tint_tmp_6);
+      success = tint_symbol_3;
     } else {
-      bool tint_tmp_11 = success;
-      if (tint_tmp_11) {
-        tint_tmp_11 = aboutEqual(dstColor.r, srcColor.r);
+      bool tint_symbol_8 = success;
+      if (tint_symbol_8) {
+        tint_symbol_8 = aboutEqual(dstColor.r, srcColor.r);
       }
-      bool tint_tmp_10 = (tint_tmp_11);
-      if (tint_tmp_10) {
-        tint_tmp_10 = aboutEqual(dstColor.g, srcColor.g);
+      bool tint_symbol_7 = tint_symbol_8;
+      if (tint_symbol_7) {
+        tint_symbol_7 = aboutEqual(dstColor.g, srcColor.g);
       }
-      bool tint_tmp_9 = (tint_tmp_10);
-      if (tint_tmp_9) {
-        tint_tmp_9 = aboutEqual(dstColor.b, srcColor.b);
+      bool tint_symbol_6 = tint_symbol_7;
+      if (tint_symbol_6) {
+        tint_symbol_6 = aboutEqual(dstColor.b, srcColor.b);
       }
-      bool tint_tmp_8 = (tint_tmp_9);
-      if (tint_tmp_8) {
-        tint_tmp_8 = aboutEqual(dstColor.a, srcColor.a);
+      bool tint_symbol_5 = tint_symbol_6;
+      if (tint_symbol_5) {
+        tint_symbol_5 = aboutEqual(dstColor.a, srcColor.a);
       }
-      success = (tint_tmp_8);
+      success = tint_symbol_5;
     }
   }
   const uint outputIndex = ((GlobalInvocationID.y * uint(dstSize.x)) + GlobalInvocationID.x);
