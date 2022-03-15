@@ -1689,6 +1689,12 @@ fn f() { return 1 ^ >; }
 )");
 }
 
+TEST_F(ParserImplErrorTest, InvalidUTF8) {
+  EXPECT("fn fu\xd0nc() {}",
+         "test.wgsl:1:4 error: invalid UTF-8\n"
+         "fn fu\xD0nc() {}\n");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

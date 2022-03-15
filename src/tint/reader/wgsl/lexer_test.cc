@@ -344,11 +344,11 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
 
 struct UnicodeCase {
   const char* utf8;
-  size_t code_units;
+  size_t count;
 };
 
-using UnicodeIdentifierTest = testing::TestWithParam<UnicodeCase>;
-TEST_P(UnicodeIdentifierTest, Parse) {
+using ValidUnicodeIdentifierTest = testing::TestWithParam<UnicodeCase>;
+TEST_P(ValidUnicodeIdentifierTest, Parse) {
   Source::File file("", GetParam().utf8);
   Lexer l(&file);
 
@@ -357,12 +357,12 @@ TEST_P(UnicodeIdentifierTest, Parse) {
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
   EXPECT_EQ(t.source().range.end.line, 1u);
-  EXPECT_EQ(t.source().range.end.column, 1u + GetParam().code_units);
+  EXPECT_EQ(t.source().range.end.column, 1u + GetParam().count);
   EXPECT_EQ(t.to_str(), GetParam().utf8);
 }
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,
-    UnicodeIdentifierTest,
+    ValidUnicodeIdentifierTest,
     testing::ValuesIn({
         UnicodeCase{// "𝐢𝐝𝐞𝐧𝐭𝐢𝐟𝐢𝐞𝐫"
                     "\xf0\x9d\x90\xa2\xf0\x9d\x90\x9d\xf0\x9d\x90\x9e\xf0\x9d"
@@ -391,6 +391,56 @@ INSTANTIATE_TEST_SUITE_P(
             "\xf0\x9d\x96\x99\xf0\x9d\x96\x8e\xf0\x9d\x96\x8b\xf0\x9d\x96\x8e"
             "\xf0\x9d\x96\x8a\xf0\x9d\x96\x97\x31\x32\x33",
             43},
+    }));
+
+using InvalidUnicodeIdentifierTest = testing::TestWithParam<const char*>;
+TEST_P(InvalidUnicodeIdentifierTest, Parse) {
+  Source::File file("", GetParam());
+  Lexer l(&file);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.IsError());
+  EXPECT_EQ(t.source().range.begin.line, 1u);
+  EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u);
+  EXPECT_EQ(t.to_str(), "invalid UTF-8");
+}
+INSTANTIATE_TEST_SUITE_P(
+    LexerTest,
+    InvalidUnicodeIdentifierTest,
+    testing::ValuesIn({
+        "\x80\x80\x80\x80",  // 10000000
+        "\x81\x80\x80\x80",  // 10000001
+        "\x8f\x80\x80\x80",  // 10001111
+        "\x90\x80\x80\x80",  // 10010000
+        "\x91\x80\x80\x80",  // 10010001
+        "\x9f\x80\x80\x80",  // 10011111
+        "\xa0\x80\x80\x80",  // 10100000
+        "\xa1\x80\x80\x80",  // 10100001
+        "\xaf\x80\x80\x80",  // 10101111
+        "\xb0\x80\x80\x80",  // 10110000
+        "\xb1\x80\x80\x80",  // 10110001
+        "\xbf\x80\x80\x80",  // 10111111
+        "\xc0\x80\x80\x80",  // 11000000
+        "\xc1\x80\x80\x80",  // 11000001
+        "\xf5\x80\x80\x80",  // 11110101
+        "\xf6\x80\x80\x80",  // 11110110
+        "\xf7\x80\x80\x80",  // 11110111
+        "\xf8\x80\x80\x80",  // 11111000
+        "\xfe\x80\x80\x80",  // 11111110
+        "\xff\x80\x80\x80",  // 11111111
+
+        "\xd0",          // 2-bytes, missing second byte
+        "\xe8\x8f",      // 3-bytes, missing third byte
+        "\xf4\x8f\x8f",  // 4-bytes, missing fourth byte
+
+        "\xd0\x7f",          // 2-bytes, second byte MSB unset
+        "\xe8\x7f\x8f",      // 3-bytes, second byte MSB unset
+        "\xe8\x8f\x7f",      // 3-bytes, third byte MSB unset
+        "\xf4\x7f\x8f\x8f",  // 4-bytes, second byte MSB unset
+        "\xf4\x8f\x7f\x8f",  // 4-bytes, third byte MSB unset
+        "\xf4\x8f\x8f\x7f",  // 4-bytes, fourth byte MSB unset
     }));
 
 TEST_F(LexerTest, IdentifierTest_SingleUnderscoreDoesNotMatch) {

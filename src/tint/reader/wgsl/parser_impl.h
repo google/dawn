@@ -828,6 +828,12 @@ class ParserImpl {
   /// @see sync().
   bool is_sync_token(const Token& t) const;
 
+  /// If `t` is an error token, then `synchronized_` is set to false and the
+  /// token's error is appended to the builder's diagnostics. If `t` is not an
+  /// error token, then this function does nothing and false is returned.
+  /// @returns true if `t` is an error, otherwise false.
+  bool handle_error(const Token& t);
+
   /// @returns true if #synchronized_ is true and the number of reported errors
   /// is less than #max_errors_.
   bool continue_parsing() {

@@ -455,30 +455,42 @@ TEST_P(DecodeUTF8InvalidTest, Invalid) {
   EXPECT_EQ(width, 0u);
 }
 
-INSTANTIATE_TEST_SUITE_P(Invalid,
-                         DecodeUTF8InvalidTest,
-                         ::testing::ValuesIn({
-                             "\x80\x80\x80\x80",  // 10000000
-                             "\x81\x80\x80\x80",  // 10000001
-                             "\x8f\x80\x80\x80",  // 10001111
-                             "\x90\x80\x80\x80",  // 10010000
-                             "\x91\x80\x80\x80",  // 10010001
-                             "\x9f\x80\x80\x80",  // 10011111
-                             "\xa0\x80\x80\x80",  // 10100000
-                             "\xa1\x80\x80\x80",  // 10100001
-                             "\xaf\x80\x80\x80",  // 10101111
-                             "\xb0\x80\x80\x80",  // 10110000
-                             "\xb1\x80\x80\x80",  // 10110001
-                             "\xbf\x80\x80\x80",  // 10111111
-                             "\xc0\x80\x80\x80",  // 11000000
-                             "\xc1\x80\x80\x80",  // 11000001
-                             "\xf5\x80\x80\x80",  // 11110101
-                             "\xf6\x80\x80\x80",  // 11110110
-                             "\xf7\x80\x80\x80",  // 11110111
-                             "\xf8\x80\x80\x80",  // 11111000
-                             "\xfe\x80\x80\x80",  // 11111110
-                             "\xff\x80\x80\x80",  // 11111111
-                         }));
+INSTANTIATE_TEST_SUITE_P(
+    Invalid,
+    DecodeUTF8InvalidTest,
+    ::testing::ValuesIn({
+        "\x80\x80\x80\x80",  // 10000000
+        "\x81\x80\x80\x80",  // 10000001
+        "\x8f\x80\x80\x80",  // 10001111
+        "\x90\x80\x80\x80",  // 10010000
+        "\x91\x80\x80\x80",  // 10010001
+        "\x9f\x80\x80\x80",  // 10011111
+        "\xa0\x80\x80\x80",  // 10100000
+        "\xa1\x80\x80\x80",  // 10100001
+        "\xaf\x80\x80\x80",  // 10101111
+        "\xb0\x80\x80\x80",  // 10110000
+        "\xb1\x80\x80\x80",  // 10110001
+        "\xbf\x80\x80\x80",  // 10111111
+        "\xc0\x80\x80\x80",  // 11000000
+        "\xc1\x80\x80\x80",  // 11000001
+        "\xf5\x80\x80\x80",  // 11110101
+        "\xf6\x80\x80\x80",  // 11110110
+        "\xf7\x80\x80\x80",  // 11110111
+        "\xf8\x80\x80\x80",  // 11111000
+        "\xfe\x80\x80\x80",  // 11111110
+        "\xff\x80\x80\x80",  // 11111111
+
+        "\xd0",          // 2-bytes, missing second byte
+        "\xe8\x8f",      // 3-bytes, missing third byte
+        "\xf4\x8f\x8f",  // 4-bytes, missing fourth byte
+
+        "\xd0\x7f",          // 2-bytes, second byte MSB unset
+        "\xe8\x7f\x8f",      // 3-bytes, second byte MSB unset
+        "\xe8\x8f\x7f",      // 3-bytes, third byte MSB unset
+        "\xf4\x7f\x8f\x8f",  // 4-bytes, second byte MSB unset
+        "\xf4\x8f\x7f\x8f",  // 4-bytes, third byte MSB unset
+        "\xf4\x8f\x8f\x7f",  // 4-bytes, fourth byte MSB unset
+    }));
 
 }  // namespace
 

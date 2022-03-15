@@ -303,8 +303,9 @@ Token ParserImpl::next() {
 }
 
 Token ParserImpl::peek(size_t idx) {
-  while (token_queue_.size() < (idx + 1))
+  while (token_queue_.size() < (idx + 1)) {
     token_queue_.push_back(lexer_->next());
+  }
   return token_queue_[idx];
 }
 
@@ -448,9 +449,8 @@ Expect<bool> ParserImpl::expect_global_decl() {
   }
 
   // The token might itself be an error.
-  if (t.IsError()) {
-    next();  // Consume it.
-    return add_error(t.source(), t.to_str());
+  if (handle_error(t)) {
+    return Failure::kErrored;
   }
 
   // Exhausted all attempts to make sense of where we're at.
@@ -2746,9 +2746,6 @@ Maybe<const ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 //   | FALSE
 Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
   auto t = peek();
-  if (t.IsError()) {
-    return add_error(t.source(), t.to_str());
-  }
   if (match(Token::Type::kTrue)) {
     return create<ast::BoolLiteralExpression>(t.source(), true);
   }
@@ -2763,6 +2760,9 @@ Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
   }
   if (match(Token::Type::kFloatLiteral)) {
     return create<ast::FloatLiteralExpression>(t.source(), t.to_f32());
+  }
+  if (handle_error(t)) {
+    return Failure::kErrored;
   }
   return Failure::kNoMatch;
 }
@@ -3165,13 +3165,18 @@ bool ParserImpl::expect(std::string_view use, Token::Type tok) {
     return true;
   }
 
+  // Error cases
+  synchronized_ = false;
+  if (handle_error(t)) {
+    return false;
+  }
+
   std::stringstream err;
   err << "expected '" << Token::TypeToName(tok) << "'";
   if (!use.empty()) {
     err << " for " << use;
   }
   add_error(t, err.str());
-  synchronized_ = false;
   return false;
 }
 
@@ -3219,6 +3224,9 @@ Expect<std::string> ParserImpl::expect_ident(std::string_view use) {
     }
 
     return {t.to_str(), t.source()};
+  }
+  if (handle_error(t)) {
+    return Failure::kErrored;
   }
   synchronized_ = false;
   return add_error(t.source(), "expected identifier", use);
@@ -3338,6 +3346,16 @@ bool ParserImpl::is_sync_token(const Token& t) const {
     if (t.Is(r)) {
       return true;
     }
+  }
+  return false;
+}
+
+bool ParserImpl::handle_error(const Token& t) {
+  // The token might itself be an error.
+  if (t.IsError()) {
+    synchronized_ = false;
+    add_error(t.source(), t.to_str());
+    return true;
   }
   return false;
 }

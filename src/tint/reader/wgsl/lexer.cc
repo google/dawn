@@ -739,6 +739,10 @@ Token Lexer::try_ident() {
     auto* utf8 = reinterpret_cast<const uint8_t*>(&file_->content.data[pos_]);
     auto [code_point, n] =
         text::utf8::Decode(utf8, file_->content.data.size() - pos_);
+    if (n == 0) {
+      pos_++;  // Skip the bad byte.
+      return {Token::Type::kError, source, "invalid UTF-8"};
+    }
     if (code_point != text::CodePoint('_') && !code_point.IsXIDStart()) {
       return {};
     }
@@ -752,6 +756,10 @@ Token Lexer::try_ident() {
     auto* utf8 = reinterpret_cast<const uint8_t*>(&file_->content.data[pos_]);
     auto [code_point, n] =
         text::utf8::Decode(utf8, file_->content.data.size() - pos_);
+    if (n == 0) {
+      pos_++;  // Skip the bad byte.
+      return {Token::Type::kError, source, "invalid UTF-8"};
+    }
     if (!code_point.IsXIDContinue()) {
       break;
     }
