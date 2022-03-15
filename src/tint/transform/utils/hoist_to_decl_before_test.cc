@@ -243,8 +243,8 @@ TEST_F(HoistToDeclBeforeTest, Array1D) {
   auto* expect = R"(
 fn f() {
   var a : array<i32, 10>;
-  let tint_symbol = &(a[0]);
-  var b = *(tint_symbol);
+  let tint_symbol = a[0];
+  var b = tint_symbol;
 }
 )";
 
@@ -279,8 +279,8 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
   auto* expect = R"(
 fn f() {
   var a : array<array<i32, 10>, 10>;
-  let tint_symbol = &(a[0][0]);
-  var b = *(tint_symbol);
+  let tint_symbol = a[0][0];
+  var b = tint_symbol;
 }
 )";
 
