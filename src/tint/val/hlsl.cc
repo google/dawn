@@ -110,8 +110,8 @@ Result HlslUsingFXC(const std::string& source,
     return result;
   }
 
-  pD3DCompile d3dCompile =
-      reinterpret_cast<pD3DCompile>(GetProcAddress(fxcLib, "D3DCompile"));
+  pD3DCompile d3dCompile = reinterpret_cast<pD3DCompile>(
+      reinterpret_cast<void*>(GetProcAddress(fxcLib, "D3DCompile")));
   if (d3dCompile == nullptr) {
     result.output = "Couldn't load D3DCompile from FXC";
     result.failed = true;
