@@ -152,7 +152,8 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "required features count", "type": "uint32_t", "default": 0},
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required features count", "default": "nullptr"},
-            {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true}
+            {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
+            {"name": "default queue", "type": "queue descriptor", "tags": ["upstream"]}
         ]
     },
     "dawn toggles device descriptor": {
@@ -1469,6 +1470,14 @@
             {"value": 2, "name": "write"}
         ]
     },
+    "mipmap filter mode": {
+        "category": "enum",
+        "tags": ["upstream"],
+        "values": [
+            {"value": 0, "name": "nearest"},
+            {"value": 1, "name": "linear"}
+        ]
+    },
     "store op": {
         "category": "enum",
         "values": [
@@ -1610,8 +1619,17 @@
             },
             {
                 "name": "on submitted work done",
+                "tags": ["dawn", "emscripten"],
                 "args": [
                     {"name": "signal value", "type": "uint64_t"},
+                    {"name": "callback", "type": "queue work done callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
+                ]
+            },
+            {
+                "name": "on submitted work done",
+                "tags": ["upstream"],
+                "args": [
                     {"name": "callback", "type": "queue work done callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
@@ -1646,6 +1664,14 @@
                     {"name": "options", "type": "copy texture for browser options", "annotation": "const*"}
                 ]
             }
+        ]
+    },
+    "queue descriptor": {
+        "category": "structure",
+        "extensible": "in",
+        "tags": ["upstream"],
+        "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
     },
     "queue work done callback": {
@@ -2202,7 +2228,8 @@
             {"name": "address mode w", "type": "address mode", "default": "clamp to edge"},
             {"name": "mag filter", "type": "filter mode", "default": "nearest"},
             {"name": "min filter", "type": "filter mode", "default": "nearest"},
-            {"name": "mipmap filter", "type": "filter mode", "default": "nearest"},
+            {"name": "mipmap filter", "type": "filter mode", "default": "nearest", "tags": ["dawn", "emscripten"]},
+            {"name": "mipmap filter", "type": "mipmap filter mode", "default": "nearest", "tags": ["upstream"]},
             {"name": "lod min clamp", "type": "float", "default": "0.0f"},
             {"name": "lod max clamp", "type": "float", "default": "1000.0f"},
             {"name": "compare", "type": "compare function", "default": "undefined"},
@@ -2487,7 +2514,9 @@
             {"name": "size", "type": "extent 3D"},
             {"name": "format", "type": "texture format"},
             {"name": "mip level count", "type": "uint32_t", "default": 1},
-            {"name": "sample count", "type": "uint32_t", "default": 1}
+            {"name": "sample count", "type": "uint32_t", "default": 1},
+            {"name": "view format count", "type": "uint32_t", "default": 0, "tags": ["upstream"]},
+            {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count", "tags": ["upstream"]}
         ]
     },
     "texture dimension": {
