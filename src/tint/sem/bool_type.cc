@@ -28,7 +28,7 @@ Bool::Bool(Bool&&) = default;
 Bool::~Bool() = default;
 
 size_t Bool::Hash() const {
-  return TypeInfo::Of<Bool>().full_hashcode;
+  return static_cast<size_t>(TypeInfo::Of<Bool>().full_hashcode);
 }
 
 bool Bool::Equals(const Type& other) const {

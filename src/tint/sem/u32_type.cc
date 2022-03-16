@@ -28,7 +28,7 @@ U32::~U32() = default;
 U32::U32(U32&&) = default;
 
 size_t U32::Hash() const {
-  return TypeInfo::Of<U32>().full_hashcode;
+  return static_cast<size_t>(TypeInfo::Of<U32>().full_hashcode);
 }
 
 bool U32::Equals(const Type& other) const {
