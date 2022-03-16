@@ -116,9 +116,13 @@ extern "C" {
 
 {% for type in by_category["function pointer"] %}
     typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
-        {%- for arg in type.arguments -%}
-            {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
-        {%- endfor -%}
+        {%- if type.arguments == [] -%}
+            void
+        {%- else -%}
+            {%- for arg in type.arguments -%}
+                {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
+            {%- endfor -%}
+        {%- endif -%}
     );
 {% endfor %}
 
