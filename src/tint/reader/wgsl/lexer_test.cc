@@ -32,7 +32,7 @@ TEST_F(LexerTest, Empty) {
   EXPECT_TRUE(t.IsEof());
 }
 
-TEST_F(LexerTest, Skips_Whitespace) {
+TEST_F(LexerTest, Skips_Blankspace) {
   Source::File file("", "\t\r\n\t    ident\t\n\t  \r ");
   Lexer l(&file);
 
@@ -74,6 +74,43 @@ ident1 //ends with comment
   t = l.next();
   EXPECT_TRUE(t.IsEof());
 }
+
+using LineCommentTerminatorTest = testing::TestWithParam<char>;
+TEST_P(LineCommentTerminatorTest, Terminators) {
+  // Test that line comments are ended by blankspace characters other than space
+  // and horizontal tab.
+  char c = GetParam();
+  std::string src = "let// This is a comment";
+  src += c;
+  src += "ident";
+  Source::File file("", src);
+  Lexer l(&file);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.Is(Token::Type::kLet));
+  EXPECT_EQ(t.source().range.begin.line, 1u);
+  EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 4u);
+
+  if (c != ' ' && c != '\t') {
+    size_t line = c == '\n' ? 2u : 1u;
+    size_t col = c == '\n' ? 1u : 25u;
+    t = l.next();
+    EXPECT_TRUE(t.IsIdentifier());
+    EXPECT_EQ(t.source().range.begin.line, line);
+    EXPECT_EQ(t.source().range.begin.column, col);
+    EXPECT_EQ(t.source().range.end.line, line);
+    EXPECT_EQ(t.source().range.end.column, col + 5);
+    EXPECT_EQ(t.to_str(), "ident");
+  }
+
+  t = l.next();
+  EXPECT_TRUE(t.IsEof());
+}
+INSTANTIATE_TEST_SUITE_P(LexerTest,
+                         LineCommentTerminatorTest,
+                         testing::Values(' ', '\t', '\n', '\v', '\f', '\r'));
 
 TEST_F(LexerTest, Skips_Comments_Block) {
   Source::File file("", R"(/* comment
@@ -128,7 +165,7 @@ abcd)");
   EXPECT_EQ(t.source().range.end.column, 4u);
 }
 
-TEST_F(LexerTest, Null_InWhitespace_IsError) {
+TEST_F(LexerTest, Null_InBlankspace_IsError) {
   Source::File file("", std::string{' ', 0, ' '});
   Lexer l(&file);
 

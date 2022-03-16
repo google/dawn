@@ -36,10 +36,9 @@ class Lexer {
   Token next();
 
  private:
-  /// Advances past whitespace and comments, if present
-  /// at the current position.
+  /// Advances past blankspace and comments, if present at the current position.
   /// @returns error token, EOF, or uninitialized
-  Token skip_whitespace_and_comments();
+  Token skip_blankspace_and_comments();
   /// Advances past a comment at the current position, if one exists.
   /// Returns an error if there was an unterminated block comment,
   /// or a null character was present.

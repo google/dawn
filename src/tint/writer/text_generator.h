@@ -32,7 +32,7 @@ class TextGenerator {
  public:
   /// Line holds a single line of text
   struct Line {
-    /// The indentation of the line in whitespaces
+    /// The indentation of the line in blankspace
     uint32_t indent = 0;
     /// The content of the line, without a trailing newline character
     std::string content;

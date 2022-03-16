@@ -28,8 +28,10 @@ namespace reader {
 namespace wgsl {
 namespace {
 
-bool is_whitespace(char c) {
-  return std::isspace(static_cast<unsigned char>(c));
+bool is_blankspace(char c) {
+  // See https://www.w3.org/TR/WGSL/#blankspace.
+  return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' ||
+         c == '\r';
 }
 
 uint32_t dec_value(char c) {
@@ -62,7 +64,7 @@ Lexer::Lexer(const Source::File* file)
 Lexer::~Lexer() = default;
 
 Token Lexer::next() {
-  if (auto t = skip_whitespace_and_comments(); !t.IsUninitialized()) {
+  if (auto t = skip_blankspace_and_comments(); !t.IsUninitialized()) {
     return t;
   }
 
@@ -128,10 +130,10 @@ bool Lexer::matches(size_t pos, std::string_view substr) {
   return file_->content.data_view.substr(pos, substr.size()) == substr;
 }
 
-Token Lexer::skip_whitespace_and_comments() {
+Token Lexer::skip_blankspace_and_comments() {
   for (;;) {
     auto pos = pos_;
-    while (!is_eof() && is_whitespace(file_->content.data[pos_])) {
+    while (!is_eof() && is_blankspace(file_->content.data[pos_])) {
       if (matches(pos_, "\n")) {
         pos_++;
         location_.line++;
@@ -148,7 +150,7 @@ Token Lexer::skip_whitespace_and_comments() {
       return t;
     }
 
-    // If the cursor didn't advance we didn't remove any whitespace
+    // If the cursor didn't advance we didn't remove any blankspace
     // so we're done.
     if (pos == pos_)
       break;
@@ -162,9 +164,10 @@ Token Lexer::skip_whitespace_and_comments() {
 
 Token Lexer::skip_comment() {
   if (matches(pos_, "//")) {
-    // Line comment: ignore everything until the end of line
-    // or end of input.
-    while (!is_eof() && !matches(pos_, "\n")) {
+    // Line comment: ignore everything until the end of input or a blankspace
+    // character other than space or horizontal tab.
+    while (!is_eof() && !(is_blankspace(file_->content.data[pos_]) &&
+                          !matches(pos_, " ") && !matches(pos_, "\t"))) {
       if (is_null()) {
         return {Token::Type::kError, begin_source(), "null character found"};
       }
