@@ -202,6 +202,8 @@ source_set("sources") {
     "BuddyMemoryAllocator.h",
     "Buffer.cpp",
     "Buffer.h",
+    "CacheKey.cpp",
+    "CacheKey.h",
     "CachedObject.cpp",
     "CachedObject.h",
     "CallbackTaskManager.cpp",
