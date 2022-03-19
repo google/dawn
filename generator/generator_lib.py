@@ -156,7 +156,8 @@ _FileOutput = namedtuple('FileOutput', ['name', 'content'])
 
 def _do_renders(renders, template_dir):
     loader = _PreprocessingLoader(template_dir)
-    env = jinja2.Environment(loader=loader,
+    env = jinja2.Environment(extensions=['jinja2.ext.do'],
+                             loader=loader,
                              lstrip_blocks=True,
                              trim_blocks=True,
                              line_comment_prefix='//*')

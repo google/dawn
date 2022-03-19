@@ -661,11 +661,13 @@ namespace dawn::native {
     }
 
     std::string BindGroupLayoutBase::EntriesToString() const {
-        std::string entries = " [";
+        std::string entries = "[";
+        std::string sep = "";
         const BindGroupLayoutBase::BindingMap& bindingMap = GetBindingMap();
         for (const auto [bindingNumber, bindingIndex] : bindingMap) {
             const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
-            entries += absl::StrFormat("%s, ", bindingInfo);
+            entries += absl::StrFormat("%s%s", sep, bindingInfo);
+            sep = ", ";
         }
         entries += "]";
         return entries;

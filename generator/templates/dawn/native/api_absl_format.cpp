@@ -49,6 +49,42 @@ namespace {{native_namespace}} {
         {% endfor %}
     {% endfor %}
 
+    //
+    // Compatible with absl::StrFormat (Needs to be disjoint from having a 'label' for now.)
+    // Currently uses a hard-coded list to determine which structures are actually supported. If
+    // additional structures are added, be sure to update the header file's list as well.
+    //
+    using absl::ParsedFormat;
+
+    {% for type in by_category["structure"] %}
+        {% if type.name.get() in [
+             "buffer binding layout",
+             "sampler binding layout",
+             "texture binding layout",
+             "storage texture binding layout"
+           ]
+        %}
+        absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+            AbslFormatConvert(const {{as_cppType(type.name)}}& value,
+                              const absl::FormatConversionSpec& spec,
+                              absl::FormatSink* s) {
+            {% set members = [] %}
+            {% set format = [] %}
+            {% set template = [] %}
+            {% for member in type.members %}
+                {% set memberName = member.name.camelCase() %}
+                {% do members.append("value." + memberName) %}
+                {% do format.append(memberName + ": %" + as_formatType(member)) %}
+                {% do template.append("'" + as_formatType(member) + "'") %}
+            {% endfor %}
+            static const auto* const fmt =
+                new ParsedFormat<{{template|join(",")}}>("{ {{format|join(", ")}} }");
+            s->Append(absl::StrFormat(*fmt, {{members|join(", ")}}));
+            return {true};
+        }
+        {% endif %}
+    {% endfor %}
+
 }  // namespace {{native_namespace}}
 
 {% set namespace = metadata.namespace %}
@@ -59,22 +95,24 @@ namespace {{namespace}} {
     //
 
     {% for type in by_category["enum"] %}
-        absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
-        AbslFormatConvert({{as_cppType(type.name)}} value,
-                            const absl::FormatConversionSpec& spec,
-                            absl::FormatSink* s) {
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString|absl::FormatConversionCharSet::kIntegral>
+    AbslFormatConvert({{as_cppType(type.name)}} value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s) {
+        if (spec.conversion_char() == absl::FormatConversionChar::s) {
             s->Append("{{as_cppType(type.name)}}::");
             switch (value) {
             {% for value in type.values %}
                 case {{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}:
-                s->Append("{{as_cppEnum(value.name)}}");
-                break;
+                    s->Append("{{as_cppEnum(value.name)}}");
+                    break;
             {% endfor %}
-                default:
-                s->Append(absl::StrFormat("%x", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
             }
-            return {true};
+        } else {
+            s->Append(absl::StrFormat("%u", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
         }
+        return {true};
+    }
     {% endfor %}
 
     //
@@ -82,10 +120,11 @@ namespace {{namespace}} {
     //
 
     {% for type in by_category["bitmask"] %}
-        absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
-        AbslFormatConvert({{as_cppType(type.name)}} value,
-                            const absl::FormatConversionSpec& spec,
-                            absl::FormatSink* s) {
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString|absl::FormatConversionCharSet::kIntegral>
+    AbslFormatConvert({{as_cppType(type.name)}} value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s) {
+        if (spec.conversion_char() == absl::FormatConversionChar::s) {
             s->Append("{{as_cppType(type.name)}}::");
             if (!static_cast<bool>(value)) {
                 {% for value in type.values if value.value == 0 %}
@@ -124,9 +163,11 @@ namespace {{namespace}} {
             if (moreThanOneBit) {
                 s->Append(")");
             }
-
-            return {true};
+        } else {
+            s->Append(absl::StrFormat("%u", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
         }
+        return {true};
+    }
     {% endfor %}
 
 }  // namespace {{namespace}}
