@@ -129,26 +129,8 @@ namespace dawn::native {
         if (descriptor->plane1) {
             mTextureViews[1] = descriptor->plane1;
         } else {
-            TextureDescriptor textureDesc;
-            textureDesc.dimension = wgpu::TextureDimension::e2D;
-            textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-            textureDesc.label = "Dawn_External_Texture_Dummy_Texture";
-            textureDesc.size = {1, 1, 1};
-            textureDesc.usage = wgpu::TextureUsage::TextureBinding;
-
-            DAWN_TRY_ASSIGN(mDummyTexture, device->CreateTexture(&textureDesc));
-
-            TextureViewDescriptor textureViewDesc;
-            textureViewDesc.arrayLayerCount = 1;
-            textureViewDesc.aspect = wgpu::TextureAspect::All;
-            textureViewDesc.baseArrayLayer = 0;
-            textureViewDesc.dimension = wgpu::TextureViewDimension::e2D;
-            textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-            textureViewDesc.label = "Dawn_External_Texture_Dummy_Texture_View";
-            textureViewDesc.mipLevelCount = 1;
-
             DAWN_TRY_ASSIGN(mTextureViews[1],
-                            device->CreateTextureView(mDummyTexture.Get(), &textureViewDesc));
+                            device->GetOrCreateDummyTextureViewForExternalTexture());
         }
 
         // We must create a buffer to store parameters needed by a shader that operates on this

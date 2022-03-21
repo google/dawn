@@ -400,6 +400,7 @@ namespace dawn::native {
         mPersistentCache = nullptr;
         mEmptyBindGroupLayout = nullptr;
         mInternalPipelineStore = nullptr;
+        mExternalTextureDummyView = nullptr;
 
         AssumeCommandsComplete();
 
@@ -785,6 +786,35 @@ namespace dawn::native {
         ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->computePipelines.erase(obj);
         ASSERT(removedCount == 1);
+    }
+
+    ResultOrError<Ref<TextureViewBase>>
+    DeviceBase::GetOrCreateDummyTextureViewForExternalTexture() {
+        if (!mExternalTextureDummyView.Get()) {
+            Ref<TextureBase> externalTextureDummy;
+            TextureDescriptor textureDesc;
+            textureDesc.dimension = wgpu::TextureDimension::e2D;
+            textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+            textureDesc.label = "Dawn_External_Texture_Dummy_Texture";
+            textureDesc.size = {1, 1, 1};
+            textureDesc.usage = wgpu::TextureUsage::TextureBinding;
+
+            DAWN_TRY_ASSIGN(externalTextureDummy, CreateTexture(&textureDesc));
+
+            TextureViewDescriptor textureViewDesc;
+            textureViewDesc.arrayLayerCount = 1;
+            textureViewDesc.aspect = wgpu::TextureAspect::All;
+            textureViewDesc.baseArrayLayer = 0;
+            textureViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            textureViewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+            textureViewDesc.label = "Dawn_External_Texture_Dummy_Texture_View";
+            textureViewDesc.mipLevelCount = 1;
+
+            DAWN_TRY_ASSIGN(mExternalTextureDummyView,
+                            CreateTextureView(externalTextureDummy.Get(), &textureViewDesc));
+        }
+
+        return mExternalTextureDummyView;
     }
 
     ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::GetOrCreatePipelineLayout(

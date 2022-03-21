@@ -170,6 +170,8 @@ namespace dawn::native {
 
         void UncacheComputePipeline(ComputePipelineBase* obj);
 
+        ResultOrError<Ref<TextureViewBase>> GetOrCreateDummyTextureViewForExternalTexture();
+
         ResultOrError<Ref<PipelineLayoutBase>> GetOrCreatePipelineLayout(
             const PipelineLayoutDescriptor* descriptor);
         void UncachePipelineLayout(PipelineLayoutBase* obj);
@@ -506,6 +508,8 @@ namespace dawn::native {
         std::unique_ptr<Caches> mCaches;
 
         Ref<BindGroupLayoutBase> mEmptyBindGroupLayout;
+
+        Ref<TextureViewBase> mExternalTextureDummyView;
 
         std::unique_ptr<DynamicUploader> mDynamicUploader;
         std::unique_ptr<AsyncTaskManager> mAsyncTaskManager;
