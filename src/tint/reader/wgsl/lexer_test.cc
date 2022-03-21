@@ -865,7 +865,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"default", Token::Type::kDefault},
         TokenData{"discard", Token::Type::kDiscard},
         TokenData{"else", Token::Type::kElse},
-        TokenData{"elseif", Token::Type::kElseIf},
         TokenData{"f32", Token::Type::kF32},
         TokenData{"fallthrough", Token::Type::kFallthrough},
         TokenData{"false", Token::Type::kFalse},

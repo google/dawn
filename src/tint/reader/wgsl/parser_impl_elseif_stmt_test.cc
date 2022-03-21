@@ -64,68 +64,6 @@ TEST_F(ParserImplTest, ElseStmts_MissingBody) {
   EXPECT_EQ(p->error(), "1:15: expected '{'");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// The tests below use the deprecated 'elseif' syntax
-////////////////////////////////////////////////////////////////////////////////
-
-TEST_F(ParserImplTest, DEPRECATED_ElseStmts) {
-  auto p = parser("elseif (a == 4) { a = b; c = d; }");
-  auto e = p->else_stmts();
-  EXPECT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: 'elseif' is now 'else if')");
-  ASSERT_EQ(e.value.size(), 1u);
-
-  ASSERT_TRUE(e.value[0]->Is<ast::ElseStatement>());
-  ASSERT_NE(e.value[0]->condition, nullptr);
-  ASSERT_TRUE(e.value[0]->condition->Is<ast::BinaryExpression>());
-  EXPECT_EQ(e.value[0]->body->statements.size(), 2u);
-}
-
-TEST_F(ParserImplTest, DEPRECATED_ElseStmts_Multiple) {
-  auto p = parser("elseif (a == 4) { a = b; c = d; } elseif(c) { d = 2; }");
-  auto e = p->else_stmts();
-  EXPECT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: 'elseif' is now 'else if'
-1:35: use of deprecated language feature: 'elseif' is now 'else if')");
-  ASSERT_EQ(e.value.size(), 2u);
-
-  ASSERT_TRUE(e.value[0]->Is<ast::ElseStatement>());
-  ASSERT_NE(e.value[0]->condition, nullptr);
-  ASSERT_TRUE(e.value[0]->condition->Is<ast::BinaryExpression>());
-  EXPECT_EQ(e.value[0]->body->statements.size(), 2u);
-
-  ASSERT_TRUE(e.value[1]->Is<ast::ElseStatement>());
-  ASSERT_NE(e.value[1]->condition, nullptr);
-  ASSERT_TRUE(e.value[1]->condition->Is<ast::IdentifierExpression>());
-  EXPECT_EQ(e.value[1]->body->statements.size(), 1u);
-}
-
-TEST_F(ParserImplTest, DEPRECATED_ElseStmts_InvalidBody) {
-  auto p = parser("elseif (true) { fn main() {}}");
-  auto e = p->else_stmts();
-  EXPECT_TRUE(e.errored);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: 'elseif' is now 'else if'
-1:17: expected '}')");
-}
-
-TEST_F(ParserImplTest, DEPRECATED_ElseStmts_MissingBody) {
-  auto p = parser("elseif (true)");
-  auto e = p->else_stmts();
-  EXPECT_TRUE(e.errored);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: 'elseif' is now 'else if'
-1:14: expected '{')");
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

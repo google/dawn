@@ -7,6 +7,7 @@
 * The `@block` attribute has been removed. [tint:1324](crbug.com/tint/1324)
 * The `@stride` attribute has been removed. [tint:1381](crbug.com/tint/1381)
 * Attributes using `[[attribute]]` syntax are no longer supported. [tint:1382](crbug.com/tint/1382)
+* The `elseif` keyword is no longer supported. [tint:1289](crbug.com/tint/1289)
 
 ## Changes for M101
 

@@ -141,8 +141,6 @@ class Token {
     kDefault,
     /// A 'else'
     kElse,
-    /// A 'elseif'
-    kElseIf,
     /// A 'f32'
     kF32,
     /// A 'fallthrough'

@@ -1684,9 +1684,6 @@ Expect<ast::ElseStatementList> ParserImpl::else_stmts() {
     bool else_if = false;
     if (match(Token::Type::kElse, &start)) {
       else_if = match(Token::Type::kIf);
-    } else if (match(Token::Type::kElseIf, &start)) {
-      deprecated(start, "'elseif' is now 'else if'");
-      else_if = true;
     } else {
       break;
     }
