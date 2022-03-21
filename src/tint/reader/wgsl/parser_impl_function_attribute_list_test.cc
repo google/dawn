@@ -56,18 +56,6 @@ TEST_F(ParserImplTest, AttributeList_Invalid) {
   EXPECT_EQ(p->error(), "1:2: expected attribute");
 }
 
-TEST_F(ParserImplTest, AttributeList_ExtraComma) {
-  auto p = parser("[[workgroup_size(2), ]]");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:22: expected attribute)");
-}
-
 TEST_F(ParserImplTest, AttributeList_BadAttribute) {
   auto p = parser("@stage()");
   auto attrs = p->attribute_list();
@@ -75,85 +63,6 @@ TEST_F(ParserImplTest, AttributeList_BadAttribute) {
   EXPECT_TRUE(attrs.errored);
   EXPECT_FALSE(attrs.matched);
   EXPECT_EQ(p->error(), "1:8: invalid value for stage attribute");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_AttributeList_Empty) {
-  auto p = parser("[[]]");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:3: empty attribute list)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_AttributeList_Invalid) {
-  auto p = parser("[[invalid]]");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:3: expected attribute)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_AttributeList_ExtraComma) {
-  auto p = parser("[[workgroup_size(2), ]]");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:22: expected attribute)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_AttributeList_MissingComma) {
-  auto p = parser("[[workgroup_size(2) workgroup_size(2)]]");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:21: expected ',' for attribute list)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_AttributeList_BadAttribute) {
-  auto p = parser("[[stage()]]");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:9: invalid value for stage attribute)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_AttributeList_MissingRightAttr) {
-  auto p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:45: expected ']]' for attribute list)");
 }
 
 }  // namespace

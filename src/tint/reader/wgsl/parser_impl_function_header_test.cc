@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {
-  auto p = parser("fn main() -> [[invariant]] f32");
+  auto p = parser("fn main() -> @invariant f32");
   auto f = p->function_header();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(f.matched);

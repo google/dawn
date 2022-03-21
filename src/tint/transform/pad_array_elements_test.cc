@@ -40,7 +40,7 @@ var<private> arr : array<i32, 4>;
 
 TEST_F(PadArrayElementsTest, ShouldRunHasExplicitArrayStride) {
   auto* src = R"(
-var<private> arr : [[stride(8)]] array<i32, 4>;
+var<private> arr : @stride(8) array<i32, 4>;
 )";
 
   EXPECT_TRUE(ShouldRun<PadArrayElements>(src));

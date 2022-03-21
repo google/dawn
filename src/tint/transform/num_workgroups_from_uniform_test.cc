@@ -34,8 +34,8 @@ TEST_F(NumWorkgroupsFromUniformTest, ShouldRunEmptyModule) {
 
 TEST_F(NumWorkgroupsFromUniformTest, ShouldRunHasNumWorkgroups) {
   auto* src = R"(
-[[stage(compute), workgroup_size(1)]]
-fn main([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
+@stage(compute) @workgroup_size(1)
+fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
@@ -44,8 +44,8 @@ fn main([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
 
 TEST_F(NumWorkgroupsFromUniformTest, Error_MissingTransformData) {
   auto* src = R"(
-[[stage(compute), workgroup_size(1)]]
-fn main([[builtin(num_workgroups)]] num_wgs : vec3<u32>) {
+@stage(compute) @workgroup_size(1)
+fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 

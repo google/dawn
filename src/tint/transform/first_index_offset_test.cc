@@ -34,7 +34,7 @@ TEST_F(FirstIndexOffsetTest, ShouldRunEmptyModule) {
 
 TEST_F(FirstIndexOffsetTest, ShouldRunFragmentStage) {
   auto* src = R"(
-[[stage(fragment)]]
+@stage(fragment)
 fn entry() {
   return;
 }
@@ -45,8 +45,8 @@ fn entry() {
 
 TEST_F(FirstIndexOffsetTest, ShouldRunVertexStage) {
   auto* src = R"(
-[[stage(vertex)]]
-fn entry() -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn entry() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 )";

@@ -2219,7 +2219,7 @@ struct FragmentInterface {
 TEST_F(CanonicalizeEntryPointIOTest, InvariantAttributes) {
   auto* src = R"(
 struct VertexOut {
-  [[builtin(position), invariant]] pos : vec4<f32>;
+  @builtin(position) @invariant pos : vec4<f32>;
 };
 
 @stage(vertex)
@@ -2228,7 +2228,7 @@ fn main1() -> VertexOut {
 }
 
 @stage(vertex)
-fn main2() -> [[builtin(position), invariant]] vec4<f32> {
+fn main2() -> @builtin(position) @invariant vec4<f32> {
   return vec4<f32>();
 }
 )";
@@ -2289,12 +2289,12 @@ fn main1() -> VertexOut {
 }
 
 @stage(vertex)
-fn main2() -> [[builtin(position), invariant]] vec4<f32> {
+fn main2() -> @builtin(position) @invariant vec4<f32> {
   return vec4<f32>();
 }
 
 struct VertexOut {
-  [[builtin(position), invariant]] pos : vec4<f32>;
+  @builtin(position) @invariant pos : vec4<f32>;
 };
 )";
 

@@ -122,14 +122,6 @@ const char kStageAttribute[] = "stage";
 const char kStrideAttribute[] = "stride";
 const char kWorkgroupSizeAttribute[] = "workgroup_size";
 
-bool is_attribute(Token t) {
-  return t == kAlignAttribute || t == kBindingAttribute ||
-         t == kBuiltinAttribute || t == kGroupAttribute || t == kIdAttribute ||
-         t == kInterpolateAttribute || t == kLocationAttribute ||
-         t == kSizeAttribute || t == kStageAttribute || t == kStrideAttribute ||
-         t == kWorkgroupSizeAttribute;
-}
-
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
 bool is_reserved(Token t) {
   return t == "asm" || t == "bf16" || t == "const" || t == "do" ||
@@ -144,7 +136,6 @@ bool is_reserved(Token t) {
 /// Used by sync_to() to skip over closing block tokens that were opened during
 /// the forward scan.
 struct BlockCounters {
-  int attrs = 0;    // [[ ]]
   int brace = 0;    // {   }
   int bracket = 0;  // [   ]
   int paren = 0;    // (   )
@@ -152,10 +143,6 @@ struct BlockCounters {
   /// @return the current enter-exit depth for the given block token type. If
   /// `t` is not a block token type, then 0 is always returned.
   int consume(const Token& t) {
-    if (t.Is(Token::Type::kAttrLeft))  // [DEPRECATED]
-      return attrs++;
-    if (t.Is(Token::Type::kAttrRight))  // [DEPRECATED]
-      return attrs--;
     if (t.Is(Token::Type::kBraceLeft))
       return brace++;
     if (t.Is(Token::Type::kBraceRight))
@@ -1374,8 +1361,7 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
   while (continue_parsing()) {
     // Check for the end of the list.
     auto t = peek();
-    if (!t.IsIdentifier() && !t.Is(Token::Type::kAttr) &&
-        !t.Is(Token::Type::kAttrLeft)) {
+    if (!t.IsIdentifier() && !t.Is(Token::Type::kAttr)) {
       break;
     }
 
@@ -2819,7 +2805,6 @@ Expect<const ast::Expression*> ParserImpl::expect_const_expr() {
 
 Maybe<ast::AttributeList> ParserImpl::attribute_list() {
   bool errored = false;
-  bool matched = false;
   ast::AttributeList attrs;
 
   while (continue_parsing()) {
@@ -2829,78 +2814,18 @@ Maybe<ast::AttributeList> ParserImpl::attribute_list() {
       } else {
         attrs.emplace_back(attr.value);
       }
-    } else {  // [DEPRECATED] - old [[attribute]] style
-      auto list = attribute_bracketed_list(attrs);
-      if (list.errored) {
-        errored = true;
-      }
-      if (!list.matched) {
-        break;
-      }
+    } else {
+      break;
     }
-
-    matched = true;
   }
 
   if (errored)
     return Failure::kErrored;
 
-  if (!matched)
+  if (attrs.empty())
     return Failure::kNoMatch;
 
   return attrs;
-}
-
-Maybe<bool> ParserImpl::attribute_bracketed_list(ast::AttributeList& attrs) {
-  const char* use = "attribute list";
-
-  Source source;
-  if (!match(Token::Type::kAttrLeft, &source)) {
-    return Failure::kNoMatch;
-  }
-
-  deprecated(source,
-             "[[attribute]] style attributes have been replaced with "
-             "@attribute style");
-
-  if (match(Token::Type::kAttrRight, &source))
-    return add_error(source, "empty attribute list");
-
-  return sync(Token::Type::kAttrRight, [&]() -> Expect<bool> {
-    bool errored = false;
-
-    while (continue_parsing()) {
-      auto attr = expect_attribute();
-      if (attr.errored) {
-        errored = true;
-      }
-      attrs.emplace_back(attr.value);
-
-      if (match(Token::Type::kComma)) {
-        continue;
-      }
-
-      if (is_attribute(peek())) {
-        // We have two attributes in a bracket without a separating comma.
-        // e.g. @location(1) group(2)
-        //                    ^^^ expected comma
-        expect(use, Token::Type::kComma);
-        return Failure::kErrored;
-      }
-
-      break;
-    }
-
-    if (errored) {
-      return Failure::kErrored;
-    }
-
-    if (!expect(use, Token::Type::kAttrRight)) {
-      return Failure::kErrored;
-    }
-
-    return true;
-  });
 }
 
 Expect<const ast::Attribute*> ParserImpl::expect_attribute() {
@@ -3142,17 +3067,6 @@ bool ParserImpl::expect(std::string_view use, Token::Type tok) {
       token_queue_.push_front(Token(Token::Type::kEqual, source));
     }
 
-    synchronized_ = true;
-    return true;
-  }
-
-  // Handle the case when `]` is expected but the actual token is `]]`.
-  // For example, in `arr1[arr2[0]]`.
-  if (tok == Token::Type::kBracketRight && t.Is(Token::Type::kAttrRight)) {
-    next();
-    auto source = t.source();
-    source.range.begin.column++;
-    token_queue_.push_front({Token::Type::kBracketRight, source});
     synchronized_ = true;
     return true;
   }

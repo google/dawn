@@ -5,6 +5,7 @@
 ### Breaking changes
 
 * The `@block` attribute has been removed. [tint:1324](crbug.com/tint/1324)
+* Attributes using `[[attribute]]` syntax are no longer supported. [tint:1382](crbug.com/tint/1382)
 
 ## Changes for M101
 

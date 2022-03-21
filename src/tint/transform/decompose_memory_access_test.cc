@@ -33,7 +33,7 @@ TEST_F(DecomposeMemoryAccessTest, ShouldRunStorageBuffer) {
 struct Buffer {
   i : i32;
 };
-[[group(0), binding(0)]] var<storage, read_write> sb : Buffer;
+@group(0) @binding(0) var<storage, read_write> sb : Buffer;
 )";
 
   EXPECT_TRUE(ShouldRun<DecomposeMemoryAccess>(src));
@@ -44,7 +44,7 @@ TEST_F(DecomposeMemoryAccessTest, ShouldRunUniformBuffer) {
 struct Buffer {
   i : i32;
 };
-[[group(0), binding(0)]] var<uniform> ub : Buffer;
+@group(0) @binding(0) var<uniform> ub : Buffer;
 )";
 
   EXPECT_TRUE(ShouldRun<DecomposeMemoryAccess>(src));

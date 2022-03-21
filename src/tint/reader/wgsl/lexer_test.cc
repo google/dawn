@@ -801,8 +801,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"&&", Token::Type::kAndAnd},
                     TokenData{"->", Token::Type::kArrow},
                     TokenData{"@", Token::Type::kAttr},
-                    TokenData{"[[", Token::Type::kAttrLeft},
-                    TokenData{"]]", Token::Type::kAttrRight},
                     TokenData{"/", Token::Type::kForwardSlash},
                     TokenData{"!", Token::Type::kBang},
                     TokenData{"[", Token::Type::kBracketLeft},

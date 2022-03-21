@@ -71,42 +71,6 @@ TEST_F(ParserImplTest, AttributeDecl_Invalidattribute) {
   EXPECT_TRUE(attrs.value.empty());
 }
 
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_attributeDecl_Parses) {
-  auto p = parser("[[invariant]]");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(p->has_error());
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 1u);
-  auto* invariant_attr = attrs.value[0]->As<ast::Attribute>();
-  EXPECT_TRUE(invariant_attr->Is<ast::InvariantAttribute>());
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_attributeDecl_MissingAttrRight) {
-  auto p = parser("[[invariant");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:12: expected ']]' for attribute list)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_attributeDecl_Invalidattribute) {
-  auto p = parser("[[invalid]]");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

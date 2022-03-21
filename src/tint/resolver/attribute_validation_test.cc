@@ -271,7 +271,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBuiltin, true},
                     TestParams{AttributeKind::kGroup, false},
                     TestParams{AttributeKind::kId, false},
-                    // kInterpolate tested separately (requires [[location]])
+                    // kInterpolate tested separately (requires @location)
                     TestParams{AttributeKind::kInvariant, true},
                     TestParams{AttributeKind::kLocation, true},
                     TestParams{AttributeKind::kOffset, false},
@@ -461,7 +461,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBuiltin, true},
                     TestParams{AttributeKind::kGroup, false},
                     TestParams{AttributeKind::kId, false},
-                    // kInterpolate tested separately (requires [[location]])
+                    // kInterpolate tested separately (requires @location)
                     TestParams{AttributeKind::kInvariant, true},
                     TestParams{AttributeKind::kLocation, false},
                     TestParams{AttributeKind::kOffset, false},
@@ -594,7 +594,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kBuiltin, true},
                     TestParams{AttributeKind::kGroup, false},
                     TestParams{AttributeKind::kId, false},
-                    // kInterpolate tested separately (requires [[location]])
+                    // kInterpolate tested separately (requires @location)
                     // kInvariant tested separately (requires position builtin)
                     TestParams{AttributeKind::kLocation, true},
                     TestParams{AttributeKind::kOffset, true},

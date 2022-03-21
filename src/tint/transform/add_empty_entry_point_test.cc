@@ -32,7 +32,7 @@ TEST_F(AddEmptyEntryPointTest, ShouldRunEmptyModule) {
 
 TEST_F(AddEmptyEntryPointTest, ShouldRunExistingEntryPoint) {
   auto* src = R"(
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn existing() {}
 )";
 

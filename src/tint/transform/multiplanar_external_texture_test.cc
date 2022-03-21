@@ -36,7 +36,7 @@ type ET = texture_external;
 }
 TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureGlobal) {
   auto* src = R"(
-[[group(0), binding(0)]] var ext_tex : texture_external;
+@group(0) @binding(0) var ext_tex : texture_external;
 )";
 
   EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
@@ -1163,10 +1163,10 @@ fn f(t : ET, s : sampler) {
   textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
 }
 
-[[group(0), binding(0)]] var ext_tex : ET;
-[[group(0), binding(1)]] var smp : sampler;
+@group(0) @binding(0) var ext_tex : ET;
+@group(0) @binding(1) var smp : sampler;
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   f(ext_tex, smp);
 }
@@ -1226,7 +1226,7 @@ fn main() {
 // Tests that the the transform handles aliases to external textures
 TEST_F(MultiplanarExternalTextureTest, ExternalTextureAlias_OutOfOrder) {
   auto* src = R"(
-[[stage(fragment)]]
+@stage(fragment)
 fn main() {
   f(ext_tex, smp);
 }
@@ -1235,8 +1235,8 @@ fn f(t : ET, s : sampler) {
   textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
 }
 
-[[group(0), binding(0)]] var ext_tex : ET;
-[[group(0), binding(1)]] var smp : sampler;
+@group(0) @binding(0) var ext_tex : ET;
+@group(0) @binding(1) var smp : sampler;
 
 type ET = texture_external;
 )";

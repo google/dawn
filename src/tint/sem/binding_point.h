@@ -26,9 +26,9 @@ namespace sem {
 
 /// BindingPoint holds a group and binding index.
 struct BindingPoint {
-  /// The `[[group]]` part of the binding point
+  /// The `@group` part of the binding point
   uint32_t group = 0;
-  /// The `[[binding]]` part of the binding point
+  /// The `@binding` part of the binding point
   uint32_t binding = 0;
 
   /// Equality operator

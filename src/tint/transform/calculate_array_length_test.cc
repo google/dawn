@@ -37,9 +37,9 @@ struct SB {
   arr : array<i32>;
 };
 
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+@group(0) @binding(0) var<storage, read> sb : SB;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
 }
 )";
@@ -54,9 +54,9 @@ struct SB {
   arr : array<i32>;
 };
 
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+@group(0) @binding(0) var<storage, read> sb : SB;
 
-[[stage(compute), workgroup_size(1)]]
+@stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }

@@ -28,20 +28,6 @@ TEST_F(ParserImplTest, AttributeDecl_EmptyStr) {
   EXPECT_EQ(attrs.value.size(), 0u);
 }
 
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_AttributeDecl_EmptyBlock) {
-  auto p = parser("[[]]");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(attrs.value.size(), 0u);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:3: empty attribute list)");
-}
-
 TEST_F(ParserImplTest, AttributeDecl_Single) {
   auto p = parser("@size(4)");
   auto attrs = p->attribute_list();
@@ -62,30 +48,6 @@ TEST_F(ParserImplTest, AttributeDecl_InvalidAttribute) {
   EXPECT_FALSE(attrs.matched);
   EXPECT_EQ(p->error(),
             "1:7: expected signed integer literal for size attribute");
-}
-
-TEST_F(ParserImplTest, AttributeDecl_MissingClose) {
-  auto p = parser("[[size(4)");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error()) << p->error();
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:10: expected ']]' for attribute list)");
-}
-
-TEST_F(ParserImplTest, StructMemberAttributeDecl_SizeMissingClose) {
-  auto p = parser("[[size(4)");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error()) << p->error();
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:10: expected ']]' for attribute list)");
 }
 
 }  // namespace

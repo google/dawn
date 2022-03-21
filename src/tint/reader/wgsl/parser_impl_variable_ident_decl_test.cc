@@ -104,56 +104,6 @@ TEST_F(ParserImplTest, VariableIdentDecl_AttributeMissingLeftParen) {
   ASSERT_EQ(p->error(), "1:18: expected '(' for stride attribute");
 }
 
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest,
-       DEPRECATED_VariableIdentDecl_AttributeMissingRightBlock) {
-  auto p = parser("my_var : [[location(4) S");
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(
-      p->error(),
-      R"(1:10: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:24: expected ']]' for attribute list)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest,
-       DEPRECATED_VariableIdentDecl_AttributeMissingRightParen) {
-  auto p = parser("my_var : [[location(4]] S");
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(
-      p->error(),
-      R"(1:10: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:22: expected ')' for location attribute)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_VariableIdentDecl_AttributeMissingLeftParen) {
-  auto p = parser("my_var : [[stride 4)]] S");
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(
-      p->error(),
-      R"(1:10: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:19: expected '(' for stride attribute)");
-}
-
-// TODO(crbug.com/tint/1382): Remove
-TEST_F(ParserImplTest, DEPRECATED_VariableIdentDecl_AttributeEmpty) {
-  auto p = parser("my_var : [[]] S");
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(
-      p->error(),
-      R"(1:10: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:12: empty attribute list)");
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

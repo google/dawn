@@ -671,11 +671,6 @@ class ParserImpl {
   /// Parses one or more attribute lists.
   /// @return the parsed attribute list, or an empty list on error.
   Maybe<ast::AttributeList> attribute_list();
-  /// Parses a list of attributes between `ATTR_LEFT` and `ATTR_RIGHT`
-  /// brackets.
-  /// @param attrs the list to append newly parsed attributes to.
-  /// @return true if any attributes were be parsed, otherwise false.
-  Maybe<bool> attribute_bracketed_list(ast::AttributeList& attrs);
   /// Parses a single attribute of the following types:
   /// * `struct_attribute`
   /// * `struct_member_attribute`

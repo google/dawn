@@ -54,10 +54,6 @@ class Token {
     kArrow,
     /// A '@'
     kAttr,
-    /// A '[[' - [DEPRECATED] now '@'
-    kAttrLeft,
-    /// A ']]' - [DEPRECATED] now '@'
-    kAttrRight,
     /// A '/'
     kForwardSlash,
     /// A '!'

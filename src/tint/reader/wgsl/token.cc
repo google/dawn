@@ -44,10 +44,6 @@ std::string_view Token::TypeToName(Type type) {
       return "->";
     case Token::Type::kAttr:
       return "@";
-    case Token::Type::kAttrLeft:
-      return "[[";
-    case Token::Type::kAttrRight:
-      return "]]";
     case Token::Type::kForwardSlash:
       return "/";
     case Token::Type::kBang:
