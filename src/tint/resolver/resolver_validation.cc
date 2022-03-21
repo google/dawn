@@ -2133,7 +2133,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
   }
 
   for (auto* attr : str->Declaration()->attributes) {
-    if (!(attr->IsAnyOf<ast::StructBlockAttribute, ast::InternalAttribute>())) {
+    if (!(attr->IsAnyOf<ast::InternalAttribute>())) {
       AddError("attribute is not valid for struct declarations", attr->source);
       return false;
     }

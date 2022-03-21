@@ -14,7 +14,6 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/writer/hlsl/test_helper.h"
@@ -337,8 +336,7 @@ tint_symbol_1 vert_main2() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
-  auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
-                           {create<ast::StructBlockAttribute>()});
+  auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())});
   auto* ubo = Global("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform,
                      ast::AttributeList{
                          create<ast::BindingAttribute>(0),
@@ -386,8 +384,7 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_With_UniformStruct) {
-  auto* s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())});
 
   Global("uniforms", ty.Of(s), ast::StorageClass::kUniform,
          ast::AttributeList{
@@ -423,12 +420,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_With_RW_StorageBuffer_Read) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
@@ -464,12 +459,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_With_RO_StorageBuffer_Read) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -504,12 +497,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_With_WO_StorageBuffer_Store) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
          ast::AttributeList{
@@ -541,12 +532,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_With_StorageBuffer_Store) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
@@ -579,8 +568,7 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
-  auto* s = Structure("S", {Member("x", ty.f32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("x", ty.f32())});
   Global("coord", ty.Of(s), ast::StorageClass::kUniform,
          ast::AttributeList{
              create<ast::BindingAttribute>(0),
@@ -624,8 +612,7 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Attribute_Called_By_EntryPoint_With_StorageBuffer) {
-  auto* s = Structure("S", {Member("x", ty.f32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("x", ty.f32())});
   Global("coord", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
          ast::AttributeList{
@@ -856,7 +843,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 // https://crbug.com/tint/297
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
-  // [[block]] struct Data {
+  // struct Data {
   //   d : f32;
   // };
   // @binding(0) @group(0) var<storage> data : Data;
@@ -873,8 +860,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   //   return;
   // }
 
-  auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {Member("d", ty.f32())});
 
   Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{

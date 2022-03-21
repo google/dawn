@@ -14,7 +14,6 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -95,8 +94,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
   void SetupStorageBuffer(ast::StructMemberList members) {
     ProgramBuilder& b = *this;
 
-    auto* s =
-        b.Structure("Data", members, {b.create<ast::StructBlockAttribute>()});
+    auto* s = b.Structure("Data", members);
 
     b.Global("data", b.ty.Of(s), ast::StorageClass::kStorage,
              ast::Access::kReadWrite,

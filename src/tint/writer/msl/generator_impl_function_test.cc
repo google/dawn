@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
@@ -329,12 +328,10 @@ vertex tint_symbol_1 vert_main2() {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionAttribute_EntryPoint_With_RW_StorageBuffer) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
@@ -376,12 +373,10 @@ fragment void frag_main(device Data* tint_symbol [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionAttribute_EntryPoint_With_RO_StorageBuffer) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -421,8 +416,7 @@ fragment void frag_main(const device Data* tint_symbol [[buffer(0)]]) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
-  auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
-                           {create<ast::StructBlockAttribute>()});
+  auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())});
   auto* ubo = Global("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform,
                      ast::AttributeList{
                          create<ast::BindingAttribute>(0),
@@ -474,12 +468,10 @@ fragment void frag_main(const constant UBO* tint_symbol_1 [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionAttribute_Called_By_EntryPoint_With_RW_StorageBuffer) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
@@ -532,12 +524,10 @@ fragment void frag_main(device Data* tint_symbol_1 [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionAttribute_Called_By_EntryPoint_With_RO_StorageBuffer) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
   Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -644,7 +634,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayReturn) {
 // https://crbug.com/tint/297
 TEST_F(MslGeneratorImplTest,
        Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar) {
-  // [[block]] struct Data {
+  // struct Data {
   //   d : f32;
   // };
   // @binding(0) @group(0) var<storage> data : Data;
@@ -659,8 +649,7 @@ TEST_F(MslGeneratorImplTest,
   //   return;
   // }
 
-  auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {Member("d", ty.f32())});
 
   Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{

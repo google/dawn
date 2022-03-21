@@ -15,7 +15,6 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/struct.h"
 
@@ -129,11 +128,9 @@ TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayStaticSize) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
-  auto* s = Structure("S",
-                      {
-                          Member("c", ty.array<f32>()),
-                      },
-                      ast::AttributeList{create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("c", ty.array<f32>()),
+                           });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -149,11 +146,9 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
 }
 
 TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayRuntimeSized) {
-  auto* s = Structure("S",
-                      {
-                          Member("c", ty.array<f32>(/*stride*/ 32)),
-                      },
-                      ast::AttributeList{create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("c", ty.array<f32>(/*stride*/ 32)),
+                           });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 

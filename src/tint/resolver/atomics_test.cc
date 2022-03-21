@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/atomic_type.h"
@@ -50,8 +49,8 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
 }
 
 TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
-  auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s =
+      Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
   auto* g = Global("g", ty.Of(s), ast::StorageClass::kStorage,
                    ast::Access::kReadWrite,
                    ast::AttributeList{

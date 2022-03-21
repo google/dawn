@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 #include "src/tint/utils/string.h"
 
@@ -27,12 +26,7 @@ struct S {
   a : i32;
   b : f32;
 })");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 0u);
-
-  auto s = p->struct_decl(attrs.value);
+  auto s = p->struct_decl();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
@@ -65,12 +59,8 @@ struct $struct {
   src = utils::ReplaceAll(src, "$member_b", member_b_ident);
 
   auto p = parser(src);
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 0u);
 
-  auto s = p->struct_decl(attrs.value);
+  auto s = p->struct_decl();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
@@ -83,64 +73,10 @@ struct $struct {
             p->builder().Symbols().Register(member_b_ident));
 }
 
-TEST_F(ParserImplTest, StructDecl_ParsesWithAttribute) {
-  auto p = parser(R"(
-[[block]] struct B {
-  a : f32;
-  b : f32;
-})");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 1u);
-
-  auto s = p->struct_decl(attrs.value);
-  EXPECT_FALSE(p->has_error());
-  EXPECT_FALSE(s.errored);
-  EXPECT_TRUE(s.matched);
-  ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s->name, p->builder().Symbols().Register("B"));
-  ASSERT_EQ(s->members.size(), 2u);
-  EXPECT_EQ(s->members[0]->symbol, p->builder().Symbols().Register("a"));
-  EXPECT_EQ(s->members[1]->symbol, p->builder().Symbols().Register("b"));
-  ASSERT_EQ(s->attributes.size(), 1u);
-  EXPECT_TRUE(s->attributes[0]->Is<ast::StructBlockAttribute>());
-}
-
-TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleAttribute) {
-  auto p = parser(R"(
-[[block]]
-[[block]] struct S {
-  a : f32;
-  b : f32;
-})");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 2u);
-
-  auto s = p->struct_decl(attrs.value);
-  EXPECT_FALSE(p->has_error());
-  EXPECT_FALSE(s.errored);
-  EXPECT_TRUE(s.matched);
-  ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s->name, p->builder().Symbols().Register("S"));
-  ASSERT_EQ(s->members.size(), 2u);
-  EXPECT_EQ(s->members[0]->symbol, p->builder().Symbols().Register("a"));
-  EXPECT_EQ(s->members[1]->symbol, p->builder().Symbols().Register("b"));
-  ASSERT_EQ(s->attributes.size(), 2u);
-  EXPECT_TRUE(s->attributes[0]->Is<ast::StructBlockAttribute>());
-  EXPECT_TRUE(s->attributes[1]->Is<ast::StructBlockAttribute>());
-}
-
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
   auto p = parser("struct S {}");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 0u);
 
-  auto s = p->struct_decl(attrs.value);
+  auto s = p->struct_decl();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
@@ -150,12 +86,8 @@ TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
 
 TEST_F(ParserImplTest, StructDecl_MissingIdent) {
   auto p = parser("struct {}");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 0u);
 
-  auto s = p->struct_decl(attrs.value);
+  auto s = p->struct_decl();
   EXPECT_TRUE(s.errored);
   EXPECT_FALSE(s.matched);
   EXPECT_EQ(s.value, nullptr);
@@ -166,54 +98,14 @@ TEST_F(ParserImplTest, StructDecl_MissingIdent) {
 
 TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
   auto p = parser("struct S }");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 0u);
 
-  auto s = p->struct_decl(attrs.value);
+  auto s = p->struct_decl();
   EXPECT_TRUE(s.errored);
   EXPECT_FALSE(s.matched);
   EXPECT_EQ(s.value, nullptr);
 
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:10: expected '{' for struct declaration");
-}
-
-// TODO(crbug.com/tint/1324): DEPRECATED: Remove when @block is removed.
-TEST_F(ParserImplTest, StructDecl_InvalidAttributeDecl) {
-  auto p = parser("[[block struct S { a : i32; }");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-
-  auto s = p->struct_decl(attrs.value);
-  EXPECT_FALSE(s.errored);
-  EXPECT_TRUE(s.matched);
-  EXPECT_NE(s.value, nullptr);
-
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      R"(1:1: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-1:3: use of deprecated language feature: [[block]] attributes have been removed from WGSL
-1:9: expected ']]' for attribute list)");
-}
-
-// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplTest, StructDecl_MissingStruct) {
-  auto p = parser("[[block]] S {}");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 1u);
-
-  auto s = p->struct_decl(attrs.value);
-  EXPECT_FALSE(s.errored);
-  EXPECT_FALSE(s.matched);
-  EXPECT_EQ(s.value, nullptr);
-
-  EXPECT_FALSE(p->has_error());
 }
 
 }  // namespace

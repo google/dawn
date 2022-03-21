@@ -22,17 +22,19 @@
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/sampler.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/test_helper.h"
 #include "src/tint/ast/texture.h"
 #include "src/tint/ast/u32.h"
 #include "src/tint/ast/vector.h"
+#include "src/tint/transform/add_spirv_block_attribute.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
 using AstStructTest = TestHelper;
+using SpirvBlockAttribute =
+    transform::AddSpirvBlockAttribute::SpirvBlockAttribute;
 
 TEST_F(AstStructTest, Creation) {
   auto name = Sym("s");
@@ -50,14 +52,14 @@ TEST_F(AstStructTest, Creation) {
 TEST_F(AstStructTest, Creation_WithAttributes) {
   auto name = Sym("s");
   AttributeList attrs;
-  attrs.push_back(create<StructBlockAttribute>());
+  attrs.push_back(ASTNodes().Create<SpirvBlockAttribute>(ID()));
 
   auto* s =
       create<Struct>(name, StructMemberList{Member("a", ty.i32())}, attrs);
   EXPECT_EQ(s->name, name);
   EXPECT_EQ(s->members.size(), 1u);
   ASSERT_EQ(s->attributes.size(), 1u);
-  EXPECT_TRUE(s->attributes[0]->Is<StructBlockAttribute>());
+  EXPECT_TRUE(s->attributes[0]->Is<SpirvBlockAttribute>());
   EXPECT_EQ(s->source.range.begin.line, 0u);
   EXPECT_EQ(s->source.range.begin.column, 0u);
   EXPECT_EQ(s->source.range.end.line, 0u);
@@ -69,11 +71,11 @@ TEST_F(AstStructTest, CreationWithSourceAndAttributes) {
   auto* s = create<Struct>(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
       name, StructMemberList{Member("a", ty.i32())},
-      AttributeList{create<StructBlockAttribute>()});
+      AttributeList{ASTNodes().Create<SpirvBlockAttribute>(ID())});
   EXPECT_EQ(s->name, name);
   EXPECT_EQ(s->members.size(), 1u);
   ASSERT_EQ(s->attributes.size(), 1u);
-  EXPECT_TRUE(s->attributes[0]->Is<StructBlockAttribute>());
+  EXPECT_TRUE(s->attributes[0]->Is<SpirvBlockAttribute>());
   EXPECT_EQ(s->source.range.begin.line, 27u);
   EXPECT_EQ(s->source.range.begin.column, 4u);
   EXPECT_EQ(s->source.range.end.line, 27u);
@@ -119,9 +121,9 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_Attribute) {
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
-        b1.create<Struct>(b1.Sym("S"),
-                          StructMemberList{b1.Member("a", b1.ty.i32())},
-                          AttributeList{b2.create<StructBlockAttribute>()});
+        b1.create<Struct>(
+            b1.Sym("S"), StructMemberList{b1.Member("a", b1.ty.i32())},
+            AttributeList{b2.ASTNodes().Create<SpirvBlockAttribute>(b2.ID())});
       },
       "internal compiler error");
 }

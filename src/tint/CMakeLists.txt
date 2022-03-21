@@ -182,8 +182,6 @@ set(TINT_LIB_SRCS
   ast/storage_texture.h
   ast/stride_attribute.cc
   ast/stride_attribute.h
-  ast/struct_block_attribute.cc
-  ast/struct_block_attribute.h
   ast/struct_member_align_attribute.cc
   ast/struct_member_align_attribute.h
   ast/struct_member_offset_attribute.cc
@@ -909,7 +907,6 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_struct_body_decl_test.cc
       reader/wgsl/parser_impl_struct_decl_test.cc
       reader/wgsl/parser_impl_struct_attribute_decl_test.cc
-      reader/wgsl/parser_impl_struct_attribute_test.cc
       reader/wgsl/parser_impl_struct_member_attribute_decl_test.cc
       reader/wgsl/parser_impl_struct_member_attribute_test.cc
       reader/wgsl/parser_impl_struct_member_test.cc

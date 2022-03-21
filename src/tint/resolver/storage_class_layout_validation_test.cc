@@ -26,7 +26,6 @@ using ResolverStorageClassLayoutValidationTest = ResolverTest;
 // Detect unaligned member for storage buffers
 TEST_F(ResolverStorageClassLayoutValidationTest,
        StorageBuffer_UnalignedMember) {
-  // [[block]]
   // struct S {
   //     @size(5) a : f32;
   //     @align(1) b : f32;
@@ -36,8 +35,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 
   Structure(Source{{12, 34}}, "S",
             {Member("a", ty.f32(), {MemberSize(5)}),
-             Member(Source{{34, 56}}, "b", ty.f32(), {MemberAlign(1)})},
-            {StructBlock()});
+             Member(Source{{34, 56}}, "b", ty.f32(), {MemberAlign(1)})});
 
   Global(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kStorage,
          GroupAndBinding(0, 0));
@@ -57,7 +55,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 
 TEST_F(ResolverStorageClassLayoutValidationTest,
        StorageBuffer_UnalignedMember_SuggestedFix) {
-  // [[block]]
   // struct S {
   //     @size(5) a : f32;
   //     @align(4) b : f32;
@@ -67,8 +64,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 
   Structure(Source{{12, 34}}, "S",
             {Member("a", ty.f32(), {MemberSize(5)}),
-             Member(Source{{34, 56}}, "b", ty.f32(), {MemberAlign(4)})},
-            {StructBlock()});
+             Member(Source{{34, 56}}, "b", ty.f32(), {MemberAlign(4)})});
 
   Global(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kStorage,
          GroupAndBinding(0, 0));
@@ -83,7 +79,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   scalar : i32;
   // };
   //
-  // [[block]]
   // struct Outer {
   //   scalar : f32;
   //   inner : Inner;
@@ -98,8 +93,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member("scalar", ty.f32()),
                 Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -126,7 +120,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   scalar : i32;
   // };
   //
-  // [[block]]
   // struct Outer {
   //   scalar : f32;
   //   @align(16) inner : Inner;
@@ -142,8 +135,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
                 Member("scalar", ty.f32()),
                 Member(Source{{56, 78}}, "inner", ty.type_name("Inner"),
                        {MemberAlign(16)}),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -156,7 +148,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_UnalignedMember_Array) {
   // type Inner = @stride(16) array<f32, 10>;
   //
-  // [[block]]
   // struct Outer {
   //   scalar : f32;
   //   inner : Inner;
@@ -170,8 +161,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member("scalar", ty.f32()),
                 Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -192,7 +182,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_UnalignedMember_Array_SuggestedFix) {
   // type Inner = @stride(16) array<f32, 10>;
   //
-  // [[block]]
   // struct Outer {
   //   scalar : f32;
   //   @align(16) inner : Inner;
@@ -207,8 +196,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
                 Member("scalar", ty.f32()),
                 Member(Source{{34, 56}}, "inner", ty.type_name("Inner"),
                        {MemberAlign(16)}),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -224,7 +212,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   @align(1) @size(5) scalar : i32;
   // };
   //
-  // [[block]]
   // struct Outer {
   //   inner : Inner;
   //   scalar : i32;
@@ -240,8 +227,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
                 Member(Source{{78, 90}}, "scalar", ty.i32()),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{22, 24}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -273,7 +259,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   @align(1) @size(5) scalar : i32;
   // };
   //
-  // [[block]]
   // struct Outer {
   //   inner : Inner;
   //   scalar : i32;
@@ -294,8 +279,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
                 Member(Source{{78, 90}}, "scalar", ty.i32()),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{22, 24}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -326,7 +310,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   //   @align(1) @size(5) scalar : i32;
   // };
   //
-  // [[block]]
   // struct Outer {
   //   @align(16) inner : Inner;
   //   scalar : i32;
@@ -342,8 +325,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
                 Member(Source{{78, 90}}, "scalar", ty.i32(), {MemberAlign(16)}),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{22, 34}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -355,7 +337,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 // size is 12. 's' should be at offset 12, which is okay here.
 TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_Vec3MemberOffset_NoFail) {
-  // [[block]]
   // struct ScalarPackedAtEndOfVec3 {
   //     v : vec3<f32>;
   //     s : f32;
@@ -363,12 +344,10 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   // @group(0) @binding(0)
   // var<uniform> a : ScalarPackedAtEndOfVec3;
 
-  Structure("ScalarPackedAtEndOfVec3",
-            {
-                Member("v", ty.vec3(ty.f32())),
-                Member("s", ty.f32()),
-            },
-            {StructBlock()});
+  Structure("ScalarPackedAtEndOfVec3", {
+                                           Member("v", ty.vec3(ty.f32())),
+                                           Member("s", ty.f32()),
+                                       });
 
   Global(Source{{78, 90}}, "a", ty.type_name("ScalarPackedAtEndOfVec3"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -381,7 +360,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_InvalidArrayStride_Scalar) {
   // type Inner = array<f32, 10>;
   //
-  // [[block]]
   // struct Outer {
   //   inner : Inner;
   //   scalar : i32;
@@ -396,8 +374,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
                 Member("scalar", ty.i32()),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -418,7 +395,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_InvalidArrayStride_Vector) {
   // type Inner = array<vec2<f32>, 10>;
   //
-  // [[block]]
   // struct Outer {
   //   inner : Inner;
   //   scalar : i32;
@@ -433,8 +409,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
                 Member("scalar", ty.i32()),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -460,7 +435,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
   // }
   // type Inner = array<ArrayElem, 10>;
   //
-  // [[block]]
   // struct Outer {
   //   inner : Inner;
   //   scalar : i32;
@@ -479,8 +453,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
                 Member("scalar", ty.i32()),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -523,8 +496,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
       Source{{12, 34}}, "Outer",
       {
           Member("inner", ty.array(Source{{34, 56}}, ty.array(ty.f32(), 4), 4)),
-      },
-      {StructBlock()});
+      });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));
@@ -544,7 +516,6 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
        UniformBuffer_InvalidArrayStride_SuggestedFix) {
   // type Inner = @stride(16) array<f32, 10>;
   //
-  // [[block]]
   // struct Outer {
   //   inner : Inner;
   //   scalar : i32;
@@ -559,8 +530,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
             {
                 Member("inner", ty.type_name(Source{{34, 56}}, "Inner")),
                 Member("scalar", ty.i32()),
-            },
-            {StructBlock()});
+            });
 
   Global(Source{{78, 90}}, "a", ty.type_name("Outer"),
          ast::StorageClass::kUniform, GroupAndBinding(0, 0));

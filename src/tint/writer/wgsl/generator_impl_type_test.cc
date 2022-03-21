@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/sem/depth_texture_type.h"
 #include "src/tint/sem/multisampled_texture_type.h"
 #include "src/tint/sem/sampled_texture_type.h"
@@ -230,18 +229,15 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithAttribute) {
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32(), {MemberAlign(8)}),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32(), {MemberAlign(8)}),
+                           });
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(@block
-struct S {
+  EXPECT_EQ(gen.result(), R"(struct S {
   a : i32;
   @align(8)
   b : f32;
@@ -250,21 +246,15 @@ struct S {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointAttributes) {
-  ast::AttributeList attrs;
-  attrs.push_back(create<ast::StructBlockAttribute>());
-
   auto* s = Structure(
-      "S",
-      ast::StructMemberList{
-          Member("a", ty.u32(), {Builtin(ast::Builtin::kVertexIndex)}),
-          Member("b", ty.f32(), {Location(2u)})},
-      attrs);
+      "S", ast::StructMemberList{
+               Member("a", ty.u32(), {Builtin(ast::Builtin::kVertexIndex)}),
+               Member("b", ty.f32(), {Location(2u)})});
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(@block
-struct S {
+  EXPECT_EQ(gen.result(), R"(struct S {
   @builtin(vertex_index)
   a : u32;
   @location(2)

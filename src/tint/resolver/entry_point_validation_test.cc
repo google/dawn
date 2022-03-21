@@ -16,7 +16,6 @@
 #include "src/tint/ast/location_attribute.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
@@ -540,16 +539,13 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_NestedStruct) {
 }
 
 TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
-  // [[block]]
   // struct Input {
   //   @location(0) a : array<f32>;
   // };
   // @stage(fragment)
   // fn main(param : Input) {}
-  auto* input = Structure(
-      "Input",
-      {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})},
-      {create<ast::StructBlockAttribute>()});
+  auto* input = Structure("Input", {Member(Source{{13, 43}}, "a",
+                                           ty.array<float>(), {Location(0)})});
   auto* param = Param("param", ty.Of(input));
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
@@ -563,14 +559,13 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
 }
 
 TEST_F(LocationAttributeTests, BadMemberType_Input) {
-  // [[block]]
   // struct S { @location(0) m: array<i32>; };
   // @stage(fragment)
   // fn frag_main( a: S) {}
 
   auto* m = Member(Source{{34, 56}}, "m", ty.array<i32>(),
                    ast::AttributeList{Location(Source{{12, 34}}, 0u)});
-  auto* s = Structure("S", {m}, ast::AttributeList{StructBlock()});
+  auto* s = Structure("S", {m});
   auto* p = Param("a", ty.Of(s));
 
   Func("frag_main", {p}, ty.void_(), {},
@@ -682,7 +677,6 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_NestedStruct) {
 }
 
 TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
-  // [[block]]
   // struct Output {
   //   @location(0) a : array<f32>;
   // };
@@ -690,10 +684,9 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
   // fn main() -> Output {
   //   return Output();
   // }
-  auto* output = Structure("Output",
-                           {Member(Source{{13, 43}}, "a", ty.array<float>(),
-                                   {Location(Source{{12, 34}}, 0)})},
-                           {create<ast::StructBlockAttribute>()});
+  auto* output =
+      Structure("Output", {Member(Source{{13, 43}}, "a", ty.array<float>(),
+                                  {Location(Source{{12, 34}}, 0)})});
   Func(Source{{12, 34}}, "main", {}, ty.Of(output),
        {Return(Construct(ty.Of(output)))},
        {Stage(ast::PipelineStage::kFragment)});

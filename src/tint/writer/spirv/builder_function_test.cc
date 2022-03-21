@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -186,7 +185,7 @@ TEST_F(BuilderTest, FunctionType_DeDuplicate) {
 
 // https://crbug.com/tint/297
 TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
-  // [[block]] struct Data {
+  // struct Data {
   //   d : f32;
   // };
   // @binding(0) @group(0) var<storage> data : Data;
@@ -201,8 +200,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   //   return;
   // }
 
-  auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {Member("d", ty.f32())});
 
   Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{

@@ -15,7 +15,6 @@
 #include "gmock/gmock.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/sem/depth_texture_type.h"
 #include "src/tint/sem/multisampled_texture_type.h"
 #include "src/tint/sem/sampled_texture_type.h"
@@ -154,12 +153,10 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
   Global("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{
              create<ast::BindingAttribute>(0),
@@ -207,12 +204,10 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32(), {MemberOffset(0)}),
-                          Member("b", ty.f32(), {MemberOffset(8)}),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("a", ty.i32(), {MemberOffset(0)}),
+                               Member("b", ty.f32(), {MemberOffset(8)}),
+                           });
   Global("g", ty.Of(s), ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();

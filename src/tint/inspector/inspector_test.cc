@@ -17,7 +17,6 @@
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/inspector/test_inspector_builder.h"
 #include "src/tint/inspector/test_inspector_runner.h"
@@ -764,7 +763,7 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
   ast::StructMemberList members;
   members.push_back(
       Member("inner_position", ty.u32(), {Builtin(ast::Builtin::kSampleMask)}));
-  Structure("in_struct", members, {});
+  Structure("in_struct", members);
   auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
 
   Func("ep_func", {in_var}, ty.void_(), {Return()},
@@ -797,7 +796,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
   ast::StructMemberList members;
   members.push_back(Member("inner_sample_mask", ty.u32(),
                            {Builtin(ast::Builtin::kSampleMask)}));
-  Structure("out_struct", members, {});
+  Structure("out_struct", members);
 
   Func("ep_func", {}, ty.type_name("out_struct"),
        {Decl(Var("out_var", ty.type_name("out_struct"))), Return("out_var")},
@@ -829,7 +828,7 @@ TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
   ast::StructMemberList members;
   members.push_back(Member("inner_position", ty.vec4<f32>(),
                            {Builtin(ast::Builtin::kPosition)}));
-  Structure("in_struct", members, {});
+  Structure("in_struct", members);
   auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
 
   Func("ep_func", {in_var}, ty.void_(), {Return()},
@@ -861,7 +860,7 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
   ast::StructMemberList members;
   members.push_back(Member("inner_position", ty.bool_(),
                            {Builtin(ast::Builtin::kFrontFacing)}));
-  Structure("in_struct", members, {});
+  Structure("in_struct", members);
   auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
 
   Func("ep_func", {in_var}, ty.void_(), {Return()},
@@ -893,7 +892,7 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
   ast::StructMemberList members;
   members.push_back(Member("inner_position", ty.u32(),
                            {Builtin(ast::Builtin::kSampleIndex)}));
-  Structure("in_struct", members, {});
+  Structure("in_struct", members);
   auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
 
   Func("ep_func", {in_var}, ty.void_(), {Return()},
@@ -925,7 +924,7 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
   ast::StructMemberList members;
   members.push_back(Member("inner_position", ty.vec3<u32>(),
                            {Builtin(ast::Builtin::kNumWorkgroups)}));
-  Structure("in_struct", members, {});
+  Structure("in_struct", members);
   auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
 
   Func("ep_func", {in_var}, ty.void_(), {Return()},
@@ -942,7 +941,7 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {
   ast::StructMemberList members;
   members.push_back(Member("struct_inner", ty.f32(), {Location(0)}));
-  Structure("in_struct", members, {});
+  Structure("in_struct", members);
   auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
 
   Func("ep_func", {in_var}, ty.void_(), {Return()},
@@ -966,7 +965,7 @@ TEST_P(InspectorGetEntryPointInterpolateTest, Test) {
   members.push_back(
       Member("struct_inner", ty.f32(),
              {Interpolate(params.in_type, params.in_sampling), Location(0)}));
-  Structure("in_struct", members, {});
+  Structure("in_struct", members);
   auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
 
   Func("ep_func", {in_var}, ty.void_(), {Return()},
@@ -1548,8 +1547,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   auto* foo_struct_type = Structure(
       "foo_type",
       {Member("0i32", ty.i32()),
-       Member("b", ty.array(ty.u32(), 4, /*stride*/ 16), {MemberAlign(16)})},
-      {create<ast::StructBlockAttribute>()});
+       Member("b", ty.array(ty.u32(), 4, /*stride*/ 16), {MemberAlign(16)})});
 
   AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
@@ -2948,8 +2946,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, CompoundTypes) {
   // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
   // from the 4-element array with 16-byte stride.
   auto* wg_struct_type = MakeStructType(
-      "WgStruct", {ty.i32(), ty.array(ty.i32(), 4, /*stride=*/16)},
-      /*is_block=*/false);
+      "WgStruct", {ty.i32(), ty.array(ty.i32(), 4, /*stride=*/16)});
   AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
   MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
                                           {{0, ty.i32()}});
@@ -2992,8 +2989,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
   const auto* wg_struct_type = MakeStructTypeFromMembers(
       "WgStruct",
       {MakeStructMember(0, ty.f32(),
-                        {create<ast::StructMemberAlignAttribute>(1024)})},
-      /*is_block=*/false);
+                        {create<ast::StructMemberAlignAttribute>(1024)})});
 
   AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
   MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",

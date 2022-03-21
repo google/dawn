@@ -15,7 +15,6 @@
 #include "gmock/gmock.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
@@ -29,8 +28,7 @@ using ::testing::HasSubstr;
 using MslSanitizerTest = TestHelper;
 
 TEST_F(MslSanitizerTest, Call_ArrayLength) {
-  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -72,12 +70,10 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
-  auto* s = Structure("my_struct",
-                      {
-                          Member(0, "z", ty.f32()),
-                          Member(4, "a", ty.array<f32>(4)),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {
+                                       Member(0, "z", ty.f32()),
+                                       Member(4, "a", ty.array<f32>(4)),
+                                   });
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -121,8 +117,7 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
-  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -170,8 +165,7 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
-  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -227,8 +221,7 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(29)]]) {
 
 TEST_F(MslSanitizerTest,
        Call_ArrayLength_ArrayLengthFromUniformMissingBinding) {
-  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),

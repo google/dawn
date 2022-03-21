@@ -15,7 +15,6 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/storage_texture_type.h"
 
@@ -26,11 +25,10 @@ namespace {
 using ResolverAssignmentValidationTest = ResolverTest;
 
 TEST_F(ResolverAssignmentValidationTest, ReadOnlyBuffer) {
-  // [[block]] struct S { m : i32 };
+  // struct S { m : i32 };
   // @group(0) @binding(0)
   // var<storage,read> a : S;
-  auto* s = Structure("S", {Member("m", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("m", ty.i32())});
   Global(Source{{12, 34}}, "a", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
          ast::AttributeList{
@@ -250,12 +248,11 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
-  // [[block]] struct S { a : atomic<i32>; };
+  // struct S { a : atomic<i32>; };
   // @group(0) @binding(0) var<storage, read_write> v : S;
   // v.a = v.a;
 
-  auto* s = Structure("S", {Member("a", ty.atomic(ty.i32()))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("a", ty.atomic(ty.i32()))});
   Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
          ast::AttributeList{
@@ -272,12 +269,11 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
-  // [[block]] struct S { a : array<f32>; };
+  // struct S { a : array<f32>; };
   // @group(0) @binding(0) var<storage, read_write> v : S;
   // v.a = v.a;
 
-  auto* s = Structure("S", {Member("a", ty.array(ty.f32()))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("a", ty.array(ty.f32()))});
   Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kReadWrite,
          ast::AttributeList{
@@ -295,7 +291,6 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
 
 TEST_F(ResolverAssignmentValidationTest,
        AssignToPhony_NonConstructibleStruct_Fail) {
-  // [[block]]
   // struct S {
   //   arr: array<i32>;
   // };
@@ -303,7 +298,7 @@ TEST_F(ResolverAssignmentValidationTest,
   // fn f() {
   //   _ = s;
   // }
-  auto* s = Structure("S", {Member("arr", ty.array<i32>())}, {StructBlock()});
+  auto* s = Structure("S", {Member("arr", ty.array<i32>())});
   Global("s", ty.Of(s), ast::StorageClass::kStorage, GroupAndBinding(0, 0));
 
   WrapInFunction(Assign(Phony(), Expr(Source{{12, 34}}, "s")));
@@ -316,7 +311,6 @@ TEST_F(ResolverAssignmentValidationTest,
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
-  // [[block]]
   // struct S {
   //   arr: array<i32>;
   // };
@@ -324,7 +318,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
   // fn f() {
   //   _ = s.arr;
   // }
-  auto* s = Structure("S", {Member("arr", ty.array<i32>())}, {StructBlock()});
+  auto* s = Structure("S", {Member("arr", ty.array<i32>())});
   Global("s", ty.Of(s), ast::StorageClass::kStorage, GroupAndBinding(0, 0));
 
   WrapInFunction(Assign(Phony(), MemberAccessor(Source{{12, 34}}, "s", "arr")));
@@ -338,12 +332,10 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
-  // [[block]]
   // struct S {
   //   i:   i32;
   //   arr: array<i32>;
   // };
-  // [[block]]
   // struct U {
   //   i:   i32;
   // };
@@ -367,13 +359,11 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
   //   _ = wg;
   //   _ = wg[3];
   // }
-  auto* S = Structure("S",
-                      {
-                          Member("i", ty.i32()),
-                          Member("arr", ty.array<i32>()),
-                      },
-                      {StructBlock()});
-  auto* U = Structure("U", {Member("i", ty.i32())}, {StructBlock()});
+  auto* S = Structure("S", {
+                               Member("i", ty.i32()),
+                               Member("arr", ty.array<i32>()),
+                           });
+  auto* U = Structure("U", {Member("i", ty.i32())});
   Global("tex", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
          GroupAndBinding(0, 0));
   Global("smp", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(0, 1));

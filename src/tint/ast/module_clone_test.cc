@@ -26,14 +26,13 @@ TEST(ModuleCloneTest, Clone) {
 #if TINT_BUILD_WGSL_READER && TINT_BUILD_WGSL_WRITER
   // Shader that exercises the bulk of the AST nodes and types.
   // See also fuzzers/tint_ast_clone_fuzzer.cc for further coverage of cloning.
-  Source::File file("test.wgsl", R"([[block]]
-struct S0 {
+  Source::File file("test.wgsl", R"(struct S0 {
   @size(4)
   m0 : u32;
   m1 : array<u32>;
 };
 
-[[block]] struct S1 {
+struct S1 {
   @size(4)
   m0 : u32;
   m1 : array<u32, 6>;

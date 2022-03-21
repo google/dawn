@@ -428,11 +428,9 @@ class ParserImpl {
   /// @param use a description of what was being parsed if an error was raised.
   /// @returns the storage class or StorageClass::kNone if none matched
   Expect<ast::StorageClass> expect_storage_class(std::string_view use);
-  /// Parses a `struct_decl` grammar element with the initial
-  /// `struct_attribute_decl*` provided as `attrs`.
+  /// Parses a `struct_decl` grammar element.
   /// @returns the struct type or nullptr on error
-  /// @param attrs the list of attributes for the struct declaration.
-  Maybe<const ast::Struct*> struct_decl(ast::AttributeList& attrs);
+  Maybe<const ast::Struct*> struct_decl();
   /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members
   Expect<ast::StructMemberList> expect_struct_body_decl();

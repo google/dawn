@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/sem/depth_texture_type.h"
 #include "src/tint/sem/multisampled_texture_type.h"
 #include "src/tint/sem/sampled_texture_type.h"
@@ -28,8 +27,7 @@ using BuilderTest_Type = TestHelper;
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   auto* ary = ty.array(ty.i32());
-  auto* str =
-      Structure("S", {Member("x", ary)}, {create<ast::StructBlockAttribute>()});
+  auto* str = Structure("S", {Member("x", ary)});
   Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(0),
@@ -49,8 +47,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   auto* ary = ty.array(ty.i32());
-  auto* str =
-      Structure("S", {Member("x", ary)}, {create<ast::StructBlockAttribute>()});
+  auto* str = Structure("S", {Member("x", ary)});
   Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(0),

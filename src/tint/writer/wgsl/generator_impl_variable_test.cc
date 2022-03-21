@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 namespace tint {
@@ -43,8 +42,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
-  auto* s = Structure("S", {Member("a", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("a", ty.i32())});
   auto* v =
       Global("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
              ast::AttributeList{
@@ -60,8 +58,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
-  auto* s = Structure("S", {Member("a", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("a", ty.i32())});
   auto* v =
       Global("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
              ast::AttributeList{
@@ -77,8 +74,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
-  auto* s = Structure("S", {Member("a", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("a", ty.i32())});
   auto* v = Global("a", ty.Of(s), ast::StorageClass::kStorage,
                    ast::Access::kReadWrite,
                    ast::AttributeList{

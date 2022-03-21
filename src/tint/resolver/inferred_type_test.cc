@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
@@ -154,7 +153,7 @@ TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
 
 TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
   auto* member = Member("x", ty.i32());
-  auto* str = Structure("S", {member}, {create<ast::StructBlockAttribute>()});
+  auto* str = Structure("S", {member});
 
   auto* expected_type = create<sem::Struct>(
       str, str->name,

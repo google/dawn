@@ -15,7 +15,6 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/struct.h"
 
@@ -57,7 +56,7 @@ TEST_F(ResolverStorageClassValidationTest, Private_RuntimeArray) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, Private_RuntimeArrayInStruct) {
-  auto* s = Structure("S", {Member("m", ty.array(ty.i32()))}, {StructBlock()});
+  auto* s = Structure("S", {Member("m", ty.array(ty.i32()))});
   Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kPrivate);
 
   EXPECT_FALSE(r()->Resolve());
@@ -80,7 +79,7 @@ TEST_F(ResolverStorageClassValidationTest, Workgroup_RuntimeArray) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, Workgroup_RuntimeArrayInStruct) {
-  auto* s = Structure("S", {Member("m", ty.array(ty.i32()))}, {StructBlock()});
+  auto* s = Structure("S", {Member("m", ty.array(ty.i32()))});
   Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kWorkgroup);
 
   EXPECT_FALSE(r()->Resolve());
@@ -192,10 +191,9 @@ TEST_F(ResolverStorageClassValidationTest, NotStorage_AccessMode) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
-  // [[block]] struct S { x : i32 };
+  // struct S { x : i32 };
   // var<storage, read> g : S;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
   Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
          ast::AttributeList{
@@ -207,11 +205,10 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
-  // [[block]] struct S { x : i32 };
+  // struct S { x : i32 };
   // type a1 = S;
   // var<storage, read> g : a1;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
   auto* a1 = Alias("a1", ty.Of(s));
   auto* a2 = Alias("a2", ty.Of(a1));
   Global(Source{{56, 78}}, "g", ty.Of(a2), ast::StorageClass::kStorage,
@@ -225,11 +222,10 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBuffer_Struct_Runtime) {
-  // [[block]] struct S { m:  array<f32>; };
+  // struct S { m:  array<f32>; };
   // @group(0) @binding(0) var<uniform, > svar : S;
 
-  auto* s = Structure(Source{{12, 34}}, "S", {Member("m", ty.array<i32>())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure(Source{{12, 34}}, "S", {Member("m", ty.array<i32>())});
 
   Global(Source{{56, 78}}, "svar", ty.Of(s), ast::StorageClass::kUniform,
          ast::AttributeList{
@@ -336,10 +332,9 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Basic) {
-  // [[block]] struct S { x : i32 };
+  // struct S { x : i32 };
   // var<uniform> g :  S;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
   Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kUniform,
          ast::AttributeList{
              create<ast::BindingAttribute>(0),
@@ -350,11 +345,10 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Basic) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Aliases) {
-  // [[block]] struct S { x : i32 };
+  // struct S { x : i32 };
   // type a1 = S;
   // var<uniform> g : a1;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
   auto* a1 = Alias("a1", ty.Of(s));
   Global(Source{{56, 78}}, "g", ty.Of(a1), ast::StorageClass::kUniform,
          ast::AttributeList{

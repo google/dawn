@@ -91,24 +91,18 @@ std::string InspectorBuilder::StructMemberName(size_t idx,
 
 const ast::Struct* InspectorBuilder::MakeStructType(
     const std::string& name,
-    std::vector<const ast::Type*> member_types,
-    bool is_block) {
+    std::vector<const ast::Type*> member_types) {
   ast::StructMemberList members;
   for (auto* type : member_types) {
     members.push_back(MakeStructMember(members.size(), type, {}));
   }
-  return MakeStructTypeFromMembers(name, std::move(members), is_block);
+  return MakeStructTypeFromMembers(name, std::move(members));
 }
 
 const ast::Struct* InspectorBuilder::MakeStructTypeFromMembers(
     const std::string& name,
-    ast::StructMemberList members,
-    bool is_block) {
-  ast::AttributeList attrs;
-  if (is_block) {
-    attrs.push_back(create<ast::StructBlockAttribute>());
-  }
-  return Structure(name, std::move(members), attrs);
+    ast::StructMemberList members) {
+  return Structure(name, std::move(members));
 }
 
 const ast::StructMember* InspectorBuilder::MakeStructMember(
@@ -121,13 +115,13 @@ const ast::StructMember* InspectorBuilder::MakeStructMember(
 const ast::Struct* InspectorBuilder::MakeUniformBufferType(
     const std::string& name,
     std::vector<const ast::Type*> member_types) {
-  return MakeStructType(name, member_types, true);
+  return MakeStructType(name, member_types);
 }
 
 std::function<const ast::TypeName*()> InspectorBuilder::MakeStorageBufferTypes(
     const std::string& name,
     std::vector<const ast::Type*> member_types) {
-  MakeStructType(name, member_types, true);
+  MakeStructType(name, member_types);
   return [this, name] { return ty.type_name(name); };
 }
 

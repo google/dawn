@@ -24,7 +24,6 @@
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/depth_texture_type.h"
@@ -153,20 +152,16 @@ class InspectorBuilder : public ProgramBuilder {
   /// Generates a struct type
   /// @param name name for the type
   /// @param member_types a vector of member types
-  /// @param is_block whether or not to decorate as a Block
   /// @returns a struct type
   const ast::Struct* MakeStructType(const std::string& name,
-                                    std::vector<const ast::Type*> member_types,
-                                    bool is_block);
+                                    std::vector<const ast::Type*> member_types);
 
   /// Generates a struct type from a list of member nodes.
   /// @param name name for the struct type
   /// @param members a vector of members
-  /// @param is_block whether or not to decorate as a Block
   /// @returns a struct type
   const ast::Struct* MakeStructTypeFromMembers(const std::string& name,
-                                               ast::StructMemberList members,
-                                               bool is_block);
+                                               ast::StructMemberList members);
 
   /// Generates a struct member with a specified index and type.
   /// @param index index of the field within the struct

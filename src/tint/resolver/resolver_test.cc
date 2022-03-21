@@ -30,7 +30,6 @@
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
@@ -783,8 +782,7 @@ TEST_F(ResolverTest, Function_Parameters) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
-  auto* s = Structure("S", {Member("m", ty.u32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("m", ty.u32())});
 
   auto* sb_var = Global("sb_var", ty.Of(s), ast::StorageClass::kStorage,
                         ast::Access::kReadWrite,
@@ -817,8 +815,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
-  auto* s = Structure("S", {Member("m", ty.u32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("m", ty.u32())});
 
   auto* sb_var = Global("sb_var", ty.Of(s), ast::StorageClass::kStorage,
                         ast::Access::kReadWrite,
@@ -1800,10 +1797,9 @@ TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
 }
 
 TEST_F(ResolverTest, Access_SetForStorageBuffer) {
-  // [[block]] struct S { x : i32 };
+  // struct S { x : i32 };
   // var<storage> g : S;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
   auto* var =
       Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
              ast::AttributeList{

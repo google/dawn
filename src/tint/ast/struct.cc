@@ -16,7 +16,6 @@
 
 #include <string>
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Struct);

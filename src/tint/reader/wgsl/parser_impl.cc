@@ -29,7 +29,6 @@
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/unary_op_expression.h"
@@ -111,7 +110,6 @@ ast::Builtin ident_to_builtin(std::string_view str) {
 }
 
 const char kBindingAttribute[] = "binding";
-const char kBlockAttribute[] = "block";
 const char kBuiltinAttribute[] = "builtin";
 const char kGroupAttribute[] = "group";
 const char kIdAttribute[] = "id";
@@ -126,8 +124,7 @@ const char kWorkgroupSizeAttribute[] = "workgroup_size";
 
 bool is_attribute(Token t) {
   return t == kAlignAttribute || t == kBindingAttribute ||
-         t == kBlockAttribute || t == kBuiltinAttribute ||
-         t == kGroupAttribute || t == kIdAttribute ||
+         t == kBuiltinAttribute || t == kGroupAttribute || t == kIdAttribute ||
          t == kInterpolateAttribute || t == kLocationAttribute ||
          t == kSizeAttribute || t == kStageAttribute || t == kStrideAttribute ||
          t == kWorkgroupSizeAttribute;
@@ -394,7 +391,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       return true;
     }
 
-    auto str = struct_decl(attrs.value);
+    auto str = struct_decl();
     if (str.errored)
       return Failure::kErrored;
 
@@ -1189,8 +1186,8 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 }
 
 // struct_decl
-//   : struct_attribute_decl* STRUCT IDENT struct_body_decl
-Maybe<const ast::Struct*> ParserImpl::struct_decl(ast::AttributeList& attrs) {
+//   : STRUCT IDENT struct_body_decl
+Maybe<const ast::Struct*> ParserImpl::struct_decl() {
   auto t = peek();
   auto source = t.source();
 
@@ -1207,7 +1204,7 @@ Maybe<const ast::Struct*> ParserImpl::struct_decl(ast::AttributeList& attrs) {
 
   auto sym = builder_.Symbols().Register(name.value);
   return create<ast::Struct>(source, sym, std::move(body.value),
-                             std::move(attrs));
+                             ast::AttributeList{});
 }
 
 // struct_body_decl
@@ -3050,11 +3047,6 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
 
       return create<ast::StageAttribute>(t.source(), stage.value);
     });
-  }
-
-  if (t == kBlockAttribute) {
-    deprecated(t.source(), "[[block]] attributes have been removed from WGSL");
-    return create<ast::StructBlockAttribute>(t.source());
   }
 
   if (t == kStrideAttribute) {

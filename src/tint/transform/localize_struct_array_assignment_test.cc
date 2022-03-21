@@ -34,7 +34,7 @@ TEST_F(LocalizeStructArrayAssignmentTest, EmptyModule) {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArray) {
   auto* src = R"(
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
 };
 
@@ -57,7 +57,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-@block
 struct Uniforms {
   i : u32;
 }
@@ -109,7 +108,7 @@ struct InnerS {
   v : i32;
 };
 
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
 };
 )";
@@ -137,7 +136,6 @@ struct InnerS {
   v : i32;
 }
 
-@block
 struct Uniforms {
   i : u32;
 }
@@ -150,7 +148,7 @@ struct Uniforms {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructStructArray) {
   auto* src = R"(
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
 };
 
@@ -177,7 +175,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-@block
 struct Uniforms {
   i : u32;
 }
@@ -237,7 +234,7 @@ struct InnerS {
   v : i32;
 };
 
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
 };
 )";
@@ -269,7 +266,6 @@ struct InnerS {
   v : i32;
 }
 
-@block
 struct Uniforms {
   i : u32;
 }
@@ -282,7 +278,7 @@ struct Uniforms {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArrayArray) {
   auto* src = R"(
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
   j : u32;
 };
@@ -306,7 +302,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-@block
 struct Uniforms {
   i : u32;
   j : u32;
@@ -342,7 +337,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArrayStruct) {
   auto* src = R"(
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
 };
 
@@ -369,7 +364,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-@block
 struct Uniforms {
   i : u32;
 }
@@ -408,7 +402,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArrayStructArray) {
   auto* src = R"(
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
   j : u32;
 };
@@ -436,7 +430,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-@block
 struct Uniforms {
   i : u32;
   j : u32;
@@ -479,7 +472,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, IndexingWithSideEffectFunc) {
   auto* src = R"(
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
   j : u32;
 };
@@ -513,7 +506,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-@block
 struct Uniforms {
   i : u32;
   j : u32;
@@ -573,7 +565,7 @@ fn main() {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
   j : u32;
 };
@@ -615,7 +607,6 @@ fn main() {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@block
 struct Uniforms {
   i : u32;
   j : u32;
@@ -648,7 +639,7 @@ struct InnerS {
 
 TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerArg) {
   auto* src = R"(
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
 };
 struct InnerS {
@@ -672,7 +663,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-@block
 struct Uniforms {
   i : u32;
 }
@@ -731,7 +721,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@block struct Uniforms {
+struct Uniforms {
   i : u32;
 };
 )";
@@ -763,7 +753,6 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@block
 struct Uniforms {
   i : u32;
 }
@@ -776,7 +765,6 @@ struct Uniforms {
 
 TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerVar) {
   auto* src = R"(
-@block
 struct Uniforms {
   i : u32;
 };
@@ -805,7 +793,6 @@ fn main() {
 )";
 
   auto* expect = R"(
-@block
 struct Uniforms {
   i : u32;
 }
@@ -845,12 +832,10 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, VectorAssignment) {
   auto* src = R"(
-@block
 struct Uniforms {
   i : u32;
 }
 
-@block
 struct OuterS {
   a1 : array<u32, 8>;
 }

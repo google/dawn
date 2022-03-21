@@ -15,7 +15,6 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/struct.h"
 
@@ -168,8 +167,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
 }
 
 TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
-  auto* s = Structure("S", {Member("a", ty.f32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("a", ty.f32())});
   Global("x", ty.Of(s), ast::StorageClass::kUniform,
          ast::AttributeList{
              create<ast::BindingAttribute>(0),

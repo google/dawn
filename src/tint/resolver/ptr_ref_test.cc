@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/reference_type.h"
@@ -61,8 +60,7 @@ TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
 TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
-  auto* buf = Structure("S", {Member("m", ty.i32())},
-                        {create<ast::StructBlockAttribute>()});
+  auto* buf = Structure("S", {Member("m", ty.i32())});
   auto* function = Var("f", ty.i32());
   auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
   auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);

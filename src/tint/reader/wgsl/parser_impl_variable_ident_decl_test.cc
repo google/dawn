@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
@@ -82,10 +81,6 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessAttrFail) {
   auto* mem = Member("a", ty.i32(), ast::AttributeList{});
   ast::StructMemberList members;
   members.push_back(mem);
-
-  auto* block_attr = create<ast::StructBlockAttribute>();
-  ast::AttributeList attrs;
-  attrs.push_back(block_attr);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());

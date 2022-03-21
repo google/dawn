@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/writer/wgsl/test_helper.h"
@@ -153,7 +152,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_ReturnValue) {
 // https://crbug.com/tint/297
 TEST_F(WgslGeneratorImplTest,
        Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar) {
-  // [[block]] struct Data {
+  // struct Data {
   //   d : f32;
   // };
   // @binding(0) @group(0) var<storage> data : Data;
@@ -168,8 +167,7 @@ TEST_F(WgslGeneratorImplTest,
   //   return;
   // }
 
-  auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("Data", {Member("d", ty.f32())});
 
   Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{
@@ -210,8 +208,7 @@ TEST_F(WgslGeneratorImplTest,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(@block
-struct Data {
+  EXPECT_EQ(gen.result(), R"(struct Data {
   d : f32;
 }
 

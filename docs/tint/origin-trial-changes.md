@@ -1,5 +1,11 @@
 # Tint changes during Origin Trial
 
+## Changes for M102
+
+### Breaking changes
+
+* The `@block` attribute has been removed. [tint:1324](crbug.com/tint/1324)
+
 ## Changes for M101
 
 ### New Features

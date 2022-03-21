@@ -193,24 +193,6 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   ASSERT_EQ(stride->As<ast::StrideAttribute>()->stride, 4u);
 }
 
-// TODO(crbug.com/tint/1324): DEPRECATED: Remove when @block is removed.
-TEST_F(ParserImplTest, GlobalDecl_Struct_WithAttribute) {
-  auto p = parser("[[block]] struct A { data: f32; }");
-  p->expect_global_decl();
-  ASSERT_FALSE(p->has_error()) << p->error();
-
-  auto program = p->program();
-  ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
-
-  auto* t = program.AST().TypeDecls()[0];
-  ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<ast::Struct>());
-
-  auto* str = t->As<ast::Struct>();
-  EXPECT_EQ(str->name, program.Symbols().Get("A"));
-  EXPECT_EQ(str->members.size(), 1u);
-}
-
 TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
   auto p = parser("A {}");
   p->expect_global_decl();

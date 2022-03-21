@@ -15,6 +15,7 @@
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
+#include "src/tint/transform/add_spirv_block_attribute.h"
 
 #include "gmock/gmock.h"
 
@@ -63,7 +64,6 @@ enum class AttributeKind {
   kSize,
   kStage,
   kStride,
-  kStructBlock,
   kWorkgroup,
 
   kBindingAndGroup,
@@ -115,8 +115,6 @@ static ast::AttributeList createAttributes(const Source& source,
       return {builder.Stage(source, ast::PipelineStage::kCompute)};
     case AttributeKind::kStride:
       return {builder.create<ast::StrideAttribute>(source, 4u)};
-    case AttributeKind::kStructBlock:
-      return {builder.create<ast::StructBlockAttribute>(source)};
     case AttributeKind::kWorkgroup:
       return {builder.create<ast::WorkgroupAttribute>(source, builder.Expr(1))};
     case AttributeKind::kBindingAndGroup:
@@ -160,7 +158,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -195,7 +192,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 }  // namespace FunctionInputAndOutputTests
@@ -244,7 +240,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -283,7 +278,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -333,7 +327,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -381,7 +374,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -431,7 +423,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -477,7 +468,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -537,13 +527,15 @@ TEST_F(EntryPointReturnTypeAttributeTest, DuplicateInternalAttribute) {
 
 namespace StructAndStructMemberTests {
 using StructAttributeTest = TestWithParams;
+using SpirvBlockAttribute =
+    transform::AddSpirvBlockAttribute::SpirvBlockAttribute;
 TEST_P(StructAttributeTest, IsValid) {
   auto& params = GetParam();
 
-  Structure("mystruct", {Member("a", ty.f32())},
-            createAttributes(Source{{12, 34}}, *this, params.kind));
-
-  WrapInFunction();
+  auto* str = create<ast::Struct>(
+      Sym("mystruct"), ast::StructMemberList{Member("a", ty.f32())},
+      createAttributes(Source{{12, 34}}, *this, params.kind));
+  AST().AddGlobalDeclaration(str);
 
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -568,25 +560,9 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, true},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
-TEST_F(StructAttributeTest, DuplicateAttribute) {
-  Structure("mystruct",
-            {
-                Member("a", ty.i32()),
-            },
-            {
-                create<ast::StructBlockAttribute>(Source{{12, 34}}),
-                create<ast::StructBlockAttribute>(Source{{56, 78}}),
-            });
-  WrapInFunction();
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            R"(56:78 error: duplicate block attribute
-12:34 note: first attribute declared here)");
-}
 using StructMemberAttributeTest = TestWithParams;
 TEST_P(StructMemberAttributeTest, IsValid) {
   auto& params = GetParam();
@@ -625,7 +601,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, true},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 TEST_F(StructMemberAttributeTest, DuplicateAttribute) {
@@ -678,11 +653,9 @@ TEST_P(ArrayAttributeTest, IsValid) {
 
   auto* arr = ty.array(ty.f32(), nullptr,
                        createAttributes(Source{{12, 34}}, *this, params.kind));
-  Structure("mystruct",
-            {
-                Member("a", arr),
-            },
-            {create<ast::StructBlockAttribute>()});
+  Structure("mystruct", {
+                            Member("a", arr),
+                        });
 
   WrapInFunction();
 
@@ -709,7 +682,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, true},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -753,7 +725,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, true}));
 
@@ -818,7 +789,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{AttributeKind::kSize, false},
                     TestParams{AttributeKind::kStage, false},
                     TestParams{AttributeKind::kStride, false},
-                    TestParams{AttributeKind::kStructBlock, false},
                     TestParams{AttributeKind::kWorkgroup, false},
                     TestParams{AttributeKind::kBindingAndGroup, false}));
 
@@ -968,8 +938,7 @@ namespace {
 
 using ResourceAttributeTest = ResolverTest;
 TEST_F(ResourceAttributeTest, UniformBufferMissingBinding) {
-  auto* s = Structure("S", {Member("x", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("x", ty.i32())});
   Global(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kUniform);
 
   EXPECT_FALSE(r()->Resolve());
@@ -979,8 +948,7 @@ TEST_F(ResourceAttributeTest, UniformBufferMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, StorageBufferMissingBinding) {
-  auto* s = Structure("S", {Member("x", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {Member("x", ty.i32())});
   Global(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead);
 
@@ -1344,8 +1312,7 @@ TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
       {
           Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
           Member(Source{{12, 34}}, "u", ty.u32(), {Location(0)}),
-      },
-      {});
+      });
   Func("main", {}, ty.Of(s), {Return(Construct(ty.Of(s)))},
        ast::AttributeList{Stage(ast::PipelineStage::kVertex)});
 

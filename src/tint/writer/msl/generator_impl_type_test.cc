@@ -16,7 +16,6 @@
 
 #include "gmock/gmock.h"
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/sem/depth_multisampled_texture_type.h"
 #include "src/tint/sem/depth_texture_type.h"
 #include "src/tint/sem/multisampled_texture_type.h"
@@ -121,8 +120,7 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayWithStride) {
-  auto* s = Structure("s", {Member("arr", ty.array<f32, 4>(64))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("s", {Member("arr", ty.array<f32, 4>(64))});
   auto* ubo = Global("ubo", ty.Of(s), ast::StorageClass::kUniform,
                      ast::AttributeList{
                          create<ast::GroupAttribute>(0),
@@ -231,37 +229,35 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
-  auto* s =
-      Structure("S",
-                {
-                    Member("a", ty.i32(), {MemberSize(32)}),
-                    Member("b", ty.f32(), {MemberAlign(128), MemberSize(128)}),
-                    Member("c", ty.vec2<f32>()),
-                    Member("d", ty.u32()),
-                    Member("e", ty.vec3<f32>()),
-                    Member("f", ty.u32()),
-                    Member("g", ty.vec4<f32>()),
-                    Member("h", ty.u32()),
-                    Member("i", ty.mat2x2<f32>()),
-                    Member("j", ty.u32()),
-                    Member("k", ty.mat2x3<f32>()),
-                    Member("l", ty.u32()),
-                    Member("m", ty.mat2x4<f32>()),
-                    Member("n", ty.u32()),
-                    Member("o", ty.mat3x2<f32>()),
-                    Member("p", ty.u32()),
-                    Member("q", ty.mat3x3<f32>()),
-                    Member("r", ty.u32()),
-                    Member("s", ty.mat3x4<f32>()),
-                    Member("t", ty.u32()),
-                    Member("u", ty.mat4x2<f32>()),
-                    Member("v", ty.u32()),
-                    Member("w", ty.mat4x3<f32>()),
-                    Member("x", ty.u32()),
-                    Member("y", ty.mat4x4<f32>()),
-                    Member("z", ty.f32()),
-                },
-                {create<ast::StructBlockAttribute>()});
+  auto* s = Structure(
+      "S", {
+               Member("a", ty.i32(), {MemberSize(32)}),
+               Member("b", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+               Member("c", ty.vec2<f32>()),
+               Member("d", ty.u32()),
+               Member("e", ty.vec3<f32>()),
+               Member("f", ty.u32()),
+               Member("g", ty.vec4<f32>()),
+               Member("h", ty.u32()),
+               Member("i", ty.mat2x2<f32>()),
+               Member("j", ty.u32()),
+               Member("k", ty.mat2x3<f32>()),
+               Member("l", ty.u32()),
+               Member("m", ty.mat2x4<f32>()),
+               Member("n", ty.u32()),
+               Member("o", ty.mat3x2<f32>()),
+               Member("p", ty.u32()),
+               Member("q", ty.mat3x3<f32>()),
+               Member("r", ty.u32()),
+               Member("s", ty.mat3x4<f32>()),
+               Member("t", ty.u32()),
+               Member("u", ty.mat4x2<f32>()),
+               Member("v", ty.u32()),
+               Member("w", ty.mat4x3<f32>()),
+               Member("x", ty.u32()),
+               Member("y", ty.mat4x4<f32>()),
+               Member("z", ty.f32()),
+           });
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -363,15 +359,13 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                                Member("b", ty.f32()),
                            });
 
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.Of(inner_x)),
-                          Member("c", ty.f32()),
-                          Member("d", ty.Of(inner_y)),
-                          Member("e", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.Of(inner_x)),
+                               Member("c", ty.f32()),
+                               Member("d", ty.Of(inner_y)),
+                               Member("e", ty.f32()),
+                           });
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -456,16 +450,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
   // array_z: size(4), align(4)
   auto* array_z = ty.array<f32>();
 
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", array_x),
-                          Member("c", ty.f32()),
-                          Member("d", array_y),
-                          Member("e", ty.f32()),
-                          Member("f", array_z),
-                      },
-                      ast::AttributeList{create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", array_x),
+                               Member("c", ty.f32()),
+                               Member("d", array_y),
+                               Member("e", ty.f32()),
+                               Member("f", array_z),
+                           });
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -544,13 +536,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
   // array: size(64), align(16)
   auto* array = ty.array(ty.vec3<f32>(), 4);
 
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", array),
-                          Member("c", ty.i32()),
-                      },
-                      ast::AttributeList{create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", array),
+                               Member("c", ty.i32()),
+                           });
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -612,8 +602,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
           Member("tint_pad_28", ty.u32()),
           Member("tint_pad_4", ty.mat4x4<f32>()),
           Member("tint_pad_21", ty.f32()),
-      },
-      {create<ast::StructBlockAttribute>()});
+      });
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -671,12 +660,10 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
 
   Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{

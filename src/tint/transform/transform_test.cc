@@ -108,7 +108,7 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
 
 TEST_F(CreateASTTypeForTest, Struct) {
   auto* str = create([](ProgramBuilder& b) {
-    auto* decl = b.Structure("S", {}, {});
+    auto* decl = b.Structure("S", {});
     return b.create<sem::Struct>(decl, decl->name, sem::StructMemberList{},
                                  4u /* align */, 4u /* size */,
                                  4u /* size_no_padding */);

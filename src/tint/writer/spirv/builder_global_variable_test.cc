@@ -14,7 +14,6 @@
 
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -377,12 +376,10 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   // };
   // var b<storage, read> : A
 
-  auto* A = Structure("A",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.i32()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* A = Structure("A", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.i32()),
+                           });
 
   Global("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -423,8 +420,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   // type B = A;
   // var b<storage, read> : B
 
-  auto* A = Structure("A", {Member("a", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* A = Structure("A", {Member("a", ty.i32())});
   auto* B = Alias("B", ty.Of(A));
   Global("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -463,8 +459,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   // type B = A;
   // var<storage, read> b : B
 
-  auto* A = Structure("A", {Member("a", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* A = Structure("A", {Member("a", ty.i32())});
   auto* B = Alias("B", ty.Of(A));
   Global("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
@@ -503,8 +498,7 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   // var<storage, read> b : A
   // var<storage, read_write> c : A
 
-  auto* A = Structure("A", {Member("a", ty.i32())},
-                      {create<ast::StructBlockAttribute>()});
+  auto* A = Structure("A", {Member("a", ty.i32())});
   Global("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::GroupAttribute>(0),
@@ -629,12 +623,10 @@ TEST_F(BuilderTest, GlobalVar_WorkgroupWithZeroInit) {
   auto* type_array = ty.array<f32, 16>();
   auto* var_array = Global("b", type_array, ast::StorageClass::kWorkgroup);
 
-  auto* type_struct = Structure("C",
-                                {
-                                    Member("a", ty.i32()),
-                                    Member("b", ty.i32()),
-                                },
-                                {create<ast::StructBlockAttribute>()});
+  auto* type_struct = Structure("C", {
+                                         Member("a", ty.i32()),
+                                         Member("b", ty.i32()),
+                                     });
   auto* var_struct =
       Global("c", ty.Of(type_struct), ast::StorageClass::kWorkgroup);
 

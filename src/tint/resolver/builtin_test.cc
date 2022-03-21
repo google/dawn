@@ -25,7 +25,6 @@
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
@@ -633,8 +632,7 @@ using ResolverBuiltinDataTest = ResolverTest;
 
 TEST_F(ResolverBuiltinDataTest, ArrayLength_Vector) {
   auto* ary = ty.array<i32>();
-  auto* str =
-      Structure("S", {Member("x", ary)}, {create<ast::StructBlockAttribute>()});
+  auto* str = Structure("S", {Member("x", ary)});
   Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(0),

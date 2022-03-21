@@ -379,8 +379,7 @@ class DependencyScanner {
             ast::IdAttribute, ast::InternalAttribute, ast::InterpolateAttribute,
             ast::InvariantAttribute, ast::LocationAttribute,
             ast::StageAttribute, ast::StrideAttribute,
-            ast::StructBlockAttribute, ast::StructMemberAlignAttribute,
-            ast::StructMemberOffsetAttribute,
+            ast::StructMemberAlignAttribute, ast::StructMemberOffsetAttribute,
             ast::StructMemberSizeAttribute>()) {
       return;
     }

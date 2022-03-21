@@ -41,7 +41,6 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/struct_member_align_attribute.h"
 #include "src/tint/ast/struct_member_offset_attribute.h"
 #include "src/tint/ast/struct_member_size_attribute.h"
@@ -711,10 +710,6 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
             }
           }
           out << ")";
-          return true;
-        },
-        [&](const ast::StructBlockAttribute*) {  //
-          out << "block";
           return true;
         },
         [&](const ast::StageAttribute* stage) {

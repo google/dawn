@@ -34,8 +34,8 @@ TEST_F(ResolverAtomicValidationTest, StorageClass_WorkGroup) {
 }
 
 TEST_F(ResolverAtomicValidationTest, StorageClass_Storage) {
-  auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))},
-                      {StructBlock()});
+  auto* s =
+      Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
   Global("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          GroupAndBinding(0, 0));
 
@@ -211,8 +211,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Complex) {
 }
 
 TEST_F(ResolverAtomicValidationTest, Struct_AccessMode_Read) {
-  auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))},
-                      {StructBlock()});
+  auto* s =
+      Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
   Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead, GroupAndBinding(0, 0));
 
@@ -225,8 +225,8 @@ TEST_F(ResolverAtomicValidationTest, Struct_AccessMode_Read) {
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Struct) {
-  auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))},
-                      {StructBlock()});
+  auto* s =
+      Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
   Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead, GroupAndBinding(0, 0));
 
@@ -245,8 +245,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStruct) {
 
   auto* Inner =
       Structure("Inner", {Member("m", ty.atomic(Source{{12, 34}}, ty.i32()))});
-  auto* Outer =
-      Structure("Outer", {Member("m", ty.Of(Inner))}, {StructBlock()});
+  auto* Outer = Structure("Outer", {Member("m", ty.Of(Inner))});
   Global(Source{{56, 78}}, "g", ty.Of(Outer), ast::StorageClass::kStorage,
          ast::Access::kRead, GroupAndBinding(0, 0));
 
@@ -265,8 +264,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStructOfArray) {
 
   auto* Inner =
       Structure("Inner", {Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
-  auto* Outer =
-      Structure("Outer", {Member("m", ty.Of(Inner))}, {StructBlock()});
+  auto* Outer = Structure("Outer", {Member("m", ty.Of(Inner))});
   Global(Source{{56, 78}}, "g", ty.Of(Outer), ast::StorageClass::kStorage,
          ast::Access::kRead, GroupAndBinding(0, 0));
 
@@ -308,7 +306,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Complex) {
   auto* s3 = Structure("S3", {Member("x", ty.Of(s4))});
   auto* s2 = Structure("S2", {Member("x", ty.Of(s3))});
   auto* s1 = Structure("S1", {Member("x", ty.Of(s2))});
-  auto* s0 = Structure("S0", {Member("x", ty.Of(s1))}, {StructBlock()});
+  auto* s0 = Structure("S0", {Member("x", ty.Of(s1))});
   Global(Source{{56, 78}}, "g", ty.Of(s0), ast::StorageClass::kStorage,
          ast::Access::kRead, GroupAndBinding(0, 0));
 

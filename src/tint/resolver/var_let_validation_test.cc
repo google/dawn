@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
@@ -220,7 +219,7 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
   // struct Inner {
   //    arr: array<i32, 4>;
   // }
-  // [[block]] struct S {
+  // struct S {
   //    inner: Inner;
   // }
   // @group(0) @binding(0) var<storage> s : S;
@@ -228,8 +227,7 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
   //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2];
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-  auto* buf = Structure("S", {Member("inner", ty.Of(inner))},
-                        {create<ast::StructBlockAttribute>()});
+  auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
   auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::AttributeList{
                              create<ast::BindingAttribute>(0),
@@ -262,8 +260,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Atomic) {
 }
 
 TEST_F(ResolverVarLetValidationTest, NonConstructibleType_RuntimeArray) {
-  auto* s = Structure("S", {Member(Source{{56, 78}}, "m", ty.array(ty.i32()))},
-                      {StructBlock()});
+  auto* s = Structure("S", {Member(Source{{56, 78}}, "m", ty.array(ty.i32()))});
   auto* v = Var(Source{{12, 34}}, "v", ty.Of(s));
   WrapInFunction(v);
 

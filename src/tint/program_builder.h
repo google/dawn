@@ -62,7 +62,6 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/ast/struct_member_align_attribute.h"
 #include "src/tint/ast/struct_member_offset_attribute.h"
 #include "src/tint/ast/struct_member_size_attribute.h"
@@ -1901,12 +1900,6 @@ class ProgramBuilder {
     return create<ast::StructMemberAlignAttribute>(source_, val);
   }
 
-  /// Creates a ast::StructBlockAttribute
-  /// @returns the struct block attribute pointer
-  const ast::StructBlockAttribute* StructBlock() {
-    return create<ast::StructBlockAttribute>();
-  }
-
   /// Creates the ast::GroupAttribute
   /// @param value group attribute index
   /// @returns the group attribute pointer
@@ -2074,16 +2067,14 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param name the struct name
   /// @param members the struct members
-  /// @param attributes the optional struct attributes
   /// @returns the struct type
   template <typename NAME>
   const ast::Struct* Structure(const Source& source,
                                NAME&& name,
-                               ast::StructMemberList members,
-                               ast::AttributeList attributes = {}) {
+                               ast::StructMemberList members) {
     auto sym = Sym(std::forward<NAME>(name));
     auto* type = create<ast::Struct>(source, sym, std::move(members),
-                                     std::move(attributes));
+                                     ast::AttributeList{});
     AST().AddTypeDecl(type);
     return type;
   }
@@ -2091,15 +2082,12 @@ class ProgramBuilder {
   /// Creates a ast::Struct registering it with the AST().TypeDecls().
   /// @param name the struct name
   /// @param members the struct members
-  /// @param attributes the optional struct attributes
   /// @returns the struct type
   template <typename NAME>
-  const ast::Struct* Structure(NAME&& name,
-                               ast::StructMemberList members,
-                               ast::AttributeList attributes = {}) {
+  const ast::Struct* Structure(NAME&& name, ast::StructMemberList members) {
     auto sym = Sym(std::forward<NAME>(name));
     auto* type =
-        create<ast::Struct>(sym, std::move(members), std::move(attributes));
+        create<ast::Struct>(sym, std::move(members), ast::AttributeList{});
     AST().AddTypeDecl(type);
     return type;
   }

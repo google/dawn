@@ -14,7 +14,6 @@
 
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/sem/depth_texture_type.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/spirv/spv_dump.h"
@@ -1482,8 +1481,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
-  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -1527,12 +1525,10 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
-  auto* s = Structure("my_struct",
-                      {
-                          Member("z", ty.f32()),
-                          Member(4, "a", ty.array<f32>(4)),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {
+                                       Member("z", ty.f32()),
+                                       Member(4, "a", ty.array<f32>(4)),
+                                   });
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -1576,8 +1572,7 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
-  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -1626,7 +1621,7 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
-  // [[block]] struct my_struct {
+  // struct my_struct {
   //   a : @stride(4) array<f32>;
   // };
   // @binding(1) @group(2) var<storage, read> b : my_struct;
@@ -1637,8 +1632,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
   //   let p3 = &((*p).a);
   //   arrayLength(&*p3);
   // }
-  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -1689,7 +1683,7 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
-  // [[block]] struct S {
+  // struct S {
   //   u : atomic<u32>;
   //   i : atomic<i32>;
   // }
@@ -1700,12 +1694,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
   //   let u : u32 = atomicLoad(&b.u);
   //   let i : i32 = atomicLoad(&b.i);
   // }
-  auto* s = Structure("S",
-                      {
-                          Member("u", ty.atomic<u32>()),
-                          Member("i", ty.atomic<i32>()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("u", ty.atomic<u32>()),
+                               Member("i", ty.atomic<i32>()),
+                           });
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -1755,7 +1747,7 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
-  // [[block]] struct S {
+  // struct S {
   //   u : atomic<u32>;
   //   i : atomic<i32>;
   // }
@@ -1768,12 +1760,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
   //   atomicStore(&b.u, u);
   //   atomicStore(&b.i, i);
   // }
-  auto* s = Structure("S",
-                      {
-                          Member("u", ty.atomic<u32>()),
-                          Member("i", ty.atomic<i32>()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("u", ty.atomic<u32>()),
+                               Member("i", ty.atomic<i32>()),
+                           });
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -1835,7 +1825,7 @@ OpReturn
 
 using Builtin_Builtin_AtomicRMW_i32 = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
-  // [[block]] struct S {
+  // struct S {
   //   v : atomic<i32>;
   // }
   //
@@ -1845,11 +1835,9 @@ TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
   //   var v = 10;
   //   let x : i32 = atomicOP(&b.v, v);
   // }
-  auto* s = Structure("S",
-                      {
-                          Member("v", ty.atomic<i32>()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("v", ty.atomic<i32>()),
+                           });
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -1912,7 +1900,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 using Builtin_Builtin_AtomicRMW_u32 = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
-  // [[block]] struct S {
+  // struct S {
   //   v : atomic<u32>;
   // }
   //
@@ -1922,11 +1910,9 @@ TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
   //   var v = 10u;
   //   let x : u32 = atomicOP(&b.v, v);
   // }
-  auto* s = Structure("S",
-                      {
-                          Member("v", ty.atomic<u32>()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("v", ty.atomic<u32>()),
+                           });
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -1987,7 +1973,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinData{"atomicXor", "OpAtomicXor"}));
 
 TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
-  // [[block]] struct S {
+  // struct S {
   //   u : atomic<u32>;
   //   i : atomic<i32>;
   // }
@@ -2000,12 +1986,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
   //   let r : u32 = atomicExchange(&b.u, u);
   //   let s : i32 = atomicExchange(&b.i, i);
   // }
-  auto* s = Structure("S",
-                      {
-                          Member("u", ty.atomic<u32>()),
-                          Member("i", ty.atomic<i32>()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("u", ty.atomic<u32>()),
+                               Member("i", ty.atomic<i32>()),
+                           });
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),
@@ -2069,7 +2053,7 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
-  // [[block]] struct S {
+  // struct S {
   //   u : atomic<u32>;
   //   i : atomic<i32>;
   // }
@@ -2080,12 +2064,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
   //   let u : vec2<u32> = atomicCompareExchangeWeak(&b.u, 10u);
   //   let i : vec2<i32> = atomicCompareExchangeWeak(&b.i, 10);
   // }
-  auto* s = Structure("S",
-                      {
-                          Member("u", ty.atomic<u32>()),
-                          Member("i", ty.atomic<i32>()),
-                      },
-                      {create<ast::StructBlockAttribute>()});
+  auto* s = Structure("S", {
+                               Member("u", ty.atomic<u32>()),
+                               Member("i", ty.atomic<i32>()),
+                           });
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::AttributeList{
              create<ast::BindingAttribute>(1),

@@ -298,8 +298,6 @@ libtint_source_set("libtint_core_all_src") {
     "ast/stride_attribute.h",
     "ast/struct.cc",
     "ast/struct.h",
-    "ast/struct_block_attribute.cc",
-    "ast/struct_block_attribute.h",
     "ast/struct_member.cc",
     "ast/struct_member.h",
     "ast/struct_member_align_attribute.cc",

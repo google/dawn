@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/reference_type.h"
@@ -216,8 +215,7 @@ TEST_F(ResolverVarLetTest, LetDecl) {
 TEST_F(ResolverVarLetTest, DefaultVarStorageClass) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
-  auto* buf = Structure("S", {Member("m", ty.i32())},
-                        {create<ast::StructBlockAttribute>()});
+  auto* buf = Structure("S", {Member("m", ty.i32())});
   auto* function = Var("f", ty.i32());
   auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
   auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);
@@ -264,8 +262,7 @@ TEST_F(ResolverVarLetTest, DefaultVarStorageClass) {
 TEST_F(ResolverVarLetTest, ExplicitVarStorageClass) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
-  auto* buf = Structure("S", {Member("m", ty.i32())},
-                        {create<ast::StructBlockAttribute>()});
+  auto* buf = Structure("S", {Member("m", ty.i32())});
   auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::Access::kReadWrite,
                          ast::AttributeList{
@@ -285,7 +282,7 @@ TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
   // struct Inner {
   //    arr: array<i32, 4>;
   // }
-  // [[block]] struct S {
+  // struct S {
   //    inner: Inner;
   // }
   // @group(0) @binding(0) var<storage, read_write> s : S;
@@ -293,8 +290,7 @@ TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
   //   let p = &s.inner.arr[2];
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-  auto* buf = Structure("S", {Member("inner", ty.Of(inner))},
-                        {create<ast::StructBlockAttribute>()});
+  auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
   auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::Access::kReadWrite,
                          ast::AttributeList{

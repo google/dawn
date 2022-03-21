@@ -15,7 +15,6 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/struct_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/multisampled_texture_type.h"
@@ -481,18 +480,15 @@ TEST_F(ResolverTypeValidationTest, Struct_MemberOffset_TooBig) {
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
-  // [[block]]
   // struct Foo {
   //   vf: f32;
   //   rt: array<f32>;
   // };
 
-  Structure("Foo",
-            {
-                Member("vf", ty.f32()),
-                Member("rt", ty.array<f32>()),
-            },
-            {create<ast::StructBlockAttribute>()});
+  Structure("Foo", {
+                       Member("vf", ty.f32()),
+                       Member("rt", ty.array<f32>()),
+                   });
 
   WrapInFunction();
 
@@ -547,18 +543,15 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInStruct) {
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
-  // [[block]]
   // struct Foo {
   //   rt: array<f32>;
   //   vf: f32;
   // };
 
-  Structure("Foo",
-            {
-                Member(Source{{12, 34}}, "rt", ty.array<f32>()),
-                Member("vf", ty.f32()),
-            },
-            {create<ast::StructBlockAttribute>()});
+  Structure("Foo", {
+                       Member(Source{{12, 34}}, "rt", ty.array<f32>()),
+                       Member("vf", ty.f32()),
+                   });
 
   WrapInFunction();
 
@@ -639,7 +632,6 @@ TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsParameter_Fail) {
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
-  // [[block]]
   // type RTArr = array<u32>;
   // struct s {
   //  b: RTArr;
@@ -647,12 +639,10 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
   //}
 
   auto* alias = Alias("RTArr", ty.array<u32>());
-  Structure("s",
-            {
-                Member(Source{{12, 34}}, "b", ty.Of(alias)),
-                Member("a", ty.u32()),
-            },
-            {create<ast::StructBlockAttribute>()});
+  Structure("s", {
+                     Member(Source{{12, 34}}, "b", ty.Of(alias)),
+                     Member("a", ty.u32()),
+                 });
 
   WrapInFunction();
 
@@ -663,7 +653,6 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
-  // [[block]]
   // type RTArr = array<u32>;
   // struct s {
   //  a: u32;
@@ -671,12 +660,10 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
   //}
 
   auto* alias = Alias("RTArr", ty.array<u32>());
-  Structure("s",
-            {
-                Member("a", ty.u32()),
-                Member("b", ty.Of(alias)),
-            },
-            {create<ast::StructBlockAttribute>()});
+  Structure("s", {
+                     Member("a", ty.u32()),
+                     Member("b", ty.Of(alias)),
+                 });
 
   WrapInFunction();
 

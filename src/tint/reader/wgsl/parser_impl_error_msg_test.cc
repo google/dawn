@@ -725,42 +725,6 @@ var x : texture_storage_2d<1>;
 )");
 }
 
-// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructAttrMissingStruct) {
-  EXPECT(
-      "[[block]];",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-[[block]];
-^^
-
-test.wgsl:1:3 warning: use of deprecated language feature: [[block]] attributes have been removed from WGSL
-[[block]];
-  ^^^^^
-
-test.wgsl:1:10 error: expected declaration after attributes
-[[block]];
-         ^
-)");
-}
-
-// TODO(crbug.com/tint/1324): DEPRECATED: Remove when [[block]] is removed.
-TEST_F(ParserImplErrorTest, DEPRECATED_GlobalDeclStructAttrMissingEnd) {
-  EXPECT(
-      "[[block struct {};",
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: [[attribute]] style attributes have been replaced with @attribute style
-[[block struct {};
-^^
-
-test.wgsl:1:3 warning: use of deprecated language feature: [[block]] attributes have been removed from WGSL
-[[block struct {};
-  ^^^^^
-
-test.wgsl:1:9 error: expected ']]' for attribute list
-[[block struct {};
-        ^^^^^^
-)");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingIdentifier) {
   EXPECT("struct {};",
          R"(test.wgsl:1:8 error: expected identifier for struct declaration
