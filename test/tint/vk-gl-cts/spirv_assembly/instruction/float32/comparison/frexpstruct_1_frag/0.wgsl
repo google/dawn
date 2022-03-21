@@ -18,7 +18,7 @@ struct main_out {
   x_4_1 : u32;
   @builtin(position)
   gl_Position : vec4<f32>;
-};
+}
 
 @stage(vertex)
 fn main(@location(0) x_3_param : vec2<f32>) -> main_out {

@@ -1,8 +1,8 @@
-var<private> data : array<i32, 9>;
+var<private> data : array<i32, 9u>;
 
 var<private> gl_FragCoord : vec4<f32>;
 
-var<private> temp : array<i32, 7>;
+var<private> temp : array<i32, 7u>;
 
 var<private> x_GLF_color : vec4<f32>;
 
@@ -67,7 +67,6 @@ fn func_i1_(a : ptr<function, i32>) -> f32 {
   } else {
     return 0.0;
   }
-  return 0.0;
 }
 
 fn main_1() {
@@ -104,7 +103,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

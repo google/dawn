@@ -1,10 +1,10 @@
 struct buf1 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 struct buf0 {
   resolution : vec2<f32>;
-};
+}
 
 @group(0) @binding(1) var<uniform> x_6 : buf1;
 
@@ -207,7 +207,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

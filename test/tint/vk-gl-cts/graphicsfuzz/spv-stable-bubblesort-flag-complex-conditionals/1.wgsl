@@ -1,10 +1,10 @@
 struct buf1 {
   resolution : vec2<f32>;
-};
+}
 
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 var<private> gl_FragCoord : vec4<f32>;
 
@@ -90,7 +90,7 @@ fn checkSwap_f1_f1_(a : ptr<function, f32>, b : ptr<function, f32>) -> bool {
 
 fn main_1() {
   var i : i32;
-  var data : array<f32, 10>;
+  var data : array<f32, 10u>;
   var i_1 : i32;
   var j : i32;
   var doSwap : bool;
@@ -185,7 +185,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

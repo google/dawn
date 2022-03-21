@@ -1,6 +1,6 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 var<private> gl_FragCoord : vec4<f32>;
 
@@ -25,7 +25,6 @@ fn main_1() {
           } else {
             continue;
           }
-          continue;
         }
         x_47_phi = 0.0;
         break;
@@ -33,7 +32,7 @@ fn main_1() {
       x_47 = x_47_phi;
       break;
     }
-    var x_48_1 : vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+    var x_48_1 : vec4<f32> = vec4<f32>();
     x_48_1.y = x_47;
     let x_48 : vec4<f32> = x_48_1;
     x_GLF_color = x_48;
@@ -45,7 +44,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

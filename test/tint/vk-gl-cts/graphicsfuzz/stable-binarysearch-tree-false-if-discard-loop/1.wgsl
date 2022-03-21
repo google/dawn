@@ -2,11 +2,11 @@ struct BST {
   data : i32;
   leftIndex : i32;
   rightIndex : i32;
-};
+}
 
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_8 : buf0;
 
@@ -15,7 +15,7 @@ var<private> gl_FragCoord : vec4<f32>;
 var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
-  var tree : array<BST, 10>;
+  var tree : array<BST, 10u>;
   var x_67 : bool;
   var x_114 : bool;
   var x_572 : i32;
@@ -48,8 +48,8 @@ fn main_1() {
         let x_76 : i32 = tree[x_70].data;
         if ((5 <= x_76)) {
           var x_114_phi : bool;
-          let x_89 : ptr<function, i32> = &(tree[x_70].leftIndex);
-          let x_90 : i32 = *(x_89);
+          let x_89_save = x_70;
+          let x_90 : i32 = tree[x_89_save].leftIndex;
           if ((x_90 == -1)) {
             let x_97 : f32 = x_8.injectionSwitch.y;
             let x_99 : f32 = x_8.injectionSwitch.x;
@@ -57,9 +57,8 @@ fn main_1() {
               loop {
                 discard;
               }
-              return;
             }
-            *(x_89) = 1;
+            tree[x_89_save].leftIndex = 1;
             tree[1] = BST(5, -1, -1);
             loop {
               x_114_phi = x_67;
@@ -76,26 +75,25 @@ fn main_1() {
               break;
             }
           } else {
-            x_95 = *(x_89);
+            x_95 = tree[x_89_save].leftIndex;
             x_68_phi = x_67;
             x_71_phi = x_95;
             continue;
           }
         } else {
-          let x_81 : ptr<function, i32> = &(tree[x_70].rightIndex);
-          let x_82 : i32 = *(x_81);
+          let x_81_save = x_70;
+          let x_82 : i32 = tree[x_81_save].rightIndex;
           if ((x_82 == -1)) {
-            *(x_81) = 1;
+            tree[x_81_save].rightIndex = 1;
             tree[1] = BST(5, -1, -1);
             x_116_phi = true;
             break;
           } else {
-            x_87 = *(x_81);
+            x_87 = tree[x_81_save].rightIndex;
             x_68_phi = x_67;
             x_71_phi = x_87;
             continue;
           }
-          return;
         }
         x_68_phi = x_114;
         x_71_phi = x_70;
@@ -158,8 +156,8 @@ fn main_1() {
           let x_148 : i32 = tree[x_142].data;
           if ((12 <= x_148)) {
             var x_186_phi : bool;
-            let x_161 : ptr<function, i32> = &(tree[x_142].leftIndex);
-            let x_162 : i32 = *(x_161);
+            let x_161_save = x_142;
+            let x_162 : i32 = tree[x_161_save].leftIndex;
             if ((x_162 == -1)) {
               let x_169 : f32 = x_8.injectionSwitch.y;
               let x_171 : f32 = x_8.injectionSwitch.x;
@@ -167,9 +165,8 @@ fn main_1() {
                 loop {
                   discard;
                 }
-                return;
               }
-              *(x_161) = 2;
+              tree[x_161_save].leftIndex = 2;
               tree[2] = BST(12, -1, -1);
               loop {
                 x_186_phi = x_139;
@@ -186,26 +183,25 @@ fn main_1() {
                 break;
               }
             } else {
-              x_167 = *(x_161);
+              x_167 = tree[x_161_save].leftIndex;
               x_140_phi = x_139;
               x_143_phi = x_167;
               continue;
             }
           } else {
-            let x_153 : ptr<function, i32> = &(tree[x_142].rightIndex);
-            let x_154 : i32 = *(x_153);
+            let x_153_save = x_142;
+            let x_154 : i32 = tree[x_153_save].rightIndex;
             if ((x_154 == -1)) {
-              *(x_153) = 2;
+              tree[x_153_save].rightIndex = 2;
               tree[2] = BST(12, -1, -1);
               x_188_phi = true;
               break;
             } else {
-              x_159 = *(x_153);
+              x_159 = tree[x_153_save].rightIndex;
               x_140_phi = x_139;
               x_143_phi = x_159;
               continue;
             }
-            return;
           }
           x_140_phi = x_186;
           x_143_phi = x_142;
@@ -255,8 +251,8 @@ fn main_1() {
         let x_202 : i32 = tree[x_196].data;
         if ((15 <= x_202)) {
           var x_240_phi : bool;
-          let x_215 : ptr<function, i32> = &(tree[x_196].leftIndex);
-          let x_216 : i32 = *(x_215);
+          let x_215_save = x_196;
+          let x_216 : i32 = tree[x_215_save].leftIndex;
           if ((x_216 == -1)) {
             let x_223 : f32 = x_8.injectionSwitch.y;
             let x_225 : f32 = x_8.injectionSwitch.x;
@@ -264,9 +260,8 @@ fn main_1() {
               loop {
                 discard;
               }
-              return;
             }
-            *(x_215) = 3;
+            tree[x_215_save].leftIndex = 3;
             tree[3] = BST(15, -1, -1);
             loop {
               x_240_phi = x_193;
@@ -283,26 +278,25 @@ fn main_1() {
               break;
             }
           } else {
-            x_221 = *(x_215);
+            x_221 = tree[x_215_save].leftIndex;
             x_194_phi = x_193;
             x_197_phi = x_221;
             continue;
           }
         } else {
-          let x_207 : ptr<function, i32> = &(tree[x_196].rightIndex);
-          let x_208 : i32 = *(x_207);
+          let x_207_save = x_196;
+          let x_208 : i32 = tree[x_207_save].rightIndex;
           if ((x_208 == -1)) {
-            *(x_207) = 3;
+            tree[x_207_save].rightIndex = 3;
             tree[3] = BST(15, -1, -1);
             x_242_phi = true;
             break;
           } else {
-            x_213 = *(x_207);
+            x_213 = tree[x_207_save].rightIndex;
             x_194_phi = x_193;
             x_197_phi = x_213;
             continue;
           }
-          return;
         }
         x_194_phi = x_240;
         x_197_phi = x_196;
@@ -346,8 +340,8 @@ fn main_1() {
         let x_256 : i32 = tree[x_250].data;
         if ((7 <= x_256)) {
           var x_294_phi : bool;
-          let x_269 : ptr<function, i32> = &(tree[x_250].leftIndex);
-          let x_270 : i32 = *(x_269);
+          let x_269_save = x_250;
+          let x_270 : i32 = tree[x_269_save].leftIndex;
           if ((x_270 == -1)) {
             let x_277 : f32 = x_8.injectionSwitch.y;
             let x_279 : f32 = x_8.injectionSwitch.x;
@@ -355,9 +349,8 @@ fn main_1() {
               loop {
                 discard;
               }
-              return;
             }
-            *(x_269) = 4;
+            tree[x_269_save].leftIndex = 4;
             tree[4] = BST(7, -1, -1);
             loop {
               x_294_phi = x_247;
@@ -374,26 +367,25 @@ fn main_1() {
               break;
             }
           } else {
-            x_275 = *(x_269);
+            x_275 = tree[x_269_save].leftIndex;
             x_248_phi = x_247;
             x_251_phi = x_275;
             continue;
           }
         } else {
-          let x_261 : ptr<function, i32> = &(tree[x_250].rightIndex);
-          let x_262 : i32 = *(x_261);
+          let x_261_save = x_250;
+          let x_262 : i32 = tree[x_261_save].rightIndex;
           if ((x_262 == -1)) {
-            *(x_261) = 4;
+            tree[x_261_save].rightIndex = 4;
             tree[4] = BST(7, -1, -1);
             x_296_phi = true;
             break;
           } else {
-            x_267 = *(x_261);
+            x_267 = tree[x_261_save].rightIndex;
             x_248_phi = x_247;
             x_251_phi = x_267;
             continue;
           }
-          return;
         }
         x_248_phi = x_294;
         x_251_phi = x_250;
@@ -437,8 +429,8 @@ fn main_1() {
         let x_310 : i32 = tree[x_304].data;
         if ((8 <= x_310)) {
           var x_348_phi : bool;
-          let x_323 : ptr<function, i32> = &(tree[x_304].leftIndex);
-          let x_324 : i32 = *(x_323);
+          let x_323_save = x_304;
+          let x_324 : i32 = tree[x_323_save].leftIndex;
           if ((x_324 == -1)) {
             let x_331 : f32 = x_8.injectionSwitch.y;
             let x_333 : f32 = x_8.injectionSwitch.x;
@@ -446,9 +438,8 @@ fn main_1() {
               loop {
                 discard;
               }
-              return;
             }
-            *(x_323) = 5;
+            tree[x_323_save].leftIndex = 5;
             tree[5] = BST(8, -1, -1);
             loop {
               x_348_phi = x_301;
@@ -465,26 +456,25 @@ fn main_1() {
               break;
             }
           } else {
-            x_329 = *(x_323);
+            x_329 = tree[x_323_save].leftIndex;
             x_302_phi = x_301;
             x_305_phi = x_329;
             continue;
           }
         } else {
-          let x_315 : ptr<function, i32> = &(tree[x_304].rightIndex);
-          let x_316 : i32 = *(x_315);
+          let x_315_save = x_304;
+          let x_316 : i32 = tree[x_315_save].rightIndex;
           if ((x_316 == -1)) {
-            *(x_315) = 5;
+            tree[x_315_save].rightIndex = 5;
             tree[5] = BST(8, -1, -1);
             x_350_phi = true;
             break;
           } else {
-            x_321 = *(x_315);
+            x_321 = tree[x_315_save].rightIndex;
             x_302_phi = x_301;
             x_305_phi = x_321;
             continue;
           }
-          return;
         }
         x_302_phi = x_348;
         x_305_phi = x_304;
@@ -528,8 +518,8 @@ fn main_1() {
         let x_364 : i32 = tree[x_358].data;
         if ((2 <= x_364)) {
           var x_402_phi : bool;
-          let x_377 : ptr<function, i32> = &(tree[x_358].leftIndex);
-          let x_378 : i32 = *(x_377);
+          let x_377_save = x_358;
+          let x_378 : i32 = tree[x_377_save].leftIndex;
           if ((x_378 == -1)) {
             let x_385 : f32 = x_8.injectionSwitch.y;
             let x_387 : f32 = x_8.injectionSwitch.x;
@@ -537,9 +527,8 @@ fn main_1() {
               loop {
                 discard;
               }
-              return;
             }
-            *(x_377) = 6;
+            tree[x_377_save].leftIndex = 6;
             tree[6] = BST(2, -1, -1);
             loop {
               x_402_phi = x_355;
@@ -556,26 +545,25 @@ fn main_1() {
               break;
             }
           } else {
-            x_383 = *(x_377);
+            x_383 = tree[x_377_save].leftIndex;
             x_356_phi = x_355;
             x_359_phi = x_383;
             continue;
           }
         } else {
-          let x_369 : ptr<function, i32> = &(tree[x_358].rightIndex);
-          let x_370 : i32 = *(x_369);
+          let x_369_save = x_358;
+          let x_370 : i32 = tree[x_369_save].rightIndex;
           if ((x_370 == -1)) {
-            *(x_369) = 6;
+            tree[x_369_save].rightIndex = 6;
             tree[6] = BST(2, -1, -1);
             x_404_phi = true;
             break;
           } else {
-            x_375 = *(x_369);
+            x_375 = tree[x_369_save].rightIndex;
             x_356_phi = x_355;
             x_359_phi = x_375;
             continue;
           }
-          return;
         }
         x_356_phi = x_402;
         x_359_phi = x_358;
@@ -619,8 +607,8 @@ fn main_1() {
         let x_418 : i32 = tree[x_412].data;
         if ((6 <= x_418)) {
           var x_456_phi : bool;
-          let x_431 : ptr<function, i32> = &(tree[x_412].leftIndex);
-          let x_432 : i32 = *(x_431);
+          let x_431_save = x_412;
+          let x_432 : i32 = tree[x_431_save].leftIndex;
           if ((x_432 == -1)) {
             let x_439 : f32 = x_8.injectionSwitch.y;
             let x_441 : f32 = x_8.injectionSwitch.x;
@@ -628,9 +616,8 @@ fn main_1() {
               loop {
                 discard;
               }
-              return;
             }
-            *(x_431) = 7;
+            tree[x_431_save].leftIndex = 7;
             tree[7] = BST(6, -1, -1);
             loop {
               x_456_phi = x_409;
@@ -647,26 +634,25 @@ fn main_1() {
               break;
             }
           } else {
-            x_437 = *(x_431);
+            x_437 = tree[x_431_save].leftIndex;
             x_410_phi = x_409;
             x_413_phi = x_437;
             continue;
           }
         } else {
-          let x_423 : ptr<function, i32> = &(tree[x_412].rightIndex);
-          let x_424 : i32 = *(x_423);
+          let x_423_save = x_412;
+          let x_424 : i32 = tree[x_423_save].rightIndex;
           if ((x_424 == -1)) {
-            *(x_423) = 7;
+            tree[x_423_save].rightIndex = 7;
             tree[7] = BST(6, -1, -1);
             x_458_phi = true;
             break;
           } else {
-            x_429 = *(x_423);
+            x_429 = tree[x_423_save].rightIndex;
             x_410_phi = x_409;
             x_413_phi = x_429;
             continue;
           }
-          return;
         }
         x_410_phi = x_456;
         x_413_phi = x_412;
@@ -710,8 +696,8 @@ fn main_1() {
         let x_472 : i32 = tree[x_466].data;
         if ((17 <= x_472)) {
           var x_510_phi : bool;
-          let x_485 : ptr<function, i32> = &(tree[x_466].leftIndex);
-          let x_486 : i32 = *(x_485);
+          let x_485_save = x_466;
+          let x_486 : i32 = tree[x_485_save].leftIndex;
           if ((x_486 == -1)) {
             let x_493 : f32 = x_8.injectionSwitch.y;
             let x_495 : f32 = x_8.injectionSwitch.x;
@@ -719,9 +705,8 @@ fn main_1() {
               loop {
                 discard;
               }
-              return;
             }
-            *(x_485) = 8;
+            tree[x_485_save].leftIndex = 8;
             tree[8] = BST(17, -1, -1);
             loop {
               x_510_phi = x_463;
@@ -738,26 +723,25 @@ fn main_1() {
               break;
             }
           } else {
-            x_491 = *(x_485);
+            x_491 = tree[x_485_save].leftIndex;
             x_464_phi = x_463;
             x_467_phi = x_491;
             continue;
           }
         } else {
-          let x_477 : ptr<function, i32> = &(tree[x_466].rightIndex);
-          let x_478 : i32 = *(x_477);
+          let x_477_save = x_466;
+          let x_478 : i32 = tree[x_477_save].rightIndex;
           if ((x_478 == -1)) {
-            *(x_477) = 8;
+            tree[x_477_save].rightIndex = 8;
             tree[8] = BST(17, -1, -1);
             x_512_phi = true;
             break;
           } else {
-            x_483 = *(x_477);
+            x_483 = tree[x_477_save].rightIndex;
             x_464_phi = x_463;
             x_467_phi = x_483;
             continue;
           }
-          return;
         }
         x_464_phi = x_510;
         x_467_phi = x_466;
@@ -801,8 +785,8 @@ fn main_1() {
         let x_526 : i32 = tree[x_520].data;
         if ((13 <= x_526)) {
           var x_564_phi : bool;
-          let x_539 : ptr<function, i32> = &(tree[x_520].leftIndex);
-          let x_540 : i32 = *(x_539);
+          let x_539_save = x_520;
+          let x_540 : i32 = tree[x_539_save].leftIndex;
           if ((x_540 == -1)) {
             let x_547 : f32 = x_8.injectionSwitch.y;
             let x_549 : f32 = x_8.injectionSwitch.x;
@@ -810,9 +794,8 @@ fn main_1() {
               loop {
                 discard;
               }
-              return;
             }
-            *(x_539) = 9;
+            tree[x_539_save].leftIndex = 9;
             tree[9] = BST(13, -1, -1);
             loop {
               x_564_phi = x_517;
@@ -829,26 +812,25 @@ fn main_1() {
               break;
             }
           } else {
-            x_545 = *(x_539);
+            x_545 = tree[x_539_save].leftIndex;
             x_518_phi = x_517;
             x_521_phi = x_545;
             continue;
           }
         } else {
-          let x_531 : ptr<function, i32> = &(tree[x_520].rightIndex);
-          let x_532 : i32 = *(x_531);
+          let x_531_save = x_520;
+          let x_532 : i32 = tree[x_531_save].rightIndex;
           if ((x_532 == -1)) {
-            *(x_531) = 9;
+            tree[x_531_save].rightIndex = 9;
             tree[9] = BST(13, -1, -1);
             x_566_phi = true;
             break;
           } else {
-            x_537 = *(x_531);
+            x_537 = tree[x_531_save].rightIndex;
             x_518_phi = x_517;
             x_521_phi = x_537;
             continue;
           }
-          return;
         }
         x_518_phi = x_564;
         x_521_phi = x_520;
@@ -966,7 +948,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

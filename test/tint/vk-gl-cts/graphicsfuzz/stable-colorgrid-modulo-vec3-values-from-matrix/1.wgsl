@@ -1,6 +1,6 @@
 struct buf0 {
   resolution : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_13 : buf0;
 
@@ -26,7 +26,7 @@ fn compute_value_f1_f1_(limit : ptr<function, f32>, thirty_two : ptr<function, f
     } else {
       let x_147 : i32 = i;
       let x_149 : f32 = *(thirty_two);
-      if (((f32(x_147) % round(x_149)) <= 0.01)) {
+      if (((f32(x_147) - (round(x_149) * floor((f32(x_147) / round(x_149))))) <= 0.01)) {
         let x_155 : f32 = result;
         result = (x_155 + 100.0);
       }
@@ -110,7 +110,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

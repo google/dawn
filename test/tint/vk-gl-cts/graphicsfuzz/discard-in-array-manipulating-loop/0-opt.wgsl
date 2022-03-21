@@ -3,9 +3,9 @@ var<private> gl_FragCoord : vec4<f32>;
 var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
-  var data : array<f32, 10>;
+  var data : array<f32, 10u>;
   var i : i32;
-  data = array<f32, 10>(0.100000001, 0.200000003, 0.300000012, 0.400000006, 0.5, 0.600000024, 0.699999988, 0.800000012, 0.899999976, 1.0);
+  data = array<f32, 10u>(0.100000001, 0.200000003, 0.300000012, 0.400000006, 0.5, 0.600000024, 0.699999988, 0.800000012, 0.899999976, 1.0);
   i = 0;
   loop {
     let x_7 : i32 = i;
@@ -34,7 +34,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

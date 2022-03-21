@@ -1,6 +1,6 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 var<private> x_GLF_color : vec4<f32>;
 
@@ -35,12 +35,10 @@ fn performPartition_() -> i32 {
         loop {
           return 1;
         }
-        return 0;
       }
       x_11_phi = x_10;
       continue;
     }
-    x_11_phi = 0;
 
     continuing {
       x_11 = x_11_phi;
@@ -62,7 +60,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

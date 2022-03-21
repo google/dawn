@@ -13,7 +13,7 @@ fn main_1() {
   dist2 = distance(tanh(x_38), vec4<f32>(0.761590004, 0.964030027, 0.995050013, 0.999329984));
   let x_41 : f32 = dist1;
   let x_43 : f32 = dist2;
-  if (((x_41 < 0.100000001) && (x_43 < 0.100000001))) {
+  if (((x_41 < 0.100000001) & (x_43 < 0.100000001))) {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   } else {
     x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -24,7 +24,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

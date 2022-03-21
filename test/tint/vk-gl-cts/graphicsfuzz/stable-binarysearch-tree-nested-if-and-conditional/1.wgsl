@@ -2,13 +2,13 @@ struct BST {
   data : i32;
   leftIndex : i32;
   rightIndex : i32;
-};
+}
 
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
-var<private> tree_1 : array<BST, 10>;
+var<private> tree_1 : array<BST, 10u>;
 
 @group(0) @binding(0) var<uniform> x_16 : buf0;
 
@@ -102,7 +102,6 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
         baseIndex = x_252;
         continue;
       }
-      return;
     }
     let x_254 : f32 = x_16.injectionSwitch.x;
     let x_256 : f32 = x_16.injectionSwitch.y;
@@ -283,7 +282,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

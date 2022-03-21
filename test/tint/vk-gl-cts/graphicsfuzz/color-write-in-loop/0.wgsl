@@ -1,7 +1,7 @@
 struct S {
   f0 : i32;
   f1 : mat4x3<f32>;
-};
+}
 
 var<private> gl_FragCoord : vec4<f32>;
 
@@ -63,7 +63,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

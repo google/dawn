@@ -2,18 +2,18 @@ struct BST {
   data : i32;
   leftIndex : i32;
   rightIndex : i32;
-};
+}
 
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 struct Obj {
-  odd_numbers : array<f32, 10>;
-  even_numbers : array<f32, 10>;
-};
+  odd_numbers : array<f32, 10u>;
+  even_numbers : array<f32, 10u>;
+}
 
-var<private> tree_1 : array<BST, 10>;
+var<private> tree_1 : array<BST, 10u>;
 
 @group(0) @binding(0) var<uniform> x_27 : buf0;
 
@@ -36,7 +36,7 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
   var param_2 : BST;
   var param_3 : i32;
   var GLF_live8i : i32;
-  var GLF_live8A : array<f32, 50>;
+  var GLF_live8A : array<f32, 50u>;
   baseIndex = 0;
   loop {
     let x_75 : i32 = baseIndex;
@@ -91,7 +91,7 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
         let x_94 : i32 = GLF_live8i;
         let x_95 : i32 = GLF_live8i;
         let x_96 : i32 = GLF_live8i;
-        let x_369 : i32 = select(0, x_96, ((x_94 >= 0) && (x_95 < 50)));
+        let x_369 : i32 = select(0, x_96, ((x_94 >= 0) & (x_95 < 50)));
         let x_371 : f32 = GLF_live8A[0];
         let x_373 : f32 = GLF_live8A[x_369];
         GLF_live8A[x_369] = (x_373 + x_371);
@@ -317,11 +317,11 @@ fn main_1() {
     let x_145 : i32 = GLF_live4index;
     let x_146 : i32 = GLF_live4index;
     let x_269 : f32 = GLF_live4obj.even_numbers[1];
-    GLF_live4obj.even_numbers[select(0, x_146, ((x_144 >= 0) && (x_145 < 10)))] = x_269;
+    GLF_live4obj.even_numbers[select(0, x_146, ((x_144 >= 0) & (x_145 < 10)))] = x_269;
     let x_147 : i32 = GLF_live4i;
     let x_148 : i32 = GLF_live4i;
     let x_149 : i32 = GLF_live4i;
-    GLF_live4obj.even_numbers[select(0, x_149, ((x_147 >= 0) && (x_148 < 10)))] = 1.0;
+    GLF_live4obj.even_numbers[select(0, x_149, ((x_147 >= 0) & (x_148 < 10)))] = 1.0;
 
     continuing {
       let x_150 : i32 = GLF_live4i;
@@ -409,7 +409,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

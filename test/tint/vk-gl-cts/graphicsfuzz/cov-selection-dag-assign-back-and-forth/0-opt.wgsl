@@ -1,8 +1,13 @@
-type Arr = @stride(16) array<i32, 2>;
+struct strided_arr {
+  @size(16)
+  el : i32;
+}
+
+type Arr = array<strided_arr, 2u>;
 
 struct buf0 {
   x_GLF_uniform_int_values : Arr;
-};
+}
 
 var<private> x_GLF_color : vec4<f32>;
 
@@ -10,10 +15,10 @@ var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
   var v : vec4<f32>;
-  let x_25 : i32 = x_5.x_GLF_uniform_int_values[0];
-  let x_28 : i32 = x_5.x_GLF_uniform_int_values[1];
-  let x_31 : i32 = x_5.x_GLF_uniform_int_values[1];
-  let x_34 : i32 = x_5.x_GLF_uniform_int_values[0];
+  let x_25 : i32 = x_5.x_GLF_uniform_int_values[0].el;
+  let x_28 : i32 = x_5.x_GLF_uniform_int_values[1].el;
+  let x_31 : i32 = x_5.x_GLF_uniform_int_values[1].el;
+  let x_34 : i32 = x_5.x_GLF_uniform_int_values[0].el;
   x_GLF_color = vec4<f32>(f32(x_25), f32(x_28), f32(x_31), f32(x_34));
   let x_37 : vec4<f32> = x_GLF_color;
   v = x_37;
@@ -26,7 +31,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

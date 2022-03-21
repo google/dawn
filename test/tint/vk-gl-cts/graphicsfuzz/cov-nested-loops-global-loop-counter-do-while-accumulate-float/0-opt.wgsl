@@ -1,14 +1,24 @@
-type Arr = @stride(16) array<f32, 3>;
+struct strided_arr {
+  @size(16)
+  el : f32;
+}
+
+type Arr = array<strided_arr, 3u>;
 
 struct buf0 {
   x_GLF_uniform_float_values : Arr;
-};
+}
 
-type Arr_1 = @stride(16) array<i32, 4>;
+struct strided_arr_1 {
+  @size(16)
+  el : i32;
+}
+
+type Arr_1 = array<strided_arr_1, 4u>;
 
 struct buf1 {
   x_GLF_uniform_int_values : Arr_1;
-};
+}
 
 var<private> x_GLF_global_loop_count : i32;
 
@@ -38,139 +48,139 @@ fn main_1() {
   var sum : f32;
   var r : i32;
   x_GLF_global_loop_count = 0;
-  let x_53 : f32 = x_7.x_GLF_uniform_float_values[1];
+  let x_53 : f32 = x_7.x_GLF_uniform_float_values[1].el;
   f = x_53;
-  let x_55 : i32 = x_10.x_GLF_uniform_int_values[1];
+  let x_55 : i32 = x_10.x_GLF_uniform_int_values[1].el;
   i = x_55;
   loop {
     let x_60 : i32 = i;
-    let x_62 : i32 = x_10.x_GLF_uniform_int_values[0];
+    let x_62 : i32 = x_10.x_GLF_uniform_int_values[0].el;
     if ((x_60 < x_62)) {
     } else {
       break;
     }
-    let x_66 : i32 = x_10.x_GLF_uniform_int_values[1];
+    let x_66 : i32 = x_10.x_GLF_uniform_int_values[1].el;
     i_1 = x_66;
     loop {
       let x_71 : i32 = i_1;
-      let x_73 : i32 = x_10.x_GLF_uniform_int_values[0];
+      let x_73 : i32 = x_10.x_GLF_uniform_int_values[0].el;
       if ((x_71 < x_73)) {
       } else {
         break;
       }
-      let x_77 : i32 = x_10.x_GLF_uniform_int_values[1];
+      let x_77 : i32 = x_10.x_GLF_uniform_int_values[1].el;
       i_2 = x_77;
       loop {
         let x_82 : i32 = i_2;
-        let x_84 : i32 = x_10.x_GLF_uniform_int_values[0];
+        let x_84 : i32 = x_10.x_GLF_uniform_int_values[0].el;
         if ((x_82 < x_84)) {
         } else {
           break;
         }
-        let x_88 : i32 = x_10.x_GLF_uniform_int_values[1];
+        let x_88 : i32 = x_10.x_GLF_uniform_int_values[1].el;
         i_3 = x_88;
         loop {
           let x_93 : i32 = i_3;
-          let x_95 : i32 = x_10.x_GLF_uniform_int_values[0];
+          let x_95 : i32 = x_10.x_GLF_uniform_int_values[0].el;
           if ((x_93 < x_95)) {
           } else {
             break;
           }
-          let x_99 : i32 = x_10.x_GLF_uniform_int_values[1];
+          let x_99 : i32 = x_10.x_GLF_uniform_int_values[1].el;
           i_4 = x_99;
           loop {
             let x_104 : i32 = i_4;
-            let x_106 : i32 = x_10.x_GLF_uniform_int_values[0];
+            let x_106 : i32 = x_10.x_GLF_uniform_int_values[0].el;
             if ((x_104 < x_106)) {
             } else {
               break;
             }
-            let x_110 : i32 = x_10.x_GLF_uniform_int_values[1];
+            let x_110 : i32 = x_10.x_GLF_uniform_int_values[1].el;
             i_5 = x_110;
             loop {
               let x_115 : i32 = i_5;
-              let x_117 : i32 = x_10.x_GLF_uniform_int_values[0];
+              let x_117 : i32 = x_10.x_GLF_uniform_int_values[0].el;
               if ((x_115 < x_117)) {
               } else {
                 break;
               }
-              let x_121 : i32 = x_10.x_GLF_uniform_int_values[1];
+              let x_121 : i32 = x_10.x_GLF_uniform_int_values[1].el;
               i_6 = x_121;
               loop {
                 let x_126 : i32 = i_6;
-                let x_128 : i32 = x_10.x_GLF_uniform_int_values[0];
+                let x_128 : i32 = x_10.x_GLF_uniform_int_values[0].el;
                 if ((x_126 < x_128)) {
                 } else {
                   break;
                 }
-                let x_132 : i32 = x_10.x_GLF_uniform_int_values[1];
+                let x_132 : i32 = x_10.x_GLF_uniform_int_values[1].el;
                 i_7 = x_132;
                 loop {
                   let x_137 : i32 = i_7;
-                  let x_139 : i32 = x_10.x_GLF_uniform_int_values[0];
+                  let x_139 : i32 = x_10.x_GLF_uniform_int_values[0].el;
                   if ((x_137 < x_139)) {
                   } else {
                     break;
                   }
-                  let x_143 : i32 = x_10.x_GLF_uniform_int_values[1];
+                  let x_143 : i32 = x_10.x_GLF_uniform_int_values[1].el;
                   i_8 = x_143;
                   loop {
                     let x_148 : i32 = i_8;
-                    let x_150 : i32 = x_10.x_GLF_uniform_int_values[0];
+                    let x_150 : i32 = x_10.x_GLF_uniform_int_values[0].el;
                     if ((x_148 < x_150)) {
                     } else {
                       break;
                     }
-                    let x_154 : i32 = x_10.x_GLF_uniform_int_values[1];
+                    let x_154 : i32 = x_10.x_GLF_uniform_int_values[1].el;
                     i_9 = x_154;
                     loop {
                       let x_159 : i32 = i_9;
-                      let x_161 : i32 = x_10.x_GLF_uniform_int_values[0];
+                      let x_161 : i32 = x_10.x_GLF_uniform_int_values[0].el;
                       if ((x_159 < x_161)) {
                       } else {
                         break;
                       }
-                      let x_165 : i32 = x_10.x_GLF_uniform_int_values[1];
+                      let x_165 : i32 = x_10.x_GLF_uniform_int_values[1].el;
                       i_10 = x_165;
                       loop {
                         let x_170 : i32 = i_10;
-                        let x_172 : i32 = x_10.x_GLF_uniform_int_values[0];
+                        let x_172 : i32 = x_10.x_GLF_uniform_int_values[0].el;
                         if ((x_170 < x_172)) {
                         } else {
                           break;
                         }
-                        let x_176 : i32 = x_10.x_GLF_uniform_int_values[1];
+                        let x_176 : i32 = x_10.x_GLF_uniform_int_values[1].el;
                         i_11 = x_176;
                         loop {
                           let x_181 : i32 = i_11;
-                          let x_183 : i32 = x_10.x_GLF_uniform_int_values[2];
+                          let x_183 : i32 = x_10.x_GLF_uniform_int_values[2].el;
                           if ((x_181 < x_183)) {
                           } else {
                             break;
                           }
-                          let x_187 : i32 = x_10.x_GLF_uniform_int_values[1];
+                          let x_187 : i32 = x_10.x_GLF_uniform_int_values[1].el;
                           i_12 = x_187;
                           loop {
                             let x_192 : i32 = i_12;
-                            let x_194 : i32 = x_10.x_GLF_uniform_int_values[0];
+                            let x_194 : i32 = x_10.x_GLF_uniform_int_values[0].el;
                             if ((x_192 < x_194)) {
                             } else {
                               break;
                             }
-                            let x_198 : i32 = x_10.x_GLF_uniform_int_values[1];
+                            let x_198 : i32 = x_10.x_GLF_uniform_int_values[1].el;
                             i_13 = x_198;
                             loop {
                               let x_203 : i32 = i_13;
-                              let x_205 : i32 = x_10.x_GLF_uniform_int_values[0];
+                              let x_205 : i32 = x_10.x_GLF_uniform_int_values[0].el;
                               if ((x_203 < x_205)) {
                               } else {
                                 break;
                               }
-                              let x_209 : i32 = x_10.x_GLF_uniform_int_values[1];
+                              let x_209 : i32 = x_10.x_GLF_uniform_int_values[1].el;
                               i_14 = x_209;
                               loop {
                                 let x_214 : i32 = i_14;
-                                let x_216 : i32 = x_10.x_GLF_uniform_int_values[2];
+                                let x_216 : i32 = x_10.x_GLF_uniform_int_values[2].el;
                                 if ((x_214 < x_216)) {
                                 } else {
                                   break;
@@ -181,14 +191,14 @@ fn main_1() {
 
                                   continuing {
                                     let x_225 : i32 = x_GLF_global_loop_count;
-                                    let x_227 : i32 = x_10.x_GLF_uniform_int_values[3];
+                                    let x_227 : i32 = x_10.x_GLF_uniform_int_values[3].el;
                                     if ((x_225 < (100 - x_227))) {
                                     } else {
                                       break;
                                     }
                                   }
                                 }
-                                let x_231 : f32 = x_7.x_GLF_uniform_float_values[0];
+                                let x_231 : f32 = x_7.x_GLF_uniform_float_values[0].el;
                                 let x_232 : f32 = f;
                                 f = (x_232 + x_231);
 
@@ -281,9 +291,9 @@ fn main_1() {
       i = (x_262 + 1);
     }
   }
-  let x_265 : f32 = x_7.x_GLF_uniform_float_values[1];
+  let x_265 : f32 = x_7.x_GLF_uniform_float_values[1].el;
   sum = x_265;
-  let x_267 : i32 = x_10.x_GLF_uniform_int_values[1];
+  let x_267 : i32 = x_10.x_GLF_uniform_int_values[1].el;
   r = x_267;
   loop {
     let x_272 : i32 = x_GLF_global_loop_count;
@@ -303,15 +313,15 @@ fn main_1() {
     }
   }
   let x_282 : f32 = sum;
-  let x_284 : f32 = x_7.x_GLF_uniform_float_values[2];
+  let x_284 : f32 = x_7.x_GLF_uniform_float_values[2].el;
   if ((x_282 == x_284)) {
-    let x_290 : i32 = x_10.x_GLF_uniform_int_values[0];
-    let x_293 : i32 = x_10.x_GLF_uniform_int_values[1];
-    let x_296 : i32 = x_10.x_GLF_uniform_int_values[1];
-    let x_299 : i32 = x_10.x_GLF_uniform_int_values[0];
+    let x_290 : i32 = x_10.x_GLF_uniform_int_values[0].el;
+    let x_293 : i32 = x_10.x_GLF_uniform_int_values[1].el;
+    let x_296 : i32 = x_10.x_GLF_uniform_int_values[1].el;
+    let x_299 : i32 = x_10.x_GLF_uniform_int_values[0].el;
     x_GLF_color = vec4<f32>(f32(x_290), f32(x_293), f32(x_296), f32(x_299));
   } else {
-    let x_303 : i32 = x_10.x_GLF_uniform_int_values[1];
+    let x_303 : i32 = x_10.x_GLF_uniform_int_values[1].el;
     let x_304 : f32 = f32(x_303);
     x_GLF_color = vec4<f32>(x_304, x_304, x_304, x_304);
   }
@@ -321,7 +331,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

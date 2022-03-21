@@ -16,7 +16,7 @@ struct main_out {
   outColor_1 : vec4<f32>;
   @builtin(frag_depth)
   gl_FragDepth_1 : f32;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

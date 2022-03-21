@@ -4,7 +4,7 @@ var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
   let x_22 : f32 = gl_FragCoord.x;
-  if (((x_22 < 0.0) || true)) {
+  if (((x_22 < 0.0) | true)) {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   } else {
     x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -15,7 +15,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

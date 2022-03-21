@@ -1,26 +1,26 @@
-type Arr = @stride(4) array<i32, 8>;
+type Arr = array<i32, 8u>;
 
 struct In2 {
   data_in2 : Arr;
-};
+}
 
-type Arr_1 = @stride(4) array<i32, 1024>;
+type Arr_1 = array<i32, 1024u>;
 
 struct Out0 {
   data_out0 : Arr_1;
-};
+}
 
-type Arr_2 = @stride(4) array<i32, 512>;
+type Arr_2 = array<i32, 512u>;
 
-type Arr_3 = @stride(4) array<i32, 512>;
+type Arr_3 = array<i32, 512u>;
 
 struct In1 {
   data_in1 : Arr_3;
-};
+}
 
 struct In0 {
   data_in0 : Arr_3;
-};
+}
 
 var<private> gl_WorkGroupID : vec3<u32>;
 

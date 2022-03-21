@@ -1,6 +1,6 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_25 : buf0;
 
@@ -30,7 +30,7 @@ fn drawShape_vf2_(pos : ptr<function, vec2<f32>>) -> vec3<f32> {
   var GLF_live7_looplimiter7 : i32;
   var GLF_live7cols_1 : i32;
   var GLF_live7rows_1 : i32;
-  var GLF_live7sums : array<f32, 9>;
+  var GLF_live7sums : array<f32, 9u>;
   var GLF_live7c_1 : i32;
   var GLF_live7r_1 : i32;
   var x_180 : i32;
@@ -139,7 +139,7 @@ fn drawShape_vf2_(pos : ptr<function, vec2<f32>>) -> vec3<f32> {
             let x_62 : i32 = GLF_live7r;
             let x_63 : i32 = GLF_live7r;
             let x_64 : i32 = GLF_live7r;
-            GLF_live7m33[select(0, x_61, ((x_59 >= 0) && (x_60 < 3)))][select(0, x_64, ((x_62 >= 0) && (x_63 < 3)))] = 1.0;
+            GLF_live7m33[select(0, x_61, ((x_59 >= 0) & (x_60 < 3)))][select(0, x_64, ((x_62 >= 0) & (x_63 < 3)))] = 1.0;
             let x_267 : f32 = x_25.injectionSwitch.y;
             if ((0.0 > x_267)) {
             } else {
@@ -149,7 +149,7 @@ fn drawShape_vf2_(pos : ptr<function, vec2<f32>>) -> vec3<f32> {
               let x_68 : i32 = GLF_live7r;
               let x_69 : i32 = GLF_live7r;
               let x_70 : i32 = GLF_live7r;
-              GLF_live7m42[select(0, x_67, ((x_65 >= 0) && (x_66 < 4)))][select(0, x_70, ((x_68 >= 0) && (x_69 < 2)))] = 1.0;
+              GLF_live7m42[select(0, x_67, ((x_65 >= 0) & (x_66 < 4)))][select(0, x_70, ((x_68 >= 0) & (x_69 < 2)))] = 1.0;
             }
 
             continuing {
@@ -194,7 +194,7 @@ fn drawShape_vf2_(pos : ptr<function, vec2<f32>>) -> vec3<f32> {
       let x_83 : i32 = GLF_live7sum_index;
       let x_84 : i32 = GLF_live7sum_index;
       let x_85 : i32 = GLF_live7sum_index;
-      GLF_live7sums[select(0, x_85, ((x_83 >= 0) && (x_84 < 9)))] = 0.0;
+      GLF_live7sums[select(0, x_85, ((x_83 >= 0) & (x_84 < 9)))] = 0.0;
       GLF_live7c_1 = 0;
       loop {
         let x_86 : i32 = GLF_live7c_1;
@@ -213,7 +213,7 @@ fn drawShape_vf2_(pos : ptr<function, vec2<f32>>) -> vec3<f32> {
           let x_89 : i32 = GLF_live7sum_index;
           let x_90 : i32 = GLF_live7sum_index;
           let x_91 : i32 = GLF_live7sum_index;
-          let x_310 : i32 = select(0, x_91, ((x_89 >= 0) && (x_90 < 9)));
+          let x_310 : i32 = select(0, x_91, ((x_89 >= 0) & (x_90 < 9)));
           let x_311 : mat3x3<f32> = GLF_live7m33;
           let x_312 : mat3x3<f32> = transpose(x_311);
           let x_92 : i32 = GLF_live7c_1;
@@ -232,7 +232,7 @@ fn drawShape_vf2_(pos : ptr<function, vec2<f32>>) -> vec3<f32> {
           let x_94 : i32 = GLF_live7sum_index;
           let x_95 : i32 = GLF_live7sum_index;
           let x_96 : i32 = GLF_live7sum_index;
-          let x_332 : i32 = select(0, x_96, ((x_94 >= 0) && (x_95 < 9)));
+          let x_332 : i32 = select(0, x_96, ((x_94 >= 0) & (x_95 < 9)));
           let x_97 : i32 = GLF_live7r_1;
           let x_334 : f32 = GLF_live7m42[1][x_97];
           let x_336 : f32 = GLF_live7sums[x_332];
@@ -306,7 +306,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

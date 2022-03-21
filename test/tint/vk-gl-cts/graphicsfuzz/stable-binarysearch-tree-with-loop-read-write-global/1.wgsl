@@ -2,19 +2,19 @@ struct BST {
   data : i32;
   leftIndex : i32;
   rightIndex : i32;
-};
+}
 
 struct QuicksortObject {
-  numbers : array<i32, 10>;
-};
+  numbers : array<i32, 10u>;
+}
 
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 var<private> obj : QuicksortObject;
 
-var<private> tree : array<BST, 10>;
+var<private> tree : array<BST, 10u>;
 
 @group(0) @binding(0) var<uniform> x_50 : buf0;
 
@@ -67,7 +67,6 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
         baseIndex = x_248;
         continue;
       }
-      return;
     } else {
       let x_249 : i32 = baseIndex;
       let x_251 : i32 = tree[x_249].rightIndex;
@@ -90,9 +89,7 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
         baseIndex = x_268;
         continue;
       }
-      return;
     }
-    return;
   }
   return;
 }
@@ -309,7 +306,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

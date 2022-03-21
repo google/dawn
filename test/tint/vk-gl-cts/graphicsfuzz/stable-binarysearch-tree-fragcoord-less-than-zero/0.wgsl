@@ -2,9 +2,9 @@ struct BST {
   data : i32;
   leftIndex : i32;
   rightIndex : i32;
-};
+}
 
-var<private> tree_1 : array<BST, 10>;
+var<private> tree_1 : array<BST, 10u>;
 
 var<private> x_GLF_color : vec4<f32>;
 
@@ -55,7 +55,6 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
         baseIndex = x_198;
         continue;
       }
-      return;
     } else {
       let x_199 : i32 = baseIndex;
       let x_201 : i32 = tree_1[x_199].rightIndex;
@@ -78,9 +77,7 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
         baseIndex = x_218;
         continue;
       }
-      return;
     }
-    return;
   }
   return;
 }
@@ -255,7 +252,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

@@ -1,12 +1,12 @@
 struct Buf1 {
   result : i32;
-};
+}
 
-type RTArr = @stride(4) array<u32>;
+type RTArr = array<u32>;
 
 struct Buf0 {
   values : RTArr;
-};
+}
 
 @group(0) @binding(1) var<storage, read_write> x_4 : Buf1;
 

@@ -1,8 +1,13 @@
-type Arr = @stride(16) array<i32, 4>;
+struct strided_arr {
+  @size(16)
+  el : i32;
+}
+
+type Arr = array<strided_arr, 4u>;
 
 struct buf0 {
   x_GLF_uniform_int_values : Arr;
-};
+}
 
 var<private> x_GLF_global_loop_count : i32;
 
@@ -12,13 +17,13 @@ var<private> x_GLF_color : vec4<f32>;
 
 fn func_() {
   var x_66_phi : i32;
-  let x_62 : i32 = x_7.x_GLF_uniform_int_values[1];
-  let x_64 : i32 = x_7.x_GLF_uniform_int_values[0];
+  let x_62 : i32 = x_7.x_GLF_uniform_int_values[1].el;
+  let x_64 : i32 = x_7.x_GLF_uniform_int_values[0].el;
   x_66_phi = x_64;
   loop {
     var x_67 : i32;
     let x_66 : i32 = x_66_phi;
-    let x_70 : i32 = x_7.x_GLF_uniform_int_values[3];
+    let x_70 : i32 = x_7.x_GLF_uniform_int_values[3].el;
     if ((x_66 < x_70)) {
     } else {
       break;
@@ -65,15 +70,15 @@ fn main_1() {
     }
   }
   let x_42 : i32 = x_GLF_global_loop_count;
-  let x_44 : i32 = x_7.x_GLF_uniform_int_values[2];
+  let x_44 : i32 = x_7.x_GLF_uniform_int_values[2].el;
   if ((x_42 == x_44)) {
-    let x_50 : i32 = x_7.x_GLF_uniform_int_values[1];
+    let x_50 : i32 = x_7.x_GLF_uniform_int_values[1].el;
     let x_51 : f32 = f32(x_50);
-    let x_53 : i32 = x_7.x_GLF_uniform_int_values[0];
+    let x_53 : i32 = x_7.x_GLF_uniform_int_values[0].el;
     let x_54 : f32 = f32(x_53);
     x_GLF_color = vec4<f32>(x_51, x_54, x_54, x_51);
   } else {
-    let x_57 : i32 = x_7.x_GLF_uniform_int_values[0];
+    let x_57 : i32 = x_7.x_GLF_uniform_int_values[0].el;
     let x_58 : f32 = f32(x_57);
     x_GLF_color = vec4<f32>(x_58, x_58, x_58, x_58);
   }
@@ -83,7 +88,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

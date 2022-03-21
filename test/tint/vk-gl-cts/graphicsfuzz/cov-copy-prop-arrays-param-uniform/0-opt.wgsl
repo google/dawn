@@ -1,10 +1,10 @@
 struct Array {
-  values : array<i32, 2>;
-};
+  values : array<i32, 2u>;
+}
 
 struct buf0 {
   zero : i32;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_8 : buf0;
 
@@ -14,17 +14,17 @@ fn main_1() {
   var x_52 : bool = false;
   var x_17 : i32;
   var x_18 : i32;
-  var x_16 : array<i32, 2>;
+  var x_16 : array<i32, 2u>;
   var param : Array;
   var x_20 : i32;
   var x_21_phi : i32;
   let x_12 : i32 = x_8.zero;
-  let x_22 : array<i32, 2> = x_16;
-  var x_23_1 : array<i32, 2> = x_22;
+  let x_22 : array<i32, 2u> = x_16;
+  var x_23_1 : array<i32, 2u> = x_22;
   x_23_1[0u] = x_12;
-  let x_23 : array<i32, 2> = x_23_1;
+  let x_23 : array<i32, 2u> = x_23_1;
   x_16 = x_23;
-  let x_54 : array<i32, 2> = x_16;
+  let x_54 : array<i32, 2u> = x_16;
   param = Array(x_54);
   x_52 = false;
   loop {
@@ -67,7 +67,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

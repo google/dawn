@@ -11,7 +11,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   final_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@location(0) frag_color_param : vec4<f32>) -> main_out {

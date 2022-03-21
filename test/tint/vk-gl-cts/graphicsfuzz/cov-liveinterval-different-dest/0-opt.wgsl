@@ -32,12 +32,11 @@ fn func_() -> vec3<f32> {
   } else {
     return vec3<f32>(0.0, 0.0, 1.0);
   }
-  return vec3<f32>(0.0, 0.0, 0.0);
 }
 
 fn main_1() {
   var j : i32;
-  var data : array<vec3<f32>, 2>;
+  var data : array<vec3<f32>, 2u>;
   var j_1 : i32;
   j = 0;
   loop {
@@ -79,7 +78,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

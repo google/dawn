@@ -1,11 +1,11 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 struct StructType {
   col : vec3<f32>;
   bbbb : vec4<bool>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_5 : buf0;
 
@@ -19,7 +19,7 @@ fn main_1() {
   var x_9_phi : i32;
   var x_42_phi : StructType;
   var x_10_phi : i32;
-  x_33_phi = StructType(vec3<f32>(0.0, 0.0, 0.0), vec4<bool>(false, false, false, false));
+  x_33_phi = StructType(vec3<f32>(), vec4<bool>());
   x_9_phi = 0;
   loop {
     var x_34 : StructType;
@@ -69,7 +69,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

@@ -1,17 +1,17 @@
 struct tmp_struct {
-  nmb : array<i32, 1>;
-};
+  nmb : array<i32, 1u>;
+}
 
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_11 : buf0;
 
 var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
-  var x_24 : array<i32, 1>;
+  var x_24 : array<i32, 1u>;
   var x_68 : bool = false;
   var x_17 : i32;
   var x_18 : i32;
@@ -29,7 +29,7 @@ fn main_1() {
     tmp_float = x_75;
     let x_76 : vec3<f32> = vec3<f32>(x_75, x_75, x_75);
     color = x_76;
-    x_24 = tmp_struct(array<i32, 1>(0)).nmb;
+    x_24 = tmp_struct(array<i32, 1u>()).nmb;
     x_68 = false;
     x_79_phi = false;
     loop {
@@ -103,7 +103,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

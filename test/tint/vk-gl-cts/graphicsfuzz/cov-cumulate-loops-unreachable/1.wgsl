@@ -6,7 +6,7 @@ fn main_1() {
   var i : i32;
   var i_1 : i32;
   var i_2 : i32;
-  var indexable : array<i32, 2>;
+  var indexable : array<i32, 2u>;
   a = 0;
   b = 1;
   x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -47,7 +47,7 @@ fn main_1() {
       break;
     }
     let x_65 : i32 = b;
-    indexable = array<i32, 2>(1, 2);
+    indexable = array<i32, 2u>(1, 2);
     let x_67 : i32 = indexable[x_65];
     let x_68 : i32 = a;
     a = (x_68 + x_67);
@@ -67,7 +67,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

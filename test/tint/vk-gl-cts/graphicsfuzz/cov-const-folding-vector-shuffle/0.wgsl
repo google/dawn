@@ -6,7 +6,7 @@ fn main_1() {
   var x_26_phi : vec2<f32>;
   var x_5_phi : i32;
   var x_40_phi : bool;
-  x_26_phi = vec2<f32>(0.0, 0.0);
+  x_26_phi = vec2<f32>();
   x_5_phi = 2;
   loop {
     var x_27 : vec2<f32>;
@@ -44,7 +44,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

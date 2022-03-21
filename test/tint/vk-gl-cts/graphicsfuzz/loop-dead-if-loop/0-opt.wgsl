@@ -1,6 +1,6 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_6 : buf0;
 
@@ -9,7 +9,7 @@ var<private> x_GLF_color : vec4<f32>;
 fn main_1() {
   var k : i32;
   var GLF_dead0j : i32;
-  var donor_replacementGLF_dead0stack : array<i32, 10>;
+  var donor_replacementGLF_dead0stack : array<i32, 10u>;
   var donor_replacementGLF_dead0top : i32;
   var x_54 : i32;
   var matrix_b : vec4<f32>;
@@ -33,7 +33,7 @@ fn main_1() {
       }
       let x_14 : i32 = donor_replacementGLF_dead0top;
       let x_15 : i32 = donor_replacementGLF_dead0top;
-      if (((x_14 >= 0) && (x_15 < 9))) {
+      if (((x_14 >= 0) & (x_15 < 9))) {
         let x_16 : i32 = donor_replacementGLF_dead0top;
         let x_17 : i32 = (x_16 + 1);
         donor_replacementGLF_dead0top = x_17;
@@ -75,7 +75,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

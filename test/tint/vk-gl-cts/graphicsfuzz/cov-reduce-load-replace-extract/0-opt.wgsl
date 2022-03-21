@@ -1,11 +1,11 @@
 struct S {
   x : i32;
   y : i32;
-};
+}
 
 struct buf0 {
   one : i32;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_10 : buf0;
 
@@ -18,7 +18,7 @@ fn func_struct_S_i1_i11_(arg : ptr<function, S>) {
 
 fn main_1() {
   var a : f32;
-  var b : array<S, 2>;
+  var b : array<S, 2u>;
   var param : S;
   a = 5.0;
   loop {
@@ -59,7 +59,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

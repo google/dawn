@@ -1,6 +1,6 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_8 : buf0;
 
@@ -9,8 +9,8 @@ var<private> gl_FragCoord : vec4<f32>;
 var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
-  var temp : array<i32, 10>;
-  var data : array<i32, 10>;
+  var temp : array<i32, 10u>;
+  var data : array<i32, 10u>;
   var x_190 : f32;
   var x_262 : f32;
   var x_63_phi : i32;
@@ -33,8 +33,8 @@ fn main_1() {
     var x_82 : i32;
     var x_64_phi : i32;
     let x_63 : i32 = x_63_phi;
-    let x_68 : array<i32, 10> = data;
-    data = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    let x_68 : array<i32, 10u> = data;
+    data = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     data = x_68;
     let x_69 : i32 = (x_63 + 1);
     x_64_phi = x_69;
@@ -157,24 +157,24 @@ fn main_1() {
         x_131 = x_131_phi;
         let x_134 : i32 = x_134_phi;
         x_136 = x_136_phi;
-        if (((x_136 <= x_126) && (x_134 <= x_129))) {
+        if (((x_136 <= x_126) & (x_134 <= x_129))) {
         } else {
           break;
         }
-        let x_143 : ptr<function, i32> = &(data[x_136]);
-        let x_144 : i32 = *(x_143);
-        let x_145 : ptr<function, i32> = &(data[x_134]);
-        let x_146 : i32 = *(x_145);
+        let x_143_save = x_136;
+        let x_144 : i32 = data[x_143_save];
+        let x_145_save = x_134;
+        let x_146 : i32 = data[x_145_save];
         let x_132 : i32 = bitcast<i32>((x_131 + bitcast<i32>(1)));
         if ((x_144 < x_146)) {
           x_151 = bitcast<i32>((x_136 + bitcast<i32>(1)));
-          let x_152 : i32 = *(x_143);
+          let x_152 : i32 = data[x_143_save];
           temp[x_131] = x_152;
           x_135_phi = x_134;
           x_137_phi = x_151;
         } else {
           x_154 = (x_134 + 1);
-          let x_155 : i32 = *(x_145);
+          let x_155 : i32 = data[x_145_save];
           temp[x_131] = x_155;
           x_135_phi = x_154;
           x_137_phi = x_136;
@@ -195,7 +195,7 @@ fn main_1() {
         var x_162 : i32;
         let x_158 : i32 = x_158_phi;
         let x_161 : i32 = x_161_phi;
-        if (((x_161 < 10) && (x_161 <= x_126))) {
+        if (((x_161 < 10) & (x_161 <= x_126))) {
         } else {
           break;
         }
@@ -330,7 +330,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

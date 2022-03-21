@@ -1,6 +1,6 @@
 struct buf0 {
   zero : i32;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_8 : buf0;
 
@@ -10,7 +10,7 @@ fn main_1() {
   var highSigned : i32;
   var highUnsigned : u32;
   var i : i32;
-  var data : array<i32, 2>;
+  var data : array<i32, 2u>;
   var i_1 : u32;
   var x_78 : bool;
   var x_79_phi : bool;
@@ -70,7 +70,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

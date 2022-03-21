@@ -1,6 +1,6 @@
 struct buf0 {
   matrix_a_uni : mat4x4<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_8 : buf0;
 
@@ -59,7 +59,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

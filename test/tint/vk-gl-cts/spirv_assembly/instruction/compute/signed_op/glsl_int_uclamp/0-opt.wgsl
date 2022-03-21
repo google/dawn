@@ -1,8 +1,8 @@
-type RTArr = @stride(4) array<i32>;
+type RTArr = array<i32>;
 
 struct S {
   field0 : RTArr;
-};
+}
 
 var<private> x_3 : vec3<u32>;
 

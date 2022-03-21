@@ -1,12 +1,17 @@
 struct buf1 {
   one : u32;
-};
+}
 
-type Arr = @stride(16) array<i32, 1>;
+struct strided_arr {
+  @size(16)
+  el : i32;
+}
+
+type Arr = array<strided_arr, 1u>;
 
 struct buf0 {
   x_GLF_uniform_int_values : Arr;
-};
+}
 
 var<private> gl_FragCoord : vec4<f32>;
 
@@ -43,7 +48,7 @@ fn main_1() {
   if (((1u << x_50) == 2u)) {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   } else {
-    let x_57 : i32 = x_10.x_GLF_uniform_int_values[0];
+    let x_57 : i32 = x_10.x_GLF_uniform_int_values[0].el;
     let x_58 : f32 = f32(x_57);
     x_GLF_color = vec4<f32>(x_58, x_58, x_58, x_58);
   }
@@ -53,7 +58,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

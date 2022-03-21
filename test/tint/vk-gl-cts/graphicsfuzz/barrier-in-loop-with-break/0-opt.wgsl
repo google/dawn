@@ -1,13 +1,13 @@
-type RTArr = @stride(4) array<i32>;
+type RTArr = array<i32>;
 
 struct doesNotMatter {
   global_seed : i32;
   data : RTArr;
-};
+}
 
 struct buf1 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 var<private> gl_LocalInvocationID : vec3<u32>;
 

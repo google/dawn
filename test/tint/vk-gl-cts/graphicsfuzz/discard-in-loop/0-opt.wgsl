@@ -28,11 +28,8 @@ fn main_1() {
         } else {
           continue;
         }
-        continue;
       }
       x_47();
-      x_48_phi = true;
-      break;
 
       continuing {
         x_31 = (x_30 + 1);
@@ -52,7 +49,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

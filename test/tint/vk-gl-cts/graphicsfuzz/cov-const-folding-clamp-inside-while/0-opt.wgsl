@@ -19,7 +19,7 @@ fn main_1() {
   }
   let x_37 : i32 = i;
   let x_39 : i32 = j;
-  if (((x_37 == 9) && (x_39 == 10))) {
+  if (((x_37 == 9) & (x_39 == 10))) {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   } else {
     x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -30,7 +30,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

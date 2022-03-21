@@ -1,6 +1,6 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_8 : buf0;
 
@@ -9,8 +9,8 @@ var<private> gl_FragCoord : vec4<f32>;
 var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
-  var temp : array<i32, 10>;
-  var data : array<i32, 10>;
+  var temp : array<i32, 10u>;
+  var data : array<i32, 10u>;
   var x_189 : f32;
   var x_261 : f32;
   var x_63_phi : i32;
@@ -154,24 +154,24 @@ fn main_1() {
         x_130 = x_130_phi;
         let x_133 : i32 = x_133_phi;
         x_135 = x_135_phi;
-        if (((x_135 <= x_125) && (x_133 <= x_128))) {
+        if (((x_135 <= x_125) & (x_133 <= x_128))) {
         } else {
           break;
         }
-        let x_142 : ptr<function, i32> = &(data[x_135]);
-        let x_143 : i32 = *(x_142);
-        let x_144 : ptr<function, i32> = &(data[x_133]);
-        let x_145 : i32 = *(x_144);
+        let x_142_save = x_135;
+        let x_143 : i32 = data[x_142_save];
+        let x_144_save = x_133;
+        let x_145 : i32 = data[x_144_save];
         let x_131 : i32 = bitcast<i32>((x_130 + bitcast<i32>(1)));
         if ((x_143 < x_145)) {
           x_150 = bitcast<i32>((x_135 + bitcast<i32>(1)));
-          let x_151 : i32 = *(x_142);
+          let x_151 : i32 = data[x_142_save];
           temp[x_130] = x_151;
           x_134_phi = x_133;
           x_136_phi = x_150;
         } else {
           x_153 = (x_133 + 1);
-          let x_154 : i32 = *(x_144);
+          let x_154 : i32 = data[x_144_save];
           temp[x_130] = x_154;
           x_134_phi = x_153;
           x_136_phi = x_135;
@@ -192,7 +192,7 @@ fn main_1() {
         var x_161 : i32;
         let x_157 : i32 = x_157_phi;
         let x_160 : i32 = x_160_phi;
-        if (((x_160 < 10) && (x_160 <= x_125))) {
+        if (((x_160 < 10) & (x_160 <= x_125))) {
         } else {
           break;
         }
@@ -327,7 +327,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

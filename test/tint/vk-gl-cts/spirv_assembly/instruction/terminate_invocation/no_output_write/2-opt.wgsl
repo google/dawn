@@ -11,14 +11,14 @@ fn main_1() {
   y_is_odd = ((i32(x_29) & 1) == 1);
   let x_33 : bool = x_is_odd;
   let x_34 : bool = y_is_odd;
-  out_data = select(0, 1, (x_33 || x_34));
+  out_data = select(0, 1, (x_33 | x_34));
   return;
 }
 
 struct main_out {
-  @location(0)
+  @location(0) @interpolate(flat)
   out_data_1 : i32;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

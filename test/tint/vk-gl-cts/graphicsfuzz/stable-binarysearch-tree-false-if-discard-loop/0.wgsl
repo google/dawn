@@ -2,12 +2,12 @@ struct BST {
   data : i32;
   leftIndex : i32;
   rightIndex : i32;
-};
+}
 
 var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
-  var tree : array<BST, 10>;
+  var tree : array<BST, 10u>;
   var x_356 : i32;
   var x_58_phi : i32;
   var x_86_phi : bool;
@@ -31,35 +31,32 @@ fn main_1() {
         }
         let x_65 : i32 = tree[x_58].data;
         if ((5 <= x_65)) {
-          let x_78 : ptr<function, i32> = &(tree[x_58].leftIndex);
-          let x_79 : i32 = *(x_78);
+          let x_78_save = x_58;
+          let x_79 : i32 = tree[x_78_save].leftIndex;
           if ((x_79 == -1)) {
-            *(x_78) = 1;
+            tree[x_78_save].leftIndex = 1;
             tree[1] = BST(5, -1, -1);
             x_86_phi = true;
             break;
           } else {
-            x_84 = *(x_78);
+            x_84 = tree[x_78_save].leftIndex;
             x_59_phi = x_84;
             continue;
           }
-          return;
         } else {
-          let x_70 : ptr<function, i32> = &(tree[x_58].rightIndex);
-          let x_71 : i32 = *(x_70);
+          let x_70_save = x_58;
+          let x_71 : i32 = tree[x_70_save].rightIndex;
           if ((x_71 == -1)) {
-            *(x_70) = 1;
+            tree[x_70_save].rightIndex = 1;
             tree[1] = BST(5, -1, -1);
             x_86_phi = true;
             break;
           } else {
-            x_76 = *(x_70);
+            x_76 = tree[x_70_save].rightIndex;
             x_59_phi = x_76;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_59 = x_59_phi;
@@ -90,35 +87,32 @@ fn main_1() {
         }
         let x_98 : i32 = tree[x_91].data;
         if ((12 <= x_98)) {
-          let x_111 : ptr<function, i32> = &(tree[x_91].leftIndex);
-          let x_112 : i32 = *(x_111);
+          let x_111_save = x_91;
+          let x_112 : i32 = tree[x_111_save].leftIndex;
           if ((x_112 == -1)) {
-            *(x_111) = 2;
+            tree[x_111_save].leftIndex = 2;
             tree[2] = BST(12, -1, -1);
             x_119_phi = true;
             break;
           } else {
-            x_117 = *(x_111);
+            x_117 = tree[x_111_save].leftIndex;
             x_92_phi = x_117;
             continue;
           }
-          return;
         } else {
-          let x_103 : ptr<function, i32> = &(tree[x_91].rightIndex);
-          let x_104 : i32 = *(x_103);
+          let x_103_save = x_91;
+          let x_104 : i32 = tree[x_103_save].rightIndex;
           if ((x_104 == -1)) {
-            *(x_103) = 2;
+            tree[x_103_save].rightIndex = 2;
             tree[2] = BST(12, -1, -1);
             x_119_phi = true;
             break;
           } else {
-            x_109 = *(x_103);
+            x_109 = tree[x_103_save].rightIndex;
             x_92_phi = x_109;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_92 = x_92_phi;
@@ -149,35 +143,32 @@ fn main_1() {
         }
         let x_131 : i32 = tree[x_124].data;
         if ((15 <= x_131)) {
-          let x_144 : ptr<function, i32> = &(tree[x_124].leftIndex);
-          let x_145 : i32 = *(x_144);
+          let x_144_save = x_124;
+          let x_145 : i32 = tree[x_144_save].leftIndex;
           if ((x_145 == -1)) {
-            *(x_144) = 3;
+            tree[x_144_save].leftIndex = 3;
             tree[3] = BST(15, -1, -1);
             x_152_phi = true;
             break;
           } else {
-            x_150 = *(x_144);
+            x_150 = tree[x_144_save].leftIndex;
             x_125_phi = x_150;
             continue;
           }
-          return;
         } else {
-          let x_136 : ptr<function, i32> = &(tree[x_124].rightIndex);
-          let x_137 : i32 = *(x_136);
+          let x_136_save = x_124;
+          let x_137 : i32 = tree[x_136_save].rightIndex;
           if ((x_137 == -1)) {
-            *(x_136) = 3;
+            tree[x_136_save].rightIndex = 3;
             tree[3] = BST(15, -1, -1);
             x_152_phi = true;
             break;
           } else {
-            x_142 = *(x_136);
+            x_142 = tree[x_136_save].rightIndex;
             x_125_phi = x_142;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_125 = x_125_phi;
@@ -208,35 +199,32 @@ fn main_1() {
         }
         let x_164 : i32 = tree[x_157].data;
         if ((7 <= x_164)) {
-          let x_177 : ptr<function, i32> = &(tree[x_157].leftIndex);
-          let x_178 : i32 = *(x_177);
+          let x_177_save = x_157;
+          let x_178 : i32 = tree[x_177_save].leftIndex;
           if ((x_178 == -1)) {
-            *(x_177) = 4;
+            tree[x_177_save].leftIndex = 4;
             tree[4] = BST(7, -1, -1);
             x_185_phi = true;
             break;
           } else {
-            x_183 = *(x_177);
+            x_183 = tree[x_177_save].leftIndex;
             x_158_phi = x_183;
             continue;
           }
-          return;
         } else {
-          let x_169 : ptr<function, i32> = &(tree[x_157].rightIndex);
-          let x_170 : i32 = *(x_169);
+          let x_169_save = x_157;
+          let x_170 : i32 = tree[x_169_save].rightIndex;
           if ((x_170 == -1)) {
-            *(x_169) = 4;
+            tree[x_169_save].rightIndex = 4;
             tree[4] = BST(7, -1, -1);
             x_185_phi = true;
             break;
           } else {
-            x_175 = *(x_169);
+            x_175 = tree[x_169_save].rightIndex;
             x_158_phi = x_175;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_158 = x_158_phi;
@@ -267,35 +255,32 @@ fn main_1() {
         }
         let x_197 : i32 = tree[x_190].data;
         if ((8 <= x_197)) {
-          let x_210 : ptr<function, i32> = &(tree[x_190].leftIndex);
-          let x_211 : i32 = *(x_210);
+          let x_210_save = x_190;
+          let x_211 : i32 = tree[x_210_save].leftIndex;
           if ((x_211 == -1)) {
-            *(x_210) = 5;
+            tree[x_210_save].leftIndex = 5;
             tree[5] = BST(8, -1, -1);
             x_218_phi = true;
             break;
           } else {
-            x_216 = *(x_210);
+            x_216 = tree[x_210_save].leftIndex;
             x_191_phi = x_216;
             continue;
           }
-          return;
         } else {
-          let x_202 : ptr<function, i32> = &(tree[x_190].rightIndex);
-          let x_203 : i32 = *(x_202);
+          let x_202_save = x_190;
+          let x_203 : i32 = tree[x_202_save].rightIndex;
           if ((x_203 == -1)) {
-            *(x_202) = 5;
+            tree[x_202_save].rightIndex = 5;
             tree[5] = BST(8, -1, -1);
             x_218_phi = true;
             break;
           } else {
-            x_208 = *(x_202);
+            x_208 = tree[x_202_save].rightIndex;
             x_191_phi = x_208;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_191 = x_191_phi;
@@ -326,35 +311,32 @@ fn main_1() {
         }
         let x_230 : i32 = tree[x_223].data;
         if ((2 <= x_230)) {
-          let x_243 : ptr<function, i32> = &(tree[x_223].leftIndex);
-          let x_244 : i32 = *(x_243);
+          let x_243_save = x_223;
+          let x_244 : i32 = tree[x_243_save].leftIndex;
           if ((x_244 == -1)) {
-            *(x_243) = 6;
+            tree[x_243_save].leftIndex = 6;
             tree[6] = BST(2, -1, -1);
             x_251_phi = true;
             break;
           } else {
-            x_249 = *(x_243);
+            x_249 = tree[x_243_save].leftIndex;
             x_224_phi = x_249;
             continue;
           }
-          return;
         } else {
-          let x_235 : ptr<function, i32> = &(tree[x_223].rightIndex);
-          let x_236 : i32 = *(x_235);
+          let x_235_save = x_223;
+          let x_236 : i32 = tree[x_235_save].rightIndex;
           if ((x_236 == -1)) {
-            *(x_235) = 6;
+            tree[x_235_save].rightIndex = 6;
             tree[6] = BST(2, -1, -1);
             x_251_phi = true;
             break;
           } else {
-            x_241 = *(x_235);
+            x_241 = tree[x_235_save].rightIndex;
             x_224_phi = x_241;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_224 = x_224_phi;
@@ -385,35 +367,32 @@ fn main_1() {
         }
         let x_263 : i32 = tree[x_256].data;
         if ((6 <= x_263)) {
-          let x_276 : ptr<function, i32> = &(tree[x_256].leftIndex);
-          let x_277 : i32 = *(x_276);
+          let x_276_save = x_256;
+          let x_277 : i32 = tree[x_276_save].leftIndex;
           if ((x_277 == -1)) {
-            *(x_276) = 7;
+            tree[x_276_save].leftIndex = 7;
             tree[7] = BST(6, -1, -1);
             x_284_phi = true;
             break;
           } else {
-            x_282 = *(x_276);
+            x_282 = tree[x_276_save].leftIndex;
             x_257_phi = x_282;
             continue;
           }
-          return;
         } else {
-          let x_268 : ptr<function, i32> = &(tree[x_256].rightIndex);
-          let x_269 : i32 = *(x_268);
+          let x_268_save = x_256;
+          let x_269 : i32 = tree[x_268_save].rightIndex;
           if ((x_269 == -1)) {
-            *(x_268) = 7;
+            tree[x_268_save].rightIndex = 7;
             tree[7] = BST(6, -1, -1);
             x_284_phi = true;
             break;
           } else {
-            x_274 = *(x_268);
+            x_274 = tree[x_268_save].rightIndex;
             x_257_phi = x_274;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_257 = x_257_phi;
@@ -444,35 +423,32 @@ fn main_1() {
         }
         let x_296 : i32 = tree[x_289].data;
         if ((17 <= x_296)) {
-          let x_309 : ptr<function, i32> = &(tree[x_289].leftIndex);
-          let x_310 : i32 = *(x_309);
+          let x_309_save = x_289;
+          let x_310 : i32 = tree[x_309_save].leftIndex;
           if ((x_310 == -1)) {
-            *(x_309) = 8;
+            tree[x_309_save].leftIndex = 8;
             tree[8] = BST(17, -1, -1);
             x_317_phi = true;
             break;
           } else {
-            x_315 = *(x_309);
+            x_315 = tree[x_309_save].leftIndex;
             x_290_phi = x_315;
             continue;
           }
-          return;
         } else {
-          let x_301 : ptr<function, i32> = &(tree[x_289].rightIndex);
-          let x_302 : i32 = *(x_301);
+          let x_301_save = x_289;
+          let x_302 : i32 = tree[x_301_save].rightIndex;
           if ((x_302 == -1)) {
-            *(x_301) = 8;
+            tree[x_301_save].rightIndex = 8;
             tree[8] = BST(17, -1, -1);
             x_317_phi = true;
             break;
           } else {
-            x_307 = *(x_301);
+            x_307 = tree[x_301_save].rightIndex;
             x_290_phi = x_307;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_290 = x_290_phi;
@@ -503,35 +479,32 @@ fn main_1() {
         }
         let x_329 : i32 = tree[x_322].data;
         if ((13 <= x_329)) {
-          let x_342 : ptr<function, i32> = &(tree[x_322].leftIndex);
-          let x_343 : i32 = *(x_342);
+          let x_342_save = x_322;
+          let x_343 : i32 = tree[x_342_save].leftIndex;
           if ((x_343 == -1)) {
-            *(x_342) = 9;
+            tree[x_342_save].leftIndex = 9;
             tree[9] = BST(13, -1, -1);
             x_350_phi = true;
             break;
           } else {
-            x_348 = *(x_342);
+            x_348 = tree[x_342_save].leftIndex;
             x_323_phi = x_348;
             continue;
           }
-          return;
         } else {
-          let x_334 : ptr<function, i32> = &(tree[x_322].rightIndex);
-          let x_335 : i32 = *(x_334);
+          let x_334_save = x_322;
+          let x_335 : i32 = tree[x_334_save].rightIndex;
           if ((x_335 == -1)) {
-            *(x_334) = 9;
+            tree[x_334_save].rightIndex = 9;
             tree[9] = BST(13, -1, -1);
             x_350_phi = true;
             break;
           } else {
-            x_340 = *(x_334);
+            x_340 = tree[x_334_save].rightIndex;
             x_323_phi = x_340;
             continue;
           }
-          return;
         }
-        return;
 
         continuing {
           x_323 = x_323_phi;
@@ -644,7 +617,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

@@ -1,6 +1,6 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_7 : buf0;
 
@@ -14,7 +14,7 @@ fn computePoint_() -> vec3<f32> {
   if ((x_48 > x_50)) {
     discard;
   }
-  return vec3<f32>(0.0, 0.0, 0.0);
+  return vec3<f32>();
 }
 
 fn main_1() {
@@ -37,7 +37,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

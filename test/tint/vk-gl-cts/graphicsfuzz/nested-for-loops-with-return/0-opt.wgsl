@@ -18,7 +18,6 @@ fn nb_mod_f1_(limit : ptr<function, f32>) -> f32 {
       return 1.0;
     }
   }
-  return 0.0;
 }
 
 fn main_1() {
@@ -33,7 +32,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

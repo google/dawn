@@ -1,14 +1,24 @@
-type Arr = @stride(16) array<i32, 2>;
+struct strided_arr {
+  @size(16)
+  el : i32;
+}
+
+type Arr = array<strided_arr, 2u>;
 
 struct buf0 {
   x_GLF_uniform_int_values : Arr;
-};
+}
 
-type Arr_1 = @stride(16) array<f32, 1>;
+struct strided_arr_1 {
+  @size(16)
+  el : f32;
+}
+
+type Arr_1 = array<strided_arr_1, 1u>;
 
 struct buf1 {
   x_GLF_uniform_float_values : Arr_1;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_7 : buf0;
 
@@ -22,11 +32,11 @@ fn main_1() {
   var j : i32;
   var k : i32;
   color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-  let x_37 : i32 = x_7.x_GLF_uniform_int_values[0];
+  let x_37 : i32 = x_7.x_GLF_uniform_int_values[0].el;
   i = x_37;
   loop {
     let x_42 : i32 = i;
-    let x_44 : i32 = x_7.x_GLF_uniform_int_values[1];
+    let x_44 : i32 = x_7.x_GLF_uniform_int_values[1].el;
     if ((x_42 < x_44)) {
     } else {
       break;
@@ -35,11 +45,11 @@ fn main_1() {
     switch(x_47) {
       case 2: {
         let x_83 : i32 = i;
-        let x_85 : f32 = x_11.x_GLF_uniform_float_values[0];
+        let x_85 : f32 = x_11.x_GLF_uniform_float_values[0].el;
         color[x_83] = x_85;
       }
       case 1: {
-        let x_52 : i32 = x_7.x_GLF_uniform_int_values[0];
+        let x_52 : i32 = x_7.x_GLF_uniform_int_values[0].el;
         j = x_52;
         loop {
           let x_57 : i32 = i;
@@ -48,7 +58,7 @@ fn main_1() {
           } else {
             break;
           }
-          let x_62 : i32 = x_7.x_GLF_uniform_int_values[0];
+          let x_62 : i32 = x_7.x_GLF_uniform_int_values[0].el;
           k = x_62;
           loop {
             let x_67 : i32 = k;
@@ -58,7 +68,7 @@ fn main_1() {
               break;
             }
             let x_71 : i32 = k;
-            let x_73 : f32 = x_11.x_GLF_uniform_float_values[0];
+            let x_73 : f32 = x_11.x_GLF_uniform_float_values[0].el;
             color[x_71] = x_73;
 
             continuing {
@@ -73,7 +83,7 @@ fn main_1() {
           }
         }
         let x_79 : i32 = i;
-        let x_81 : f32 = x_11.x_GLF_uniform_float_values[0];
+        let x_81 : f32 = x_11.x_GLF_uniform_float_values[0].el;
         color[x_79] = x_81;
       }
       default: {
@@ -93,7 +103,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

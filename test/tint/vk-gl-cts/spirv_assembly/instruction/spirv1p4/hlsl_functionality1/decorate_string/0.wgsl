@@ -16,7 +16,7 @@ struct main_out {
   gl_Position : vec4<f32>;
   @location(0) @interpolate(flat)
   pos_1 : u32;
-};
+}
 
 @stage(vertex)
 fn main(@location(0) position_param : vec4<f32>) -> main_out {

@@ -22,9 +22,9 @@ fn main_1() {
 }
 
 struct main_out {
-  @location(0)
+  @location(0) @interpolate(flat)
   expect_1 : i32;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

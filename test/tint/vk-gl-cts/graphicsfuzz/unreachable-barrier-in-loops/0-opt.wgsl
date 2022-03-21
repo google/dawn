@@ -1,16 +1,16 @@
 struct buf1 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 struct buf2 {
   resolution : vec2<f32>;
-};
+}
 
-type RTArr = @stride(4) array<i32>;
+type RTArr = array<i32>;
 
 struct doesNotMatter {
   x_compute_data : RTArr;
-};
+}
 
 var<private> gl_GlobalInvocationID : vec3<u32>;
 
@@ -21,7 +21,7 @@ var<private> gl_GlobalInvocationID : vec3<u32>;
 @group(0) @binding(0) var<storage, read_write> x_15 : doesNotMatter;
 
 fn main_1() {
-  var A : array<f32, 1>;
+  var A : array<f32, 1u>;
   var i : i32;
   var value : vec4<f32>;
   var m : i32;

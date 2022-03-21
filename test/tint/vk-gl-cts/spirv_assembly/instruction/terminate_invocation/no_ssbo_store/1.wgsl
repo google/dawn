@@ -1,8 +1,8 @@
-type RTArr = @stride(4) array<i32>;
+type RTArr = array<i32>;
 
 struct S {
   field0 : RTArr;
-};
+}
 
 var<private> x_2 : vec4<f32>;
 
@@ -25,9 +25,9 @@ fn main_1() {
 }
 
 struct main_out {
-  @location(0)
+  @location(0) @interpolate(flat)
   x_4_1 : i32;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) x_2_param : vec4<f32>, @location(0) @interpolate(flat) x_3_param : i32) -> main_out {

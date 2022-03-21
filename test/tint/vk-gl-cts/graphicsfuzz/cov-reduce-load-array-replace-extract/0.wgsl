@@ -1,15 +1,15 @@
 struct buf0 {
   zero : i32;
-};
+}
 
 var<private> x_GLF_color : vec4<f32>;
 
 @group(0) @binding(0) var<uniform> x_5 : buf0;
 
 fn main_1() {
-  var x_9 : array<i32, 1>;
+  var x_9 : array<i32, 1u>;
   var x_10_phi : i32;
-  let x_33 : array<i32, 1> = x_9;
+  let x_33 : array<i32, 1u> = x_9;
   let x_6 : i32 = x_33[0u];
   loop {
     x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -23,7 +23,7 @@ fn main_1() {
     break;
   }
   let x_10 : i32 = x_10_phi;
-  if (((x_10 == 1) || (x_10 == 2))) {
+  if (((x_10 == 1) | (x_10 == 2))) {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   } else {
     x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -34,7 +34,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

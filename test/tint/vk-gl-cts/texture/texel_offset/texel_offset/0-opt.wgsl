@@ -12,7 +12,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   result_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

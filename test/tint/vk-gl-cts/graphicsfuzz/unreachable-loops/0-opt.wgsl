@@ -1,6 +1,6 @@
 struct buf0 {
   injected : vec2<f32>;
-};
+}
 
 var<private> x_GLF_color : vec4<f32>;
 
@@ -36,7 +36,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

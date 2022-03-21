@@ -1,13 +1,13 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_6 : buf0;
 
 var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
-  var data : array<i32, 10>;
+  var data : array<i32, 10u>;
   var x_40 : i32;
   var x_40_phi : i32;
   var x_11_phi : i32;
@@ -48,7 +48,6 @@ fn main_1() {
         continue;
       }
     }
-    x_41_phi = 0;
 
     continuing {
       x_41 = x_41_phi;
@@ -64,7 +63,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

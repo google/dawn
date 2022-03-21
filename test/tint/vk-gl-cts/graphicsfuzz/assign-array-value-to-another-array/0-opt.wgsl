@@ -2,8 +2,8 @@ var<private> x_GLF_color : vec4<f32>;
 
 fn func_i1_(x : ptr<function, i32>) {
   var a : i32;
-  var data : array<i32, 9>;
-  var temp : array<i32, 2>;
+  var data : array<i32, 9u>;
+  var temp : array<i32, 2u>;
   var i : i32;
   var x_95 : bool;
   var x_96_phi : bool;
@@ -85,7 +85,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

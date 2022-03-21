@@ -2,13 +2,13 @@ struct struct_base {
   data : i32;
   leftIndex : i32;
   rightIndex : i32;
-};
+}
 
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
-var<private> struct_array : array<struct_base, 3>;
+var<private> struct_array : array<struct_base, 3u>;
 
 @group(0) @binding(0) var<uniform> x_8 : buf0;
 
@@ -16,7 +16,7 @@ var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
   var index : i32;
-  struct_array = array<struct_base, 3>(struct_base(1, 1, 1), struct_base(1, 1, 1), struct_base(1, 1, 1));
+  struct_array = array<struct_base, 3u>(struct_base(1, 1, 1), struct_base(1, 1, 1), struct_base(1, 1, 1));
   index = 1;
   struct_array[1].rightIndex = 1;
   let x_39 : i32 = struct_array[1].leftIndex;
@@ -41,7 +41,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

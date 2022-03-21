@@ -1,12 +1,12 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
-type RTArr = @stride(4) array<u32>;
+type RTArr = array<u32>;
 
 struct doesNotMatter {
   x_compute_data : RTArr;
-};
+}
 
 var<private> GLF_live2gl_FragCoord : vec4<f32>;
 

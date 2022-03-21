@@ -1,10 +1,10 @@
 struct buf0 {
   resolution : vec2<f32>;
-};
+}
 
 struct buf1 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_13 : buf0;
 
@@ -32,7 +32,7 @@ fn compute_value_f1_f1_(limit : ptr<function, f32>, thirty_two : ptr<function, f
     } else {
       let x_136 : i32 = i;
       let x_138 : f32 = *(thirty_two);
-      if (((f32(x_136) % round(x_138)) <= 0.01)) {
+      if (((f32(x_136) - (round(x_138) * floor((f32(x_136) / round(x_138))))) <= 0.01)) {
         let x_144 : f32 = result;
         result = (x_144 + 100.0);
       }
@@ -121,7 +121,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

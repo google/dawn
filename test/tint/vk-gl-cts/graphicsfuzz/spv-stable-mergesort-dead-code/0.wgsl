@@ -1,10 +1,10 @@
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
-var<private> data : array<i32, 10>;
+var<private> data : array<i32, 10u>;
 
-var<private> temp : array<i32, 10>;
+var<private> temp : array<i32, 10u>;
 
 @group(0) @binding(0) var<uniform> x_28 : buf0;
 
@@ -28,7 +28,7 @@ fn merge_i1_i1_i1_(from : ptr<function, i32>, mid : ptr<function, i32>, to : ptr
     let x_260 : i32 = *(mid);
     let x_262 : i32 = j;
     let x_263 : i32 = *(to);
-    if (((x_259 <= x_260) && (x_262 <= x_263))) {
+    if (((x_259 <= x_260) & (x_262 <= x_263))) {
     } else {
       break;
     }
@@ -56,7 +56,7 @@ fn merge_i1_i1_i1_(from : ptr<function, i32>, mid : ptr<function, i32>, to : ptr
     let x_295 : i32 = i;
     let x_297 : i32 = i;
     let x_298 : i32 = *(mid);
-    if (((x_295 < 10) && (x_297 <= x_298))) {
+    if (((x_295 < 10) & (x_297 <= x_298))) {
     } else {
       break;
     }
@@ -295,7 +295,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

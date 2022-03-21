@@ -25,7 +25,7 @@ fn main_1() {
     loop {
       x_45 = x_45_phi;
       let x_7 : i32 = x_7_phi;
-      x_51_phi = vec3<f32>(0.0, 0.0, 0.0);
+      x_51_phi = vec3<f32>();
       x_52_phi = x_45;
       if ((x_7 < 0)) {
       } else {
@@ -48,7 +48,7 @@ fn main_1() {
     if (x_52) {
       break;
     }
-    x_54 = vec3<f32>(0.0, 0.0, 0.0);
+    x_54 = vec3<f32>();
     x_36 = true;
     x_55_phi = x_54;
     break;
@@ -65,7 +65,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {
@@ -95,7 +95,7 @@ fn GLF_live4drawShape_() -> vec3<f32> {
     loop {
       x_65 = x_65_phi;
       let x_8 : i32 = x_8_phi;
-      x_71_phi = vec3<f32>(0.0, 0.0, 0.0);
+      x_71_phi = vec3<f32>();
       x_72_phi = x_65;
       if ((x_8 < 0)) {
       } else {
@@ -118,7 +118,7 @@ fn GLF_live4drawShape_() -> vec3<f32> {
     if (x_72) {
       break;
     }
-    x_74 = vec3<f32>(0.0, 0.0, 0.0);
+    x_74 = vec3<f32>();
     x_57 = true;
     x_75_phi = x_74;
     break;

@@ -1,10 +1,10 @@
 struct buf1 {
   resolution : vec2<f32>;
-};
+}
 
 struct buf0 {
   injectionSwitch : vec2<f32>;
-};
+}
 
 var<private> gl_FragCoord : vec4<f32>;
 
@@ -15,7 +15,7 @@ var<private> gl_FragCoord : vec4<f32>;
 var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
-  var data : array<f32, 10>;
+  var data : array<f32, 10u>;
   var x_40_phi : i32;
   var x_52_phi : i32;
   x_40_phi = 0;
@@ -57,10 +57,10 @@ fn main_1() {
       if ((x_59 < (x_52 + 1))) {
         continue;
       }
-      let x_69 : ptr<function, f32> = &(data[x_52]);
-      let x_70 : f32 = *(x_69);
-      let x_71 : ptr<function, f32> = &(data[x_59]);
-      let x_72 : f32 = *(x_71);
+      let x_69_save = x_52;
+      let x_70 : f32 = data[x_69_save];
+      let x_71_save = x_59;
+      let x_72 : f32 = data[x_71_save];
       let x_74 : f32 = gl_FragCoord.y;
       let x_76 : f32 = x_6.resolution.y;
       if ((x_74 < (x_76 * 0.5))) {
@@ -72,10 +72,10 @@ fn main_1() {
       }
       let x_84 : bool = x_84_phi;
       if (x_84) {
-        let x_87 : f32 = *(x_69);
-        let x_88 : f32 = *(x_71);
-        *(x_69) = x_88;
-        *(x_71) = x_87;
+        let x_87 : f32 = data[x_69_save];
+        let x_88 : f32 = data[x_71_save];
+        data[x_69_save] = x_88;
+        data[x_71_save] = x_87;
       }
 
       continuing {
@@ -108,7 +108,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {

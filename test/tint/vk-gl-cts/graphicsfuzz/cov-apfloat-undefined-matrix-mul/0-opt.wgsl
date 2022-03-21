@@ -1,14 +1,24 @@
-type Arr = @stride(16) array<i32, 12>;
+struct strided_arr {
+  @size(16)
+  el : i32;
+}
+
+type Arr = array<strided_arr, 12u>;
 
 struct buf1 {
   x_GLF_uniform_int_values : Arr;
-};
+}
 
-type Arr_1 = @stride(16) array<f32, 1>;
+struct strided_arr_1 {
+  @size(16)
+  el : f32;
+}
+
+type Arr_1 = array<strided_arr_1, 1u>;
 
 struct buf0 {
   x_GLF_uniform_float_values : Arr_1;
-};
+}
 
 @group(0) @binding(1) var<uniform> x_6 : buf1;
 
@@ -25,24 +35,24 @@ fn main_1() {
   var v1 : vec4<f32>;
   var v2 : vec4<f32>;
   var v3 : vec4<f32>;
-  let x_17 : i32 = x_6.x_GLF_uniform_int_values[4];
-  let x_18 : i32 = x_6.x_GLF_uniform_int_values[5];
-  let x_19 : i32 = x_6.x_GLF_uniform_int_values[6];
-  let x_20 : i32 = x_6.x_GLF_uniform_int_values[10];
-  let x_21 : i32 = x_6.x_GLF_uniform_int_values[7];
-  let x_22 : i32 = x_6.x_GLF_uniform_int_values[8];
-  let x_23 : i32 = x_6.x_GLF_uniform_int_values[11];
-  let x_24 : i32 = x_6.x_GLF_uniform_int_values[1];
-  let x_25 : i32 = x_6.x_GLF_uniform_int_values[2];
-  let x_26 : i32 = x_6.x_GLF_uniform_int_values[3];
+  let x_17 : i32 = x_6.x_GLF_uniform_int_values[4].el;
+  let x_18 : i32 = x_6.x_GLF_uniform_int_values[5].el;
+  let x_19 : i32 = x_6.x_GLF_uniform_int_values[6].el;
+  let x_20 : i32 = x_6.x_GLF_uniform_int_values[10].el;
+  let x_21 : i32 = x_6.x_GLF_uniform_int_values[7].el;
+  let x_22 : i32 = x_6.x_GLF_uniform_int_values[8].el;
+  let x_23 : i32 = x_6.x_GLF_uniform_int_values[11].el;
+  let x_24 : i32 = x_6.x_GLF_uniform_int_values[1].el;
+  let x_25 : i32 = x_6.x_GLF_uniform_int_values[2].el;
+  let x_26 : i32 = x_6.x_GLF_uniform_int_values[3].el;
   m0 = mat3x4<f32>(vec4<f32>(f32(x_17), f32(x_18), f32(x_19), 4.0), vec4<f32>(f32(x_20), f32(x_21), f32(x_22), 8.0), vec4<f32>(f32(x_23), f32(x_24), f32(x_25), f32(x_26)));
-  let x_27 : i32 = x_6.x_GLF_uniform_int_values[4];
+  let x_27 : i32 = x_6.x_GLF_uniform_int_values[4].el;
   let x_104 : f32 = f32(x_27);
   m1 = mat3x4<f32>(vec4<f32>(x_104, 0.0, 0.0, 0.0), vec4<f32>(0.0, x_104, 0.0, 0.0), vec4<f32>(0.0, 0.0, x_104, 0.0));
   undefined = ldexp(vec3<f32>(1.0, 1.0, 1.0), vec3<i32>(500, 500, 500));
-  let x_28 : i32 = x_6.x_GLF_uniform_int_values[4];
+  let x_28 : i32 = x_6.x_GLF_uniform_int_values[4].el;
   let x_111 : f32 = f32(x_28);
-  let x_29 : i32 = x_6.x_GLF_uniform_int_values[0];
+  let x_29 : i32 = x_6.x_GLF_uniform_int_values[0].el;
   defined = ldexp(vec3<f32>(x_111, x_111, x_111), vec3<i32>(x_29, x_29, x_29));
   let x_116 : mat3x4<f32> = m0;
   let x_117 : vec3<f32> = undefined;
@@ -59,20 +69,20 @@ fn main_1() {
   let x_129 : f32 = v2.x;
   let x_131 : f32 = v3.x;
   if ((x_129 > x_131)) {
-    let x_30 : i32 = x_6.x_GLF_uniform_int_values[4];
-    let x_31 : i32 = x_6.x_GLF_uniform_int_values[9];
-    let x_32 : i32 = x_6.x_GLF_uniform_int_values[9];
-    let x_33 : i32 = x_6.x_GLF_uniform_int_values[4];
+    let x_30 : i32 = x_6.x_GLF_uniform_int_values[4].el;
+    let x_31 : i32 = x_6.x_GLF_uniform_int_values[9].el;
+    let x_32 : i32 = x_6.x_GLF_uniform_int_values[9].el;
+    let x_33 : i32 = x_6.x_GLF_uniform_int_values[4].el;
     x_GLF_color = vec4<f32>(f32(x_30), f32(x_31), f32(x_32), f32(x_33));
   } else {
-    let x_34 : i32 = x_6.x_GLF_uniform_int_values[9];
+    let x_34 : i32 = x_6.x_GLF_uniform_int_values[9].el;
     let x_146 : f32 = f32(x_34);
     x_GLF_color = vec4<f32>(x_146, x_146, x_146, x_146);
   }
   let x_149 : f32 = v0.x;
   let x_151 : f32 = v1.x;
   if ((x_149 < x_151)) {
-    let x_156 : f32 = x_15.x_GLF_uniform_float_values[0];
+    let x_156 : f32 = x_15.x_GLF_uniform_float_values[0].el;
     x_GLF_color.y = x_156;
   }
   return;
@@ -81,7 +91,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

@@ -1,6 +1,6 @@
 struct theSSBO {
   out_data : i32;
-};
+}
 
 @group(0) @binding(0) var<storage, read_write> x_4 : theSSBO;
 
@@ -9,7 +9,7 @@ fn main_1() {
   var x_30_phi : mat2x2<f32>;
   var x_32_phi : i32;
   x_4.out_data = 42;
-  x_30_phi = mat2x2<f32>(vec2<f32>(0.0, 0.0), vec2<f32>(0.0, 0.0));
+  x_30_phi = mat2x2<f32>();
   x_32_phi = 1;
   loop {
     var x_33 : i32;

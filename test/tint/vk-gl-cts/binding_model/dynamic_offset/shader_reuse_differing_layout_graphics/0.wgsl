@@ -1,6 +1,6 @@
 struct block0 {
   in_color : vec4<f32>;
-};
+}
 
 var<private> position : vec4<f32>;
 
@@ -23,7 +23,7 @@ struct main_out {
   gl_Position : vec4<f32>;
   @location(0)
   frag_color_1 : vec4<f32>;
-};
+}
 
 @stage(vertex)
 fn main(@location(0) position_param : vec4<f32>) -> main_out {

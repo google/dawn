@@ -4,7 +4,6 @@ fn mand_() -> vec3<f32> {
   loop {
     return vec3<f32>(1.0, 1.0, 1.0);
   }
-  return vec3<f32>(0.0, 0.0, 0.0);
 }
 
 fn main_1() {
@@ -13,13 +12,12 @@ fn main_1() {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
     return;
   }
-  return;
 }
 
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

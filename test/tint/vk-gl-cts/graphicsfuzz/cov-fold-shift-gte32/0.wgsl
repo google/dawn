@@ -1,6 +1,6 @@
 struct buf0 {
   one : u32;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_6 : buf0;
 
@@ -55,7 +55,7 @@ fn main_1() {
   let x_96 : u32 = d;
   let x_99 : u32 = e;
   let x_102 : u32 = f;
-  if (((((((x_88 == 1u) && (x_90 == 0u)) && (x_93 == 1u)) && (x_96 == 0u)) && (x_99 == 1u)) && (x_102 == 0u))) {
+  if (((((((x_88 == 1u) & (x_90 == 0u)) & (x_93 == 1u)) & (x_96 == 0u)) & (x_99 == 1u)) & (x_102 == 0u))) {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   } else {
     x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -66,7 +66,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

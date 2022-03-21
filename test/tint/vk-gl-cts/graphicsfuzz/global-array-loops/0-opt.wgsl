@@ -1,6 +1,6 @@
 struct buf0 {
   one : f32;
-};
+}
 
 @group(0) @binding(0) var<uniform> x_8 : buf0;
 
@@ -11,11 +11,11 @@ fn main_1() {
   var x_29 : i32;
   var x_30 : i32;
   var x_31 : i32;
-  var globalNumbers : array<i32, 10>;
+  var globalNumbers : array<i32, 10u>;
   var x_17 : i32;
   var acc : i32;
   var i_1 : i32;
-  var localNumbers : array<i32, 2>;
+  var localNumbers : array<i32, 2u>;
   var param : i32;
   var x_24 : i32;
   var x_24_phi : i32;
@@ -89,13 +89,12 @@ fn main_1() {
     let x_34 : i32 = x_34_phi;
     x_31 = x_34;
     let x_93 : i32 = x_31;
-    let x_21 : array<i32, 2> = localNumbers;
-    var x_22_1 : array<i32, 2> = x_21;
+    let x_21 : array<i32, 2u> = localNumbers;
+    var x_22_1 : array<i32, 2u> = x_21;
     x_22_1[1u] = x_93;
-    let x_22 : array<i32, 2> = x_22_1;
+    let x_22 : array<i32, 2u> = x_22_1;
     localNumbers = x_22;
     globalNumbers[0] = 0;
-    let x_95 : ptr<function, i32> = &(localNumbers[1]);
     let x_13 : i32 = x_22[1u];
     param = x_13;
     x_17 = 0;
@@ -106,10 +105,10 @@ fn main_1() {
       } else {
         break;
       }
-      let x_102 : ptr<function, i32> = &(globalNumbers[x_13]);
-      let x_18 : i32 = *(x_102);
+      let x_102_save = x_13;
+      let x_18 : i32 = globalNumbers[x_102_save];
       if ((x_18 <= 1)) {
-        *(x_102) = 1;
+        globalNumbers[x_102_save] = 1;
       }
 
       continuing {
@@ -141,7 +140,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

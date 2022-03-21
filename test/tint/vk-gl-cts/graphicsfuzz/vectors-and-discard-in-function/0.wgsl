@@ -3,7 +3,7 @@ var<private> x_GLF_color : vec4<f32>;
 fn func_() -> i32 {
   var coord : vec2<f32>;
   var tmp3 : f32;
-  var tmp2 : array<f32, 1>;
+  var tmp2 : array<f32, 1u>;
   var tmp : vec4<f32>;
   var x_48 : f32;
   coord = vec2<f32>(1.0, 1.0);
@@ -31,7 +31,7 @@ fn main_1() {
 struct main_out {
   @location(0)
   x_GLF_color_1 : vec4<f32>;
-};
+}
 
 @stage(fragment)
 fn main() -> main_out {

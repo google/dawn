@@ -2,19 +2,19 @@ struct result {
   res0 : i32;
   res1 : i32;
   res2 : i32;
-};
+}
 
 struct block0 {
   data0 : i32;
-};
+}
 
 struct block1 {
   data1 : i32;
-};
+}
 
 struct block2 {
   data2 : i32;
-};
+}
 
 @group(0) @binding(3) var<storage, read_write> x_4 : result;
 
