@@ -54,7 +54,7 @@ class OpArrayLengthTest : public DawnTest {
         // 0.
         mShaderInterface = R"(
             struct DataBuffer {
-                data : @stride(4) array<f32>;
+                data : array<f32>;
             };
 
             // The length should be 1 because the buffer is 4-byte long.
@@ -72,7 +72,7 @@ class OpArrayLengthTest : public DawnTest {
 
             struct Buffer3 {
                 @size(64) garbage : mat4x4<f32>;
-                data : @stride(8) array<Buffer3Data>;
+                data : array<Buffer3Data>;
             };
             @group(0) @binding(2) var<storage, read> buffer3 : Buffer3;
         )";
@@ -125,7 +125,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, (R"(
         struct ResultBuffer {
-            data : @stride(4) array<u32, 3>;
+            data : array<u32, 3>;
         };
         @group(1) @binding(0) var<storage, read_write> result : ResultBuffer;
         )" + mShaderInterface + R"(

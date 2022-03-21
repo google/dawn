@@ -444,38 +444,28 @@ namespace {
                 Field{"mat3x4<f32>", /* align */ 16, /* size */ 48}.PaddedSize(128),
                 Field{"mat4x4<f32>", /* align */ 16, /* size */ 64}.PaddedSize(128),
 
-                // Array types with no custom alignment, size or stride
+                // Array types with no custom alignment or size.
                 // Note: The use of StorageBufferOnly() is due to UBOs requiring 16 byte alignment
                 // of array elements. See https://www.w3.org/TR/WGSL/#storage-class-constraints
                 Field{"array<u32, 1>", /* align */ 4, /* size */ 4}.StorageBufferOnly(),
                 Field{"array<u32, 2>", /* align */ 4, /* size */ 8}.StorageBufferOnly(),
                 Field{"array<u32, 3>", /* align */ 4, /* size */ 12}.StorageBufferOnly(),
                 Field{"array<u32, 4>", /* align */ 4, /* size */ 16}.StorageBufferOnly(),
-                Field{"@stride(16) array<u32, 1>", /* align */ 4, /* size */ 16}
-                    .StorageBufferOnly()
-                    .Strided<4, 12>(),
-                Field{"@stride(16) array<u32, 2>", /* align */ 4, /* size */ 32}
-                    .StorageBufferOnly()
-                    .Strided<4, 12>(),
-                Field{"@stride(16) array<u32, 3>", /* align */ 4, /* size */ 48}
-                    .StorageBufferOnly()
-                    .Strided<4, 12>(),
-                Field{"@stride(16) array<u32, 4>", /* align */ 4, /* size */ 64}
-                    .StorageBufferOnly()
-                    .Strided<4, 12>(),
+                Field{"array<vec4<u32>, 1>", /* align */ 16, /* size */ 16},
+                Field{"array<vec4<u32>, 2>", /* align */ 16, /* size */ 32},
+                Field{"array<vec4<u32>, 3>", /* align */ 16, /* size */ 48},
+                Field{"array<vec4<u32>, 4>", /* align */ 16, /* size */ 64},
                 Field{"array<vec3<u32>, 4>", /* align */ 16, /* size */ 64}.Strided<12, 4>(),
-                Field{"@stride(32) array<vec3<u32>, 4>", /* align */ 16, /* size */ 128}
-                    .Strided<12, 20>(),
 
                 // Array types with custom alignment
                 Field{"array<u32, 1>", /* align */ 32, /* size */ 4}.StorageBufferOnly(),
                 Field{"array<u32, 2>", /* align */ 32, /* size */ 8}.StorageBufferOnly(),
                 Field{"array<u32, 3>", /* align */ 32, /* size */ 12}.StorageBufferOnly(),
                 Field{"array<u32, 4>", /* align */ 32, /* size */ 16}.StorageBufferOnly(),
-                Field{"@stride(16) array<u32, 1>", /* align */ 32, /* size */ 16}.Strided<4, 12>(),
-                Field{"@stride(16) array<u32, 2>", /* align */ 32, /* size */ 32}.Strided<4, 12>(),
-                Field{"@stride(16) array<u32, 3>", /* align */ 32, /* size */ 48}.Strided<4, 12>(),
-                Field{"@stride(16) array<u32, 4>", /* align */ 32, /* size */ 64}.Strided<4, 12>(),
+                Field{"array<vec4<u32>, 1>", /* align */ 32, /* size */ 16},
+                Field{"array<vec4<u32>, 2>", /* align */ 32, /* size */ 32},
+                Field{"array<vec4<u32>, 3>", /* align */ 32, /* size */ 48},
+                Field{"array<vec4<u32>, 4>", /* align */ 32, /* size */ 64},
                 Field{"array<vec3<u32>, 4>", /* align */ 32, /* size */ 64}.Strided<12, 4>(),
 
                 // Array types with custom size
