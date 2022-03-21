@@ -108,7 +108,7 @@ fn main() -> @builtin(position) vec4<f32> {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @stage(vertex)
@@ -137,7 +137,7 @@ fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -175,7 +175,7 @@ fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -213,7 +213,7 @@ fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(5) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -256,7 +256,7 @@ fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -304,7 +304,7 @@ fn main(@location(0) var_a : f32,
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -364,7 +364,7 @@ fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -444,7 +444,7 @@ struct Inputs {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -526,7 +526,7 @@ fn main(inputs : Inputs, indices : Indices) -> @builtin(position) vec4<f32> {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -603,7 +603,7 @@ struct Indices {
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -670,7 +670,7 @@ fn main(@location(0) var_a : f32,
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -715,7 +715,7 @@ fn main(@location(0) var_a : vec2<f32>,
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -771,7 +771,7 @@ fn main(@location(0) var_a : f32,
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data_1 : @stride(4) array<u32>;
+  tint_vertex_data_1 : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0_1 : TintVertexData;
@@ -848,7 +848,7 @@ fn main(
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -1008,7 +1008,7 @@ fn main(
   auto* expect =
       R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
@@ -1167,7 +1167,7 @@ fn main(
 
   auto* expect = R"(
 struct TintVertexData {
-  tint_vertex_data : @stride(4) array<u32>;
+  tint_vertex_data : array<u32>;
 }
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;

@@ -166,33 +166,6 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   EXPECT_EQ(str->members.size(), 2u);
 }
 
-TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
-  auto p = parser("struct A { data: @stride(4) array<f32>; }");
-
-  p->expect_global_decl();
-  ASSERT_FALSE(p->has_error()) << p->error();
-
-  auto program = p->program();
-  ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
-
-  auto* t = program.AST().TypeDecls()[0];
-  ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<ast::Struct>());
-
-  auto* str = t->As<ast::Struct>();
-  EXPECT_EQ(str->name, program.Symbols().Get("A"));
-  EXPECT_EQ(str->members.size(), 1u);
-
-  const auto* ty = str->members[0]->type;
-  ASSERT_TRUE(ty->Is<ast::Array>());
-  const auto* arr = ty->As<ast::Array>();
-
-  ASSERT_EQ(arr->attributes.size(), 1u);
-  auto* stride = arr->attributes[0];
-  ASSERT_TRUE(stride->Is<ast::StrideAttribute>());
-  ASSERT_EQ(stride->As<ast::StrideAttribute>()->stride, 4u);
-}
-
 TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
   auto p = parser("A {}");
   p->expect_global_decl();

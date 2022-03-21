@@ -419,11 +419,6 @@ class ParserImpl {
   /// Parses a `type_decl` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<const ast::Type*> type_decl();
-  /// Parses a `type_decl` grammar element with the given pre-parsed
-  /// attributes.
-  /// @param attrs the list of attributes for the type.
-  /// @returns the parsed Type or nullptr if none matched.
-  Maybe<const ast::Type*> type_decl(ast::AttributeList& attrs);
   /// Parses a `storage_class` grammar element, erroring on parse failure.
   /// @param use a description of what was being parsed if an error was raised.
   /// @returns the storage class or StorageClass::kNone if none matched
@@ -849,8 +844,7 @@ class ParserImpl {
   Expect<const ast::Type*> expect_type_decl_pointer(Token t);
   Expect<const ast::Type*> expect_type_decl_atomic(Token t);
   Expect<const ast::Type*> expect_type_decl_vector(Token t);
-  Expect<const ast::Type*> expect_type_decl_array(Token t,
-                                                  ast::AttributeList attrs);
+  Expect<const ast::Type*> expect_type_decl_array(Token t);
   Expect<const ast::Type*> expect_type_decl_matrix(Token t);
 
   Expect<const ast::Type*> expect_type(std::string_view use);

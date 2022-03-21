@@ -48,7 +48,7 @@ struct GlobalLights {
   dirIntensity : f32;
   dirDirection : vec3<f32>;
   lightCount : u32;
-  lights : @stride(32) array<Light>;
+  lights : array<Light>;
 }
 
 @binding(2) @group(0) var<storage, read> globalLights : GlobalLights;

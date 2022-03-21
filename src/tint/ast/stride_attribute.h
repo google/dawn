@@ -18,11 +18,13 @@
 #include <string>
 
 #include "src/tint/ast/attribute.h"
+#include "src/tint/ast/internal_attribute.h"
 
 namespace tint {
 namespace ast {
 
-/// A stride attribute
+/// A stride attribute used by the SPIR-V reader for strided arrays and
+/// matrices.
 class StrideAttribute final : public Castable<StrideAttribute, Attribute> {
  public:
   /// constructor

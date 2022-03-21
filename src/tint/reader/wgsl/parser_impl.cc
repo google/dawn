@@ -119,7 +119,6 @@ const char kLocationAttribute[] = "location";
 const char kSizeAttribute[] = "size";
 const char kAlignAttribute[] = "align";
 const char kStageAttribute[] = "stage";
-const char kStrideAttribute[] = "stride";
 const char kWorkgroupSizeAttribute[] = "workgroup_size";
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
@@ -799,7 +798,7 @@ Expect<ast::TexelFormat> ParserImpl::expect_texel_format(std::string_view use) {
 }
 
 // variable_ident_decl
-//   : IDENT COLON variable_attribute_list* type_decl
+//   : IDENT COLON type_decl
 Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
     std::string_view use,
     bool allow_inferred) {
@@ -814,19 +813,12 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (!expect(use, Token::Type::kColon))
     return Failure::kErrored;
 
-  auto attrs = attribute_list();
-  if (attrs.errored)
-    return Failure::kErrored;
-
   auto t = peek();
-  auto type = type_decl(attrs.value);
+  auto type = type_decl();
   if (type.errored)
     return Failure::kErrored;
   if (!type.matched)
     return add_error(t.source(), "invalid type", use);
-
-  if (!expect_attributes_consumed(attrs.value))
-    return Failure::kErrored;
 
   return TypedIdentifier{type.value, ident.value, ident.source};
 }
@@ -929,25 +921,6 @@ Maybe<const ast::Alias*> ParserImpl::type_alias() {
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
 //   | texture_sampler_types
 Maybe<const ast::Type*> ParserImpl::type_decl() {
-  auto attrs = attribute_list();
-  if (attrs.errored)
-    return Failure::kErrored;
-
-  auto type = type_decl(attrs.value);
-  if (type.errored) {
-    return Failure::kErrored;
-  }
-  if (!expect_attributes_consumed(attrs.value)) {
-    return Failure::kErrored;
-  }
-  if (!type.matched) {
-    return Failure::kNoMatch;
-  }
-
-  return type;
-}
-
-Maybe<const ast::Type*> ParserImpl::type_decl(ast::AttributeList& attrs) {
   auto t = peek();
   Source source;
   if (match(Token::Type::kIdentifier, &source)) {
@@ -981,7 +954,7 @@ Maybe<const ast::Type*> ParserImpl::type_decl(ast::AttributeList& attrs) {
   }
 
   if (match(Token::Type::kArray, &source)) {
-    return expect_type_decl_array(t, std::move(attrs));
+    return expect_type_decl_array(t);
   }
 
   if (t.IsMatrix()) {
@@ -1080,9 +1053,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   return builder_.ty.vec(make_source_range_from(t.source()), subtype, count);
 }
 
-Expect<const ast::Type*> ParserImpl::expect_type_decl_array(
-    Token t,
-    ast::AttributeList attrs) {
+Expect<const ast::Type*> ParserImpl::expect_type_decl_array(Token t) {
   const char* use = "array declaration";
 
   const ast::Expression* size = nullptr;
@@ -1111,7 +1082,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_array(
   }
 
   return builder_.ty.array(make_source_range_from(t.source()), subtype.value,
-                           size, std::move(attrs));
+                           size);
 }
 
 Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
@@ -1321,19 +1292,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     }
     return_attributes = attrs.value;
 
-    // Apply stride attributes to the type node instead of the function.
-    ast::AttributeList type_attributes;
-    auto itr =
-        std::find_if(return_attributes.begin(), return_attributes.end(),
-                     [](auto* attr) { return Is<ast::StrideAttribute>(attr); });
-    if (itr != return_attributes.end()) {
-      type_attributes.emplace_back(*itr);
-      return_attributes.erase(itr);
-    }
-
-    auto tok = peek();
-
-    auto type = type_decl(type_attributes);
+    auto type = type_decl();
     if (type.errored) {
       errored = true;
     } else if (!type.matched) {
@@ -2971,19 +2930,6 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
         return Failure::kErrored;
 
       return create<ast::StageAttribute>(t.source(), stage.value);
-    });
-  }
-
-  if (t == kStrideAttribute) {
-    const char* use = "stride attribute";
-    return expect_paren_block(use, [&]() -> Result {
-      auto val = expect_nonzero_positive_sint(use);
-      if (val.errored)
-        return Failure::kErrored;
-      deprecated(t.source(),
-                 "the @stride attribute is deprecated; use a larger type if "
-                 "necessary");
-      return create<ast::StrideAttribute>(t.source(), val.value);
     });
   }
 

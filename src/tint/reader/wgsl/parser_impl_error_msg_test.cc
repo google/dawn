@@ -445,9 +445,9 @@ fn f() {
 
 TEST_F(ParserImplErrorTest, FunctionScopeUnusedDecl) {
   EXPECT("fn f(a:i32)->i32{return a;@size(1)}",
-         R"(test.wgsl:1:28 error: unexpected attributes
+         R"(test.wgsl:1:27 error: expected '}'
 fn f(a:i32)->i32{return a;@size(1)}
-                           ^^^^
+                          ^
 )");
 }
 
@@ -771,31 +771,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingGreaterThan) {
          R"(test.wgsl:1:21 error: expected '>' for array declaration
 var i : array<u32, 3;
                     ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayAttrNotArray) {
-  EXPECT("var i : @location(1) i32;",
-         R"(test.wgsl:1:10 error: unexpected attributes
-var i : @location(1) i32;
-         ^^^^^^^^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayStrideInvalid) {
-  EXPECT(
-      "var i : @stride(x) array<i32>;",
-      R"(test.wgsl:1:17 error: expected signed integer literal for stride attribute
-var i : @stride(x) array<i32>;
-                ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayStrideNegative) {
-  EXPECT("var i : @stride(-1) array<i32>;",
-         R"(test.wgsl:1:17 error: stride attribute must be greater than 0
-var i : @stride(-1) array<i32>;
-                ^^
 )");
 }
 

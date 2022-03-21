@@ -41,7 +41,7 @@ struct S1 {
 let c0 : i32 = 10;
 let c1 : bool = true;
 
-type t0 = @stride(16) array<vec4<f32>>;
+type t0 = array<vec4<f32>>;
 type t1 = array<vec4<f32>>;
 
 var<private> g0 : u32 = 20u;

@@ -258,7 +258,7 @@ struct State {
         ctx.dst->Symbols().New(kStructName),
         {
             ctx.dst->Member(GetStructBufferName(),
-                            ctx.dst->ty.array<ProgramBuilder::u32>(4)),
+                            ctx.dst->ty.array<ProgramBuilder::u32>()),
         });
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
       // The decorated variable with struct type

@@ -57,7 +57,6 @@
 #include "src/tint/transform/loop_to_for_loop.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/num_workgroups_from_uniform.h"
-#include "src/tint/transform/pad_array_elements.h"
 #include "src/tint/transform/promote_initializers_to_const_var.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
@@ -209,7 +208,6 @@ SanitizedResult Sanitize(
   manager.Add<transform::CalculateArrayLength>();
   manager.Add<transform::PromoteInitializersToConstVar>();
 
-  manager.Add<transform::PadArrayElements>();
   manager.Add<transform::AddEmptyEntryPoint>();
 
   data.Add<transform::CanonicalizeEntryPointIO::Config>(

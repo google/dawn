@@ -27,7 +27,6 @@
 #include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/loop_to_for_loop.h"
 #include "src/tint/transform/manager.h"
-#include "src/tint/transform/pad_array_elements.h"
 #include "src/tint/transform/promote_initializers_to_const_var.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
@@ -105,7 +104,6 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   }
   manager.Add<PromoteInitializersToConstVar>();
 
-  manager.Add<PadArrayElements>();
   manager.Add<AddEmptyEntryPoint>();
   manager.Add<AddSpirvBlockAttribute>();
 

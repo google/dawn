@@ -75,35 +75,6 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
   ASSERT_EQ(p->error(), "1:1: expected identifier for test");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_NonAccessAttrFail) {
-  auto p = parser("my_var : @location(1) S");
-
-  auto* mem = Member("a", ty.i32(), ast::AttributeList{});
-  ast::StructMemberList members;
-  members.push_back(mem);
-
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:11: unexpected attributes");
-}
-
-TEST_F(ParserImplTest, VariableIdentDecl_AttributeMissingRightParen) {
-  auto p = parser("my_var : @location(4 S");
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:22: expected ')' for location attribute");
-}
-
-TEST_F(ParserImplTest, VariableIdentDecl_AttributeMissingLeftParen) {
-  auto p = parser("my_var : @stride 4) S");
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:18: expected '(' for stride attribute");
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

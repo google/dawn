@@ -327,7 +327,6 @@ tint_unittests_source_set("tint_unittests_transform_src") {
     "../../src/tint/transform/module_scope_var_to_entry_point_param_test.cc",
     "../../src/tint/transform/multiplanar_external_texture_test.cc",
     "../../src/tint/transform/num_workgroups_from_uniform_test.cc",
-    "../../src/tint/transform/pad_array_elements_test.cc",
     "../../src/tint/transform/promote_initializers_to_const_var_test.cc",
     "../../src/tint/transform/promote_side_effects_to_decl_test.cc",
     "../../src/tint/transform/remove_phonies_test.cc",

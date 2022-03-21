@@ -467,8 +467,6 @@ libtint_source_set("libtint_core_all_src") {
     "transform/multiplanar_external_texture.h",
     "transform/num_workgroups_from_uniform.cc",
     "transform/num_workgroups_from_uniform.h",
-    "transform/pad_array_elements.cc",
-    "transform/pad_array_elements.h",
     "transform/promote_initializers_to_const_var.cc",
     "transform/promote_initializers_to_const_var.h",
     "transform/promote_side_effects_to_decl.cc",

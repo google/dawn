@@ -1622,7 +1622,7 @@ OpReturn
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
   // struct my_struct {
-  //   a : @stride(4) array<f32>;
+  //   a : array<f32>;
   // };
   // @binding(1) @group(2) var<storage, read> b : my_struct;
   //

@@ -119,30 +119,6 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
   EXPECT_EQ(out.str(), "bool ary[1]");
 }
 
-TEST_F(MslGeneratorImplTest, EmitType_ArrayWithStride) {
-  auto* s = Structure("s", {Member("arr", ty.array<f32, 4>(64))});
-  auto* ubo = Global("ubo", ty.Of(s), ast::StorageClass::kUniform,
-                     ast::AttributeList{
-                         create<ast::GroupAttribute>(0),
-                         create<ast::BindingAttribute>(1),
-                     });
-  WrapInFunction(MemberAccessor(ubo, "arr"));
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr(R"(struct tint_padded_array_element {
-  /* 0x0000 */ float el;
-  /* 0x0004 */ int8_t tint_pad[60];
-};)"));
-  EXPECT_THAT(gen.result(), HasSubstr(R"(struct tint_array_wrapper {
-  /* 0x0000 */ tint_padded_array_element arr[4];
-};)"));
-  EXPECT_THAT(gen.result(), HasSubstr(R"(struct s {
-  /* 0x0000 */ tint_array_wrapper arr;
-};)"));
-}
-
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
   auto* bool_ = create<sem::Bool>();
 

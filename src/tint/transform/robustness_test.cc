@@ -1431,7 +1431,7 @@ struct S {
 };
 @group(0) @binding(0) var<storage, read> s : S;
 
-type UArr = @stride(16) array<f32, 4>;
+type UArr = array<vec4<f32>, 4>;
 struct U {
   a : UArr;
 };
@@ -1451,11 +1451,11 @@ fn f() {
   var i32_sb4 : f32 = s.b[-1];
   var i32_sb5 : f32 = s.b[-4];
 
-  var i32_ua1 : f32 = u.a[4];
-  var i32_ua2 : f32 = u.a[1];
-  var i32_ua3 : f32 = u.a[0];
-  var i32_ua4 : f32 = u.a[-1];
-  var i32_ua5 : f32 = u.a[-4];
+  var i32_ua1 : f32 = u.a[4].x;
+  var i32_ua2 : f32 = u.a[1].x;
+  var i32_ua3 : f32 = u.a[0].x;
+  var i32_ua4 : f32 = u.a[-1].x;
+  var i32_ua5 : f32 = u.a[-4].x;
 
   // Unsigned
   var u32_sa1 : f32 = s.a[0u];
@@ -1472,12 +1472,12 @@ fn f() {
   var u32_sb5 : f32 = s.b[10u];
   var u32_sb6 : f32 = s.b[100u];
 
-  var u32_ua1 : f32 = u.a[0u];
-  var u32_ua2 : f32 = u.a[1u];
-  var u32_ua3 : f32 = u.a[3u];
-  var u32_ua4 : f32 = u.a[4u];
-  var u32_ua5 : f32 = u.a[10u];
-  var u32_ua6 : f32 = u.a[100u];
+  var u32_ua1 : f32 = u.a[0u].x;
+  var u32_ua2 : f32 = u.a[1u].x;
+  var u32_ua3 : f32 = u.a[3u].x;
+  var u32_ua4 : f32 = u.a[4u].x;
+  var u32_ua5 : f32 = u.a[10u].x;
+  var u32_ua6 : f32 = u.a[100u].x;
 }
 )";
 
@@ -1490,7 +1490,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> s : S;
 
-type UArr = @stride(16) array<f32, 4>;
+type UArr = array<vec4<f32>, 4>;
 
 struct U {
   a : UArr;
@@ -1509,11 +1509,11 @@ fn f() {
   var i32_sb3 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb4 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb5 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
-  var i32_ua1 : f32 = u.a[3];
-  var i32_ua2 : f32 = u.a[1];
-  var i32_ua3 : f32 = u.a[0];
-  var i32_ua4 : f32 = u.a[0];
-  var i32_ua5 : f32 = u.a[0];
+  var i32_ua1 : f32 = u.a[3].x;
+  var i32_ua2 : f32 = u.a[1].x;
+  var i32_ua3 : f32 = u.a[0].x;
+  var i32_ua4 : f32 = u.a[0].x;
+  var i32_ua5 : f32 = u.a[0].x;
   var u32_sa1 : f32 = s.a[0u];
   var u32_sa2 : f32 = s.a[1u];
   var u32_sa3 : f32 = s.a[3u];
@@ -1526,12 +1526,12 @@ fn f() {
   var u32_sb4 : f32 = s.b[min(4u, (arrayLength(&(s.b)) - 1u))];
   var u32_sb5 : f32 = s.b[min(10u, (arrayLength(&(s.b)) - 1u))];
   var u32_sb6 : f32 = s.b[min(100u, (arrayLength(&(s.b)) - 1u))];
-  var u32_ua1 : f32 = u.a[0u];
-  var u32_ua2 : f32 = u.a[1u];
-  var u32_ua3 : f32 = u.a[3u];
-  var u32_ua4 : f32 = u.a[3u];
-  var u32_ua5 : f32 = u.a[3u];
-  var u32_ua6 : f32 = u.a[3u];
+  var u32_ua1 : f32 = u.a[0u].x;
+  var u32_ua2 : f32 = u.a[1u].x;
+  var u32_ua3 : f32 = u.a[3u].x;
+  var u32_ua4 : f32 = u.a[3u].x;
+  var u32_ua5 : f32 = u.a[3u].x;
+  var u32_ua6 : f32 = u.a[3u].x;
 }
 )";
 
@@ -1553,7 +1553,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> s : S;
 
-type UArr = @stride(16) array<f32, 4>;
+type UArr = array<vec4<f32>, 4>;
 
 struct U {
   a : UArr;
@@ -1572,11 +1572,11 @@ fn f() {
   var i32_sb3 : f32 = s.b[0];
   var i32_sb4 : f32 = s.b[-1];
   var i32_sb5 : f32 = s.b[-4];
-  var i32_ua1 : f32 = u.a[3];
-  var i32_ua2 : f32 = u.a[1];
-  var i32_ua3 : f32 = u.a[0];
-  var i32_ua4 : f32 = u.a[0];
-  var i32_ua5 : f32 = u.a[0];
+  var i32_ua1 : f32 = u.a[3].x;
+  var i32_ua2 : f32 = u.a[1].x;
+  var i32_ua3 : f32 = u.a[0].x;
+  var i32_ua4 : f32 = u.a[0].x;
+  var i32_ua5 : f32 = u.a[0].x;
   var u32_sa1 : f32 = s.a[0u];
   var u32_sa2 : f32 = s.a[1u];
   var u32_sa3 : f32 = s.a[3u];
@@ -1589,12 +1589,12 @@ fn f() {
   var u32_sb4 : f32 = s.b[4u];
   var u32_sb5 : f32 = s.b[10u];
   var u32_sb6 : f32 = s.b[100u];
-  var u32_ua1 : f32 = u.a[0u];
-  var u32_ua2 : f32 = u.a[1u];
-  var u32_ua3 : f32 = u.a[3u];
-  var u32_ua4 : f32 = u.a[3u];
-  var u32_ua5 : f32 = u.a[3u];
-  var u32_ua6 : f32 = u.a[3u];
+  var u32_ua1 : f32 = u.a[0u].x;
+  var u32_ua2 : f32 = u.a[1u].x;
+  var u32_ua3 : f32 = u.a[3u].x;
+  var u32_ua4 : f32 = u.a[3u].x;
+  var u32_ua5 : f32 = u.a[3u].x;
+  var u32_ua6 : f32 = u.a[3u].x;
 }
 )";
 
@@ -1618,7 +1618,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> s : S;
 
-type UArr = @stride(16) array<f32, 4>;
+type UArr = array<vec4<f32>, 4>;
 
 struct U {
   a : UArr;
@@ -1637,11 +1637,11 @@ fn f() {
   var i32_sb3 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb4 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb5 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
-  var i32_ua1 : f32 = u.a[4];
-  var i32_ua2 : f32 = u.a[1];
-  var i32_ua3 : f32 = u.a[0];
-  var i32_ua4 : f32 = u.a[-1];
-  var i32_ua5 : f32 = u.a[-4];
+  var i32_ua1 : f32 = u.a[4].x;
+  var i32_ua2 : f32 = u.a[1].x;
+  var i32_ua3 : f32 = u.a[0].x;
+  var i32_ua4 : f32 = u.a[-1].x;
+  var i32_ua5 : f32 = u.a[-4].x;
   var u32_sa1 : f32 = s.a[0u];
   var u32_sa2 : f32 = s.a[1u];
   var u32_sa3 : f32 = s.a[3u];
@@ -1654,12 +1654,12 @@ fn f() {
   var u32_sb4 : f32 = s.b[min(4u, (arrayLength(&(s.b)) - 1u))];
   var u32_sb5 : f32 = s.b[min(10u, (arrayLength(&(s.b)) - 1u))];
   var u32_sb6 : f32 = s.b[min(100u, (arrayLength(&(s.b)) - 1u))];
-  var u32_ua1 : f32 = u.a[0u];
-  var u32_ua2 : f32 = u.a[1u];
-  var u32_ua3 : f32 = u.a[3u];
-  var u32_ua4 : f32 = u.a[4u];
-  var u32_ua5 : f32 = u.a[10u];
-  var u32_ua6 : f32 = u.a[100u];
+  var u32_ua1 : f32 = u.a[0u].x;
+  var u32_ua2 : f32 = u.a[1u].x;
+  var u32_ua3 : f32 = u.a[3u].x;
+  var u32_ua4 : f32 = u.a[4u].x;
+  var u32_ua5 : f32 = u.a[10u].x;
+  var u32_ua6 : f32 = u.a[100u].x;
 }
 )";
 
@@ -1683,7 +1683,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> s : S;
 
-type UArr = @stride(16) array<f32, 4>;
+type UArr = array<vec4<f32>, 4>;
 
 struct U {
   a : UArr;
@@ -1702,11 +1702,11 @@ fn f() {
   var i32_sb3 : f32 = s.b[0];
   var i32_sb4 : f32 = s.b[-1];
   var i32_sb5 : f32 = s.b[-4];
-  var i32_ua1 : f32 = u.a[4];
-  var i32_ua2 : f32 = u.a[1];
-  var i32_ua3 : f32 = u.a[0];
-  var i32_ua4 : f32 = u.a[-1];
-  var i32_ua5 : f32 = u.a[-4];
+  var i32_ua1 : f32 = u.a[4].x;
+  var i32_ua2 : f32 = u.a[1].x;
+  var i32_ua3 : f32 = u.a[0].x;
+  var i32_ua4 : f32 = u.a[-1].x;
+  var i32_ua5 : f32 = u.a[-4].x;
   var u32_sa1 : f32 = s.a[0u];
   var u32_sa2 : f32 = s.a[1u];
   var u32_sa3 : f32 = s.a[3u];
@@ -1719,12 +1719,12 @@ fn f() {
   var u32_sb4 : f32 = s.b[4u];
   var u32_sb5 : f32 = s.b[10u];
   var u32_sb6 : f32 = s.b[100u];
-  var u32_ua1 : f32 = u.a[0u];
-  var u32_ua2 : f32 = u.a[1u];
-  var u32_ua3 : f32 = u.a[3u];
-  var u32_ua4 : f32 = u.a[4u];
-  var u32_ua5 : f32 = u.a[10u];
-  var u32_ua6 : f32 = u.a[100u];
+  var u32_ua1 : f32 = u.a[0u].x;
+  var u32_ua2 : f32 = u.a[1u].x;
+  var u32_ua3 : f32 = u.a[3u].x;
+  var u32_ua4 : f32 = u.a[4u].x;
+  var u32_ua5 : f32 = u.a[10u].x;
+  var u32_ua6 : f32 = u.a[100u].x;
 }
 )";
 

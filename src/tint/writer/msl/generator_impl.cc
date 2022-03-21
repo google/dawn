@@ -63,7 +63,6 @@
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/module_scope_var_to_entry_point_param.h"
-#include "src/tint/transform/pad_array_elements.h"
 #include "src/tint/transform/promote_initializers_to_const_var.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
@@ -179,7 +178,6 @@ SanitizedResult Sanitize(
 
   manager.Add<transform::VectorizeScalarMatrixConstructors>();
   manager.Add<transform::WrapArraysInStructs>();
-  manager.Add<transform::PadArrayElements>();
   manager.Add<transform::RemovePhonies>();
   manager.Add<transform::SimplifyPointers>();
   // ArrayLengthFromUniform must come after SimplifyPointers, as
@@ -2945,9 +2943,8 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
 
       [&](const sem::Array* arr) {
         if (!arr->IsStrideImplicit()) {
-          TINT_ICE(Writer, diagnostics_)
-              << "arrays with explicit strides should have "
-                 "removed with the PadArrayElements transform";
+          TINT_ICE(Writer, diagnostics_) << "arrays with explicit strides not "
+                                            "exist past the SPIR-V reader";
           return SizeAndAlign{};
         }
         auto num_els = std::max<uint32_t>(arr->Count(), 1);

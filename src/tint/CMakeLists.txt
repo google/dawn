@@ -345,8 +345,6 @@ set(TINT_LIB_SRCS
   transform/multiplanar_external_texture.h
   transform/num_workgroups_from_uniform.cc
   transform/num_workgroups_from_uniform.h
-  transform/pad_array_elements.cc
-  transform/pad_array_elements.h
   transform/promote_initializers_to_const_var.cc
   transform/promote_initializers_to_const_var.h
   transform/promote_side_effects_to_decl.cc
@@ -1023,7 +1021,6 @@ if(TINT_BUILD_TESTS)
       transform/module_scope_var_to_entry_point_param_test.cc
       transform/multiplanar_external_texture_test.cc
       transform/num_workgroups_from_uniform_test.cc
-      transform/pad_array_elements_test.cc
       transform/promote_initializers_to_const_var_test.cc
       transform/promote_side_effects_to_decl_test.cc
       transform/remove_phonies_test.cc

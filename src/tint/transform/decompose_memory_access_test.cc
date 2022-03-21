@@ -1970,22 +1970,26 @@ struct SB {
 
 TEST_F(DecomposeMemoryAccessTest, ComplexStaticAccessChain) {
   auto* src = R"(
+// sizeof(S1) == 32
+// alignof(S1) == 16
 struct S1 {
   a : i32;
   b : vec3<f32>;
   c : i32;
 };
 
+// sizeof(S2) == 116
+// alignof(S2) == 16
 struct S2 {
   a : i32;
-  b : @stride(32) array<S1, 3>;
+  b : array<S1, 3>;
   c : i32;
 };
 
 struct SB {
   @size(128)
   a : i32;
-  b : @stride(256) array<S2>;
+  b : array<S2>;
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -1999,9 +2003,9 @@ fn main() {
   // sb.b[4].b[1].b.z
   //    ^  ^ ^  ^ ^ ^
   //    |  | |  | | |
-  //  128  | |1200| 1224
+  //  128  | |688 | 712
   //       | |    |
-  //    1152 1168 1216
+  //     640 656  704
 
   auto* expect = R"(
 struct S1 {
@@ -2012,14 +2016,14 @@ struct S1 {
 
 struct S2 {
   a : i32;
-  b : @stride(32) array<S1, 3>;
+  b : array<S1, 3>;
   c : i32;
 }
 
 struct SB {
   @size(128)
   a : i32;
-  b : @stride(256) array<S2>;
+  b : array<S2>;
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2029,7 +2033,7 @@ fn tint_symbol(@internal(disable_validation__ignore_constructible_function_param
 
 @stage(compute) @workgroup_size(1)
 fn main() {
-  var x : f32 = tint_symbol(sb, 1224u);
+  var x : f32 = tint_symbol(sb, 712u);
 }
 )";
 
@@ -2050,12 +2054,12 @@ fn main() {
 struct SB {
   @size(128)
   a : i32;
-  b : @stride(256) array<S2>;
+  b : array<S2>;
 };
 
 struct S2 {
   a : i32;
-  b : @stride(32) array<S1, 3>;
+  b : array<S1, 3>;
   c : i32;
 };
 
@@ -2069,9 +2073,9 @@ struct S1 {
   // sb.b[4].b[1].b.z
   //    ^  ^ ^  ^ ^ ^
   //    |  | |  | | |
-  //  128  | |1200| 1224
+  //  128  | |688 | 712
   //       | |    |
-  //    1152 1168 1216
+  //     640 656  704
 
   auto* expect = R"(
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
@@ -2079,7 +2083,7 @@ fn tint_symbol(@internal(disable_validation__ignore_constructible_function_param
 
 @stage(compute) @workgroup_size(1)
 fn main() {
-  var x : f32 = tint_symbol(sb, 1224u);
+  var x : f32 = tint_symbol(sb, 712u);
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2087,12 +2091,12 @@ fn main() {
 struct SB {
   @size(128)
   a : i32;
-  b : @stride(256) array<S2>;
+  b : array<S2>;
 }
 
 struct S2 {
   a : i32;
-  b : @stride(32) array<S1, 3>;
+  b : array<S1, 3>;
   c : i32;
 }
 
@@ -2118,14 +2122,14 @@ struct S1 {
 
 struct S2 {
   a : i32;
-  b : @stride(32) array<S1, 3>;
+  b : array<S1, 3>;
   c : i32;
 };
 
 struct SB {
   @size(128)
   a : i32;
-  b : @stride(256) array<S2>;
+  b : array<S2>;
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2148,14 +2152,14 @@ struct S1 {
 
 struct S2 {
   a : i32;
-  b : @stride(32) array<S1, 3>;
+  b : array<S1, 3>;
   c : i32;
 }
 
 struct SB {
   @size(128)
   a : i32;
-  b : @stride(256) array<S2>;
+  b : array<S2>;
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2168,7 +2172,7 @@ fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
   var k : i32 = 2;
-  var x : f32 = tint_symbol(sb, (((((128u + (256u * u32(i))) + 16u) + (32u * j)) + 16u) + (4u * u32(k))));
+  var x : f32 = tint_symbol(sb, (((((128u + (128u * u32(i))) + 16u) + (32u * j)) + 16u) + (4u * u32(k))));
 }
 )";
 
@@ -2192,12 +2196,12 @@ fn main() {
 struct SB {
   @size(128)
   a : i32;
-  b : @stride(256) array<S2>;
+  b :array<S2>;
 };
 
 struct S2 {
   a : i32;
-  b : @stride(32) array<S1, 3>;
+  b : array<S1, 3>;
   c : i32;
 };
 
@@ -2217,7 +2221,7 @@ fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
   var k : i32 = 2;
-  var x : f32 = tint_symbol(sb, (((((128u + (256u * u32(i))) + 16u) + (32u * j)) + 16u) + (4u * u32(k))));
+  var x : f32 = tint_symbol(sb, (((((128u + (128u * u32(i))) + 16u) + (32u * j)) + 16u) + (4u * u32(k))));
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2225,12 +2229,12 @@ fn main() {
 struct SB {
   @size(128)
   a : i32;
-  b : @stride(256) array<S2>;
+  b : array<S2>;
 }
 
 struct S2 {
   a : i32;
-  b : @stride(32) array<S1, 3>;
+  b : array<S1, 3>;
   c : i32;
 }
 
@@ -2256,7 +2260,7 @@ struct S1 {
 
 type A1 = S1;
 
-type A1_Array = @stride(32) array<S1, 3>;
+type A1_Array = array<S1, 3>;
 
 struct S2 {
   a : i32;
@@ -2266,7 +2270,7 @@ struct S2 {
 
 type A2 = S2;
 
-type A2_Array = @stride(256) array<S2>;
+type A2_Array = array<S2>;
 
 struct SB {
   @size(128)
@@ -2294,7 +2298,7 @@ struct S1 {
 
 type A1 = S1;
 
-type A1_Array = @stride(32) array<S1, 3>;
+type A1_Array = array<S1, 3>;
 
 struct S2 {
   a : i32;
@@ -2304,7 +2308,7 @@ struct S2 {
 
 type A2 = S2;
 
-type A2_Array = @stride(256) array<S2>;
+type A2_Array = array<S2>;
 
 struct SB {
   @size(128)
@@ -2322,7 +2326,7 @@ fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
   var k : i32 = 2;
-  var x : f32 = tint_symbol(sb, (((((128u + (256u * u32(i))) + 16u) + (32u * j)) + 16u) + (4u * u32(k))));
+  var x : f32 = tint_symbol(sb, (((((128u + (128u * u32(i))) + 16u) + (32u * j)) + 16u) + (4u * u32(k))));
 }
 )";
 
@@ -2350,7 +2354,7 @@ struct SB {
   b : A2_Array;
 };
 
-type A2_Array = @stride(256) array<S2>;
+type A2_Array = array<S2>;
 
 type A2 = S2;
 
@@ -2362,7 +2366,7 @@ struct S2 {
 
 type A1 = S1;
 
-type A1_Array = @stride(32) array<S1, 3>;
+type A1_Array = array<S1, 3>;
 
 struct S1 {
   a : i32;
@@ -2380,7 +2384,7 @@ fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
   var k : i32 = 2;
-  var x : f32 = tint_symbol(sb, (((((128u + (256u * u32(i))) + 16u) + (32u * j)) + 16u) + (4u * u32(k))));
+  var x : f32 = tint_symbol(sb, (((((128u + (128u * u32(i))) + 16u) + (32u * j)) + 16u) + (4u * u32(k))));
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2391,7 +2395,7 @@ struct SB {
   b : A2_Array;
 }
 
-type A2_Array = @stride(256) array<S2>;
+type A2_Array = array<S2>;
 
 type A2 = S2;
 
@@ -2403,7 +2407,7 @@ struct S2 {
 
 type A1 = S1;
 
-type A1_Array = @stride(32) array<S1, 3>;
+type A1_Array = array<S1, 3>;
 
 struct S1 {
   a : i32;
