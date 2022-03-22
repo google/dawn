@@ -275,6 +275,14 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
               return nullptr;
             },
             [&](Default) {
+              if (auto* tn = ty->As<ast::TypeName>()) {
+                if (IsBuiltin(tn->name)) {
+                  auto name = builder_->Symbols().NameFor(tn->name);
+                  AddError("cannot use builtin '" + name + "' as type",
+                           ty->source);
+                  return nullptr;
+                }
+              }
               TINT_UNREACHABLE(Resolver, diagnostics_)
                   << "Unhandled resolved type '"
                   << (resolved ? resolved->TypeInfo().name : "<null>")

@@ -705,6 +705,14 @@ TEST_F(ResolverTypeValidationTest, FunctionAsType) {
 note: 'f' declared here)");
 }
 
+TEST_F(ResolverTypeValidationTest, BuiltinAsType) {
+  // var<private> v : max;
+  Global("v", ty.type_name("max"), ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "error: cannot use builtin 'max' as type");
+}
+
 namespace GetCanonicalTests {
 struct Params {
   builder::ast_type_func_ptr create_ast_type;
