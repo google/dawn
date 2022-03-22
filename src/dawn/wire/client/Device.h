@@ -84,7 +84,6 @@ namespace dawn::wire::client {
             void* userdata = nullptr;
         };
         RequestTracker<ErrorScopeData> mErrorScopes;
-        uint64_t mErrorScopeStackSize = 0;
 
         struct CreatePipelineAsyncRequest {
             WGPUCreateComputePipelineAsyncCallback createComputePipelineAsyncCallback = nullptr;

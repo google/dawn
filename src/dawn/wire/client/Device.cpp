@@ -145,35 +145,18 @@ namespace dawn::wire::client {
         mDeviceLostUserdata = userdata;
     }
 
-    void Device::PushErrorScope(WGPUErrorFilter filter) {
-        mErrorScopeStackSize++;
-
-        DevicePushErrorScopeCmd cmd;
-        cmd.self = ToAPI(this);
-        cmd.filter = filter;
-
-        client->SerializeCommand(cmd);
-    }
-
     bool Device::PopErrorScope(WGPUErrorCallback callback, void* userdata) {
-        if (mErrorScopeStackSize == 0) {
-            return false;
-        }
-        mErrorScopeStackSize--;
-
+        // TODO(crbug.com/dawn/1324) Replace bool return with void when users are updated.
         if (client->IsDisconnected()) {
             callback(WGPUErrorType_DeviceLost, "GPU device disconnected", userdata);
             return true;
         }
 
         uint64_t serial = mErrorScopes.Add({callback, userdata});
-
         DevicePopErrorScopeCmd cmd;
         cmd.deviceId = this->id;
         cmd.requestSerial = serial;
-
         client->SerializeCommand(cmd);
-
         return true;
     }
 

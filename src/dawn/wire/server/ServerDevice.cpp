@@ -89,13 +89,9 @@ namespace dawn::wire::server {
         userdata->requestSerial = requestSerial;
         userdata->device = ObjectHandle{deviceId, device->generation};
 
-        ErrorScopeUserdata* unownedUserdata = userdata.release();
-        bool success = mProcs.devicePopErrorScope(
-            device->handle, ForwardToServer<&Server::OnDevicePopErrorScope>, unownedUserdata);
-        if (!success) {
-            delete unownedUserdata;
-        }
-        return success;
+        mProcs.devicePopErrorScope(device->handle, ForwardToServer<&Server::OnDevicePopErrorScope>,
+                                   userdata.release());
+        return true;
     }
 
     void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,

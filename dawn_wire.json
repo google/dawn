@@ -209,8 +209,7 @@
             "BufferUnmap",
             "DeviceCreateErrorBuffer",
             "DeviceGetQueue",
-            "DeviceInjectError",
-            "DevicePushErrorScope"
+            "DeviceInjectError"
         ],
         "client_special_objects": [
             "Adapter",
