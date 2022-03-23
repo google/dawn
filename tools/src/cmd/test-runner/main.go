@@ -52,9 +52,9 @@ const (
 // These directories contain large corpora of tests for which the generated code
 // is uninteresting.
 var dirsWithNoPassExpectations = []string{
-	"/test/benchmark/",
-	"/test/unittest/",
-	"/test/vk-gl-cts/",
+	"/test/tint/benchmark/",
+	"/test/tint/unittest/",
+	"/test/tint/vk-gl-cts/",
 }
 
 func main() {
