@@ -20,7 +20,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, IfStmt) {
-  auto p = parser("if (a == 4) { a = b; c = d; }");
+  auto p = parser("if a == 4 { a = b; c = d; }");
   auto e = p->if_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -35,8 +35,30 @@ TEST_F(ParserImplTest, IfStmt) {
 }
 
 TEST_F(ParserImplTest, IfStmt_WithElse) {
-  auto p =
-      parser("if (a == 4) { a = b; c = d; } else if(c) { d = 2; } else {}");
+  auto p = parser("if a == 4 { a = b; c = d; } else if(c) { d = 2; } else {}");
+  auto e = p->if_stmt();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+
+  ASSERT_TRUE(e->Is<ast::IfStatement>());
+  ASSERT_NE(e->condition, nullptr);
+  ASSERT_TRUE(e->condition->Is<ast::BinaryExpression>());
+  EXPECT_EQ(e->body->statements.size(), 2u);
+
+  ASSERT_EQ(e->else_statements.size(), 2u);
+  ASSERT_NE(e->else_statements[0]->condition, nullptr);
+  ASSERT_TRUE(
+      e->else_statements[0]->condition->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(e->else_statements[0]->body->statements.size(), 1u);
+
+  ASSERT_EQ(e->else_statements[1]->condition, nullptr);
+  EXPECT_EQ(e->else_statements[1]->body->statements.size(), 0u);
+}
+
+TEST_F(ParserImplTest, IfStmt_WithElse_WithParens) {
+  auto p = parser("if(a==4) { a = b; c = d; } else if(c) { d = 2; } else {}");
   auto e = p->if_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -59,13 +81,13 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidCondition) {
-  auto p = parser("if (a = 3) {}");
+  auto p = parser("if a = 3 {}");
   auto e = p->if_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:7: expected ')'");
+  EXPECT_EQ(p->error(), "1:6: expected '{'");
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingCondition) {
@@ -75,47 +97,47 @@ TEST_F(ParserImplTest, IfStmt_MissingCondition) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:4: expected '('");
+  EXPECT_EQ(p->error(), "1:4: unable to parse condition expression");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidBody) {
-  auto p = parser("if (a) { fn main() {}}");
+  auto p = parser("if a { fn main() {}}");
   auto e = p->if_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: expected '}'");
+  EXPECT_EQ(p->error(), "1:8: expected '}'");
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingBody) {
-  auto p = parser("if (a)");
+  auto p = parser("if a");
   auto e = p->if_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:7: expected '{'");
+  EXPECT_EQ(p->error(), "1:5: expected '{'");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
-  auto p = parser("if (a) {} else if (a) { fn main() -> a{}}");
+  auto p = parser("if a {} else if a { fn main() -> a{}}");
   auto e = p->if_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:25: expected '}'");
+  EXPECT_EQ(p->error(), "1:21: expected '}'");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElse) {
-  auto p = parser("if (a) {} else { fn main() -> a{}}");
+  auto p = parser("if a {} else { fn main() -> a{}}");
   auto e = p->if_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:18: expected '}'");
+  EXPECT_EQ(p->error(), "1:16: expected '}'");
 }
 
 }  // namespace

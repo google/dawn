@@ -2,6 +2,10 @@
 
 ## Changes for M102
 
+### New Features
+
+* Parentheses are no longer required around expressions for if and switch statements [tint:1424](crbug.com/tint/1424)
+
 ### Breaking changes
 
 * The `@block` attribute has been removed. [tint:1324](crbug.com/tint/1324)

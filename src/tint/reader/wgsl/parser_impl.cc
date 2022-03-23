@@ -1650,15 +1650,18 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
 }
 
 // if_stmt
-//   : IF paren_rhs_stmt body_stmt ( ELSE else_stmts ) ?
+//   : IF expression compound_stmt ( ELSE else_stmts ) ?
 Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
   Source source;
   if (!match(Token::Type::kIf, &source))
     return Failure::kNoMatch;
 
-  auto condition = expect_paren_rhs_stmt();
+  auto condition = logical_or_expression();
   if (condition.errored)
     return Failure::kErrored;
+  if (!condition.matched) {
+    return add_error(peek(), "unable to parse condition expression");
+  }
 
   auto body = expect_body_stmt();
   if (body.errored)
@@ -1690,10 +1693,14 @@ Expect<ast::ElseStatementList> ParserImpl::else_stmts() {
 
     const ast::Expression* cond = nullptr;
     if (else_if) {
-      auto condition = expect_paren_rhs_stmt();
+      auto condition = logical_or_expression();
       if (condition.errored) {
         return Failure::kErrored;
       }
+      if (!condition.matched) {
+        return add_error(peek(), "unable to parse condition expression");
+      }
+
       cond = condition.value;
     }
 
@@ -1716,9 +1723,12 @@ Maybe<const ast::SwitchStatement*> ParserImpl::switch_stmt() {
   if (!match(Token::Type::kSwitch, &source))
     return Failure::kNoMatch;
 
-  auto condition = expect_paren_rhs_stmt();
+  auto condition = logical_or_expression();
   if (condition.errored)
     return Failure::kErrored;
+  if (!condition.matched) {
+    return add_error(peek(), "unable to parse selector expression");
+  }
 
   auto body = expect_brace_block("switch statement",
                                  [&]() -> Expect<ast::CaseStatementList> {

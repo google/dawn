@@ -1033,13 +1033,6 @@ var i : vec3<1>;
 )");
 }
 
-TEST_F(ParserImplErrorTest, IfStmtMissingLParen) {
-  EXPECT("fn f() { if true) {} }", R"(test.wgsl:1:13 error: expected '('
-fn f() { if true) {} }
-            ^^^^
-)");
-}
-
 TEST_F(ParserImplErrorTest, IfStmtMissingRParen) {
   EXPECT("fn f() { if (true {} }", R"(test.wgsl:1:19 error: expected ')'
 fn f() { if (true {} }
