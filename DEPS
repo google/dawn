@@ -26,11 +26,11 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@555c8b467c21e2c4b22d00e87e3faa0431df9ac2',
+    'url': '{chromium_git}/chromium/src/build@c7876b5a44308b94074287939244bc562007de69',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@f78b4b9f33bd8ef9944d5ce643daff1c31880189',
+    'url': '{chromium_git}/chromium/src/buildtools@e1471b21ee9c6765ee95e9db0c76fe997ccad35c',
     'condition': 'dawn_standalone',
   },
   'buildtools/clang_format/script': {
@@ -69,12 +69,12 @@ deps = {
   },
 
   'buildtools/third_party/libc++abi/trunk': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@2715a6c0de8dac4c7674934a6b3d30ba0c685271',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@edde7bbc4049ae4a32257d9f16451312c763c601',
     'condition': 'dawn_standalone',
   },
 
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@8b7330592cb85ba09505a6be7bacabd0ad6160a3',
+    'url': '{chromium_git}/chromium/src/tools/clang@df9b14e26c163dd8e2c0ab081e2689f038ae7141',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
@@ -254,14 +254,27 @@ hooks = [
     ],
   },
   {
-    'name': 'clang_format_mac',
+    'name': 'clang_format_mac_x64',
     'pattern': '.',
-    'condition': 'dawn_standalone and host_os == "mac"',
+    'condition': 'dawn_standalone and host_os == "mac" and host_cpu == "x64"',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
                 '--no_auth',
                 '--bucket', 'chromium-clang-format',
-                '-s', 'buildtools/mac/clang-format.sha1',
+                '-s', 'buildtools/mac/clang-format.x64.sha1',
+                '-o', 'buildtools/mac/clang-format',
+    ],
+  },
+  {
+    'name': 'clang_format_mac_arm64',
+    'pattern': '.',
+    'condition': 'dawn_standalone and host_os == "mac" and host_cpu == "arm64"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-clang-format',
+                '-s', 'buildtools/mac/clang-format.arm64.sha1',
+                '-o', 'buildtools/mac/clang-format',
     ],
   },
   {
