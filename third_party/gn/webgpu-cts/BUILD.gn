@@ -1,10 +1,22 @@
-# Copyright 2022 The Chromium Authors.  All rights reserved.
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
+# Copyright 2022 The Dawn Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 # Note: This file is intentionally not used by any other BUILD.gn in Dawn.
 # Instead, Chromium depends directly on this file to build the WebGPU CTS.
 # Scripts called from this file assume Dawn is checked out inside Chromium.
+
+import("../../../scripts/dawn_overrides_with_defaults.gni")
 
 group("webgpu-cts") {
   public_deps = [
@@ -38,12 +50,12 @@ foreach(ts_file, list_from_ts_sources_txt) {
 }
 
 action("compile_src") {
-  script = "scripts/compile_src.py"
+  script = "${dawn_root}/webgpu-cts/scripts/compile_src.py"
 
   inputs = [
              "//third_party/node/node_modules/typescript/lib/tsc.js",
              "//third_party/node/node.py",
-             "scripts/tsc_ignore_errors.py",
+             "${dawn_root}/webgpu-cts/scripts/tsc_ignore_errors.py",
            ] + ts_source_inputs
 
   outputs = js_outputs
@@ -74,7 +86,7 @@ copy("copy_resources") {
 }
 
 action("verify_gen_ts_dep_list") {
-  script = "scripts/gen_ts_dep_lists.py"
+  script = "${dawn_root}/webgpu-cts/scripts/gen_ts_dep_lists.py"
   inputs = [
     # TODO(kainino): Make sure this gets retriggered when the CTS dep changes.
     "resource_files.txt",
