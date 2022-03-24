@@ -99,3 +99,6 @@ $RECYCLE.BIN/
 
 ### Dawn node tools binaries
 src/dawn/node/tools/bin/
+
+### Cached node transpiled tools
+/.node_transpile_work_dir

@@ -17,8 +17,8 @@
 import os
 
 webgpu_cts_scripts_dir = os.path.dirname(os.path.abspath(__file__))
-dawn_third_party_dir = os.path.join(
-    os.path.dirname(os.path.dirname(webgpu_cts_scripts_dir)), 'third_party')
+dawn_dir = os.path.dirname(os.path.dirname(webgpu_cts_scripts_dir))
+dawn_third_party_dir = os.path.join(dawn_dir, 'third_party')
 gn_webgpu_cts_dir = os.path.join(dawn_third_party_dir, 'gn', 'webgpu-cts')
 webgpu_cts_root_dir = os.path.join(dawn_third_party_dir, 'webgpu-cts')
 chromium_third_party_dir = None
