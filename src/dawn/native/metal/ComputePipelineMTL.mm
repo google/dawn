@@ -43,7 +43,7 @@ namespace dawn::native::metal {
             newComputePipelineStateWithFunction:computeData.function.Get()
                                           error:&error]);
         if (error != nullptr) {
-            return DAWN_INTERNAL_ERROR("Error creating pipeline state" +
+            return DAWN_INTERNAL_ERROR("Error creating pipeline state " +
                                        std::string([error.localizedDescription UTF8String]));
         }
         ASSERT(mMtlComputePipelineState != nil);

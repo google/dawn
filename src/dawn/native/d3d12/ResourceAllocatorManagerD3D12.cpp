@@ -299,7 +299,8 @@ namespace dawn::native::d3d12 {
         // incorrectly allocate a mismatched size.
         if (resourceInfo.SizeInBytes == 0 ||
             resourceInfo.SizeInBytes == std::numeric_limits<uint64_t>::max()) {
-            return DAWN_OUT_OF_MEMORY_ERROR("Resource allocation size was invalid.");
+            return DAWN_OUT_OF_MEMORY_ERROR(absl::StrFormat(
+                "Resource allocation size (%u) was invalid.", resourceInfo.SizeInBytes));
         }
 
         BuddyMemoryAllocator* allocator =

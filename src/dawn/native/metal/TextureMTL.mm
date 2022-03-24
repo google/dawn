@@ -289,6 +289,8 @@ namespace dawn::native::metal {
                     // TODO (dawn:1181): Allow non-conformant implementation on macOS 10.11
                     UNREACHABLE();
                 }
+            case wgpu::TextureFormat::Stencil8:
+                return MTLPixelFormatStencil8;
 
 #if defined(DAWN_PLATFORM_MACOS)
             case wgpu::TextureFormat::Depth24UnormStencil8:
@@ -383,8 +385,6 @@ namespace dawn::native::metal {
             case wgpu::TextureFormat::ASTC12x12Unorm:
             case wgpu::TextureFormat::ASTC12x12UnormSrgb:
 
-            // TODO(dawn:666): implement stencil8
-            case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }

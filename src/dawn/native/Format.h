@@ -72,7 +72,7 @@ namespace dawn::native {
         // an internal Dawn enum.
         wgpu::TextureComponentType baseType;
         SampleTypeBit supportedSampleTypes;
-        wgpu::TextureFormat format;
+        wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
     };
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the

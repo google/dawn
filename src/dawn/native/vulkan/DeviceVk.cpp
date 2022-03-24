@@ -93,9 +93,9 @@ namespace dawn::native::vulkan {
 
         DAWN_TRY(PrepareRecordingContext());
 
-        // The environment can request to use D32S8 or D24S8 when it's not available. Override
-        // the decision if it is not applicable.
-        ApplyDepth24PlusS8Toggle();
+        // The environment can request to various options for depth-stencil formats that could be
+        // unavailable. Override the decision if it is not applicable.
+        ApplyDepthStencilFormatToggles();
 
         // The environment can only request to use VK_KHR_zero_initialize_workgroup_memory when the
         // extension is available. Override the decision if it is no applicable.
@@ -518,13 +518,17 @@ namespace dawn::native::vulkan {
         // By default try to initialize workgroup memory with OpConstantNull according to the Vulkan
         // extension VK_KHR_zero_initialize_workgroup_memory.
         SetToggle(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension, true);
+
+        // By default try to use S8 if available.
+        SetToggle(Toggle::VulkanUseS8, true);
     }
 
-    void Device::ApplyDepth24PlusS8Toggle() {
+    void Device::ApplyDepthStencilFormatToggles() {
         bool supportsD32s8 =
             ToBackend(GetAdapter())->IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT);
         bool supportsD24s8 =
             ToBackend(GetAdapter())->IsDepthStencilFormatSupported(VK_FORMAT_D24_UNORM_S8_UINT);
+        bool supportsS8 = ToBackend(GetAdapter())->IsDepthStencilFormatSupported(VK_FORMAT_S8_UINT);
 
         ASSERT(supportsD32s8 || supportsD24s8);
 
@@ -533,6 +537,9 @@ namespace dawn::native::vulkan {
         }
         if (!supportsD32s8) {
             ForceSetToggle(Toggle::VulkanUseD32S8, false);
+        }
+        if (!supportsS8) {
+            ForceSetToggle(Toggle::VulkanUseS8, false);
         }
     }
 

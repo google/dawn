@@ -279,7 +279,11 @@ namespace dawn::native::d3d12 {
 
         D3D12_DEPTH_STENCIL_DESC ComputeDepthStencilDesc(const DepthStencilState* descriptor) {
             D3D12_DEPTH_STENCIL_DESC mDepthStencilDescriptor;
-            mDepthStencilDescriptor.DepthEnable = TRUE;
+            mDepthStencilDescriptor.DepthEnable =
+                (descriptor->depthCompare == wgpu::CompareFunction::Always &&
+                 !descriptor->depthWriteEnabled)
+                    ? FALSE
+                    : TRUE;
             mDepthStencilDescriptor.DepthWriteMask = descriptor->depthWriteEnabled
                                                          ? D3D12_DEPTH_WRITE_MASK_ALL
                                                          : D3D12_DEPTH_WRITE_MASK_ZERO;

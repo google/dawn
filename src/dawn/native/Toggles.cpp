@@ -99,6 +99,12 @@ namespace dawn::native {
               "backend will use D32S8 (toggle to on) but setting the toggle to off will make it "
               "use the D24S8 format when possible.",
               "https://crbug.com/dawn/286"}},
+            {Toggle::VulkanUseS8,
+             {"vulkan_use_s8",
+              "Vulkan has a pure stencil8 format but it is not universally available. When this "
+              "toggle is on, the backend will use S8 for the stencil8 format, otherwise it will "
+              "fallback to D32S8 or D24S8.",
+              "https://crbug.com/dawn/666"}},
             {Toggle::MetalDisableSamplerCompare,
              {"metal_disable_sampler_compare",
               "Disables the use of sampler compare on Metal. This is unsupported before A9 "

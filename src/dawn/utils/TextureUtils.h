@@ -22,8 +22,7 @@
 #include "dawn/common/Assert.h"
 
 namespace utils {
-    // TODO(dawn:666): Add Stencil8 format when it's implemented.
-    static constexpr std::array<wgpu::TextureFormat, 94> kAllTextureFormats = {
+    static constexpr std::array<wgpu::TextureFormat, 95> kAllTextureFormats = {
         wgpu::TextureFormat::R8Unorm,
         wgpu::TextureFormat::R8Snorm,
         wgpu::TextureFormat::R8Uint,
@@ -66,6 +65,7 @@ namespace utils {
         wgpu::TextureFormat::Depth24PlusStencil8,
         wgpu::TextureFormat::Depth24UnormStencil8,
         wgpu::TextureFormat::Depth32FloatStencil8,
+        wgpu::TextureFormat::Stencil8,
         wgpu::TextureFormat::BC1RGBAUnorm,
         wgpu::TextureFormat::BC1RGBAUnormSrgb,
         wgpu::TextureFormat::BC2RGBAUnorm,
@@ -206,16 +206,16 @@ namespace utils {
                       kBCFormats.size() + kETC2Formats.size() + kASTCFormats.size(),
                   "Number of compressed format must equal number of BC, ETC2, and ASTC formats.");
 
-    // TODO(dawn:666): Add Stencil8 format when it's implemented.
     static constexpr std::array<wgpu::TextureFormat, 6> kDepthFormats = {
         wgpu::TextureFormat::Depth16Unorm,         wgpu::TextureFormat::Depth32Float,
         wgpu::TextureFormat::Depth24Plus,          wgpu::TextureFormat::Depth24PlusStencil8,
         wgpu::TextureFormat::Depth24UnormStencil8, wgpu::TextureFormat::Depth32FloatStencil8,
     };
-    static constexpr std::array<wgpu::TextureFormat, 3> kStencilFormats = {
+    static constexpr std::array<wgpu::TextureFormat, 4> kStencilFormats = {
         wgpu::TextureFormat::Depth24PlusStencil8,
         wgpu::TextureFormat::Depth24UnormStencil8,
         wgpu::TextureFormat::Depth32FloatStencil8,
+        wgpu::TextureFormat::Stencil8,
     };
     static constexpr std::array<wgpu::TextureFormat, 3> kDepthAndStencilFormats = {
         wgpu::TextureFormat::Depth24PlusStencil8,
@@ -230,6 +230,7 @@ namespace utils {
     bool IsASTCTextureFormat(wgpu::TextureFormat textureFormat);
 
     bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat);
+    bool IsStencilOnlyFormat(wgpu::TextureFormat textureFormat);
 
     bool TextureFormatSupportsMultisampling(wgpu::TextureFormat textureFormat);
     bool TextureFormatSupportsResolveTarget(wgpu::TextureFormat textureFormat);

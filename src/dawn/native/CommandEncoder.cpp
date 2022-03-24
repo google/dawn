@@ -369,15 +369,19 @@ namespace dawn::native {
                 }
             } else {
                 DAWN_TRY(ValidateLoadOp(depthStencilAttachment->stencilLoadOp));
-                DAWN_INVALID_IF(depthStencilAttachment->stencilLoadOp == wgpu::LoadOp::Undefined,
-                                "stencilLoadOp must be set if the attachment (%s) has a stencil "
-                                "aspect and stencilReadOnly (%u) is false.",
-                                attachment, depthStencilAttachment->stencilReadOnly);
+                DAWN_INVALID_IF(
+                    depthStencilAttachment->stencilLoadOp == wgpu::LoadOp::Undefined,
+                    "stencilLoadOp (%s) must be set if the attachment (%s) has a stencil "
+                    "aspect and stencilReadOnly (%u) is false.",
+                    depthStencilAttachment->stencilLoadOp, attachment,
+                    depthStencilAttachment->stencilReadOnly);
                 DAWN_TRY(ValidateStoreOp(depthStencilAttachment->stencilStoreOp));
-                DAWN_INVALID_IF(depthStencilAttachment->depthStoreOp == wgpu::StoreOp::Undefined,
-                                "stencilStoreOp must be set if the attachment (%s) has a stencil "
-                                "aspect and stencilReadOnly (%u) is false.",
-                                attachment, depthStencilAttachment->stencilReadOnly);
+                DAWN_INVALID_IF(
+                    depthStencilAttachment->stencilStoreOp == wgpu::StoreOp::Undefined,
+                    "stencilStoreOp (%s) must be set if the attachment (%s) has a stencil "
+                    "aspect and stencilReadOnly (%u) is false.",
+                    depthStencilAttachment->stencilStoreOp, attachment,
+                    depthStencilAttachment->stencilReadOnly);
             }
 
             if (!std::isnan(depthStencilAttachment->clearDepth)) {

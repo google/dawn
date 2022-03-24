@@ -1327,7 +1327,7 @@ namespace dawn::native::d3d12 {
                 }
             }
 
-            if (renderPassBuilder->HasDepth()) {
+            if (renderPassBuilder->HasDepthOrStencil()) {
                 D3D12_CLEAR_FLAGS clearFlags = {};
                 float depthClear = 0.0f;
                 uint8_t stencilClear = 0u;
@@ -1359,7 +1359,7 @@ namespace dawn::native::d3d12 {
         commandList->OMSetRenderTargets(
             static_cast<uint8_t>(renderPassBuilder->GetHighestColorAttachmentIndexPlusOne()),
             renderPassBuilder->GetRenderTargetViews(), FALSE,
-            renderPassBuilder->HasDepth()
+            renderPassBuilder->HasDepthOrStencil()
                 ? &renderPassBuilder->GetRenderPassDepthStencilDescriptor()->cpuDescriptor
                 : nullptr);
     }
@@ -1384,7 +1384,7 @@ namespace dawn::native::d3d12 {
             commandContext->GetCommandList4()->BeginRenderPass(
                 static_cast<uint8_t>(renderPassBuilder.GetHighestColorAttachmentIndexPlusOne()),
                 renderPassBuilder.GetRenderPassRenderTargetDescriptors().data(),
-                renderPassBuilder.HasDepth()
+                renderPassBuilder.HasDepthOrStencil()
                     ? renderPassBuilder.GetRenderPassDepthStencilDescriptor()
                     : nullptr,
                 renderPassBuilder.GetRenderPassFlags());

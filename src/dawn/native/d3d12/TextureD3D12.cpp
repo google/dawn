@@ -178,6 +178,8 @@ namespace dawn::native::d3d12 {
                 case wgpu::TextureFormat::Depth24Plus:
                     return DXGI_FORMAT_R32_TYPELESS;
 
+                // Depth24UnormStencil8 is the smallest format supported on D3D12 that has stencil.
+                case wgpu::TextureFormat::Stencil8:
                 case wgpu::TextureFormat::Depth24UnormStencil8:
                     return DXGI_FORMAT_R24G8_TYPELESS;
                 case wgpu::TextureFormat::Depth24PlusStencil8:
@@ -253,8 +255,6 @@ namespace dawn::native::d3d12 {
                 case wgpu::TextureFormat::ASTC12x12UnormSrgb:
 
                 case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-                // TODO(dawn:666): implement stencil8
-                case wgpu::TextureFormat::Stencil8:
                 case wgpu::TextureFormat::Undefined:
                     UNREACHABLE();
             }
@@ -346,6 +346,8 @@ namespace dawn::native::d3d12 {
             case wgpu::TextureFormat::Depth32Float:
             case wgpu::TextureFormat::Depth24Plus:
                 return DXGI_FORMAT_D32_FLOAT;
+            // Depth24UnormStencil8 is the smallest format supported on D3D12 that has stencil.
+            case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Depth24UnormStencil8:
                 return DXGI_FORMAT_D24_UNORM_S8_UINT;
             case wgpu::TextureFormat::Depth24PlusStencil8:
@@ -424,8 +426,6 @@ namespace dawn::native::d3d12 {
             case wgpu::TextureFormat::ASTC12x12Unorm:
             case wgpu::TextureFormat::ASTC12x12UnormSrgb:
 
-            // TODO(dawn:666): implement stencil8
-            case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
@@ -684,6 +684,7 @@ namespace dawn::native::d3d12 {
             case wgpu::TextureFormat::Depth24UnormStencil8:
             case wgpu::TextureFormat::Depth24PlusStencil8:
             case wgpu::TextureFormat::Depth32FloatStencil8:
+            case wgpu::TextureFormat::Stencil8:
                 switch (aspect) {
                     case Aspect::Depth:
                         return DXGI_FORMAT_R32_FLOAT;
@@ -1179,6 +1180,7 @@ namespace dawn::native::d3d12 {
                 case wgpu::TextureFormat::Depth16Unorm:
                     mSrvDesc.Format = DXGI_FORMAT_R16_UNORM;
                     break;
+                case wgpu::TextureFormat::Stencil8:
                 case wgpu::TextureFormat::Depth24UnormStencil8:
                     switch (descriptor->aspect) {
                         case wgpu::TextureAspect::DepthOnly:

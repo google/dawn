@@ -126,53 +126,6 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         return device.CreateTexture(&texDescriptor);
     }
 
-    void PopulatePipelineDescriptorWriteDepth(utils::ComboRenderPipelineDescriptor* desc,
-                                              wgpu::TextureFormat format,
-                                              float regionDepth) {
-        desc->vertex.module = mVertexModule;
-
-        std::string fsSource = R"(
-        @stage(fragment) fn main() -> @builtin(frag_depth) f32 {
-            return )" + std::to_string(regionDepth) +
-                               ";\n}";
-
-        desc->cFragment.module = utils::CreateShaderModule(device, fsSource.c_str());
-        wgpu::DepthStencilState* depthStencil = desc->EnableDepthStencil(format);
-        depthStencil->depthWriteEnabled = true;
-        desc->cFragment.targetCount = 0;
-    }
-
-    // Initialize the depth/stencil values for the texture using a render pass.
-    // The texture will be cleared to the "clear" value, and then bottom left corner will
-    // be written with the "region" value.
-    void InitializeDepthTextureRegion(wgpu::Texture texture,
-                                      wgpu::TextureFormat depthFormat,
-                                      float clearDepth,
-                                      float regionDepth,
-                                      uint32_t mipLevel = 0) {
-        wgpu::TextureViewDescriptor viewDesc = {};
-        viewDesc.baseMipLevel = mipLevel;
-        viewDesc.mipLevelCount = 1;
-
-        utils::ComboRenderPassDescriptor renderPassDesc({}, texture.CreateView(&viewDesc));
-        renderPassDesc.UnsetDepthStencilLoadStoreOpsForFormat(depthFormat);
-        renderPassDesc.cDepthStencilAttachmentInfo.depthClearValue = clearDepth;
-
-        utils::ComboRenderPipelineDescriptor renderPipelineDesc;
-        PopulatePipelineDescriptorWriteDepth(&renderPipelineDesc, GetParam().mTextureFormat,
-                                             regionDepth);
-
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
-        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPassDesc);
-        pass.SetPipeline(pipeline);
-        pass.Draw(6);
-        pass.End();
-
-        wgpu::CommandBuffer commands = commandEncoder.Finish();
-        queue.Submit(1, &commands);
-    }
-
     // Initialize the depth/stencil values for the texture using a render pass.
     // The texture will be cleared to the "clear" values, and then bottom left corner will
     // be written with the "region" values.
@@ -182,20 +135,42 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
                                              uint8_t clearStencil,
                                              uint8_t regionStencil,
                                              uint32_t mipLevel = 0) {
+        wgpu::TextureFormat format = GetParam().mTextureFormat;
+        // Create the render pass used for the initialization.
+        utils::ComboRenderPipelineDescriptor renderPipelineDesc;
+        renderPipelineDesc.vertex.module = mVertexModule;
+        renderPipelineDesc.cFragment.targetCount = 0;
+
+        wgpu::DepthStencilState* depthStencil = renderPipelineDesc.EnableDepthStencil(format);
+
+        if (utils::IsStencilOnlyFormat(format)) {
+            depthStencil->depthCompare = wgpu::CompareFunction::Always;
+            renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
+                @stage(fragment) fn main() {}
+            )");
+        } else {
+            depthStencil->depthWriteEnabled = true;
+            renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, std::string(R"(
+                @stage(fragment) fn main() -> @builtin(frag_depth) f32 {
+                    return )" + std::to_string(regionDepth) + R"(;
+                })")
+                                                                                        .c_str());
+        }
+        if (!utils::IsDepthOnlyFormat(format)) {
+            depthStencil->stencilFront.passOp = wgpu::StencilOperation::Replace;
+        }
+
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
+
+        // Build the render pass used for initialization.
         wgpu::TextureViewDescriptor viewDesc = {};
         viewDesc.baseMipLevel = mipLevel;
         viewDesc.mipLevelCount = 1;
 
         utils::ComboRenderPassDescriptor renderPassDesc({}, texture.CreateView(&viewDesc));
+        renderPassDesc.UnsetDepthStencilLoadStoreOpsForFormat(format);
         renderPassDesc.cDepthStencilAttachmentInfo.depthClearValue = clearDepth;
         renderPassDesc.cDepthStencilAttachmentInfo.stencilClearValue = clearStencil;
-
-        utils::ComboRenderPipelineDescriptor renderPipelineDesc;
-        PopulatePipelineDescriptorWriteDepth(&renderPipelineDesc, GetParam().mTextureFormat,
-                                             regionDepth);
-        renderPipelineDesc.cDepthStencil.stencilFront.passOp = wgpu::StencilOperation::Replace;
-
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
 
         // Draw the quad (two triangles)
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -471,7 +446,7 @@ TEST_P(DepthCopyTests, FromDepthAspect) {
         kWidth, kHeight, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
 
     constexpr float kInitDepth = 0.2f;
-    InitializeDepthTextureRegion(texture, GetParam().mTextureFormat, 0.f, kInitDepth);
+    InitializeDepthStencilTextureRegion(texture, 0.f, kInitDepth, 0, 0);
 
     // This expectation is the test as it performs the CopyTextureToBuffer.
     if (GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm) {
@@ -511,7 +486,7 @@ TEST_P(DepthCopyTests, FromNonZeroMipDepthAspect) {
         9, 9, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 2);
 
     constexpr float kInitDepth = 0.4f;
-    InitializeDepthTextureRegion(depthTexture, GetParam().mTextureFormat, 0.f, kInitDepth, 1);
+    InitializeDepthStencilTextureRegion(depthTexture, 0.f, kInitDepth, 0, 0, /*mipLevel*/ 1);
 
     // This expectation is the test as it performs the CopyTextureToBuffer.
     if (GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm) {
@@ -670,17 +645,19 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
     // Create a stencil texture
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
+    const bool hasDepth = !utils::IsStencilOnlyFormat(GetParam().mTextureFormat);
 
     wgpu::Texture depthStencilTexture =
         CreateDepthStencilTexture(kWidth, kHeight,
                                   wgpu::TextureUsage::RenderAttachment |
                                       wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst);
 
-    {
+    if (hasDepth) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 
         // Clear depth to 0.7, so we can check that the stencil copy doesn't mutate the depth.
         utils::ComboRenderPassDescriptor passDescriptor({}, depthStencilTexture.CreateView());
+        passDescriptor.UnsetDepthStencilLoadStoreOpsForFormat(GetParam().mTextureFormat);
         passDescriptor.cDepthStencilAttachmentInfo.depthClearValue = 0.7;
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
@@ -727,10 +704,14 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
         renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
             @stage(fragment) fn main() {
             })");
+        renderPipelineDesc.cFragment.targetCount = 0;
         wgpu::DepthStencilState* depthStencil =
             renderPipelineDesc.EnableDepthStencil(GetParam().mTextureFormat);
         depthStencil->stencilFront.passOp = wgpu::StencilOperation::DecrementClamp;
-        renderPipelineDesc.cFragment.targetCount = 0;
+        if (!hasDepth) {
+            depthStencil->depthWriteEnabled = false;
+            depthStencil->depthCompare = wgpu::CompareFunction::Always;
+        }
 
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
 
@@ -739,6 +720,7 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
         utils::ComboRenderPassDescriptor passDescriptor({}, depthStencilTexture.CreateView());
         passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
         passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+        passDescriptor.UnsetDepthStencilLoadStoreOpsForFormat(GetParam().mTextureFormat);
 
         // Draw the quad in the bottom left (two triangles).
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
@@ -754,19 +736,23 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
     EXPECT_TEXTURE_EQ(expectedStencilData.data(), depthStencilTexture, {0, 0}, {kWidth, kHeight}, 0,
                       wgpu::TextureAspect::StencilOnly);
 
-    ExpectAttachmentDepthTestData(depthStencilTexture, GetParam().mTextureFormat, kWidth, kHeight,
-                                  0, 0,
-                                  {
-                                      0.7, 0.7, 0.7, 0.7,  //
-                                      0.7, 0.7, 0.7, 0.7,  //
-                                      0.7, 0.7, 0.7, 0.7,  //
-                                      0.7, 0.7, 0.7, 0.7,  //
-                                  });
+    if (hasDepth) {
+        ExpectAttachmentDepthTestData(depthStencilTexture, GetParam().mTextureFormat, kWidth,
+                                      kHeight, 0, 0,
+                                      {
+                                          0.7, 0.7, 0.7, 0.7,  //
+                                          0.7, 0.7, 0.7, 0.7,  //
+                                          0.7, 0.7, 0.7, 0.7,  //
+                                          0.7, 0.7, 0.7, 0.7,  //
+                                      });
+    }
 }
 
 DAWN_INSTANTIATE_TEST_P(DepthStencilCopyTests,
                         {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend()},
+                         // Test with the vulkan_use_s8 toggle forced on and off.
+                         VulkanBackend({"vulkan_use_s8"}, {}),
+                         VulkanBackend({}, {"vulkan_use_s8"})},
                         std::vector<wgpu::TextureFormat>(utils::kDepthAndStencilFormats.begin(),
                                                          utils::kDepthAndStencilFormats.end()));
 
@@ -784,6 +770,8 @@ DAWN_INSTANTIATE_TEST_P(DepthCopyFromBufferTests,
 
 DAWN_INSTANTIATE_TEST_P(StencilCopyTests,
                         {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend()},
+                         // Test with the vulkan_use_s8 toggle forced on and off.
+                         VulkanBackend({"vulkan_use_s8"}, {}),
+                         VulkanBackend({}, {"vulkan_use_s8"})},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));

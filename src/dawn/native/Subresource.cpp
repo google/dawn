@@ -87,6 +87,10 @@ namespace dawn::native {
             return 1;
         } else if (aspects == (Aspect::Plane0 | Aspect::Plane1)) {
             return 2;
+        } else if (aspects == Aspect::Stencil) {
+            // Fake a the existence of a depth aspect so that the stencil data stays at index 1.
+            ASSERT(GetAspectIndex(Aspect::Stencil) == 1);
+            return 2;
         } else {
             ASSERT(aspects == (Aspect::Depth | Aspect::Stencil));
             return 2;

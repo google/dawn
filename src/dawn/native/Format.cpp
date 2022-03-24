@@ -264,13 +264,22 @@ namespace dawn::native {
                 internalFormat.baseFormat = baseFormat;
             }
 
-            AspectInfo* firstAspect = internalFormat.aspectInfo.data();
-            firstAspect->block.byteSize = 1;
-            firstAspect->block.width = 1;
-            firstAspect->block.height = 1;
-            firstAspect->baseType = wgpu::TextureComponentType::Uint;
-            firstAspect->supportedSampleTypes = SampleTypeBit::Uint;
-            firstAspect->format = format;
+            // Duplicate the data for the stencil aspect in both the first and second aspect info.
+            //  - aspectInfo[0] is used by AddMultiAspectFormat to copy the info for the whole
+            //    stencil8 aspect of depth-stencil8 formats.
+            //  - aspectInfo[1] is the actual info used in the rest of Dawn since
+            //    GetAspectIndex(Aspect::Stencil) is 1.
+            ASSERT(GetAspectIndex(Aspect::Stencil) == 1);
+
+            internalFormat.aspectInfo[0].block.byteSize = 1;
+            internalFormat.aspectInfo[0].block.width = 1;
+            internalFormat.aspectInfo[0].block.height = 1;
+            internalFormat.aspectInfo[0].baseType = wgpu::TextureComponentType::Uint;
+            internalFormat.aspectInfo[0].supportedSampleTypes = SampleTypeBit::Uint;
+            internalFormat.aspectInfo[0].format = format;
+
+            internalFormat.aspectInfo[1] = internalFormat.aspectInfo[0];
+
             AddFormat(internalFormat);
         };
 
@@ -330,8 +339,16 @@ namespace dawn::native {
                     internalFormat.baseFormat = baseFormat;
                 }
 
+                // Multi aspect formats just copy information about single-aspect formats. This
+                // means that the single-plane formats must have been added before multi-aspect
+                // ones. (it is ASSERTed below).
                 const size_t firstFormatIndex = ComputeFormatIndex(firstFormat);
                 const size_t secondFormatIndex = ComputeFormatIndex(secondFormat);
+
+                ASSERT(table[firstFormatIndex].aspectInfo[0].format !=
+                       wgpu::TextureFormat::Undefined);
+                ASSERT(table[secondFormatIndex].aspectInfo[0].format !=
+                       wgpu::TextureFormat::Undefined);
 
                 internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
                 internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
@@ -388,8 +405,7 @@ namespace dawn::native {
         AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, false, false, 16, SampleTypeBit::UnfilterableFloat, 4);
 
         // Depth-stencil formats
-        // TODO(dawn:666): Implement the stencil8 format
-        AddStencilFormat(wgpu::TextureFormat::Stencil8, false);
+        AddStencilFormat(wgpu::TextureFormat::Stencil8, true);
         AddDepthFormat(wgpu::TextureFormat::Depth16Unorm, 2, true);
         // TODO(crbug.com/dawn/843): This is 4 because we read this to perform zero initialization,
         // and textures are always use depth32float. We should improve this to be more robust. Perhaps,
