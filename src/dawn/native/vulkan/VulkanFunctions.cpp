@@ -147,6 +147,12 @@ namespace dawn::native::vulkan {
         }
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
+#if defined(DAWN_PLATFORM_ANDROID)
+        if (globalInfo.HasExt(InstanceExt::AndroidSurface)) {
+            GET_INSTANCE_PROC(CreateAndroidSurfaceKHR);
+        }
+#endif  // defined(DAWN_PLATFORM_ANDROID)
+
 #if defined(DAWN_USE_X11)
         if (globalInfo.HasExt(InstanceExt::XlibSurface)) {
             GET_INSTANCE_PROC(CreateXlibSurfaceKHR);

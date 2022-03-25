@@ -37,6 +37,7 @@ namespace dawn::native::vulkan {
         Win32Surface,
         XcbSurface,
         XlibSurface,
+        AndroidSurface,
 
         // Others
         DebugUtils,

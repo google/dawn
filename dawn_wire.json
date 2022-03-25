@@ -176,7 +176,8 @@
             "SurfaceDescriptorFromWindowsHWND",
             "SurfaceDescriptorFromXlibWindow",
             "SurfaceDescriptorFromWindowsCoreWindow",
-            "SurfaceDescriptorFromWindowsSwapChainPanel"
+            "SurfaceDescriptorFromWindowsSwapChainPanel",
+            "SurfaceDescriptorFromAndroidNativeWindow"
         ],
         "client_side_commands": [
             "AdapterCreateDevice",

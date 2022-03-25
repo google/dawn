@@ -132,6 +132,10 @@ namespace dawn::native::vulkan {
             GetPhysicalDeviceWin32PresentationSupportKHR = nullptr;
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
+#if defined(DAWN_PLATFORM_ANDROID)
+        PFN_vkCreateAndroidSurfaceKHR CreateAndroidSurfaceKHR = nullptr;
+#endif  // defined(DAWN_PLATFORM_ANDROID)
+
 #if defined(DAWN_USE_X11)
         // KHR_xlib_surface
         PFN_vkCreateXlibSurfaceKHR CreateXlibSurfaceKHR = nullptr;

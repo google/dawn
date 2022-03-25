@@ -88,6 +88,9 @@ if (WIN32)
     endif()
 elseif(APPLE)
     set(ENABLE_METAL ON)
+elseif(ANDROID)
+    set(ENABLE_VULKAN ON)
+    set(ENABLE_OPENGLES ON)
 elseif(UNIX)
     set(ENABLE_OPENGLES ON)
     set(ENABLE_DESKTOP_GL ON)
@@ -96,7 +99,7 @@ elseif(UNIX)
 endif()
 
 # GLFW is not supported in UWP
-if((WIN32 AND NOT WINDOWS_STORE) OR UNIX)
+if((WIN32 AND NOT WINDOWS_STORE) OR UNIX AND NOT ANDROID)
     set(DAWN_SUPPORTS_GLFW_FOR_WINDOWING ON)
 endif()
 

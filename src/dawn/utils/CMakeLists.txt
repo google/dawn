@@ -43,7 +43,6 @@ target_link_libraries(dawn_utils
             dawn_proc
             dawn_wire
             SPIRV-Tools-opt
-            glfw
 )
 
 if(WIN32 AND NOT WINDOWS_STORE)

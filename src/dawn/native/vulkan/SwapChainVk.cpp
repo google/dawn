@@ -134,6 +134,30 @@ namespace dawn::native::vulkan {
                     break;
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
+#if defined(DAWN_PLATFORM_ANDROID)
+                case Surface::Type::AndroidWindow: {
+                    if (info.HasExt(InstanceExt::AndroidSurface)) {
+                        ASSERT(surface->GetAndroidNativeWindow() != nullptr);
+
+                        VkAndroidSurfaceCreateInfoKHR createInfo;
+                        createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+                        createInfo.pNext = nullptr;
+                        createInfo.flags = 0;
+                        createInfo.window =
+                            static_cast<struct ANativeWindow*>(surface->GetAndroidNativeWindow());
+
+                        VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
+                        DAWN_TRY(CheckVkSuccess(
+                            fn.CreateAndroidSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
+                            "CreateAndroidSurfaceKHR"));
+                        return vkSurface;
+                    }
+
+                    break;
+                }
+
+#endif  // defined(DAWN_PLATFORM_ANDROID)
+
 #if defined(DAWN_USE_X11)
                 case Surface::Type::Xlib: {
                     if (info.HasExt(InstanceExt::XlibSurface)) {
@@ -382,22 +406,22 @@ namespace dawn::native::vulkan {
             config.wgpuUsage = GetUsage();
         }
 
-        // Only support BGRA8Unorm with SRGB color space for now.
-        bool hasBGRA8Unorm = false;
+        // Only support BGRA8Unorm (and RGBA8Unorm on android) with SRGB color space for now.
+        config.wgpuFormat = GetFormat();
+        config.format = VulkanImageFormat(ToBackend(GetDevice()), config.wgpuFormat);
+        config.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+
+        bool formatIsSupported = false;
         for (const VkSurfaceFormatKHR& format : surfaceInfo.formats) {
-            if (format.format == VK_FORMAT_B8G8R8A8_UNORM &&
-                format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-                hasBGRA8Unorm = true;
+            if (format.format == config.format && format.colorSpace == config.colorSpace) {
+                formatIsSupported = true;
                 break;
             }
         }
-        if (!hasBGRA8Unorm) {
-            return DAWN_INTERNAL_ERROR(
-                "Vulkan SwapChain must support BGRA8Unorm with sRGB colorspace.");
+        if (!formatIsSupported) {
+            return DAWN_INTERNAL_ERROR(absl::StrFormat(
+                "Vulkan SwapChain must support %s with sRGB colorspace.", config.wgpuFormat));
         }
-        config.format = VK_FORMAT_B8G8R8A8_UNORM;
-        config.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-        config.wgpuFormat = wgpu::TextureFormat::BGRA8Unorm;
 
         // Only the identity transform with opaque alpha is supported for now.
         DAWN_INVALID_IF((surfaceInfo.capabilities.supportedTransforms &
@@ -406,11 +430,26 @@ namespace dawn::native::vulkan {
 
         config.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
-        DAWN_INVALID_IF((surfaceInfo.capabilities.supportedCompositeAlpha &
-                         VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0,
-                        "Vulkan SwapChain must support opaque alpha.");
-
         config.alphaMode = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+#if !defined(DAWN_PLATFORM_ANDROID)
+        DAWN_INVALID_IF((surfaceInfo.capabilities.supportedCompositeAlpha &
+                            VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0,
+                        "Vulkan SwapChain must support opaque alpha.");
+#else
+        // TODO(dawn:286): investigate composite alpha for WebGPU native
+        VkCompositeAlphaFlagBitsKHR compositeAlphaFlags[4] = {
+            VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+            VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+            VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+            VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
+        };
+        for (uint32_t i = 0; i < 4; i++) {
+            if (surfCapabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
+                config.alphaMode = compositeAlphaFlags[i];
+                break;
+            }
+        }
+#endif  // #if !defined(DAWN_PLATFORM_ANDROID)
 
         // Choose the number of images for the swapchain= and clamp it to the min and max from the
         // surface capabilities. maxImageCount = 0 means there is no limit.

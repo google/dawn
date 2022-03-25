@@ -47,6 +47,7 @@ namespace dawn::native::vulkan {
         {InstanceExt::Win32Surface, "VK_KHR_win32_surface", NeverPromoted},
         {InstanceExt::XcbSurface, "VK_KHR_xcb_surface", NeverPromoted},
         {InstanceExt::XlibSurface, "VK_KHR_xlib_surface", NeverPromoted},
+        {InstanceExt::AndroidSurface, "VK_KHR_android_surface", NeverPromoted},
 
         {InstanceExt::DebugUtils, "VK_EXT_debug_utils", NeverPromoted},
         {InstanceExt::ValidationFeatures, "VK_EXT_validation_features", NeverPromoted},
@@ -99,6 +100,7 @@ namespace dawn::native::vulkan {
                     hasDependencies = HasDep(InstanceExt::GetPhysicalDeviceProperties2);
                     break;
 
+                case InstanceExt::AndroidSurface:
                 case InstanceExt::FuchsiaImagePipeSurface:
                 case InstanceExt::MetalSurface:
                 case InstanceExt::WaylandSurface:

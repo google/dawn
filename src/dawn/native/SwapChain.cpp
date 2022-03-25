@@ -74,11 +74,17 @@ namespace dawn::native {
 
             DAWN_TRY(ValidatePresentMode(descriptor->presentMode));
 
-            // TODO(crbug.com/dawn/160): Lift this restriction once
-            // wgpu::Instance::GetPreferredSurfaceFormat is implemented.
-            DAWN_INVALID_IF(descriptor->format != wgpu::TextureFormat::BGRA8Unorm,
+// TODO(crbug.com/dawn/160): Lift this restriction once wgpu::Instance::GetPreferredSurfaceFormat is
+// implemented.
+// TODO(dawn:286):
+#if defined(DAWN_PLATFORM_ANDROID)
+            constexpr wgpu::TextureFormat kRequireSwapChainFormat = wgpu::TextureFormat::RGBA8Unorm;
+#else
+            constexpr wgpu::TextureFormat kRequireSwapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
+#endif  // !defined(DAWN_PLATFORM_ANDROID)
+            DAWN_INVALID_IF(descriptor->format != kRequireSwapChainFormat,
                             "Format (%s) is not %s, which is (currently) the only accepted format.",
-                            descriptor->format, wgpu::TextureFormat::BGRA8Unorm);
+                            descriptor->format, kRequireSwapChainFormat);
 
             DAWN_INVALID_IF(descriptor->usage != wgpu::TextureUsage::RenderAttachment,
                             "Usage (%s) is not %s, which is (currently) the only accepted usage.",
