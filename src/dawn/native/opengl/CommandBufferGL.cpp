@@ -452,85 +452,6 @@ namespace dawn::native::opengl {
             return validTextureCopyExtent;
         }
 
-        void CopyTextureToTextureWithBlit(const OpenGLFunctions& gl,
-                                          const TextureCopy& src,
-                                          const TextureCopy& dst,
-                                          const Extent3D& copySize) {
-            Texture* srcTexture = ToBackend(src.texture.Get());
-            Texture* dstTexture = ToBackend(dst.texture.Get());
-
-            // Generate temporary framebuffers for the blits.
-            GLuint readFBO = 0, drawFBO = 0;
-            gl.GenFramebuffers(1, &readFBO);
-            gl.GenFramebuffers(1, &drawFBO);
-            gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
-            gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFBO);
-
-            // Reset state that may affect glBlitFramebuffer().
-            gl.Disable(GL_SCISSOR_TEST);
-            GLenum blitMask = 0;
-            if (src.aspect & Aspect::Color) {
-                blitMask |= GL_COLOR_BUFFER_BIT;
-            }
-            if (src.aspect & Aspect::Depth) {
-                blitMask |= GL_DEPTH_BUFFER_BIT;
-            }
-            if (src.aspect & Aspect::Stencil) {
-                blitMask |= GL_STENCIL_BUFFER_BIT;
-            }
-            // Iterate over all layers, doing a single blit for each.
-            for (uint32_t layer = 0; layer < copySize.depthOrArrayLayers; ++layer) {
-                // Bind all required aspects for this layer.
-                for (Aspect aspect : IterateEnumMask(src.aspect)) {
-                    GLenum glAttachment;
-                    switch (aspect) {
-                        case Aspect::Color:
-                            glAttachment = GL_COLOR_ATTACHMENT0;
-                            break;
-                        case Aspect::Depth:
-                            glAttachment = GL_DEPTH_ATTACHMENT;
-                            break;
-                        case Aspect::Stencil:
-                            glAttachment = GL_STENCIL_ATTACHMENT;
-                            break;
-                        case Aspect::CombinedDepthStencil:
-                        case Aspect::None:
-                        case Aspect::Plane0:
-                        case Aspect::Plane1:
-                            UNREACHABLE();
-                    }
-                    if (srcTexture->GetArrayLayers() == 1 &&
-                        srcTexture->GetDimension() == wgpu::TextureDimension::e2D) {
-                        gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment,
-                                                srcTexture->GetGLTarget(), srcTexture->GetHandle(),
-                                                src.mipLevel);
-                    } else {
-                        gl.FramebufferTextureLayer(GL_READ_FRAMEBUFFER, glAttachment,
-                                                   srcTexture->GetHandle(),
-                                                   static_cast<GLint>(src.mipLevel),
-                                                   static_cast<GLint>(src.origin.z + layer));
-                    }
-                    if (dstTexture->GetArrayLayers() == 1 &&
-                        dstTexture->GetDimension() == wgpu::TextureDimension::e2D) {
-                        gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment,
-                                                dstTexture->GetGLTarget(), dstTexture->GetHandle(),
-                                                dst.mipLevel);
-                    } else {
-                        gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, glAttachment,
-                                                   dstTexture->GetHandle(),
-                                                   static_cast<GLint>(dst.mipLevel),
-                                                   static_cast<GLint>(dst.origin.z + layer));
-                    }
-                }
-                gl.BlitFramebuffer(src.origin.x, src.origin.y, src.origin.x + copySize.width,
-                                   src.origin.y + copySize.height, dst.origin.x, dst.origin.y,
-                                   dst.origin.x + copySize.width, dst.origin.y + copySize.height,
-                                   blitMask, GL_NEAREST);
-            }
-            gl.Enable(GL_SCISSOR_TEST);
-            gl.DeleteFramebuffers(1, &readFBO);
-            gl.DeleteFramebuffers(1, &drawFBO);
-        }
         bool TextureFormatIsSnorm(wgpu::TextureFormat format) {
             return format == wgpu::TextureFormat::RGBA8Snorm ||
                    format == wgpu::TextureFormat::RG8Snorm ||
@@ -793,16 +714,10 @@ namespace dawn::native::opengl {
                     } else {
                         dstTexture->EnsureSubresourceContentInitialized(dstRange);
                     }
-                    if (gl.IsAtLeastGL(4, 3) || gl.IsAtLeastGLES(3, 2)) {
-                        gl.CopyImageSubData(srcTexture->GetHandle(), srcTexture->GetGLTarget(),
-                                            src.mipLevel, src.origin.x, src.origin.y, src.origin.z,
-                                            dstTexture->GetHandle(), dstTexture->GetGLTarget(),
-                                            dst.mipLevel, dst.origin.x, dst.origin.y, dst.origin.z,
-                                            copySize.width, copySize.height,
-                                            copy->copySize.depthOrArrayLayers);
-                    } else {
-                        CopyTextureToTextureWithBlit(gl, src, dst, copySize);
-                    }
+                    CopyImageSubData(gl, src.aspect, srcTexture->GetHandle(),
+                                     srcTexture->GetGLTarget(), src.mipLevel, src.origin,
+                                     dstTexture->GetHandle(), dstTexture->GetGLTarget(),
+                                     dst.mipLevel, dst.origin, copySize);
                     break;
                 }
 
