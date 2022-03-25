@@ -16,6 +16,7 @@
 
 #include <cassert>
 
+#include "src/tint/fuzzers/tint_ast_fuzzer/mutations/change_binary_operator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/replace_identifier.h"
 
 namespace tint {
@@ -30,6 +31,9 @@ std::unique_ptr<Mutation> Mutation::FromMessage(
     case protobufs::Mutation::kReplaceIdentifier:
       return std::make_unique<MutationReplaceIdentifier>(
           message.replace_identifier());
+    case protobufs::Mutation::kChangeBinaryOperator:
+      return std::make_unique<MutationChangeBinaryOperator>(
+          message.change_binary_operator());
     case protobufs::Mutation::MUTATION_NOT_SET:
       assert(false && "Mutation is not set");
       break;

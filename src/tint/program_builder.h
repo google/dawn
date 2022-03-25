@@ -1723,7 +1723,7 @@ class ProgramBuilder {
   /// @param rhs the right hand argument to the division operation
   /// @returns a `ast::BinaryExpression` dividing `lhs` by `rhs`
   template <typename LHS, typename RHS>
-  const ast::Expression* Div(LHS&& lhs, RHS&& rhs) {
+  const ast::BinaryExpression* Div(LHS&& lhs, RHS&& rhs) {
     return create<ast::BinaryExpression>(ast::BinaryOp::kDivide,
                                          Expr(std::forward<LHS>(lhs)),
                                          Expr(std::forward<RHS>(rhs)));
@@ -1733,7 +1733,7 @@ class ProgramBuilder {
   /// @param rhs the right hand argument to the modulo operation
   /// @returns a `ast::BinaryExpression` applying modulo of `lhs` by `rhs`
   template <typename LHS, typename RHS>
-  const ast::Expression* Mod(LHS&& lhs, RHS&& rhs) {
+  const ast::BinaryExpression* Mod(LHS&& lhs, RHS&& rhs) {
     return create<ast::BinaryExpression>(ast::BinaryOp::kModulo,
                                          Expr(std::forward<LHS>(lhs)),
                                          Expr(std::forward<RHS>(rhs)));
@@ -1765,6 +1765,26 @@ class ProgramBuilder {
   template <typename LHS, typename RHS>
   const ast::BinaryExpression* Xor(LHS&& lhs, RHS&& rhs) {
     return create<ast::BinaryExpression>(ast::BinaryOp::kXor,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the logical and operation
+  /// @param rhs the right hand argument to the logical and operation
+  /// @returns a `ast::BinaryExpression` of `lhs` && `rhs`
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* LogicalAnd(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the logical or operation
+  /// @param rhs the right hand argument to the logical or operation
+  /// @returns a `ast::BinaryExpression` of `lhs` || `rhs`
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* LogicalOr(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
                                          Expr(std::forward<LHS>(lhs)),
                                          Expr(std::forward<RHS>(rhs)));
   }
@@ -1815,6 +1835,17 @@ class ProgramBuilder {
   template <typename LHS, typename RHS>
   const ast::BinaryExpression* Equal(LHS&& lhs, RHS&& rhs) {
     return create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the not-equal expression
+  /// @param rhs the right hand argument to the not-equal expression
+  /// @returns a `ast::BinaryExpression` comparing `lhs` equal to `rhs` for
+  ///          disequality
+  template <typename LHS, typename RHS>
+  const ast::BinaryExpression* NotEqual(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kNotEqual,
                                          Expr(std::forward<LHS>(lhs)),
                                          Expr(std::forward<RHS>(rhs)));
   }

@@ -21,12 +21,15 @@ namespace fuzzers {
 namespace ast_fuzzer {
 namespace {
 
+const std::pair<uint32_t, uint32_t> kChanceOfChangingBinaryOperators = {30, 90};
 const std::pair<uint32_t, uint32_t> kChanceOfReplacingIdentifiers = {30, 70};
 
 }  // namespace
 
 ProbabilityContext::ProbabilityContext(RandomGenerator* generator)
     : generator_(generator),
+      chance_of_changing_binary_operators_(
+          RandomFromRange(kChanceOfChangingBinaryOperators)),
       chance_of_replacing_identifiers_(
           RandomFromRange(kChanceOfReplacingIdentifiers)) {
   assert(generator != nullptr && "generator must not be nullptr");

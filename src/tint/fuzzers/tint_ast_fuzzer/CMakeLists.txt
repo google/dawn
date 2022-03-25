@@ -40,7 +40,9 @@ set(LIBTINT_AST_FUZZER_SOURCES
         ../random_generator_engine.h
         mutation.h
         mutation_finder.h
+        mutation_finders/change_binary_operators.h
         mutation_finders/replace_identifiers.h
+        mutations/change_binary_operator.h
         mutations/replace_identifier.h
         mutator.h
         node_id_map.h
@@ -55,7 +57,9 @@ set(LIBTINT_AST_FUZZER_SOURCES ${LIBTINT_AST_FUZZER_SOURCES}
         ../random_generator_engine.cc
         mutation.cc
         mutation_finder.cc
+        mutation_finders/change_binary_operators.cc
         mutation_finders/replace_identifiers.cc
+        mutations/change_binary_operator.cc
         mutations/replace_identifier.cc
         mutator.cc
         node_id_map.cc
@@ -92,6 +96,7 @@ add_tint_ast_fuzzer(tint_ast_wgsl_writer_fuzzer)
 # Add tests.
 if (${TINT_BUILD_TESTS})
     set(TEST_SOURCES
+            mutations/change_binary_operator_test.cc
             mutations/replace_identifier_test.cc)
 
     add_executable(tint_ast_fuzzer_unittests ${TEST_SOURCES})

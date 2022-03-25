@@ -77,6 +77,8 @@ class Type : public Castable<Type, Node> {
   bool is_float_scalar() const;
   /// @returns true if this type is a float matrix
   bool is_float_matrix() const;
+  /// @returns true if this type is a square float matrix
+  bool is_square_float_matrix() const;
   /// @returns true if this type is a float vector
   bool is_float_vector() const;
   /// @returns true if this type is a float scalar or vector

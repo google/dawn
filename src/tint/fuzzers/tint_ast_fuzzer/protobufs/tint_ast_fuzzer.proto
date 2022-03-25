@@ -17,7 +17,10 @@ syntax = "proto3";
 package tint.fuzzers.ast_fuzzer.protobufs;
 
 message Mutation {
-  oneof mutation { MutationReplaceIdentifier replace_identifier = 1; };
+  oneof mutation {
+    MutationReplaceIdentifier replace_identifier = 1;
+    MutationChangeBinaryOperator change_binary_operator = 2;
+  };
 }
 
 message MutationSequence {
@@ -45,4 +48,14 @@ message MutationReplaceIdentifier {
 
   // The id of a definition of a variable to replace the use with.
   uint32 replacement_id = 2;
+}
+
+message MutationChangeBinaryOperator {
+  // This transformation replaces one binary operator with another.
+
+  // The id of a binary expression in the AST.
+  uint32 binary_expr_id = 1;
+
+  // A BinaryOp representing the new binary operator.
+  uint32 new_operator = 2;
 }

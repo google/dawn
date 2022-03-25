@@ -80,6 +80,12 @@ bool Type::is_float_matrix() const {
   return Is([](const Matrix* m) { return m->type()->is_float_scalar(); });
 }
 
+bool Type::is_square_float_matrix() const {
+  return Is([](const Matrix* m) {
+    return m->type()->is_float_scalar() && m->rows() == m->columns();
+  });
+}
+
 bool Type::is_float_vector() const {
   return Is([](const Vector* v) { return v->type()->is_float_scalar(); });
 }

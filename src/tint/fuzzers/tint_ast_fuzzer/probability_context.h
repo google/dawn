@@ -55,6 +55,11 @@ class ProbabilityContext {
     return static_cast<size_t>(generator_->GetUInt64(arr.size()));
   }
 
+  /// @return the probability of replacing some binary operator with another.
+  uint32_t GetChanceOfChangingBinaryOperators() const {
+    return chance_of_changing_binary_operators_;
+  }
+
   /// @return the probability of replacing some identifier with some other one.
   uint32_t GetChanceOfReplacingIdentifiers() const {
     return chance_of_replacing_identifiers_;
@@ -67,6 +72,7 @@ class ProbabilityContext {
 
   RandomGenerator* generator_;
 
+  uint32_t chance_of_changing_binary_operators_;
   uint32_t chance_of_replacing_identifiers_;
 };
 
