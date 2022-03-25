@@ -188,8 +188,8 @@ namespace dawn::native {
               "https://crbug.com/dawn/776"}},
             {Toggle::DisallowSpirv,
              {"disallow_spirv",
-              "Disallow usage of SPIR-V completely so that only WGSL is used for shader modules."
-              "This is useful to prevent a Chromium renderer process from successfully sending"
+              "Disallow usage of SPIR-V completely so that only WGSL is used for shader modules. "
+              "This is useful to prevent a Chromium renderer process from successfully sending "
               "SPIR-V code to be compiled in the GPU process.",
               "https://crbug.com/1214923"}},
             {Toggle::DumpShaders,
