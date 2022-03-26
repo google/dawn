@@ -28,11 +28,6 @@ namespace dawn::native {
 
     enum class SingleShaderStage { Vertex, Fragment, Compute };
 
-    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-        SingleShaderStage value,
-        const absl::FormatConversionSpec& spec,
-        absl::FormatSink* s);
-
     static_assert(static_cast<uint32_t>(SingleShaderStage::Vertex) < kNumStages);
     static_assert(static_cast<uint32_t>(SingleShaderStage::Fragment) < kNumStages);
     static_assert(static_cast<uint32_t>(SingleShaderStage::Compute) < kNumStages);

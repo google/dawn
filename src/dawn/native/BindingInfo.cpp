@@ -18,62 +18,6 @@
 
 namespace dawn::native {
 
-    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-        BindingInfoType value,
-        const absl::FormatConversionSpec& spec,
-        absl::FormatSink* s) {
-        switch (value) {
-            case BindingInfoType::Buffer:
-                s->Append("buffer");
-                break;
-            case BindingInfoType::Sampler:
-                s->Append("sampler");
-                break;
-            case BindingInfoType::Texture:
-                s->Append("texture");
-                break;
-            case BindingInfoType::StorageTexture:
-                s->Append("storageTexture");
-                break;
-            case BindingInfoType::ExternalTexture:
-                s->Append("externalTexture");
-                break;
-            default:
-                UNREACHABLE();
-        }
-        return {true};
-    }
-
-    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-        const BindingInfo& value,
-        const absl::FormatConversionSpec& spec,
-        absl::FormatSink* s) {
-        static const auto* const fmt =
-            new absl::ParsedFormat<'u', 's', 's', 's'>("{ binding: %u, visibility: %s, %s: %s }");
-        switch (value.bindingType) {
-            case BindingInfoType::Buffer:
-                s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding),
-                                          value.visibility, value.bindingType, value.buffer));
-                break;
-            case BindingInfoType::Sampler:
-                s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding),
-                                          value.visibility, value.bindingType, value.sampler));
-                break;
-            case BindingInfoType::Texture:
-                s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding),
-                                          value.visibility, value.bindingType, value.texture));
-                break;
-            case BindingInfoType::StorageTexture:
-                s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding),
-                                          value.visibility, value.bindingType,
-                                          value.storageTexture));
-                break;
-            case BindingInfoType::ExternalTexture:
-                break;
-        }
-        return {true};
-    }
-
     void IncrementBindingCounts(BindingCounts* bindingCounts, const BindGroupLayoutEntry& entry) {
         bindingCounts->totalCount += 1;
 

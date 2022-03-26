@@ -131,8 +131,8 @@ namespace dawn::native {
             TextureViewBase* view = entry.textureView;
 
             Aspect aspect = view->GetAspects();
-            // TODO(dawn:563): Format Aspects
-            DAWN_INVALID_IF(!HasOneBit(aspect), "Multiple aspects selected in %s.", view);
+            DAWN_INVALID_IF(!HasOneBit(aspect), "Multiple aspects (%s) selected in %s.", aspect,
+                            view);
 
             TextureBase* texture = view->GetTexture();
             switch (bindingInfo.bindingType) {
@@ -152,9 +152,11 @@ namespace dawn::native {
                         "Sample count (%u) of %s doesn't match expectation (multisampled: %d).",
                         texture->GetSampleCount(), texture, bindingInfo.texture.multisampled);
 
-                    // TODO(dawn:563): Improve error message.
-                    DAWN_INVALID_IF((supportedTypes & requiredType) == 0,
-                                    "Texture component type usage mismatch.");
+                    DAWN_INVALID_IF(
+                        (supportedTypes & requiredType) == 0,
+                        "None of the supported sample types (%s) of %s match the expected sample "
+                        "types (%s).",
+                        supportedTypes, texture, requiredType);
 
                     DAWN_INVALID_IF(
                         entry.textureView->GetDimension() != bindingInfo.texture.viewDimension,

@@ -113,6 +113,7 @@ namespace dawn::native {
         uint32_t mXWindow = 0;
     };
 
+    // Not defined in webgpu_absl_format.h/cpp because you can't forward-declare a nested type.
     absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
         Surface::Type value,
         const absl::FormatConversionSpec& spec,
