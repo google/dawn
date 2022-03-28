@@ -62,6 +62,7 @@
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
+#include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
@@ -187,6 +188,7 @@ SanitizedResult Sanitize(
   // only accessed directly via member accessors.
   manager.Add<transform::NumWorkgroupsFromUniform>();
   manager.Add<transform::PromoteSideEffectsToDecl>();
+  manager.Add<transform::UnwindDiscardFunctions>();
   manager.Add<transform::SimplifyPointers>();
   manager.Add<transform::RemovePhonies>();
   // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as

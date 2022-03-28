@@ -34,6 +34,7 @@
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/single_entry_point.h"
 #include "src/tint/transform/unshadow.h"
+#include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Glsl);
@@ -84,6 +85,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   }
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<PromoteSideEffectsToDecl>();
+  manager.Add<UnwindDiscardFunctions>();
   manager.Add<SimplifyPointers>();
 
   manager.Add<RemovePhonies>();

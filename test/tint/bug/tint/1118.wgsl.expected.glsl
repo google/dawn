@@ -39,6 +39,7 @@ layout(binding = 2) uniform Mesh_1 {
 } x_137;
 
 vec4 glFragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+bool tint_discard = false;
 void main_1() {
   vec3 viewDirectionW = vec3(0.0f, 0.0f, 0.0f);
   vec4 baseColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -57,10 +58,12 @@ void main_1() {
   vec3 finalSpecular = vec3(0.0f, 0.0f, 0.0f);
   vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((fClipDistance3 > 0.0f)) {
-    discard;
+    tint_discard = true;
+    return;
   }
   if ((fClipDistance4 > 0.0f)) {
-    discard;
+    tint_discard = true;
+    return;
   }
   vec4 x_34 = x_29.vEyePosition;
   vec3 x_38 = vec3(0.0f, 0.0f, 0.0f);
@@ -115,12 +118,24 @@ main_out tint_symbol(float fClipDistance3_param, float fClipDistance4_param) {
   fClipDistance3 = fClipDistance3_param;
   fClipDistance4 = fClipDistance4_param;
   main_1();
-  main_out tint_symbol_1 = main_out(glFragColor);
-  return tint_symbol_1;
+  if (tint_discard) {
+    main_out tint_symbol_1 = main_out(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+    return tint_symbol_1;
+  }
+  main_out tint_symbol_2 = main_out(glFragColor);
+  return tint_symbol_2;
+}
+
+void tint_discard_func() {
+  discard;
 }
 
 void main() {
   main_out inner_result = tint_symbol(fClipDistance3_param_1, fClipDistance4_param_1);
+  if (tint_discard) {
+    tint_discard_func();
+    return;
+  }
   glFragColor_1_1 = inner_result.glFragColor_1;
   return;
 }

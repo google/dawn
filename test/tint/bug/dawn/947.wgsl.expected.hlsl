@@ -45,21 +45,29 @@ struct tint_symbol_5 {
   float4 value : SV_Target0;
 };
 
+static bool tint_discard = false;
+
 float4 fs_main_inner(float2 texcoord) {
-  if (true) {
-    float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
-    if (!(all((clampedTexcoord == texcoord)))) {
-      discard;
-    }
-    float4 srcColor = myTexture.Sample(mySampler, texcoord);
-    return srcColor;
+  float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+  if (!(all((clampedTexcoord == texcoord)))) {
+    tint_discard = true;
+    return float4(0.0f, 0.0f, 0.0f, 0.0f);
   }
-  float4 unused;
-  return unused;
+  float4 srcColor = myTexture.Sample(mySampler, texcoord);
+  return srcColor;
+}
+
+void tint_discard_func() {
+  discard;
 }
 
 tint_symbol_5 fs_main(tint_symbol_4 tint_symbol_3) {
   const float4 inner_result_1 = fs_main_inner(tint_symbol_3.texcoord);
+  if (tint_discard) {
+    tint_discard_func();
+    const tint_symbol_5 tint_symbol_8 = (tint_symbol_5)0;
+    return tint_symbol_8;
+  }
   tint_symbol_5 wrapper_result_1 = (tint_symbol_5)0;
   wrapper_result_1.value = inner_result_1;
   return wrapper_result_1;

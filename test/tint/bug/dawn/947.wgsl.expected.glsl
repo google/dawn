@@ -52,19 +52,29 @@ struct VertexOutputs {
   vec4 position;
 };
 
+bool tint_discard = false;
 uniform highp sampler2D myTexture_mySampler;
 
 vec4 fs_main(vec2 texcoord) {
   vec2 clampedTexcoord = clamp(texcoord, vec2(0.0f, 0.0f), vec2(1.0f, 1.0f));
   if (!(all(equal(clampedTexcoord, texcoord)))) {
-    discard;
+    tint_discard = true;
+    return vec4(0.0f, 0.0f, 0.0f, 0.0f);
   }
   vec4 srcColor = texture(myTexture_mySampler, texcoord);
   return srcColor;
 }
 
+void tint_discard_func() {
+  discard;
+}
+
 void main() {
   vec4 inner_result = fs_main(texcoord_1);
+  if (tint_discard) {
+    tint_discard_func();
+    return;
+  }
   value = inner_result;
   return;
 }

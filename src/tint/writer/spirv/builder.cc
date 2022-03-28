@@ -52,6 +52,7 @@
 #include "src/tint/transform/remove_unreachable_statements.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
+#include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/var_for_dynamic_index.h"
 #include "src/tint/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
@@ -278,6 +279,7 @@ SanitizedResult Sanitize(const Program* in,
   }
   manager.Add<transform::RemoveUnreachableStatements>();
   manager.Add<transform::PromoteSideEffectsToDecl>();
+  manager.Add<transform::UnwindDiscardFunctions>();
   manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
   manager.Add<transform::FoldConstants>();
   manager.Add<transform::VectorizeScalarMatrixConstructors>();

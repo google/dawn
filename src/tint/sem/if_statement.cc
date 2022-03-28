@@ -40,5 +40,9 @@ ElseStatement::ElseStatement(const ast::ElseStatement* declaration,
 
 ElseStatement::~ElseStatement() = default;
 
+const ast::ElseStatement* ElseStatement::Declaration() const {
+  return static_cast<const ast::ElseStatement*>(Base::Declaration());
+}
+
 }  // namespace sem
 }  // namespace tint

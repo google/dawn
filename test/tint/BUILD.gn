@@ -338,6 +338,7 @@ tint_unittests_source_set("tint_unittests_transform_src") {
     "../../src/tint/transform/test_helper.h",
     "../../src/tint/transform/transform_test.cc",
     "../../src/tint/transform/unshadow_test.cc",
+    "../../src/tint/transform/unwind_discard_functions_test.cc",
     "../../src/tint/transform/utils/hoist_to_decl_before_test.cc",
     "../../src/tint/transform/var_for_dynamic_index_test.cc",
     "../../src/tint/transform/vectorize_scalar_matrix_constructors_test.cc",

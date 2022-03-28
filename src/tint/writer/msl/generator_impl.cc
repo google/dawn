@@ -68,6 +68,7 @@
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
+#include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/transform/wrap_arrays_in_structs.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
@@ -174,6 +175,7 @@ SanitizedResult Sanitize(
   }
   manager.Add<transform::CanonicalizeEntryPointIO>();
   manager.Add<transform::PromoteSideEffectsToDecl>();
+  manager.Add<transform::UnwindDiscardFunctions>();
   manager.Add<transform::PromoteInitializersToConstVar>();
 
   manager.Add<transform::VectorizeScalarMatrixConstructors>();

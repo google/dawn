@@ -73,6 +73,9 @@ class ElseStatement final : public Castable<ElseStatement, CompoundStatement> {
   /// Destructor
   ~ElseStatement() override;
 
+  /// @returns the AST node
+  const ast::ElseStatement* Declaration() const;
+
   /// @returns the else-statement condition expression
   const Expression* Condition() const { return condition_; }
 
