@@ -281,18 +281,12 @@ TEST(ChangeBinaryOperatorTest, AddSubtract) {
     }
     for (std::string vector_type : {"vec2<f32>", "vec3<f32>", "vec4<f32>"}) {
       std::string scalar_type = "f32";
-      CheckMutations(
-          vector_type, scalar_type, vector_type, op,
-          {
-              other_op, ast::BinaryOp::kMultiply, ast::BinaryOp::kDivide
-              // TODO(https://crbug.com/tint/1370): once fixed, add kModulo
-          });
-      CheckMutations(
-          scalar_type, vector_type, vector_type, op,
-          {
-              other_op, ast::BinaryOp::kMultiply, ast::BinaryOp::kDivide
-              // TODO(https://crbug.com/tint/1370): once fixed, add kModulo
-          });
+      CheckMutations(vector_type, scalar_type, vector_type, op,
+                     {other_op, ast::BinaryOp::kMultiply,
+                      ast::BinaryOp::kDivide, ast::BinaryOp::kModulo});
+      CheckMutations(scalar_type, vector_type, vector_type, op,
+                     {other_op, ast::BinaryOp::kMultiply,
+                      ast::BinaryOp::kDivide, ast::BinaryOp::kModulo});
     }
     for (std::string square_matrix_type :
          {"mat2x2<f32>", "mat3x3<f32>", "mat4x4<f32>"}) {
@@ -353,20 +347,14 @@ TEST(ChangeBinaryOperatorTest, Mul) {
   }
   for (std::string vector_type : {"vec2<f32>", "vec3<f32>", "vec4<f32>"}) {
     std::string scalar_type = "f32";
-    CheckMutations(
-        vector_type, scalar_type, vector_type, ast::BinaryOp::kMultiply,
-        {
-            ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
-            ast::BinaryOp::kDivide
-            // TODO(https://crbug.com/tint/1370): once fixed, add kModulo
-        });
-    CheckMutations(
-        scalar_type, vector_type, vector_type, ast::BinaryOp::kMultiply,
-        {
-            ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
-            ast::BinaryOp::kDivide
-            // TODO(https://crbug.com/tint/1370): once fixed, add kModulo
-        });
+    CheckMutations(vector_type, scalar_type, vector_type,
+                   ast::BinaryOp::kMultiply,
+                   {ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
+                    ast::BinaryOp::kDivide, ast::BinaryOp::kModulo});
+    CheckMutations(scalar_type, vector_type, vector_type,
+                   ast::BinaryOp::kMultiply,
+                   {ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
+                    ast::BinaryOp::kDivide, ast::BinaryOp::kModulo});
   }
   for (std::string square_matrix_type :
        {"mat2x2<f32>", "mat3x3<f32>", "mat4x4<f32>"}) {
@@ -472,7 +460,7 @@ TEST(ChangeBinaryOperatorTest, Mul) {
                  ast::BinaryOp::kMultiply, {});
 }
 
-TEST(ChangeBinaryOperatorTest, Divide) {
+TEST(ChangeBinaryOperatorTest, DivideAndModulo) {
   for (std::string type : {"i32", "vec2<i32>", "vec3<i32>", "vec4<i32>"}) {
     CheckMutations(
         type, type, type, ast::BinaryOp::kDivide,
@@ -517,26 +505,15 @@ TEST(ChangeBinaryOperatorTest, Divide) {
   }
   for (std::string vector_type : {"vec2<f32>", "vec3<f32>", "vec4<f32>"}) {
     std::string scalar_type = "f32";
-    CheckMutations(
-        vector_type, scalar_type, vector_type, ast::BinaryOp::kDivide,
-        {
-            ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
-            ast::BinaryOp::kMultiply
-            // TODO(https://crbug.com/tint/1370): once fixed, add kModulo
-        });
-    CheckMutations(
-        scalar_type, vector_type, vector_type, ast::BinaryOp::kDivide,
-        {
-            ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
-            ast::BinaryOp::kMultiply
-            // TODO(https://crbug.com/tint/1370): once fixed, add kModulo
-        });
+    CheckMutations(vector_type, scalar_type, vector_type,
+                   ast::BinaryOp::kDivide,
+                   {ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
+                    ast::BinaryOp::kMultiply, ast::BinaryOp::kModulo});
+    CheckMutations(scalar_type, vector_type, vector_type,
+                   ast::BinaryOp::kDivide,
+                   {ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
+                    ast::BinaryOp::kMultiply, ast::BinaryOp::kModulo});
   }
-}
-
-// TODO(https://crbug.com/tint/1370): once fixed, combine this with the Divide
-// test
-TEST(ChangeBinaryOperatorTest, Modulo) {
   for (std::string type : {"i32", "vec2<i32>", "vec3<i32>", "vec4<i32>"}) {
     CheckMutations(
         type, type, type, ast::BinaryOp::kModulo,
@@ -579,8 +556,6 @@ TEST(ChangeBinaryOperatorTest, Modulo) {
                    {ast::BinaryOp::kAdd, ast::BinaryOp::kSubtract,
                     ast::BinaryOp::kMultiply, ast::BinaryOp::kDivide});
   }
-  // TODO(https://crbug.com/tint/1370): mixed float scalars/vectors will be
-  // added when this test is combined with the Divide test
 }
 
 TEST(ChangeBinaryOperatorTest, AndOrXor) {

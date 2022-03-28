@@ -59,16 +59,10 @@ bool CanReplaceAddSubtractWith(const sem::Type* lhs_type,
       // type-compatible if the matrices are square.
       return !lhs_type->is_float_matrix() || lhs_type->is_square_float_matrix();
     case ast::BinaryOp::kDivide:
+    case ast::BinaryOp::kModulo:
       // '/' is not defined for matrices.
       return lhs_type->is_numeric_scalar_or_vector() &&
              rhs_type->is_numeric_scalar_or_vector();
-    case ast::BinaryOp::kModulo:
-      // TODO(https://crbug.com/tint/1370): once fixed, the rules should be the
-      //  same as for divide.
-      if (lhs_type->is_float_vector() || rhs_type->is_float_vector()) {
-        return lhs_type == rhs_type;
-      }
-      return !lhs_type->is_float_matrix() && !rhs_type->is_float_matrix();
     case ast::BinaryOp::kShiftLeft:
     case ast::BinaryOp::kShiftRight:
       return IsSuitableForShift(lhs_type, rhs_type);
@@ -102,16 +96,10 @@ bool CanReplaceMultiplyWith(const sem::Type* lhs_type,
       // These operators require homogeneous integer types.
       return lhs_type == rhs_type && lhs_type->is_integer_scalar_or_vector();
     case ast::BinaryOp::kDivide:
+    case ast::BinaryOp::kModulo:
       // '/' is not defined for matrices.
       return lhs_type->is_numeric_scalar_or_vector() &&
              rhs_type->is_numeric_scalar_or_vector();
-    case ast::BinaryOp::kModulo:
-      // TODO(https://crbug.com/tint/1370): once fixed, this should be the same
-      // as for divide
-      if (lhs_type->is_float_vector() || rhs_type->is_float_vector()) {
-        return lhs_type == rhs_type;
-      }
-      return !lhs_type->is_float_matrix() && !rhs_type->is_float_matrix();
     case ast::BinaryOp::kShiftLeft:
     case ast::BinaryOp::kShiftRight:
       return IsSuitableForShift(lhs_type, rhs_type);
@@ -120,9 +108,9 @@ bool CanReplaceMultiplyWith(const sem::Type* lhs_type,
   }
 }
 
-bool CanReplaceDivideWith(const sem::Type* lhs_type,
-                          const sem::Type* rhs_type,
-                          ast::BinaryOp new_operator) {
+bool CanReplaceDivideOrModuloWith(const sem::Type* lhs_type,
+                                  const sem::Type* rhs_type,
+                                  ast::BinaryOp new_operator) {
   // The program is assumed to be well-typed, so this method determines when
   // 'new_operator' can be used as a type-preserving replacement in a '/'
   // expression.
@@ -131,40 +119,13 @@ bool CanReplaceDivideWith(const sem::Type* lhs_type,
     case ast::BinaryOp::kSubtract:
     case ast::BinaryOp::kMultiply:
     case ast::BinaryOp::kDivide:
+    case ast::BinaryOp::kModulo:
       // These operators work in all contexts where '/' works.
       return true;
-    case ast::BinaryOp::kModulo:
-      // TODO(https://crbug.com/tint/1370): this special case should not be
-      // required; modulo and divide should work in the same contexts.
-      return lhs_type->is_integer_scalar_or_vector() || lhs_type == rhs_type;
     case ast::BinaryOp::kAnd:
     case ast::BinaryOp::kOr:
     case ast::BinaryOp::kXor:
       // These operators require homogeneous integer types.
-      return lhs_type == rhs_type && lhs_type->is_integer_scalar_or_vector();
-    case ast::BinaryOp::kShiftLeft:
-    case ast::BinaryOp::kShiftRight:
-      return IsSuitableForShift(lhs_type, rhs_type);
-    default:
-      return false;
-  }
-}
-
-// TODO(https://crbug.com/tint/1370): once fixed, this method will be removed
-//  and the same method will be used to check Divide and Modulo.
-bool CanReplaceModuloWith(const sem::Type* lhs_type,
-                          const sem::Type* rhs_type,
-                          ast::BinaryOp new_operator) {
-  switch (new_operator) {
-    case ast::BinaryOp::kAdd:
-    case ast::BinaryOp::kSubtract:
-    case ast::BinaryOp::kMultiply:
-    case ast::BinaryOp::kDivide:
-    case ast::BinaryOp::kModulo:
-      return true;
-    case ast::BinaryOp::kAnd:
-    case ast::BinaryOp::kOr:
-    case ast::BinaryOp::kXor:
       return lhs_type == rhs_type && lhs_type->is_integer_scalar_or_vector();
     case ast::BinaryOp::kShiftLeft:
     case ast::BinaryOp::kShiftRight:
@@ -362,9 +323,9 @@ bool MutationChangeBinaryOperator::CanReplaceBinaryOperator(
       return CanReplaceMultiplyWith(lhs_basic_type, rhs_basic_type,
                                     new_operator);
     case ast::BinaryOp::kDivide:
-      return CanReplaceDivideWith(lhs_basic_type, rhs_basic_type, new_operator);
     case ast::BinaryOp::kModulo:
-      return CanReplaceModuloWith(lhs_basic_type, rhs_basic_type, new_operator);
+      return CanReplaceDivideOrModuloWith(lhs_basic_type, rhs_basic_type,
+                                          new_operator);
     case ast::BinaryOp::kAnd:
     case ast::BinaryOp::kOr:
       return CanReplaceAndOrWith(lhs_basic_type, rhs_basic_type, new_operator);

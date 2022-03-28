@@ -1367,15 +1367,13 @@ static constexpr Params all_valid_cases[] = {
     ParamsFor<vec3<f32>, f32, vec3<f32>>(Op::kSubtract),
     ParamsFor<vec3<f32>, f32, vec3<f32>>(Op::kMultiply),
     ParamsFor<vec3<f32>, f32, vec3<f32>>(Op::kDivide),
-    // NOTE: no kModulo for vec3<f32>, f32
-    // ParamsFor<vec3<f32>, f32, vec3<f32>>(Op::kModulo),
+    ParamsFor<vec3<f32>, f32, vec3<f32>>(Op::kModulo),
 
     ParamsFor<f32, vec3<f32>, vec3<f32>>(Op::kAdd),
     ParamsFor<f32, vec3<f32>, vec3<f32>>(Op::kSubtract),
     ParamsFor<f32, vec3<f32>, vec3<f32>>(Op::kMultiply),
     ParamsFor<f32, vec3<f32>, vec3<f32>>(Op::kDivide),
-    // NOTE: no kModulo for f32, vec3<f32>
-    // ParamsFor<f32, vec3<f32>, vec3<f32>>(Op::kModulo),
+    ParamsFor<f32, vec3<f32>, vec3<f32>>(Op::kModulo),
 
     // Matrix arithmetic
     ParamsFor<mat2x3<f32>, f32, mat2x3<f32>>(Op::kMultiply),

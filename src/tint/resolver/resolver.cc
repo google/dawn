@@ -1901,23 +1901,13 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     }
 
     // Binary arithmetic expressions with mixed scalar and vector operands
-    if (lhs_vec_elem_type && (lhs_vec_elem_type == rhs_ty)) {
-      if (expr->IsModulo()) {
-        if (rhs_ty->is_integer_scalar()) {
-          return build(lhs_ty);
-        }
-      } else if (rhs_ty->is_numeric_scalar()) {
-        return build(lhs_ty);
-      }
+    if (lhs_vec_elem_type && (lhs_vec_elem_type == rhs_ty) &&
+        rhs_ty->is_numeric_scalar()) {
+      return build(lhs_ty);
     }
-    if (rhs_vec_elem_type && (rhs_vec_elem_type == lhs_ty)) {
-      if (expr->IsModulo()) {
-        if (lhs_ty->is_integer_scalar()) {
-          return build(rhs_ty);
-        }
-      } else if (lhs_ty->is_numeric_scalar()) {
-        return build(rhs_ty);
-      }
+    if (rhs_vec_elem_type && (rhs_vec_elem_type == lhs_ty) &&
+        lhs_ty->is_numeric_scalar()) {
+      return build(rhs_ty);
     }
   }
 
