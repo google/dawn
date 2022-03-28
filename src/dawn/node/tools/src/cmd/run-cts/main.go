@@ -135,7 +135,7 @@ func run() error {
 	var flags dawnNodeFlags
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
 	flag.StringVar(&cts, "cts", "", "root directory of WebGPU CTS")
-	flag.StringVar(&node, "node", "", "path to node executable")
+	flag.StringVar(&node, "node", defaultNodePath(), "path to node executable")
 	flag.StringVar(&npx, "npx", "", "path to npx executable")
 	flag.StringVar(&resultsPath, "output", "", "path to write test results file")
 	flag.StringVar(&expectationsPath, "expect", "", "path to expectations file")
@@ -188,11 +188,7 @@ func run() error {
 
 	// Find node
 	if node == "" {
-		var err error
-		node, err = exec.LookPath("node")
-		if err != nil {
-			return fmt.Errorf("add node to PATH or specify with --node")
-		}
+		return fmt.Errorf("cannot find path to node. Specify with --node")
 	}
 	// Find npx
 	if npx == "" {
@@ -1072,4 +1068,45 @@ func saveExpectations(path string, ex testcaseStatuses) error {
 	}
 
 	return nil
+}
+
+// defaultNodePath looks for the node binary, first in dawn's third_party
+// directory, falling back to PATH. This is used as the default for the --node
+// command line flag.
+func defaultNodePath() string {
+	if dir := thisDir(); dir != "" {
+		node := filepath.Join(dir, "../../../../../../../third_party/node")
+		if info, err := os.Stat(node); err == nil && info.IsDir() {
+			path := ""
+			switch fmt.Sprintf("%v/%v", runtime.GOOS, runtime.GOARCH) { // See `go tool dist list`
+			case "darwin/amd64":
+				path = filepath.Join(node, "node-darwin-x64/bin/node")
+			case "darwin/arm64":
+				path = filepath.Join(node, "node-darwin-arm64/bin/node")
+			case "linux/amd64":
+				path = filepath.Join(node, "node-linux-x64/bin/node")
+			case "windows/amd64":
+				path = filepath.Join(node, "node.exe")
+			}
+			if _, err := os.Stat(path); err == nil {
+				return path
+			}
+		}
+	}
+
+	if path, err := exec.LookPath("node"); err == nil {
+		return path
+	}
+
+	return ""
+}
+
+// thisDir returns the path to the directory that holds the .go file of the
+// caller function
+func thisDir() string {
+	_, file, _, ok := runtime.Caller(1)
+	if !ok {
+		return ""
+	}
+	return filepath.Dir(file)
 }

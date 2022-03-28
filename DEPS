@@ -19,6 +19,11 @@ vars = {
   'dawn_gn_version': 'git_revision:bd99dbf98cbdefe18a4128189665c5761263bcfb',
   'dawn_go_version': 'version:1.16',
 
+  'node_darwin_arm64_sha': '31859fc1fa0994a95f44f09c367d6ff63607cfde',
+  'node_darwin_x64_sha': '16dfd094763b71988933a31735f9dea966f9abd6',
+  'node_linux_x64_sha': 'ab9544e24e752d3d17f335fb7b2055062e582d11',
+  'node_win_x64_sha': '5ef847033c517c499f56f9d136d159b663bab717',
+
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,
 }
@@ -158,7 +163,7 @@ deps = {
     'condition': 'build_with_chromium',
   },
 
-  # Dependencies required to build Dawn NodeJS bindings
+  # Dependencies required to build / run Dawn NodeJS bindings
   'third_party/node-api-headers': {
     'url': '{github_git}/nodejs/node-api-headers.git@d68505e4055ecb630e14c26c32e5c2c65e179bba',
     'condition': 'dawn_node',
@@ -320,6 +325,60 @@ hooks = [
                 'tools/cmake-win32/',
     ],
   },
+
+  # Node binaries, when dawn_node is enabled
+  {
+    'name': 'node_linux64',
+    'pattern': '.',
+    'condition': 'dawn_node and host_os == "linux"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--extract',
+                '--no_auth',
+                '--bucket', 'chromium-nodejs/16.13.0',
+                Var('node_linux_x64_sha'),
+                '-o', 'third_party/node/node-linux-x64.tar.gz',
+    ],
+  },
+  {
+    'name': 'node_mac',
+    'pattern': '.',
+    'condition': 'dawn_node and host_os == "mac"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--extract',
+                '--no_auth',
+                '--bucket', 'chromium-nodejs/16.13.0',
+                Var('node_darwin_x64_sha'),
+                '-o', 'third_party/node/node-darwin-x64.tar.gz',
+    ],
+  },
+  {
+    'name': 'node_mac_arm64',
+    'pattern': '.',
+    'condition': 'dawn_node and host_os == "mac"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--extract',
+                '--no_auth',
+                '--bucket', 'chromium-nodejs/16.13.0',
+                Var('node_darwin_arm64_sha'),
+                '-o', 'third_party/node/node-darwin-arm64.tar.gz',
+    ],
+  },
+  {
+    'name': 'node_win',
+    'pattern': '.',
+    'condition': 'dawn_node and host_os == "win"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-nodejs/16.13.0',
+                Var('node_win_x64_sha'),
+                '-o', 'third_party/node/node.exe',
+    ],
+  },
+
 ]
 
 recursedeps = [
