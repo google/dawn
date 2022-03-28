@@ -100,8 +100,6 @@ namespace dawn::native::vulkan {
 
             VkDescriptorSetLayoutBinding vkBinding;
             vkBinding.binding = static_cast<uint32_t>(bindingIndex);
-            // TODO(dawn:728) In the future, special handling will be needed for external textures
-            // here because they encompass multiple views.
             vkBinding.descriptorType = VulkanDescriptorType(bindingInfo);
             vkBinding.descriptorCount = 1;
             vkBinding.stageFlags = VulkanShaderStageFlags(bindingInfo.visibility);
@@ -126,8 +124,6 @@ namespace dawn::native::vulkan {
         std::map<VkDescriptorType, uint32_t> descriptorCountPerType;
 
         for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
-            // TODO(dawn:728) In the future, special handling will be needed for external textures
-            // here because they encompass multiple views.
             VkDescriptorType vulkanType = VulkanDescriptorType(GetBindingInfo(bindingIndex));
 
             // map::operator[] will return 0 if the key doesn't exist.

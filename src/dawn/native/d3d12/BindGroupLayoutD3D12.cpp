@@ -78,21 +78,15 @@ namespace dawn::native::d3d12 {
 
             D3D12_DESCRIPTOR_RANGE_TYPE descriptorRangeType =
                 WGPUBindingInfoToDescriptorRangeType(bindingInfo);
-
-            // TODO(dawn:728) In the future, special handling will be needed for external textures
-            // here because they encompass multiple views.
             mShaderRegisters[bindingIndex] = uint32_t(bindingInfo.binding);
-
-            if (bindingIndex < GetDynamicBufferCount()) {
-                continue;
-            }
 
             // For dynamic resources, Dawn uses root descriptor in D3D12 backend. So there is no
             // need to allocate the descriptor from descriptor heap or create descriptor ranges.
+            if (bindingIndex < GetDynamicBufferCount()) {
+                continue;
+            }
             ASSERT(!bindingInfo.buffer.hasDynamicOffset);
 
-            // TODO(dawn:728) In the future, special handling will be needed for external textures
-            // here because they encompass multiple views.
             mDescriptorHeapOffsets[bindingIndex] =
                 descriptorRangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER
                     ? mSamplerDescriptorCount++
