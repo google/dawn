@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 #version 310 es
 precision mediump float;
 
@@ -28,6 +30,13 @@ void main() {
   fragment_main();
   return;
 }
+Error parsing GLSL shader:
+ERROR: 0:6: 'atomicCompSwap' : Atomic memory function can only be used for shader storage block member or shared variable. 
+ERROR: 0:6: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
 #version 310 es
 
 uvec2 tint_atomicCompareExchangeWeak(inout uint param_0, uint param_1, uint param_2) {
@@ -58,3 +67,10 @@ void main() {
   compute_main();
   return;
 }
+Error parsing GLSL shader:
+ERROR: 0:5: 'atomicCompSwap' : Atomic memory function can only be used for shader storage block member or shared variable. 
+ERROR: 0:5: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+

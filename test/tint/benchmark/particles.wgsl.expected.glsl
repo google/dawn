@@ -170,7 +170,7 @@ struct UBO {
   uint width;
 };
 
-uniform highp sampler2D tint_symbol_1;
+uniform highp sampler2D tint_symbol_6;
 void simulate(uvec3 GlobalInvocationID) {
   rand_seed = ((sim_params.seed.xy + vec2(GlobalInvocationID.xy)) * sim_params.seed.zw);
   uint idx = GlobalInvocationID.x;
@@ -182,22 +182,27 @@ void simulate(uvec3 GlobalInvocationID) {
   if ((particle.lifetime < 0.0f)) {
     ivec2 coord = ivec2(0, 0);
     {
-      for(int level = (textureQueryLevels(tint_symbol_1) - 1); (level > 0); level = (level - 1)) {
-        vec4 probabilites = texelFetch(tint_symbol_1, coord, level);
-        vec4 value = vec4(rand());
+      for(int level = (textureQueryLevels(tint_symbol_6) - 1); (level > 0); level = (level - 1)) {
+        vec4 probabilites = texelFetch(tint_symbol_6, coord, level);
+        float tint_symbol_5 = rand();
+        vec4 value = vec4(tint_symbol_5);
         bvec4 mask = bvec4(uvec4(greaterThanEqual(value, vec4(0.0f, probabilites.xyz))) & uvec4(lessThan(value, probabilites)));
         coord = (coord * 2);
         coord.x = (coord.x + (any(mask.yw) ? 1 : 0));
         coord.y = (coord.y + (any(mask.zw) ? 1 : 0));
       }
     }
-    vec2 uv = (vec2(coord) / vec2(textureSize(tint_symbol_1, 0)));
+    vec2 uv = (vec2(coord) / vec2(textureSize(tint_symbol_6, 0)));
     particle.position = vec3((((uv - 0.5f) * 3.0f) * vec2(1.0f, -1.0f)), 0.0f);
-    particle.color = texelFetch(tint_symbol_1, coord, 0);
-    particle.velocity.x = ((rand() - 0.5f) * 0.100000001f);
-    particle.velocity.y = ((rand() - 0.5f) * 0.100000001f);
-    particle.velocity.z = (rand() * 0.300000012f);
-    particle.lifetime = (0.5f + (rand() * 2.0f));
+    particle.color = texelFetch(tint_symbol_6, coord, 0);
+    float tint_symbol_1 = rand();
+    particle.velocity.x = ((tint_symbol_1 - 0.5f) * 0.100000001f);
+    float tint_symbol_2 = rand();
+    particle.velocity.y = ((tint_symbol_2 - 0.5f) * 0.100000001f);
+    float tint_symbol_3 = rand();
+    particle.velocity.z = (tint_symbol_3 * 0.300000012f);
+    float tint_symbol_4 = rand();
+    particle.lifetime = (0.5f + (tint_symbol_4 * 2.0f));
   }
   data.particles[idx] = particle;
 }

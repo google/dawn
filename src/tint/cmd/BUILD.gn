@@ -27,8 +27,8 @@ executable("tint") {
 
   if (tint_build_glsl_writer) {
     deps += [
-      "${tint_root_dir}/third_party/glslang:glslang_default_resource_limits_sources",
-      "${tint_root_dir}/third_party/glslang:glslang_lib_sources",
+      "${tint_root_dir}/third_party/vulkan-deps/glslang/src:glslang_default_resource_limits_sources",
+      "${tint_root_dir}/third_party/vulkan-deps/glslang/src:glslang_lib_sources",
     ]
   }
 

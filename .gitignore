@@ -19,13 +19,11 @@ lcov.info
 /third_party/cpplint
 /third_party/benchmark
 /third_party/binutils
-/third_party/glslang
 /third_party/googletest
 /third_party/gpuweb-cts
 /third_party/llvm-build
 /third_party/protobuf
-/third_party/spirv-headers
-/third_party/spirv-tools
+/third_party/vulkan-deps
 /tools/clang
 /tools/bin
 

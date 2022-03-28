@@ -200,7 +200,7 @@ if (${TINT_CHECK_CHROMIUM_STYLE})
 endif()
 
 if (${TINT_BUILD_SPV_READER})
-  include_directories("${TINT_THIRD_PARTY_DIR}/spirv-tools/include")
+  include_directories("${TINT_THIRD_PARTY_DIR}/vulkan-deps/spirv-tools/src/include")
 endif()
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
@@ -264,7 +264,7 @@ function(tint_core_compile_options TARGET)
 
   if (${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
     target_include_directories(${TARGET} PUBLIC
-        "${TINT_THIRD_PARTY_DIR}/spirv-headers/include")
+        "${TINT_THIRD_PARTY_DIR}/vulkan-deps/spirv-headers/src/include")
   endif()
 
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SPV_READER=$<BOOL:${TINT_BUILD_SPV_READER}>)

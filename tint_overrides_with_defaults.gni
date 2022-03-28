@@ -24,7 +24,7 @@ declare_args() {
 
   # Path to spirv-tools checkout
   if (!defined(tint_spirv_tools_dir)) {
-    tint_spirv_tools_dir = "//third_party/spirv-tools"
+    tint_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
   }
 
   # Path to googletest checkout
@@ -34,7 +34,7 @@ declare_args() {
 
   # Path to spirv-headers checkout
   if (!defined(tint_spirv_headers_dir)) {
-    tint_spirv_headers_dir = "//third_party/spirv-headers"
+    tint_spirv_headers_dir = "//third_party/vulkan-deps/spirv-headers/src"
   }
 
   # Build the SPIR-V input reader

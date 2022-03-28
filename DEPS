@@ -7,24 +7,8 @@ gclient_gn_args = [
 ]
 
 vars = {
-  'chromium_git':  'https://chromium.googlesource.com',
-  'github': '/external/github.com',
+  'chromium_git': 'https://chromium.googlesource.com',
 
-  'benchmark_revision': 'e991355c02b93fe17713efe04cbc2e278e00fdbd',
-  'build_revision': '555c8b467c21e2c4b22d00e87e3faa0431df9ac2',
-  'buildtools_revision': 'f78b4b9f33bd8ef9944d5ce643daff1c31880189',
-  'catapult_revision': 'fa35beefb3429605035f98211ddb8750dee6a13d',
-  'clang_format_revision': '2271e89c145a5e27d6c110b6a1113c057a8301a3',
-  'clang_revision': '8b7330592cb85ba09505a6be7bacabd0ad6160a3',
-  'glslang_revision': '4b7b86d568b40f4b076259dc2fc4cdd006340f34',
-  'googletest_revision': '6b74da4757a549563d7c37c8fae3e704662a043b',
-  'gpuweb_cts_revision': 'b0291fd966b55a5efc496772555b94842bde1085',
-  'libcxx_revision': '79a2e924d96e2fc1e4b937c42efd08898fa472d7',
-  'libcxxabi_revision': '2715a6c0de8dac4c7674934a6b3d30ba0c685271',
-  'protobuf_revision': 'fde7cf7358ec7cd69e8db9be4f1fa6a5c431386a',
-  'spirv_headers_revision': 'eddd4dfc930f1374a70797460240a501c7d333f7',
-  'spirv_tools_revision': 'df2aad68b98279412494a6d449bd71b6756e699b',
-  'testing_revision': 'd485ae97b7900c1fb7edfbe2901ae5adcb120865',
   'tint_gn_revision': 'git_revision:281ba2c91861b10fec7407c4b6172ec3d4661243',
 
   # We don't use location metadata in our test isolates.
@@ -32,32 +16,29 @@ vars = {
 }
 
 deps = {
-  'third_party/gpuweb-cts': Var('chromium_git') + Var('github') +
-      '/gpuweb/cts.git@' + Var('gpuweb_cts_revision'),
+  'third_party/gpuweb-cts': {
+    'url': '{chromium_git}/external/github.com/gpuweb/cts@b0291fd966b55a5efc496772555b94842bde1085',
+  },
 
-  'third_party/spirv-headers': Var('chromium_git') + Var('github') +
-      '/KhronosGroup/SPIRV-Headers.git@' + Var('spirv_headers_revision'),
-
-  'third_party/spirv-tools': Var('chromium_git') + Var('github') +
-      '/KhronosGroup//SPIRV-Tools.git@' + Var('spirv_tools_revision'),
-
-  'third_party/glslang': Var('chromium_git') + Var('github') +
-      '/KhronosGroup/glslang.git@' + Var('glslang_revision'),
+  'third_party/vulkan-deps': {
+    'url': '{chromium_git}/vulkan-deps@20efc30b0c6fe3c9bbd4f8ed6335593ee51391b0',
+  },
 
   # Dependencies required to use GN/Clang in standalone
-  'build': Var('chromium_git') + '/chromium/src/build@' +
-      Var('build_revision'),
+  'build': {
+    'url': '{chromium_git}/chromium/src/build@555c8b467c21e2c4b22d00e87e3faa0431df9ac2',
+  },
 
-  'buildtools': Var('chromium_git') + '/chromium/src/buildtools@' +
-      Var('buildtools_revision'),
+  'buildtools': {
+    'url': '{chromium_git}/chromium/src/buildtools@f78b4b9f33bd8ef9944d5ce643daff1c31880189',
+  },
 
-  'tools/clang': Var('chromium_git') + '/chromium/src/tools/clang@' +
-      Var('clang_revision'),
+  'tools/clang': {
+    'url': '{chromium_git}/chromium/src/tools/clang@8b7330592cb85ba09505a6be7bacabd0ad6160a3',
+  },
 
   'buildtools/clang_format/script': {
-    'url': Var('chromium_git') +
-      '/external/github.com/llvm/llvm-project/clang/tools/clang-format.git@' +
-        Var('clang_format_revision'),
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/clang/tools/clang-format.git@2271e89c145a5e27d6c110b6a1113c057a8301a3',
   },
 
   'buildtools/linux64': {
@@ -85,31 +66,34 @@ deps = {
     'condition': 'host_os == "win"',
   },
 
-  'buildtools/third_party/libc++/trunk':
-    Var('chromium_git') +
-      '/external/github.com/llvm/llvm-project/libcxx.git@' +
-        Var('libcxx_revision'),
+  'buildtools/third_party/libc++/trunk': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@79a2e924d96e2fc1e4b937c42efd08898fa472d7',
+  },
 
-  'buildtools/third_party/libc++abi/trunk':
-    Var('chromium_git') +
-      '/external/github.com/llvm/llvm-project/libcxxabi.git@' +
-        Var('libcxxabi_revision'),
+  'buildtools/third_party/libc++abi/trunk': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@2715a6c0de8dac4c7674934a6b3d30ba0c685271',
+  },
 
   # Dependencies required for testing
-  'testing': Var('chromium_git') + '/chromium/src/testing@' +
-      Var('testing_revision'),
+  'testing': {
+    'url': '{chromium_git}/chromium/src/testing@d485ae97b7900c1fb7edfbe2901ae5adcb120865',
+  },
 
-  'third_party/catapult': Var('chromium_git') + '/catapult.git@' +
-      Var('catapult_revision'),
+  'third_party/catapult': {
+    'url': '{chromium_git}/catapult.git@fa35beefb3429605035f98211ddb8750dee6a13d',
+  },
 
-  'third_party/benchmark': Var('chromium_git') + Var('github') +
-      '/google/benchmark.git@' + Var('benchmark_revision'),
+  'third_party/benchmark': {
+    'url': '{chromium_git}/external/github.com/google/benchmark.git@e991355c02b93fe17713efe04cbc2e278e00fdbd',
+  },
 
-  'third_party/googletest': Var('chromium_git') + Var('github') +
-      '/google/googletest.git@' + Var('googletest_revision'),
+  'third_party/googletest': {
+    'url': '{chromium_git}/external/github.com/google/googletest.git@6b74da4757a549563d7c37c8fae3e704662a043b',
+  },
 
-  'third_party/protobuf': Var('chromium_git') + Var('github') +
-      '/protocolbuffers/protobuf.git@' + Var('protobuf_revision'),
+  'third_party/protobuf': {
+    'url': '{chromium_git}/external/github.com/protocolbuffers/protobuf.git@fde7cf7358ec7cd69e8db9be4f1fa6a5c431386a',
+  },
 }
 
 hooks = [
@@ -210,4 +194,7 @@ hooks = [
 recursedeps = [
   # buildtools provides clang_format, libc++, and libc++abi
   'buildtools',
+  # vulkan-deps provides spirv-headers, spirv-tools & gslang
+  # It also provides other Vulkan tools that Tint doesn't use
+  'third_party/vulkan-deps',
 ]
