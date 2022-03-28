@@ -84,12 +84,13 @@ func run() error {
 	var formatList, filter, dxcPath, xcrunPath string
 	var maxFilenameColumnWidth int
 	numCPU := runtime.NumCPU()
-	fxc, verbose, generateExpected, generateSkip := false, false, false, false
+	fxc, fxcAndDxc, verbose, generateExpected, generateSkip := false, false, false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, glsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
 	flag.BoolVar(&fxc, "fxc", false, "validate with FXC instead of DXC")
+	flag.BoolVar(&fxcAndDxc, "fxc-and-dxc", false, "validate with both FXC and DXC")
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
@@ -101,6 +102,10 @@ func run() error {
 	args := flag.Args()
 	if len(args) == 0 {
 		showUsage()
+	}
+
+	if fxcAndDxc {
+		fxc = true
 	}
 
 	// executable path is the first argument
@@ -210,7 +215,11 @@ func run() error {
 			color.Set(color.FgGreen)
 			tool_path := *tool.path
 			if fxc && tool.lang == "hlsl" {
-				tool_path = "Tint will use FXC dll in PATH"
+				if fxcAndDxc {
+					tool_path += " AND Tint will use FXC dll in PATH"
+				} else {
+					tool_path = "Tint will use FXC dll in PATH"
+				}
 			}
 			fmt.Printf("ENABLED (" + tool_path + ")")
 		} else {
@@ -239,7 +248,7 @@ func run() error {
 	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
 			for job := range pendingJobs {
-				job.run(dir, exe, fxc, dxcPath, xcrunPath, generateExpected, generateSkip)
+				job.run(dir, exe, fxc, fxcAndDxc, dxcPath, xcrunPath, generateExpected, generateSkip)
 			}
 		}()
 	}
@@ -497,7 +506,7 @@ type job struct {
 	result chan status
 }
 
-func (j job) run(wd, exe string, fxc bool, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
+func (j job) run(wd, exe string, fxc, fxcAndDxc bool, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
 	j.result <- func() status {
 		// expectedFilePath is the path to the expected output file for the given test
 		expectedFilePath := j.file + ".expected." + string(j.format)
@@ -539,13 +548,7 @@ func (j job) run(wd, exe string, fxc bool, dxcPath, xcrunPath string, generateEx
 			args = append(args, "--validate") // spirv-val and glslang are statically linked, always available
 			validate = true
 		case hlsl:
-			if fxc {
-				args = append(args, "--fxc")
-				validate = true
-			} else if dxcPath != "" {
-				args = append(args, "--dxc", dxcPath)
-				validate = true
-			}
+			// Handled below
 		case msl:
 			if xcrunPath != "" {
 				args = append(args, "--xcrun", xcrunPath)
@@ -553,13 +556,37 @@ func (j job) run(wd, exe string, fxc bool, dxcPath, xcrunPath string, generateEx
 			}
 		}
 
-		args = append(args, j.flags...)
-
 		// Invoke the compiler...
+		ok := false
+		var out string
 		start := time.Now()
-		ok, out := invoke(wd, exe, args...)
-		timeTaken := time.Since(start)
+		if j.format == hlsl {
+			// If fxcAndDxc is set, run FXC first as it's more likely to fail, then DXC iff FXC succeeded.
+			if fxc || fxcAndDxc {
+				validate = true
+				args_fxc := append(args, "--fxc")
+				args_fxc = append(args_fxc, j.flags...)
+				ok, out = invoke(wd, exe, args_fxc...)
+			}
 
+			if dxcPath != "" && (!fxc || (fxcAndDxc && ok)) {
+				validate = true
+				args_dxc := append(args, "--dxc", dxcPath)
+				args_dxc = append(args_dxc, j.flags...)
+				ok, out = invoke(wd, exe, args_dxc...)
+			}
+
+			// If we didn't run either fxc or dxc validation, run as usual
+			if !validate {
+				args = append(args, j.flags...)
+				ok, out = invoke(wd, exe, args...)
+			}
+
+		} else {
+			args = append(args, j.flags...)
+			ok, out = invoke(wd, exe, args...)
+		}
+		timeTaken := time.Since(start)
 		out = strings.ReplaceAll(out, "\r\n", "\n")
 		matched := expected == "" || expected == out
 
