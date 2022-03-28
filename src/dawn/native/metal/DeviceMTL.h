@@ -54,8 +54,7 @@ namespace dawn::native::metal {
         MaybeError SubmitPendingCommandBuffer();
 
         Ref<Texture> CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
-                                                    IOSurfaceRef ioSurface,
-                                                    uint32_t plane);
+                                                    IOSurfaceRef ioSurface);
         void WaitForCommandsToBeScheduled();
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;

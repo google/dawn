@@ -43,6 +43,8 @@ namespace dawn::native::metal {
         ExternalImageDescriptorIOSurface();
 
         IOSurfaceRef ioSurface;
+
+        // This has been deprecated.
         uint32_t plane;
     };
 

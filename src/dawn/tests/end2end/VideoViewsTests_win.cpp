@@ -77,9 +77,6 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         mD3d11Device = std::move(d3d11Device);
     }
 
-    void OnTearDown() override {
-    }
-
   protected:
     static DXGI_FORMAT GetDXGITextureFormat(wgpu::TextureFormat format) {
         switch (format) {

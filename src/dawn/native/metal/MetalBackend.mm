@@ -37,8 +37,8 @@ namespace dawn::native::metal {
     WGPUTexture WrapIOSurface(WGPUDevice device,
                               const ExternalImageDescriptorIOSurface* cDescriptor) {
         Device* backendDevice = ToBackend(FromAPI(device));
-        Ref<TextureBase> texture = backendDevice->CreateTextureWrappingIOSurface(
-            cDescriptor, cDescriptor->ioSurface, cDescriptor->plane);
+        Ref<TextureBase> texture =
+            backendDevice->CreateTextureWrappingIOSurface(cDescriptor, cDescriptor->ioSurface);
         return ToAPI(texture.Detach());
     }
 

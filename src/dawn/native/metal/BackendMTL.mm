@@ -358,6 +358,12 @@ namespace dawn::native::metal {
                 mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
             }
 
+            // Uses newTextureWithDescriptor::iosurface::plane which is available
+            // on ios 11.0+ and macOS 11.0+
+            if (@available(macOS 10.11, iOS 11.0, *)) {
+                mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
+            }
+
 #if defined(DAWN_PLATFORM_MACOS)
             // MTLPixelFormatDepth24Unorm_Stencil8 is only available on macOS 10.11+
             if ([*mDevice isDepth24Stencil8PixelFormatSupported]) {

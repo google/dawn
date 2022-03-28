@@ -17,6 +17,7 @@
 
 #include "dawn/native/Texture.h"
 
+#include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
 #include "dawn/native/DawnNative.h"
 
@@ -31,8 +32,7 @@ namespace dawn::native::metal {
     MTLPixelFormat MetalPixelFormat(wgpu::TextureFormat format);
     MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase* device,
                                              const TextureDescriptor* descriptor,
-                                             IOSurfaceRef ioSurface,
-                                             uint32_t plane);
+                                             IOSurfaceRef ioSurface);
 
     class Texture final : public TextureBase {
       public:
@@ -41,13 +41,13 @@ namespace dawn::native::metal {
         static ResultOrError<Ref<Texture>> CreateFromIOSurface(
             Device* device,
             const ExternalImageDescriptor* descriptor,
-            IOSurfaceRef ioSurface,
-            uint32_t plane);
+            IOSurfaceRef ioSurface);
         static Ref<Texture> CreateWrapping(Device* device,
                                            const TextureDescriptor* descriptor,
                                            NSPRef<id<MTLTexture>> wrapped);
 
         id<MTLTexture> GetMTLTexture();
+        IOSurfaceRef GetIOSurface();
         NSPRef<id<MTLTexture>> CreateFormatView(wgpu::TextureFormat format);
 
         void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
@@ -62,8 +62,7 @@ namespace dawn::native::metal {
         MaybeError InitializeAsInternalTexture(const TextureDescriptor* descriptor);
         MaybeError InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
                                            const TextureDescriptor* textureDescriptor,
-                                           IOSurfaceRef ioSurface,
-                                           uint32_t plane);
+                                           IOSurfaceRef ioSurface);
         void InitializeAsWrapping(const TextureDescriptor* descriptor,
                                   NSPRef<id<MTLTexture>> wrapped);
 
@@ -74,7 +73,9 @@ namespace dawn::native::metal {
                                 TextureBase::ClearValue clearValue);
 
         NSPRef<id<MTLTexture>> mMtlTexture;
+
         MTLTextureUsage mMtlUsage;
+        CFRef<IOSurfaceRef> mIOSurface = nullptr;
     };
 
     class TextureView final : public TextureViewBase {

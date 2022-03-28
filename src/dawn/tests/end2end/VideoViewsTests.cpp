@@ -117,6 +117,58 @@ std::vector<uint8_t> VideoViewsTests::GetTestTextureData(wgpu::TextureFormat for
     }
 }
 
+uint32_t VideoViewsTests::NumPlanes(wgpu::TextureFormat format) {
+    switch (format) {
+        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+            return 2;
+        default:
+            UNREACHABLE();
+            return 0;
+    }
+}
+std::vector<uint8_t> VideoViewsTests::GetTestTextureDataWithPlaneIndex(size_t planeIndex,
+                                                                       size_t bytesPerRow,
+                                                                       size_t height,
+                                                                       bool isCheckerboard) {
+    std::vector<uint8_t> texelData = VideoViewsTests::GetTestTextureData(
+        wgpu::TextureFormat::R8BG8Biplanar420Unorm, isCheckerboard);
+    const uint32_t texelDataRowBytes = kYUVImageDataWidthInTexels;
+    const uint32_t texelDataHeight =
+        planeIndex == 0 ? kYUVImageDataHeightInTexels : kYUVImageDataHeightInTexels / 2;
+
+    std::vector<uint8_t> texels(bytesPerRow * height, 0);
+    uint32_t plane_first_texel_offset = 0;
+    // The size of the test video frame is 4 x 4
+    switch (planeIndex) {
+        case VideoViewsTests::kYUVLumaPlaneIndex:
+            for (uint32_t i = 0; i < texelDataHeight; ++i) {
+                if (i < texelDataHeight) {
+                    for (uint32_t j = 0; j < texelDataRowBytes; ++j) {
+                        texels[bytesPerRow * i + j] =
+                            texelData[texelDataRowBytes * i + j + plane_first_texel_offset];
+                    }
+                }
+            }
+            return texels;
+        case VideoViewsTests::kYUVChromaPlaneIndex:
+            // TexelData is 4 * 6 size, first 4 * 4 is Y plane, UV plane started
+            // at index 16.
+            plane_first_texel_offset = 16;
+            for (uint32_t i = 0; i < texelDataHeight; ++i) {
+                if (i < texelDataHeight) {
+                    for (uint32_t j = 0; j < texelDataRowBytes; ++j) {
+                        texels[bytesPerRow * i + j] =
+                            texelData[texelDataRowBytes * i + j + plane_first_texel_offset];
+                    }
+                }
+            }
+            return texels;
+        default:
+            UNREACHABLE();
+            return {};
+    }
+}
+
 // Vertex shader used to render a sampled texture into a quad.
 wgpu::ShaderModule VideoViewsTests::GetTestVertexShaderModule() const {
     return utils::CreateShaderModule(device, R"(

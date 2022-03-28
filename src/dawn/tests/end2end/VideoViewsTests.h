@@ -28,7 +28,8 @@ class VideoViewsTestBackend {
     virtual ~VideoViewsTestBackend();
 
     virtual void OnSetUp(WGPUDevice device) = 0;
-    virtual void OnTearDown() = 0;
+    virtual void OnTearDown() {
+    }
 
     class PlatformTexture {
       public:
@@ -74,6 +75,11 @@ class VideoViewsTests : public DawnTest {
                                                           RGBA8{90, 240, 0, 0xFF}};  // UV
 
     static std::vector<uint8_t> GetTestTextureData(wgpu::TextureFormat format, bool isCheckerboard);
+    static uint32_t NumPlanes(wgpu::TextureFormat format);
+    static std::vector<uint8_t> GetTestTextureDataWithPlaneIndex(size_t planeIndex,
+                                                                 size_t bytesPerRow,
+                                                                 size_t height,
+                                                                 bool isCheckerboard);
 
   protected:
     void SetUp() override;

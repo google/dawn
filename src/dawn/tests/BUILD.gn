@@ -451,7 +451,10 @@ source_set("end2end_tests_sources") {
   }
 
   if (dawn_enable_metal) {
-    sources += [ "end2end/IOSurfaceWrappingTests.cpp" ]
+    sources += [
+      "end2end/IOSurfaceWrappingTests.cpp",
+      "end2end/VideoViewsTests_mac.cpp",
+    ]
     frameworks = [ "IOSurface.framework" ]
   }
 
@@ -468,7 +471,8 @@ source_set("end2end_tests_sources") {
     deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
   }
 
-  if (dawn_enable_d3d12 || (dawn_enable_vulkan && is_chromeos)) {
+  if (dawn_enable_d3d12 || (dawn_enable_vulkan && is_chromeos) ||
+      dawn_enable_metal) {
     sources += [
       "end2end/VideoViewsTests.cpp",
       "end2end/VideoViewsTests.h",
