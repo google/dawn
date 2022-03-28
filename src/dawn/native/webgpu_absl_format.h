@@ -73,6 +73,12 @@ namespace dawn::native {
         const absl::FormatConversionSpec& spec,
         absl::FormatSink* s);
 
+    class AttachmentState;
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        const AttachmentState* value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s);
+
     //
     // Enums
     //

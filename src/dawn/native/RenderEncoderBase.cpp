@@ -239,10 +239,12 @@ namespace dawn::native {
 
                     // TODO(dawn:563): More detail about why the states are incompatible would be
                     // nice.
-                    DAWN_INVALID_IF(
-                        pipeline->GetAttachmentState() != mAttachmentState.Get(),
-                        "Attachment state of %s is not compatible with the attachment state of %s",
-                        pipeline, this);
+                    DAWN_INVALID_IF(pipeline->GetAttachmentState() != mAttachmentState.Get(),
+                                    "Attachment state of %s is not compatible with %s.\n"
+                                    "%s expects an attachment state of %s.\n"
+                                    "%s has an attachment state of %s.",
+                                    pipeline, this, this, mAttachmentState.Get(), pipeline,
+                                    pipeline->GetAttachmentState());
 
                     DAWN_INVALID_IF(pipeline->WritesDepth() && mDepthReadOnly,
                                     "%s writes depth while %s's depthReadOnly is true", pipeline,

@@ -14,6 +14,7 @@
 
 #include "dawn/native/webgpu_absl_format.h"
 
+#include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Format.h"
@@ -163,6 +164,48 @@ namespace dawn::native {
             s->Append(absl::StrFormat(" of Texture \"%s\"", textureLabel));
         }
         s->Append("]");
+        return {true};
+    }
+
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        const AttachmentState* value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s) {
+        if (value == nullptr) {
+            s->Append("[null]");
+            return {true};
+        }
+
+        s->Append("{ colorFormats: [");
+
+        ColorAttachmentIndex nextColorIndex(uint8_t(0));
+
+        bool needsComma = false;
+        for (ColorAttachmentIndex i : IterateBitSet(value->GetColorAttachmentsMask())) {
+            while (nextColorIndex < i) {
+                s->Append(absl::StrFormat("%s, ", wgpu::TextureFormat::Undefined));
+                nextColorIndex++;
+                needsComma = false;
+            }
+
+            if (needsComma) {
+                s->Append(", ");
+            }
+
+            s->Append(absl::StrFormat("%s", value->GetColorAttachmentFormat(i)));
+
+            nextColorIndex++;
+            needsComma = true;
+        }
+
+        s->Append("], ");
+
+        if (value->HasDepthStencilAttachment()) {
+            s->Append(absl::StrFormat("depthStencilFormat: %s, ", value->GetDepthStencilFormat()));
+        }
+
+        s->Append(absl::StrFormat("sampleCount: %u }", value->GetSampleCount()));
+
         return {true};
     }
 
